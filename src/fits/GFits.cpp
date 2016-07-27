@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp - FITS file access class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,9 +58,9 @@
 #define G_INSERT2                "GFits::insert(std::string&, GFitsHDU& hdu)"
 #define G_REMOVE1                                       "GFits::remove(int&)"
 #define G_REMOVE2                               "GFits::remove(std::string&)"
-#define G_OPEN                                    "GFits::open(std::string&)"
+#define G_OPEN                               "GFits::open(GFilename&, bool&)"
 #define G_SAVE                                           "GFits::save(bool&)"
-#define G_SAVETO                         "GFits::saveto(std::string&, bool&)"
+#define G_SAVETO                           "GFits::saveto(GFilename&, bool&)"
 #define G_FREE_MEM                                    "GFits::free_members()"
 #define G_NEW_IMAGE                                      "GFits::new_image()"
 
@@ -80,6 +80,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty FITS file.
  ***************************************************************************/
 GFits::GFits(void)
 {
@@ -95,12 +97,12 @@ GFits::GFits(void)
  * @brief FITS file constructor
  *
  * @param[in] filename FITS file name.
- * @param[in] create Create file if it does not exist (default=false)?
+ * @param[in] create Create file if it does not exist? (default: false)
  *
  * Construct an object by opening a FITS file. If the file does not exist it
  * will be created if @p create is set to true.
  ***************************************************************************/
-GFits::GFits(const std::string& filename, const bool& create)
+GFits::GFits(const GFilename& filename, const bool& create)
 {
     // Initialise class members
     init_members();
@@ -632,9 +634,8 @@ GFitsHDU* GFits::set(const std::string& extname, const GFitsHDU& hdu)
     // Get extenion number
     int extno = this->extno(extname);
     if (extno == -1) {
-        std::string msg = "No extension with name \""+extname+"\" found in"
-                          " FITS file.\n"
-                          "Please specify a valid extension name.";
+        std::string msg = "No extension with name \""+extname+"\" found in "
+                          "FITS file. Please specify a valid extension name.";
         throw GException::invalid_argument(G_SET2, msg);
     }
 
@@ -764,11 +765,10 @@ GFitsHDU* GFits::insert(const int& extno, const GFitsHDU& hdu)
     // Throw an exception if a non-image extension should be inserted in the
     // first slot
     if (extno == 0 && hdu.exttype() != GFitsHDU::HT_IMAGE) {
-        std::string msg = "Attempt to insert a table extension as the first"
-                          " extension of a FITS file.\n"
-                          "The first extension of a FITS file must be an"
-                          " image, hence use the next slot to insert a"
-                          " table.";
+        std::string msg = "Attempt to insert a table extension as the first "
+                          "extension of a FITS file. The first extension of "
+                          "a FITS file must be an image, hence use the next "
+                          "slot to insert a table.";
         throw GException::invalid_argument(G_INSERT1, msg);
     }
 
@@ -816,9 +816,8 @@ GFitsHDU* GFits::insert(const std::string& extname, const GFitsHDU& hdu)
     // Get extenion number
     int extno = this->extno(extname);
     if (extno == -1) {
-        std::string msg = "No extension with name \""+extname+"\" found in"
-                          " FITS file.\n"
-                          "Please specify a valid extension name.";
+        std::string msg = "No extension with name \""+extname+"\" found in "
+                          "FITS file. Please specify a valid extension name.";
         throw GException::invalid_argument(G_INSERT2, msg);
     }
 
@@ -849,11 +848,11 @@ void GFits::remove(const int& extno)
     // Throw an exception if removal would lead to a non-image extension
     // in the first slot
     if (extno == 0 && size() > 1 && m_hdu[1]->exttype() != GFitsHDU::HT_IMAGE) {
-        std::string msg = "Attempt to remove primary image from a FITS file"
-                          " with a table extension as second extension.\n"
-                          "The removal of the primary image would result in"
-                          " having a table as the first extension of the FITS"
-                          " file, which is not a valid FITS file.";
+        std::string msg = "Attempt to remove primary image from a FITS file "
+                          "with a table extension as second extension. The "
+                          "removal of the primary image would result in "
+                          "having a table as the first extension of the FITS "
+                          "file, which is not a valid FITS file.";
         throw GException::invalid_argument(G_REMOVE1, msg);
     }
 
@@ -886,9 +885,8 @@ void GFits::remove(const std::string& extname)
     // Get extenion number
     int extno = this->extno(extname);
     if (extno == -1) {
-        std::string msg = "No extension with name \""+extname+"\" found in"
-                          " FITS file.\n"
-                          "Please specify a valid extension name.";
+        std::string msg = "No extension with name \""+extname+"\" found in "
+                          "FITS file. Please specify a valid extension name.";
         throw GException::invalid_argument(G_REMOVE2, msg);
     }
 
@@ -994,9 +992,9 @@ int GFits::extno(const std::string& extname) const
  * @brief Open or (optionally) create FITS file
  *
  * @param[in] filename Name of FITS file to be opened.
- * @param[in] create Create FITS file if it does not exist (default=false)
+ * @param[in] create Create FITS file if it does not exist (default: false)
  *
- * @exception GException::fits_already_opened
+ * @exception GException::invalid_argument
  *            Class instance contains already an opened FITS file.
  *            Close file before opening a new one using GFits::close().
  * @exception GException::fits_open_error 
@@ -1013,18 +1011,25 @@ int GFits::extno(const std::string& extname) const
  * hdu(int extno) method.
  * Any environment variable present in the filename will be expanded.
  ***************************************************************************/
-void GFits::open(const std::string& filename, const bool& create)
+void GFits::open(const GFilename& filename, const bool& create)
 {
-    // Remove any HDUs
-    m_hdu.clear();
-
-    // Don't allow opening if another file is already open
+    // Don't allow opening if a file is already open
     if (m_fitsfile != NULL) {
-        throw GException::fits_already_opened(G_OPEN, m_filename);
+        std::string msg;
+        if (m_filename == filename) {
+            msg = "FITS file \""+m_filename+"\" has already been "
+                  "opened, cannot open it again.";
+        }
+        else {
+            msg = "A FITS file \""+m_filename+"\" has already "
+                  "been opened, cannot open another FITS file \""+
+                  filename+"\" before closing the existing one.";
+        }
+        throw GException::invalid_argument(G_OPEN, msg);
     }
 
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
+    // Remove any HDUs
+    m_hdu.clear();
 
     // Initialise FITS file as readwrite and non created
     m_readwrite = true;
@@ -1032,20 +1037,32 @@ void GFits::open(const std::string& filename, const bool& create)
 
     // Try opening FITS file with readwrite access
     int status = 0;
-    status     = __ffopen(FHANDLE(m_fitsfile), fname.c_str(), 1, &status);
+    status     = __ffopen(FHANDLE(m_fitsfile), std::string(filename).c_str(), 1, &status);
 
-    // If failed then try opening as readonly
-    if (status == 104 || status == 112) {
+    // If failed then try opening as readonly.
+    // 
+    // Possible error codes are:
+    //  104: FILE_NOT_OPENED (could not open the named file)
+    //  107: END_OF_FILE (tried to move past end of file, occurs if extname is invalid)
+    //  112: READONLY_FILE (cannot write to readonly file)
+    if (status == 104 || status == 107 || status == 112) {
         status      = 0;
-        status      = __ffopen(FHANDLE(m_fitsfile), fname.c_str(), 0, &status);
+        status      = __ffopen(FHANDLE(m_fitsfile), std::string(filename).c_str(), 0, &status);
         m_readwrite = false;
     }
 
     // If failed and if we are allowed to create a new FITS file then create
-    // FITS file now
-    if (create && status == 104) {
+    // FITS file now. We pass the URL as filename since we want to create a
+    // fresh file without any extension. We also remove any file before in
+    // case that file exists but is not a FITS file.
+    //
+    // Possible error codes are:
+    //  104: FILE_NOT_OPENED (could not open the named file)
+    //  107: END_OF_FILE (tried to move past end of file, occurs if extname is invalid)
+    if (create && (status == 104 || status == 107)) {
+        filename.remove();
         status      = 0;
-        status      = __ffinit(FHANDLE(m_fitsfile), fname.c_str(), &status);
+        status      = __ffinit(FHANDLE(m_fitsfile), filename.url().c_str(), &status);
         m_readwrite = true;
         m_created   = true;
     }
@@ -1053,17 +1070,17 @@ void GFits::open(const std::string& filename, const bool& create)
     // Throw special exception if status=202 (keyword not found). This error
     // may occur if the file is opened with an expression
     if (status == 202) {
-        throw GException::fits_open_error(G_OPEN, fname, status,
+        throw GException::fits_open_error(G_OPEN, filename, status,
                           "Keyword not found when opening file.");
     }
 
     // Throw any other error
     else if (status != 0) {
-        throw GException::fits_open_error(G_OPEN, fname, status);
+        throw GException::fits_open_error(G_OPEN, filename, status);
     }
 
-    // Store FITS file attributes
-    m_filename = fname;
+    // Store FITS file name as GFilename object
+    m_filename = filename;
 
     // Determine number of HDUs
     int num_hdu = 0;
@@ -1112,7 +1129,7 @@ void GFits::open(const std::string& filename, const bool& create)
 /***********************************************************************//**
  * @brief Saves FITS file
  *
- * @param[in] clobber Overwrite existing FITS file (true/false).
+ * @param[in] clobber Overwrite existing FITS file? (default: false).
  *
  * @exception GException::fits_file_exist
  *            Attemting to overwrite an existing file without having specified
@@ -1149,7 +1166,32 @@ void GFits::save(const bool& clobber)
               "Either open FITS file before saving or use saveto() method.");
     }
 
-    // If no HDUs exist then save an empty primary image.
+    // We have to make sure that all data are online before we can save them.
+    // This needs to be done before the data are deleted from disk. We do
+    // this by cloning all HDUs, as cloning will force all data to get online.
+    for (int i = 0; i < size(); ++i) {
+        GFitsHDU* hdu = m_hdu[i]->clone();
+        delete m_hdu[i];
+        m_hdu[i] = hdu;
+    }
+
+    // Determine number of HDUs in current FITS file on disk
+    int num_hdu = 0;
+    status = __ffthdu(FPTR(m_fitsfile), &num_hdu, &status);
+    if (status != 0) {
+        throw GException::fits_error(G_SAVE, status);
+    }
+
+    // Delete all HDUs (except of the primary HDU) since we will write them
+    // all freshly
+    for (int i = num_hdu-1; i >= 0; --i) {
+        status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
+        if (status != 0) {
+            throw GException::fits_error(G_SAVE, status);
+        }
+    }
+
+    // If no HDUs exist in the FITS object then write an empty primary image
     if (size() == 0) {
         status     = __ffmahd(FPTR(m_fitsfile), 1, NULL, &status);
         status     = __ffcrim(FPTR(m_fitsfile), 8, 0, NULL, &status);
@@ -1163,22 +1205,6 @@ void GFits::save(const bool& clobber)
         for (int i = 0; i < size(); ++i) {
             m_hdu[i]->extno(i);
             m_hdu[i]->save();
-        }
-    }
-
-    // Determine number of HDUs in FITS file
-    int num_hdu = 0;
-    status = __ffthdu(FPTR(m_fitsfile), &num_hdu, &status);
-    if (status != 0) {
-        throw GException::fits_error(G_SAVE, status);
-    }
-
-    // Delete all excedent HDUs (these may be their following removal
-    // of HDUs from the GFits object)
-    for (int i = num_hdu-1; i >= size(); --i) {
-        status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
-        if (status != 0) {
-            throw GException::fits_error(G_SAVE, status);
         }
     }
 
@@ -1199,63 +1225,44 @@ void GFits::save(const bool& clobber)
  * @brief Saves to specified FITS file
  *
  * @param[in] filename Filename.
- * @param[in] clobber Overwrite existing FITS file (true/false).
+ * @param[in] clobber Overwrite existing FITS file? (default: false)
  *
  * @exception GException::fits_file_exist
  *            Specified file exists already. Overwriting requires
  *            clobber=true.
  *
- * Saves object into a specific FITS file.
- * Any environment variable present in the filename will be expanded.
+ * Saves the FITS object into a specific file.
  ***************************************************************************/
-void GFits::saveto(const std::string& filename, const bool& clobber)
+void GFits::saveto(const GFilename& filename, const bool& clobber)
 {
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
-    // Create gzipped file name version
-    std::string gzfname = fname + ".gz";
-
     // Debug header
     #if defined(G_DEBUG)
     std::cout << "GFits::saveto(\"" << fname << "\", " << clobber << ")"
               << " (size=" << size() << ") -->" << std::endl;
     #endif
 
-    // If overwriting has been specified then remove any existing file. We
-    // consider here also the possibility that the file is gzipped, but
-    // the file name does not contain the .gz extension.
+    // If overwriting has been specified then remove the file. Otherwise,
+    // throw an exception if the file exists.
     if (clobber) {
-        if (gammalib::file_exists(fname)) {
-            std::remove(fname.c_str());
-        }
-        else {
-            if (gammalib::file_exists(gzfname)) {
-                std::remove(gzfname.c_str());
-            }
-        }
+        filename.remove();
     }
-
-    // Otherwise, if file exists then throw an exception
-    else if (gammalib::file_exists(fname) ||
-             gammalib::file_exists(gzfname)) {
-        throw GException::fits_file_exist(G_SAVETO, fname);
+    else if (filename.exists()) {
+        throw GException::fits_file_exist(G_SAVETO, filename);
     }
 
     // Create or open FITS file
-    GFits new_fits;
-    new_fits.open(fname, true);
+    GFits fits(filename, true);
 
     // Append all headers
     for (int i = 0; i < size(); ++i) {
-        new_fits.append(*m_hdu[i]);
+        fits.append(*m_hdu[i]);
     }
 
-    // Save new FITS file
-    new_fits.save();
+    // Save FITS file
+    fits.save();
 
-    // Close new FITS file
-    new_fits.close();
+    // Close FITS file
+    fits.close();
 
     // Debug trailer
     #if defined(G_DEBUG)
@@ -1304,7 +1311,8 @@ std::string GFits::print(const GChatter& chatter) const
         result.append("=== GFits ===");
 
         // Append file information
-        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("Filename"));
+        result.append(m_filename);
         result.append("\n"+gammalib::parformat("History"));
         if (m_created) {
             result.append("new file");
@@ -1365,7 +1373,7 @@ void GFits::init_members(void)
  *
  * @param fits Object to be copied
  *
- * The method does not copy the FITS filename and FITS file pointer.
+ * The method does not copy the FITS file name and FITS file pointer.
  * This prevents that several copies of the FITS file pointer exist in
  * different instances of GFits, which would lead to confusion since one
  * instance could close the file while for another it still would be
@@ -1484,8 +1492,6 @@ GFitsImage* GFits::new_image(void)
     // Get number of bits per pixel
     int status =   0;
     int bitpix = -64;
-    //status     = __ffgipr(FPTR(m_fitsfile), 0, &bitpix, NULL, NULL, &status);
-    //status     = __ffgidt(FPTR(m_fitsfile), &bitpix, &status);
     status     = __ffgiet(FPTR(m_fitsfile), &bitpix, &status);
     if (status != 0) {
         throw GException::fits_error(G_NEW_IMAGE, status);
@@ -1623,9 +1629,8 @@ int gammalib::fits_move_to_hdu(const std::string& caller, void* vptr,
 
     // Throw exception in case of an error
     if (status != 0) {
-        std::string msg = "Unable to move FITS file pointer to extension"
-                          " number "+
-                          gammalib::str(position-1)+".";
+        std::string msg = "Unable to move FITS file pointer to extension "
+                          "number "+gammalib::str(position-1)+".";
         throw GException::fits_error(caller, status, msg);
     }
 

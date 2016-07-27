@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.cpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,16 @@
 #endif
 #include "GTools.hpp"
 #include "GFilename.hpp"
-#include "GCTAPointing.hpp"
-#include "GFits.hpp"
+#include "GMatrix.hpp"
+#include "GNodeArray.hpp"
 #include "GHorizDir.hpp"
+#include "GSkyDir.hpp"
+#include "GTime.hpp"
+#include "GTimeReference.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
+#include "GCTAPointing.hpp"
+#include "GCTAInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_DIR_HORIZ                         "GCTAPointing::dir_horiz(GTime&)"
@@ -114,7 +121,7 @@ GCTAPointing::GCTAPointing(const GXmlElement& xml)
  *
  * Construct CTA pointing from a pointing table FITS file.
  ***************************************************************************/
-GCTAPointing::GCTAPointing(const std::string& filename)
+GCTAPointing::GCTAPointing(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -408,25 +415,19 @@ GHorizDir GCTAPointing::dir_horiz(const GTime& time) const
  * If no extension name is provided, the pointing is are loaded from the
  * "POINTING" extension.
  ************************************************************************/
-void GCTAPointing::load(const std::string& filename)
+void GCTAPointing::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get pointing table
-    const GFitsTable& table = *file.table(fname.extname("POINTING"));
+    const GFitsTable& table = *fits.table(filename.extname("POINTING"));
 
     // Read pointing from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;

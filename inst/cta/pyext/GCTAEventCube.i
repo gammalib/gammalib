@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAEventCube.i - CTA event bin container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,8 +38,10 @@ class GCTAEventCube : public GEventCube {
 public:
     // Constructors and destructors
     GCTAEventCube(void);
-    explicit GCTAEventCube(const std::string& filename);
+    explicit GCTAEventCube(const GFilename& filename);
     GCTAEventCube(const GSkyMap& map, const GEbounds& ebds, const GGti& gti);
+    GCTAEventCube(const GSkyMap& map, const GSkyMap& weights,
+                  const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
@@ -50,16 +52,18 @@ public:
     virtual int            size(void) const;
     virtual int            dim(void) const;
     virtual int            naxis(const int& axis) const;
-    virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename,
-                                const bool& clobber = false) const;
+    virtual void           load(const GFilename& filename);
+    virtual void           save(const GFilename& filename,
+                                const bool&      clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const;
 
     // Other methods
-    void                   map(const GSkyMap& map);
-    const GSkyMap&         map(void) const;
+    void                   counts(const GSkyMap& counts);
+    const GSkyMap&         counts(void) const;
+    void                   weights(const GSkyMap& weights);
+    const GSkyMap&         weights(void) const;
     int                    nx(void) const;
     int                    ny(void) const;
     int                    npix(void) const;

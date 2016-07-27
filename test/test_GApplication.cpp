@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GApplication.cpp - test GApplication classes            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,10 +42,14 @@ void TestGApplication::set(void)
     name("GApplication");
 
     // Append tests
-    append(static_cast<pfunction>(&TestGApplication::test_constructor), "Test GLog constructor");
-    append(static_cast<pfunction>(&TestGApplication::test_stream_logger), "Test stream logger");
-    append(static_cast<pfunction>(&TestGApplication::test_C_logger), "Test C logger");
-    append(static_cast<pfunction>(&TestGApplication::test_GApplicationPar), "Test GApplicationPar class");
+    append(static_cast<pfunction>(&TestGApplication::test_constructor),
+           "Test GLog constructor");
+    append(static_cast<pfunction>(&TestGApplication::test_stream_logger),
+           "Test stream logger");
+    append(static_cast<pfunction>(&TestGApplication::test_C_logger),
+           "Test C logger");
+    append(static_cast<pfunction>(&TestGApplication::test_GApplicationPar),
+           "Test GApplicationPar class");
 
     // Return
     return;

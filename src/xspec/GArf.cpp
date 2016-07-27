@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.cpp - XSPEC Auxiliary Response File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,13 +30,19 @@
 #endif
 #include "GArf.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
 #include "GTools.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_AT                                                 "GArf::at(int&)"
+#define G_OPERATOR                           "GArf::operator[](std::string&)"
+#define G_AT1                                                "GArf::at(int&)"
+#define G_AT2                                          "GArf::at(int&, int&)"
+#define G_APPEND           "GArf::append(std::string&, std::vector<double>&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -69,7 +75,7 @@ GArf::GArf(void)
  *
  * @param[in] filename File name.
  ***************************************************************************/
-GArf::GArf(const std::string& filename)
+GArf::GArf(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -167,6 +173,56 @@ GArf& GArf::operator=(const GArf& arf)
 }
 
 
+/***********************************************************************//**
+ * @brief Return additional vector column
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column.
+ *
+ * Returns reference to additional vector column.
+ ***************************************************************************/
+std::vector<double>& GArf::operator[](const std::string& colname)
+{
+    // Determine index of additional column (-1 if not found)
+    int index = column_index(colname);
+
+    // Throw exception if index not found
+    if (index == -1) {
+        std::string msg = "Could not find additional column with name \""+
+                          colname+"\".";
+        throw GException::invalid_value(G_OPERATOR, msg);
+    }
+
+    // Return reference to vector column
+    return (m_coldata[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return additional vector column (const version)
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column.
+ *
+ * Returns reference to additional vector column.
+ ***************************************************************************/
+const std::vector<double>& GArf::operator[](const std::string& colname) const
+{
+    // Determine index of additional column (-1 if not found)
+    int index = column_index(colname);
+
+    // Throw exception if index not found
+    if (index == -1) {
+        std::string msg = "Could not find additional column with name \""+
+                          colname+"\".";
+        throw GException::invalid_value(G_OPERATOR, msg);
+    }
+
+    // Return reference to vector column
+    return (m_coldata[index]);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -213,9 +269,9 @@ GArf* GArf::clone(void) const
  ***************************************************************************/
 double& GArf::at(const int& index)
 {
-    // Raise exception if index is out of range
+    // Throw an exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT1, index, 0, size()-1);
     }
 
     // Return reference
@@ -235,9 +291,9 @@ double& GArf::at(const int& index)
  ***************************************************************************/
 const double& GArf::at(const int& index) const
 {
-    // Raise exception if index is out of range
+    // Throw an exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT1, index, 0, size()-1);
     }
 
     // Return reference
@@ -246,29 +302,113 @@ const double& GArf::at(const int& index) const
 
 
 /***********************************************************************//**
+ * @brief Return content of additional columns
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin or column index is out of range.
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+double& GArf::at(const int& index, const int& col)
+{
+    // Throw an exception if bin or column index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT2, "Bin index", index, size());
+    }
+    if (col < 0 || col >= columns()) {
+        throw GException::out_of_range(G_AT2, "Column index", col, columns());
+    }
+
+    // Return reference
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return content of additional columns (const version)
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin or column index is out of range.
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+const double& GArf::at(const int& index, const int& col) const
+{
+    // Throw an exception if bin or column index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT2, "Bin index", index, size());
+    }
+    if (col < 0 || col >= columns()) {
+        throw GException::out_of_range(G_AT2, "Column index", col, columns());
+    }
+
+    // Return reference
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Append additional column to spectrum
+ *
+ * @param[in] name Additional column name.
+ * @param[in] column Additional column data.
+ ***************************************************************************/
+void GArf::append(const std::string& name, const std::vector<double>& column)
+{
+    // Throw an exception if the number of elements in the column does not
+    // correspond to the size of the spectrum
+    if (column.size() != size()) {
+        std::string msg = "Size of column "+gammalib::str(column.size())+
+                          " is incompatible with size of spectrum "+
+                          gammalib::str(size())+".";
+        throw GException::invalid_argument(G_APPEND, msg);
+    }
+
+    // Append column name
+    m_colnames.push_back(name);
+    
+    // Append column data
+    m_coldata.push_back(column);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load Auxiliary Response File
  *
  * @param[in] filename File name.
+ *
+ * Loads the Auxiliary Response File from the `SPECRESP` extension of the
+ * FITS file.
  ***************************************************************************/
-void GArf::load(const std::string& filename)
+void GArf::load(const GFilename& filename)
 {
-    // Clear any existing models
+    // Clear response
     clear();
 
-    // Open FITS file
-    GFits file(filename);
+    // Open FITS file (without extension name as the user is not allowed
+    // to modify the extension names)
+    GFits fits(filename.url());
 
     // Get ARF table
-    const GFitsTable& table = *file.table("SPECRESP");
+    const GFitsTable& table = *fits.table("SPECRESP");
 
     // Read ARF data
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
-    m_filename = filename;
+    m_filename = filename.url();
 
     // Return
     return;
@@ -279,21 +419,30 @@ void GArf::load(const std::string& filename)
  * @brief Save Auxiliary Response File
  *
  * @param[in] filename File name.
- * @param[in] clobber Overwrite existing file? (defaults to true)
+ * @param[in] clobber Overwrite existing file?
+ *
+ * Saves the Auxiliary Response File into a FITS file. If a file with the
+ * given @p filename does not yet exist it will be created. If the file
+ * exists it can be overwritten if the @p clobber flag is set to `true`.
+ * Otherwise an exception is thrown.
+ *
+ * The method will save the `SPECRESP` binary FITS table into the FITS file
+ * that contains the values of the Auxiliary Response File.
  ***************************************************************************/
-void GArf::save(const std::string& filename, const bool& clobber) const
+void GArf::save(const GFilename& filename, const bool& clobber) const
 {
-    // Open FITS file
+    // Create FITS file
     GFits fits;
 
     // Write ARF into file
     write(fits);
 
-    // Close FITS file
-    fits.saveto(filename, clobber);
+    // Save to file (without extension name since the requested extension
+    // may not yet exist in the file)
+    fits.saveto(filename.url(), clobber);
 
     // Store filename
-    m_filename = filename;
+    m_filename = filename.url();
 
     // Return
     return;
@@ -304,9 +453,25 @@ void GArf::save(const std::string& filename, const bool& clobber) const
  * @brief Read Auxiliary Response File
  *
  * @param[in] table ARF FITS table.
+ *
+ * Reads the Auxiliary Response File from a FITS table. The true energy
+ * boundaries are expected in the `ENERG_LO` and `ENERG_HI` columns, the
+ * response information is expected in the `SPECRESP` column.
+ *
+ * The method will analyze the unit of the `SPECRESP` column, and if either
+ * `m^2` or `m2` are encountered, multiply the values of the column by 
+ * \f$10^4\f$ to convert the response into units of \f$cm^2\f$. Units of the
+ * `ENERG_LO` and `ENERG_HI` columns are also interpreted for conversion.
+ *
+ * See
+ * http://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc4
+ * for details about the Auxiliary Response File format.
  ***************************************************************************/
 void GArf::read(const GFitsTable& table)
 {
+    // Clear members
+    clear();
+
     // Get pointer to data columns
     const GFitsTableCol* energy_lo = table["ENERG_LO"];
     const GFitsTableCol* energy_hi = table["ENERG_HI"];
@@ -314,7 +479,8 @@ void GArf::read(const GFitsTable& table)
 
     // Determine effective area conversion factor. Internal
     // units are cm^2
-    std::string u_specresp = gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
+    std::string u_specresp =
+                gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
     double      c_specresp = 1.0;
     if (u_specresp == "m^2" || u_specresp == "m2") {
         c_specresp = 10000.0;
@@ -337,6 +503,31 @@ void GArf::read(const GFitsTable& table)
 
     } // endfor: looped over energy bins
 
+    // Read any additional columns
+    for (int icol = 0; icol < table.ncols(); ++icol) {
+
+        // Fall through if the column is a standard column
+        std::string colname(table[icol]->name());
+        if ((colname == "ENERG_LO") ||
+            (colname == "ENERG_HI") ||
+            (colname == "SPECRESP")) {
+            continue;
+        }
+
+        // Get pointer to column
+        const GFitsTableCol* column = table[icol];
+
+        // Set column vector
+        std::vector<double> coldata;
+        for (int i = 0; i < num; ++i) {
+            coldata.push_back(column->real(i));
+        }
+
+        // Append column
+        append(colname, coldata);
+
+    } // endfor: looped over all additional columns
+
     // Return
     return;
 }
@@ -346,9 +537,27 @@ void GArf::read(const GFitsTable& table)
  * @brief Write Auxiliary Response File
  *
  * @param[in] fits FITS file.
+ *
+ * Writes the Auxiliary Response File into the `SPECRESP` extension of the
+ * FITS file. An existing extension with the same name will be removed from
+ * the FITS file before writing.
+ *
+ * The method writes the boundaries of the true energy bins into the
+ * `ENERG_LO` and `ENERG_HI` columns, response information will be written
+ * into the `SPECRESP` column.
+ *
+ * See
+ * http://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc4
+ * for details about the Auxiliary Response File format.
  ***************************************************************************/
 void GArf::write(GFits& fits) const
 {
+    // If the FITS object contains already an extension with the same
+    // name then remove now this extension
+    if (fits.contains("SPECRESP")) {
+        fits.remove("SPECRESP");
+    }
+
     // Set column length
     int length = size();
 
@@ -356,7 +565,7 @@ void GArf::write(GFits& fits) const
     if (length > 0) {
 
         // Create new binary table
-        GFitsBinTable* hdu = new GFitsBinTable;
+        GFitsBinTable hdu;
 
         // Allocate floating point vector columns
         GFitsTableFloatCol energy_lo("ENERG_LO", length);
@@ -365,9 +574,9 @@ void GArf::write(GFits& fits) const
 
         // Fill columns
         for (int i = 0; i < length; ++i) {
-            energy_lo(i) = m_ebounds.emin(i).keV();
-            energy_hi(i) = m_ebounds.emax(i).keV();
-            specresp(i)  = m_specresp[i];
+            energy_lo(i) = (float)m_ebounds.emin(i).keV();
+            energy_hi(i) = (float)m_ebounds.emax(i).keV();
+            specresp(i)  = (float)m_specresp[i];
         }
 
         // Set column units
@@ -376,18 +585,31 @@ void GArf::write(GFits& fits) const
         specresp.unit("cm^2");
 
         // Set table attributes
-        hdu->extname("SPECRESP");
+        hdu.extname("SPECRESP");
 
         // Append columns to table
-        hdu->append(energy_lo);
-        hdu->append(energy_hi);
-        hdu->append(specresp);
+        hdu.append(energy_lo);
+        hdu.append(energy_hi);
+        hdu.append(specresp);
+
+        // Append any additional columns
+        for (int icol = 0; icol < columns(); ++icol) {
+
+            // Allocate floating point vector columns
+            GFitsTableFloatCol column(m_colnames[icol], length);
+
+            // Fill columns
+            for (int i = 0; i < length; ++i) {
+                column(i) = (float)m_coldata[icol][i];
+            }
+
+            // Append columns to table
+            hdu.append(column);
+
+        } // endfor: looped over all additional columns
 
         // Append HDU to FITS file
-        fits.append(*hdu);
-
-        // Free binary table
-        delete hdu;
+        fits.append(hdu);
 
     } // endif: there were data to write
 
@@ -399,7 +621,7 @@ void GArf::write(GFits& fits) const
 /***********************************************************************//**
  * @brief Print Auxiliary Response File
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing Auxiliary Response File information.
  ***************************************************************************/
 std::string GArf::print(const GChatter& chatter) const
@@ -443,6 +665,8 @@ void GArf::init_members(void)
     m_filename.clear();
     m_ebounds.clear();
     m_specresp.clear();
+    m_colnames.clear();
+    m_coldata.clear();
 
     // Return
     return;
@@ -460,6 +684,8 @@ void GArf::copy_members(const GArf& arf)
     m_filename = arf.m_filename;
     m_ebounds  = arf.m_ebounds;
     m_specresp = arf.m_specresp;
+    m_colnames = arf.m_colnames;
+    m_coldata  = arf.m_coldata;
 
     // Return
     return;
@@ -473,4 +699,31 @@ void GArf::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns index of additional vector column
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column index.
+ *
+ * Returns index of additional vector column. Returns -1 if the vector column
+ * has not found.
+ ***************************************************************************/
+int GArf::column_index(const std::string& colname) const
+{
+    // Initialise index
+    int index(-1);
+
+    // Search vector column name
+    for (int i = 0; i < columns(); ++i) {
+        if (m_colnames[i] == colname) {
+            index = i;
+            break;
+        }
+    }
+
+    // Return index
+    return index;
 }

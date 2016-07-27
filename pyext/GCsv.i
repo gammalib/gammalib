@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCsv.i - Comma-separated values table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,7 +28,10 @@
 #include "GCsv.hpp"
 #include "GTools.hpp"
 %}
-%include stl.i
+%include "stl.i"
+%include "std_vector.i"
+%template(vectors) std::vector<std::string>;
+
 
 /***********************************************************************//**
  * @brief Tuple to index conversion to provide element access.
@@ -87,7 +90,7 @@ public:
     // Constructors and destructors
     GCsv(void);
     GCsv(const int& nrows, const int& ncols);
-    GCsv(const std::string& filename, const std::string& sep = " ");
+    GCsv(const GFilename& filename, const std::string& sep = " ");
     GCsv(const GCsv& csv);
     virtual ~GCsv(void);
  
@@ -100,14 +103,15 @@ public:
     const int&  nrows(void) const;
     const int&  precision(void) const;
     void        precision(const int& precision);
+    void        append(const std::vector<std::string>& list);
     std::string string(const int& row, const int& col) const;
     double      real(const int& row, const int& col) const;
     int         integer(const int& row, const int& col) const;
     void        string(const int& row, const int& col, const std::string& value);
     void        real(const int& row, const int& col, const double& value);
     void        integer(const int& row, const int& col, const int& value);
-    void        load(const std::string& filename, const std::string& sep = " ");
-    void        save(const std::string& filename, const std::string& sep = " ",
+    void        load(const GFilename& filename, const std::string& sep = " ");
+    void        save(const GFilename& filename, const std::string& sep = " ",
                      const bool& clobber = false) const;
 };
 

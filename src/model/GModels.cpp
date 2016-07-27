@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.cpp - Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
 #include "GModels.hpp"
 #include "GModel.hpp"
 #include "GModelRegistry.hpp"
@@ -102,7 +103,7 @@ GModels::GModels(const GModels& models)
  * Constructs model container from an XML file. See the read() method for
  * more information about the expected structure of the XML file.
  ***************************************************************************/
-GModels::GModels(const std::string& filename)
+GModels::GModels(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -662,13 +663,13 @@ bool GModels::contains(const std::string& name) const
  * Loads all models from an XML file. See the read() method for more
  * information about the expected structure of the XML file.
  ***************************************************************************/
-void GModels::load(const std::string& filename)
+void GModels::load(const GFilename& filename)
 {
     // Clear any existing models
     clear();
 
     // Load XML document
-    GXml xml(filename);
+    GXml xml(filename.url());
 
     // Read models from XML document
     read(xml);
@@ -685,7 +686,7 @@ void GModels::load(const std::string& filename)
  *
  * Saves all models in the container into an XML file.
  ***************************************************************************/
-void GModels::save(const std::string& filename) const
+void GModels::save(const GFilename& filename) const
 {
     // Declare empty XML document
     GXml xml;
@@ -828,7 +829,7 @@ int GModels::npars(void) const
  * container. The optimizer parameter container will thus contains a flat
  * array of a model parameters.
  ***************************************************************************/
-GOptimizerPars GModels::pars(void)
+GOptimizerPars GModels::pars(void) const
 {
     // Initialise parameter container
     GOptimizerPars pars;

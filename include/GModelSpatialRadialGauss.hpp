@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.hpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,7 @@ class GModelSpatialRadialGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialGauss(void);
+    GModelSpatialRadialGauss(const bool& dummy, const std::string& type);
     GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
     explicit GModelSpatialRadialGauss(const GXmlElement& xml);
     GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
@@ -90,7 +91,8 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_sigma;      //!< Gaussian width (deg)
+    std::string m_type;      //!< Model type
+    GModelPar   m_sigma;     //!< Gaussian width (deg)
 };
 
 
@@ -109,14 +111,14 @@ std::string GModelSpatialRadialGauss::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "GaussFunction".
+ * @return Model type.
  *
  * Returns the type of the radial Gauss model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialGauss::type(void) const
 {
-    return "GaussFunction";
+    return (m_type);
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsTableCDoubleCol.cpp - FITS table double precision complex column  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -297,8 +297,8 @@ int GFitsTableCDoubleCol::integer(const int& row, const int& inx) const
  * @exception GException::fits_invalid_row
  *            Specified row is invalid.
  *
- * This method inserts rows into a FITS table. This implies that all columns
- * will be loaded into memory.
+ * Inserts rows into a FITS table. This implies that all columns will be
+ * loaded into memory.
  ***************************************************************************/
 void GFitsTableCDoubleCol::insert(const int& row, const int& nrows)
 {
@@ -314,6 +314,9 @@ void GFitsTableCDoubleCol::insert(const int& row, const int& nrows)
         // number of rows to be inserted
         if (m_length == 0) {
             m_length = nrows;
+            m_size   = m_number * m_length;
+            alloc_data();
+            init_data();
         }
         
         // ... otherwise fetch data, allocate new data and copy over

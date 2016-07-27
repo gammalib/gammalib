@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTABackgroundPerfTable.hpp - CTA performance table background class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,11 +29,11 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GFilename.hpp"
 #include "GCTABackground.hpp"
 #include "GCTAResponseTable.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GFits;
 
 
 /***********************************************************************//**
@@ -46,7 +46,7 @@ class GCTABackgroundPerfTable : public GCTABackground {
 public:
     // Constructors and destructors
     GCTABackgroundPerfTable(void);
-    explicit GCTABackgroundPerfTable(const std::string& filename);
+    explicit GCTABackgroundPerfTable(const GFilename& filename);
     GCTABackgroundPerfTable(const GCTABackgroundPerfTable& bgd);
     virtual ~GCTABackgroundPerfTable(void);
 
@@ -62,8 +62,8 @@ public:
     void                       clear(void);
     GCTABackgroundPerfTable*   clone(void) const;
     std::string                classname(void) const;
-    void                       load(const std::string& filename);
-    std::string                filename(void) const;
+    void                       load(const GFilename& filename);
+    GFilename                  filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,
                                   const GTime& time,
                                   GRan& ran) const;
@@ -99,7 +99,7 @@ private:
     };
 
     // Members
-    std::string         m_filename;   //!< Name of background response file
+    GFilename           m_filename;   //!< Name of background response file
     GNodeArray          m_logE;       //!< log(E) nodes for background interpolation
     std::vector<double> m_background; //!< Background rate
     double              m_sigma;      //!< Sigma for offset angle computation (0=none)
@@ -127,7 +127,7 @@ std::string GCTABackgroundPerfTable::classname(void) const
  * @return Returns filename from which the background was loaded.
  ***************************************************************************/
 inline
-std::string GCTABackgroundPerfTable::filename(void) const
+GFilename GCTABackgroundPerfTable::filename(void) const
 {
     // Return filename
     return m_filename;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsImage.cpp - Abstract FITS image base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -224,15 +224,13 @@ GFitsImage::GFitsImage(const int& bitpix, const int& nx, const int& ny,
  * @brief Constructor
  *
  * @param[in] bitpix Number of Bits per pixel (negative is floating point).
- * @param[in] naxis Image dimensions [0,1,2,3,4].
- * @param[in] naxes Pointer to array giving number of pixels in each dimension.
+ * @param[in] naxes Vector of number of pixels in each dimension.
  *
  * Construct instance of GFitsImage by specifying the image dimension and
  * the number of pixels in each dimension. This method also adds the relevant
  * header cards.
  ***************************************************************************/
-GFitsImage::GFitsImage(const int& bitpix, const int& naxis,
-                       const int* naxes) : GFitsHDU()
+GFitsImage::GFitsImage(const int& bitpix, const std::vector<int>& naxes) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -241,7 +239,7 @@ GFitsImage::GFitsImage(const int& bitpix, const int& naxis,
     m_bitpix = bitpix;
 
     // Store number of axes
-    m_naxis = naxis;
+    m_naxis = naxes.size();
 
     // Copy number of pixels in each dimension and calculate the total
     // number of pixels
@@ -773,6 +771,12 @@ void GFitsImage::save_image(int datatype, const void* pixels)
         if (status != 0) {
             throw GException::fits_error(G_SAVE_IMAGE, status);
         }
+    }
+
+    // Make sure that the image on disk has the right size by resizing it
+    status = __ffrsim(FPTR(m_fitsfile), m_bitpix, m_naxis, m_naxes, &status);
+    if (status != 0) {
+        throw GException::fits_error(G_SAVE_IMAGE, status);
     }
 
     // Save the image pixels (if there are some ...)

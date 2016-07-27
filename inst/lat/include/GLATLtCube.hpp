@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATLtCube.hpp - Fermi/LAT livetime cube class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,12 +30,15 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GLATLtCubeMap.hpp"
-#include "GLATAeff.hpp"
-#include "GLATPsf.hpp"
 #include "GGti.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
+#include "GLATLtCubeMap.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GSkyDir;
+class GEnergy;
+class GLATAeff;
+class GLATPsf;
 
 
 /***********************************************************************//**
@@ -51,7 +54,7 @@ class GLATLtCube : public GBase {
 public:
     // Constructors and destructors
     GLATLtCube(void);
-    explicit GLATLtCube(const std::string& filename);
+    explicit GLATLtCube(const GFilename& filename);
     GLATLtCube(const GLATLtCube& cube);
     virtual ~GLATLtCube(void);
 
@@ -71,9 +74,9 @@ public:
     void        clear(void);
     GLATLtCube* clone(void) const;
     std::string classname(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename,
-                     const bool& clobber=false) const;
+    void        load(const GFilename& filename);
+    void        save(const GFilename& filename,
+                     const bool&      clobber = false) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
 private:

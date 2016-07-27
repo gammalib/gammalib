@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GLATAeff.hpp - Fermi/LAT effective area                *
+ *                  GLATAeff.hpp - Fermi LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATAeff.hpp
- * @brief Fermi/LAT effective area class definition
+ * @brief Fermi LAT effective area class definition
  * @author Juergen Knoedlseder
  */
 
@@ -33,11 +33,12 @@
 #include "GBase.hpp"
 #include "GLATResponseTable.hpp"
 #include "GLATEfficiency.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GEnergy;
+class GFits;
+class GFitsTable;
 
 
 /***********************************************************************//**
@@ -54,7 +55,7 @@ class GLATAeff : public GBase {
 public:
     // Constructors and destructors
     GLATAeff(void);
-    explicit GLATAeff(const std::string& filename);
+    GLATAeff(const GFilename& filename, const std::string& evtype);
     GLATAeff(const GLATAeff& aeff);
     virtual ~GLATAeff(void);
 
@@ -65,24 +66,26 @@ public:
                          const double& phi);
 
     // Methods
-    void          clear(void);
-    GLATAeff*     clone(void) const;
-    std::string   classname(void) const;
-    void          load(const std::string& filename);
-    void          save(const std::string& filename,
-                       const bool &clobber = false);
-    void          read(const GFits& file);
-    void          write(GFits& file) const;
-    int           size(void) const;
-    int           nenergies(void) const;
-    int           ncostheta(void) const;
-    const double& costhetamin(void) const;
-    void          costhetamin(const double& ctheta);
-    bool          has_phi(void) const;
-    bool          has_efficiency(void) const;
-    double        efficiency_factor1(const GEnergy& srcEng) const;
-    double        efficiency_factor2(const GEnergy& srcEng) const;
-    std::string   print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GLATAeff*          clone(void) const;
+    std::string        classname(void) const;
+    const std::string& evtype(void) const;
+    void               load(const GFilename&   filename,
+                            const std::string& evtype);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false);
+    void               read(const GFits& file);
+    void               write(GFits& file) const;
+    int                size(void) const;
+    int                nenergies(void) const;
+    int                ncostheta(void) const;
+    const double&      costhetamin(void) const;
+    void               costhetamin(const double& ctheta);
+    bool               has_phi(void) const;
+    bool               has_efficiency(void) const;
+    double             efficiency_factor1(const GEnergy& srcEng) const;
+    double             efficiency_factor2(const GEnergy& srcEng) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods
@@ -95,13 +98,12 @@ private:
     void write_efficiency(GFits& file) const;
     
     // Protected members
-    GLATResponseTable   m_aeff_bins;    //!< Aeff energy and cos theta binning
-    std::vector<double> m_aeff;         //!< Aeff array
-    double              m_min_ctheta;   //!< Minimum valid cos(theta)
-    bool                m_front;        //!< Response is for front section
-    bool                m_back;         //!< Response is for back section
-    GLATEfficiency*     m_eff_func1;    //!< Efficiency functor 1
-    GLATEfficiency*     m_eff_func2;    //!< Efficiency functor 2
+    std::string         m_evtype;     //!< Event type
+    GLATResponseTable   m_aeff_bins;  //!< Aeff energy and cos theta binning
+    std::vector<double> m_aeff;       //!< Aeff array
+    double              m_min_ctheta; //!< Minimum valid cos(theta)
+    GLATEfficiency*     m_eff_func1;  //!< Efficiency functor 1
+    GLATEfficiency*     m_eff_func2;  //!< Efficiency functor 2
 };
 
 
@@ -114,6 +116,18 @@ inline
 std::string GLATAeff::classname(void) const
 {
     return ("GLATAeff");
+}
+
+
+/***********************************************************************//**
+ * @brief Return event type
+ *
+ * @return Event type.
+ ***************************************************************************/
+inline
+const std::string& GLATAeff::evtype(void) const
+{
+    return (m_evtype);
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GXmlDocument.cpp - XML document node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -175,10 +175,11 @@ GXmlDocument* GXmlDocument::clone(void) const
 void GXmlDocument::write(GUrl& url, const int& indent) const
 {
     // Write document header into URL
-    url.printf("<?xml version=\"%s\" encoding=\"%s\" standalone=\"%s\"?>\n",
-               version().c_str(),
-               encoding().c_str(),
-               standalone().c_str());
+    url.printf("<?xml");
+    m_version.write(url);
+    m_encoding.write(url);
+    m_standalone.write(url);
+    url.printf("?>\n");
 
     // Write children into URL
     for (int i = 0; i < m_nodes.size(); ++i) {
@@ -211,9 +212,9 @@ std::string GXmlDocument::print(const GChatter& chatter,
 
         // Append document to string
         result.append("GXmlDocument::");
-        result.append("version=" + version());
-        result.append(" encoding=" + encoding());
-        result.append(" standalone=" + standalone());
+        result.append("version=\"" + version() +"\"");
+        result.append(" encoding=\"" + encoding() +"\"");
+        result.append(" standalone=\"" + standalone() +"\"");
 
         // Append children
         for (int i = 0; i < m_nodes.size(); ++i) {
@@ -239,15 +240,16 @@ std::string GXmlDocument::print(const GChatter& chatter,
 void GXmlDocument::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_version.clear();
     m_encoding.clear();
     m_standalone.clear();
     m_version.name("version");
     m_encoding.name("encoding");
-    m_standalone.name("m_standalone");
-    m_version.value("\"1.0\"");
-    m_encoding.value("\"UTF-8\"");
-    m_standalone.value("\"no\"");
+    m_standalone.name("standalone");
+    m_version.value("1.0");
+    m_encoding.value("UTF-8");
+    m_standalone.value("no");
 
     // Return
     return;
@@ -262,6 +264,7 @@ void GXmlDocument::init_members(void)
 void GXmlDocument::copy_members(const GXmlDocument& node)
 {
     // Copy attributes
+    m_filename   = node.m_filename;
     m_version    = node.m_version;
     m_encoding   = node.m_encoding;
     m_standalone = node.m_standalone;

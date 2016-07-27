@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEbounds.cpp - Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -83,7 +83,7 @@ GEbounds::GEbounds(void)
  *
  * Constructs energy boundaries from a FITS file.
  ***************************************************************************/
-GEbounds::GEbounds(const std::string& filename)
+GEbounds::GEbounds(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -576,25 +576,19 @@ void GEbounds::set_log(const int& num, const GEnergy& emin, const GEnergy& emax)
  * If no extension name is provided, the energy boundaries are loaded from
  * the "EBOUNDS" extension.
  ***************************************************************************/
-void GEbounds::load(const std::string& filename)
+void GEbounds::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get energy boundary table
-    const GFitsTable& table = *file.table(fname.extname("EBOUNDS"));
+    const GFitsTable& table = *fits.table(filename.extname("EBOUNDS"));
 
     // Read energy boundaries from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -605,29 +599,40 @@ void GEbounds::load(const std::string& filename)
  * @brief Save energy boundaries into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite any existing file  (default: false)?
- * @param[in] unit Energy units (default: "keV")
+ * @param[in] clobber Overwrite an existing energy boundaries extension?
+ * @param[in] unit Energy unit
  *
- * Saves energy boundaries into a FITS file.
+ * Saves energy boundaries into a FITS file. If a file with the given
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. Energy boundaries can only be appended to an
+ * existing file if the @p clobber flag is set to `true` (otherwise an
+ * exception is thrown).
  *
- * If no extension name is provided, the energy boundaries are saved into
- * an "EBOUNDS" extension.
+ * The method will append a binary FITS table containing the energy
+ * boundaries to the FITS file. The extension name can be specified as part
+ * of the @p filename. For example the @p filename
+ *
+ *      myfile.fits[ENERGY BOUNDARIES]
+ *
+ * will save the energy boundaries in the `ENERGY BOUNDARIES` extension of
+ * the `myfile.fits` file. If the extension exists already in the file it
+ * will be replaced, otherwise a new extension will be created. If no
+ * extension name is provided, the method will use `EBOUNDS` as the default
+ * extension name for energy boundaries.
  ***************************************************************************/
-void GEbounds::save(const std::string& filename,
+void GEbounds::save(const GFilename&   filename,
                     const bool&        clobber,
                     const std::string& unit) const
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
 
     // Write energy boundaries to FITS file
-    write(file, fname.extname("EBOUNDS"), unit);
+    write(fits, filename.extname("EBOUNDS"), unit);
 
     // Save to file
-    file.saveto(fname.filename(), clobber);
+    fits.save(clobber);
 
     // Return
     return;
@@ -688,7 +693,7 @@ void GEbounds::read(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write energy boundaries into FITS object
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS")
  * @param[in] unit Energy units (defaults to "keV")
  *
@@ -698,13 +703,13 @@ void GEbounds::read(const GFitsTable& table)
  *
  * @todo Write header keywords.
  ***************************************************************************/
-void GEbounds::write(GFits&             file,
+void GEbounds::write(GFits&             fits,
                      const std::string& extname,
                      const std::string& unit) const
 {
     // Create energy boundary columns
-    GFitsTableDoubleCol cemin = GFitsTableDoubleCol("E_MIN", m_num);
-    GFitsTableDoubleCol cemax = GFitsTableDoubleCol("E_MAX", m_num);
+    GFitsTableDoubleCol cemin("E_MIN", m_num);
+    GFitsTableDoubleCol cemax("E_MAX", m_num);
 
     // Fill energy boundary columns
     for (int i = 0; i < m_num; ++i) {
@@ -717,16 +722,19 @@ void GEbounds::write(GFits&             file,
     cemax.unit(unit);
 
     // Create binary table
-    GFitsBinTable* table = new GFitsBinTable(m_num);
-    table->append(cemin);
-    table->append(cemax);
-    table->extname(extname);
+    GFitsBinTable table(m_num);
+    table.append(cemin);
+    table.append(cemax);
+    table.extname(extname);
 
-    // Write to FITS file
-    file.append(*table);
+    // If the FITS object contains already an extension with the same
+    // name then remove now this extension
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
-    // Free table
-    delete table;
+    // Append EBOUNDS table to FITS file
+    fits.append(table);
 
     // Return
     return;
@@ -1062,8 +1070,8 @@ std::string GEbounds::print(const GChatter& chatter) const
             if (size() > 1) {
                 for (int i = 0; i < size(); ++i) {
                     result.append("\n");
-                    result.append(gammalib::parformat("Energy interval "));
-                    result.append(gammalib::str(i));
+                    result.append(gammalib::parformat("Energy interval "+
+                                  gammalib::str(i)));
                     result.append(emin(i).print());
                     result.append(" - ");
                     result.append(emax(i).print());

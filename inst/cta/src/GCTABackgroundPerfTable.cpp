@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTABackgroundPerfTable.cpp - CTA performance table background class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,10 +32,11 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
+#include "GRan.hpp"
 #include "GCTABackgroundPerfTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                  "GCTABackgroundPerfTable::load(std::string&)"
+#define G_LOAD                    "GCTABackgroundPerfTable::load(GFilename&)"
 #define G_MC           "GCTABackgroundPerfTable::mc(GEnergy&, GTime&, GRan&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -76,7 +77,7 @@ GCTABackgroundPerfTable::GCTABackgroundPerfTable(void) : GCTABackground()
  * Construct instance by loading the background information from a
  * performance table.
  ***************************************************************************/
-GCTABackgroundPerfTable::GCTABackgroundPerfTable(const std::string& filename) :
+GCTABackgroundPerfTable::GCTABackgroundPerfTable(const GFilename& filename) :
                          GCTABackground()
 {
     // Initialise class members
@@ -244,7 +245,7 @@ GCTABackgroundPerfTable* GCTABackgroundPerfTable::clone(void) const
  *
  * Loads the background information from a performance table.
  ***************************************************************************/
-void GCTABackgroundPerfTable::load(const std::string& filename)
+void GCTABackgroundPerfTable::load(const GFilename& filename)
 {
     // Clear arrays
     m_logE.clear();
@@ -254,13 +255,10 @@ void GCTABackgroundPerfTable::load(const std::string& filename)
     const int n = 1000;
     char  line[n];
 
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
     // Open performance table readonly
-    FILE* fptr = std::fopen(fname.c_str(), "r");
+    FILE* fptr = std::fopen(filename.url().c_str(), "r");
     if (fptr == NULL) {
-        throw GException::file_open_error(G_LOAD, fname);
+        throw GException::file_open_error(G_LOAD, filename.url());
     }
 
     // Read lines

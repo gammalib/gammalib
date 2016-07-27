@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATMeanPsf.hpp - Fermi/LAT mean PSF class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,7 +45,7 @@ class GLATObservation;
  *
  * The position-dependent mean PSF is the point spread function that has
  * been averaged over the zenith and azimuth angles of an observation. The
- * averaging is done using the livetime cube which holds the lifetime as
+ * averaging is done using the livetime cube which holds the livetime as
  * function and zenith and azimuth angles for an observation.
  ***************************************************************************/
 class GLATMeanPsf : public GBase {

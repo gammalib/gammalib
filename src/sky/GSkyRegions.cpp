@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSkyRegions.cpp - Sky region container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Pierrick Martin                             *
+ *  copyright (C) 2013-2016 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,10 +30,11 @@
 #include <fstream>
 #endif
 #include "GBase.hpp"
+#include "GTools.hpp"
+#include "GSkyDir.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
 #include "GSkyRegions.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                       "GSkyRegions::operator[](std::string&)"
@@ -46,8 +47,8 @@
 #define G_REMOVE1                                  "GSkyRegions::remove(int&)"
 #define G_REMOVE2                          "GSkyRegions::remove(std::string&)"
 #define G_EXTEND                           "GSkyRegions::extend(GSkyRegions&)"
-#define G_LOAD                               "GSkyRegions::load(std::string&)"
-#define G_SAVE                               "GSkyRegions::save(std::string&)"
+#define G_LOAD                                 "GSkyRegions::load(GFilename&)"
+#define G_SAVE                                 "GSkyRegions::save(GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -100,7 +101,7 @@ GSkyRegions::GSkyRegions(const GSkyRegions& regions)
  *
  * Constructs region container from a DS9 region file.
  ***************************************************************************/
-GSkyRegions::GSkyRegions(const std::string& filename)
+GSkyRegions::GSkyRegions(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -416,14 +417,14 @@ void GSkyRegions::extend(const GSkyRegions& regions)
  *
  * Loads all regions from a DS9 region file.
  ***************************************************************************/
-void GSkyRegions::load(const std::string& filename)
+void GSkyRegions::load(const GFilename& filename)
 {
     // Clear any existing regions
     clear();
 
     // Open file. Throw an exception if opening failed.
     std::ifstream ds9file;
-    ds9file.open(filename.c_str());
+    ds9file.open(filename.url().c_str());
 	if (ds9file.is_open()) {
         
 		// Loop over file lines
@@ -482,7 +483,7 @@ void GSkyRegions::load(const std::string& filename)
 
 	// File could not be opened
     else {
-        throw GException::file_open_error(G_LOAD, filename);
+        throw GException::file_open_error(G_LOAD, filename.url());
     }
 		
     // Return
@@ -500,11 +501,11 @@ void GSkyRegions::load(const std::string& filename)
  *
  * Saves all regions in the container into a DS9 region file.
  ***************************************************************************/
-void GSkyRegions::save(const std::string& filename) const
+void GSkyRegions::save(const GFilename& filename) const
 {
     // Open file
     std::ofstream ds9file;
-    ds9file.open(filename.c_str());
+    ds9file.open(filename.url().c_str());
 
     // If file opened correctly, then save regions
     if (ds9file.is_open()) {
@@ -533,7 +534,7 @@ void GSkyRegions::save(const std::string& filename) const
 
 	// ... otherwise, if file could not be opened then throw an exception
     else {
-        throw GException::file_open_error(G_SAVE, filename);
+        throw GException::file_open_error(G_SAVE, filename.url());
     }	
 		
 	// Return

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCTAAeff2D.cpp - CTA 2D effective area class            *
+ *                GCTAAeff2D.cpp - CTA 2D effective area class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GException.hpp"
 #include "GFilename.hpp"
 #include "GFits.hpp"
@@ -56,6 +57,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty effective area.
  ***************************************************************************/
 GCTAAeff2D::GCTAAeff2D(void) : GCTAAeff()
 {
@@ -74,7 +77,7 @@ GCTAAeff2D::GCTAAeff2D(void) : GCTAAeff()
  *
  * Constructs effective area from a FITS file.
  ***************************************************************************/
-GCTAAeff2D::GCTAAeff2D(const std::string& filename) : GCTAAeff()
+GCTAAeff2D::GCTAAeff2D(const GFilename& filename) : GCTAAeff()
 {
     // Initialise class members
     init_members();
@@ -91,6 +94,8 @@ GCTAAeff2D::GCTAAeff2D(const std::string& filename) : GCTAAeff()
  * @brief Copy constructor
  *
  * @param[in] aeff Effective area.
+ *
+ * Constructs effective area by copying from another effective area.
  ***************************************************************************/
 GCTAAeff2D::GCTAAeff2D(const GCTAAeff2D& aeff) : GCTAAeff(aeff)
 {
@@ -107,6 +112,8 @@ GCTAAeff2D::GCTAAeff2D(const GCTAAeff2D& aeff) : GCTAAeff(aeff)
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs effective area.
  ***************************************************************************/
 GCTAAeff2D::~GCTAAeff2D(void)
 {
@@ -129,8 +136,10 @@ GCTAAeff2D::~GCTAAeff2D(void)
  *
  * @param[in] aeff Effective area.
  * @return Effective area.
+ *
+ * Assigns effective area.
  ***************************************************************************/
-GCTAAeff2D& GCTAAeff2D::operator= (const GCTAAeff2D& aeff)
+GCTAAeff2D& GCTAAeff2D::operator=(const GCTAAeff2D& aeff)
 {
     // Execute only if object is not identical
     if (this != &aeff) {
@@ -158,16 +167,18 @@ GCTAAeff2D& GCTAAeff2D::operator= (const GCTAAeff2D& aeff)
  * @brief Return effective area in units of cm2
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Defaults to 0.0.
- * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
- * @param[in] etrue Use true energy (true/false). Defaults to true.
+ * @param[in] theta Offset angle in camera system (rad) (default: 0.0).
+ * @param[in] phi Azimuth angle in camera system (rad).
+ * @param[in] zenith Zenith angle in Earth system (rad).
+ * @param[in] azimuth Azimuth angle in Earth system (rad).
+ * @param[in] etrue Use true energy?
+ * @return Effective area in cm2.
  *
  * Returns the effective area in units of cm2 for a given energy and
- * offset angle. The effective area is bi-linearily interpolated in the
+ * offset angle. The effective area is bi-linearly interpolated in the
  * log10(energy) - offset angle plane. The method assures that the effective
- * area value never becomes negative.
+ * area value never becomes negative. Outside the logE - theta range covered
+ * by the response table the effective area will be set to zero.
  *
  * The method supports true and reconstructed energies for logE. To access
  * the effective area as function of true energy, specify etrue=true
@@ -181,16 +192,26 @@ double GCTAAeff2D::operator()(const double& logE,
                               const double& azimuth,
                               const bool&   etrue) const
 {
-    // Set parameter index
-    int index = (etrue) ? 0 : 1;
+    // Initialise effective area
+    double aeff(0.0);
 
-    // Get effective area value in cm2
-    double aeff = m_aeff(index, logE, theta);
+    // Continue only if logE and theta are in validity range
+    if ((logE  >= m_logE_min)  && (logE  <= m_logE_max) &&
+        (theta >= m_theta_min) && (theta <= m_theta_max)) {
 
-    // Make sure that effective area is not negative
-    if (aeff < 0.0) {
-        aeff = 0.0;
-    }
+        // Set parameter index
+        int index = (etrue) ? m_inx_aeff : m_inx_aeff_reco;
+
+        // Get effective area value in cm2
+        aeff = (m_inx_energy == 0) ? m_aeff(index, logE, theta) :
+                                     m_aeff(index, theta, logE);
+
+        // Make sure that effective area is not negative
+        if (aeff < 0.0) {
+            aeff = 0.0;
+        }
+
+    } // endif: logE and theta in validity range
     
     // Return effective area value
     return aeff;
@@ -204,13 +225,13 @@ double GCTAAeff2D::operator()(const double& logE,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear effective area.
  *
- * This method properly resets the object to an initial state.
+ * Clears effective area.
  ***************************************************************************/
 void GCTAAeff2D::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free class members
     free_members();
     this->GCTAAeff::free_members();
 
@@ -224,9 +245,11 @@ void GCTAAeff2D::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone effective area
  *
- * @return Deep copy of effective area instance.
+ * @return Deep copy of effective area.
+ *
+ * Returns a pointer to a deep copy of the effective area.
  ***************************************************************************/
 GCTAAeff2D* GCTAAeff2D::clone(void) const
 {
@@ -240,12 +263,26 @@ GCTAAeff2D* GCTAAeff2D::clone(void) const
  * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
- *            FITS file format differs from expectation.
+ *            Response table is not two-dimensional.
  *
- * Reads the effective area form the FITS @p table.
+ * Reads the effective area form the FITS @p table. The following column
+ * names are mandatory:
  *
- * The data are stored in m_aeff which is of type GCTAResponseTable. The
- * energy axis will be set to log10, the offset angle axis to radians.
+ *     ENERG_LO - Energy lower bin boundaries
+ *     ENERG_HI - Energy upper bin boundaries
+ *     THETA_LO - Offset angle lower bin boundaries
+ *     THETA_HI - Offset angle upper bin boundaries
+ *     EFFAREA  - Effective area
+ *
+ * In addition, the following column names are optional:
+ *
+ *     EFFAREA_RECO - Effective area as function of reconstructed energy
+ *
+ * The data are stored in the m_aeff member. The energy axis will be set to
+ * log10, the offset angle axis to radians.
+ *
+ * @todo Analyse the unit of the parameter axis to determine the conversion
+ * factor for the effective areas. For the moment they are hard wired. 
  ***************************************************************************/
 void GCTAAeff2D::read(const GFitsTable& table)
 {
@@ -255,31 +292,31 @@ void GCTAAeff2D::read(const GFitsTable& table)
     // Read effective area table
     m_aeff.read(table);
 
-    // Check that axis names comply to format
-    if (m_aeff.axis_lo_name(0) != "ENERG_LO" ||
-        m_aeff.axis_hi_name(0) != "ENERG_HI") {
-        std::string msg = "Effective area response table does not contain"
-                          " \"ENERG_LO\" and \"ENERG_HI\" columns as the"
-                          " first axis.";
-        throw GException::invalid_value(G_READ, msg);
-    }
-    if (m_aeff.axis_lo_name(1) != "THETA_LO" ||
-        m_aeff.axis_hi_name(1) != "THETA_HI") {
-        std::string msg = "Effective area response table does not contain"
-                          " \"THETA_LO\" and \"THETA_HI\" columns as the"
-                          " second axis.";
+    // Throw an exception if the table is not two-dimensional
+    if (m_aeff.axes() != 2) {
+        std::string msg = "Expected two-dimensional effective area response "
+                          "table but found "+gammalib::str(m_aeff.axes())+
+                          " dimensions. Please specify a two-dimensional "
+                          "effective area.";
         throw GException::invalid_value(G_READ, msg);
     }
 
+    // Set table indices
+    set_indices();
+    
     // Set energy axis to logarithmic scale
-    m_aeff.axis_log10(0);
+    m_aeff.axis_log10(m_inx_energy);
 
     // Set offset angle axis to radians
-    m_aeff.axis_radians(1);
+    m_aeff.axis_radians(m_inx_theta);
 
     // Convert effective areas from m2 to cm2
-    m_aeff.scale(0, 1.0e4);
-    m_aeff.scale(1, 1.0e4);
+    for (int i = 0; i < m_aeff.tables(); ++i) {
+        m_aeff.scale(i, 1.0e4);
+    }
+
+    // Set table boundaries
+    set_boundaries();
 
     // Return
     return;
@@ -291,7 +328,7 @@ void GCTAAeff2D::read(const GFitsTable& table)
  *
  * @param[in] table FITS binary table.
  *
- * Writes effective area into the FITS binary @p table.
+ * Writes effective area into a FITS binary @p table.
  *
  * @todo Add keywords.
  ***************************************************************************/
@@ -301,8 +338,9 @@ void GCTAAeff2D::write(GFitsBinTable& table) const
     GCTAResponseTable aeff(m_aeff);
 
     // Convert area from cm2 to m2
-    aeff.scale(0, 1.0e-4);
-    aeff.scale(1, 1.0e-4);
+    for (int i = 0; i < aeff.tables(); ++i) {
+        aeff.scale(i, 1.0e-4);
+    }
 
     // Write response table
     aeff.write(table);
@@ -317,30 +355,22 @@ void GCTAAeff2D::write(GFitsBinTable& table) const
  *
  * @param[in] filename FITS file name.
  *
- * Loads the effective area from a FITS file.
- *
- * If no extension name is provided, the effective area will be loaded from
- * the "EFFECTIVE AREA" extension.
+ * Loads the effective area from a FITS file. If no extension name is given
+ * the effective area will be loaded from the "EFFECTIVE AREA" extension.
  ***************************************************************************/
-void GCTAAeff2D::load(const std::string& filename)
+void GCTAAeff2D::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get effective area table
-    const GFitsTable& table = *file.table(fname.extname("EFFECTIVE AREA"));
+    const GFitsTable& table = *fits.table(filename.extname("EFFECTIVE AREA"));
 
     // Read effective area from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;
@@ -351,32 +381,49 @@ void GCTAAeff2D::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save effectiva area into FITS file
+ * @brief Save effective area into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
- * Save the effectiva area into a FITS file.
+ * Saves effectiva area into a FITS file. If a file with the given 
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. The method will create a (or replace an existing)
+ * effective area extension. The extension name can be specified as part
+ * of the @p filename, or if no extension name is given, is assumed to be
+ * "EFFECTIVE AREA".
  *
- * If no extension name is provided, the effective area will be saved into
- * the "EFFECTIVE AREA" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
-void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
+void GCTAAeff2D::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
+    // Get extension name
+    std::string extname = filename.extname("EFFECTIVE AREA");
+
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
+
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
     // Create binary table
     GFitsBinTable table;
-    table.extname(fname.extname("EFFECTIVE AREA"));
 
-    // Write the Effective area table
+    // Write the background table
     write(table);
 
-    // Create FITS file, append table, and write into the file
-    GFits fits;
+    // Set binary table extension name
+    table.extname(extname);
+
+    // Append table to FITS file
     fits.append(table);
-    fits.saveto(fname.filename(), clobber);
+
+    // Save to file
+    fits.save(clobber);
 
     // Return
     return;
@@ -384,44 +431,51 @@ void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
 
 
 /***********************************************************************//**
- * @brief Return maximum effective area at a given energy
+ * @brief Return maximum effective area at a given energy in cm2
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
- * @param[in] etrue Use true energy (true/false). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad).
+ * @param[in] azimuth Azimuth angle in Earth system (rad).
+ * @param[in] etrue Use true energy?
  * @return Maximum effective area (cm2).
+ *
+ * Returns the maximum effective area for a given energy, zenith and azimuth
+ * angle in units of cm2.
  ***************************************************************************/
 double GCTAAeff2D::max(const double& logE,
                        const double& zenith,
                        const double& azimuth,
                        const bool&   etrue) const
 {
-    // Set parameter index
-    int index = (etrue) ? 0 : 1;
-
-    // Get number of theta bins
-    int n_theta = m_aeff.axis(1);
-
     // Initialise maximum effective area
     double max_aeff = 0.0;
 
-    // Compute stepsize
-    double theta_step = m_aeff.axis_hi(1, n_theta - 1) / (double(n_theta) - 1.0);
+    // Set parameter index
+    int index = (etrue) ? m_inx_aeff : m_inx_aeff_reco;
+
+    // Get number of theta bins
+    int n_theta = m_aeff.axis_bins(m_inx_theta);
 
     // Loop over theta values
     for (int i = 0; i < n_theta; ++i) {
 
-        // Compute theta
-        double theta = i * theta_step;
+        // Compute lower and upper theta bin values (radians)
+        double theta_lo = m_aeff.axis_lo(m_inx_theta, i) * gammalib::deg2rad;
+        double theta_hi = m_aeff.axis_hi(m_inx_theta, i) * gammalib::deg2rad;
 
         // Get effective area value in cm2
-        double aeff = m_aeff(index, logE, theta);
+        double aeff_lo = (m_inx_energy == 0) ? m_aeff(index, logE, theta_lo) :
+                                               m_aeff(index, theta_lo, logE);
+        double aeff_hi = (m_inx_energy == 0) ? m_aeff(index, logE, theta_hi) :
+                                               m_aeff(index, theta_hi, logE);
 
         // Update maximum effective area if larger than current maximum
         // effective area
-        if (aeff > max_aeff) {
-            max_aeff = aeff;
+        if (aeff_lo > max_aeff) {
+            max_aeff = aeff_lo;
+        }
+        if (aeff_hi > max_aeff) {
+            max_aeff = aeff_hi;
         }
 
     } // endfor: loop over theta values
@@ -432,9 +486,39 @@ double GCTAAeff2D::max(const double& logE,
 
 
 /***********************************************************************//**
+ * @brief Assign response table
+ *
+ * @param[in] table Response table.
+ *
+ * Assigns the response table for an effective area. The effective area
+ * values are given in units of cm2.
+ ***************************************************************************/
+void GCTAAeff2D::table(const GCTAResponseTable& table)
+{
+    // Assign response table
+    m_aeff = table;
+    
+    // Set indices
+    set_indices();
+
+    // Set energy axis to logarithmic scale
+    m_aeff.axis_log10(m_inx_energy);
+
+    // Set offset angle axis to radians
+    m_aeff.axis_radians(m_inx_theta);
+
+    // Set table boundaries
+    set_boundaries();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print effective area information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing effective area information.
  ***************************************************************************/
 std::string GCTAAeff2D::print(const GChatter& chatter) const
@@ -446,12 +530,14 @@ std::string GCTAAeff2D::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Compute energy boundaries in TeV
-        double emin = m_aeff.axis_lo(0,0);
-        double emax = m_aeff.axis_hi(0,m_aeff.axis(0)-1);
+        double emin = m_aeff.axis_lo(m_inx_energy,0);
+        double emax = m_aeff.axis_hi(m_inx_energy,
+                                     m_aeff.axis_bins(m_inx_energy)-1);
 
         // Compute offset angle boundaries in deg
-        double omin = m_aeff.axis_lo(1,0);
-        double omax = m_aeff.axis_hi(1,m_aeff.axis(1)-1);
+        double omin = m_aeff.axis_lo(m_inx_theta,0);
+        double omax = m_aeff.axis_hi(m_inx_theta,
+                                     m_aeff.axis_bins(m_inx_theta)-1);
 
         // Append header
         result.append("=== GCTAAeff2D ===");
@@ -459,9 +545,9 @@ std::string GCTAAeff2D::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_aeff.axis(0)));
+                      gammalib::str(m_aeff.axis_bins(m_inx_energy)));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_aeff.axis(1)));
+                      gammalib::str(m_aeff.axis_bins(m_inx_theta)));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));
@@ -488,6 +574,14 @@ void GCTAAeff2D::init_members(void)
     // Initialise members
     m_filename.clear();
     m_aeff.clear();
+    m_inx_energy    = 0;
+    m_inx_theta     = 1;
+    m_inx_aeff      = 0;
+    m_inx_aeff_reco = 1;
+    m_logE_min      = 0.0;
+    m_logE_max      = 0.0;
+    m_theta_min     = 0.0;
+    m_theta_max     = 0.0;
 
     // Return
     return;
@@ -502,8 +596,16 @@ void GCTAAeff2D::init_members(void)
 void GCTAAeff2D::copy_members(const GCTAAeff2D& aeff)
 {
     // Copy members
-    m_filename = aeff.m_filename;
-    m_aeff     = aeff.m_aeff;
+    m_filename      = aeff.m_filename;
+    m_aeff          = aeff.m_aeff;
+    m_inx_energy    = aeff.m_inx_energy;
+    m_inx_theta     = aeff.m_inx_theta;
+    m_inx_aeff      = aeff.m_inx_aeff;
+    m_inx_aeff_reco = aeff.m_inx_aeff_reco;
+    m_logE_min      = aeff.m_logE_min;
+    m_logE_max      = aeff.m_logE_max;
+    m_theta_min     = aeff.m_theta_min;
+    m_theta_max     = aeff.m_theta_max;
 
     // Return
     return;
@@ -518,3 +620,50 @@ void GCTAAeff2D::free_members(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Set table indices
+ *
+ * Sets the data members m_inx_energy, m_inx_theta, m_inx_aeff and optionally
+ * m_inx_aeff_reco.
+ ***************************************************************************/
+void GCTAAeff2D::set_indices(void)
+{
+    // Get mandatory indices (throw exception if not found)
+    m_inx_energy = m_aeff.axis("ENERG");
+    m_inx_theta  = m_aeff.axis("THETA");
+    m_inx_aeff   = m_aeff.table("EFFAREA");
+
+    // Get optional index (use "EFFAREA" if "EFFAREA_RECO" does not exist)
+    m_inx_aeff_reco = (m_aeff.has_table("EFFAREA_RECO")) ?
+                       m_aeff.table("EFFAREA_RECO") : m_inx_aeff;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set effective area boundaries
+ *
+ * Sets the data members m_logE_min, m_logE_max, m_theta_min and m_theta_max
+ * that define the validity range of the effective area.
+ ***************************************************************************/
+void GCTAAeff2D::set_boundaries(void)
+{
+    // Compute minimum and maximum logE boundaries
+    m_logE_min = std::log10(m_aeff.axis_lo(m_inx_aeff, 0));
+    m_logE_max = std::log10(m_aeff.axis_hi(m_inx_aeff,
+                                           m_aeff.axis_bins(m_inx_aeff)-1));
+
+    // Compute minimum and maximum theta boundaries
+    m_theta_min = m_aeff.axis_lo(m_inx_theta, 0) *
+                  gammalib::deg2rad;
+    m_theta_max = m_aeff.axis_hi(m_inx_theta, m_aeff.axis_bins(m_inx_theta)-1) *
+                  gammalib::deg2rad;
+
+    // Return
+    return;
+}
+

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEnergies.cpp - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty energy container.
  ***************************************************************************/
 GEnergies::GEnergies(void)
 {
@@ -78,7 +80,7 @@ GEnergies::GEnergies(void)
  *
  * Constructs energy container from a FITS file.
  ***************************************************************************/
-GEnergies::GEnergies(const std::string& filename)
+GEnergies::GEnergies(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -95,6 +97,8 @@ GEnergies::GEnergies(const std::string& filename)
  * @brief Copy constructor
  *
  * @param energies Energy container.
+ *
+ * Construct energy container by copying from another energy container.
  ***************************************************************************/
 GEnergies::GEnergies(const GEnergies& energies)
 {
@@ -193,7 +197,7 @@ GEnergies& GEnergies::operator=(const GEnergies& energies)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear container
+ * @brief Clear energy container
  *
  * Removes all energies from the container.
  ***************************************************************************/
@@ -211,7 +215,7 @@ void GEnergies::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone energy container
  *
  * @return Pointer to deep copy of energy container
  *
@@ -541,25 +545,19 @@ void GEnergies::set_log(const int&     num,
  * If no extension name is provided, the energies are loaded from the
  * "ENERGIES" extension.
  ***************************************************************************/
-void GEnergies::load(const std::string& filename)
+void GEnergies::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get energies table
-    const GFitsTable& table = *file.table(fname.extname("ENERGIES"));
+    const GFitsTable& table = *fits.table(filename.extname("ENERGIES"));
 
     // Read energies from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -567,29 +565,39 @@ void GEnergies::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save energies to FITS file
+ * @brief Save energies into FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite any existing energies extension?
+ * @param[in] clobber Overwrite an existing energies extension?
  *
- * Saves energies into a FITS file.
+ * Saves energies into a FITS file. If a file with the given @p filename
+ * does not yet exist it will be created, otherwise the method opens the
+ * existing file. Energies can only be appended to an existing file if the
+ * @p clobber flag is set to `true` (otherwise an exception is thrown).
  *
- * If no extension name is provided, the energies are saved into an
- * "ENERGIES" extension.
+ * The method will append a binary FITS table containing the energies to the
+ * FITS file. The extension name can be specified as part of the
+ * @p filename. For example the @p filename
+ *
+ *      myfile.fits[ENERGY VALUES]
+ *
+ * will save the energies in the `ENERGY VALUES` extension of the
+ * `myfile.fits` file. If the extension exists already in the file it will be
+ * replaced, otherwise a new extension will be created. If no extension name
+ * is provided, the method will use `ENERGIES` as the default extension name
+ * for energies.
  ***************************************************************************/
-void GEnergies::save(const std::string& filename, const bool& clobber) const
+void GEnergies::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
 
     // Write energies to FITS file
-    write(file, fname.extname("ENERGIES"));
+    write(fits, filename.extname("ENERGIES"));
 
     // Save to file
-    file.saveto(fname.filename(), clobber);
+    fits.save(clobber);
 
     // Return
     return;
@@ -642,18 +650,18 @@ void GEnergies::read(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write energies into FITS object
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  * @param[in] extname Energy extension name (default: "ENERGIES")
  *
  * Writes energies into FITS object.
  ***************************************************************************/
-void GEnergies::write(GFits& file, const std::string& extname) const
+void GEnergies::write(GFits& fits, const std::string& extname) const
 {
     // Set number of energies
     int num = m_energies.size();
 
     // Create Energy column
-    GFitsTableDoubleCol col_energy = GFitsTableDoubleCol("Energy", num);
+    GFitsTableDoubleCol col_energy("Energy", num);
 
     // Fill energy column in units of MeV
     for (int i = 0; i < num; ++i) {
@@ -662,15 +670,18 @@ void GEnergies::write(GFits& file, const std::string& extname) const
     col_energy.unit("MeV");
 
     // Create energies table
-    GFitsBinTable* table = new GFitsBinTable(num);
-    table->append(col_energy);
-    table->extname(extname);
+    GFitsBinTable table(num);
+    table.append(col_energy);
+    table.extname(extname);
 
-    // Write to FITS file
-    file.append(*table);
+    // If the FITS object contains already an extension with the same
+    // name then remove now this extension
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
-    // Free table
-    delete table;
+    // Append ENERGIES table to FITS file
+    fits.append(table);
 
     // Return
     return;
@@ -680,7 +691,7 @@ void GEnergies::write(GFits& file, const std::string& extname) const
 /***********************************************************************//**
  * @brief Print energy container information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing energy container information.
  ***************************************************************************/
 std::string GEnergies::print(const GChatter& chatter) const
@@ -701,7 +712,9 @@ std::string GEnergies::print(const GChatter& chatter) const
         // EXPLICIT: Append energies
         if (chatter >= EXPLICIT) {
             for (int i = 0; i < size(); ++i) {
-                result.append("\n"+m_energies[i].print(chatter));
+                result.append("\n");
+                result.append(gammalib::parformat("Energy "+gammalib::str(i)));
+                result.append(m_energies[i].print(chatter));
             }
         }
 

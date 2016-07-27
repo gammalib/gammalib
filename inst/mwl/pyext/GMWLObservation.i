@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.i - Multi-wavelength observation class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,7 +43,7 @@ class GMWLObservation : public GObservation {
 public:
     // Constructors and destructors
     GMWLObservation(void);
-    explicit GMWLObservation(const std::string& filename);
+    explicit GMWLObservation(const GFilename& filename);
     GMWLObservation(const GMWLObservation& obs);
     virtual ~GMWLObservation(void);
 
@@ -56,18 +56,14 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    void               load(const std::string& filename);
-    const std::string& filename(void) const;
-    const std::string& extno(void) const;
-    const std::string& extname(void) const;
-    void               filename(const std::string& filename);
-    void               extno(const std::string& extno);
-    void               extname(const std::string& extname);
+    void             load(const GFilename& filename);
+    const GFilename& filename(void) const;
+    void             filename(const GFilename& filename);
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNodeArray.cpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GException.hpp"
 #include "GFilename.hpp"
 #include "GNodeArray.hpp"
+#include "GVector.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -82,7 +83,7 @@ GNodeArray::GNodeArray(void)
  *
  * Constructs node array from a FITS file.
  ***************************************************************************/
-GNodeArray::GNodeArray(const std::string& filename)
+GNodeArray::GNodeArray(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -700,25 +701,19 @@ void GNodeArray::set_value(const double& value) const
  * If no extension name is provided, the node array is loaded from the
  * "NODES" extension.
  ***************************************************************************/
-void GNodeArray::load(const std::string& filename)
+void GNodeArray::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get nodes table
-    const GFitsTable& table = *file.table(fname.extname("NODES"));
+    const GFitsTable& table = *fits.table(filename.extname("NODES"));
 
     // Read nodes from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -726,29 +721,39 @@ void GNodeArray::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save nodes to FITS file
+ * @brief Save node array into FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite any existing nodes extension?
+ * @param[in] clobber Overwrite an existing node array extension?
  *
- * Saves node array into a FITS file.
+ * Saves node array into a FITS file. If a file with the given @p filename
+ * does not yet exist it will be created, otherwise the method opens the
+ * existing file. Node arrays can only be appended to an existing file if the
+ * @p clobber flag is set to `true` (otherwise an exception is thrown).
  *
- * If no extension name is provided, the node array is saved into a
- * "NODES" extension.
+ * The method will append a binary FITS table containing the node array to
+ * the FITS file. The extension name can be specified as part of the
+ * @p filename. For example the @p filename
+ *
+ *      myfile.fits[NODE ARRAY]
+ *
+ * will save the node array in the `NODE ARRAY` extension of the
+ * `myfile.fits` file. If the extension exists already in the file it will be
+ * replaced, otherwise a new extension will be created. If no extension name
+ * is provided, the method will use `NODES` as the default extension name
+ * for the node array.
  ***************************************************************************/
-void GNodeArray::save(const std::string& filename, const bool& clobber) const
+void GNodeArray::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
 
-    // Allocate FITS file
-    GFits file;
-
-    // Write nodes to FITS file
-    write(file, fname.extname("NODES"));
+    // Write node array to FITS object
+    write(fits, filename.extname("NODES"));
 
     // Save to file
-    file.saveto(fname.filename(), clobber);
+    fits.save(clobber);
 
     // Return
     return;
@@ -794,18 +799,18 @@ void GNodeArray::read(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write nodes into FITS object
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  * @param[in] extname Nodes extension name (defaults to "NODES")
  *
  * Writes nodes into FITS object.
  ***************************************************************************/
-void GNodeArray::write(GFits& file, const std::string& extname) const
+void GNodeArray::write(GFits& fits, const std::string& extname) const
 {
     // Set number of nodes
     int num = m_node.size();
 
     // Create node column
-    GFitsTableDoubleCol col_nodes = GFitsTableDoubleCol("Value", num);
+    GFitsTableDoubleCol col_nodes("Value", num);
 
     // Fill node column
     for (int i = 0; i < num; ++i) {
@@ -813,15 +818,18 @@ void GNodeArray::write(GFits& file, const std::string& extname) const
     }
 
     // Create nodes table
-    GFitsBinTable* table = new GFitsBinTable(num);
-    table->append(col_nodes);
-    table->extname(extname);
+    GFitsBinTable table(num);
+    table.append(col_nodes);
+    table.extname(extname);
 
-    // Write to FITS file
-    file.append(*table);
+    // If the FITS object contains already an extension with the same
+    // name then remove now this extension
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
-    // Free table
-    delete table;
+    // Append NODES table to FITS file
+    fits.append(table);
 
     // Return
     return;

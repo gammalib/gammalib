@@ -1,4 +1,23 @@
-## Process this file with automake to produce Makefile.in
+#############################################################################
+# Makefile.am for GammaLib package                                          #
+# ------------------------------------------------------------------------- #
+# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# ------------------------------------------------------------------------- #
+#                                                                           #
+#  This program is free software: you can redistribute it and/or modify     #
+#  it under the terms of the GNU General Public License as published by     #
+#  the Free Software Foundation, either version 3 of the License, or        #
+#  (at your option) any later version.                                      #
+#                                                                           #
+#  This program is distributed in the hope that it will be useful,          #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+#  GNU General Public License for more details.                             #
+#                                                                           #
+#  You should have received a copy of the GNU General Public License        #
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
+#                                                                           #
+#############################################################################
 
 # Include M4 macros
 ACLOCAL_AMFLAGS = -I m4
@@ -9,7 +28,7 @@ INST_DIR = inst
 endif
 
 # Subdirectories
-SUBDIRS = include $(INST_DIR) src pyext test
+SUBDIRS = include $(INST_DIR) src pyext examples test
 
 # Pkgconfig directory
 pkgconfigdir = $(libdir)/pkgconfig
@@ -25,14 +44,14 @@ doc_DATA = \
 	   AUTHORS \
 	   ChangeLog \
 	   COPYING \
-       INSTALL \
+	   INSTALL \
 	   NEWS \
-	   README
+	   README.md
 docdir = ${datadir}/doc/${PACKAGE}
 
 # Extra files to be distributed in the tar file
-#EXTRA_DIST = autogen.sh \
-#             gammalib.pc.in
+EXTRA_DIST = README.md \
+             doc/Doxyfile doc/source
 
 #install-data-local: $(HTML_INSTALL_DATA_TARGETS)
 #uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
@@ -76,7 +95,8 @@ dynamic-analysis: coverage valgrind
 # Add cppcheck rule
 cppcheck:
 	@if type cppcheck >/dev/null 2>&1; then \
-		cppcheck -v --enable=all --xml --suppress=missingIncludeSystem \
+		cppcheck -v --enable=all --xml --xml-version=2 \
+        --suppress=missingIncludeSystem \
 		-Iinclude -Iinst/lat/include -Iinst/cta/include -Iinst/mwl/include \
 		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
 	else \
@@ -104,9 +124,15 @@ cppncss:
 # Add coverage rule
 coverage:
 	@if type gcovr >/dev/null 2>&1; then \
-		gcovr -r . -x -o gcovr-reports-data.xml; \
+		gcovr -r . -x -o coverage-report-cxx.xml; \
 	else \
 		echo "gcovr script not found in PATH."; \
+	fi; \
+	if type coverage >/dev/null 2>&1; then \
+	    export COVERAGE_FILE=test/.coverage; \
+		coverage xml --omit=/usr/** -o coverage-report-python.xml; \
+	else \
+		echo "coverage script not found in PATH."; \
 	fi
 
 # Add Valgrind rule

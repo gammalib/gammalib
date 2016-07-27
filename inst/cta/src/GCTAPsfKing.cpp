@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.cpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,10 +30,12 @@
 #endif
 #include <cmath>
 #include "GTools.hpp"
-#include "GException.hpp"
 #include "GMath.hpp"
+#include "GException.hpp"
+#include "GRan.hpp"
 #include "GFilename.hpp"
 #include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAPsfKing.hpp"
 #include "GCTAException.hpp"
@@ -65,6 +67,8 @@ const double r_max = 0.7 * gammalib::deg2rad;  // Maximum delta for fixed
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty point spread function.
  ***************************************************************************/
 GCTAPsfKing::GCTAPsfKing(void) : GCTAPsf()
 {
@@ -83,7 +87,7 @@ GCTAPsfKing::GCTAPsfKing(void) : GCTAPsf()
  *
  * Constructs point spread function from a FITS file.
  ***************************************************************************/
-GCTAPsfKing::GCTAPsfKing(const std::string& filename) : GCTAPsf()
+GCTAPsfKing::GCTAPsfKing(const GFilename& filename) : GCTAPsf()
 {
     // Initialise class members
     init_members();
@@ -100,6 +104,9 @@ GCTAPsfKing::GCTAPsfKing(const std::string& filename) : GCTAPsf()
  * @brief Copy constructor
  *
  * @param[in] psf Point spread function.
+ *
+ * Constructs point spread function by copying from another point spread
+ * function.
  ***************************************************************************/
 GCTAPsfKing::GCTAPsfKing(const GCTAPsfKing& psf) : GCTAPsf(psf)
 {
@@ -116,6 +123,8 @@ GCTAPsfKing::GCTAPsfKing(const GCTAPsfKing& psf) : GCTAPsf(psf)
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs point spread function.
  ***************************************************************************/
 GCTAPsfKing::~GCTAPsfKing(void)
 {
@@ -138,6 +147,8 @@ GCTAPsfKing::~GCTAPsfKing(void)
  *
  * @param[in] psf Point spread function.
  * @return Point spread function.
+ *
+ * Assigns point spread function.
  ***************************************************************************/
 GCTAPsfKing& GCTAPsfKing::operator=(const GCTAPsfKing& psf)
 {
@@ -244,9 +255,9 @@ double GCTAPsfKing::operator()(const double& delta,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear point spread function
  *
- * This method properly resets the object to an initial state.
+ * Clears point spread function.
  ***************************************************************************/
 void GCTAPsfKing::clear(void)
 {
@@ -264,9 +275,11 @@ void GCTAPsfKing::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone point spread functions
  *
- * @return Deep copy of point spread function instance.
+ * @return Deep copy of point spread function.
+ *
+ * Returns a pointer to a deep copy of the point spread function.
  ***************************************************************************/
 GCTAPsfKing* GCTAPsfKing::clone(void) const
 {
@@ -280,13 +293,20 @@ GCTAPsfKing* GCTAPsfKing::clone(void) const
  * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
- *            FITS file format differs from expectation.
+ *            Response table is not two-dimensional.
  *
- * Reads the point spread function from the FITS @p table.
+ * Reads the point spread function form the FITS @p table. The following
+ * column names are mandatory:
  *
- * The data are stored in m_psf which is of type GCTAResponseTable. The
- * energy axis will be set to log10. The offset angle axis and sigma
- * parameter columns will be set to radians.
+ *     ENERG_LO - Energy lower bin boundaries
+ *     ENERG_HI - Energy upper bin boundaries
+ *     THETA_LO - Offset angle lower bin boundaries
+ *     THETA_HI - Offset angle upper bin boundaries
+ *     GAMMA    - Gamma
+ *     SIGMA    - Sigma
+ *
+ * The data are stored in the m_psf member. The energy axis will be set to
+ * log10, the offset angle axis to radians.
  ***************************************************************************/
 void GCTAPsfKing::read(const GFitsTable& table)
 {
@@ -296,30 +316,30 @@ void GCTAPsfKing::read(const GFitsTable& table)
     // Read PSF table
     m_psf.read(table);
 
-    // Check that axis names comply to format
-    if (m_psf.axis_lo_name(0) != "ENERG_LO" ||
-        m_psf.axis_hi_name(0) != "ENERG_HI") {
-        std::string msg = "Point spread function response table does not"
-                          " contain \"ENERG_LO\" and \"ENERG_HI\" columns"
-                          " as the first axis.";
-        throw GException::invalid_value(G_READ, msg);
-    }
-    if (m_psf.axis_lo_name(1) != "THETA_LO" ||
-        m_psf.axis_hi_name(1) != "THETA_HI") {
-        std::string msg = "Point spread function response table does not"
-                          " contain \"THETA_LO\" and \"THETA_HI\" columns"
-                          " as the second axis.";
+    // Get mandatory indices (throw exception if not found)
+    m_inx_energy = m_psf.axis("ENERG");
+    m_inx_theta  = m_psf.axis("THETA");
+    m_inx_gamma  = m_psf.table("GAMMA");
+    m_inx_sigma  = m_psf.table("SIGMA");
+
+    // Throw an exception if the table is not two-dimensional
+    if (m_psf.axes() != 2) {
+        std::string msg = "Expected two-dimensional point spread function "
+                          "response table but found "+
+                          gammalib::str(m_psf.axes())+
+                          " dimensions. Please specify a two-dimensional "
+                          "point spread function.";
         throw GException::invalid_value(G_READ, msg);
     }
 
     // Set energy axis to logarithmic scale
-    m_psf.axis_log10(0);
+    m_psf.axis_log10(m_inx_energy);
 
     // Set offset angle axis to radians
-    m_psf.axis_radians(1);
+    m_psf.axis_radians(m_inx_theta);
 
     // Convert sigma parameters to radians
-    m_psf.scale(1, gammalib::deg2rad);
+    m_psf.scale(m_inx_sigma, gammalib::deg2rad);
    
     // Return
     return;
@@ -337,8 +357,14 @@ void GCTAPsfKing::read(const GFitsTable& table)
  ***************************************************************************/
 void GCTAPsfKing::write(GFitsBinTable& table) const
 {
-    // Write background table
-    m_psf.write(table);
+    // Create a copy of the response table
+    GCTAResponseTable psf(m_psf);
+
+    // Convert sigma parameters back to degrees
+    psf.scale(m_inx_sigma, gammalib::rad2deg);
+
+    // Write response table
+    psf.write(table);
 
     // Return
     return;
@@ -355,25 +381,19 @@ void GCTAPsfKing::write(GFitsBinTable& table) const
  * If no extension name is provided, the point spread function will be loaded
  * from the "POINT SPREAD FUNCTION" extension.
  ***************************************************************************/
-void GCTAPsfKing::load(const std::string& filename)
+void GCTAPsfKing::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get PSFa table
-    const GFitsTable& table = *file.table(fname.extname("POINT SPREAD FUNCTION"));
+    const GFitsTable& table = *fits.table(filename.extname("POINT SPREAD FUNCTION"));
 
     // Read PSF from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;
@@ -388,27 +408,44 @@ void GCTAPsfKing::load(const std::string& filename)
  * @param[in] filename FITS file name.
  * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the point spread function into a FITS file.
+ * Saves point spread function into a FITS file. If a file with the given
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. The method will create a (or replace an existing)
+ * point spread function extension. The extension name can be specified as
+ * part of the @p filename, or if no extension name is given, is assumed to
+ * be "POINT SPREAD FUNCTION".
  *
- * If no extension name is provided, the point spread function will be saved
- * into the "POINT SPREAD FUNCTION" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
-void GCTAPsfKing::save(const std::string& filename, const bool& clobber) const
+void GCTAPsfKing::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
+    // Get extension name
+    std::string extname = filename.extname("POINT SPREAD FUNCTION");
+
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
+
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
     // Create binary table
     GFitsBinTable table;
-    table.extname(fname.extname("POINT SPREAD FUNCTION"));
 
-    // Write the PSF table
+    // Write the background table
     write(table);
 
-    // Create FITS file, append table, and write into the file
-    GFits fits;
+    // Set binary table extension name
+    table.extname(extname);
+
+    // Append table to FITS file
     fits.append(table);
-    fits.saveto(fname.filename(), clobber);
+
+    // Save to file
+    fits.save(clobber);
 
     // Return
     return;
@@ -558,19 +595,41 @@ double GCTAPsfKing::containment_radius(const double& fraction,
  * @brief Print point spread function information
  *
  * @return Content of point spread function instance.
+ * @return String containing point spread function information.
  ***************************************************************************/
 std::string GCTAPsfKing::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
+    // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-		// Append information
-		result.append("=== GCTAPsfKing ===");
-		result.append("\n"+gammalib::parformat("Filename")+m_filename);
-		result.append("\n"+m_psf.print(chatter));
-    }
+        // Compute energy boundaries in TeV
+        double emin = m_psf.axis_lo(m_inx_energy,0);
+        double emax = m_psf.axis_hi(m_inx_energy,
+                                    m_psf.axis_bins(m_inx_energy)-1);
+
+        // Compute offset angle boundaries in deg
+        double omin = m_psf.axis_lo(m_inx_theta,0);
+        double omax = m_psf.axis_hi(m_inx_theta,
+                                    m_psf.axis_bins(m_inx_theta)-1);
+
+        // Append header
+        result.append("=== GCTAPsfKing ===");
+
+        // Append information
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(m_psf.axis_bins(m_inx_energy)));
+        result.append("\n"+gammalib::parformat("Number of offset bins") +
+                      gammalib::str(m_psf.axis_bins(m_inx_theta)));
+        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
+        result.append("\n"+gammalib::parformat("Offset angle range"));
+        result.append(gammalib::str(omin)+" - "+gammalib::str(omax)+" deg");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;
@@ -591,6 +650,10 @@ void GCTAPsfKing::init_members(void)
     // Initialise members
     m_filename.clear();
     m_psf.clear();
+    m_inx_energy = 0;
+    m_inx_theta  = 1;
+    m_inx_gamma  = 0;
+    m_inx_sigma  = 1;
     m_par_logE   = -1.0e30;
     m_par_theta  = -1.0;
     m_par_norm   = 0.0;
@@ -613,6 +676,10 @@ void GCTAPsfKing::copy_members(const GCTAPsfKing& psf)
     // Copy members
     m_filename   = psf.m_filename;
     m_psf        = psf.m_psf;
+    m_inx_energy = psf.m_inx_energy;
+    m_inx_theta  = psf.m_inx_theta;
+    m_inx_gamma  = psf.m_inx_gamma;
+    m_inx_sigma  = psf.m_inx_sigma;
     m_par_logE   = psf.m_par_logE;
     m_par_theta  = psf.m_par_theta;
     m_par_norm   = psf.m_par_norm;
@@ -658,23 +725,12 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
         m_par_theta = theta;
     
         // Determine sigma and gamma by interpolating between nodes
-        std::vector<double> pars = m_psf(logE,theta);
-
-        // Throw an exception if there are not 2 parameters
-        if (pars.size() != 2) {
-            std::string msg = gammalib::str(pars.size()) + " parameters have"
-                              " been found in the response table of the"
-                              " King profile response function while 2"
-                              " parameters are expected.\n"
-                              "Possibly, the point spread function information"
-                              " has not yet been loaded. Please load the point"
-                              " spread function before using it.";
-            throw GException::invalid_value(G_UPDATE, msg);
-        }
+        std::vector<double> pars = (m_inx_energy == 0) ? m_psf(logE, theta) :
+                                                         m_psf(theta, logE);
 
         // Set parameters
-        m_par_gamma  = pars[0];
-        m_par_sigma  = pars[1];
+        m_par_gamma  = pars[m_inx_gamma];
+        m_par_sigma  = pars[m_inx_sigma];
         m_par_sigma2 = m_par_sigma * m_par_sigma;
 
         // Check for parameter sanity

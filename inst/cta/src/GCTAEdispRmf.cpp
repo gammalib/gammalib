@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdispRmf.cpp - CTA RMF energy dispersion class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,12 +31,18 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GFilename.hpp"
+#include "GRan.hpp"
 #include "GIntegral.hpp"
+#include "GFunction.hpp"
 #include "GEnergy.hpp"
+#include "GRmf.hpp"
+#include "GNodeArray.hpp"
+#include "GMatrixSparse.hpp"
 #include "GCTAEdispRmf.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                             "GCTAEdispRmf::load(std::string&)"
+#define G_LOAD                               "GCTAEdispRmf::load(GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -73,7 +79,7 @@ GCTAEdispRmf::GCTAEdispRmf(void) : GCTAEdisp()
  *
  * Construct instance by loading the Redistribution Matrix File.
  ***************************************************************************/
-GCTAEdispRmf::GCTAEdispRmf(const std::string& filename) : GCTAEdisp()
+GCTAEdispRmf::GCTAEdispRmf(const GFilename& filename) : GCTAEdisp()
 {
     // Initialise class members
     init_members();
@@ -232,7 +238,7 @@ GCTAEdispRmf* GCTAEdispRmf::clone(void) const
  *
  * This method loads the energy dispersion information from an RMF file.
  ***************************************************************************/
-void GCTAEdispRmf::load(const std::string& filename)
+void GCTAEdispRmf::load(const GFilename& filename)
 {
     // Load RMF file
     m_rmf.load(filename);

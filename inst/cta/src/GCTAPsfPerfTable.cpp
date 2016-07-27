@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAPsfPerfTable.cpp - CTA performance table PSF class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,11 +32,12 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GCTAPsfPerfTable.hpp"
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                         "GCTAPsfPerfTable::load(std::string&)"
+#define G_LOAD                           "GCTAPsfPerfTable::load(GFilename&)"
 #define G_CONTAINMENT_RADIUS  "GCTAPsfPerfTable::containment_radius(double&,"\
                        " double&, double&, double&, double&, double&, bool&)"
 
@@ -77,7 +78,7 @@ GCTAPsfPerfTable::GCTAPsfPerfTable(void) : GCTAPsf()
  * Construct instance by loading the point spread function information from
  * an ASCII performance table.
  ***************************************************************************/
-GCTAPsfPerfTable::GCTAPsfPerfTable(const std::string& filename) : GCTAPsf()
+GCTAPsfPerfTable::GCTAPsfPerfTable(const GFilename& filename) : GCTAPsf()
 {
     // Initialise class members
     init_members();
@@ -257,7 +258,7 @@ GCTAPsfPerfTable* GCTAPsfPerfTable::clone(void) const
  * This method loads the point spread function information from an ASCII
  * performance table.
  ***************************************************************************/
-void GCTAPsfPerfTable::load(const std::string& filename)
+void GCTAPsfPerfTable::load(const GFilename& filename)
 {
     // Set conversion factor from 68% containment radius to 1 sigma
     const double conv = 0.6624305 * gammalib::deg2rad;
@@ -272,13 +273,10 @@ void GCTAPsfPerfTable::load(const std::string& filename)
     const int n = 1000;
     char  line[n];
 
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
     // Open performance table readonly
-    FILE* fptr = std::fopen(fname.c_str(), "r");
+    FILE* fptr = std::fopen(filename.url().c_str(), "r");
     if (fptr == NULL) {
-        throw GCTAException::file_open_error(G_LOAD, fname);
+        throw GCTAException::file_open_error(G_LOAD, filename);
     }
 
     // Read lines

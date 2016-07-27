@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialDiffuseCube.i - Spatial map cube model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -25,6 +25,7 @@
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GEnergies.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 %}
 
@@ -39,8 +40,8 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
-    GModelSpatialDiffuseCube(const std::string& filename,
-                             const double&      value = 1.0);
+    GModelSpatialDiffuseCube(const GFilename& filename,
+                             const double&    value = 1.0);
     GModelSpatialDiffuseCube(const GSkyMap&   map,
                              const GEnergies& energies,
                              const double&    value = 1.0);
@@ -69,8 +70,8 @@ public:
     int                        pixels(void) const;
     double                     value(void) const;
     void                       value(const double& value);
-    const std::string&         filename(void) const;
-    void                       filename(const std::string& filename);
+    const GFilename&           filename(void) const;
+    void                       filename(const GFilename& filename);
     const GSkyMap&             cube(void) const;
     void                       cube(const GSkyMap& cube);
     GEnergies                  energies(void);
@@ -78,10 +79,9 @@ public:
     const GModelSpectralNodes& spectrum(void) const;
     void                       set_mc_cone(const GSkyDir& centre,
                                            const double&  radius) const;
-    void                       load(const std::string& filename);
-    void                       save(const std::string& filename,
+    void                       load(const GFilename& filename);
+    void                       save(const GFilename& filename,
                                     const bool& clobber = false) const;
-    //void                       read(const GFits& file);
     void                       write(GFits& file) const;
 };
 

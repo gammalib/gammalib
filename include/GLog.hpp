@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.hpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GFilename.hpp"
 #include "GTypemaps.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -63,7 +64,7 @@ class GLog {
 public:
     // Constructors and destructors
     GLog(void);
-    GLog(const std::string& filename, const bool& clobber = false);
+    GLog(const GFilename& filename, const bool& clobber = false);
     GLog(const GLog& log);
     virtual ~GLog(void);
 
@@ -85,7 +86,7 @@ public:
     void               clear(void);
     int                size(void) const;
     std::string        classname(void) const;
-    void               open(const std::string& filename, const bool& clobber = false);
+    void               open(const GFilename& filename, const bool& clobber = false);
     void               close(void);
     void               flush(const bool& force = false);
     void               date(const bool& flag);
@@ -106,7 +107,7 @@ public:
     const int&         max_size(void) const;
     const int&         indent(void) const;
     const GChatter&    chatter(void) const;
-    const std::string& filename(void) const;
+    const GFilename&   filename(void) const;
 
 protected:
     // Protected methods
@@ -126,7 +127,7 @@ protected:
     bool        m_use_date;   //!< Dump date in prefix
     bool        m_linestart;  //!< Signals that buffer is at line start
     FILE*       m_file;       //!< Log file pointer
-    std::string m_filename;   //!< Log file name
+    GFilename   m_filename;   //!< Log file name
     std::string m_name;       //!< Name for prefix
     std::string m_buffer;     //!< Output string buffer
     GChatter    m_chatter;    //!< Chattiness for print() method
@@ -450,7 +451,7 @@ const GChatter& GLog::chatter(void) const
  * Returns the filename of the log file.
  ***************************************************************************/
 inline
-const std::string& GLog::filename(void) const
+const GFilename& GLog::filename(void) const
 {
     return m_filename;
 }

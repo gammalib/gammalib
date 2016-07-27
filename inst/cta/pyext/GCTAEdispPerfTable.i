@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTAEdispPerfTable.i - CTA performance table energy dispersion class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GCTAEdispPerfTable : public GCTAEdisp {
 public:
     // Constructors and destructors
     GCTAEdispPerfTable(void);
-    explicit GCTAEdispPerfTable(const std::string& filename);
+    explicit GCTAEdispPerfTable(const GFilename& filename);
     GCTAEdispPerfTable(const GCTAEdispPerfTable& psf);
     virtual ~GCTAEdispPerfTable(void);
 
@@ -55,8 +55,8 @@ public:
     void                clear(void);
     GCTAEdispPerfTable* clone(void) const;
     std::string         classname(void) const;
-    void                load(const std::string& filename);
-    std::string         filename(void) const;
+    void                load(const GFilename& filename);
+    GFilename           filename(void) const;
     GEnergy             mc(GRan&         ran,
                            const double& logE,
                            const double& theta = 0.0,

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GXml.cpp - XML class                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
+#include "GException.hpp"
+#include "GFilename.hpp"
 #include "GUrlFile.hpp"
 #include "GUrlString.hpp"
 #include "GXml.hpp"
@@ -37,8 +40,6 @@
 #include "GXmlElement.hpp"
 #include "GXmlComment.hpp"
 #include "GXmlPI.hpp"
-#include "GException.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                                     "GXml::load(std::string&)"
@@ -515,24 +516,24 @@ const GXmlElement* GXml::element(const std::string& name, const int& index) cons
  * @todo Ideally, we would like to extract the URL type from the filename
  * so that any kind of URL can be used for loading.
  ***************************************************************************/
-void GXml::load(const std::string& filename)
+void GXml::load(const GFilename& filename)
 {
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
-    // Check if file exists
-    if (!gammalib::file_exists(fname)) {
-        throw GException::file_open_error(G_LOAD, fname);
+    // Throw an exception if file does not exist
+    if (!filename.exists()) {
+        throw GException::file_open_error(G_LOAD, filename);
     }
 
     // Open XML URL as file for reading
-    GUrlFile url(fname.c_str(), "r");
+    GUrlFile url(filename.url().c_str(), "r");
 
     // Read XML document from URL
     read(url);
 
     // Close URL
     url.close();
+
+    // Store filename in XML document
+    m_root.filename(filename);
 
     // Return
     return;
@@ -554,10 +555,13 @@ void GXml::load(const std::string& filename)
  * @todo Ideally, we would like to extract the URL type from the filename
  * so that any kind of URL can be used for loading.
  ***************************************************************************/
-void GXml::save(const std::string& filename)
+void GXml::save(const GFilename& filename)
 {
     // Open XML file for writing
-    GUrlFile url(filename.c_str(), "w");
+    GUrlFile url(filename.url().c_str(), "w");
+
+    // Store filename in XML document
+    m_root.filename(filename);
 
     // Write XML document
     write(url, 0);
@@ -869,7 +873,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Handle element start tag
     case MT_ELEMENT_START:
         {
-            // Create new element node, set it's parent, append it to the
+            // Create new element node, set its parent, append it to the
             // current node and make it the current node
             GXmlElement element(segment);
             element.parent(*current);
@@ -909,8 +913,11 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Append comment markup
     case MT_COMMENT:
         {
-            // Append comment
-            (*current)->append(GXmlComment(segment));
+            // Create a new comment node, set its parent and append it to the
+            // current node
+            GXmlComment comment(segment);
+            comment.parent(*current);
+            (*current)->append(comment);
         }
         break;
 
@@ -956,8 +963,11 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Processing tag
     case MT_PROCESSING:
         {
-            // Append PI
-            (*current)->append(GXmlPI(segment));
+            // Create a new PI node, set its parent and append it to the
+            // current node
+            GXmlPI pi(segment);
+            pi.parent(*current);
+            (*current)->append(pi);
         }
         break;
 

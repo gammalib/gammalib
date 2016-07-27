@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralLogParabola.i - Log parabola spectral model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Michael Mayer                               *
+ *  copyright (C) 2012-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,10 +38,15 @@ class GModelSpectralLogParabola : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralLogParabola(void);
-    explicit GModelSpectralLogParabola(const double&  prefactor,
-                                       const double&  index,
-                                       const GEnergy& pivot,
-                                       const double&  curvature);
+    GModelSpectralLogParabola(const std::string& type,
+                              const std::string& prefactor,
+                              const std::string& index,
+                              const std::string& pivot,
+                              const std::string& curvature);
+    GModelSpectralLogParabola(const double&  prefactor,
+                              const double&  index,
+                              const GEnergy& pivot,
+                              const double&  curvature);
     explicit GModelSpectralLogParabola(const GXmlElement& xml);
     GModelSpectralLogParabola(const GModelSpectralLogParabola& model);
     virtual ~GModelSpectralLogParabola(void);
@@ -52,9 +57,9 @@ public:
     virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
     virtual double                     eval(const GEnergy& srcEng,
-                                            const GTime&   srcTime) const;
+                                            const GTime&   srcTime = GTime()) const;
     virtual double                     eval_gradients(const GEnergy& srcEng,
-                                                      const GTime&   srcTime);
+                                                      const GTime&   srcTime = GTime());
     virtual double                     flux(const GEnergy& emin,
                                             const GEnergy& emax) const;
     virtual double                     eflux(const GEnergy& emin,

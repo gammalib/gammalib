@@ -1,7 +1,7 @@
 /***************************************************************************
  *                cta.i - Cherenkov Telescope Array module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,9 @@
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
+
+/* __ Include GammaLib typemaps __________________________________________ */
+%include typemap_GFilename.i
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
@@ -162,7 +165,6 @@
 /* __ CTA ________________________________________________________________ */
 %include "GCTAObservation.i"
 %include "GCTAOnOffObservation.i"
-%include "GCTAOnOffObservations.i"
 %include "GCTAEventCube.i"
 %include "GCTAEventList.i"
 %include "GCTAEventBin.i"
@@ -183,6 +185,7 @@
 %include "GCTAPsfVector.i"
 %include "GCTAPsf2D.i"
 %include "GCTAPsfKing.i"
+%include "GCTAPsfTable.i"
 %include "GCTAEdisp.i"
 %include "GCTAEdispPerfTable.i"
 %include "GCTAEdispRmf.i"
@@ -193,6 +196,7 @@
 %include "GCTACubeExposure.i"
 %include "GCTACubeBackground.i"
 %include "GCTACubePsf.i"
+%include "GCTACubeEdisp.i"
 %include "GCTAModelCubeBackground.i"
 %include "GCTAModelIrfBackground.i"
 %include "GCTAModelAeffBackground.i"

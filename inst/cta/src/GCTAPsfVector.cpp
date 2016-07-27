@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAPsfVector.cpp - CTA point spread function vector class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,7 +31,9 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GFilename.hpp"
+#include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAPsfVector.hpp"
@@ -77,7 +79,7 @@ GCTAPsfVector::GCTAPsfVector(void) : GCTAPsf()
  *
  * Constructs point spread function vector from a FITS file.
  ***************************************************************************/
-GCTAPsfVector::GCTAPsfVector(const std::string& filename) : GCTAPsf()
+GCTAPsfVector::GCTAPsfVector(const GFilename& filename) : GCTAPsf()
 {
     // Initialise class members
     init_members();
@@ -256,25 +258,19 @@ GCTAPsfVector* GCTAPsfVector::clone(void) const
  * If no extension name is provided, the point spread function will be loaded
  * from the "PSF" extension.
  ***************************************************************************/
-void GCTAPsfVector::load(const std::string& filename)
+void GCTAPsfVector::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get PSFa table
-    const GFitsTable& table = *file.table(fname.extname("PSF"));
+    const GFitsTable& table = *fits.table(filename.extname("PSF"));
 
     // Read PSF from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;

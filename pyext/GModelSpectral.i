@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectral.i - Abstract spectral model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,9 +48,9 @@ public:
     virtual std::string     classname(void) const = 0;
     virtual std::string     type(void) const = 0;
     virtual double          eval(const GEnergy& srcEng,
-                                 const GTime& srcTime) const = 0;
+                                 const GTime&   srcTime = GTime()) const = 0;
     virtual double          eval_gradients(const GEnergy& srcEng,
-                                           const GTime& srcTime) = 0;
+                                           const GTime&   srcTime = GTime()) = 0;
     virtual double          flux(const GEnergy& emin,
                                  const GEnergy& emax) const = 0;
     virtual double          eflux(const GEnergy& emin,

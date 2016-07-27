@@ -2,7 +2,7 @@
 # ==========================================================================
 # This scripts performs unit tests for the GammaLib Python bindings.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-import gammalib
-import sys
 import os
+import sys
+import gammalib
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Import test modules
 import test_GApplication
 import test_GLinalg
 import test_GModel
@@ -70,10 +72,18 @@ except:
 # ================== #
 def test(installed=False):
     """
-    Perform unit testing for Python interface.
+    Perform unit testing for Python interface
     """
+    # Set environment variables first
+    if installed:
+        os.environ['TEST_DATA']     = 'data'
+        os.environ['TEST_COM_DATA'] = 'com/data'
+        os.environ['TEST_CTA_DATA'] = 'cta/data'
+        os.environ['TEST_LAT_DATA'] = 'lat/data'
+        os.environ['TEST_MWL_DATA'] = 'mwl/data'
+
     # Allocate test suites
-    suites = gammalib.GTestSuites("Python interface testing")
+    suites = gammalib.GTestSuites('Python interface testing')
 
     # Allocate test suites and append them to the container
     suite1  = test_GApplication.Test()
@@ -130,8 +140,8 @@ def test(installed=False):
     if has_cta:
         suite_cta = test_CTA.Test()
         suite_cta.set()
-        if installed:
-            suite_cta.caldb_path("cta/caldb")
+        #if installed:
+        #    suite_cta.testdir('cta') # Test data for installed test
         suites.append(suite_cta)
 
     # Optionally handle LAT suite
@@ -161,53 +171,53 @@ def test(installed=False):
         head, tail = os.path.split(testdir)
 
         # Copy over test data
-        os.system("cp -r %s %s" % (head+"/data", "data"))
-        os.system("cp -r %s %s" % (head+"/cta",  "cta"))
+        os.system('cp -r %s %s' % (head+'/data', 'data'))
+        os.system('cp -r %s %s' % (head+'/cta',  'cta'))
 
         # Special post processing for CTA files. This is needed because
         # the XML files contain absolute PATH information. This is a kluge
         # that works for now, but it's not a very maintainable way to
         # handle this
         if has_cta:
-            xml = gammalib.GXml("cta/data/irf_unbinned.xml")
-            elements = xml.element("observation_list").element("observation")
+            xml = gammalib.GXml('cta/data/irf_unbinned.xml')
+            elements = xml.element('observation_list').element('observation')
             for element in elements:
-                filename   = element.attribute("file")
+                filename   = element.attribute('file')
                 head, tail = os.path.split(filename)
                 head, dir  = os.path.split(head)
-                if len(tail) > 0:
-                    filename   = "cta/"+dir+"/"+tail
-                else:
-                    filename = ""
-                element.attribute("file", filename)
-            xml.save("cta/data/irf_unbinned.xml")
-            xml = gammalib.GXml("cta/data/irf_1dc.xml")
-            elements = xml.element("observation_list").element("observation")
+                if len(dir) > 0:
+                    filename   = 'cta/'+dir+'/'+tail
+                element.attribute('file', filename)
+            xml.save('cta/data/irf_unbinned.xml')
+            xml = gammalib.GXml('cta/data/irf_1dc.xml')
+            elements = xml.element('observation_list').element('observation')
             for element in elements:
-                filename   = element.attribute("file")
+                filename   = element.attribute('file')
                 head, tail = os.path.split(filename)
                 head, dir  = os.path.split(head)
-                if dir == "dc1":
-                    dir = "caldb/dc1"
-                if len(tail) > 0:
-                    filename = "cta/"+dir+"/"+tail
-                else:
-                    filename = ""
-                element.attribute("file", filename)
-            xml.save("cta/data/irf_1dc.xml")
+                if dir == 'dc1':
+                    dir = 'caldb/dc1'
+                if len(dir) > 0:
+                    filename = 'cta/'+dir+'/'+tail
+                element.attribute('file', filename)
+            xml.save('cta/data/irf_1dc.xml')
 
     # Run test suite
     success = suites.run()
 
     # If we have a non-installed version then save test results
     if not installed:
-        suites.save("reports/GPython.xml")
+        suites.save('reports/python.xml')
 
     # Set return code
     if success:
         rc = 0
     else:
         rc = 1
+
+    # Remove temporary direction
+    if installed:
+        os.system('rm -rf %s' % (path))
 
     # Exit with return code
     sys.exit(rc)
@@ -217,8 +227,6 @@ def test(installed=False):
 # Main routine entry point #
 # ======================== #
 if __name__ == '__main__':
-    """
-    Perform unit testing for Python interface.
-    """
+
     # Run tests
     test()

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GammaLib.hpp - Gamma-Ray Astronomy Library Header file         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -154,8 +154,9 @@
 #include "GWcsCAR.hpp"
 #include "GWcsMER.hpp"
 #include "GWcsMOL.hpp"
-#include "GWcsTAN.hpp"
+#include "GWcsSIN.hpp"
 #include "GWcsSTG.hpp"
+#include "GWcsTAN.hpp"
 
 /* __ Observation handling _______________________________________________ */
 #include "GEnergy.hpp"

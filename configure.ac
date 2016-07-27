@@ -29,12 +29,13 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [1.0.1], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [1.1.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects])
-#AM_INIT_AUTOMAKE([gnu no-dependencies subdir-objects])
-#AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects serial-tests])
+AC_CONFIG_AUX_DIR([.])
+AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects foreign])
+#AM_INIT_AUTOMAKE([gnu no-dependencies subdir-objects foreign])
+#AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects serial-tests foreign])
 AC_CONFIG_HEADER([config.h])
 
 
@@ -55,7 +56,7 @@ AC_CONFIG_HEADER([config.h])
 # 5. If any interfaces have been removed or changed since the last public   #
 #    release, then set age to 0.                                            #
 #############################################################################
-GAMMALIB_LT_VERSION="1:1:0"
+GAMMALIB_LT_VERSION="2:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
 
 
@@ -72,14 +73,6 @@ else
   gammalib_prefix=${prefix}
 fi
 AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${gammalib_prefix}", [Location where library is installed])
-
-
-#############################################################################
-# Determine source directory for unit testing                               #
-#############################################################################
-PACKAGE_SOURCE=`pwd`
-AC_DEFINE_UNQUOTED([PACKAGE_SOURCE], "${PACKAGE_SOURCE}", [Location where source is installed])
-AC_SUBST(PACKAGE_SOURCE)
 
 
 #############################################################################
@@ -562,7 +555,7 @@ esac
 # Checks for optional instrument specific interfaces                        #
 #############################################################################
 # Checks for the existence of instrument specific interfaces
-AC_CHECK_FILE([inst/Makefile.am],
+AC_CHECK_FILE([$srcdir/inst/README.md],
               [with_inst=yes],
               [with_inst=no])
 AM_CONDITIONAL([WITH_INST], [test "x$with_inst" = "xyes"])
@@ -574,7 +567,7 @@ AC_ARG_WITH([mwl],
             [],
             [with_mwl=yes])
 if test "x$with_mwl" = "xyes"; then
-  AC_CHECK_FILE([inst/mwl/Makefile.am],
+  AC_CHECK_FILE([$srcdir/inst/mwl/README.md],
                 [with_mwl=yes],
                 [with_mwl=no])
 fi
@@ -587,7 +580,7 @@ AC_ARG_WITH([cta],
             [],
             [with_cta=yes])
 if test "x$with_cta" = "xyes"; then
-  AC_CHECK_FILE([inst/cta/Makefile.am],
+  AC_CHECK_FILE([$srcdir/inst/cta/README.md],
                 [with_cta=yes],
                 [with_cta=no])
 fi
@@ -600,7 +593,7 @@ AC_ARG_WITH([lat],
             [],
             [with_lat=yes])
 if test "x$with_lat" = "xyes"; then
-  AC_CHECK_FILE([inst/lat/Makefile.am],
+  AC_CHECK_FILE([$srcdir/inst/lat/README.md],
                 [with_lat=yes],
                 [with_lat=no])
 fi
@@ -613,7 +606,7 @@ AC_ARG_WITH([com],
             [],
             [with_com=yes])
 if test "x$with_com" = "xyes"; then
-  AC_CHECK_FILE([inst/com/Makefile.am],
+  AC_CHECK_FILE([$srcdir/inst/com/README.md],
                 [with_com=yes],
                 [with_com=no])
 fi
@@ -699,6 +692,23 @@ AC_ARG_ENABLE([small_memory],
              [SMALL_MEMORY="yes"])
 if test "x$SMALL_MEMORY" = "xyes"; then
   AC_DEFINE([G_SMALL_MEMORY], [1], [Define if small memory optimization is selected])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+
+#############################################################################
+# Checks for Legacy XML format option (G_LEGACY_XML_FORMAT)                #
+#############################################################################
+AC_MSG_CHECKING(whether to support legacy XML format option)
+AC_ARG_ENABLE([legacy_xml_format],
+              AS_HELP_STRING([--enable-legacy-xml-format],
+                             [support legacy XML format [default=yes]]),
+              [LEGACY_XML_FORMAT="$enableval"],
+              [LEGACY_XML_FORMAT="yes"])
+if test "x$LEGACY_XML_FORMAT" = "xyes"; then
+  AC_DEFINE([G_LEGACY_XML_FORMAT], [1], [Legacy XML format is supported])
   AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
@@ -816,14 +826,17 @@ AC_SUBST(OPENMP_LIB_LDFLAGS)
 # Python binding requires Python and either the files gammalib_wrap.cpp and #
 # gammalib.py or swig to create these files.  The following conditionals    #
 # are set:                                                                  #
-# WITH_PYTHON - Python bindings will be built                               #
-# HAVE_SWIG   - swig is available                                           #
+# WITH_PYTHON   - Python bindings will be built                             #
+# HAVE_SWIG     - swig is available                                         #
+# HAVE_WRAPPERS - wrappers are available                                    #
 #############################################################################
 # Initialise flags
 enable_python="no"
 has_python="no"
 has_python_h="no"
 has_swig="no"
+has_wrappers="no"
+build_wrappers="no"
 
 # Python binding enabled?
 AC_ARG_ENABLE([python-binding],
@@ -837,9 +850,9 @@ if test "x$ac_enable_python_binding" = "xno"; then
 else
 
   # Do we have Python and Python.h?
-  AM_PATH_PYTHON([2.2],
+  AM_PATH_PYTHON([2.3],
                  [has_python="yes"],
-                 [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
+                 [AC_MSG_WARN([Python >= 2.3 not found. Python >= 2.3 is required to build python binding. Python can be obtained from http://www.python.org])])
 
   # It would really be weired if Python has not been found, as barely every system has Python. Maybe
   # it was not found because the autoconf is so old, and in an early version of the AM_PATH_PYTHON
@@ -938,40 +951,58 @@ else
 
   # Do we have Python wrappers
   has_wrappers="yes"
-  AC_CHECK_FILES([pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
-                  pyext/gammalib/base_wrap.cpp pyext/gammalib/base.py
-                  pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
-                  pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
-                  pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
-                  pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
-                  pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
-                  pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
-                  pyext/gammalib/sky_wrap.cpp pyext/gammalib/sky.py
-                  pyext/gammalib/support_wrap.cpp pyext/gammalib/support.py
-                  pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
-                  pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py
-                  pyext/gammalib/xspec_wrap.cpp pyext/gammalib/xspec.py
-                  pyext/gammalib/vo_wrap.cpp pyext/gammalib/vo.py],,
+  AC_CHECK_FILES([$srcdir/pyext/gammalib/app_wrap.cpp
+                  $srcdir/pyext/gammalib/app.py
+                  $srcdir/pyext/gammalib/base_wrap.cpp
+                  $srcdir/pyext/gammalib/base.py
+                  $srcdir/pyext/gammalib/fits_wrap.cpp
+                  $srcdir/pyext/gammalib/fits.py
+                  $srcdir/pyext/gammalib/linalg_wrap.cpp
+                  $srcdir/pyext/gammalib/linalg.py
+                  $srcdir/pyext/gammalib/model_wrap.cpp
+                  $srcdir/pyext/gammalib/model.py
+                  $srcdir/pyext/gammalib/numerics_wrap.cpp
+                  $srcdir/pyext/gammalib/numerics.py
+                  $srcdir/pyext/gammalib/obs_wrap.cpp
+                  $srcdir/pyext/gammalib/obs.py
+                  $srcdir/pyext/gammalib/opt_wrap.cpp
+                  $srcdir/pyext/gammalib/opt.py
+                  $srcdir/pyext/gammalib/sky_wrap.cpp
+                  $srcdir/pyext/gammalib/sky.py
+                  $srcdir/pyext/gammalib/support_wrap.cpp
+                  $srcdir/pyext/gammalib/support.py
+                  $srcdir/pyext/gammalib/test_wrap.cpp
+                  $srcdir/pyext/gammalib/test.py
+                  $srcdir/pyext/gammalib/xml_wrap.cpp
+                  $srcdir/pyext/gammalib/xml.py
+                  $srcdir/pyext/gammalib/xspec_wrap.cpp
+                  $srcdir/pyext/gammalib/xspec.py
+                  $srcdir/pyext/gammalib/vo_wrap.cpp
+                  $srcdir/pyext/gammalib/vo.py],,
                  [has_wrappers="no"])
-if test "x$with_mwl" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$with_lat" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/lat_wrap.cpp pyext/gammalib/lat.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$with_cta" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/cta_wrap.cpp pyext/gammalib/cta.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$with_com" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/com_wrap.cpp pyext/gammalib/com.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$has_wrappers" = "xno"; then
-  AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
-fi
+  if test "x$with_mwl" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/mwl_wrap.cpp
+                    $srcdir/pyext/gammalib/mwl.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_lat" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/lat_wrap.cpp
+                    $srcdir/pyext/gammalib/lat.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_cta" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/cta_wrap.cpp
+                    $srcdir/pyext/gammalib/cta.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_com" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/com_wrap.cpp
+                    $srcdir/pyext/gammalib/com.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$has_wrappers" = "xno"; then
+    AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
+  fi
 
   # Do we have wrappers or can we created wrappers?
   can_wrappers="no"
@@ -979,16 +1010,22 @@ fi
     can_wrappers="yes"
   fi
 
+  # Don't we have wrappers but we have swig
+  if [test "x$has_wrappers" = "xno" -a "x$has_swig" = "xyes"]; then
+    build_wrappers="yes"
+  fi
+
   # Signal if Python is enabled
   if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
     enable_python="yes"
     AC_DEFINE([HAVE_PYTHON], [1], [Define if Python bindings are built])
   fi
-  
 
 fi
-AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
+AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
+AM_CONDITIONAL(HAVE_WRAPPERS, test "x$has_wrappers" = "xyes")
+AM_CONDITIONAL(BUILD_WRAPPERS, test "x$build_wrappers" = "xyes")
 
 # Set Python environment
 if test "x$enable_python" = "xyes"; then
@@ -1013,6 +1050,32 @@ if test "x$enable_python" = "xyes"; then
   AC_SUBST(PYTHON_EXTRA_LIBS)
 
 fi
+
+
+#############################################################################
+# Checks for coverage option                                                #
+#############################################################################
+# Initialise Python coverage with empty string
+PYTHON_COVERAGE=
+
+# Check for coverage option
+AC_MSG_CHECKING(whether to build GammaLib for code coverage measure)
+AC_ARG_ENABLE([coverage],
+              AS_HELP_STRING([--enable-coverage],
+                             [turn on code coverage measure [default=no]]),
+              [enable_coverage="$enableval"],
+              [enable_coverage="no"])
+if test "x$enable_coverage" = "xyes"; then
+  CXXFLAGS="--coverage $CXXFLAGS"
+  LDFLAGS="--coverage $LDFLAGS"
+  if test "x$has_python" = "xyes"; then
+    PYTHON_COVERAGE="coverage run --append "
+  fi
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+AC_SUBST(PYTHON_COVERAGE)
 
 
 #############################################################################
@@ -1365,26 +1428,37 @@ AC_CONFIG_FILES([Makefile
                  src/gammalib-setup
                  include/Makefile
                  test/Makefile
+                 test/test_python.sh
+                 test/test_examples.sh
                  pyext/Makefile
                  pyext/setup.py
+                 pyext/gammalib/__init__.py
+                 examples/Makefile
+                 examples/cpp/Makefile
                  gammalib.pc
                  testconf.sh],
-                [if test -f testconf.sh; then chmod +x testconf.sh; fi])
+                [if test -f test/test_python.sh; then chmod +x test/test_python.sh; fi;
+                 if test -f test/test_examples.sh; then chmod +x test/test_examples.sh; fi;
+                 if test -f testconf.sh; then chmod +x testconf.sh; fi])
 
 if test "x$with_inst" = "xyes"; then
   AC_CONFIG_FILES([inst/Makefile])
 fi
 if test "x$with_mwl" = "xyes"; then
   AC_CONFIG_FILES([inst/mwl/Makefile])
+  AC_CONFIG_FILES([inst/mwl/test/Makefile])
 fi
 if test "x$with_cta" = "xyes"; then
   AC_CONFIG_FILES([inst/cta/Makefile])
+  AC_CONFIG_FILES([inst/cta/test/Makefile])
 fi
 if test "x$with_lat" = "xyes"; then
   AC_CONFIG_FILES([inst/lat/Makefile])
+  AC_CONFIG_FILES([inst/lat/test/Makefile])
 fi
 if test "x$with_com" = "xyes"; then
   AC_CONFIG_FILES([inst/com/Makefile])
+  AC_CONFIG_FILES([inst/com/test/Makefile])
 fi
 AC_OUTPUT
 
@@ -1502,6 +1576,11 @@ if test "x$SMALL_MEMORY" = "xyes"; then
   echo "  * Optimize memory usage        (yes)   (default)"
 else
   echo "  - Optimize memory usage        (no)"
+fi
+if test "x$LEGACY_XML_FORMAT" = "xyes"; then
+  echo "  * Support legacy XML format    (yes)   (default)"
+else
+  echo "  - Support legacy XML format    (no)"
 fi
 if test "x$enable_openmp" = "xyes"; then
   echo "  * Enable OpenMP                (yes)   (default)"

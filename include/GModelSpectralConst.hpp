@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralConst.hpp - Spectral constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,10 +29,14 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
+#include "GModelPar.hpp"
 #include "GEnergy.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GTime;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -55,6 +59,7 @@ class GModelSpectralConst : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralConst(void);
+    GModelSpectralConst(const std::string& type, const std::string& value);
     explicit GModelSpectralConst(const GXmlElement& xml);
     explicit GModelSpectralConst(const double& value);
     GModelSpectralConst(const GModelSpectralConst& model);
@@ -69,9 +74,9 @@ public:
     virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GEnergy& srcEng,
-                                      const GTime&   srcTime) const;
+                                      const GTime&   srcTime = GTime()) const;
     virtual double               eval_gradients(const GEnergy& srcEng,
-                                                const GTime&   srcTime);
+                                                const GTime&   srcTime = GTime());
     virtual double               flux(const GEnergy& emin,
                                       const GEnergy& emax) const;
     virtual double               eflux(const GEnergy& emin,
@@ -95,7 +100,8 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_norm;  //!< Normalization factor
+    std::string m_type;     //!< Model type
+    GModelPar   m_norm;     //!< Normalization factor
 };
 
 
@@ -114,14 +120,14 @@ std::string GModelSpectralConst::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "ConstantValue".
+ * @return Model type.
  *
  * Returns the type of the constant spectral model.
  ***************************************************************************/
 inline
 std::string GModelSpectralConst::type(void) const
 {
-    return "ConstantValue";
+    return (m_type);
 }
 
 

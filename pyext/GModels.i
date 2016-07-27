@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModels.i - Model container class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,7 +42,7 @@ public:
     // Constructors and destructors
     GModels(void);
     GModels(const GModels& models);
-    explicit GModels(const std::string& filename);
+    explicit GModels(const GFilename& filename);
     virtual ~GModels(void);
  
     // Methods
@@ -62,12 +62,12 @@ public:
     void           reserve(const int& num);
     void           extend(const GModels& models);
     bool           contains(const std::string& name) const;
-    void           load(const std::string& filename);
-    void           save(const std::string& filename) const;
+    void           load(const GFilename& filename);
+    void           save(const GFilename& filename) const;
     void           read(const GXml& xml);
     void           write(GXml& xml) const;
     int            npars(void) const;
-    GOptimizerPars pars(void);
+    GOptimizerPars pars(void) const;
     double         eval(const GEvent& event, const GObservation& obs) const;
     double         eval_gradients(const GEvent& event, const GObservation& obs) const;
 };

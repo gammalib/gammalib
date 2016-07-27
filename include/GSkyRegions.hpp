@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegions.hpp - Sky region container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Pierrick Martin                             *
+ *  copyright (C) 2013-2016 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,7 +33,11 @@
 #include "GContainer.hpp"
 #include "GSkyRegion.hpp"
 #include "GException.hpp"
-#include "GSkyDir.hpp"
+#include "GFilename.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GSkyDir;
+
 
 /***********************************************************************//**
  * @class GSkyRegions
@@ -56,7 +60,7 @@ public:
     // Constructors and destructors
     GSkyRegions(void);
     GSkyRegions(const GSkyRegions& regions);
-    explicit GSkyRegions(const std::string& filename);
+    explicit GSkyRegions(const GFilename& filename);
     virtual ~GSkyRegions(void);
 
     // Operators
@@ -65,25 +69,25 @@ public:
     const GSkyRegion* operator[](const int& index) const;
 
     // Methods
-    void               clear(void);
-    GSkyRegions*       clone(void) const;
-    std::string        classname(void) const;
-    GSkyRegion*        at(const int& index);
-    const GSkyRegion*  at(const int& index) const;
-    int                size(void) const;
-    bool               is_empty(void) const;
-    GSkyRegion*        set(const int& index, const GSkyRegion& region);
-    GSkyRegion*        append(const GSkyRegion& region);
-    GSkyRegion*        insert(const int& index, const GSkyRegion& region);
-    void               remove(const int& index);
-    void               reserve(const int& num);
-    void               extend(const GSkyRegions& regions);
-    bool               contains(const GSkyDir& dir) const;
-    bool               overlaps(const GSkyRegion& reg) const;
-    void               load(const std::string& filename);
-    void               save(const std::string& filename) const;
-    const std::string& filename(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    void              clear(void);
+    GSkyRegions*      clone(void) const;
+    std::string       classname(void) const;
+    GSkyRegion*       at(const int& index);
+    const GSkyRegion* at(const int& index) const;
+    int               size(void) const;
+    bool              is_empty(void) const;
+    GSkyRegion*       set(const int& index, const GSkyRegion& region);
+    GSkyRegion*       append(const GSkyRegion& region);
+    GSkyRegion*       insert(const int& index, const GSkyRegion& region);
+    void              remove(const int& index);
+    void              reserve(const int& num);
+    void              extend(const GSkyRegions& regions);
+    bool              contains(const GSkyDir& dir) const;
+    bool              overlaps(const GSkyRegion& reg) const;
+    void              load(const GFilename& filename);
+    void              save(const GFilename& filename) const;
+    const GFilename&  filename(void) const;
+    std::string       print(const GChatter& chatter = NORMAL) const;
 	
 protected:
     // Protected methods
@@ -92,7 +96,7 @@ protected:
     void free_members(void);
 
     // Protected members
-    mutable std::string      m_filename;   //!< Filename of origin
+    mutable GFilename        m_filename;   //!< Filename of origin
     std::vector<GSkyRegion*> m_regions;    //!< List of regions
 };
 
@@ -191,7 +195,7 @@ void GSkyRegions::reserve(const int& num)
  * no load() or save() method has been called before.
  ***************************************************************************/
 inline
-const std::string& GSkyRegions::filename(void) const
+const GFilename& GSkyRegions::filename(void) const
 {
     return (m_filename);
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GObservations.cpp - Observation container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,11 @@
 #endif
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
 #include "GObservations.hpp"
 #include "GObservationRegistry.hpp"
 #include "GMatrixSparse.hpp"
+#include "GOptimizer.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                                        "GObservations::at(int&)"
@@ -96,7 +98,7 @@ GObservations::GObservations(const GObservations& obs)
  * from a XML file. Please refer to the read() method for more information
  * about the structure of the XML file.
  ***************************************************************************/
-GObservations::GObservations(const std::string& filename)
+GObservations::GObservations(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -497,13 +499,13 @@ bool GObservations::contains(const std::string& instrument,
  * Loads observation from a XML file into the container. Please refer to the
  * read() method for more information about the structure of the XML file.
  ***************************************************************************/
-void GObservations::load(const std::string& filename)
+void GObservations::load(const GFilename& filename)
 {
     // Clear any existing observations
     clear();
 
     // Load XML document
-    GXml xml(filename);
+    GXml xml(filename.url());
 
     // Read observations from XML document
     read(xml);
@@ -521,7 +523,7 @@ void GObservations::load(const std::string& filename)
  * Saves observations into a XML file. Please refer to the read() method for
  * more information about the structure of the XML file.
  ***************************************************************************/
-void GObservations::save(const std::string& filename) const
+void GObservations::save(const GFilename& filename) const
 {
     // Declare empty XML document
     GXml xml;
@@ -691,7 +693,7 @@ void GObservations::write(GXml& xml) const
  * method for more information about the expected structure of the XML
  * file. 
  ***************************************************************************/
-void GObservations::models(const std::string& filename)
+void GObservations::models(const GFilename& filename)
 {
     // Load models
     m_models.load(filename);
@@ -853,6 +855,29 @@ void GObservations::eval(void)
 
 
 /***********************************************************************//**
+ * @brief Return total number of observed events
+ *
+ * @return Total number of observed events.
+ *
+ * Returns the total number of observed events that is container in the
+ * observation container.
+ ***************************************************************************/
+int GObservations::nobserved(void) const
+{
+    // Initialise number of observed events
+    int nobserved = 0;
+
+    // Compute number of observed events
+    for (int i = 0; i < size(); ++i) {
+        nobserved += (*this)[i]->nobserved();
+    }
+
+    // Return number of observed events
+    return nobserved;
+}
+
+
+/***********************************************************************//**
  * @brief Print observation list information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -874,6 +899,8 @@ std::string GObservations::print(const GChatter& chatter) const
         result.append(gammalib::str(size()));
         result.append("\n"+gammalib::parformat("Number of models"));
         result.append(gammalib::str(m_models.size()));
+        result.append("\n"+gammalib::parformat("Number of observed events"));
+        result.append(gammalib::str(nobserved()));
         result.append("\n"+gammalib::parformat("Number of predicted events"));
         result.append(gammalib::str(npred()));
 

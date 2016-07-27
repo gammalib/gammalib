@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlDocument.hpp - XML document node class definition         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GUrl.hpp"
+#include "GFilename.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlAttribute.hpp"
 
@@ -68,12 +69,14 @@ public:
                                 const int&      indent = 0) const;
 
     // Methods
-    std::string   version(void) const;
-    std::string   encoding(void) const;
-    std::string   standalone(void) const;
-    void          version(const std::string& version);
-    void          encoding(const std::string& encoding);
-    void          standalone(const std::string& standalone);
+    const GFilename& filename(void) const;
+    std::string      version(void) const;
+    std::string      encoding(void) const;
+    std::string      standalone(void) const;
+    void             filename(const GFilename& filename);
+    void             version(const std::string& version);
+    void             encoding(const std::string& encoding);
+    void             standalone(const std::string& standalone);
 
 protected:
     // Protected methods
@@ -82,6 +85,7 @@ protected:
     void free_members(void);
 
     // Protected data members
+    GFilename     m_filename;     //!< Name of XML file
     GXmlAttribute m_version;      //!< XML version ("1.0", "1.1")
     GXmlAttribute m_encoding;     //!< Encoding (e.g. "UTF-8")
     GXmlAttribute m_standalone;   //!< Standalone ("yes", "no") 
@@ -97,6 +101,18 @@ inline
 std::string GXmlDocument::classname(void) const
 {
     return ("GXmlDocument");
+}
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Filename of XML document.
+ ***************************************************************************/
+inline
+const GFilename& GXmlDocument::filename(void) const
+{
+    return (m_filename);
 }
 
 
@@ -133,6 +149,19 @@ inline
 std::string GXmlDocument::standalone(void) const
 {
     return (m_standalone.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set filename
+ *
+ * @param[in] filename Filename of XML document.
+ ***************************************************************************/
+inline
+void GXmlDocument::filename(const GFilename& filename)
+{
+    m_filename = filename;
+    return;
 }
 
 

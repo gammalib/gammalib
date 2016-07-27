@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPar.cpp - Application parameter               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_STRING_SET                  "GApplicationPar::string(std::string&)"
-#define G_FILENAME_SET              "GApplicationPar::filename(std::string&)"
+#define G_FILENAME_SET                "GApplicationPar::filename(GFilename&)"
 #define G_BOOLEAN_SET                       "GApplicationPar::boolean(bool&)"
 #define G_INTEGER_SET                        "GApplicationPar::integer(int&)"
 #define G_REAL_SET                           "GApplicationPar::real(double&)"
@@ -315,7 +315,7 @@ void GApplicationPar::string(const std::string& value)
  * This method sets a filename parameter. The method only applies to filename
  * parameters. Other parameter types will produce an exception.
  ***************************************************************************/
-void GApplicationPar::filename(const std::string& value)
+void GApplicationPar::filename(const GFilename& value)
 {
     // Check if parameter is a filename parameter
     if (!is_filename()) {
@@ -497,7 +497,7 @@ std::string GApplicationPar::string(void)
  * exception. Any environment variables that are encountered within the
  * filename are expanded automatically.
  ***************************************************************************/
-std::string GApplicationPar::filename(void)
+GFilename GApplicationPar::filename(void)
 {
     // Check if parameter is a filename parameter
     if (!is_filename()) {
@@ -518,7 +518,7 @@ std::string GApplicationPar::filename(void)
     }
 
     // Return value
-    return (gammalib::expand_env(m_value));
+    return (GFilename(m_value));
 }
 
 
@@ -949,7 +949,7 @@ void GApplicationPar::check_value_bool(const std::string& value) const
         lvalue != "n" && lvalue != "no"  && lvalue != "false" && lvalue != "f") {
         std::string msg = "Invalid boolean value \""+value+"\" encountered"
                           " for parameter \""+m_name+"\". Use"
-                          " y/n/yes/no/true/false";
+                          " y/n/yes/no/t/f/true/false";
         throw GException::invalid_value(G_CHECK_VALUE_BOOL, msg);
     }
 
@@ -982,7 +982,7 @@ void GApplicationPar::check_value_int(const std::string& value) const
 
         // If no options check has been done and if there is a m_min and
         // m_max value then perform an integer check
-        if (!has_options && m_min.length() > 0 && m_max.length()) {
+        if (!has_options && m_min.length() > 0 && m_max.length() > 0) {
 
             // Throw an exception if we have a NAN parameter
             if (m_status == ST_NAN) {
@@ -1038,7 +1038,7 @@ void GApplicationPar::check_value_real(const std::string& value) const
 
         // If no options check has been done and if there is a m_min and
         // m_max value then perform an integer check
-        if (!has_options && m_min.length() > 0 && m_max.length()) {
+        if (!has_options && m_min.length() > 0 && m_max.length() > 0) {
 
             // Throw an exception if we have a NAN parameter
             if (m_status == ST_NAN) {
@@ -1084,7 +1084,6 @@ void GApplicationPar::check_value_real(const std::string& value) const
 void GApplicationPar::check_value_string(const std::string& value) const
 {
     // Check for options
-    //bool has_options = check_options(value);
     check_options(value);
 
     // Return
@@ -1108,7 +1107,6 @@ void GApplicationPar::check_value_string(const std::string& value) const
 void GApplicationPar::check_value_filename(const std::string& value) const
 {
     // Check for options
-    //bool has_options = check_options(value);
     check_options(value);
 
     // Return

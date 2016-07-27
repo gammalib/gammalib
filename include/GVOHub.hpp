@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GVOHub.hpp - VO SAMP Hub class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Thierry Louge                               *
+ *  copyright (C) 2014-2016 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,8 +34,10 @@
 #include <vector>
 #include <sys/socket.h>
 #include "GBase.hpp"
-#include "GXml.hpp"
-#include "GXmlNode.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GXml;
+class GXmlNode;
 
 
 /***********************************************************************//**
@@ -43,8 +45,8 @@
  *
  * @brief VO SAMP Hub class
  *
- * This class implements a SAMP hub for exchanges through VO-compatible
- * applications.
+ * This class implements a SAMP hub to support the interoperability of
+ * Virtual Observatory applications.
  ***************************************************************************/
 class GVOHub : public GBase {
 
@@ -63,7 +65,6 @@ public:
     std::string classname(void) const;
     void        start(void);
     std::string print(const GChatter& chatter = NORMAL) const;
-    
 
 protected:
     // Protected methods
@@ -73,29 +74,31 @@ protected:
     void                     start_hub(void);
     void                     handle_request(const socklen_t& sock);
     void                     request_ping(const socklen_t& sock);
-    void                     request_register(const GXml& xml,
+    void                     request_register(const GXml&      xml,
                                               const socklen_t& sock);
-    void                     request_unregister(const GXml& xml,
+    void                     request_unregister(const GXml&      xml,
                                                 const socklen_t& sock);
-    void                     request_declare_metadata(const GXml& xml,
+    void                     request_declare_metadata(const GXml&      xml,
                                                       const socklen_t& sock);
-    void                     request_declare_subscriptions(const GXml& xml,
+    void                     request_declare_subscriptions(const GXml&      xml,
                                                            const socklen_t& sock);
-    void                     request_set_xml_rpc_callback(const GXml& xml,
+    void                     request_set_xml_rpc_callback(const GXml&      xml,
                                                           const socklen_t& sock);
-    void                     request_get_subscriptions(const GXml& xml,
+    void                     request_get_subscriptions(const GXml&      xml,
                                                        const socklen_t& sock);
-    void                     request_get_registered_clients(const GXml& xml,
+    void                     request_get_registered_clients(const GXml&      xml,
                                                             const socklen_t& sock);
-    void                     request_get_subscribed_clients(const GXml& xml,
+    void                     request_get_subscribed_clients(const GXml&      xml,
                                                             const socklen_t& sock);
-    void                     request_get_metadata(const GXml& xml,
+    void                     request_get_metadata(const GXml&      xml,
                                                   const socklen_t& sock);
+    void                     request_notify_all(const GXml&      xml,
+                                                const socklen_t& sock);
     void                     request_shutdown(const socklen_t& sock);
     std::string              get_client_key(const GXml& xml) const;
     int                      get_client_index(const GXml& xml) const;
     int                      get_client_index(const std::string& reference) const;
-    std::string              get_response_value(const GXml& xml,
+    std::string              get_response_value(const GXmlNode*    node,
                                                 const std::string& name) const;
     void                     get_name_value_pair(const GXmlNode* node,
                                                  std::string&    name,
@@ -103,21 +106,9 @@ protected:
     std::vector<std::string> get_subscriptions(const GXml& xml) const;
     std::string              get_callback_url(const GXml& xml) const;
     std::string              get_hub_lockfile(void) const;
-    void 		             send_notifications(const std::string& method,
-                                                const std::string& client);
+    std::string              get_mtype(const GXml& xml) const;
 
-    // Low-level methods
-    void        create_samp_file(void) const;
-    void        delete_samp_file(void) const;
-    int         get_socket(void);
-    void        post_samp_ok(const socklen_t& sock) const;
-    void        post_samp_void(const socklen_t& sock) const;
-    void	    post_string(const std::string& content, const socklen_t& sock) const;
-    void        notify(const std::string& url, const std::string& notification) const;
-    std::string	random_string(const size_t& length) const;
-    std::string hub_url(void) const;
-
-    // Protected structure
+    // Client structure
     struct client {
         std::string              name;
         std::string              private_key;
@@ -132,6 +123,27 @@ protected:
         std::string              url;
         std::vector<std::string> subscriptions;
     };
+
+    // Low-level methods
+    void        create_samp_file(void) const;
+    void        delete_samp_file(void) const;
+    int         get_socket(void);
+    void        post_samp_ok(const socklen_t& sock) const;
+    void        post_samp_void(const socklen_t& sock) const;
+    void	    post_string(const std::string& content,
+                            const socklen_t&   sock) const;
+    void        notify(const std::string& url,
+                       const std::string& notification) const;
+    void        notify_register(const client&      client,
+                                const std::string& reference);
+    void        notify_unregister(const client&      client,
+                                  const std::string& reference);
+    void        notify_metadata(const client&      client,
+                                const std::string& reference);
+    void        notify_image_load(const client& client,
+                                  const GXml&   xml);
+    std::string	random_string(const size_t& length) const;
+    std::string hub_url(void) const;
 
     // Protected members
     std::string         m_secret;    //!< Secret Hub key

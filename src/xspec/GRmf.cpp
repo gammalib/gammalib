@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.cpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,8 @@
 #include "GMath.hpp"
 #include "GRmf.hpp"
 #include "GException.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableFloatCol.hpp"
@@ -70,7 +72,7 @@ GRmf::GRmf(void)
  *
  * @param[in] filename File name.
  ***************************************************************************/
-GRmf::GRmf(const std::string& filename)
+GRmf::GRmf(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -367,29 +369,34 @@ GEbounds GRmf::emeasured(const GEnergy& etrue) const
  * @brief Load Redistribution Matrix File
  *
  * @param[in] filename File name.
+ *
+ * Loads the Redistribution Matrix File from the `MATRIX` extension of the
+ * FITS file. If the file contains also an `EBOUNDS` extension the energy
+ * boundaries of all measured energies are also loaded.
  ***************************************************************************/
-void GRmf::load(const std::string& filename)
+void GRmf::load(const GFilename& filename)
 {
-    // Clear any existing models
+    // Clear matrix
     clear();
 
-    // Open FITS file
-    GFits file(filename);
+    // Open FITS file (without extension name as the user is not allowed
+    // to modify the extension names)
+    GFits fits(filename.url());
 
     // Read measured energy boundaries
-    m_ebds_measured.load(filename);
+    m_ebds_measured.load(filename.url());
 
     // Get RMF table
-    const GFitsTable& table = *file.table("MATRIX");
+    const GFitsTable& table = *fits.table("MATRIX");
 
     // Read RMF data
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
-    m_filename = filename;
+    m_filename = filename.url();
 
     // Return
     return;
@@ -400,24 +407,36 @@ void GRmf::load(const std::string& filename)
  * @brief Save Redistribution Matrix File
  *
  * @param[in] filename File name.
- * @param[in] clobber Overwrite existing file? (defaults to true)
- * @param[in] unit Energy unit (defaults to "keV")
+ * @param[in] clobber Overwrite existing file?
+ * @param[in] unit Energy unit.
+ *
+ * Saves the Redistribution Matrix File into a FITS file. If a file with the
+ * given @p filename does not yet exist it will be created. If the file
+ * exists it can be overwritten if the @p clobber flag is set to `true`.
+ * Otherwise an exception is thrown.
+ *
+ * The method will save two binary FITS tables into the FITS file: a
+ * `MATRIX` extension that contains the Redistribution Matrix File elements,
+ * and an `EBOUNDS` extension that contains the measured energy boundaries
+ * for all matrix. The @p unit argument specifies the unit of the true
+ * energies that will be saved in the `MATRIX` extension.
  ***************************************************************************/
-void GRmf::save(const std::string& filename,
+void GRmf::save(const GFilename&   filename,
                 const bool&        clobber,
                 const std::string& unit) const
 {
-    // Open FITS file
+    // Create FITS file
     GFits fits;
 
     // Write RMF into file
     write(fits, unit);
 
-    // Close FITS file
-    fits.saveto(filename, clobber);
+    // Save to file (without extension name since the requested extension
+    // may not yet exist in the file)
+    fits.saveto(filename.url(), clobber);
 
     // Store filename
-    m_filename = filename;
+    m_filename = filename.url();
 
     // Return
     return;
@@ -428,6 +447,18 @@ void GRmf::save(const std::string& filename,
  * @brief Read Redistribution Matrix File
  *
  * @param[in] table RMF FITS table.
+ *
+ * Reads the Redistribution Matrix File from a FITS table. The true energy
+ * bins are expected in the `ENERG_LO` and `ENERG_HI` columns. Information
+ * for matrix compression are stored in the `N_GRP`, `F_CHAN` and `N_CHAN`
+ * columns, and the matrix elements are stored in the `MATRIX` column.
+ *
+ * The method automatically decompresses the Redistribution Matrix File and
+ * stores the matrix elements in a spare matrix.
+ *
+ * See
+ * http://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc3
+ * for details about the Redistribution Matrix File file format.
  ***************************************************************************/
 void GRmf::read(const GFitsTable& table)
 {
@@ -449,8 +480,8 @@ void GRmf::read(const GFitsTable& table)
     // Initialize matrix
     m_matrix = GMatrixSparse(rows, columns);
 
-   // Initialize matrix maximum
-   double max = 0.0;
+    // Initialize matrix maximum
+    double max = 0.0;
 
     // Set true energy bins
     for (int itrue = 0; itrue < rows; ++itrue) {
@@ -495,10 +526,34 @@ void GRmf::read(const GFitsTable& table)
  * @brief Write Redistribution Matrix File
  *
  * @param[in] fits FITS file.
- * @param[in] unit Energy unit (defaults to "keV")
+ * @param[in] unit Energy unit.
+ *
+ * Writes the Redistribution Matrix File into `MATRIX` and `EBOUNDS`
+ * extensions of the FITS file. Extensions with these names will be removed
+ * from the FITS file before writing.
+ *
+ * The true energy bins are written into the `ENERG_LO` and `ENERG_HI`
+ * columns. The units of the energies in these columns is specified by the
+ * @p unit argument. Information for matrix compression are stored in the
+ * `N_GRP`, `F_CHAN` and `N_CHAN` columns, and the matrix elements are
+ * written into the `MATRIX` column.
+ *
+ * The measured energy bins are written into the `EBOUNDS` extension.
+ *
+ * See
+ * http://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc3
+ * for details about the Redistribution Matrix File file format.
  ***************************************************************************/
 void GRmf::write(GFits& fits, const std::string& unit) const
 {
+    // Remove extensions if they exist already
+    if (fits.contains("MATRIX")) {
+        fits.remove("MATRIX");
+    }
+    if (fits.contains("EBOUNDS")) {
+        fits.remove("EBOUNDS");
+    }
+
     // Set table length
     int length = ntrue();
 
@@ -536,7 +591,7 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         } // endfor: looped over true energies
 
         // Create new binary table
-        GFitsBinTable* hdu = new GFitsBinTable;
+        GFitsBinTable hdu;
 
         // Allocate columns
         GFitsTableFloatCol energy_lo("ENERG_LO", length);
@@ -593,21 +648,18 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         energy_hi.unit(unit);
 
         // Set table attributes
-        hdu->extname("MATRIX");
+        hdu.extname("MATRIX");
 
         // Append columns to table
-        hdu->append(energy_lo);
-        hdu->append(energy_hi);
-        hdu->append(n_grp);
-        hdu->append(f_chan);
-        hdu->append(n_chan);
-        hdu->append(matrix);
+        hdu.append(energy_lo);
+        hdu.append(energy_hi);
+        hdu.append(n_grp);
+        hdu.append(f_chan);
+        hdu.append(n_chan);
+        hdu.append(matrix);
 
         // Append HDU to FITS file
-        fits.append(*hdu);
-
-        // Free binary table
-        delete hdu;
+        fits.append(hdu);
 
         // Append measured energy boundaries
         m_ebds_measured.write(fits);
@@ -622,7 +674,7 @@ void GRmf::write(GFits& fits, const std::string& unit) const
 /***********************************************************************//**
  * @brief Print Redistribution Matrix File
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing Redistribution Matrix File information.
  ***************************************************************************/
 std::string GRmf::print(const GChatter& chatter) const

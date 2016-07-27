@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.i  -  COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCOMEventCube.hpp
  * @brief COMPTEL event bin container class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -38,7 +38,7 @@ class GCOMEventCube : public GEventCube {
 public:
     // Constructors and destructors
     GCOMEventCube(void);
-    explicit GCOMEventCube(const std::string& filename);
+    explicit GCOMEventCube(const GFilename& filename);
     explicit GCOMEventCube(const GSkyMap& map, const GEbounds& ebds,
                            const GGti& gti, const double& phimin,
                            const double& dphi);
@@ -52,9 +52,9 @@ public:
     virtual int            size(void) const;
     virtual int            dim(void) const;
     virtual int            naxis(const int& axis) const;
-    virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename,
-                                const bool& clobber = false) const;
+    virtual void           load(const GFilename& filename);
+    virtual void           save(const GFilename& filename,
+                                const bool&      clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const;

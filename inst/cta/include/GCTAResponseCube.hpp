@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GCTAResponse.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTACubePsf.hpp"
+#include "GCTACubeEdisp.hpp"
 #include "GCTACubeBackground.hpp"
 #include "GCTACubeSource.hpp"
 
@@ -63,6 +64,10 @@ public:
     GCTAResponseCube(const GCTACubeExposure&   exposure,
                      const GCTACubePsf&        psf,
                      const GCTACubeBackground& background);
+    GCTAResponseCube(const GCTACubeExposure&   exposure,
+                     const GCTACubePsf&        psf,
+					 const GCTACubeEdisp&      edisp,
+                     const GCTACubeBackground& background);
     virtual ~GCTAResponseCube(void);
 
     // Operators
@@ -87,7 +92,7 @@ public:
                                    const GEnergy&      obsEng,
                                    const GTime&        obsTime,
                                    const GObservation& obs) const;
-    virtual GEbounds          ebounds(const GEnergy& obsEnergy) const;
+    virtual GEbounds          ebounds(const GEnergy& obsEng) const;
     virtual void              read(const GXmlElement& xml);
     virtual void              write(GXmlElement& xml) const;
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
@@ -97,6 +102,8 @@ public:
     void                      exposure(const GCTACubeExposure& exposure);
     const GCTACubePsf&        psf(void) const;
     void                      psf(const GCTACubePsf& psf);
+    const GCTACubeEdisp&      edisp(void) const;
+    void                      edisp(const GCTACubeEdisp& edisp);
     const GCTACubeBackground& background(void) const;
     void                      background(const GCTACubeBackground& background);
 
@@ -134,10 +141,17 @@ private:
     GCTACubeExposure   m_exposure;    //!< Exposure cube
     GCTACubePsf        m_psf;         //!< Mean point spread function
     GCTACubeBackground m_background;  //!< Background cube
+    GCTACubeEdisp      m_edisp;       //!< Energy dispersion cube
     mutable bool       m_apply_edisp; //!< Apply energy dispersion
+    mutable bool       m_has_edisp;   //!< Flag to indicate if energy
+                                      //   dispersion is available
 
     // Response cache
-    mutable std::vector<GCTACubeSource*> m_cache; //!< Response cache
+    mutable std::vector<GCTACubeSource*> m_cache;        //!< Response cache
+    mutable GNodeArray                   m_diffuse_logE; //!< Diffuse energy
+                                                         //   bounds
+                                                         //   computation
+                                                         //   cache
 };
 
 
@@ -179,7 +193,7 @@ bool GCTAResponseCube::is_valid(void) const
 inline
 bool GCTAResponseCube::use_edisp(void) const
 {
-    return false;
+    return (m_apply_edisp && m_has_edisp);
 }
 
 
@@ -270,6 +284,32 @@ void GCTAResponseCube::psf(const GCTACubePsf& psf)
 
 
 /***********************************************************************//**
+ * @brief Set cube analysis energy dispersion cube
+ *
+ * @param[in] edisp Cube analysis energy dispersion cube.
+ ***************************************************************************/
+inline
+void GCTAResponseCube::edisp(const GCTACubeEdisp& edisp)
+{
+    m_edisp     = edisp;
+    m_has_edisp = true;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return cube analysis energy dispersion cube
+ *
+ * @return Reference to cube analysis energy dispersion cube.
+ ***************************************************************************/
+inline
+const GCTACubeEdisp& GCTAResponseCube::edisp(void) const
+{
+    return (m_edisp);
+}
+
+
+/***********************************************************************//**
  * @brief Set cube analysis background cube
  *
  * @param[in] background Cube analysis background cube.
@@ -292,5 +332,6 @@ const GCTACubeBackground& GCTAResponseCube::background(void) const
 {
     return (m_background);
 }
+
 
 #endif /* GCTARESPONSECUBE_HPP */

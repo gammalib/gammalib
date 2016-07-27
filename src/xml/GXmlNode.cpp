@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.cpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,10 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GException.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlElement.hpp"
-#include "GTools.hpp"
+#include "GXmlDocument.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                                 "GXmlNode::operator[](int&)"
@@ -523,6 +524,49 @@ void GXmlNode::extend(const GXmlNode& node)
 
 
 /***********************************************************************//**
+ * @brief Return filename of XML file
+ *
+ * @return Filename.
+ *
+ * Returns the file name of the XML file by moving up the XML file hierarchy
+ * to the root. In case that the XML node cannot move up to the root XML
+ * node an empty file name is returned (this may happen if the XML node
+ * is an orphan node). The file name will also be empty if the XML file has
+ * not been read from disk or written to disk.
+ ***************************************************************************/
+GFilename GXmlNode::filename(void) const
+{
+    // Initialise empty filename
+    GFilename filename;
+
+    // Move up the XML document hierarchy until the root node has been
+    // found
+    GXmlNode* parent = this->parent();
+    while (parent != NULL) {
+
+        // Cast parent into a root node
+        GXmlDocument* root = dynamic_cast<GXmlDocument*>(parent);
+
+        // If the parent is a root node, recover the filename and exit the
+        // loop
+        if (root != NULL) {
+            filename = root->filename();
+            break;
+        }
+
+        // ... otherwise move up the XML tree
+        else {
+            parent = parent->parent();
+        }
+
+    } // endwhile: move up to the root document
+
+    // Return filename
+    return filename;
+}
+
+
+/***********************************************************************//**
  * @brief Return number of GXMLElement children of node
  *
  * @return Number of child elements.
@@ -902,6 +946,7 @@ void GXmlNode::init_members(void)
 {
     // Initialise members
     m_nodes.clear();
+    m_parent = NULL;
 
     // Return
     return;
@@ -912,9 +957,14 @@ void GXmlNode::init_members(void)
  * @brief Copy class members
  *
  * @param[in] node XML node.
+ *
+ * @todo Is copying the parent node pointer correct?
  ***************************************************************************/
 void GXmlNode::copy_members(const GXmlNode& node)
 {
+    // Copy members
+    m_parent = node.m_parent;
+
     // Copy nodes
     m_nodes.clear();
     for (int i = 0; i < node.m_nodes.size(); ++i) {

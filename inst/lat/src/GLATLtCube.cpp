@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATLtCube.cpp - Fermi/LAT livetime cube class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,8 +28,13 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATLtCube.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
+#include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GLATAeff.hpp"
+#include "GLATPsf.hpp"
+#include "GLATLtCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -66,7 +71,7 @@ GLATLtCube::GLATLtCube(void)
  *
  * @param[in] filename Livetime cube filename.
  ***************************************************************************/
-GLATLtCube::GLATLtCube(const std::string& filename)
+GLATLtCube::GLATLtCube(const GFilename& filename)
 {
     // Initialise class members
     init_members();
@@ -350,7 +355,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear lifetime cube
+ * @brief Clear livetime cube
  ***************************************************************************/
 void GLATLtCube::clear(void)
 {
@@ -366,9 +371,9 @@ void GLATLtCube::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone lifetime cube
+ * @brief Clone livetime cube
  *
- * @return Pointer to deep copy of lifetime cube.
+ * @return Pointer to deep copy of livetime cube.
  ***************************************************************************/
 GLATLtCube* GLATLtCube::clone(void) const
 {
@@ -385,19 +390,19 @@ GLATLtCube* GLATLtCube::clone(void) const
  *       critical since they are not really needed. We just need them once
  *       we want to implement also saving.
  ***************************************************************************/
-void GLATLtCube::load(const std::string& filename)
+void GLATLtCube::load(const GFilename& filename)
 {
     // Clear object
     clear();
 
-    // Open lifetime cube FITS file
-    GFits file(filename);
+    // Open livetime cube FITS file
+    GFits fits(filename);
 
     // Get HDUs
-    const GFitsTable& hdu_exposure          = *file.table("EXPOSURE");
-    const GFitsTable& hdu_weighted_exposure = *file.table("WEIGHTED_EXPOSURE");
-    //const GFitsTable& hdu_cthetabounds      = *file.table("CTHETABOUNDS");
-    const  GFitsTable& hdu_gti               = *file.table("GTI");
+    const GFitsTable& hdu_exposure          = *fits.table("EXPOSURE");
+    const GFitsTable& hdu_weighted_exposure = *fits.table("WEIGHTED_EXPOSURE");
+    //const GFitsTable& hdu_cthetabounds      = *fits.table("CTHETABOUNDS");
+    const  GFitsTable& hdu_gti               = *fits.table("GTI");
 
     // Load exposure
     m_exposure.read(hdu_exposure);
@@ -411,7 +416,7 @@ void GLATLtCube::load(const std::string& filename)
     m_gti.read(hdu_gti);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -422,11 +427,11 @@ void GLATLtCube::load(const std::string& filename)
  * @brief Save livetime cube into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing file?
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-void GLATLtCube::save(const std::string& filename, const bool& clobber) const
+void GLATLtCube::save(const GFilename& filename, const bool& clobber) const
 {
     // Return
     return;

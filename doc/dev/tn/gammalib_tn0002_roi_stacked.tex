@@ -1,0 +1,205 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Handling of Regions of Interest in stacked analysis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{}}
+\newcommand{\doctype}{\mbox{RoI handling in stacked analysis}}
+\newcommand{\reference}{\mbox{GammaLib-TN0002}}
+\newcommand{\version}{\mbox{1.0}}
+\newcommand{\calendar}{\mbox{20 July 2016}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{technote}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Scope
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Scope}
+
+This technical note provides considerations for handling of Regions of Interest in a stacked
+analysis.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Formulating the problem
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Formulating the problem}
+
+Each analysis of an observation requires the definition of a Region of Interest (RoI) which delimits
+the data space that is used for the analysis.
+The RoI can be a spatial selection (for example a circle on the sky) or an energy selection, or a
+combination of both.
+Let's denote in the following the data space coordinates by $\vec{d}$.
+The expected number of events in an observation $i$ after RoI selection is then given by
+\begin{equation}
+e_i(\vec{d}) = w_i(\vec{d}) \times M_i(\vec{d})
+\end{equation}
+where $M_i(\vec{d})$ is the expected number of events (computed from a model) before the
+RoI selection, and $w_i(\vec{d})$ is the RoI window function that is $1$ inside the RoI and $0$ 
+outside.
+For stacked analysis the data space is represented by a counts cube, and the RoI can only partially
+overlap with some of the cube bins.
+The partial overlap can for example be spatially or in energy.
+The window function can then be generalised into an function given the fractional overlap of a
+counts cube bin with the RoI, and this function takes values between $0$ and $1$.
+
+Let's now consider the stacking of two observations into a single counts cube (the reasoning can
+be easily extended to an arbitrary number of observations).
+The expected number of events in the stacked counts cube is then given by
+\begin{equation}
+e(\vec{d}) = w_1(\vec{d}) M_1(\vec{d}) + w_2(\vec{d}) M_2(\vec{d}) \, .
+\label{eq:added}
+\end{equation}
+We are now seeking for a weighting function $w(\vec{d})$ of the stacked observation so that
+we can simply write the expected number of events as the product between the weighting
+function and a stacked model, i.e.
+\begin{equation}
+e(\vec{d}) = w(\vec{d}) \times \left( M_1(\vec{d}) + M_2(\vec{d})\right) \, .
+\label{eq:stacked}
+\end{equation}
+Combining Eq.~(\ref{eq:added}) and Eq.~(\ref{eq:stacked}) results in
+\begin{eqnarray}
+w(\vec{d}) \times \left( M_1(\vec{d}) + M_2(\vec{d})\right) & = & w_1(\vec{d}) M_1(\vec{d}) + w_2(\vec{d}) M_2(\vec{d}) \nonumber \\
+w(\vec{d}) & = & \frac{w_1(\vec{d}) M_1(\vec{d}) + w_2(\vec{d}) M_2(\vec{d})} {M_1(\vec{d}) + M_2(\vec{d})} \nonumber \\
+w(\vec{d}) & = & w_1(\vec{d}) \frac{M_1(\vec{d})}{M_1(\vec{d}) + M_2(\vec{d})} +
+w_2(\vec{d}) \frac{M_2(\vec{d})}{M_1(\vec{d}) + M_2(\vec{d})}
+\label{eq:weight}
+\end{eqnarray}
+which means that the weighting function for the stacked observation is the sum of the weighting
+function of the individual observations, weighted by the relative contribution of the model in the
+individual observations.
+The obvious problem is that the relative contribution of the model in the individual observations
+is in not available in a stacked analysis.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Ignoring partial overlap
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Ignoring partial overlap}
+
+Suppose we can ignore the effects of partial overlap of the RoI with counts cube bins (we could
+accomplish this in principle by redefining the bin boundaries so that there is not partial overlap
+problem).
+In that case the window functions of individual observations $w_i(\vec{d})$ take the values $0$
+and $1$.
+We can then distinguish four cases for our example of stacking two observations:
+\begin{equation}
+w(\vec{d}) = \left \{
+   \begin{array}{c l}
+      \displaystyle
+      1 & w_1(\vec{d})=1, w_2(\vec{d})=1 \\
+      \\
+     \displaystyle
+      \frac{M_1(\vec{d})}{M_1(\vec{d})+M_2(\vec{d})} & w_1(\vec{d})=1, w_2(\vec{d})=0 \\
+      \\
+     \displaystyle
+      \frac{M_2(\vec{d})}{M_1(\vec{d})+M_2(\vec{d})} & w_1(\vec{d})=0, w_2(\vec{d})=1 \\
+      \\
+     \displaystyle
+      0 & w_1(\vec{d})=0, w_2(\vec{d})=0
+   \end{array}
+   \right .
+\label{eq:cases}
+\end{equation}
+For all data space coordinates that fall in both RoIs the stacked weighting function is 1, while for all
+coordinates that fall outside both RoIs the stacked weighting function is 0.
+In case that the data space coordinate $\vec{d}$ falls in the RoI of the first observation but outside the 
+RoI of the second observation the weighting function becomes
+\begin{equation}
+w(\vec{d}) = \frac{M_1(\vec{d})}{M_1(\vec{d})+M_2(\vec{d})}
+\end{equation}
+which is smaller than 1 for all coordinates $\vec{d}$ for which $M_2(\vec{d}) > 0$.
+These coordinates correspond to zones that fall {\bf outside the RoI of the second observation},
+hence the reduction of the weighting function is due to the spill over of events from the second
+observation coming from outside its RoI into the stacked observation.
+
+A solution to this problem is to avoid the spill over, and to set $M_2(\vec{d}) = 0$ for all
+$\vec{d}$ outside the RoI.
+In other terms
+\begin{equation}
+\tilde{M_i}(\vec{d}) = w_i(\vec{d}) \times M_i(\vec{d})
+\end{equation}
+The issue here is that this cannot be done in an exact way for sky models, since they are defined 
+in the physics space and not the data space, hence PSF blurring or energy redistribution cannot
+be taken into account properly.
+It nevertheless is probably still the best (maybe the only?) solution to limit the effect of the spill
+over problem.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Taking into account partial overlap
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Taking into account partial overlap}
+
+In case we want to take into account the partial overlap of counts cube bins with the RoIs we
+need to compute Eq.~(\ref{eq:weight}).
+In general, the model can be factorised into 
+\begin{equation}
+M_i(\vec{d}) = R_i(\vec{d}) \times \tau_i
+\end{equation}
+where $R_i(\vec{d})$ is an event rate and $\tau_i$ is the livetime of the observation $i$.
+Equation \ref{eq:weight} can then be rewritten as
+\begin{equation}
+w(\vec{d}) =
+w_1(\vec{d}) \frac{R_1(\vec{d}) \times \tau_1}
+{R_1(\vec{d}) \times \tau_1 + R_2(\vec{d}) \times \tau_2} +
+w_2(\vec{d}) \frac{R_2(\vec{d}) \times \tau_2}
+{R_1(\vec{d}) \times \tau_1 + R_2(\vec{d}) \times \tau_2}
+\label{eq:overlap}
+\end{equation}
+We can still apply the logic of setting $R_i(\vec{d}) = 0$ outside the RoI, but there will be bins
+(specifically in energy) for which the RoIs of both observations will have partial overlap, and we
+need to compute Eq.~(\ref{eq:overlap}) explicitly.
+
+For this we may consider some special cases.
+The first is that $R_1(\vec{d}) \approx R_2(\vec{d})$ which would be the case if both observations
+share roughly the same pointing and have the same energy threshold.
+We can then drop the $R_i(\vec{d})$ from Eq.~(\ref{eq:overlap}) and get
+\begin{equation}
+w(\vec{d}) \approx w_1(\vec{d}) \frac{\tau_1}{\tau_1 + \tau_2} + w_2(\vec{d}) \frac{\tau_2}{\tau_1 + \tau_2}
+\end{equation}
+hence the weighting function for the stacked analysis is the sum of the weighting functions of the
+observations, weighted by their respective livetimes.
+
+Another special case is that there is negligible overlap between both observations, hence
+$R_1(\vec{d}) \approx 0$ where $R_2(\vec{d})$ is non-zero, and vice versa.
+Then all fractions in Eq.~(\ref{eq:overlap}) become unity and we get
+\begin{equation}
+w(\vec{d}) \approx w_1(\vec{d}) + w_2(\vec{d}) \, .
+\end{equation}
+
+We can also consider the special case $R_1(\vec{d}) \times \tau_1 \gg R_2(\vec{d}) \times \tau_2$ 
+for which Eq.~(\ref{eq:overlap})
+is approximated by
+\begin{equation}
+w(\vec{d}) \approx w_1(\vec{d}) + w_2(\vec{d}) \frac{R_2(\vec{d}) \times \tau_2}{R_1(\vec{d}) \times \tau_1}
+\approx w_1(\vec{d}) \, .
+\end{equation}
+
+This illustrates that the weighting function taking into account partial overlaps can take different forms
+dependent on the relative weights of the $R_i(\vec{d})$ or $M_i(\vec{d})$, and there is no obvious way
+of how to do this properly without knowing the individual $M_i(\vec{d})$ or making an assumption about
+them.
+
+\end{document}
+

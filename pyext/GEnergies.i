@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GEnergies.i - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,7 +41,7 @@ class GEnergies : public GContainer {
 public:
     // Constructors and destructors
     GEnergies(void);
-    explicit GEnergies(const std::string& filename);
+    explicit GEnergies(const GFilename& filename);
     GEnergies(const GEnergies& energies);
     GEnergies(const int& num, const GEnergy& emin, const GEnergy& emax,
               const bool& log = true);
@@ -63,9 +63,9 @@ public:
                                         const GEnergy& emax);
     void        set_log(const int& num, const GEnergy& emin,
                                         const GEnergy& emax);
-    void        load(const std::string& filename);
-    void        save(const std::string& filename,
-                     const bool&        clobber = false) const;
+    void        load(const GFilename& filename);
+    void        save(const GFilename& filename,
+                     const bool&      clobber = false) const;
     void        read(const GFitsTable& table);
     void        write(GFits& file,
                       const std::string& extname = "ENERGIES") const;

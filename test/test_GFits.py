@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib FITS module.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,10 +17,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-import math
 import os
-import sys
+import math
 import gammalib
+
 
 # =================================== #
 # Test class for GammaLib FITS module #
@@ -47,34 +47,77 @@ class Test(gammalib.GPythonTestSuite):
         self.name("fits")
 
         # Append tests
-        self.append(self.test_fits, "Test GFits")
-        self.append(self.test_fits_table_columns, "Test FITS table columns")
+        self.append(self.test_fits, "Test GFits class")
+        self.append(self.test_fits_image, "Test GFitsImage class")
+        self.append(self.test_fits_table, "Test GFitsTable class")
+        self.append(self.test_fits_table_columns, "Test GFitsTableCol classes")
 
         # Return
         return
 
     def test_fits(self):
         """
-        Test FITS interface.
+        Test GFile class interface.
         """
-        # Set filenames
-        file1 = "test_python_fits_v1.fits"
-        file2 = "test_python_fits_v2.fits"
+        # Get test data directory
+        datadir = os.environ['TEST_DATA'] + '/'
+        
+        # Set test file names
+        file = gammalib.GFilename(datadir+'file.fits')
+
+        # Test loading of FITS file
+        self.test_try("Test GFits file load constructor")
+        try:
+            fits = gammalib.GFits(file)
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to load FITS file.")
+
+        # Test creation of FITS file
+        self.test_try("Test GFits file creation constructor")
+        try:
+            fits = gammalib.GFits("test_file.fits", True)
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to create FITS file.")
+
+        # Open FITS file
+        fits = gammalib.GFits(file)
+        self.test_value(fits["EVENTS"].nrows(), 1231, "Check number of rows")
+
+        # Open FITS file with event selection
+        fits = gammalib.GFits(file+"[EVENTS][ENERGY>1.0]")
+        self.test_value(fits["EVENTS"].nrows(), 152, "Check number of rows")
+
+        # Open FITS file with non-existing extension name
+        self.test_try("Test non-existing extension name")
+        try:
+            fits = gammalib.GFits(file+"[DUMMY][ENERGY>1.0]")
+            self.test_try_failure()
+        except:
+            self.test_try_success()
+
+        # Return
+        return
+
+    def test_fits_image(self):
+        """
+        Test GFitsImage class interface.
+        """
+        # Set test file names
+        file1 = gammalib.GFilename("test_python_fits_image_v1.fits")
+        file2 = gammalib.GFilename("test_python_fits_image_v2.fits")
 
         # Remove test files
-        try:
-            os.remove(file1)
-            os.remove(file2)
-        except:
-            pass
+        file1.remove()
+        file2.remove()
 
         # Create FITS file
         fits = gammalib.GFits(file1, True)
-        sys.stdout.write(".")
 
         # Create images
-        nx = 10
-        ny = 10
+        nx   = 10
+        ny   = 10
         img1 = gammalib.GFitsImageByte(nx, ny)
         img2 = gammalib.GFitsImageDouble(nx, ny)
         img3 = gammalib.GFitsImageFloat(nx, ny)
@@ -104,7 +147,6 @@ class Test(gammalib.GPythonTestSuite):
         img7.extname("Short")
         img8.extname("ULong")
         img9.extname("UShort")
-        sys.stdout.write(".")
 
         # Append images to FITS file
         fits.append(img1)
@@ -116,14 +158,52 @@ class Test(gammalib.GPythonTestSuite):
         fits.append(img7)
         fits.append(img8)
         fits.append(img9)
-        sys.stdout.write(".")
 
         # Set header keywords
         img_byte = fits.image(0)
         img_byte.card("test", "test-value", "this is for testing")
         img_byte.card("real", 3.1415, "a real value")
         img_byte.card("int", 41, "an integer value")
-        sys.stdout.write(".")
+
+        # Save FITS file
+        fits.save()
+
+        # Close FITS file
+        fits.close()
+
+        # Re-open FITS file
+        fits = gammalib.GFits(file1)
+
+        # Get double precision image, take square root of pixel and save in
+        # another file
+        img_double = fits.image("Double")
+        for x in range(nx):
+            for y in range(ny):
+                img_double[x, y] = math.sqrt(img_double[x, y])
+
+        # Save into another FITS file
+        fits.saveto(file2)
+
+        # Close FITS file
+        fits.close()
+
+        # Return
+        return
+
+    def test_fits_table(self):
+        """
+        Test GFitsTable class interface.
+        """
+        # Set test file names
+        file1 = gammalib.GFilename("test_python_fits_table_v1.fits")
+        file2 = gammalib.GFilename("test_python_fits_table_v2.fits")
+
+        # Remove test files
+        file1.remove()
+        file2.remove()
+
+        # Create FITS file
+        fits = gammalib.GFits(file1, True)
 
         # Create table columns
         nrows = 10
@@ -152,7 +232,6 @@ class Test(gammalib.GPythonTestSuite):
             col9[i] = str(i * 100)
             col10[i] = i * 100
             col11[i] = i * 100
-        sys.stdout.write(".")
 
         # Set ASCII table
         tbl_ascii = gammalib.GFitsAsciiTable()
@@ -169,7 +248,6 @@ class Test(gammalib.GPythonTestSuite):
         tbl_ascii.append(col11)
         tbl_ascii.extname("ASCII table")
         fits.append(tbl_ascii)
-        sys.stdout.write(".")
 
         # Set binary table
         tbl_bin = gammalib.GFitsBinTable()
@@ -186,36 +264,12 @@ class Test(gammalib.GPythonTestSuite):
         tbl_bin.append(col11)
         tbl_bin.extname("Binary table")
         fits.append(tbl_bin)
-        sys.stdout.write(".")
 
         # Save FITS file
-        # sys.stdout.write(fits+"\n")
         fits.save()
-        sys.stdout.write(".")
 
         # Close FITS file
         fits.close()
-        sys.stdout.write(".")
-
-        # Re-open FITS file
-        fits = gammalib.GFits(file1)
-        sys.stdout.write(".")
-
-        # Get double precision image, take square root of pixel and save in
-        # another file
-        img_double = fits.image("Double")
-        for x in range(nx):
-            for y in range(ny):
-                img_double[x, y] = math.sqrt(img_double[x, y])
-        sys.stdout.write(".")
-
-        # Save into another FITS file
-        fits.saveto(file2)
-        sys.stdout.write(".")
-
-        # Close FITS file
-        fits.close()
-        sys.stdout.write(".")
 
         # Return
         return
@@ -237,6 +291,19 @@ class Test(gammalib.GPythonTestSuite):
         col9  = gammalib.GFitsTableStringCol("STRING", nrows, 20)
         col10 = gammalib.GFitsTableULongCol("ULONG", nrows)
         col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
+
+        # Test number of rows
+        self.test_value(col1.length(),  nrows, "Check number of rows in Bit column")
+        self.test_value(col2.length(),  nrows, "Check number of rows in Boolean column")
+        self.test_value(col3.length(),  nrows, "Check number of rows in Byte column")
+        self.test_value(col4.length(),  nrows, "Check number of rows in Double column")
+        self.test_value(col5.length(),  nrows, "Check number of rows in Float column")
+        self.test_value(col6.length(),  nrows, "Check number of rows in Long column")
+        self.test_value(col7.length(),  nrows, "Check number of rows in LongLong column")
+        self.test_value(col8.length(),  nrows, "Check number of rows in Short column")
+        self.test_value(col9.length(),  nrows, "Check number of rows in String column")
+        self.test_value(col10.length(), nrows, "Check number of rows in ULong column")
+        self.test_value(col11.length(), nrows, "Check number of rows in UShort column")
 
         # Test iterators
         for row in col1:
@@ -261,6 +328,30 @@ class Test(gammalib.GPythonTestSuite):
             pass
         for row in col11:
             pass
+
+        # Test setting and retrieving of values
+        col1[5] = True
+        self.test_assert(col1[5], "Check Bit column setting and retrieving")
+        col2[5] = True
+        self.test_assert(col2[5], "Check Boolean column setting and retrieving")
+        col3[5] = 5
+        self.test_value(col3[5], 5, "Check Byte column setting and retrieving")
+        col4[5] = 3.14
+        self.test_value(col4[5], 3.14, 1.0e-6, "Check Double column setting and retrieving")
+        col5[5] = 3.14
+        self.test_value(col5[5], 3.14, 1.0e-6, "Check Float column setting and retrieving")
+        col6[5] = 314
+        self.test_value(col6[5], 314, "Check Long column setting and retrieving")
+        col7[5] = 314
+        self.test_value(col7[5], 314, "Check LongLong column setting and retrieving")
+        col8[5] = 314
+        self.test_value(col8[5], 314, "Check Short column setting and retrieving")
+        col9[5] = "Hallo"
+        self.test_assert(col9[5] == "Hallo", "Check String column setting and retrieving")
+        col10[5] = 314
+        self.test_value(col10[5], 314, "Check ULong column setting and retrieving")
+        col11[5] = 314
+        self.test_value(col11[5], 314, "Check UShort column setting and retrieving")
 
         # Return
         return

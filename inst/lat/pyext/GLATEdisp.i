@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GLATEdisp.i - Fermi/LAT energy dispersion class              *
+ *            GLATEdisp.i - Fermi LAT energy dispersion class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATEdisp.i
- * @brief Fermi/LAT energy dispersion class definition
- * @author J. Knoedlseder
+ * @brief Fermi LAT energy dispersion class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,7 +39,7 @@ class GLATEdisp : public GBase {
 public:
     // Constructors and destructors
     GLATEdisp(void);
-    explicit GLATEdisp(const std::string filename);
+    GLATEdisp(const GFilename& filename, const std::string& evtype);
     GLATEdisp(const GLATEdisp& edisp);
     virtual ~GLATEdisp(void);
 
@@ -47,20 +47,22 @@ public:
     //double operator()(const double& logE, const double& ctheta);
 
     // Methods
-    void         clear(void);
-    GLATEdisp*   clone(void) const;
-    std::string  classname(void) const;
-    void         load(const std::string filename);
-    void         save(const std::string filename,
-                      const bool& clobber = false);
-    void         read(const GFits& file);
-    void         write(GFits& file) const;
-    int          size(void) const;
-    int          nenergies(void) const;
-    int          ncostheta(void) const;
-    //double       costhetamin(void) const;
-    //void         costhetamin(const double& ctheta);
-    bool         has_phi(void) const;
+    void               clear(void);
+    GLATEdisp*         clone(void) const;
+    std::string        classname(void) const;
+    const std::string& evtype(void) const;
+    void               load(const GFilename&   filename,
+                            const std::string& evtype);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false);
+    void               read(const GFits& file);
+    void               write(GFits& file) const;
+    int                size(void) const;
+    int                nenergies(void) const;
+    int                ncostheta(void) const;
+    //double             costhetamin(void) const;
+    //void               costhetamin(const double& ctheta);
+    bool               has_phi(void) const;
 };
 
 

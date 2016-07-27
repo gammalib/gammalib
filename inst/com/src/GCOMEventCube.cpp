@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.cpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,9 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GFits.hpp"
-#include "GCOMException.hpp"
+#include "GFilename.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMEventCube.hpp"
 
@@ -77,7 +78,7 @@ GCOMEventCube::GCOMEventCube(void) : GEventCube()
  *
  * Construct an event cube by loading information from a FITS file.
  ***************************************************************************/
-GCOMEventCube::GCOMEventCube(const std::string& filename) : GEventCube()
+GCOMEventCube::GCOMEventCube(const GFilename& filename) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -102,9 +103,11 @@ GCOMEventCube::GCOMEventCube(const std::string& filename) : GEventCube()
  * Construct an event cube from sky map, energy boundaries, Good Time
  * Intervals and the scatter angle minimum value and step size.
  ***************************************************************************/
-GCOMEventCube::GCOMEventCube(const GSkyMap& map, const GEbounds& ebds,
-                             const GGti& gti, const double& phimin,
-                             const double& dphi) : GEventCube()
+GCOMEventCube::GCOMEventCube(const GSkyMap&  map,
+                             const GEbounds& ebds,
+                             const GGti&     gti,
+                             const double&   phimin,
+                             const double&   dphi) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -174,7 +177,7 @@ GCOMEventCube::~GCOMEventCube(void)
  * @param[in] cube Event cube.
  * @return Event cube.
  ***************************************************************************/
-GCOMEventCube& GCOMEventCube::operator= (const GCOMEventCube& cube)
+GCOMEventCube& GCOMEventCube::operator=(const GCOMEventCube& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -360,19 +363,16 @@ int GCOMEventCube::naxis(const int& axis) const
  * The method clears the object before loading, thus any events residing in
  * the object before loading will be lost.
  ***************************************************************************/
-void GCOMEventCube::load(const std::string& filename)
+void GCOMEventCube::load(const GFilename& filename)
 {
-    // Clear object
-    clear();
-
     // Open DRE FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
-    // Load DRE cube
-    read(file);
+    // Load DRE cube from FITS file
+    read(fits);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -383,16 +383,16 @@ void GCOMEventCube::load(const std::string& filename)
  * @brief Save COMPTEL event cube into FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite existing FITS file (default=false).
+ * @param[in] clobber Overwrite existing FITS file? (default: false).
  *
  * Save the COMPTEL event cube into FITS file.
  ***************************************************************************/
-void GCOMEventCube::save(const std::string& filename, const bool& clobber) const
+void GCOMEventCube::save(const GFilename& filename, const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;
 
-    // Write event cube
+    // Write event cube into FITS file
     write(fits);
     
     // Save FITS file
@@ -647,7 +647,10 @@ void GCOMEventCube::init_members(void)
  ***************************************************************************/
 void GCOMEventCube::copy_members(const GCOMEventCube& cube)
 {
-    // Copy members
+    // Copy members. Note that the event bin is not copied as it will
+    // be initialised later. The event bin serves just as a container of
+    // pointers, hence we do not want to copy over the pointers from the
+    // original class.
     m_dir        = cube.m_dir;
     m_map        = cube.m_map;
     m_time       = cube.m_time;
@@ -680,7 +683,7 @@ void GCOMEventCube::free_members(void)
 /***********************************************************************//**
  * @brief Set sky directions and solid angles of events cube
  *
- * @exception GCOMException::no_sky
+ * @exception GException::invalid_value
  *            No sky pixels have been defined.
  *
  * This method computes the sky directions and solid angles for all (Chi,Psi)
@@ -692,8 +695,10 @@ void GCOMEventCube::set_scatter_directions(void)
 {
     // Throw an error if we have no sky pixels
     if (npix() < 1) {
-        throw GCOMException::no_sky(G_SET_SCATTER_DIRECTIONS,
-              "Every COMPTEL event cube needs a definition of sky pixels.");
+        std::string msg = "No sky pixels have been found in event cube. "
+                          "Every COMPTEL event cube needs a definition of "
+                          "sky pixels.";
+        throw GException::invalid_value(G_SET_SCATTER_DIRECTIONS, msg);
     }
 
     // Clear vectors
@@ -752,15 +757,17 @@ void GCOMEventCube::set_scatter_angles(const double& phimin, const double& dphi)
 /***********************************************************************//**
  * @brief Set log mean energy and energy width of event cube
  *
- * @exception GCOMException::no_ebds
- *            No energy intervals found.
+ * @exception GException::invalid_value
+ *            No energy boundaries found.
  ***************************************************************************/
 void GCOMEventCube::set_energies(void)
 {
     // Throw an error if GTI is empty
     if (m_ebounds.size() < 1) {
-        throw GCOMException::no_ebds(G_SET_ENERGIES, "Every COMPTEL event"
-                  " cube needs a definition of the energy boundaries.");
+        std::string msg = "No energy boundaries have been found in event "
+                          "cube. Every COMPTEL event cube needs a definition "
+                          "of the energy boundaries.";
+        throw GException::invalid_value(G_SET_ENERGIES, msg);
     }
 
     // Compute the logarithmic mean energy
@@ -777,7 +784,7 @@ void GCOMEventCube::set_energies(void)
 /***********************************************************************//**
  * @brief Set mean event time and ontime of event cube
  *
- * @exception GCOMException::no_gti
+ * @exception GException::invalid_value
  *            No Good Time Intervals found.
  *
  * Computes the mean time of the event cube by taking the mean between start
@@ -788,13 +795,14 @@ void GCOMEventCube::set_times(void)
 {
     // Throw an error if GTI is empty
     if (m_gti.size() < 1) {
-        throw GCOMException::no_gti(G_SET_TIMES, "Every COMPTEL event cube"
-                  " needs associated GTIs to allow the computation of the"
-                  " ontime.");
+        std::string msg = "No Good Time Intervals have been found in event "
+                          "cube. Every COMPTEL event cube needs a definition "
+                          "of the Good Time Intervals.";
+        throw GException::invalid_value(G_SET_TIMES, msg);
     }
     
     // Compute mean time
-    m_time = 0.5 * (m_gti.tstart() + m_gti.tstop());
+    m_time = m_gti.tstart() + 0.5 * (m_gti.tstop() - m_gti.tstart());
 
     // Set ontime
     m_ontime = m_gti.ontime();
@@ -836,7 +844,7 @@ void GCOMEventCube::init_bin(void)
  *
  * @exception GException::out_of_range
  *            Event index is outside valid range.
- * @exception GCOMException::no_dirs
+ * @exception GException::invalid_value
  *            Sky directions and solid angles vectors have not been set up.
  *
  * This method provides the event attributes to the event bin. The event bin
@@ -856,7 +864,10 @@ void GCOMEventCube::set_bin(const int& index)
 
     // Check for the existence of sky directions and solid angles
     if (m_dirs.size() != npix() || m_solidangle.size() != npix()) {
-        throw GCOMException::no_dirs(G_SET_BIN);
+        std::string msg = "Sky direction vector has not been setup for "
+                          "event cube. Every COMPTEL event cube needs an "
+                          "internal vector of sky directions.";
+        throw GException::invalid_value(G_SET_BIN, msg);
     }
 
     // Get pixel and energy bin indices.
@@ -871,7 +882,7 @@ void GCOMEventCube::set_bin(const int& index)
     m_dir.phibar(m_phi[iphi]);
     
     // Set pointers
-    m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
+    m_bin.m_counts      = const_cast<double*>(&(m_map.pixels()[index]));
     m_bin.m_solidangle  = &(m_solidangle[ipix]);
 
     // Return

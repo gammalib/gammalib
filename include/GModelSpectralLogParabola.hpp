@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralLogParabola.hpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Michael Mayer                               *
+ *  copyright (C) 2012-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,12 +31,15 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <cmath>
-#include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
-#include "GEnergy.hpp"
-#include "GXmlElement.hpp"
-#include "GIntegral.hpp"
 #include "GFunction.hpp"
+#include "GModelPar.hpp"
+#include "GEnergy.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GTime;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -63,10 +66,15 @@ class GModelSpectralLogParabola : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralLogParabola(void);
-    explicit GModelSpectralLogParabola(const double&  prefactor,
-                                       const double&  index,
-                                       const GEnergy& pivot,
-                                       const double&  curvature);
+    GModelSpectralLogParabola(const std::string& type,
+                              const std::string& prefactor,
+                              const std::string& index,
+                              const std::string& pivot,
+                              const std::string& curvature);
+    GModelSpectralLogParabola(const double&  prefactor,
+                              const double&  index,
+                              const GEnergy& pivot,
+                              const double&  curvature);
     explicit GModelSpectralLogParabola(const GXmlElement& xml);
     GModelSpectralLogParabola(const GModelSpectralLogParabola& model);
     virtual ~GModelSpectralLogParabola(void);
@@ -80,9 +88,9 @@ public:
     virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
     virtual double                     eval(const GEnergy& srcEng,
-                                            const GTime&   srcTime) const;
+                                            const GTime&   srcTime = GTime()) const;
     virtual double                     eval_gradients(const GEnergy& srcEng,
-                                                      const GTime&   srcTime);
+                                                      const GTime&   srcTime = GTime());
     virtual double                     flux(const GEnergy& emin,
                                             const GEnergy& emax) const;
     virtual double                     eflux(const GEnergy& emin,
@@ -159,10 +167,11 @@ protected:
 
 
     // Protected members
-    GModelPar m_norm;         //!< Normalization factor
-    GModelPar m_index;        //!< Spectral index
-    GModelPar m_curvature;    //!< Curvature
-    GModelPar m_pivot;        //!< Pivot energy
+    std::string m_type;                //!< Model type
+    GModelPar   m_norm;                //!< Normalization factor
+    GModelPar   m_index;               //!< Spectral index
+    GModelPar   m_curvature;           //!< Curvature
+    GModelPar   m_pivot;               //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;     //!< Last energy value
@@ -206,7 +215,7 @@ std::string GModelSpectralLogParabola::classname(void) const
 inline
 std::string GModelSpectralLogParabola::type(void) const
 {
-    return "LogParabola";
+    return (m_type);
 }
 
 

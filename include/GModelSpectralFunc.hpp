@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralFunc.hpp - Spectral function model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,11 +30,16 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
+#include "GModelPar.hpp"
 #include "GEnergy.hpp"
-#include "GXmlElement.hpp"
 #include "GNodeArray.hpp"
+#include "GFilename.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GTime;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -57,8 +62,8 @@ class GModelSpectralFunc : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralFunc(void);
-    explicit GModelSpectralFunc(const std::string& filename,
-                                const double&      norm);
+    GModelSpectralFunc(const GFilename& filename,
+                       const double&    norm);
     explicit GModelSpectralFunc(const GXmlElement& xml);
     GModelSpectralFunc(const GModelSpectralFunc& model);
     virtual ~GModelSpectralFunc(void);
@@ -72,9 +77,9 @@ public:
     virtual std::string         classname(void) const;
     virtual std::string         type(void) const;
     virtual double              eval(const GEnergy& srcEng,
-                                     const GTime&   srcTime) const;
+                                     const GTime&   srcTime = GTime()) const;
     virtual double              eval_gradients(const GEnergy& srcEng,
-                                               const GTime&   srcTime);
+                                               const GTime&   srcTime = GTime());
     virtual double              flux(const GEnergy& emin,
                                      const GEnergy& emax) const;
     virtual double              eflux(const GEnergy& emin,
@@ -88,17 +93,17 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const std::string& filename(void) const;
-    void               filename(const std::string& filename);
-    double             norm(void) const;
-    void               norm(const double& norm);
+    const GFilename& filename(void) const;
+    void             filename(const GFilename& filename);
+    double           norm(void) const;
+    void             norm(const double& norm);
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GModelSpectralFunc& model);
     void free_members(void);
-    void load_nodes(const std::string& filename);
+    void load_nodes(const GFilename& filename);
     void set_cache(void) const;
     void mc_update(const GEnergy& emin, const GEnergy& emax) const;
 
@@ -108,7 +113,7 @@ protected:
     mutable GNodeArray  m_log_nodes;  //!< lof10(Energy) nodes of function
     std::vector<double> m_lin_values; //!< Function values at nodes
     std::vector<double> m_log_values; //!< log10(Function) values at nodes
-    std::string         m_filename;   //!< Name of file function
+    GFilename           m_filename;   //!< Name of file function
 
     // Cached members used for pre-computations
     mutable std::vector<double> m_prefactor; //!< Power-law normalisations
@@ -190,7 +195,7 @@ void GModelSpectralFunc::norm(const double& norm)
  * Returns the name of the file function node file.
  ***************************************************************************/
 inline
-const std::string& GModelSpectralFunc::filename(void) const
+const GFilename& GModelSpectralFunc::filename(void) const
 {
     return (m_filename);
 }
@@ -204,7 +209,7 @@ const std::string& GModelSpectralFunc::filename(void) const
  * Loads the nodes from a file function node file and sets the filename.
  ***************************************************************************/
 inline
-void GModelSpectralFunc::filename(const std::string& filename)
+void GModelSpectralFunc::filename(const GFilename& filename)
 {
     load_nodes(filename);
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralExpPlaw.hpp - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,11 +29,15 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
-#include "GEnergy.hpp"
-#include "GXmlElement.hpp"
 #include "GFunction.hpp"
+#include "GModelPar.hpp"
+#include "GEnergy.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GTime;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -61,10 +65,15 @@ class GModelSpectralExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralExpPlaw(void);
-    explicit GModelSpectralExpPlaw(const double&  prefactor,
-                                   const double&  index,
-                                   const GEnergy& pivot,
-                                   const GEnergy& cutoff);
+    GModelSpectralExpPlaw(const std::string& type,
+                          const std::string& prefactor,
+                          const std::string& index,
+                          const std::string& pivot,
+                          const std::string& cutoff);
+    GModelSpectralExpPlaw(const double&  prefactor,
+                          const double&  index,
+                          const GEnergy& pivot,
+                          const GEnergy& cutoff);
     explicit GModelSpectralExpPlaw(const GXmlElement& xml);
     GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model);
     virtual ~GModelSpectralExpPlaw(void);
@@ -78,9 +87,9 @@ public:
     virtual std::string            classname(void) const;
     virtual std::string            type(void) const;
     virtual double                 eval(const GEnergy& srcEng,
-                                        const GTime&   srcTime) const;
+                                        const GTime&   srcTime = GTime()) const;
     virtual double                 eval_gradients(const GEnergy& srcEng,
-                                                  const GTime&   srcTime);
+                                                  const GTime&   srcTime = GTime());
     virtual double                 flux(const GEnergy& emin,
                                         const GEnergy& emax) const;
     virtual double                 eflux(const GEnergy& emin,
@@ -150,10 +159,11 @@ protected:
     };
 
     // Protected members
-    GModelPar m_norm;               //!< Normalization factor
-    GModelPar m_index;              //!< Spectral index
-    GModelPar m_ecut;               //!< Exponential cut off energy
-    GModelPar m_pivot;              //!< Pivot energy
+    std::string m_type;               //!< Model type
+    GModelPar   m_norm;              //!< Normalization factor
+    GModelPar   m_index;             //!< Spectral index
+    GModelPar   m_ecut;              //!< Exponential cut off energy
+    GModelPar   m_pivot;             //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;   //!< Last energy value
@@ -186,14 +196,14 @@ std::string GModelSpectralExpPlaw::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "ExpCutoff".
+ * @return Model type.
  *
  * Returns the type of the exponentially cut off power law model.
  ***************************************************************************/
 inline
 std::string GModelSpectralExpPlaw::type(void) const
 {
-    return "ExpCutoff";
+    return (m_type);
 }
 
 

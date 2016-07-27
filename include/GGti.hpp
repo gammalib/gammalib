@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.hpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GContainer.hpp"
 #include "GTime.hpp"
 #include "GTimeReference.hpp"
+#include "GFilename.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GXmlElement;
@@ -58,7 +59,7 @@ class GGti : public GContainer {
 public:
     // Constructors and destructors
     GGti(void);
-    explicit GGti(const std::string& filename);
+    explicit GGti(const GFilename& filename);
     GGti(const GGti& gti);
     GGti(const GTime& tstart, const GTime& tstop);
     explicit GGti(const GXmlElement& xml);
@@ -82,11 +83,11 @@ public:
     void                  remove(const int& index);
     void                  reserve(const int& num);
     void                  extend(const GGti& gti);
-    void                  load(const std::string& filename);
-    void                  save(const std::string& filename,
+    void                  load(const GFilename& filename);
+    void                  save(const GFilename& filename,
                                const bool& clobber = false) const;
     void                  read(const GFitsTable& table);
-    void                  write(GFits& file,
+    void                  write(GFits& fits,
                                 const std::string& extname = "GTI") const;
     void                  read(const GXmlElement& xml);
     void                  write(GXmlElement& xml) const;
@@ -110,14 +111,15 @@ protected:
     void  insert_gti(const int& index, const GTime& tstart, const GTime& tstop);
 
     // Protected data area
-    int             m_num;       //!< Number of Good Time Intervals
-    GTime           m_tstart;    //!< Start time of Good Time Intervals
-    GTime           m_tstop;     //!< Stop time of Good Time Intervals
-    double          m_ontime;    //!< Sum of Good Time Interval durations (in seconds)
-    double          m_telapse;   //!< Time between start of first GTI and stop of last GTI (in seconds)
-    GTime          *m_start;     //!< Array of start times
-    GTime          *m_stop;      //!< Array of stop times
-    GTimeReference  m_reference; //!< Time reference
+    int             m_num;          //!< Number of Good Time Intervals
+    GTime           m_tstart;       //!< Start time of Good Time Intervals
+    GTime           m_tstop;        //!< Stop time of Good Time Intervals
+    double          m_ontime;       //!< Sum of Good Time Interval durations (in seconds)
+    double          m_telapse;      //!< Time between start of first GTI and stop of last GTI (in seconds)
+    GTime          *m_start;        //!< Array of start times
+    GTime          *m_stop;         //!< Array of stop times
+    GTimeReference  m_reference;    //!< Time reference
+    GFilename       m_xml_filename; //!< XML filename
 };
 
 

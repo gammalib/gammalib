@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponseIrf.hpp - CTA instrument response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,9 +39,8 @@
 #include "GCTAEdisp.hpp"
 #include "GCTABackground.hpp"
 
-/* __ Type definitions ___________________________________________________ */
-
 /* __ Forward declarations _______________________________________________ */
+class GFilename;
 class GSkyDir;
 class GPhoton;
 class GEbounds;
@@ -103,10 +102,10 @@ public:
     void                  caldb(const GCaldb& caldb);
     const GCaldb&         caldb(void) const;
     void                  load(const std::string& rspname);
-    void                  load_aeff(const std::string& filename);
-    void                  load_psf(const std::string& filename);
-    void                  load_edisp(const std::string& filename);
-    void                  load_background(const std::string& filename);
+    void                  load_aeff(const GFilename& filename);
+    void                  load_psf(const GFilename& filename);
+    void                  load_edisp(const GFilename& filename);
+    void                  load_background(const GFilename& filename);
     void                  offset_sigma(const double& sigma);
     double                offset_sigma(void) const;
     const GCTAAeff*       aeff(void) const;
@@ -161,46 +160,46 @@ public:
 
 private:
     // Private methods
-    void        init_members(void);
-    void        copy_members(const GCTAResponseIrf& rsp);
-    void        free_members(void);
-    std::string irf_filename(const std::string& filename) const;
-    double      irf_ptsrc(const GEvent&       event,
+    void      init_members(void);
+    void      copy_members(const GCTAResponseIrf& rsp);
+    void      free_members(void);
+    GFilename irf_filename(const std::string& filename) const;
+    double    irf_ptsrc(const GEvent&       event,
+                        const GSource&      source,
+                        const GObservation& obs) const;
+    double    irf_radial(const GEvent&       event,
+                         const GSource&      source,
+                         const GObservation& obs) const;
+    double    irf_elliptical(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const;
+    double    irf_diffuse(const GEvent&       event,
                           const GSource&      source,
                           const GObservation& obs) const;
-    double      irf_radial(const GEvent&       event,
-                           const GSource&      source,
-                           const GObservation& obs) const;
-    double      irf_elliptical(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
-    double      irf_diffuse(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const;
-    double      nroi_ptsrc(const GModelSky&    model,
+    double    nroi_ptsrc(const GModelSky&    model,
+                         const GEnergy&      srcEng,
+                         const GTime&        srcTime,
+                         const GEnergy&      obsEng,
+                         const GTime&        obsTime,
+                         const GObservation& obs) const;
+    double    nroi_radial(const GModelSky&    model,
+                          const GEnergy&      srcEng,
+                          const GTime&        srcTime,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const;
+    double    nroi_elliptical(const GModelSky&    model,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
+                              const GEnergy&      obsEng,
+                              const GTime&        obsTime,
+                              const GObservation& obs) const;
+    double    nroi_diffuse(const GModelSky&    model,
                            const GEnergy&      srcEng,
                            const GTime&        srcTime,
                            const GEnergy&      obsEng,
                            const GTime&        obsTime,
                            const GObservation& obs) const;
-    double      nroi_radial(const GModelSky&    model,
-                            const GEnergy&      srcEng,
-                            const GTime&        srcTime,
-                            const GEnergy&      obsEng,
-                            const GTime&        obsTime,
-                            const GObservation& obs) const;
-    double      nroi_elliptical(const GModelSky&    model,
-                                const GEnergy&      srcEng,
-                                const GTime&        srcTime,
-                                const GEnergy&      obsEng,
-                                const GTime&        obsTime,
-                                const GObservation& obs) const;
-    double      nroi_diffuse(const GModelSky&    model,
-                             const GEnergy&      srcEng,
-                             const GTime&        srcTime,
-                             const GEnergy&      obsEng,
-                             const GTime&        obsTime,
-                             const GObservation& obs) const;
 
     // Private data members
     GCaldb          m_caldb;          //!< Calibration database
@@ -318,7 +317,7 @@ const GCaldb& GCTAResponseIrf::caldb(void) const
 
 
 /***********************************************************************//**
- * @brief Set path to the calibration database
+ * @brief Set calibration database
  *
  * @param[in] caldb Calibration database.
  *

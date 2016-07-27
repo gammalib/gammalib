@@ -11,7 +11,7 @@
 			    <parameter scale="1e-07" name="Intensity" min="1e-07" max="1000.0" value="0.1"  free="1"/>
             </node>
 		</spectrum>
-		<spatialModel type="SkyDirFunction">
+		<spatialModel type="PointSource">
 			<parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
 			<parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
 		</spatialModel>

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventBin.cpp - COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -205,7 +205,7 @@ double GCOMEventBin::size(void) const
 double GCOMEventBin::error(void) const
 {
     // Compute uncertainty
-    double error = sqrt(counts()+1.0e-50);
+    double error = std::sqrt(counts()+1.0e-50);
 
     // Return error
     return error;
@@ -255,22 +255,22 @@ void GCOMEventBin::init_members(void)
     // Allocate members
     m_alloc      = true;
     m_index      = -1;   // Signals that event bin does not correspond to cube
-    m_counts     = new double;
     m_dir        = new GCOMInstDir;
-    m_solidangle = new double;
     m_time       = new GTime;
-    m_ontime     = new double;
     m_energy     = new GEnergy;
     m_ewidth     = new GEnergy;
+    m_counts     = new double;
+    m_solidangle = new double;
+    m_ontime     = new double;
 
     // Initialise members
-    *m_counts = 0.0;
     m_dir->clear();
-    *m_solidangle = 0.0;
     m_time->clear();
-    *m_ontime = 0.0;
     m_energy->clear();
     m_ewidth->clear();
+    *m_counts     = 0.0;
+    *m_solidangle = 0.0;
+    *m_ontime     = 0.0;
 
     // Return
     return;
@@ -287,17 +287,20 @@ void GCOMEventBin::copy_members(const GCOMEventBin& bin)
     // First de-allocate existing memory if needed
     free_members();
 
-
     // Copy members by cloning
-    m_alloc      = true;
-    m_index      = bin.m_index;
-    m_counts     = new double(*bin.m_counts);
     m_dir        = new GCOMInstDir(*bin.m_dir);
-    m_solidangle = new double(*bin.m_solidangle);
     m_time       = new GTime(*bin.m_time);
-    m_ontime     = new double(*bin.m_ontime);
     m_energy     = new GEnergy(*bin.m_energy);
     m_ewidth     = new GEnergy(*bin.m_ewidth);
+    m_counts     = new double(*bin.m_counts);
+    m_solidangle = new double(*bin.m_solidangle);
+    m_ontime     = new double(*bin.m_ontime);
+
+    // Copy non-pointer members
+    m_index = bin.m_index;
+
+    // Signal memory allocation
+    m_alloc = true;
 
     // Return
     return;
@@ -321,24 +324,26 @@ void GCOMEventBin::free_members(void)
 {
     // If memory was allocated then free members now
     if (m_alloc) {
-        if (m_counts     != NULL) delete m_counts;
         if (m_dir        != NULL) delete m_dir;
-        if (m_solidangle != NULL) delete m_solidangle;
         if (m_time       != NULL) delete m_time;
-        if (m_ontime     != NULL) delete m_ontime;
         if (m_energy     != NULL) delete m_energy;
         if (m_ewidth     != NULL) delete m_ewidth;
+        if (m_counts     != NULL) delete m_counts;
+        if (m_solidangle != NULL) delete m_solidangle;
+        if (m_ontime     != NULL) delete m_ontime;
     }
 
     // Signal member pointers as free
-    m_alloc      = false;
-    m_counts     = NULL;
     m_dir        = NULL;
-    m_solidangle = NULL;
     m_time       = NULL;
-    m_ontime     = NULL;
     m_energy     = NULL;
     m_ewidth     = NULL;
+    m_counts     = NULL;
+    m_solidangle = NULL;
+    m_ontime     = NULL;
+
+    // Signal memory de-allocation
+    m_alloc = false;
 
     // Return
     return;

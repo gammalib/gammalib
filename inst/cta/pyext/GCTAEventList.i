@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GCTAEventList.i - CTA event atom container class            *
+ *                GCTAEventList.i - CTA event list class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventList.i
- * @brief CTA event atom container class Python interface definition
+ * @brief CTA event list class Python interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,14 +32,14 @@
 /***********************************************************************//**
  * @class GCTAEventList
  *
- * @brief CTA event atom container class Python interface
+ * @brief CTA event list class Python interface
  ***************************************************************************/
 class GCTAEventList : public GEventList {
 
 public:
     // Constructors and destructors
     GCTAEventList(void);
-    explicit GCTAEventList(const std::string& filename);
+    explicit GCTAEventList(const GFilename& filename);
     GCTAEventList(const GCTAEventList& list);
     virtual ~GCTAEventList(void);
 
@@ -48,21 +48,27 @@ public:
     virtual GCTAEventList* clone(void) const;
     virtual std::string    classname(void) const;
     virtual int            size(void) const;
-    virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename,
-                                const bool& clobber = false) const;
-    virtual void           read(const GFits& file);
-    virtual void           write(GFits& file) const;
+    virtual void           load(const GFilename& filename);
+    virtual void           save(const GFilename& filename,
+                                const bool&      clobber = false) const;
+    virtual void           read(const GFits& fits);
+    virtual void           write(GFits& fits) const;
     virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
     virtual const GCTARoi& roi(void) const;
 
     // Implement other methods
-    void   append(const GCTAEventAtom& event);
-    void   reserve(const int& number);
-    double irf_cache(const std::string& name, const int& index) const;
-    void   irf_cache(const std::string& name, const int& index,
-                     const double& irf) const;
+    void               append(const GCTAEventAtom& event);
+    void               reserve(const int& number);
+    void               remove(const int& index, const int& number = 1);
+    void               write(GFits& fits, const std::string& evtname,
+                                          const std::string& gtiname) const;
+    void               fetch(void);
+    void               dispose(void);
+    double             irf_cache(const std::string& name, const int& index) const;
+    void               irf_cache(const std::string& name, const int& index,
+                                 const double& irf) const;
+    const std::string& gtiname(void) const;
 };
 
 

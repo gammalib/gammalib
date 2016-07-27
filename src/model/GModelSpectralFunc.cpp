@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralFunc.cpp - Spectral function model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GCsv.hpp"
+#include "GRan.hpp"
 #include "GModelSpectralFunc.hpp"
 #include "GModelSpectralRegistry.hpp"
 
@@ -47,7 +48,7 @@ const GModelSpectralRegistry g_spectral_func_registry(&g_spectral_func_seed);
 #define G_MC      "GModelSpectralFunc::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                       "GModelSpectralFunc::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpectralFunc::write(GXmlElement&)"
-#define G_LOAD_NODES           "GModelSpectralFunc::load_nodes(std::string&)"
+#define G_LOAD_NODES             "GModelSpectralFunc::load_nodes(GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -85,8 +86,8 @@ GModelSpectralFunc::GModelSpectralFunc(void) : GModelSpectral()
  * in the specified ASCII file. See the load_nodes() method for more
  * information about the expected structure of the file.
  ***************************************************************************/
-GModelSpectralFunc::GModelSpectralFunc(const std::string& filename,
-                                       const double&      norm) :
+GModelSpectralFunc::GModelSpectralFunc(const GFilename& filename,
+                                       const double&    norm) :
                     GModelSpectral()
 {
     // Initialise members
@@ -618,7 +619,8 @@ void GModelSpectralFunc::read(const GXmlElement& xml)
     }
 
     // Load nodes from file
-    load_nodes(xml.attribute("file"));
+    //load_nodes(xml.attribute("file"));
+    load_nodes(gammalib::xml_file_expand(xml, xml.attribute("file")));
 
     // Return
     return;
@@ -684,7 +686,8 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
     }
 
     // Set file attribute
-    xml.attribute("file", m_filename);
+    //xml.attribute("file", m_filename.url());
+    xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return
     return;
@@ -709,7 +712,8 @@ std::string GModelSpectralFunc::print(const GChatter& chatter) const
         result.append("=== GModelSpectralFunc ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("Function file")+m_filename);
+        result.append("\n"+gammalib::parformat("Function file"));
+        result.append(m_filename.url());
         result.append("\n"+gammalib::parformat("Number of nodes"));
         result.append(gammalib::str(m_lin_nodes.size()));
         result.append("\n"+gammalib::parformat("Number of parameters"));
@@ -850,7 +854,7 @@ void GModelSpectralFunc::free_members(void)
  * positive. Also, at least 2 nodes and 2 columns are required in the file
  * function.
  ***************************************************************************/
-void GModelSpectralFunc::load_nodes(const std::string& filename)
+void GModelSpectralFunc::load_nodes(const GFilename& filename)
 {
     // Clear nodes and values
     m_lin_nodes.clear();
@@ -862,17 +866,17 @@ void GModelSpectralFunc::load_nodes(const std::string& filename)
     m_filename = filename;
 
     // Load file
-    GCsv csv = GCsv(filename);
+    GCsv csv = GCsv(filename.url());
 
     // Check if there are at least 2 nodes
     if (csv.nrows() < 2) {
-        throw GException::file_function_data(G_LOAD_NODES, filename,
+        throw GException::file_function_data(G_LOAD_NODES, filename.url(),
                                              csv.nrows());
     }
 
     // Check if there are at least 2 columns
     if (csv.ncols() < 2) {
-        throw GException::file_function_columns(G_LOAD_NODES, filename,
+        throw GException::file_function_columns(G_LOAD_NODES, filename.url(),
                                                 csv.ncols());
     }
 
@@ -887,20 +891,20 @@ void GModelSpectralFunc::load_nodes(const std::string& filename)
             log10energy = std::log10(csv.real(i,0));
         }
         else {
-            throw GException::file_function_value(G_LOAD_NODES, filename,
+            throw GException::file_function_value(G_LOAD_NODES, filename.url(),
                   csv.real(i,0), "Energy value must be positive.");
         }
         if (csv.real(i,1) > 0) {
             log10value = std::log10(csv.real(i,1));
         }
         else {
-            throw GException::file_function_value(G_LOAD_NODES, filename,
+            throw GException::file_function_value(G_LOAD_NODES, filename.url(),
                   csv.real(i,1), "Intensity value must be positive.");
         }
         
         // Make sure that energies are increasing
         if (csv.real(i,0) <= last_energy) {
-            throw GException::file_function_value(G_LOAD_NODES, filename,
+            throw GException::file_function_value(G_LOAD_NODES, filename.url(),
                   csv.real(i,0), "Energy values must be monotonically increasing.");
         }
         

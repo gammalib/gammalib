@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GEvents.hpp - Abstract event container class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,9 @@
 #include "GEbounds.hpp"
 #include "GGti.hpp"
 #include "GRoi.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
 
 
 /***********************************************************************//**
@@ -78,9 +81,9 @@ public:
     virtual GEvents*    clone(void) const = 0;
     virtual std::string classname(void) const = 0;
     virtual int         size(void) const = 0;
-    virtual void        load(const std::string& filename) = 0;
-    virtual void        save(const std::string& filename,
-                             const bool& clobber = false) const = 0;
+    virtual void        load(const GFilename& filename) = 0;
+    virtual void        save(const GFilename& filename,
+                             const bool&      clobber = false) const = 0;
     virtual void        read(const GFits& file) = 0;
     virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;
@@ -107,7 +110,6 @@ protected:
     // Protected members
     GEbounds m_ebounds;      //!< Energy boundaries covered by events
     GGti     m_gti;          //!< Good time intervals covered by events
-
 };
 
 

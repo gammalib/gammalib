@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCOMObservation.hpp - COMPTEL observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,12 +28,20 @@
 #define GCOMOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GObservation.hpp"
 #include "GTime.hpp"
-#include "GModel.hpp"
+#include "GFilename.hpp"
+#include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
 #include "GCOMResponse.hpp"
-#include "GCaldb.hpp"
+//#include "GCaldb.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GCaldb;
+class GResponse;
+class GXmlElement;
+class GFitsHDU;
 
 
 /***********************************************************************//**
@@ -41,24 +49,26 @@
  *
  * @brief Interface class for COMPTEL observations
  *
- * This class implements a multi-wavelength observation. A multi-wavelength
- * observation contains spectral points obtained with an unspecified
- * instrument. The spectral points are given in physical units.
+ * This class implements a COMPTEL observation. Each COMPTEL observation is
+ * defined for a given energy range, and is composed of a DRE, DRB, DRG and
+ * DRX file. The DRE file contains the event data, the DRB file contains a
+ * background model, the DRG file contains geometry factors, and the DRX file
+ * contains the exposure.
  ***************************************************************************/
 class GCOMObservation : public GObservation {
 
 public:
     // Constructors and destructors
     GCOMObservation(void);
-    GCOMObservation(const std::string& drename,
-                    const std::string& drbname,
-                    const std::string& drgname,
-                    const std::string& drxname);
+    GCOMObservation(const GFilename& drename,
+                    const GFilename& drbname,
+                    const GFilename& drgname,
+                    const GFilename& drxname);
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
 
     // Operators
-    virtual GCOMObservation& operator= (const GCOMObservation& obs);
+    virtual GCOMObservation& operator=(const GCOMObservation& obs);
 
     // Implement pure virtual methods
     virtual void                clear(void);
@@ -66,50 +76,50 @@ public:
     virtual std::string         classname(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GCOMResponse* response(void) const;
-    virtual std::string         instrument(void) const { return m_instrument; }
-    virtual double              ontime(void) const { return m_ontime; }
-    virtual double              livetime(void) const { return m_livetime; }
-    virtual double              deadc(const GTime& time) const { return m_deadc; }
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void           load(const std::string& drename,
-                        const std::string& drbname,
-                        const std::string& drgname,
-                        const std::string& drxname);
+    void           load(const GFilename& drename,
+                        const GFilename& drbname,
+                        const GFilename& drgname,
+                        const GFilename& drxname);
     void           response(const std::string& rspname, const GCaldb& caldb);
-    void           obs_id(const double& id) { m_obs_id=id; }
-    void           ontime(const double& ontime) { m_ontime=ontime; }
-    void           livetime(const double& livetime) { m_livetime=livetime; }
-    void           deadc(const double& deadc) { m_deadc=deadc; }
-    void           ewidth(const double& ewidth) { m_ewidth=ewidth; }
-    const double&  obs_id(void) const { return m_obs_id; }
-    const double&  ewidth(void) const { return m_ewidth; }
-    const GSkyMap& drb(void) const { return m_drb; }
-    const GSkyMap& drg(void) const { return m_drg; }
-    const GSkyMap& drx(void) const { return m_drx; }
+    void           obs_id(const double& id);
+    void           ontime(const double& ontime);
+    void           livetime(const double& livetime);
+    void           deadc(const double& deadc);
+    void           ewidth(const double& ewidth);
+    const double&  obs_id(void) const;
+    const double&  ewidth(void) const;
+    const GSkyMap& drb(void) const;
+    const GSkyMap& drg(void) const;
+    const GSkyMap& drx(void) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCOMObservation& obs);
     void free_members(void);
-    void load_dre(const std::string& drename);
-    void load_drb(const std::string& drbname);
-    void load_drg(const std::string& drgname);
-    void load_drx(const std::string& drxname);
+    void load_dre(const GFilename& drename);
+    void load_drb(const GFilename& drbname);
+    void load_drg(const GFilename& drgname);
+    void load_drx(const GFilename& drxname);
     bool check_map(const GSkyMap& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
 
     // Protected members
     std::string  m_instrument;  //!< Instrument name
-    std::string  m_drename;     //!< DRE filename
-    std::string  m_drbname;     //!< DRB filename
-    std::string  m_drgname;     //!< DRG filename
-    std::string  m_drxname;     //!< DRX filename
+    GFilename    m_drename;     //!< DRE filename
+    GFilename    m_drbname;     //!< DRB filename
+    GFilename    m_drgname;     //!< DRG filename
+    GFilename    m_drxname;     //!< DRX filename
     GSkyMap      m_drb;         //!< Background model
     GSkyMap      m_drg;         //!< Geometry factors
     GSkyMap      m_drx;         //!< Exposure map
@@ -145,6 +155,190 @@ const GCOMResponse* GCOMObservation::response(void) const
 {
     // Return response pointer
     return &m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument
+ *
+ * @return Instrument name.
+ ***************************************************************************/
+inline
+std::string GCOMObservation::instrument(void) const
+{
+    // Return instrument
+    return (m_instrument);
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime
+ *
+ * @return Ontime (seconds).
+ ***************************************************************************/
+inline
+double GCOMObservation::ontime(void) const
+{
+    // Return ontime
+    return (m_ontime);
+}
+
+
+/***********************************************************************//**
+ * @brief Return livetime
+ *
+ * @return Livetime (seconds).
+ ***************************************************************************/
+inline
+double GCOMObservation::livetime(void) const
+{
+    // Return livetime
+    return (m_livetime);
+}
+
+
+/***********************************************************************//**
+ * @brief Return deadtime correction factor
+ *
+ * @param[in] time Time.
+ *
+ * @return Deadtime correction factor.
+ ***************************************************************************/
+inline
+double GCOMObservation::deadc(const GTime& time) const
+{
+    // Return livetime
+    return (m_deadc);
+}
+
+
+/***********************************************************************//**
+ * @brief Set observation ID
+ *
+ * @param[in] id Observation ID.
+ ***************************************************************************/
+inline
+void GCOMObservation::obs_id(const double& id)
+{
+    m_obs_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set ontime
+ *
+ * @param[in] ontime Ontime.
+ ***************************************************************************/
+inline
+void GCOMObservation::ontime(const double& ontime)
+{
+    m_ontime = ontime;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set livetime
+ *
+ * @param[in] livetime Livetime.
+ ***************************************************************************/
+inline
+void GCOMObservation::livetime(const double& livetime)
+{
+    m_livetime = livetime;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set deadtime correction factor
+ *
+ * @param[in] deadc Deadtime correction factor.
+ ***************************************************************************/
+inline
+void GCOMObservation::deadc(const double& deadc)
+{
+    m_deadc = deadc;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy width
+ *
+ * @param[in] ewidth Energy width (MeV).
+ ***************************************************************************/
+inline
+void GCOMObservation::ewidth(const double& ewidth)
+{
+    m_ewidth = ewidth;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation ID
+ *
+ * @return Observation ID.
+ ***************************************************************************/
+inline
+const double& GCOMObservation::obs_id(void) const
+{
+    // Return observation ID
+    return (m_obs_id);
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy width
+ *
+ * @return Energy width (MeV).
+ ***************************************************************************/
+inline
+const double& GCOMObservation::ewidth(void) const
+{
+    // Return energy width
+    return (m_ewidth);
+}
+
+
+/***********************************************************************//**
+ * @brief Return background model
+ *
+ * @return Background model.
+ ***************************************************************************/
+inline
+const GSkyMap& GCOMObservation::drb(void) const
+{
+    // Return background model
+    return (m_drb);
+}
+
+
+/***********************************************************************//**
+ * @brief Return geometry factors
+ *
+ * @return Geometry factors.
+ ***************************************************************************/
+inline
+const GSkyMap& GCOMObservation::drg(void) const
+{
+    // Return geometry factors
+    return (m_drg);
+}
+
+
+/***********************************************************************//**
+ * @brief Return exposure
+ *
+ * @return Exposure.
+ ***************************************************************************/
+inline
+const GSkyMap& GCOMObservation::drx(void) const
+{
+    // Return exposure
+    return (m_drx);
 }
 
 #endif /* GCOMOBSERVATION_HPP */

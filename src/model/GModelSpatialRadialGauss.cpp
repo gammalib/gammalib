@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.cpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialGauss g_radial_gauss_seed;
 const GModelSpatialRegistry    g_radial_gauss_registry(&g_radial_gauss_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialRadialGauss g_radial_gauss_legacy_seed(true, "GaussFunction");
+const GModelSpatialRegistry    g_radial_gauss_legacy_registry(&g_radial_gauss_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                 "GModelSpatialRadialGauss::read(GXmlElement&)"
@@ -59,11 +63,36 @@ const GModelSpatialRegistry    g_radial_gauss_registry(&g_radial_gauss_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty radial Gaussian model.
  ***************************************************************************/
 GModelSpatialRadialGauss::GModelSpatialRadialGauss(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty radial Gaussian model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialRadialGauss::GModelSpatialRadialGauss(const bool&        dummy,
+                                                   const std::string& type) :
+                          GModelSpatialRadial()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -239,7 +268,7 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * \f]
  *
  * where
- * - \f$\theta\f$ is the angular separation from the source direction, and
+ * - \f$\theta\f$ is the angular separation from the centre of the model, and
  * - \f$\sigma\f$ is the Gaussian width.
  *
  * @todo The Gaussian function is only correct in the small angle
@@ -371,7 +400,7 @@ double GModelSpatialRadialGauss::theta_max(void) const
  * Reads the radial Gauss model information from an XML element. The XML
  * element shall have either the format 
  *
- *     <spatialModel type="GaussFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -379,7 +408,7 @@ double GModelSpatialRadialGauss::theta_max(void) const
  *
  * or
  *
- *     <spatialModel type="GaussFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="GLON"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -449,7 +478,7 @@ void GModelSpatialRadialGauss::read(const GXmlElement& xml)
  * Writes the radial disk model information into an XML element. The XML
  * element will have the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -548,6 +577,8 @@ std::string GModelSpatialRadialGauss::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialRadialGauss::init_members(void)
 {
+    // Initialise model type
+    m_type = "RadialGaussian";
 
     // Initialise Gaussian sigma
     m_sigma.clear();
@@ -580,6 +611,7 @@ void GModelSpatialRadialGauss::init_members(void)
 void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& model)
 {
     // Copy members
+    m_type  = model.m_type;
     m_sigma = model.m_sigma;
 
     // Return

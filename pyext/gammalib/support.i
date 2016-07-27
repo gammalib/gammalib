@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      support.i - Support module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2016 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,10 +34,15 @@
 #include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GEnergy.hpp"
+#include "GFilename.hpp"
 %}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
+
+/* __ Include GammaLib typemaps __________________________________________ */
+%include typemap_GFilename.i
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";

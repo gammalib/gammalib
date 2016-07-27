@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw.hpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,10 +29,15 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
+#include "GModelPar.hpp"
 #include "GEnergy.hpp"
-#include "GXmlElement.hpp"
+//#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GTime;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -57,9 +62,13 @@ class GModelSpectralPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
-    explicit GModelSpectralPlaw(const double&  prefactor,
-                                const double&  index,
-                                const GEnergy& pivot);
+    GModelSpectralPlaw(const std::string& type,
+                       const std::string& prefactor,
+                       const std::string& index,
+                       const std::string& pivot);
+    GModelSpectralPlaw(const double&  prefactor,
+                       const double&  index,
+                       const GEnergy& pivot);
     explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
@@ -73,9 +82,9 @@ public:
     virtual std::string         classname(void) const;
     virtual std::string         type(void) const;
     virtual double              eval(const GEnergy& srcEng,
-                                     const GTime&   srcTime) const;
+                                     const GTime&   srcTime = GTime()) const;
     virtual double              eval_gradients(const GEnergy& srcEng,
-                                               const GTime&   srcTime);
+                                               const GTime&   srcTime = GTime());
     virtual double              flux(const GEnergy& emin,
                                      const GEnergy& emax) const;
     virtual double              eflux(const GEnergy& emin,
@@ -105,9 +114,10 @@ protected:
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
-    GModelPar m_norm;                //!< Normalization factor
-    GModelPar m_index;               //!< Spectral index
-    GModelPar m_pivot;               //!< Pivot energy
+    std::string m_type;                //!< Model type
+    GModelPar   m_norm;                //!< Normalization factor
+    GModelPar   m_index;               //!< Spectral index
+    GModelPar   m_pivot;               //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;     //!< Last energy value
@@ -140,14 +150,14 @@ std::string GModelSpectralPlaw::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "PowerLaw".
+ * @return Model type.
  *
  * Returns the type of the spectral power law model.
  ***************************************************************************/
 inline
 std::string GModelSpectralPlaw::type(void) const
 {
-    return "PowerLaw";
+    return (m_type);
 }
 
 

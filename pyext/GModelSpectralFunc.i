@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralFunc.i - Spectral function model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,8 +38,8 @@ class GModelSpectralFunc : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralFunc(void);
-    explicit GModelSpectralFunc(const std::string& filename,
-                                const double&      norm);
+    GModelSpectralFunc(const GFilename& filename,
+                       const double&    norm);
     explicit GModelSpectralFunc(const GXmlElement& xml);
     GModelSpectralFunc(const GModelSpectralFunc& model);
     virtual ~GModelSpectralFunc(void);
@@ -50,9 +50,9 @@ public:
     virtual std::string         classname(void) const;
     virtual std::string         type(void) const;
     virtual double              eval(const GEnergy& srcEng,
-                                     const GTime&   srcTime) const;
+                                     const GTime&   srcTime = GTime()) const;
     virtual double              eval_gradients(const GEnergy& srcEng,
-                                               const GTime&   srcTime);
+                                               const GTime&   srcTime = GTime());
     virtual double              flux(const GEnergy& emin,
                                      const GEnergy& emax) const;
     virtual double              eflux(const GEnergy& emin,
@@ -65,10 +65,10 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    const std::string& filename(void) const;
-    void               filename(const std::string& filename);
-    double             norm(void) const;
-    void               norm(const double& norm);
+    const GFilename& filename(void) const;
+    void             filename(const GFilename& filename);
+    double           norm(void) const;
+    void             norm(const double& norm);
 };
 
 

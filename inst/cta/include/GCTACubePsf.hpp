@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTACubePsf.hpp - CTA cube analysis point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,12 +30,18 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GMath.hpp"
 #include "GFits.hpp"
 #include "GSkyMap.hpp"
-#include "GObservations.hpp"
-#include "GCTAObservation.hpp"
+#include "GEnergies.hpp"
 #include "GNodeArray.hpp"
-#include "GCTAEventCube.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GObservations;
+class GCTAEventCube;
+class GCTAObservation;
+
 
 
 /***********************************************************************//**
@@ -55,7 +61,7 @@ public:
     // Constructors and destructors
     GCTACubePsf(void);
     GCTACubePsf(const GCTACubePsf& cube);
-    explicit GCTACubePsf(const std::string& filename);
+    explicit GCTACubePsf(const GFilename& filename);
     GCTACubePsf(const GCTAEventCube& cube,
                 const double& dmax, const int& ndbins);
     GCTACubePsf(const std::string&   wcs,
@@ -66,7 +72,7 @@ public:
                 const double&        dy,
                 const int&           nx,
                 const int&           ny,
-                const GEbounds&      ebounds,
+                const GEnergies&     energies,
                 const double&        dmax,
                 const int&           ndbins);
     virtual ~GCTACubePsf(void);
@@ -78,23 +84,23 @@ public:
                             const GEnergy& energy) const;
 
     // Methods
-    void               clear(void);
-    GCTACubePsf*       clone(void) const;
-    std::string        classname(void) const;
-    void               set(const GCTAObservation& obs);
-    void               fill(const GObservations& obs, GLog* log = NULL);
-    const GSkyMap&     map(void) const;
-    const GEbounds&    ebounds(void) const;
-    const GNodeArray&  deltas(void) const;
-    const GNodeArray&  elogmeans(void) const;
-    double             delta_max(void) const;
-    int                offset(const int& idelta, const int& iebin) const;
-    void               read(const GFits& fits);
-    void               write(GFits& file) const;
-    void               load(const std::string& filename);
-    void               save(const std::string& filename, const bool& clobber = false) const;
-    const std::string& filename(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    void              clear(void);
+    GCTACubePsf*      clone(void) const;
+    std::string       classname(void) const;
+    void              set(const GCTAObservation& obs);
+    void              fill(const GObservations& obs, GLog* log = NULL);
+    const GSkyMap&    cube(void) const;
+    const GEnergies&  energies(void) const;
+    const GNodeArray& deltas(void) const;
+    double            delta_max(void) const;
+    int               offset(const int& idelta, const int& iebin) const;
+    void              read(const GFits& fits);
+    void              write(GFits& file) const;
+    void              load(const GFilename& filename);
+    void              save(const GFilename& filename,
+                           const bool&      clobber = false) const;
+    const GFilename&  filename(void) const;
+    std::string       print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Methods
@@ -102,19 +108,21 @@ protected:
     void copy_members(const GCTACubePsf& cube);
     void free_members(void);
     void clear_cube(void);
+    void fill_cube(const GCTAObservation& obs, GSkyMap* exposure = NULL,
+                   GLog* log = NULL);
     void update(const double& delta, const double& logE) const;
     void set_delta_axis(void);
     void set_eng_axis(void);
     void set_to_smooth(void);
 
     // Data
-    mutable std::string m_filename;          //!< Filename
-    GSkyMap             m_cube;              //!< PSF cube
-    GEbounds            m_ebounds;           //!< Energy bounds for the PSF cube
-    GNodeArray          m_elogmeans;         //!< Mean log10TeV energy for the PSF cube
-    GNodeArray          m_deltas;            //!< Delta bins (deg) for the PSF cube
-    GNodeArray          m_deltas_cache;      //!< Internal delta bins (rad)
-    bool                m_quadratic_binning; //!< Internal binning is linear
+    mutable GFilename m_filename;          //!< Filename
+    GSkyMap           m_cube;              //!< PSF cube
+    GEnergies         m_energies;          //!< Energy values for the PSF cube
+    GNodeArray        m_elogmeans;         //!< Mean log10TeV energy for the PSF cube
+    GNodeArray        m_deltas;            //!< Delta bins (deg) for the PSF cube
+    GNodeArray        m_deltas_cache;      //!< Internal delta bins (rad)
+    bool              m_quadratic_binning; //!< Internal binning is linear
 
 private:
     // Response table computation cache for 2D access
@@ -151,21 +159,21 @@ std::string GCTACubePsf::classname(void) const
  * cube.
  ***************************************************************************/
 inline
-const GSkyMap& GCTACubePsf::map(void) const
+const GSkyMap& GCTACubePsf::cube(void) const
 {
     return (m_cube);
 }
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries
+ * @brief Return energies
  *
- * @return Energy boundaris
+ * @return Energies
  ***************************************************************************/
 inline
-const GEbounds& GCTACubePsf::ebounds(void) const
+const GEnergies& GCTACubePsf::energies(void) const
 {
-    return (m_ebounds);
+    return (m_energies);
 }
 
 
@@ -198,18 +206,6 @@ double GCTACubePsf::delta_max(void) const
 
 
 /***********************************************************************//**
- * @brief Return arithmetic mean of log10 energies
- *
- * @return Arithmetic mean of log10 energies.
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubePsf::elogmeans(void) const
-{
-    return (m_elogmeans);
-}
-
-
-/***********************************************************************//**
  * @brief Return exposure cube filename
  *
  * @return Exposure cube filename.
@@ -218,7 +214,7 @@ const GNodeArray& GCTACubePsf::elogmeans(void) const
  * the exposure cube has been saved.
  ***************************************************************************/
 inline
-const std::string& GCTACubePsf::filename(void) const
+const GFilename& GCTACubePsf::filename(void) const
 {
     return (m_filename);
 }

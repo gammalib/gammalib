@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegions.i - Sky region container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Pierrick Martin                             *
+ *  copyright (C) 2013-2016 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,25 +39,27 @@ public:
     // Constructors and destructors
     GSkyRegions(void);
     GSkyRegions(const GSkyRegions& regions);
-	explicit GSkyRegions(const std::string& filename);
+	explicit GSkyRegions(const GFilename& filename);
     virtual ~GSkyRegions(void);
 
     // Methods
-    void         clear(void);
-    GSkyRegions* clone(void) const;
-    std::string  classname(void) const;
-    GSkyRegion*  at(const int& index);
-    int          size(void) const;
-    bool         is_empty(void) const;
-    GSkyRegion*  set(const int& index, const GSkyRegion& region);
-    GSkyRegion*  append(const GSkyRegion& region);
-    GSkyRegion*  insert(const int& index, const GSkyRegion& region);
-    void         remove(const int& index);
-    void         reserve(const int& num);
-    void         extend(const GSkyRegions& regions);
-    void         load(const std::string& filename);
-    void         save(const std::string& filename) const;
-
+    void              clear(void);
+    GSkyRegions*      clone(void) const;
+    std::string       classname(void) const;
+    GSkyRegion*       at(const int& index);
+    int               size(void) const;
+    bool              is_empty(void) const;
+    GSkyRegion*       set(const int& index, const GSkyRegion& region);
+    GSkyRegion*       append(const GSkyRegion& region);
+    GSkyRegion*       insert(const int& index, const GSkyRegion& region);
+    void              remove(const int& index);
+    void              reserve(const int& num);
+    void              extend(const GSkyRegions& regions);
+    bool              contains(const GSkyDir& dir) const;
+    bool              overlaps(const GSkyRegion& reg) const;
+    void              load(const GFilename& filename);
+    void              save(const GFilename& filename) const;
+    const GFilename&  filename(void) const;
 };
 
 /***********************************************************************//**

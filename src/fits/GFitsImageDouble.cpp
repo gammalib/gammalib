@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsImageDouble.cpp - Double precision FITS image class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -162,17 +162,16 @@ GFitsImageDouble::GFitsImageDouble(const int& nx, const int& ny, const int& nz,
 /***********************************************************************//**
  * @brief Pixel array constructor
  *
- * @param[in] naxis Image dimension (0,1,2,3,4).
- * @param[in] naxes Number of pixels in each dimension.
+ * @param[in] naxes Vector of number of pixels in each dimension.
  * @param[in] pixels Optional pointer to image pixel array
  *
  * Construct instance of GFitsImageDouble by specifying the image dimension and
  * the number of pixels in each dimension. Note that this constructor does
  * not allocate any memory for the actual image.
  ***************************************************************************/
-GFitsImageDouble::GFitsImageDouble(const int& naxis, const int* naxes,
-                                   const double* pixels) :
-                  GFitsImage(G_BITPIX, naxis, naxes)
+GFitsImageDouble::GFitsImageDouble(const std::vector<int>& naxes,
+                                   const double*           pixels) :
+                  GFitsImage(G_BITPIX, naxes)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -769,7 +768,7 @@ void GFitsImageDouble::copy_members(const GFitsImageDouble& image)
     // Copy NULL value
     alloc_nulval(image.m_nulval);
 
-    // Small memory option: release column if it was fetch above
+    // Small memory option: release image if it was fetched above
     #if defined(G_SMALL_MEMORY)
     if (not_loaded) {
         const_cast<GFitsImageDouble*>(&image)->release_data();

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATPsf.hpp - Fermi LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,12 +31,10 @@
 #include <string>
 #include "GBase.hpp"
 #include "GLATPsfBase.hpp"
-#include "GLATInstDir.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GFits;
 
 
 /***********************************************************************//**
@@ -45,11 +43,11 @@
  * @brief Interface for the Fermi LAT point spread function
  *
  * This class provides the interface to the Fermi LAT point spread function
- * (PSF). An instance of the class holds the PSF for a specific detector
- * section (front or back). The class handles different PSF versions by
- * holding a pointer to the versioned PSF, which is defined by the abstract
- * base class GLATPsfBase. On loading (or reading) of the PSF information
- * from the FITS file, the appropriate versioned PSF will be allocated.
+ * (PSF). An instance of the class holds the PSF for a specific event type.
+ * The class handles different PSF versions by holding a pointer to the
+ * versioned PSF, which is defined by the abstract base class GLATPsfBase.
+ * On loading (or reading) of the PSF information from the FITS file, the
+ * appropriate versioned PSF will be allocated.
  *
  * @todo Implement Phi dependence
  ***************************************************************************/
@@ -58,7 +56,7 @@ class GLATPsf : public GBase {
 public:
     // Constructors and destructors
     GLATPsf(void);
-    explicit GLATPsf(const std::string& filename);
+    GLATPsf(const GFilename& filename, const std::string& evtype);
     GLATPsf(const GLATPsf& psf);
     virtual ~GLATPsf(void);
 
@@ -68,24 +66,24 @@ public:
                         const double& ctheta);
 
     // Methods
-    void        clear(void);
-    GLATPsf*    clone(void) const;
-    std::string classname(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename,
-                     const bool& clobber = false);
-    void        read(const GFits& file);
-    void        write(GFits& file) const;
-    int         size(void) const;
-    int         nenergies(void) const;
-    int         ncostheta(void) const;
-    double      costhetamin(void) const;
-    void        costhetamin(const double& ctheta);
-    bool        has_phi(void) const;
-    bool        is_front(void) const;
-    bool        is_back(void) const;
-    int         version(void) const;
-    std::string print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GLATPsf*           clone(void) const;
+    std::string        classname(void) const;
+    const std::string& evtype(void) const;
+    void               load(const GFilename&   filename,
+                            const std::string& evtype);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false);
+    void               read(const GFits& file);
+    void               write(GFits& file) const;
+    int                size(void) const;
+    int                nenergies(void) const;
+    int                ncostheta(void) const;
+    double             costhetamin(void) const;
+    void               costhetamin(const double& ctheta);
+    bool               has_phi(void) const;
+    int                version(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods
@@ -94,7 +92,8 @@ private:
     void free_members(void);
     
     // Members
-    GLATPsfBase* m_psf;   //!< Pointer to versioned point spread function
+    std::string  m_evtype; //!< Event type
+    GLATPsfBase* m_psf;    //!< Pointer to versioned point spread function
 };
 
 
@@ -107,6 +106,33 @@ inline
 std::string GLATPsf::classname(void) const
 {
     return ("GLATPsf");
+}
+
+
+/***********************************************************************//**
+ * @brief Return event type
+ *
+ * @return Event type.
+ *
+ * Returns the event type for this point spread function.
+ ***************************************************************************/
+inline
+const std::string& GLATPsf::evtype(void) const
+{
+    return (m_evtype);
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if PSF has phi dependence 
+ *
+ * @todo Implement phi dependence
+ ***************************************************************************/
+inline
+bool GLATPsf::has_phi(void) const
+{
+    // Return
+    return (false);
 }
 
 #endif /* GLATPSF_HPP */

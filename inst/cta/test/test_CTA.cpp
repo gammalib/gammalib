@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,9 +29,10 @@
 #include <config.h>
 #endif
 #include <stdlib.h>
+#include <unistd.h>
 #include <iostream>
 #include <cmath>
-#include <unistd.h>
+#include <cstdlib>     // getenv
 #include "GCTALib.hpp"
 #include "GTools.hpp"
 #include "GNodeArray.hpp"
@@ -46,27 +47,41 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir          = PACKAGE_SOURCE"/inst/cta/test/data";
-const std::string cta_caldb        = PACKAGE_SOURCE"/inst/cta/caldb";
-const std::string cta_irf          = "cta_dummy_irf";
-const std::string cta_events       = datadir+"/crab_events.fits.gz";
-const std::string cta_cntmap       = datadir+"/crab_cntmap.fits.gz";
-const std::string cta_cube_xml     = datadir+"/obs_cube.xml";
-const std::string cta_bin_xml      = datadir+"/obs_binned.xml";
-const std::string cta_unbin_xml    = datadir+"/obs_unbinned.xml";
-const std::string cta_model_xml    = datadir+"/crab.xml";
-const std::string cta_rsp_xml      = datadir+"/rsp_models.xml";
-const std::string cta_cube_bgd_xml = datadir+"/cta_model_cube_bgd.xml";
-const std::string cta_irf_bgd_xml  = datadir+"/cta_model_irf_bgd.xml";
-const std::string cta_aeff_bgd_xml = datadir+"/cta_model_aeff_bgd.xml";
-const std::string cta_caldb_king   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
-const std::string cta_irf_king     = "irf_file.fits";
-const std::string cta_edisp_perf   = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
-const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
-const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/test/caldb/edisp_matrix.fits";
-const std::string cta_bkgcube      = datadir+"/bkgcube.fits";
-const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
-const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
+const std::string datadir           = std::getenv("TEST_CTA_DATA");
+const std::string caldbdir          = datadir + "/../caldb";
+const std::string cta_caldb         = datadir + "/../../caldb";
+const std::string cta_irf           = "cta_dummy_irf";
+const std::string cta_events        = datadir+"/crab_events.fits";
+const std::string cta_events_gti    = datadir+"/crab_events_gti.fits[EVENTS2]";
+const std::string cta_cntmap        = datadir+"/crab_cntmap.fits";
+const std::string cta_bin_xml       = datadir+"/obs_binned.xml";
+const std::string cta_unbin_xml     = datadir+"/obs_unbinned.xml";
+const std::string cta_model_xml     = datadir+"/crab.xml";
+const std::string cta_rsp_xml       = datadir+"/rsp_models.xml";
+const std::string cta_cube_bgd_xml  = datadir+"/cta_model_cube_bgd.xml";
+const std::string cta_irf_bgd_xml   = datadir+"/cta_model_irf_bgd.xml";
+const std::string cta_aeff_bgd_xml  = datadir+"/cta_model_aeff_bgd.xml";
+const std::string cta_caldb_king    = cta_caldb+"/data/cta/e/bcf/IFAE20120510_50h_King";
+const std::string cta_irf_king      = "irf_file.fits";
+const std::string cta_psf_table     = caldbdir+"/psf_table.fits[PSF_2D_TABLE]";
+const std::string cta_edisp_perf    = caldbdir+"/cta_dummy_irf.dat";
+const std::string cta_edisp_rmf     = caldbdir+"/dc1/rmf.fits";
+const std::string cta_edisp_2D      = caldbdir+"/edisp_matrix.fits";
+const std::string cta_modbck_fit    = datadir+"/bg_test.fits";
+const std::string cta_point_table   = datadir+"/crab_pointing.fits";
+
+/* __ Test files for stacked analysis (based on Prod2::South_0.5h) _______ */
+const std::string cta_stacked_xml       = datadir+"/stacked_obs.xml";
+const std::string cta_stacked_model     = datadir+"/stacked_model.xml";
+const std::string cta_stacked_cntcube   = datadir+"/stacked_cntcube.fits";
+const std::string cta_stacked_expcube   = datadir+"/stacked_expcube.fits";
+const std::string cta_stacked_psfcube   = datadir+"/stacked_psfcube.fits";
+const std::string cta_stacked_edispcube = datadir+"/stacked_edispcube.fits";
+const std::string cta_stacked_bkgcube   = datadir+"/stacked_bkgcube.fits";
+
+/* __ Test files for On/Off analysis _____________________________________ */
+const std::string cta_onoff_xml   = datadir+"/onoff_obs.xml";
+const std::string cta_onoff_model = datadir+"/onoff_model.xml";
 
 
 /***********************************************************************//**
@@ -78,20 +93,38 @@ void TestGCTAResponse::set(void)
     name("GCTAResponse");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response), "Test response");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_aeff), "Test effective area");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf), "Test PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test energy dispersion");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_PerfTable), "Test energy dispersion Performance Table computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_RMF), "Test energy dispersion RMF computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_2D), "Test energy dispersion 2D computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube), "Test PSF cube");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bkgcube), "Test background cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response),
+           "Test response");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_aeff),
+           "Test effective area");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf),
+           "Test Gaussian point spread function");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king),
+           "Test King point spread function");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_table),
+           "Test Table point spread function");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf),
+           "Test integrated point spread function");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp),
+           "Test energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_PerfTable),
+           "Test Performance Table energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_RMF),
+           "Test RMF energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_2D),
+           "Test 2D energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse),
+           "Test diffuse IRF");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse),
+           "Test diffuse IRF integration");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube),
+           "Test exposure cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube),
+           "Test point spread function cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispcube),
+           "Test energy dispersion cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bkgcube),
+           "Test background cube");
 
     // Return
     return;
@@ -119,9 +152,12 @@ void TestGCTAModel::set(void)
     name("Test CTA models");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModel::test_model_cube_bgd), "Test CTA cube background model");
-    append(static_cast<pfunction>(&TestGCTAModel::test_model_irf_bgd), "Test CTA IRF background model");
-    append(static_cast<pfunction>(&TestGCTAModel::test_model_aeff_bgd), "Test CTA Aeff background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_cube_bgd),
+           "Test CTA cube background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_irf_bgd),
+           "Test CTA IRF background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_aeff_bgd),
+           "Test CTA Aeff background model");
 
     // Return
     return;
@@ -149,9 +185,18 @@ void TestGCTAObservation::set(void)
     name("GCTAObservation");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAObservation::test_unbinned_obs), "Test unbinned observations");
-    append(static_cast<pfunction>(&TestGCTAObservation::test_binned_obs), "Test binned observation");
-    append(static_cast<pfunction>(&TestGCTAObservation::test_cube_obs), "Test cube-style observation");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_event_bin),
+           "Test event bin");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_event_cube),
+           "Test event cube");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_unbinned_obs),
+           "Test unbinned observations");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_binned_obs),
+           "Test binned observation");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_stacked_obs),
+           "Test stacked observation");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_onoff_obs),
+           "Test On/Off observation");
 
     // Return
     return;
@@ -179,9 +224,14 @@ void TestGCTAOptimize::set(void)
     name("CTA optimizers");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_unbinned_optimizer), "Test unbinned optimizer");
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_binned_optimizer), "Test binned optimizer");
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_cube_optimizer), "Test cube-style optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_unbinned_optimizer),
+           "Test unbinned optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_binned_optimizer),
+           "Test binned optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_stacked_optimizer),
+           "Test stacked optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer),
+           "Test On/Off optimizer");
 
     // Return
     return;
@@ -459,6 +509,57 @@ void TestGCTAResponse::test_response_psf_king(void)
             }
         }
         test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
+        
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test table point spread function
+ *
+ * The Psf computation is tested by integrating numerically the Psf
+ * function. Integration is done in a rather simplistic way, by stepping
+ * radially away from the centre. The integration is done for a set of
+ * energies from 0.1-10 TeV.
+ ***************************************************************************/
+void TestGCTAResponse::test_response_psf_table(void)
+{
+    // Load point spread function
+    GCTAPsfTable psf(cta_psf_table);
+
+    // Integrate PSF
+    GEnergy eng;
+    double  sum_check = 0.1;
+    for (double e = 0.1; e < 10.0; e *= 2.0) {
+        eng.TeV(e);
+        double r_max = psf.delta_max(eng.log10TeV()) * gammalib::rad2deg;
+        double r     = 0.0;
+        double dr    = 0.00001;
+        int    steps = int(r_max / dr);
+        double sum   = 0.0;
+        double rcont = 0.0 ;
+        for (int i = 0; i < steps; ++i) {
+            r   += dr;
+            sum += psf(r * gammalib::deg2rad, eng.log10TeV()) *
+                   gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
+                   gammalib::deg2rad;
+            
+            // since 'sum' already totals to 1.0, its also a 'fraction',
+            // which we can plug back into containment_radius(), to compare
+            // with the origial radius 'r'
+            if (sum > sum_check && sum < 1.0) {
+                rcont      = psf.containment_radius(sum, eng.log10TeV());
+                sum_check += 0.1;
+                std::string msg = "Table PSF containment radius for "+eng.print()+
+                                  " and "+gammalib::str(sum*100.0)+
+                                  "% containment";
+                test_value(rcont, r*gammalib::deg2rad, 0.1, msg);
+            }
+        }
+        test_value(sum, 1.0, 0.01, "PSF integration for "+eng.print());
         
     }
 
@@ -861,8 +962,8 @@ void TestGCTAResponse::test_response_expcube(void)
     }
     test_try("CTA exposure cube map constructor");
     try {
-        GEbounds         ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-        GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
+        GEnergies        energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+        GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, energies);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -873,8 +974,8 @@ void TestGCTAResponse::test_response_expcube(void)
     GCTAObservation obs_cta;
     obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
-    GEbounds         ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-    GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
+    GEnergies        energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, energies);
     cube.set(obs_cta);
     cube.save("test_cta_expcube_one.fits", true);
 
@@ -908,8 +1009,8 @@ void TestGCTAResponse::test_response_psfcube(void)
     }
     test_try("CTA PSF cube map constructor");
     try {
-        GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-        GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+        GEnergies   energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+        GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, energies, 0.1, 20);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -920,8 +1021,8 @@ void TestGCTAResponse::test_response_psfcube(void)
     GCTAObservation obs_cta;
     obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
-    GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-    GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+    GEnergies   energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, energies, 0.1, 20);
     cube.set(obs_cta);
     cube.save("test_cta_psfcube_one.fits", true);
 
@@ -939,7 +1040,7 @@ void TestGCTAResponse::test_response_psfcube(void)
 }
 
 /***********************************************************************//**
- * @brief Test PSF cube handling
+ * @brief Test background cube handling
  ***************************************************************************/
 void TestGCTAResponse::test_response_bkgcube(void)
 {
@@ -954,8 +1055,56 @@ void TestGCTAResponse::test_response_bkgcube(void)
     }
 
     GCTACubeBackground cube;
-    cube.load(cta_bkgcube);
+    cube.load(cta_stacked_bkgcube);
     cube.save("test_cta_bkgcube.fits", true);
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Test energy dispersion cube handling
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edispcube(void)
+{
+    // Test PSF cube constructors
+    test_try("CTA Edisp cube void constructor");
+    try {
+    	GCTACubeEdisp cube;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("CTA Edisp cube map constructor");
+    try {
+        GEnergies     energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+        GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10,
+                           energies, 2.0, 20);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test set method
+    GCTAObservation obs_cta;
+    obs_cta.load(cta_events);
+    obs_cta.response(cta_irf, GCaldb(cta_caldb));
+    GEnergies     energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10,
+                       energies, 2.0, 20);
+    cube.set(obs_cta);
+    cube.save("test_cta_edispcube_one.fits", true);
+
+    // Test fill method
+    GObservations obs;
+    obs_cta.id("000001");
+    obs.append(obs_cta);
+    obs_cta.id("000002");
+    obs.append(obs_cta);
+    cube.fill(obs);
+    cube.save("test_cta_edispcube_two.fits", true);
 
     // Return
     return;
@@ -1292,13 +1441,317 @@ void TestGCTAModel::test_model_aeff_bgd(void)
 
 
 /***********************************************************************//**
+ * @brief Checks handling of CTA event bin
+ ***************************************************************************/
+void TestGCTAObservation::test_event_bin(void)
+{
+    // Test event bin void constructor
+    GCTAEventBin bin;
+    test_value(bin.classname(), "GCTAEventBin",
+               "Check classname() for empty bin");
+    test_value(bin.size(), 0.0, 1.0e-10, "Check size() for empty bin");
+    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for empty bin");
+    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for empty bin");
+    test_value(bin.energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for empty bin");
+    test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for empty bin");
+    test_value(bin.counts(), 0.0, 1.0e-10, "Check counts() for empty bin");
+    test_value(bin.error(),  0.0, 1.0e-10, "Check error() for empty bin");
+    test_value(bin.ipix(), -1, "Check ipix() for empty bin");
+    test_value(bin.ieng(), -1, "Check ieng() for empty bin");
+    test_value(bin.solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for empty bin");
+    test_value(bin.ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for empty bin");
+    test_value(bin.ontime(), 0.0, 1.0e-10, "Check ontime() for empty bin");
+    test_value(bin.weight(), 0.0, 1.0e-10, "Check weight() for empty bin");
+    test_value(bin.print(), "0", "Check print() for empty bin");
+
+    // Set bin attributes
+    GSkyDir  skydir;
+    skydir.radec_deg(37.2, -67.3);
+    GCTAInstDir instdir(skydir);
+    instdir.detx(-0.78);
+    instdir.dety(+0.35);
+    bin.dir(instdir);
+    bin.energy(GEnergy(2.0, "TeV"));
+    bin.time(GTime(87.3));
+    bin.counts(4.0);
+    bin.solidangle(3.14);
+    bin.ewidth(GEnergy(7.0, "GeV"));
+    bin.ontime(101.0);
+    bin.weight(0.71);
+
+    // Set size reference
+    double ref_size = 3.14 * 7000.0 * 101.0 * 0.71;
+
+    // Test bin attributes
+    test_value(bin.size(), ref_size, 1.0e-10, "Check size() for filled bin");
+    test_value(bin.dir().dir().ra_deg(), 37.2, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin.dir().dir().dec_deg(), -67.3, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin.dir().detx(), -0.78, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin.dir().dety(), +0.35, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin.energy().TeV(), 2.0, 1.0e-10,
+               "Check energy() for filled bin");
+    test_value(bin.time().secs(), 87.3, 1.0e-10, "Check time() for filled bin");
+    test_value(bin.counts(), 4.0, 1.0e-10, "Check counts() for filled bin");
+    test_value(bin.error(),  2.0, 1.0e-10, "Check error() for filled bin");
+    test_value(bin.ipix(), -1, "Check ipix() for filled bin");
+    test_value(bin.ieng(), -1, "Check ieng() for filled bin");
+    test_value(bin.solidangle(), 3.14, 1.0e-10,
+               "Check solidangle() for filled bin");
+    test_value(bin.ewidth().GeV(), 7.0, 1.0e-10,
+               "Check ewidth() for filled bin");
+    test_value(bin.ontime(), 101.0, 1.0e-10, "Check ontime() for filled bin");
+    test_value(bin.weight(), 0.71, 1.0e-10, "Check weight() for filled bin");
+    test_value(bin.print(), "4", "Check print() for filled bin");
+
+    // Test copy constructor
+    GCTAEventBin bin2(bin);
+    test_value(bin2.size(), ref_size, 1.0e-10, "Check size() for copied bin");
+    test_value(bin2.dir().dir().ra_deg(), 37.2, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin2.dir().dir().dec_deg(), -67.3, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin2.dir().detx(), -0.78, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin2.dir().dety(), +0.35, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin2.energy().TeV(), 2.0, 1.0e-10,
+               "Check energy() for copied bin");
+    test_value(bin2.time().secs(), 87.3, 1.0e-10, "Check time() for copied bin");
+    test_value(bin2.counts(), 4.0, 1.0e-10, "Check counts() for copied bin");
+    test_value(bin2.error(),  2.0, 1.0e-10, "Check error() for copied bin");
+    test_value(bin2.ipix(), -1, "Check ipix() for copied bin");
+    test_value(bin2.ieng(), -1, "Check ieng() for copied bin");
+    test_value(bin2.solidangle(), 3.14, 1.0e-10,
+               "Check solidangle() for copied bin");
+    test_value(bin2.ewidth().GeV(), 7.0, 1.0e-10,
+               "Check ewidth() for copied bin");
+    test_value(bin2.ontime(), 101.0, 1.0e-10, "Check ontime() for copied bin");
+    test_value(bin2.weight(), 0.71, 1.0e-10, "Check weight() for copied bin");
+    test_value(bin2.print(), "4", "Check print() for copied bin");
+
+    // Assignment operator
+    GCTAEventBin bin3 = bin;
+    test_value(bin3.size(), ref_size, 1.0e-10, "Check size() for assigned bin");
+    test_value(bin3.dir().dir().ra_deg(), 37.2, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin3.dir().dir().dec_deg(), -67.3, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin3.dir().detx(), -0.78, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin3.dir().dety(), +0.35, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin3.energy().TeV(), 2.0, 1.0e-10,
+               "Check energy() for assigned bin");
+    test_value(bin3.time().secs(), 87.3, 1.0e-10,
+               "Check time() for assigned bin");
+    test_value(bin3.counts(), 4.0, 1.0e-10, "Check counts() for assigned bin");
+    test_value(bin3.error(),  2.0, 1.0e-10, "Check error() for assigned bin");
+    test_value(bin3.ipix(), -1, "Check ipix() for assigned bin");
+    test_value(bin3.ieng(), -1, "Check ieng() for assigned bin");
+    test_value(bin3.solidangle(), 3.14, 1.0e-10,
+               "Check solidangle() for assigned bin");
+    test_value(bin3.ewidth().GeV(), 7.0, 1.0e-10,
+               "Check ewidth() for assigned bin");
+    test_value(bin3.ontime(), 101.0, 1.0e-10, "Check ontime() for assigned bin");
+    test_value(bin3.weight(), 0.71, 1.0e-10, "Check weight() for assigned bin");
+    test_value(bin3.print(), "4", "Check print() for assigned bin");
+
+    // clone method
+    GCTAEventBin* bin4 = bin.clone();
+    test_value(bin4->size(), ref_size, 1.0e-10, "Check size() for cloned bin");
+    test_value(bin4->dir().dir().ra_deg(), 37.2, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin4->dir().dir().dec_deg(), -67.3, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin4->dir().detx(), -0.78, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin4->dir().dety(), +0.35, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin4->energy().TeV(), 2.0, 1.0e-10,
+               "Check energy() for cloned bin");
+    test_value(bin4->time().secs(), 87.3, 1.0e-10,
+               "Check time() for cloned bin");
+    test_value(bin4->counts(), 4.0, 1.0e-10, "Check counts() for cloned bin");
+    test_value(bin4->error(),  2.0, 1.0e-10, "Check error() for cloned bin");
+    test_value(bin4->ipix(), -1, "Check ipix() for cloned bin");
+    test_value(bin4->ieng(), -1, "Check ieng() for cloned bin");
+    test_value(bin4->solidangle(), 3.14, 1.0e-10,
+               "Check solidangle() for cloned bin");
+    test_value(bin4->ewidth().GeV(), 7.0, 1.0e-10,
+               "Check ewidth() for cloned bin");
+    test_value(bin4->ontime(), 101.0, 1.0e-10, "Check ontime() for cloned bin");
+    test_value(bin4->weight(), 0.71, 1.0e-10, "Check weight() for cloned bin");
+    test_value(bin4->print(), "4", "Check print() for cloned bin");
+
+    // clear method
+    bin.clear();
+    test_value(bin.classname(), "GCTAEventBin",
+               "Check classname() for cleared bin");
+    test_value(bin.size(), 0.0, 1.0e-10, "Check size() for cleared bin");
+    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for cleared bin");
+    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for cleared bin");
+    test_value(bin.energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for cleared bin");
+    test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for cleared bin");
+    test_value(bin.counts(), 0.0, 1.0e-10, "Check counts() for cleared bin");
+    test_value(bin.error(),  0.0, 1.0e-10, "Check error() for cleared bin");
+    test_value(bin.ipix(), -1, "Check ipix() for cleared bin");
+    test_value(bin.ieng(), -1, "Check ieng() for cleared bin");
+    test_value(bin.solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for cleared bin");
+    test_value(bin.ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for cleared bin");
+    test_value(bin.ontime(), 0.0, 1.0e-10, "Check ontime() for cleared bin");
+    test_value(bin.weight(), 0.0, 1.0e-10, "Check weight() for cleared bin");
+    test_value(bin.print(), "0", "Check print() for cleared bin");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test event cube
+ ***************************************************************************/
+void TestGCTAObservation::test_event_cube(void)
+{
+    // Construct empty event cube
+    GCTAEventCube cube1;
+
+    // Test empty event cube
+    test_value(cube1.size(), 0, "Check that empty event cube has size()=0");
+    test_value(cube1.dim(), 0, "Check that empty event cube has dim()=0");
+    test_value(cube1.number(), 0, "Check that empty event cube has number()=0");
+    test_value(cube1.nx(), 0, "Check that empty event cube has nx()=0");
+    test_value(cube1.ny(), 0, "Check that empty event cube has ny()=0");
+    test_value(cube1.npix(), 0, "Check that empty event cube has npix()=0");
+    test_value(cube1.ebins(), 0, "Check that empty event cube has ebins()=0");
+
+    // Construct 3x3x5 event cube
+    GSkyMap       map("CAR", "CEL", 0.0, 0.0, 0.5, 0.5, 3, 4, 5);
+    GEbounds      ebounds(5, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
+    GGti          gti(GTime(0.0, "sec"), GTime(1800.0, "sec"));
+    GCTAEventCube cube2(map, ebounds, gti);
+
+    // Test 3x3x5 event cube
+    test_value(cube2.size(), 60, "Check that event cube has size()=60");
+    test_value(cube2.dim(), 3, "Check that event cube has dim()=3");
+    test_value(cube2.number(), 0, "Check that event cube has number()=0");
+    test_value(cube2.nx(), 3, "Check that event cube has nx()=3");
+    test_value(cube2.ny(), 4, "Check that event cube has ny()=4");
+    test_value(cube2.npix(), 12, "Check that event cube has npix()=12");
+    test_value(cube2.ebins(), 5, "Check that event cube has ebins()=5");
+
+    // Fill counts cube and test result
+    double ref(0.0);
+    double value(0.0);
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                value += 0.376;
+                ref   += value;
+                map(GSkyPixel(ix,iy),iebin) = value;
+            }
+        }
+    }
+    cube2.counts(map);
+    test_value(cube2.number(), int(ref+0.5),
+               "Check event cube number() for filled cube");
+
+    // Checks weights
+    double total(0.0);
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                total += cube2.weights()(GSkyPixel(ix,iy),iebin);
+            }
+        }
+    }
+    test_value(total, 60.0, 1.0e-6,
+               "Check event cube weights for cube with unity weights");
+
+    // Save event cube
+    cube2.save("test_cta_event_cube.fits", true);
+
+    // Construct counts cube from FITS file
+    GCTAEventCube cube3("test_cta_event_cube.fits");
+    
+    // Test loaded event cube
+    test_value(cube3.size(), 60, "Check that loaded event cube has size()=60");
+    test_value(cube3.dim(), 3, "Check that loaded event cube has dim()=3");
+    test_value(cube3.nx(), 3, "Check that loaded event cube has nx()=3");
+    test_value(cube3.ny(), 4, "Check that loaded event cube has ny()=4");
+    test_value(cube3.npix(), 12, "Check that loaded event cube has npix()=12");
+    test_value(cube3.ebins(), 5, "Check that loaded event cube has ebins()=5");
+    test_value(cube3.number(), int(ref+0.5),
+               "Check event cube number() for loaded cube");
+
+    // Checks weights for loaded event cube
+    total = 0.0;
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                total += cube3.weights()(GSkyPixel(ix,iy),iebin);
+            }
+        }
+    }
+    test_value(total, 60.0, 1.0e-6,
+               "Check event cube weights for loaded cube with unity weights");
+
+    // Set weights
+    cube3.weights(map);
+
+    // Checks weights
+    total = 0.0;
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                total += cube3.weights()(GSkyPixel(ix,iy),iebin);
+            }
+        }
+    }
+    test_value(total, ref, 1.0e-6,
+               "Check event cube weights after setting them");
+
+    // Save event cube
+    cube3.save("test_cta_event_cube.fits", true);
+
+    // Construct counts cube from FITS file
+    GCTAEventCube cube4("test_cta_event_cube.fits");
+
+    // Checks weights
+    total = 0.0;
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                total += cube3.weights()(GSkyPixel(ix,iy),iebin);
+            }
+        }
+    }
+    test_value(total, ref, 1.0e-6,
+               "Check event cube weights after loading them again");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test unbinned observation handling
  ***************************************************************************/
 void TestGCTAObservation::test_unbinned_obs(void)
 {
-    // Set filenames
-    const std::string file1 = "test_cta_obs_unbinned.xml";
-
     // Declare observations
     GObservations   obs;
     GCTAObservation run;
@@ -1308,6 +1761,47 @@ void TestGCTAObservation::test_unbinned_obs(void)
     try {
         run.load(cta_events);
         run.response(cta_irf, GCaldb(cta_caldb));
+        test_value(run.roi().centre().dir().ra_deg(), 83.63);
+        test_value(run.roi().centre().dir().dec_deg(), 22.01);
+        test_value(run.roi().radius(), 5.0);
+        test_value(run.ebounds().emin().TeV(), 0.1);
+        test_value(run.ebounds().emax().TeV(), 100.0);
+        test_value(run.gti().tstart().convert(run.gti().reference()), 0.0);
+        test_value(run.gti().tstop().convert(run.gti().reference()), 1800.0);
+        test_value(run.ontime(), 1800.0);
+        test_value(run.livetime(), 1710.0);
+        test_value(run.deadc(), 0.95);
+        test_value(run.ra_obj(), 0.0);
+        test_value(run.dec_obj(), 0.0);
+        test_value(run.obs_id(), 0);
+        test_value(run.pointing().dir().ra_deg(), 83.63);
+        test_value(run.pointing().dir().dec_deg(), 22.01);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Load unbinned CTA observation with non-default extension names
+    test_try("Load unbinned CTA observation with non-default extension names");
+    try {
+        run.load(cta_events_gti);
+        run.response(cta_irf, GCaldb(cta_caldb));
+        test_value(run.roi().centre().dir().ra_deg(), 83.65);
+        test_value(run.roi().centre().dir().dec_deg(), 23.01);
+        test_value(run.roi().radius(), 4.0);
+        test_value(run.ebounds().emin().TeV(), 0.2);
+        test_value(run.ebounds().emax().TeV(), 120.0);
+        test_value(run.gti().tstart().convert(run.gti().reference()), 1.0);
+        test_value(run.gti().tstop().convert(run.gti().reference()), 2000.0);
+        test_value(run.ontime(), 1800.0);
+        test_value(run.livetime(), 1710.0);
+        test_value(run.deadc(), 0.95);
+        test_value(run.ra_obj(), 0.0);
+        test_value(run.dec_obj(), 0.0);
+        test_value(run.obs_id(), 0);
+        test_value(run.pointing().dir().ra_deg(), 83.63);
+        test_value(run.pointing().dir().dec_deg(), 22.01);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1339,16 +1833,70 @@ void TestGCTAObservation::test_unbinned_obs(void)
     test_try("Test XML loading and saving");
     try {
         obs = GObservations(cta_unbin_xml);
-        obs.save(file1);
+        obs.save("test_cta_obs_unbinned.xml");
+        GCTAObservation* run = dynamic_cast<GCTAObservation*>(obs[0]);
+        test_value(run->roi().centre().dir().ra_deg(), 83.63);
+        test_value(run->roi().centre().dir().dec_deg(), 22.01);
+        test_value(run->roi().radius(), 5.0);
+        test_value(run->ebounds().emin().TeV(), 0.1);
+        test_value(run->ebounds().emax().TeV(), 100.0);
+        test_value(run->gti().tstart().convert(run->gti().reference()), 0.0);
+        test_value(run->gti().tstop().convert(run->gti().reference()), 1800.0);
+        test_value(run->ontime(), 1800.0);
+        test_value(run->livetime(), 1710.0);
+        test_value(run->deadc(), 0.95);
+        test_value(run->ra_obj(), 0.0);
+        test_value(run->dec_obj(), 0.0);
+        test_value(run->obs_id(), 0);
+        test_value(run->pointing().dir().ra_deg(), 83.63);
+        test_value(run->pointing().dir().dec_deg(), 22.01);
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    // Exit test
+    // Remove test files
+    std::remove("test_cta_events1.fits");
+    std::remove("test_cta_events2.fits");
+
+    // Test loading of the event file and saving into a different extension
+    run.load(cta_events);
+    run.save("test_cta_events1.fits[EVENTS2;GTI2]", true);
+    GFits fits("test_cta_events1.fits");
+    test_value(fits.size(), 3, "FITS file should contain 3 HDUs");
+    test_assert(fits.contains("EVENTS2"), "FITS should contain \"EVENTS2\" HDU");
+    test_assert(fits.contains("GTI2"), "FITS should contain \"GTI2\" HDU");
+    fits.close();
+    run.save("test_cta_events1.fits[EVENTS3;GTI3]", true);
+    fits.open("test_cta_events1.fits");
+    test_value(fits.size(), 5, "FITS file should contain 5 HDUs");
+    test_assert(fits.contains("EVENTS2"), "FITS should contain \"EVENTS2\" HDU");
+    test_assert(fits.contains("GTI2"), "FITS should contain \"GTI2\" HDU");
+    test_assert(fits.contains("EVENTS3"), "FITS should contain \"EVENTS3\" HDU");
+    test_assert(fits.contains("GTI3"), "FITS should contain \"GTI3\" HDU");
+    fits.close();
+
+    // Test writing of multiple event files into FITS file
+    run.load(cta_events);
+    GFits fits2;
+    run.write(fits2, "EVENTS1", "GTI1");
+    run.write(fits2, "EVENTS2", "GTI2");
+    run.write(fits2, "EVENTS3", "GTI3");
+    fits2.saveto("test_cta_events2.fits", true);
+    fits2.close();
+    fits.open("test_cta_events2.fits");
+    test_value(fits.size(), 7, "FITS file should contain 7 HDUs");
+    test_assert(fits.contains("EVENTS1"), "FITS should contain \"EVENTS1\" HDU");
+    test_assert(fits.contains("GTI1"), "FITS should contain \"GTI1\" HDU");
+    test_assert(fits.contains("EVENTS2"), "FITS should contain \"EVENTS2\" HDU");
+    test_assert(fits.contains("GTI2"), "FITS should contain \"GTI2\" HDU");
+    test_assert(fits.contains("EVENTS3"), "FITS should contain \"EVENTS3\" HDU");
+    test_assert(fits.contains("GTI3"), "FITS should contain \"GTI3\" HDU");
+    fits.close();
+
+    // Return
     return;
- 
 }
 
 
@@ -1386,49 +1934,82 @@ void TestGCTAObservation::test_binned_obs(void)
         test_try_failure(e);
     }
 
-    // Exit test
+    // Return
     return;
- 
 }
 
 
 /***********************************************************************//**
- * @brief Test cube-style observation handling
+ * @brief Test stacked observation handling
  ***************************************************************************/
-void TestGCTAObservation::test_cube_obs(void)
+void TestGCTAObservation::test_stacked_obs(void)
 {
-    // Set filenames
-    const std::string filename = "test_cta_obs_cube.xml";
+    // Construct stacked observation without energy dispersion
+    GCTAObservation cta1(cta_stacked_cntcube,
+                         cta_stacked_expcube,
+                         cta_stacked_psfcube,
+                         cta_stacked_bkgcube);
 
-    // Declare observations
-    GObservations   obs;
-    GCTAObservation run;
-
-    // Load cube-style CTA observation
-    test_try("Load cube-style CTA observation");
-    try {
-        run.load(cta_cntmap);
-        //run.response(cta_irf, GCaldb(cta_caldb));
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test for presence of response
+    const GCTAResponseCube* rsp =
+          dynamic_cast<const GCTAResponseCube*>(cta1.response());
+    test_assert((rsp != NULL), "Observation contains cube response");
+    if (rsp != NULL) {
+        rsp->apply_edisp(true);  // Try to use energy dispersion
+        test_assert((!rsp->use_edisp()), "Response has no energy dispersion");
     }
 
-    // Test XML loading and saving
-    test_try("Test XML loading and saving");
-    try {
-        obs = GObservations(cta_cube_xml);
-        obs.save(filename);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Construct stacked observation with energy dispersion
+    GCTAObservation cta2(cta_stacked_cntcube,
+                         cta_stacked_expcube,
+                         cta_stacked_psfcube,
+                         cta_stacked_edispcube,
+                         cta_stacked_bkgcube);
+
+    // Test for presence of response
+    rsp = dynamic_cast<const GCTAResponseCube*>(cta2.response());
+    test_assert((rsp != NULL), "Observation contains cube response");
+    if (rsp != NULL) {
+        rsp->apply_edisp(true);  // Try to use energy dispersion
+        test_assert(rsp->use_edisp(), "Response has energy dispersion");
     }
 
-    // Exit test
+    // Construct stacked observation from XML file without energy dispersion
+    GObservations obs(cta_stacked_xml);
+    test_value(obs.size(), 1, "One observation in container");
+
+    // Test for presence of response
+    rsp = dynamic_cast<const GCTAResponseCube*>(obs[0]->response());
+    test_assert((rsp != NULL), "Observation contains cube response");
+    if (rsp != NULL) {
+        rsp->apply_edisp(true);  // Try to use energy dispersion
+        test_assert((!rsp->use_edisp()), "Response has no energy dispersion");
+    }
+
+    // Save observation container into XML file
+    obs.save("test_cta_obs_cube.xml");
+
+    // Return
     return;
- 
+}
+
+
+/***********************************************************************//**
+ * @brief Test On/Off observation handling
+ *
+ * @todo Unit test to be implemented
+ ***************************************************************************/
+void TestGCTAObservation::test_onoff_obs(void)
+{
+    // Load On/Off observation into container
+    GObservations obs(cta_onoff_xml);
+    //std::cout << *(obs[0]) << std::endl;
+
+    // Save observation container into XML file
+    obs.save("test_cta_onoff_obs.xml");
+
+    // Return
+    return;
 }
 
 
@@ -1437,61 +2018,54 @@ void TestGCTAObservation::test_cube_obs(void)
  ***************************************************************************/
 void TestGCTAOptimize::test_unbinned_optimizer(void)
 {
+    // Set reference result
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            6.03743e-16, 2.01634e-17,
+                            -2.49595, 0.0249533,
+                            300000, 0,
+                            1, 0,
+                            2.94185, 0.0379307,
+                            6.43398e-05, 1.80715e-06,
+                            -1.82866, 0.0155452,
+                            1000000, 0,
+                            1, 0};
+
     // Declare observations
     GObservations   obs;
     GCTAObservation run;
 
-    // Load unbinned CTA observation
-    test_try("Load unbinned CTA observation");
-    try {
-        run.load(cta_events);
-        run.response(cta_irf, GCaldb(cta_caldb));
-        obs.append(run);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Load unbinned CTA observation and set response
+    run.load(cta_events);
+    run.response(cta_irf, GCaldb(cta_caldb));
+    obs.append(run);
 
     // Load models from XML file
     obs.models(cta_model_xml);
 
     // Perform LM optimization
-    double fit_results[] = {83.6331, 0,
-                            22.0145, 0,
-                            5.656246512e-16, 1.91458426e-17,
-                            -2.49595, 0.0249533,
-                            300000, 0,
-                            1, 0,
-                            2.94185, 0.0379307,
-                            6.490832107e-05, 1.749021094e-06,
-                            -1.82866, 0.0155452,
-                            1000000, 0,
-                            1, 0};
-    test_try("Perform LM optimization");
-    try {
-        GOptimizerLM opt;
-        opt.max_iter(100);
-        obs.optimize(opt);
-        obs.errors(opt);
-        test_try_success();
-        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            const GModel* model = obs.models()[i];
-            for (int k = 0; k < model->size(); ++k) {
-                GModelPar par  = (*model)[k];
-                std::string msg = "Verify optimization result for " + par.print();
-                test_value(par.value(), fit_results[j++], 5.0e-5, msg);
-                test_value(par.error(), fit_results[j++], 5.0e-5, msg);
-            }
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+
+    // Verify fit results
+    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+        const GModel* model = obs.models()[i];
+        for (int k = 0; k < model->size(); ++k) {
+            GModelPar par  = (*model)[k];
+            std::string msg = "Verify optimization result for " + par.print();
+            test_value(par.value(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+            test_value(par.error(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
         }
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
 
-    // Exit test
+    // Return
     return;
-
 }
 
 
@@ -1500,111 +2074,158 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
  ***************************************************************************/
 void TestGCTAOptimize::test_binned_optimizer(void)
 {
-    // Declare observations
-    GObservations   obs;
-    GCTAObservation run;
-
-    // Load binned CTA observation
-    test_try("Load binned CTA observation");
-    try {
-        run.load(cta_cntmap);
-        run.response(cta_irf, GCaldb(cta_caldb));
-        obs.append(run);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Load models from XML file
-    obs.models(cta_model_xml);
-
-    // Perform LM optimization
+    // Set reference result
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
-                            5.616410411e-16, 1.904730785e-17,
+                            5.99255e-16, 2.00626e-17,
                             -2.49175, 0.0250639,
                             300000, 0,
                             1, 0,
                             2.95662, 0.0704027,
-                            6.550723074e-05, 1.945714239e-06,
+                            6.42985e-05, 1.96478e-06,
                             -1.82084, 0.0163749,
                             1000000, 0,
                             1, 0};
-    test_try("Perform LM optimization");
-    try {
-        GOptimizerLM opt;
-        opt.max_iter(100);
-        obs.optimize(opt);
-        obs.errors(opt);
-        test_try_success();
-        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            const GModel* model = obs.models()[i];
-            for (int k = 0; k < model->size(); ++k) {
-                GModelPar par  = (*model)[k];
-                std::string msg = "Verify optimization result for " + par.print();
-                test_value(par.value(), fit_results[j++], 5.0e-5, msg);
-                test_value(par.error(), fit_results[j++], 5.0e-5, msg);
-            }
-        }
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
 
-    // Exit test
-    return;
+    // Declare observations
+    GObservations   obs;
+    GCTAObservation run;
 
-}
-
-
-/***********************************************************************//**
- * @brief Test cube optimizer
- ***************************************************************************/
-void TestGCTAOptimize::test_cube_optimizer(void)
-{
-    // Load cube-style CTA observation
-    GObservations obs(cta_cube_xml);
+    // Load binned CTA observation and set response
+    run.load(cta_cntmap);
+    run.response(cta_irf, GCaldb(cta_caldb));
+    obs.append(run);
 
     // Load models from XML file
     obs.models(cta_model_xml);
 
     // Perform LM optimization
-    double fit_results[] = {83.6331, 0,
-                            22.0145, 0,
-                            5.72212e-16, 2.01231e-17,
-                            -2.49178, 0.0250624,
-                            300000, 0,
-                            1, 0,
-                            2.95657, 0.0704068,
-                            6.68923e-05, 1.96972e-06,
-                            -1.82086, 0.0163749,
-                            1000000, 0,
-                            1, 0};
-    test_try("Perform LM optimization");
-    try {
-        GOptimizerLM opt;
-        opt.max_iter(100);
-        obs.optimize(opt);
-        obs.errors(opt);
-        test_try_success();
-        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            const GModel* model = obs.models()[i];
-            for (int k = 0; k < model->size(); ++k) {
-                GModelPar par  = (*model)[k];
-                std::string msg = "Verify optimization result for " + par.print();
-                test_value(par.value(), fit_results[j++], 1.0e-4, msg);
-                test_value(par.error(), fit_results[j++], 1.0e-4, msg);
-            }
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+
+    // Verify fit results
+    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+        const GModel* model = obs.models()[i];
+        for (int k = 0; k < model->size(); ++k) {
+            GModelPar par  = (*model)[k];
+            std::string msg = "Verify optimization result for " + par.print();
+            test_value(par.value(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+            test_value(par.error(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
         }
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test stacked optimizer
+ *
+ * The stacked response cubes have been computed using the Prod2::South_0.5h
+ * response.
+ ***************************************************************************/
+void TestGCTAOptimize::test_stacked_optimizer(void)
+{
+    // Set reference result
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.98351e-16, 1.09268e-17,
+                            -2.49903, 0.0145957,
+                            300000, 0,
+                            1, 0,
+                            1.07386, 0.0218562,
+                            0.00440413, 0.0145699,
+                            1.0e6, 0,
+                            1, 0};
+    
+    // Load stacked CTA observation
+    GObservations obs(cta_stacked_xml);
+
+    // Load models from XML file
+    obs.models(cta_stacked_model);
+
+    // Perform LM optimization
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+
+    // Verify fit results
+    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+        const GModel* model = obs.models()[i];
+        for (int k = 0; k < model->size(); ++k) {
+            GModelPar par  = (*model)[k];
+            std::string msg = "Verify optimization result for " + par.print();
+            test_value(par.value(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+            test_value(par.error(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+        }
     }
 
-    // Exit test
+    // Return
     return;
+}
 
+
+/***********************************************************************//**
+ * @brief Test On/Off optimizer
+ ***************************************************************************/
+void TestGCTAOptimize::test_onoff_optimizer(void)
+{
+    // Set reference result
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.95777e-16, 2.02034e-17,
+                            -2.50932, 0.0304839,
+                            300000, 0,
+                            1, 0,
+                            1.09509, 0.140468,
+                            0.54909, 0.0872644,
+                            1.0e6, 0,
+                            1, 0};
+    
+    // Load On/Off CTA observation
+    GObservations obs(cta_onoff_xml);
+
+    // Load models from XML file
+    obs.models(cta_onoff_model);
+
+    // Perform LM optimization
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+    //std::cout << opt << std::endl;
+    //std::cout << obs << std::endl;
+    //std::cout << obs.models() << std::endl;
+
+    // Verify fit results
+    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+        const GModel* model = obs.models()[i];
+        for (int k = 0; k < model->size(); ++k) {
+            GModelPar par  = (*model)[k];
+            std::string msg = "Verify optimization result for " + par.print();
+            test_value(par.value(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+            test_value(par.error(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+        }
+    }
+
+    // Return
+    return;
 }
 
 
@@ -1618,10 +2239,9 @@ int main(void)
 
     // Check if data directory exists
     bool has_data = (access(datadir.c_str(), R_OK) == 0);
-    if (has_data) {
-        std::string caldb = "CALDB="+cta_caldb;
-        putenv((char*)caldb.c_str());
-    }
+
+    // Set CALDB environment variable
+    setenv("CALDB", cta_caldb.c_str(), 1);
 
     // Initially assume that we pass all tests
     bool success = true;

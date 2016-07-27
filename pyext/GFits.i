@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GFits.i - FITS file class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,41 +53,41 @@ class GFits : public GContainer {
 public:
     // Constructors and destructors
     GFits(void);
-    explicit GFits(const std::string& filename, const bool& create = false);
+    GFits(const GFilename& filename, const bool& create = false);
     GFits(const GFits& fits);
     virtual ~GFits(void);
 
     // Methods
-    void               clear(void);
-    GFits*             clone(void) const;
-    std::string        classname(void) const;
-    GFitsHDU*          at(const int& extno);
-    GFitsHDU*          at(const std::string& extname);
-    GFitsImage*        image(const int& extno);
-    GFitsImage*        image(const std::string& extname);
-    GFitsTable*        table(const int& extno);
-    GFitsTable*        table(const std::string& extname);
-    int                size(void) const;
-    bool               is_empty(void) const;
-    GFitsHDU*          set(const int& extno, const GFitsHDU& hdu);
-    GFitsHDU*          set(const std::string& extname, const GFitsHDU& hdu);
-    GFitsHDU*          append(const GFitsHDU& hdu);
-    GFitsHDU*          insert(const int& extno, const GFitsHDU& hdu);
-    GFitsHDU*          insert(const std::string& extname, const GFitsHDU& hdu);
-    void               remove(const int& extno);
-    void               remove(const std::string& extname);
-    void               reserve(const int& num);
-    void               extend(const GFits& fits);
-    bool               contains(const int& extno) const;
-    bool               contains(const std::string& extname) const;
-    const std::string& filename(void) const;
-    int                extno(const std::string& extname) const;
-    void               open(const std::string& filename,
-                            const bool&        create = false);
-    void               save(const bool& clobber = false);
-    void               saveto(const std::string& filename,
-                              const bool&        clobber = false);
-    void               close(void);
+    void             clear(void);
+    GFits*           clone(void) const;
+    std::string      classname(void) const;
+    GFitsHDU*        at(const int& extno);
+    GFitsHDU*        at(const std::string& extname);
+    GFitsImage*      image(const int& extno);
+    GFitsImage*      image(const std::string& extname);
+    GFitsTable*      table(const int& extno);
+    GFitsTable*      table(const std::string& extname);
+    int              size(void) const;
+    bool             is_empty(void) const;
+    GFitsHDU*        set(const int& extno, const GFitsHDU& hdu);
+    GFitsHDU*        set(const std::string& extname, const GFitsHDU& hdu);
+    GFitsHDU*        append(const GFitsHDU& hdu);
+    GFitsHDU*        insert(const int& extno, const GFitsHDU& hdu);
+    GFitsHDU*        insert(const std::string& extname, const GFitsHDU& hdu);
+    void             remove(const int& extno);
+    void             remove(const std::string& extname);
+    void             reserve(const int& num);
+    void             extend(const GFits& fits);
+    bool             contains(const int& extno) const;
+    bool             contains(const std::string& extname) const;
+    const GFilename& filename(void) const;
+    int              extno(const std::string& extname) const;
+    void             open(const GFilename& filename,
+                          const bool&      create = false);
+    void             save(const bool& clobber = false);
+    void             saveto(const GFilename& filename,
+                            const bool&      clobber = false);
+    void             close(void);
 };
 
 

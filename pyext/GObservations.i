@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.i - Observations container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GObservations(void);
     GObservations(const GObservations& obs);
-    explicit GObservations(const std::string& filename);
+    explicit GObservations(const GFilename& filename);
     virtual ~GObservations(void);
 
     // Methods
@@ -56,18 +56,19 @@ public:
     void           extend(const GObservations& obs);
     bool           contains(const std::string& instrument,
                             const std::string& id) const;
-    void           load(const std::string& filename);
-    void           save(const std::string& filename) const;
+    void           load(const GFilename& filename);
+    void           save(const GFilename& filename) const;
     void           read(const GXml& xml);
     void           write(GXml& xml) const;
     void           models(const GModels& models);
-    void           models(const std::string& filename);
+    void           models(const GFilename& filename);
     const GModels& models(void);
     void           optimize(GOptimizer& opt);
     void           errors(GOptimizer& opt);
     void           errors_hessian(void);
     void           eval(void);
     double         logL(void) const;
+    int            nobserved(void) const;
     double         npred(void) const;
 
     // Optimizer function access method

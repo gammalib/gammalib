@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCsv.cpp - Comma-separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,12 +31,14 @@
 #include <cstdio>            // std::fopen, std::fgets, std::fclose, etc...
 #include "GCsv.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                               "GCsv::operator()(int&, int&)"
-#define G_LOAD                       "GCsv::load(std::string&, std::string&)"
-#define G_SAVE                "GCsv::save(std::string&, std::string&, bool&)"
+#define G_APPEND                    "GCsv::append(std::vector<std::string>&)"
+#define G_LOAD                         "GCsv::load(GFilename&, std::string&)"
+#define G_SAVE                  "GCsv::save(GFilename&, std::string&, bool&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -96,7 +98,7 @@ GCsv::GCsv(const int& nrows, const int& ncols)
  * @param[in] filename Filename.
  * @param[in] sep Column separator (default is whitespace).
  ***************************************************************************/
-GCsv::GCsv(const std::string& filename, const std::string& sep)
+GCsv::GCsv(const GFilename& filename, const std::string& sep)
 { 
     // Initialise private
     init_members();
@@ -249,6 +251,48 @@ GCsv* GCsv::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Append list of strings
+ *
+ * @param[in] list List of strings.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid number of elements in list.
+ *
+ * Appends a list of strings to the CSV table. If the table is empty, the
+ * number of elements in the list will determine the number of columns of
+ * the table. If a table exists already, the method will throw an exception
+ * if the number of elements in the list does not correspond to the number
+ * of table columns.
+ ***************************************************************************/
+void GCsv::append(const std::vector<std::string>& list)
+{
+    // If we have already rows then check columns size ...
+    if (m_rows > 0) {
+        if (m_cols != list.size()) {
+            std::string msg = "Invalid attempt to append "+
+                              gammalib::str(list.size())+" elements to a CSV "
+                              "table with "+gammalib::str(m_cols)+" columns.";
+            throw GException::invalid_argument(G_APPEND, msg);
+        }
+    }
+
+    // ... otherwise store the number of columns
+    else {
+        m_cols = list.size();
+    }
+
+    // Append
+    m_data.push_back(list);
+
+    // Increment number of rows
+    m_rows++;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Get string value
  *
  * @param[in] row Table row.
@@ -370,7 +414,7 @@ void GCsv::integer(const int& row, const int& col, const int& value)
  * Load CSV table from ASCII file. Any environment variable present in the
  * filename will be expanded.
  **************************************************************************/
-void GCsv::load(const std::string& filename, const std::string& sep)
+void GCsv::load(const GFilename& filename, const std::string& sep)
 {
     // Clear instance
     clear();
@@ -380,7 +424,7 @@ void GCsv::load(const std::string& filename, const std::string& sep)
     char  line[n];
 
     // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
+    std::string fname = gammalib::expand_env(filename.url());
 
     // Open CSV table (read-only)
     FILE* fptr = std::fopen(fname.c_str(), "r");
@@ -453,26 +497,23 @@ void GCsv::load(const std::string& filename, const std::string& sep)
  * @exception GException::file_error
  *            Unable to create file.
  *
- * Save CSV table into ASCII file. Any environment variable present in the
- * filename will be expanded.
+ * Save CSV table into ASCII file.
  **************************************************************************/
-void GCsv::save(const std::string& filename, const std::string& sep,
-                const bool& clobber) const
+void GCsv::save(const GFilename&   filename,
+                const std::string& sep,
+                const bool&        clobber) const
 {
     // Throw exception if file exists but clobber flag is false
-    if (!clobber && gammalib::file_exists(filename)) {
-        std::string msg = "File \""+filename+"\" exists already but the "
-                          "clobber flag is set to \"false\". Set the "
+    if (!clobber && filename.exists()) {
+        std::string msg = "File \""+filename+"\" exists already but "
+                          "the clobber flag is set to \"false\". Set the "
                           "clobber flag to true to overwrite the existing "
                           "file or specify another file name.";
         throw GException::invalid_value(G_SAVE, msg);
     }
 
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
     // Open CSV table (write-only)
-    FILE* fptr = std::fopen(fname.c_str(), "w");
+    FILE* fptr = std::fopen(filename.url().c_str(), "w");
     if (fptr == NULL) {
         std::string msg = "Unable to create file \""+filename+"\".";
         throw GException::file_error(G_SAVE, msg);
@@ -484,7 +525,9 @@ void GCsv::save(const std::string& filename, const std::string& sep,
         // Write columns
         for (int col = 0; col < m_cols; ++col) {
             std::fputs(m_data[row][col].c_str(), fptr);
-            std::fputs(sep.c_str(), fptr);
+            if (col < m_cols-1) {
+                std::fputs(sep.c_str(), fptr);
+            }
         }
 
         // Write linebreak
@@ -527,7 +570,7 @@ std::string GCsv::print(const GChatter& chatter) const
             result.append("default");
         }
         else {
-        result.append(gammalib::str(m_precision));
+            result.append(gammalib::str(m_precision));
         }
 
     } // endif: chatter was not silent

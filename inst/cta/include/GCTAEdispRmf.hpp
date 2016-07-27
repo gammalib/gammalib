@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEdispRmf.hpp - CTA RMF energy dispersion class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -27,15 +27,16 @@
 #ifndef GCTAEDISPRMF_HPP
 #define GCTAEDISPRMF_HPP
 
-/* __ Includes ___________________________________________________________ */
+/* __ Includes (members required) ________________________________________ */
 #include <string>
+#include "GFilename.hpp"
 #include "GRmf.hpp"
-#include "GVector.hpp"
-#include "GFunction.hpp"
-#include "GCTAEdisp.hpp"
+#include "GMatrixSparse.hpp"
 #include "GNodeArray.hpp"
+#include "GCTAEdisp.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GFunction;
 class GRan;
 class GEnergy;
 class GEbounds;
@@ -51,7 +52,7 @@ class GCTAEdispRmf : public GCTAEdisp {
 public:
     // Constructors and destructors
     GCTAEdispRmf(void);
-    explicit GCTAEdispRmf(const std::string& filename);
+    explicit GCTAEdispRmf(const GFilename& filename);
     GCTAEdispRmf(const GCTAEdispRmf& edisp);
     virtual ~GCTAEdispRmf(void);
 
@@ -68,8 +69,8 @@ public:
     void          clear(void);
     GCTAEdispRmf* clone(void) const;
     std::string   classname(void) const;
-    void          load(const std::string& filename);
-    std::string   filename(void) const;
+    void          load(const GFilename& filename);
+    GFilename     filename(void) const;
     GEnergy       mc(GRan& ran,
                      const double& logEsrc,
                      const double& theta = 0.0,
@@ -127,7 +128,7 @@ private:
     };
 
     // Members
-    std::string   m_filename;  //!< Name of response file
+    GFilename     m_filename;  //!< Name of response file
     GRmf          m_rmf;       //!< Redistribution matrix file
     GMatrixSparse m_matrix;    //!< Normalised redistribution matrix
 
@@ -178,7 +179,7 @@ std::string GCTAEdispRmf::classname(void) const
  * @return Returns filename from which the Redistribution Matrix was loaded.
  ***************************************************************************/
 inline
-std::string GCTAEdispRmf::filename(void) const
+GFilename GCTAEdispRmf::filename(void) const
 {
     return (m_filename);
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,11 +28,12 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATEventCube.hpp"
-#include "GLATException.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
+#include "GLATEventCube.hpp"
+#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GLATEventCube::naxis(int)"
@@ -77,7 +78,7 @@ GLATEventCube::GLATEventCube(void) : GEventCube()
  *
  * Construct event cube object by loading the events from a FITS file.
  ***************************************************************************/
-GLATEventCube::GLATEventCube(const std::string& filename) : GEventCube()
+GLATEventCube::GLATEventCube(const GFilename& filename) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -133,7 +134,7 @@ GLATEventCube::~GLATEventCube(void)
  * @param[in] cube LAT event cube.
  * @return LAT event cube.
  ***************************************************************************/
-GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
+GLATEventCube& GLATEventCube::operator=(const GLATEventCube& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -306,19 +307,16 @@ int GLATEventCube::naxis(const int& axis) const
  *
  * @param[in] filename FITS file name.
  ***************************************************************************/
-void GLATEventCube::load(const std::string& filename)
+void GLATEventCube::load(const GFilename& filename)
 {
-    // Clear object
-    clear();
-
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
-    // Read counts map
-    read(file);
+    // Read event cube from FITS file
+    read(fits);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -329,17 +327,17 @@ void GLATEventCube::load(const std::string& filename)
  * @brief Save LAT event cube into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing FITS file? (default=false)
+ * @param[in] clobber Overwrite existing FITS file? (default: false)
  *
  * Save the LAT event cube into FITS file.
  ***************************************************************************/
-void GLATEventCube::save(const std::string& filename,
-                         const bool& clobber) const
+void GLATEventCube::save(const GFilename& filename,
+                         const bool&      clobber) const
 {
     // Create empty FITS file
     GFits fits;
 
-    // Write event cube
+    // Write event cube into FITS file
     write(fits);
     
     // Save FITS file
@@ -831,14 +829,37 @@ void GLATEventCube::read_ebds(const GFitsTable& hdu)
  *
  * @param[in] hdu GTI table.
  *
- * Reads the Good Time Intervals from the GTI extension.
+ * Reads the Good Time Intervals from the GTI extension. Since the Fermi
+ * LAT Science Tools do not set corrently the time reference for source
+ * maps, the method automatically adds this missing information so that
+ * the time reference is set correctly. The time reference that is assumed
+ * for Fermi LAT is
  *
- * @todo GTI read method should take const GFitsTable* as argument
+ *      MJDREFI 51910
+ *      MJDREFF 0.00074287037037037
+ * 
  ***************************************************************************/
 void GLATEventCube::read_gti(const GFitsTable& hdu)
 {
+    // Work on a local copy of the HDU to make the kluge work
+    GFitsTable* hdu_local = hdu.clone();
+
+    // Kluge: modify HDU table in case that the MJDREF header keyword is
+    // blank. This happens for Fermi LAT source maps since the Science
+    // Tools do not properly write out the time reference. We hard-code
+    // here the Fermi LAT time reference to circumvent the problem.
+    if (hdu.has_card("MJDREF")) {
+        if (gammalib::strip_whitespace(hdu.string("MJDREF")).empty()) {
+            hdu_local->header().remove("MJDREF");
+            hdu_local->card("MJDREFI", 51910,
+                            "Integer part of MJD reference");
+            hdu_local->card("MJDREFF", 0.00074287037037037,
+                            "Fractional part of MJD reference");
+        }
+    }
+
     // Read Good Time Intervals
-    m_gti.read(hdu);
+    m_gti.read(*hdu_local);
 
     // Set time
     set_times();
@@ -929,14 +950,14 @@ void GLATEventCube::set_energies(void)
 
 
 /***********************************************************************//**
- * @brief Set mean event time and ontime of event cube.
+ * @brief Set mean event time and ontime of event cube
  *
- * @exception GLATException::no_gti
- *            No Good Time Intervals found in event cube.
+ * @exception GException::invalid_value
+ *            No Good Time Intervals found.
  *
- * This method computes the mean event time and the ontime of the event
- * cube. The mean event time is the average between the start and the stop
- * time. The ontime is the sum of all Good Time Intervals.
+ * Computes the mean time of the event cube by taking the mean between start
+ * and stop time. Computes also the ontime by summing up of all good time
+ * intervals.
  *
  * @todo Could add a more sophisticated mean event time computation that
  *       weights by the length of the GTIs, yet so far we do not really use
@@ -946,12 +967,14 @@ void GLATEventCube::set_times(void)
 {
     // Throw an error if GTI is empty
     if (m_gti.size() < 1) {
-        throw GLATException::no_gti(G_SET_TIMES, "Every LAT event cube needs"
-                  " associated GTIs to allow the computation of the ontime.");
+        std::string msg = "No Good Time Intervals have been found in event "
+                          "cube. Every LAT event cube needs a definition "
+                          "of the Good Time Intervals.";
+        throw GException::invalid_value(G_SET_TIMES, msg);
     }
 
     // Compute mean time
-    m_time = 0.5 * (gti().tstart() + gti().tstop());
+    m_time = m_gti.tstart() + 0.5 * (m_gti.tstop() - m_gti.tstart());
 
     // Set ontime
     m_ontime = m_gti.ontime();

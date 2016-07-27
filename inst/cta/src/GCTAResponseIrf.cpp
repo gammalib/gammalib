@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,15 +53,16 @@
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
 #include "GCTASupport.hpp"
+#include "GCTAAeff.hpp"
 #include "GCTAAeff2D.hpp"
 #include "GCTAAeffArf.hpp"
 #include "GCTAAeffPerfTable.hpp"
+#include "GCTAPsf.hpp"
 #include "GCTAPsf2D.hpp"
 #include "GCTAPsfVector.hpp"
 #include "GCTAPsfPerfTable.hpp"
 #include "GCTAPsfKing.hpp"
-#include "GCTAAeff.hpp"
-#include "GCTAPsf.hpp"
+#include "GCTAPsfTable.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAEdisp2D.hpp"
 #include "GCTAEdispRmf.hpp"
@@ -76,10 +77,10 @@
 #define G_MC   "GCTAResponseIrf::mc(double&, GPhoton&, GObservation&, GRan&)"
 #define G_READ                          "GCTAResponseIrf::read(GXmlElement&)"
 #define G_WRITE                        "GCTAResponseIrf::write(GXmlElement&)"
-#define G_LOAD_AEFF                "GCTAResponseIrf::load_aeff(std::string&)"
-#define G_LOAD_PSF                  "GCTAResponseIrf::load_psf(std::string&)"
-#define G_LOAD_EDISP              "GCTAResponseIrf::load_edisp(std::string&)"
-#define G_LOAD_BACKGROUND    "GCTAResponseIrf::load_background(std::string&)"
+#define G_LOAD_AEFF                  "GCTAResponseIrf::load_aeff(GFilename&)"
+#define G_LOAD_PSF                    "GCTAResponseIrf::load_psf(GFilename&)"
+#define G_LOAD_EDISP                "GCTAResponseIrf::load_edisp(GFilename&)"
+#define G_LOAD_BACKGROUND      "GCTAResponseIrf::load_background(GFilename&)"
 #define G_NIRF            "GCTAResponseIrf::nirf(GPhoton&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_IRF_RADIAL         "GCTAResponseIrf::irf_radial(GEvent&, GSource&,"\
@@ -633,7 +634,7 @@ GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
     }
 
     // Continue only if event is detected
-    if (ran.uniform() <= ulimite) {
+    if ((ulimite > 0.0) && (ran.uniform() <= ulimite)) {
 
         // Apply deadtime correction
         double deadc = obs.deadc(photon.time());
@@ -1020,23 +1021,23 @@ void GCTAResponseIrf::load(const std::string& rspname)
 
     // First attempt reading the response using the GCaldb interface
     std::string expr      = "NAME("+rspname+")";
-    std::string aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
-    std::string psfname   = m_caldb.filename("","","RPSF","","",expr);
-    std::string edispname = m_caldb.filename("","","EDISP","","",expr);
-    std::string bgdname   = m_caldb.filename("","","BGD","","",expr);
+    GFilename   aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
+    GFilename   psfname   = m_caldb.filename("","","RPSF","","",expr);
+    GFilename   edispname = m_caldb.filename("","","EDISP","","",expr);
+    GFilename   bgdname   = m_caldb.filename("","","BGD","","",expr);
 
     // If filenames are empty then build filenames from CALDB root path and
     // response name
-    if (aeffname.length() < 1) {
+    if (aeffname.is_empty()) {
         aeffname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
-    if (psfname.length() < 1) {
+    if (psfname.is_empty()) {
         psfname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
-    if (edispname.length() < 1) {
+    if (edispname.is_empty()) {
         edispname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
-    if (bgdname.length() < 1) {
+    if (bgdname.is_empty()) {
         bgdname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
 
@@ -1088,40 +1089,37 @@ void GCTAResponseIrf::load(const std::string& rspname)
  * If the file is not a FITS file, it will be interpreted as a
  * GCTAAeffPerfTable performance table.
  ***************************************************************************/
-void GCTAResponseIrf::load_aeff(const std::string& filename)
+void GCTAResponseIrf::load_aeff(const GFilename& filename)
 {
     // Free any existing effective area instance
     if (m_aeff != NULL) delete m_aeff;
     m_aeff = NULL;
 
-    // Initialise filename
-    GFilename fname(filename);
-
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(fname.filename())) {
+    if (!filename.exists()) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid effective area response file.";
         throw GException::file_error(G_LOAD_AEFF, msg);
     }
 
     // If file is a FITS file ...
-    if (gammalib::is_fits(filename)) {
+    if (filename.is_fits()) {
 
         // Open FITS file
-        GFits file(fname.filename());
+        GFits fits(filename);
 
         // Get the extension name. If an extension name has been specified
         // then use this name, otherwise use either the "EFFECTIVE AREA"
         // or the "SPECRESP" extension.
         std::string extname = "";
-        if (fname.has_extname()) {
-            extname = fname.extname();
+        if (filename.has_extname()) {
+            extname = filename.extname();
         }
         else {
-            if (file.contains("EFFECTIVE AREA")) {
+            if (fits.contains("EFFECTIVE AREA")) {
                 extname = "EFFECTIVE AREA";
             }
-            else if (file.contains("SPECRESP")) {
+            else if (fits.contains("SPECRESP")) {
                 extname = "SPECRESP";
             }
         }
@@ -1130,7 +1128,7 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
         if (!extname.empty()) {
 
             // Get FITS table
-            const GFitsTable& table = *file.table(extname);
+            const GFitsTable& table = *fits.table(extname);
 
             // Read save energy thresholds if available
             if (table.has_card("LO_THRES")) {
@@ -1144,7 +1142,7 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
             if (table.contains("SPECRESP")) {
 
                 // Close file
-                file.close();
+                fits.close();
 
                 // Allocate Aeff from file
                 m_aeff = new GCTAAeffArf(filename);
@@ -1154,7 +1152,7 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
             else {
 
                 // Close file
-                file.close();
+                fits.close();
 
                 // Allocate Aeff from file
                 m_aeff = new GCTAAeff2D(filename);
@@ -1199,51 +1197,64 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
  *
  * If the file is a FITS file, the method will either use the extension name
  * specified with the filename, or if no extension name is given, search for
- * a "POINT SPREAD FUNCTION" or "PSF" extension in the file and open the
- * corresponding FITS table. If columns named "GAMMA" and "SIGMA" are found
- * in the table, a GCTAPsfKing object will be allocated. If columns named
- * "SCALE", "SIGMA_1", "AMPL_2", "SIGMA_2", "AMPL_3" and "SIGMA_3" are found
- * in the table, a GCTAPsf2D object will be allocated. Otherwise, a
- * GCTAPsfVector object will be allocated.
+ * one of the following extension names
+ *
+ *       POINT SPREAD FUNCTION
+ *       PSF
+ *       PSF_2D_TABLE
+ *
+ * in the file and open the corresponding FITS table. If columns named "GAMMA"
+ * and "SIGMA" are found in the table, a GCTAPsfKing object will be allocated.
+ *
+ * If columns named "SCALE", "SIGMA_1", "AMPL_2", "SIGMA_2", "AMPL_3" and
+ * "SIGMA_3" are found in the table, a GCTAPsf2D object will be allocated.
+ *
+ * If columns named "RAD_LO", "RAD_HI", and "RPSF" are found in the table, a
+ * GCTAPsfTable object will be allocated.
+ *
+ * Otherwise, a CTAPsfVector object will be allocated.
  *
  * If the file is not a FITS file, it will be interpreted as a
  * GCTAPsfPerfTable performance table.
  ***************************************************************************/
-void GCTAResponseIrf::load_psf(const std::string& filename)
+void GCTAResponseIrf::load_psf(const GFilename& filename)
 {
     // Free any existing point spread function instance
     if (m_psf != NULL) delete m_psf;
     m_psf = NULL;
 
-    // Initialise filename
-    GFilename fname(filename);
-
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(fname.filename())) {
+    if (!filename.exists()) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid point spread function response file.";
         throw GException::file_error(G_LOAD_PSF, msg);
     }
 
     // If file is a FITS file ...
-    if (gammalib::is_fits(filename)) {
+    if (filename.is_fits()) {
 
         // Open FITS file
-        GFits file(fname.filename());
+        GFits fits(filename);
 
         // Get the extension name. If an extension name has been specified
-        // then use this name, otherwise use either the
-        // "POINT SPREAD FUNCTION" or the "PSF" extension.
+        // then use this name, otherwise use either the following extensions
+        // if they exist:
+        // - "POINT SPREAD FUNCTION"
+        // - "PSF"
+        // - "PSF_2D_TABLE"
         std::string extname = "";
-        if (fname.has_extname()) {
-            extname = fname.extname();
+        if (filename.has_extname()) {
+            extname = filename.extname();
         }
         else {
-            if (file.contains("POINT SPREAD FUNCTION")) {
+            if (fits.contains("POINT SPREAD FUNCTION")) {
                 extname = "POINT SPREAD FUNCTION";
             }
-            else if (file.contains("PSF")) {
+            else if (fits.contains("PSF")) {
                 extname = "PSF";
+            }
+            else if (fits.contains("PSF_2D_TABLE")) {
+                extname = "PSF_2D_TABLE";
             }
         }
 
@@ -1251,13 +1262,13 @@ void GCTAResponseIrf::load_psf(const std::string& filename)
         if (!extname.empty()) {
 
             // Get FITS table
-            const GFitsTable& table = *file.table(extname);
+            const GFitsTable& table = *fits.table(extname);
 
             // Check for King profile specific table columns
             if (table.contains("GAMMA") && table.contains("SIGMA")) {
             
                 // Close FITS file
-                file.close();
+                fits.close();
 
                 // Allocate King profile PSF
                 m_psf = new GCTAPsfKing(filename);
@@ -1271,10 +1282,22 @@ void GCTAResponseIrf::load_psf(const std::string& filename)
                      table.contains("AMPL_3") && table.contains("SIGMA_3")) {
             
                 // Close FITS file
-                file.close();
+                fits.close();
 
                 // Allocate Gaussian profile PSF
                 m_psf = new GCTAPsf2D(filename);
+                
+            }
+
+            // ... otherwise check for PSF table specific table columns
+            else if (table.contains("RAD_LO") && table.contains("RAD_HI") &&
+                     table.contains("RPSF")) {
+            
+                // Close FITS file
+                fits.close();
+
+                // Allocate PSF table
+                m_psf = new GCTAPsfTable(filename);
                 
             }
             
@@ -1282,7 +1305,7 @@ void GCTAResponseIrf::load_psf(const std::string& filename)
             else {
             
                 // Close FITS file
-                file.close();
+                fits.close();
 
                 // Allocate vector PSF
                 m_psf = new GCTAPsfVector(filename);
@@ -1335,40 +1358,37 @@ void GCTAResponseIrf::load_psf(const std::string& filename)
  * If the file is not a FITS file, it will be interpreted as a
  * GCTAEdispPerfTable performance table.
  ***************************************************************************/
-void GCTAResponseIrf::load_edisp(const std::string& filename)
+void GCTAResponseIrf::load_edisp(const GFilename& filename)
 {
     // Free any existing energy dispersion instance
     if (m_edisp != NULL) delete m_edisp;
     m_edisp = NULL;
 
-    // Initialise filename
-    GFilename fname(filename);
-
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(fname.filename())) {
+    if (!filename.exists()) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid energy dispersion response file.";
         throw GException::file_error(G_LOAD_EDISP, msg);
     }
 
     // If file is a FITS file ...
-    if (gammalib::is_fits(filename)) {
+    if (filename.is_fits()) {
 
         // Open FITS file
-        GFits file(fname.filename());
+        GFits fits(filename);
 
         // Get the extension name. If an extension name has been specified
         // then use this name, otherwise use either the "EFFECTIVE AREA"
         // or the "SPECRESP" extension.
         std::string extname = "";
-        if (fname.has_extname()) {
-            extname = fname.extname();
+        if (filename.has_extname()) {
+            extname = filename.extname();
         }
         else {
-            if (file.contains("ENERGY DISPERSION")) {
+            if (fits.contains("ENERGY DISPERSION")) {
                 extname = "ENERGY DISPERSION";
             }
-            else if (file.contains("MATRIX")) {
+            else if (fits.contains("MATRIX")) {
                 extname = "MATRIX";
             }
         }
@@ -1377,13 +1397,13 @@ void GCTAResponseIrf::load_edisp(const std::string& filename)
         if (!extname.empty()) {
 
             // Get FITS table
-            const GFitsTable& table = *file.table(extname);
+            const GFitsTable& table = *fits.table(extname);
 
             // Check for 2D migration matrix
             if (table.contains("MIGRA_LO") && table.contains("MIGRA_HI")) {
             
                 // Close FITS file
-                file.close();
+                fits.close();
 
                 // Allocate 2D migration matrix
                 m_edisp = new GCTAEdisp2D(filename);
@@ -1394,7 +1414,7 @@ void GCTAResponseIrf::load_edisp(const std::string& filename)
             else {
             
                 // Close FITS file
-                file.close();
+                fits.close();
 
                 // Allocate Gaussian profile PSF
                 m_edisp = new GCTAEdispRmf(filename);
@@ -1443,24 +1463,21 @@ void GCTAResponseIrf::load_edisp(const std::string& filename)
  * If the file is not a FITS file it will be interpreted as a
  * GCTABackgroundPerfTable performance table.
  ***************************************************************************/
-void GCTAResponseIrf::load_background(const std::string& filename)
+void GCTAResponseIrf::load_background(const GFilename& filename)
 {
     // Free any existing background model instance
     if (m_background != NULL) delete m_background;
     m_background = NULL;
 
-    // Initialise filename
-    GFilename fname(filename);
-
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(fname.filename())) {
+    if (!filename.exists()) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid background response file.";
         throw GException::file_error(G_LOAD_BACKGROUND, msg);
     }
 
     // If file is a FITS file than load background as 3D background
-    if (gammalib::is_fits(filename)) {
+    if (filename.is_fits()) {
         m_background = new GCTABackground3D(filename);
     }
 
@@ -2168,15 +2185,15 @@ void GCTAResponseIrf::free_members(void)
  * file with the added suffix .dat exists. Returns the file name with the
  * appropriate extension.
  ***************************************************************************/
-std::string GCTAResponseIrf::irf_filename(const std::string& filename) const
+GFilename GCTAResponseIrf::irf_filename(const std::string& filename) const
 {
     // Set input filename as result filename
-    std::string result = filename;
+    GFilename result = filename;
 
     // If file does not exist then try a variant with extension .dat
-    if (!gammalib::file_exists(result)) {
-        std::string testname = result + ".dat";
-        if (gammalib::file_exists(testname)) {
+    if (!result.exists()) {
+        GFilename testname = filename + ".dat";
+        if (testname.exists()) {
             result = testname;
         }
     }

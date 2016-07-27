@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.hpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Christoph Deil                              *
+ *  copyright (C) 2011-2016 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,7 @@ class GModelSpatialRadialDisk : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialDisk(void);
+    GModelSpatialRadialDisk(const bool& dummy, const std::string& type);
     GModelSpatialRadialDisk(const GSkyDir& dir, const double& radius);
     explicit GModelSpatialRadialDisk(const GXmlElement& xml);
     GModelSpatialRadialDisk(const GModelSpatialRadialDisk& model);
@@ -90,7 +91,8 @@ protected:
     void update(void) const;
 
     // Protected members
-    GModelPar m_radius;    //!< Disk radius (degrees)
+    std::string m_type;      //!< Model type
+    GModelPar   m_radius;    //!< Disk radius (degrees)
 
     // Cached members used for pre-computations
     mutable double m_last_radius;   //!< Last disk radius
@@ -114,14 +116,14 @@ std::string GModelSpatialRadialDisk::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "DiskFunction".
+ * @return Model type.
  *
  * Returns the type of the radial disk model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialDisk::type(void) const
 {
-    return "DiskFunction";
+    return (m_type);
 }
 
 

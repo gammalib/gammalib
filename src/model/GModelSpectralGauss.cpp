@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralGauss.cpp - Spectral Gaussian model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
+ *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,10 +31,11 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
-#include "GModelSpectralGauss.hpp"
-#include "GModelSpectralRegistry.hpp"
+#include "GRan.hpp"
 #include "GFunction.hpp"
 #include "GIntegral.hpp"
+#include "GModelSpectralGauss.hpp"
+#include "GModelSpectralRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 

@@ -68,22 +68,17 @@ GModel::GModel(void)
  *
  * @param[in] xml XML element.
  *
- * Construct model from XML element. The method extracts the "name",
- * "instrument" and "id" attributes from the model node.
+ * Construct model from XML element. The method extracts all model attributes
+ * from the XML file (see the read_attributes() method for more information
+ * about the supported attributes).
  ***************************************************************************/
 GModel::GModel(const GXmlElement& xml)
 {
     // Initialise members
     init_members();
 
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Set observation identifiers
-    ids(xml.attribute("id"));
+    // Read attributes
+    read_attributes(xml);
 
     // Return
     return;
@@ -604,6 +599,159 @@ void GModel::free_members(void)
 
 
 /***********************************************************************//**
+ * @brief Read model attributes
+ *
+ * @param[in] xml XML element.
+ ***************************************************************************/
+void GModel::read_attributes(const GXmlElement& xml)
+{
+    // Set model name
+    name(xml.attribute("name"));
+
+    // Set instruments
+    instruments(xml.attribute("instrument"));
+
+    // Set observation identifiers
+    ids(xml.attribute("id"));
+
+    // Set model TS
+    if (xml.has_attribute("ts")) {
+        std::string ts = xml.attribute("ts");
+        this->ts(gammalib::todouble(ts));
+    }
+
+    // Set TS computation flag
+    if (xml.has_attribute("tscalc")) {
+        bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
+        this->tscalc(tscalc);
+    }
+
+    // Read instrument scales
+    read_scales(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write model attributes
+ *
+ * @param[in] xml XML element.
+ ***************************************************************************/
+void GModel::write_attributes(GXmlElement& xml) const
+{
+    // Set model name
+    xml.attribute("name", name());
+
+    // Set model type
+    xml.attribute("type", type());
+
+    // Set instruments
+    std::string instruments = this->instruments();
+    if (instruments.length() > 0) {
+        xml.attribute("instrument", instruments);
+    }
+
+    // Set observation identifiers
+    std::string identifiers = ids();
+    if (identifiers.length() > 0) {
+        xml.attribute("id", identifiers);
+    }
+
+    // If available, set "ts" attribute
+    if (m_has_ts) {
+        xml.attribute("ts", gammalib::str(ts(), 3));
+    }
+
+    // If available, set "tscalc" attribute
+    if (m_has_tscalc) {
+        std::string ts_calc = tscalc() ? "1" : "0";
+        xml.attribute("tscalc", ts_calc);
+    }
+
+    // Write instrument scales
+    write_scales(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print model attributes
+ *
+ * @return Returns string with model attributes.
+ ***************************************************************************/
+std::string GModel::print_attributes(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append model name
+    result.append(gammalib::parformat("Name")+name());
+
+    // Append instruments
+    result.append("\n"+gammalib::parformat("Instruments"));
+    if (!m_instruments.empty()) {
+        for (int i = 0; i < m_instruments.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(m_instruments[i]);
+        }
+    }
+    else {
+        result.append("all");
+    }
+
+    // Append Test Statistic
+    if (m_has_ts) {
+        result.append("\n"+gammalib::parformat("Test Statistic"));
+        result.append(gammalib::str(ts()));
+    }
+    else if (m_tscalc) {
+        result.append("\n"+gammalib::parformat("Test Statistic"));
+        result.append("Computation requested");
+    }
+
+    // Append instrument scale factors
+    result.append("\n"+gammalib::parformat("Instrument scale factors"));
+    if (!m_scales.empty()) {
+        for (int i = 0; i < m_scales.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(m_scales[i].name());
+            result.append("=");
+            result.append(gammalib::str(m_scales[i].value()));
+        }
+        result.append(", others unity");
+    }
+    else {
+        result.append("unity");
+    }
+
+    // Append observation identifiers
+    result.append("\n"+gammalib::parformat("Observation identifiers"));
+    if (!m_ids.empty()) {
+        for (int i = 0; i < m_ids.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(m_ids[i]);
+        }
+    }
+    else {
+        result.append("all");
+    }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Read instrument scales from XML element
  *
  * @param[in] xml XML source element.
@@ -715,77 +863,4 @@ void GModel::write_scales(GXmlElement& xml) const
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Print model attributes
- *
- * @return Returns string with model attributes.
- ***************************************************************************/
-std::string GModel::print_attributes(void) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Append model name
-    result.append(gammalib::parformat("Name")+name());
-
-    // Append instruments
-    result.append("\n"+gammalib::parformat("Instruments"));
-    if (!m_instruments.empty()) {
-        for (int i = 0; i < m_instruments.size(); ++i) {
-            if (i > 0) {
-                result.append(", ");
-            }
-            result.append(m_instruments[i]);
-        }
-    }
-    else {
-        result.append("all");
-    }
-
-    // Append Test Statistic
-    if (m_has_ts) {
-        result.append("\n"+gammalib::parformat("Test Statistic"));
-        result.append(gammalib::str(ts()));
-    }
-    else if (m_tscalc) {
-        result.append("\n"+gammalib::parformat("Test Statistic"));
-        result.append("Computation requested");
-    }
-
-    // Append instrument scale factors
-    result.append("\n"+gammalib::parformat("Instrument scale factors"));
-    if (!m_scales.empty()) {
-        for (int i = 0; i < m_scales.size(); ++i) {
-            if (i > 0) {
-                result.append(", ");
-            }
-            result.append(m_scales[i].name());
-            result.append("=");
-            result.append(gammalib::str(m_scales[i].value()));
-        }
-        result.append(", others unity");
-    }
-    else {
-        result.append("unity");
-    }
-
-    // Append observation identifiers
-    result.append("\n"+gammalib::parformat("Observation identifiers"));
-    if (!m_ids.empty()) {
-        for (int i = 0; i < m_ids.size(); ++i) {
-            if (i > 0) {
-                result.append(", ");
-            }
-            result.append(m_ids[i]);
-        }
-    }
-    else {
-        result.append("all");
-    }
-
-    // Return result
-    return result;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAPsfKing.i - King profile CTA point spread function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAPsfKing.hpp"
-#include "GTools.hpp"
+//#include "GTools.hpp"
 %}
 
 
@@ -42,7 +42,7 @@ class GCTAPsfKing : public GCTAPsf {
 public:
     // Constructors and destructors
     GCTAPsfKing(void);
-    explicit GCTAPsfKing(const std::string& filename);
+    explicit GCTAPsfKing(const GFilename& filename);
     GCTAPsfKing(const GCTAPsfKing& psf);
     virtual ~GCTAPsfKing(void);
 
@@ -59,8 +59,8 @@ public:
     void         clear(void);
     GCTAPsfKing* clone(void) const;
     std::string  classname(void) const;
-    void         load(const std::string& filename);
-    std::string  filename(void) const;
+    void         load(const GFilename& filename);
+    GFilename    filename(void) const;
     double       mc(GRan&         ran,
                     const double& logE, 
                     const double& theta = 0.0, 
@@ -82,12 +82,12 @@ public:
                                     const double& azimuth = 0.0,
                                     const bool&   etrue = true) const;
     // Methods
-    const GCTAResponseTable&   table(void) const;
-    void                       table(const GCTAResponseTable& table);
-    void                       read(const GFitsTable& table);
-    void                       write(GFitsBinTable& table) const;
-    void                       save(const std::string& filename,
-                                    const bool& clobber = false) const;
+    const GCTAResponseTable& table(void) const;
+    void                     table(const GCTAResponseTable& table);
+    void                     read(const GFitsTable& table);
+    void                     write(GFitsBinTable& table) const;
+    void                     save(const GFilename& filename,
+                                  const bool&      clobber = false) const;
 };
 
 

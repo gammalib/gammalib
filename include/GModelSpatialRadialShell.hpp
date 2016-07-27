@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.hpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Christoph Deil                              *
+ *  copyright (C) 2011-2016 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,7 @@ class GModelSpatialRadialShell : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialShell(void);
+    GModelSpatialRadialShell(const bool& dummy, const std::string& type);
     GModelSpatialRadialShell(const GSkyDir& dir,
                              const double&  radius,
                              const double&  width);
@@ -106,6 +107,7 @@ protected:
     static double f2(double x);
 
     // Protected members
+    std::string     m_type;          //!< Model type
     GModelPar       m_radius;        //!< Inner shell radius (deg)
     GModelPar       m_width;         //!< Shell thickness (deg)
 
@@ -135,14 +137,14 @@ std::string GModelSpatialRadialShell::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "ShellFunction".
+ * @return Model type.
  *
  * Returns the type of the radial shell model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialShell::type(void) const
 {
-    return "ShellFunction";
+    return (m_type);
 }
 
 

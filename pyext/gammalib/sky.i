@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          sky.i - Sky module                             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2016 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,10 +34,20 @@
 #include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GSkyDir.hpp"
 %}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
+%include "std_vector.i"
+namespace std {
+   %template(vectori)      vector<int>;
+   %template(vectord)      vector<double>;
+   %template(vectorskydir) vector<GSkyDir>;
+};
+
+/* __ Include GammaLib typemaps __________________________________________ */
+%include typemap_GFilename.i
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
@@ -114,5 +124,6 @@
 %include "GWcsCAR.i"
 %include "GWcsMER.i"
 %include "GWcsMOL.i"
-%include "GWcsTAN.i"
+%include "GWcsSIN.i"
 %include "GWcsSTG.i"
+%include "GWcsTAN.i"

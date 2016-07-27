@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATObservation.hpp - Fermi/LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,12 +29,14 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GTime.hpp"
 #include "GObservation.hpp"
 #include "GLATResponse.hpp"
 #include "GLATLtCube.hpp"
-#include "GTime.hpp"
-#include "GModel.hpp"
-#include "GModels.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GResponse;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -64,7 +66,7 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
@@ -76,8 +78,7 @@ public:
     void              load_binned(const std::string& cntmap_name,
                                   const std::string& expmap_name,
                                   const std::string& ltcube_name);
-    void              response(const std::string& irfname,
-                               const std::string& caldb = "");    
+    void              response(const std::string& irfname);    
     const GLATLtCube* ltcube(void) const;
 
 protected:
@@ -93,7 +94,7 @@ protected:
     std::string  m_cntfile;      //!< Counts map filename
     std::string  m_expfile;      //!< Exposure map filename
     GLATResponse m_response;     //!< Instrument response functions
-    GLATLtCube*  m_ltcube;       //!< Pointer to lifetime cube
+    GLATLtCube*  m_ltcube;       //!< Pointer to livetime cube
 };
 
 

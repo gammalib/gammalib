@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpectralBrokenPlaw.i - Broken power law spectrum class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Anneli Schulz                               *
+ *  copyright (C) 2013-2016 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,11 @@ class GModelSpectralBrokenPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralBrokenPlaw(void);
+    GModelSpectralBrokenPlaw(const std::string& type,
+                             const std::string& prefactor,
+                             const std::string& index1,
+                             const std::string& breakenergy,
+                             const std::string& index2);
     GModelSpectralBrokenPlaw(const double&  prefactor,
                              const double&  index1,
                              const GEnergy& breakenergy,
@@ -52,9 +57,9 @@ public:
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual double                    eval(const GEnergy& srcEng,
-                                           const GTime&   srcTime) const;
+                                           const GTime&   srcTime = GTime()) const;
     virtual double                    eval_gradients(const GEnergy& srcEng,
-                                                     const GTime&   srcTime);
+                                                     const GTime&   srcTime = GTime());
     virtual double                    flux(const GEnergy& emin,
                                            const GEnergy& emax) const;
     virtual double                    eflux(const GEnergy& emin,

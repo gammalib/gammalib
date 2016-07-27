@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAAeffPerfTable.hpp - CTA performance table effective area class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,7 +74,7 @@ GCTAAeffPerfTable::GCTAAeffPerfTable(void) : GCTAAeff()
  * Construct instance by loading the effective area information from an
  * ASCII performance table.
  ***************************************************************************/
-GCTAAeffPerfTable::GCTAAeffPerfTable(const std::string& filename) : GCTAAeff()
+GCTAAeffPerfTable::GCTAAeffPerfTable(const GFilename& filename) : GCTAAeff()
 {
     // Initialise class members
     init_members();
@@ -245,7 +245,7 @@ GCTAAeffPerfTable* GCTAAeffPerfTable::clone(void) const
  * This method loads the effective area information from an ASCII
  * performance table.
  ***************************************************************************/
-void GCTAAeffPerfTable::load(const std::string& filename)
+void GCTAAeffPerfTable::load(const GFilename& filename)
 {
     // Clear arrays
     m_logE.clear();
@@ -255,13 +255,10 @@ void GCTAAeffPerfTable::load(const std::string& filename)
     const int n = 1000;
     char  line[n];
 
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
     // Open performance table readonly
-    FILE* fptr = std::fopen(fname.c_str(), "r");
+    FILE* fptr = std::fopen(filename.url().c_str(), "r");
     if (fptr == NULL) {
-        throw GCTAException::file_open_error(G_LOAD, fname);
+        throw GCTAException::file_open_error(G_LOAD, filename.url());
     }
 
     // Read lines

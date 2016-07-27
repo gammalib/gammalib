@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATResponse.hpp - Fermi/LAT Response class              *
+ *                GLATResponse.hpp - Fermi LAT Response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.hpp
- * @brief Fermi/LAT Response class definition
+ * @brief Fermi LAT Response class definition
  * @author Juergen Knoedlseder
  */
 
@@ -30,19 +30,22 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GLATEventAtom.hpp"
-#include "GLATEventBin.hpp"
+#include "GResponse.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
 #include "GLATEdisp.hpp"
 #include "GLATMeanPsf.hpp"
-#include "GEvent.hpp"
-#include "GModel.hpp"
-#include "GObservation.hpp"
-#include "GResponse.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GSource;
+class GEvent;
+class GPhoton;
+class GObservation;
+class GEnergy;
+class GTime;
+class GModelSky;
+class GLATEventAtom;
+class GLATEventBin;
 
 
 /***********************************************************************//**
@@ -82,8 +85,6 @@ public:
 
     // Other Methods
     int                size(void) const;
-    void               caldb(const std::string& caldb);
-    const std::string& caldb(void) const;
     const std::string& rspname(void) const;
     void               load(const std::string& rspname);
     void               save(const std::string& rspname) const;
@@ -108,10 +109,7 @@ private:
     void free_members(void);
 
     // Private members
-    std::string               m_caldb;      //!< Name of or path to the calibration database
     std::string               m_rspname;    //!< Name of the instrument response
-    bool                      m_has_front;   //!< Front IRF loaded?
-    bool                      m_has_back;    //!< Back IRF loaded?
     bool                      m_force_mean; //!< Use mean PSF in any case
     std::vector<GLATAeff*>    m_aeff;       //!< Effective areas
     std::vector<GLATPsf*>     m_psf;        //!< Point spread functions
@@ -140,7 +138,7 @@ std::string GLATResponse::classname(void) const
 inline
 bool GLATResponse::use_edisp(void) const
 {
-    return false;
+    return (false);
 }
 
 
@@ -152,31 +150,21 @@ bool GLATResponse::use_edisp(void) const
 inline
 bool GLATResponse::use_tdisp(void) const
 {
-    return false;
+    return (false);
 }
 
 
 /***********************************************************************//**
- * @brief Return number of bins in effective area response
+ * @brief Return number of event types
  *
- * @return Number of bins in effective area response.
+ * @return Number of event types.
+ *
+ * Returns the number of events types in this reponse.
  ***************************************************************************/
 inline
 int GLATResponse::size(void) const
 {
     return (int)m_aeff.size();
-}
-
-
-/***********************************************************************//**
- * @brief Return calibration database
- *
- * @return Calibration database.
- ***************************************************************************/
-inline
-const std::string& GLATResponse::caldb(void) const
-{
-    return m_caldb;
 }
 
 
@@ -188,7 +176,7 @@ const std::string& GLATResponse::caldb(void) const
 inline
 const std::string& GLATResponse::rspname(void) const
 {
-    return m_rspname;
+    return (m_rspname);
 }
 
 
@@ -200,7 +188,7 @@ const std::string& GLATResponse::rspname(void) const
 inline
 const bool& GLATResponse::force_mean(void) const
 {
-    return m_force_mean;
+    return (m_force_mean);
 }
 
 

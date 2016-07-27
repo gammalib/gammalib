@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,14 +43,13 @@
  * This class implements a point source as the spatial component of the
  * factorised source model. The point source has two parameters: the Right
  * Ascension and Declination of the point source location.
- *
- * The model is of type "SkyDirFunction".
  ***************************************************************************/
 class GModelSpatialPointSource : public GModelSpatial {
 
 public:
     // Constructors and destructors
     GModelSpatialPointSource(void);
+    GModelSpatialPointSource(const bool& dummy, const std::string& type);
     explicit GModelSpatialPointSource(const GSkyDir& dir);
     GModelSpatialPointSource(const double& ra, const double& dec);
     explicit GModelSpatialPointSource(const GXmlElement& xml);
@@ -94,8 +93,9 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_ra;          //!< Right Ascension (deg)
-    GModelPar m_dec;         //!< Declination (deg)
+    std::string m_type;   //!< Model type
+    GModelPar   m_ra;     //!< Right Ascension (deg)
+    GModelPar   m_dec;    //!< Declination (deg)
 };
 
 
@@ -114,14 +114,14 @@ std::string GModelSpatialPointSource::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "SkyDirFunction".
+ * @return Model type.
  *
  * Returns the type of the spatial model.
  ***************************************************************************/
 inline
 std::string GModelSpatialPointSource::type(void) const
 {
-    return "SkyDirFunction";
+    return (m_type);
 }
 
 

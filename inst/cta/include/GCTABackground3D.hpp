@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.hpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GFilename.hpp"
 #include "GCTABackground.hpp"
 #include "GCTAResponseTable.hpp"
 
@@ -47,7 +48,7 @@ class GCTABackground3D : public GCTABackground {
 public:
     // Constructors and destructors
     GCTABackground3D(void);
-    explicit GCTABackground3D(const std::string& filename);
+    explicit GCTABackground3D(const GFilename& filename);
     GCTABackground3D(const GCTABackground3D& bgd);
     virtual ~GCTABackground3D(void);
 
@@ -63,8 +64,8 @@ public:
     void                       clear(void);
     GCTABackground3D*          clone(void) const;
     std::string                classname(void) const;
-    void                       load(const std::string& filename);
-    std::string                filename(void) const;
+    void                       load(const GFilename& filename);
+    GFilename                  filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,
                                   const GTime& time,
                                   GRan& ran) const;
@@ -77,38 +78,44 @@ public:
     void                       table(const GCTAResponseTable& table);
     void                       read(const GFitsTable& table);
     void                       write(GFitsBinTable& table) const;
-    void                       save(const std::string& filename,
-                                    const bool& clobber = false) const;
+    void                       save(const GFilename& filename,
+                                    const bool&      clobber = false) const;
 
 private:
     // Methods
-    void init_members(void);
-    void copy_members(const GCTABackground3D& bgd);
-    void free_members(void);
-    void init_mc_cache(void) const;
+    void   init_members(void);
+    void   copy_members(const GCTABackground3D& bgd);
+    void   free_members(void);
+    void   set_limits(void);
+    int    index(const int& idetx, const int& idety, const int& iebin) const;
+    void   init_mc_cache(void) const;
+    void   init_mc_max_rate(void) const;
+    double solid_angle(const double& detx1, const double& dety1,
+                       const double& detx2, const double& dety2,
+                       const double& detx3, const double& dety3) const;
 
     // Members
-    std::string       m_filename;    //!< Name of background response file
+    GFilename         m_filename;    //!< Name of background response file
     GCTAResponseTable m_background;  //!< Background response table
-    double            m_mc_max_bin;  //!< Maximum spatial binsize for MC
-    double            m_mc_max_logE; //!< Maximum log energy binsize for MC
+    int               m_inx_detx;    //!< DETX index
+    int               m_inx_dety;    //!< DETY index
+    int               m_inx_energy;  //!< Energy index
+    int               m_inx_bgd;     //!< Background index
+    int               m_num_detx;    //!< Number of DETX bins
+    int               m_num_dety;    //!< Number of DETY bins
+    int               m_num_energy;  //!< Number of energy bins
+    int               m_num[3];      //!< Array of number of bins
+    double            m_detx_min;    //!< DETX minimum (radians)
+    double            m_detx_max;    //!< DETX maximum (radians)
+    double            m_dety_min;    //!< DETY minimum (radians)
+    double            m_dety_max;    //!< DETY maximum (radians)
+    double            m_logE_min;    //!< Log10(E/TeV) minimum
+    double            m_logE_max;    //!< Log10(E/TeV) maximum
 
     // Monte Carlo cache
-    mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
-    mutable GModelSpectralNodes m_mc_spectrum; //!< Response cube spectrum
-    mutable int                 m_mc_nx;       //!< DETX pixels for MC
-    mutable int                 m_mc_ny;       //!< DETY pixels for MC
-    mutable int                 m_mc_npix;     //!< DETX*DETY pixels for MC
-    mutable int                 m_mc_nmaps;    //!< Number of maps for MC
-    mutable double              m_mc_detx_min; //!< DETX minimum
-    mutable double              m_mc_detx_max; //!< DETX maximum
-    mutable double              m_mc_detx_bin; //!< DETX binsize for MC
-    mutable double              m_mc_dety_min; //!< DETY minimum
-    mutable double              m_mc_dety_max; //!< DETY maximum
-    mutable double              m_mc_dety_bin; //!< DETY binsize for MC
-    mutable double              m_mc_logE_min; //!< log10 energy minimum (TeV)
-    mutable double              m_mc_logE_max; //!< log10 energy maximum (TeV)
-    mutable double              m_mc_logE_bin; //!< log10 energy binsize (TeV)
+    mutable std::vector<double> m_mc_max;                //!< Maximum background rate
+    mutable GModelSpectralNodes m_mc_spectrum;           //!< Response cube spectrum
+    mutable double              m_mc_one_minus_costheta; //!< 1-cos(theta_max)
 };
 
 
@@ -130,7 +137,7 @@ std::string GCTABackground3D::classname(void) const
  * @return Returns filename from which the background was loaded.
  ***************************************************************************/
 inline
-std::string GCTABackground3D::filename(void) const
+GFilename GCTABackground3D::filename(void) const
 {
     // Return filename
     return m_filename;

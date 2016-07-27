@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventList.cpp - Fermi/LAT event list class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,13 +31,14 @@
 #include <cstdio>             // std::sprintf
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GLATEventList.hpp"
-#include "GLATException.hpp"
+#include "GFilename.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
 #include "GFitsTableLongCol.hpp"
 #include "GFitsTableShortCol.hpp"
+#include "GLATEventList.hpp"
+#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR                          "GLATEventList::operator[](int&)"
@@ -76,7 +77,7 @@ GLATEventList::GLATEventList(void) : GEventList()
  *
  * Construct event list object by loading the events from a FITS file.
  ***************************************************************************/
-GLATEventList::GLATEventList(const std::string& filename) : GEventList()
+GLATEventList::GLATEventList(const GFilename& filename) : GEventList()
 {
     // Initialise members
     init_members();
@@ -248,19 +249,16 @@ GLATEventList* GLATEventList::clone(void) const
  *
  * This method loads LAT events from a FT1 file.
  ***************************************************************************/
-void GLATEventList::load(const std::string& filename)
+void GLATEventList::load(const GFilename& filename)
 {
-    // Clear object
-    clear();
-
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
-    // Read event list
-    read(file);
+    // Read event list from FITS file
+    read(fits);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -277,8 +275,8 @@ void GLATEventList::load(const std::string& filename)
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GLATEventList::save(const std::string& filename,
-                         const bool& clobber) const
+void GLATEventList::save(const GFilename& filename,
+                         const bool&      clobber) const
 {
     // Return
     return;

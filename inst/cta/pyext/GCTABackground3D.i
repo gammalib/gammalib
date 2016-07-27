@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTABackground3D.i - CTA 3D background class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GCTABackground3D : public GCTABackground {
 public:
     // Constructors and destructors
     GCTABackground3D(void);
-    explicit GCTABackground3D(const std::string& filename);
+    explicit GCTABackground3D(const GFilename& filename);
     GCTABackground3D(const GCTABackground3D& bgd);
     virtual ~GCTABackground3D(void);
 
@@ -52,8 +52,8 @@ public:
     void                       clear(void);
     GCTABackground3D*          clone(void) const;
     std::string                classname(void) const;
-    void                       load(const std::string& filename);
-    std::string                filename(void) const;
+    void                       load(const GFilename& filename);
+    GFilename                  filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,
                                   const GTime& time,
                                   GRan& ran) const;
@@ -65,8 +65,8 @@ public:
     void                       table(const GCTAResponseTable& table);
     void                       read(const GFitsTable& table);
     void                       write(GFitsBinTable& table) const;
-    void                       save(const std::string& filename,
-                                    const bool& clobber = false) const;
+    void                       save(const GFilename& filename,
+                                    const bool&      clobber = false) const;
 };
 
 

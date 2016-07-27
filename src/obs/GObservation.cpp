@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,16 +28,22 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GException.hpp"
-#include "GObservation.hpp"
-#include "GModelSky.hpp"
-#include "GModelData.hpp"
 #include "GIntegral.hpp"
 #include "GDerivative.hpp"
-#include "GTools.hpp"
+#include "GVector.hpp"
+#include "GMatrixSparse.hpp"
+#include "GObservation.hpp"
+#include "GResponse.hpp"
 #include "GEventCube.hpp"
 #include "GEventList.hpp"
 #include "GEventBin.hpp"
+#include "GModel.hpp"
+#include "GModels.hpp"
+#include "GModelPar.hpp"
+#include "GModelSky.hpp"
+#include "GModelData.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LIKELIHOOD           "GObservation::likelihood(GModels&, GVector*,"\
@@ -343,6 +349,29 @@ double GObservation::model(const GModels& models,
 
     // Return
     return model;
+}
+
+
+/***********************************************************************//**
+ * @brief Return total number of observed events
+ *
+ * @returns Total number of observed events.
+ *
+ * Returns the total number of observed events.
+ ***************************************************************************/
+int GObservation::nobserved(void) const
+{
+    // Initialise number of observed events
+    int nobserved = 0;
+
+    // Extract number of observed events from event contained
+    const GEvents* events = this->events();
+    if (events != NULL) {
+        nobserved = events->number();
+    }
+
+    // Return number of observed events
+    return nobserved;
 }
 
 
@@ -754,22 +783,44 @@ void GObservation::events(const GEvents& events)
 
 
 /***********************************************************************//**
- * @brief Return event container
+ * @brief Return events
  *
  * @exception GException::no_events
- *            No event container defined for observation.
+ *            No events allocated for observation.
  *
- * Returns pointer to event container.
+ * Returns pointer to events.
+ ***************************************************************************/
+GEvents* GObservation::events(void)
+{
+    // Throw an exception if the event container is not valid
+    if (m_events == NULL) {
+        std::string msg = "No events allocated for observation.";
+        throw GException::invalid_value(G_EVENTS, msg);
+    }
+
+    // Return pointer to events
+    return (m_events);
+}
+
+
+/***********************************************************************//**
+ * @brief Return events (const version)
+ *
+ * @exception GException::no_events
+ *            No events allocated for observation.
+ *
+ * Returns const pointer to events.
  ***************************************************************************/
 const GEvents* GObservation::events(void) const
 {
     // Throw an exception if the event container is not valid
     if (m_events == NULL) {
-        throw GException::no_events(G_EVENTS);
+        std::string msg = "No events allocated for observation.";
+        throw GException::invalid_value(G_EVENTS, msg);
     }
 
-    // Return pointer to event container
-    return m_events;
+    // Return pointer to events
+    return (m_events);
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -316,6 +316,24 @@ void GApplication::logFileOpen(const bool& clobber)
 
     // Set logger chattiness
     set_log_chatter();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Close log file
+ *
+ * Logs trailer and close application log file.
+ ***************************************************************************/
+void GApplication::logFileClose(void)
+{
+    // Put trailer in log file
+    log_trailer();
+
+    // Close log file
+    log.close();
 
     // Return
     return;

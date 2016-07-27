@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.cpp - Multi-wavelength observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,7 +80,7 @@ GMWLObservation::GMWLObservation(void) : GObservation()
  *
  * Creates instance from file.
  ***************************************************************************/
-GMWLObservation::GMWLObservation(const std::string& filename) : GObservation()
+GMWLObservation::GMWLObservation(const GFilename& filename) : GObservation()
 {
     // Initialise members
     init_members();
@@ -232,17 +232,12 @@ void GMWLObservation::response(const GResponse& rsp)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
- *
  * Reads information for a multi-wavelength observation from an XML element.
  * The expected format of the XML element is
  *
  *     <observation name="..." id="..." instrument="MWL">
  *       <parameter name="Instrument" value="..."/>
- *       <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
+ *       <parameter name="Data" file="..."/>
  *     </observation>
  *
  * The extno and extname attributes of the data parameter are optional, and
@@ -255,65 +250,15 @@ void GMWLObservation::read(const GXmlElement& xml)
     // Clear observation
     clear();
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
+    // Get parameters
+    m_instrument = gammalib::xml_get_attr(G_READ, xml, "Instrument", "value");
+    std::string filename = gammalib::xml_get_attr(G_READ, xml, "Data", "file");
 
-    // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || npars != 2) {
-        throw GException::xml_invalid_parnum(G_READ, xml,
-              "MWL observation requires exactly 2 parameters.");
-    }
+    // Expand file names
+    filename = gammalib::xml_file_expand(xml, filename);
 
-    // Extract parameters
-    int npar[2] = {0, 0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Instrument name
-        if (par->attribute("name") == "Instrument") {
-
-            // Read instrument name
-            m_instrument = par->attribute("value");
-            
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-        // Handle data filename
-        else if (par->attribute("name") == "Data") {
-
-            // Read filename
-            std::string filename = par->attribute("file");
-            
-            // Read (optional) extension number and name
-            std::string extno   = par->attribute("extno");
-            std::string extname = par->attribute("extname");
-            
-            // Load file (this also stores the filename, extno and
-            // extname)
-            if (!gammalib::strip_whitespace(extno).empty()) {
-                load(filename+"["+extno+"]");
-            }
-            else if (!gammalib::strip_whitespace(extname).empty()) {
-                load(filename+"["+extname+"]");
-            }
-            else {
-                load(filename);
-            }
-            
-            // Increment parameter counter
-            npar[1]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"Instrument\" and \"Data\" parameters.");
-    }
+    // Load file
+    load(filename);
 
     // Return
     return;
@@ -335,54 +280,21 @@ void GMWLObservation::read(const GXmlElement& xml)
  *
  *     <observation name="..." id="..." instrument="MWL">
  *       <parameter name="Instrument" value="..."/>
- *       <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
+ *       <parameter name="Data" file="..."/>
  *     </observation>
  ***************************************************************************/
 void GMWLObservation::write(GXmlElement& xml) const
 {
-    // If XML element has 0 nodes then append 2 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Instrument\""));
-        xml.append(GXmlElement("parameter name=\"Data\""));
-    }
+    // Allocate XML element pointer
+    GXmlElement* par;
 
-    // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
-        throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "MWL observation requires exactly 2 parameters.");
-    }
+    // Set Instrument parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Instrument");
+    par->attribute("value", gammalib::xml_file_reduce(xml, m_instrument));
 
-    // Set or update parameter attributes
-    int npar[] = {0, 0};
-    for (int i = 0; i < 2; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Instrument
-        if (par->attribute("name") == "Instrument") {
-            npar[0]++;
-            par->attribute("value", m_instrument);
-        }
-
-        // Handle Data
-        else if (par->attribute("name") == "Data") {
-            npar[1]++;
-            par->attribute("file", m_filename);
-            if (gammalib::strip_whitespace(m_extno).length() > 0) {
-                par->attribute("extno", m_extno);
-            }
-            if (gammalib::strip_whitespace(m_extname).length() > 0) {
-                par->attribute("extname", m_extname);
-            }
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1)
-        throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"Instrument\" and \"Data\" parameters.");
+    // Set Data parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Data");
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return
     return;
@@ -394,37 +306,22 @@ void GMWLObservation::write(GXmlElement& xml) const
  *
  * @param[in] filename File name.
  ***************************************************************************/
-void GMWLObservation::load(const std::string& filename)
+void GMWLObservation::load(const GFilename& filename)
 {
     // Clear observation
     clear();
-
-    // Create file name
-    GFilename fname(filename);
 
     // Allocate spectrum
     GMWLSpectrum* spec = new GMWLSpectrum;
     m_events = spec;
 
     // Load spectrum
-    if (fname.has_extno()) {
-        spec->load(filename);
-        m_extno = gammalib::str(fname.extno());
-        id(filename+"["+m_extno+"]");
-    }
-    else if (fname.has_extname()) {
-        spec->load(filename);
-        m_extname = fname.extname();
-        id(filename+"["+m_extname+"]");
-    }
-    else {
-        spec->load(filename);
-        id(filename);
-    }
+    spec->load(filename);
 
     // Set attributes
     name("Multi-wavelength observation");
-    m_filename   = fname.filename();
+    id(filename);
+    m_filename   = filename;
     m_instrument = spec->instrument();
 
     // Return
@@ -487,8 +384,6 @@ void GMWLObservation::init_members(void)
     // Initialise members
     m_instrument = "MWL";
     m_filename.clear();
-    m_extno.clear();
-    m_extname.clear();
     m_response.clear();
 
     // Overwrite base class statistics
@@ -509,8 +404,6 @@ void GMWLObservation::copy_members(const GMWLObservation& obs)
     // Copy members
     m_instrument = obs.m_instrument;
     m_filename   = obs.m_filename;
-    m_extno      = obs.m_extno;
-    m_extname    = obs.m_extname;
     m_response   = obs.m_response;
 
     // Return

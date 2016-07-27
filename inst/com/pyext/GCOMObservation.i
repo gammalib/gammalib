@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.i - COMPTEL observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,10 +38,10 @@ class GCOMObservation : public GObservation {
 public:
     // Constructors and destructors
     GCOMObservation(void);
-    GCOMObservation(const std::string& drename,
-                    const std::string& drbname,
-                    const std::string& drgname,
-                    const std::string& drxname);
+    GCOMObservation(const GFilename& drename,
+                    const GFilename& drbname,
+                    const GFilename& drgname,
+                    const GFilename& drxname);
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
 
@@ -54,15 +54,15 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    void           load(const std::string& drename,
-                        const std::string& drbname,
-                        const std::string& drgname,
-                        const std::string& drxname);
+    void           load(const GFilename& drename,
+                        const GFilename& drbname,
+                        const GFilename& drgname,
+                        const GFilename& drxname);
     void           response(const std::string& rspname, const GCaldb& caldb);
     void           obs_id(const double& id);
     void           ontime(const double& ontime);

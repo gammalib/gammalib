@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAAeff2D.hpp - CTA 2D effective area class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,9 +29,13 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GFits.hpp"
+#include "GFilename.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAResponseTable.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFitsTable;
+class GFitsBinTable;
 
 
 /***********************************************************************//**
@@ -47,7 +51,7 @@ class GCTAAeff2D : public GCTAAeff {
 public:
     // Constructors and destructors
     GCTAAeff2D(void);
-    explicit GCTAAeff2D(const std::string& filename);
+    explicit GCTAAeff2D(const GFilename& filename);
     GCTAAeff2D(const GCTAAeff2D& cta);
     virtual ~GCTAAeff2D(void);
 
@@ -64,8 +68,8 @@ public:
     void        clear(void);
     GCTAAeff2D* clone(void) const;
     std::string classname(void) const;
-    void        load(const std::string& filename);
-    std::string filename(void) const;
+    void        load(const GFilename& filename);
+    GFilename   filename(void) const;
     double      max(const double& logE,
                     const double& zenith,
                     const double& azimuth,
@@ -77,18 +81,28 @@ public:
     void                     table(const GCTAResponseTable& table);
     void                     read(const GFitsTable& table);
     void                     write(GFitsBinTable& table) const;
-    void                     save(const std::string& filename,
-                                  const bool& clobber = false) const;
+    void                     save(const GFilename& filename,
+                                  const bool&      clobber = false) const;
     
 private:
     // Methods
     void init_members(void);
     void copy_members(const GCTAAeff2D& aeff);
     void free_members(void);
+    void set_indices(void);
+    void set_boundaries(void);
 
     // Members
-    std::string       m_filename;  //!< Name of Aeff response file
-    GCTAResponseTable m_aeff;      //!< Aeff response table
+    GFilename         m_filename;      //!< Name of Aeff response file
+    GCTAResponseTable m_aeff;          //!< Aeff response table
+    int               m_inx_energy;    //!< Energy index
+    int               m_inx_theta;     //!< Theta index
+    int               m_inx_aeff;      //!< Effective area (true energy)
+    int               m_inx_aeff_reco; //!< Effective area (reconstructed energy)
+    double            m_logE_min;      //!< Minimum logE (log10(E/TeV))
+    double            m_logE_max;      //!< Maximum logE (log10(E/TeV))
+    double            m_theta_min;     //!< Minimum theta (radians)
+    double            m_theta_max;     //!< Maximum theta (radians)
 };
 
 
@@ -110,9 +124,8 @@ std::string GCTAAeff2D::classname(void) const
  * @return Returns filename from which effective area was loaded
  ***************************************************************************/
 inline
-std::string GCTAAeff2D::filename(void) const
+GFilename GCTAAeff2D::filename(void) const
 {
-    // Return filename
     return m_filename;
 }
 
@@ -121,23 +134,14 @@ std::string GCTAAeff2D::filename(void) const
  * @brief Return response table
  *
  * @return Response table.
+ *
+ * Returns the response table of the effective area. The effective area
+ * values are given in units of cm2.
  ***************************************************************************/
 inline
 const GCTAResponseTable& GCTAAeff2D::table(void) const
 {
     return m_aeff;
-}
-
-
-/***********************************************************************//**
- * @brief Assign response table
- *
- * @param[in] table Response table.
- ***************************************************************************/
-inline
-void GCTAAeff2D::table(const GCTAResponseTable& table)
-{
-     m_aeff = table;
 }
 
 #endif /* GCTAAEFF2D_HPP */

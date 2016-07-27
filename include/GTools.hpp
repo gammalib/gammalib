@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,8 +32,11 @@
 #include <string>
 #include <cmath>
 #include <cfloat>
-#include "GEnergy.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GFilename;
+class GXmlElement;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -86,6 +89,7 @@ namespace gammalib {
     std::string              centre(const std::string& s, const int& n,
                                     const char& c = ' ');
     std::string              parformat(const std::string& s, const int& indent = 0);
+    std::string              number(const std::string& noun, const int& number);
     double                   plaw_photon_flux(const double& emin,
                                               const double& emax,
                                               const double& epivot,
@@ -95,12 +99,9 @@ namespace gammalib {
                                               const double& epivot,
                                               const double& gamma);
     GEnergy                  elogmean(const GEnergy& a, const GEnergy& b);
-    bool                     file_exists(const std::string& filename);
-    bool                     file_exists_gzip(const std::string& filename);
     bool                     dir_exists(const std::string& dirname);
     bool                     is_infinite(const double& x);
     bool                     is_notanumber(const double& x);
-    bool                     is_fits(const std::string& filename);
     bool                     contains(const std::string& str,
                                       const std::string& substring);
     void                     warning(const std::string& origin,
@@ -115,9 +116,17 @@ namespace gammalib {
     const GXmlElement*       xml_get_par(const std::string& origin,
                                          const GXmlElement& xml,
                                          const std::string& name);
+    std::string              xml_get_attr(const std::string& origin,
+                                          const GXmlElement& xml,
+                                          const std::string& name,
+                                          const std::string& attribute);
     void                     xml_check_par(const std::string& origin,
                                            const std::string& name,
                                            const int&         number);
+    GFilename                xml_file_expand(const GXmlElement& xml,
+                                             const std::string& filename);
+    GFilename                xml_file_reduce(const GXmlElement& xml,
+                                             const std::string& filename);
     int                      recv(int fd, char *buffer, int len, int flags,
                                   int timeout);
 }

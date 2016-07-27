@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,13 +31,17 @@
 #include <string>
 #include "GBase.hpp"
 #include "GEvents.hpp"
-#include "GResponse.hpp"
-#include "GModels.hpp"
 #include "GTime.hpp"
-#include "GEnergy.hpp"
 #include "GFunction.hpp"
-#include "GVector.hpp"
-#include "GMatrixSparse.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GVector;
+class GMatrixSparse;
+class GModel;
+class GModels;
+class GModelPar;
+class GResponse;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -82,12 +86,13 @@ public:
     virtual std::string      instrument(void) const = 0;
     virtual double           ontime(void) const = 0;
     virtual double           livetime(void) const = 0;
-    virtual double           deadc(const GTime& time) const = 0;
+    virtual double           deadc(const GTime& time = GTime()) const = 0;
     virtual void             read(const GXmlElement& xml) = 0;
     virtual void             write(GXmlElement& xml) const = 0;
     virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
+    virtual GEvents*         events(void);
     virtual const GEvents*   events(void) const;
     virtual void             events(const GEvents& events);
     virtual double           likelihood(const GModels& models,
@@ -97,6 +102,7 @@ public:
     virtual double           model(const GModels& models,
                                    const GEvent&  event,
                                    GVector*       gradient = NULL) const;
+    virtual int              nobserved(void) const;
     virtual double           npred(const GModels& models,
                                    GVector*       gradient = NULL) const;
     virtual double           npred(const GModel& model) const;

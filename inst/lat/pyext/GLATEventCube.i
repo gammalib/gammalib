@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventCube.i - Fermi/LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GLATEventCube : public GEventCube {
 public:
     // Constructors and destructors
     GLATEventCube(void);
-    explicit GLATEventCube(const std::string& filename);
+    explicit GLATEventCube(const GFilename& filename);
     GLATEventCube(const GLATEventCube& cube);
     virtual ~GLATEventCube(void);
 
@@ -50,9 +50,9 @@ public:
     virtual int            size(void) const;
     virtual int            dim(void) const;
     virtual int            naxis(const int& axis) const;
-    virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename,
-                                const bool& clobber = false) const;
+    virtual void           load(const GFilename& filename);
+    virtual void           save(const GFilename& filename,
+                                const bool&      clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const;

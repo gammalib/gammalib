@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GVO.cpp - Test VO module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,7 +71,7 @@ void TestGVO::test_GVOHub(void)
     // Kluge: wait until no Hub is online
     GRan ran;
     int  no_hub = 0;
-    while (no_hub < 3) {
+    while (no_hub < 10) {
         GVOClient client;
         if (!client.ping_hub()) {
             no_hub++;
@@ -105,7 +105,7 @@ void TestGVO::test_GVOHub(void)
     
         // Test Hub connection
         GVOClient client;
-        for (int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 10; ++i) {
             sleep(1);
             client.connect();
             if (client.is_connected()) {
@@ -140,7 +140,7 @@ void TestGVO::test_GVOClient(void)
     // Kluge: wait until no Hub is online
     GRan ran;
     int  no_hub = 0;
-    while (no_hub < 3) {
+    while (no_hub < 10) {
         GVOClient client;
         if (!client.ping_hub()) {
             no_hub++;

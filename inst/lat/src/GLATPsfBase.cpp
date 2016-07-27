@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GLATPsfBase.cpp - Abstract Fermi/LAT point spread function base class  *
+ *  GLATPsfBase.cpp - Abstract Fermi LAT point spread function base class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfBase.cpp
- * @brief Abstract Fermi/LAT point spread function base class implementation
+ * @brief Abstract Fermi LAT point spread function base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -202,16 +202,30 @@ void GLATPsfBase::read_scale(const GFitsTable& table)
     // Get pointer to column
     const GFitsTableCol* scale = table["PSFSCALE"];
 
-    // Get scaling factors
-    if (front()) {
-        m_scale_par1 = scale->real(0,0);
-        m_scale_par2 = scale->real(0,1);
+    // If we have 3 colums in the table we have a Pass 8 response and hence
+    // the table only applies to the specific event type. The first two table
+    // elements are the scales, the third element is the index.
+    if (scale->number() == 3) {
+        m_scale_par1  = scale->real(0,0);
+        m_scale_par2  = scale->real(0,1);
+        m_scale_index = scale->real(0,2);
     }
+
+    // ... otherwise we have an earlier response, and the front scales
+    // are stored in the first 2 elements while the back scales are
+    // stored in the second 2 elements, and the index is in the fifth
+    // element
     else {
-        m_scale_par1 = scale->real(0,2);
-        m_scale_par2 = scale->real(0,3);
+        if (front()) {
+            m_scale_par1 = scale->real(0,0);
+            m_scale_par2 = scale->real(0,1);
+        }
+        else {
+            m_scale_par1 = scale->real(0,2);
+            m_scale_par2 = scale->real(0,3);
+        }
+        m_scale_index = scale->real(0,4);
     }
-    m_scale_index = scale->real(0,4);
 
     // Return
     return;

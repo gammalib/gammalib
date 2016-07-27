@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSkyMap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -110,20 +110,20 @@ class GSkyMap : public GBase {
 public:
     // Constructors and destructors
     GSkyMap(void);
-    explicit GSkyMap(const std::string& filename);
-    explicit GSkyMap(const std::string& coords,
-                     const int&         nside,
-                     const std::string& order,
-                     const int&         nmaps = 1);
-    explicit GSkyMap(const std::string& wcs,
-                     const std::string& coords,
-                     const double&      x,
-                     const double&      y,
-                     const double&      dx,
-                     const double&      dy,
-                     const int&         nx,
-                     const int&         ny,
-                     const int&         nmaps = 1);
+    explicit GSkyMap(const GFilename& filename);
+    GSkyMap(const std::string& coords,
+            const int&         nside,
+            const std::string& order,
+            const int&         nmaps = 1);
+    GSkyMap(const std::string& wcs,
+            const std::string& coords,
+            const double&      x,
+            const double&      y,
+            const double&      dx,
+            const double&      dy,
+            const int&         nx,
+            const int&         ny,
+            const int&         nmaps = 1);
     GSkyMap(const GSkyMap& map);
     virtual ~GSkyMap(void);
 
@@ -143,35 +143,44 @@ public:
     double        operator()(const GSkyDir& dir, const int& map = 0) const;
 
     // Methods
-    void                  clear(void);
-    GSkyMap*              clone(void) const;
-    std::string           classname(void) const;
-    const int&            npix(void) const;
-    const int&            nx(void) const;
-    const int&            ny(void) const;
-    const int&            nmaps(void) const;
-    void                  nmaps(const int& nmaps);
-    GSkyPixel             inx2pix(const int& index) const;
-    GSkyDir               inx2dir(const int& index) const;
-    GSkyDir               pix2dir(const GSkyPixel& pixel) const;
-    int                   pix2inx(const GSkyPixel& pixel) const;
-    int                   dir2inx(const GSkyDir& dir) const;
-    GSkyPixel             dir2pix(const GSkyDir& dir) const;
-    double                flux(const int& index, const int& map = 0) const;
-    double                flux(const GSkyPixel& pixel, const int& map = 0) const;
-    double                solidangle(const int& index) const;
-    double                solidangle(const GSkyPixel& pixel) const;
-    bool                  contains(const GSkyDir& dir) const;
-    bool                  contains(const GSkyPixel& pixel) const;
-    const GSkyProjection* projection(void) const;
-    void                  projection(const GSkyProjection& proj);
-    const double*         pixels(void) const;
-    GSkyMap               extract(const int& map, const int& nmaps = 1) const;
-    void                  stack_maps(void);
-    void                  load(const std::string& filename);
-    void                  save(const std::string& filename, bool clobber = false) const;
-    void                  read(const GFitsHDU& hdu);
-    void                  write(GFits& file) const;
+    void                    clear(void);
+    GSkyMap*                clone(void) const;
+    std::string             classname(void) const;
+    const int&              npix(void) const;
+    const int&              nx(void) const;
+    const int&              ny(void) const;
+    const int&              nmaps(void) const;
+    void                    nmaps(const int& nmaps);
+    const std::vector<int>& shape(void) const;
+    void                    shape(const int& s1);
+    void                    shape(const int& s1, const int& s2);
+    void                    shape(const int& s1, const int& s2, const int& s3);
+    void                    shape(const std::vector<int>& shape);
+    int                     ndim(void) const;
+    GSkyPixel               inx2pix(const int& index) const;
+    GSkyDir                 inx2dir(const int& index) const;
+    GSkyDir                 pix2dir(const GSkyPixel& pixel) const;
+    int                     pix2inx(const GSkyPixel& pixel) const;
+    int                     dir2inx(const GSkyDir& dir) const;
+    GSkyPixel               dir2pix(const GSkyDir& dir) const;
+    double                  flux(const int& index, const int& map = 0) const;
+    double                  flux(const GSkyPixel& pixel, const int& map = 0) const;
+    double                  solidangle(const int& index) const;
+    double                  solidangle(const GSkyPixel& pixel) const;
+    bool                    contains(const GSkyDir& dir) const;
+    bool                    contains(const GSkyPixel& pixel) const;
+    const GSkyProjection*   projection(void) const;
+    void                    projection(const GSkyProjection& proj);
+    const double*           pixels(void) const;
+    GSkyMap                 extract(const int& map, const int& nmaps = 1) const;
+    void                    stack_maps(void);
+    void                    load(const GFilename& filename);
+    void                    save(const GFilename& filename,
+                                 const bool&      clobber = false) const;
+    void                    read(const GFitsHDU& hdu);
+    void                    write(GFits& file,
+                                  const std::string& extname = "") const;
+    void                    publish(const std::string& name = "") const;
 };
 
 

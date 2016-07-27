@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,13 +28,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <typeinfo>
 #include "GObservationRegistry.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
+#include "GFilename.hpp"
 #include "GGti.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"
-#include "GCTAException.hpp"
 #include "GCTASupport.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
@@ -44,10 +45,10 @@
 #include "GCTARoi.hpp"
 
 /* __ Globals ____________________________________________________________ */
-const GCTAObservation      g_obs_cta_seed("CTA");
-const GCTAObservation      g_obs_hess_seed("HESS");
-const GCTAObservation      g_obs_magic_seed("MAGIC");
-const GCTAObservation      g_obs_veritas_seed("VERITAS");
+const GCTAObservation      g_obs_cta_seed(true, "CTA");
+const GCTAObservation      g_obs_hess_seed(true, "HESS");
+const GCTAObservation      g_obs_magic_seed(true, "MAGIC");
+const GCTAObservation      g_obs_veritas_seed(true, "VERITAS");
 const GObservationRegistry g_obs_cta_registry(&g_obs_cta_seed);
 const GObservationRegistry g_obs_hess_registry(&g_obs_hess_seed);
 const GObservationRegistry g_obs_magic_registry(&g_obs_magic_seed);
@@ -61,9 +62,10 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_EBOUNDS                                "GCTAObservation::ebounds()"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
-#define G_LOAD           "GCTAObservation::load(std::string&, std::string&, "\
-                                                              "std::string&)"
-#define G_EVENTS                                  "GCTAObservation::events()"
+#define G_LOAD1              "GCTAObservation::load(GFilename&, GFilename&, "\
+                                                    "GFilename&, GFilename&)"
+#define G_LOAD2              "GCTAObservation::load(GFilename&, GFilename&, "\
+                                        "GFilename&, GFilename&, GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -81,7 +83,7 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Creates an empty CTA observation.
+ * Constructs an empty CTA observation.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(void) : GObservation()
 {
@@ -96,15 +98,20 @@ GCTAObservation::GCTAObservation(void) : GObservation()
 /***********************************************************************//**
  * @brief Instrument constructor
  *
+ * @param[in] dummy Dummy flag.
  * @param[in] instrument Instrument name.
  *
- * Creates an empty CTA observation for a given instrument. This enables
- * using the CTA specific interface for any other VHE instrument. Note that
- * each other VHE instruments needs a specific registry at the beginning
- * of the GCTAObservation.cpp file. So far the following instruments are
- * supported: CTA, HESS, VERITAS, MAGIC.
+ * Constructs an empty CTA observation for a given instrument.
+ *
+ * This method is specifically used allocation of global class instances for
+ * observation registry. By specifying explicit instrument names it is
+ * possible to use the "CTA" module are for other Imaging Air Cherenkov
+ * Telescopes. So far, the following instrument codes are supported:
+ * "CTA", "HESS", "VERITAS", "MAGIC".
  ***************************************************************************/
-GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
+GCTAObservation::GCTAObservation(const bool&        dummy,
+                                 const std::string& instrument) :
+                 GObservation()
 {
     // Initialise members
     init_members();
@@ -118,20 +125,40 @@ GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
 
 
 /***********************************************************************//**
- * @brief Stacked cube analysis constructor
+ * @brief Unbinned or binned analysis constructor
+ *
+ * @param[in] filename Event list or counts cube FITS file name.
+ *
+ * Constructs a CTA observation from either an event list of a counts cube.
+ ***************************************************************************/
+GCTAObservation::GCTAObservation(const GFilename& filename) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Load data
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Stacked analysis constructor
  *
  * @param[in] cntcube Counts cube file name.
  * @param[in] expcube Exposure cube file name.
- * @param[in] psfcube Psf cube file name.
- * @param[in] bkgcube Backgorund cube file name.
+ * @param[in] psfcube Point spread function cube file name.
+ * @param[in] bkgcube Background cube file name.
  *
- * Creates a CTA observation from a counts cube, an exposure cube and a Psf
- * cube.
+ * Constructs a CTA observation from a counts cube, an exposure cube, a point
+ * spread function cube, and a background cube.
  ***************************************************************************/
-GCTAObservation::GCTAObservation(const std::string& cntcube,
-                                 const std::string& expcube,
-                                 const std::string& psfcube,
-                                 const std::string& bkgcube) : GObservation()
+GCTAObservation::GCTAObservation(const GFilename& cntcube,
+                                 const GFilename& expcube,
+                                 const GFilename& psfcube,
+                                 const GFilename& bkgcube) : GObservation()
 {
     // Initialise members
     init_members();
@@ -145,11 +172,40 @@ GCTAObservation::GCTAObservation(const std::string& cntcube,
 
 
 /***********************************************************************//**
+ * @brief Stacked analysis with energy dispersion constructor
+ *
+ * @param[in] cntcube Counts cube file name.
+ * @param[in] expcube Exposure cube file name.
+ * @param[in] psfcube Point spread function cube file name.
+ * @param[in] edispcube Energy dispersion cube file name.
+ * @param[in] bkgcube Background cube file name.
+ *
+ * Constructs a CTA observation from a counts cube, an exposure cube, a point
+ * spread function cube, an energy dispersion cube, and a background cube.
+ ***************************************************************************/
+GCTAObservation::GCTAObservation(const GFilename& cntcube,
+                                 const GFilename& expcube,
+                                 const GFilename& psfcube,
+                                 const GFilename& edispcube,
+                                 const GFilename& bkgcube) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Load data
+    load(cntcube, expcube, psfcube, edispcube, bkgcube);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] obs CTA observation.
  *
- * Creates a CTA observation by copying an existing CTA observation.
+ * Constructs a CTA observation by copying an existing CTA observation.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const GCTAObservation& obs) : GObservation(obs)
 {
@@ -166,6 +222,8 @@ GCTAObservation::GCTAObservation(const GCTAObservation& obs) : GObservation(obs)
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs CTA observation.
  ***************************************************************************/
 GCTAObservation::~GCTAObservation(void)
 {
@@ -222,6 +280,8 @@ GCTAObservation& GCTAObservation::operator=(const GCTAObservation& obs)
 
 /***********************************************************************//**
  * @brief Clear CTA observation
+ *
+ * Clear CTA observation.
  ***************************************************************************/
 void GCTAObservation::clear(void)
 {
@@ -242,6 +302,8 @@ void GCTAObservation::clear(void)
  * @brief Clone CTA observation
  *
  * @return Pointer to deep copy of CTA observation.
+ *
+ * Returns a pointer to a deep copy of a CTA observation.
  ***************************************************************************/
 GCTAObservation* GCTAObservation::clone(void) const
 {
@@ -254,28 +316,30 @@ GCTAObservation* GCTAObservation::clone(void) const
  *
  * @param[in] rsp Response function.
  *
- * @exception GException::invalid_value
- *            Specified response in not of type GCTAResponse.
+ * @exception GException::invalid_argument
+ *            Invalid response class specified.
  *
- * Sets the response function for the observation. The argument has to be of
- * type GCTAResponse, otherwise an exception is thrown.
+ * Sets the response function for the observation.
  ***************************************************************************/
 void GCTAObservation::response(const GResponse& rsp)
 {
-    // Free response
-    if (m_response != NULL) delete m_response;
-    m_response = NULL;
+    // Cast response dynamically
+    const GCTAResponse* ptr = dynamic_cast<const GCTAResponse*>(&rsp);
 
-    // Get pointer on CTA response
-    const GCTAResponse* cta = dynamic_cast<const GCTAResponse*>(&rsp);
-    if (cta == NULL) {
-        std::string msg = "Specified response function is not a CTA "
-                          "response function.\n" + rsp.print();
-        throw GException::invalid_value(G_RESPONSE_SET, msg);
+    // Throw exception if response is not of correct type
+    if (ptr == NULL) {
+        std::string cls = std::string(typeid(&rsp).name());
+        std::string msg = "Invalid response type \""+cls+"\" provided on "
+                          "input. Please specify a \"GCTAResponse\" "
+                          "object as argument.";
+        throw GException::invalid_argument(G_RESPONSE_SET, msg);
     }
 
+    // Free response
+    if (m_response != NULL) delete m_response;
+
     // Clone response function
-    m_response = cta->clone();
+    m_response = ptr->clone();
 
     // Return
     return;
@@ -290,15 +354,16 @@ void GCTAObservation::response(const GResponse& rsp)
  * @exception GException::invalid_value
  *            No valid response found in CTA observation.
  *
- * Returns a pointer to the CTA response function. The pointer returned is
- * never NULL.
+ * Returns a pointer to the CTA response function. An exception is thrown if
+ * the pointer is not valid, hence the user does not need to verify the
+ * validity of the pointer.
  ***************************************************************************/
 const GCTAResponse* GCTAObservation::response(void) const
 {
     // Throw an exception if the response pointer is not valid
     if (m_response == NULL) {
-        std::string msg = "No valid response function found in CTA"
-                          " observation.\n";
+        std::string msg = "No valid response function found in CTA "
+                          "observation.\n";
         throw GException::invalid_value(G_RESPONSE_GET, msg);
     }
 
@@ -377,250 +442,127 @@ void GCTAObservation::response(const GCTACubeExposure&   expcube,
 
 
 /***********************************************************************//**
+ * @brief Set CTA response function
+ *
+ * @param[in] expcube Exposure cube.
+ * @param[in] psfcube Psf cube.
+ * @param[in] edispcube Edisp cube.
+ * @param[in] bkgcube Background cube.
+ *
+ * Sets the CTA response function fur cube analysis by specifying the
+ * exposure cube, the Psf cube, the exposure cube and the background cube.
+ * The method also copies over the ontime, the livetime and the deadtime
+ * correction factor from the exposure cube.
+ ***************************************************************************/
+void GCTAObservation::response(const GCTACubeExposure&   expcube,
+                               const GCTACubePsf&        psfcube,
+							   const GCTACubeEdisp&      edispcube,
+                               const GCTACubeBackground& bkgcube)
+{
+    // Free response
+    if (m_response != NULL) delete m_response;
+    m_response = NULL;
+
+    // Allocate fresh response function
+    GCTAResponseCube* rsp = new GCTAResponseCube(expcube,
+                                                 psfcube,
+                                                 edispcube,
+                                                 bkgcube);
+
+    // Store pointer
+    m_response = rsp;
+
+    // Copy over time information from exposure cube
+    ontime(expcube.ontime());
+    livetime(expcube.livetime());
+    deadc(expcube.deadc());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Get Region of Interest
  *
- * @exception GException::invalid_value
- *            Events is not an event list or unable to open an event file.
+ * @return Region of Interest.
  *
- * Extract the Region of Interest from the event list. If events are loaded
- * into the observation, the RoI is simply copied over. If no events are
- * present, the method attemps to read the RoI from the header keywords of
- * the event file. This obviously only works if a valid event file name is
- * available.
+ * @exception GException::invalid_value
+ *            Observation does not contain events.
+ *            Observation does not contain an event list.
+ *
+ * Extracts the Region of Interest from the event list. An exception is
+ * thrown if the observation does not contain an event list.
  ***************************************************************************/
 GCTARoi GCTAObservation::roi(void) const
 {
-    // Initialise ROI
-    GCTARoi roi;
-
-    // If CTA has events then simply retrieve the ROI from the event list
-    if (m_events != NULL) {
-
-        // Extract region of interest from CTA observation
-        const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(m_events);
-        if (list == NULL) {
-            std::string msg = "The observation does not contain an event "
-                              "list. An event list is needed to retrieve "
-                              "the Region of Interest.";
-            throw GException::invalid_value(G_ROI, msg);
-        }
-        roi = list->roi();
-
+    // Throw an exception if no events exist
+    if (m_events == NULL) {
+        std::string msg = "Region of Interest is not defined since the "
+                          "observation does not contain events.";
+        throw GException::invalid_value(G_ROI, msg);
     }
 
-    // ... otherwise try reading the ROI from the event file header
-    else {
-
-        // Try opening event file
-        GFits fits;
-        try {
-            fits.open(m_eventfile);
-        }
-        catch (std::exception &e) {
-            std::string msg;
-            if (m_eventfile.length() == 0) {
-                msg = "The observation does not contain any information about "
-                      "the event file, hence the Region of Interest cannot be "
-                      "determined.";
-            }
-            else {
-                msg = "Could no open the event file \""+m_eventfile+"\". "
-                      "Please check that the file name is valid.";
-            }
-            throw GException::invalid_value(G_ROI, msg);
-        }
-    
-        // Get event list HDU
-        const GFitsTable& hdu = *fits.table("EVENTS");
-
-        // Read ROI from data selection keywords
-        roi = gammalib::read_ds_roi(hdu);
-
-        // Close FITS file
-        fits.close();
-
+    // Get pointer to event list. Throw an exception if no event list is found
+    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(m_events);
+    if (list == NULL) {
+        std::string msg = "Region of Interest is not defined since the "
+                          "observation does not contain an event list.";
+        throw GException::invalid_value(G_ROI, msg);
     }
 
     // Return ROI
-    return roi;
+    return (list->roi());
 }
 
 
 /***********************************************************************//**
  * @brief Get Good Time Intervals
  *
- * @exception GException::invalid_value
- *            Unable to open the event file or to extract GTI information
- *            from file.
+ * @return Good Time Intervals.
  *
- * Extract the Good Time Intervals from the events. If events are loaded into
- * the observation, the GTIs are simply copied over. If no events are present
- * the method attemps to read the GTIs from the event file. This obviously
- * only works if a valid event file name is available.
+ * @exception GException::invalid_value
+ *            Observation does not contain events.
+ *
+ * Extracts the Good Time Intervals from the events. An exception is thrown
+ * if the observation does not contain events.
  ***************************************************************************/
 GGti GCTAObservation::gti(void) const
 {
-    // Initialise GTIs
-    GGti gti;
-
-    // If CTA has events then simply retrieve the GTIs from the events
-    if (m_events != NULL) {
-
-        // Copy over GTIs
-        gti = m_events->gti();
-
+    // Throw an exception if no events exist
+    if (m_events == NULL) {
+        std::string msg = "Good Time Intervals are not defined since the "
+                          "observation does not contain events.";
+        throw GException::invalid_value(G_GTI, msg);
     }
 
-    // ... otherwise try reading the GTIs from the event file
-    else {
-
-        // Try opening event file
-        GFits fits;
-        try {
-            fits.open(m_eventfile);
-        }
-        catch (std::exception &e) {
-            std::string msg;
-            if (m_eventfile.length() == 0) {
-                msg = "The observation does not contain any information about "
-                      "the event file, hence the Good Time Intervals cannot be "
-                      "determined.";
-            }
-            else {
-                msg = "Could no open the event file \""+m_eventfile+"\". "
-                      "Please check that the file name is valid.";
-            }
-            throw GException::invalid_value(G_GTI, msg);
-        }
-    
-        // If we have a GTI extension, then read Good Time Intervals from
-        // that extension
-        if (fits.contains("GTI")) {
-            const GFitsTable& table = *fits.table("GTI");
-            gti.read(table);
-        }
-
-        // ... otherwise build GTI from TSTART and TSTOP
-        else if (fits.contains("EVENTS")) {
-
-            // Read start and stop time
-            const GFitsTable& events = *fits.table("EVENTS");
-            double            tstart = events.real("TSTART");
-            double            tstop  = events.real("TSTOP");
-
-            // Create time reference from header information
-            GTimeReference timeref(events);
-
-            // Set start and stop time
-            GTime start(tstart);
-            GTime stop(tstop);
-
-            // Append start and stop time as single time interval to GTI
-            gti.append(start, stop);
-
-            // Set GTI time reference
-            gti.reference(timeref);
-
-        } // endelse: GTI built from TSTART and TSTOP on event file
-
-        // ... else throw an exception
-        else {
-            std::string msg = "Could no find Good Time Interval information "
-                              "in the event file \""+m_eventfile+"\". Please "
-                              "check that Good Time Interval information is "
-                              "properly set in the event file.";
-            throw GException::invalid_value(G_GTI, msg);
-        }
-
-        // Close FITS file
-        fits.close();
-
-    }
-
-    // Return GTIs
-    return gti;
+    // Return GTI
+    return (m_events->gti());
 }
 
 
 /***********************************************************************//**
  * @brief Get energy boundaries
  *
- * @exception GException::invalid_value
- *            Unable to open the event file or to extract energy boundaries
- *            from file.
+ * @return Energy boundaries.
  *
- * Extract the energy boundaries from the events. If events are loaded into
- * the observation, the energy boundaries are simply copied over. If no
- * events are present the method attemps to read the energy boundaries from
- * the event file. This obviously only works if a valid event file name is
- * available.
+ * @exception GException::invalid_value
+ *            Observation does not contain events.
+ *
+ * Extract the energy boundaries from the events. An exception is thrown if
+ * the observation does not contain events.
  ***************************************************************************/
 GEbounds GCTAObservation::ebounds(void) const
 {
-    // Initialise energy boundaries
-    GEbounds ebounds;
-
-    // If CTA has events then simply retrieve the energy boundaries from the
-    // events
-    if (m_events != NULL) {
-
-        // Copy over energy boundaries
-        ebounds = m_events->ebounds();
-
-    }
-
-    // ... otherwise try reading the energy boundaries from the event file
-    else {
-
-        // Try opening event file
-        GFits fits;
-        try {
-            fits.open(m_eventfile);
-        }
-        catch (std::exception &e) {
-            std::string msg;
-            if (m_eventfile.length() == 0) {
-                msg = "The observation does not contain any information about "
-                      "the event file, hence the energy boundaries cannot be "
-                      "determined.";
-            }
-            else {
-                msg = "Could no open the event file \""+m_eventfile+"\". "
-                      "Please check that the file name is valid.";
-            }
-            throw GException::invalid_value(G_EBOUNDS, msg);
-        }
-
-        // If file contains an EBOUNDS extension then load the energy
-        // boundaries from that extension
-        if (fits.contains("EBOUNDS")) {
-            const GFitsTable& hdu = *fits.table("EBOUNDS");
-            ebounds.read(hdu);
-        }
-
-        // ... otherwise, if file contains an EVENTS extension then load the
-        // energy boundaries from the data selection keywords
-        else if (fits.contains("EVENTS")) {
-            const GFitsTable& hdu = *fits.table("EVENTS");
-            ebounds = gammalib::read_ds_ebounds(hdu);
-        }
-
-        // ... else throw an exception
-        else {
-            std::string msg = "Could no find energy boundary information in "
-                              "the event file \""+m_eventfile+"\". Please "
-                              "check that energy boundary information is "
-                              "properly set in the event file.";
-            throw GException::invalid_value(G_EBOUNDS, msg);
-        }
-        
-        // Close FITS file
-        fits.close();
-
+    // Throw an exception if no events exist
+    if (m_events == NULL) {
+        std::string msg = "Energy boundaries are not defined since the "
+                          "observation does not contain events.";
+        throw GException::invalid_value(G_EBOUNDS, msg);
     }
 
     // Return energy boundaries
-    return ebounds;
+    return (m_events->ebounds());
 }
 
 
@@ -635,7 +577,7 @@ GEbounds GCTAObservation::ebounds(void) const
  *            Invalid parameter names found in XML element.
  *
  * Reads information for a CTA observation from an XML element. This method
- * handles to variants: a first where an event list of counts cube is
+ * handles two variants: a first where an event list of counts cube is
  * given and a second where the observation definition information is
  * provided by parameter tags.
  *
@@ -686,14 +628,18 @@ GEbounds GCTAObservation::ebounds(void) const
  *        ...
  *        <parameter name="ExposureCube" file="..."/>
  *        <parameter name="PsfCube"      file="..."/>
+ *        <parameter name="EdispCube"    file="..."/>
+ *        <parameter name="BkgCube"      file="..."/>
  *      </observation>
- *   
+ *
+ * Note that the @p EdispCube is an optional parameter.
+ *
  * Optional user energy thresholds can be specified by adding the @a emin
  * and @a emax attributes to the @p observation tag:
  *
  *     <observation name="..." id="..." instrument="..." emin="..." emax="...">
  *
- * The method does no load the events into memory but stores the file name
+ * The method does not load the events into memory but stores the file name
  * of the event file. The events are only loaded when required. This reduces
  * the memory needs for an CTA observation object and allows for loading
  * of event information upon need.
@@ -734,31 +680,12 @@ void GCTAObservation::read(const GXmlElement& xml)
         if ((par->attribute("name") == "EventList") ||
             (par->attribute("name") == "CountsCube")) {
 
-            // Store event type
-            m_eventtype = par->attribute("name");
-
             // Read eventlist file name
-            std::string filename = par->attribute("file");
+            std::string filename = gammalib::xml_file_expand(xml,
+                                             par->attribute("file"));
 
-            // Open FITS file
-            GFits fits(filename);
-
-            // Read event attributes but do not load the events here
-            // to save memory
-            if (fits.contains("EVENTS")) {
-                const GFitsHDU& hdu = *fits.at("EVENTS");
-                read_attributes(hdu);
-            }
-            else {
-                const GFitsHDU& hdu = *fits.at(0);
-                read_attributes(hdu);
-            }
-
-            // Close FITS file
-            fits.close();
-
-            // Store event filename
-            m_eventfile = filename;
+            // Load events
+            load(filename);
 
             // Increment parameter counter
             n_evfile++;
@@ -768,7 +695,7 @@ void GCTAObservation::read(const GXmlElement& xml)
         else if (par->attribute("name") == "Background") {
 
             // Read background file name
-            m_bgdfile = par->attribute("file");
+            m_bgdfile = gammalib::xml_file_expand(xml, par->attribute("file"));
 
         }
 
@@ -920,27 +847,29 @@ void GCTAObservation::read(const GXmlElement& xml)
  * @exception GException::invalid_value
  *            No valid events found in observation.
  *
- * Writes information for a CTA observation into an XML element. This method
- * handles to variants: a first where an event list of counts cube is
- * given and a second where the observation definition information is
- * provided by parameter tags. Note that in both bases, a valid event
- * type needs to be set (either @a EventList or @a CountsCube).
+ * Writes information for a CTA observation into an XML element.
  *
- * The XML format for an event list is
+ * Dependent on the content of the CTA observation, different XML formats
+ * will be written. If the CTA observation contains an event list that
+ * has been loaded from disk, the method will write the file name of the
+ * event list using the format
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="EventList" file="..."/>
  *       ...
  *     </observation>
  *
- * and for a counts cube is
+ * If the CTA observation contains a counts cube that has been loaded from
+ * disk, the method will write the file name of the counts cube using the
+ * format
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="CountsCube" file="..."/>
  *       ...
  *     </observation>
  *
- * The second variant without event information has the following format
+ * In all other cases the method will only write the metadata information
+ * for the CTA observation using the format
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="Pointing" ra="..." dec="..."/>
@@ -948,15 +877,19 @@ void GCTAObservation::read(const GXmlElement& xml)
  *       ...
  *     </observation>
  *
- * In addition, calibration information can be specified using the format
+ * In case that response information is available and that the response
+ * information has been either loaded or saved to disk, the method will
+ * write the reponse information into the XML file. If the response for
+ * an unbinned or binned observation has been loaded from the calibration
+ * database, the format
  *
  *     <observation name="..." id="..." instrument="...">
  *       ...
  *       <parameter name="Calibration" database="..." response="..."/>
  *     </observation>
  *
- * If even more control is required over the response, individual file names
- * can be specified using
+ * will be written. If the response has been loaded from individual files,
+ * the format
  *
  *     <observation name="..." id="..." instrument="...">
  *       ...
@@ -966,15 +899,21 @@ void GCTAObservation::read(const GXmlElement& xml)
  *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
- * In case that a @a CountsCube is handled, the stacked response can also be
- * provided in the format
+ * will be written. If the observation contains information about the
+ * response to a stacked analysis, the format
  *
- *      <observation name="..." id="..." instrument="...">
- *        ...
- *        <parameter name="ExposureCube" file="..."/>
- *        <parameter name="PsfCube"      file="..."/>
- *      </observation>
- *   
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="ExposureCube" file="..."/>
+ *       <parameter name="PsfCube"      file="..."/>
+ *       <parameter name="EdispCube"    file="..."/>
+ *       <parameter name="BkgCube"      file="..."/>
+ *     </observation>
+ *
+ * will be written. Note that the @p EdispCube parameter will only be
+ * written in case that an energy dispersion cube had been defined (energy
+ * dispersion is optional).
+ *
  * If user energy thresholds are defined (i.e. threshold values are >0) the
  * additional @a emin and @a emax attributes will be written to the
  * @p observation tag:
@@ -984,18 +923,17 @@ void GCTAObservation::read(const GXmlElement& xml)
  ***************************************************************************/
 void GCTAObservation::write(GXmlElement& xml) const
 {
-    // Throw an exception if m_eventtype is neither "EventList" nor
-    // "CountsCube"
-    if ((m_eventtype != "EventList") &&
-        (m_eventtype != "CountsCube")) {
+    // Throw an exception if eventtype() is neither "EventList" nor
+    std::string evttype = eventtype();
+    if ((evttype != "EventList") && (evttype != "CountsCube")) {
         std::string msg;
-        if (m_eventtype.length() == 0) {
+        if (evttype.empty()) {
             msg = "The observation does not contain any events, hence "
                   "it cannot be written into an XML file.";
         }
         else {
             msg = "The observation contains an unknown event type \""+
-                  m_eventtype+"\". The event type needs to be either "
+                  evttype+"\". The event type needs to be either "
                   "\"EventList\" or \"CountsCube\".";
         }
         throw GException::invalid_value(G_WRITE, msg);
@@ -1009,11 +947,14 @@ void GCTAObservation::write(GXmlElement& xml) const
         xml.attribute("emax", gammalib::str(m_hi_user_thres));
     }
 
-    // If there is a filename then write the event information to the
-    // XML file
-    if (m_eventfile.length() > 0) {
-        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_eventtype);
-        par->attribute("file", m_eventfile);
+    // If there is an event filename then write the event information to the
+    // XML file ...
+    if (!m_eventfile.is_empty()) {
+
+        // Write event file name
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, evttype);
+        par->attribute("file", gammalib::xml_file_reduce(xml, m_eventfile.url()));
+
     }
 
     // ... otherwise write the observation definition information
@@ -1033,8 +974,8 @@ void GCTAObservation::write(GXmlElement& xml) const
         // Write deadtime correction factor
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Deadtime");
         par->attribute("deadc",  gammalib::str(m_deadc));
-    }
 
+    }
 
     // Write response information
     if (m_response != NULL) {
@@ -1047,9 +988,18 @@ void GCTAObservation::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Read data from FITS object
+ * @brief Read data from FITS file
  *
- * @param[in] fits FITS object.
+ * @param[in] fits FITS file.
+ *
+ * Reads event data from a FITS file and sets the observation attributes.
+ *
+ * The method automatically switches between an event list and a counts cube,
+ * depending of the information provided in the FITS file. If an extension
+ * name is specified, the method checks whether the extension exists and
+ * loads the extension as event list. Otherwise, it checks whether the file
+ * contains an "EVENTS" extension and loads the extension as event list.
+ * If none of the above are satistified, the method loads a counts cube.
  ***************************************************************************/
 void GCTAObservation::read(const GFits& fits)
 {
@@ -1058,9 +1008,15 @@ void GCTAObservation::read(const GFits& fits)
     if (m_events != NULL) delete m_events;
     m_events = NULL;
 
+    // Retrieve file name from FITS file
+    GFilename filename(fits.filename());
+
+    // Get extension name
+    std::string extname = filename.extname("EVENTS");
+
     // If FITS file contains an EVENTS extension we have an unbinned
     // observation ...
-    if (fits.contains("EVENTS")) {
+    if (fits.contains(extname)) {
 
         // Allocate event list
         GCTAEventList* events = new GCTAEventList;
@@ -1072,7 +1028,7 @@ void GCTAObservation::read(const GFits& fits)
         events->read(fits);
 
         // Read observation attributes from EVENTS extension
-        const GFitsHDU& hdu = *fits.at("EVENTS");
+        const GFitsHDU& hdu = *fits.at(extname);
         read_attributes(hdu);
 
     }
@@ -1095,22 +1051,32 @@ void GCTAObservation::read(const GFits& fits)
 
     }
 
-    // Set the event type
-    set_event_type();
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Write CTA observation into FITS object.
+ * @brief Write observation into FITS file.
  *
- * @param[in] fits FITS object.
+ * @param[in] fits FITS file.
+ * @param[in] evtname Events FITS extension name (default: "EVENTS").
+ * @param[in] gtiname Good Time Intervals FITS extension name (default: "GTI").
  *
- * This method does nothing if no events are within the CTA observation.
+ * Writes the observation into a FITS file.
+ *
+ * If the observation contains an event list, the event list and Good Time
+ * Intervals will be written to the FITS file. The FITS extension name for
+ * the event list and the Good Time Intervals can be optionally specified
+ * thru the @p evtname and @p gtiname arguments.
+ *
+ * If the observation contains an event cube, the event cube will be written
+ * into the primary extension of the FITS file.
+ *
+ * This method does nothing if no events are in the CTA observation.
  ***************************************************************************/
-void GCTAObservation::write(GFits& fits) const
+void GCTAObservation::write(GFits& fits, const std::string& evtname,
+                                         const std::string& gtiname) const
 {
     // Get pointers on event list
     const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(events());
@@ -1119,12 +1085,21 @@ void GCTAObservation::write(GFits& fits) const
     // Case A: Observation contains an event list
     if (list != NULL) {
 
-        // Write event list into FITS file. This method also writes
-        // the GTI as they are part of the event list.
-        list->write(fits);
+        // Remove HDUs if they exist already
+        if (fits.contains(evtname)) {
+            fits.remove(evtname);
+        }
+        if (fits.contains(gtiname)) {
+            fits.remove(gtiname);
+        }
 
-        // Write observation attributes into EVENTS header
-        GFitsHDU& hdu = *fits.at("EVENTS");
+        // Write event list and Good Time Intervals into FITS file
+        list->write(fits, evtname, gtiname);
+
+        // Get reference to events extension
+        GFitsHDU& hdu = *fits.at(evtname);
+
+        // Write observation attributes to events extension
         write_attributes(hdu);
 
     } // endif: observation contained an event list
@@ -1149,14 +1124,17 @@ void GCTAObservation::write(GFits& fits) const
 
 
 /***********************************************************************//**
- * @brief Load event list or counts cube from FITS file
+ * @brief Load unbinned or binned analysis data
  *
- * @param[in] filename FITS file name.
+ * @param[in] filename Event list or counts cube FITS file name.
  *
  * Loads either an event list or a counts cube from a FITS file.
  ***************************************************************************/
-void GCTAObservation::load(const std::string& filename)
+void GCTAObservation::load(const GFilename& filename)
 {
+    // Store event filename
+    m_eventfile = filename;
+
     // Open FITS file
     GFits fits(filename);
 
@@ -1166,51 +1144,98 @@ void GCTAObservation::load(const std::string& filename)
     // Close FITS file
     fits.close();
 
-    // Store event filename
-    m_eventfile = filename;
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Load stacked cube from FITS files
+ * @brief Load stacked analysis data
  *
  * @param[in] cntcube Counts cube file name.
  * @param[in] expcube Exposure cube file name.
- * @param[in] psfcube Psf cube file name.
+ * @param[in] psfcube Point spread function cube file name.
  * @param[in] bkgcube Background cube file name.
  *
- * Loads a counts map, an exposure cube, a Psf cube and a background cube
- * for stacked cube analysis.
+ * Loads a counts cube, an exposure cube, a point spread function cube, and a
+ * background cube for stacked analysis.
  ***************************************************************************/
-void GCTAObservation::load(const std::string& cntcube,
-                           const std::string& expcube,
-                           const std::string& psfcube,
-                           const std::string& bkgcube) {
+void GCTAObservation::load(const GFilename& cntcube,
+                           const GFilename& expcube,
+                           const GFilename& psfcube,
+                           const GFilename& bkgcube) {
 
     // Load counts cube FITS file
     load(cntcube);
 
     // Check whether we have an event cube
     if (dynamic_cast<const GCTAEventCube*>(events()) == NULL) {
-        std::string msg = "Specified file \""+cntcube+"\" is not a CTA "
+        std::string msg = "Specified file \""+cntcube.url()+"\" is not a CTA "
                           "counts cube. Please provide a counts cube.";
-        throw GException::invalid_argument(G_LOAD, msg);
+        throw GException::invalid_argument(G_LOAD1, msg);
     }
 
     // Load exposure cube
     GCTACubeExposure exposure(expcube);
 
-    // Load Psf cube
+    // Load point spread function cube
     GCTACubePsf psf(psfcube);
 
     // Load background cube
     GCTACubeBackground background(bkgcube);
 
-    // Attach exposure cube, Psf cube and background cube as response
+    // Set exposure cube, point spread function cube, and background cube
+    // as response for this observation
     response(exposure, psf, background);
+ 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load stacked analysis data with energy dispersion
+ *
+ * @param[in] cntcube Counts cube file name.
+ * @param[in] expcube Exposure cube file name.
+ * @param[in] psfcube Point spread function cube file name.
+ * @param[in] edispcube Energy dispersion cube file name.
+ * @param[in] bkgcube Background cube file name.
+ *
+ * Loads a counts cube, an exposure cube, a point spread function cube, a
+ * energy dispersion cube and a background cube for stacked analysis.
+ ***************************************************************************/
+void GCTAObservation::load(const GFilename& cntcube,
+                           const GFilename& expcube,
+                           const GFilename& psfcube,
+                           const GFilename& edispcube,
+                           const GFilename& bkgcube) {
+
+    // Load counts cube FITS file
+    load(cntcube);
+
+    // Check whether we have an event cube
+    if (dynamic_cast<const GCTAEventCube*>(events()) == NULL) {
+        std::string msg = "Specified file \""+cntcube.url()+"\" is not a CTA "
+                          "counts cube. Please provide a counts cube.";
+        throw GException::invalid_argument(G_LOAD2, msg);
+    }
+
+    // Load exposure cube
+    GCTACubeExposure exposure(expcube);
+
+    // Load point spread function cube
+    GCTACubePsf psf(psfcube);
+
+    // Load energy dispersion cube
+    GCTACubeEdisp edisp(edispcube);
+
+    // Load background cube
+    GCTACubeBackground background(bkgcube);
+
+    // Set exposure cube, point spread function cube, energy dispersion
+    // cube, and background cube as response for this observation
+    response(exposure, psf, edisp, background);
  
     // Return
     return;
@@ -1221,114 +1246,122 @@ void GCTAObservation::load(const std::string& cntcube,
  * @brief Save CTA observation into FITS file.
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite existing FITS file (default=false).
+ * @param[in] clobber Overwrite existing FITS file? (default: false)
+ *
+ * Saves the CTA observation into a FITS file.
+ *
+ * If the CTA observation contains an event list, the method will write an
+ * events and a Good Time Intervals extension to the FITS file. The names
+ * for both extension can be optionally specified in the filename using
+ * the format
+ *
+ *      filename[EVENTS;GTI]
+ *
+ * where the string in the squared bracket defines the extension names. The
+ * part before the semi-colon is the events extension name and the part after
+ * the semi-colon is the Good Time Intervals extension name.
+ *
+ * If the CTA observation contains an event cube, the method will write the
+ * cube into the primary image, followed by binary tables containing the
+ * energy boundaries and the Good Time Intervals. The extension names of
+ * these binary tables are "EBOUNDS" and "GTI", and cannot be modified.
  ***************************************************************************/
-void GCTAObservation::save(const std::string& filename, const bool& clobber) const
+void GCTAObservation::save(const GFilename& filename,
+                           const bool&      clobber) const
 {
-
-    // Create FITS file
-    GFits fits;
-
-    // Write data into FITS file
-    write(fits);
-
-    // Save FITS file
-    fits.saveto(filename, clobber);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set event container
- *
- * @param[in] events Event container.
- *
- * Set the event container for this observation by cloning the @p events.
- ***************************************************************************/
-void GCTAObservation::events(const GEvents& events)
-{
-    // Remove an existing event container
-    if (m_events != NULL) delete m_events;
-
-    // Clone events
-    m_events = events.clone();
-
-    // Set event type
-    set_event_type();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to event container
- *
- * @return Pointer to event container (always valid).
- *
- * @exception GException::invalid_value
- *            Events could not be fetched from disk.
- *
- * Returns a pointer to the event container. If no events exist the method
- * tries to fetch events from the file specified by the m_eventfile member.
- * If this fails, an exception will be thrown.
- ***************************************************************************/
-const GEvents* GCTAObservation::events(void) const
-{
-    // If event container is offline then bring it online now
-    if (m_events == NULL) {
-
-        // Try loading the events from FITS file. Catch any exception. Put
-        // the code into a critical zone as it might be called from within
-        // a parallelized thread.
-        #pragma omp critical
-        {
-        try {
-                const_cast<GCTAObservation*>(this)->load(m_eventfile);
+    // Set default events and Good Time Intervals extension name and extract
+    // a possible overwrite from the extension name argument of the filename.
+    // The specific format that is implemented is [events;gti], where the
+    // part before the semi-colon is the events extension name and the part
+    // after the semi-colon is the Good Time Intervals extension name.
+    std::string evtname = "EVENTS";
+    std::string gtiname = "GTI";
+    if (filename.has_extname()) {
+        std::vector<std::string> extnames = gammalib::split(filename.extname(), ";");
+        if (extnames.size() > 0) {
+            evtname = gammalib::strip_whitespace(extnames[0]);
         }
-        catch (...) {
-            ;
+        if (extnames.size() > 1) {
+            gtiname = gammalib::strip_whitespace(extnames[1]);
         }
-        }
-
-        // Throw an exception if the event container is still not valid
-        if (m_events == NULL) {
-            std::string msg;
-            if (m_eventfile.length() == 0) {
-                msg = "The observation does not contain any information about "
-                      "the event file, hence the events cannot be fetched "
-                      "from disk for access.";
-            }
-            else {
-                msg = "Could no load the event file \""+m_eventfile+"\" into "
-                      "the observation. Please check that the file name is "
-                      "valid and that the file contains events.";
-            }
-            throw GException::invalid_value(G_EVENTS, msg);
-        }
-
     }
 
-    // Return pointer to event container
-    return m_events;
+    // Open or create FITS file. Since we accept here a special structure
+    // for the extension that cfitsio does not understand we only pass
+    // the URL without extension name to the GFits constructor.
+    GFits fits(filename.url(), true);
+
+    // Write data into FITS file
+    write(fits, evtname, gtiname);
+
+    // Save FITS file
+    fits.save(clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event type string
+ *
+ * @return Event type string.
+ *
+ * Returns "EventList" if the observation contains an event list,
+ * "CountsCube" if it contains a counts cube, "Events" if it container an
+ * unknown type of events (which should never occur), and an empty string if
+ * no events have been allocated.
+ ***************************************************************************/
+std::string GCTAObservation::eventtype(void) const
+{
+    // Initialise empty event type string
+    std::string eventtype = "";
+
+    // Continue only if events are allocated
+    if (m_events != NULL) {
+
+        // Case A: we have a list
+        GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
+        if (list != NULL) {
+            eventtype = "EventList";
+        }
+
+        // Case B: we have a cube
+        else {
+            GCTAEventCube* cube = dynamic_cast<GCTAEventCube*>(m_events);
+            if (cube != NULL) {
+                eventtype = "CountsCube";
+            }
+
+            // Case C: we don't know what we have
+            else {
+                eventtype = "Events";
+            }
+        }
+
+    } // endif: events were allocated
+
+    // Return event type
+    return eventtype;
 }
 
 
 /***********************************************************************//**
  * @brief Dispose events
  *
- * Drops the events from the observation. Be careful with using this method
- * as the events are not saved before being disposed.
+ * Disposes the events to save memory. The method only applies to event
+ * lists. If does nothing in case that the observation does not contain an
+ * event list.
  ***************************************************************************/
 void GCTAObservation::dispose_events(void)
 {
-    // Delete any existing event container
-    if (m_events != NULL) delete m_events;
+    // Get pointer to event list
+    GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
 
-    // Signal that we disposed the events
-    m_events = NULL;
+    // Dispose event list if pointer is valid
+    if (list != NULL) {
+        list->dispose();
+    }
 
     // Return
     return;
@@ -1356,8 +1389,8 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Name")+name());
         result.append("\n"+gammalib::parformat("Identifier")+id());
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
-        result.append("\n"+gammalib::parformat("Event file")+eventfile());
-        result.append("\n"+gammalib::parformat("Event type")+m_eventtype);
+        result.append("\n"+gammalib::parformat("Event file")+eventfile().url());
+        result.append("\n"+gammalib::parformat("Event type")+eventtype());
         result.append("\n"+gammalib::parformat("Statistics")+statistics());
         result.append("\n"+gammalib::parformat("Ontime"));
         result.append(gammalib::str(ontime())+" s");
@@ -1433,7 +1466,6 @@ void GCTAObservation::init_members(void)
     m_instrument = "CTA";
     m_object.clear();
     m_eventfile.clear();
-    m_eventtype.clear();
     m_bgdfile.clear();
     m_response = NULL;
     m_pointing.clear();
@@ -1463,7 +1495,6 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_instrument    = obs.m_instrument;
     m_object        = obs.m_object;
     m_eventfile     = obs.m_eventfile;
-    m_eventtype     = obs.m_eventtype;
     m_bgdfile       = obs.m_bgdfile;
     m_pointing      = obs.m_pointing;
     m_obs_id        = obs.m_obs_id;
@@ -1644,49 +1675,6 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     // Other information
     hdu.card("EUNIT",    "TeV",    "Energy unit");
     hdu.card("EVTVER",   "draft1", "Event list version number");
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set event type
- *
- * Depending on the type of events that are stored in the m_events member,
- * set the event type to
- *
- *     "EventList" if m_events is of type GCTAEventList
- *     "CountsCube" if m_events is of type GCTAEventCube
- *     "Events" if m_events is not NULL but neither GCTAEventList nor GCTAEventCube
- *     "" if m_events is NULL
- *
- ***************************************************************************/
-void GCTAObservation::set_event_type(void)
-{
-    // Continue only if events are loaded
-    if (m_events != NULL) {
-
-        // Case A: we have a list
-        GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
-        if (list != NULL) {
-            m_eventtype = "EventList";
-        }
-
-        // Case B: we have a cube
-        else {
-            GCTAEventCube* cube = dynamic_cast<GCTAEventCube*>(m_events);
-            if (cube != NULL) {
-                m_eventtype = "CountsCube";
-            }
-
-            // Case C: we don't know what we have
-            else {
-                m_eventtype = "Events";
-            }
-        }
-
-    }
 
     // Return
     return;

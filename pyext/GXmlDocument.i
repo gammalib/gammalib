@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlDocument.i - XML document node class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,12 +49,14 @@ public:
     virtual NodeType      type(void) const;
 
     // Methods
-    std::string version(void) const;
-    std::string encoding(void) const;
-    std::string standalone(void) const;
-    void        version(const std::string& version);
-    void        encoding(const std::string& encoding);
-    void        standalone(const std::string& standalone);
+    const GFilename& filename(void) const;
+    std::string      version(void) const;
+    std::string      encoding(void) const;
+    std::string      standalone(void) const;
+    void             filename(const GFilename& filename);
+    void             version(const std::string& version);
+    void             encoding(const std::string& encoding);
+    void             standalone(const std::string& standalone);
 };
 
 

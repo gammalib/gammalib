@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 1.0.1
+New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-27 January 2016
+24 July 2016
 
 
 1. Introduction
@@ -13,21 +13,152 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-None
+The following classes have been added:
+- GCTAPsfTable
+- GWcsSIN
+
+The following classes have been removed:
+- GCTAOnOffObservations
+
+The following methods have been added to the public interface:
+- GApplication::logFileClose()
+- GObservation::events() (non-const variant)
+- GObservation::nobserved()
+- GObservations::nobserved()
+- GFilename::operator std::string()
+- GFilename::exists()
+- GFilename::is_fits()
+- GFilename::remove()
+- GFilaname::protocol()
+- GFilename::path()
+- GFilename::file()
+- GCsv::append()
+- GSkyMap::shape()
+- GSkyMap::ndim()
+- GModelSky::spatial()
+- GModelSky::spectral()
+- GModelSky::temporal()
+- GArf::columns()
+- GArf::at()
+- GArf::append()
+- GArf::operator()(int,int)
+- GArf::operator[](std::string)
+- GXmlDocument::filename()
+- GXmlNode::filename()
+- GXmlNode::parent()
+- GCTAObservation(GFilename) constructor
+- GCTAResponseTable::axis(std::string)
+- GCTAResponseTable::table(std::string)
+- GCTAResponseTable::has_axis(std::string)
+- GCTAResponseTable::has_table(std::string)
+- GCTAEventCube::weights()
+- GCTAEventBin::weight()
+- friend GTime  operator+(const GTime&  time,    const double& seconds)
+- friend GTime  operator+(const double& seconds, const GTime&  time)
+- friend GTime  operator-(const GTime&  time,    const double& seconds)
+- friend double operator-(const GTime&  a,       const GTime&  b)
+- GTime::operator+=(const double& seconds)
+- GTime::operator-=(const double& seconds)
+- friend double operator/(const GEnergy& a, const GEnergy& b);
+
+The following methods have been removed:
+- GFilename::size()
+- gammalib::file_exists()
+- gammalib::file_exists_gzip()
+- gammalib::is_fits()
+- GTime::operator+=(const GTime& time)
+- GTime::operator-=(const GTime& time)
+- GTime::operator*=(const double& scale)
+- GTime::operator/=(const double& scale)
+- friend GTime operator+(const GTime &a, const GTime &b)
+- friend GTime operator-(const GTime &a, const GTime &b)
+- friend GTime operator* (const GTime &time, const double &s)
+- friend GTime operator*(const double &s, const GTime &time)
+- friend GTime operator*(const GTime &time, const double &s)
+- friend GTime operator/(const GTime &time, const double &s)
+- GXmlElement::parent()
+- GCTACubeExposure::elogmeans()
+- GCTACubePsf::elogmeans()
+- GCTACubeBackground::elogmeans()
+
+The following methods have been renamed:
+- GCTAResponseTable::tables(), was GCTAResponseTable::size()
+- GCTAResponseTable::axis_bins(), was GCTAResponseTable::axis()
+- GFilename::is_empty(), was GFilename::empty()
+- GFilename::url(), was GFilename::filename()
+- GCTAEventCube::counts(), was GCTAEventCube::map()
+- GCTACubePsf::cube(), was GCTACubePsf::map()
+- GCTACubeEdisp::cube(), was GCTACubeEdisp::map()
+
+The following classes now use GFilename for filenames arguments instead
+of std::string:
+- GApplicationPar
+- GApplicationPars
+- GArf
+- GCsv
+- GEbounds
+- GEnergies
+- GEventCube, GCOMEventCube, GCTAEventCube, GLATEventCube, GMWLSpectrum
+- GEventList, GCTAEventList, GLATEventList
+- GEvents
+- GGti
+- GLog
+- GModelSpatialDiffuseCube
+- GModelSpatialDiffuseMap
+- GModelSpectralFunc
+- GModels
+- GNodeArray
+- GObservations
+- GPha
+- GRmf
+- GSkyMap
+- GSkyRegions
+- GTestSuites
+- GXml
+- GCTAAeff, GCTAAeff2D, GCTAAeffArf, GCTAAeffPerfTable
+- GCTABackground, GCTABackground3D, GCTABackgroundPerfTable
+- GCTACubeBackground, GCTACubeExposure, GCTACubePsf
+- GCTAEdisp, GCTAEdisp2D, GCTAEdispPerfTable, GCTAEdispRmf
+- GCTAObservation
+- GCTAOnOffObservations
+- GCTAPointing
+- GCTAPsf, GCTAPsf2D, GCTAPsfKing, GCTAPsfPerfTable, GCTAPsfVector
+
+The return value has been changed for the following methods:
+- GFits::filename() returns now GFilename instead of std::string
+- GCTAObservation::eventtype() returns now std::string instead of const std::string&
+- GCaldb::filename() returns now GFilename instead of std::string
+
+The interface for the following methods has been changed:
+- GFitsImage naxes constructor
+- GFitsImageByte naxes constructor
+- GFitsImageDouble naxes constructor
+- GFitsImageFloat naxes constructor
+- GFitsImageLong naxes constructor
+- GFitsImageLongLong naxes constructor
+- GFitsImageSByte naxes constructor
+- GFitsImageShort naxes constructor
+- GFitsImageULong naxes constructor
+- GFitsImageUShort naxes constructor
+- GSkyMap::save()
+- GModelSpectralRegistry::alloc()
+- GModelSpatialRegistry::alloc()
+- GModelTemporalRegistry::alloc()
 
 
 3. Configuration
 -----------------
-If GammaLib is compiled on Mavericks (Mac OS X 10.9) or newer but Python has been
-compiled for an earlier deployment target, a compatibility issue arises due to the
-way how class names are mangled by the compiler. This is now automatically detected
-and fixed, which should solve some compatibility issues that have been encountered
-by user using the Anaconda package on Mac OS X.
+The GammaLib package now supports out of source builds (#1484).
 
 
 4. Application module
 ---------------------
-None
+The GApplicationPar::filename() methods now take and return GFilename objects
+instead of std::string objects (#1671).
+
+A GApplication::logFileClose() method has been added to force writing the
+trailer and closing the log file. This is primarily useful for usage in
+Python where the desctructor is not always called.
 
 
 5. Base module
@@ -37,7 +168,15 @@ None
 
 6. FITS I/O Interface
 ---------------------
-None
+The GFitsTableCol::insert() method did not work corretly for an empty column
+since it de-allocated memory without having necessarily memory on disk. This
+was corrected by allocating now memory after inserting elements into an empty
+FITS column.
+
+GFits now uses the GFilename class to store the FITS filename (fixes #1649).
+
+The GFitsImage naxes constructor now takes a std::vector as argument instead
+of a pointer to an array and a dimension (#1779).
 
 
 7. Linear algebra module
@@ -47,9 +186,82 @@ None
 
 8. Model module
 ---------------
-The diffuse map normalization for Monte Carlo simulations has been corrected in
-GModelSpatialDiffuseMap::set_mc_cone() to properly account for the case that the
-diffuse map has not been normalized. This fixes #1584.
+Sky directions drawn by GModelSpatialDiffuseConst::mc() are now restricted
+to the simulation cone that has previously been defined using the mc_norm()
+method. This speeds up considerbly the Monte Carlo simulations for an
+isotropic diffuse model (#1674). 
+
+The GModelSpectral eval() and eval_gradients() methods use an empty GTim()
+object as default time argument since all spectral models are so far time-
+independent. This avoids that a user needs to specify a dummy time argument
+(#1672).
+
+The set_mc_cone() methods of the GModelSpatialDiffuseCube class and the
+GModelSpatialDiffuseMap class now recompute only the Monte Carlo acceptance
+cone in case that the cone centre or radius have changed since the last
+computation. This speeds up the computations (#1673).
+
+The GModelSpatialDiffuseCube::mc() method now uses a rejection method for
+simulating sky directions, which makes the MC method identical to the model
+evaluation method, using in both cases a log-log interpolation. The simulation
+cone is now used for Monte Carlo simulations (#1722).
+
+Also the GModelSpatialDiffuseMap::mc() method now uses a rejection method for
+simulating sky directions (#1725).
+
+The methods spatial(), spectral() and temporal() have been added to GModelSky
+to allow setting of model components.
+
+Private methods GModel::read_attributes() and GModel::write_attributes() have
+been added to centralize the reading and writing of model attributes. These
+methods are now called at all relevant places, reducing code duplication and
+assuring that all attributes are correctly read by all classes and constructors
+(#1765).
+
+The GModelSpatialDiffuseMap, GModelSpatialDiffuseCube and GModelSpectralFunc
+class now support the specifications of file names that are relative to the
+XML file (#1808).
+
+The spatial model components have been renamed to enhance the readability and
+to make them more homogenous. The Fermi/LAT Science Tools should also evolve
+to support the new names:
+* "PointSource" (alias: "SkyDirFunction")
+* "RadialDisk" (alias: "DiskFunction")
+* "RadialGaussian" (alias: "GaussFunction")
+* "RadialShell" (alias: "ShellFunction")
+* "EllipticalDisk"
+* "EllipticalGaussian" (alias: "EllipticalGauss")
+* "DiffuseIsotropic" (alias: "ConstantValue")
+* "DiffuseMap" (alias: "SpatialMap")
+* "DiffuseMapCube" (alias: "MapCubeFunction")
+By default the old model names are still supported. Support of the old model
+names can be turned off by specifying the --disable-legacy-model-names option
+to the ./configure script (#1818).
+
+The model classes now write the same XML element names than those that were read
+in. In that way a maximum legacy for the Fermi/LAT data format is assured (#1820).
+
+The spectral registry class now also checks for model parameter names which allows
+to have models of the same type but with different parameters in the registry
+(#1824). The interface for the GModelSpectralRegistry::alloc() method has been
+changed so that it no longer takes a name string but an XML element. The same has
+been done for the GModelSpatialRegistry and GModelTemporalRegistry classes so that
+more general model definition XML file handling can be implemented.
+
+The names of some spectral model components have been modified to be more
+explicit and homogenous:
+* "Constant" (was "ConstantValue")
+* "PowerLaw" (combines "PowerLaw" and "PowerLaw2")
+* "BrokenPowerLaw"
+* "ExponentialCutoffPowerLaw" (was "ExpCutoff")
+* "SuperExponentialCutoffPowerLaw" (was "PLSuperExpCutoff")
+* "Gaussian"
+* "LogParabola"
+* "FileFunction"
+* "NodeFunction"
+By default the old model names are still supported. Support of the old model
+names can be turned off by specifying the --disable-legacy-model-names option
+to the ./configure script (#1821).
 
 
 9. Numerics module
@@ -59,7 +271,29 @@ None
 
 10. Observation module
 ----------------------
-None
+A non-const GObservation::events() method has been added to allow for
+the manipulation of events within an observation without the need to
+create a local copy.
+
+The argument of GObservation::deadc(GTime) now defaults to GTime() so
+that no argument is needed when calling the method. This reflects the
+fact that the deadtime correction is often computed as an average value
+over the observation, and does in fact not depend on time (#1670).
+
+The GTime operators have been revised as time is implemented as an
+absolute quantity, while addition and subtraction of GTime objects are
+relative operations. The GTime arguments of the operators have thus be
+replaced by double precision values that specify relative time in seconds.
+The multiplication and division operators have been removed (#1714).
+
+The GObservations::nobserved() method has been added that returns the
+total number of events in an observation container. The method is used
+by the print() method. The method uses the GObservation::nobserved()
+method that have also been added to determine for each observation
+the number of observed events (#1723).
+
+A division operator has been added to the GEnergy method to compute the
+ratio of two energies.
 
 
 11. Optimization module
@@ -69,33 +303,90 @@ None
 
 12. Sky module
 --------------
-None
+The GSkyMap load() and save() methods now support the handling of FITS
+extension names. Users can now specify with which extension name a sky
+map is written to a FITS file, and from which extension name it should
+be loaded. This allows to have multiple sky maps in the same file, and
+to mix also HEALPix and WCS maps in the same file (#1695).
+
+A GSkyMap::publish() method has been added that publishes the sky map
+on a Virtual Observatory Hub. This finally makes GammaLib interoperable
+with VO imaging tools (#1231).
+
+A shape member was added to the GSkyMap class to enable handling of
+images with more than 3 dimensions. The shape() methods set or retrieve
+the number of maps in each of the dimensions, the ndim() method returns
+the number of dimensions. Note that a longitude and latitude dimensions
+are not counted in the map dimensions, i.e. a 3D image cube with
+longitude, latitude and a number of maps has a dimension of 1 (#1733).
+
+An optional extname argument has been added to the GSkyMap::save() method
+so that the extension name can be set (#1787).
+
+The Orthographic/synthesis (SIN) projection has been added to the WCS
+projections (#1798).
 
 
 13. Support module
 ------------------
-Correct a bug in GFilename::set_filename() that prevented using numbers in FITS
-extension names (#1611).
+The GFilename class has been extended and some methods have been renamed.
+The full filename including and FITS extension is now returned by an
+implicit type conversion operator std::string(). The filename() method has
+been renamed to url(), and the methods exists(), is_fits() and remove()
+have been added to replace functions of the GTools module that were used
+for this purpose in the past. Furthermore, the method protocol() returns
+the access protocol (e.g. http, ftp, file) of the file name, the method
+path() returns the path of th file name, and the method file() returns the
+file name without the path.
+
+Put FITS access in a critical OMP zone to make GFilename::is_fits() thread
+safe (#1717).
+
+The gammalib::number() function was added to convert a singular noun into
+a plural noun is the number of instances of the noun is not one (#1743).
+
+The GCsv::append() method appends a list of strings to a CSV file. This allow
+easy creation of a CSV file, in particular from Python lists (#1773).
 
 
 14. XML module
 --------------
-None
+The GXmlAttribute class does no longer store the hyphens of an attribute, but
+the hyphens are stripped upon construction, and added back when writing the
+attribute into a URL. The side effect of this new behaviour is that XML test
+reports are also written in case that an exception has occured during a unit
+test (#1746).
+
+The node parent attribute has been move from the GXmlElement class to the
+GXmlNode class, the parent() access methods have also been moved to GXmlNode.
+A filename() method has been added to the GXmlNode and GXmlDocument classes
+that enables accessing the file name of the XML file from a GXmlNode object.
+The method walks up the parents until the root node is found, and it gets the
+file name from the root node (#1808).
 
 
 15. VO module
 -------------
-None
+A GVOClient::publish() method was added that allows publishing of a FITS
+image to the Hub. The FITS image will be saved into a temporary storage
+location and the Hub will be informed that an image is available.
 
 
 16. Xspec module
 ----------------
-None
+The GArf class now also handles additional double precision columns that may
+be needed for response computation.
 
 
 17. Test module
 ---------------
-None
+A GTestSuite::test_value() method has been added for strings to simplify the
+writing of test cases for string comparison (#1772).
+
+The Python interface for handling of SWIG exceptions is now also compatible
+with Python 3, hence there should be no longer "basic_string ::_S_construct
+null not valid" messages when errors occur in the SWIG interface under
+Python 3.
 
 
 18. Multi-wavelength interface
@@ -105,12 +396,104 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-None
+Pass 8 response function and data are now supported. The LAT module has been
+adapted so that event types can be handled. Note that the fisheye effect is
+not taken into account (#1517).
 
 
 20. CTA interface
 -----------------
-Add table column units to the CTA event list columns (fixes #1616).
+The response table instrument response functions now rely on the FITS table
+column names to determine the information instead of hard-wired column indices
+(#1656).
+
+Event fetching and disposal has been implemented in the GCTAEventList class by
+additing the fetch() and dispose() methods. Now, events are only loaded upon
+request and can be dispatched after user to save memory. The event fetching and
+disposal logic has been removed from GCTAObservation (#1648).
+
+Add GCTAEventList::remove() method to remove events from an event list.
+
+The GCTAEventList::append() method now also appends empty elements to the
+additional columns so that all event list columns have finally the same length.
+
+The GCTAEdisp2D::compute_ebounds_obs() and GCTAEdisp2::compute_ebounds_src()
+methods have been corrected so that they return the energy intervals covered by
+valid matrix elements. With the code before there were problems with not setting
+correctly the maximum energies of the intervals (#1662).
+
+The extension name for the GTI HDU is now determined from the data sub-space
+keyword provided in the events FITS file header. This allows to have multiple
+GTIs (and also event lists) in a single FITS file. We do however require that
+the event and GTI extension reside in the same FITS file. The name of the GTI
+extension can be recovered using the GCTAEventList::gtiname() method. This
+satisfies the feature request #1598.
+
+A second variant of a write() method has been added to GCTAEventList that allows
+specifying the events and Good Time Intervals FITS extension names. The standard
+write() method will call this new write() method using the events extension name
+extracted from the file name and the GTI extension name set by the m_gti_extname
+member. The GCTAObservation::write() method was also extended and now has two
+optional arguments that allow specifying the events and Good Time Interval FITS
+extension names. These are simply forwared to the new GCTAEventList::write().
+The GCTAObservation::save() method has now a special logic that decodes any
+optionally specified extension in the format [EVENTS;GTI] into an events and a
+Good Time Intervals extension name. These changes satisfy the feature request
+#1598.
+
+A rejection method is now used in GCTABackground3D::mc() to assure that the Monte
+Carlo simulated instrument directions are identical to the model evaluations
+(#1722).
+
+Add GCTACubeEdisp class that computes the mean energy dispersion for a stacked
+analysis. This class is now used in GCTAResponseCube to take into account the
+energy dispersion is a stacked analysis (#1721, #1801).
+
+A filename constructor has been added to GCTAObservation that allows constructing
+a CTA observation from an event list or a counts cube. A dummy argument has been
+added to the instrument constructor so that it does not conflict with the filename
+constructor (#1744).
+
+The interpolation scheme was changed in GCTABackground3D. Formerly, if one of the
+rates above and below the requested energy was zero, the rate from the non-zero
+node was taken, resulting in a discontinuity. Now the rate is set to zero.
+
+The classes GCTACubePsf and GCTACubeEdisp now save the information in 4D images
+instead of folding two dimension in a single dimension of a 3D image.
+
+The GCTAOnOffObservations container class has now been removed, as On/Off observations
+are now stored as any other observation in the GObservations container (#1669).
+
+The On/Off fitting of CTA data has now been implemented (#1044).
+
+The GCTAPsfTable class has been added to support non-parametric point spread function
+histograms (#1786). 
+
+The classes GCTACubeExposure, GCTACubePsf and GCTACubeBackground store response values
+for given sets of energies, and now the energies are written into the FITS files instead
+of the energy boundaries enclosing these energies. This provides a more explicit storage
+of the response information, as before the energies had to be inferred from the energy
+boundaries of the bins (#1788).
+
+The GCTACubeExposure::elogmeans(), GCTACubePsf::elogmeans(), and GCTACubeBackground::elogmeans()
+methods have been removed as the energies() methods provide now essentially the same
+information.
+
+A weight sky map has been added to the CTA event cube, and the weight of each bin is
+multiplied to the bin size in the GCTAEventBin::size() method so that model values are
+weigthed according to the bin weight. This enables the usage of only partially covered
+bins, arising for example from different energy thresholds or ROIs (#1789).
+
+The cube response classes GCTACubeExposure, GCTACubePsf, GCTACubeEdisp and
+GCTACubeBackground do no longer select on RoI and energy boundaries as this is now
+handled by the weight array (#1789).
+
+The GCTAAeff2D class no longer extrapolates the effective area beyond the boundaries
+of the response table, but sets the effective area values to zero (#1784).
+
+The GCTABackground3D class now assures that the mc() method covers the same DETX and DETY
+range than the access operator. This fixes a consistency problem between Monte Carlo
+sampling and function evaluation (#1815).
 
 
 21. COMPTEL interface

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPars.cpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,9 +34,10 @@
 #include <sys/stat.h>      // mkdir() function
 #include <cstdlib>         // std::getenv() function
 #include <cstdio>          // std::fopen(), etc. functions
-#include "GApplicationPars.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
+#include "GApplicationPars.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                 "GApplicationPars::operator[](std::string&)"
@@ -49,10 +50,10 @@
 #define G_REMOVE1                            "GApplicationPars::remove(int&)"
 #define G_REMOVE2                    "GApplicationPars::remove(std::string&)"
 #define G_EXTEND                "GApplicationPars::extend(GApplicationPars&)"
-#define G_LOAD1                        "GApplicationPars::load(std::string&)"
-#define G_LOAD2                       "GApplicationPars::load(std::string&, "\
+#define G_LOAD1                          "GApplicationPars::load(GFilename&)"
+#define G_LOAD2                         "GApplicationPars::load(GFilename&, "\
                                                  "std::vector<std::string>&)"
-#define G_SAVE                         "GApplicationPars::save(std::string&)"
+#define G_SAVE                           "GApplicationPars::save(GFilename&)"
 #define G_OUTPATH                   "GApplicationPars::outpath(std::string&)"
 #define G_READ                         "GApplicationPars::read(std::string&)"
 #define G_WRITE                       "GApplicationPars::write(std::string&)"
@@ -91,7 +92,7 @@ GApplicationPars::GApplicationPars(void)
  *
  * @param[in] filename Parameter filename. 
  ***************************************************************************/
-GApplicationPars::GApplicationPars(const std::string& filename)
+GApplicationPars::GApplicationPars(const GFilename& filename)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -109,7 +110,8 @@ GApplicationPars::GApplicationPars(const std::string& filename)
  * @param[in] filename Parameter filename. 
  * @param[in] args Command line arguments. 
  ***************************************************************************/
-GApplicationPars::GApplicationPars(const std::string& filename, const std::vector<std::string>& args)
+GApplicationPars::GApplicationPars(const GFilename&                filename,
+                                   const std::vector<std::string>& args)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -631,15 +633,15 @@ bool GApplicationPars::contains(const std::string& name) const
  *
  * Loads all parameters from parameter file.
  ***************************************************************************/
-void GApplicationPars::load(const std::string& filename)
+void GApplicationPars::load(const GFilename& filename)
 {
     // Reset parameters
     m_parfile.clear();
 
     // Get path to parameter file for input
-    std::string path = inpath(filename);
+    std::string path = inpath(filename.url());
     if (path.length() == 0) {
-        throw GException::par_file_not_found(G_LOAD1, filename);
+        throw GException::par_file_not_found(G_LOAD1, filename.url());
     }
 
     // Read parfile
@@ -667,16 +669,16 @@ void GApplicationPars::load(const std::string& filename)
  * Loads all parameters from parameter file. Parameters are overwritten by
  * the values specified in the command line arguments.
  ***************************************************************************/
-void GApplicationPars::load(const std::string& filename,
-                 const std::vector<std::string>& args)
+void GApplicationPars::load(const GFilename&                filename,
+                            const std::vector<std::string>& args)
 {
     // Reset parameters
     m_parfile.clear();
 
     // Get path to parameter file for input
-    std::string path = inpath(filename);
+    std::string path = inpath(filename.url());
     if (path.length() == 0) {
-        throw GException::par_file_not_found(G_LOAD2, filename);
+        throw GException::par_file_not_found(G_LOAD2, filename.url());
     }
 
     // Read parfile
@@ -741,12 +743,12 @@ void GApplicationPars::load(const std::string& filename,
  * @exception GException::par_file_not_found
  *            No valid directory to write the parameter file has been found.
  ***************************************************************************/
-void GApplicationPars::save(const std::string& filename)
+void GApplicationPars::save(const GFilename& filename)
 {
     // Get path to parameter file for output
-    std::string path = outpath(filename);
+    std::string path = outpath(filename.url());
     if (path.size() == 0) {
-        throw GException::par_file_not_found(G_SAVE, filename);
+        throw GException::par_file_not_found(G_SAVE, filename.url());
     }
 
     // Update parameter file

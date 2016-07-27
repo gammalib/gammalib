@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,6 +52,7 @@ public:
     void                      test_response_aeff(void);
     void                      test_response_psf(void);
     void                      test_response_psf_king(void);
+    void                      test_response_psf_table(void);
     void                      test_response_npsf(void);
     void                      test_response_edisp(void);
     void                      test_response_edisp_PerfTable(void);
@@ -62,6 +63,7 @@ public:
     void                      test_response_expcube(void);
     void                      test_response_psfcube(void);
     void                      test_response_bkgcube(void);
+    void                      test_response_edispcube(void);
 
     // Utility methods
     void test_response_edisp_integration(const GCTAResponseIrf& rsp,
@@ -113,9 +115,12 @@ public:
     virtual void                 set(void);
     virtual TestGCTAObservation* clone(void) const;
     virtual std::string          classname(void) const { return "TestGCTAObservation"; }
+    void                         test_event_bin(void);
+    void                         test_event_cube(void);
     void                         test_unbinned_obs(void);
     void                         test_binned_obs(void);
-    void                         test_cube_obs(void);
+    void                         test_stacked_obs(void);
+    void                         test_onoff_obs(void);
 };
 
 
@@ -138,8 +143,10 @@ public:
     virtual std::string       classname(void) const { return "TestGCTAOptimize"; }
     void                      test_unbinned_optimizer(void);
     void                      test_binned_optimizer(void);
-    void                      test_cube_optimizer(void);
+    void                      test_stacked_optimizer(void);
+    void                      test_onoff_optimizer(void);
 };
+
 
 /***********************************************************************//**
  * @class TestGCTAPointing

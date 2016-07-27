@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GSupport.hpp - test support module                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,7 @@ public:
     void                  test_url_file(void);
     void                  test_url_string(void);
     void                  test_filename(void);
+    void                  test_csv(void);
 
 private:
     // Private methods

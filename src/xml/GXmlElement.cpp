@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GXmlElement.cpp - XML element node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,9 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
-#include "GXmlElement.hpp"
 #include "GTools.hpp"
+#include "GException.hpp"
+#include "GFilename.hpp"
+#include "GXmlDocument.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_PARSE_START                "GXmlElement::parse_start(std::string&)"
@@ -328,7 +330,7 @@ void GXmlElement::remove_attribute(const std::string& name)
  * @brief Write element into URL
  *
  * @param[in] url Unified Resource Locator.
- * @param[in] indent Text indentation (default = 0).
+ * @param[in] indent Text indentation.
  *
  * Writes the element into a Unified Resource Locator.
  ***************************************************************************/
@@ -400,8 +402,8 @@ void GXmlElement::write(GUrl& url, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML element
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @param[in] indent Text indentation (defaults to 0).
+ * @param[in] chatter Chattiness.
+ * @param[in] indent Text indentation.
  * @return String containing XML element
  ***************************************************************************/
 std::string GXmlElement::print(const GChatter& chatter,
@@ -448,7 +450,6 @@ void GXmlElement::init_members(void)
     // Initialise members
     m_name.clear();
     m_attr.clear();
-    m_parent = NULL;
 
     // Return
     return;
@@ -461,14 +462,11 @@ void GXmlElement::init_members(void)
  * @param[in] node XML element.
  *
  * This method copies all class members. XML attributes are cloned.
- *
- * @todo Is copying the parent correct?
  ***************************************************************************/
 void GXmlElement::copy_members(const GXmlElement& node)
 {
     // Copy members
     m_name   = node.m_name;
-    m_parent = node.m_parent;
 
     // Copy attribute container
     m_attr.clear();

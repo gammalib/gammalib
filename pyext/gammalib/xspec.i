@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         xspec.i - XSPEC module                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,9 @@
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
+
+/* __ Include GammaLib typemaps __________________________________________ */
+%include typemap_GFilename.i
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAPsfVector.hpp - CTA point spread function vector class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,10 +29,14 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GFits.hpp"
-#include "GRan.hpp"
+#include <vector>
+#include "GFilename.hpp"
 #include "GNodeArray.hpp"
 #include "GCTAPsf.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GFitsTable;
 
 
 /***********************************************************************//**
@@ -48,7 +52,7 @@ class GCTAPsfVector : public GCTAPsf {
 public:
     // Constructors and destructors
     GCTAPsfVector(void);
-    GCTAPsfVector(const std::string& filename);
+    GCTAPsfVector(const GFilename& filename);
     GCTAPsfVector(const GCTAPsfVector& psf);
     virtual ~GCTAPsfVector(void);
 
@@ -66,8 +70,8 @@ public:
     void           clear(void);
     GCTAPsfVector* clone(void) const;
     std::string    classname(void) const;
-    void           load(const std::string& filename);
-    std::string    filename(void) const;
+    void           load(const GFilename& filename);
+    GFilename      filename(void) const;
     double         mc(GRan&         ran,
                       const double& logE, 
                       const double& theta = 0.0, 
@@ -101,7 +105,7 @@ private:
     void update(const double& logE) const;
 
     // Members
-    std::string         m_filename;  //!< Name of Aeff response file
+    GFilename           m_filename;  //!< Name of Aeff response file
     GNodeArray          m_logE;      //!< log(E) nodes for Aeff interpolation
     std::vector<double> m_r68;       //!< 68% containment radius of PSF in degrees
     std::vector<double> m_sigma;     //!< Sigma value of PSF in radians
@@ -129,12 +133,14 @@ std::string GCTAPsfVector::classname(void) const
 /***********************************************************************//**
  * @brief Return filename
  *
- * @return Returns filename from which point spread function was loaded
+ * @return Filename.
+ *
+ * Returns filename from which point spread function was loaded.
  ***************************************************************************/
 inline
-std::string GCTAPsfVector::filename(void) const
+GFilename GCTAPsfVector::filename(void) const
 {
-    return m_filename;
+    return (m_filename);
 }
 
 #endif /* GCTAPSFVECTOR_HPP */

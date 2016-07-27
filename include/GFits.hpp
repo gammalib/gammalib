@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GFits.hpp - FITS file class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,7 @@
 #include "GFitsHDU.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
+#include "GFilename.hpp"
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
@@ -64,7 +65,7 @@ class GFits : public GContainer {
 public:
     // Constructors and destructors
     GFits(void);
-    explicit GFits(const std::string& filename, const bool& create = false);
+    GFits(const GFilename& filename, const bool& create = false);
     GFits(const GFits& fits);
     virtual ~GFits(void);
 
@@ -104,13 +105,13 @@ public:
     void               extend(const GFits& fits);
     bool               contains(const int& extno) const;
     bool               contains(const std::string& extname) const;
-    const std::string& filename(void) const;
+    const GFilename&   filename(void) const;
     int                extno(const std::string& extname) const;
-    void               open(const std::string& filename,
-                            const bool&        create = false);
+    void               open(const GFilename& filename,
+                            const bool&      create = false);
     void               save(const bool& clobber = false);
-    void               saveto(const std::string& filename,
-                              const bool&        clobber = false);
+    void               saveto(const GFilename& filename,
+                              const bool&      clobber = false);
     void               close(void);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
@@ -136,7 +137,7 @@ private:
 
     // Private data area
     std::vector<GFitsHDU*> m_hdu;        //!< Pointers to HDUs
-    std::string            m_filename;   //!< FITS file name
+    GFilename              m_filename;   //!< FITS file name
     void*                  m_fitsfile;   //!< FITS file pointer
     bool                   m_readwrite;  //!< FITS file is readwrite (true/false)
     bool                   m_created;    //!< FITS file has been created (true/false)
@@ -299,13 +300,13 @@ bool GFits::contains(const std::string& extname) const
 /***********************************************************************//**
  * @brief Return FITS filename
  *
- * @return FITS filename.
+ * @return FITS file name.
  *
- * Returns the FITS filename. If the object is not yet associated to a file
- * an empty string will be returned.
+ * Returns the FITS file name. If the object is not yet associated to a file
+ * the file name will be empty.
  ***************************************************************************/
 inline
-const std::string& GFits::filename(void) const
+const GFilename& GFits::filename(void) const
 {
     return (m_filename);
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.hpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,14 +29,15 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GFits.hpp"
-#include "GRan.hpp"
+//#include "GRan.hpp"
+#include "GFilename.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAResponseTable.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GFits;
+class GRan;
 class GFitsBinTable;
+
 
 /***********************************************************************//**
  * @class GCTAPsf2D
@@ -51,7 +52,7 @@ class GCTAPsf2D : public GCTAPsf {
 public:
     // Constructors and destructors
     GCTAPsf2D(void);
-    explicit GCTAPsf2D(const std::string& filename);
+    explicit GCTAPsf2D(const GFilename& filename);
     GCTAPsf2D(const GCTAPsf2D& psf);
     virtual ~GCTAPsf2D(void);
 
@@ -69,8 +70,8 @@ public:
     void        clear(void);
     GCTAPsf2D*  clone(void) const;
     std::string classname(void) const;
-    void        load(const std::string& filename);
-    std::string filename(void) const;
+    void        load(const GFilename& filename);
+    GFilename   filename(void) const;
     double      mc(GRan&         ran,
                    const double& logE, 
                    const double& theta = 0.0, 
@@ -98,8 +99,8 @@ public:
     void                       table(const GCTAResponseTable& table);
     void                       read(const GFitsTable& table);
     void                       write(GFitsBinTable& table) const;
-    void                       save(const std::string& filename,
-                                    const bool& clobber = false) const;
+    void                       save(const GFilename& filename,
+                                    const bool&      clobber = false) const;
     
 
 private:
@@ -110,8 +111,15 @@ private:
     void update(const double& logE, const double& theta) const;
 
     // Members
-    std::string       m_filename;   //!< Name of Aeff response file
+    GFilename         m_filename;   //!< Name of Aeff response file
     GCTAResponseTable m_psf;        //!< PSF response table
+    int               m_inx_energy; //!< Energy index
+    int               m_inx_theta;  //!< Theta index
+    int               m_inx_sigma1; //!< 1st Gaussian sigma
+    int               m_inx_ampl2;  //!< 2nd Gaussian relative amplitude
+    int               m_inx_sigma2; //!< 2nd Gaussian sigma
+    int               m_inx_ampl3;  //!< 3nd Gaussian relative amplitude
+    int               m_inx_sigma3; //!< 3nd Gaussian sigma
 
     // Precomputation cache
     mutable double    m_par_logE;   //!< Cache energy
@@ -146,7 +154,7 @@ std::string GCTAPsf2D::classname(void) const
  * @return Returns filename from which point spread function was loaded
  ***************************************************************************/
 inline
-std::string GCTAPsf2D::filename(void) const
+GFilename GCTAPsf2D::filename(void) const
 {
     return m_filename;
 }

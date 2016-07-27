@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GMWLObservation.hpp - Multi-wavelength observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,10 +28,15 @@
 #define GMWLOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GObservation.hpp"
+#include <string>
 #include "GTime.hpp"
-#include "GModel.hpp"
+#include "GFilename.hpp"
+#include "GObservation.hpp"
 #include "GMWLResponse.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GResponse;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -48,7 +53,7 @@ class GMWLObservation : public GObservation {
 public:
     // Constructors and destructors
     GMWLObservation(void);
-    explicit GMWLObservation(const std::string& filename);
+    explicit GMWLObservation(const GFilename& filename);
     GMWLObservation(const GMWLObservation& obs);
     virtual ~GMWLObservation(void);
 
@@ -64,19 +69,15 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void               load(const std::string& filename);
-    const std::string& filename(void) const;
-    const std::string& extno(void) const;
-    const std::string& extname(void) const;
-    void               filename(const std::string& filename);
-    void               extno(const std::string& extno);
-    void               extname(const std::string& extname);
+    void             load(const GFilename& filename);
+    const GFilename& filename(void) const;
+    void             filename(const GFilename& filename);
 
 protected:
     // Protected methods
@@ -86,9 +87,7 @@ protected:
 
     // Protected members
     std::string  m_instrument;   //!< Instrument name
-    std::string  m_filename;     //!< Filename
-    std::string  m_extno;        //!< Extension number
-    std::string  m_extname;      //!< Extension name
+    GFilename    m_filename;     //!< Filename
     GMWLResponse m_response;     //!< Response function
 };
 
@@ -171,33 +170,9 @@ double GMWLObservation::deadc(const GTime& time) const
  * @return Filename.
  ***************************************************************************/
 inline
-const std::string& GMWLObservation::filename(void) const
+const GFilename& GMWLObservation::filename(void) const
 {
-    return m_filename;
-}
-
-
-/***********************************************************************//**
- * @brief Return extension number
- *
- * @return Extension number.
- ***************************************************************************/
-inline
-const std::string& GMWLObservation::extno(void) const
-{
-    return m_extno;
-}
-
-
-/***********************************************************************//**
- * @brief Return extension name
- *
- * @return Extension name.
- ***************************************************************************/
-inline
-const std::string& GMWLObservation::extname(void) const
-{
-    return m_extname;
+    return (m_filename);
 }
 
 
@@ -207,35 +182,9 @@ const std::string& GMWLObservation::extname(void) const
  * @param[in] filename Filename.
  ***************************************************************************/
 inline
-void GMWLObservation::filename(const std::string& filename)
+void GMWLObservation::filename(const GFilename& filename)
 {
     m_filename = filename;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set extension number
- *
- * @param[in] extno Extension number.
- ***************************************************************************/
-inline
-void GMWLObservation::extno(const std::string& extno)
-{
-    m_extno = extno;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set extension name
- *
- * @param[in] extname Extension name..
- ***************************************************************************/
-inline
-void GMWLObservation::extname(const std::string& extname)
-{
-    m_extname = extname;
     return;
 }
 

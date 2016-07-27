@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.cpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1404,6 +1404,9 @@ void GWcs::wcs_s2p(int ncoord, int nelem, const double* world,
 
 /***********************************************************************//**
  * @brief Print WCS information
+ *
+ * @param[in] chatter Chattiness.
+ * @return String containing WCS information.
  ***************************************************************************/
 std::string GWcs::wcs_print(const GChatter& chatter) const
 {
@@ -1416,13 +1419,26 @@ std::string GWcs::wcs_print(const GChatter& chatter) const
         // Append World Coordinate parameters
         result.append("\n"+gammalib::parformat("Number of axes"));
         result.append(gammalib::str(m_naxis));
-        result.append("\n"+gammalib::parformat("Longitude axis"));
-        result.append(gammalib::str(m_lng));
-        result.append("\n"+gammalib::parformat("Latitude axis"));
-        result.append(gammalib::str(m_lat));
-        result.append("\n"+gammalib::parformat("Spectral axis"));
-        result.append(gammalib::str(m_spec));
-    
+        if (chatter >= EXPLICIT) {
+            result.append("\n"+gammalib::parformat("Longitude axis"));
+            result.append(gammalib::str(m_lng));
+            result.append("\n"+gammalib::parformat("Latitude axis"));
+            result.append(gammalib::str(m_lat));
+            result.append("\n"+gammalib::parformat("Spectral axis"));
+            result.append(gammalib::str(m_spec));
+        }
+
+        // Append coordinate system
+        result.append("\n"+gammalib::parformat("Coodinate system")+coordsys());
+ 
+        // Append projection parameters
+        result.append("\n"+gammalib::parformat("Projection code")+code());
+        result.append("\n"+gammalib::parformat("Projection name")+name());
+        if (chatter >= EXPLICIT) {
+            result.append("\n"+gammalib::parformat("Radius of the gen. sphere"));
+            result.append(gammalib::str(m_r0)+" deg");
+        }
+   
         // Append coordinates
         result.append("\n"+gammalib::parformat("Reference coordinate")+"(");
         for (int i = 0; i < m_crval.size(); ++i) {
@@ -1465,112 +1481,113 @@ std::string GWcs::wcs_print(const GChatter& chatter) const
         result.append(wcs_print_value(m_lonpole)+", ");
         result.append(wcs_print_value(m_latpole)+") deg");
 
-        // Append LATPOLEa keyword usage
-        result.append("\n"+gammalib::parformat("LATPOLE keyword usage"));
-        switch (m_latpreq) {
-        case 0:
-            result.append("Not used. Theta_p determined uniquely by"
-                          " CRVALia and LONPOLEa keywords.");
-            break;
-        case 1:
-            result.append("Required to select between two valid solutions"
-                          " of Theta_p.");
-            break;
-        case 2:
-            result.append("Theta_p was specified solely by LATPOLE.");
-            break;
-        default:
-            result.append("UNDEFINED");
-            break;
-        }
 
-        // Append celestial transformation parameters
-        result.append("\n"+gammalib::parformat("Reference vector (m_ref)")+"(");
-        for (int k = 0; k < 4; ++k) {
-            if (k > 0) {
-                result.append(", ");
-            }
-            result.append(wcs_print_value(m_ref[k]));
-        }
-        result.append(") deg");
+        // Append details
+        if (chatter >= EXPLICIT) {
 
-        // Append Euler angles
-        result.append("\n"+gammalib::parformat("Euler angles")+"(");
-        for (int k = 0; k < 5; ++k) {
-            if (k > 0) {
-                result.append(", ");
+            // Append LATPOLEa keyword usage
+            result.append("\n"+gammalib::parformat("LATPOLE keyword usage"));
+            switch (m_latpreq) {
+            case 0:
+                result.append("Not used. Theta_p determined uniquely by"
+                              " CRVALia and LONPOLEa keywords.");
+                break;
+            case 1:
+                result.append("Required to select between two valid solutions"
+                              " of Theta_p.");
+                break;
+            case 2:
+                result.append("Theta_p was specified solely by LATPOLE.");
+                break;
+            default:
+                result.append("UNDEFINED");
+                break;
             }
-            result.append(gammalib::str(m_euler[k]));
-            if (k < 3) {
-                result.append(" deg");
+
+            // Append celestial transformation parameters
+            result.append("\n"+gammalib::parformat("Reference vector (m_ref)")+"(");
+            for (int k = 0; k < 4; ++k) {
+                if (k > 0) {
+                    result.append(", ");
+                }
+                result.append(wcs_print_value(m_ref[k]));
             }
-        }
-        result.append(")");
+            result.append(") deg");
+
+            // Append Euler angles
+            result.append("\n"+gammalib::parformat("Euler angles")+"(");
+            for (int k = 0; k < 5; ++k) {
+                if (k > 0) {
+                    result.append(", ");
+                }
+                result.append(gammalib::str(m_euler[k]));
+                if (k < 3) {
+                    result.append(" deg");
+                }
+            }
+            result.append(")");
     
-        // Append latitude preservement flag
-        if (m_isolat) {
-            result.append("\n"+gammalib::parformat("Latitude preserved")+"True");
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Latitude preserved")+"False");
-        }
-
-        // Append linear transformation parameters
-        if (m_unity) {
-            result.append("\n"+gammalib::parformat("Unity PC matrix")+"True");
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Unity PC matrix")+"False");
-        }
-        result.append("\n"+gammalib::parformat("Pixel-to-image trafo")+"(");
-        for (int k = 0; k < m_piximg.size(); ++k) {
-            if (k > 0) {
-                result.append(", ");
+            // Append latitude preservement flag
+            result.append("\n"+gammalib::parformat("Latitude preserved"));
+            if (m_isolat) {
+                result.append("True");
             }
-            result.append(gammalib::str(m_piximg[k]));
-        }
-        result.append(")");
-        result.append("\n"+gammalib::parformat("Image-to-pixel trafo")+"(");
-        for (int k = 0; k < m_imgpix.size(); ++k) {
-            if (k > 0) {
-                result.append(", ");
+            else {
+                result.append("False");
             }
-            result.append(gammalib::str(m_imgpix[k]));
-        }
-        result.append(")");
-    
-        // Append coordinate system
-        result.append("\n"+gammalib::parformat("Coodinate system")+coordsys());
-    
-        // Append projection parameters
-        result.append("\n"+gammalib::parformat("Projection code")+code());
-        result.append("\n"+gammalib::parformat("Projection name")+name());
-        result.append("\n"+gammalib::parformat("Radius of the gen. sphere"));
-        result.append(gammalib::str(m_r0)+" deg");
 
-        // Append boundary checking information
-        result.append("\n"+gammalib::parformat("Strict bounds checking"));
-        if (m_bounds) {
-            result.append("True");
-        }
-        else {
-            result.append("False");
-        }
+            // Append linear transformation parameters
+            result.append("\n"+gammalib::parformat("Unity PC matrix"));
+            if (m_unity) {
+                result.append("True");
+            }
+            else {
+                result.append("False");
+            }
+            result.append("\n"+gammalib::parformat("Pixel-to-image trafo")+"(");
+            for (int k = 0; k < m_piximg.size(); ++k) {
+                if (k > 0) {
+                    result.append(", ");
+                }
+                result.append(gammalib::str(m_piximg[k]));
+            }
+            result.append(")");
+            result.append("\n"+gammalib::parformat("Image-to-pixel trafo")+"(");
+            for (int k = 0; k < m_imgpix.size(); ++k) {
+                if (k > 0) {
+                    result.append(", ");
+                }
+                result.append(gammalib::str(m_imgpix[k]));
+            }
+            result.append(")");
 
-        // Append fiducial offset information
-        result.append("\n"+gammalib::parformat("Use fiducial offset"));
-        if (m_offset) {
-            result.append("True");
-        }
-        else {
-            result.append("False");
-        }
-        result.append("\n"+gammalib::parformat("Fiducial offset"));
-        result.append("("+gammalib::str(m_x0)+", "+gammalib::str(m_y0)+")");
+            // Append boundary checking information
+            result.append("\n"+gammalib::parformat("Strict bounds checking"));
+            if (m_bounds) {
+                result.append("True");
+            }
+            else {
+                result.append("False");
+            }
+
+            // Append fiducial offset information
+            result.append("\n"+gammalib::parformat("Use fiducial offset"));
+            if (m_offset) {
+                result.append("True");
+            }
+            else {
+                result.append("False");
+            }
+            result.append("\n"+gammalib::parformat("Fiducial offset"));
+            result.append("("+gammalib::str(m_x0)+", "+gammalib::str(m_y0)+")");
     
-        // Append spectral transformation parameters
-        result.append("\n"+gammalib::parformat("Rest frequency")+wcs_print_value(m_restfrq));
-        result.append("\n"+gammalib::parformat("Rest wavelength")+wcs_print_value(m_restwav));
+            // Append spectral transformation parameters
+            result.append("\n"+gammalib::parformat("Rest frequency"));
+            result.append(wcs_print_value(m_restfrq));
+            result.append("\n"+gammalib::parformat("Rest wavelength"));
+            result.append(wcs_print_value(m_restwav));
+
+        } // endif: print details
 
     } // endif: chatter was not silent
 

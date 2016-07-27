@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAObservation.i - CTA Observation class interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,11 +38,16 @@ class GCTAObservation : public GObservation {
 public:
     // Constructors and destructors
     GCTAObservation(void);
-    explicit GCTAObservation(const std::string& instrument);
-    GCTAObservation(const std::string& cntcube,
-                    const std::string& expcube,
-                    const std::string& psfcube,
-                    const std::string& bkgcube);
+    explicit GCTAObservation(const GFilename& filename);
+    GCTAObservation(const GFilename& cntcube,
+                    const GFilename& expcube,
+                    const GFilename& psfcube,
+                    const GFilename& bkgcube);
+    GCTAObservation(const GFilename& cntcube,
+                    const GFilename& expcube,
+                    const GFilename& psfcube,
+                    const GFilename& edispcube,
+                    const GFilename& bkgcube);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -55,30 +60,37 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
-
-    // Overwrite virtual base class methods
-    virtual const GEvents* events(void) const;
-    virtual void           events(const GEvents& events);
 
     // Other methods
     bool                has_response(void) const;
     bool                has_events(void) const;
     void                read(const GFits& fits);
-    void                write(GFits& fits) const;
-    void                load(const std::string& filename);
-    void                load(const std::string& cntcube,
-                             const std::string& expcube,
-                             const std::string& psfcube,
-                             const std::string& bkgcube);
-    void                save(const std::string& filename,
-                             const bool& clobber = false) const;
+    void                write(GFits& fits,
+                              const std::string& evtname = "EVENTS",
+                              const std::string& gtiname = "GTI") const;
+    void                load(const GFilename& filename);
+    void                load(const GFilename& cntcube,
+                             const GFilename& expcube,
+                             const GFilename& psfcube,
+                             const GFilename& bkgcube);
+    void                load(const GFilename& cntcube,
+                             const GFilename& expcube,
+                             const GFilename& psfcube,
+                             const GFilename& edispcube,
+                             const GFilename& bkgcube);
+    void                save(const GFilename& filename,
+                             const bool&      clobber = false) const;
     void                response(const std::string& rspname,
-                                 const GCaldb& caldb);
+                                 const GCaldb&      caldb);
     void                response(const GCTACubeExposure& expcube,
                                  const GCTACubePsf&      psfcube,
+                                 const GCTACubeBackground& bkgcube);
+    void                response(const GCTACubeExposure&   expcube,
+                                 const GCTACubePsf&        psfcube,
+                                 const GCTACubeEdisp&      edispcube,
                                  const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
@@ -96,9 +108,9 @@ public:
     void                ontime(const double& ontime);
     void                livetime(const double& livetime);
     void                deadc(const double& deadc);
-    void                eventfile(const std::string& filename);
-    const std::string&  eventfile(void) const;
-    const std::string&  eventtype(void) const;
+    void                eventfile(const GFilename& filename);
+    const GFilename&    eventfile(void) const;
+    std::string         eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.cpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,23 +32,24 @@
 #include "GException.hpp"
 #include "GFilename.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                          "GCTABackground3D::read(GFitsTable&)"
-#define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
-#define G_INIT_MC_CACHE                   "GCTABackground3D::init_mc_cache()"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_ZERO_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
+//#define G_TINY_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
+//#define G_NO_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_MC_INIT
 //#define G_DEBUG_CACHE
-#define G_LOG_INTERPOLATION   //!< Energy interpolate log10(background rate)
 
 /* __ Constants __________________________________________________________ */
 
@@ -61,6 +62,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty background.
  ***************************************************************************/
 GCTABackground3D::GCTABackground3D(void) : GCTABackground()
 {
@@ -79,7 +82,7 @@ GCTABackground3D::GCTABackground3D(void) : GCTABackground()
  *
  * Constructs background from a FITS file.
  ***************************************************************************/
-GCTABackground3D::GCTABackground3D(const std::string& filename) :
+GCTABackground3D::GCTABackground3D(const GFilename& filename) :
                   GCTABackground()
 {
     // Initialise class members
@@ -97,6 +100,8 @@ GCTABackground3D::GCTABackground3D(const std::string& filename) :
  * @brief Copy constructor
  *
  * @param[in] bgd Background.
+ *
+ * Constructs background by copying from another background.
  ***************************************************************************/
 GCTABackground3D::GCTABackground3D(const GCTABackground3D& bgd) :
                   GCTABackground(bgd)
@@ -114,6 +119,8 @@ GCTABackground3D::GCTABackground3D(const GCTABackground3D& bgd) :
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs background.
  ***************************************************************************/
 GCTABackground3D::~GCTABackground3D(void)
 {
@@ -136,6 +143,8 @@ GCTABackground3D::~GCTABackground3D(void)
  *
  * @param[in] bgd Background.
  * @return Background.
+ *
+ * Assigns background.
  ***************************************************************************/
 GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
 {
@@ -165,50 +174,38 @@ GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
  * @brief Return background rate in units of events/s/MeV/sr
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] detx Tangential coord in nominal sys (rad).
- * @param[in] dety Tangential coord in nominal sys (rad).
+ * @param[in] detx Tangential X coordinate in nominal system (radians).
+ * @param[in] dety Tangential Y coordinate in nominal system (radians).
  *
  * Returns the background rate in units of events/s/MeV/sr for a given energy
- * and detector coordinates. The method assures that the background rate
- * never becomes negative.
+ * and detector coordinates. The operator interpolates linearly in DETX and
+ * DETY, and logarithmically in energy.
  *
- * The method interpolates linearly in DETX and DETY, and logarithmically
- * in the energy direction.
- *
- * If the background model is not valid the operator returns 0.0.
+ * The operator assures that the background rate never becomes negative. For
+ * invalid background models or detector coordinates outside the range
+ * covered by the response cube, the operator returns a rate of zero.
  ***************************************************************************/
 double GCTABackground3D::operator()(const double& logE, 
                                     const double& detx, 
                                     const double& dety) const
 {
-    // Initialise rate
-    double rate(0.0);
+    // Initialise background rate
+    double rate = 0.0;
 
-    // Continue only if background model is valid
-    if (is_valid()) {
+    // Continue only if background model is valid and if the DETX and DETY
+    // values are in validity range
+    if (is_valid() && (detx >= m_detx_min) && (detx <= m_detx_max) &&
+                      (dety >= m_dety_min) && (dety <= m_dety_max)) {
 
-        // Get background rate
-        #if defined(G_LOG_INTERPOLATION)
-        // Retrieve node arrays
-        const GNodeArray& detx_nodes   = m_background.nodes(0);
-        const GNodeArray& dety_nodes   = m_background.nodes(1);
-        const GNodeArray& energy_nodes = m_background.nodes(2);
+        // Retrieve references to node arrays
+        const GNodeArray& detx_nodes   = m_background.axis_nodes(m_inx_detx);
+        const GNodeArray& dety_nodes   = m_background.axis_nodes(m_inx_dety);
+        const GNodeArray& energy_nodes = m_background.axis_nodes(m_inx_energy);
 
         // Set values for node arrays
         detx_nodes.set_value(detx);
         dety_nodes.set_value(dety);
         energy_nodes.set_value(logE);
-
-        // Compute offsets of DETY in DETX-DETY plane
-        int size1        = m_background.axis(0);
-        int offset_left  = dety_nodes.inx_left()  * size1;
-        int offset_right = dety_nodes.inx_right() * size1;
-
-        // Set indices for bi-linear interpolation in DETX-DETY plane
-        int inx_ll = detx_nodes.inx_left()  + offset_left;
-        int inx_lr = detx_nodes.inx_left()  + offset_right;
-        int inx_rl = detx_nodes.inx_right() + offset_left;
-        int inx_rr = detx_nodes.inx_right() + offset_right;
 
         // Set weighting factors for bi-linear interpolation in DETX-DETY plane
         double wgt_ll = detx_nodes.wgt_left()  * dety_nodes.wgt_left();
@@ -216,43 +213,47 @@ double GCTABackground3D::operator()(const double& logE,
         double wgt_rl = detx_nodes.wgt_right() * dety_nodes.wgt_left();
         double wgt_rr = detx_nodes.wgt_right() * dety_nodes.wgt_right();
 
-        // Set indices for energy interpolation
-        int inx_emin = energy_nodes.inx_left();
-        int inx_emax = energy_nodes.inx_right();
-
         // Set weighting factors for energy interpolation
         double wgt_emin = energy_nodes.wgt_left();
         double wgt_emax = energy_nodes.wgt_right();
 
-        // Compute offsets in energy dimension
-        int npixels     = m_background.axis(0) * m_background.axis(1);
-        int offset_emin = inx_emin * npixels;
-        int offset_emax = inx_emax * npixels;
+        // Get bin indices
+        int inx_ll_emin = index(detx_nodes.inx_left(),  dety_nodes.inx_left(),
+                                energy_nodes.inx_left());
+        int inx_lr_emin = index(detx_nodes.inx_left(),  dety_nodes.inx_right(),
+                                energy_nodes.inx_left());
+        int inx_rl_emin = index(detx_nodes.inx_right(), dety_nodes.inx_left(),
+                                energy_nodes.inx_left());
+        int inx_rr_emin = index(detx_nodes.inx_right(), dety_nodes.inx_right(),
+                                energy_nodes.inx_left());
+        int inx_ll_emax = index(detx_nodes.inx_left(),  dety_nodes.inx_left(),
+                                energy_nodes.inx_right());
+        int inx_lr_emax = index(detx_nodes.inx_left(),  dety_nodes.inx_right(),
+                                energy_nodes.inx_right());
+        int inx_rl_emax = index(detx_nodes.inx_right(), dety_nodes.inx_left(),
+                                energy_nodes.inx_right());
+        int inx_rr_emax = index(detx_nodes.inx_right(), dety_nodes.inx_right(),
+                                energy_nodes.inx_right());
 
-        // Bi-linear interpolation the rates in both energy layers
-        double rate_emin = wgt_ll * m_background(0, inx_ll + offset_emin) +
-                           wgt_lr * m_background(0, inx_lr + offset_emin) +
-                           wgt_rl * m_background(0, inx_rl + offset_emin) +
-                           wgt_rr * m_background(0, inx_rr + offset_emin);
-        double rate_emax = wgt_ll * m_background(0, inx_ll + offset_emax) +
-                           wgt_lr * m_background(0, inx_lr + offset_emax) +
-                           wgt_rl * m_background(0, inx_rl + offset_emax) +
-                           wgt_rr * m_background(0, inx_rr + offset_emax);
+        // Bi-linearly interpolate the rates in both energy layers
+        double rate_emin = wgt_ll * m_background(m_inx_bgd, inx_ll_emin) +
+                           wgt_lr * m_background(m_inx_bgd, inx_lr_emin) +
+                           wgt_rl * m_background(m_inx_bgd, inx_rl_emin) +
+                           wgt_rr * m_background(m_inx_bgd, inx_rr_emin);
+        double rate_emax = wgt_ll * m_background(m_inx_bgd, inx_ll_emax) +
+                           wgt_lr * m_background(m_inx_bgd, inx_lr_emax) +
+                           wgt_rl * m_background(m_inx_bgd, inx_rl_emax) +
+                           wgt_rr * m_background(m_inx_bgd, inx_rr_emax);
 
-        // If both rates are positive then perform a logarithmic
-        // interpolation in energy
+        // If both rates are positive then perform a logarithmic interpolation
+        // in energy
         if (rate_emin > 0.0 && rate_emax > 0.0) {
-            rate = std::pow(10.0, wgt_emin * std::log10(rate_emin) +
-                                  wgt_emax * std::log10(rate_emax));
+            rate = std::exp(wgt_emin * std::log(rate_emin) +
+                            wgt_emax * std::log(rate_emax));
         }
-
-        // ... otherwise perform a linear interpolation
         else {
-            rate = wgt_emin * rate_emin + wgt_emax * rate_emax;
+            rate = 0.0;
         }
-        #else
-        rate = m_background(0, detx, dety, logE);
-        #endif
 
         // Make sure that background rate is not negative
         if (rate < 0.0) {
@@ -275,11 +276,11 @@ double GCTABackground3D::operator()(const double& logE,
 /***********************************************************************//**
  * @brief Clear background
  *
- * This method properly resets the background to an initial state.
+ * Clears background.
  ***************************************************************************/
 void GCTABackground3D::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free class members
     free_members();
     this->GCTABackground::free_members();
 
@@ -295,7 +296,9 @@ void GCTABackground3D::clear(void)
 /***********************************************************************//**
  * @brief Clone background
  *
- * @return Pointer to deep copy of background.
+ * @return Deep copy of background.
+ *
+ * Returns a pointer to a deep copy of the background.
  ***************************************************************************/
 GCTABackground3D* GCTABackground3D::clone(void) const
 {
@@ -309,13 +312,21 @@ GCTABackground3D* GCTABackground3D::clone(void) const
  * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
- *            FITS file format differs from expectation.
+ *            Response table is not three-dimensional.
  *
- * Reads the background from the FITS @p table.
+ * Reads the background form the FITS @p table. The following column names
+ * are mandatory:
  *
- * The data are stored in m_background which is of type GCTAResponseTable.
- * The DETX and DETY axes will be set to radians, the energy axis will be set
- * to log10.
+ *     DETX_LO  - DETX lower bin boundaries
+ *     DETX_HI  - DETX upper bin boundaries
+ *     DETY_LO  - DETY lower bin boundaries
+ *     DETY_HI  - DETY upper bin boundaries
+ *     ENERG_LO - Energy lower bin boundaries
+ *     ENERG_HI - Energy upper bin boundaries
+ *     BGD      - Background template
+ *
+ * The data are stored in the m_background member. The DETX and DETY axes
+ * will be set to radians, the energy axis will be set to log10.
  ***************************************************************************/
 void GCTABackground3D::read(const GFitsTable& table)
 {
@@ -325,35 +336,41 @@ void GCTABackground3D::read(const GFitsTable& table)
     // Read background table
     m_background.read(table);
 
-    // Check that axis names comply to format
-    if (m_background.axis_lo_name(0) != "DETX_LO" ||
-        m_background.axis_hi_name(0) != "DETX_HI") {
-        std::string msg = "Background response table does not contain"
-                          " \"DETX_LO\" and \"DETX_HI\" columns as the"
-                          " first axis.";
+    // Throw an exception if the table is not three-dimensional
+    if (m_background.axes() != 3) {
+        std::string msg = "Expected three-dimensional background "
+                          "response table but found "+
+                          gammalib::str(m_background.axes())+
+                          " dimensions. Please specify a three-dimensional "
+                          "background.";
         throw GException::invalid_value(G_READ, msg);
     }
-    if (m_background.axis_lo_name(1) != "DETY_LO" ||
-        m_background.axis_hi_name(1) != "DETY_HI") {
-        std::string msg = "Background response table does not contain"
-                          " \"DETY_LO\" and \"DETY_HI\" columns as the"
-                          " second axis.";
-        throw GException::invalid_value(G_READ, msg);
-    }
-    if (m_background.axis_lo_name(2) != "ENERG_LO" ||
-        m_background.axis_hi_name(2) != "ENERG_HI") {
-        std::string msg = "Background response table does not contain"
-                          " \"ENERG_LO\" and \"ENERG_HI\" columns as the"
-                          " third axis.";
-        throw GException::invalid_value(G_READ, msg);
-    }
+
+    // Get mandatory indices (throw exception if not found)
+    m_inx_detx   = m_background.axis("DETX");
+    m_inx_dety   = m_background.axis("DETY");
+    m_inx_energy = m_background.axis("ENERG");
+    m_inx_bgd    = m_background.table("BGD");
+
+    // Get axes dimensions
+    m_num_detx   = m_background.axis_bins(m_inx_detx);
+    m_num_dety   = m_background.axis_bins(m_inx_dety);
+    m_num_energy = m_background.axis_bins(m_inx_energy);
+
+    // Set dimension array
+    m_num[m_inx_detx]   = m_num_detx;
+    m_num[m_inx_dety]   = m_num_dety;
+    m_num[m_inx_energy] = m_num_energy;
 
     // Set DETX and DETY axis to radians
-    m_background.axis_radians(0);
-    m_background.axis_radians(1);
+    m_background.axis_radians(m_inx_detx);
+    m_background.axis_radians(m_inx_dety);
 
     // Set energy axis to logarithmic scale
-    m_background.axis_log10(2);
+    m_background.axis_log10(m_inx_energy);
+
+    // Set DETX and DETY limits
+    set_limits();
 
     // Return
     return;
@@ -388,25 +405,19 @@ void GCTABackground3D::write(GFitsBinTable& table) const
  * If no extension name is provided, the background will be loaded from the
  * "BACKGROUND" extension.
  ***************************************************************************/
-void GCTABackground3D::load(const std::string& filename)
+void GCTABackground3D::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get background table
-    const GFitsTable& table = *file.table(fname.extname("BACKGROUND"));
+    const GFitsTable& table = *fits.table(filename.extname("BACKGROUND"));
 
     // Read effective area from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;
@@ -419,30 +430,47 @@ void GCTABackground3D::load(const std::string& filename)
 /***********************************************************************//**
  * @brief Save background into FITS file
  *
- * @param[in] filename background table FITS file name.
+ * @param[in] filename Background table FITS file name.
  * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the background into a FITS file.
+ * Saves background into a FITS file. If a file with the given @p filename
+ * does not yet exist it will be created, otherwise the method opens the
+ * existing file. The method will create a (or replace an existing)
+ * background extension. The extension name can be specified as part
+ * of the @p filename, or if no extension name is given, is assumed to be
+ * "BACKGROUND".
  *
- * If no extension name is provided, the background will be saved into the
- * "BACKGROUND" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
-void GCTABackground3D::save(const std::string& filename, const bool& clobber) const
+void GCTABackground3D::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
+    // Get extension name
+    std::string extname = filename.extname("BACKGROUND");
+
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
+
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
     // Create binary table
     GFitsBinTable table;
-    table.extname(fname.extname("BACKGROUND"));
 
     // Write the background table
     write(table);
 
-    // Create FITS file, append table, and write into the file
-    GFits fits;
+    // Set binary table extension name
+    table.extname(extname);
+
+    // Append table to FITS file
     fits.append(table);
-    fits.saveto(fname.filename(), clobber);
+
+    // Save to file
+    fits.save(clobber);
 
     // Return
     return;
@@ -452,85 +480,86 @@ void GCTABackground3D::save(const std::string& filename, const bool& clobber) co
 /***********************************************************************//**
  * @brief Returns MC instrument direction
  *
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
+ * @param[in] energy Event energy.
+ * @param[in] time Event trigger time.
  * @param[in,out] ran Random number generator.
  * @return CTA instrument direction.
+ *
+ * Returns a Monte Carlo simulated instrument direction for a given @p energy
+ * and event trigger @p time. The simulation is done using a rejection
+ * method that makes use of the background rate access operator. This assures
+ * that the simulation is consistent with the background rate interpolation
+ * that is done by the access operator.
  ***************************************************************************/
 GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
                                  const GTime&   time,
                                  GRan&          ran) const
 {
-    // Initialise Monte Carlo Cache
-    if (m_mc_cache.empty()) {
+    // If Monte Carlo has not been initialised then initialise the cache now
+    if (m_mc_max.empty()) {
         init_mc_cache();
     }
 
     // Allocate instrument direction
     GCTAInstDir dir;
 
-    // Continue only if there are cube pixels and maps
-    if (m_mc_npix > 0 && m_mc_nmaps > 0) {
+    // Continue only if are maps
+    if (!m_mc_max.empty()) {
 
-        // Determine the map that corresponds best to the specified energy.
-        // This is not 100% clean, as ideally some map interpolation should
-        // be done to the exact energy specified. However, as long as the map
-        // does not change drastically with energy, taking the closest map
-        // seems to be fine. And recall that we rebin in energy anyways if
-        // the input binning is too coarse.
-        double logE  = energy.log10TeV();
-        int    index = -1;
-        if (logE == m_mc_logE_min) {
-            index = 0;
-        } else if (logE == m_mc_logE_max) {
-            index = m_mc_nmaps-1;
-        }
-        else {
-            index = int((logE - m_mc_logE_min) / m_mc_logE_bin);
-        }
-        if (index < 0 || index >= m_mc_nmaps) {
-            std::string msg = "The specified energy "+energy.print()+" does"
-                              " not fall in any of the energy boundaries of"
-                              " the background response cube.\n"
-                              "Please select an energy that is comprised"
-                              " in the range ["+
-                              gammalib::str(m_background.axis_lo(2,0))+
-                              " "+m_background.axis_lo_unit(2)+" - "+
-                              gammalib::str(m_background.axis_hi(2,m_background.axis(2)-1))+
-                              " "+m_background.axis_hi_unit(2)+"].";
-            throw GException::invalid_value(G_MC, msg);
+        // Get reference to node array for the energy axis
+        const GNodeArray& energy_nodes = m_background.axis_nodes(m_inx_energy);
+
+        // Get log10(energy) in TeV
+        double logE = energy.log10TeV();
+
+        // Set values for node arrays
+        energy_nodes.set_value(logE);
+
+        // Get indices for energy interpolation
+        int inx_left  = energy_nodes.inx_left();
+        int inx_right = energy_nodes.inx_right();
+
+        // Get maximum background rate as the maximum of the left and the right
+        // energy node
+        double max_rate = m_mc_max[inx_left];
+        if (m_mc_max[inx_right] > max_rate) {
+            max_rate = m_mc_max[inx_right];
         }
 
-        // Get uniform random number
-        double u = ran.uniform();
+        // Get instrument direction using a rejection method. This assures
+        // that the Monte Carlo sample follows the model distribution
+        while (true) {
 
-        // Get pixel index according to random number. We use a bi-section
-        // method to find the corresponding response cube pixel
-        int offset = index * (m_mc_npix+1);
-        int low    = offset;
-        int high   = offset + m_mc_npix;
-        while ((high - low) > 1) {
-            int mid = (low+high) / 2;
-            if (u < m_mc_cache[mid]) {
-                high = mid;
+            // Get randomized detx and dety in radians. If the direction falls
+            // outside the validity range then get another pair of detx and
+            // dety values.
+            double theta = std::acos(1.0 - ran.uniform() * m_mc_one_minus_costheta);
+            double phi   = gammalib::twopi * ran.uniform();
+            double detx  = theta * std::cos(phi);
+            double dety  = theta * std::sin(phi);
+            if ((detx < m_detx_min) || (detx > m_detx_max) ||
+                (dety < m_dety_min) || (dety > m_dety_max)) {
+                continue;
             }
-            else if (m_mc_cache[mid] <= u) {
-                low = mid;
+
+            // Get background rate for these coordinates. If the background
+            // rate is zero then get other coordinates.
+            double value = this->operator()(logE, detx, dety);
+            if (value <= 0.0) {
+                continue;
             }
-        }
 
-        // Get pixel indices in x and y
-        int pixel = low - offset;
-        int idetx = pixel % m_mc_nx;
-        int idety = pixel / m_mc_nx;
+            // Get uniform random number
+            double uniform = ran.uniform() * max_rate;
 
-        // Get randomized detx and dety
-        double detx = m_mc_detx_min + (idetx + ran.uniform()) * m_mc_detx_bin;
-        double dety = m_mc_dety_min + (idety + ran.uniform()) * m_mc_dety_bin;
+            // Exit loop if we're not larger than the background rate value
+            if (uniform <= value) {
+                dir.detx(detx);
+                dir.dety(dety);
+                break;
+            }
 
-        // Set instrument direction (in radians)
-        dir.detx(detx * gammalib::deg2rad);
-        dir.dety(dety * gammalib::deg2rad);
+        } // endwhile: loop until instrument direction was accepted
 
     } // endif: there were cube pixels and maps
 
@@ -563,34 +592,30 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
         if (is_valid()) {
 
             // Compute DETX boundaries in deg
-            double detx_min = m_background.axis_lo(0,0);
-            double detx_max = m_background.axis_hi(0,m_background.axis(0)-1);
+            double detx_min = m_background.axis_lo(m_inx_detx, 0);
+            double detx_max = m_background.axis_hi(m_inx_detx, m_num_detx-1);
 
             // Compute DETY boundaries in deg
-            double dety_min = m_background.axis_lo(1,0);
-            double dety_max = m_background.axis_hi(1,m_background.axis(1)-1);
+            double dety_min = m_background.axis_lo(m_inx_dety,0);
+            double dety_max = m_background.axis_hi(m_inx_dety, m_num_dety-1);
 
             // Compute energy boundaries in TeV
-            double emin = m_background.axis_lo(2,0);
-            double emax = m_background.axis_hi(2,m_background.axis(2)-1);
+            double emin = m_background.axis_lo(m_inx_energy, 0);
+            double emax = m_background.axis_hi(m_inx_energy, m_num_energy-1);
 
             // Append information
             result.append("\n"+gammalib::parformat("Number of DETX bins") +
-                          gammalib::str(m_background.axis(0)));
+                          gammalib::str(m_num_detx));
             result.append("\n"+gammalib::parformat("Number of DETY bins") +
-                          gammalib::str(m_background.axis(1)));
+                          gammalib::str(m_num_dety));
             result.append("\n"+gammalib::parformat("Number of energy bins") +
-                          gammalib::str(m_background.axis(2)));
+                          gammalib::str(m_num_energy));
             result.append("\n"+gammalib::parformat("DETX range"));
             result.append(gammalib::str(detx_min)+" - "+gammalib::str(detx_max)+" deg");
             result.append("\n"+gammalib::parformat("DETX range"));
             result.append(gammalib::str(dety_min)+" - "+gammalib::str(dety_max)+" deg");
             result.append("\n"+gammalib::parformat("Energy range"));
             result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
-            result.append("\n"+gammalib::parformat("Maximum bin size for MC"));
-            result.append(gammalib::str(m_mc_max_bin)+" deg");
-            result.append("\n"+gammalib::parformat("Maximum logE step for MC"));
-            result.append(gammalib::str(m_mc_max_logE)+"^10 TeV");
 
         } // endif: there were 3 axis
 
@@ -625,25 +650,27 @@ void GCTABackground3D::init_members(void)
     // Initialise members
     m_filename.clear();
     m_background.clear();
-    m_mc_max_bin  = 0.05;  //!< Spatial binning not worse than 0.05 deg
-    m_mc_max_logE = 0.02;  //!< Spectral binning not worse than 0.02^10 TeV
+    m_inx_detx   = 0;
+    m_inx_dety   = 1;
+    m_inx_energy = 2;
+    m_inx_bgd    = 0;
+    m_num_detx   = 0;
+    m_num_dety   = 0;
+    m_num_energy = 0;
+    m_num[0]     = 0;
+    m_num[1]     = 0;
+    m_num[2]     = 0;
+    m_detx_min   = 0.0;
+    m_detx_max   = 0.0;
+    m_dety_min   = 0.0;
+    m_dety_max   = 0.0;
+    m_logE_min   = 0.0;
+    m_logE_max   = 0.0;
 
     // Initialise MC cache
-    m_mc_cache.clear();
+    m_mc_max.clear();
     m_mc_spectrum.clear();
-    m_mc_nx       = 0;
-    m_mc_ny       = 0;
-    m_mc_npix     = 0;
-    m_mc_nmaps    = 0;
-    m_mc_detx_min = 0.0;
-    m_mc_detx_max = 0.0;
-    m_mc_detx_bin = 0.0;
-    m_mc_dety_min = 0.0;
-    m_mc_dety_max = 0.0;
-    m_mc_dety_bin = 0.0;
-    m_mc_logE_min = 0.0;
-    m_mc_logE_max = 0.0;
-    m_mc_logE_bin = 0.0;
+    m_mc_one_minus_costheta = 0.0;
 
     // Return
     return;
@@ -658,30 +685,92 @@ void GCTABackground3D::init_members(void)
 void GCTABackground3D::copy_members(const GCTABackground3D& bgd)
 {
     // Copy members
-    m_filename    = bgd.m_filename;
-    m_background  = bgd.m_background;
-    m_mc_max_bin  = bgd.m_mc_max_bin;
-    m_mc_max_logE = bgd.m_mc_max_logE;
+    m_filename   = bgd.m_filename;
+    m_background = bgd.m_background;
+    m_inx_detx   = bgd.m_inx_detx;
+    m_inx_dety   = bgd.m_inx_dety;
+    m_inx_energy = bgd.m_inx_energy;
+    m_inx_bgd    = bgd.m_inx_bgd;
+    m_num_detx   = bgd.m_num_detx;
+    m_num_dety   = bgd.m_num_dety;
+    m_num_energy = bgd.m_num_energy;
+    m_num[0]     = bgd.m_num[0];
+    m_num[1]     = bgd.m_num[1];
+    m_num[2]     = bgd.m_num[2];
+    m_detx_min   = bgd.m_detx_min;
+    m_detx_max   = bgd.m_detx_max;
+    m_dety_min   = bgd.m_dety_min;
+    m_dety_max   = bgd.m_dety_max;
+    m_logE_min   = bgd.m_logE_min;
+    m_logE_max   = bgd.m_logE_max;
 
     // Copy MC cache
-    m_mc_cache    = bgd.m_mc_cache;
-    m_mc_spectrum = bgd.m_mc_spectrum;
-    m_mc_nx       = bgd.m_mc_nx;
-    m_mc_ny       = bgd.m_mc_ny;
-    m_mc_npix     = bgd.m_mc_npix;
-    m_mc_nmaps    = bgd.m_mc_nmaps;
-    m_mc_detx_min = bgd.m_mc_detx_min;
-    m_mc_detx_max = bgd.m_mc_detx_max;
-    m_mc_detx_bin = bgd.m_mc_detx_bin;
-    m_mc_dety_min = bgd.m_mc_dety_min;
-    m_mc_dety_max = bgd.m_mc_dety_max;
-    m_mc_dety_bin = bgd.m_mc_dety_bin;
-    m_mc_logE_min = bgd.m_mc_logE_min;
-    m_mc_logE_max = bgd.m_mc_logE_max;
-    m_mc_logE_bin = bgd.m_mc_logE_bin;
+    m_mc_max                = bgd.m_mc_max;
+    m_mc_spectrum           = bgd.m_mc_spectrum;
+    m_mc_one_minus_costheta = bgd.m_mc_one_minus_costheta;
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set DETX, DETY and log10(E/TeV) limits
+ *
+ * Set the DETX, DETY and log10(E/TeV) limits.
+ ***************************************************************************/
+void GCTABackground3D::set_limits(void)
+{
+    // Compute DETX boundaries in radians
+    m_detx_min = m_background.axis_lo(m_inx_detx, 0) *
+                 gammalib::deg2rad;
+    m_detx_max = m_background.axis_hi(m_inx_detx, m_num_detx-1) *
+                 gammalib::deg2rad;
+
+    // Compute DETY boundaries in radians
+    m_dety_min = m_background.axis_lo(m_inx_dety, 0) *
+                 gammalib::deg2rad;
+    m_dety_max = m_background.axis_hi(m_inx_dety, m_num_dety-1) *
+                 gammalib::deg2rad;
+
+    // Compute energy boundaries in log10(TeV)
+    GEnergy emin(m_background.axis_lo(m_inx_energy, 0),
+                 m_background.axis_lo_unit(m_inx_energy));
+    GEnergy emax(m_background.axis_hi(m_inx_energy, m_num_energy-1),
+                 m_background.axis_hi_unit(m_inx_energy));
+    m_logE_min = emin.log10TeV();
+    m_logE_max = emax.log10TeV();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return background rate bin index
+ *
+ * @param[in] idetx DETX index.
+ * @param[in] idety DETY index.
+ * @param[in] iebin Energy index.
+ * @return Background rate bin index.
+ *
+ * Returns the background rate bin index independent of the ordering.
+ ***************************************************************************/
+int GCTABackground3D::index(const int& idetx,
+                            const int& idety,
+                            const int& iebin) const
+{
+    // Set index arrays
+    int inx[3];
+    inx[m_inx_detx]   = idetx;
+    inx[m_inx_dety]   = idety;
+    inx[m_inx_energy] = iebin;
+
+    // Compute index
+    int index = inx[0] + (inx[1] + inx[2] * m_num[1]) * m_num[0];
+
+    // Return index
+    return index;
 }
 
 
@@ -698,153 +787,251 @@ void GCTABackground3D::free_members(void)
 /***********************************************************************//**
  * @brief Initialise Monte Carlo cache
  *
- * @exception GException::invalid_value
- *            No valid background model defined.
- *
- * Initialises the cache for Monte Carlo sampling. The method uses the
- * members m_mc_max_bin and m_mc_max_logE to enforce an internal rebinning
- * in case that the provided background model information is coarsely
- * pixelised. This rebinning is needed to assure coherence between Monte
- * Carlo simulated data and the model.
- * 
- * @todo Verify assumption made about the solid angles of the response table
- *       elements.
+ * Initialises the cache for Monte Carlo sampling.
  ***************************************************************************/
 void GCTABackground3D::init_mc_cache(void) const
 {
     // Initialise cache
-    m_mc_cache.clear();
+    m_mc_max.clear();
     m_mc_spectrum.clear();
 
-    // Throw an exception if the background model is not valid
-    if (!is_valid()) {
-        std::string msg = "No valid background model defined.";
-        throw GException::invalid_value(G_INIT_MC_CACHE, msg);
+    // Initialise maximum rate array
+    init_mc_max_rate();
+
+    // Compute 1-cos(theta_max)
+    double theta1 = std::sqrt(m_detx_min * m_detx_min + m_dety_min * m_dety_min);
+    double theta2 = std::sqrt(m_detx_min * m_detx_min + m_dety_max * m_dety_max);
+    double theta3 = std::sqrt(m_detx_max * m_detx_max + m_dety_min * m_dety_min);
+    double theta4 = std::sqrt(m_detx_max * m_detx_max + m_dety_max * m_dety_max);
+    double theta = theta1;
+    if (theta2 > theta) {
+        theta = theta2;
+    }
+    if (theta3 > theta) {
+        theta = theta3;
+    }
+    if (theta4 > theta) {
+        theta = theta4;
+    }
+    m_mc_one_minus_costheta = 1.0 - std::cos(theta);
+
+    // Set number of energy bins. Make sure that we compute at least 100 energy
+    // bins
+    int nbins = m_num_energy * 10;
+    if (nbins < 100) {
+        nbins = 100;
     }
 
-    // Determine number of response cube pixels and maps
-    m_mc_nx    = m_background.axis(0);
-    m_mc_ny    = m_background.axis(1);
-    m_mc_nmaps = m_background.axis(2);
+    // Compute DETX and DETY binsize in radians and energy binsize in log10(TeV)
+    double detx_bin = (m_detx_max - m_detx_min) / m_num_detx;
+    double dety_bin = (m_dety_max - m_dety_min) / m_num_dety;
+    double logE_bin = (m_logE_max - m_logE_min) / (nbins+1);
 
-    // Compute DETX boundaries and binsize in deg. If DETX binsize is too
-    // coarse then request a finer sampling
-    m_mc_detx_min = m_background.axis_lo(0,0);
-    m_mc_detx_max = m_background.axis_hi(0,m_mc_nx-1);
-    m_mc_detx_bin = (m_mc_detx_max - m_mc_detx_min) / m_mc_nx;
-    if (m_mc_detx_bin > m_mc_max_bin) {
-        m_mc_nx       = int((m_mc_detx_max - m_mc_detx_min) / m_mc_max_bin + 1.0);
-        m_mc_detx_bin = (m_mc_detx_max - m_mc_detx_min) / m_mc_nx;
-    }
+    // Loop over all energy bins
+    for (int i = 0; i < nbins; ++i) {
 
-    // Compute DETY boundaries and binsize in deg. If DETY binsize is too
-    // coarse then request a finer sampling
-    m_mc_dety_min = m_background.axis_lo(1,0);
-    m_mc_dety_max = m_background.axis_hi(1,m_mc_ny-1);
-    m_mc_dety_bin = (m_mc_dety_max - m_mc_dety_min) / m_mc_ny;
-    if (m_mc_dety_bin > m_mc_max_bin) {
-        m_mc_ny       = int((m_mc_dety_max - m_mc_dety_min) / m_mc_max_bin + 1.0);
-        m_mc_dety_bin = (m_mc_dety_max - m_mc_dety_min) / m_mc_ny;
-    }
+        // Get logE of energy bin
+        double logE = m_logE_min + i * logE_bin;
 
-    // Compute energy sampling. If energy sampling is too coarse then
-    // request a finer sampling
-    GEnergy emin(m_background.axis_lo(2,0), m_background.axis_lo_unit(2));
-    GEnergy emax(m_background.axis_hi(2,m_mc_nmaps-1), m_background.axis_hi_unit(2));
-    m_mc_logE_min = emin.log10TeV();
-    m_mc_logE_max = emax.log10TeV();
-    m_mc_logE_bin = (m_mc_logE_max - m_mc_logE_min) / m_mc_nmaps;
-    if (m_mc_logE_bin > m_mc_max_logE) {
-        m_mc_nmaps    = int((m_mc_logE_max - m_mc_logE_min) / m_mc_max_logE + 1.0);
-        m_mc_logE_bin = (m_mc_logE_max - m_mc_logE_min) / m_mc_nmaps;
-    }
+        // Initialise cache with cumulative pixel fluxes and compute total flux
+        // in response table for normalization. Negative pixels are excluded
+        // from the cumulative map.
+        double total_flux = 0.0; // units: events/s/MeV
+        double dx         = 0.5 * detx_bin;
+        double dy         = 0.5 * dety_bin;
+        double detx       = m_detx_min + dx;
+        for (int ix = 0; ix < m_num_detx; ++ix, detx += detx_bin) {
+            double dety = m_dety_min + dy;
+            for (int iy = 0; iy < m_num_dety; ++iy, dety += dety_bin) {
 
-    // Determine number of MC cube pixels
-    m_mc_npix = m_mc_nx * m_mc_ny;
+                // Compute intensities
+                double i0 = (*this)(logE, detx,    dety);
+                double i1 = (*this)(logE, detx-dx, dety-dy);
+                double i2 = (*this)(logE, detx,    dety-dy);
+                double i3 = (*this)(logE, detx+dx, dety-dy);
+                double i4 = (*this)(logE, detx+dx, dety);
+                double i5 = (*this)(logE, detx+dx, dety+dy);
+                double i6 = (*this)(logE, detx,    dety+dy);
+                double i7 = (*this)(logE, detx-dx, dety+dy);
+                double i8 = (*this)(logE, detx-dx, dety);
 
-    // Determine solid angle of pixel (we assume here simply that we have
-    // square pixels of identical solid angle; it needs to be checked whether
-    // this is a valid assumption)
-    double solidangle = m_mc_detx_bin * gammalib::deg2rad *
-                        m_mc_dety_bin * gammalib::deg2rad;
+                // Compute solid angle of the 8 pixel wedges
+                double s1 = solid_angle(detx, dety, detx-dx, dety-dy, detx,    dety-dy);
+                double s2 = solid_angle(detx, dety, detx,    dety-dy, detx+dx, dety-dy);
+                double s3 = solid_angle(detx, dety, detx+dx, dety-dy, detx+dx, dety);
+                double s4 = solid_angle(detx, dety, detx+dx, dety,    detx+dx, dety+dy);
+                double s5 = solid_angle(detx, dety, detx+dx, dety+dy, detx,    dety+dy);
+                double s6 = solid_angle(detx, dety, detx,    dety+dy, detx-dx, dety+dy);
+                double s7 = solid_angle(detx, dety, detx-dx, dety+dy, detx-dx, dety);
+                double s8 = solid_angle(detx, dety, detx-dx, dety,    detx-dx, dety-dy);
 
-    // Continue only if there are pixels and maps
-    if (m_mc_npix > 0 && m_mc_nmaps > 0) {
+                // Compute flux by summing the flux in 8 pixel wedges
+                double flux1 = s1 * (i1 + i2 + i0);
+                double flux2 = s2 * (i2 + i3 + i0);
+                double flux3 = s3 * (i3 + i4 + i0);
+                double flux4 = s4 * (i4 + i5 + i0);
+                double flux5 = s5 * (i5 + i6 + i0);
+                double flux6 = s6 * (i6 + i7 + i0);
+                double flux7 = s7 * (i7 + i8 + i0);
+                double flux8 = s8 * (i8 + i1 + i0);
+                double flux  = (flux1 + flux2  + flux3  + flux4 +
+                                flux5 + flux6  + flux7  + flux8) / 3.0;
 
-        // Reserve space for all pixels in cache
-        m_mc_cache.reserve((m_mc_npix+1)*m_mc_nmaps);
-
-        // Loop over all maps
-        for (int i = 0; i < m_mc_nmaps; ++i) {
-
-            // Compute pixel offset
-            int offset = i * (m_mc_npix+1);
-
-            // Get logE
-            double logE = m_mc_logE_min + (i+0.5) * m_mc_logE_bin;
-
-            // Set first cache value to 0
-            m_mc_cache.push_back(0.0);
-
-            // Initialise cache with cumulative pixel fluxes and compute
-            // total flux in response table for normalization. Negative
-            // pixels are excluded from the cumulative map.
-            double total_rate = 0.0;
-            double xmin       = m_mc_detx_min * gammalib::deg2rad;
-            double xbin       = m_mc_detx_bin * gammalib::deg2rad;
-            double ymin       = m_mc_dety_min * gammalib::deg2rad;
-            double ybin       = m_mc_dety_bin * gammalib::deg2rad;
-            double detx       = xmin + 0.5 * xbin;
-            for (int ix = 0; ix < m_mc_nx; ++ix, detx += xbin) {
-                double dety = ymin + 0.5 * ybin;
-                for (int iy = 0; iy < m_mc_ny; ++iy, dety += ybin) {
-                    double rate = (*this)(logE, detx, dety) * solidangle;
-                    if (rate > 0.0) {
-                        total_rate += rate;
-                    }
-                    m_mc_cache.push_back(total_rate); // units: events/s/MeV
+                // Sum flux
+                if (flux > 0.0) {
+                    total_flux += flux;
                 }
-            }
 
-            // Normalize cumulative pixel fluxes so that the values in the
-            // cache run from 0 to 1
-            if (total_rate > 0.0) {
-                for (int k = 0, element = offset; k < m_mc_npix; ++k, ++element) {
-                    m_mc_cache[element] /= total_rate;
-                }
-            }
+            } // endfor: loop over DETY
 
-            // Make sure that last pixel in the cache is >1
-            m_mc_cache[m_mc_npix+offset] = 1.0001;
+        } // endfor: loop over DETX
 
-            // Set energy value (unit independent)
-            GEnergy energy;
-            energy.log10(logE, m_background.axis_lo_unit(2));
+        // Set energy value (unit independent)
+        GEnergy energy;
+        energy.log10(logE, m_background.axis_lo_unit(m_inx_energy));
 
-            // Only append node if rate > 0
-            if (total_rate > 0.0) {
-                m_mc_spectrum.append(energy, total_rate);
-            }
-
-            // Dump spectrum for debugging
-            #if defined(G_DEBUG_MC_INIT)
-            std::cout << "Energy=" << energy;
-            std::cout << " Rate=" << total_rate;
-            std::cout << " events/s/MeV" << std::endl;
-            #endif
-
-        } // endfor: looped over all maps
-
-        // Dump cache values for debugging
-        #if defined(G_DEBUG_CACHE)
-        for (int i = 0; i < m_mc_cache.size(); ++i) {
-            std::cout << "i=" << i;
-            std::cout << " c=" << m_mc_cache[i] << std::endl;
+        // Only append node if flux is positive
+        if (total_flux > 0.0) {
+            m_mc_spectrum.append(energy, total_flux);
         }
+
+        // Dump spectrum for debugging
+        #if defined(G_DEBUG_MC_INIT)
+        std::cout << "Energy=" << energy;
+        std::cout << " Rate_total=" << total_flux;
+        std::cout << " events/s/MeV" << std::endl;
         #endif
 
-    } // endif: there were cube pixels and maps
+    } // endfor: looped over energy bins
+
+    // Dump maximum rate
+    #if defined(G_DEBUG_MC_INIT)
+    for (int i = 0; i < m_mc_max.size(); ++i) {
+        double logE = m_logE_min + (i+0.5) * logE_bin;
+        GEnergy energy;
+        energy.log10(logE, m_background.axis_lo_unit(m_inx_energy));
+        std::cout << "Energy=" << energy;
+        std::cout << " Rate_max=" << max_rate;
+        std::cout << " events/s/sr/MeV";
+    }
+    #endif
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise array of maximum background rate
+ *
+ * Initialises the array m_mc_max that holds the maximum background rate in
+ * each DETX-DETY plane of the background model.
+ ***************************************************************************/
+void GCTABackground3D::init_mc_max_rate(void) const
+{
+    // Initialise cache
+    m_mc_max.clear();
+
+    // Loop over all maps to determine the maximum map intensity in units
+    // of events/s/sr/MeV
+    for (int iebin = 0; iebin < m_num_energy; ++iebin) {
+
+        // Initialise maximum rate
+        double max_rate = 0.0;
+
+        // Loop over DETX-DETY plane
+        for (int ix = 0; ix < m_num_detx; ++ix) {
+            for (int iy = 0; iy < m_num_dety; ++iy) {
+
+                // Get bin index
+                int inx = index(ix, iy, iebin);
+
+                // Get background rate
+                double rate = m_background(m_inx_bgd, inx);
+                
+                // If background rate is larger than maximum then store the
+                // background rate as new maximum
+                if (rate > max_rate) {
+                    max_rate = rate;
+                }
+
+            } // endfor: looped over DETY
+        } // endfor: looped over DETX
+
+        // Append maximum rate
+        m_mc_max.push_back(max_rate);
+
+    } // endif: looped over all maps
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute solid angle of pixel wedge
+ *
+ * @param[in] detx1 DETX of first edge.
+ * @param[in] dety1 DETY of first edge.
+ * @param[in] detx2 DETX of second edge.
+ * @param[in] dety2 DETY of second edge.
+ * @param[in] detx3 DETX of third edge.
+ * @param[in] dety3 DETY of third edge.
+ * @return Solid angle (steradians).
+ *
+ * Estimate the solid angle subtended by 3 coordinates using Huilier's
+ * theorem.
+ *
+ * Below, the definiton of the pixel cornes and sides are shown as used
+ * within the code.
+ *
+ *             a12
+ *         1---------2
+ *         |        / 
+ *         |       /  
+ *         |      /   
+ *         |     /    
+ *      a13|    /a23
+ *         |   / 
+ *         |  / 
+ *         | /
+ *         |/
+ *         3
+ *
+ ***************************************************************************/
+double GCTABackground3D::solid_angle(const double& detx1, const double& dety1,
+                                     const double& detx2, const double& dety2,
+                                     const double& detx3, const double& dety3) const
+{
+    // Initialise solid angle
+    double solidangle = 0.0;
+
+    // Set sky directions
+	double  theta1 = std::sqrt(detx1 * detx1 + dety1 * dety1);
+	double  phi1   = std::atan2(dety1, detx1);
+	double  theta2 = std::sqrt(detx2 * detx2 + dety2 * dety2);
+	double  phi2   = std::atan2(dety2, detx2);
+	double  theta3 = std::sqrt(detx3 * detx3 + dety3 * dety3);
+	double  phi3   = std::atan2(dety3, detx3);
+    GSkyDir dir1;
+    GSkyDir dir2;
+    GSkyDir dir3;
+    dir1.radec(phi1, gammalib::pihalf - theta1);
+    dir2.radec(phi2, gammalib::pihalf - theta2);
+    dir3.radec(phi3, gammalib::pihalf - theta3);
+
+    // Compute angular distances between pixel corners
+    double a12 = dir1.dist(dir2);
+    double a13 = dir1.dist(dir3);
+    double a23 = dir2.dist(dir3);
+
+    // Compute solid angle
+    double s   = 0.5 * (a12 + a23 + a13);
+    solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                           std::tan(0.5*(s-a12)) *
+                                           std::tan(0.5*(s-a23)) *
+                                           std::tan(0.5*(s-a13))));
+
+    // Return solid angle
+    return solidangle;
 }

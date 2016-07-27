@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GMWLSpectrum.cpp - Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,7 +81,7 @@ GMWLSpectrum::GMWLSpectrum(void) : GEventCube()
  *
  * Creates instance from file.
  ***************************************************************************/
-GMWLSpectrum::GMWLSpectrum(const std::string& filename) : GEventCube()
+GMWLSpectrum::GMWLSpectrum(const GFilename& filename) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -258,30 +258,27 @@ GMWLSpectrum* GMWLSpectrum::clone(void) const
  *
  * @todo So far only FITS file support is implemented.
  ***************************************************************************/
-void GMWLSpectrum::load(const std::string& filename)
+void GMWLSpectrum::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
     // Clear object
     clear();
 
     // Open FITS file
-    GFits file(fname.filename());
+    GFits fits(filename);
 
     // Read spectrum
-    if (fname.has_extno()) {
-        read(file, fname.extno());
+    if (filename.has_extno()) {
+        read(fits, filename.extno());
     }
-    else if (fname.has_extname()) {
-        read(file, fname.extname());
+    else if (filename.has_extname()) {
+        read(fits, filename.extname());
     }
     else {
-        read(file);
+        read(fits);
     }
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -296,8 +293,8 @@ void GMWLSpectrum::load(const std::string& filename)
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GMWLSpectrum::save(const std::string& filename,
-                        const bool& clobber) const
+void GMWLSpectrum::save(const GFilename& filename,
+                        const bool&      clobber) const
 {
     // Return
     return;
@@ -380,7 +377,7 @@ void GMWLSpectrum::read(const GFits& fits, const int& extno)
 
     // If we found no table then throw an exception
     if (extension == 0) {
-        throw GMWLException::file_open_error(G_READ, fits.filename(),
+        throw GMWLException::file_open_error(G_READ, fits.filename().url(),
                                              "No table found in file.");
     }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeffArf.cpp - CTA ARF effective area class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,7 +77,7 @@ GCTAAeffArf::GCTAAeffArf(void) : GCTAAeff()
  *
  * Constructs effective area from an ARF FITS file.
  ***************************************************************************/
-GCTAAeffArf::GCTAAeffArf(const std::string&  filename) : GCTAAeff()
+GCTAAeffArf::GCTAAeffArf(const GFilename&  filename) : GCTAAeff()
 {
     // Initialise class members
     init_members();
@@ -247,25 +247,19 @@ GCTAAeffArf* GCTAAeffArf::clone(void) const
  * If no extension name is provided, the effective area will be loaded from
  * the "SPECRESP" extension.
  ***************************************************************************/
-void GCTAAeffArf::load(const std::string& filename)
+void GCTAAeffArf::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname.filename());
+    GFits fits(filename);
 
     // Get ARF table
-    const GFitsTable& table = *file.table(fname.extname("SPECRESP"));
+    const GFitsTable& table = *fits.table(filename.extname("SPECRESP"));
 
     // Read ARF from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.hpp - Test suite container class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,8 +32,11 @@
 #include <vector>
 #include "GContainer.hpp"
 #include "GLog.hpp"
-#include "GXml.hpp"
 #include "GTestSuite.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GXml;
 
 
 /***********************************************************************//**
@@ -53,7 +56,7 @@ public:
     // Constructors and destructors
     GTestSuites(void);
     GTestSuites(const GTestSuites& suites);
-    GTestSuites(const std::string& name);
+    explicit GTestSuites(const std::string& name);
     virtual ~GTestSuites(void);
     
     // Operators
@@ -83,7 +86,7 @@ public:
     int                tests(void) const;
     const time_t&      timestamp(void) const;
     bool               run(void);
-    void               save(const std::string& filename) const;
+    void               save(const GFilename& filename) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
     
 protected:
