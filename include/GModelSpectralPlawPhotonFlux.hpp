@@ -47,7 +47,7 @@ class GXmlElement;
  * This class implements a power law spectrum. The model is defined by
  *
  * \f[
- *    S_{\rm E}(E | t) = {\tt m\_photon\_flux}
+ *    S_{\rm E}(E | t) = {\tt m\_flux}
  *    \frac{{\tt m\_index}+1}
  *         {{\tt e\_max}^{{\tt m\_index}+1} -
  *          {\tt e\_min}^{{\tt m\_index}+1}}
@@ -58,7 +58,7 @@ class GXmlElement;
  *
  * \f[
  *    S_{\rm E}(E | t) = 
- *    \frac{{\tt m\_photon\_flux}}
+ *    \frac{{\tt m\_flux}}
  *         {\log {\tt e\_max} - \log {\tt e\_min}}
  *    E^{\tt m\_index}
  * \f]
@@ -66,7 +66,7 @@ class GXmlElement;
  * for \f${\tt m\_index} = -1\f$, where
  * - \f${\tt e\_min}\f$ is the minimum energy of an interval,
  * - \f${\tt e\_max}\f$ is the maximum energy of an interval,
- * - \f${\tt m\_photon\_flux}\f$ is the photon flux between
+ * - \f${\tt m\_flux}\f$ is the photon flux between
  *   \f${\tt e\_min}\f$ and \f${\tt e\_max}\f$, and
  * - \f${\tt m\_index}\f$ is the spectral index.
  ***************************************************************************/
@@ -76,14 +76,14 @@ public:
     // Constructors and destructors
     GModelSpectralPlawPhotonFlux(void);
     GModelSpectralPlawPhotonFlux(const std::string& type,
-                        const std::string& integral,
-                        const std::string& index,
-                        const std::string& emin,
-                        const std::string& emax);
-    GModelSpectralPlawPhotonFlux(const double&  integral,
-                        const double&  index,
-                        const GEnergy& emin,
-                        const GEnergy& emax);
+                                 const std::string& flux,
+                                 const std::string& index,
+                                 const std::string& emin,
+                                 const std::string& emax);
+    GModelSpectralPlawPhotonFlux(const double&  flux,
+                                 const double&  index,
+                                 const GEnergy& emin,
+                                 const GEnergy& emax);
     explicit GModelSpectralPlawPhotonFlux(const GXmlElement& xml);
     GModelSpectralPlawPhotonFlux(const GModelSpectralPlawPhotonFlux& model);
     virtual ~GModelSpectralPlawPhotonFlux(void);
@@ -92,29 +92,29 @@ public:
     virtual GModelSpectralPlawPhotonFlux& operator=(const GModelSpectralPlawPhotonFlux& model);
 
     // Implemented pure virtual base class methods
-    virtual void                 clear(void);
+    virtual void                          clear(void);
     virtual GModelSpectralPlawPhotonFlux* clone(void) const;
-    virtual std::string          classname(void) const;
-    virtual std::string          type(void) const;
-    virtual double               eval(const GEnergy& srcEng,
-                                      const GTime&   srcTime = GTime()) const;
-    virtual double               eval_gradients(const GEnergy& srcEng,
-                                                const GTime&   srcTime = GTime());
-    virtual double               flux(const GEnergy& emin,
-                                      const GEnergy& emax) const;
-    virtual double               eflux(const GEnergy& emin,
-                                       const GEnergy& emax) const;
-    virtual GEnergy              mc(const GEnergy& emin,
-                                    const GEnergy& emax,
-                                    const GTime&   time,
-                                    GRan&          ran) const;
-    virtual void                 read(const GXmlElement& xml);
-    virtual void                 write(GXmlElement& xml) const;
-    virtual std::string          print(const GChatter& chatter = NORMAL) const;
+    virtual std::string                   classname(void) const;
+    virtual std::string                   type(void) const;
+    virtual double                        eval(const GEnergy& srcEng,
+                                               const GTime&   srcTime = GTime()) const;
+    virtual double                        eval_gradients(const GEnergy& srcEng,
+                                                         const GTime&   srcTime = GTime());
+    virtual double                        flux(const GEnergy& emin,
+                                               const GEnergy& emax) const;
+    virtual double                        eflux(const GEnergy& emin,
+                                                const GEnergy& emax) const;
+    virtual GEnergy                       mc(const GEnergy& emin,
+                                             const GEnergy& emax,
+                                             const GTime&   time,
+                                             GRan&          ran) const;
+    virtual void                          read(const GXmlElement& xml);
+    virtual void                          write(GXmlElement& xml) const;
+    virtual std::string                   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double  photon_flux(void) const;
-    void    photon_flux(const double& photon_flux);
+    double  flux(void) const;
+    void    flux(const double& flux);
     double  index(void) const;
     void    index(const double& index);
     GEnergy emin(void) const;
@@ -131,7 +131,7 @@ protected:
 
     // Protected members
     std::string     m_type;            //!< Model type
-    GModelPar       m_photon_flux;     //!< Photon flux
+    GModelPar       m_flux;            //!< Photon flux (ph/cm2/s)
     GModelPar       m_index;           //!< Spectral index
     GModelPar       m_emin;            //!< Lower energy limit (MeV)
     GModelPar       m_emax;            //!< Upper energy limit (MeV)
@@ -144,14 +144,10 @@ protected:
     mutable double  m_norm;            //!< Power-law normalization (for pivot energy 1 MeV)
     mutable double  m_g_norm;          //!< Power-law normalization gradient
     mutable double  m_power;           //!< Power-law factor
-    mutable double  m_last_phflux;     //!< Last photon flux
     mutable double  m_last_index;      //!< Last spectral index (MeV)
     mutable GEnergy m_last_emin;       //!< Last lower energy limit
     mutable GEnergy m_last_emax;       //!< Last upper energy limit
     mutable GEnergy m_last_energy;     //!< Last source energy
-    mutable double  m_last_value;      //!< Last function value
-    mutable double  m_last_g_phflux;   //!< Last photon flux gradient
-    mutable double  m_last_g_index;    //!< Last spectral index gradient
 };
 
 
@@ -189,23 +185,23 @@ std::string GModelSpectralPlawPhotonFlux::type(void) const
  * Returns the photon flux.
  ***************************************************************************/
 inline
-double GModelSpectralPlawPhotonFlux::photon_flux(void) const
+double GModelSpectralPlawPhotonFlux::flux(void) const
 {
-    return (m_photon_flux.value());
+    return (m_flux.value());
 }
 
 
 /***********************************************************************//**
  * @brief Set photon flux
  *
- * @param[in] photon_flux Photon flux (ph/cm2/s).
+ * @param[in] flux Photon flux (ph/cm2/s).
  *
  * Sets the photon flux.
  ***************************************************************************/
 inline
-void GModelSpectralPlawPhotonFlux::photon_flux(const double& photon_flux)
+void GModelSpectralPlawPhotonFlux::flux(const double& flux)
 {
-    m_photon_flux.value(photon_flux);
+    m_flux.value(flux);
     return;
 }
 

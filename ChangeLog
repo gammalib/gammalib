@@ -1,4 +1,13 @@
-2016-07-24  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-07-28
+
+        * Version 1.2.0 released
+        =========================
+
+	Add GModelSpectralPlawEnergyFlux class (#1790)
+	Rename GModelSpectralPlaw2 to GModelSpectralPlawPhotonFlux (#1790)
+
+
+2016-07-24
 
         * Version 1.1.0 released
         =========================
@@ -70,7 +79,7 @@
         Finalize implementation of CTA On/Off fitting (#1044, #1781)
 
 
-2016-01-27  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-01-27
 
         * Bug fix version 1.0.1 released
         ================================
@@ -81,7 +90,7 @@
         Correct diffuse map MC normalisation (#1584)
 
 
-2015-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-12-18
 
         * Version 1.0.0 released
         =========================
@@ -99,7 +108,7 @@
         Resolve Python test problem on El Capitan (#1563)
 
 
-2015-10-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-10-28
 
         * Version 0.11.0 released
         =========================
@@ -130,7 +139,7 @@
         Implement rejection method for skymap Monte Carlo (#1465)
 
 
-2015-05-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-05-22
 
         * Version 0.10.0 released
         =========================
@@ -162,7 +171,7 @@
         Add CTA Prod2 instrument response function (#1464)
 
 
-2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-01-07
 
         * Bug fix version 0.9.1 released
         ================================
@@ -170,7 +179,7 @@
         Fixed bug #1383 (unit test error with recent gcc compiler)
 
 
-2014-11-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-11-13
 
         * Version 0.9.0 released
         ========================
@@ -210,7 +219,7 @@
         Several bug corrections
 
 
-2014-03-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-03-12
 
         * Bug fix Version 0.8.2 released
         ================================
@@ -230,7 +239,7 @@
         Correct LAT PSF computation for sources outside event cube
 
 
-2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-02-05
         
         * Bug fix Version 0.8.1 released
         ================================
@@ -247,7 +256,7 @@
         Correct deadtime computation for CTA non point source response (#1133)
 
 
-2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-01-18
 
         * Version 0.8.0 released
         ========================
@@ -279,7 +288,8 @@
         - GWcslib => GWcs
         - GWcsHPX => GHealpix
 
-2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-12-18
 
         * Version 0.7.0 released
         ========================
@@ -300,7 +310,8 @@
         Rework GTime interface and introduce GTimeReference class
         Add GModelSpectralLogParabola spectral model
 
-2012-09-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-09-17
 
         * Bug fix version 0.6.2 released
         ================================
@@ -312,7 +323,8 @@
         Improve Python bindings configuration
         Add TEST_ENV_DIR to load library path
 
-2012-09-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-09-15
 
         * Bug fix version 0.6.1 released
         ================================
@@ -320,7 +332,8 @@
         Do not require gammalib/__init__.py file to be present
         clang++ compiler takes precedence over g++ compiler
 
-2012-09-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-09-14
 
         * Version 0.6.0 released
         ========================
@@ -334,7 +347,8 @@
         Correct bugs in GSparseMatrix
         Enhance code quality
 
-2012-04-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-04-03
 
         * Version 0.5.0 released
         ========================
@@ -351,7 +365,8 @@
         Add GModelSpectralNodes model
         Correct Npred integration in GCTAModelRadialAcceptance
 
-2011-10-12  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-10-12
 
         * Version 0.4.12 released
         =========================
@@ -359,7 +374,8 @@
         Add missing #include <cstring> to GTools.cpp
         Correct but in python interface for GSymMatrix and GSparseMatrix
 
-2011-10-03  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-10-03
 
         * Version 0.4.11 released
         =========================
@@ -380,7 +396,8 @@
         Replace FITS table column methods by access operators
         Fix bug in GSparseMatrix::cs_transpose
 
-2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-07-20
 
         * Version 0.4.10 released
         =========================
@@ -388,7 +405,8 @@
         Improve configuration script
         Minor bug fixes
 
-2011-07-09  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-07-09
 
         * Version 0.4.9 released
         ========================
@@ -400,7 +418,8 @@
         Add NaN/Inf check in various places (--enable-nan-check)
         Test for presence of Python.h
 
-2011-02-24  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-02-24
 
         * Version 0.4.7 released
         ========================
@@ -408,7 +427,8 @@
         Fix memory leaks in container classes handling pointers
         Add more example scripts
 
-2011-02-21  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-02-21
 
         * Version 0.4.6 released
         ========================
@@ -421,7 +441,8 @@
         Add Doxygen and man support (make doxygen; make doxygen-install)
         Add html documentation
 
-2011-02-02  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-02-02
 
         * Version 0.4.5 released
         ========================
@@ -433,7 +454,8 @@
         Improve automatic configuration, remove autogen.sh
         Adapt for Solaris 2.10
 
-2011-01-06  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-01-06
 
         * Version 0.4.4 released
         ========================
@@ -443,7 +465,8 @@
         Correct some bugs and enhance some classes
         Correct and validate Fermi-LAT interface for binned analysis
 
-2010-12-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2010-12-20
 
         * Version 0.4.3 released
         ========================
@@ -453,7 +476,8 @@
         Add more source models
         First working Fermi-LAT interface for binned analysis
 
-2010-11-23  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2010-11-23
 
         * Version 0.4.2 released
         ========================
@@ -461,7 +485,8 @@
         Tag sources with GammaLib-00-04-02
         Enhance FITS interface
 
-2010-11-15  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2010-11-15
 
         * Version 0.4.1 released
         ========================
@@ -471,14 +496,16 @@
         Prototype implementation of application logger
         Cleanup of FITS interface
 
-2010-06-11  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2010-06-11
 
         * Version 0.4.0 released
         ========================
 
         Tag sources with GammaLib-00-04-00
 
-2009-10-09  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2009-10-09
 
         * Version 0.2.0 released
         ========================

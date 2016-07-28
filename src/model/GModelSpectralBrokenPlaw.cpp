@@ -90,8 +90,9 @@ GModelSpectralBrokenPlaw::GModelSpectralBrokenPlaw(void) : GModelSpectral()
  *
  * @param[in] type Model type.
  * @param[in] prefactor Name of prefactor parameter.
- * @param[in] index Name of index parameter.
- * @param[in] pivot Name of pivot parameter.
+ * @param[in] index1 Name of index1 parameter.
+ * @param[in] breakenergy Name of breakenergy parameter.
+ * @param[in] index2 Name of index2 parameter.
  ***************************************************************************/
 GModelSpectralBrokenPlaw::GModelSpectralBrokenPlaw(const std::string& type,
                                                    const std::string& prefactor,

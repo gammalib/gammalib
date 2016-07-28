@@ -216,7 +216,7 @@
 #include "GModelSpectralNodes.hpp"
 #include "GModelSpectralPlaw.hpp"
 #include "GModelSpectralPlawPhotonFlux.hpp"
-#include "GModelSpectralPlawenergyFlux.hpp"
+#include "GModelSpectralPlawEnergyFlux.hpp"
 #include "GModelTemporal.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"

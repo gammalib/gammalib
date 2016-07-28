@@ -39,19 +39,20 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralPlawEnergyFlux    g_spectral_plaw_eflux_seed("PowerLaw",
-                                                    "EnergyFlux",
-                                                    "Index",
-                                                    "LowerLimit",
-                                                    "UpperLimit");
-const GModelSpectralRegistry g_spectral_plaw_eflux_registry(&g_spectral_plaw_eflux_seed);
+const GModelSpectralPlawEnergyFlux g_spectral_plaw_eflux_seed("PowerLaw",
+                                                              "EnergyFlux",
+                                                              "Index",
+                                                              "LowerLimit",
+                                                              "UpperLimit");
+const GModelSpectralRegistry       g_spectral_plaw_eflux_registry(&g_spectral_plaw_eflux_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_FLUX                "GModelSpectralPlawEnergyFlux::flux(GEnergy&, GEnergy&)"
-#define G_EFLUX              "GModelSpectralPlawEnergyFlux::eflux(GEnergy&, GEnergy&)"
-#define G_MC     "GModelSpectralPlawEnergyFlux::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
-#define G_READ                      "GModelSpectralPlawEnergyFlux::read(GXmlElement&)"
-#define G_WRITE                    "GModelSpectralPlawEnergyFlux::write(GXmlElement&)"
+#define G_FLUX       "GModelSpectralPlawEnergyFlux::flux(GEnergy&, GEnergy&)"
+#define G_EFLUX     "GModelSpectralPlawEnergyFlux::eflux(GEnergy&, GEnergy&)"
+#define G_MC  "GModelSpectralPlawEnergyFlux::mc(GEnergy&, GEnergy&, GTime&, "\
+                                                                     "GRan&)"
+#define G_READ             "GModelSpectralPlawEnergyFlux::read(GXmlElement&)"
+#define G_WRITE           "GModelSpectralPlawEnergyFlux::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -69,7 +70,8 @@ const GModelSpectralRegistry g_spectral_plaw_eflux_registry(&g_spectral_plaw_efl
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(void) : GModelSpectral()
+GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(void) :
+                              GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -83,17 +85,17 @@ GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(void) : GModelSpectra
  * @brief Model type and parameter name constructor
  *
  * @param[in] type Model type.
- * @param[in] energy_flux Name of energy flux parameter.
+ * @param[in] eflux Name of energy flux parameter.
  * @param[in] index Name of index parameter.
  * @param[in] emin Name of emin parameter.
  * @param[in] emax Name of emax parameter.
  ***************************************************************************/
 GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const std::string& type,
-                                         const std::string& energy_flux,
-                                         const std::string& index,
-                                         const std::string& emin,
-                                         const std::string& emax) :
-                     GModelSpectral()
+                                                           const std::string& eflux,
+                                                           const std::string& index,
+                                                           const std::string& emin,
+                                                           const std::string& emax) :
+                              GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -102,7 +104,7 @@ GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const std::string& ty
     m_type = type;
 
     // Set parameter names
-    m_energy_flux.name(energy_flux);
+    m_eflux.name(eflux);
     m_index.name(index);
     m_emin.name(emin);
     m_emax.name(emax);
@@ -115,7 +117,7 @@ GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const std::string& ty
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] energy_flux Energy flux (erg/cm2/s).
+ * @param[in] eflux Energy flux (erg/cm2/s).
  * @param[in] index Power law index.
  * @param[in] emin Minimum energy.
  * @param[in] emax Maximum energy.
@@ -126,17 +128,17 @@ GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const std::string& ty
  * - minimum energy and
  * - maximum energy.
  ***************************************************************************/
-GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const double&  energy_flux,
-                                         const double&  index,
-                                         const GEnergy& emin,
-                                         const GEnergy& emax) :
-                     GModelSpectral()
+GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const double&  eflux,
+                                                           const double&  index,
+                                                           const GEnergy& emin,
+                                                           const GEnergy& emax) :
+                              GModelSpectral()
 {
     // Initialise members
     init_members();
 
     // Set parameters
-    m_energy_flux.value(energy_flux);
+    m_eflux.value(eflux);
     m_index.value(index);
     m_emin.value(emin.MeV());
     m_emax.value(emax.MeV());
@@ -152,11 +154,10 @@ GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const double&  energy
  * @param[in] xml XML element.
  *
  * Constructs energy flux normalized power law spectral model by extracting
- * information from an XML element. See the read() method for more
- * information about the expected structure of the XML element.
+ * information from an XML element.
  ***************************************************************************/
 GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const GXmlElement& xml) :
-                     GModelSpectral()
+                              GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -175,7 +176,7 @@ GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const GXmlElement& xm
  * @param[in] model Spectral power law model.
  ***************************************************************************/
 GModelSpectralPlawEnergyFlux::GModelSpectralPlawEnergyFlux(const GModelSpectralPlawEnergyFlux& model) :
-                     GModelSpectral(model)
+                              GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -283,7 +284,7 @@ GModelSpectralPlawEnergyFlux* GModelSpectralPlawEnergyFlux::clone(void) const
  * Computes
  *
  * \f[
- *    S_{\rm E}(E | t) = {\tt m\_energy\_flux}
+ *    S_{\rm E}(E | t) = {\tt m\_eflux}
  *    \frac{{\tt m\_index}+2}
  *         {{\tt e\_max}^{{\tt m\_index}+2} -
  *          {\tt e\_min}^{{\tt m\_index}+2}}
@@ -294,7 +295,7 @@ GModelSpectralPlawEnergyFlux* GModelSpectralPlawEnergyFlux::clone(void) const
  *
  * \f[
  *    S_{\rm E}(E | t) = 
- *    \frac{{\tt m\_energy\_flux}}
+ *    \frac{{\tt m\_eflux}}
  *         {\log {\tt e\_max} - \log {\tt e\_min}}
  *    E^{\tt m\_index}
  * \f]
@@ -302,18 +303,18 @@ GModelSpectralPlawEnergyFlux* GModelSpectralPlawEnergyFlux::clone(void) const
  * for \f${\tt m\_index} = -2\f$, where
  * - \f${\tt e\_min}\f$ is the minimum energy of an interval,
  * - \f${\tt e\_max}\f$ is the maximum energy of an interval,
- * - \f${\tt m\_energy\_flux}\f$ is the energy flux between
+ * - \f${\tt m\_eflux}\f$ is the energy flux between
  *   \f${\tt e\_min}\f$ and \f${\tt e\_max}\f$, and
  * - \f${\tt m\_index}\f$ is the spectral index.
  ***************************************************************************/
 double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
-                                 const GTime&   srcTime) const
+                                          const GTime&   srcTime) const
 {
     // Update precomputed values
     update(srcEng);
 
     // Compute function value
-    double value = m_energy_flux.value() * gammalib::erg2MeV * m_norm * m_power;
+    double value = m_eflux.value() * gammalib::erg2MeV * m_norm * m_power;
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -323,7 +324,7 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", energy flux=" << energy_flux();
+        std::cout << ", eflux=" << eflux();
         std::cout << ", m_norm=" << m_norm;
         std::cout << ", m_power=" << m_power;
         std::cout << ")" << std::endl;
@@ -345,7 +346,7 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
  * Computes
  *
  * \f[
- *    S_{\rm E}(E | t) = {\tt m\_energy\_flux}
+ *    S_{\rm E}(E | t) = {\tt m\_eflux}
  *    \frac{{\tt m\_index}+2}
  *         {{\tt e\_max}^{{\tt m\_index}+2} -
  *          {\tt e\_min}^{{\tt m\_index}+2}}
@@ -356,7 +357,7 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
  *
  * \f[
  *    S_{\rm E}(E | t) = 
- *    \frac{{\tt m\_energy\_flux}}
+ *    \frac{{\tt m\_eflux}}
  *         {\log {\tt e\_max} - \log {\tt e\_min}}
  *    E^{\tt m\_index}
  * \f]
@@ -364,7 +365,7 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
  * for \f${\tt m\_index} = -2\f$, where
  * - \f${\tt e\_min}\f$ is the minimum energy of an interval,
  * - \f${\tt e\_max}\f$ is the maximum energy of an interval,
- * - \f${\tt m\_energy\_flux}\f$ is the energy flux between
+ * - \f${\tt m\_eflux}\f$ is the energy flux between
  *   \f${\tt e\_min}\f$ and \f${\tt e\_max}\f$, and
  * - \f${\tt m\_index}\f$ is the spectral index.
  *
@@ -372,8 +373,8 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
  * respect to the parameters using
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_energy\_flux}} =
- *      \frac{S_{\rm E}(E | t)}{{\tt m\_energy\_flux}}
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_eflux}} =
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_eflux}}
  * \f]
  *
  * \f[
@@ -399,21 +400,21 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
  * No partial derivatives are supported for the energy boundaries.
  ***************************************************************************/
 double GModelSpectralPlawEnergyFlux::eval_gradients(const GEnergy& srcEng,
-                                           const GTime&   srcTime)
+                                                    const GTime&   srcTime)
 {
     // Initialise gradients
-    double g_energy_flux = 0.0;
-    double g_index    = 0.0;
+    double g_eflux = 0.0;
+    double g_index = 0.0;
     
     // Update precomputed values
     update(srcEng);
 
     // Compute function value
-    double value = m_energy_flux.value() * gammalib::erg2MeV * m_norm * m_power;
+    double value = m_eflux.value() * gammalib::erg2MeV * m_norm * m_power;
 
     // Integral flux gradient
-    if (m_energy_flux.is_free() && m_energy_flux.factor_value() > 0.0) {
-         g_energy_flux = value / m_energy_flux.factor_value();
+    if (m_eflux.is_free() && m_eflux.factor_value() > 0.0) {
+         g_eflux = value / m_eflux.factor_value();
     }
 
     // Index gradient
@@ -423,7 +424,7 @@ double GModelSpectralPlawEnergyFlux::eval_gradients(const GEnergy& srcEng,
     }
 
     // Set gradients
-    m_energy_flux.factor_gradient(g_energy_flux);
+    m_eflux.factor_gradient(g_eflux);
     m_index.factor_gradient(g_index);
 
     // Compile option: Check for NaN/Inf
@@ -434,10 +435,10 @@ double GModelSpectralPlawEnergyFlux::eval_gradients(const GEnergy& srcEng,
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", energy flux=" << energy_flux();
+        std::cout << ", eflux=" << eflux();
         std::cout << ", m_norm=" << m_norm;
         std::cout << ", m_power=" << m_power;
-        std::cout << ", g_energy_flux=" << g_energy_flux;
+        std::cout << ", g_eflux=" << g_eflux;
         std::cout << ", g_index=" << g_index;
         std::cout << ")" << std::endl;
     }
@@ -466,7 +467,7 @@ double GModelSpectralPlawEnergyFlux::eval_gradients(const GEnergy& srcEng,
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  ***************************************************************************/
 double GModelSpectralPlawEnergyFlux::flux(const GEnergy& emin,
-                                 const GEnergy& emax) const
+                                          const GEnergy& emax) const
 {
     // Initialise flux
     double flux = 0.0;
@@ -480,12 +481,12 @@ double GModelSpectralPlawEnergyFlux::flux(const GEnergy& emin,
 			double gamma        = m_index.value() + 2.0;
 			double pow_ref_emin = std::pow(this->emin().MeV(), gamma);
 			double pow_ref_emax = std::pow(this->emax().MeV(), gamma);
-			norm = m_energy_flux.value() * gammalib::erg2MeV * gamma / (pow_ref_emax - pow_ref_emin);
+			norm = m_eflux.value() * gammalib::erg2MeV * gamma / (pow_ref_emax - pow_ref_emin);
 		}
 		else {
 			double log_ref_emin = std::log(this->emin().MeV());
 			double log_ref_emax = std::log(this->emax().MeV());
-			norm = m_energy_flux.value() * gammalib::erg2MeV / (log_ref_emax - log_ref_emin);
+			norm = m_eflux.value() * gammalib::erg2MeV / (log_ref_emax - log_ref_emin);
 		}
 
     	// Compute photon flux
@@ -528,7 +529,7 @@ double GModelSpectralPlawEnergyFlux::flux(const GEnergy& emin,
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  ***************************************************************************/
 double GModelSpectralPlawEnergyFlux::eflux(const GEnergy& emin,
-                                  const GEnergy& emax) const
+                                           const GEnergy& emax) const
 {
     // Initialise flux
     double eflux = 0.0;
@@ -546,7 +547,7 @@ double GModelSpectralPlawEnergyFlux::eflux(const GEnergy& emin,
             double pow_emax     = std::pow(emax.MeV(), gamma);
             double factor       = (pow_emax - pow_emin) /
                                               (pow_ref_emax - pow_ref_emin);
-            eflux               = m_energy_flux.value() * factor;
+            eflux               = m_eflux.value() * factor;
         }
         else {
         	double log_emin     = std::log(emin.MeV());
@@ -555,7 +556,7 @@ double GModelSpectralPlawEnergyFlux::eflux(const GEnergy& emin,
 			double log_ref_emax = std::log(this->emax().MeV());
 			double factor       = (log_emax - log_emin) /
 								  (log_ref_emax - log_ref_emin);
-			eflux               = m_energy_flux.value() * factor;
+			eflux               = m_eflux.value() * factor;
         }
 
     } // endif: integration range was valid
@@ -580,9 +581,9 @@ double GModelSpectralPlawEnergyFlux::eflux(const GEnergy& emin,
  * Returns Monte Carlo energy by randomly drawing from a power law.
  ***************************************************************************/
 GEnergy GModelSpectralPlawEnergyFlux::mc(const GEnergy& emin,
-                                const GEnergy& emax,
-                                const GTime&   time,
-                                GRan&          ran) const
+                                         const GEnergy& emax,
+                                         const GTime&   time,
+                                         GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
@@ -629,13 +630,13 @@ GEnergy GModelSpectralPlawEnergyFlux::mc(const GEnergy& emin,
 void GModelSpectralPlawEnergyFlux::read(const GXmlElement& xml)
 {
     // Get parameter pointers
-    const GXmlElement* eflux = gammalib::xml_get_par(G_READ, xml, m_energy_flux.name());
+    const GXmlElement* eflux = gammalib::xml_get_par(G_READ, xml, m_eflux.name());
     const GXmlElement* index = gammalib::xml_get_par(G_READ, xml, m_index.name());
     const GXmlElement* emin  = gammalib::xml_get_par(G_READ, xml, m_emin.name());
     const GXmlElement* emax  = gammalib::xml_get_par(G_READ, xml, m_emax.name());
 
     // Read parameters
-    m_energy_flux.read(*eflux);
+    m_eflux.read(*eflux);
     m_index.read(*index);
     m_emin.read(*emin);
     m_emax.read(*emax);
@@ -669,13 +670,13 @@ void GModelSpectralPlawEnergyFlux::write(GXmlElement& xml) const
     }
 
     // Get XML parameters
-    GXmlElement* eflux = gammalib::xml_need_par(G_WRITE, xml, m_energy_flux.name());
+    GXmlElement* eflux = gammalib::xml_need_par(G_WRITE, xml, m_eflux.name());
     GXmlElement* index = gammalib::xml_need_par(G_WRITE, xml, m_index.name());
     GXmlElement* emin  = gammalib::xml_need_par(G_WRITE, xml, m_emin.name());
     GXmlElement* emax  = gammalib::xml_need_par(G_WRITE, xml, m_emax.name());
 
     // Write parameters
-    m_energy_flux.write(*eflux);
+    m_eflux.write(*eflux);
     m_index.write(*index);
     m_emin.write(*emin);
     m_emax.write(*emax);
@@ -688,7 +689,7 @@ void GModelSpectralPlawEnergyFlux::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print power law information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing power law information.
  ***************************************************************************/
 std::string GModelSpectralPlawEnergyFlux::print(const GChatter& chatter) const
@@ -731,15 +732,15 @@ void GModelSpectralPlawEnergyFlux::init_members(void)
 	m_type = "PowerLaw";
 
     // Initialise energy flux
-    m_energy_flux.clear();
-    m_energy_flux.name("EnergyFlux");
-    m_energy_flux.unit("erg/cm2/s");
-    m_energy_flux.scale(1.0);
-    m_energy_flux.value(1.0);       // default: 1.0
-    m_energy_flux.range(0.0, 10.0); // range:   [0,10]
-    m_energy_flux.free();
-    m_energy_flux.gradient(0.0);
-    m_energy_flux.has_grad(true);
+    m_eflux.clear();
+    m_eflux.name("EnergyFlux");
+    m_eflux.unit("erg/cm2/s");
+    m_eflux.scale(1.0);
+    m_eflux.value(1.0);       // default: 1.0
+    m_eflux.range(0.0, 10.0); // range:   [0,10]
+    m_eflux.free();
+    m_eflux.gradient(0.0);
+    m_eflux.has_grad(true);
 
     // Initialise powerlaw index
     m_index.clear();
@@ -775,24 +776,22 @@ void GModelSpectralPlawEnergyFlux::init_members(void)
 
     // Set parameter pointer(s)
     m_pars.clear();
-    m_pars.push_back(&m_energy_flux);
+    m_pars.push_back(&m_eflux);
     m_pars.push_back(&m_index);
     m_pars.push_back(&m_emin);
     m_pars.push_back(&m_emax);
 
     // Initialise last parameters (for fast computation)
-    m_log_emin     = 0.0;
-    m_log_emax     = 0.0;
-    m_pow_emin     = 0.0;
-    m_pow_emax     = 0.0;
-    m_norm         = 0.0;
-    m_power        = 0.0;
-    m_last_index   = 1000.0;
+    m_log_emin   = 0.0;
+    m_log_emax   = 0.0;
+    m_pow_emin   = 0.0;
+    m_pow_emax   = 0.0;
+    m_norm       = 0.0;
+    m_power      = 0.0;
+    m_last_index = 1000.0;
     m_last_emin.MeV(0.0);
     m_last_emax.MeV(0.0);
     m_last_energy.MeV(0.0);
-    m_last_value   = 0.0;
-    m_last_g_index = 0.0;
 
     // Return
     return;
@@ -807,15 +806,15 @@ void GModelSpectralPlawEnergyFlux::init_members(void)
 void GModelSpectralPlawEnergyFlux::copy_members(const GModelSpectralPlawEnergyFlux& model)
 {
     // Copy members
-	m_type        = model.m_type;
-    m_energy_flux = model.m_energy_flux;
-    m_index       = model.m_index;
-    m_emin        = model.m_emin;
-    m_emax        = model.m_emax;
+	m_type  = model.m_type;
+    m_eflux = model.m_eflux;
+    m_index = model.m_index;
+    m_emin  = model.m_emin;
+    m_emax  = model.m_emax;
 
     // Set parameter pointer(s)
     m_pars.clear();
-    m_pars.push_back(&m_energy_flux);
+    m_pars.push_back(&m_eflux);
     m_pars.push_back(&m_index);
     m_pars.push_back(&m_emin);
     m_pars.push_back(&m_emax);
@@ -831,8 +830,6 @@ void GModelSpectralPlawEnergyFlux::copy_members(const GModelSpectralPlawEnergyFl
     m_last_emin    = model.m_last_emin;
     m_last_emax    = model.m_last_emax;
     m_last_energy  = model.m_last_energy;
-    m_last_value   = model.m_last_value;
-    m_last_g_index = model.m_last_g_index;
 
     // Return
     return;

@@ -445,17 +445,17 @@ format:
     <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
-An alternative power law function is defined by the :doxy:`GModelSpectralPlawPhotonFlux`
-class that uses the integral photon flux as parameter rather than the
-Prefactor:
+An alternative power law function is defined by the
+:doxy:`GModelSpectralPlawPhotonFlux` class that uses the integral photon flux
+as parameter rather than the ``Prefactor``:
 
 .. math::
-    \frac{dN}{dE} = \frac{F_{\rm Ph}(\gamma+1)E^{\gamma}}
+    \frac{dN}{dE} = \frac{F_{\rm ph}(\gamma+1)E^{\gamma}}
                          {E_{\rm max}^{\gamma+1} - E_{\rm min}^{\gamma+1}}
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`F_{\rm Ph}` = ``PhotonFlux``
+* :math:`F_{\rm ph}` = ``PhotonFlux``
 * :math:`\gamma` = ``Index``
 * :math:`E_{\rm min}` = ``LowerLimit``
 * :math:`E_{\rm max}` = ``UpperLimit``
@@ -466,9 +466,9 @@ is:
 .. code-block:: xml
 
    <spectrum type="PowerLaw">
-    <parameter scale="1e-07" name="PhotonFlux" min="1e-07" max="1000.0"    value="1.0" free="1"/>
-    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
-    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+    <parameter scale="1e-07" name="PhotonFlux" min="1e-07" max="1000.0"    value="1.0"      free="1"/>
+    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0"     free="1"/>
+    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0"    free="0"/>
     <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
    </spectrum>
 
@@ -478,24 +478,24 @@ format:
 .. code-block:: xml
 
    <spectrum type="PowerLaw2">
-    <parameter scale="1e-07" name="Intergal"   min="1e-07" max="1000.0"    value="1.0" free="1"/>
-    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
-    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+    <parameter scale="1e-07" name="Intergal"   min="1e-07" max="1000.0"    value="1.0"      free="1"/>
+    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0"     free="1"/>
+    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0"    free="0"/>
     <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
    </spectrum>
 
 .. note::
 
-   The UpperLimit and LowerLimit parameters are always treated as fixed and,
-   as should be apparent from this definition, the flux given by the PhotonFlux
-   parameter is over the range (LowerLimit, UpperLimit). Use of this model
-   allows the errors on the integrated photon flux to be evaluated directly by
-   likelihood, obviating the need to propagate the errors if one is using
-   the PowerLaw form.
+   The ``UpperLimit`` and ``LowerLimit`` parameters are always treated as fixed
+   and, as should be apparent from this definition, the flux given by the
+   ``PhotonFlux`` parameter is over the range [``LowerLimit``, ``UpperLimit``].
+   Use of this model allows the errors on the integrated photon flux to be
+   evaluated directly by likelihood, obviating the need to propagate the errors
+   if one is using the PowerLaw form.
 
-Another alternative power law function is defined by the :doxy:`GModelSpectralPlawEnergyFlux`
-class that uses the integral energy flux as parameter rather than the
-Prefactor:
+Another alternative power law function is defined by the
+:doxy:`GModelSpectralPlawEnergyFlux` class that uses the integral energy flux
+as parameter rather than the ``Prefactor``:
 
 .. math::
     \frac{dN}{dE} = \frac{F_{\rm E}(\gamma+2)E^{\gamma}}
@@ -514,20 +514,21 @@ is:
 .. code-block:: xml
 
    <spectrum type="PowerLaw">
-    <parameter scale="1e-07" name="EnergyFlux" min="1e-07" max="1000.0"    value="1.0" free="1"/>
-    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
-    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+    <parameter scale="1e-07" name="EnergyFlux" min="1e-07" max="1000.0"    value="1.0"      free="1"/>
+    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0"     free="1"/>
+    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0"    free="0"/>
     <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
    </spectrum>
 
 .. note::
 
-   The UpperLimit and LowerLimit parameters are always treated as fixed and,
-   as should be apparent from this definition, the flux given by the EnergyFlux
-   parameter is over the range (LowerLimit, UpperLimit). Use of this model
-   allows the errors on the integrated energy flux to be evaluated directly by
-   likelihood, obviating the need to propagate the errors if one is using
-   the PowerLaw form.
+   The ``UpperLimit`` and ``LowerLimit`` parameters are always treated as fixed
+   and, as should be apparent from this definition, the flux given by the
+   ``EnergyFlux`` parameter is over the range [``LowerLimit``, ``UpperLimit``].
+   Use of this model allows the errors on the integrated energy flux to be
+   evaluated directly by likelihood, obviating the need to propagate the errors
+   if one is using the PowerLaw form.
+
 
 Exponentially cut-off power law
 ===============================

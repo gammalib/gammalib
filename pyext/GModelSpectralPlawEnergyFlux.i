@@ -39,41 +39,41 @@ public:
     // Constructors and destructors
     GModelSpectralPlawEnergyFlux(void);
     GModelSpectralPlawEnergyFlux(const std::string& type,
-                                 const std::string& energy_flux,
+                                 const std::string& eflux,
                                  const std::string& index,
                                  const std::string& emin,
                                  const std::string& emax);
-    explicit GModelSpectralPlawEnergyFlux(const double&  energy_flux,
-                                 const double&  index,
-                                 const GEnergy& emin,
-                                 const GEnergy& emax);
+    explicit GModelSpectralPlawEnergyFlux(const double&  eflux,
+                                          const double&  index,
+                                          const GEnergy& emin,
+                                          const GEnergy& emax);
     explicit GModelSpectralPlawEnergyFlux(const GXmlElement& xml);
     GModelSpectralPlawEnergyFlux(const GModelSpectralPlawEnergyFlux& model);
     virtual ~GModelSpectralPlawEnergyFlux(void);
 
-    // Implemented pure virtual methods
-    virtual void                 clear(void);
+    // Implemented pure virtual base class methods
+    virtual void                          clear(void);
     virtual GModelSpectralPlawEnergyFlux* clone(void) const;
-    virtual std::string          classname(void) const;
-    virtual std::string          type(void) const;
-    virtual double               eval(const GEnergy& srcEng,
-                                      const GTime&   srcTime = GTime()) const;
-    virtual double               eval_gradients(const GEnergy& srcEng,
-                                                const GTime&   srcTime = GTime());
-    virtual double               flux(const GEnergy& emin,
-                                      const GEnergy& emax) const;
-    virtual double               eflux(const GEnergy& emin,
-                                       const GEnergy& emax) const;
-    virtual GEnergy              mc(const GEnergy& emin,
-                                    const GEnergy& emax,
-                                    const GTime&   time,
-                                    GRan&          ran) const;
-    virtual void                 read(const GXmlElement& xml);
-    virtual void                 write(GXmlElement& xml) const;
+    virtual std::string                   classname(void) const;
+    virtual std::string                   type(void) const;
+    virtual double                        eval(const GEnergy& srcEng,
+                                               const GTime&   srcTime = GTime()) const;
+    virtual double                        eval_gradients(const GEnergy& srcEng,
+                                                         const GTime&   srcTime = GTime());
+    virtual double                        flux(const GEnergy& emin,
+                                               const GEnergy& emax) const;
+    virtual double                        eflux(const GEnergy& emin,
+                                                const GEnergy& emax) const;
+    virtual GEnergy                       mc(const GEnergy& emin,
+                                             const GEnergy& emax,
+                                             const GTime&   time,
+                                             GRan&          ran) const;
+    virtual void                          read(const GXmlElement& xml);
+    virtual void                          write(GXmlElement& xml) const;
 
     // Other methods
-    double  energy_flux(void) const;
-    void    energy_flux(const double& energy_flux);
+    double  eflux(void) const;
+    void    eflux(const double& eflux);
     double  index(void) const;
     void    index(const double& index);
     GEnergy emin(void) const;

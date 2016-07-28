@@ -1563,26 +1563,27 @@ void TestGModel::test_plaw_phflux(void)
     test_value(model1.type(), "PowerLaw", "Check type of void model");
 
     // Test value constructor
-    GModelSpectralPlawPhotonFlux model2(2.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
-    test_value(model2.photon_flux(), 2.0);
+    GModelSpectralPlawPhotonFlux model2(2.0, -2.1, GEnergy(10.0, "MeV"),
+                                                   GEnergy(100.0, "MeV"));
+    test_value(model2.flux(), 2.0);
     test_value(model2.index(), -2.1);
     test_value(model2.emin().MeV(), 10.0);
     test_value(model2.emax().MeV(), 100.0);
 
     // Test XML constructor and value
-    GXml                xml(m_xml_model_point_plaw_phflux);
-    GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+    GXml         xml(m_xml_model_point_plaw_phflux);
+    GXmlElement* element = xml.element(0)->element(0)->element("spectrum", 0);
     GModelSpectralPlawPhotonFlux model3(*element);
     test_value(model3.size(), 4);
     test_value(model3.type(), "PowerLaw", "Check model type");
-    test_value(model3.photon_flux(), 1.0e-7);
+    test_value(model3.flux(), 1.0e-7);
     test_value(model3.index(), -2.0);
     test_value(model3.emin().MeV(), 100.0);
     test_value(model3.emax().MeV(), 500000.0);
 
     // Test integral method
-    model3.photon_flux(2.1e-7);
-    test_value(model3.photon_flux(), 2.1e-7);
+    model3.flux(2.1e-7);
+    test_value(model3.flux(), 2.1e-7);
 
     // Test index method
     model3.index(-2.3);
@@ -1624,26 +1625,27 @@ void TestGModel::test_plaw_eflux(void)
     test_value(model1.type(), "PowerLaw", "Check type of void model");
 
     // Test value constructor
-    GModelSpectralPlawEnergyFlux model2(2.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
-    test_value(model2.energy_flux(), 2.0);
+    GModelSpectralPlawEnergyFlux model2(2.0, -2.1, GEnergy(10.0, "MeV"),
+                                                   GEnergy(100.0, "MeV"));
+    test_value(model2.eflux(), 2.0);
     test_value(model2.index(), -2.1);
     test_value(model2.emin().MeV(), 10.0);
     test_value(model2.emax().MeV(), 100.0);
     
     // Test XML constructor and value
-    GXml                xml(m_xml_model_point_plaw_eflux);
-    GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+    GXml         xml(m_xml_model_point_plaw_eflux);
+    GXmlElement* element = xml.element(0)->element(0)->element("spectrum", 0);
     GModelSpectralPlawEnergyFlux model3(*element);
     test_value(model3.size(), 4);
     test_value(model3.type(), "PowerLaw", "Check model type");
-    test_value(model3.energy_flux(), 1.0e-7);
+    test_value(model3.eflux(), 1.0e-7);
     test_value(model3.index(), -2.0);
     test_value(model3.emin().MeV(), 100.0);
     test_value(model3.emax().MeV(), 500000.0);
 
     // Test integral method
-    model3.energy_flux(2.1e-7);
-    test_value(model3.energy_flux(), 2.1e-7);
+    model3.eflux(2.1e-7);
+    test_value(model3.eflux(), 2.1e-7);
 
     // Test index method
     model3.index(-2.3);
@@ -2894,7 +2896,7 @@ void TestGModel::test_legacy_model_point_plaw2(void)
 
     // Test model values
     test_value(spectral->type(), "PowerLaw2", "Check model type");
-    test_value(spectral->photon_flux(), 1.0e-7, 1.0e-7, "Check integral photon flux");
+    test_value(spectral->flux(), 1.0e-7, 1.0e-7, "Check integral photon flux");
     test_value(spectral->index(), -2.0, 1.0e-7, "Check index");
     test_value(spectral->emin().MeV(), 100.0, 1.0e-7, "Check minimum energy");
     test_value(spectral->emax().MeV(), 500000.0, 1.0e-7, "Check maximum energy");
@@ -2910,7 +2912,7 @@ void TestGModel::test_legacy_model_point_plaw2(void)
 
     // Re-test model values
     test_value(spectral->type(), "PowerLaw2", "Check model type");
-    test_value(spectral->photon_flux(), 1.0e-7, 1.0e-7, "Check integral photon flux");
+    test_value(spectral->flux(), 1.0e-7, 1.0e-7, "Check integral photon flux");
     test_value(spectral->index(), -2.0, 1.0e-7, "Check index");
     test_value(spectral->emin().MeV(), 100.0, 1.0e-7, "Check minimum energy");
     test_value(spectral->emax().MeV(), 500000.0, 1.0e-7, "Check maximum energy");
