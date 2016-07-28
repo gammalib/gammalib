@@ -397,11 +397,11 @@ non-accessible class members need then to be declared ``mutable`` to avoid
 compiler errors. Alternatively, the ``const_cast`` declaration can be used
 to allow member modifications within a ``const`` method.
 
-As example we show here part of the definition of :doxy:`GModelSpectralPlaw2`:
+As example we show here part of the definition of :doxy:`GModelSpectralPlawPhotonFlux`:
 
 .. code-block:: cpp
 
-    class GModelSpectralPlaw2 : public GModelSpectral {
+    class GModelSpectralPlawPhotonFlux : public GModelSpectral {
     public:
         virtual double eval(const GEnergy& srcEng) const;
         virtual void   read(const GXmlElement& xml);
@@ -430,11 +430,11 @@ As example we show here part of the definition of :doxy:`GModelSpectralPlaw2`:
         mutable double  m_last_g_index;    //!< Last spectral index gradient
 
 This class has an internal cache for precomputation, which is
-potentially updated when :doxy:`GModelSpectralPlaw2::eval` is called. Here the corresponding code:
+potentially updated when :doxy:`GModelSpectralPlawPhotonFlux::eval` is called. Here the corresponding code:
 
 .. code-block:: cpp
 
-    double GModelSpectralPlaw2::eval(const GEnergy& srcEng) const
+    double GModelSpectralPlawPhotonFlux::eval(const GEnergy& srcEng) const
     {
         // Update precomputed values
         update(srcEng);

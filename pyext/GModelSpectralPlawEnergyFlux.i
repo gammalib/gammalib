@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralPlaw2.i - Spectral power law model class          *
+ *    GModelSpectralPlawEnergyFlux.i - Spectral power law model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,41 +19,41 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpectralPlaw2.i
- * @brief Flux normalized power law spectral model class Python interface definition
- * @author Juergen Knoedlseder
+ * @file GModelSpectralPlawEnergyFlux.i
+ * @brief Energy flux normalized power law spectral model class Python interface definition
+ * @author Michael Mayer
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelSpectralPlaw2.hpp"
+#include "GModelSpectralPlawEnergyFlux.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelSpectralPlaw2
+ * @class GModelSpectralPlawEnergyFlux
  *
  * @brief Flux normalized power law spectral model class
  ***************************************************************************/
-class GModelSpectralPlaw2 : public GModelSpectral {
+class GModelSpectralPlawEnergyFlux : public GModelSpectral {
 public:
     // Constructors and destructors
-    GModelSpectralPlaw2(void);
-    GModelSpectralPlaw2(const std::string& type,
-                        const std::string& integral,
-                        const std::string& index,
-                        const std::string& emin,
-                        const std::string& emax);
-    GModelSpectralPlaw2(const double&  integral,
-                        const double&  index,
-                        const GEnergy& emin,
-                        const GEnergy& emax);
-    explicit GModelSpectralPlaw2(const GXmlElement& xml);
-    GModelSpectralPlaw2(const GModelSpectralPlaw2& model);
-    virtual ~GModelSpectralPlaw2(void);
+    GModelSpectralPlawEnergyFlux(void);
+    GModelSpectralPlawEnergyFlux(const std::string& type,
+                                 const std::string& energy_flux,
+                                 const std::string& index,
+                                 const std::string& emin,
+                                 const std::string& emax);
+    explicit GModelSpectralPlawEnergyFlux(const double&  energy_flux,
+                                 const double&  index,
+                                 const GEnergy& emin,
+                                 const GEnergy& emax);
+    explicit GModelSpectralPlawEnergyFlux(const GXmlElement& xml);
+    GModelSpectralPlawEnergyFlux(const GModelSpectralPlawEnergyFlux& model);
+    virtual ~GModelSpectralPlawEnergyFlux(void);
 
     // Implemented pure virtual methods
     virtual void                 clear(void);
-    virtual GModelSpectralPlaw2* clone(void) const;
+    virtual GModelSpectralPlawEnergyFlux* clone(void) const;
     virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GEnergy& srcEng,
@@ -72,8 +72,8 @@ public:
     virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
-    double  integral(void) const;
-    void    integral(const double& integral);
+    double  energy_flux(void) const;
+    void    energy_flux(const double& energy_flux);
     double  index(void) const;
     void    index(const double& index);
     GEnergy emin(void) const;
@@ -84,10 +84,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GModelSpectralPlaw2 class extension
+ * @brief GModelSpectralPlawEnergyFlux class extension
  ***************************************************************************/
-%extend GModelSpectralPlaw2 {
-    GModelSpectralPlaw2 copy() {
+%extend GModelSpectralPlawEnergyFlux {
+    GModelSpectralPlawEnergyFlux copy() {
         return (*self);
     }
 };

@@ -62,7 +62,8 @@ public:
     void                test_const(void);
     void                test_gauss(void);
     void                test_plaw(void);
-    void                test_plaw2(void);
+    void                test_plaw_phflux(void);
+    void                test_plaw_eflux(void);
     void                test_eplaw(void);
     void                test_bplaw(void);
     void                test_supeplaw(void);
@@ -102,7 +103,8 @@ private:
     std::string m_xml_model_point_const;
     std::string m_xml_model_point_gauss;
     std::string m_xml_model_point_plaw;
-    std::string m_xml_model_point_plaw2;
+    std::string m_xml_model_point_plaw_phflux;
+    std::string m_xml_model_point_plaw_eflux;
     std::string m_xml_model_point_eplaw;
     std::string m_xml_model_point_bplaw;
     std::string m_xml_model_point_supeplaw;

@@ -445,17 +445,17 @@ format:
     <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
-An alternative power law function is defined by the :doxy:`GModelSpectralPlaw2`
+An alternative power law function is defined by the :doxy:`GModelSpectralPlawPhotonFlux`
 class that uses the integral photon flux as parameter rather than the
 Prefactor:
 
 .. math::
-    \frac{dN}{dE} = \frac{N(\gamma+1)E^{\gamma}}
+    \frac{dN}{dE} = \frac{F_{\rm Ph}(\gamma+1)E^{\gamma}}
                          {E_{\rm max}^{\gamma+1} - E_{\rm min}^{\gamma+1}}
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`N` = ``PhotonFlux``
+* :math:`F_{\rm Ph}` = ``PhotonFlux``
 * :math:`\gamma` = ``Index``
 * :math:`E_{\rm min}` = ``LowerLimit``
 * :math:`E_{\rm max}` = ``UpperLimit``
@@ -487,12 +487,47 @@ format:
 .. note::
 
    The UpperLimit and LowerLimit parameters are always treated as fixed and,
-   as should be apparent from this definition, the flux given by the Integral
+   as should be apparent from this definition, the flux given by the PhotonFlux
    parameter is over the range (LowerLimit, UpperLimit). Use of this model
-   allows the errors on the integrated flux to be evaluated directly by
+   allows the errors on the integrated photon flux to be evaluated directly by
    likelihood, obviating the need to propagate the errors if one is using
    the PowerLaw form.
 
+Another alternative power law function is defined by the :doxy:`GModelSpectralPlawEnergyFlux`
+class that uses the integral energy flux as parameter rather than the
+Prefactor:
+
+.. math::
+    \frac{dN}{dE} = \frac{F_{\rm E}(\gamma+2)E^{\gamma}}
+                         {E_{\rm max}^{\gamma+2} - E_{\rm min}^{\gamma+2}}
+
+where the parameters in the XML definition have the following mappings:
+
+* :math:`F_{\rm E}` = ``EnergyFlux``
+* :math:`\gamma` = ``Index``
+* :math:`E_{\rm min}` = ``LowerLimit``
+* :math:`E_{\rm max}` = ``UpperLimit``
+
+The XML format for specifying a power law defined by the integral energy flux
+is:
+
+.. code-block:: xml
+
+   <spectrum type="PowerLaw">
+    <parameter scale="1e-07" name="EnergyFlux" min="1e-07" max="1000.0"    value="1.0" free="1"/>
+    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
+    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+    <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
+   </spectrum>
+
+.. note::
+
+   The UpperLimit and LowerLimit parameters are always treated as fixed and,
+   as should be apparent from this definition, the flux given by the EnergyFlux
+   parameter is over the range (LowerLimit, UpperLimit). Use of this model
+   allows the errors on the integrated energy flux to be evaluated directly by
+   likelihood, obviating the need to propagate the errors if one is using
+   the PowerLaw form.
 
 Exponentially cut-off power law
 ===============================

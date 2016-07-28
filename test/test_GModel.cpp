@@ -58,7 +58,8 @@ void TestGModel::set(void)
     m_xml_model_point_const        = datadir + "/model_point_const.xml";
     m_xml_model_point_gauss        = datadir + "/model_point_gauss.xml";
     m_xml_model_point_plaw         = datadir + "/model_point_plaw.xml";
-    m_xml_model_point_plaw2        = datadir + "/model_point_plaw2.xml";
+    m_xml_model_point_plaw_phflux  = datadir + "/model_point_plaw_phflux.xml";
+    m_xml_model_point_plaw_eflux   = datadir + "/model_point_plaw_eflux.xml";
     m_xml_model_point_eplaw        = datadir + "/model_point_eplaw.xml";
     m_xml_model_point_bplaw        = datadir + "/model_point_bplaw.xml";
     m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
@@ -124,8 +125,10 @@ void TestGModel::set(void)
            "Test GModelSpectralGauss");
     append(static_cast<pfunction>(&TestGModel::test_plaw),
            "Test GModelSpectralPlaw");
-    append(static_cast<pfunction>(&TestGModel::test_plaw2),
-           "Test GModelSpectralPlaw2");
+    append(static_cast<pfunction>(&TestGModel::test_plaw_phflux),
+           "Test GModelSpectralPlawPhotonFkux");
+    append(static_cast<pfunction>(&TestGModel::test_plaw_eflux),
+               "Test GModelSpectralPlawEnergyFlux");
     append(static_cast<pfunction>(&TestGModel::test_eplaw),
            "Test GModelSpectralExpPlaw");
     append(static_cast<pfunction>(&TestGModel::test_supeplaw),
@@ -1551,35 +1554,35 @@ void TestGModel::test_plaw(void)
 
 
 /***********************************************************************//**
- * @brief Test GModelSpectralPlaw2 class
+ * @brief Test GModelSpectralPlawPhotonFlux class
  ***************************************************************************/
-void TestGModel::test_plaw2(void)
+void TestGModel::test_plaw_phflux(void)
 {
     // Test void constructor
-    GModelSpectralPlaw2 model1;
+    GModelSpectralPlawPhotonFlux model1;
     test_value(model1.type(), "PowerLaw", "Check type of void model");
 
     // Test value constructor
-    GModelSpectralPlaw2 model2(2.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
-    test_value(model2.integral(), 2.0);
+    GModelSpectralPlawPhotonFlux model2(2.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+    test_value(model2.photon_flux(), 2.0);
     test_value(model2.index(), -2.1);
     test_value(model2.emin().MeV(), 10.0);
     test_value(model2.emax().MeV(), 100.0);
-    
+
     // Test XML constructor and value
-    GXml                xml(m_xml_model_point_plaw2);
+    GXml                xml(m_xml_model_point_plaw_phflux);
     GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
-    GModelSpectralPlaw2 model3(*element);
+    GModelSpectralPlawPhotonFlux model3(*element);
     test_value(model3.size(), 4);
     test_value(model3.type(), "PowerLaw", "Check model type");
-    test_value(model3.integral(), 1.0e-7);
+    test_value(model3.photon_flux(), 1.0e-7);
     test_value(model3.index(), -2.0);
     test_value(model3.emin().MeV(), 100.0);
     test_value(model3.emax().MeV(), 500000.0);
 
     // Test integral method
-    model3.integral(2.1e-7);
-    test_value(model3.integral(), 2.1e-7);
+    model3.photon_flux(2.1e-7);
+    test_value(model3.photon_flux(), 2.1e-7);
 
     // Test index method
     model3.index(-2.3);
@@ -1595,6 +1598,67 @@ void TestGModel::test_plaw2(void)
 
     // Test operator access
     const char* strarray[] = {"PhotonFlux", "Index", "LowerLimit", "UpperLimit"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralPlawEnergyFlux class
+ ***************************************************************************/
+void TestGModel::test_plaw_eflux(void)
+{
+    // Test void constructor
+    GModelSpectralPlawEnergyFlux model1;
+    test_value(model1.type(), "PowerLaw", "Check type of void model");
+
+    // Test value constructor
+    GModelSpectralPlawEnergyFlux model2(2.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+    test_value(model2.energy_flux(), 2.0);
+    test_value(model2.index(), -2.1);
+    test_value(model2.emin().MeV(), 10.0);
+    test_value(model2.emax().MeV(), 100.0);
+    
+    // Test XML constructor and value
+    GXml                xml(m_xml_model_point_plaw_eflux);
+    GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralPlawEnergyFlux model3(*element);
+    test_value(model3.size(), 4);
+    test_value(model3.type(), "PowerLaw", "Check model type");
+    test_value(model3.energy_flux(), 1.0e-7);
+    test_value(model3.index(), -2.0);
+    test_value(model3.emin().MeV(), 100.0);
+    test_value(model3.emax().MeV(), 500000.0);
+
+    // Test integral method
+    model3.energy_flux(2.1e-7);
+    test_value(model3.energy_flux(), 2.1e-7);
+
+    // Test index method
+    model3.index(-2.3);
+    test_value(model3.index(), -2.3);
+
+    // Test emin method
+    model3.emin(GEnergy(10.0, "MeV"));
+    test_value(model3.emin().MeV(), 10.0);
+
+    // Test emax method
+    model3.emax(GEnergy(10.0, "MeV"));
+    test_value(model3.emax().MeV(), 10.0);
+
+    // Test operator access
+    const char* strarray[] = {"EnergyFlux", "Index", "LowerLimit", "UpperLimit"};
     for (int i = 0; i < 4; ++i) {
         std::string keyname(strarray[i]);
         model3[keyname].remove_range(); // To allow setting of any value
@@ -2094,15 +2158,16 @@ void TestGModel::test_spatial_model(void)
 void TestGModel::test_spectral_model(void)
 {
     // Test spectral models XML interface
-    test_xml_model("GModelSpectralConst",        m_xml_model_point_const);
-    test_xml_model("GModelSpectralPlaw",         m_xml_model_point_plaw);
-    test_xml_model("GModelSpectralPlaw2",        m_xml_model_point_plaw2);
-    test_xml_model("GModelSpectralExpPaw",       m_xml_model_point_eplaw);
-    test_xml_model("GModelSpectralBrokenPlaw",   m_xml_model_point_bplaw);
-    test_xml_model("GModelSpectralSuperExpPlaw", m_xml_model_point_supeplaw);
-    test_xml_model("GModelSpectralLogParabola",  m_xml_model_point_logparabola);
-    test_xml_model("GModelSpectralNodes",        m_xml_model_point_nodes);
-    test_xml_model("GModelSpectralFunc",         m_xml_model_point_filefct);
+    test_xml_model("GModelSpectralConst",          m_xml_model_point_const);
+    test_xml_model("GModelSpectralPlaw",           m_xml_model_point_plaw);
+    test_xml_model("GModelSpectralPlawPhotonFlux", m_xml_model_point_plaw_phflux);
+    test_xml_model("GModelSpectralPlawEnergyFlux", m_xml_model_point_plaw_eflux);
+    test_xml_model("GModelSpectralExpPaw",         m_xml_model_point_eplaw);
+    test_xml_model("GModelSpectralBrokenPlaw",     m_xml_model_point_bplaw);
+    test_xml_model("GModelSpectralSuperExpPlaw",   m_xml_model_point_supeplaw);
+    test_xml_model("GModelSpectralLogParabola",    m_xml_model_point_logparabola);
+    test_xml_model("GModelSpectralNodes",          m_xml_model_point_nodes);
+    test_xml_model("GModelSpectralFunc",           m_xml_model_point_filefct);
 
     // Return
     return;
@@ -2823,13 +2888,13 @@ void TestGModel::test_legacy_model_point_plaw2(void)
     GModels models(m_xml_legacy_point_plaw2);
 
     // Extract spectral component
-    GModelSpectralPlaw2* spectral = static_cast<GModelSpectralPlaw2*>(
+    GModelSpectralPlawPhotonFlux* spectral = static_cast<GModelSpectralPlawPhotonFlux*>(
                                       static_cast<GModelSky*>(
                                         models[0])->spectral());
 
     // Test model values
     test_value(spectral->type(), "PowerLaw2", "Check model type");
-    test_value(spectral->integral(), 1.0e-7, 1.0e-7, "Check integral photon flux");
+    test_value(spectral->photon_flux(), 1.0e-7, 1.0e-7, "Check integral photon flux");
     test_value(spectral->index(), -2.0, 1.0e-7, "Check index");
     test_value(spectral->emin().MeV(), 100.0, 1.0e-7, "Check minimum energy");
     test_value(spectral->emax().MeV(), 500000.0, 1.0e-7, "Check maximum energy");
@@ -2840,12 +2905,12 @@ void TestGModel::test_legacy_model_point_plaw2(void)
     models.load("test_xml_legacy_point_plaw2.xml");
 
     // Extract spectral component
-    spectral = static_cast<GModelSpectralPlaw2*>(
+    spectral = static_cast<GModelSpectralPlawPhotonFlux*>(
                  static_cast<GModelSky*>(models[0])->spectral());
 
     // Re-test model values
     test_value(spectral->type(), "PowerLaw2", "Check model type");
-    test_value(spectral->integral(), 1.0e-7, 1.0e-7, "Check integral photon flux");
+    test_value(spectral->photon_flux(), 1.0e-7, 1.0e-7, "Check integral photon flux");
     test_value(spectral->index(), -2.0, 1.0e-7, "Check index");
     test_value(spectral->emin().MeV(), 100.0, 1.0e-7, "Check minimum energy");
     test_value(spectral->emax().MeV(), 500000.0, 1.0e-7, "Check maximum energy");

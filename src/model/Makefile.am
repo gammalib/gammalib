@@ -56,7 +56,8 @@ sources = GModelPar.cpp \
           GModelSpectralLogParabola.cpp \
           GModelSpectralNodes.cpp \
           GModelSpectralPlaw.cpp \
-          GModelSpectralPlaw2.cpp \
+          GModelSpectralPlawPhotonFlux.cpp \
+          GModelSpectralPlawEnergyFlux.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \
