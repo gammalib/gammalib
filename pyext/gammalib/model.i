@@ -145,6 +145,7 @@
 %include "GModelSpectralRegistry.i"
 %include "GModelSpectralBrokenPlaw.i"
 %include "GModelSpectralConst.i"
+%include "GModelSpectralExpInvPlaw.i"
 %include "GModelSpectralExpPlaw.i"
 %include "GModelSpectralSuperExpPlaw.i"
 %include "GModelSpectralFunc.i"

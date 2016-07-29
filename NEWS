@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-28 July 2016
+29 July 2016
 
 
 1. Introduction
@@ -12,6 +12,7 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
+- GModelSpectralExpInvPlaw
 - GModelSpectralPlawEnergyFlux
 
 The following classes have been removed:
@@ -68,6 +69,11 @@ and the integral() methods were renamed to flux(). A new class
 GModelSpectralPlawEnergyFlux has been added that handles integral energy
 fluxes as opposed to GModelSpectralPlawPhotonFlux that handles integral
 photon fluxes. Unit tests have been added for the new class (#1790).
+
+The GModelSpectralExpInvPlaw class has been added that uses a cut-off
+parameter instead of a cut-off energy for the exponentially cut-off
+power law. The cut-off parameter is the inverse of the cut-off energy
+(#1800).
 
 
 9. Numerics module

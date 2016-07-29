@@ -209,6 +209,7 @@
 #include "GModelSpectralBrokenPlaw.hpp"
 #include "GModelSpectralConst.hpp"
 #include "GModelSpectralExpPlaw.hpp"
+#include "GModelSpectralExpInvPlaw.hpp"
 #include "GModelSpectralSuperExpPlaw.hpp"
 #include "GModelSpectralFunc.hpp"
 #include "GModelSpectralGauss.hpp"

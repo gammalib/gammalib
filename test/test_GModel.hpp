@@ -65,6 +65,7 @@ public:
     void                test_plaw_phflux(void);
     void                test_plaw_eflux(void);
     void                test_eplaw(void);
+    void                test_einvplaw(void);
     void                test_bplaw(void);
     void                test_supeplaw(void);
     void                test_logparabola(void);
@@ -106,6 +107,7 @@ private:
     std::string m_xml_model_point_plaw_phflux;
     std::string m_xml_model_point_plaw_eflux;
     std::string m_xml_model_point_eplaw;
+    std::string m_xml_model_point_einvplaw;
     std::string m_xml_model_point_bplaw;
     std::string m_xml_model_point_supeplaw;
     std::string m_xml_model_point_logparabola;

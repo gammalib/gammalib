@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
@@ -61,6 +61,7 @@ void TestGModel::set(void)
     m_xml_model_point_plaw_phflux  = datadir + "/model_point_plaw_phflux.xml";
     m_xml_model_point_plaw_eflux   = datadir + "/model_point_plaw_eflux.xml";
     m_xml_model_point_eplaw        = datadir + "/model_point_eplaw.xml";
+    m_xml_model_point_einvplaw     = datadir + "/model_point_einvplaw.xml";
     m_xml_model_point_bplaw        = datadir + "/model_point_bplaw.xml";
     m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
     m_xml_model_point_logparabola  = datadir + "/model_point_logparabola.xml";
@@ -128,9 +129,11 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_plaw_phflux),
            "Test GModelSpectralPlawPhotonFkux");
     append(static_cast<pfunction>(&TestGModel::test_plaw_eflux),
-               "Test GModelSpectralPlawEnergyFlux");
+           "Test GModelSpectralPlawEnergyFlux");
     append(static_cast<pfunction>(&TestGModel::test_eplaw),
            "Test GModelSpectralExpPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_einvplaw),
+           "Test GModelSpectralExpInvPlaw");
     append(static_cast<pfunction>(&TestGModel::test_supeplaw),
            "Test GModelSpectralSuperExpPlaw");
     append(static_cast<pfunction>(&TestGModel::test_bplaw),
@@ -1739,6 +1742,82 @@ void TestGModel::test_eplaw(void)
 
 
 /***********************************************************************//**
+ * @brief Test GModelSpectralExpInvPlaw class
+ ***************************************************************************/
+void TestGModel::test_einvplaw(void)
+{
+    // Test void constructor
+    GModelSpectralExpInvPlaw model1;
+    test_value(model1.type(), "ExponentialCutoffPowerLaw", "Check type of void model");
+
+    // Test value constructor
+    GModelSpectralExpInvPlaw model2(2.0, -2.1, GEnergy(100.0, "MeV"), 1.0e-3);
+    test_value(model2.prefactor(), 2.0);
+    test_value(model2.index(), -2.1);
+    test_value(model2.pivot().MeV(), 100.0);
+    test_value(model2.inverse_cutoff(), 1.0e-3);
+    test_value(model2.cutoff().GeV(), 1.0);
+
+    // Test alternative value constructor
+    GModelSpectralExpInvPlaw model3(2.0, -2.1, GEnergy(100.0, "MeV"),
+                                               GEnergy(1.0, "GeV"));
+    test_value(model3.prefactor(), 2.0);
+    test_value(model3.index(), -2.1);
+    test_value(model3.pivot().MeV(), 100.0);
+    test_value(model3.inverse_cutoff(), 1.0e-3);
+    test_value(model3.cutoff().GeV(), 1.0);
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_point_einvplaw);
+    GXmlElement* element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralExpInvPlaw model4(*element);
+    test_value(model4.size(), 4);
+    test_value(model4.type(), "ExponentialCutoffPowerLaw", "Check type of model");
+    test_value(model4.prefactor(), 5.7e-16);
+    test_value(model4.index(), -2.48);
+    test_value(model4.pivot().TeV(), 0.3);
+    test_value(model4.inverse_cutoff(), 1.0e-6);
+    test_value(model4.cutoff().TeV(), 1.0);
+
+    // Test prefactor method
+    model4.prefactor(2.3e-16);
+    test_value(model4.prefactor(), 2.3e-16);
+
+    // Test index method
+    model4.index(-2.6);
+    test_value(model4.index(), -2.6);
+
+    // Test pivot method
+    model4.pivot(GEnergy(0.5, "TeV"));
+    test_value(model4.pivot().TeV(), 0.5);
+
+    // Test cutoff parameter method
+    model4.inverse_cutoff(4.2e-9);
+    test_value(model4.inverse_cutoff(), 4.2e-9);
+
+    // Test cutoff method
+    model4.cutoff(GEnergy(10.0, "TeV"));
+    test_value(model4.cutoff().TeV(), 10.0);
+
+    // Test operator access
+    const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "InverseCutoffEnergy"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model4[keyname].remove_range(); // To allow setting of any value
+        model4[keyname].value(2.1);
+        model4[keyname].error(1.9);
+        model4[keyname].gradient(0.8);
+        test_value(model4[keyname].value(), 2.1);
+        test_value(model4[keyname].error(), 1.9);
+        test_value(model4[keyname].gradient(), 0.8);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test GModelSpectralSuperExpPlaw class
  ***************************************************************************/
 void TestGModel::test_supeplaw(void)
@@ -2165,6 +2244,7 @@ void TestGModel::test_spectral_model(void)
     test_xml_model("GModelSpectralPlawPhotonFlux", m_xml_model_point_plaw_phflux);
     test_xml_model("GModelSpectralPlawEnergyFlux", m_xml_model_point_plaw_eflux);
     test_xml_model("GModelSpectralExpPaw",         m_xml_model_point_eplaw);
+    test_xml_model("GModelSpectralExpInvPaw",      m_xml_model_point_einvplaw);
     test_xml_model("GModelSpectralBrokenPlaw",     m_xml_model_point_bplaw);
     test_xml_model("GModelSpectralSuperExpPlaw",   m_xml_model_point_supeplaw);
     test_xml_model("GModelSpectralLogParabola",    m_xml_model_point_logparabola);

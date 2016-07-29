@@ -1,8 +1,9 @@
-2016-07-28
+2016-07-29
 
         * Version 1.2.0 released
         =========================
 
+	Add GModelSpectralExpInvPlaw class (#1800)
 	Add GModelSpectralPlawEnergyFlux class (#1790)
 	Rename GModelSpectralPlaw2 to GModelSpectralPlawPhotonFlux (#1790)
 
