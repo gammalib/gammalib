@@ -263,12 +263,20 @@ uninstall-local:
 # Set files to be removed in 'make clean'
 CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
 
-# Files to be removed in build directory
+# Files to be removed in build directory. Only remove wrapper files if the
+# have been built or if the were copied in the build directory
 clean-local:
 	rm -rf build
+if BUILD_WRAPPERS
 	rm -rf $(builddir)/gammalib/*.py
-	rm -rf $(builddir)/gammalib/*.pyc
 	rm -rf $(builddir)/gammalib/*_wrap.cpp
+else
+	if test "x$(builddir)" != "x$(srcdir)"; then \
+		rm -rf $(builddir)/gammalib/*.py; \
+		rm -rf $(builddir)/gammalib/*_wrap.cpp; \
+	fi
+endif
+	rm -rf $(builddir)/gammalib/*.pyc
 	rm -rf $(builddir)/gammalib/_*.so
 	rm -rf $(builddir)/gammalib/__pycache__
 
