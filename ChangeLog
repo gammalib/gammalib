@@ -3,6 +3,7 @@
         * Version 1.2.0 released
         =========================
 
+	Fix removal of Python wrappers after make clean (#1826)
 	Add GModelSpectralPlawEnergyFlux class (#1790)
 	Rename GModelSpectralPlaw2 to GModelSpectralPlawPhotonFlux (#1790)
 

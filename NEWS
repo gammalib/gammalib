@@ -38,7 +38,9 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-None
+The Python wrappers were always removed when typing "make clean", even if
+they had been shipped with the code. Now, the Python wrappers are only
+removed in a "make clean" if they have been built (#1826).
 
 
 4. Application module
