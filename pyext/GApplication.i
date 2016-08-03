@@ -76,15 +76,6 @@ public:
     %rename(_log_filename)   log_filename() const;
     %rename(_log_header)     log_header();
     %rename(_log_trailer)    log_trailer();
-    %rename(_log_string)     log_string(const GChatter& chatter,
-                                        const std::string& string);
-    %rename(_log_header1)    log_header1(const GChatter&    chatter,
-                                         const std::string& header);
-    %rename(_log_header2)    log_header2(const GChatter&    chatter,
-                                         const std::string& header);
-    %rename(_log_header3)    log_header3(const GChatter&    chatter,
-                                         const std::string& header);
-    %rename(_log_parameters) log_parameters(const GChatter& chatter);
     %rename(_need_help)      need_help() const;
     %rename(_log)            log;
 
@@ -105,24 +96,6 @@ public:
     const std::string& log_filename(void) const;
     void               log_header(void);
     void               log_trailer(void);
-    void               log_string(const GChatter& chatter,
-                                  const std::string& string);
-    void               log_value(const GChatter&    chatter,
-                                 const std::string& name,
-                                 const std::string& value);
-    void               log_value(const GChatter&    chatter,
-                                 const std::string& name,
-                                 const int&         value);
-    void               log_value(const GChatter&    chatter,
-                                 const std::string& name,
-                                 const double&      value);
-    void               log_header1(const GChatter&    chatter,
-                                   const std::string& header);
-    void               log_header2(const GChatter&    chatter,
-                                   const std::string& header);
-    void               log_header3(const GChatter&    chatter,
-                                   const std::string& header);
-    void               log_parameters(const GChatter& chatter);
     const bool&        need_help(void) const;
 
     // Public members
@@ -147,6 +120,21 @@ GApplication._log_value = _log_value
  * @brief GApplication C++ class extension
  ***************************************************************************/
 %extend GApplication {
+    void _log_string(const int& chatter, const std::string& string) {
+        self->log_string(GChatter(chatter), string);
+    }
+    void _log_header1(const int& chatter, const std::string& header) {
+        self->log_header1(GChatter(chatter), header);
+    }
+    void _log_header2(const int& chatter, const std::string& header) {
+        self->log_header2(GChatter(chatter), header);
+    }
+    void _log_header3(const int& chatter, const std::string& header) {
+        self->log_header3(GChatter(chatter), header);
+    }
+    void _log_parameters(const int& chatter) {
+        self->log_parameters(GChatter(chatter));
+    }
     GApplicationPar& __getitem__(const std::string& name) {
         return (*self)[name];
     }
