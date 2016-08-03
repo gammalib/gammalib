@@ -84,7 +84,8 @@ public:
     void               log_header(void);
     void               log_trailer(void);
     void               log_string(const GChatter& chatter,
-                                  const std::string& string);
+                                  const std::string& string,
+                                  const bool&        linefeed = true);
     void               log_value(const GChatter&    chatter,
                                  const std::string& name,
                                  const std::string& value);

@@ -119,8 +119,9 @@ GApplication._log_value = _log_value
  * @brief GApplication C++ class extension
  ***************************************************************************/
 %extend GApplication {
-    void _log_string(const int& chatter, const std::string& string) {
-        self->log_string(GChatter(chatter), string);
+    void _log_string(const int& chatter, const std::string& string,
+                     const bool& linefeed = true) {
+        self->log_string(GChatter(chatter), string, linefeed);
     }
     void _log_header1(const int& chatter, const std::string& header) {
         self->log_header1(GChatter(chatter), header);

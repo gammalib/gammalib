@@ -502,11 +502,14 @@ void GApplication::log_trailer(void)
  *
  * @param[in] chatter Minimum required chattiness
  * @param[in] string String
+ * @param[in] linefeed Terminate string with linefeed?
  *
  * Writes a string into the log file if chattiness is at least @p chatter.
+ * If @p linefeed is true the string is terminated with a linefeed.
  ***************************************************************************/
 void GApplication::log_string(const GChatter&    chatter,
-                              const std::string& string)
+                              const std::string& string,
+                              const bool&        linefeed)
 {
     // Get chattiness of application
     GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
@@ -515,6 +518,9 @@ void GApplication::log_string(const GChatter&    chatter,
     // required chattiness
     if (chattiness >= chatter) {
         log << string;
+        if (linefeed) {
+            log << std::endl;
+        }
     }
 
     // Return

@@ -382,12 +382,12 @@ void TestGApplication::test_GApplication(void)
 
     // Write something into the logfile and close it
     app1.log_header();
-    app1.log_string(SILENT, "Silent");
-    app1.log_string(TERSE, "Terse");
-    app1.log_string(NORMAL, "Normal");
-    app1.log_string(EXPLICIT, "Explicit");
-    app1.log_string(VERBOSE, "Verbose");
-    app1.log_string(TERSE, "\n");
+    app1.log_string(SILENT, "Silent", false);
+    app1.log_string(TERSE, "Terse", false);
+    app1.log_string(NORMAL, "Normal", false);
+    app1.log_string(EXPLICIT, "Explicit", false);
+    app1.log_string(VERBOSE, "Verbose", false);
+    app1.log_string(TERSE, "");
     app1.log_value(NORMAL, "String parameter", "3.14");
     app1.log_value(NORMAL, "Floating parameter", 3.14);
     app1.log_value(NORMAL, "Integer parameter", 3);
