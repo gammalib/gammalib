@@ -462,51 +462,47 @@ void TestGApplication::test_GApplication(void)
 
         // Test logging of header 2
         fgets(line, 100, fp);
-        test_value(line, "\n", "Check log file line 14");
+        test_value(line, "+----------+\n", "Check log file line 14");
         fgets(line, 100, fp);
-        test_value(line, "+----------+\n", "Check log file line 15");
+        test_value(line, "| Header 2 |\n", "Check log file line 15");
         fgets(line, 100, fp);
-        test_value(line, "| Header 2 |\n", "Check log file line 16");
-        fgets(line, 100, fp);
-        test_value(line, "+----------+\n", "Check log file line 17");
+        test_value(line, "+----------+\n", "Check log file line 16");
 
         // Test logging of header 3
         fgets(line, 100, fp);
-        test_value(line, "\n", "Check log file line 18");
-        fgets(line, 100, fp);
-        test_value(line, "=== Header 3 ===\n", "Check log file line 19");
+        test_value(line, "=== Header 3 ===\n", "Check log file line 17");
 
         // Test logging of parameters
         fgets(line, 100, fp);
+        test_value(line, "+============+\n", "Check log file line 18");
+        fgets(line, 100, fp);
+        test_value(line, "| Parameters |\n", "Check log file line 19");
+        fgets(line, 100, fp);
         test_value(line, "+============+\n", "Check log file line 20");
         fgets(line, 100, fp);
-        test_value(line, "| Parameters |\n", "Check log file line 21");
-        fgets(line, 100, fp);
-        test_value(line, "+============+\n", "Check log file line 22");
-        fgets(line, 100, fp);
         test_value(line, " chatter ...................: 2\n",
-                         "Check log file line 23");
+                         "Check log file line 21");
         fgets(line, 100, fp);
         test_value(line, " clobber ...................: yes\n",
-                         "Check log file line 24");
+                         "Check log file line 22");
         fgets(line, 100, fp);
         test_value(line, " debug .....................: no\n",
-                         "Check log file line 25");
+                         "Check log file line 23");
         fgets(line, 100, fp);
         test_value(line, " mode ......................: ql\n",
-                         "Check log file line 26");
+                         "Check log file line 24");
         fgets(line, 100, fp);
         test_value(line, " logfile ...................: test_logfile.log\n",
-                         "Check log file line 27");
+                         "Check log file line 25");
         fgets(line, 32, fp);
         test_value(line, "Application \"test_GApplication\"",
-                         "Check log file line 28");
+                         "Check log file line 26");
         // Empty remaining characters (not checked since they are machine
         // dependent)
         fgets(line, 200, fp);
         fgets(line, 32, fp);
         test_value(line, "Application \"test_GApplication\"",
-                         "Check log file line 29");
+                         "Check log file line 27");
 
         // Close log file
         fclose(fp);
