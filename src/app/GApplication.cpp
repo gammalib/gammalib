@@ -660,7 +660,6 @@ void GApplication::log_header2(const GChatter&    chatter,
     // Only write message if chattiness is at least equal to the minimum
     // required chattiness
     if (chattiness >= chatter) {
-        log << std::endl;
         log.header2(header);
     }
 
@@ -687,7 +686,6 @@ void GApplication::log_header3(const GChatter&    chatter,
     // Only write message if chattiness is at least equal to the minimum
     // required chattiness
     if (chattiness >= chatter) {
-        log << std::endl;
         log.header3(header);
     }
 
