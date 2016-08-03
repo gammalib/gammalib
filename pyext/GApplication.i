@@ -108,10 +108,9 @@ public:
  ***************************************************************************/
 %pythoncode %{
 # Log the value of a parameter
-def _log_value(self, name, value):
-    self._log.parformat(str(name))
-    self._log(str(value))
-    self._log('\n')
+def _log_value(self, chatter, name, value):
+    string = gammalib.parformat(str(name))+str(value)+'\n'
+    self._log_string(chatter, string)
 GApplication._log_value = _log_value
 %}
 
