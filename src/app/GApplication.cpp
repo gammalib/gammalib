@@ -552,6 +552,64 @@ void GApplication::log_value(const GChatter&    chatter,
 
 
 /***********************************************************************//**
+ * @brief Write parameter value in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] name Parameter name string
+ * @param[in] value Integer value
+ *
+ * Writes a parameter value into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_value(const GChatter&    chatter,
+                             const std::string& name,
+                             const int&         value)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << gammalib::parformat(name);
+        log << value << std::endl;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write parameter value in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] name Parameter name string
+ * @param[in] value Floating point value
+ *
+ * Writes a parameter value into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_value(const GChatter&    chatter,
+                             const std::string& name,
+                             const double&      value)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << gammalib::parformat(name);
+        log << value << std::endl;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Write header 1 in log file
  *
  * @param[in] chatter Minimum required chattiness

@@ -88,6 +88,12 @@ public:
     void               log_value(const GChatter&    chatter,
                                  const std::string& name,
                                  const std::string& value);
+    void               log_value(const GChatter&    chatter,
+                                 const std::string& name,
+                                 const int&         value);
+    void               log_value(const GChatter&    chatter,
+                                 const std::string& name,
+                                 const double&      value);
     void               log_header1(const GChatter&    chatter,
                                    const std::string& header);
     void               log_header2(const GChatter&    chatter,
