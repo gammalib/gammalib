@@ -163,6 +163,11 @@ sphinx-install:
 	    cp -r $(srcdir)/doc/html/_static $(DESTDIR)$(docdir)/html/ ; \
 	fi
 
+# Add clean wrappers rule
+clean-wrappers:
+	rm -rf $(builddir)/pyext/gammalib/*.py
+	rm -rf $(builddir)/pyext/gammalib/*_wrap.cpp
+
 # Add documentation rule:
 doc: doxygen sphinx
     

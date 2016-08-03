@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-29 July 2016
+3 August 2016
 
 
 1. Introduction
@@ -22,7 +22,11 @@ The following classes have been renamed:
 - GModelSpectralPlawPhotonFlux, was GModelSpectralPlaw2
 
 The following methods have been added:
-- ...
+- GApplication::log_string()
+- GApplication::log_value()
+- GApplication::log_header1()
+- GApplication::log_header2()
+- GApplication::log_header3()
 
 The following methods have been removed:
 - ...
@@ -31,7 +35,7 @@ The following methods have been renamed:
 - GModelSpectralPlawPhotonFlux::flux(), was GModelSpectralPlaw2::integral()
 
 The parameters for the following methods have been changed:
-- ...
+- GApplication::log_parameters() now has a mandatory GChatter argument
 
 The return value of the following methods has been changed:
 - ...
@@ -46,7 +50,11 @@ removed in a "make clean" if they have been built (#1826).
 
 4. Application module
 ---------------------
-None
+The GApplication::log_parameters() method now takes a mandatory GChatter
+argument to enable displaying of parameters only above a given chattiness
+level. This avoids a log-level check in the client code. For the same
+purpose, the GApplication methods log_string(), log_value(), log_header1(),
+log_header2(), and log_header3() have been introduced (#1828).
 
 
 5. Base module

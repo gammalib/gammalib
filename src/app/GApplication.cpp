@@ -498,50 +498,179 @@ void GApplication::log_trailer(void)
 
 
 /***********************************************************************//**
+ * @brief Write string in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] string String
+ *
+ * Writes a string into the log file if chattiness is at least @p chatter.
+ ***************************************************************************/
+void GApplication::log_string(const GChatter&    chatter,
+                              const std::string& string)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << string;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write parameter value in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] name Parameter name string
+ * @param[in] value Value string
+ *
+ * Writes a parameter value into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_value(const GChatter&    chatter,
+                             const std::string& name,
+                             const std::string& value)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << gammalib::parformat(name);
+        log << value << std::endl;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write header 1 in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] header Header string
+ *
+ * Writes a header of level 1 into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_header1(const GChatter&    chatter,
+                               const std::string& header)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << std::endl;
+        log.header1(header);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write header 2 in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] header Header string
+ *
+ * Writes a header of level 2 into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_header2(const GChatter&    chatter,
+                               const std::string& header)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << std::endl;
+        log.header2(header);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write header 3 in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] header Header string
+ *
+ * Writes a header of level 3 into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_header3(const GChatter&    chatter,
+                               const std::string& header)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << std::endl;
+        log.header3(header);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Write application parameters in log file
+ *
+ * @param[in] chatter Minimum required chattiness
  *
  * Writes all application parameters in the log file. For parameters that
  * have not yet been queried the method does not write the current value
  * but signals [not queried].
  ***************************************************************************/
-void GApplication::log_parameters(void)
+void GApplication::log_parameters(const GChatter& chatter)
 {
-    // Write header
-    log.header1("Parameters");
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
 
-    // Count number of written parameters
-    int written = 0;
+    // Only write parameters if the chattiness is at least equal to the
+    // minimum required chattiness
+    if (chattiness >= chatter) {
 
-    // Write parameters in logger
-    for (int i = 0; i < m_pars.size(); ++i) {
+        // Write header
+        log.header1("Parameters");
 
-        // Skip all parameters that still need to be queried as we
-        // do not yet know their value
-        //if (m_pars.m_pars[i].is_query()) {
-        //    continue;
-        //}
+        // Write parameters in logger
+        for (int i = 0; i < m_pars.size(); ++i) {
 
-        // Add line feed
-        if (written > 0) {
-            log << std::endl;
-        }
+            // Set parameter name
+            std::string name = " " + m_pars.m_pars[i].name() + " ";
+            name = name + gammalib::fill(".", 28-name.length()) + ": ";
 
-        // Set parameter name
-        std::string name = " " + m_pars.m_pars[i].name() + " ";
-        name = name + gammalib::fill(".", 28-name.length()) + ": ";
+            // Write parameter
+            if (m_pars.m_pars[i].is_query()) {
+                log << name << "[not queried]" << std::endl;
+            }
+            else {
+                log << name << m_pars.m_pars[i].m_value << std::endl;
+            }
 
-        // Write parameter
-        if (m_pars.m_pars[i].is_query()) {
-            log << name << "[not queried]";
-        }
-        else {
-            log << name << m_pars.m_pars[i].m_value;
-        }
+        } // endfor: looped over all parameters
 
-        // Increment number of written parameters
-        written++;
-
-    }
+    } // endif: chattiness satisfied minimum required level
 
     // Return
     return;
@@ -551,7 +680,7 @@ void GApplication::log_parameters(void)
 /***********************************************************************//**
  * @brief Print application
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing application information.
  ***************************************************************************/
 std::string GApplication::print(const GChatter& chatter) const

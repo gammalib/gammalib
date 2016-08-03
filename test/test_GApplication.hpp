@@ -1,7 +1,7 @@
 /***************************************************************************
  *             test_GApplication.hpp - Test GApplication class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     void                      test_stream_logger(void);
     void                      test_C_logger(void);
     void                      test_GApplicationPar(void);
+    void                      test_GApplication(void);
 };
 
 #endif /* TEST_GAPPLICATION_HPP */

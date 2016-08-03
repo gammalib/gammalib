@@ -28,6 +28,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>     // setenv
+#include <cstdio>
 #include "test_GApplication.hpp"
 
 /* __ Globals ____________________________________________________________ */
@@ -50,6 +52,8 @@ void TestGApplication::set(void)
            "Test C logger");
     append(static_cast<pfunction>(&TestGApplication::test_GApplicationPar),
            "Test GApplicationPar class");
+    append(static_cast<pfunction>(&TestGApplication::test_GApplication),
+           "Test GApplication class");
 
     // Return
     return;
@@ -355,11 +359,163 @@ void TestGApplication::test_GApplicationPar(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Test GApplication class
+ **************************************************************************/
+void TestGApplication::test_GApplication(void)
+{
+    // Allocate application
+    GApplication app1("test_GApplication", "1.0.0");
+
+    // Test name and version
+    test_value(app1.name(), "test_GApplication", "Check application name");
+    test_value(app1.version(), "1.0.0", "Check application version");
+
+    // Open log file
+    app1.logFileOpen();
+
+    // Test log filename
+    test_value(app1.par_filename(), "test_GApplication.par",
+               "Check application parameter file name");
+    test_value(app1.log_filename(), "test_logfile.log",
+               "Check application log file name");
+
+    // Write something into the logfile and close it
+    app1.log_header();
+    app1.log_string(SILENT, "Silent");
+    app1.log_string(TERSE, "Terse");
+    app1.log_string(NORMAL, "Normal");
+    app1.log_string(EXPLICIT, "Explicit");
+    app1.log_string(VERBOSE, "Verbose");
+    app1.log_string(TERSE, "\n");
+    app1.log_value(NORMAL, "User parameter", "3.14");
+    app1.log_value(VERBOSE, "Verbose parameter", "3.14!!");
+    app1.log_header1(NORMAL, "Header 1");
+    app1.log_header2(NORMAL, "Header 2");
+    app1.log_header3(NORMAL, "Header 3");
+    app1.log_header1(VERBOSE, "Verbose header 1");
+    app1.log_header2(VERBOSE, "Verbose header 2");
+    app1.log_header3(VERBOSE, "Verbose header 3");
+    app1.log_parameters(NORMAL);
+    app1.log_parameters(VERBOSE);
+    app1.log_trailer();
+    app1.logFileClose();
+
+    // Check if log file exists
+    char line[200];
+    FILE *fp = fopen("test_logfile.log", "r");
+    test_assert(fp != NULL, "Check if logfile exists");
+
+    // If log file exists then check it line by line
+    if (fp != NULL) {
+
+        // Test header
+        fgets(line, 100, fp);
+        test_value(line, "***************************************************"
+                         "*****************************\n",
+                         "Check log file line 1");
+        fgets(line, 100, fp);
+        test_value(line, "*                               test_GApplication  "
+                         "                            *\n",
+                         "Check log file line 2");
+        fgets(line, 100, fp);
+        test_value(line, "* -------------------------------------------------"
+                         "--------------------------- *\n",
+                         "Check log file line 3");
+        fgets(line, 100, fp);
+        test_value(line, "* Version: 1.0.0                                   "
+                         "                            *\n",
+                         "Check log file line 4");
+        fgets(line, 100, fp);
+        test_value(line, "***************************************************"
+                         "*****************************\n",
+                         "Check log file line 5");
+
+        // Test logging of strings
+        fgets(line, 100, fp);
+        test_value(line, "SilentTerseNormal\n", "Check log file line 6");
+
+        // Test logging of user parameter
+        fgets(line, 100, fp);
+        test_value(line, " User parameter ............: 3.14\n",
+                         "Check log file line 7");
+
+        // Test logging of header 1
+        fgets(line, 100, fp);
+        test_value(line, "\n", "Check log file line 8");
+        fgets(line, 100, fp);
+        test_value(line, "+==========+\n", "Check log file line 9");
+        fgets(line, 100, fp);
+        test_value(line, "| Header 1 |\n", "Check log file line 10");
+        fgets(line, 100, fp);
+        test_value(line, "+==========+\n", "Check log file line 11");
+
+        // Test logging of header 2
+        fgets(line, 100, fp);
+        test_value(line, "\n", "Check log file line 12");
+        fgets(line, 100, fp);
+        test_value(line, "+----------+\n", "Check log file line 13");
+        fgets(line, 100, fp);
+        test_value(line, "| Header 2 |\n", "Check log file line 14");
+        fgets(line, 100, fp);
+        test_value(line, "+----------+\n", "Check log file line 15");
+
+        // Test logging of header 3
+        fgets(line, 100, fp);
+        test_value(line, "\n", "Check log file line 16");
+        fgets(line, 100, fp);
+        test_value(line, "=== Header 3 ===\n", "Check log file line 17");
+
+        // Test logging of parameters
+        fgets(line, 100, fp);
+        test_value(line, "+============+\n", "Check log file line 18");
+        fgets(line, 100, fp);
+        test_value(line, "| Parameters |\n", "Check log file line 19");
+        fgets(line, 100, fp);
+        test_value(line, "+============+\n", "Check log file line 20");
+        fgets(line, 100, fp);
+        test_value(line, " chatter ...................: 2\n",
+                         "Check log file line 21");
+        fgets(line, 100, fp);
+        test_value(line, " clobber ...................: yes\n",
+                         "Check log file line 22");
+        fgets(line, 100, fp);
+        test_value(line, " debug .....................: no\n",
+                         "Check log file line 23");
+        fgets(line, 100, fp);
+        test_value(line, " mode ......................: ql\n",
+                         "Check log file line 24");
+        fgets(line, 100, fp);
+        test_value(line, " logfile ...................: test_logfile.log\n",
+                         "Check log file line 25");
+        fgets(line, 32, fp);
+        test_value(line, "Application \"test_GApplication\"",
+                         "Check log file line 26");
+        // Empty remaining characters (not checked since they are machine
+        // dependent)
+        fgets(line, 200, fp);
+        fgets(line, 32, fp);
+        test_value(line, "Application \"test_GApplication\"",
+                         "Check log file line 27");
+
+        // Close log file
+        fclose(fp);
+        
+    } // endif: log file existed
+
+    // Return
+    return; 
+}
+
+
 /***************************************************************************
  * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
+    // Set PFILES environment variable
+    setenv("PFILES", "data", 1);
+
     // Allocate test suit container
     GTestSuites testsuites("GApplication");
 

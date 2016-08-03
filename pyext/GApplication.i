@@ -76,7 +76,15 @@ public:
     %rename(_log_filename)   log_filename() const;
     %rename(_log_header)     log_header();
     %rename(_log_trailer)    log_trailer();
-    %rename(_log_parameters) log_parameters();
+    %rename(_log_string)     log_string(const GChatter& chatter,
+                                        const std::string& string);
+    %rename(_log_header1)    log_header1(const GChatter&    chatter,
+                                         const std::string& header);
+    %rename(_log_header2)    log_header2(const GChatter&    chatter,
+                                         const std::string& header);
+    %rename(_log_header3)    log_header3(const GChatter&    chatter,
+                                         const std::string& header);
+    %rename(_log_parameters) log_parameters(const GChatter& chatter);
     %rename(_need_help)      need_help() const;
     %rename(_log)            log;
 
@@ -97,7 +105,18 @@ public:
     const std::string& log_filename(void) const;
     void               log_header(void);
     void               log_trailer(void);
-    void               log_parameters(void);
+    void               log_string(const GChatter& chatter,
+                                  const std::string& string);
+    void               log_value(const GChatter&    chatter,
+                                 const std::string& name,
+                                 const std::string& value);
+    void               log_header1(const GChatter&    chatter,
+                                   const std::string& header);
+    void               log_header2(const GChatter&    chatter,
+                                   const std::string& header);
+    void               log_header3(const GChatter&    chatter,
+                                   const std::string& header);
+    void               log_parameters(const GChatter& chatter);
     const bool&        need_help(void) const;
 
     // Public members
@@ -106,7 +125,20 @@ public:
 
 
 /***********************************************************************//**
- * @brief GApplication class extension
+ * @brief GApplication Python class extension
+ ***************************************************************************/
+%pythoncode %{
+# Log the value of a parameter
+def _log_value(self, name, value):
+    self._log.parformat(str(name))
+    self._log(str(value))
+    self._log('\n')
+GApplication._log_value = _log_value
+%}
+
+
+/***********************************************************************//**
+ * @brief GApplication C++ class extension
  ***************************************************************************/
 %extend GApplication {
     GApplicationPar& __getitem__(const std::string& name) {

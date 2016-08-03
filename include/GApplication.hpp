@@ -83,7 +83,18 @@ public:
     const std::string& log_filename(void) const;
     void               log_header(void);
     void               log_trailer(void);
-    void               log_parameters(void);
+    void               log_string(const GChatter& chatter,
+                                  const std::string& string);
+    void               log_value(const GChatter&    chatter,
+                                 const std::string& name,
+                                 const std::string& value);
+    void               log_header1(const GChatter&    chatter,
+                                   const std::string& header);
+    void               log_header2(const GChatter&    chatter,
+                                   const std::string& header);
+    void               log_header3(const GChatter&    chatter,
+                                   const std::string& header);
+    void               log_parameters(const GChatter& chatter);
     const bool&        need_help(void) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
