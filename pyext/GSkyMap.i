@@ -178,7 +178,7 @@ public:
     void                    save(const GFilename& filename,
                                  const bool&      clobber = false) const;
     void                    read(const GFitsHDU& hdu);
-    void                    write(GFits& file,
+    GFitsHDU*               write(GFits& file,
                                   const std::string& extname = "") const;
     void                    publish(const std::string& name = "") const;
 };

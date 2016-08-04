@@ -38,7 +38,7 @@ The parameters for the following methods have been changed:
 - GApplication::log_parameters() now has a mandatory GChatter argument
 
 The return value of the following methods has been changed:
-- ...
+- GSkyMap::write() now returns a pointer to GFitsHDU instead of void
 
 
 3. Configuration
@@ -109,7 +109,10 @@ None
 
 12. Sky module
 --------------
-None
+The GSkyMap::write() method now returns a pointer to the written GFitsHDU
+object. In case that no sky map is written, for example because none has been
+defined so far, the method returns NONE. The GSkyMap::publish() method will
+detect the NONE value and will do nothing if no sky map exists (#1835).
 
 
 13. Support module
