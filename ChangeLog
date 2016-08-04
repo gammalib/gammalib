@@ -3,6 +3,7 @@
         * Version 1.2.0 released
         =========================
 
+        Fix invalid pointer problem in GLog copies (#1823)
         Fix GSkyMap::publish() bug for empty sky maps (#1835)
         Fix loss of application name and version (#1835)
         Add methods for logging in applications (#1828)

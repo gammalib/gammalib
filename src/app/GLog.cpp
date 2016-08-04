@@ -36,6 +36,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <unistd.h>     // dup
 #include "GLog.hpp"
 #include "GTools.hpp"
 
@@ -552,7 +553,7 @@ void GLog::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] log Object from which members which should be copied.
+ * @param[in] log Logger.
  ***************************************************************************/
 void GLog::copy_members(const GLog& log)
 {
@@ -563,11 +564,19 @@ void GLog::copy_members(const GLog& log)
     m_stderr     = log.m_stderr;
     m_use_date   = log.m_use_date;
     m_linestart  = log.m_linestart;
-    m_file       = log.m_file;
     m_filename   = log.m_filename;
     m_name       = log.m_name;
     m_buffer     = log.m_buffer;
     m_chatter    = log.m_chatter;
+
+    // Copy file pointer by duplicating the file descriptor and opening
+    // the duplicated file descriptor
+    if (log.m_file != NULL) {
+        m_file = fdopen(dup(fileno(log.m_file)), "a");
+    }
+    else {
+        m_file = NULL;
+    }
 
     // Return
     return;
@@ -820,10 +829,3 @@ void GLog::append(std::string arg)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

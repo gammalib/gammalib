@@ -62,6 +62,13 @@ The application name and version and now conserved in a GApplication::clear()
 method call and the application is properly initialised like in the call of
 a constructor (#1835).
 
+The GLog::copy_members() method simply copied the file pointer, hence after
+a copy of a log instance there were two instances holding the same pointer
+to the file, and as soon as one instance closes the log file the file
+pointer in the second instance became invalid. This has been fixed by
+duplicating the file descriptor and opening the log file in the copied
+instance using the duplicated descriptor. This solves the problems (#1823).
+
 
 5. Base module
 --------------
