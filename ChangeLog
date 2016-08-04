@@ -1,8 +1,9 @@
-2016-08-03
+2016-08-04
 
         * Version 1.2.0 released
         =========================
 
+        Fix loss of application name and version (#1835)
         Add methods for logging in applications (#1828)
         Fix removal of Python wrappers after make clean (#1826)
         Add GModelSpectralExpInvPlaw class (#1800)

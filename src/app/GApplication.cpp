@@ -238,11 +238,31 @@ GApplication& GApplication::operator=(const GApplication& app)
  ***************************************************************************/
 void GApplication::clear(void)
 {
+    // Save application name and version as we need them to reconstruct
+    // the application after freeing and initialising its members
+    std::string name    = m_name;
+    std::string version = m_version;
+
     // Free members
     free_members();
 
     // Initialise members
     init_members();
+
+    // Recover saved application name and version
+    m_name    = name;
+    m_version = version;
+
+    // Set default parfile and logfile name
+    m_parfile = name+".par";
+    m_logfile = name+".log";
+
+    // Initialise application parameters
+    m_pars.load(par_filename());
+
+    // Set log filename and chattiness
+    set_log_filename();
+    set_log_chatter();
 
     // Return
     return;

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-3 August 2016
+4 August 2016
 
 
 1. Introduction
@@ -57,6 +57,10 @@ purpose, the GApplication methods log_string(), log_value(), log_header1(),
 log_header2(), and log_header3() have been introduced. There are three
 variants of log_value() for strings, integers and double precision values
 (#1828).
+
+The application name and version and now conserved in a GApplication::clear()
+method call and the application is properly initialised like in the call of
+a constructor (#1835).
 
 
 5. Base module
