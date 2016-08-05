@@ -466,7 +466,6 @@ void GLog::clear(void)
  ***************************************************************************/
 long int GLog::size(void) const
 {
-std::cout << "GLog::size m_buffer.size()=" << m_buffer.size() << std::endl;
     // Determine the number of characters written to disk
     long int size = (m_file != NULL) ? std::ftell(m_file) : 0;
 
@@ -542,17 +541,18 @@ void GLog::close(void)
 void GLog::init_members(void)
 {
     // Initialise members
-    m_max_length = 8192;
-    m_indent     = 0;
-    m_stdout     = false;
-    m_stderr     = false;
-    m_use_date   = false;
-    m_linestart  = true;
-    m_file       = NULL;
+    m_max_length   = 8192;
+    m_indent       = 0;
+    m_written_size = 0;
+    m_stdout       = false;
+    m_stderr       = false;
+    m_use_date     = false;
+    m_linestart    = true;
+    m_file         = NULL;
+    m_chatter      = NORMAL;
     m_filename.clear();
     m_name.clear();
     m_buffer.clear();
-    m_chatter    = NORMAL;
 
     // Return
     return;
@@ -837,6 +837,9 @@ void GLog::append(std::string arg)
 
     // Add string to buffer
     m_buffer.append(arg);
+
+    // Increment written number of characters
+    m_written_size += arg.size();
 
     // Flush Buffer
     flush();

@@ -348,28 +348,23 @@ void GApplication::logFileOpen(const bool& clobber)
 /***********************************************************************//**
  * @brief Close log file
  *
- * Writer trailer into the log file and close application log file.
- *
- * The trailer is only written in case that there is some content in the
- * log file.
+ * Close the log file. In case that some characters have been written
+ * through the logger a trailer will be appended to the logger before
+ * closing the log file. The trailer informs about the computation time
+ * used by the application.
  ***************************************************************************/
 void GApplication::logFileClose(void)
 {
-    // Continue only if log file is open
-    if (log.is_open()) {
-    
-        // If log file is not empty then write the trailer into log file.
-        // This kluge avoids writing a trailer in an empty log file that
-        // is for example occuring in copy operations.
-        if (!log.is_empty()) {
+    // Continue only if log file is open and if something has been written
+    // through this logger. This avoid writing trailers for logger than
+    // have not been used.
+    if (log.is_open() && (log.written_size() > 0)) {
 
-            // Put line feed
-            log << std::endl;
+        // Write line feed before trailer into logger
+        log << std::endl;
             
-            // Write trailer into logger
-            log_trailer();
-
-        } // endif: logger was not empty
+        // Write trailer into logger
+        log_trailer();
 
         // Close log file
         log.close();

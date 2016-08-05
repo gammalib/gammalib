@@ -898,7 +898,7 @@ void GTestSuite::init_members(void)
 
     // Set logger parameters
     cout(true);
-    m_log.max_size(1);
+    m_log.buffer_size(1);
 
     // Return
     return;

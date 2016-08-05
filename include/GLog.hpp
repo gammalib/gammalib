@@ -55,7 +55,7 @@
  *
  * The logger interface implements an internal character buffer that is
  * flushed once a maximum size parameter is exceeded. The buffer limit can
- * be modified using the max_size() method; by default it is set to 8192
+ * be modified using the buffer_size() method; by default it is set to 8192
  * characters. The logger allows prepending of the current date and the task
  * name.
  ***************************************************************************/
@@ -85,6 +85,7 @@ public:
     // Methods
     void               clear(void);
     long int           size(void) const;
+    long int           written_size(void) const;
     std::string        classname(void) const;
     bool               is_open(void) const;
     bool               is_empty(void) const;
@@ -96,7 +97,7 @@ public:
     void               cout(const bool& flag);
     void               cerr(const bool& flag);
     void               name(const std::string& name);
-    void               max_size(const int& size);
+    void               buffer_size(const int& size);
     void               indent(const int& indent);
     void               chatter(const GChatter& chatter);
     void               header0(const std::string& arg);
@@ -107,7 +108,7 @@ public:
     const bool&        cout(void) const;
     const bool&        cerr(void) const;
     const std::string& name(void) const;
-    const int&         max_size(void) const;
+    const int&         buffer_size(void) const;
     const int&         indent(void) const;
     const GChatter&    chatter(void) const;
     const GFilename&   filename(void) const;
@@ -123,17 +124,18 @@ protected:
     void        append(std::string arg);
 
     // Protected data members
-    int         m_max_length; //!< Maximum buffer length
-    int         m_indent;     //!< Indentation of text
-    bool        m_stdout;     //!< Dump in standard output
-    bool        m_stderr;     //!< Dump in standard error
-    bool        m_use_date;   //!< Dump date in prefix
-    bool        m_linestart;  //!< Signals that buffer is at line start
-    FILE*       m_file;       //!< Log file pointer
-    GFilename   m_filename;   //!< Log file name
-    std::string m_name;       //!< Name for prefix
-    std::string m_buffer;     //!< Output string buffer
-    GChatter    m_chatter;    //!< Chattiness for print() method
+    int         m_max_length;   //!< Maximum buffer length
+    int         m_indent;       //!< Indentation of text
+    long int    m_written_size; //!< Number of char's written though this logger
+    bool        m_stdout;       //!< Dump in standard output
+    bool        m_stderr;       //!< Dump in standard error
+    bool        m_use_date;     //!< Dump date in prefix
+    bool        m_linestart;    //!< Signals that buffer is at line start
+    FILE*       m_file;         //!< Log file pointer
+    GFilename   m_filename;     //!< Log file name
+    std::string m_name;         //!< Name for prefix
+    std::string m_buffer;       //!< Output string buffer
+    GChatter    m_chatter;      //!< Chattiness for print() method
 };
 
 
@@ -146,6 +148,18 @@ inline
 std::string GLog::classname(void) const
 {
     return ("GLog");
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of characters written through this logger
+ *
+ * @return Number of characters written.
+ ***************************************************************************/
+inline
+long int GLog::written_size(void) const
+{
+    return (m_written_size);
 }
 
 
@@ -302,19 +316,15 @@ void GLog::name(const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Set the maximum buffer size
+ * @brief Set the buffer size
  *
- * @param[in] size Maximum buffer size.
+ * @param[in] size Buffer size.
  *
- * Set the maximum number of characters allowed in the internal buffer before
- * the buffer is flushed into the specified streams or file.
- *
- * @todo No maximum buffer size checking is performed. This could be
- * implemented but is not really crucial since the physical buffer size can
- * indeed be larger than this maximum size.
+ * Set the number of characters allowed in the internal buffer before the
+ * buffer is flushed into the specified streams or file.
  ***************************************************************************/
 inline
-void GLog::max_size(const int& size)
+void GLog::buffer_size(const int& size)
 {
     m_max_length = size;
     return;
@@ -421,15 +431,15 @@ const std::string& GLog::name(void) const
 
 
 /***********************************************************************//**
- * @brief Return the maximum buffer size
+ * @brief Return the buffer size
  *
- * @return Maximum buffer size.
+ * @return Buffer size.
  *
- * Returns the maximum number of characters allowed in the internal buffer
+ * Returns the number of characters that are allowed in the internal buffer
  * before the buffer is flushed into the specified streams or file.
  ***************************************************************************/
 inline
-const int& GLog::max_size(void) const
+const int& GLog::buffer_size(void) const
 {
     return m_max_length;
 }

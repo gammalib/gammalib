@@ -29,12 +29,14 @@ The following methods have been added:
 - GApplication::log_header3()
 - GLog::is_open()
 - GLog::is_empty()
+- GLog::written_size()
 
 The following methods have been removed:
 - ...
 
 The following methods have been renamed:
 - GModelSpectralPlawPhotonFlux::flux(), was GModelSpectralPlaw2::integral()
+- GLog::buffer_size(), was GLog::max_size()
 
 The parameters for the following methods have been changed:
 - GApplication::log_parameters() now has a mandatory GChatter argument
@@ -77,6 +79,9 @@ a log file is actually empty (#1837).
 
 The GLog::size() method now returns the actual size of the log file, including
 the number of characters on disk.
+
+The GLog::max_size() method has been renamed to GLog::buffer_size since this
+is more explicit (#1837).
 
 
 5. Base module

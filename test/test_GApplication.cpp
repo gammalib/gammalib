@@ -147,6 +147,10 @@ void TestGApplication::test_GLog(void)
     test_value(log1.size(), 13, "Check logger 1 size in memory");
     test_value(log2.size(), 15, "Check logger 2 size in memory");
 
+    // Check the written sizes of the loggers.
+    test_value(log1.written_size(), 13, "Check logger 1 written size");
+    test_value(log2.written_size(),  6, "Check logger 2 written size");
+
     // Flush both loggers. Each logger flushes what he has.
     log1.flush(true);
     log2.flush(true);

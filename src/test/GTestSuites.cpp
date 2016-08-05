@@ -550,7 +550,7 @@ void GTestSuites::init_members(void)
     m_log.clear();
 
     // Set logger parameters
-    m_log.max_size(1);
+    m_log.buffer_size(1);
     m_log.cout(true);
 
     // Return
