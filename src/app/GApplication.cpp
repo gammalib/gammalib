@@ -49,6 +49,8 @@ const int header_width = 80;                                //!< Header width
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs an empty application.
  ***************************************************************************/
 GApplication::GApplication(void)
 {
@@ -66,9 +68,13 @@ GApplication::GApplication(void)
  * @param[in] name Application name.
  * @param[in] version Application version.
  *
- * Constructs an application from an application @p name and @p version. The
- * application parameters will be loaded from the parameter file. No log
- * file will be opened.
+ * Constructs an application from an application @p name and @p version. The 
+ * constructor will set the parameter filename to "<name>.par" and the log
+ * filename to "<name>".log. The parameters will be loaded from the parameter
+ * file.
+ *
+ * No log file will be opened. To open the log file an explicit call to the
+ * logFileOpen() method is required.
  *
  * This constructor should be used for Python scripts.
  ***************************************************************************/
@@ -106,9 +112,12 @@ GApplication::GApplication(const std::string& name, const std::string& version)
  * @param[in] argv Command line arguments
  *
  * Constructs an application from an application @p name, @p version and a
- * number @p argc of command line arguments @p argv. The application
- * parameters will be loaded from the parameter file and the log file will
- * be opened.
+ * number @p argc of command line arguments @p argv. The constructor will
+ * set the parameter filename to "<name>.par" and the log filename to
+ * "<name>".log. The parameters will be loaded from the parameter file.
+ *
+ * No log file will be opened. To open the log file an explicit call to the
+ * logFileOpen() method is required.
  *
  * This constructor should be used for C++ applications.
  ***************************************************************************/
@@ -152,9 +161,6 @@ GApplication::GApplication(const std::string& name, const std::string& version,
         // Set log filename and chattiness
         set_log_filename();
         set_log_chatter();
-
-        // Initialise the application logger
-        logFileOpen();
 
     } // endif: no --help option specified
 
