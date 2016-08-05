@@ -86,6 +86,7 @@ public:
     void               clear(void);
     int                size(void) const;
     std::string        classname(void) const;
+    bool               is_open(void) const;
     void               open(const GFilename& filename, const bool& clobber = false);
     void               close(void);
     void               flush(const bool& force = false);
@@ -143,6 +144,18 @@ inline
 std::string GLog::classname(void) const
 {
     return ("GLog");
+}
+
+
+/***********************************************************************//**
+ * @brief Signal that log file is open
+ *
+ * @return True if log file is open, false otherwise.
+ ***************************************************************************/
+inline
+bool GLog::is_open(void) const
+{
+    return (m_file != NULL);
 }
 
 

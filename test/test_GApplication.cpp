@@ -381,7 +381,6 @@ void TestGApplication::test_GApplication(void)
                "Check application log file name");
 
     // Write something into the logfile and close it
-    app1.log_header();
     app1.log_string(SILENT, "Silent", false);
     app1.log_string(TERSE, "Terse", false);
     app1.log_string(NORMAL, "Normal", false);

@@ -554,9 +554,18 @@ void GLog::init_members(void)
  * @brief Copy class members
  *
  * @param[in] log Logger.
+ *
+ * Copy all class members from @p log to the current logger instance. This
+ * method will flush the buffer of @p log before copying.
  ***************************************************************************/
 void GLog::copy_members(const GLog& log)
 {
+    // Force flushing the buffer before doing the copy. This assures that the
+    // log file is left in a clean state, and in particular, that logging
+    // will be done in order. We have to circument const correctness for
+    // doing this.
+    const_cast<GLog*>(&log)->flush(true);
+
     // Copy attributes
     m_max_length = log.m_max_length;
     m_indent     = log.m_indent;
@@ -643,6 +652,9 @@ void GLog::flush(const bool& force)
             }
 
         } // endwhile: flush until empty
+
+        // And now flush the kernel buffer
+        std::fflush(m_file);
 
     } // endif: flush was required
 

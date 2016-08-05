@@ -332,7 +332,10 @@ void GApplication::logFileOpen(const bool& clobber)
         // Initialise the application logger
         log.open(log_filename(), clobber);
 
-    }
+        // Write header into log file
+        log_header();
+
+    } // endif: file name was not empty
 
     // Set logger chattiness
     set_log_chatter();
@@ -349,11 +352,16 @@ void GApplication::logFileOpen(const bool& clobber)
  ***************************************************************************/
 void GApplication::logFileClose(void)
 {
-    // Put trailer in log file
-    log_trailer();
+    // Continue only if log file is open
+    if (log.is_open()) {
+    
+        // Write trailer into log file
+        log_trailer();
 
-    // Close log file
-    log.close();
+        // Close log file
+        log.close();
+
+    } // endif: log file was open
 
     // Return
     return;
@@ -872,11 +880,8 @@ void GApplication::free_members(void)
     // Save application parameters
     m_pars.save(par_filename());
 
-    // Put trailer in log file
-    log_trailer();
-
     // Close log file
-    log.close();
+    logFileClose();
 
     // Return
     return;

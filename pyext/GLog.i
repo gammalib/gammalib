@@ -47,6 +47,7 @@ public:
     void               clear(void);
     int                size(void) const;
     std::string        classname(void) const;
+    bool               is_open(void) const;
     void               open(const GFilename& filename, const bool& clobber = false);
     void               close(void);
     void               flush(const bool& force = false);
