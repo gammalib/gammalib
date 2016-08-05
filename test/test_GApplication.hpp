@@ -47,9 +47,9 @@ public:
     virtual void              set(void);
     virtual TestGApplication* clone(void) const;
     virtual std::string       classname(void) const { return "TestGApplication"; }
-    void                      test_constructor(void);
-    void                      test_stream_logger(void);
-    void                      test_C_logger(void);
+    void                      test_GLog(void);
+    void                      test_GLog_stream(void);
+    void                      test_GLog_C(void);
     void                      test_GApplicationPar(void);
     void                      test_GApplication(void);
 };

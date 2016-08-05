@@ -348,15 +348,28 @@ void GApplication::logFileOpen(const bool& clobber)
 /***********************************************************************//**
  * @brief Close log file
  *
- * Logs trailer and close application log file.
+ * Writer trailer into the log file and close application log file.
+ *
+ * The trailer is only written in case that there is some content in the
+ * log file.
  ***************************************************************************/
 void GApplication::logFileClose(void)
 {
     // Continue only if log file is open
     if (log.is_open()) {
     
-        // Write trailer into log file
-        log_trailer();
+        // If log file is not empty then write the trailer into log file.
+        // This kluge avoids writing a trailer in an empty log file that
+        // is for example occuring in copy operations.
+        if (!log.is_empty()) {
+
+            // Put line feed
+            log << std::endl;
+            
+            // Write trailer into logger
+            log_trailer();
+
+        } // endif: logger was not empty
 
         // Close log file
         log.close();
@@ -850,6 +863,8 @@ void GApplication::init_members(void)
  * @brief Copy class members
  *
  * @param[in] app Application.
+ *
+ * Copies all class members.
  ***************************************************************************/
 void GApplication::copy_members(const GApplication& app)
 {

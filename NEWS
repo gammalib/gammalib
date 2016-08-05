@@ -28,6 +28,7 @@ The following methods have been added:
 - GApplication::log_header2()
 - GApplication::log_header3()
 - GLog::is_open()
+- GLog::is_empty()
 
 The following methods have been removed:
 - ...
@@ -71,7 +72,11 @@ duplicating the file descriptor and opening the log file in the copied
 instance using the duplicated descriptor. This solves the problems (#1823).
 
 A GLog::is_open() method has been added to assess whether a log file is
-actually opened (#1837).
+actually opened. The GLog::is_empty() method has been added to assess whether
+a log file is actually empty (#1837).
+
+The GLog::size() method now returns the actual size of the log file, including
+the number of characters on disk.
 
 
 5. Base module

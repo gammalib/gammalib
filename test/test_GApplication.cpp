@@ -44,11 +44,11 @@ void TestGApplication::set(void)
     name("GApplication");
 
     // Append tests
-    append(static_cast<pfunction>(&TestGApplication::test_constructor),
+    append(static_cast<pfunction>(&TestGApplication::test_GLog),
            "Test GLog constructor");
-    append(static_cast<pfunction>(&TestGApplication::test_stream_logger),
+    append(static_cast<pfunction>(&TestGApplication::test_GLog_stream),
            "Test stream logger");
-    append(static_cast<pfunction>(&TestGApplication::test_C_logger),
+    append(static_cast<pfunction>(&TestGApplication::test_GLog_C),
            "Test C logger");
     append(static_cast<pfunction>(&TestGApplication::test_GApplicationPar),
            "Test GApplicationPar class");
@@ -73,15 +73,105 @@ TestGApplication* TestGApplication::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Test GLog constructor
+ * @brief Test GLog class
  **************************************************************************/
-void TestGApplication::test_constructor(void)
+void TestGApplication::test_GLog(void)
 {
     // Void constructor
     GLog log1;
 
-    // Copy constructor
+    // Check empty logger
+    test_assert(log1.is_empty(), "Check whether logger is empty");
+    test_value(log1.size(), 0, "Check whether logger size is 0");
+    test_assert(!log1.is_open(), "Check whether log file is closed");
+
+    // Copy empty logger
     GLog log2 = log1;
+
+    // Check whether copied logger isempty
+    test_assert(log2.is_empty(), "Check whether copied logger is empty");
+    test_value(log2.size(), 0, "Check whether copied logger size is 0");
+    test_assert(!log2.is_open(), "Check whether copied log file is closed");
+
+    // Write a few characters and check the logger size
+    log2 << "Honeymoon";
+    test_value(log2.size(), 9, "Check logger size in memory");
+
+    // Flush to disk for a closed file. This should make the text disappear.
+    log2.flush(true);
+    test_value(log2.size(), 0,
+               "Check logger size in memory after flushing without file");
+    test_assert(log2.is_empty(),
+                "Check whether logger is empty after flushing without file");
+    
+    // Open log file and check whether it's open now
+    log2.open("test_logfile.log", true);
+    test_assert(log2.is_open(), "Check whether log file is now open");
+
+    // Write a few characters and check the logger size
+    log2 << "Honeymoon";
+    test_value(log2.size(), 9, "Check logger size in memory");
+
+    // Flush to disk and check again the logger size
+    log2.flush(true);
+    test_value(log2.size(), 9,
+               "Check logger size on disk after flushing to disk");
+    test_assert(!log2.is_empty(),
+                "Check whether logger is not empty after flushing to disk");
+
+    // Write more characters and check the logger size
+    log2 << " and Milk!";
+    test_value(log2.size(), 19, "Check logger size on disk+memory");
+
+    // Close log file and check whether the logger is empty again
+    log2.close();
+    test_assert(log2.is_empty(), "Check whether logger is empty again");
+    test_value(log2.size(), 0, "Check whether logger size is again 0");
+
+    // Open log file again and check whether it's open now
+    log1.open("test_logfile.log", true);
+    test_assert(log1.is_open(), "Check whether log file is now open");
+
+    // Write a few characters and check the logger size
+    log1 << "Honeymoon";
+    test_value(log1.size(), 9, "Check logger size in memory");
+
+    // Copy filled logger
+    log2 = log1;
+
+    // Now fill both loggers with more characters
+    log1 << " and";
+    log2 << " Milk!";
+
+    // Check the logger size in memory. They should be different.
+    test_value(log1.size(), 13, "Check logger 1 size in memory");
+    test_value(log2.size(), 15, "Check logger 2 size in memory");
+
+    // Flush both loggers. Each logger flushes what he has.
+    log1.flush(true);
+    log2.flush(true);
+
+    // Check that logger size on disk. Both loggers flushed their
+    // content, first logger 1, then logger 2, and the sum should
+    // be on disk. Both logger sizes are now identical.
+    test_value(log1.size(), 19, "Check logger 1 size on disk");
+    test_value(log2.size(), 19, "Check logger 2 size on disk");
+
+    // Close loggers
+    log1.close();
+    log2.close();
+
+    // Check if log file exists
+    char line[100];
+    FILE *fp = fopen("test_logfile.log", "r");
+    test_assert(fp != NULL, "Check if logfile exists");
+
+    // If log file exists then check it and close file
+    if (fp != NULL) {
+        fgets(line, 100, fp);
+        test_value(line, "Honeymoon and Milk!", "Check log file content");
+        fclose(fp);
+    }
 
     // Return
     return; 
@@ -91,7 +181,7 @@ void TestGApplication::test_constructor(void)
 /***********************************************************************//**
  * @brief Test stream logger
  **************************************************************************/
-void TestGApplication::test_stream_logger(void)
+void TestGApplication::test_GLog_stream(void)
 {
     // Test
     GLog log;
@@ -114,7 +204,7 @@ void TestGApplication::test_stream_logger(void)
 /***********************************************************************//**
  * @brief Test C logger
  **************************************************************************/
-void TestGApplication::test_C_logger(void)
+void TestGApplication::test_GLog_C(void)
 {
     // Test
     GLog log;
@@ -377,7 +467,7 @@ void TestGApplication::test_GApplication(void)
     // Test log filename
     test_value(app1.par_filename(), "test_GApplication.par",
                "Check application parameter file name");
-    test_value(app1.log_filename(), "test_logfile.log",
+    test_value(app1.log_filename(), "test_application.log",
                "Check application log file name");
 
     // Write something into the logfile and close it
@@ -406,7 +496,7 @@ void TestGApplication::test_GApplication(void)
 
     // Check if log file exists
     char line[200];
-    FILE *fp = fopen("test_logfile.log", "r");
+    FILE *fp = fopen("test_application.log", "r");
     test_assert(fp != NULL, "Check if logfile exists");
 
     // If log file exists then check it line by line
@@ -491,21 +581,24 @@ void TestGApplication::test_GApplication(void)
         test_value(line, " mode ......................: ql\n",
                          "Check log file line 24");
         fgets(line, 100, fp);
-        test_value(line, " logfile ...................: test_logfile.log\n",
+        test_value(line, " logfile ...................: test_application.log\n",
                          "Check log file line 25");
         fgets(line, 32, fp);
         test_value(line, "Application \"test_GApplication\"",
                          "Check log file line 26");
+
         // Empty remaining characters (not checked since they are machine
         // dependent)
         fgets(line, 200, fp);
+        fgets(line, 100, fp);
+        test_value(line, "\n", "Check log file line 27");
         fgets(line, 32, fp);
         test_value(line, "Application \"test_GApplication\"",
-                         "Check log file line 27");
+                         "Check log file line 28");
 
         // Close log file
         fclose(fp);
-        
+
     } // endif: log file existed
 
     // Return
