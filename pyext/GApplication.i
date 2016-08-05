@@ -109,7 +109,7 @@ public:
 %pythoncode %{
 # Log the value of a parameter
 def _log_value(self, chatter, name, value):
-    string = gammalib.parformat(str(name))+str(value)+'\n'
+    string = gammalib.parformat(str(name))+str(value)
     self._log_string(chatter, string)
 GApplication._log_value = _log_value
 %}
