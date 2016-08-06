@@ -66,6 +66,7 @@ public:
     bool               boolean(void);
     int                integer(void);
     double             real(void);
+    const std::string& current_value(void) const;
     const std::string& min(void) const;
     const std::string& max(void) const;
     const std::string& prompt(void) const;

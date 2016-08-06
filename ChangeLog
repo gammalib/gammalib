@@ -1,8 +1,9 @@
-2016-08-05
+2016-08-06
 
         * Version 1.2.0 released
         =========================
 
+        Add GApplication::pars() and GApplicationPar::current_value() methods (#1838)
         Add GLog is_open(), is_empty() and written_size() methods (#1837)
         Fix invalid pointer problem in GLog copies (#1823)
         Fix GSkyMap::publish() bug for empty sky maps (#1835)

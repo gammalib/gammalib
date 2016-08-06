@@ -63,47 +63,49 @@ public:
     const GApplicationPar& operator[](const std::string& name) const;
 
     // Methods
-    void               clear(void);
-    GApplication*      clone(void) const;
-    std::string        classname(void) const;
-    const std::string& name(void) const;
-    const std::string& version(void) const;
-    double             telapse(void) const;
-    double             celapse(void) const;
-    void               logFileOpen(const bool& clobber = true);
-    void               logFileClose(void);
-    bool               logTerse(void) const;
-    bool               logNormal(void) const;
-    bool               logExplicit(void) const;
-    bool               logVerbose(void) const;
-    bool               logDebug(void) const;
-    bool               clobber(void) const;
-    bool               has_par(const std::string& name) const;
-    const std::string& par_filename(void) const;
-    const std::string& log_filename(void) const;
-    void               log_header(void);
-    void               log_trailer(void);
-    void               log_string(const GChatter& chatter,
-                                  const std::string& string,
-                                  const bool&        linefeed = true);
-    void               log_value(const GChatter&    chatter,
-                                 const std::string& name,
-                                 const std::string& value);
-    void               log_value(const GChatter&    chatter,
-                                 const std::string& name,
-                                 const int&         value);
-    void               log_value(const GChatter&    chatter,
-                                 const std::string& name,
-                                 const double&      value);
-    void               log_header1(const GChatter&    chatter,
-                                   const std::string& header);
-    void               log_header2(const GChatter&    chatter,
-                                   const std::string& header);
-    void               log_header3(const GChatter&    chatter,
-                                   const std::string& header);
-    void               log_parameters(const GChatter& chatter);
-    const bool&        need_help(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    void                    clear(void);
+    GApplication*           clone(void) const;
+    std::string             classname(void) const;
+    const std::string&      name(void) const;
+    const std::string&      version(void) const;
+    double                  telapse(void) const;
+    double                  celapse(void) const;
+    void                    logFileOpen(const bool& clobber = true);
+    void                    logFileClose(void);
+    bool                    logTerse(void) const;
+    bool                    logNormal(void) const;
+    bool                    logExplicit(void) const;
+    bool                    logVerbose(void) const;
+    bool                    logDebug(void) const;
+    bool                    clobber(void) const;
+    bool                    has_par(const std::string& name) const;
+    const std::string&      par_filename(void) const;
+    const std::string&      log_filename(void) const;
+    void                    log_header(void);
+    void                    log_trailer(void);
+    void                    log_string(const GChatter& chatter,
+                                       const std::string& string,
+                                       const bool&        linefeed = true);
+    void                    log_value(const GChatter&    chatter,
+                                      const std::string& name,
+                                      const std::string& value);
+    void                    log_value(const GChatter&    chatter,
+                                      const std::string& name,
+                                      const int&         value);
+    void                    log_value(const GChatter&    chatter,
+                                      const std::string& name,
+                                      const double&      value);
+    void                    log_header1(const GChatter&    chatter,
+                                        const std::string& header);
+    void                    log_header2(const GChatter&    chatter,
+                                        const std::string& header);
+    void                    log_header3(const GChatter&    chatter,
+                                        const std::string& header);
+    void                    log_parameters(const GChatter& chatter);
+    const bool&             need_help(void) const;
+    const GApplicationPars& pars(void) const;
+    void                    pars(const GApplicationPars& pars);
+    std::string             print(const GChatter& chatter = NORMAL) const;
 
     // Public members
     GLog log;   //!< Application logger
@@ -241,6 +243,31 @@ const bool& GApplication::need_help(void) const
 {
     // Return
     return (m_need_help);
+}
+
+
+/***********************************************************************//**
+ * @brief Return application parameters
+ *
+ * @return Application parameters.
+ ***************************************************************************/
+inline
+const GApplicationPars& GApplication::pars(void) const
+{
+    return m_pars;
+}
+
+
+/***********************************************************************//**
+ * @brief Set application parameters
+ *
+ * @param[in] pars Application parameters.
+ ***************************************************************************/
+inline
+void GApplication::pars(const GApplicationPars& pars)
+{
+    m_pars = pars;
+    return;
 }
 
 #endif /* GAPPLICATION_HPP */

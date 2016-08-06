@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-5 August 2016
+6 August 2016
 
 
 1. Introduction
@@ -27,6 +27,8 @@ The following methods have been added:
 - GApplication::log_header1()
 - GApplication::log_header2()
 - GApplication::log_header3()
+- GApplication::pars()
+- GApplicationPar::current_value()
 - GLog::is_open()
 - GLog::is_empty()
 - GLog::written_size()
@@ -82,6 +84,11 @@ the number of characters on disk.
 
 The GLog::max_size() method has been renamed to GLog::buffer_size since this
 is more explicit (#1837).
+
+GApplication::pars() methods have been added to allow to retrieve or to set all
+application parameters. The GApplicationPar::current_value() method has been
+added to retrieve the current parameter value without querying for the parameter
+(#1838).
 
 
 5. Base module

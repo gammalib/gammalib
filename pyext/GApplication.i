@@ -60,43 +60,46 @@ public:
 
     // Ignore base class methods and make methods private in Python by
     // prepending an underscore
-    %ignore                  clear();
-    %ignore                  clone() const;
-    %ignore                  classname() const;
-    %rename(_name)           name() const;
-    %rename(_version)        version() const;
-    %rename(_logTerse)       logTerse() const;
-    %rename(_logNormal)      logNormal() const;
-    %rename(_logExplicit)    logExplicit() const;
-    %rename(_logVerbose)     logVerbose() const;
-    %rename(_logDebug)       logDebug() const;
-    %rename(_clobber)        clobber() const;
-    %rename(_has_par)        has_par(const std::string& name) const;
-    %rename(_par_filename)   par_filename() const;
-    %rename(_log_filename)   log_filename() const;
-    %rename(_log_header)     log_header();
-    %rename(_log_trailer)    log_trailer();
-    %rename(_need_help)      need_help() const;
+    %ignore                  clear;
+    %ignore                  clone;
+    %ignore                  classname;
+    %rename(_name)           name;
+    %rename(_version)        version;
+    %rename(_logTerse)       logTerse;
+    %rename(_logNormal)      logNormal;
+    %rename(_logExplicit)    logExplicit;
+    %rename(_logVerbose)     logVerbose;
+    %rename(_logDebug)       logDebug;
+    %rename(_clobber)        clobber;
+    %rename(_has_par)        has_par;
+    %rename(_par_filename)   par_filename;
+    %rename(_log_filename)   log_filename;
+    %rename(_log_header)     log_header;
+    %rename(_log_trailer)    log_trailer;
+    %rename(_need_help)      need_help;
     %rename(_log)            log;
+    %rename(_pars)           pars;
 
     // Methods
-    void               clear(void);
-    GApplication*      clone(void) const;
-    std::string        classname(void) const;
-    const std::string& name(void) const;
-    const std::string& version(void) const;
-    bool               logTerse(void) const;
-    bool               logNormal(void) const;
-    bool               logExplicit(void) const;
-    bool               logVerbose(void) const;
-    bool               logDebug(void) const;
-    bool               clobber(void) const;
-    bool               has_par(const std::string& name) const;
-    const std::string& par_filename(void) const;
-    const std::string& log_filename(void) const;
-    void               log_header(void);
-    void               log_trailer(void);
-    const bool&        need_help(void) const;
+    void                    clear(void);
+    GApplication*           clone(void) const;
+    std::string             classname(void) const;
+    const std::string&      name(void) const;
+    const std::string&      version(void) const;
+    bool                    logTerse(void) const;
+    bool                    logNormal(void) const;
+    bool                    logExplicit(void) const;
+    bool                    logVerbose(void) const;
+    bool                    logDebug(void) const;
+    bool                    clobber(void) const;
+    bool                    has_par(const std::string& name) const;
+    const std::string&      par_filename(void) const;
+    const std::string&      log_filename(void) const;
+    void                    log_header(void);
+    void                    log_trailer(void);
+    const bool&             need_help(void) const;
+    const GApplicationPars& pars(void) const;
+    void                    pars(const GApplicationPars& pars);
 
     // Public members
     GLog log;   //!< Application logger
