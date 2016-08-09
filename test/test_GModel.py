@@ -1,7 +1,7 @@
 # ==========================================================================
-# This module performs unit tests for the GammaLib model module.
+# This module performs unit tests for the GammaLib model module
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@ import gammalib
 # ==================================== #
 class Test(gammalib.GPythonTestSuite):
     """
-    Test class for GammaLib model module.
+    Test class for GammaLib model module
     """
     # Constructor
     def __init__(self):
         """
-        Constructor.
+        Constructor
         """
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
@@ -41,42 +41,46 @@ class Test(gammalib.GPythonTestSuite):
     # Set test functions
     def set(self):
         """
-        Set all test functions.
+        Set all test functions
         """
         # Set test name
-        self.name("model")
+        self.name('model')
 
         # Append tests
-        self.append(self.test_iterator, "Test Model iterator")
+        self.append(self.test_models, 'Test GModels')
 
         # Return
         return
 
     # Test function
-    def test_iterator(self):
+    def test_models(self):
         """
-        Test function.
+        Test GModels class
         """
-        
-        # Initialise model container
+        # Read model container and create a copy of its first model (the
+        # copy is needed since the model container will go out of scope
+        # later)
+        models = gammalib.GModels('data/model_point_plaw.xml')
+        model  = models[0].copy()
+        name   = model.name()
+
+        # Create an empty model container
         models = gammalib.GModels()
-        
-        # Read model container
-        models_test = gammalib.GModels('data/model_point_plaw.xml')
-        model = models_test[0]
-        name = model.name()
-        
+
+        # Append 10 identical models to model container
         for i in range(10):
             model.name(name+'_'+str(i))
             models.append(model)
         
-        size = models.size()
+        # Loop over all models using the container iterator and count the
+        # number of iterations
         nmodels = 0
         for model in models:
             nmodels += 1
-            
-        self.test_assert(size == 10, 'Test model container size')
-        self.test_assert(nmodels == 10, 'Test model iterator')
+
+        # Check that looping was successful
+        self.test_value(models.size(), 10, 'Check model container size')
+        self.test_value(nmodels, 10, 'Check model iterator')
         
         # Return
         return

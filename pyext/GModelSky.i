@@ -91,4 +91,7 @@ public:
  * @brief GModelSky class extension
  ***************************************************************************/
 %extend GModelSky {
+    GModelSky copy() {
+        return (*self);
+    }
 };

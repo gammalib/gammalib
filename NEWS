@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-6 August 2016
+9 August 2016
 
 
 1. Introduction
@@ -27,6 +27,7 @@ The following methods have been added:
 - GApplication::log_header1()
 - GApplication::log_header2()
 - GApplication::log_header3()
+- GApplication::operator[](const int& index)
 - GApplication::pars()
 - GApplicationPar::current_value()
 - GLog::is_open()
@@ -89,6 +90,9 @@ GApplication::pars() methods have been added to allow to retrieve or to set all
 application parameters. The GApplicationPar::current_value() method has been
 added to retrieve the current parameter value without querying for the parameter
 (#1838).
+
+Operators have been added to GApplication that allow the access of application
+parameters by index (#1838).
 
 
 5. Base module

@@ -116,7 +116,9 @@ testscripts = gammalib/tests/__init__.py \
 # Test data to be distributed in $(pyexecdir)/gammalib/tests/data
 testdata = $(top_srcdir)/test/data/initial_coords.txt \
            $(top_srcdir)/test/data/fk5_to_galactic.txt \
-           $(top_srcdir)/test/data/file.fits.gz
+           $(top_srcdir)/test/data/file.fits.gz \
+           $(top_srcdir)/test/data/test_GApplication.par \
+           $(top_srcdir)/test/data/model_point_plaw.xml
 
 # Distribute scripts
 testscriptsdir   = $(pyexecdir)/gammalib/tests

@@ -149,6 +149,9 @@ std::string GApplication::classname(void) const
  * @brief Parameter access operator
  *
  * @param[in] name Parameter name.
+ * @return Reference to application parameter.
+ *
+ * Returns a reference to the application parameter with the given @p name.
  ***************************************************************************/
 inline
 GApplicationPar& GApplication::operator[](const std::string& name)
@@ -161,11 +164,47 @@ GApplicationPar& GApplication::operator[](const std::string& name)
  * @brief Parameter access operator (const version)
  *
  * @param[in] name Parameter name.
+ * @return Constant reference to application parameter
+ *
+ * Returns a const reference to the application parameter with the given
+ * @p name.
  ***************************************************************************/
 inline
 const GApplicationPar& GApplication::operator[](const std::string& name) const
 {
     return (m_pars[name]);
+}
+
+
+/***********************************************************************//**
+ * @brief Parameter access operator
+ *
+ * @param[in] index Parameter index [0,...,pars().size()-1].
+ * @return Reference to application parameter
+ *
+ * Returns a reference to the application parameter with the given @p index.
+ * No range checking is performed for the index.
+ ***************************************************************************/
+inline
+GApplicationPar& GApplication::operator[](const int& index)
+{
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Parameter access operator (const version)
+ *
+ * @param[in] index Parameter index [0,...,pars().size()-1].
+ * @return Constant reference to application parameter
+ *
+ * Returns a const reference to the application parameter with the given
+ * @p index. No range checking is performed for the index.
+ ***************************************************************************/
+inline
+const GApplicationPar& GApplication::operator[](const int& index) const
+{
+    return (m_pars[index]);
 }
 
 
@@ -270,30 +309,6 @@ void GApplication::pars(const GApplicationPars& pars)
 {
     m_pars = pars;
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Parameter access operator
- *
- * @param[in] name Parameter name.
- ***************************************************************************/
-inline
-GApplicationPar& GApplication::operator[](const int& index)
-{
-    return (m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Parameter access operator (const version)
- *
- * @param[in] name Parameter name.
- ***************************************************************************/
-inline
-const GApplicationPar& GApplication::operator[](const int& index) const
-{
-    return (m_pars[index]);
 }
 
 #endif /* GAPPLICATION_HPP */

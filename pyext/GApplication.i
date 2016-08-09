@@ -222,7 +222,8 @@ GApplication._log_value = _log_value
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", "Application parameter index",
+            throw GException::out_of_range("__getitem__(int)", "Application "
+                                           "parameter index",
                                            index, self->pars().size());
         }
     }
@@ -232,7 +233,8 @@ GApplication._log_value = _log_value
             return;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", "Application parameter index",
+            throw GException::out_of_range("__setitem__(int)", "Application "
+                                           "parameter index",
                                            index, self->pars().size());
         }
     }
