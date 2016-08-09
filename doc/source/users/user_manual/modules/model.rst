@@ -82,27 +82,32 @@ morphology of the source.
 It satisfies
 
 .. math::
-   \int_{\Omega} M_{\rm spatial}(\alpha,\delta|E,t) d\Omega = 1
+   \int_{\Omega} M_{\rm spatial}(\alpha,\delta|E,t) \, d\Omega = 1
 
 for all :math:`E` and :math:`t`, hence the spatial component does not
 impact the spatially integrated spectral and temporal properties of the
 source (the integration is done here over the spatial parameters
 :math:`\alpha` and :math:`\delta` in a spherical coordinate system).
+The units of the spatial model component are
+:math:`[M_{\rm spatial}] = {\rm sr}^{-1}`.
 
 The spectral model component describes the spatially integrated time
 dependent spectral distribution of the source.
 It satisfies
 
 .. math::
-   \int_{E} M_{\rm spectral}(E | t) dE = \Phi
+   \int_{E} M_{\rm spectral}(E | t) \, dE = \Phi
 
 for all :math:`t`, where :math:`\Phi` is the spatially and spectrally
 integrated total source flux. The spectral component does not impact
 the temporal properties of the integrated flux :math:`\Phi`.
+The units of the spectral model component
+are :math:`[M_{\rm spectral}] = {\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1}`.
 
 The temporal model component describes the relative variation of the
 source flux with respect to the mean value given by the spectral model
 component.
+The temporal model component is unit less.
 
 
 Spatial components
@@ -383,9 +388,6 @@ differential flux values.
 The energy values are assumed to be in units of MeV, the flux values are
 normally assumed to be in units of
 :math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1}`.
-The only exception to this rule is the isotropic diffuse model
-:doxy:`GModelSpatialDiffuseConst` for which the flux values are given
-in units of :math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1} {\rm sr}^{-1}`.
 
 The only parameter of the model is a multiplicative normalization:
 
