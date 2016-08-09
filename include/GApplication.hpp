@@ -274,11 +274,9 @@ void GApplication::pars(const GApplicationPars& pars)
 
 
 /***********************************************************************//**
- * @brief Return pointer to application parameter
+ * @brief Parameter access operator
  *
- * @param[in] index Parameter index [0,...,m_pars.size()-1].
- *
- * Returns a pointer to the application parameter with the specified @p index.
+ * @param[in] name Parameter name.
  ***************************************************************************/
 inline
 GApplicationPar& GApplication::operator[](const int& index)
@@ -288,11 +286,9 @@ GApplicationPar& GApplication::operator[](const int& index)
 
 
 /***********************************************************************//**
- * @brief Return pointer to application parameter (const version)
+ * @brief Parameter access operator (const version)
  *
- * @param[in] index Model index [0,...,m_pars.size()-1].
- *
- * Returns a const pointer to the parameter with the specified @p index.
+ * @param[in] name Parameter name.
  ***************************************************************************/
 inline
 const GApplicationPar& GApplication::operator[](const int& index) const
