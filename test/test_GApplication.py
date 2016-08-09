@@ -197,7 +197,7 @@ class Test(gammalib.GPythonTestSuite):
         Test GApplication class
         """
         # Set PFILES environment variable
-        os.environ['PFILES'] = os.environ['PWD']+'/data'
+        os.environ['PFILES'] = os.environ['TEST_DATA']
         
         # Allocate test application
         app = gammalib.GApplication('test_GApplication', '1.1.0')
