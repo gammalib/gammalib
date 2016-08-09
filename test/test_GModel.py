@@ -47,15 +47,36 @@ class Test(gammalib.GPythonTestSuite):
         self.name("model")
 
         # Append tests
-        self.append(self.test, "Model module dummy test")
+        self.append(self.test_iterator, "Test Model iterator")
 
         # Return
         return
 
     # Test function
-    def test(self):
+    def test_iterator(self):
         """
         Test function.
         """
+        
+        # Initialise model container
+        models = gammalib.GModels()
+        
+        # Read model container
+        models_test = gammalib.GModels('data/model_point_plaw.xml')
+        model = models_test[0]
+        name = model.name()
+        
+        for i in range(10):
+            model.name(name+'_'+str(i))
+            models.append(model)
+        
+        size = models.size()
+        nmodels = 0
+        for model in models:
+            nmodels += 1
+            
+        self.test_assert(size == 10, 'Test model container size')
+        self.test_assert(nmodels == 10, 'Test model iterator')
+        
         # Return
         return

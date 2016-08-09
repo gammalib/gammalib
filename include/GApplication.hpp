@@ -59,6 +59,8 @@ public:
 
     // Operators
     GApplication&          operator=(const GApplication& app);
+    GApplicationPar&       operator[](const int& index);
+    const GApplicationPar& operator[](const int& index) const;
     GApplicationPar&       operator[](const std::string& name);
     const GApplicationPar& operator[](const std::string& name) const;
 
@@ -268,6 +270,34 @@ void GApplication::pars(const GApplicationPars& pars)
 {
     m_pars = pars;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to application parameter
+ *
+ * @param[in] index Parameter index [0,...,m_pars.size()-1].
+ *
+ * Returns a pointer to the application parameter with the specified @p index.
+ ***************************************************************************/
+inline
+GApplicationPar& GApplication::operator[](const int& index)
+{
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to application parameter (const version)
+ *
+ * @param[in] index Model index [0,...,m_pars.size()-1].
+ *
+ * Returns a const pointer to the parameter with the specified @p index.
+ ***************************************************************************/
+inline
+const GApplicationPar& GApplication::operator[](const int& index) const
+{
+    return (m_pars[index]);
 }
 
 #endif /* GAPPLICATION_HPP */

@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import os
 import gammalib
 
 
@@ -85,6 +86,7 @@ class Test(gammalib.GPythonTestSuite):
         # Append tests
         self.append(self.test_log, 'Test GLog')
         self.append(self.test_pars, 'Test GApplicationPars')
+        self.append(self.test_par_iteration, 'Test GApplication parameter iteration')
 
         # Return
         return
@@ -204,5 +206,33 @@ class Test(gammalib.GPythonTestSuite):
         else:
             self.test_try_failure('This should never happen')
 
+    def test_par_iteration(self):
+        
+        
+        # Set PFILES environment temporary
+        os.environ['PFILES'] = os.environ['PWD']+'/data'
+        
+        # Test GApplicationPars from par file
+        app =  gammalib.GApplication('test_GApplication','1.1.0')
+        
+        # Test for proper reading of par file
+        self.test_assert(app._version() == '1.1.0', 'Test for proper application version')
+        self.test_assert(app.pars().size() == 5, 'Test number of parameters')
+        
+        # Loop over parameters
+        npars = 0
+        for par in app:
+            
+            # Increment counter
+            npars += 1
+            
+            # Set chatter parameter to test persistence
+            if par.name() == 'chatter':
+                par.integer(4)
+        
+        # Test outcome of iteration
+        self.test_assert(npars == 5, 'Test number of parameters in iterative loop')
+        self.test_assert(app['chatter'].integer() == 4, 'Test if parameter could be stored correctly')
+                    
         # Return
         return
