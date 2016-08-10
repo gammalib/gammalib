@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-9 August 2016
+10 August 2016
 
 
 1. Introduction
@@ -33,6 +33,7 @@ The following methods have been added:
 - GLog::is_open()
 - GLog::is_empty()
 - GLog::written_size()
+- GSkyMap::is_empty()
 
 The following methods have been removed:
 - ...
@@ -145,6 +146,9 @@ The GSkyMap::write() method now returns a pointer to the written GFitsHDU
 object. In case that no sky map is written, for example because none has been
 defined so far, the method returns NONE. The GSkyMap::publish() method will
 detect the NONE value and will do nothing if no sky map exists (#1835).
+
+The GSkyMap::is_empty() method signals whether a sky map contains no pixels
+or no maps (#1828).
 
 
 13. Support module

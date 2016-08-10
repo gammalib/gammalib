@@ -1,8 +1,9 @@
-2016-08-09
+2016-08-10
 
         * Version 1.2.0 released
         =========================
 
+        Add GSkyMap::is_empty() method (#1828)
         Add GApplication access by index operator (#1838)
         Add GApplication::pars() and GApplicationPar::current_value() methods (#1838)
         Add GLog is_open(), is_empty() and written_size() methods (#1837)

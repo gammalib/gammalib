@@ -146,6 +146,7 @@ public:
     void                    clear(void);
     GSkyMap*                clone(void) const;
     std::string             classname(void) const;
+    bool                    is_empty(void) const;
     const int&              npix(void) const;
     const int&              nx(void) const;
     const int&              ny(void) const;

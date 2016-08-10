@@ -131,6 +131,7 @@ public:
     void                    clear(void);
     GSkyMap*                clone(void) const;
     std::string             classname(void) const;
+    bool                    is_empty(void) const;
     const int&              npix(void) const;
     const int&              nx(void) const;
     const int&              ny(void) const;
@@ -285,6 +286,20 @@ inline
 std::string GSkyMap::classname(void) const
 {
     return ("GSkyMap");
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if sky map is empty
+ *
+ * @return True if sky map is empty, false otherwise.
+ *
+ * Signals if a sky map has no pixels or maps.
+ ***************************************************************************/
+inline
+bool GSkyMap::is_empty(void) const
+{
+    return ((m_num_pixels == 0) || (m_num_maps == 0));
 }
 
 
