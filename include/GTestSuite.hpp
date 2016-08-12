@@ -85,7 +85,11 @@ public:
                                          const std::string& message = "");
     void                      test_value(const double&      value,
                                          const double&      expected,
-                                         const double&      eps = 1.0e-7,
+                                         const std::string& name = "",
+                                         const std::string& message = "");
+    void                      test_value(const double&      value,
+                                         const double&      expected,
+                                         const double&      eps,
                                          const std::string& name = "",
                                          const std::string& message = "");
     void                      test_value(const std::string& value,

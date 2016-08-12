@@ -458,6 +458,33 @@ void GTestSuite::test_value(const int&         value,
  *
  * @param[in] value Double precision value to test.
  * @param[in] expected Expected double precision value.
+ * @param[in] name Test case name.
+ * @param[in] message Test case message.
+ *
+ * Test if the @p value is equal to the @p expected value within a relative
+ * precision of 1.0e-7.
+ ***************************************************************************/
+void GTestSuite::test_value(const double&      value,
+                            const double&      expected,
+                            const std::string& name,
+                            const std::string& message)
+{
+    // Compute precision
+    double eps = (expected != 0.0) ? 1.0e-7 * expected : 1.0e-7;
+
+    // Test double precision value
+    test_value(value, expected, eps, name, message);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test a double precision value
+ *
+ * @param[in] value Double precision value to test.
+ * @param[in] expected Expected double precision value.
  * @param[in] eps Precision of the test.
  * @param[in] name Test case name.
  * @param[in] message Test case message.

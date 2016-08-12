@@ -1,8 +1,9 @@
-2016-08-10
+2016-08-12
 
         * Version 1.2.0 released
         =========================
 
+        Add GTestSuite::test_value() method with automatic precision computation
         Add GSkyMap::is_empty() method (#1828)
         Add GApplication access by index operator (#1838)
         Add GApplication::pars() and GApplicationPar::current_value() methods (#1838)

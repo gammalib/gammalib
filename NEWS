@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-10 August 2016
+12 August 2016
 
 
 1. Introduction
@@ -173,7 +173,10 @@ None
 
 17. Test module
 ---------------
-None
+A GTestSuite::test_value() method for double precision values has been added
+that automatically requires a relative precision of 1.0e-7. The default value
+for "eps" has been removed from the former double precision test_value()
+method. This should allow writing of more compact unit tests.
 
 
 18. Multi-wavelength interface
