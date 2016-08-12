@@ -623,7 +623,8 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
  *
  * Verifies the ability to handle binned Fermi/LAT data.
  ***************************************************************************/
-void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const std::string& irf)
+void TestGLATObservation::test_one_binned_obs(const std::string& datadir,
+                                              const std::string& irf)
 {
     // Set filenames
     std::string lat_cntmap  = datadir+"/cntmap.fits";
@@ -649,7 +650,7 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
 
     // Try loading event list
     GLATEventCube cube(lat_cntmap);
-    test_value(cube.number(), nevents, "Test number of events in cube.");
+    test_value(double(cube.number()), nevents, "Check number of events in cube.");
 
     // Load LAT binned observation from counts map
     test_try("Load LAT binned observation");

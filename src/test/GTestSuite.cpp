@@ -470,7 +470,7 @@ void GTestSuite::test_value(const double&      value,
                             const std::string& message)
 {
     // Compute precision
-    double eps = (expected != 0.0) ? 1.0e-7 * expected : 1.0e-7;
+    double eps = (expected != 0.0) ? 1.0e-7 * std::abs(expected) : 1.0e-7;
 
     // Test double precision value
     test_value(value, expected, eps, name, message);
