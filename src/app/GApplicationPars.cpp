@@ -204,9 +204,9 @@ GApplicationPar& GApplicationPars::operator[](const std::string& name)
 
     // Throw exception if parameter name has not been found
     if (index == -1) {
-        std::string msg = "Parameter \""+name+"\" has not been found in"
-                          " parameter file.\n"
-                          "Please specify a valid parameter name.";
+        std::string msg = "Parameter \""+name+"\" has not been found in "
+                          "parameter file. Please specify a valid parameter "
+                          "name.";
         throw GException::invalid_argument(G_ACCESS, msg);
     }
 
@@ -231,9 +231,9 @@ const GApplicationPar& GApplicationPars::operator[](const std::string& name) con
 
     // Throw exception if parameter name has not been found
     if (index == -1) {
-        std::string msg = "Parameter \""+name+"\" has not been found in"
-                          " parameter file.\n"
-                          "Please specify a valid parameter name.";
+        std::string msg = "Parameter \""+name+"\" has not been found in "
+                          "parameter file. Please specify a valid parameter "
+                          "name.";
         throw GException::invalid_argument(G_ACCESS, msg);
     }
 
