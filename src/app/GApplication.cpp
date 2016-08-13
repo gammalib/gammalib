@@ -94,6 +94,9 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     // Initialise application parameters
     m_pars.load(par_filename());
 
+    // Signal that application parameters have been loaded
+    m_pars_loaded = true;
+
     // Set log filename and chattiness
     set_log_filename();
     set_log_chatter();
@@ -157,6 +160,9 @@ GApplication::GApplication(const std::string& name, const std::string& version,
 
         // Initialise application parameters
         m_pars.load(par_filename(), m_args);
+
+        // Signal that application parameters have been loaded
+        m_pars_loaded = true;
 
         // Set log filename and chattiness
         set_log_filename();
@@ -265,6 +271,9 @@ void GApplication::clear(void)
 
     // Initialise application parameters
     m_pars.load(par_filename());
+
+    // Signal that application parameters have been loaded
+    m_pars_loaded = true;
 
     // Set log filename and chattiness
     set_log_filename();
@@ -847,7 +856,8 @@ void GApplication::init_members(void)
     m_logfile.clear();
     m_args.clear();
     m_pars.clear();
-    m_need_help = false;
+    m_pars_loaded = false;
+    m_need_help   = false;
 
     // Save the execution calendar start time
     std::time(&m_tstart);
@@ -873,15 +883,16 @@ void GApplication::copy_members(const GApplication& app)
     log = app.log;
 
     // Copy protected attributes
-    m_name      = app.m_name;
-    m_version   = app.m_version;
-    m_parfile   = app.m_parfile;
-    m_logfile   = app.m_logfile;
-    m_args      = app.m_args;
-    m_tstart    = app.m_tstart;
-    m_cstart    = app.m_cstart;
-    m_pars      = app.m_pars;
-    m_need_help = app.m_need_help;
+    m_name        = app.m_name;
+    m_version     = app.m_version;
+    m_parfile     = app.m_parfile;
+    m_logfile     = app.m_logfile;
+    m_args        = app.m_args;
+    m_tstart      = app.m_tstart;
+    m_cstart      = app.m_cstart;
+    m_pars        = app.m_pars;
+    m_pars_loaded = app.m_pars_loaded;
+    m_need_help   = app.m_need_help;
 
     // Return
     return;
@@ -893,8 +904,10 @@ void GApplication::copy_members(const GApplication& app)
  ***************************************************************************/
 void GApplication::free_members(void)
 {
-    // Save application parameters
-    m_pars.save(par_filename());
+    // Save application parameters if they have been loaded
+    if (m_pars_loaded) {
+        m_pars.save(par_filename());
+    }
 
     // Close log file
     logFileClose();

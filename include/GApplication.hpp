@@ -121,15 +121,16 @@ protected:
     void set_log_filename(void);
 
     // Protected data members
-    std::string              m_name;       //!< Application name
-    std::string              m_version;    //!< Application version
-    std::string              m_parfile;    //!< Parameter filename
-    std::string              m_logfile;    //!< Log filename
-    std::vector<std::string> m_args;       //!< Command line arguments
-    std::time_t              m_tstart;     //!< Calendar start time of execution
-    std::clock_t             m_cstart;     //!< Clock start time of execution
-    GApplicationPars         m_pars;       //!< Application parameters
-    bool                     m_need_help;  //!< --help specified
+    std::string              m_name;        //!< Application name
+    std::string              m_version;     //!< Application version
+    std::string              m_parfile;     //!< Parameter filename
+    std::string              m_logfile;     //!< Log filename
+    std::vector<std::string> m_args;        //!< Command line arguments
+    std::time_t              m_tstart;      //!< Calendar start time of execution
+    std::clock_t             m_cstart;      //!< Clock start time of execution
+    GApplicationPars         m_pars;        //!< Application parameters
+    bool                     m_pars_loaded; //!< Application parameters loaded
+    bool                     m_need_help;   //!< --help specified
 };
 
 
