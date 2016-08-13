@@ -955,16 +955,19 @@ void GObservations::init_members(void)
  ***************************************************************************/
 void GObservations::copy_members(const GObservations& obs)
 {
-    // Copy attributes. WARNING: The member m_fct SHALL not be copied to not
-    // corrupt its m_this pointer which should always point to the proper
-    // observation. See note in init_members().
+    // Copy attributes
     m_models = obs.m_models;
+    m_fct    = obs.m_fct;
 
     // Copy observations
     m_obs.clear();
     for (int i = 0; i < obs.m_obs.size(); ++i) {
         m_obs.push_back((obs.m_obs[i]->clone()));
     }
+
+    // Set likelihood function pointer to this instance. This makes sure
+    // that the optimizer points to this instance
+    m_fct.set(this);
 
     // Return
     return;

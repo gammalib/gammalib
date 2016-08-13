@@ -614,15 +614,19 @@ void GObservations::likelihood::init_members(void)
 void GObservations::likelihood::copy_members(const likelihood& fct)
 {
     // Copy attributes
-    m_value  = fct.m_value;
-    m_npred  = fct.m_npred;
-    m_this   = fct.m_this;
+    m_value = fct.m_value;
+    m_npred = fct.m_npred;
+    m_this  = fct.m_this;
 
     // Clone gradient if it exists
-    if (fct.m_gradient != NULL) m_gradient = new GVector(*fct.m_gradient);
+    if (fct.m_gradient != NULL) {
+        m_gradient = new GVector(*fct.m_gradient);
+    }
 
     // Clone curvature matrix if it exists
-    if (fct.m_curvature != NULL) m_curvature = new GMatrixSparse(*fct.m_curvature);
+    if (fct.m_curvature != NULL) {
+        m_curvature = new GMatrixSparse(*fct.m_curvature);
+    }
 
     // Return
     return;
