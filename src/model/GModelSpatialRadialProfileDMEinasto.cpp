@@ -447,8 +447,8 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_theta_max.clear();
     m_theta_max.name("Theta Max");
     m_theta_max.unit("degrees");
-    m_theta_max.value( 180.0 ); // can only go from halo center to opposite halo center
-    m_theta_max.min(1.0e-6); // arbitrarily chosen
+    m_theta_max.value( 1.0e-6 ); // can only go from halo center to opposite halo center
+    m_theta_max.min(1.0e-10); // arbitrarily chosen
     m_theta_max.fix(); // should always be fixed!
     m_theta_max.scale(1.0);
     m_theta_max.gradient(0.0);
