@@ -640,7 +640,39 @@ void GModelSpatialRadialProfileDMEinasto::update() const
   }
 }
 
-//double GModelSpatialRadialProfileDMEinasto::prof_val(const double& theta )
-//{
-  //return this->profile_value( theta ) ;
-//}
+/***********************************************************************//**
+ * @brief Calculate Halo J Factor
+ *
+ * @param[in] minangle minimum integration angle (degrees).
+ * @param[in] maxangle maximum integration angle (degrees).
+ *
+ * Calculates the halo's j-factor of the halo by integrating across the 
+ * profile between two angles.
+ *
+ ***************************************************************************/
+double GModelSpatialRadialProfileDMEinasto::j_factor( const double& minangle, const double& maxangle, const int& npoints) const
+{
+  
+  // init variables
+  double minradian = minangle * gammalib::deg2rad ; 
+  double maxradian = maxangle * gammalib::deg2rad ;
+  double dr    = ( maxradian - minradian ) / npoints ;
+  double r     = 0.0  ;
+  double total = 0.0  ;
+  
+  // loop over different radii in the profile
+  for (int i = 0; i<npoints; ++i)
+  {
+
+    // integration:  Int[ profile(r) * r * dr ]
+    r = minradian + ( i * dr ) ;
+    total += profile_value( r ) * r * dr ; 
+
+  }
+  
+  // 2 * pi * Int[ profile(r) * r * dr
+  total *= gammalib::twopi ;
+
+  return total ;
+}
+
