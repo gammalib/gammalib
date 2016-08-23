@@ -73,6 +73,7 @@ public:
     double scale_radius(void) const ;
     void   scale_radius(const double& scale_radius ) ;
     //double prof_val(const double& theta) ;
+    double j_factor( const double& minangle, const double& maxangle, const int& npoints ) const ;
 
 protected:
     // Protected methods
