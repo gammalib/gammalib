@@ -1,8 +1,9 @@
-2016-08-12
+2016-09-26
 
         * Version 1.2.0 released
         =========================
 
+        Check CTA response table dimension for consistency (#1848)
         Add GTestSuite::test_value() method with automatic precision computation
         Add GSkyMap::is_empty() method (#1828)
         Add GApplication access by index operator (#1838)

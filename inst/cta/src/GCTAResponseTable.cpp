@@ -1860,6 +1860,41 @@ void GCTAResponseTable::read_tables(const GFitsTable& hdu)
             throw GException::invalid_value(G_READ_TABLES, msg);
         }
 
+        // Check table dimension if there is dimension information
+        if (col->dim().size() > 0) {
+
+            // Check that the table dimension is identical to the number of
+            // axis pairs
+            if (axes() != col->dim().size()) {
+                std::string msg = "Table column \""+m_colname_table[i]+"\" "
+                                  "dimension "+
+                                  gammalib::str(col->dim().size())+" is "
+                                  "inconsistent with "+
+                                  gammalib::str(axes())+" axis pairs. Please "
+                                  "check the response table for consistency.";
+                throw GException::invalid_value(G_READ_TABLES, msg);
+            }
+
+            // Check for all axes that the length of the axis columns is
+            // identical to the size of the table in that axis direction
+            for (int i = 0; i < axes(); ++i) {
+                if (axis_bins(i) != col->dim()[i]) {
+                    std::string msg = "Table column \""+m_colname_table[i]+"\" "
+                                      "has "+gammalib::str(col->dim()[i])+
+                                      " bins in axis "+gammalib::str(i)+
+                                      " while corresponding axis columns \""+
+                                      m_colname_lo[i]+"\" and \""+
+                                      m_colname_hi[i]+"\" have a length of "+
+                                      gammalib::str(axis_bins(i))+". Please "
+                                      "check the response table for "
+                                      "consistency.";
+                    throw GException::invalid_value(G_READ_TABLES, msg);
+                }
+            }
+
+        } // endif: table had dimension information
+
+
         // Initialise table
         std::vector<double> table(num);
 
