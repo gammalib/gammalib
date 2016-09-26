@@ -48,9 +48,8 @@ public:
     virtual std::string     classname(void) const = 0;
     virtual std::string     type(void) const = 0;
     virtual double          eval(const GEnergy& srcEng,
-                                 const GTime&   srcTime = GTime()) const = 0;
-    virtual double          eval_gradients(const GEnergy& srcEng,
-                                           const GTime&   srcTime = GTime()) = 0;
+                                 const GTime& srcTime = GTime(),
+                                 const bool& gradients = false) const = 0;
     virtual double          flux(const GEnergy& emin,
                                  const GEnergy& emax) const = 0;
     virtual double          eflux(const GEnergy& emin,

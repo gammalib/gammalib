@@ -516,10 +516,10 @@ double GModelSky::value(const GPhoton& photon)
 GVector GModelSky::gradients(const GPhoton& photon)
 {
     // Evaluate source model gradients
-    if (m_spatial  != NULL) m_spatial->eval_gradients(photon);
-    if (m_spectral != NULL) m_spectral->eval_gradients(photon.energy(),
-                                                       photon.time());
-    if (m_temporal != NULL) m_temporal->eval_gradients(photon.time());
+    if (m_spatial  != NULL) m_spatial->eval(photon, true);
+    if (m_spectral != NULL) m_spectral->eval(photon.energy(), photon.time(),
+                                             true);
+    if (m_temporal != NULL) m_temporal->eval(photon.time(), true);
 
     // Set vector of gradients
     GVector gradients;
@@ -540,40 +540,21 @@ GVector GModelSky::gradients(const GPhoton& photon)
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
- * @return Value of sky model
+ * @param[in] gradients Compute gradients?
+ * @return Value of sky model.
  *
  * Evalutes the value of the sky model for an @p event of a specific
  * observation @p obs.
+ *
+ * If the @p gradients flag is true the method will also compute the
+ * parameter gradients for all model parameters.
  ***************************************************************************/
-double GModelSky::eval(const GEvent& event, const GObservation& obs) const
+double GModelSky::eval(const GEvent&       event,
+                       const GObservation& obs,
+                       const bool&         gradients) const
 {
     // Evaluate function
-    double value = obs.response()->convolve(*this, event, obs, false);
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate sky model and parameter gradients for a given event of an
- *        observation
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- * @return Value of sky model
- *
- * Evalutes the value of the sky model and of the parameter for an @p event
- * of a specific observation @p obs.
- *
- * While the value of the sky model is returned by the method, the parameter
- * gradients are set as GModelPar members.
- ***************************************************************************/
-double GModelSky::eval_gradients(const GEvent&       event, 
-                                 const GObservation& obs) const
-{
-    // Evaluate function
-    double value = obs.response()->convolve(*this, event, obs, true);
+    double value = obs.response()->convolve(*this, event, obs, gradients);
 
     // Return
     return value;

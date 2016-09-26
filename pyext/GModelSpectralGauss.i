@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralGauss.i - Spectral gaussian model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,9 +51,8 @@ public:
     virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GEnergy& srcEng,
-                                      const GTime&   srcTime = GTime()) const;
-    virtual double               eval_gradients(const GEnergy& srcEng,
-                                                const GTime&   srcTime = GTime());
+                                      const GTime&   srcTime = GTime(),
+                                      const bool&    gradients = false) const;
     virtual double               flux(const GEnergy& emin,
                                       const GEnergy& emax) const;
     virtual double               eflux(const GEnergy& emin,

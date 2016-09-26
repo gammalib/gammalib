@@ -1390,8 +1390,10 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                 // and the livetime (s)
                 value += spectral->flux(emin, emax) * norm_flux;
 								
-                // Determine the model gradients at the current energy
-                spectral->eval_gradients(emean);
+                // Determine the model gradients at the current energy. The
+                // eval() method needs a time in case that the spectral model
+                // has a time dependence. We simply use a dummy time here.
+                spectral->eval(emean, GTime(), true);
 
                 // Loop over spectral model parameters
                 for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
@@ -1445,8 +1447,8 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
  *       background models; that's not very satisfactory ...
  ***********************************************************************/
 double GCTAOnOffObservation::N_bgd(const GModels& models,
-							           const int&     ibin,
-						               GVector*       grad) const
+                                   const int&     ibin,
+                                   GVector*       grad) const
 {
 	// Get total number of model parameters
 	int npars = models.npars();
@@ -1505,8 +1507,10 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                 // Determine the number of background events in model by
                 // computing the model normalization at the mean bin energy bin
                 // and multiplying the normalisation with the number of
-                // background events
-                value += spectral->eval_gradients(emean) * norm;
+                // background events. The eval() method needs a time in case
+                // that the spectral model has a time dependence. We simply
+                // use a dummy time here.
+                value += spectral->eval(emean, GTime(), true) * norm;
 
                 // Compute the parameter gradients for all spectral model
                 // parameters

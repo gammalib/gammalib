@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.cpp - Abstract response base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -332,28 +332,17 @@ double GResponse::eval_prob(const GModelSky&    model,
             irf *= model.scale(obs.instrument()).value();
         }
 
-        // Case A: evaluate gradients
+        // Evaluate spectral and temporal components
+        double spec = (model.spectral() != NULL)
+                      ? model.spectral()->eval(srcEng, srcTime, grad) : 1.0;
+        double temp = (model.temporal() != NULL)
+                      ? model.temporal()->eval(srcTime, grad) : 1.0;
+
+        // Compute probability
+        prob = spec * temp * irf;
+
+        // Optionally compute partial derivatives
         if (grad) {
-
-            // Evaluate source model
-            double spec = (model.spectral() != NULL) ? model.spectral()->eval_gradients(srcEng, srcTime) : 1.0;
-            double temp = (model.temporal() != NULL) ? model.temporal()->eval_gradients(srcTime) : 1.0;
-
-            // Set probability
-            prob = spec * temp * irf;
-
-            // Compile option: Check for NaN/Inf
-            #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
-                std::cout << "*** ERROR: GResponse::eval_prob:";
-                std::cout << " NaN/Inf encountered";
-                std::cout << " (prob=" << prob;
-                std::cout << ", spec=" << spec;
-                std::cout << ", temp=" << temp;
-                std::cout << ", irf=" << irf;
-                std::cout << ")" << std::endl;
-            }
-            #endif
 
             // Multiply factors to spectral gradients
             if (model.spectral() != NULL) {
@@ -375,32 +364,20 @@ double GResponse::eval_prob(const GModelSky&    model,
                 }
             }
 
-        } // endif: gradient evaluation has been requested
+        } // endif: computed partial derivatives
 
-        // Case B: evaluate no gradients
-        else {
-
-            // Evaluate source model
-            double spec = (model.spectral() != NULL) ? model.spectral()->eval(srcEng, srcTime) : 1.0;
-            double temp = (model.temporal() != NULL) ? model.temporal()->eval(srcTime) : 1.0;
-
-            // Set probability
-            prob = spec * temp * irf;
-
-            // Compile option: Check for NaN/Inf
-            #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
-                std::cout << "*** ERROR: GResponse::eval_prob:";
-                std::cout << " NaN/Inf encountered";
-                std::cout << " (prob=" << prob;
-                std::cout << ", spec=" << spec;
-                std::cout << ", temp=" << temp;
-                std::cout << ", irf=" << irf;
-                std::cout << ")" << std::endl;
-            }
-            #endif
-
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
+            std::cout << "*** ERROR: GResponse::eval_prob:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (prob=" << prob;
+            std::cout << ", spec=" << spec;
+            std::cout << ", temp=" << temp;
+            std::cout << ", irf=" << irf;
+            std::cout << ")" << std::endl;
         }
+        #endif
 
     } // endif: Gamma-ray source model had a spatial component
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.hpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,9 +64,8 @@ public:
     virtual std::string             type(void) const;
     virtual bool                    is_constant(void) const;
     virtual double                  eval(const GEvent& event,
-                                         const GObservation& obs) const;
-    virtual double                  eval_gradients(const GEvent& event,
-                                                   const GObservation& obs) const;
+                                         const GObservation& obs,
+                                         const bool& gradients = false) const;
     virtual double                  npred(const GEnergy& obsEng,
                                           const GTime& obsTime,
                                           const GObservation& obs) const;

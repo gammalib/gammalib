@@ -53,10 +53,8 @@ const GModelRegistry            g_cta_radial_acceptance_registry(&g_cta_radial_a
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                "GCTAModelRadialAcceptance::operator() (int)"
-#define G_EVAL                     "GCTAModelRadialAcceptance::eval(GEvent&,"\
-                                                            " GObservation&)"
-#define G_EVAL_GRADIENTS "GCTAModelRadialAcceptance::eval_gradients(GEvent&,"\
-                                                            " GObservation&)"
+#define G_EVAL     "GCTAModelRadialAcceptance::eval(GEvent&, GObservation&, "\
+                                                                     "bool&)"
 #define G_NPRED          "GCTAModelRadialAcceptance::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_MC            "GCTAModelRadialAcceptance::mc(GObservation&, GRan&)"
@@ -282,13 +280,18 @@ GCTAModelRadialAcceptance* GCTAModelRadialAcceptance::clone(void) const
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @param[in] gradients Compute gradients?
+ * @return Function value.
  *
  * Evaluates tha CTA radial acceptance model which is a factorization of a
  * spatial, spectral and temporal model component. This method also applies
  * a deadtime correction factor, so that the normalization of the model is
  * a real rate (counts/exposure time).
  *
- * @todo Add bookkeeping of last value and evaluate only if argument 
+ * If the @p gradients flag is true the method will also set the parameter
+ * gradients of the model parameters.
+ *
+ * @todo Add bookkeeping of last value and evaluate only if argument
  *       changed
  * @todo Verify that CTA instrument direction pointer is valid, or better,
  *       add an offset method to GCTAPointing. Ideally, we should precompute
@@ -297,8 +300,9 @@ GCTAModelRadialAcceptance* GCTAModelRadialAcceptance::clone(void) const
  *       similar to the Fermi/LAT livetime cube that provides the effective
  *       sky exposure as function of offset angle).
  ***************************************************************************/
-double GCTAModelRadialAcceptance::eval(const GEvent& event,
-                                       const GObservation& obs) const
+double GCTAModelRadialAcceptance::eval(const GEvent&       event,
+                                       const GObservation& obs,
+                                       const bool&         gradients) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
@@ -320,75 +324,12 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event,
 
     // Evaluate function and gradients
     double rad  = (radial()   != NULL)
-                  ? radial()->eval(offset) : 1.0;
+                  ? radial()->eval(offset, gradients) : 1.0;
     double spec = (spectral() != NULL)
-                  ? spectral()->eval(event.energy(), event.time()) : 1.0;
+                  ? spectral()->eval(event.energy(), event.time(), gradients)
+                  : 1.0;
     double temp = (temporal() != NULL)
-                  ? temporal()->eval(event.time()) : 1.0;
-
-    // Compute value
-    double value = rad * spec * temp;
-
-    // Apply deadtime correction
-    value *= obs.deadc(event.time());
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation (not used).
- *
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found in observation
- *
- * Evaluates tha CTA radial acceptance model and parameter gradients. The CTA
- * radial acceptance model is a factorization of a spatial, spectral and
- * temporal model component. This method also applies a deadtime correction
- * factor, so that the normalization of the model is a real rate
- * (counts/exposure time).
- *
- * @todo Add bookkeeping of last value and evaluate only if argument 
- *       changed
- * @todo Verify that CTA instrument direction pointer is valid, or better,
- *       add an offset method to GCTAPointing. Ideally, we should precompute
- *       all offset angles (for an event cube this may only be done easily
- *       if the pointing has been fixed; otherwise we need a structure
- *       similar to the Fermi/LAT livetime cube that provides the effective
- *       sky exposure as function of offset angle).
- ***************************************************************************/
-double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
-                                                 const GObservation& obs) const
-{
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
-
-    // Get instrument direction
-    const GInstDir*    inst_dir = &(event.dir());
-    const GCTAInstDir* cta_dir  = static_cast<const GCTAInstDir*>(inst_dir);
-
-    // Compute offset angle (in degrees)
-    double offset = cta_dir->dir().dist_deg(pnt.dir());
-
-    // Evaluate function and gradients
-    double rad  = (radial()   != NULL)
-                  ? radial()->eval_gradients(offset) : 1.0;
-    double spec = (spectral() != NULL)
-                  ? spectral()->eval_gradients(event.energy(), event.time()) : 1.0;
-    double temp = (temporal() != NULL)
-                  ? temporal()->eval_gradients(event.time()) : 1.0;
+                  ? temporal()->eval(event.time(), gradients) : 1.0;
 
     // Compute value
     double value = rad * spec * temp;
@@ -397,34 +338,39 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
     double deadc = obs.deadc(event.time());
     value       *= deadc;
 
-    // Multiply factors to radial gradients
-    if (radial() != NULL) {
-        double fact = spec * temp * deadc;
-        if (fact != 1.0) {
-            for (int i = 0; i < radial()->size(); ++i)
-                (*radial())[i].factor_gradient( (*radial())[i].factor_gradient() * fact );
-        }
-    }
+    // Optionally compute partial derivatives
+    if (gradients) {
 
-    // Multiply factors to spectral gradients
-    if (spectral() != NULL) {
-        double fact = rad * temp * deadc;
-        if (fact != 1.0) {
-            for (int i = 0; i < spectral()->size(); ++i)
-                (*spectral())[i].factor_gradient( (*spectral())[i].factor_gradient() * fact );
+        // Multiply factors to radial gradients
+        if (radial() != NULL) {
+            double fact = spec * temp * deadc;
+            if (fact != 1.0) {
+                for (int i = 0; i < radial()->size(); ++i)
+                    (*radial())[i].factor_gradient((*radial())[i].factor_gradient() * fact );
+            }
         }
-    }
 
-    // Multiply factors to temporal gradients
-    if (temporal() != NULL) {
-        double fact = rad * spec * deadc;
-        if (fact != 1.0) {
-            for (int i = 0; i < temporal()->size(); ++i)
-                (*temporal())[i].factor_gradient( (*temporal())[i].factor_gradient() * fact );
+        // Multiply factors to spectral gradients
+        if (spectral() != NULL) {
+            double fact = rad * temp * deadc;
+            if (fact != 1.0) {
+                for (int i = 0; i < spectral()->size(); ++i)
+                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact );
+            }
         }
-    }
 
-    // Return value
+        // Multiply factors to temporal gradients
+        if (temporal() != NULL) {
+            double fact = rad * spec * deadc;
+            if (fact != 1.0) {
+                for (int i = 0; i < temporal()->size(); ++i)
+                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact );
+            }
+        }
+
+    } // endif: computed partial derivatives
+
+    // Return
     return value;
 }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GModelData.hpp - Abstract virtual data model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,9 +69,8 @@ public:
     virtual std::string type(void) const = 0;
     virtual bool        is_constant(void) const = 0;
     virtual double      eval(const GEvent& event,
-                             const GObservation& obs) const = 0;
-    virtual double      eval_gradients(const GEvent& event,
-                                       const GObservation& obs) const = 0;
+                             const GObservation& obs,
+                             const bool& gradients = false) const = 0;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const = 0;
     virtual GEvents*    mc(const GObservation& obs, GRan& ran) const = 0;

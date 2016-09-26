@@ -240,6 +240,7 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  * @param[in] posangle Position angle (counterclockwise from North) (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for an elliptical disk source model. The
@@ -277,6 +278,10 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  * The normalisation constant \f${\tt m\_norm}\f$ which is the inverse of the
  * solid angle subtended by an ellipse is given by
  *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
+ *
  * @todo Quote formula for ellipse solid angle
  *
  * (see the update() method).
@@ -284,7 +289,8 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
 double GModelSpatialEllipticalDisk::eval(const double&  theta,
                                          const double&  posangle,
                                          const GEnergy& energy,
-                                         const GTime&   time) const
+                                         const GTime&   time,
+                                         const bool&    gradients) const
 {
     // Initialise value
     double value = 0.0;
@@ -325,31 +331,6 @@ double GModelSpatialEllipticalDisk::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
- *
- * @param[in] theta Angular distance from disk centre (radians).
- * @param[in] posangle Position angle (counterclockwise from North) (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * Evaluates the function value. No gradient computation is implemented as
- * Elliptical models will be convolved with the instrument response and thus
- * require the numerical computation of the derivatives.
- *
- * See the eval() method for more information.
- ***************************************************************************/
-double GModelSpatialEllipticalDisk::eval_gradients(const double&  theta,
-                                                   const double&  posangle,
-                                                   const GEnergy& energy,
-                                                   const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, posangle, energy, time));
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialGauss.hpp - Radial Gaussian CTA model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,8 +69,8 @@ public:
     virtual GCTAModelRadialGauss* clone(void) const;
     virtual std::string           classname(void) const;
     virtual std::string           type(void) const;
-    virtual double                eval(const double& offset) const;
-    virtual double                eval_gradients(const double& offset) const;
+    virtual double                eval(const double& offset,
+                                       const bool& gradients = false) const;
     virtual GCTAInstDir           mc(const GCTAInstDir& dir, GRan& ran) const;
     virtual double                omega(void) const;
     virtual void                  read(const GXmlElement& xml);
@@ -78,8 +78,8 @@ public:
     virtual std::string           print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double sigma(void) const { return m_sigma.value(); }
-    void   sigma(const double& sigma) { m_sigma.value(sigma); }
+    double sigma(void) const;
+    void   sigma(const double& sigma);
 
 protected:
     // Protected methods
@@ -128,6 +128,31 @@ inline
 std::string GCTAModelRadialGauss::type(void) const
 {
     return ("Gaussian");
+}
+
+
+/***********************************************************************//**
+ * @brief Return Gaussian width parameter
+ *
+ * @return Gaussian width parameter.
+ ***************************************************************************/
+inline
+double GCTAModelRadialGauss::sigma(void) const
+{
+    return (m_sigma.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set Gaussian width parameter
+ *
+ * @param[in] sigma Gaussian width parameter.
+ ***************************************************************************/
+inline
+void GCTAModelRadialGauss::sigma(const double& sigma)
+{
+    m_sigma.value(sigma);
+    return;
 }
 
 #endif /* GCTAMODELRADIALGAUSS_HPP */

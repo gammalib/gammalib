@@ -233,9 +233,9 @@ takes the :doxy:`GSource` class instead of the :doxy:`GPhoton` class as argument
 :doxy:`GSource` differs from :doxy:`GPhoton` in that the photon arrival direction
 :math:`p` is replaced by the spatial component :doxy:`GModelSpatial` of a source
 model.
-Equation :eq:`pirf` is used by the :doxy:`GModelSky::eval` and
-:doxy:`GModelSky::eval_gradients` methods for computation of the instrument
-response to a source model (see :ref:`fig_calltree_model`). 
+Equation :eq:`pirf` is used by the :doxy:`GModelSky::eval` method for
+computation of the instrument response to a source model
+(see :ref:`fig_calltree_model`). 
 
 A maximum likelihood analysis of the data generally needs the computation of the
 predicted number of events within the selection region for each source model.

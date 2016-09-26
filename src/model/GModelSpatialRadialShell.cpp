@@ -258,11 +258,12 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate function (in units of sr^-1)
  *
  * @param[in] theta Angular distance from shell centre (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial part for a shell source model. The shell source
@@ -290,10 +291,15 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
  * 
  * Here, \f$\theta_{\rm in}\f$ and \f$\theta_{\rm out}\f$ are the shell inner
  * and outer radius.
+ *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
  ***************************************************************************/
 double GModelSpatialRadialShell::eval(const double&  theta,
                                       const GEnergy& energy,
-                                      const GTime&   time) const
+                                      const GTime&   time,
+                                      const bool&    gradients) const
 {
     // Update precomputation cache
     update();
@@ -328,26 +334,6 @@ double GModelSpatialRadialShell::eval(const double&  theta,
 
     // Return normalised value
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] theta Angular distance from shell centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * This method simply calls the eval() method as no analytical gradients will
- * be computed. See the eval() method for details.
- ***************************************************************************/
-double GModelSpatialRadialShell::eval_gradients(const double&  theta,
-                                                const GEnergy& energy,
-                                                const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, energy, time));
 }
 
 

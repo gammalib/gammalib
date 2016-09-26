@@ -65,8 +65,8 @@ public:
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual GClassCode                code(void) const;
-    virtual double                    eval(const GPhoton& photon) const;
-    virtual double                    eval_gradients(const GPhoton& photon) const;
+    virtual double                    eval(const GPhoton& photon,
+                                           const bool& gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;

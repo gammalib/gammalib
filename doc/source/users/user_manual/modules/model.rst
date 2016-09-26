@@ -35,7 +35,7 @@ methods.
 
 For model evaluation, the :doxy:``GObservation::model`` method loops over all 
 models in the :doxy:`GModels` container and calls the 
-:doxy:`GModel::eval_gradients` method of each model. 
+:doxy:`GModel::eval` method of each model.
 For :doxy:`GModelSky` models this method invokes the :doxy:`GResponse::convolve`
 method that calls among others the :doxy:`GResponse::irf` method.
 That method needs to be implement for each instruments.
@@ -46,7 +46,7 @@ The integrate over observed time is for the moment a simple multiplication
 with ontime.
 The integral over observed energy is performed by the 
 ``GObservation::npred_spec`` method that calls the
-:doxy:`GModel::eval_gradients` method.
+:doxy:`GModel::eval` method.
 For :doxy:`GModelSky` models this method calls the :doxy:`GResponse::nroi`
 method that needs to be implement for each instruments.
 

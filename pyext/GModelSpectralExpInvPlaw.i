@@ -56,18 +56,14 @@ public:
     GModelSpectralExpInvPlaw(const GModelSpectralExpInvPlaw& model);
     virtual ~GModelSpectralExpInvPlaw(void);
 
-    // Operators
-    virtual GModelSpectralExpInvPlaw& operator=(const GModelSpectralExpInvPlaw& model);
-
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpectralExpInvPlaw* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual double                    eval(const GEnergy& srcEng,
-                                           const GTime&   srcTime = GTime()) const;
-    virtual double                    eval_gradients(const GEnergy& srcEng,
-                                                    const GTime&   srcTime = GTime());
+                                           const GTime&   srcTime = GTime(),
+                                           const bool&    gradients = false) const;
     virtual double                    flux(const GEnergy& emin,
                                            const GEnergy& emax) const;
     virtual double                    eflux(const GEnergy& emin,

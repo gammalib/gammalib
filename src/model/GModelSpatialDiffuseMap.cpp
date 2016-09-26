@@ -309,43 +309,32 @@ GModelSpatialDiffuseMap* GModelSpatialDiffuseMap::clone(void) const
  * @brief Return intensity of sky map
  *
  * @param[in] photon Incident photon.
+ * @param[in] gradients Compute gradients?
  * @return Sky map intensity (\f$\mbox{ph cm}^{-2}\mbox{sr}^{-1}\mbox{s}^{-1}\f$)
  *
  * Returns the intensity of the sky map at the specified sky direction
  * multiplied by the normalization factor. If the sky direction falls outside
  * the sky map, an intensity of 0 is returned.
+ *
+ * If the @p gradients flag is true the method will also evaluate the partial
+ * derivatives of the model.
  ***************************************************************************/
-double GModelSpatialDiffuseMap::eval(const GPhoton& photon) const
+double GModelSpatialDiffuseMap::eval(const GPhoton& photon,
+                                     const bool&    gradients) const
 {
     // Get skymap intensity
     double intensity = m_map(photon.dir());
 
-    // Return intensity times normalization factor
-    return (intensity * m_value.value());
-}
+    // Optionally compute partial derivatives
+    if (gradients) {
 
+        // Compute partial derivatives of the parameter values
+        double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
 
-/***********************************************************************//**
- * @brief Return intensity of sky map and gradient
- *
- * @param[in] photon Incident photon.
- * @return Sky map intensity (\f$\mbox{ph cm}^{-2}\mbox{sr}^{-1}\mbox{s}^{-1}\f$)
- *
- * Returns the intensity of the sky map at the specified sky direction
- * multiplied by the normalization factor. The method also sets the gradient
- * with respect to the normalization factor. If the sky direction falls
- * outside the sky map, an intensity of 0 is returned.
- ***************************************************************************/
-double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
-{
-    // Get skymap intensity
-    double intensity = m_map(photon.dir());
+        // Set gradient
+        m_value.factor_gradient(g_value);
 
-    // Compute partial derivatives of the parameter values
-    double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
-
-    // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseMap*>(this)->m_value.factor_gradient(g_value);
+    } // endif: computed partial derivatives
 
     // Return intensity times normalization factor
     return (intensity * m_value.value());

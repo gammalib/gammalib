@@ -279,68 +279,7 @@ GModelSpectralPlawEnergyFlux* GModelSpectralPlawEnergyFlux::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Computes
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_eflux}
- *    \frac{{\tt m\_index}+2}
- *         {{\tt e\_max}^{{\tt m\_index}+2} -
- *          {\tt e\_min}^{{\tt m\_index}+2}}
- *    E^{\tt m\_index}
- * \f]
- *
- * for \f${\tt m\_index} \ne -2\f$ and
- *
- * \f[
- *    S_{\rm E}(E | t) = 
- *    \frac{{\tt m\_eflux}}
- *         {\log {\tt e\_max} - \log {\tt e\_min}}
- *    E^{\tt m\_index}
- * \f]
- *
- * for \f${\tt m\_index} = -2\f$, where
- * - \f${\tt e\_min}\f$ is the minimum energy of an interval,
- * - \f${\tt e\_max}\f$ is the maximum energy of an interval,
- * - \f${\tt m\_eflux}\f$ is the energy flux between
- *   \f${\tt e\_min}\f$ and \f${\tt e\_max}\f$, and
- * - \f${\tt m\_index}\f$ is the spectral index.
- ***************************************************************************/
-double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
-                                          const GTime&   srcTime) const
-{
-    // Update precomputed values
-    update(srcEng);
-
-    // Compute function value
-    double value = m_eflux.value() * gammalib::erg2MeV * m_norm * m_power;
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralPlawEnergyFlux::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", eflux=" << eflux();
-        std::cout << ", m_norm=" << m_norm;
-        std::cout << ", m_power=" << m_power;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Computes
@@ -369,8 +308,8 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
  *   \f${\tt e\_min}\f$ and \f${\tt e\_max}\f$, and
  * - \f${\tt m\_index}\f$ is the spectral index.
  *
- * The method also evaluates the partial derivatives of the model with
- * respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_eflux}} =
@@ -399,38 +338,38 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
  *
  * No partial derivatives are supported for the energy boundaries.
  ***************************************************************************/
-double GModelSpectralPlawEnergyFlux::eval_gradients(const GEnergy& srcEng,
-                                                    const GTime&   srcTime)
+double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
+                                          const GTime&   srcTime,
+                                          const bool&    gradients) const
 {
-    // Initialise gradients
-    double g_eflux = 0.0;
-    double g_index = 0.0;
-    
     // Update precomputed values
     update(srcEng);
 
     // Compute function value
     double value = m_eflux.value() * gammalib::erg2MeV * m_norm * m_power;
 
-    // Integral flux gradient
-    if (m_eflux.is_free() && m_eflux.factor_value() > 0.0) {
-         g_eflux = value / m_eflux.factor_value();
-    }
+    // Optionally compute gradients
+    if (gradients) {
 
-    // Index gradient
-    if (m_index.is_free()) {
-        g_index = value * (m_g_norm + gammalib::ln10 * srcEng.log10MeV()) *
-                  m_index.scale();
-    }
+        // Compute partial derivatives of the parameter values
+        double g_eflux = (m_eflux.is_free() && m_eflux.factor_value() > 0.0)
+                         ? g_eflux = value / m_eflux.factor_value()
+                         : 0.0;
+        double g_index = (m_index.is_free())
+                         ? value * (m_g_norm + gammalib::ln10 *
+                                    srcEng.log10MeV()) * m_index.scale()
+                         : 0.0;
 
-    // Set gradients
-    m_eflux.factor_gradient(g_eflux);
-    m_index.factor_gradient(g_index);
+        // Set gradients
+        m_eflux.factor_gradient(g_eflux);
+        m_index.factor_gradient(g_index);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralPlawEnergyFlux::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralPlawEnergyFlux::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
@@ -438,8 +377,6 @@ double GModelSpectralPlawEnergyFlux::eval_gradients(const GEnergy& srcEng,
         std::cout << ", eflux=" << eflux();
         std::cout << ", m_norm=" << m_norm;
         std::cout << ", m_power=" << m_power;
-        std::cout << ", g_eflux=" << g_eflux;
-        std::cout << ", g_index=" << g_index;
         std::cout << ")" << std::endl;
     }
     #endif

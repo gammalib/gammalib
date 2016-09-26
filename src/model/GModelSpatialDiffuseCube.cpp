@@ -310,11 +310,16 @@ GModelSpatialDiffuseCube* GModelSpatialDiffuseCube::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] photon Incident photon.
- * @return Model value.
+ * @param[in] gradients Compute gradients?
+ * @return Sky map intensity (\f$\mbox{ph cm}^{-2}\mbox{sr}^{-1}\mbox{s}^{-1}\f$)
  *
  * Computes the spatial diffuse model as function of photon parameters.
+ *
+ * If the @p gradients flag is true the method will also evaluate the partial
+ * derivatives of the model.
  ***************************************************************************/
-double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
+double GModelSpatialDiffuseCube::eval(const GPhoton& photon,
+                                      const bool&    gradients) const
 {
     // Get log-log interpolated cube intensity
     double intensity = cube_intensity(photon);
@@ -322,44 +327,25 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
     // Set the intensity times the scaling factor as model value
     double value = intensity * m_value.value();
 
+    // Optionally compute partial derivatives
+    if (gradients) {
+
+        // Compute partial derivatives of the parameter value. In case that
+        // the value is negative set the gradient to zero.
+        double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
+        if (value < 0.0) {
+            g_value = 0.0;
+        }
+
+        // Set gradient
+        m_value.factor_gradient(g_value);
+
+    } // endif: computed partial derivatives
+
     // Make sure that value is not negative
     if (value < 0.0) {
         value = 0.0;
     }
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] photon Incident photon.
- * @return Model value.
- *
- * Computes the spatial diffuse model as function of photon parameters and
- * sets the value gradient.
- ***************************************************************************/
-double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
-{
-    // Get log-log interpolated cube intensity
-    double intensity = cube_intensity(photon);
-
-    // Compute the model value
-    double value = intensity * m_value.value();
-
-    // Compute partial derivatives of the parameter value
-    double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
-
-    // Make sure that value is not negative
-    if (value < 0.0) {
-        value   = 0.0;
-        g_value = 0.0;
-    }
-
-    // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseCube*>(this)->m_value.factor_gradient(g_value);
 
     // Return value
     return value;

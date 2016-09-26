@@ -69,11 +69,8 @@ public:
     virtual double                        eval(const double&  theta,
                                                const double&  posangle,
                                                const GEnergy& energy,
-                                               const GTime&   time) const;
-    virtual double                        eval_gradients(const double&  theta,
-                                                         const double&  posangle,
-                                                         const GEnergy& energy,
-                                                         const GTime&   time) const;
+                                               const GTime&   time,
+                                               const bool&    gradients = false) const;
     virtual GSkyDir                       mc(const GEnergy& energy,
                                              const GTime& time,
                                              GRan& ran) const;

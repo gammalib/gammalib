@@ -272,6 +272,7 @@ GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
  * @brief Evaluate isotropic spatial model value
  *
  * @param[in] photon Incident photon.
+ * @param[in] gradients Compute gradients?
  * @return Model value (\f$sr^{-1}\f$).
  *
  * Evaluates the isotropic spatial model for a given @p photon, characterised
@@ -285,39 +286,9 @@ GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
  *
  * where \f$v\f$ is the value() parameter, which is divided by the solid
  * angle \f$4\pi\f$ of the celestial sphere. 
- ***************************************************************************/
-double GModelSpatialDiffuseConst::eval(const GPhoton& photon) const
-{
-    // Set normalization constant
-    const double norm = 1.0 / gammalib::fourpi;
-
-    // Compute model value
-    double value = norm * m_value.value();
-
-    // Return model value
-    return (value);
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate isotropic spatial model value and parameter gradient
  *
- * @param[in] photon Incident photon.
- * @return Model value (\f$sr^{-1}\f$).
- *
- * Evaluates the isotropic spatial model for a given @p photon, characterised
- * by a sky direction, energy and arrival time \f$(\vec{p},E,t)\f$, and
- * computes the gradient of the value() parameter. By definition, the
- * isotropic spatial model and gradient are independent of sky direction,
- * energy and time. The model value is given by
- *
- * \f[
- *    M_\mathrm{S}(\vec{p}|E,t) = \frac{v}{4\pi}
- * \f]
- *
- * where \f$v\f$ is the value() parameter, which is divided by the solid
- * angle \f$4\pi\f$ of the celestial sphere. The value() gradient is given
- * by
+ * If the @p gradients flag is true the method will also evaluate the partial
+ * derivatives of the model. The value() gradient is given by
  *
  * \f[
  *    \frac{\partial M_\mathrm{S}(\vec{p}|E,t)}{\partial v_v} =
@@ -327,7 +298,8 @@ double GModelSpatialDiffuseConst::eval(const GPhoton& photon) const
  * where \f$v=v_v v_s\f$ is the factorisation of the value() parameter into
  * a value \f$v_v\f$ and scale \f$v_s\f$ term.
  ***************************************************************************/
-double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
+double GModelSpatialDiffuseConst::eval(const GPhoton& photon,
+                                       const bool&    gradients) const
 {
     // Set normalization constant
     const double norm = 1.0 / gammalib::fourpi;
@@ -335,14 +307,19 @@ double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
     // Compute model value
     double value = norm * m_value.value();
 
-    // Compute partial derivatives of the parameter values
-    double g_norm = (m_value.is_free()) ? norm * m_value.scale() : 0.0;
+    // Optionally compute partial derivatives
+    if (gradients) {
 
-    // Set gradient (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseConst*>(this)->m_value.factor_gradient(g_norm);
+        // Compute partial derivatives of the parameter values
+        double g_norm = (m_value.is_free()) ? norm * m_value.scale() : 0.0;
 
-    // Return value
-    return value;
+        // Set gradient
+        m_value.factor_gradient(g_norm);
+
+    } // endif: computed partial derivatives
+
+    // Return model value
+    return (value);
 }
 
 

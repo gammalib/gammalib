@@ -273,6 +273,7 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  * @param[in] posangle Position angle (counterclockwise from North) (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for an elliptical Gaussian source model.
@@ -309,6 +310,10 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  *    {\tt m\_norm} = \frac{1}{2 \pi \times a \times b}
  * \f]
  *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
+ *
  * @warning
  * The above formula for an elliptical Gaussian are accurate for small
  * angles, with semimajor and semiminor axes below a few degrees. This
@@ -323,7 +328,8 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
 double GModelSpatialEllipticalGauss::eval(const double&  theta,
                                           const double&  posangle,
                                           const GEnergy& energy,
-                                          const GTime&   time) const
+                                          const GTime&   time,
+                                          const bool&    gradients) const
 {
     // Initialise value
     double value = 0.0;
@@ -382,31 +388,6 @@ double GModelSpatialEllipticalGauss::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
- *
- * @param[in] theta Angular distance from gaussian centre (radians).
- * @param[in] posangle Position angle (counterclockwise from North) (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * Evaluates the function value. No gradient computation is implemented as
- * elliptical models will be convolved with the instrument response and thus
- * require the numerical computation of the derivatives.
- *
- * See the eval() method for more information.
- ***************************************************************************/
-double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
-                                                    const double&  posangle,
-                                                    const GEnergy& energy,
-                                                    const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, posangle, energy, time));
 }
 
 

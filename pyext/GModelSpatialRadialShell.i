@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialShell.i - Radial spatial shell source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Christoph Deil                              *
+ *  copyright (C) 2011-2016 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,10 +52,8 @@ public:
     virtual std::string               type(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
-                                           const GTime& time) const;
-    virtual double                    eval_gradients(const double& theta,
-                                                     const GEnergy& energy,
-                                                     const GTime& time) const;
+                                           const GTime&   time,
+                                           const bool&    gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
@@ -76,9 +74,9 @@ public:
 /***********************************************************************//**
  * @brief GModelSpatialRadialShell class extension
  *
- * The eval(GSkyDir&) and eval_gradients(GSkyDir&) need to be defined in the
- * extension to force swig to build also the interface for these methods that
- * are implemented in the base class only. It's not clear to me why these
+ * The eval(GPhoton&, bool&) method need to be defined in the extension to
+ * force swig to build also the interface for these methods that are
+ * implemented in the base class only. It's not clear to me why these
  * methods are not inherited automatically. Maybe this could also be handled
  * by a %typemap(typecheck) construct.
  ***************************************************************************/
@@ -86,10 +84,7 @@ public:
     GModelSpatialRadialShell copy() {
         return (*self);
     }
-    double eval(const GPhoton& photon) const {
-        return self->GModelSpatialRadial::eval(photon);
-    }
-    double eval_gradients(const GPhoton& photon) const {
-        return self->GModelSpatialRadial::eval_gradients(photon);
+    double eval(const GPhoton& photon, const bool& gradients) const {
+        return self->GModelSpatialRadial::eval(photon, gradients);
     }
 };

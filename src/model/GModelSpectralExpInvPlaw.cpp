@@ -317,7 +317,8 @@ GModelSpectralExpInvPlaw* GModelSpectralExpInvPlaw::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
- * @return Model value.
+ * @param[in] gradients Compute gradients?
+ * @return Model value (ph/cm2/s/MeV).
  *
  * Evaluates
  *
@@ -333,60 +334,8 @@ GModelSpectralExpInvPlaw* GModelSpectralExpInvPlaw::clone(void) const
  * - \f${\tt m\_index}\f$ is the spectral index, and
  * - \f${\tt m\_lambda}\f$ is the cut-off parameter.
  *
- * @todo The method expects that pivot!=0. Otherwise Inf or NaN
- *       may result. We should add a test that prevents using invalid
- *       values.
- ***************************************************************************/
-double GModelSpectralExpInvPlaw::eval(const GEnergy& srcEng,
-                                   const GTime&   srcTime) const
-{
-    // Update the evaluation cache
-    update_eval_cache(srcEng);
-
-    // Compute function value
-    double value = m_norm.value() * m_last_power;
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", power=" << m_last_power;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @return Model value.
- *
- * Evaluates
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *    \exp \left( -{\tt m\_lambda}*E \right)
- * \f]
- *
- * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
- * - \f${\tt m\_pivot}\f$ is the pivot energy,
- * - \f${\tt m\_index}\f$ is the spectral index, and
- * - \f${\tt m\_lambda}\f$ is the cut-off parameter.
- *
- * The method also evaluates the partial derivatives of the model with
- * respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
@@ -413,8 +362,9 @@ double GModelSpectralExpInvPlaw::eval(const GEnergy& srcEng,
  *       may result. We should add a test that prevents using invalid
  *       values.
  ***************************************************************************/
-double GModelSpectralExpInvPlaw::eval_gradients(const GEnergy& srcEng,
-                                             const GTime&   srcTime)
+double GModelSpectralExpInvPlaw::eval(const GEnergy& srcEng,
+                                      const GTime&   srcTime,
+                                      const bool&    gradients) const
 {
     // Update the evaluation cache
     update_eval_cache(srcEng);
@@ -422,34 +372,41 @@ double GModelSpectralExpInvPlaw::eval_gradients(const GEnergy& srcEng,
     // Compute function value
     double value = m_norm.value() * m_last_power;
 
-    // Compute partial derivatives with respect to the parameter factor
-    // values. The partial derivatives with respect to the parameter
-    // values are obtained by division by the scale factor.
-    double g_norm   = (m_norm.is_free())
-                      ? m_norm.scale() * m_last_power : 0.0;
-    double g_index  = (m_index.is_free())
-                      ? value * m_index.scale() * std::log(m_last_e_norm) : 0.0;
-    double g_lambda = (m_lambda.is_free())
-                      ? -value * m_lambda.scale() * m_last_energy.MeV() : 0.0;
-    double g_pivot  = (m_pivot.is_free())
-                      ? -value * m_last_index / m_pivot.factor_value() : 0.0;
+    // Optionally compute gradients
+    if (gradients) {
 
-    // Set gradients
-    m_norm.factor_gradient(g_norm);
-    m_index.factor_gradient(g_index);
-    m_lambda.factor_gradient(g_lambda);
-    m_pivot.factor_gradient(g_pivot);
+        // Compute partial derivatives with respect to the parameter factor
+        // values. The partial derivatives with respect to the parameter
+        // values are obtained by division by the scale factor.
+        double g_norm   = (m_norm.is_free())
+                          ? m_norm.scale() * m_last_power
+                          : 0.0;
+        double g_index  = (m_index.is_free())
+                          ? value * m_index.scale() * std::log(m_last_e_norm)
+                          : 0.0;
+        double g_lambda = (m_lambda.is_free())
+                          ? -value * m_lambda.scale() * m_last_energy.MeV()
+                          : 0.0;
+        double g_pivot  = (m_pivot.is_free())
+                          ? -value * m_last_index / m_pivot.factor_value()
+                          : 0.0;
+
+        // Set gradients
+        m_norm.factor_gradient(g_norm);
+        m_index.factor_gradient(g_index);
+        m_lambda.factor_gradient(g_lambda);
+        m_pivot.factor_gradient(g_pivot);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", e_norm=" << m_last_e_norm;
-        std::cout << ", e_lambda=" << m_last_e_lambda;
         std::cout << ", power=" << m_last_power;
         std::cout << ")" << std::endl;
     }
@@ -875,7 +832,7 @@ void GModelSpectralExpInvPlaw::free_members(void)
  *
  * @param[in] energy Energy.
  *
- * Updates the precomputation cache for eval() and eval_gradients() methods.
+ * Updates the precomputation cache for eval() method.
  ***************************************************************************/
 void GModelSpectralExpInvPlaw::update_eval_cache(const GEnergy& energy) const
 {

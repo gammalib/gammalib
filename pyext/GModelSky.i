@@ -61,9 +61,8 @@ public:
     virtual std::string type(void) const;
     virtual bool        is_constant(void) const;
     virtual double      eval(const GEvent& event,
-                             const GObservation& obs) const;
-    virtual double      eval_gradients(const GEvent& event,
-                                       const GObservation& obs) const;
+                             const GObservation& obs,
+                             const bool& gradients = false) const;
     virtual double      npred(const GEnergy& obsEng,
                               const GTime& obsTime,
                               const GObservation& obs) const;

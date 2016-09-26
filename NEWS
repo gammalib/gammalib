@@ -36,14 +36,20 @@ The following methods have been added:
 - GSkyMap::is_empty()
 
 The following methods have been removed:
-- ...
+- <all classes>::eval_gradients()
+  The eval_gradients() methods duplicate much of the code of the eval()
+  methods. To increase the maintainability of the code, the eval_gradients()
+  methods have been removed, and the computation of partial derivatives is
+  now done by the eval() methods if the optional gradients argument is set
+  to true.
 
 The following methods have been renamed:
 - GModelSpectralPlawPhotonFlux::flux(), was GModelSpectralPlaw2::integral()
 - GLog::buffer_size(), was GLog::max_size()
 
-The parameters for the following methods have been changed:
+The arguments for the following methods have been changed:
 - GApplication::log_parameters() now has a mandatory GChatter argument
+- <all classes>::eval() has now an optional gradients parameter (see above)
 
 The return value of the following methods has been changed:
 - GSkyMap::write() now returns a pointer to GFitsHDU instead of void

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialGauss.cpp - Radial Gaussian CTA model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -217,6 +217,8 @@ GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] offset Offset angle [degrees].
+ * @param[in] gradients Compute gradients?
+ * @return Function value
  *
  * Evaluates the Gaussian model for a given offset. The Gaussian model is
  * defined as
@@ -226,66 +228,36 @@ GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
  * \f$\theta\f$ is the offset angle (in degrees), and
  * \f$\sigma\f$ is the Gaussian width (in degrees\f$^2\f$).
  *
- * Note that this method implements a function which is unity for
- * \f$\theta=0\f$.
- ***************************************************************************/
-double GCTAModelRadialGauss::eval(const double& offset) const
-{
-    // Compute value
-    double arg   = offset * offset / sigma();
-    double value = std::exp(-0.5 * arg * arg);
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
-        std::cout << "(offset=" << offset << "): NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", sigma=" << sigma();
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] offset Offset angle [degrees].
- *
- * Evaluates the Gaussian model for a given offset. The Gaussian model is
- * defined as
- * \f[f(\theta) = \exp \left(-\frac{1}{2}
- *                     \left( \frac{\theta^2}{\sigma} \right)^2 \right)\f]
- * where
- * \f$\theta\f$ is the offset angle (in degrees), and
- * \f$\sigma\f$ is the Gaussian width (in degrees\f$^2\f$).
- *
- * The partial derivative of the Gaussian width is given by
+ * If the @p gradients flag is true the method will also compute the partial
+ * derivatives of the parameters. The partial derivative of the Gaussian width
+ * is given by
  * \f[\frac{df}{d\sigma_v} = f(\theta) \frac{\theta^4}{\sigma^3} \sigma_s\f]
  * where 
  * \f$\sigma_v\f$ is the value part, 
  * \f$\sigma_s\f$ is the scaling part, and 
- * \f$\sigma = \sigma_v \sigma_s\f$. 
+ * \f$\sigma = \sigma_v \sigma_s\f$.
  *
  * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
  ***************************************************************************/
-double GCTAModelRadialGauss::eval_gradients(const double& offset) const
+double GCTAModelRadialGauss::eval(const double& offset,
+                                  const bool&   gradients) const
 {
     // Compute value
     double arg   = offset * offset / sigma();
     double arg2  = arg * arg;
-    double value = exp(-0.5 * arg2);
+    double value = std::exp(-0.5 * arg2);
 
-    // Compute partial derivatives of the sigma parameter.
-    double g_sigma = value * arg2 / sigma() * m_sigma.scale();
+    // Optionally compute partial derivatives
+    if (gradients) {
 
-    // Set gradients (circumvent const correctness)
-    const_cast<GCTAModelRadialGauss*>(this)->m_sigma.factor_gradient(g_sigma);
+        // Compute partial derivatives of the sigma parameter.
+        double g_sigma = value * arg2 / sigma() * m_sigma.scale();
+
+        // Set factor gradient
+        m_sigma.factor_gradient(g_sigma);
+
+    } // endif: computed partial derivatives
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)

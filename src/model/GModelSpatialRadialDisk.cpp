@@ -259,6 +259,7 @@ GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
  * @param[in] theta Angular distance from disk centre (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for a disk source model using
@@ -281,10 +282,15 @@ GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
  *   sky direction of interest, and
  * - \f${\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)} \f$ is a normalization
  *   constant (see the update() method for details).
+ *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
  ***************************************************************************/
 double GModelSpatialRadialDisk::eval(const double&  theta,
                                      const GEnergy& energy,
-                                     const GTime&   time) const
+                                     const GTime&   time,
+                                     const bool&    gradients) const
 {
     // Update precomputation cache
     update();
@@ -306,29 +312,6 @@ double GModelSpatialRadialDisk::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
- *
- * @param[in] theta Angular distance from disk centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * Evaluates the function value. No gradient computation is implemented as
- * radial models will be convolved with the instrument response and thus
- * require the numerical computation of the derivatives.
- *
- * See the eval() method for more information.
- ***************************************************************************/
-double GModelSpatialRadialDisk::eval_gradients(const double&  theta,
-                                               const GEnergy& energy,
-                                               const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, energy, time));
 }
 
 
