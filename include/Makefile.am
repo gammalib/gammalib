@@ -176,6 +176,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlawPhotonFlux.hpp \
                      GModelSpectralPlawEnergyFlux.hpp \
+                     GModelSpectralComposite.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalRegistry.hpp \
                      GModelTemporalConst.hpp

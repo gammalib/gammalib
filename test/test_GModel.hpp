@@ -58,7 +58,7 @@ public:
     void                test_radial_shell(void);
     void                test_elliptical_disk(void);
     void                test_elliptical_gauss(void);
-    void                test_spatial_composite(void);
+//    void                test_spatial_composite(void);
     void                test_spatial_model(void);
     void                test_const(void);
     void                test_gauss(void);

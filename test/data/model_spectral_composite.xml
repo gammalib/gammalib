@@ -8,7 +8,7 @@
         <parameter name="PivotEnergy" scale="1e6"   value="1"  min="0.01"  max="1000.0" free="0"/>
       </spectrum>
       <spectrum type="PowerLaw" component="HardComponent">     
-        <parameter name="Prefactor"   scale="1e-17" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+        <parameter name="Prefactor"   scale="1e-17" value="5"  min="1e-07" max="1000.0" free="1"/>
         <parameter name="Index"       scale="-1"    value="2.0" min="0.0"   max="+5.0"   free="1"/>
         <parameter name="PivotEnergy" scale="1e6"   value="1"  min="0.01"  max="1000.0" free="0"/>
       </spectrum>

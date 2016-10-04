@@ -155,6 +155,7 @@
 %include "GModelSpectralPlaw.i"
 %include "GModelSpectralPlawPhotonFlux.i"
 %include "GModelSpectralPlawEnergyFlux.i"
+%include "GModelSpectralComposite.i"
 %include "GModelTemporal.i"
 %include "GModelTemporalRegistry.i"
 %include "GModelTemporalConst.i"
