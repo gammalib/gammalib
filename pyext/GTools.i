@@ -28,7 +28,6 @@
 #include "GTools.hpp"
 %}
 
-
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
     const double MeV2erg    =  1.6021765e-6;

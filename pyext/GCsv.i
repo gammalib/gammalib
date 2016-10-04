@@ -28,9 +28,6 @@
 #include "GCsv.hpp"
 #include "GTools.hpp"
 %}
-%include "stl.i"
-%include "std_vector.i"
-%template(vectors) std::vector<std::string>;
 
 
 /***********************************************************************//**
