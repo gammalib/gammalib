@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="Crab" type="PointSource">
+    <spectrum type="Composite">
+      <spectrum type="PowerLaw" component="SoftComponent">     
+        <parameter name="Prefactor"   scale="1e-17" value="3"  min="1e-07" max="1000.0" free="1"/>
+        <parameter name="Index"       scale="-1"    value="3.5" min="0.0"   max="+5.0"   free="1"/>
+        <parameter name="PivotEnergy" scale="1e6"   value="1"  min="0.01"  max="1000.0" free="0"/>
+      </spectrum>
+      <spectrum type="PowerLaw" component="HardComponent">     
+        <parameter name="Prefactor"   scale="1e-17" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+        <parameter name="Index"       scale="-1"    value="2.0" min="0.0"   max="+5.0"   free="1"/>
+        <parameter name="PivotEnergy" scale="1e6"   value="1"  min="0.01"  max="1000.0" free="0"/>
+      </spectrum>
+    </spectrum>
+    <spatialModel type="PointSource">
+      <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
+      <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+    </spatialModel>
+  </source>
+</source_library>
