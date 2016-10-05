@@ -64,6 +64,7 @@ void TestGModel::set(void)
     m_xml_model_point_bplaw        = datadir + "/model_point_bplaw.xml";
     m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
     m_xml_model_point_logparabola  = datadir + "/model_point_logparabola.xml";
+    m_xml_point_multiplicative     = datadir + "/model_point_multiplicative.xml";
     m_xml_model_point_nodes        = datadir + "/model_point_nodes.xml";
     m_xml_model_point_filefct      = datadir + "/model_point_filefct.xml";
     m_xml_model_diffuse_const      = datadir + "/model_diffuse_const.xml";
@@ -139,6 +140,8 @@ void TestGModel::set(void)
            "Test GModelSpectralBrokenPlaw");
     append(static_cast<pfunction>(&TestGModel::test_logparabola),
            "Test GModelSpectralLogParabola");
+    append(static_cast<pfunction>(&TestGModel::test_multiplicative),
+               "Test GModelSpectralMultiplicative");
     append(static_cast<pfunction>(&TestGModel::test_nodes),
            "Test GModelSpectralNodes");
     append(static_cast<pfunction>(&TestGModel::test_filefct),
@@ -2001,6 +2004,50 @@ void TestGModel::test_logparabola(void)
         test_value(model3[keyname].error(), 1.9);
         test_value(model3[keyname].gradient(), 0.8);
     }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralMultiplicative class
+ ***************************************************************************/
+void TestGModel::test_multiplicative(void)
+{
+    // Test void constructor
+	GModelSpectralMultiplicative model1;
+    test_value(model1.type(), "Multiplicative", "Check void model type");
+
+    // Test value constructor
+    model1.append(GModelSpectralPlaw(1e-17, -2.5, GEnergy(1, "TeV")), "Plaw1");
+    model1.append(GModelSpectralPlaw(1.0, 0.1, GEnergy(1, "TeV")), "Plaw2");
+
+    test_value(model1.eval(GEnergy(1,"TeV")),1e-17);
+    model1["Plaw2:Index"].value(2.5);
+    test_value(model1.eval(GEnergy(5,"TeV")),1e-17);
+
+    // Test XML constructor
+    GXml               xml(m_xml_point_multiplicative);
+    GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralMultiplicative model2(*element);
+    test_value(model2.size(), 7);
+    test_value(model2.type(), "Multiplicative", "Check model type");
+    test_value(model2.eval(GEnergy(1,"TeV")), 1e-17 * std::exp(-1));
+
+    // Create copy of model2
+    GModelSpectralMultiplicative model3(model2);
+
+    // Change model2
+    model2["1:Prefactor"].value(3e-17);
+    test_value(model2["1:Prefactor"].value(), 3e-17);
+
+    model2["2:CutoffEnergy"].value(1e7);
+    test_value(model2["2:CutoffEnergy"].value(), 1e7);
+
+    //  Verify model3 hasnt been changed
+    test_value(model3["1:Prefactor"].value(), 1e-17);
+    test_value(model3["2:CutoffEnergy"].value(), 1e6);
 
     // Exit test
     return;

@@ -214,6 +214,7 @@
 #include "GModelSpectralFunc.hpp"
 #include "GModelSpectralGauss.hpp"
 #include "GModelSpectralLogParabola.hpp"
+#include "GModelSpectralMultiplicative.hpp"
 #include "GModelSpectralNodes.hpp"
 #include "GModelSpectralPlaw.hpp"
 #include "GModelSpectralPlawPhotonFlux.hpp"
