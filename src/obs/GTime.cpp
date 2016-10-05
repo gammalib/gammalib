@@ -28,8 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <ctime>
 #include <cstdio>
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GException.hpp"
 #include "GTime.hpp"
 #include "GTimeReference.hpp"
@@ -40,8 +42,8 @@ const double jd_ref  = mjd_ref + 2400000.5;               //!< JD of time=0
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT                     "GTime::GTime(double&, std::string&)"
-#define G_TIME                 "GTime::time(double&, double&, std::string&, " \
-                                                 "std::string&, std::string&"
+#define G_SECS_GET                                "GTime::secs(std::string&)"
+#define G_SECS_SET                       "GTime::secs(double&, std::string&)"
 #define G_UTC                                      "GTime::utc(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -92,7 +94,7 @@ GTime::GTime(const GTime& time)
  * @brief Time constructor
  *
  * @param[in] time Time value in TT (seconds or days).
- * @param[in] unit Time unit (default: "secs").
+ * @param[in] unit Time unit string.
  *
  * @exception GException::time_invalid_unit
  *            Invalid time unit specified.
@@ -227,49 +229,145 @@ GTime* GTime::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in Julian Days (TT) (unit: days)
+ * @brief Return time in Julian Days (TT)
  *
- * @return Time in Julian Days (TT) [days].
+ * @return Time in Julian Days (TT) (days).
  *
  * Returns the time in Julian Days (JD) in the Terrestrial Time (TT) system.
  ***************************************************************************/
 double GTime::jd(void) const
 {
     // Convert time from MET to JD
-    double jd = m_time / gammalib::sec_in_day + jd_ref;
+    double jd = m_time * gammalib::sec2day + jd_ref;
     
-    // Return JD
+    // Return Julian Days
     return jd;
 }
 
 
 /***********************************************************************//**
- * @brief Return time in Modified Julian Days (TT) (unit: days)
+ * @brief Return time in Julian Days for various time system
  *
- * @return Time in Modified Julian Days (TT) [days].
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ * @return Time in Julian Days (days).
+ *
+ * Returns the time in Julian Days (JD) for the specified time system.
+ ***************************************************************************/
+double GTime::jd(const std::string& timesys) const
+{
+    // Convert time to Julian Days
+    double jd = secs(timesys) * gammalib::sec2day + jd_ref;
+    
+    // Return Julian Days
+    return jd;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time in Modified Julian Days (TT)
+ *
+ * @return Time in Modified Julian Days (TT) (days).
  *
  * Returns the time in Modified Julian Days (MJD) in the Terrestrial Time
  * (TT) system.
  ***************************************************************************/
 double GTime::mjd(void) const
 {
-    // Convert time to MJD
-    double mjd = m_time / gammalib::sec_in_day + mjd_ref;
+    // Convert time to Modified Julian Days
+    double mjd = m_time * gammalib::sec2day + mjd_ref;
     
-    // Return MJD
+    // Return Modified Julian Days
     return mjd;
 }
 
 
 /***********************************************************************//**
- * @brief Return time in native reference (TT) (unit: days)
+ * @brief Return time in Modified Julian Days for various time system
  *
- * @return Time in native reference [days].
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ * @return Time in Modified Julian Days (days).
+ *
+ * Returns the time in Modified Julian Days (JD) for the specified time
+ * system.
+ ***************************************************************************/
+double GTime::mjd(const std::string& timesys) const
+{
+    // Convert time to Modified Julian Days
+    double mjd = secs(timesys) * gammalib::sec2day + mjd_ref;
+    
+    // Return Modified Julian Days
+    return mjd;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time in seconds in native reference for various time systems
+ *
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ * @return Time (seconds).
+ ***************************************************************************/
+double GTime::secs(const std::string& timesys) const
+{
+    // Initialise time
+    double time;
+
+    // If system is TT then return the stored time ...
+    if (timesys == "TT") {
+        time = m_time;
+    }
+    
+    // ... otherwise if the system if TAI then subtract an offset ...
+    else if (timesys == "TAI") {
+        time = m_time - gammalib::tai2tt;
+    }
+
+    // ... otherwise if the system is UTC then convert the time from TT to TAI
+    // and subtract the leap seconds. The repeated calling of the leap second
+    // method is a kluge to converge as the argument is given in the UTC system
+    // but upon start we're in the TAI system.
+    else if (timesys == "UTC") {
+        time         = m_time - gammalib::tai2tt; // Time in TAI
+        double mjd   = time * gammalib::sec2day + mjd_ref;
+        double leaps = leap_seconds(mjd);
+        leaps        = leap_seconds(mjd - leaps * gammalib::sec2day);
+        leaps        = leap_seconds(mjd - leaps * gammalib::sec2day);
+        time        -= leaps;
+    }
+
+    // ... otherwise throw an exception
+    else {
+        std::string msg = "Unknown time system \""+timesys+"\". Either specify "
+                          "\"TT\", \"TAI\" or \"UTC\".";
+        throw GException::invalid_argument(G_SECS_GET, msg);
+    }
+
+    // Return time
+    return time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time in days in native reference (TT)
+ *
+ * @return Time in native reference (days).
  ***************************************************************************/
 double GTime::days(void) const
 {
     // Return time
-    return m_time / gammalib::sec_in_day;
+    return (m_time * gammalib::sec2day);
+}
+
+
+/***********************************************************************//**
+ * @brief Return time in days in native reference for various time system
+ *
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ * @return Time in native reference (days).
+ ***************************************************************************/
+double GTime::days(const std::string& timesys) const
+{
+    // Return time
+    return (secs(timesys) * gammalib::sec2day);
 }
 
 
@@ -362,6 +460,110 @@ std::string GTime::utc(void) const
 
 
 /***********************************************************************//**
+ * @brief Return Greenwich mean sidereal time in hours in a day
+ *
+ * @return Greenwich mean sidereal time (hours).
+ *
+ * See http://aa.usno.navy.mil/faq/docs/GAST.php
+ ***************************************************************************/
+double GTime::gmst(void) const
+{
+    // Get days since 1 January 2000, 12h in Universal Time
+    double d = days("UTC") + 3652.50076602;
+
+    // Compute Greenwich mean sidereal time in hours
+    double gmst = 18.697374558 + 24.06570982441908 * d;
+
+    // Put into [0,24]
+    gmst -= floor(gmst/24.0) * 24.0;
+
+    // Return Greenwich mean sidereal time in hours
+    return gmst;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Greenwich apparent sidereal time in hours in a day
+ *
+ * @return Greenwich apparent sidereal time (hours).
+ *
+ * See http://aa.usno.navy.mil/faq/docs/GAST.php
+ ***************************************************************************/
+double GTime::gast(void) const
+{
+    // Get days since 1 January 2000, 12h in Universal Time
+    double d = days("UTC") + 3652.50076602;
+
+    // Compute longitude of the ascending node of the Moon in degrees
+    double Omega = 125.04 - 0.052954 * d;
+
+    // Compute mean longitude of the Sun in degrees
+    double L = 280.47 + 0.98565 * d;
+
+    // Compute nutation in longitude in hours
+    double DeltaPsi = -0.000319 * std::sin(Omega * gammalib::deg2rad) -
+                       0.000024 * std::sin(2.0 * L * gammalib::deg2rad);
+
+    // Compute the obliquity in degrees
+    double epsilon = 23.4393 - 0.0000004 * d;
+
+    // Compute equation of equinoxes
+    double eqeq = DeltaPsi * std::cos(epsilon * gammalib::deg2rad);
+
+    // Compute Greenwich apparent sidereal time in hours
+    double gast = gmst() + eqeq;
+
+    // Put into [0,24]
+    gast -= floor(gast/24.0) * 24.0;
+
+    // Return Greenwich apparent sidereal time in hours
+    return gast;
+}
+
+
+/***********************************************************************//**
+ * @brief Return local mean sidereal time in hours in a day
+ *
+ * @param[in] geolon Geographic longitude West of Greenwich (degrees).
+ * @return Local mean sidereal time (hours).
+ *
+ * See http://aa.usno.navy.mil/faq/docs/GAST.php
+ ***************************************************************************/
+double GTime::lmst(const double& geolon) const
+{
+    // Compute local mean siderial time
+    double lmst = gmst() - geolon/15.0;
+
+    // Put into [0,24]
+    lmst -= floor(lmst/24.0) * 24.0;
+
+    // Return local mean sidereal time in hours
+    return lmst;
+}
+
+
+/***********************************************************************//**
+ * @brief Return local apparent sidereal time in hours in a day
+ *
+ * @param[in] geolon Geographic longitude West of Greenwich (degrees).
+ * @return Local apparent sidereal time (hours).
+ *
+ * See http://aa.usno.navy.mil/faq/docs/GAST.php
+ ***************************************************************************/
+double GTime::last(const double& geolon) const
+{
+    // Compute local mean siderial time
+    double last = gast() - geolon/15.0;
+
+    // Put into [0,24]
+    last -= floor(last/24.0) * 24.0;
+
+    // Return local mean sidereal time in hours
+    return last;
+}
+
+
+/***********************************************************************//**
  * @brief Return time in specified reference
  *
  * @return Time in specified reference.
@@ -399,6 +601,12 @@ double GTime::convert(const GTimeReference& ref) const
 
     } // endif: UTC time system has been requested
 
+    // ... otherwise, if time is requested in TAI system then subtract the
+    // TAI offset
+    else if (gammalib::toupper(ref.timesys()) == "TAI") {
+        time -= gammalib::tai2tt;
+    }
+
     // Convert to specified time unit
     double to_unit = ref.unitseconds();
     if (to_unit != 1.0) {
@@ -411,13 +619,13 @@ double GTime::convert(const GTimeReference& ref) const
 
 
 /***********************************************************************//**
- * @brief Set time in Julian Days (TT) (unit: days)
+ * @brief Set time in Julian Days in native reference (TT)
  *
- * @param[in] time Time in Julian Days (TT) [days].
+ * @param[in] time Time in Julian Days (TT) (days).
  ***************************************************************************/
 void GTime::jd(const double& time)
 {
-    // Convert time from JD to native (seconds)
+    // Convert time from Julian Days to seconds in native reference
     m_time = (time - jd_ref) * gammalib::sec_in_day;
     
     // Return
@@ -426,13 +634,32 @@ void GTime::jd(const double& time)
 
 
 /***********************************************************************//**
- * @brief Set time in Modified Julian Days (TT) (unit: days)
+ * @brief Set time in Julian Days in native reference for various time systems
  *
- * @param[in] time Time in Modified Julian Days (TT) [days].
+ * @param[in] time Time in Julian Days (days).
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ ***************************************************************************/
+void GTime::jd(const double& time, const std::string& timesys)
+{
+    // Convert time from Julian Days to seconds in native reference
+    double seconds = (time - jd_ref) * gammalib::sec_in_day;
+
+    // Set time according to the specified time system
+    secs(seconds, timesys);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time in Modified Julian Days in native reference (TT)
+ *
+ * @param[in] time Time in Modified Julian Days (TT) (days).
  ***************************************************************************/
 void GTime::mjd(const double& time)
 {
-    // Convert time from MJD to native (seconds)
+    // Convert time from Modified Julian Days to native (seconds)
     m_time = (time - mjd_ref) * gammalib::sec_in_day;
     
     // Return
@@ -441,15 +668,92 @@ void GTime::mjd(const double& time)
 
 
 /***********************************************************************//**
- * @brief Set time in native reference in days (TT)
+ * @brief Set time in Modified Julian Days in native reference for various
+ *        time systems
  *
- * @param[in] days Time (TT) [days].
+ * @param[in] time Time in Modified Julian Days (days).
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ ***************************************************************************/
+void GTime::mjd(const double& time, const std::string& timesys)
+{
+    // Convert time from Modified Julian Days to seconds in native reference
+    double seconds = (time - mjd_ref) * gammalib::sec_in_day;
+
+    // Set time according to the specified time system
+    secs(seconds, timesys);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time in seconds in native reference for various time systems
+ *
+ * @param[in] seconds Time in native reference (seconds).
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ ***************************************************************************/
+void GTime::secs(const double& seconds, const std::string& timesys)
+{
+    // If system is TT then simply set time ...
+    if (timesys == "TT") {
+        m_time = seconds;
+    }
+    
+    // ... otherwise if the system if TAI then add an offset ...
+    else if (timesys == "TAI") {
+        m_time = seconds + gammalib::tai2tt;
+    }
+
+    // ... otherwise if the system is UTC then convert the time from TT to TAI
+    // and add the leap seconds ...
+    else if (timesys == "UTC") {
+        double mjd   = seconds * gammalib::sec2day + mjd_ref; // Time in UTC
+        double leaps = leap_seconds(mjd);
+        m_time       = seconds + gammalib::tai2tt + leaps;
+    }
+
+    // ... otherwise throw an exception
+    else {
+        std::string msg = "Unknown time system \""+timesys+"\". Either specify "
+                          "\"TT\", \"TAI\" or \"UTC\".";
+        throw GException::invalid_argument(G_SECS_SET, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time in days in native reference (TT)
+ *
+ * @param[in] days Time (TT) (days).
  ***************************************************************************/
 void GTime::days(const double& days)
 {
     // Set time
     m_time = days * gammalib::sec_in_day;
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time in days in native reference for various time systems
+ *
+ * @param[in] days Time (TT) (days).
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ ***************************************************************************/
+void GTime::days(const double& days, const std::string& timesys)
+{
+    // Convert time from days to seconds in native reference
+    double seconds = days * gammalib::sec_in_day;
+
+    // Set time according to the specified time system
+    secs(seconds, timesys);
+
     // Return
     return;
 }
@@ -594,6 +898,51 @@ void GTime::set(const double& time, const GTimeReference& ref)
 
     } // endif: Time was given in UTC time system
 
+    // ... otherwise if system is TAI system then add TAI offset
+    else if (gammalib::toupper(ref.timesys()) == "TAI") {
+        m_time += gammalib::tai2tt;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time to current time
+ *
+ * Sets time to current time.
+ ***************************************************************************/
+void GTime::now(void)
+{
+    // Allocate variables
+    struct std::tm timeStruct;
+    std::time_t    now;
+    char           buffer[100];
+
+    // Get time
+    now = std::time(NULL);
+    #ifdef HAVE_GMTIME_R   
+    std::gmtime_r(&now, &timeStruct);
+    #else
+    std::memcpy(&timeStruct, gmtime(&now), sizeof(struct tm));
+    #endif
+
+    // Write message type, time and task name to buffer
+    std::sprintf(buffer, "%04d-%02d-%02dT%02d:%02d:%02d",
+                         timeStruct.tm_year + 1900,
+                         timeStruct.tm_mon + 1,
+                         timeStruct.tm_mday,
+                         timeStruct.tm_hour,
+                         timeStruct.tm_min,
+                         timeStruct.tm_sec);
+
+    // Build string from buffer
+    std::string date = buffer;
+
+    // Set UTC time
+    utc(date);
+
     // Return
     return;
 }
@@ -691,7 +1040,7 @@ void GTime::free_members(void)
 /***********************************************************************//**
  * @brief Returns number of leap seconds for a given MJD
  *
- * @param[in] mjd Modified Julian Day.
+ * @param[in] mjd Modified Julian Day in UTC time system.
  * @return Number of lead seconds.
  *
  * Return the number of leap seconds for a given MJD specified in the UTC

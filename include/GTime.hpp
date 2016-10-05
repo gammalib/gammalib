@@ -83,17 +83,30 @@ public:
     GTime*         clone(void) const;
     std::string    classname(void) const;
     double         jd(void) const;
+    double         jd(const std::string& timesys) const;
     double         mjd(void) const;
+    double         mjd(const std::string& timesys) const;
     const double&  secs(void) const;
+    double         secs(const std::string& timesys) const;
     double         days(void) const;
+    double         days(const std::string& timesys) const;
     std::string    utc(void) const;
+    double         gmst(void) const;
+    double         gast(void) const;
+    double         lmst(const double& geolon) const;
+    double         last(const double& geolon) const;
     double         convert(const GTimeReference& ref) const;
     void           jd(const double& time);
+    void           jd(const double& time, const std::string& timesys);
     void           mjd(const double& time);
+    void           mjd(const double& time, const std::string& timesys);
     void           secs(const double& seconds);
+    void           secs(const double& seconds, const std::string& timesys);
     void           days(const double& days);
+    void           days(const double& days, const std::string& timesys);
     void           utc(const std::string& time);
     void           set(const double& time, const GTimeReference& ref);
+    void           now(void);
     GTimeReference reference(void) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
   
@@ -124,9 +137,9 @@ std::string GTime::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in native reference (TT) (unit: seconds)
+ * @brief Return time in seconds in native reference (TT)
  *
- * @return Time in native reference [seconds].
+ * @return Time in native reference (seconds).
  ***************************************************************************/
 inline
 const double& GTime::secs(void) const
@@ -136,9 +149,9 @@ const double& GTime::secs(void) const
 
 
 /***********************************************************************//**
- * @brief Set time in native reference in seconds (TT)
+ * @brief Set time in seconds in native reference (TT)
  *
- * @param[in] seconds Time (TT) [seconds].
+ * @param[in] seconds Time in native reference (seconds).
  ***************************************************************************/
 inline
 void GTime::secs(const double& seconds)
