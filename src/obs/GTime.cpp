@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <ctime>
+#include <cstring>      // std::memcpy
 #include <cstdio>
 #include "GTools.hpp"
 #include "GMath.hpp"
