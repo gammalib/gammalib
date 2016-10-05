@@ -82,8 +82,10 @@ public:
     virtual std::string              print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int  components(void) const;
-    void append(const GModelSpectral& spec, const std::string& name="");
+    void                  append(const GModelSpectral& spec, const std::string& name="");
+    int                   components(void) const;
+    const GModelSpectral* component(const int& index) const;
+    const GModelSpectral* component(const std::string& name) const;
 
 protected:
     // Protected methods
@@ -91,11 +93,18 @@ protected:
     void copy_members(const GModelSpectralComposite& model);
     void free_members(void);
     void add_component(const GXmlElement& spec);
+    void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
-    std::string                  m_type;       //!< Model type
-    std::vector<GModelSpectral*> m_spectral;   //!< Container of spectral models
-    std::vector<std::string>     m_components; //!< Names of components
+    std::string                  m_type;        //!< Model type
+    std::vector<GModelSpectral*> m_spectral;    //!< Container of spectral models
+    std::vector<std::string>     m_components;  //!< Names of components
+
+    // MC cache
+    mutable double               m_mc_flux;     //!< Flux cache
+    mutable std::vector<double>  m_mc_probs;    //!< Probailities of individual components
+    mutable GEnergy              m_mc_emin;     //!< Last minimum energy
+    mutable GEnergy              m_mc_emax;     //!< Last maximum energy
 
 };
 

@@ -61,7 +61,11 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    int  components(void) const;
+    void                append(const GModelSpectral& spec, const std::string& name="");
+    int                 components(void) const;
+    GModelSpectral*     component(const int& index) const;
+    GModelSpectral*     component(const std::string& name) const;
+
 };
 
 

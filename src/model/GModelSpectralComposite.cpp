@@ -42,9 +42,10 @@ const GModelSpectralComposite     g_spectral_comp_seed;
 const GModelSpectralRegistry g_spectral_comp_registry(&g_spectral_comp_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC "GModelSpectralComposite::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
-#define G_READ                  "GModelSpectralComposite::read(GXmlElement&)"
-#define G_WRITE                "GModelSpectralComposite::write(GXmlElement&)"
+#define G_MC               "GModelSpectralComposite::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
+#define G_WRITE            "GModelSpectralComposite::write(GXmlElement&)"
+#define G_COMPONENT_INDEX  "GModelSpectralComposite::component(const int&)"
+#define G_COMPONENT_NAME   "GModelSpectralComposite::component(const std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -344,8 +345,33 @@ GEnergy GModelSpectralComposite::mc(const GEnergy& emin,
               "Minimum energy < maximum energy required.");
     }
 
+    // Throw exception if model container is empty
+    if (m_spectral.size() == 0) {
+    	throw GException::runtime_error(G_MC,
+    	              "Composite spectral model is empty. It is required to have at"\
+					  " least one spectral model to run simulations");
+    }
+
+    // Update MC cache
+    update_mc_cache(emin, emax);
+
+    // Get random value
+    double u = ran.uniform();
+
+    // Initialise index of model to use for simulation
+    int index = 0;
+
+    // Loop over spectral components and compute relative probabilites
+    for (int i = 0; i < m_mc_probs.size(); ++i) {
+
+    	if (u <= m_mc_probs[i]) {
+    		index = i;
+    		break;
+    	}
+    }
+
     // Set energy
-    GEnergy energy;
+    GEnergy energy = m_spectral[index]->mc(emin, emax, time, ran);
 
     // Return energy
     return energy;
@@ -442,14 +468,14 @@ void GModelSpectralComposite::write(GXmlElement& xml) const
 			cpy->write(*spec);
 
 			// Add component name if previously available
-			std::cout<<m_components[i]<<" " <<gammalib::str(i+1)<<std::endl;
 			if (m_components[i] != gammalib::str(i+1)) {
 				spec->attribute("component", m_components[i]);
 			}
 
 			// Remove temporary copy
 			delete cpy;
-		}
+
+		} // endif: spectral model was not NULL
 
     } // endfor: loop over model components
 
@@ -493,6 +519,97 @@ std::string GModelSpectralComposite::print(const GChatter& chatter) const
 }
 
 
+/***********************************************************************//**
+ * @brief Append spectral component
+ *
+ * @param[in] spec Spectral model component
+ * @param[in] name Name of spectral component (can be empty)
+ *
+ * Appends a spectral component to the composite model
+ ***************************************************************************/
+void GModelSpectralComposite::append(const GModelSpectral& spec, const std::string& name)
+{
+    // Append model container
+    m_spectral.push_back(spec.clone());
+
+    // Get index of latest model
+    int index = m_spectral.size()-1;
+
+    // Use model index if component name is empty
+    std::string component_name = !name.empty() ? name : gammalib::str(m_spectral.size());
+
+	// Add component name (for now simple number)
+	m_components.push_back(component_name);
+
+	// Get number of spectral parameters from model
+	int npars = m_spectral[index]->size();
+
+	// Loop over model parameters
+	for (int ipar = 0; ipar < npars; ++ipar) {
+
+		// Get model parameter
+		GModelPar* par = &(m_spectral[index]->operator[](ipar));
+
+		// Modify parameter name
+		par->name(name+":"+par->name());
+
+		// Append model parameter with new name to internal container
+		m_pars.push_back(par);
+
+	} // endfor: loop over model parameters
+}
+
+
+/***********************************************************************//**
+ * @brief Returns spectral component element
+ *
+ * @param[in] index Index of spectral component.
+ * @return Spectral model.
+ *
+ * Returns a spectral component to the composite model
+ ***************************************************************************/
+const GModelSpectral* GModelSpectralComposite::component(const int& index) const
+{
+	// Check if index is in validity range
+	if (index >= m_spectral.size() || index < 0) {
+		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index", index, m_spectral.size(),"");
+	}
+
+	// Return spectral component
+	return m_spectral[index];
+
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to specific spectral component
+ *
+ * @param[in] name Name of spectral component.
+ * @return Spectral model.
+ *
+ * Returns a spectral component of the composite model
+ ***************************************************************************/
+const GModelSpectral* GModelSpectralComposite::component(const std::string& name) const
+{
+	// Check if model name is found
+	int index = -1;
+	for(int i = 0; i < m_components.size(); ++i) {
+		if (m_components[i] == name) {
+			index = i;
+			break;
+		}
+	}
+
+	// Check if component name was found
+	if (index == -1) {
+		throw GException::model_not_found(G_COMPONENT_NAME, name,"");
+	}
+
+	// Return spectral component
+	return m_spectral[index];
+
+}
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -530,8 +647,25 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
     // Copy pointer(s) of spectral component
     m_spectral.clear();
     for(int i = 0; i < model.components(); ++i) {
-    	GModelSpectral* spec = (model.m_spectral[i] != NULL) ? model.m_spectral[i]->clone() : NULL;
-    	m_spectral.push_back(spec);
+    	m_spectral.push_back(model.m_spectral[i]->clone());
+    }
+
+	// Store pointers to spectral parameters
+    m_pars.clear();
+    for(int i = 0; i < model.components(); ++i) {
+
+    	// Retrieve spectral model
+		GModelSpectral* spec = m_spectral[i];
+
+		// Loop over parameters
+		for (int ipar = 0; ipar < spec->size(); ++ipar) {
+
+			// Get model parameter reference
+			GModelPar& par = spec->operator[](ipar);
+
+			// Append model parameter pointer to internal container
+			m_pars.push_back(&par);
+		}
     }
 
     // Return
@@ -561,6 +695,10 @@ void GModelSpectralComposite::free_members(void)
 
 /***********************************************************************//**
  * @brief Add spectral component from XML element
+ *
+ * @param[in] spec XML element containing spectral information
+ *
+ * Add an XML spectral component to the model container
  ***************************************************************************/
 void GModelSpectralComposite::add_component(const GXmlElement& spec)
 {
@@ -582,39 +720,43 @@ void GModelSpectralComposite::add_component(const GXmlElement& spec)
 
 
 /***********************************************************************//**
- * @brief Append spectral component
+ * @brief Update Monte Carlo pre computation cache
  *
- * Appends a spectral component to the composite model
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Updates the precomputation cache for Monte Carlo simulations.
  ***************************************************************************/
-void GModelSpectralComposite::append(const GModelSpectral& spec, const std::string& name)
+void GModelSpectralComposite::update_mc_cache(const GEnergy& emin,
+                                         const GEnergy& emax) const
+
 {
-    // Append model container
-    m_spectral.push_back(spec.clone());
+	// Update cache if energy range has changed
+	if (emin != m_mc_emin || emax != m_mc_emax) {
+		m_mc_emin = emin;
+		m_mc_emax = emax;
+		m_mc_flux = flux(m_mc_emin, m_mc_emax);
 
-    // Get index of latest model
-    int index = m_spectral.size()-1;
+		// Initialise sum and probabilites
+	    double sum = 0.0;
+	    m_mc_probs.clear();
 
-    // Use model index if component name is empty
-    std::string component_name = !name.empty() ? name : gammalib::str(m_spectral.size());
+	    // Loop over spectral components and compute relative probabilites
+	    for (int i = 0; i < m_spectral.size(); ++i) {
 
-	// Add component name (for now simple number)
-	m_components.push_back(component_name);
+	    	// Relative probability
+	    	double prob = m_spectral[i]->flux(emin, emax) / m_mc_flux;
 
-	// Get number of spectral parameters from model
-	int npars = m_spectral[index]->size();
+	    	// Add probability
+	    	m_mc_probs.push_back(prob + sum);
 
-	// Loop over model parameters
-	for (int i = 0; i < npars; ++i) {
+	    	// Increment sum
+	    	sum += prob;
 
-		// Get model parameter
-		GModelPar& par = (*m_spectral[index])[i];
+	    } //endfor: looped over spectral components
 
-		// Modify parameter name
-		par.name(name+":"+par.name());
+	} // endif: emin and emax have changed
 
-		// Append model parameter with new name to internal container
-		m_pars.push_back(&par);
-
-	} // endfor: loop over model parameters
-
+    // Return
+    return;
 }
