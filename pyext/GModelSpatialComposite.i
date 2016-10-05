@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GModelSpatialPointSource.i - Spatial point source model class     *
+ *       GModelSpatialComposite.i - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016 by Domenico Tiziani                                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,35 +19,33 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialPointSource.i
- * @brief Point source spatial model class Python interface
- * @author Juergen Knoedlseder
+ * @file GModelSpatialComposite.i
+ * @brief Spatial composite model class Python interface
+ * @author Domenico Tiziani
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialComposite.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelSpatialPointSource
+ * @class GModelSpatialComposite
  *
- * @brief Point source spatial model
+ * @brief Spatial composite model
  ***************************************************************************/
-class GModelSpatialPointSource  : public GModelSpatial {
+class GModelSpatialComposite  : public GModelSpatial {
 
 public:
     // Constructors and destructors
-    GModelSpatialPointSource(void);
-    explicit GModelSpatialPointSource(const GSkyDir& dir);
-    GModelSpatialPointSource(const double& ra, const double& dec);
-    explicit GModelSpatialPointSource(const GXmlElement& xml);
-    GModelSpatialPointSource(const GModelSpatialPointSource& model);
-    virtual ~GModelSpatialPointSource(void);
+    GModelSpatialComposite(void);
+    explicit GModelSpatialComposite(const GXmlElement& xml);
+    GModelSpatialComposite(const GModelSpatialComposite& model);
+    virtual ~GModelSpatialComposite(void);
 
     // Implemented virtual methods
     virtual void                      clear(void);
-    virtual GModelSpatialPointSource* clone(void) const;
+    virtual GModelSpatialComposite* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual double                    eval(const GPhoton& photon,
@@ -63,20 +61,17 @@ public:
     virtual void                      write(GXmlElement& xml) const;
 
     // Other methods
-    double  ra(void) const;
-    double  dec(void) const;
-    void    ra(const double& ra);
-    void    dec(const double& dec);
-    GSkyDir dir(void) const;
-    void    dir(const GSkyDir& dir);
+    int components(void) const;
+    void append(const GModelSpatial& component, std::string name);
+    void append(const GModelSpatial& component);
 };
 
 
 /***********************************************************************//**
- * @brief GModelSpatialPointSource class extension
+ * @brief GModelSpatialComposite class extension
  ***************************************************************************/
-%extend GModelSpatialPointSource {
-    GModelSpatialPointSource copy() {
+%extend GModelSpatialComposite {
+    GModelSpatialComposite copy() {
         return (*self);
     }
 };

@@ -45,6 +45,7 @@ sources = GModelPar.cpp \
           GModelSpatialDiffuseConst.cpp \
           GModelSpatialDiffuseCube.cpp \
           GModelSpatialDiffuseMap.cpp \
+          GModelSpatialComposite.cpp \
           GModelSpectral.cpp \
           GModelSpectralRegistry.cpp \
           GModelSpectralBrokenPlaw.cpp \

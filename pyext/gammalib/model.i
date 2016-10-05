@@ -141,6 +141,7 @@
 %include "GModelSpatialDiffuseConst.i"
 %include "GModelSpatialDiffuseCube.i"
 %include "GModelSpatialDiffuseMap.i"
+%include "GModelSpatialComposite.i"
 %include "GModelSpectral.i"
 %include "GModelSpectralRegistry.i"
 %include "GModelSpectralBrokenPlaw.i"

@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <sstream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
@@ -35,16 +36,11 @@
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
-const double tolerance =  0.000027777778;    // angular tolerance is 1 arcsec
 
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpatialComposite g_spatial_ptsrc_seed;
-const GModelSpatialRegistry    g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
-#if defined(G_LEGACY_XML_FORMAT)
-const GModelSpatialComposite g_spatial_ptsrc_legacy_seed(true, "SkyDirFunction");
-const GModelSpatialRegistry    g_spatial_ptsrc_legacy_registry(&g_spatial_ptsrc_legacy_seed);
-#endif
+const GModelSpatialComposite g_spatial_comp_seed;
+const GModelSpatialRegistry    g_spatial_comp_registry(&g_spatial_comp_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                 "GModelSpatialComposite::read(GXmlElement&)"
@@ -100,53 +96,6 @@ GModelSpatialComposite::GModelSpatialComposite(const bool&        dummy,
     return;
 }
 
-
-/***********************************************************************//**
- * @brief Sky direction constructor
- *
- * @param[in] dir Sky direction.
- *
- * Construct a point source spatial model from a sky direction.
- ***************************************************************************/
-GModelSpatialComposite::GModelSpatialComposite(const GSkyDir& dir) :
-                          GModelSpatial()
-{
-    // Initialise members
-    init_members();
-
-    // Assign direction
-    this->dir(dir);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Value constructor
- *
- * @param[in] ra Right Ascencion of model centre.
- * @param[in] dec Declination of model centre.
- *
- * Construct a point source spatial model from the Right Ascension and
- * Declination of the model centre.
- ***************************************************************************/
-GModelSpatialComposite::GModelSpatialComposite(const double& ra,
-                                                   const double& dec) :
-                          GModelSpatial()
-{
-    // Initialise members
-    init_members();
-
-    // Set values
-    m_ra.value(ra);
-    m_dec.value(dec);
-
-    // Return
-    return;
-}
-
-
 /***********************************************************************//**
  * @brief XML constructor
  *
@@ -161,7 +110,7 @@ GModelSpatialComposite::GModelSpatialComposite(const GXmlElement& xml) :
 {
     // Initialise members
     init_members();
-
+    
     // Read information from XML element
     read(xml);
 
@@ -173,10 +122,10 @@ GModelSpatialComposite::GModelSpatialComposite(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Point source spatial model.
+ * @param[in] model Spatial composite model.
  ***************************************************************************/
 GModelSpatialComposite::GModelSpatialComposite(const GModelSpatialComposite& model) :
-                          GModelSpatial(model)
+    GModelSpatial(model)
 {
     // Initialise members
     init_members();
@@ -293,8 +242,17 @@ GModelSpatialComposite* GModelSpatialComposite::clone(void) const
 double GModelSpatialComposite::eval(const GPhoton& photon,
                                       const bool&    gradients) const
 {
-    // Set value dependent on source distance
-    double value = (photon.dir().dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
+    // Initalise value
+    double value = 0.;
+    
+    // Sum over all components
+    for (unsigned int i = 0; i < components(); i++) {
+        value += m_components[i]->eval(photon, gradients);
+    }
+    
+    // Normalise
+    value /= m_components.size();
+    
 
     // Return value
     return value;
@@ -317,8 +275,15 @@ GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
                                      const GTime&   time,
                                      GRan&          ran) const
 {
+    // Choose one component
+    int idx = static_cast<int>(m_components.size() * ran.uniform());
+    GModelSpatial *component = m_components[idx];
+
+    // Simulate component
+    GSkyDir sky_dir = component->mc(energy, time, ran);
+    
     // Return sky direction
-    return (dir());
+    return (sky_dir);
 }
 
 
@@ -335,11 +300,12 @@ GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
 bool GModelSpatialComposite::contains(const GSkyDir& dir,
                                         const double&  margin) const
 {
-    // Compute distance to centre (radian)
-    double distance = dir.dist(this->dir());
-
-    // Return flag
-    return (distance <= margin*gammalib::deg2rad);
+    // Loop over all components
+    for (unsigned int idx_comp = 0; idx_comp < components(); idx_comp++) {
+        if (m_components[idx_comp]->contains(dir, margin))
+            return true;
+    }
+    return false;
 }
 
 
@@ -370,57 +336,63 @@ bool GModelSpatialComposite::contains(const GSkyDir& dir,
  *
  ***************************************************************************/
 void GModelSpatialComposite::read(const GXmlElement& xml)
-{
-    // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Point source model requires exactly 2 parameters.");
+{   
+    // Verify that XML element is composed from spatial models 
+    if (xml.elements("spatialModel") != xml.elements()) {
+        throw GException::model_invalid_spatial(G_READ, type(),
+        "Composite spatial model must be composed solely from spatial models.");
     }
 
-    // Extract model parameters
-    bool has_glon = false;
-    bool has_glat = false;
-    int  npar[]   = {0, 0};
-    for (int i = 0; i < 2; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle RA/GLON
-        if (par->attribute("name") == "RA") {
-            m_ra.read(*par);
-            npar[0]++;
-        }
-        else if (par->attribute("name") == "GLON") {
-            m_ra.read(*par);
-            npar[0]++;
-            has_glon = true;
-        }
-
-        // Handle DEC/GLAT
-        else if (par->attribute("name") == "DEC") {
-            m_dec.read(*par);
-            npar[1]++;
-        }
-        else if (par->attribute("name") == "GLAT") {
-            m_dec.read(*par);
-            npar[1]++;
-            has_glat = true;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check if we have to convert GLON/GLAT into RA/DEC
-    if (has_glon && has_glat) {
-        GSkyDir dir;
-        dir.lb_deg(ra(), dec()),
-        m_ra.value(dir.ra_deg());
-        m_dec.value(dir.dec_deg());
+    // Verify that XML element has at least one component
+    if (xml.elements() == 0) {
+        throw GException::model_invalid_spatial(G_READ, type(),
+        "Composite spatial model requires at least one component.");
     }
-    else if (has_glon || has_glat) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-                          "Require either RA/DEC or GLON/GLAT.");
-    }
+
+    // Extract components
+    for (unsigned int idx_elt = 0; idx_elt < xml.elements("spatialModel"); idx_elt++) {
+        // Get element
+        const GXmlElement* element = xml.element("spatialModel", idx_elt);
+        
+        // Get spatial model
+        GModelSpatialRegistry registry;
+        GModelSpatial*        ptr = registry.alloc(*element);
+
+        // Add model to components
+        m_components.push_back(ptr);
+
+        // Get name for component
+        std::string name;
+        if (element->has_attribute("name")) {
+            // Use name provided in xml
+            name = element->attribute("name");
+
+            // If name is not unique, generate a unique one
+            if (!component_name_is_unique(name))
+                name = unique_component_name();
+        } else {
+            // Generate unique name
+            name = unique_component_name();
+        }
+
+        // Append name to vector
+        m_component_names.push_back(name);
+
+        // Loop over all paramters in new component
+        for (unsigned int idx_par = 0; idx_par < ptr->size(); idx_par++) {
+            // Get model parameter
+            GModelPar& par = (*ptr)[idx_par];
+            
+            // Modify parameter name
+            par.name(name+":"+par.name());
+        
+            // Append to paramaters
+            m_pars.push_back(&par);
+
+        } // endfor: looped over all parameters
+
+    } // endfor: looped over all components
+
 
     // Return
     return;
@@ -463,35 +435,88 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
               "Spatial model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 2 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"RA\""));
-        xml.append(GXmlElement("parameter name=\"DEC\""));
+    // Verify that XML element is composed from spatial models 
+    if (xml.elements("spatialModel") != xml.elements()) {
+        throw GException::model_invalid_spatial(G_WRITE, type(),
+        "Composite spatial model must be composed solely from spatial models.");
     }
 
-    // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Point source model requires exactly 2 parameters.");
-    }
+    // Write all model components
+    for (unsigned int idx_comp = 0; idx_comp < m_components.size(); idx_comp++) {
+        GModelSpatial *component = m_components[idx_comp];
+        
+        // Find xml element with matching name
+        GXmlElement *matching_model = 0;
+        for (unsigned int idx_elt = 0; idx_elt < xml.elements("spatialModel"); idx_elt++) {
+            if (xml.element("spatialModel", idx_elt)->attribute("name")
+                .compare(m_component_names[idx_comp]) == 0) {
+                matching_model = xml.element("spatialModel", idx_elt);
+                break;
+            }
+        } // endfor: loop over all xml elements
 
-    // Get pointers on both model parameters
-    GXmlElement* par1 = xml.element("parameter", 0);
-    GXmlElement* par2 = xml.element("parameter", 1);
+        // Strip prefix from parameter names
 
-    // Set or update sky direction
-    if (par1->attribute("name") == "RA" && par2->attribute("name") == "DEC") {
-        m_ra.write(*par1);
-        m_dec.write(*par2);
-    }
-    else if (par2->attribute("name") == "RA" && par1->attribute("name") == "DEC") {
-        m_ra.write(*par2);
-        m_dec.write(*par1);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-                          "Require RA and DEC parameters.");
-    }
+        // Loop over all parameters of component
+        for (unsigned int idx_par = 0; idx_par < component->size(); idx_par++) {
+            
+            // Get parameter
+            GModelPar& par = (*component)[idx_par];
+            
+            // Get name components
+            std::vector<std::string> name_components = gammalib::split(par.name(), ":");
+
+            // Remove first component
+            name_components.erase(name_components.begin());
+
+            // Join new name
+            std::string new_name = name_components[0];
+            for (unsigned int i = 1; i < name_components.size(); i++) {
+                new_name.append(":");
+                new_name.append(name_components[i]);
+            }
+            
+            // Set new name
+            par.name(new_name);
+
+        } // endfor looped over all parameters
+
+        // Write component
+        if (matching_model) {
+            // Use existing xml element
+            component->write(*matching_model);
+        } else {
+            // Create new xml element
+            GXmlElement new_element("spatialModel");
+            component->write(new_element);
+            xml.append(new_element);
+        }
+        
+        // Re-add prefix to parameter names
+        
+        std::string prefix = m_component_names[idx_comp];
+
+        // Loop over all parameters of component
+        for (unsigned int idx_par = 0; idx_par < component->size(); idx_par++) {
+            
+            // Get parameter
+            GModelPar& par = (*component)[idx_par];
+            
+            // Prepend prefix
+            std::string new_name = prefix;
+            new_name.append(":");
+            new_name.append(par.name());
+            
+            // Set new name
+            par.name(new_name);
+
+        } // endfor looped over all parameters
+
+        
+        
+    } // endfor: loop over all components
+
+    // TODO: Remove unused xml elements
 
     // Return
     return;
@@ -499,10 +524,59 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print point source information
+ * @brief Return number of model components
  *
- * @return String containing point source information.
+ * @return Number of model components
  ***************************************************************************/
+int GModelSpatialComposite::components(void) const {
+    return m_components.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Append a spatial model component
+ *
+ * @param[in] model Spatial model component to append
+ * @param[in] name Name of spatial model
+ ***************************************************************************/
+void GModelSpatialComposite::append(const GModelSpatial& component,
+                                    std::string name) {
+
+    // Clone component
+    GModelSpatial *new_component = component.clone();
+    // Add component
+    m_components.push_back(new_component);
+
+    // Add component name
+    m_component_names.push_back(name);
+
+    // Get number of paramaters from new component
+    int npars = new_component->size();
+    
+    for (unsigned int i = 0; i < npars; i++) {
+        // Get model parameter
+        GModelPar& par = (*new_component)[i];
+        
+        // Modify parameter name
+        par.name(name+":"+par.name());
+        
+        // Append to paramaters
+        m_pars.push_back(&par);
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief Append a spatial model component
+ *
+ * @param[in] model Spatial model component to append
+ *
+ * A unique name is generated for the model.
+ ***************************************************************************/
+void GModelSpatialComposite::append(const GModelSpatial& component) {
+    append(component, unique_component_name());
+}
+
 std::string GModelSpatialComposite::print(const GChatter& chatter) const
 {
     // Initialise result string
@@ -511,56 +585,24 @@ std::string GModelSpatialComposite::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Append header
+    	// Append header
         result.append("=== GModelSpatialComposite ===");
 
-        // Append parameters
-        result.append("\n"+gammalib::parformat("Number of parameters"));
-        result.append(gammalib::str(size()));
-        for (int i = 0; i < size(); ++i) {
-            result.append("\n"+m_pars[i]->print(chatter));
-        }
+        // Append information
+		result.append("\n"+gammalib::parformat("Number of components"));
+		result.append(gammalib::str(components()));
+		result.append("\n"+gammalib::parformat("Number of parameters"));
+		result.append(gammalib::str(size()));
+
+		// Print parameter information
+		for (int i = 0; i < size(); ++i) {
+			result.append("\n"+m_pars[i]->print(chatter));
+		}
 
     } // endif: chatter was not silent
 
     // Return result
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return position of point source
- *
- * @return Point source sky direction.
- *
- * Returns the sky direction of the point source.
- ***************************************************************************/
-GSkyDir GModelSpatialComposite::dir(void) const
-{
-    // Allocate sky direction
-    GSkyDir srcDir;
-
-    // Set sky direction
-    srcDir.radec_deg(ra(), dec());
-
-    // Return direction
-    return srcDir;
-}
-
-
-/***********************************************************************//**
- * @brief Set position of point source
- *
- * Sets the sky direction of the point source.
- ***************************************************************************/
-void GModelSpatialComposite::dir(const GSkyDir& dir)
-{
-    // Assign Right Ascension and Declination
-    m_ra.value(dir.ra_deg());
-    m_dec.value(dir.dec_deg());
-
-    // Return
-    return;
 }
 
 
@@ -576,30 +618,14 @@ void GModelSpatialComposite::dir(const GSkyDir& dir)
 void GModelSpatialComposite::init_members(void)
 {
     // Initialise model type
-    m_type = "PointSource";
+    m_type = "SpatialComposite";
 
-    // Initialise Right Ascension
-    m_ra.clear();
-    m_ra.name("RA");
-    m_ra.unit("deg");
-    m_ra.fix();
-    m_ra.scale(1.0);
-    m_ra.gradient(0.0);
-    m_ra.has_grad(false);
+    // Initialise models vector
+    m_components.clear();
+    m_component_names.clear();
 
-    // Initialise Declination
-    m_dec.clear();
-    m_dec.name("DEC");
-    m_dec.unit("deg");
-    m_dec.fix();
-    m_dec.scale(1.0);
-    m_dec.gradient(0.0);
-    m_dec.has_grad(false);
-
-    // Set parameter pointer(s)
+    // Initialise parameters vector
     m_pars.clear();
-    m_pars.push_back(&m_ra);
-    m_pars.push_back(&m_dec);
 
     // Return
     return;
@@ -609,20 +635,30 @@ void GModelSpatialComposite::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Point source spatial model.
+ * @param[in] model Spatial composite model.
  ***************************************************************************/
 void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
 {
     // Copy members
     m_type = model.m_type;
-    m_ra   = model.m_ra;
-    m_dec  = model.m_dec;
+    for (unsigned int idx_comp = 0; idx_comp < model.m_components.size(); idx_comp ++) {
+        m_components.push_back(model.m_components[idx_comp]->clone());
+        m_component_names.push_back(model.m_component_names[idx_comp]);
 
-    // Set parameter pointer(s)
-    m_pars.clear();
-    m_pars.push_back(&m_ra);
-    m_pars.push_back(&m_dec);
-
+        // Get number of parameters to append
+        int npars = m_components[idx_comp]->size();
+    
+        // Append parameters
+        for (unsigned int idx_par = 0; idx_par < npars; idx_par++) {
+            // Get model parameter
+            GModelPar& par = (*m_components[idx_comp])[idx_par];
+        
+            // Append to paramaters
+            m_pars.push_back(&par);
+        }
+    }
+    
+    
     // Return
     return;
 }
@@ -633,6 +669,52 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
  ***************************************************************************/
 void GModelSpatialComposite::free_members(void)
 {
+    // Free model components
+    for (unsigned int i = 0; i < m_components.size(); i ++) {
+        delete m_components[i];
+    }
+    m_components.clear();
+    m_pars.clear();
+    
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns an unused name for a model component
+ * 
+ * @return Model name
+ ***************************************************************************/
+std::string GModelSpatialComposite::unique_component_name(void) {
+    while (1) {
+        // Generate name from name index
+        std::string s = gammalib::str(m_name_index++);
+
+        // Check if name is unique
+        if (component_name_is_unique(s)) { 
+            // Return
+            return s;
+        }
+    }
+}
+
+/***********************************************************************//**
+ * @brief Checks if @p name is not used in component names
+ * 
+ * @param[in] name Name to check
+ * 
+ * @return name unique?
+ ***************************************************************************/
+bool GModelSpatialComposite::component_name_is_unique(std::string name) const {
+
+    // Check if name is unique
+    bool is_unique = true;
+    for (unsigned int i = 0; i < m_component_names.size(); i++) {
+        if (name.compare(m_component_names[i]) == 0) {
+            is_unique = false;
+            break;
+        }
+    }
+    return is_unique;
 }

@@ -162,6 +162,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialDiffuseConst.hpp \
                      GModelSpatialDiffuseCube.hpp \
                      GModelSpatialDiffuseMap.hpp \
+                     GModelSpatialComposite.hpp \
                      GModelSpectral.hpp \
                      GModelSpectralRegistry.hpp \
                      GModelSpectralBrokenPlaw.hpp \

@@ -77,17 +77,23 @@ public:
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-	
+    int components(void) const;
+    void append(const GModelSpatial& component, std::string name);
+    void append(const GModelSpatial& component);
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GModelSpatialComposite& model);
     void free_members(void);
+    std::string unique_component_name(void);
+    bool component_name_is_unique(std::string name) const;
 
     // Protected members
     std::string m_type;   //!< Model type
-	std::vector<GModelSpatial> m_models; //!< Models
+    std::vector<GModelSpatial*> m_components; //!< Components
+    std::vector<std::string> m_component_names; //!< Component names
+    unsigned int m_name_index;
 };
 
 
@@ -130,65 +136,6 @@ GClassCode GModelSpatialComposite::code(void) const
     return GMODEL_SPATIAL_POINT_SOURCE;
 }
 
-
-/***********************************************************************//**
- * @brief Return Right Ascencion of model centre
- *
- * @return Right Ascencion of model centre (degrees).
- *
- * Returns the Right Ascension of the model centre in degrees.
- ***************************************************************************/
-inline
-double GModelSpatialComposite::ra(void) const
-{
-    return (m_ra.value());
-}
-
-
-/***********************************************************************//**
- * @brief Set Right Ascencion of model centre
- *
- * @param[in] ra Right Ascencion of model centre.
- *
- * Sets the Right Ascencion of model centre.
- ***************************************************************************/
-inline
-void GModelSpatialComposite::ra(const double& ra)
-{
-    m_ra.value(ra);
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return Declination of model centre
- *
- * @return Declination of model centre (degrees).
- *
- * Returns the Declination of the model centre in degrees.
- ***************************************************************************/
-inline
-double GModelSpatialComposite::dec(void) const
-{
-    return (m_dec.value());
-}
-
-
-/***********************************************************************//**
- * @brief Set Declination of model centre
- *
- * @param[in] dec Declination of model centre.
- *
- * Sets the Declination of model centre.
- ***************************************************************************/
-inline
-void GModelSpatialComposite::dec(const double& dec)
-{
-    m_dec.value(dec);
-    return;
-}
-
-
 /***********************************************************************//**
  * @brief Return normalization of point source for Monte Carlo simulations
  *
@@ -204,8 +151,9 @@ inline
 double GModelSpatialComposite::mc_norm(const GSkyDir& dir,
                                          const double&  radius) const
 {
-    double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
-    return (norm);
+    //double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
+    //return (norm);
+    return 1.0;
 }
 
 #endif /* GMODELSPATIALCOMPOSITE_HPP */

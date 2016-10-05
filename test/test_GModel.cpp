@@ -117,8 +117,8 @@ void TestGModel::set(void)
            "Test GModelSpatialDiffuseCube");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_map),
            "Test GModelSpatialDiffuseMap");
-    //append(static_cast<pfunction>(&TestGModel::test_spatial_composite),
-    //           "Test GModelSpatialComposite");
+    append(static_cast<pfunction>(&TestGModel::test_spatial_composite),
+           "Test GModelSpatialComposite");
     append(static_cast<pfunction>(&TestGModel::test_spatial_model),
            "Test spatial model XML I/O");
 
@@ -1408,52 +1408,52 @@ void TestGModel::test_elliptical_gauss(void)
 /***********************************************************************//**
  * @brief Test GModelSpatialComposite class
  ***************************************************************************/
-//void TestGModel::test_spatial_composite(void)
-//{
-//    // Test void constructor
-//    GModelSpatialComposite model1;
-//    test_value(model1.type(), "SpatialComposite", "Check void model type");
-//
-//    GSkyDir dir = GSkyDir();
-//    dir.radec_deg(83.6331, 22.01);
-//
-//    // Test append method
-//    model1.append(GModelSpatialPointSource(dir));
-//    model1.append(GModelSpatialRadialGauss(dir, 0.2));
-//    test_value(model1.size(), 2);
-//
-//    // Test model eval
-//    GPhoton photon = GPhoton(dir, GEnergy(1, "TeV"), GTime());
-//    test_value(model1.eval(photon), 1.0);
-//
-//    // Test XML constructor
-//    GXml                      xml(m_xml_model_spatial_composite);
-//    GXmlElement*              element = xml.element(0)->element(0)->element("spatialModel", 0);
-//    GModelSpectralComposite model2(*element);
-//    test_value(model2.size(), 5);
-//    test_value(model2.type(), "SpatialComposite", "Check model type");
-//
-//    // Test access of individual parameters
-//    test_value(model2['1:RA'].value(), 83.6331);
-//    test_value(model2['1:DEC'].value(), 22.01);
-//    test_value(model2['1:Sigma'].value(), 0.2);
-//
-//
-//    // Test prefactor method
-//    model2['1:RA'].value(83.1331);
-//    test_value(model2['1:RA'].value(), 83.1331);
-//
-//    // Test index method
-//    model2['1:DEC'].value(22.51);
-//    test_value(model2['1:DEC'].value(), 22.51);
-//
-//    // Test pivot method
-//    model2['1:Sigma'].value(0.6);
-//    test_value(model2['1:Sigma'].value(), 0.6);
-//
-//    // Exit test
-//    return;
-//}
+void TestGModel::test_spatial_composite(void)
+{
+   // Test void constructor
+   GModelSpatialComposite model1;
+   test_value(model1.type(), "SpatialComposite", "Check void model type");
+
+   GSkyDir dir = GSkyDir();
+   dir.radec_deg(83.6331, 22.01);
+
+   // Test append method
+   model1.append(GModelSpatialPointSource(dir));
+   model1.append(GModelSpatialRadialGauss(dir, 0.2));
+   test_value(model1.components(), 2);
+   test_value(model1.size(), 5);
+
+   // Test XML constructor
+   GXml                      xml(m_xml_model_spatial_composite);
+   GXmlElement*              element = xml.element(0)->element(0)->element("spatialModel", 0);
+
+   GModelSpatialComposite model2(*element);
+   test_value(model2.size(), 5);
+   test_value(model2.type(), "SpatialComposite", "Check model type");
+      
+   // Test access of individual parameters
+   test_value(model2["1:RA"].value(), 83.6331);
+   test_value(model2["1:DEC"].value(), 22.0145);
+   test_value(model2["1:Sigma"].value(), 0.2);
+   
+   // Test prefactor method
+       
+   test_value(model2["1:RA"].value(), 83.6331);
+   model2["1:RA"].value(83.1331);
+   test_value(model2["1:RA"].value(), 83.1331);
+   
+   // Test index method
+   model2["1:DEC"].value(22.51);
+   test_value(model2["1:DEC"].value(), 22.51);
+       
+   // Test pivot method
+   model2["1:Sigma"].value(0.6);
+   test_value(model2["1:Sigma"].value(), 0.6);
+       
+
+   // Exit test
+   return;
+}
 
 
 /***********************************************************************//**

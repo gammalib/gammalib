@@ -204,6 +204,7 @@
 #include "GModelSpatialDiffuseConst.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialDiffuseMap.hpp"
+#include "GModelSpatialComposite.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelSpectralBrokenPlaw.hpp"
