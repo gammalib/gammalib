@@ -58,7 +58,7 @@
 /* __ Debug definitions __________________________________________________ */
 //#define G_CONSOLE_DUMP               //!< Show method headers
 //#define G_CONSOLE_ERRORS             //!< Show error messages
-//#define G_SHOW_MESSAGE               //!< Show posted and received messages
+#define G_SHOW_MESSAGE               //!< Show posted and received messages
 
 
 /*==========================================================================
@@ -1147,6 +1147,9 @@ void GVOHub::request_notify_all(const GXml& xml, const socklen_t& sock)
                 if (mtype == "image.load.fits") {
                     notify_image_load(m_clients[i], xml);
 		        }
+		if (mtype == "table.load.votable") {
+                    notify_table_load(m_clients[i], xml);
+		        }
 
             } // endif: message type matched client subscription
 
@@ -2061,8 +2064,8 @@ void GVOHub::notify_image_load(const GVOHub::client& client,
                                const GXml&           xml)
 {
 	// Get client response
-	const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
-
+       const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
+       //const GXmlNode* node = xml.element("methodCall > params > param[1] > value > struct > member > value > struct");
     // Extract image information from client response
 	std::string name = get_response_value(node, "name");
 	std::string url  = get_response_value(node, "url");
@@ -2090,14 +2093,14 @@ void GVOHub::notify_image_load(const GVOHub::client& client,
     msg.append("          <name>name</name>\n");
     msg.append("          <value>"+name+"</value>\n");
     msg.append("        </member>\n");
-	msg.append("        <member>\n");
+    msg.append("        <member>\n");
     msg.append("          <name>image-id</name>\n");
     msg.append("          <value>"+id+"</value>\n");
     msg.append("        </member>\n");
-	msg.append("        <member>\n");
+    msg.append("        <member>\n");
     msg.append("          <name>url</name>\n");
     msg.append("          <value>"+url+"</value>\n");
-	msg.append("        </member>\n");
+    msg.append("        </member>\n");
     msg.append("      </struct></value>\n");
     msg.append("    </member>\n");
     msg.append("  </struct></value></param>\n");
@@ -2111,7 +2114,69 @@ void GVOHub::notify_image_load(const GVOHub::client& client,
     return;
 }
 
+/***********************************************************************//**
+ * @brief Notify client about image loading
+ *
+ * @param[in] client Client.
+ * @param[in] xml Message from which image information is extracted.
+ *
+ * Notify a client that a FITS image is avialable for loading. The method
+ * sends a "image.load.fits" message to the @p client. Information about the
+ * image is extracted from the @p xml document.
+ ***************************************************************************/
+void GVOHub::notify_table_load(const GVOHub::client& client,
+                               const GXml&           xml)
+{
+	// Get client response
+	const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
 
+    // Extract image information from client response
+	std::string name = get_response_value(node, "name");
+	std::string url  = get_response_value(node, "url");
+	std::string id   = get_response_value(node, "table-id");
+
+    // Declare notification
+    std::string msg = "";
+
+	// Set notification for image.load.fits
+    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<methodCall>\n");
+    msg.append("<methodName>samp.client.receiveNotification</methodName>\n");
+    msg.append("<params>\n");
+    msg.append("  <param><value>"+client.private_key+"</value></param>\n");
+    msg.append("  <param><value>"+m_hub_id+"</value></param>\n");
+    msg.append("  <param><value><struct>\n");
+    msg.append("    <member>\n");
+    msg.append("      <name>samp.mtype</name>\n");
+    msg.append("      <value>table.load.votable</value>\n");
+    msg.append("    </member>\n");
+    msg.append("    <member>\n");
+    msg.append("      <name>samp.params</name>\n");
+    msg.append("      <value><struct>\n");
+    msg.append("        <member>\n");
+    msg.append("          <name>name</name>\n");
+    msg.append("          <value>"+name+"</value>\n");
+    msg.append("        </member>\n");
+    msg.append("        <member>\n");
+    msg.append("          <name>table-id</name>\n");
+    msg.append("          <value>"+id+"</value>\n");
+    msg.append("        </member>\n");
+    msg.append("        <member>\n");
+    msg.append("          <name>url</name>\n");
+    msg.append("          <value>"+url+"</value>\n");
+    msg.append("        </member>\n");
+    msg.append("      </struct></value>\n");
+    msg.append("    </member>\n");
+    msg.append("  </struct></value></param>\n");
+    msg.append("</params>\n");
+    msg.append("</methodCall>\n");
+
+    // Post notification
+    notify(client.url, msg);
+		  
+    // Return
+    return;
+}
 /***********************************************************************//**
  * @brief Generates random string of characters
  *

@@ -35,6 +35,7 @@
 class GFitsHDU;
 class GXml;
 class GXmlNode;
+class GVOTable;
 
 
 /***********************************************************************//**
@@ -78,6 +79,7 @@ public:
     void        shutdown_hub(void) const;
     GXml        execute(const std::string& request) const;
     void        publish(const GFitsHDU& hdu);
+    void        publish(const GVOTable& votable);
     std::string print(const GChatter& chatter = NORMAL) const;
     
 protected:

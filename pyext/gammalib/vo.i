@@ -50,5 +50,6 @@
 %import(module="gammalib.support") "GException.i";
 
 /* __ Virtual Observatory module _________________________________________ */
+%include "GVOTable.i"
 %include "GVOClient.i"
 %include "GVOHub.i"
