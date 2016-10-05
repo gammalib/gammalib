@@ -88,7 +88,7 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
  *
  * Constructs empty On/Off observation.
  ***************************************************************************/
-GCTAOnOffObservation::GCTAOnOffObservation(void)
+GCTAOnOffObservation::GCTAOnOffObservation(void) : GObservation()
 {
     // Initialise private members
     init_members();
@@ -103,7 +103,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(void)
  *
  * @param[in] obs On/Off observation.
  ***************************************************************************/
-GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs)
+GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs) :
+                      GObservation(obs)
 { 
     // Initialise private
     init_members();
@@ -135,7 +136,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
                                            const GEbounds&        etrue,
                                            const GEbounds&        ereco,
                                            const GSkyRegions&     on,
-                                           const GSkyRegions&     off)
+                                           const GSkyRegions&     off) : 
+                      GObservation()
 {
     // Initialise private
     init_members();
