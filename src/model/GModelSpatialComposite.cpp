@@ -624,9 +624,6 @@ void GModelSpatialComposite::init_members(void)
     m_components.clear();
     m_component_names.clear();
 
-    // Initialise parameters vector
-    m_pars.clear();
-
     // Return
     return;
 }
@@ -671,10 +668,13 @@ void GModelSpatialComposite::free_members(void)
 {
     // Free model components
     for (unsigned int i = 0; i < m_components.size(); i ++) {
+        
+        // Delete component i
         delete m_components[i];
+
+        // Signal free pointer
+        m_components[i] = NULL;
     }
-    m_components.clear();
-    m_pars.clear();
     
     // Return
     return;
