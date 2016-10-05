@@ -551,7 +551,7 @@ void GModelSpectralComposite::append(const GModelSpectral& spec, const std::stri
 		GModelPar* par = &(m_spectral[index]->operator[](ipar));
 
 		// Modify parameter name
-		par->name(name+":"+par->name());
+		par->name(component_name+":"+par->name());
 
 		// Append model parameter with new name to internal container
 		m_pars.push_back(par);
@@ -627,6 +627,12 @@ void GModelSpectralComposite::init_members(void)
     // Clear spectral models
     m_spectral.clear();
     m_components.clear();
+
+    // Clear MC cache
+    m_mc_probs.clear();
+    m_mc_emin.clear();
+    m_mc_emax.clear();
+    m_mc_flux = 0.0;
 
     // Return
     return;
