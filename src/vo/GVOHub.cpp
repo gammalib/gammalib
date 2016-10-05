@@ -2128,8 +2128,8 @@ void GVOHub::notify_table_load(const GVOHub::client& client,
                                const GXml&           xml)
 {
 	// Get client response
-	const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
-
+	//const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
+        const GXmlNode* node = xml.element("methodCall > params > param[1] > value > struct > member > value > struct");
     // Extract image information from client response
 	std::string name = get_response_value(node, "name");
 	std::string url  = get_response_value(node, "url");
