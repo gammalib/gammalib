@@ -194,6 +194,9 @@ GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation
     // Execute only if object is not identical
     if (this != &obs) {
 
+        // Copy base class members
+        this->GObservation::operator=(obs);
+
         // Free members
         free_members();
 
