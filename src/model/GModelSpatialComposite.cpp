@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <sstream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
