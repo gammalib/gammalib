@@ -253,7 +253,7 @@ double GModelSpatialComposite::eval(const GPhoton& photon,
     }
     
     // Normalise
-    value /= m_components.size();
+    value /= (double)m_components.size();
     
 
     // Return value
@@ -292,7 +292,6 @@ GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
 
         // Simulate component
         GSkyDir sky_dir = component->mc(energy, time, ran);
-        std::cout << sky_dir << std::endl;
     
     // Return sky direction
     return (sky_dir);
