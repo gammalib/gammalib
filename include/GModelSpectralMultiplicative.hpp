@@ -107,12 +107,12 @@ protected:
 
 		// Method
 		double eval(const double& x) {
-			GEnergy e(x, "TeV");
-			double flux = m_spec[0]->eval(e);
+			GEnergy energy(x, "MeV");
+			double value = m_spec[0]->eval(energy);
 			for(int i=1;i<m_spec.size();++i){
-				flux*=m_spec[i]->eval(e);
+				value*=m_spec[i]->eval(energy);
 			}
-			return flux;
+			return value;
 		}
 
 		// Members

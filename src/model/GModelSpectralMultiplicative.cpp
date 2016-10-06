@@ -41,8 +41,8 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralMultiplicative     g_spectral_comp_seed;
-const GModelSpectralRegistry g_spectral_comp_registry(&g_spectral_comp_seed);
+const GModelSpectralMultiplicative     g_spectral_multi_seed;
+const GModelSpectralRegistry g_spectral_multi_registry(&g_spectral_multi_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC               "GModelSpectralMultiplicative::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
@@ -81,7 +81,7 @@ GModelSpectralMultiplicative::GModelSpectralMultiplicative(void) : GModelSpectra
  *
  * @param[in] xml XML element containing position information.
  *
- * Constructs a power law spectral model by extracting information from an
+ * Constructs a multiplicative spectral model by extracting information from an
  * XML element. See the read() method for more information about the expected
  * structure of the XML element.
  ***************************************************************************/
@@ -101,7 +101,7 @@ GModelSpectralMultiplicative::GModelSpectralMultiplicative(const GXmlElement& xm
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Spectral power law model.
+ * @param[in] model Multiplicative spectral model.
  ***************************************************************************/
 GModelSpectralMultiplicative::GModelSpectralMultiplicative(const GModelSpectralMultiplicative& model)
                                        : GModelSpectral(model)
@@ -173,7 +173,7 @@ GModelSpectralMultiplicative& GModelSpectralMultiplicative::operator=(const GMod
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear spectral power law model
+ * @brief Clear multiplicative spectral model
  ***************************************************************************/
 void GModelSpectralMultiplicative::clear(void)
 {
@@ -191,9 +191,9 @@ void GModelSpectralMultiplicative::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone spectral power law model
+ * @brief Clone multiplicative spectral model model
  *
- * @return Pointer to deep copy of spectral power law model.
+ * @return Pointer to deep copy of multiplicative spectral model.
  ***************************************************************************/
 GModelSpectralMultiplicative* GModelSpectralMultiplicative::clone(void) const
 {
@@ -213,7 +213,7 @@ GModelSpectralMultiplicative* GModelSpectralMultiplicative::clone(void) const
  * Evaluates
  *
  * \f[
- *    \sum_{i=0}^{N} {M_{\rm i}}(\rm srcEng, srcTime)
+ *    \prod_{i=0}^{N} {M_{\rm i}}(\rm srcEng, srcTime)
  * \f]
  *
  * where \f${M_{\rm i}}\f$ is the model evaluation of the i-th model
@@ -243,6 +243,36 @@ double GModelSpectralMultiplicative::eval(const GEnergy& srcEng,
 
 	} // endfor: loop over model components
 
+	// Modify gradients if requested
+	if (gradients) {
+
+		// Loop over models
+		for(int i = 0; i < m_spectral.size(); ++i) {
+
+			// Initialise scaling factor
+			double factor = 1.0;
+
+			//Loop over other models and compute factor
+			for(int j = 0; j < m_spectral.size(); ++j) {
+				if (i != j) {
+					factor *= m_spectral[j]->eval(srcEng, srcTime, false);
+				}
+			}
+
+			// Loop over model parameters
+			for(int ipar = 0; ipar < m_spectral[i]->size(); ++ipar) {
+
+				// Get reference to model parameter
+				GModelPar& par = m_spectral[i]->operator[](ipar);
+
+				// Scale parameter gradient
+				par.gradient(par.gradient()*factor);
+
+			} // endfor: loop over model parameters
+		} // endfor: loop over models
+	} //endif: compute gradients
+
+
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
@@ -267,8 +297,7 @@ double GModelSpectralMultiplicative::eval(const GEnergy& srcEng,
  * @param[in] emax Maximum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * Computes the sum of all photon fluxes of each individual component
- *
+ * Computes the photon flux of multiplicative spectral model
  ***************************************************************************/
 double GModelSpectralMultiplicative::flux(const GEnergy& emin,
                                 const GEnergy& emax) const
@@ -289,7 +318,7 @@ double GModelSpectralMultiplicative::flux(const GEnergy& emin,
 		integral.eps(1.0e-8);
 
 		// Calculate integral between emin and emax
-		flux = integral.romberg(emin.TeV(), emax.TeV());
+		flux = integral.romberg(emin.MeV(), emax.MeV());
 
     } // endif: integration range was valid
 
@@ -305,8 +334,7 @@ double GModelSpectralMultiplicative::flux(const GEnergy& emin,
  * @param[in] emax Maximum photon energy.
  * @return Energy flux (erg/cm2/s).
  *
- * Computes the sum of all energy fluxes of each individual component
- *
+ * Computes the energy flux of multiplicative spectral model
  ***************************************************************************/
 double GModelSpectralMultiplicative::eflux(const GEnergy& emin,
                                  const GEnergy& emax) const
@@ -327,7 +355,7 @@ double GModelSpectralMultiplicative::eflux(const GEnergy& emin,
 		integral.eps(1.0e-8);
 
 		// Calculate integral between emin and emax
-		eflux = integral.romberg(emin.TeV(), emax.TeV());
+		eflux = integral.romberg(emin.MeV(), emax.MeV());
 
 	} // endif: integration range was valid
 
@@ -348,7 +376,7 @@ double GModelSpectralMultiplicative::eflux(const GEnergy& emin,
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
  *
- * Returns Monte Carlo energy by randomly drawing from a power law.
+ * Returns Monte Carlo energy by randomly drawing from a multiplicative spectral model.
  ***************************************************************************/
 GEnergy GModelSpectralMultiplicative::mc(const GEnergy& emin,
                                const GEnergy& emax,
