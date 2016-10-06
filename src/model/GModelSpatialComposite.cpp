@@ -43,7 +43,9 @@ const GModelSpatialRegistry    g_spatial_comp_registry(&g_spatial_comp_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                 "GModelSpatialComposite::read(GXmlElement&)"
-#define G_WRITE               "GModelSpatialComposite::write(GXmlElement&)"
+#define G_WRITE                "GModelSpatialComposite::write(GXmlElement&)"
+#define G_COMPONENT_INDEX      "GModelSpatialComposite::component(const int&)"
+#define G_COMPONENT_NAME       "GModelSpatialComposite::component(const std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
