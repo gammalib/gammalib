@@ -93,7 +93,6 @@ protected:
     std::string m_type;   //!< Model type
     std::vector<GModelSpatial*> m_components; //!< Components
     std::vector<std::string> m_component_names; //!< Component names
-    unsigned int m_name_index;
 };
 
 

@@ -357,9 +357,6 @@ void GModelSpatialComposite::read(const GXmlElement& xml)
         GModelSpatialRegistry registry;
         GModelSpatial*        ptr = registry.alloc(*element);
 
-        // Add model to components
-        m_components.push_back(ptr);
-
         // Get name for component
         std::string name;
         if (element->has_attribute("name")) {
@@ -373,6 +370,9 @@ void GModelSpatialComposite::read(const GXmlElement& xml)
             // Generate unique name
             name = unique_component_name();
         }
+
+        // Add model to components
+        m_components.push_back(ptr);
 
         // Append name to vector
         m_component_names.push_back(name);
@@ -540,6 +540,8 @@ int GModelSpatialComposite::components(void) const {
  ***************************************************************************/
 void GModelSpatialComposite::append(const GModelSpatial& component,
                                     std::string name) {
+    // Make sure that name is unique
+    name = component_name_is_unique(name) ? name : unique_component_name();
 
     // Clone component
     GModelSpatial *new_component = component.clone();
@@ -686,9 +688,10 @@ void GModelSpatialComposite::free_members(void)
  * @return Model name
  ***************************************************************************/
 std::string GModelSpatialComposite::unique_component_name(void) {
+    unsigned int index = components();
     while (1) {
         // Generate name from name index
-        std::string s = gammalib::str(m_name_index++);
+        std::string s = gammalib::str(index++);
 
         // Check if name is unique
         if (component_name_is_unique(s)) { 
