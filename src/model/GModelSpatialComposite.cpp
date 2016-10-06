@@ -692,9 +692,11 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
 {
     // Copy members
     m_type = model.m_type;
+    m_component_names = model.m_component_names;
+    m_components.clear();
+    m_pars.clear();
     for (unsigned int idx_comp = 0; idx_comp < model.m_components.size(); idx_comp ++) {
         m_components.push_back(model.m_components[idx_comp]->clone());
-        m_component_names.push_back(model.m_component_names[idx_comp]);
 
         // Get number of parameters to append
         int npars = m_components[idx_comp]->size();
