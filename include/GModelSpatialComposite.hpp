@@ -88,8 +88,6 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialComposite& model);
     void free_members(void);
-    std::string unique_component_name(void);
-    bool component_name_is_unique(std::string name) const;
 
     // Protected members
     std::string m_type;   //!< Model type
