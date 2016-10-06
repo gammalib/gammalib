@@ -534,7 +534,11 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 {
     // Timing measurement
     #if defined(G_LIKELIHOOD_DEBUG)
+    #ifdef _OPENMP
+    double t_start = omp_get_wtime();
+    #else
     clock_t t_start = clock();
+    #endif
     #endif
 	
     // Initialise statistics
