@@ -278,11 +278,21 @@ GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
                                      GRan&          ran) const
 {
     // Choose one component
-    int idx = static_cast<int>(m_components.size() * ran.uniform());
-    GModelSpatial *component = m_components[idx];
+    
+    int idx = 1;
+    double u = ran.uniform() * m_components.size();
+    
+    while (idx < m_components.size()) {
+            if (u <= idx) {
+                break;
+            }
+            idx++;
+        }
+        GModelSpatial *component = m_components[idx-1];
 
-    // Simulate component
-    GSkyDir sky_dir = component->mc(energy, time, ran);
+        // Simulate component
+        GSkyDir sky_dir = component->mc(energy, time, ran);
+        std::cout << sky_dir << std::endl;
     
     // Return sky direction
     return (sky_dir);
