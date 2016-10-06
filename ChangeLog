@@ -3,6 +3,7 @@
         * Version 1.2.0 released
         =========================
 
+        Add GVOTable class (#1231)
         Add multiplicative spectral model (#1861)
         Add additional time setting and getting methods (#1856)
         Check CTA response table dimension for consistency (#1848)

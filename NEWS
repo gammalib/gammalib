@@ -15,6 +15,7 @@ The following classes have been added:
 - GModelSpectralExpInvPlaw
 - GModelSpectralPlawEnergyFlux
 - GModelSpectralMultiplicative
+- GVOTable
 
 The following classes have been removed:
 - ...
@@ -193,7 +194,9 @@ None
 
 15. VO module
 -------------
-None
+A GVOTable class has been added that allows handling of VO tables, including
+transformation of FITS tables into VO tables and sending VO tables through the
+VO hub to other applications (#1231).
 
 
 16. Xspec module
