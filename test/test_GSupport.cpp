@@ -133,6 +133,17 @@ void TestGSupport::test_tools(void)
     test_value(gammalib::plaw_photon_flux(2.0, 3.0, 2.5, -1.0), 1.01366277027);
     test_value(gammalib::plaw_photon_flux(2.0, 3.0, 2.5, -2.5), 1.06136118604);
 
+    // Create vector of strings
+    std::vector<std::string> strings;
+    strings.push_back("This");
+    strings.push_back("is");
+    strings.push_back("a");
+    strings.push_back("vector");
+    test_assert(gammalib::contains(strings, "a"), "\"a\" in vector");
+    test_assert(gammalib::contains(strings, "vector"), "\"vector\" in vector");
+    test_assert(!gammalib::contains(strings, "b"), "\"b\" not in vector");
+    test_assert(!gammalib::contains(strings, "isavector"), "\"isavector\" not in vector");
+
     // Return
     return;
 }

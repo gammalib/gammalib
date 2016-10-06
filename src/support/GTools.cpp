@@ -1084,6 +1084,24 @@ bool gammalib::contains(const std::string& str, const std::string& substring)
 
 
 /***********************************************************************//**
+ * @brief Checks if a string is contained in a vector of strings
+ *
+ * @param[in] strings Vector of strings you want to search in.
+ * @param[in] string string you are looking for in strings.
+ * @return True if a string is contained a vector.
+ *
+ * Checks if a string is contained in a vector of strings
+ ***************************************************************************/
+bool gammalib::contains(const std::vector<std::string> strings, const std::string& string)
+{
+    // Compute result
+    bool result = std::find(strings.begin(), strings.end(), string) != strings.end();
+
+    // Return result
+    return result;
+}
+
+/***********************************************************************//**
  * @brief Emits warning
  *
  * @param[in] origin Name of method that emits warning.
