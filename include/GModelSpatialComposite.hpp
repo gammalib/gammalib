@@ -80,6 +80,9 @@ public:
     int components(void) const;
     void append(const GModelSpatial& component, std::string name);
     void append(const GModelSpatial& component);
+    const GModelSpatial* component(const int& index) const;
+    const GModelSpatial* component(const std::string& name) const;
+
 
 protected:
     // Protected methods

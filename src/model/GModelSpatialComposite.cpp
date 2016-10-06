@@ -447,8 +447,8 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
         // Find xml element with matching name
         GXmlElement *matching_model = 0;
         for (unsigned int idx_elt = 0; idx_elt < xml.elements("spatialModel"); idx_elt++) {
-            if (xml.element("spatialModel", idx_elt)->attribute("name")
-                .compare(m_component_names[idx_comp]) == 0) {
+            if (xml.element("spatialModel", idx_elt)->attribute("name") == 
+                m_component_names[idx_comp]) {
                 matching_model = xml.element("spatialModel", idx_elt);
                 break;
             }
@@ -607,6 +607,57 @@ std::string GModelSpatialComposite::print(const GChatter& chatter) const
 }
 
 
+
+/***********************************************************************//**
+ * @brief Returns spatial component element
+ *
+ * @param[in] index Index of spatial component.
+ * @return Spatial model.
+ *
+ * Returns a spatial component to the composite model
+ ***************************************************************************/
+const GModelSpatial* GModelSpatialComposite::component(const int& index) const
+{
+	// Check if index is in validity range
+	if (index >= m_components.size() || index < 0) {
+		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index", index, m_components.size(),"");
+	}
+
+	// Return spectral component
+	return m_components[index];
+
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to specific spatial component
+ *
+ * @param[in] name Name of spatial component.
+ * @return Spatial model.
+ *
+ * Returns a spatial component of the composite model
+ ***************************************************************************/
+const GModelSpatial* GModelSpatialComposite::component(const std::string& name) const
+{
+	// Check if model name is found
+	int index = -1;
+	for(int i = 0; i < m_component_names.size(); ++i) {
+            if (m_component_names[i] == name) {
+			index = i;
+			break;
+		}
+	}
+
+	// Check if component name was found
+	if (index == -1) {
+		throw GException::model_not_found(G_COMPONENT_NAME, name,"");
+	}
+
+	// Return spectral component
+	return m_components[index];
+
+}
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
@@ -713,7 +764,7 @@ bool GModelSpatialComposite::component_name_is_unique(std::string name) const {
     // Check if name is unique
     bool is_unique = true;
     for (unsigned int i = 0; i < m_component_names.size(); i++) {
-        if (name.compare(m_component_names[i]) == 0) {
+        if (name == m_component_names[i]) {
             is_unique = false;
             break;
         }
