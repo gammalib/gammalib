@@ -69,6 +69,7 @@ public:
     void                test_bplaw(void);
     void                test_supeplaw(void);
     void                test_logparabola(void);
+    void                test_multiplicative(void);
     void                test_nodes(void);
     void                test_filefct(void);
     void                test_spectral_model(void);
@@ -111,6 +112,7 @@ private:
     std::string m_xml_model_point_bplaw;
     std::string m_xml_model_point_supeplaw;
     std::string m_xml_model_point_logparabola;
+    std::string m_xml_point_multiplicative;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_point_filefct;
     std::string m_xml_model_diffuse_const;

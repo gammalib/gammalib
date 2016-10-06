@@ -55,6 +55,7 @@ sources = GModelPar.cpp \
           GModelSpectralFunc.cpp \
           GModelSpectralGauss.cpp \
           GModelSpectralLogParabola.cpp \
+          GModelSpectralMultiplicative.cpp \
           GModelSpectralNodes.cpp \
           GModelSpectralPlaw.cpp \
           GModelSpectralPlawPhotonFlux.cpp \
