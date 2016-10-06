@@ -1,7 +1,7 @@
 /***************************************************************************
- *                     GVOTable.cpp - VO Table composition class           *
+ *                      GVOTable.cpp - VO table class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Thierry Louge                               *
+ *  copyright (C) 2015-2016 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GVOTable.cpp
- * @brief Implements IVOA standard Recommendation 2013-09-20 VOTable1.3
+ * @brief VO table class implementation
  * @author Thierry Louge
  */
 
@@ -28,22 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>         // std::getenv() function
-#include <cstdio>          // std::fopen(), etc. functions
-#include <cstring>         // std::memset() function
-#include <csignal>         // signal() function
-#include <cerrno>          // errno
-#include <unistd.h>        // close() function
-#include <netdb.h>         // getaddrinfo() function
-#include <netinet/in.h>    // sockaddr_in, INADDR_ANY, htons
-#include <fstream>
-#include <sys/shm.h>
-#include <sys/socket.h>    // socket(), connect() functions
-#include <sys/wait.h>      // waitpid() function
-#include <arpa/inet.h>     // inet_addr() function
 #include "GVOTable.hpp"
-#include "GException.hpp"
-#include "GXml.hpp"
+#include "GXmlElement.hpp"
+#include "GFitsCfitsio.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsTableCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -52,8 +41,6 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_CONSOLE_DUMP
-#define G_SHOW_MESSAGE
 
 
 /*==========================================================================
@@ -73,20 +60,21 @@ GVOTable::GVOTable(void)
     // Return
     return;
 }
+
+
 /***********************************************************************//**
- * @brief Constructor for generic xml case
+ * @brief FITS table constructor
+ *
+ * @param[in] table FITS table
  ***************************************************************************/
-GVOTable::GVOTable(const std::string& filename)
+GVOTable::GVOTable(const GFitsTable& table)
 {
     // Initialise members
     init_members();
-    //Set up the preliminary structure
-    GXml xmlhandler = GXml(filename);
-    m_sharedtablename = std::tmpnam(NULL);
-    xmlhandler.save(m_sharedtablename+".xml");
-    //m_tablexml = GXml(filename);
-    //m_tablexml->save(m_sharedtablename+".xml");
-    //close_votable();
+    
+    // Read VO table from FITS table
+    read(table);
+
     // Return
     return;
 }
@@ -95,7 +83,7 @@ GVOTable::GVOTable(const std::string& filename)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] VOTable
+ * @param[in] votable VO table
  ***************************************************************************/
 GVOTable::GVOTable(const GVOTable& votable)
 {
@@ -191,10 +179,50 @@ GVOTable* GVOTable::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Read VO table from FITS table
+ ***************************************************************************/
+void GVOTable::read(const GFitsTable& table)
+{
+    // Clear VO table
+    m_xml.clear();
+
+    // Set name and resource string
+    m_name     = table.extname();
+    m_resource = table.classname();
+
+    // Set VOTABLE element string
+    std::string s1("VOTABLE version=\"1.3\" xmlns:xsi=\"http://www.w3.org/"
+                   "2001/XMLSchema-instance\" xmlns=\"http://www.ivoa.net/"
+                   "xml/VOTable/v1.3\" xmlns:stc=\"http://www.ivoa.net/xml/"
+                   "STC/v1.30\"");
+    std::string s2("RESOURCE name=\""+m_resource+"\"");
+    std::string s3("TABLE name=\""+m_name+"\"");
+
+    // Create table element
+    GXmlElement* votable = m_xml.append(s1)->append(s2)->append(s3);
+
+    // Append description
+    votable->append("DESCRIPTION")->append(GXmlText(m_description));
+
+    // Append FIELD elements by extracting the information from the FITS
+    // columns
+    for (int i = 0; i < table.ncols(); ++i) {
+        votable->append(field_from_fits_column(*table[i]));
+    }
+
+    // Append data
+    votable->append(data_from_fits_table(table));
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print VO Table information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing VO table information
+ * @param[in] chatter Chattiness.
+ * @return String containing VO table information.
  ***************************************************************************/
 std::string GVOTable::print(const GChatter& chatter) const
 {
@@ -204,102 +232,14 @@ std::string GVOTable::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Append header
+        // Append VO table
         result.append("=== GVOTable ===");
-	result.append(m_header);
-	result.append(m_fields);    
-    	result.append(m_data);
-    	result.append(m_footer);
+        result.append(m_xml.print(chatter, 0));
 
     } // endif: chatter was not silent
 
     // Return result
     return result;
-}
-/***********************************************************************//**
- * @brief Opens the VO table, set the header
- *
- ***************************************************************************/
-void GVOTable::open_votable(void)
-{
-    m_header.append("<?xml version=\"1.0\"?>\n");
-    // m_header.append("<VOTABLE version=\"1.3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-    //m_header.append("xmlns=\"http://www.ivoa.net/xml/VOTable/v1.3\"\n");
-    //STC is recommended space time coordinates datamodel for galaxies
-    m_header.append("xmlns:stc=\"http://www.ivoa.net/xml/STC/v1.30\">\n");
-    //m_header.append("\t<RESOURCE name=\"Gammalib\">\n");
-    //m_header.append("\t\t<TABLE name=\"GammalibTable\">\n");
-    //m_header.append("\t\t\t<DESCRIPTION>VOTable coming from gammalib</DESCRIPTION>\n");
-    // Return
-    return;
-}
-/***********************************************************************//**
- * @brief Set the footer, closes the VO table
- *
- ***************************************************************************/
-void GVOTable::close_votable(void)
-{
-    m_footer.append("\t\t</TABLE>\n");
-    m_footer.append("\t</RESOURCE>\n");
-    m_footer.append("</VOTABLE>\n");
-
-    std::string table = m_header + m_wcs + m_pixels + m_fields + m_data + m_footer;	
-    m_tablexml = new GXml(table);
-    m_tablexml->save("VOTableExemple.xml");
-    // Return
-    return;
-}
-/***********************************************************************//**
- * @brief Fills <FIELD> in the VO table
- *
- * @param[in] FIELD characteristics, like: name="_RAJ2000" ucd="pos.eq.ra" 
- * ref="J2000" datatype="double" width="10" precision="6" unit="deg"
- ***************************************************************************/
-void GVOTable::fill_fields(const std::string& name, const std::string& ucd,
-	const std::string& id, const std::string& datatype, 
-	const std::string& width,const std::string& precision,
-	const std::string& unit,const std::string& description)
-{
-    m_fields.append("\t\t\t<FIELD  name=\""+name+"\" ucd=\""+ucd+"\" ID=\""+id+"\" datatype=\""+datatype+"\" width=\""+width+"\" precision=\""+precision+"\" unit=\""+unit+"\">\n");
-    m_fields.append("\t\t\t\t<DESCRIPTION>"+description+"</DESCRIPTION>\n");
-    m_fields.append("\t\t\t</FIELD>\n");
-    // Return
-    return;
-}
-/***********************************************************************//**
- * @brief Fills TABLEDATA of the VO table
- *
- ***************************************************************************/
-void GVOTable::fill_tabledata(const std::string& data)
-{
-    m_data.append("<TD>"+data+"</TD>");
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief inits TABLEDATA part of the VO table
- *
- ***************************************************************************/
-void GVOTable::init_tabledata(void)
-{
-    m_data.append("\t\t\t<DATA>\n");
-    m_data.append("\t\t\t\t<TABLEDATA>\n");
-    m_data.append("\t\t\t\t\t<TR>");
-    // Return
-    return;
-}
-/***********************************************************************//**
- * @brief closes TABLEDATA part of the VO table
- *
- ***************************************************************************/
-void GVOTable::close_tabledata(void)
-{
-    m_data.append("\t\t\t\t\t</TR>");
-    m_data.append("\t\t\t\t</TABLEDATA>\n");
-    m_data.append("\t\t\t</DATA>\n");
-    // Return
-    return;
 }
 
 
@@ -315,12 +255,11 @@ void GVOTable::close_tabledata(void)
 void GVOTable::init_members(void)
 {
     // Initialise members
-    m_header = "";
-    m_fields = "";
-    m_data = "";
-    m_footer = "";
-    m_pixels = "";
-    m_wcs = "";
+    m_xml.clear();
+    m_name.clear();
+    m_resource.clear();
+    m_description.clear();
+
     // Return
     return;
 }
@@ -329,11 +268,15 @@ void GVOTable::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] hub VO hub.
+ * @param[in] table VO table.
  ***************************************************************************/
-void GVOTable::copy_members(const GVOTable& hub)
+void GVOTable::copy_members(const GVOTable& table)
 {
     // Copy members
+    m_xml         = table.m_xml;
+    m_name        = table.m_name;
+    m_resource    = table.m_resource;
+    m_description = table.m_description;
 
     // Return
     return;
@@ -345,9 +288,116 @@ void GVOTable::copy_members(const GVOTable& hub)
  ***************************************************************************/
 void GVOTable::free_members(void)
 { 
-    
     // Return
     return;
 }
 
 
+/***********************************************************************//**
+ * @brief Return FIELD element with column description
+ *
+ * @param[in] column FITS column
+ * @return XML FIELD element with column description
+ ***************************************************************************/
+GXmlElement GVOTable::field_from_fits_column(const GFitsTableCol& column) const
+{
+    // Create FIELD element
+    GXmlElement field("FIELD");
+
+    // Set datatype
+    std::string datatype;
+    switch (column.type()) {
+        case __TLOGICAL:
+            datatype = "boolean";
+            break;
+        case __TBIT:
+            datatype = "bit";
+            break;
+        case __TBYTE:
+        case __TSBYTE:
+            datatype = "unsignedByte";
+            break;
+        case __TSHORT:
+        case __TUSHORT:
+            datatype = "short";
+            break;
+        case __TINT:
+        case __TUINT:
+            datatype = "int";
+            break;
+        case __TLONG:
+        case __TULONG:
+        case __TLONGLONG:
+            datatype = "long";
+            break;
+        case __TSTRING:
+            datatype = "char";
+            break;
+        case __TFLOAT:
+            datatype = "float";
+            break;
+        case __TDOUBLE:
+            datatype = "double";
+            break;
+        case __TCOMPLEX:
+            datatype = "floatComplex";
+            break;
+        case __TDBLCOMPLEX:
+            datatype = "doubleComplex";
+            break;
+        default:
+            datatype = "unknown";
+            break;
+    }
+
+    // Set FIELD attributes
+    field.attribute("name", column.name());
+    field.attribute("ID", "col"+gammalib::str(column.colnum()+1));
+    field.attribute("datatype", datatype);
+    field.attribute("unit", column.unit());
+
+    // Return XML FIELD element
+    return field;
+}
+
+
+/***********************************************************************//**
+ * @brief Return DATA element with FITS table data
+ *
+ * @param[in] table FITS table
+ * @return XML DATA element with FITS data
+ ***************************************************************************/
+GXmlElement GVOTable::data_from_fits_table(const GFitsTable& table) const
+{
+    // Create DATA element and append TABLEDATA element
+    GXmlElement  data("DATA");
+    GXmlElement* tabledata = data.append("TABLEDATA");
+
+    // Loop over all rows
+    for (int row = 0; row < table.nrows(); ++row) {
+
+        // Create TR element
+        GXmlElement tr("TR");
+
+        // Append all column data
+        for (int col = 0; col < table.ncols(); ++col) {
+
+            // Create TD element
+            GXmlElement td("TD");
+
+            // Set column data as text of TD element
+            td.append(GXmlText(table[col]->string(row)));
+
+            // Append TD element to TR element
+            tr.append(td);
+
+        } // endfor: looped over columns
+
+        // Append TR element to TABLEDATA
+        tabledata->append(tr);
+
+    } // endfor: looped over rows
+
+    // Return XML DATA element
+    return data;
+}

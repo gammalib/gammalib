@@ -1,7 +1,7 @@
 /***************************************************************************
- *                      GVOTable.hpp - VOTable class                     *
+ *                      GVOTable.hpp - VO table class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Thierry Louge                               *
+ *  copyright (C) 2014-2016 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GVOTable.hpp
- * @brief VOTable class definition
+ * @brief VO table class definition
  * @author Thierry Louge
  */
 
@@ -31,67 +31,61 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <vector>
-#include <sys/socket.h>
 #include "GBase.hpp"
 #include "GXml.hpp"
-#include "GXmlNode.hpp"
-#include "GWcs.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFitsTable;
+class GFitsTableCol;
+class GXmlElement;
+
+
 /***********************************************************************//**
  * @class GVOTable
  *
  * @brief VOTable class
  *
  * This class implements a VOTable for exchanges through VO-compatible
- * applications.
+ * applications. The class implements IVOA standard Recommendation 2013-09-20
+ * VOTable1.3.
+ *
+ * See
+ * http://www.ivoa.net/documents/VOTable/20130920/REC-VOTable-1.3-20130920.pdf
  ***************************************************************************/
 class GVOTable : public GBase {
 
 public:
     // Constructors and destructors
     GVOTable(void);
+    explicit GVOTable(const GFitsTable& table);
     GVOTable(const GVOTable& votable);
-    GVOTable(const std::string& filename);
     virtual ~GVOTable(void);
 
     // Operators
     GVOTable& operator=(const GVOTable& votable);
 
     // Methods
-    void        	clear(void);
-    GVOTable*     	clone(void) const;
-    std::string 	classname(void) const;
-    std::string		print(const GChatter& chatter = NORMAL) const;
-    void 		open_votable(void);
-    void 		fill_tabledata(const std::string& data);
-    void 		fill_fields(const std::string& name, const std::string& ucd,
-				const std::string& id, const std::string& datatype, 
-				const std::string& width,const std::string& precision,
-				const std::string& unit,const std::string& description);
-    void 		close_votable(void);
-    void 		init_tabledata(void);
-    void 		close_tabledata(void);
-    // Members
-    GXml* 		m_tablexml;	      //!< GXml object containing the VOTable
-    std::string		m_sharedtablename;    //!< name of the VOTable copied on temp dir
+    void               clear(void);
+    GVOTable*          clone(void) const;
+    std::string        classname(void) const;
+    void               read(const GFitsTable& table);
+    const GXml&        xml(void) const;
+    const std::string& name(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
-    void                init_members(void);
-    void                copy_members(const GVOTable& client);
-    void                free_members(void);
-    
-private:
-    //Protected members
-    std::string		m_header;     //!< header of the VOTable
-    std::string		m_wcs;        //!< representation of wcs in the VOTable
-    std::string		m_pixels;     //!< pixel system and values in the VOTable
-    std::string		m_fields;     //!< <FIELD> of the VOTable
-    std::string		m_data;       //!< data part of VOTable
-    std::string		m_footer;     //!< footer of the VOTable
-    int 		m_nx;	      //!< Number of pixels in x axis of skymap
-    int 		m_ny;	      //!< Number of pixels in y axis of skymap
-    
+    void        init_members(void);
+    void        copy_members(const GVOTable& table);
+    void        free_members(void);
+    GXmlElement field_from_fits_column(const GFitsTableCol& column) const;
+    GXmlElement data_from_fits_table(const GFitsTable& table) const;
+
+    // Protected members
+    GXml        m_xml;         //!< VO table
+    std::string m_name;        //!< VO table name
+    std::string m_resource;    //!< VO resource name
+    std::string m_description; //!< VO table description
 };
 
 
@@ -104,6 +98,30 @@ inline
 std::string GVOTable::classname(void) const
 {
     return ("GVOTable");
+}
+
+
+/***********************************************************************//**
+ * @brief Return VO table XML file
+ *
+ * @return VO table XML file.
+ ***************************************************************************/
+inline
+const GXml& GVOTable::xml(void) const
+{
+    return (m_xml);
+}
+
+
+/***********************************************************************//**
+ * @brief Return VO table name
+ *
+ * @return VO table name string.
+ ***************************************************************************/
+inline
+const std::string& GVOTable::name(void) const
+{
+    return (m_name);
 }
 
 #endif /* GVOTable_HPP */

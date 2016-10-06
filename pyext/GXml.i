@@ -63,7 +63,7 @@ public:
     GXmlElement* element(const std::string& name);
     GXmlElement* element(const std::string& name, const int& index);
     void         load(const GFilename& filename);
-    void         save(const GFilename& filename);
+    void         save(const GFilename& filename) const;
     void         read(const GUrl& url);
     void         write(GUrl& url, const int& indent = 0) const;
 };

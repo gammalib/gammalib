@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVOTable.i - VOTable class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Thierry Louge                               *
+ *  copyright (C) 2014-2016 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,13 +20,12 @@
  ***************************************************************************/
 /**
  * @file GVOTable.i
- * @brief GVOTable class interface definition
+ * @brief VO table class definition
  * @author Thierry Louge
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GVOTable.hpp"
-#include "GXml.hpp"
 %}
 
 
@@ -36,27 +35,24 @@
  * @brief VOTable class
  ***************************************************************************/
 class GVOTable : public GBase {
+
 public:
     // Constructors and destructors
     GVOTable(void);
+    explicit GVOTable(const GFitsTable& table);
     GVOTable(const GVOTable& votable);
-    GVOTable(const std::string& filename);
     virtual ~GVOTable(void);
 
+    // Operators
+    GVOTable& operator=(const GVOTable& votable);
+
     // Methods
-    void        	clear(void);
-    GVOTable*     	clone(void) const;
-    std::string 	classname(void) const;
-    std::string		print(const GChatter& chatter = NORMAL) const;
-    void 		open_votable(void);
-    void 		fill_tabledata(const std::string& data);
-    void 		fill_fields(const std::string& name, const std::string& ucd,
-				const std::string& id, const std::string& datatype, 
-				const std::string& width,const std::string& precision,
-				const std::string& unit,const std::string& description);
-    void 		close_votable(void);
-    void 		init_tabledata(void);
-    void 		close_tabledata(void);
+    void               clear(void);
+    GVOTable*          clone(void) const;
+    std::string        classname(void) const;
+    void               read(const GFitsTable& table);
+    const GXml&        xml(void) const;
+    const std::string& name(void) const;
 };
 
 

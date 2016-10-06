@@ -22,7 +22,8 @@
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
-           -I$(top_srcdir)/src/support
+           -I$(top_srcdir)/src/support \
+           -I$(top_srcdir)/src/fits
 
 # Define sources for this directory
 sources = GVOClient.cpp \

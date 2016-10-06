@@ -54,7 +54,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_SHOW_MESSAGE               //!< Show posted and received messages
+//#define G_SHOW_MESSAGE               //!< Show posted and received messages
 
 
 /*==========================================================================
@@ -277,7 +277,6 @@ bool GVOClient::ping_hub(void) const
     request.append("<methodCall>\n");
     request.append("  <methodName>samp.hub.ping</methodName>\n");
     request.append("  <params>\n");
-    //request.append("    <param><value/></param>\n");
     request.append("  </params>\n");
     request.append("</methodCall>\n");
 
@@ -399,16 +398,26 @@ void GVOClient::publish(const GFitsHDU& hdu)
     hub_command.append("<methodCall>\n");
     hub_command.append("  <methodName>samp.hub.notifyAll</methodName>\n");
     hub_command.append("  <params>\n");
-    //hub_command.append("    <param><value>image.load.fits</value></param>\n");
-    //hub_command.append("    <param><value>"+m_secret+"</value></param>\n");
     hub_command.append("    <param><value>"+m_client_key+"</value></param>\n");
     hub_command.append("    <param><value><struct>\n");
     hub_command.append("      <member><name>samp.params</name><value><struct>\n");
-    hub_command.append("        <member><name>name</name><value>"+extname+"</value></member>\n");
-    hub_command.append("        <member><name>url</name><value>file://localhost"+samp_share+"</value></member>\n");
-    hub_command.append("        <member><name>image-id</name><value>Gammalib Data</value></member>\n");
+    hub_command.append("        <member>\n");
+    hub_command.append("          <name>name</name>\n");
+    hub_command.append("          <value>"+extname+"</value>\n");
+    hub_command.append("        </member>\n");
+    hub_command.append("        <member>\n");
+    hub_command.append("          <name>url</name>\n");
+    hub_command.append("          <value>file://localhost"+samp_share+"</value>\n");
+    hub_command.append("        </member>\n");
+    hub_command.append("        <member>\n");
+    hub_command.append("          <name>image-id</name>\n");
+    hub_command.append("          <value>Gammalib Data</value>\n");
+    hub_command.append("        </member>\n");
     hub_command.append("      </struct></value></member>\n");
-    hub_command.append("      <member><name>samp.mtype</name><value>image.load.fits</value></member>\n");
+    hub_command.append("      <member>\n");
+    hub_command.append("        <name>samp.mtype</name>\n");
+    hub_command.append("        <value>image.load.fits</value>\n");
+    hub_command.append("      </member>\n");
     hub_command.append("    </struct></value></param>\n");
     hub_command.append("  </params>\n");
     hub_command.append("</methodCall>\n");
@@ -425,47 +434,76 @@ void GVOClient::publish(const GFitsHDU& hdu)
     return;
 }
 
+
 /***********************************************************************//**
- * @brief publishes the VOTable in a VO Hub
+ * @brief Publish VO table
  *
- * @param[in] 
+ * @param[in] votable VO table
  *
- * @exception GException::
- *            
+ * Publishes a VO table.
  ***************************************************************************/
 void GVOClient::publish(const GVOTable& votable)
 {
-    //The Client should save the Table, not the table itself
-    //That implies to play with pointers and references somewhat
+    // Signal that client should be disconnected after sending the table
+    // to Hub
+    bool disconnected = !is_connected();
 
-    //std::string samp_share = std::tmpnam(NULL);
-    //votable.m_tablexml->save(samp_share+".xml");
-    //votable.m_tablexml->print();
-    
+    // Make sure that the client is connected to a Hub
+    if (disconnected) {
+        connect();
+    }
+
+    // Save FITS HDU into a temporary file
+    std::string samp_share = std::tmpnam(NULL);
+    votable.xml().save(samp_share);
+
+    // Compose notification to be passed to the Hub
     std::string hub_command = "";
-    //ELABORATE THE COMMAND TO BE PASSED TO THE HUB
-    //SEND THE DATA
     hub_command.append("<?xml version=\"1.0\"?>\n");
     hub_command.append("<methodCall>");
     hub_command.append("  <methodName>samp.hub.notifyAll</methodName>\n");
     hub_command.append("  <params>\n");
-    //hub_command.append("    <param><value>table.load.votable</value></param>\n");
     hub_command.append("    <param><value>"+m_client_key+"</value></param>\n");
     hub_command.append("    <param><value><struct>\n");
     hub_command.append("      <member><name>samp.params</name><value><struct>\n");
-    hub_command.append("        <member><name>name</name><value>Gammalib_VOTABLE</value></member>\n");
-    hub_command.append("        <member><name>url</name><value>file://localhost"+votable.m_sharedtablename+".xml"+"</value></member>\n");
-    hub_command.append("        <member><name>table-id</name><value>file://localhost"+votable.m_sharedtablename+".xml"+"</value></member>\n");
+    hub_command.append("        <member>\n");
+    hub_command.append("          <name>name</name>\n");
+    hub_command.append("          <value>"+votable.name()+"</value>\n");
+    hub_command.append("        </member>\n");
+    hub_command.append("        <member>\n");
+    hub_command.append("          <name>url</name>\n");
+    hub_command.append("          <value>\n");
+    hub_command.append("            file://localhost"+samp_share+"\n");
+    hub_command.append("          </value>\n");
+    hub_command.append("        </member>\n");
+    hub_command.append("        <member>\n");
+    hub_command.append("          <name>table-id</name>\n");
+    hub_command.append("          <value>\n");
+    hub_command.append("            file://localhost"+samp_share+"\n");
+    hub_command.append("          </value>\n");
+    hub_command.append("        </member>\n");
     hub_command.append("      </struct></value></member>\n");
-    hub_command.append("      <member><name>samp.mtype</name><value>table.load.votable</value></member>\n");
+    hub_command.append("      <member>\n");
+    hub_command.append("        <name>samp.mtype</name>\n");
+    hub_command.append("        <value>table.load.votable</value>\n");
+    hub_command.append("      </member>\n");
     hub_command.append("    </struct></value></param>\n");
     hub_command.append("  </params>\n");
     hub_command.append("</methodCall>\n");
+
+    // Send notification
     execute(hub_command);
+
+    // Disconnect client from Hub
+    if (disconnected) {
+        disconnect();
+    }
 
     // Return
     return;
 }
+
+
 /***********************************************************************//**
  * @brief Print VO client information
  *
@@ -717,21 +755,10 @@ bool GVOClient::require_hub(void)
     // First get Hub information
     bool found = find_hub();
 
-    #if defined(G_SHOW_MESSAGE)
-    std::cout << "find_hub() result:" << std::endl;
-    std::cout << found << std::endl;
-    #endif
     // If we have Hub information, check if the Hub is alive
     if (found) {
         found = ping_hub();
     }
-
-    // Debug option: show posted message
-    #if defined(G_SHOW_MESSAGE)
-    std::cout << "ping_hub() result:" << std::endl;
-    std::cout << found << std::endl;
-    #endif
-    
 
     // If the Hub is not alive then create a GammaLib own Hub
     if (!found) {
@@ -1074,7 +1101,6 @@ std::string GVOClient::receive_string(void) const
         int n       = 0;
         do {
             n = gammalib::recv(m_socket, buffer, 1000, 0, timeout);
-            //n = recv(m_socket, buffer, 1000, 0);
             if (n > 0) {
                 buffer[n] = '\0';
                 result.append(std::string(buffer));
