@@ -51,8 +51,8 @@ const GModelSpectralRegistry       g_spectral_multi_registry(&g_spectral_multi_s
 #define G_COMPONENT_INDEX     "GModelSpectralMultiplicative::component(int&)"
 #define G_COMPONENT_NAME            "GModelSpectralMultiplicative::component"\
                                                              "(std::string&)"
-#define G_APPEND "GModelSpectralMultiplicative::append(const GModelSpectral&"\
-                                                      ", const std::string&)"
+#define G_APPEND     "GModelSpectralMultiplicative::append(GModelSpectral&, "\
+                                                              "std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -229,12 +229,12 @@ GModelSpectralMultiplicative* GModelSpectralMultiplicative::clone(void) const
  * parameters using
  *
  * \f[
- *     \frac{\delta S}{\delta P_{\rm ij}}\prod_{\rm k\neq \rm i}^{n} M_{\rm k}
+ *    \frac{\delta S}{\delta P_{\rm ij}}\prod_{\rm k\neq \rm i}^{n} M_{\rm k}
  * \f]
  *
  * where \f${P_{\rm ij}}\f$ is the j-th parameter of the i-th multiplicative
- * component, while \f${M_{\rm k}}\f$ is the k-th model component and n the number
- * of model components.
+ * component, while \f${M_{\rm k}}\f$ is the k-th model component and n the
+ * number of model components.
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
@@ -442,7 +442,7 @@ void GModelSpectralMultiplicative::read(const GXmlElement& xml)
         // Get spectral XML element
         const GXmlElement* spec = xml.element("spectrum", i);
 
-        // Initialise a spectral registry object
+        // Allocate a spectral registry object
         GModelSpectralRegistry registry;
 
         // Read spectral model
@@ -581,6 +581,9 @@ std::string GModelSpectralMultiplicative::print(const GChatter& chatter) const
  * @param[in] spec Spectral model component.
  * @param[in] name Name of spectral component (can be empty).
  *
+ * @exception GException::invalid_value
+ *            Invalid component name specified
+ *
  * Appends a spectral component to the Multiplicative model
  ***************************************************************************/
 void GModelSpectralMultiplicative::append(const GModelSpectral& spec,
@@ -598,11 +601,12 @@ void GModelSpectralMultiplicative::append(const GModelSpectral& spec,
 
     // Check if component name is unique, throw exception if not
     if (gammalib::contains(m_components, component_name)) {
-        std::string msg =
-            "Attempt to append component with name \""+component_name+"\" to multiplicative"
-            " spectral model container, but a component with the same name exists already.\n"
-            "Every component in the container needs a unique name. On default the system will"
-            "increment an integer if no component name is provided.";
+        std::string msg = "Attempt to append component with name \""+
+                          component_name+"\" to multiplicative spectral model "
+                          "container, but a component with the same name exists "
+                          "already. Every component in the container needs a "
+                          "unique name. On default the system will increment "
+                          "an integer if no component name is provided.";
         throw GException::invalid_value(G_APPEND, msg);
     }
 
