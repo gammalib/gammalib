@@ -44,6 +44,7 @@
 #include "GObservation.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialComposite.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF_RADIAL               "GResponse::irf_radial(GEvent&, GSource&,"\
@@ -320,12 +321,39 @@ double GResponse::eval_prob(const GModelSky&    model,
     // Continue only if the model has a spatial component
     if (model.spatial() != NULL) {
 
-        // Set source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
-        
-        // Get IRF value. This method returns the spatial component of the
-        // source model.
-        double irf = this->irf(event, source, obs);
+        // Initialise IRF value
+        double irf = 0.0;
+
+        // Try to retrieve a composite spectral model
+        const GModelSpatialComposite* composite = dynamic_cast<const
+                GModelSpatialComposite*>(model.spatial());
+
+        // Compute IRF using GSource if not a composite model
+        if (composite == NULL) {
+
+            // Set source
+            GSource source(model.name(), model.spatial(), srcEng, srcTime);
+
+            // Get IRF value. This method returns the spatial component of the
+            // source model.
+            irf = this->irf(event, source, obs);
+        }
+        else {
+
+            // Loop over composite model components
+            for(int i = 0; i < composite->components(); ++i) {
+
+                // Circumvent function returning const component
+                GModelSpatial* spat = const_cast<GModelSpatial*>(composite->component(i));
+
+                // Set source
+                GSource source(model.name(), spat, srcEng, srcTime);
+
+                // Get IRF value. This method returns the spatial component of the
+                // source model.
+                irf += this->irf(event, source, obs);
+            }
+        }
 
         // If required, apply instrument specific model scaling
         if (model.has_scales()) {
