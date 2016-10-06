@@ -449,7 +449,7 @@ void GVOClient::publish(const GVOTable& votable)
     hub_command.append("  <methodName>samp.hub.notifyAll</methodName>\n");
     hub_command.append("  <params>\n");
     //hub_command.append("    <param><value>table.load.votable</value></param>\n");
-    hub_command.append("    <param><value>"+m_secret+"</value></param>\n");
+    hub_command.append("    <param><value>"+m_client_key+"</value></param>\n");
     hub_command.append("    <param><value><struct>\n");
     hub_command.append("      <member><name>samp.params</name><value><struct>\n");
     hub_command.append("        <member><name>name</name><value>Gammalib_VOTABLE</value></member>\n");

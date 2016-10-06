@@ -56,8 +56,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_CONSOLE_DUMP               //!< Show method headers
-//#define G_CONSOLE_ERRORS             //!< Show error messages
+#define G_CONSOLE_DUMP               //!< Show method headers
+#define G_CONSOLE_ERRORS             //!< Show error messages
 #define G_SHOW_MESSAGE               //!< Show posted and received messages
 
 
@@ -1131,6 +1131,10 @@ void GVOHub::request_notify_all(const GXml& xml, const socklen_t& sock)
     // Get message type
     std::string mtype = get_mtype(xml);
 
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "mtype:"+mtype << std::endl;
+    #endif
+
     // Post void message
     post_samp_void(sock);
 
@@ -1317,20 +1321,29 @@ std::string GVOHub::get_response_value(const GXmlNode*    node,
 
     // Search for parameter name, and if found, return its value
     if (node != NULL) {
+        #if defined(G_CONSOLE_DUMP)
+        std::cout << "GVOHub::get_response_value parsing non null node" << std::endl;
+        #endif
         int num = node->elements("member");            
         for (int i = 0; i < num; ++i) {
             const GXmlNode* member = node->element("member", i);
             std::string one_name;
             std::string one_value;
             get_name_value_pair(member, one_name, one_value);
+            #if defined(G_CONSOLE_DUMP)
+            std::cout << "GVOHub::get_response_value parsing "+one_name+ " " + one_value << std::endl;
+            #endif
             if (one_name == name) {
                 value = one_value;
                 break;
             }
         }
         
+    } else {
+        #if defined(G_CONSOLE_DUMP)
+        std::cout << "GVOHub::get_response_value parsing NULL node" << std::endl;
+        #endif
     }
-
     // Return value
     return value;
 }
@@ -2208,13 +2221,23 @@ std::string GVOHub::get_mtype(const GXml& xml) const
 {
     // Header
     #if defined(G_CONSOLE_DUMP)
-    std::cout << "GVOHub::get_mtype" << std::endl;
+    std::cout << "GVOHub::get_mtype entrance" << std::endl;
     #endif
 
     // Initialise response
     std::string client_key = "";
 
     // Get the client's private key
+    /*
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::get_mtype identifying node" << std::endl;
+    #endif
+    const GXmlNode* node = xml.element("methodCall > params > param[1] > value > struct ");
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::get_mtype calling get response value" << std::endl;
+    #endif
+    client_key = get_response_value(node, "name");
+    /**/
     const GXmlNode* node = xml.element("methodCall > params > param > value");
     if (node != NULL) {
         const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
@@ -2222,7 +2245,7 @@ std::string GVOHub::get_mtype(const GXml& xml) const
             client_key = text->text();
         }
     }
-
+    /* */
     // Return key
     return client_key;
 }
