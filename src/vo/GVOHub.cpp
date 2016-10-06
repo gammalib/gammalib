@@ -1125,7 +1125,7 @@ void GVOHub::request_notify_all(const GXml& xml, const socklen_t& sock)
 {
     // Header
     #if defined(G_CONSOLE_DUMP)
-    std::cout << "GVOHub::request_notify_all" << std::endl;
+    std::cout << "GVOHub::request_notify_all entrance" << std::endl;
     #endif
 
     // Get message type
@@ -2077,8 +2077,8 @@ void GVOHub::notify_image_load(const GVOHub::client& client,
                                const GXml&           xml)
 {
 	// Get client response
-       const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
-       //const GXmlNode* node = xml.element("methodCall > params > param[1] > value > struct > member > value > struct");
+       //const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
+        const GXmlNode* node = xml.element("methodCall > params > param[1] > value > struct > member > value > struct");
     // Extract image information from client response
 	std::string name = get_response_value(node, "name");
 	std::string url  = get_response_value(node, "url");
@@ -2221,23 +2221,18 @@ std::string GVOHub::get_mtype(const GXml& xml) const
 {
     // Header
     #if defined(G_CONSOLE_DUMP)
-    std::cout << "GVOHub::get_mtype entrance" << std::endl;
+    std::cout << "In GVOHub::get_mtype" << std::endl;
     #endif
 
     // Initialise response
     std::string client_key = "";
 
     // Get the client's private key
-    /*
-    #if defined(G_CONSOLE_DUMP)
-    std::cout << "GVOHub::get_mtype identifying node" << std::endl;
-    #endif
+    
     const GXmlNode* node = xml.element("methodCall > params > param[1] > value > struct ");
-    #if defined(G_CONSOLE_DUMP)
-    std::cout << "GVOHub::get_mtype calling get response value" << std::endl;
-    #endif
-    client_key = get_response_value(node, "name");
-    /**/
+    
+    client_key = get_response_value(node, "samp.mtype");
+    /*
     const GXmlNode* node = xml.element("methodCall > params > param > value");
     if (node != NULL) {
         const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
@@ -2245,7 +2240,7 @@ std::string GVOHub::get_mtype(const GXml& xml) const
             client_key = text->text();
         }
     }
-    /* */
+    */
     // Return key
     return client_key;
 }
