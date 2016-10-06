@@ -141,7 +141,7 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_logparabola),
            "Test GModelSpectralLogParabola");
     append(static_cast<pfunction>(&TestGModel::test_multiplicative),
-               "Test GModelSpectralMultiplicative");
+           "Test GModelSpectralMultiplicative");
     append(static_cast<pfunction>(&TestGModel::test_nodes),
            "Test GModelSpectralNodes");
     append(static_cast<pfunction>(&TestGModel::test_filefct),
@@ -2020,34 +2020,35 @@ void TestGModel::test_multiplicative(void)
     test_value(model1.type(), "Multiplicative", "Check void model type");
 
     // Test value constructor
-    model1.append(GModelSpectralPlaw(1e-17, -2.5, GEnergy(1, "TeV")), "Plaw1");
-    model1.append(GModelSpectralPlaw(1.0, 0.1, GEnergy(1, "TeV")), "Plaw2");
+    model1.append(GModelSpectralPlaw(1.0e-17, -2.5, GEnergy(1.0, "TeV")), "Plaw1");
+    model1.append(GModelSpectralPlaw(1.0, 0.1, GEnergy(1.0, "TeV")), "Plaw2");
 
-    test_value(model1.eval(GEnergy(1,"TeV")),1e-17);
+    // Test eval method
+    test_value(model1.eval(GEnergy(1.0, "TeV")), 1.0e-17);
     model1["Plaw2:Index"].value(2.5);
-    test_value(model1.eval(GEnergy(5,"TeV")),1e-17);
+    test_value(model1.eval(GEnergy(5.0, "TeV")), 1.0e-17);
 
     // Test XML constructor
-    GXml               xml(m_xml_point_multiplicative);
-    GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+    GXml         xml(m_xml_point_multiplicative);
+    GXmlElement* element = xml.element(0)->element(0)->element("spectrum", 0);
     GModelSpectralMultiplicative model2(*element);
     test_value(model2.size(), 7);
     test_value(model2.type(), "Multiplicative", "Check model type");
-    test_value(model2.eval(GEnergy(1,"TeV")), 1e-17 * std::exp(-1));
+    test_value(model2.eval(GEnergy(1.0, "TeV")), 1.0e-17 * std::exp(-1.0));
 
     // Create copy of model2
     GModelSpectralMultiplicative model3(model2);
 
     // Change model2
-    model2["1:Prefactor"].value(3e-17);
-    test_value(model2["1:Prefactor"].value(), 3e-17);
+    model2["1:Prefactor"].value(3.0e-17);
+    test_value(model2["1:Prefactor"].value(), 3.0e-17);
 
-    model2["2:CutoffEnergy"].value(1e7);
-    test_value(model2["2:CutoffEnergy"].value(), 1e7);
+    model2["2:CutoffEnergy"].value(1.0e7);
+    test_value(model2["2:CutoffEnergy"].value(), 1.0e7);
 
-    //  Verify model3 hasnt been changed
-    test_value(model3["1:Prefactor"].value(), 1e-17);
-    test_value(model3["2:CutoffEnergy"].value(), 1e6);
+    // Verify model3 hasnt been changed
+    test_value(model3["1:Prefactor"].value(), 1.0e-17);
+    test_value(model3["2:CutoffEnergy"].value(), 1.0e6);
 
     // Exit test
     return;

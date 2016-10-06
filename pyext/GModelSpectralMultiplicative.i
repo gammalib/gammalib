@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GModelSpectralMultiplicative.i - Spectral power law model class     *
+ *   GModelSpectralMultiplicative.i - Multiplicative spectral model class  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2016 Michael Mayer                                       *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpecComposite spectral model class interface definition
+ * @file GModelSpectralMultiplicative.i
+ * @brief Multiplicative spectral model class interface definition
  * @author Michael Mayer
  */
 %{
@@ -31,7 +32,7 @@
 /***********************************************************************//**
  * @class GModelSpectralMultiplicative
  *
- * @brief Composite spectral model class
+ * @brief Multiplicative spectral model class
  ***************************************************************************/
 class GModelSpectralMultiplicative : public GModelSpectral {
 public:
@@ -42,30 +43,29 @@ public:
     virtual ~GModelSpectralMultiplicative(void);
 
     // Implemented pure virtual methods
-    virtual void                clear(void);
+    virtual void                          clear(void);
     virtual GModelSpectralMultiplicative* clone(void) const;
-    virtual std::string         classname(void) const;
-    virtual std::string         type(void) const;
-    virtual double              eval(const GEnergy& srcEng,
-                                     const GTime&   srcTime = GTime(),
-                                     const bool&    gradients = false) const;
-    virtual double              flux(const GEnergy& emin,
-                                     const GEnergy& emax) const;
-    virtual double              eflux(const GEnergy& emin,
-                                      const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin,
-                                   const GEnergy& emax,
-                                   const GTime&   time,
-                                   GRan&          ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
+    virtual std::string                   classname(void) const;
+    virtual std::string                   type(void) const;
+    virtual double                        eval(const GEnergy& srcEng,
+                                               const GTime&   srcTime = GTime(),
+                                               const bool&    gradients = false) const;
+    virtual double                        flux(const GEnergy& emin,
+                                               const GEnergy& emax) const;
+    virtual double                        eflux(const GEnergy& emin,
+                                                const GEnergy& emax) const;
+    virtual GEnergy                       mc(const GEnergy& emin,
+                                             const GEnergy& emax,
+                                             const GTime&   time,
+                                             GRan&          ran) const;
+    virtual void                          read(const GXmlElement& xml);
+    virtual void                          write(GXmlElement& xml) const;
 
     // Other methods
-    void                append(const GModelSpectral& spec, const std::string& name="");
-    int                 components(void) const;
-    GModelSpectral*     component(const int& index) const;
-    GModelSpectral*     component(const std::string& name) const;
-
+    void                  append(const GModelSpectral& spec, const std::string& name="");
+    int                   components(void) const;
+    const GModelSpectral* component(const int& index) const;
+    const GModelSpectral* component(const std::string& name) const;
 };
 
 

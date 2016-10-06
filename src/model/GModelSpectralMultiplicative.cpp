@@ -1,5 +1,5 @@
 /***************************************************************************
- * GModelSpectralMultiplicative.cpp - Spectral multiplicative model class  *
+ *  GModelSpectralMultiplicative.cpp - Multiplicative spectral model class *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2016 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
@@ -41,14 +41,16 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralMultiplicative     g_spectral_multi_seed;
-const GModelSpectralRegistry g_spectral_multi_registry(&g_spectral_multi_seed);
+const GModelSpectralMultiplicative g_spectral_multi_seed;
+const GModelSpectralRegistry       g_spectral_multi_registry(&g_spectral_multi_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC               "GModelSpectralMultiplicative::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
-#define G_WRITE            "GModelSpectralMultiplicative::write(GXmlElement&)"
-#define G_COMPONENT_INDEX  "GModelSpectralMultiplicative::component(const int&)"
-#define G_COMPONENT_NAME   "GModelSpectralMultiplicative::component(const std::string&)"
+#define G_MC  "GModelSpectralMultiplicative::mc(GEnergy&, GEnergy&, GTime&, "\
+                                                                     "GRan&)"
+#define G_WRITE           "GModelSpectralMultiplicative::write(GXmlElement&)"
+#define G_COMPONENT_INDEX     "GModelSpectralMultiplicative::component(int&)"
+#define G_COMPONENT_NAME            "GModelSpectralMultiplicative::component"\
+                                                             "(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -66,7 +68,8 @@ const GModelSpectralRegistry g_spectral_multi_registry(&g_spectral_multi_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpectralMultiplicative::GModelSpectralMultiplicative(void) : GModelSpectral()
+GModelSpectralMultiplicative::GModelSpectralMultiplicative(void) :
+                              GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -79,13 +82,14 @@ GModelSpectralMultiplicative::GModelSpectralMultiplicative(void) : GModelSpectra
 /***********************************************************************//**
  * @brief XML constructor
  *
- * @param[in] xml XML element containing position information.
+ * @param[in] xml XML element containing spectral model information.
  *
- * Constructs a multiplicative spectral model by extracting information from an
- * XML element. See the read() method for more information about the expected
- * structure of the XML element.
+ * Constructs a multiplicative spectral model by extracting information from
+ * an XML element. See the read() method for more information about the
+ * expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralMultiplicative::GModelSpectralMultiplicative(const GXmlElement& xml) : GModelSpectral()
+GModelSpectralMultiplicative::GModelSpectralMultiplicative(const GXmlElement& xml) :
+                              GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -103,8 +107,8 @@ GModelSpectralMultiplicative::GModelSpectralMultiplicative(const GXmlElement& xm
  *
  * @param[in] model Multiplicative spectral model.
  ***************************************************************************/
-GModelSpectralMultiplicative::GModelSpectralMultiplicative(const GModelSpectralMultiplicative& model)
-                                       : GModelSpectral(model)
+GModelSpectralMultiplicative::GModelSpectralMultiplicative(const GModelSpectralMultiplicative& model) :
+                              GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -139,8 +143,8 @@ GModelSpectralMultiplicative::~GModelSpectralMultiplicative(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Spectral power law model.
- * @return Spectral power law model.
+ * @param[in] model Multiplicative spectral model.
+ * @return Multiplicative spectral model.
  ***************************************************************************/
 GModelSpectralMultiplicative& GModelSpectralMultiplicative::operator=(const GModelSpectralMultiplicative& model)
 {
@@ -216,61 +220,65 @@ GModelSpectralMultiplicative* GModelSpectralMultiplicative::clone(void) const
  *    \prod_{i=0}^{N} {M_{\rm i}}(\rm srcEng, srcTime)
  * \f]
  *
- * where \f${M_{\rm i}}\f$ is the model evaluation of the i-th model
+ * where \f${M_{\rm i}}\f$ is the i-th model component.
  *
- * If the @p gradients flag is true the method will also compute the
- * partial derivatives of each model component with respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the partial
+ * derivatives of each model component with respect to the parameters using
+ *
+ * @todo Add formula for gradient computation
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
 double GModelSpectralMultiplicative::eval(const GEnergy& srcEng,
-                                const GTime&   srcTime,
-                                const bool&    gradients) const
+                                          const GTime&   srcTime,
+                                          const bool&    gradients) const
 {
     // Initialise result
-	double value = 0.0;
+    double value = 0.0;
 
-	// Check for available spectral components
-	if (m_spectral.size()) {
+    // Check for available spectral components
+    if (m_spectral.size()) {
 
-		// Add first spectral component
-		value += m_spectral[0]->eval(srcEng, srcTime, gradients);
+        // Set first spectral component
+        value = m_spectral[0]->eval(srcEng, srcTime, gradients);
 
-		// Loop over model components
-		for (int i = 1; i < m_spectral.size(); ++i) {
-			value *= m_spectral[i]->eval(srcEng, srcTime, gradients);
-		}
+        // Loop over model components
+        for (int i = 1; i < m_spectral.size(); ++i) {
+            value *= m_spectral[i]->eval(srcEng, srcTime, gradients);
+        }
 
-	} // endfor: loop over model components
+    } // endfor: loop over model components
 
-	// Modify gradients if requested
-	if (gradients) {
+    // Modify gradients if requested
+    if (gradients) {
 
-		// Loop over models
-		for(int i = 0; i < m_spectral.size(); ++i) {
+        // Loop over model components
+        for (int i = 0; i < m_spectral.size(); ++i) {
 
-			// Initialise scaling factor
-			double factor = 1.0;
+            // Initialise scaling factor
+            double factor = 1.0;
 
-			//Loop over other models and compute factor
-			for(int j = 0; j < m_spectral.size(); ++j) {
-				if (i != j) {
-					factor *= m_spectral[j]->eval(srcEng, srcTime, false);
-				}
-			}
+            // Loop over other model components and compute factor
+            for (int j = 0; j < m_spectral.size(); ++j) {
+                if (i != j) {
+                    factor *= m_spectral[j]->eval(srcEng, srcTime, false);
+                }
+            }
 
-			// Loop over model parameters
-			for(int ipar = 0; ipar < m_spectral[i]->size(); ++ipar) {
+            // Loop over model parameters
+            for (int ipar = 0; ipar < m_spectral[i]->size(); ++ipar) {
 
-				// Get reference to model parameter
-				GModelPar& par = m_spectral[i]->operator[](ipar);
+                // Get reference to model parameter
+                GModelPar& par = m_spectral[i]->operator[](ipar);
 
-				// Scale parameter gradient
-				par.gradient(par.gradient()*factor);
+                // Scale parameter gradient
+                par.gradient(par.gradient()*factor);
 
-			} // endfor: loop over model parameters
-		} // endfor: loop over models
-	} //endif: compute gradients
+            } // endfor: loop over model parameters
+
+        } // endfor: loop over models
+
+    } //endif: compute gradients
 
 
     // Compile option: Check for NaN/Inf
@@ -300,7 +308,7 @@ double GModelSpectralMultiplicative::eval(const GEnergy& srcEng,
  * Computes the photon flux of multiplicative spectral model
  ***************************************************************************/
 double GModelSpectralMultiplicative::flux(const GEnergy& emin,
-                                const GEnergy& emax) const
+                                          const GEnergy& emax) const
 {
     // Initialise flux
     double flux = 0.0;
@@ -308,17 +316,17 @@ double GModelSpectralMultiplicative::flux(const GEnergy& emin,
     // Compute only if integration range is valid and components are available
     if (emin < emax && m_spectral.size()) {
 
-    	// Initialise function to integrate
-		flux_kern kernel(m_spectral);
+        // Initialise function to integrate
+        flux_kern kernel(m_spectral);
 
-		// Initialise integral class with function
-		GIntegral integral(&kernel);
+        // Initialise integral class with function
+        GIntegral integral(&kernel);
 
-		// Set integration precision
-		integral.eps(1.0e-8);
+        // Set integration precision
+        integral.eps(1.0e-8);
 
-		// Calculate integral between emin and emax
-		flux = integral.romberg(emin.MeV(), emax.MeV());
+        // Calculate integral between emin and emax
+        flux = integral.romberg(emin.MeV(), emax.MeV());
 
     } // endif: integration range was valid
 
@@ -337,30 +345,30 @@ double GModelSpectralMultiplicative::flux(const GEnergy& emin,
  * Computes the energy flux of multiplicative spectral model
  ***************************************************************************/
 double GModelSpectralMultiplicative::eflux(const GEnergy& emin,
-                                 const GEnergy& emax) const
+                                           const GEnergy& emax) const
 {
-   // Initialise eflux
-	double eflux = 0.0;
+    // Initialise eflux
+    double eflux = 0.0;
 
-	// Compute only if integration range is valid and components are available
-	if (emin < emax && m_spectral.size()) {
+    // Compute only if integration range is valid and components are available
+    if (emin < emax && m_spectral.size()) {
 
-		// Initialise function to integrate
-		eflux_kern kernel(m_spectral);
+        // Initialise function to integrate
+        eflux_kern kernel(m_spectral);
 
-		// Initialise integral class with function
-		GIntegral integral(&kernel);
+        // Initialise integral class with function
+        GIntegral integral(&kernel);
 
-		// Set integration precision
-		integral.eps(1.0e-8);
+        // Set integration precision
+        integral.eps(1.0e-8);
 
-		// Calculate integral between emin and emax
-		eflux = integral.romberg(emin.MeV(), emax.MeV());
+        // Calculate integral between emin and emax
+        eflux = integral.romberg(emin.MeV(), emax.MeV());
 
-	} // endif: integration range was valid
+    } // endif: integration range was valid
 
-	// Return flux
-	return eflux;
+    // Return flux
+    return eflux;
 }
 
 
@@ -376,12 +384,13 @@ double GModelSpectralMultiplicative::eflux(const GEnergy& emin,
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
  *
- * Returns Monte Carlo energy by randomly drawing from a multiplicative spectral model.
+ * Returns Monte Carlo energy by randomly drawing from a multiplicative
+ * spectral model.
  ***************************************************************************/
 GEnergy GModelSpectralMultiplicative::mc(const GEnergy& emin,
-                               const GEnergy& emax,
-                               const GTime&   time,
-                               GRan&          ran) const
+                                         const GEnergy& emax,
+                                         const GTime&   time,
+                                         GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
@@ -391,9 +400,9 @@ GEnergy GModelSpectralMultiplicative::mc(const GEnergy& emin,
 
     // Throw exception if model container is empty
     if (m_spectral.size() == 0) {
-    	throw GException::runtime_error(G_MC,
-    	              "Multiplicative spectral model is empty. It is required to have at"\
-					  " least one spectral model to run simulations");
+        std::string msg = "Multiplicative spectral model is empty. At least"
+                          " one spectral model is required for simulations.";
+    	throw GException::runtime_error(G_MC, msg);
     }
 
     // Update MC cache
@@ -416,19 +425,19 @@ GEnergy GModelSpectralMultiplicative::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralMultiplicative::read(const GXmlElement& xml)
 {
-	// Get number of spectral components
-	int n_spectrals = xml.elements("spectrum");
+    // Get number of spectral components
+    int n_spectrals = xml.elements("spectrum");
 
-	// Loop over spectral elements
-	for(int i = 0; i < n_spectrals; ++i) {
+    // Loop over spectral elements
+    for (int i = 0; i < n_spectrals; ++i) {
 
-		// Get spectral XML element
-		const GXmlElement* spec = xml.element("spectrum", i);
+        // Get spectral XML element
+        const GXmlElement* spec = xml.element("spectrum", i);
 
-		// Add spectral component
-		add_component(*spec);
+        // Add spectral component
+        add_component(*spec);
 
-	} // endfor: loop over components
+    } // endfor: loop over components
 
     // Return
     return;
@@ -459,52 +468,53 @@ void GModelSpectralMultiplicative::write(GXmlElement& xml) const
     }
 
     // Loop over model components
-    for(int i = 0; i < m_spectral.size(); i++) {
+    for (int i = 0; i < m_spectral.size(); i++) {
 
-    	// Write spectral model
-		if (m_spectral[i] != NULL) {
+        // Write spectral model
+        if (m_spectral[i] != NULL) {
 
-			// Create new spectrum node
-			xml.append(GXmlElement("spectrum"));
+            // Create new spectrum node
+            xml.append(GXmlElement("spectrum"));
 
-			// Get new spectrum node
-			GXmlElement* spec = xml.element("spectrum", xml.elements("spectrum")-1);
+            // Get new spectrum node
+            GXmlElement* spec = xml.element("spectrum", xml.elements("spectrum")-1);
 
-			// Create temporary copy of the spectral model
-			// This is a kluge to write out the original parameters.
-			GModelSpectral* cpy = m_spectral[i]->clone();
+            // Create temporary copy of the spectral model. This is a kluge to
+            // write out the original parameters.
+            GModelSpectral* cpy = m_spectral[i]->clone();
 
-			// Loop over parameters of model
-			for (int j = 0; j < cpy->size(); ++j) {
+            // Loop over parameters of model
+            for (int j = 0; j < cpy->size(); ++j) {
 
-				// Get model parameter and name
-				GModelPar& par = (*cpy)[j];
-				std::string parname = par.name();
+                // Get model parameter and name
+                GModelPar&  par     = (*cpy)[j];
+                std::string parname = par.name();
 
-				// Check if name contains colon
-				if (gammalib::contains(parname, ":")) {
+                // Check if name contains colon
+                if (gammalib::contains(parname, ":")) {
 
-					// Split at the colon
-					std::vector<std::string> splits = gammalib::split(parname, ":");
+                    // Split at the colon
+                    std::vector<std::string> splits = gammalib::split(parname, ":");
 
-					// Use second part of the string to recover original parameter name
-					par.name(splits[1]);
-				}
+                    // Use second part of the string to recover original
+                    // parameter name
+                    par.name(splits[1]);
+                }
 
-			} // endfor: loop over parameters
+            } // endfor: loop over parameters
 
-			// Write spectral component
-			cpy->write(*spec);
+            // Write spectral component
+            cpy->write(*spec);
 
-			// Add component name if previously available
-			if (m_components[i] != gammalib::str(i+1)) {
-				spec->attribute("component", m_components[i]);
-			}
+            // Add component name if previously available
+            if (m_components[i] != gammalib::str(i+1)) {
+                spec->attribute("component", m_components[i]);
+            }
 
-			// Remove temporary copy
-			delete cpy;
+            // Remove temporary copy
+            delete cpy;
 
-		} // endif: spectral model was not NULL
+        } // endif: spectral model was not NULL
 
     } // endfor: loop over model components
 
@@ -514,7 +524,7 @@ void GModelSpectralMultiplicative::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Print multiplicative spectral model information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing model information.
@@ -527,19 +537,19 @@ std::string GModelSpectralMultiplicative::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-    	// Append header
+        // Append header
         result.append("=== GModelSpectralMultiplicative ===");
 
         // Append information
-		result.append("\n"+gammalib::parformat("Number of components"));
-		result.append(gammalib::str(components()));
-		result.append("\n"+gammalib::parformat("Number of parameters"));
-		result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of components"));
+        result.append(gammalib::str(components()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
 
-		// Print parameter information
-		for (int i = 0; i < size(); ++i) {
-			result.append("\n"+m_pars[i]->print(chatter));
-		}
+        // Print parameter information
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
 
     } // endif: chatter was not silent
 
@@ -551,12 +561,13 @@ std::string GModelSpectralMultiplicative::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Append spectral component
  *
- * @param[in] spec Spectral model component
- * @param[in] name Name of spectral component (can be empty)
+ * @param[in] spec Spectral model component.
+ * @param[in] name Name of spectral component (can be empty).
  *
  * Appends a spectral component to the Multiplicative model
  ***************************************************************************/
-void GModelSpectralMultiplicative::append(const GModelSpectral& spec, const std::string& name)
+void GModelSpectralMultiplicative::append(const GModelSpectral& spec,
+                                          const std::string&    name)
 {
     // Append model container
     m_spectral.push_back(spec.clone());
@@ -564,80 +575,84 @@ void GModelSpectralMultiplicative::append(const GModelSpectral& spec, const std:
     // Get index of latest model
     int index = m_spectral.size()-1;
 
-    // Use model index if component name is empty
-    std::string component_name = !name.empty() ? name : gammalib::str(m_spectral.size());
+    // Use model index as component name if component name is empty
+    std::string component_name = !name.empty() ? name
+                                               : gammalib::str(m_spectral.size());
 
-	// Add component name (for now simple number)
-	m_components.push_back(component_name);
+    // Add component name (for now simple number)
+    m_components.push_back(component_name);
 
-	// Get number of spectral parameters from model
-	int npars = m_spectral[index]->size();
+    // Get number of spectral parameters from model
+    int npars = m_spectral[index]->size();
 
-	// Loop over model parameters
-	for (int ipar = 0; ipar < npars; ++ipar) {
+    // Loop over model parameters
+    for (int ipar = 0; ipar < npars; ++ipar) {
 
-		// Get model parameter
-		GModelPar* par = &(m_spectral[index]->operator[](ipar));
+        // Get model parameter
+        GModelPar* par = &(m_spectral[index]->operator[](ipar));
 
-		// Modify parameter name
-		par->name(component_name+":"+par->name());
+        // Prepend component name to parameter name
+        par->name(component_name+":"+par->name());
 
-		// Append model parameter with new name to internal container
-		m_pars.push_back(par);
+        // Append model parameter with new name to internal container
+        m_pars.push_back(par);
 
-	} // endfor: loop over model parameters
+    } // endfor: loop over model parameters
+
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Returns spectral component element
+ * @brief Return spectral model component by index
  *
  * @param[in] index Index of spectral component.
- * @return Spectral model.
+ * @return Pointer to spectral model.
  *
- * Returns a spectral component to the Multiplicative model
+ * Returns a component of the multiplicative spectral model by @p index.
  ***************************************************************************/
 const GModelSpectral* GModelSpectralMultiplicative::component(const int& index) const
 {
 	// Check if index is in validity range
 	if (index >= m_spectral.size() || index < 0) {
-		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index", index, m_spectral.size(),"");
+		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
+                                       index, m_spectral.size());
 	}
 
 	// Return spectral component
 	return m_spectral[index];
-
 }
 
 
 /***********************************************************************//**
- * @brief Returns pointer to specific spectral component
+ * @brief Return spectral model component by name
  *
  * @param[in] name Name of spectral component.
- * @return Spectral model.
+ * @return Pointer to spectral model.
  *
- * Returns a spectral component of the Multiplicative model
+ * Returns a component of the multiplicative spectral model by @p name.
  ***************************************************************************/
 const GModelSpectral* GModelSpectralMultiplicative::component(const std::string& name) const
 {
-	// Check if model name is found
-	int index = -1;
-	for(int i = 0; i < m_components.size(); ++i) {
-		if (m_components[i] == name) {
-			index = i;
-			break;
-		}
-	}
+    // Check if model name is found
+    int index = -1;
+    for (int i = 0; i < m_components.size(); ++i) {
+        if (m_components[i] == name) {
+            index = i;
+            break;
+        }
+    }
 
-	// Check if component name was found
-	if (index == -1) {
-		throw GException::model_not_found(G_COMPONENT_NAME, name,"");
-	}
+    // Check if component name was found
+    if (index == -1) {
+        throw GException::model_not_found(G_COMPONENT_NAME, name);
+    }
 
 	// Return spectral component
 	return m_spectral[index];
-
 }
+
 
 /*==========================================================================
  =                                                                         =
@@ -661,7 +676,7 @@ void GModelSpectralMultiplicative::init_members(void)
     m_mc_spectrum.clear();
     m_mc_emin.clear();
     m_mc_emax.clear();
-    m_n_mc_nodes = 100;
+    m_mc_values.clear();
 
     // Return
     return;
@@ -671,7 +686,7 @@ void GModelSpectralMultiplicative::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModelSpectralMultiplicative members which should be copied.
+ * @param[in] model Multiplicative spectral model.
  ***************************************************************************/
 void GModelSpectralMultiplicative::copy_members(const GModelSpectralMultiplicative& model)
 {
@@ -681,9 +696,9 @@ void GModelSpectralMultiplicative::copy_members(const GModelSpectralMultiplicati
 
     // Copy MC cache
     m_mc_spectrum = model.m_mc_spectrum;
-    m_n_mc_nodes  = model.m_n_mc_nodes;
     m_mc_emin     = model.m_mc_emin;
     m_mc_emax     = model.m_mc_emax;
+    m_mc_values   = model.m_mc_values;
 
     // Copy pointer(s) of spectral component
     m_spectral.clear();
@@ -691,22 +706,22 @@ void GModelSpectralMultiplicative::copy_members(const GModelSpectralMultiplicati
     	m_spectral.push_back(model.m_spectral[i]->clone());
     }
 
-	// Store pointers to spectral parameters
+    // Store pointers to spectral parameters
     m_pars.clear();
-    for(int i = 0; i < model.components(); ++i) {
+    for (int i = 0; i < model.components(); ++i) {
 
-    	// Retrieve spectral model
-		GModelSpectral* spec = m_spectral[i];
+        // Retrieve spectral model
+        GModelSpectral* spec = m_spectral[i];
 
-		// Loop over parameters
-		for (int ipar = 0; ipar < spec->size(); ++ipar) {
+        // Loop over parameters
+        for (int ipar = 0; ipar < spec->size(); ++ipar) {
 
-			// Get model parameter reference
-			GModelPar& par = spec->operator[](ipar);
+            // Get model parameter reference
+            GModelPar& par = spec->operator[](ipar);
 
-			// Append model parameter pointer to internal container
-			m_pars.push_back(&par);
-		}
+            // Append model parameter pointer to internal container
+            m_pars.push_back(&par);
+        }
     }
 
     // Return
@@ -720,14 +735,15 @@ void GModelSpectralMultiplicative::copy_members(const GModelSpectralMultiplicati
 void GModelSpectralMultiplicative::free_members(void)
 {
     // Free memory
-	for(int i = 0; i < m_spectral.size(); ++i) {
+    for (int i = 0; i < m_spectral.size(); ++i) {
 
-		// Delete component i
-		if (m_spectral[i] != NULL) delete m_spectral[i];
+        // Delete component i
+        if (m_spectral[i] != NULL) delete m_spectral[i];
 
-		// Signal free pointer
-		m_spectral[i] = NULL;
-	}
+        // Signal free pointer
+        m_spectral[i] = NULL;
+    
+    }
 
     // Return
     return;
@@ -743,17 +759,17 @@ void GModelSpectralMultiplicative::free_members(void)
  ***************************************************************************/
 void GModelSpectralMultiplicative::add_component(const GXmlElement& spec)
 {
-	// Initialise a spectral registry object
+    // Initialise a spectral registry object
     GModelSpectralRegistry registry;
 
-	// Read spectral model
-	GModelSpectral* ptr = registry.alloc(spec);
+    // Read spectral model
+    GModelSpectral* ptr = registry.alloc(spec);
 
-	// Get component attribute from XML file
-	std::string component_name = spec.attribute("component");
+    // Get component attribute from XML file
+    std::string component_name = spec.attribute("component");
 
-	// Append spectral component to container
-	append(*ptr, component_name);
+    // Append spectral component to container
+    append(*ptr, component_name);
 
     // Return
     return;
@@ -766,27 +782,66 @@ void GModelSpectralMultiplicative::add_component(const GXmlElement& spec)
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
  *
- * Updates the precomputation cache for Monte Carlo simulations.
+ * Updates the precomputation cache for Monte Carlo simulations. In case that
+ * the energy boundaries have changed or at least one of the model parameters
+ * has changed the method computes a spectral node function which has 100
+ * nodes per decade containing the multiplicative spectral model values and
+ * stores that into a Monte Carlo cache. This cache is then used by the mc()
+ * method for simulations.
  ***************************************************************************/
 void GModelSpectralMultiplicative::update_mc_cache(const GEnergy& emin,
-                                         const GEnergy& emax) const
+                                                   const GEnergy& emax) const
 
 {
-	// Update cache if energy range has changed
-	if (emin != m_mc_emin || emax != m_mc_emax) {
-		m_mc_emin = emin;
-		m_mc_emax = emax;
-		m_mc_spectrum.clear();
+    // Check if one of the parameters has changed. If the dimension of the
+    // parameter value cache differs from the number of parameters then notify
+    // a change. This will clear the cache and store the parameter values
+    // later
+    bool par_changed = (m_mc_values.size() != size());
+    if (par_changed == false) {
+        for (int i = 0; i < size(); ++i) {
+            if (m_pars[i]->value() != m_mc_values[i]) {
+                par_changed = true;
+                break;
+            }
+        }
+    }
 
-		// Initialise energy array
-		GEnergies energies = GEnergies(m_n_mc_nodes, m_mc_emin, m_mc_emax, true);
+    // Update cache if energy range or parameters have changed
+    if (par_changed || emin != m_mc_emin || emax != m_mc_emax) {
 
-		// Append nodes to spectral function
-		for(int i = 0; i < m_n_mc_nodes; ++i) {
-			m_mc_spectrum.append(energies[i], eval(energies[i]));
-		}
+        // Store energy range
+        m_mc_emin = emin;
+        m_mc_emax = emax;
 
-	} // endif: emin and emax have changed
+        // If parameters have changed then store the current parameter
+        // values for a comparison check for the next method call
+        if (par_changed) {
+            m_mc_values.clear();
+            for (int i = 0; i < size(); ++i) {
+                m_mc_values.push_back(m_pars[i]->value());
+            }
+        }
+
+        // Clear spectral nodes
+        m_mc_spectrum.clear();
+
+        // Compute number of nodes. We use here 100 nodes per log energy and
+        // assure that at least 100 nodes are used.
+        int nodes = int((emax.log10MeV() - emin.log10MeV()) * 100.0);
+        if (nodes < 100) {
+            nodes = 100;
+        }
+
+        // Initialise energy array with fixed number of nodes
+        GEnergies energies = GEnergies(nodes, m_mc_emin, m_mc_emax, true);
+
+        // Append nodes to spectral function
+        for (int i = 0; i < energies.size(); ++i) {
+            m_mc_spectrum.append(energies[i], eval(energies[i]));
+        }
+
+    } // endif: emin and emax have changed
 
     // Return
     return;

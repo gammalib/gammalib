@@ -1,7 +1,7 @@
 /***************************************************************************
- *    GModelSpectralMultiplicative.hpp - Spectral power law model class    *
+ *  GModelSpectralMultiplicative.hpp - Multiplicative spectral model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                               *
+ *  copyright (C) 2016 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,16 +41,14 @@ class GTime;
 class GXmlElement;
 
 
-
 /***********************************************************************//**
  * @class GModelSpectralMultiplicative
  *
  * @brief Multiplicative spectral model class
  *
- * This class implements a Multiplicative spectrum. The model is defined by the sum
- * of several individual spectral models. Each spectral model can be added via
- * the XML interface or using the append() method.
- *
+ * This class implements a spectral model that is a multiplication spectral
+ * model components. The spectral model components can be defined in an
+ * XML file, or added using the append() method.
  ***************************************************************************/
 class GModelSpectralMultiplicative : public GModelSpectral {
 
@@ -65,24 +63,24 @@ public:
     virtual GModelSpectralMultiplicative& operator=(const GModelSpectralMultiplicative& model);
 
     // Implemented pure virtual methods
-    virtual void                     clear(void);
+    virtual void                          clear(void);
     virtual GModelSpectralMultiplicative* clone(void) const;
-    virtual std::string              classname(void) const;
-    virtual std::string              type(void) const;
-    virtual double                   eval(const GEnergy& srcEng,
-                                         const GTime&   srcTime = GTime(),
-                                         const bool&    gradients = false) const;
-    virtual double                   flux(const GEnergy& emin,
-                                         const GEnergy& emax) const;
-    virtual double                   eflux(const GEnergy& emin,
-                                         const GEnergy& emax) const;
-    virtual GEnergy                  mc(const GEnergy& emin,
-                                        const GEnergy& emax,
-                                        const GTime&   time,
-                                        GRan&          ran) const;
-    virtual void                     read(const GXmlElement& xml);
-    virtual void                     write(GXmlElement& xml) const;
-    virtual std::string              print(const GChatter& chatter = NORMAL) const;
+    virtual std::string                   classname(void) const;
+    virtual std::string                   type(void) const;
+    virtual double                        eval(const GEnergy& srcEng,
+                                               const GTime&   srcTime = GTime(),
+                                               const bool&    gradients = false) const;
+    virtual double                        flux(const GEnergy& emin,
+                                               const GEnergy& emax) const;
+    virtual double                        eflux(const GEnergy& emin,
+                                                const GEnergy& emax) const;
+    virtual GEnergy                       mc(const GEnergy& emin,
+                                             const GEnergy& emax,
+                                             const GTime&   time,
+                                             GRan&          ran) const;
+    virtual void                          read(const GXmlElement& xml);
+    virtual void                          write(GXmlElement& xml) const;
+    virtual std::string                   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void                  append(const GModelSpectral& spec, const std::string& name="");
@@ -98,34 +96,32 @@ protected:
     void add_component(const GXmlElement& spec);
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
-    // Class to determine to the integral photon flux
-	class flux_kern : public GFunction {
-	public:
-		// Constructor
-		flux_kern(std::vector<GModelSpectral*> spec) :
-				  m_spec(spec){};
+    // Class to determine the integral photon flux
+    class flux_kern : public GFunction {
+    public:
+        // Constructor
+        flux_kern(std::vector<GModelSpectral*> spec) : m_spec(spec) {}
 
-		// Method
-		double eval(const double& x) {
-			GEnergy energy(x, "MeV");
-			double value = m_spec[0]->eval(energy);
-			for(int i=1;i<m_spec.size();++i){
-				value*=m_spec[i]->eval(energy);
-			}
-			return value;
-		}
+        // Method
+        double eval(const double& x) {
+            GEnergy energy(x, "MeV");
+            double value = m_spec[0]->eval(energy);
+            for (int i = 1 ; i < m_spec.size(); ++i) {
+                value *= m_spec[i]->eval(energy);
+            }
+            return value;
+        }
 
-		// Members
-	protected:
-		std::vector<GModelSpectral*> m_spec; //!< Spectral models
-	};
+    protected:
+        // Protected members
+        std::vector<GModelSpectral*> m_spec; //!< Spectral models
+    };
 
-	// Class to determine the integral energy flux, derviation of flux_kern
+	// Class to determine the integral energy flux, derived from flux_kern
 	class eflux_kern : public flux_kern {
 	public:
 		// Constructor
-		eflux_kern(std::vector<GModelSpectral*> spec) :
-				   flux_kern(spec) {};
+		eflux_kern(std::vector<GModelSpectral*> spec) : flux_kern(spec) {}
 
 		// Method
 		double eval(const double& x) {
@@ -140,10 +136,9 @@ protected:
 
     // MC cache
     mutable GModelSpectralNodes  m_mc_spectrum; //!< MC spectrum cache
-    mutable int                  m_n_mc_nodes;  //!< Probailities of individual components
     mutable GEnergy              m_mc_emin;     //!< Last minimum energy
     mutable GEnergy              m_mc_emax;     //!< Last maximum energy
-
+    mutable std::vector<double>  m_mc_values;   //!< Parameter values
 };
 
 
@@ -185,6 +180,5 @@ int GModelSpectralMultiplicative::components(void) const
 {
     return (m_spectral.size());
 }
-
 
 #endif /* GMODELSPECTRALMULTIPLICATIVE_HPP */
