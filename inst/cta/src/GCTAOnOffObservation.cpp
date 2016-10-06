@@ -46,6 +46,11 @@
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAOnOffObservation.hpp"
 
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 /* __ Globals ____________________________________________________________ */
 const GCTAOnOffObservation g_onoff_obs_cta_seed;
 const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
