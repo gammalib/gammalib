@@ -397,8 +397,17 @@ void GModelSpectralComposite::read(const GXmlElement& xml)
 		// Get spectral XML element
 		const GXmlElement* spec = xml.element("spectrum", i);
 
-		// Add spectral component
-		add_component(*spec);
+		// Initialise a spectral registry object
+	    GModelSpectralRegistry registry;
+
+		// Read spectral model
+		GModelSpectral* ptr = registry.alloc(*spec);
+
+		// Get component attribute from XML file
+		std::string component_name = spec->attribute("component");
+
+		// Append spectral component to container
+		append(*ptr, component_name);
 
 	} // endfor: loop over components
 
@@ -539,6 +548,7 @@ void GModelSpectralComposite::append(const GModelSpectral& spec, const std::stri
     // Use model index if component name is empty
     std::string component_name = !name.empty() ? name : gammalib::str(m_spectral.size());
 
+    // Check if component name is unique, throw exception if not
     if (gammalib::contains(m_components, component_name)) {
     	std::string msg =
 			"Attempt to append component with name \""+component_name+"\" to composite"
@@ -709,32 +719,6 @@ void GModelSpectralComposite::free_members(void)
 		// Signal free pointer
 		m_spectral[i] = NULL;
 	}
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Add spectral component from XML element
- *
- * @param[in] spec XML element containing spectral information
- *
- * Add an XML spectral component to the model container
- ***************************************************************************/
-void GModelSpectralComposite::add_component(const GXmlElement& spec)
-{
-	// Initialise a spectral registry object
-    GModelSpectralRegistry registry;
-
-	// Read spectral model
-	GModelSpectral* ptr = registry.alloc(spec);
-
-	// Get component attribute from XML file
-	std::string component_name = spec.attribute("component");
-
-	// Append spectral component to container
-	append(*ptr, component_name);
 
     // Return
     return;

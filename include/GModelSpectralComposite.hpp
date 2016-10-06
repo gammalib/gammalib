@@ -92,7 +92,6 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpectralComposite& model);
     void free_members(void);
-    void add_component(const GXmlElement& spec);
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
