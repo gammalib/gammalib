@@ -1,7 +1,7 @@
 /***************************************************************************
- *                      GVOClient.i - VO client class                      *
+ *                       GVOTable.i - VOTable class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,50 +19,48 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GVOClient.i
- * @brief VO client class interface definition
- * @author Juergen Knoedlseder
+ * @file GVOTable.i
+ * @brief VO table class definition
+ * @author Thierry Louge
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GVOClient.hpp"
-#include "GXml.hpp"
+#include "GVOTable.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GVOClient
+ * @class GVOTable
  *
- * @brief VO client class
+ * @brief VOTable class
  ***************************************************************************/
-class GVOClient : public GBase {
+class GVOTable : public GBase {
+
 public:
     // Constructors and destructors
-    GVOClient(void);
-    GVOClient(const GVOClient& client);
-    virtual ~GVOClient(void);
+    GVOTable(void);
+    explicit GVOTable(const GFitsTable& table);
+    GVOTable(const GVOTable& votable);
+    virtual ~GVOTable(void);
+
+    // Operators
+    GVOTable& operator=(const GVOTable& votable);
 
     // Methods
-    void        clear(void);
-    GVOClient*  clone(void) const;
-    std::string classname(void) const;
-    void        connect(void);
-    void        disconnect(void);
-    bool        has_hub(void) const;
-    bool        is_connected(void) const;
-    bool        ping_hub(void) const;
-    void        shutdown_hub(void) const;
-    GXml        execute(const std::string& request) const;
-    void        publish(const GFitsHDU& hdu);
-    void        publish(const GVOTable& votable);
+    void               clear(void);
+    GVOTable*          clone(void) const;
+    std::string        classname(void) const;
+    void               read(const GFitsTable& table);
+    const GXml&        xml(void) const;
+    const std::string& name(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GVOClient class extension
+ * @brief GVOTable class extension
  ***************************************************************************/
-%extend GVOClient {
-    GVOClient copy() {
+%extend GVOTable {
+    GVOTable copy() {
         return (*self);
     }
 };

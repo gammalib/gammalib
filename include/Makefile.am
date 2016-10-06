@@ -85,6 +85,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GXmlPI.hpp \
                      GVOClient.hpp \
                      GVOHub.hpp \
+                     GVOTable.hpp \
                      GPha.hpp \
                      GArf.hpp \
                      GRmf.hpp \

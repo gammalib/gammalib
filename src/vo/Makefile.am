@@ -22,11 +22,13 @@
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
-           -I$(top_srcdir)/src/support
+           -I$(top_srcdir)/src/support \
+           -I$(top_srcdir)/src/fits
 
 # Define sources for this directory
 sources = GVOClient.cpp \
-          GVOHub.cpp
+          GVOHub.cpp \
+          GVOTable.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libvo.la

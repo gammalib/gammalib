@@ -543,7 +543,7 @@ void GVOHub::request_register(const GXml& xml, const socklen_t& sock)
     std::string response = "";
 
     // Set response
-    response.append("<?xml version='1.0' encoding='UTF-8'?>\n");
+    response.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     response.append("<methodResponse>\n");
     response.append("<params>\n");
     response.append("  <param><value><struct>\n");
@@ -830,7 +830,7 @@ void GVOHub::request_get_subscriptions(const GXml& xml, const socklen_t& sock)
     std::string response = "";
 
     // Set response
-    response.append("<?xml version='1.0' encoding='UTF-8'?>\n");
+    response.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     response.append("<methodResponse>\n");
     response.append("<params>\n");
     response.append("  <param><value><struct>\n");
@@ -953,10 +953,21 @@ void GVOHub::request_get_subscribed_clients(const GXml& xml, const socklen_t& so
     // Declare message
     std::string msg = "";    
 
-    msg.append("<?xml version=\'1.0\' encoding=\"UTF-8\"?>\n");
+    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     msg.append("<methodResponse>\n");
     msg.append("<params>\n");
-    msg.append("  <param><value><struct><member><name>c0</name><value><struct></struct></value></member><member><name>gammalib_hub</name><value><struct></struct></value></member></struct></value></param></params></methodResponse>");
+    msg.append("  <param><value><struct>\n");
+    msg.append("    <member>\n");
+    msg.append("      <name>c0</name>\n");
+    msg.append("      <value><struct></struct></value>\n");
+    msg.append("    </member>\n");
+    msg.append("    <member>\n");
+    msg.append("      <name>gammalib_hub</name>\n");
+    msg.append("      <value><struct></struct></value>\n");
+    msg.append("    </member>\n");
+    msg.append("  </struct></value></param>\n");
+    msg.append("</params>\n");
+    msg.append("</methodResponse>");
 
     // Post response
     post_string(msg, sock);
@@ -997,7 +1008,7 @@ void GVOHub::request_get_metadata(const GXml& xml, const socklen_t& sock)
     std::string response = "";
 
     // Set response
-    response.append("<?xml version='1.0' encoding='UTF-8'?>\n");
+    response.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     response.append("<methodResponse>\n");
     response.append("<params>\n");
     response.append("  <param><value><struct>\n");
@@ -1125,11 +1136,15 @@ void GVOHub::request_notify_all(const GXml& xml, const socklen_t& sock)
 {
     // Header
     #if defined(G_CONSOLE_DUMP)
-    std::cout << "GVOHub::request_notify_all" << std::endl;
+    std::cout << "GVOHub::request_notify_all entrance" << std::endl;
     #endif
 
     // Get message type
     std::string mtype = get_mtype(xml);
+
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "mtype:"+mtype << std::endl;
+    #endif
 
     // Post void message
     post_samp_void(sock);
@@ -1143,9 +1158,14 @@ void GVOHub::request_notify_all(const GXml& xml, const socklen_t& sock)
             // Continue only if message type matches client's subscription
             if (mtype == m_clients[i].subscriptions[j]) {
     
-                // Image loading
+                // Image loading?
                 if (mtype == "image.load.fits") {
                     notify_image_load(m_clients[i], xml);
+		        }
+
+                // ... or VO table loading?
+                else if (mtype == "table.load.votable") {
+                    notify_table_load(m_clients[i], xml);
 		        }
 
             } // endif: message type matched client subscription
@@ -1314,20 +1334,29 @@ std::string GVOHub::get_response_value(const GXmlNode*    node,
 
     // Search for parameter name, and if found, return its value
     if (node != NULL) {
+        #if defined(G_CONSOLE_DUMP)
+        std::cout << "GVOHub::get_response_value parsing non null node" << std::endl;
+        #endif
         int num = node->elements("member");            
         for (int i = 0; i < num; ++i) {
             const GXmlNode* member = node->element("member", i);
             std::string one_name;
             std::string one_value;
             get_name_value_pair(member, one_name, one_value);
+            #if defined(G_CONSOLE_DUMP)
+            std::cout << "GVOHub::get_response_value parsing "+one_name+ " " + one_value << std::endl;
+            #endif
             if (one_name == name) {
                 value = one_value;
                 break;
             }
         }
         
+    } else {
+        #if defined(G_CONSOLE_DUMP)
+        std::cout << "GVOHub::get_response_value parsing NULL node" << std::endl;
+        #endif
     }
-
     // Return value
     return value;
 }
@@ -1390,7 +1419,8 @@ std::vector<std::string> GVOHub::get_subscriptions(const GXml& xml) const
     std::vector<std::string> subscriptions;
 
     // Get the client's private key
-    const GXmlNode* node = xml.element("methodCall > params > param[1] > value > struct");
+    const GXmlNode* node = xml.element("methodCall > params > param[1] > "
+                                       "value > struct");
     if (node != NULL) {
         int num = node->elements("member");
         for (int i = 0; i < num; ++i) {
@@ -1424,7 +1454,8 @@ std::string GVOHub::get_callback_url(const GXml& xml) const
     std::string url;
 
     // Get the client's private key
-    const GXmlNode* node = xml.element("methodCall > params > param[1] > value");
+    const GXmlNode* node = xml.element("methodCall > params > param[1] > "
+                                       "value");
     if (node != NULL) {
 		const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
         if (text != NULL) {
@@ -2061,7 +2092,9 @@ void GVOHub::notify_image_load(const GVOHub::client& client,
                                const GXml&           xml)
 {
 	// Get client response
-	const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
+    const GXmlNode* node = xml.element("methodCall > params > param[1] > "
+                                       "value > struct > member > value > "
+                                       "struct");
 
     // Extract image information from client response
 	std::string name = get_response_value(node, "name");
@@ -2090,14 +2123,80 @@ void GVOHub::notify_image_load(const GVOHub::client& client,
     msg.append("          <name>name</name>\n");
     msg.append("          <value>"+name+"</value>\n");
     msg.append("        </member>\n");
-	msg.append("        <member>\n");
+    msg.append("        <member>\n");
     msg.append("          <name>image-id</name>\n");
     msg.append("          <value>"+id+"</value>\n");
     msg.append("        </member>\n");
-	msg.append("        <member>\n");
+    msg.append("        <member>\n");
     msg.append("          <name>url</name>\n");
     msg.append("          <value>"+url+"</value>\n");
-	msg.append("        </member>\n");
+    msg.append("        </member>\n");
+    msg.append("      </struct></value>\n");
+    msg.append("    </member>\n");
+    msg.append("  </struct></value></param>\n");
+    msg.append("</params>\n");
+    msg.append("</methodCall>\n");
+
+    // Post notification
+    notify(client.url, msg);
+		  
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Notify client about VO table loading
+ *
+ * @param[in] client Client.
+ * @param[in] xml Message from which table information is extracted.
+ *
+ * Notify a client that a VO table is avialable for loading. The method sends
+ * sends a "table.load.votable" message to the @p client. Information about
+ * the VO table is extracted from the @p xml document.
+ ***************************************************************************/
+void GVOHub::notify_table_load(const GVOHub::client& client,
+                               const GXml&           xml)
+{
+	// Get client response
+    const GXmlNode* node = xml.element("methodCall > params > param[1] > "
+                                       "value > struct > member > value > "
+                                       "struct");
+
+    // Extract image information from client response
+	std::string name = get_response_value(node, "name");
+	std::string url  = get_response_value(node, "url");
+	std::string id   = get_response_value(node, "table-id");
+
+    // Declare notification
+    std::string msg = "";
+
+	// Set notification for table.load.votable
+    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<methodCall>\n");
+    msg.append("<methodName>samp.client.receiveNotification</methodName>\n");
+    msg.append("<params>\n");
+    msg.append("  <param><value>"+client.private_key+"</value></param>\n");
+    msg.append("  <param><value>"+m_hub_id+"</value></param>\n");
+    msg.append("  <param><value><struct>\n");
+    msg.append("    <member>\n");
+    msg.append("      <name>samp.mtype</name>\n");
+    msg.append("      <value>table.load.votable</value>\n");
+    msg.append("    </member>\n");
+    msg.append("    <member>\n");
+    msg.append("      <name>samp.params</name>\n");
+    msg.append("      <value><struct>\n");
+    msg.append("        <member>\n");
+    msg.append("          <name>name</name>\n");
+    msg.append("          <value>"+name+"</value>\n");
+    msg.append("        </member>\n");
+    msg.append("        <member>\n");
+    msg.append("          <name>table-id</name>\n");
+    msg.append("          <value>"+id+"</value>\n");
+    msg.append("        </member>\n");
+    msg.append("        <member>\n");
+    msg.append("          <name>url</name>\n");
+    msg.append("          <value>"+url+"</value>\n");
+    msg.append("        </member>\n");
     msg.append("      </struct></value>\n");
     msg.append("    </member>\n");
     msg.append("  </struct></value></param>\n");
@@ -2120,7 +2219,8 @@ void GVOHub::notify_image_load(const GVOHub::client& client,
 std::string GVOHub::random_string(const size_t& length) const
 {
     srand(time(0));
-    std::string str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    std::string str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmno"
+                      "pqrstuvwxyz";
     int pos;
     while(str.size() != length) {
         pos = ((rand() % (str.size() - 1)));
@@ -2143,20 +2243,18 @@ std::string GVOHub::get_mtype(const GXml& xml) const
 {
     // Header
     #if defined(G_CONSOLE_DUMP)
-    std::cout << "GVOHub::get_mtype" << std::endl;
+    std::cout << "In GVOHub::get_mtype" << std::endl;
     #endif
 
     // Initialise response
     std::string client_key = "";
 
+    // Get the XML node containing the client's private key
+    const GXmlNode* node = xml.element("methodCall > params > param[1] > "
+                                       "value > struct ");
+
     // Get the client's private key
-    const GXmlNode* node = xml.element("methodCall > params > param > value");
-    if (node != NULL) {
-        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
-        if (text != NULL) {
-            client_key = text->text();
-        }
-    }
+    client_key = get_response_value(node, "samp.mtype");
 
     // Return key
     return client_key;
