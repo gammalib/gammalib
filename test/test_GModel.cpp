@@ -1432,23 +1432,25 @@ void TestGModel::test_spatial_composite(void)
    test_value(model2.type(), "SpatialComposite", "Check model type");
       
    // Test access of individual parameters
-   test_value(model2["1:RA"].value(), 83.6331);
-   test_value(model2["1:DEC"].value(), 22.0145);
-   test_value(model2["1:Sigma"].value(), 0.2);
+   test_value(model2["2:RA"].value(), 83.6331);
+   test_value(model2["2:DEC"].value(), 22.0145);
+   test_value(model2["2:Sigma"].value(), 0.2);
+
+   test_value(model2["PointSource:RA"].value(), 83.6331);
    
    // Test prefactor method
        
-   test_value(model2["1:RA"].value(), 83.6331);
-   model2["1:RA"].value(83.1331);
-   test_value(model2["1:RA"].value(), 83.1331);
+   test_value(model2["2:RA"].value(), 83.6331);
+   model2["2:RA"].value(83.1331);
+   test_value(model2["2:RA"].value(), 83.1331);
    
    // Test index method
-   model2["1:DEC"].value(22.51);
-   test_value(model2["1:DEC"].value(), 22.51);
+   model2["2:DEC"].value(22.51);
+   test_value(model2["2:DEC"].value(), 22.51);
        
    // Test pivot method
-   model2["1:Sigma"].value(0.6);
-   test_value(model2["1:Sigma"].value(), 0.6);
+   model2["2:Sigma"].value(0.6);
+   test_value(model2["2:Sigma"].value(), 0.6);
        
 
    // Exit test

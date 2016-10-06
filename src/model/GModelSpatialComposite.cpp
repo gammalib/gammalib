@@ -46,6 +46,7 @@ const GModelSpatialRegistry    g_spatial_comp_registry(&g_spatial_comp_seed);
 #define G_WRITE                "GModelSpatialComposite::write(GXmlElement&)"
 #define G_COMPONENT_INDEX      "GModelSpatialComposite::component(const int&)"
 #define G_COMPONENT_NAME       "GModelSpatialComposite::component(const std::string&)"
+#define G_APPEND               "GModelSpatialComposite::append(const GModelSpatial&, const std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -313,88 +314,35 @@ bool GModelSpatialComposite::contains(const GSkyDir& dir,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing point source model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
- * Read the point source information from an XML element with the following
- * format
- *
- *     <spatialModel type="PointSource">
- *       <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
- *       <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
- *     </spatialModel>
- *
- * or
- *
- *     <spatialModel type="PointSource">
- *       <parameter free="0" max="360" min="-360" name="GLON" scale="1" value="83.6331" />
- *       <parameter free="0" max="90" min="-90" name="GLAT" scale="1" value="22.0145" />
- *     </spatialModel>
- *
+ * Reads the spatial information from an XML element.
  ***************************************************************************/
 void GModelSpatialComposite::read(const GXmlElement& xml)
 {   
-    // Verify that XML element is composed from spatial models 
-    if (xml.elements("spatialModel") != xml.elements()) {
-        throw GException::model_invalid_spatial(G_READ, type(),
-        "Composite spatial model must be composed solely from spatial models.");
-    }
-
-    // Verify that XML element has at least one component
-    if (xml.elements() == 0) {
-        throw GException::model_invalid_spatial(G_READ, type(),
-        "Composite spatial model requires at least one component.");
-    }
-
-    // Extract components
-    for (unsigned int idx_elt = 0; idx_elt < xml.elements("spatialModel"); idx_elt++) {
-        // Get element
-        const GXmlElement* element = xml.element("spatialModel", idx_elt);
+    // Get number of spatial components
+    int n_comp = xml.elements("spatialModel");
+    
+    // Loop over spatial elements
+    for(int i = 0; i < n_comp; ++i) {
         
-        // Get spatial model
+        // Get spatial XML element
+        const GXmlElement* spec = xml.element("spatialModel", i);
+        
+        // Initialise a spatial registry object
         GModelSpatialRegistry registry;
-        GModelSpatial*        ptr = registry.alloc(*element);
-
-        // Get name for component
-        std::string name;
-        if (element->has_attribute("name")) {
-            // Use name provided in xml
-            name = element->attribute("name");
-
-            // If name is not unique, generate a unique one
-            if (!component_name_is_unique(name))
-                name = unique_component_name();
-        } else {
-            // Generate unique name
-            name = unique_component_name();
-        }
-
-        // Add model to components
-        m_components.push_back(ptr);
-
-        // Append name to vector
-        m_component_names.push_back(name);
-
-        // Loop over all paramters in new component
-        for (unsigned int idx_par = 0; idx_par < ptr->size(); idx_par++) {
-            // Get model parameter
-            GModelPar& par = (*ptr)[idx_par];
-            
-            // Modify parameter name
-            par.name(name+":"+par.name());
         
-            // Append to paramaters
-            m_pars.push_back(&par);
-
-        } // endfor: looped over all parameters
-
-    } // endfor: looped over all components
-
-
+        // Read spatial model
+        GModelSpatial* ptr = registry.alloc(*spec);
+        
+        // Get component attribute from XML file
+        std::string component_name = spec->attribute("component");
+        
+        // Append spatial component to container
+        append(*ptr, component_name);
+        
+    } // endfor: loop over components
+    
     // Return
     return;
 }
@@ -535,49 +483,54 @@ int GModelSpatialComposite::components(void) const {
 
 
 /***********************************************************************//**
- * @brief Append a spatial model component
+ * @brief Append spatial component
  *
  * @param[in] model Spatial model component to append
- * @param[in] name Name of spatial model
+ * @param[in] name Name of spatial model (can be empty)
+ * 
+ * Appends a spatial component to the composite model
  ***************************************************************************/
 void GModelSpatialComposite::append(const GModelSpatial& component,
-                                    std::string name) {
-    // Make sure that name is unique
-    name = component_name_is_unique(name) ? name : unique_component_name();
+                                    const std::string& name) {
 
-    // Clone component
-    GModelSpatial *new_component = component.clone();
-    // Add component
-    m_components.push_back(new_component);
+// Append model container
+    m_components.push_back(component.clone());
 
-    // Add component name
-    m_component_names.push_back(name);
-
-    // Get number of paramaters from new component
-    int npars = new_component->size();
+    // Get index of latest model
+    int index = m_components.size()-1;
     
-    for (unsigned int i = 0; i < npars; i++) {
+    // Use model index if component name is empty
+    std::string component_name = !name.empty() ? name : gammalib::str(m_components.size());
+    
+    // Check if component name is unique, throw exception if not
+    if (gammalib::contains(m_component_names, component_name)) {
+    	std::string msg =
+            "Attempt to append component with name \""+component_name+"\" to composite"
+            " spectral model container, but a component with the same name exists already.\n"
+            "Every component in the container needs a unique name. On default the system will"
+            "increment an integer if no component name is provided.";
+        throw GException::invalid_value(G_APPEND, msg);
+    }
+
+    // Add component name (for now simple number)
+    m_component_names.push_back(component_name);
+    
+    // Get number of spectral parameters from model
+    int npars = m_components[index]->size();
+    
+    // Loop over model parameters
+    for (int ipar = 0; ipar < npars; ++ipar) {
+        
         // Get model parameter
-        GModelPar& par = (*new_component)[i];
+        GModelPar* par = &(m_components[index]->operator[](ipar));
         
         // Modify parameter name
-        par.name(name+":"+par.name());
+        par->name(component_name+":"+par->name());
         
-        // Append to paramaters
-        m_pars.push_back(&par);
-    }
-}
-
-
-/***********************************************************************//**
- * @brief Append a spatial model component
- *
- * @param[in] model Spatial model component to append
- *
- * A unique name is generated for the model.
- ***************************************************************************/
-void GModelSpatialComposite::append(const GModelSpatial& component) {
-    append(component, unique_component_name());
+        // Append model parameter with new name to internal container
+        m_pars.push_back(par);
+        
+    } // endfor: loop over model parameters
 }
 
 std::string GModelSpatialComposite::print(const GChatter& chatter) const
