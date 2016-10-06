@@ -1062,8 +1062,8 @@ bool gammalib::dir_exists(const std::string& dirname)
 /***********************************************************************//**
  * @brief Checks if a substring is in a string
  *
- * @param[in] str string you want to search in.
- * @param[in] substring string you are looking for in str.
+ * @param[in] str String you want to search in.
+ * @param[in] substring String you are looking for in @p str.
  * @return True if a string contains a sub string.
  *
  * Checks if substring is contained in str
@@ -1077,6 +1077,27 @@ bool gammalib::contains(const std::string& str, const std::string& substring)
     if (str.find(substring) != std::string::npos){
         result = true;
     }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks if a string is contained in a vector of strings
+ *
+ * @param[in] strings Vector of strings you want to search in.
+ * @param[in] string String you are looking for in strings.
+ * @return True if a string is contained a vector.
+ *
+ * Checks if a string is contained in a vector of strings
+ ***************************************************************************/
+bool gammalib::contains(const std::vector<std::string>& strings,
+                        const std::string&              string)
+{
+    // Compute result
+    bool result = std::find(strings.begin(), strings.end(), string) !=
+                  strings.end();
 
     // Return result
     return result;

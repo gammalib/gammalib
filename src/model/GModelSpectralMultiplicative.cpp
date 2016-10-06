@@ -51,6 +51,8 @@ const GModelSpectralRegistry       g_spectral_multi_registry(&g_spectral_multi_s
 #define G_COMPONENT_INDEX     "GModelSpectralMultiplicative::component(int&)"
 #define G_COMPONENT_NAME            "GModelSpectralMultiplicative::component"\
                                                              "(std::string&)"
+#define G_APPEND     "GModelSpectralMultiplicative::append(GModelSpectral&, "\
+                                                              "std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -223,9 +225,16 @@ GModelSpectralMultiplicative* GModelSpectralMultiplicative::clone(void) const
  * where \f${M_{\rm i}}\f$ is the i-th model component.
  *
  * If the @p gradients flag is true the method will also compute the partial
- * derivatives of each model component with respect to the parameters using
+ * derivatives of each parameter of eachmodel component with respect to the
+ * parameters using
  *
- * @todo Add formula for gradient computation
+ * \f[
+ *    \frac{\delta S}{\delta P_{\rm ij}}\prod_{\rm k\neq \rm i}^{n} M_{\rm k}
+ * \f]
+ *
+ * where \f${P_{\rm ij}}\f$ is the j-th parameter of the i-th multiplicative
+ * component, while \f${M_{\rm k}}\f$ is the k-th model component and n the
+ * number of model components.
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
@@ -279,7 +288,6 @@ double GModelSpectralMultiplicative::eval(const GEnergy& srcEng,
         } // endfor: loop over models
 
     } //endif: compute gradients
-
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -434,8 +442,17 @@ void GModelSpectralMultiplicative::read(const GXmlElement& xml)
         // Get spectral XML element
         const GXmlElement* spec = xml.element("spectrum", i);
 
-        // Add spectral component
-        add_component(*spec);
+        // Allocate a spectral registry object
+        GModelSpectralRegistry registry;
+
+        // Read spectral model
+        GModelSpectral* ptr = registry.alloc(*spec);
+
+        // Get component attribute from XML file
+        std::string component_name = spec->attribute("component");
+
+        // Append spectral component to container
+        append(*ptr, component_name);
 
     } // endfor: loop over components
 
@@ -564,6 +581,9 @@ std::string GModelSpectralMultiplicative::print(const GChatter& chatter) const
  * @param[in] spec Spectral model component.
  * @param[in] name Name of spectral component (can be empty).
  *
+ * @exception GException::invalid_value
+ *            Invalid component name specified
+ *
  * Appends a spectral component to the Multiplicative model
  ***************************************************************************/
 void GModelSpectralMultiplicative::append(const GModelSpectral& spec,
@@ -578,6 +598,17 @@ void GModelSpectralMultiplicative::append(const GModelSpectral& spec,
     // Use model index as component name if component name is empty
     std::string component_name = !name.empty() ? name
                                                : gammalib::str(m_spectral.size());
+
+    // Check if component name is unique, throw exception if not
+    if (gammalib::contains(m_components, component_name)) {
+        std::string msg = "Attempt to append component with name \""+
+                          component_name+"\" to multiplicative spectral model "
+                          "container, but a component with the same name exists "
+                          "already. Every component in the container needs a "
+                          "unique name. On default the system will increment "
+                          "an integer if no component name is provided.";
+        throw GException::invalid_value(G_APPEND, msg);
+    }
 
     // Add component name (for now simple number)
     m_components.push_back(component_name);
@@ -744,32 +775,6 @@ void GModelSpectralMultiplicative::free_members(void)
         m_spectral[i] = NULL;
     
     }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Add spectral component from XML element
- *
- * @param[in] spec XML element containing spectral information
- *
- * Add an XML spectral component to the model container
- ***************************************************************************/
-void GModelSpectralMultiplicative::add_component(const GXmlElement& spec)
-{
-    // Initialise a spectral registry object
-    GModelSpectralRegistry registry;
-
-    // Read spectral model
-    GModelSpectral* ptr = registry.alloc(spec);
-
-    // Get component attribute from XML file
-    std::string component_name = spec.attribute("component");
-
-    // Append spectral component to container
-    append(*ptr, component_name);
 
     // Return
     return;
