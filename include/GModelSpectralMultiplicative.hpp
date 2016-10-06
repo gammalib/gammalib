@@ -93,7 +93,6 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpectralMultiplicative& model);
     void free_members(void);
-    void add_component(const GXmlElement& spec);
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Class to determine the integral photon flux
