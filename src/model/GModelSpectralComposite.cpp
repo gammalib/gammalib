@@ -46,6 +46,7 @@ const GModelSpectralRegistry g_spectral_comp_registry(&g_spectral_comp_seed);
 #define G_WRITE            "GModelSpectralComposite::write(GXmlElement&)"
 #define G_COMPONENT_INDEX  "GModelSpectralComposite::component(const int&)"
 #define G_COMPONENT_NAME   "GModelSpectralComposite::component(const std::string&)"
+#define G_APPEND           "GModelSpectralComposite::append(const GModelSpectral&, const std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -538,6 +539,15 @@ void GModelSpectralComposite::append(const GModelSpectral& spec, const std::stri
     // Use model index if component name is empty
     std::string component_name = !name.empty() ? name : gammalib::str(m_spectral.size());
 
+    if (gammalib::contains(m_components, component_name)) {
+    	std::string msg =
+			"Attempt to append component with name \""+component_name+"\" to composite"
+			" spectral model container, but a component with the same name exists already.\n"
+			"Every component in the container needs a unique name. On default the system will"
+			"increment an integer if no component name is provided.";
+		throw GException::invalid_value(G_APPEND, msg);
+    }
+
 	// Add component name (for now simple number)
 	m_components.push_back(component_name);
 
@@ -650,20 +660,24 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
     m_type       = model.m_type;
     m_components = model.m_components;
 
+    // Copy MC cache
+    m_mc_probs   = model.m_mc_probs;
+    m_mc_emin    = model.m_mc_emin;
+    m_mc_emax    = model.m_mc_emax;
+    m_mc_flux    = model.m_mc_flux;
+
     // Copy pointer(s) of spectral component
     m_spectral.clear();
-    for(int i = 0; i < model.components(); ++i) {
-    	m_spectral.push_back(model.m_spectral[i]->clone());
-    }
 
-	// Store pointers to spectral parameters
+    // Clear parameters and copy the pointers from the clone
     m_pars.clear();
     for(int i = 0; i < model.components(); ++i) {
+    	m_spectral.push_back(model.m_spectral[i]->clone());
 
     	// Retrieve spectral model
-		GModelSpectral* spec = m_spectral[i];
+    	GModelSpectral* spec = m_spectral[i];
 
-		// Loop over parameters
+    	// Loop over parameters and store pointers
 		for (int ipar = 0; ipar < spec->size(); ++ipar) {
 
 			// Get model parameter reference
@@ -671,8 +685,10 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
 
 			// Append model parameter pointer to internal container
 			m_pars.push_back(&par);
-		}
-    }
+
+		} // endfor: loop over parameters
+
+    } // endfor: loop over spectral models
 
     // Return
     return;
