@@ -134,7 +134,7 @@ std::string GModelSpatialComposite::type(void) const
 inline
 GClassCode GModelSpatialComposite::code(void) const
 {
-    return GMODEL_SPATIAL_POINT_SOURCE;
+    return GMODEL_SPATIAL_COMPOSITE;
 }
 
 /***********************************************************************//**
