@@ -129,6 +129,7 @@ public:
     void                optimize(GOptimizer& opt);
     void                errors(GOptimizer& opt);
     void                errors_hessian(void);
+    void                save_covmat(const GFilename& filename);
     void                eval(void);
     double              logL(void) const;
     int                 nobserved(void) const;
