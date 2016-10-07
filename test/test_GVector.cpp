@@ -400,7 +400,7 @@ void TestGVector::arithmetics(void){
     // acosh(GVector)
     test = acosh(m_test);
     for (int i = 0; i < 5; ++i) {
-        test_value(test[i], std::acosh(m_test[i]));
+        test_value(test[i], acosh(m_test[i]));
     }
 
     // asin(GVector/10.0)
@@ -412,7 +412,7 @@ void TestGVector::arithmetics(void){
     // asinh(GVector/10.0)
     test = asinh(m_test/10.0);
     for (int i = 0; i < 5; ++i) {
-        test_value(test[i], std::asinh(m_test[i]/10.0));
+        test_value(test[i], asinh(m_test[i]/10.0));
     }
 
     // atan(GVector/10.0)
@@ -424,7 +424,7 @@ void TestGVector::arithmetics(void){
     // atanh(GVector/10.0)
     test = atanh(m_test/10.0);
     for (int i = 0; i < 5; ++i) {
-        test_value(test[i], std::atanh(m_test[i]/10.0));
+        test_value(test[i], atanh(m_test[i]/10.0));
     }
 
     // cos(GVector)
