@@ -281,10 +281,13 @@ void TestGVector::arithmetics(void){
                 m_result[3]==-m_test[3]&&
                 m_result[4]==-m_test[4],"GVector = -GVector");
 
-    // Devide by zero
+    // Divide by zero
     m_result  = m_test;
     m_result /= 0.0;
-    test_assert(m_result.print()=="(inf, inf, inf, inf, inf)"||m_result.print()=="(Inf, Inf, Inf, Inf, Inf)","Devide by zero",m_result.print());
+    test_assert(m_result.print() == "(inf, inf, inf, inf, inf)" ||
+                m_result.print() == "(Inf, Inf, Inf, Inf, Inf)" ||
+                m_result.print() == "(Infinity, Infinity, Infinity, Infinity, Infinity)" ,
+                "Divide by zero", m_result.print());
 
     // GVector + GVector
     m_result = m_test + m_test;
