@@ -64,7 +64,7 @@ const GModelSpatialRegistry    g_spatial_comp_registry(&g_spatial_comp_seed);
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Constructs empty point source model.
+ * Constructs empty spatial composite model.
  ***************************************************************************/
 GModelSpatialComposite::GModelSpatialComposite(void) : GModelSpatial()
 {
@@ -82,7 +82,7 @@ GModelSpatialComposite::GModelSpatialComposite(void) : GModelSpatial()
  * @param[in] dummy Dummy flag.
  * @param[in] type Model type.
  *
- * Constructs empty point source model by specifying a model @p type.
+ * Constructs empty spatial composite model by specifying a model @p type.
  ***************************************************************************/
 GModelSpatialComposite::GModelSpatialComposite(const bool&        dummy,
                                                    const std::string& type) :
@@ -103,7 +103,7 @@ GModelSpatialComposite::GModelSpatialComposite(const bool&        dummy,
  *
  * @param[in] xml XML element.
  *
- * Construct a point source spatial model by extracting information from an
+ * Construct a spatial composite model by extracting information from an
  * XML element. See the read() method for more information about the expected
  * structure of the XML element.
  ***************************************************************************/
@@ -162,8 +162,8 @@ GModelSpatialComposite::~GModelSpatialComposite(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Point source spatial model.
- * @return Point source spatial model.
+ * @param[in] model Spatial composite model.
+ * @return Spatial composite model.
  ***************************************************************************/
 GModelSpatialComposite& GModelSpatialComposite::operator=(const GModelSpatialComposite& model)
 {
@@ -196,7 +196,7 @@ GModelSpatialComposite& GModelSpatialComposite::operator=(const GModelSpatialCom
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear point source model
+ * @brief Clear spatial composite model
  ***************************************************************************/
 void GModelSpatialComposite::clear(void)
 {
@@ -214,9 +214,9 @@ void GModelSpatialComposite::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone point source model
+ * @brief Clone spatial composite model
  *
- * @return Pointer to deep copy of point source model.
+ * @return Pointer to deep copy of spatial composite model.
  ***************************************************************************/
 GModelSpatialComposite* GModelSpatialComposite::clone(void) const
 {
@@ -232,14 +232,9 @@ GModelSpatialComposite* GModelSpatialComposite::clone(void) const
  * @param[in] gradients Compute gradients?
  * @return Model value.
  *
- * Evaluates the spatial part for a point source model. It implements a delta
- * function with respect to the coordinates of the source. For numerical
- * reasons, a certain tolerance is accepted (typically 0.1 arcsec, i.e. well
- * below the angular resolution of gamma-ray telescopes).
+ * Evaluates the spatial part for all model components and returns
+ * the normalised sum.
  *
- * The method will not compute analytical parameter gradients, even if the
- * @p gradients argument is set to true. Point source parameter gradients
- * need to be computed numerically.
  ***************************************************************************/
 double GModelSpatialComposite::eval(const GPhoton& photon,
                                       const bool&    gradients) const
@@ -269,9 +264,8 @@ double GModelSpatialComposite::eval(const GPhoton& photon,
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Draws an arbitrary sky direction for the point source model. As the point
- * source is a point in the sky, the methods always returns the directon of
- * the point source.
+ * Draws an arbitrary model component and an arbitrary direction from that 
+ * component.
  ***************************************************************************/
 GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
                                      const GTime&   time,
@@ -305,8 +299,8 @@ GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
  * @param[in] margin Margin to be added to sky direction (degrees)
  * @return True if the model contains the sky direction.
  *
- * Signals whether a sky direction is contained in the point source
- * model.
+ * Signals whether a sky direction is contained in one of the 
+ * model components.
  ***************************************************************************/
 bool GModelSpatialComposite::contains(const GSkyDir& dir,
                                         const double&  margin) const
@@ -573,7 +567,7 @@ std::string GModelSpatialComposite::print(const GChatter& chatter) const
 
 
 /***********************************************************************//**
- * @brief Returns spatial component element
+ * @brief Returns pointer to spatial component element
  *
  * @param[in] index Index of spatial component.
  * @return Spatial model.
