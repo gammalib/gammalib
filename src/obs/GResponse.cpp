@@ -321,39 +321,11 @@ double GResponse::eval_prob(const GModelSky&    model,
     // Continue only if the model has a spatial component
     if (model.spatial() != NULL) {
 
-        // Initialise IRF value
-        double irf = 0.0;
+        // Set source
+        GSource source(model.name(), model.spatial(), srcEng, srcTime);
 
-        // Try to retrieve a composite spectral model
-        const GModelSpatialComposite* composite = dynamic_cast<const
-                GModelSpatialComposite*>(model.spatial());
-
-        // Compute IRF using GSource if not a composite model
-        if (composite == NULL) {
-
-            // Set source
-            GSource source(model.name(), model.spatial(), srcEng, srcTime);
-
-            // Get IRF value. This method returns the spatial component of the
-            // source model.
-            irf = this->irf(event, source, obs);
-        }
-        else {
-
-            // Loop over composite model components
-            for(int i = 0; i < composite->components(); ++i) {
-
-                // Circumvent function returning const component
-                GModelSpatial* spat = const_cast<GModelSpatial*>(composite->component(i));
-
-                // Set source
-                GSource source(model.name(), spat, srcEng, srcTime);
-
-                // Get IRF value. This method returns the spatial component of the
-                // source model.
-                irf += this->irf(event, source, obs);
-            }
-        }
+        // Compute IRF value
+        double irf = this->irf(event, source, obs);
 
         // If required, apply instrument specific model scaling
         if (model.has_scales()) {

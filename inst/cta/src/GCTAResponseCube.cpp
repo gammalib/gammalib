@@ -40,6 +40,7 @@
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialShell.hpp"
 #include "GModelSpatialElliptical.hpp"
+#include "GModelSpatialComposite.hpp"
 #include "GModelSpatialDiffuse.hpp"
 #include "GPhoton.hpp"
 #include "GSource.hpp"
@@ -416,6 +417,9 @@ double GCTAResponseCube::irf(const GEvent&       event,
             break;
         case GMODEL_SPATIAL_DIFFUSE:
             irf = irf_diffuse(event, source, obs);
+            break;
+        case GMODEL_SPATIAL_COMPOSITE:
+            irf = irf_composite(event, source, obs);
             break;
         default:
             break;
@@ -1491,5 +1495,34 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     #endif
 
     // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to composite source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to composite source.
+ *
+ * Returns the instrument response to a specified composite source.
+ ***************************************************************************/
+double GCTAResponseCube::irf_composite(const GEvent&       event,
+                                     const GSource&      source,
+                                     const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    const GModelSpatialComposite* model = dynamic_cast<const GModelSpatialComposite*>(source.model());
+
+    for (int i=0;i<model->components();++i) {
+        GModelSpatial* spat = const_cast<GModelSpatial*>(model->component(i));
+        GSource src(source.name(), spat, source.energy(), source.time());
+        irf += this->irf(event, source, obs);
+    }
+
     return irf;
 }
