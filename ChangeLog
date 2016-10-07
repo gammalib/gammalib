@@ -3,6 +3,7 @@
         * Version 1.2.0 released
         =========================
 
+        Increase precision of gammalib::str() floating point functions
         Add GFits::publish() methods (#1231)
         Add GVOTable class (#1231)
         Add multiplicative spectral model (#1861)

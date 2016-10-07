@@ -41,6 +41,8 @@ namespace gammalib {
     std::string              strip_whitespace(const std::string& arg);
     std::string              strip_chars(const std::string& arg,
                                          const std::string& chars);
+    std::string              rstrip_chars(const std::string& arg,
+                                          const std::string& chars);
     std::string              expand_env(const std::string& arg);
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);

@@ -415,7 +415,7 @@ void GApplicationPar::real(const double& value)
     }
 
     // Set value string at highest precision
-    std::string value_string = gammalib::str(value, 15);
+    std::string value_string = gammalib::str(value);
 
     // Strip trailing zeros
     std::string::size_type start = 0;

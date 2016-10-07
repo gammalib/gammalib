@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GVector.cpp - Test vector class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -382,70 +382,121 @@ void TestGVector::arithmetics(void){
                         "|GVector| (vector norm)");
 
     // min(GVector)
-    test_assert(min(m_test)==1.1,"min(GVector)");
+    test_value(min(m_test), 1.1, 1e-6, "min(GVector)");
 
     // max(GVector)
-    test_assert(max(m_test)==5.5,"max(GVector)");
+    test_value(max(m_test), 5.5, 1e-6, "max(GVector)");
 
     // sum(GVector)
-    test_value(m_test[0]+m_test[1]+m_test[2]+m_test[3]+m_test[4],sum(m_test),1e-6,"sum(GVector)");
+    test_value(m_test[0]+m_test[1]+m_test[2]+m_test[3]+m_test[4],
+               sum(m_test), 1e-6, "sum(GVector)");
 
     // acos(GVector/10.0)
-    test_assert(acos(m_test/10.0).print()=="(1.46057, 1.34898, 1.23449, 1.1152, 0.988432)","acos(GVector/10.0)");
+    GVector test = acos(m_test/10.0);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::acos(m_test[i]/10.0));
+    }
 
     // acosh(GVector)
-    test_assert(acosh(m_test).print()=="(0.443568, 1.42542, 1.86328, 2.16158, 2.38953)","acosh(GVector)");
+    test = acosh(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::acosh(m_test[i]));
+    }
 
     // asin(GVector/10.0)
-    test_assert(asin(m_test/10.0).print()=="(0.110223, 0.221814, 0.336304, 0.455599, 0.582364)","asin(GVector/10.0)");
+    test = asin(m_test/10.0);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::asin(m_test[i]/10.0));
+    }
 
     // asinh(GVector/10.0)
-    test_assert(asinh(m_test/10.0).print()=="(0.109779, 0.218263, 0.324286, 0.426913, 0.52548)","asinh(GVector/10.0)");
+    test = asinh(m_test/10.0);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::asinh(m_test[i]/10.0));
+    }
 
     // atan(GVector/10.0)
-    test_assert(atan(m_test/10.0).print()=="(0.10956, 0.21655, 0.318748, 0.414507, 0.502843)","atan(GVector/10.0)");
+    test = atan(m_test/10.0);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::atan(m_test[i]/10.0));
+    }
 
     // atanh(GVector/10.0)
-    test_assert(atanh(m_test/10.0).print()=="(0.110447, 0.223656, 0.342828, 0.472231, 0.618381)","atanh(GVector/10.0)");
+    test = atanh(m_test/10.0);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::atanh(m_test[i]/10.0));
+    }
 
     // cos(GVector)
-    test_assert(cos(m_test).print()=="(0.453596, -0.588501, -0.98748, -0.307333, 0.70867)","cos(GVector)");
+    test = cos(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::cos(m_test[i]));
+    }
 
     // cosh(GVector)
-    test_assert(cosh(m_test).print()=="(1.66852, 4.56791, 13.5748, 40.7316, 122.348)","cosh(GVector)");
+    test = cosh(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::cosh(m_test[i]));
+    }
 
     // exp(GVector)
-    test_assert(exp(m_test).print()=="(3.00417, 9.02501, 27.1126, 81.4509, 244.692)","exp(GVector)");
+    test = exp(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::exp(m_test[i]));
+    }
 
     // abs(cos(m_test))
-    test_assert(abs(cos(m_test)).print()=="(0.453596, 0.588501, 0.98748, 0.307333, 0.70867)","abs(cos(m_test))");
+    test = abs(cos(m_test));
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::abs(std::cos(m_test[i])));
+    }
 
     // log(GVector)
-    test_assert(log(m_test).print()=="(0.0953102, 0.788457, 1.19392, 1.4816, 1.70475)","log(GVector)");
+    test = log(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::log(m_test[i]));
+    }
 
     // log10(GVector)
-    test_assert(log10(m_test).print()=="(0.0413927, 0.342423, 0.518514, 0.643453, 0.740363)","log10(GVector)");
+    test = log10(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::log10(m_test[i]));
+    }
 
     // sin(GVector)
-    test_assert(sin(m_test).print()=="(0.891207, 0.808496, -0.157746, -0.951602, -0.70554)","sin(GVector)");
+    test = sin(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::sin(m_test[i]));
+    }
 
     // sinh(GVector)
-    test_assert(sinh(m_test).print()=="(1.33565, 4.45711, 13.5379, 40.7193, 122.344)","sinh(GVector)");
+    test = sinh(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::sinh(m_test[i]));
+    }
 
     // sqrt(GVector)
-    test_assert(sqrt(m_test).print()=="(1.04881, 1.48324, 1.81659, 2.09762, 2.34521)","sqrt(GVector)");
+    test = sqrt(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::sqrt(m_test[i]));
+    }
 
     // tan(GVector)
-    test_assert(tan(m_test).print()=="(1.96476, -1.37382, 0.159746, 3.09632, -0.995584)","tan(GVector)");
+    test = tan(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::tan(m_test[i]));
+    }
 
     // tanh(GVector)
-    test_assert(tanh(m_test).print()=="(0.800499, 0.975743, 0.997283, 0.999699, 0.999967)","tanh(GVector)");
+    test = tanh(m_test);
+    for (int i = 0; i < 5; ++i) {
+        test_value(test[i], std::tanh(m_test[i]));
+    }
 
     // Incompatible size GVector + GVector
     test_try("Incompatible size GVector + GVector:");
     try {
         m_result = m_test + m_bigger;
-
         test_try_failure();
     }
     catch (GException::vector_mismatch &e) {
@@ -459,7 +510,6 @@ void TestGVector::arithmetics(void){
     test_try("cross(a,b) (using 5-dim vectors)");
     try {
         cross(m_test,m_test);
-
         test_try_failure();
     }
     catch (GException::vector_bad_cross_dim &e) {
@@ -473,7 +523,6 @@ void TestGVector::arithmetics(void){
     test_try("cross(a,b) (using vectors with different dimension)");
     try {
         cross(m_test,m_bigger);
-
         test_try_failure();
     }
     catch (GException::vector_mismatch &e) {
@@ -492,7 +541,10 @@ void TestGVector::arithmetics(void){
         test_cross_b[1] = 1.0;
 
         //Test if cross == (0,0,1)
-        test_assert(cross(test_cross_a, test_cross_b)[0]==0&&cross(test_cross_a, test_cross_b)[1]==0&&cross(test_cross_a, test_cross_b)[2]==1,"Check cross(a,b) value");
+        test_assert(cross(test_cross_a, test_cross_b)[0] == 0 &&
+                    cross(test_cross_a, test_cross_b)[1] == 0 &&
+                    cross(test_cross_a, test_cross_b)[2] == 1,
+                    "Check cross(a,b) value");
 
         test_try_success();
     }

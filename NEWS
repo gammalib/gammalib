@@ -50,6 +50,7 @@ The following methods have been added:
 - GTime::last(const double& geolon)
 - GTime::now()
 - GFits::publish()
+- gammalib::rstrip_chars()
 
 The following methods have been removed:
 - <all classes>::eval_gradients()
@@ -187,7 +188,12 @@ or no maps (#1828).
 
 13. Support module
 ------------------
-None
+The gammalib::rstrip_chars() function has been added to right strip characters
+from a string.
+
+The gammalib::str() functions for single and double precision floating point
+numbers now have an increased precision so that significant digits are no
+longer lost.
 
 
 14. XML module
