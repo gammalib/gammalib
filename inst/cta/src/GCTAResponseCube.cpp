@@ -1516,13 +1516,25 @@ double GCTAResponseCube::irf_composite(const GEvent&       event,
     // Initialise IRF
     double irf = 0.0;
 
+    // Get pointer to composite model
     const GModelSpatialComposite* model = dynamic_cast<const GModelSpatialComposite*>(source.model());
 
+    // Loop over model components
     for (int i=0;i<model->components();++i) {
+
+        // Get pointer to spatial component
         GModelSpatial* spat = const_cast<GModelSpatial*>(model->component(i));
+
+        // Create new GSource object
         GSource src(source.name(), spat, source.energy(), source.time());
+
+        // Compute irf value
         irf += this->irf(event, source, obs);
     }
+
+    // Divide by number of model components
+    irf /= (double)model->components();
+
 
     return irf;
 }

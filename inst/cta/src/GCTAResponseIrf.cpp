@@ -2882,8 +2882,11 @@ double GCTAResponseIrf::irf_composite(const GEvent&       event,
         GSource src(source.name(), spat, source.energy(), source.time());
 
         // Compute irf value
-        irf = this->irf(event, source, obs);
+        irf += this->irf(event, src, obs);
     }
+
+    // Divide by number of model components
+    irf /= (double)model->components();
 
     // Return IRF value
     return irf;
@@ -3516,23 +3519,23 @@ double GCTAResponseIrf::nroi_composite(const GModelSky&    model,
     double nroi = 0.0;
 
     // Get composite model
-    const GModelSpatialComposite* comp = dynamic_cast<const GModelSpatialComposite*>(model.spatial());
+    GModelSpatialComposite* comp = dynamic_cast<GModelSpatialComposite*>(model.spatial());
 
     // Loop over model components
-    for (int i=0;i<comp->components();++i) {
-
-        // Retrieve pointer to spatial component
-        GModelSpatial* spat = const_cast<GModelSpatial*>(comp->component(i));
+    for (int i = 0; i < comp->components(); ++i) {
 
         // Create new sky model
         GModelSky sky = GModelSky(model);
 
         // Assign spatial part
-        sky.spatial(spat);
+        sky.spatial(comp->component(i));
 
         // Compute nroi
-        nroi = this->nroi(sky, srcEng, srcTime, obsEng, obsTime, obs);
+        nroi += this->nroi(sky, srcEng, srcTime, obsEng, obsTime, obs);
     }
+
+    // Divide by number of model components
+    nroi /= (double)comp->components();
 
     // Return nroi
     return nroi;

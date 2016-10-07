@@ -628,7 +628,7 @@ const GModelSpatial* GModelSpatialComposite::component(const std::string& name) 
 void GModelSpatialComposite::init_members(void)
 {
     // Initialise model type
-    m_type = "SpatialComposite";
+    m_type = "Composite";
 
     // Initialise models vector
     m_components.clear();
