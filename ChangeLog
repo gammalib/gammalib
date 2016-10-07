@@ -1,8 +1,9 @@
-2016-10-06
+2016-10-07
 
         * Version 1.2.0 released
         =========================
 
+        Add GFits::publish() methods (#1231)
         Add GVOTable class (#1231)
         Add multiplicative spectral model (#1861)
         Add additional time setting and getting methods (#1856)

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-6 October 2016
+7 October 2016
 
 
 1. Introduction
@@ -49,6 +49,7 @@ The following methods have been added:
 - GTime::lmst(const double& geolon)
 - GTime::last(const double& geolon)
 - GTime::now()
+- GFits::publish()
 
 The following methods have been removed:
 - <all classes>::eval_gradients()
@@ -124,7 +125,9 @@ None
 
 6. FITS I/O Interface
 ---------------------
-None
+Add GFits::publish() methods that publish a FITS HDU to an Virtual Observatory
+hub. If the FITS HDU is an image it will be published as a FITS image, which
+table HDUs will be published as VO tables (#1231).
 
 
 7. Linear algebra module
