@@ -63,6 +63,7 @@
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
 #include "GMath.hpp"
+#include "GNdarray.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"

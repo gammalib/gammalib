@@ -1,8 +1,9 @@
-2016-10-07
+2016-10-08
 
         * Version 1.2.0 released
         =========================
 
+        Add GNdarray class (#1768)
         Increase precision of gammalib::str() floating point functions
         Add GFits::publish() methods (#1231)
         Add GVOTable class (#1231)

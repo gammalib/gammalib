@@ -38,8 +38,11 @@
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
+%include std_vector.i
+%template(vectori) std::vector<int>;
 
 /* __ Include GammaLib typemaps __________________________________________ */
+%include GTypemaps.i
 %include typemap_GFilename.i
 
 /* __ Include interface classes __________________________________________ */
@@ -53,3 +56,4 @@
 %include "GFunction.i"
 %include "GIntegral.i"
 %include "GMath.i"
+%include "GNdarray.i"

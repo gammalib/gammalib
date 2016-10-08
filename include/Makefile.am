@@ -44,6 +44,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GDerivative.hpp \
                      GFunction.hpp \
                      GMath.hpp \
+                     GNdarray.hpp \
                      GFits.hpp \
                      GFitsHDU.hpp \
                      GFitsHeader.hpp \

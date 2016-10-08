@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-7 October 2016
+8 October 2016
 
 
 1. Introduction
@@ -16,6 +16,7 @@ The following classes have been added:
 - GModelSpectralPlawEnergyFlux
 - GModelSpectralMultiplicative
 - GVOTable
+- GNdarray
 
 The following classes have been removed:
 - ...
@@ -155,7 +156,8 @@ product of spectral model components as a new spectral model (#1861).
 
 9. Numerics module
 ------------------
-None
+The GNdarray class has been added that implements a n-dimensional double
+precision floating point array (#1768).
 
 
 10. Observation module
