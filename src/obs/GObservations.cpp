@@ -843,12 +843,12 @@ void GObservations::errors_hessian(void)
  *
  * @param[in] filename FITS filename.
  *
- * Saves the covariance matrix into FITS file.
- * The covariance matrix is calculated as the inverse of the curvature
- * matrix.
+ * Saves the covariance matrix into FITS file. The covariance matrix is
+ * calculated as the inverse of the curvature matrix.
  ***************************************************************************/
 void GObservations::save_covmat(const GFilename& filename) 
 {
+
     // Calculate covariance matrix
     GMatrixSparse covmat = m_fct.curvature()->invert();
 
@@ -856,10 +856,10 @@ void GObservations::save_covmat(const GFilename& filename)
     std::vector<std::string> covmat_entries;
 
     for (int i = 0 ; i < m_models.size(); ++i){
-	for (int j = 0; j < m_models[i]->size(); j++){
+	    for (int j = 0; j < m_models[i]->size(); j++){
             covmat_entries.push_back(m_models[i]->at(j).name() + "(" +
                                      m_models[i]->name() + ")" );
-	}
+        }
     }
 
     // Allocate FITS object
@@ -872,16 +872,19 @@ void GObservations::save_covmat(const GFilename& filename)
     GFitsTableDoubleCol cov("Covariance", 1, size*size);
 
     // Fill tables
+    // We need to take the scale factors into account as
+    // covariance matrix is for the unscaled parameters
     int counter = 0;
     for (int i = 0; i < size; ++i){
         par(0, i) = covmat_entries[i];
         for (int j = 0; j < size; ++j){
-            cov(0, counter) = covmat(i,j);
+            cov(0, counter) = covmat(i,j) * m_models.pars()[i]->scale()
+		                      * m_models.pars()[j]->scale();
             ++counter;
         }
     }
 
-    // Set dimension
+    // Set dimension for covariance matrix column
     std::vector<int> dim;
     dim.push_back(size);
     dim.push_back(size);
@@ -891,6 +894,9 @@ void GObservations::save_covmat(const GFilename& filename)
     covmat_table.append(par);
     covmat_table.append(cov);
 
+    // Set extension name
+    covmat_table.extname("CovarianceTable");
+
     // Append table to FITS object
     fits.append(covmat_table);
 
@@ -899,6 +905,7 @@ void GObservations::save_covmat(const GFilename& filename)
 
     // Close FITS object
     fits.close();
+
 }
 
 
