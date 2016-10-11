@@ -856,7 +856,7 @@ void GObservations::save_covmat(const GFilename& filename)
     std::vector<std::string> covmat_entries;
 
     for (int i = 0 ; i < m_models.size(); ++i){
-	    for (int j = 0; j < m_models[i]->size(); j++){
+	    for (int j = 0; j < m_models[i]->size(); ++j){
             covmat_entries.push_back(m_models[i]->at(j).name() + "(" +
                                      m_models[i]->name() + ")" );
         }
@@ -866,7 +866,7 @@ void GObservations::save_covmat(const GFilename& filename)
     GFits fits;
 
     // Create binary table and columns
-    int size    = covmat_entries.size();
+    int size = covmat_entries.size();
     GFitsBinTable       covmat_table;
     GFitsTableStringCol par("Parameters", 1, 50, size);
     GFitsTableDoubleCol cov("Covariance", 1, size*size);
