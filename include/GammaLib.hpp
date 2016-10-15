@@ -64,6 +64,8 @@
 #include "GFunction.hpp"
 #include "GMath.hpp"
 #include "GNdarray.hpp"
+#include "GFft.hpp"
+#include "GFftWavetable.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"

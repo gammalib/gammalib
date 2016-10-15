@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GNdarray.i - N-dimensional array class                 *
+ *                 GFft.i - Fast Fourier transformation class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2016 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,63 +19,56 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GNdarray.i
- * @brief N-dimensional array class interface definition
+ * @file GFft.i
+ * @brief Fast Fourier transformation class interface definition
  * @author Juergen Knoedlseder
  */
 
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GNdarray.hpp"
+#include "GFft.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GNdarray
+ * @class GFft
  *
- * @brief N-dimensional array class
- *
- * This class implement a n-dimensional double precision floating point
- * array.
+ * @brief Fast Fourier Transformation class
  ***************************************************************************/
-class GNdarray : public GBase {
+class GFft : public GBase {
 
 public:
     // Constructors and destructors
-    GNdarray(void);
-    explicit GNdarray(const int& nx);
-    GNdarray(const int& nx, const int& ny);
-    GNdarray(const int& nx, const int& ny, const int& nz);
-    GNdarray(const std::vector<int>& n);
-    GNdarray(const GNdarray& array);
-    virtual ~GNdarray(void);
+    GFft(void);
+    explicit GFft(const GNdarray& array);
+    GFft(const GFft& fft);
+    virtual ~GFft(void);
 
     // Operators
-    bool      operator==(const GNdarray& array) const;
-    bool      operator!=(const GNdarray& array) const;
-    GNdarray& operator+=(const GNdarray& array);
-    GNdarray& operator-=(const GNdarray& array);
-    GNdarray& operator+=(const double& value);
-    GNdarray& operator-=(const double& value);
-    GNdarray& operator*=(const double& value);
-    GNdarray  operator-(void) const;
+    GFft& operator+=(const GFft& fft);
+    GFft& operator-=(const GFft& fft);
+    GFft& operator*=(const GFft& fft);
+    GFft& operator/=(const GFft& fft);
+    GFft  operator-(void) const;
 
     // Methods
     void                    clear(void);
-    GNdarray*               clone(void) const;
+    GFft*                   clone(void) const;
     std::string             classname(void) const;
     int                     dim() const;
     int                     size(void) const;
     const std::vector<int>& shape(void) const;
     const std::vector<int>& strides(void) const;
+    void                    forward(const GNdarray& array);
+    GNdarray                backward(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GNdarray class extension
+ * @brief GFft class extension
  ***************************************************************************/
-%extend GNdarray {
-    double __getitem__(int GTuple[]) {
+%extend GFft {
+    std::complex<double> __getitem__(int GTuple[]) {
         // Handle first the special case of a single index. In Python we want
         // to support accessing a n-dimensional array with a single index so
         // that we can iterate over the array
@@ -104,7 +97,7 @@ public:
         }
         return ((*self)(index));
     }
-    void __setitem__(int GTuple[], const double& value) {
+    void __setitem__(int GTuple[], const std::complex<double>& value) {
         if (GTuple[0] != self->dim()) {
             throw GException::invalid_value("__setitem__(int)", "Invalid "
                   "access of "+gammalib::str(self->dim())+"-dimensional "
@@ -121,103 +114,7 @@ public:
         }
         (*self)(index) = value;
     }
-    GNdarray __add__(const GNdarray &a) {
-        return (*self) + a;
-    }
-    GNdarray __add__(const double &a) {
-        return (*self) + a;
-    }
-    GNdarray __sub__(const GNdarray &a) {
-        return (*self) - a;
-    }
-    GNdarray __sub__(const double &a) {
-        return (*self) - a;
-    }
-    GNdarray __mul__(const double &a) {
-        return (*self) * a;
-    }
-    // Python 2.x
-    GNdarray __div__(const double &a) {
-        return (*self) / a;
-    }
-    // Python 3.x
-    GNdarray __truediv__(const double &a) {
-        return (*self) / a;
-    }
-    // Python 2.x operator/=
-    GNdarray __idiv__(const double& value) {
-        self->operator/=(value);
+    GFft copy() {
         return (*self);
-    }
-    // Python 3.x operator/=
-    GNdarray __itruediv__(const double& value) {
-        self->operator/=(value);
-        return (*self);
-    }
-    int __is__(const GNdarray &a) {
-            return (*self) == a;
-    }
-    GNdarray copy() {
-        return (*self);
-    }
-    double min() {
-        return min(*self);
-    }
-    double max() {
-        return max(*self);
-    }
-    double sum() {
-        return sum(*self);
-    }
-    GNdarray acos() {
-        return acos(*self);
-    }
-    GNdarray acosh() {
-        return acosh(*self);
-    }
-    GNdarray asin() {
-        return asin(*self);
-    }
-    GNdarray asinh() {
-        return asinh(*self);
-    }
-    GNdarray atan() {
-        return atan(*self);
-    }
-    GNdarray atanh() {
-        return atanh(*self);
-    }
-    GNdarray cos() {
-        return cos(*self);
-    }
-    GNdarray cosh() {
-        return cosh(*self);
-    }
-    GNdarray exp() {
-        return exp(*self);
-    }
-    GNdarray abs() {
-        return abs(*self);
-    }
-    GNdarray log() {
-        return log(*self);
-    }
-    GNdarray log10() {
-        return log10(*self);
-    }
-    GNdarray sin() {
-        return sin(*self);
-    }
-    GNdarray sinh() {
-        return sinh(*self);
-    }
-    GNdarray sqrt() {
-        return sqrt(*self);
-    }
-    GNdarray tan() {
-        return tan(*self);
-    }
-    GNdarray tanh() {
-        return tanh(*self);
     }
 };

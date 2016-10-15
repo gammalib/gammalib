@@ -45,6 +45,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFunction.hpp \
                      GMath.hpp \
                      GNdarray.hpp \
+                     GFft.hpp \
+                     GFftWavetable.hpp \
                      GFits.hpp \
                      GFitsHDU.hpp \
                      GFitsHeader.hpp \

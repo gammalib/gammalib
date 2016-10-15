@@ -52,6 +52,8 @@ void TestGNumerics::set(void)
     // Append tests
     append(static_cast<pfunction>(&TestGNumerics::test_ndarray),
            "Test GNdarray");
+    append(static_cast<pfunction>(&TestGNumerics::test_fft),
+           "Test GFft");
     append(static_cast<pfunction>(&TestGNumerics::test_integral),
            "Test GIntegral");
     append(static_cast<pfunction>(&TestGNumerics::test_romberg_integration),
@@ -269,6 +271,78 @@ void TestGNumerics::test_ndarray(void)
     test_value(tanh(nda)(0,1), std::tanh(5.5));
     test_value(pow(nda,3.0)(0,0), std::pow(3.0,3.0));
     test_value(pow(nda,3.0)(0,1), std::pow(5.5,3.0));
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test Fast Fourier Transform
+ ***************************************************************************/
+void TestGNumerics::test_fft(void)
+{
+    // Loop over array lengths
+    for (int n = 2; n < 12; ++n) {
+
+        // Skip n=8,9,10 since they can be factorised
+        if (n > 7 && n < 11) {
+            continue;
+        }
+
+        // Allocate 1-dimensional array
+        GNdarray array(n);
+
+        // Set one elements
+        array(n/2) = 1.0;
+
+        // Allocate FFT
+        GFft fft(array);
+
+        // Backward transformation
+        GNdarray back = fft.backward();
+
+        // Check FFT results
+        check_fft(array, fft, back);
+
+    } // endfor: looped over array lengths
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check Fast Fourier Transform
+ *
+ * @param[in] array Input array.
+ * @param[in] fft Fast Fourier Transform of input array.
+ * @param[in] back Backward transform of FFT (should be equal to input array)
+ ***************************************************************************/
+void TestGNumerics::check_fft(const GNdarray& array,
+                              const GFft&     fft,
+                              const GNdarray& back)
+{
+    // Get normalisation factor
+    double norm = 1.0 / double(array.size());
+
+    // Compute reference value and compare with FFT result
+    for (int k = 0; k < array.size(); ++k) {
+        double ref_real = 0.0;
+        double ref_imag = 0.0;
+        for (int n = 0; n < array.size(); ++n) {
+            double x = -gammalib::twopi * k * n * norm;
+            ref_real += array(n) * std::cos(x);
+            ref_imag += array(n) * std::sin(x);
+        }
+        std::complex<double> ref(ref_real, ref_imag);
+        test_value(fft(k), ref);
+    }
+
+    // Test backward transformation
+    for (int k = 0; k < array.size(); ++k) {
+        test_value(back(k), array(k));
+    }
 
     // Exit test
     return;

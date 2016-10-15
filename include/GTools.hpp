@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
+#include <complex>
 #include <cmath>
 #include <cfloat>
 
@@ -69,6 +70,8 @@ namespace gammalib {
     std::string              str(const long long int& value);
     std::string              str(const float& value, const int& precision = 0);
     std::string              str(const double& value, const int& precision = 0);
+    std::string              str(const std::complex<double>& value,
+                                 const int& precision = 0);
     char*                    tochar(const std::string& arg);
     short                    toshort(const std::string& arg);
     unsigned short           toushort(const std::string& arg);

@@ -159,31 +159,38 @@ GNdarray::GNdarray(const int& nx, const int& ny, const int& nz)
  *
  * @param[in] n Array dimensions.
  *
- * Constructs a n-dimensional array.
+ * Constructs a n-dimensional array. If the array dimension vector @p n is
+ * empty an empty n-dimensional array is constructed (similar to the void
+ * constructor).
  ***************************************************************************/
 GNdarray::GNdarray(const std::vector<int>& n)
 {
     // Initialise class members
     init_members();
 
-    // Compute size of array
-    int size = n[0];
-    for (int i = 1; i < n.size(); ++i) {
-        size *= n[i];
-    }
+    // Continue only if there are dimensions in vector
+    if (n.size() > 0) {
 
-    // Set shape
-    m_shape = n;
+        // Compute size of array
+        int size = n[0];
+        for (int i = 1; i < n.size(); ++i) {
+            size *= n[i];
+        }
 
-    // Set strides
-    int stride = 1;
-    for (int i = 0; i < n.size(); ++i) {
-        m_strides.push_back(stride);
-        stride *= n[i];
-    }
+        // Set shape
+        m_shape = n;
 
-    // Initialise data array with zeros
-    m_data.assign(size, 0.0);
+        // Set strides
+        int stride = 1;
+        for (int i = 0; i < n.size(); ++i) {
+            m_strides.push_back(stride);
+            stride *= n[i];
+        }
+
+        // Initialise data array with zeros
+        m_data.assign(size, 0.0);
+
+    } // endif: there were dimensions in vector
 
     // Return
     return;

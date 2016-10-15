@@ -30,6 +30,8 @@ sources = GIntegral.cpp \
           GFunction.cpp \
           GMath.cpp \
           GNdarray.cpp \
+          GFft.cpp \
+          GFftWavetable.cpp \
           GException_numerics.cpp
 
 # Build libtool library

@@ -38,7 +38,7 @@
  *
  * @brief N-dimensional array class
  *
- * This class implement a n-dimensional double precision floating point
+ * This class implements a n-dimensional double precision floating point
  * array.
  ***************************************************************************/
 class GNdarray : public GBase {
@@ -105,6 +105,7 @@ public:
     int                     dim() const;
     int                     size(void) const;
     const std::vector<int>& shape(void) const;
+    const std::vector<int>& strides(void) const;
     double&                 at(const int& ix);
     double&                 at(const int& ix, const int& iy);
     double&                 at(const int& ix, const int& iy, const int& iz);
@@ -115,9 +116,7 @@ public:
     const double&           at(const std::vector<int>& i) const;
     std::string             print(const GChatter& chatter = NORMAL) const;
 
-#ifndef SWIG
 protected:
-#endif
     // Protected methods
     void init_members(void);
     void copy_members(const GNdarray& array);
@@ -302,6 +301,20 @@ inline
 const std::vector<int>& GNdarray::shape(void) const
 {
     return m_shape;
+}
+
+
+/***********************************************************************//**
+ * @brief Return strides of array
+ *
+ * @return Strides of array
+ *
+ * Returns the strides of the array.
+ ***************************************************************************/
+inline
+const std::vector<int>& GNdarray::strides(void) const
+{
+    return m_strides;
 }
 
 

@@ -39,7 +39,9 @@
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 %include std_vector.i
+%include std_complex.i
 %template(vectori) std::vector<int>;
+%template(vectorc) std::vector<std::complex<double> >;
 
 /* __ Include GammaLib typemaps __________________________________________ */
 %include GTypemaps.i
@@ -57,3 +59,5 @@
 %include "GIntegral.i"
 %include "GMath.i"
 %include "GNdarray.i"
+%include "GFft.i"
+%include "GFftWavetable.i"

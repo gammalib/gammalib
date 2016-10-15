@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-8 October 2016
+16 October 2016
 
 
 1. Introduction
@@ -17,6 +17,8 @@ The following classes have been added:
 - GModelSpectralMultiplicative
 - GVOTable
 - GNdarray
+- GFft
+- GFftWavetable
 
 The following classes have been removed:
 - ...
@@ -158,6 +160,11 @@ product of spectral model components as a new spectral model (#1861).
 ------------------
 The GNdarray class has been added that implements a n-dimensional double
 precision floating point array (#1768).
+
+The GFft class has been added that performs a Fast Fourier Transformation
+of a n-dimensional array. The GFftWavetable class is a support class for
+GFft that provides the trigonometric coefficients for a factorisation. For
+the moment, GFft does only support 1-dimensional arrays (#1731).
 
 
 10. Observation module

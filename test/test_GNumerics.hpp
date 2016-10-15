@@ -69,6 +69,10 @@ public:
     virtual TestGNumerics* clone(void) const;
     virtual std::string    classname(void) const { return "TestGNumerics"; }
     void                   test_ndarray(void);
+    void                   test_fft(void);
+    void                   check_fft(const GNdarray& array,
+                                     const GFft&     fft,
+                                     const GNdarray& back);
     void                   test_integral(void);
     void                   test_romberg_integration(void);
     void                   test_adaptive_simpson_integration(void);

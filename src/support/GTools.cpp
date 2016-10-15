@@ -549,6 +549,51 @@ std::string gammalib::str(const double& value, const int& precision)
 
 
 /***********************************************************************//**
+ * @brief Convert complex value into string
+ *
+ * @param[in] value Complex value to be converted into string.
+ * @param[in] precision Floating point precision.
+ * @return String with complex value.
+ *
+ * Converts a complex value into a string. Any positive @p precision argument
+ * specifies the exact number of digits after the comma.
+ ***************************************************************************/
+std::string gammalib::str(const std::complex<double>& value,
+                          const int&                  precision)
+{
+    // Allocate output stream
+    std::ostringstream s_value;
+
+    // If specified then set the requested fixed point precision. Otherwise
+    // use a precision that should be sufficient for floating point values.
+    if (precision > 0) {
+        s_value.precision(precision);
+        s_value.setf(std::ios::fixed, std::ios::floatfield);
+    }
+    else {
+        s_value.precision(15);
+    }
+
+    // Put double precision floating point value in stream
+    s_value << value.real();
+    if (value.imag() < 0.0) {
+        s_value << "-";
+    }
+    else {
+        s_value << "+";
+    }
+    s_value << std::abs(value.imag()) << "j";
+
+    // Convert to a string
+    std::string result = s_value.str();
+
+    // Return result
+    return result;
+}
+
+
+
+/***********************************************************************//**
  * @brief Convert string to C string
  *
  * @param[in] arg String to be converted.

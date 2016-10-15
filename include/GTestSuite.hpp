@@ -34,6 +34,7 @@ class GTestSuite;
 typedef void (GTestSuite::*pfunction)(void);
 
 /* __ Includes ___________________________________________________________ */
+#include <complex>
 #include <vector>
 #include <string>
 #include "GLog.hpp"
@@ -92,6 +93,15 @@ public:
                                          const double&      eps,
                                          const std::string& name = "",
                                          const std::string& message = "");
+    void                      test_value(const std::complex<double>& value,
+                                         const std::complex<double>& expected,
+                                         const std::string&          name = "",
+                                         const std::string&          message = "");
+    void                      test_value(const std::complex<double>& value,
+                                         const std::complex<double>& expected,
+                                         const double&               eps,
+                                         const std::string&          name = "",
+                                         const std::string&          message = "");
     void                      test_value(const std::string& value,
                                          const std::string& expected,
                                          const std::string& name = "",
