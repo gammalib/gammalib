@@ -1882,10 +1882,15 @@ void GFft::factorn(std::vector<std::complex<double> >& in,
                 double sumc_imag = bp - bm;
 
                 //
-                in[istride*(i+em)].real(in[istride*(i+em)].real() + sum_real);
-                in[istride*(i+em)].imag(in[istride*(i+em)].imag() + sum_imag);
-                in[istride*(i+ecm)].real(in[istride*(i+ecm)].real() + sumc_real);
-                in[istride*(i+ecm)].imag(in[istride*(i+ecm)].imag() + sumc_imag);
+                //in[istride*(i+em)].real(in[istride*(i+em)].real() + sum_real);
+                //in[istride*(i+em)].imag(in[istride*(i+em)].imag() + sum_imag);
+                //in[istride*(i+ecm)].real(in[istride*(i+ecm)].real() + sumc_real);
+                //in[istride*(i+ecm)].imag(in[istride*(i+ecm)].imag() + sumc_imag);
+                in[istride*(i+em)]  = std::complex<double>(in[istride*(i+em)].real() + sum_real,
+                                                           in[istride*(i+em)].imag() + sum_imag);
+                in[istride*(i+ecm)] = std::complex<double>(in[istride*(i+ecm)].real() + sumc_real,
+                                                           in[istride*(i+ecm)].imag() + sumc_imag);
+                
 
             } // endfor: i
             
