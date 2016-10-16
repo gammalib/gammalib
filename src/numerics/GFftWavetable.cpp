@@ -347,10 +347,7 @@ void GFftWavetable::set_members(const int& n)
 
         // Compute number of coefficients for current factor
         int q = n / product;
-/*
-std::cout << "i=" << i << " q=" << q << " factor=" << m_factors[i];
-std::cout << " product=" << product << " n=" << n << std::endl;
-*/
+
         // Loop over all output coefficients
         for (int j = 1; j < m_factors[i]; ++j) {
 
@@ -361,9 +358,7 @@ std::cout << " product=" << product << " n=" << n << std::endl;
                 m = m + j * product_1;
                 m = m % n;
                 double theta = d_theta * m;      /*  d_theta*j*k*p_(i-1) */
-/*
-std::cout << " j=" << j << " k=" << k << " theta=" << theta << std::endl;
-*/
+
                 // Compute trigonometric lookup table value
                 std::complex<double> value(std::cos(theta), std::sin(theta));
 
@@ -441,17 +436,6 @@ void GFftWavetable::set_factors(const int& n)
                 m_factors.push_back(factor);
             }
         }
-        /*
-        int i = 0;
-        while (subtransforms[i] && ntest != 1) {
-            int factor = subtransforms[i];
-            while ((ntest % factor) == 0) {
-                ntest /= factor;
-                m_factors.push_back(factor);
-            }
-            i++;
-        }
-        */
 
         // Deal with any other even prime factors (there is only one)
         int factor = 2;

@@ -457,7 +457,7 @@ void GFft::set_data(const GNdarray& array)
 
         // Set real part of data from n-dimensional array
         for (int i = 0; i < array.size(); ++i) {
-            m_data[i].real(array(i));
+            m_data[i] = std::complex<double>(array(i), 0.0);
         }
 
         // Save shape
@@ -664,12 +664,15 @@ void GFft::factor2(const std::vector<std::complex<double> >& in,
             const double x1_imag = z0_imag - z1_imag;
 
             // out0 = 1 * x0
-            out[ostride*j].real(x0_real);
-            out[ostride*j].imag(x0_imag);
+            //out[ostride*j].real(x0_real);
+            //out[ostride*j].imag(x0_imag);
+            out[ostride*j] = std::complex<double>(x0_real, x0_imag);
           
             // out1 = w1 * x1
-            out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
-            out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            //out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
+            //out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            out[ostride*(j+p_1)] = std::complex<double>(w1_real * x1_real - w1_imag * x1_imag,
+                                                        w1_real * x1_imag + w1_imag * x1_real);
 
         } // endfor: k1
         
@@ -790,17 +793,22 @@ void GFft::factor3(const std::vector<std::complex<double> >& in,
             const double x2_imag = t2_imag - t3_real;
 
             // out0 = 1 * x0
-            out[ostride*j].real(x0_real);
-            out[ostride*j].imag(x0_imag);
+            //out[ostride*j].real(x0_real);
+            //out[ostride*j].imag(x0_imag);
+            out[ostride*j] = std::complex<double>(x0_real, x0_imag);
           
             // out1 = w1 * x1
-            out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
-            out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            //out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
+            //out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            out[ostride*(j+p_1)] = std::complex<double>(w1_real * x1_real - w1_imag * x1_imag,
+                                                        w1_real * x1_imag + w1_imag * x1_real);
 
             // out2 = w2 * x2
-            out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
-            out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
-            
+            //out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
+            //out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            out[ostride*(j+2*p_1)] = std::complex<double>(w2_real * x2_real - w2_imag * x2_imag,
+                                                          w2_real * x2_imag + w2_imag * x2_real);
+
         } // endfor: k1
         
     } // endfor: k
@@ -936,20 +944,27 @@ void GFft::factor4(const std::vector<std::complex<double> >& in,
             const double x3_imag = t3_imag - t4_real;
 
             // out0 = 1 * x0
-            out[ostride*j].real(x0_real);
-            out[ostride*j].imag(x0_imag);
+            //out[ostride*j].real(x0_real);
+            //out[ostride*j].imag(x0_imag);
+            out[ostride*j] = std::complex<double>(x0_real, x0_imag);
           
             // out1 = w1 * x1
-            out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
-            out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            //out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
+            //out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            out[ostride*(j+p_1)] = std::complex<double>(w1_real * x1_real - w1_imag * x1_imag,
+                                                        w1_real * x1_imag + w1_imag * x1_real);
 
             // out2 = w2 * x2
-            out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
-            out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            //out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
+            //out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            out[ostride*(j+2*p_1)] = std::complex<double>(w2_real * x2_real - w2_imag * x2_imag,
+                                                          w2_real * x2_imag + w2_imag * x2_real);
 
             // out3 = w3 * x3
-            out[ostride*(j+3*p_1)].real(w3_real * x3_real - w3_imag * x3_imag);
-            out[ostride*(j+3*p_1)].imag(w3_real * x3_imag + w3_imag * x3_real);
+            //out[ostride*(j+3*p_1)].real(w3_real * x3_real - w3_imag * x3_imag);
+            //out[ostride*(j+3*p_1)].imag(w3_real * x3_imag + w3_imag * x3_real);
+            out[ostride*(j+3*p_1)] = std::complex<double>(w3_real * x3_real - w3_imag * x3_imag,
+                                                          w3_real * x3_imag + w3_imag * x3_real);
           
         } // endfor: k1
         
@@ -1135,24 +1150,33 @@ void GFft::factor5(const std::vector<std::complex<double> >& in,
             const double x4_imag = t8_imag - t10_real;
 
             // out0 = 1 * x0
-            out[ostride*j].real(x0_real);
-            out[ostride*j].imag(x0_imag);
+            //out[ostride*j].real(x0_real);
+            //out[ostride*j].imag(x0_imag);
+            out[ostride*j] = std::complex<double>(x0_real, x0_imag);
           
             // out1 = w1 * x1
-            out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
-            out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            //out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
+            //out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            out[ostride*(j+p_1)] = std::complex<double>(w1_real * x1_real - w1_imag * x1_imag,
+                                                        w1_real * x1_imag + w1_imag * x1_real);
 
             // out2 = w2 * x2
-            out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
-            out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            //out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
+            //out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            out[ostride*(j+2*p_1)] = std::complex<double>(w2_real * x2_real - w2_imag * x2_imag,
+                                                          w2_real * x2_imag + w2_imag * x2_real);
 
             // out3 = w3 * x3
-            out[ostride*(j+3*p_1)].real(w3_real * x3_real - w3_imag * x3_imag);
-            out[ostride*(j+3*p_1)].imag(w3_real * x3_imag + w3_imag * x3_real);
+            //out[ostride*(j+3*p_1)].real(w3_real * x3_real - w3_imag * x3_imag);
+            //out[ostride*(j+3*p_1)].imag(w3_real * x3_imag + w3_imag * x3_real);
+            out[ostride*(j+3*p_1)] = std::complex<double>(w3_real * x3_real - w3_imag * x3_imag,
+                                                          w3_real * x3_imag + w3_imag * x3_real);
 
             // out4 = w4 * x4
-            out[ostride*(j+4*p_1)].real(w4_real * x4_real - w4_imag * x4_imag);
-            out[ostride*(j+4*p_1)].imag(w4_real * x4_imag + w4_imag * x4_real);
+            //out[ostride*(j+4*p_1)].real(w4_real * x4_real - w4_imag * x4_imag);
+            //out[ostride*(j+4*p_1)].imag(w4_real * x4_imag + w4_imag * x4_real);
+            out[ostride*(j+4*p_1)] = std::complex<double>(w4_real * x4_real - w4_imag * x4_imag,
+                                                          w4_real * x4_imag + w4_imag * x4_real);
           
         } // endfor: k1
         
@@ -1352,28 +1376,39 @@ void GFft::factor6(const std::vector<std::complex<double> >& in,
             const double x5_imag = a2_imag - b2_imag;
 
             // out0 = 1 * x0
-            out[ostride*j].real(x0_real);
-            out[ostride*j].imag(x0_imag);
+            //out[ostride*j].real(x0_real);
+            //out[ostride*j].imag(x0_imag);
+            out[ostride*j] = std::complex<double>(x0_real, x0_imag);
           
             // out1 = w1 * x1
-            out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
-            out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            //out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
+            //out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            out[ostride*(j+p_1)] = std::complex<double>(w1_real * x1_real - w1_imag * x1_imag,
+                                                        w1_real * x1_imag + w1_imag * x1_real);
 
             // out2 = w2 * x2
-            out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
-            out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            //out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
+            //out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            out[ostride*(j+2*p_1)] = std::complex<double>(w2_real * x2_real - w2_imag * x2_imag,
+                                                          w2_real * x2_imag + w2_imag * x2_real);
 
             // out3 = w3 * x3
-            out[ostride*(j+3*p_1)].real(w3_real * x3_real - w3_imag * x3_imag);
-            out[ostride*(j+3*p_1)].imag(w3_real * x3_imag + w3_imag * x3_real);
+            //out[ostride*(j+3*p_1)].real(w3_real * x3_real - w3_imag * x3_imag);
+            //out[ostride*(j+3*p_1)].imag(w3_real * x3_imag + w3_imag * x3_real);
+            out[ostride*(j+3*p_1)] = std::complex<double>(w3_real * x3_real - w3_imag * x3_imag,
+                                                          w3_real * x3_imag + w3_imag * x3_real);
 
             // out4 = w4 * x4
-            out[ostride*(j+4*p_1)].real(w4_real * x4_real - w4_imag * x4_imag);
-            out[ostride*(j+4*p_1)].imag(w4_real * x4_imag + w4_imag * x4_real);
-
+            //out[ostride*(j+4*p_1)].real(w4_real * x4_real - w4_imag * x4_imag);
+            //out[ostride*(j+4*p_1)].imag(w4_real * x4_imag + w4_imag * x4_real);
+            out[ostride*(j+4*p_1)] = std::complex<double>(w4_real * x4_real - w4_imag * x4_imag,
+                                                          w4_real * x4_imag + w4_imag * x4_real);
+            
             // out5 = w5 * x5
-            out[ostride*(j+5*p_1)].real(w5_real * x5_real - w5_imag * x5_imag);
-            out[ostride*(j+5*p_1)].imag(w5_real * x5_imag + w5_imag * x5_real);
+            //out[ostride*(j+5*p_1)].real(w5_real * x5_real - w5_imag * x5_imag);
+            //out[ostride*(j+5*p_1)].imag(w5_real * x5_imag + w5_imag * x5_real);
+            out[ostride*(j+5*p_1)] = std::complex<double>(w5_real * x5_real - w5_imag * x5_imag,
+                                                          w5_real * x5_imag + w5_imag * x5_real);
 
         } // endfor: k1
         
@@ -1669,32 +1704,45 @@ void GFft::factor7(const std::vector<std::complex<double> >& in,
             const double x6_imag = T7_imag + T10_real;
           
             // out0 = 1 * x0
-            out[ostride*j].real(x0_real);
-            out[ostride*j].imag(x0_imag);
+            //out[ostride*j].real(x0_real);
+            //out[ostride*j].imag(x0_imag);
+            out[ostride*j] = std::complex<double>(x0_real, x0_imag);
           
             // out1 = w1 * x1
-            out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
-            out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            //out[ostride*(j+p_1)].real(w1_real * x1_real - w1_imag * x1_imag);
+            //out[ostride*(j+p_1)].imag(w1_real * x1_imag + w1_imag * x1_real);
+            out[ostride*(j+p_1)] = std::complex<double>(w1_real * x1_real - w1_imag * x1_imag,
+                                                        w1_real * x1_imag + w1_imag * x1_real);
 
             // out2 = w2 * x2
-            out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
-            out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            //out[ostride*(j+2*p_1)].real(w2_real * x2_real - w2_imag * x2_imag);
+            //out[ostride*(j+2*p_1)].imag(w2_real * x2_imag + w2_imag * x2_real);
+            out[ostride*(j+2*p_1)] = std::complex<double>(w2_real * x2_real - w2_imag * x2_imag,
+                                                          w2_real * x2_imag + w2_imag * x2_real);
 
             // out3 = w3 * x3
-            out[ostride*(j+3*p_1)].real(w3_real * x3_real - w3_imag * x3_imag);
-            out[ostride*(j+3*p_1)].imag(w3_real * x3_imag + w3_imag * x3_real);
+            //out[ostride*(j+3*p_1)].real(w3_real * x3_real - w3_imag * x3_imag);
+            //out[ostride*(j+3*p_1)].imag(w3_real * x3_imag + w3_imag * x3_real);
+            out[ostride*(j+3*p_1)] = std::complex<double>(w3_real * x3_real - w3_imag * x3_imag,
+                                                          w3_real * x3_imag + w3_imag * x3_real);
 
             // out4 = w4 * x4
-            out[ostride*(j+4*p_1)].real(w4_real * x4_real - w4_imag * x4_imag);
-            out[ostride*(j+4*p_1)].imag(w4_real * x4_imag + w4_imag * x4_real);
+            //out[ostride*(j+4*p_1)].real(w4_real * x4_real - w4_imag * x4_imag);
+            //out[ostride*(j+4*p_1)].imag(w4_real * x4_imag + w4_imag * x4_real);
+            out[ostride*(j+4*p_1)] = std::complex<double>(w4_real * x4_real - w4_imag * x4_imag,
+                                                          w4_real * x4_imag + w4_imag * x4_real);
 
             // out5 = w5 * x5
-            out[ostride*(j+5*p_1)].real(w5_real * x5_real - w5_imag * x5_imag);
-            out[ostride*(j+5*p_1)].imag(w5_real * x5_imag + w5_imag * x5_real);
+            //out[ostride*(j+5*p_1)].real(w5_real * x5_real - w5_imag * x5_imag);
+            //out[ostride*(j+5*p_1)].imag(w5_real * x5_imag + w5_imag * x5_real);
+            out[ostride*(j+5*p_1)] = std::complex<double>(w5_real * x5_real - w5_imag * x5_imag,
+                                                          w5_real * x5_imag + w5_imag * x5_real);
           
             // out6 = w6 * x6
-            out[ostride*(j+6*p_1)].real(w6_real * x6_real - w6_imag * x6_imag);
-            out[ostride*(j+6*p_1)].imag(w6_real * x6_imag + w6_imag * x6_real);
+            //out[ostride*(j+6*p_1)].real(w6_real * x6_real - w6_imag * x6_imag);
+            //out[ostride*(j+6*p_1)].imag(w6_real * x6_imag + w6_imag * x6_real);
+            out[ostride*(j+6*p_1)] = std::complex<double>(w6_real * x6_real - w6_imag * x6_imag,
+                                                          w6_real * x6_imag + w6_imag * x6_real);
        
         } // endfor: k1
 
@@ -1898,8 +1946,10 @@ void GFft::factorn(std::vector<std::complex<double> >& in,
                 }
 
                 //
-                out[ostride*(j + e1 * p_1)].real(w_real * x_real - w_imag * x_imag);
-                out[ostride*(j + e1 * p_1)].imag(w_real * x_imag + w_imag * x_real);
+                //out[ostride*(j + e1 * p_1)].real(w_real * x_real - w_imag * x_imag);
+                //out[ostride*(j + e1 * p_1)].imag(w_real * x_imag + w_imag * x_real);
+                out[ostride*(j + e1 * p_1)] = std::complex<double>(w_real * x_real - w_imag * x_imag,
+                                                                   w_real * x_imag + w_imag * x_real);
 
             } // endfor: e1
 
