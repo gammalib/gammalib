@@ -1412,7 +1412,7 @@ void TestGModel::test_spatial_composite(void)
 {
    // Test void constructor
    GModelSpatialComposite model1;
-   test_value(model1.type(), "SpatialComposite", "Check void model type");
+   test_value(model1.type(), "Composite", "Check void model type");
 
    GSkyDir dir = GSkyDir();
    dir.radec_deg(83.6331, 22.01);
@@ -1429,7 +1429,7 @@ void TestGModel::test_spatial_composite(void)
 
    GModelSpatialComposite model2(*element);
    test_value(model2.size(), 5);
-   test_value(model2.type(), "SpatialComposite", "Check model type");
+   test_value(model2.type(), "Composite", "Check model type");
       
    // Test access of individual parameters
    test_value(model2["2:RA"].value(), 83.6331);

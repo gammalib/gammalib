@@ -387,18 +387,16 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
               "Spatial model is not of type \""+type()+"\".");
     }
 
-    // Verify that XML element is composed from spatial models 
-    if (xml.elements("spatialModel") != xml.elements()) {
-        throw GException::model_invalid_spatial(G_WRITE, type(),
-        "Composite spatial model must be composed solely from spatial models.");
-    }
-
     // Write all model components
-    for (unsigned int idx_comp = 0; idx_comp < m_components.size(); idx_comp++) {
+    for (unsigned int idx_comp = 0; idx_comp < m_components.size(); ++idx_comp) {
         GModelSpatial *component = m_components[idx_comp];
         
+        // Check for NULL
+        if (!component)
+            continue;
+
         // Find xml element with matching name
-        GXmlElement *matching_model = 0;
+        GXmlElement *matching_model = NULL;
         for (unsigned int idx_elt = 0; idx_elt < xml.elements("spatialModel"); idx_elt++) {
             if (xml.element("spatialModel", idx_elt)->attribute("name") == 
                 m_component_names[idx_comp]) {
@@ -407,64 +405,47 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
             }
         } // endfor: loop over all xml elements
 
+        // Create temporary copy of the spatial model
+        GModelSpatial* spat = component->clone();
+
         // Strip prefix from parameter names
 
         // Loop over all parameters of component
-        for (unsigned int idx_par = 0; idx_par < component->size(); idx_par++) {
+        for (unsigned int idx_par = 0; idx_par < spat->size(); ++idx_par) {
             
             // Get parameter
-            GModelPar& par = (*component)[idx_par];
+            GModelPar& par = (*spat)[idx_par];
+
+            // Check if name contains colon
+            if (gammalib::contains(par.name(), ":")) {
             
-            // Get name components
-            std::vector<std::string> name_components = gammalib::split(par.name(), ":");
+                // Get name components
+                std::vector<std::string> name_components = gammalib::split(par.name(), ":");
 
-            // Remove first component
-            name_components.erase(name_components.begin());
 
-            // Join new name
-            std::string new_name = name_components[0];
-            for (unsigned int i = 1; i < name_components.size(); i++) {
-                new_name.append(":");
-                new_name.append(name_components[i]);
+                // Join new name
+                std::string new_name = name_components[1];
+                for (unsigned int i = 2; i < name_components.size(); i++) {
+                    new_name.append(":");
+                    new_name.append(name_components[i]);
+                }
+
+                // Set new name
+                par.name(new_name);
             }
-            
-            // Set new name
-            par.name(new_name);
 
         } // endfor looped over all parameters
 
         // Write component
         if (matching_model) {
             // Use existing xml element
-            component->write(*matching_model);
+            spat->write(*matching_model);
         } else {
             // Create new xml element
             GXmlElement new_element("spatialModel");
-            component->write(new_element);
+            spat->write(new_element);
             xml.append(new_element);
         }
-        
-        // Re-add prefix to parameter names
-        
-        std::string prefix = m_component_names[idx_comp];
-
-        // Loop over all parameters of component
-        for (unsigned int idx_par = 0; idx_par < component->size(); idx_par++) {
-            
-            // Get parameter
-            GModelPar& par = (*component)[idx_par];
-            
-            // Prepend prefix
-            std::string new_name = prefix;
-            new_name.append(":");
-            new_name.append(par.name());
-            
-            // Set new name
-            par.name(new_name);
-
-        } // endfor looped over all parameters
-
-        
         
     } // endfor: loop over all components
 
