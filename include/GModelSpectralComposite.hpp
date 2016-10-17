@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralComposite.hpp - Spectral power law model class    *
+ *         GModelSpectralComposite.hpp - Spectral composite model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                               *
+ *  copyright (C) 2016 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,7 +82,8 @@ public:
     virtual std::string              print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                  append(const GModelSpectral& spec, const std::string& name="");
+    void                  append(const GModelSpectral& spec,
+                                 const std::string&    name="");
     int                   components(void) const;
     const GModelSpectral* component(const int& index) const;
     const GModelSpectral* component(const std::string& name) const;
@@ -104,7 +105,7 @@ protected:
     mutable std::vector<double>  m_mc_probs;    //!< Probailities of individual components
     mutable GEnergy              m_mc_emin;     //!< Last minimum energy
     mutable GEnergy              m_mc_emax;     //!< Last maximum energy
-
+    mutable std::vector<double>  m_mc_values;   //!< Parameter values
 };
 
 
@@ -146,6 +147,5 @@ int GModelSpectralComposite::components(void) const
 {
     return (m_spectral.size());
 }
-
 
 #endif /* GMODELSPECTRALCOMPOSITE_HPP */

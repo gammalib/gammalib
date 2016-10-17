@@ -38,15 +38,16 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralComposite     g_spectral_comp_seed;
-const GModelSpectralRegistry g_spectral_comp_registry(&g_spectral_comp_seed);
+const GModelSpectralComposite g_spectral_comp_seed;
+const GModelSpectralRegistry  g_spectral_comp_registry(&g_spectral_comp_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC               "GModelSpectralComposite::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
-#define G_WRITE            "GModelSpectralComposite::write(GXmlElement&)"
-#define G_COMPONENT_INDEX  "GModelSpectralComposite::component(const int&)"
-#define G_COMPONENT_NAME   "GModelSpectralComposite::component(const std::string&)"
-#define G_APPEND           "GModelSpectralComposite::append(const GModelSpectral&, const std::string&)"
+#define G_MC "GModelSpectralComposite::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
+#define G_WRITE                "GModelSpectralComposite::write(GXmlElement&)"
+#define G_COMPONENT_INDEX          "GModelSpectralComposite::component(int&)"
+#define G_COMPONENT_NAME   "GModelSpectralComposite::component(std::string&)"
+#define G_APPEND          "GModelSpectralComposite::append(GModelSpectral&, "\
+                                                              "std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -77,13 +78,13 @@ GModelSpectralComposite::GModelSpectralComposite(void) : GModelSpectral()
 /***********************************************************************//**
  * @brief XML constructor
  *
- * @param[in] xml XML element containing position information.
+ * @param[in] xml XML element containing model information.
  *
- * Constructs a power law spectral model by extracting information from an
- * XML element. See the read() method for more information about the expected
- * structure of the XML element.
+ * Constructs a composite spectral model by extracting information from an
+ * XML element.
  ***************************************************************************/
-GModelSpectralComposite::GModelSpectralComposite(const GXmlElement& xml) : GModelSpectral()
+GModelSpectralComposite::GModelSpectralComposite(const GXmlElement& xml) :
+                         GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -99,10 +100,10 @@ GModelSpectralComposite::GModelSpectralComposite(const GXmlElement& xml) : GMode
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Spectral power law model.
+ * @param[in] model Composite spectral model.
  ***************************************************************************/
-GModelSpectralComposite::GModelSpectralComposite(const GModelSpectralComposite& model)
-                                       : GModelSpectral(model)
+GModelSpectralComposite::GModelSpectralComposite(const GModelSpectralComposite& model) :
+                         GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -137,8 +138,8 @@ GModelSpectralComposite::~GModelSpectralComposite(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Spectral power law model.
- * @return Spectral power law model.
+ * @param[in] model Composite spectral model.
+ * @return Composite spectral model.
  ***************************************************************************/
 GModelSpectralComposite& GModelSpectralComposite::operator=(const GModelSpectralComposite& model)
 {
@@ -171,7 +172,7 @@ GModelSpectralComposite& GModelSpectralComposite::operator=(const GModelSpectral
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear spectral power law model
+ * @brief Clear composite spectral model
  ***************************************************************************/
 void GModelSpectralComposite::clear(void)
 {
@@ -189,9 +190,9 @@ void GModelSpectralComposite::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone spectral power law model
+ * @brief Clone composite spectral model
  *
- * @return Pointer to deep copy of spectral power law model.
+ * @return Pointer to deep copy of composite spectral model.
  ***************************************************************************/
 GModelSpectralComposite* GModelSpectralComposite::clone(void) const
 {
@@ -217,13 +218,12 @@ GModelSpectralComposite* GModelSpectralComposite::clone(void) const
  * where \f${M_{\rm i}}\f$ is the model evaluation of the i-th model
  *
  * If the @p gradients flag is true the method will also compute the
- * partial derivatives of each model component with respect to the parameters using
- *
- * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
+ * partial derivatives of each model component with respect to the
+ * parameters.
  ***************************************************************************/
 double GModelSpectralComposite::eval(const GEnergy& srcEng,
-                                const GTime&   srcTime,
-                                const bool&    gradients) const
+                                     const GTime&   srcTime,
+                                     const bool&    gradients) const
 {
     // Initialise result
 	double value = 0.0;
@@ -260,11 +260,10 @@ double GModelSpectralComposite::eval(const GEnergy& srcEng,
  * @param[in] emax Maximum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * Computes the sum of all photon fluxes of each individual component
- *
+ * Computes the sum of the photon fluxes in all components.
  ***************************************************************************/
 double GModelSpectralComposite::flux(const GEnergy& emin,
-                                const GEnergy& emax) const
+                                     const GEnergy& emax) const
 {
     // Initialise flux
     double flux = 0.0;
@@ -294,11 +293,10 @@ double GModelSpectralComposite::flux(const GEnergy& emin,
  * @param[in] emax Maximum photon energy.
  * @return Energy flux (erg/cm2/s).
  *
- * Computes the sum of all energy fluxes of each individual component
- *
+ * Computes the sum of the energy fluxes in all components.
  ***************************************************************************/
 double GModelSpectralComposite::eflux(const GEnergy& emin,
-                                 const GEnergy& emax) const
+                                      const GEnergy& emax) const
 {
    // Initialise eflux
 	double eflux = 0.0;
@@ -333,12 +331,13 @@ double GModelSpectralComposite::eflux(const GEnergy& emin,
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
  *
- * Returns Monte Carlo energy by randomly drawing from a power law.
+ * Returns Monte Carlo energy by randomly drawing from a composite spectral
+ * model.
  ***************************************************************************/
 GEnergy GModelSpectralComposite::mc(const GEnergy& emin,
-                               const GEnergy& emax,
-                               const GTime&   time,
-                               GRan&          ran) const
+                                    const GEnergy& emax,
+                                    const GTime&   time,
+                                    GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
@@ -364,7 +363,6 @@ GEnergy GModelSpectralComposite::mc(const GEnergy& emin,
 
     // Loop over spectral components and compute relative probabilites
     for (int i = 0; i < m_mc_probs.size(); ++i) {
-
     	if (u <= m_mc_probs[i]) {
     		index = i;
     		break;
@@ -392,7 +390,7 @@ void GModelSpectralComposite::read(const GXmlElement& xml)
 	int n_spectrals = xml.elements("spectrum");
 
 	// Loop over spectral elements
-	for(int i = 0; i < n_spectrals; ++i) {
+	for (int i = 0; i < n_spectrals; ++i) {
 
 		// Get spectral XML element
 		const GXmlElement* spec = xml.element("spectrum", i);
@@ -495,10 +493,124 @@ void GModelSpectralComposite::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Append spectral component
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing model information.
+ * @param[in] spec Spectral model component.
+ * @param[in] name Name of spectral component.
+ *
+ * Appends a spectral component to the composite model
+ ***************************************************************************/
+void GModelSpectralComposite::append(const GModelSpectral& spec,
+                                     const std::string&    name)
+{
+    // Append model container
+    m_spectral.push_back(spec.clone());
+
+    // Get index of latest model
+    int index = m_spectral.size()-1;
+
+    // Use model index if component name is empty
+    std::string component_name = !name.empty() ? name
+                                               : gammalib::str(m_spectral.size());
+
+    // Check if component name is unique, throw exception if not
+    if (gammalib::contains(m_components, component_name)) {
+    	std::string msg = "Attempt to append component \""+component_name+"\" "
+                          "to composite spectral model, but a component with "
+                          "the same name exists already. Each component needs "
+                          "a unique name.";
+		throw GException::invalid_value(G_APPEND, msg);
+    }
+
+	// Add component name (for now simple number)
+	m_components.push_back(component_name);
+
+	// Get number of spectral parameters from model
+	int npars = m_spectral[index]->size();
+
+	// Loop over model parameters
+	for (int ipar = 0; ipar < npars; ++ipar) {
+
+		// Get model parameter
+		GModelPar* par = &(m_spectral[index]->operator[](ipar));
+
+		// Modify parameter name
+		par->name(component_name+":"+par->name());
+
+		// Append model parameter with new name to internal container
+		m_pars.push_back(par);
+
+	} // endfor: loop over model parameters
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns spectral component element
+ *
+ * @param[in] index Index of spectral component.
+ * @return Spectral model.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of range.
+ *
+ * Returns a spectral component to the composite model
+ ***************************************************************************/
+const GModelSpectral* GModelSpectralComposite::component(const int& index) const
+{
+	// Check if index is in validity range
+	if (index >= m_spectral.size() || index < 0) {
+		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
+                                       index, m_spectral.size());
+	}
+
+	// Return spectral component
+	return m_spectral[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to specific spectral component
+ *
+ * @param[in] name Name of spectral component.
+ * @return Spectral model.
+ *
+ * @exception GException::invalid_argument
+ *            Spectral model not found.
+ *
+ * Returns a spectral component of the composite model
+ ***************************************************************************/
+const GModelSpectral* GModelSpectralComposite::component(const std::string& name) const
+{
+	// Check if model name is found
+	int index = -1;
+	for(int i = 0; i < m_components.size(); ++i) {
+		if (m_components[i] == name) {
+			index = i;
+			break;
+		}
+	}
+
+	// Check if component name was found
+	if (index == -1) {
+        std::string msg = "Model component \""+name+"\" not found in composite "
+                          "spectral model.";
+		throw GException::invalid_argument(G_COMPONENT_NAME, msg);
+	}
+
+	// Return spectral component
+	return m_spectral[index];
+
+}
+
+
+/***********************************************************************//**
+ * @brief Print composite spectral model information
+ *
+ * @param[in] chatter Chattiness.
+ * @return String containing composite spectral model information.
  ***************************************************************************/
 std::string GModelSpectralComposite::print(const GChatter& chatter) const
 {
@@ -529,107 +641,6 @@ std::string GModelSpectralComposite::print(const GChatter& chatter) const
 }
 
 
-/***********************************************************************//**
- * @brief Append spectral component
- *
- * @param[in] spec Spectral model component
- * @param[in] name Name of spectral component (can be empty)
- *
- * Appends a spectral component to the composite model
- ***************************************************************************/
-void GModelSpectralComposite::append(const GModelSpectral& spec, const std::string& name)
-{
-    // Append model container
-    m_spectral.push_back(spec.clone());
-
-    // Get index of latest model
-    int index = m_spectral.size()-1;
-
-    // Use model index if component name is empty
-    std::string component_name = !name.empty() ? name : gammalib::str(m_spectral.size());
-
-    // Check if component name is unique, throw exception if not
-    if (gammalib::contains(m_components, component_name)) {
-    	std::string msg =
-			"Attempt to append component with name \""+component_name+"\" to composite"
-			" spectral model container, but a component with the same name exists already.\n"
-			"Every component in the container needs a unique name. On default the system will"
-			"increment an integer if no component name is provided.";
-		throw GException::invalid_value(G_APPEND, msg);
-    }
-
-	// Add component name (for now simple number)
-	m_components.push_back(component_name);
-
-	// Get number of spectral parameters from model
-	int npars = m_spectral[index]->size();
-
-	// Loop over model parameters
-	for (int ipar = 0; ipar < npars; ++ipar) {
-
-		// Get model parameter
-		GModelPar* par = &(m_spectral[index]->operator[](ipar));
-
-		// Modify parameter name
-		par->name(component_name+":"+par->name());
-
-		// Append model parameter with new name to internal container
-		m_pars.push_back(par);
-
-	} // endfor: loop over model parameters
-}
-
-
-/***********************************************************************//**
- * @brief Returns spectral component element
- *
- * @param[in] index Index of spectral component.
- * @return Spectral model.
- *
- * Returns a spectral component to the composite model
- ***************************************************************************/
-const GModelSpectral* GModelSpectralComposite::component(const int& index) const
-{
-	// Check if index is in validity range
-	if (index >= m_spectral.size() || index < 0) {
-		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index", index, m_spectral.size(),"");
-	}
-
-	// Return spectral component
-	return m_spectral[index];
-
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to specific spectral component
- *
- * @param[in] name Name of spectral component.
- * @return Spectral model.
- *
- * Returns a spectral component of the composite model
- ***************************************************************************/
-const GModelSpectral* GModelSpectralComposite::component(const std::string& name) const
-{
-	// Check if model name is found
-	int index = -1;
-	for(int i = 0; i < m_components.size(); ++i) {
-		if (m_components[i] == name) {
-			index = i;
-			break;
-		}
-	}
-
-	// Check if component name was found
-	if (index == -1) {
-		throw GException::model_not_found(G_COMPONENT_NAME, name,"");
-	}
-
-	// Return spectral component
-	return m_spectral[index];
-
-}
-
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -652,6 +663,7 @@ void GModelSpectralComposite::init_members(void)
     m_mc_probs.clear();
     m_mc_emin.clear();
     m_mc_emax.clear();
+    m_mc_values.clear();
     m_mc_flux = 0.0;
 
     // Return
@@ -674,6 +686,7 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
     m_mc_probs   = model.m_mc_probs;
     m_mc_emin    = model.m_mc_emin;
     m_mc_emax    = model.m_mc_emax;
+    m_mc_values  = model.m_mc_values;
     m_mc_flux    = model.m_mc_flux;
 
     // Copy pointer(s) of spectral component
@@ -681,8 +694,10 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
 
     // Clear parameters and copy the pointers from the clone
     m_pars.clear();
-    for(int i = 0; i < model.components(); ++i) {
-    	m_spectral.push_back(model.m_spectral[i]->clone());
+    for (int i = 0; i < model.components(); ++i) {
+    	
+        // Clone spectral component
+        m_spectral.push_back(model.m_spectral[i]->clone());
 
     	// Retrieve spectral model
     	GModelSpectral* spec = m_spectral[i];
@@ -711,7 +726,7 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
 void GModelSpectralComposite::free_members(void)
 {
     // Free memory
-	for(int i = 0; i < m_spectral.size(); ++i) {
+	for (int i = 0; i < m_spectral.size(); ++i) {
 
 		// Delete component i
 		if (m_spectral[i] != NULL) delete m_spectral[i];
@@ -734,13 +749,40 @@ void GModelSpectralComposite::free_members(void)
  * Updates the precomputation cache for Monte Carlo simulations.
  ***************************************************************************/
 void GModelSpectralComposite::update_mc_cache(const GEnergy& emin,
-                                         const GEnergy& emax) const
+                                              const GEnergy& emax) const
 
 {
-	// Update cache if energy range has changed
-	if (emin != m_mc_emin || emax != m_mc_emax) {
+    // Check if one of the parameters has changed. If the dimension of the
+    // parameter value cache differs from the number of parameters then notify
+    // a change. This will clear the cache and store the parameter values
+    // later
+    bool par_changed = (m_mc_values.size() != size());
+    if (par_changed == false) {
+        for (int i = 0; i < size(); ++i) {
+            if (m_pars[i]->value() != m_mc_values[i]) {
+                par_changed = true;
+                break;
+            }
+        }
+    }
+
+    // Update cache if energy range or parameters have changed
+    if (par_changed || emin != m_mc_emin || emax != m_mc_emax) {
+
+        // Store energy range
 		m_mc_emin = emin;
 		m_mc_emax = emax;
+
+        // If parameters have changed then store the current parameter
+        // values for a comparison check for the next method call
+        if (par_changed) {
+            m_mc_values.clear();
+            for (int i = 0; i < size(); ++i) {
+                m_mc_values.push_back(m_pars[i]->value());
+            }
+        }
+
+        // Compute MC flux
 		m_mc_flux = flux(m_mc_emin, m_mc_emax);
 
 		// Initialise sum and probabilites

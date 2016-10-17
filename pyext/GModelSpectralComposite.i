@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GModelSpectralComposite.i - Spectral power law model class     *
+ *          GModelSpectralComposite.i - Spectral composite model class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2016 Michael Mayer                                       *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpecComposite spectral model class interface definition
+ * @file GModelSpectralComposite.i
+ * @brief Composite spectral model class interface definition
  * @author Michael Mayer
  */
 %{
@@ -61,11 +62,11 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    void                append(const GModelSpectral& spec, const std::string& name="");
+    void                append(const GModelSpectral& spec,
+                               const std::string&    name="");
     int                 components(void) const;
     GModelSpectral*     component(const int& index) const;
     GModelSpectral*     component(const std::string& name) const;
-
 };
 
 

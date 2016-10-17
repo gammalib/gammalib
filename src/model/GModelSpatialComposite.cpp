@@ -662,7 +662,7 @@ void GModelSpatialComposite::free_members(void)
     for (int i = 0; i < m_components.size(); ++i) {
         
         // Delete component i
-        delete m_components[i];
+        if (m_components[i] != NULL) delete m_components[i];
 
         // Signal free pointer
         m_components[i] = NULL;

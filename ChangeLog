@@ -3,6 +3,7 @@
         * Version 1.2.0 released
         =========================
 
+        Add composite spatial and spectral models (#1706)
         Add GObservations::save_covmat() method (#1863)
         Add GFft and GFftWavetable classes (#1731)
         Add GNdarray class (#1768)
