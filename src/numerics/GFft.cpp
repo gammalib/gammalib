@@ -35,6 +35,10 @@
 #include "GNdarray.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OP_ADD                                    "GFft::operator+=(GFft&)"
+#define G_OP_SUB                                    "GFft::operator-=(GFft&)"
+#define G_OP_MUL                                    "GFft::operator*=(GFft&)"
+#define G_OP_DIV                                    "GFft::operator/=(GFft&)"
 #define G_FORWARD                                  "GFft::forward(GNdarray&)"
 #define G_BACKWARD                                         "GFft::backward()"
 
@@ -148,13 +152,18 @@ GFft& GFft::operator=(const GFft& fft)
  * @param[in] fft Fast Fourier Transform.
  * @return Fast Fourier Transform.
  *
- * Adds a Fast Fourier Transform to another Fast Fourier Transform.
- *
- * @todo Implement operator
+ * Adds a Fast Fourier Transform to another Fast Fourier Transform. The
+ * method requires that both FFTs have the same dimension.
  ***************************************************************************/
 GFft& GFft::operator+=(const GFft& fft)
 {
-    // TODO: Implement operator
+    // Throw an exception if the FFTs have not the same shape
+    require_same_shape(G_OP_ADD, fft);
+    
+    // Add elements
+    for (int i = 0; i < m_size; ++i) {
+        *(m_data+i) += *(fft.m_data+i);
+    }
 
     // Return Fast Fourier Transform
     return *this;
@@ -168,12 +177,17 @@ GFft& GFft::operator+=(const GFft& fft)
  * @return Fast Fourier transform.
  *
  * Subtracts a Fast Fourier Transform from another Fast Fourier Transform.
- *
- * @todo Implement operator
+ * The method requires that both FFTs have the same dimension.
  ***************************************************************************/
 GFft& GFft::operator-=(const GFft& fft)
 {
-    // TODO: Implement operator
+    // Throw an exception if the FFTs have not the same shape
+    require_same_shape(G_OP_SUB, fft);
+
+    // Subtract elements
+    for (int i = 0; i < m_size; ++i) {
+        *(m_data+i) -= *(fft.m_data+i);
+    }
 
     // Return Fast Fourier Transform
     return *this;
@@ -187,12 +201,17 @@ GFft& GFft::operator-=(const GFft& fft)
  * @return Fast Fourier transform.
  *
  * Multiplies a Fast Fourier Transform to another Fast Fourier Transform.
- *
- * @todo Implement operator
+ * The method requires that both FFTs have the same dimension.
  ***************************************************************************/
 GFft& GFft::operator*=(const GFft& fft)
 {
-    // TODO: Implement operator
+    // Throw an exception if the FFTs have not the same shape
+    require_same_shape(G_OP_MUL, fft);
+
+    // Multiply elements
+    for (int i = 0; i < m_size; ++i) {
+        *(m_data+i) *= *(fft.m_data+i);
+    }
 
     // Return Fast Fourier Transform
     return *this;
@@ -206,12 +225,17 @@ GFft& GFft::operator*=(const GFft& fft)
  * @return Fast Fourier transform.
  *
  * Divides a Fast Fourier Transform by another Fast Fourier Transform.
- *
- * @todo Implement operator
+ * The method requires that both FFTs have the same dimension.
  ***************************************************************************/
 GFft& GFft::operator/=(const GFft& fft)
 {
-    // TODO: Implement operator
+    // Throw an exception if the FFTs have not the same shape
+    require_same_shape(G_OP_DIV, fft);
+
+    // Divide elements
+    for (int i = 0; i < m_size; ++i) {
+        *(m_data+i) /= *(fft.m_data+i);
+    }
 
     // Return Fast Fourier Transform
     return *this;
@@ -607,6 +631,75 @@ void GFft::set_data(const GNdarray& array)
         }
 
     } // endif: there were elements in the array
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if FFT has the same shape
+ *
+ * @param[in] fft Fast Fourier Transform.
+ * @return True if the FFT has the same shape.
+ ***************************************************************************/
+bool GFft::has_same_shape(const GFft& fft) const
+{
+    // Check if the array has the same dimension
+    bool identity = m_shape.size() == fft.m_shape.size();
+
+    // Check if the shape is identical. Break as soon as one shape value
+    // differs.
+    if (identity) {
+        for (int i = 0; i < m_shape.size(); ++i) {
+            if (m_shape[i] != fft.m_shape[i]) {
+                identity = false;
+                break;
+            }
+        }
+    }
+
+    // Return result
+    return identity;
+}
+
+
+/***********************************************************************//**
+ * @brief Throw exception if FFT shapes differ
+ *
+ * @param[in] method Method that throws exception.
+ * @param[in] fft Fast Fourier Transform.
+ *
+ * @exception GException::invalid_argument
+ *            FFT shapes differ.
+ ***************************************************************************/
+void GFft::require_same_shape(const std::string& method,
+                              const GFft&        fft) const
+{
+    // If the shape differs then throw an exception
+    if (!has_same_shape(fft)) {
+
+        // Compose exception message
+        std::string msg = "Incompatible FFT dimensions (";
+        for (int i = 0; i < m_shape.size(); ++i) {
+            if (i > 0) {
+                msg += ", ";
+            }
+            msg += gammalib::str(m_shape[i]);
+        }
+        msg += ") <=> (";
+        for (int i = 0; i < fft.m_shape.size(); ++i) {
+            if (i > 0) {
+                msg += ", ";
+            }
+            msg += gammalib::str(fft.m_shape[i]);
+        }
+        msg += ").";
+
+        // Throw exception
+        throw GException::invalid_argument(method, msg);
+
+    } // endif: array shapes differed
 
     // Return
     return;

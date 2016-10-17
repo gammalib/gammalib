@@ -96,6 +96,8 @@ protected:
     void copy_members(const GFft& fft);
     void free_members(void);
     void set_data(const GNdarray& array);
+    bool has_same_shape(const GFft& fft) const;
+    void require_same_shape(const std::string& method, const GFft& fft) const;
 
     // Low-level FFT methods
     void transform(std::complex<double>* data,

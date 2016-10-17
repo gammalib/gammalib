@@ -114,6 +114,33 @@ public:
         }
         (*self)(index) = value;
     }
+    GFft __add__(const GFft &a) {
+        return (*self) + a;
+    }
+    GFft __sub__(const GFft &a) {
+        return (*self) - a;
+    }
+    GFft __mul__(const GFft &a) {
+        return (*self) * a;
+    }
+    // Python 2.x
+    GFft __div__(const GFft &a) {
+        return (*self) / a;
+    }
+    // Python 3.x
+    GFft __truediv__(const GFft &a) {
+        return (*self) / a;
+    }
+    // Python 2.x operator/=
+    GFft __idiv__(const GFft& a) {
+        self->operator/=(a);
+        return (*self);
+    }
+    // Python 3.x operator/=
+    GFft __itruediv__(const GFft& a) {
+        self->operator/=(a);
+        return (*self);
+    }
     GFft copy() {
         return (*self);
     }
