@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-16 October 2016
+17 October 2016
 
 
 1. Introduction
@@ -54,6 +54,7 @@ The following methods have been added:
 - GTime::now()
 - GFits::publish()
 - gammalib::rstrip_chars()
+- GObservations::save_covmat()
 
 The following methods have been removed:
 - <all classes>::eval_gradients()
@@ -178,6 +179,9 @@ mean and apparent siderial times, and the local mean and apparent siderial
 times that depend on the geographic longitude. Finally, a now() method has
 been added to the GTime class that sets the time to the current time (see
 #1856).
+
+The GObservations::save_covmat() method computes and saves the covariance
+matrix into a FITS file (#1863).
 
 
 11. Optimization module

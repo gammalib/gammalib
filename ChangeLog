@@ -1,8 +1,9 @@
-2016-10-16
+2016-10-17
 
         * Version 1.2.0 released
         =========================
 
+        Add GObservations::save_covmat() method (#1863)
         Add GFft and GFftWavetable classes (#1731)
         Add GNdarray class (#1768)
         Increase precision of gammalib::str() floating point functions
