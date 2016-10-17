@@ -164,7 +164,8 @@ precision floating point array (#1768).
 The GFft class has been added that performs a Fast Fourier Transformation
 of a n-dimensional array. The GFftWavetable class is a support class for
 GFft that provides the trigonometric coefficients for a factorisation. For
-the moment, GFft does only support 1-dimensional arrays (#1731).
+the moment, GFft does only support 1-dimensional and 2-dimensional arrays
+(#1731).
 
 
 10. Observation module
