@@ -148,7 +148,7 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_filefct),
            "Test GModelSpectralFunc");
     append(static_cast<pfunction>(&TestGModel::test_spectral_composite),
-               "Test GModelSpectralComposite");
+           "Test GModelSpectralComposite");
     append(static_cast<pfunction>(&TestGModel::test_spectral_model),
            "Test spectral model XML I/O");
 
@@ -1410,51 +1410,42 @@ void TestGModel::test_elliptical_gauss(void)
  ***************************************************************************/
 void TestGModel::test_spatial_composite(void)
 {
-   // Test void constructor
-   GModelSpatialComposite model1;
-   test_value(model1.type(), "Composite", "Check void model type");
+    // Test void constructor
+    GModelSpatialComposite model1;
+    test_value(model1.type(), "Composite", "Check void model type");
 
-   GSkyDir dir = GSkyDir();
-   dir.radec_deg(83.6331, 22.01);
+    // Set sky direction
+    GSkyDir dir = GSkyDir();
+    dir.radec_deg(83.6331, 22.01);
 
-   // Test append method
-   model1.append(GModelSpatialPointSource(dir));
-   model1.append(GModelSpatialRadialGauss(dir, 0.2));
-   test_value(model1.components(), 2);
-   test_value(model1.size(), 5);
+    // Test append method
+    model1.append(GModelSpatialPointSource(dir));
+    model1.append(GModelSpatialRadialGauss(dir, 0.2));
+    test_value(model1.components(), 2);
+    test_value(model1.size(), 5);
 
-   // Test XML constructor
-   GXml                      xml(m_xml_model_spatial_composite);
-   GXmlElement*              element = xml.element(0)->element(0)->element("spatialModel", 0);
-
-   GModelSpatialComposite model2(*element);
-   test_value(model2.size(), 5);
-   test_value(model2.type(), "Composite", "Check model type");
+    // Test XML constructor
+    GXml         xml(m_xml_model_spatial_composite);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialComposite model2(*element);
+    test_value(model2.size(), 5);
+    test_value(model2.type(), "Composite", "Check model type");
       
-   // Test access of individual parameters
-   test_value(model2["2:RA"].value(), 83.6331);
-   test_value(model2["2:DEC"].value(), 22.0145);
-   test_value(model2["2:Sigma"].value(), 0.2);
+    // Test access of individual parameters
+    test_value(model2["2:RA"].value(), 83.6331);
+    test_value(model2["2:DEC"].value(), 22.0145);
+    test_value(model2["2:Sigma"].value(), 0.2);
+    test_value(model2["PointSource:RA"].value(), 83.6331);
+    test_value(model2["2:RA"].value(), 83.6331);
+    model2["2:RA"].value(83.1331);
+    test_value(model2["2:RA"].value(), 83.1331);
+    model2["2:DEC"].value(22.51);
+    test_value(model2["2:DEC"].value(), 22.51);
+    model2["2:Sigma"].value(0.6);
+    test_value(model2["2:Sigma"].value(), 0.6);
 
-   test_value(model2["PointSource:RA"].value(), 83.6331);
-   
-   // Test prefactor method
-       
-   test_value(model2["2:RA"].value(), 83.6331);
-   model2["2:RA"].value(83.1331);
-   test_value(model2["2:RA"].value(), 83.1331);
-   
-   // Test index method
-   model2["2:DEC"].value(22.51);
-   test_value(model2["2:DEC"].value(), 22.51);
-       
-   // Test pivot method
-   model2["2:Sigma"].value(0.6);
-   test_value(model2["2:Sigma"].value(), 0.6);
-       
-
-   // Exit test
-   return;
+    // Exit test
+    return;
 }
 
 

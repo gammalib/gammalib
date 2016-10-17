@@ -105,7 +105,7 @@ namespace gammalib {
     bool                     contains(const std::string& str,
                                       const std::string& substring);
     bool                     contains(const std::vector<std::string> strings,
-                                          const std::string& string);
+                                      const std::string& string);
     void                     warning(const std::string& origin,
                                      const std::string& message);
     std::string              xml2str(const std::string& arg);

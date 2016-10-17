@@ -599,7 +599,7 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialEllipticalDisk::print(const GChatter& chatter) const

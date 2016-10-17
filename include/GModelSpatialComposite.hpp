@@ -42,7 +42,6 @@
  *
  * This class implements the spatial model for a composition of spatial
  * models.
- *
  ***************************************************************************/
 class GModelSpatialComposite : public GModelSpatial {
 
@@ -58,27 +57,28 @@ public:
     virtual GModelSpatialComposite& operator=(const GModelSpatialComposite& model);
 
     // Implemented pure virtual methods
-    virtual void                      clear(void);
+    virtual void                    clear(void);
     virtual GModelSpatialComposite* clone(void) const;
-    virtual std::string               classname(void) const;
-    virtual std::string               type(void) const;
-    virtual GClassCode                code(void) const;
-    virtual double                    eval(const GPhoton& photon,
-                                           const bool& gradients = false) const;
-    virtual GSkyDir                   mc(const GEnergy& energy,
-                                         const GTime& time,
-                                         GRan& ran) const;
-    virtual double                    mc_norm(const GSkyDir& dir,
-                                              const double&  radius) const;
-    virtual bool                      contains(const GSkyDir& dir,
-                                               const double&  margin = 0.0) const;
-    virtual void                      read(const GXmlElement& xml);
-    virtual void                      write(GXmlElement& xml) const;
-    virtual std::string               print(const GChatter& chatter = NORMAL) const;
+    virtual std::string             classname(void) const;
+    virtual std::string             type(void) const;
+    virtual GClassCode              code(void) const;
+    virtual double                  eval(const GPhoton& photon,
+                                         const bool& gradients = false) const;
+    virtual GSkyDir                 mc(const GEnergy& energy,
+                                       const GTime& time,
+                                       GRan& ran) const;
+    virtual double                  mc_norm(const GSkyDir& dir,
+                                            const double&  radius) const;
+    virtual bool                    contains(const GSkyDir& dir,
+                                             const double&  margin = 0.0) const;
+    virtual void                    read(const GXmlElement& xml);
+    virtual void                    write(GXmlElement& xml) const;
+    virtual std::string             print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int components(void) const;
-    void append(const GModelSpatial& component, const std::string& name = "");
+    int                  components(void) const;
+    void                 append(const GModelSpatial& component,
+                                const std::string&   name = "");
     const GModelSpatial* component(const int& index) const;
     const GModelSpatial* component(const std::string& name) const;
 
@@ -90,9 +90,9 @@ protected:
     void free_members(void);
 
     // Protected members
-    std::string m_type;   //!< Model type
-    std::vector<GModelSpatial*> m_components; //!< Components
-    std::vector<std::string> m_component_names; //!< Component names
+    std::string                 m_type;            //!< Model type
+    std::vector<GModelSpatial*> m_components;      //!< Components
+    std::vector<std::string>    m_component_names; //!< Component names
 };
 
 
@@ -135,24 +135,34 @@ GClassCode GModelSpatialComposite::code(void) const
     return GMODEL_SPATIAL_COMPOSITE;
 }
 
+
 /***********************************************************************//**
- * @brief Return normalization of point source for Monte Carlo simulations
+ * @brief Return normalization of composite source for Monte Carlo
+ *        simulations
  *
  * @param[in] dir Centre of simulation cone.
  * @param[in] radius Radius of simulation cone (degrees).
  * @return Normalization.
  *
- * Returns the normalization for a point source within a circular region.
- * The normalization is 1 if the point source falls within the circle
- * defined by @p dir and @p radius, 0 otherwise.
+ * Returns unity.
  ***************************************************************************/
 inline
 double GModelSpatialComposite::mc_norm(const GSkyDir& dir,
-                                         const double&  radius) const
+                                       const double&  radius) const
 {
-    //double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
-    //return (norm);
     return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of model components
+ *
+ * @return Number of model components.
+ ***************************************************************************/
+inline
+int GModelSpatialComposite::components(void) const
+{
+    return m_components.size();
 }
 
 #endif /* GMODELSPATIALCOMPOSITE_HPP */

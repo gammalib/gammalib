@@ -43,8 +43,6 @@
 #include "GEbounds.hpp"       // will become obsolete
 #include "GObservation.hpp"
 #include "GModelSky.hpp"
-#include "GModelSpatialPointSource.hpp"
-#include "GModelSpatialComposite.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF_RADIAL               "GResponse::irf_radial(GEvent&, GSource&,"\

@@ -2863,14 +2863,15 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
  * Returns the instrument response to a specified composite source.
  ***************************************************************************/
 double GCTAResponseIrf::irf_composite(const GEvent&       event,
-                                     const GSource&      source,
-                                     const GObservation& obs) const
+                                      const GSource&      source,
+                                      const GObservation& obs) const
 {
     // Initialise IRF
     double irf = 0.0;
 
     // Get pointer to composite model
-    const GModelSpatialComposite* model = dynamic_cast<const GModelSpatialComposite*>(source.model());
+    const GModelSpatialComposite* model =
+        dynamic_cast<const GModelSpatialComposite*>(source.model());
 
     // Loop over model components
     for (int i = 0; i < model->components(); ++i) {
@@ -2883,10 +2884,13 @@ double GCTAResponseIrf::irf_composite(const GEvent&       event,
 
         // Compute irf value
         irf += this->irf(event, src, obs);
+
     }
 
     // Divide by number of model components
-    irf /= (double)model->components();
+    if (model->components() > 0) {
+        irf /= double(model->components());
+    }
 
     // Return IRF value
     return irf;
@@ -3509,17 +3513,18 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
  * \f$S(p,E,t)\f$ and the response function \f$R(p',E',t'|p,E,t)\f$.
  ***************************************************************************/
 double GCTAResponseIrf::nroi_composite(const GModelSky&    model,
-                                     const GEnergy&      srcEng,
-                                     const GTime&        srcTime,
-                                     const GEnergy&      obsEng,
-                                     const GTime&        obsTime,
-                                     const GObservation& obs) const
+                                       const GEnergy&      srcEng,
+                                       const GTime&        srcTime,
+                                       const GEnergy&      obsEng,
+                                       const GTime&        obsTime,
+                                       const GObservation& obs) const
 {
     // Initialise nroi
     double nroi = 0.0;
 
     // Get composite model
-    GModelSpatialComposite* comp = dynamic_cast<GModelSpatialComposite*>(model.spatial());
+    GModelSpatialComposite* comp =
+        dynamic_cast<GModelSpatialComposite*>(model.spatial());
 
     // Loop over model components
     for (int i = 0; i < comp->components(); ++i) {
@@ -3532,10 +3537,13 @@ double GCTAResponseIrf::nroi_composite(const GModelSky&    model,
 
         // Compute nroi
         nroi += this->nroi(sky, srcEng, srcTime, obsEng, obsTime, obs);
+
     }
 
     // Divide by number of model components
-    nroi /= (double)comp->components();
+    if (comp->components() > 0) {
+        nroi /= double(comp->components());
+    }
 
     // Return nroi
     return nroi;

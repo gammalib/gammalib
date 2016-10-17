@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GModelSpatialComposite.i - Spatial point source model class     *
+ *        GModelSpatialComposite.i - Spatial point source model class      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2016 by Domenico Tiziani                                 *
  * ----------------------------------------------------------------------- *
@@ -44,26 +44,26 @@ public:
     virtual ~GModelSpatialComposite(void);
 
     // Implemented virtual methods
-    virtual void                      clear(void);
+    virtual void                    clear(void);
     virtual GModelSpatialComposite* clone(void) const;
-    virtual std::string               classname(void) const;
-    virtual std::string               type(void) const;
-    virtual double                    eval(const GPhoton& photon,
-                                           const bool& gradients = false) const;
-    virtual GSkyDir                   mc(const GEnergy& energy,
-                                         const GTime& time,
-                                         GRan& ran) const;
-    virtual double                    mc_norm(const GSkyDir& dir,
-                                              const double&  radius) const;
-    virtual bool                      contains(const GSkyDir& dir,
-                                               const double&  margin = 0.0) const;
-    virtual void                      read(const GXmlElement& xml);
-    virtual void                      write(GXmlElement& xml) const;
+    virtual std::string             classname(void) const;
+    virtual std::string             type(void) const;
+    virtual double                  eval(const GPhoton& photon,
+                                         const bool& gradients = false) const;
+    virtual GSkyDir                 mc(const GEnergy& energy,
+                                       const GTime& time,
+                                       GRan& ran) const;
+    virtual double                  mc_norm(const GSkyDir& dir,
+                                            const double&  radius) const;
+    virtual bool                    contains(const GSkyDir& dir,
+                                             const double&  margin = 0.0) const;
+    virtual void                    read(const GXmlElement& xml);
+    virtual void                    write(GXmlElement& xml) const;
 
     // Other methods
-    int components(void) const;
-    void append(const GModelSpatial& component, const std::string& name = "");
-    void append(const GModelSpatial& component);
+    int                  components(void) const;
+    void                 append(const GModelSpatial& component,
+                                const std::string&   name = "");
     const GModelSpatial* component(const int& index) const;
     const GModelSpatial* component(const std::string& name) const;
 };
