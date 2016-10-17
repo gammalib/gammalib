@@ -120,7 +120,7 @@ GVOTable::~GVOTable(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] VO table.
+ * @param[in] votable VO table.
  * @return VO table.
  ***************************************************************************/
 GVOTable& GVOTable::operator=(const GVOTable& votable)

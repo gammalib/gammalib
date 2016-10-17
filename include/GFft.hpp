@@ -66,7 +66,9 @@ public:
 
     // FFT access operators
     std::complex<double>&       operator()(const int& ix);
+    std::complex<double>&       operator()(const int& ix, const int& iy);
     const std::complex<double>& operator()(const int& ix) const;
+    const std::complex<double>& operator()(const int& ix, const int& iy) const;
 
     // Operators
     GFft& operator=(const GFft& fft);
@@ -197,7 +199,7 @@ std::string GFft::classname(void) const
 /***********************************************************************//**
  * @brief 1-dimensional FFT element access operator
  *
- * @param[in] ix Element index [0,...,size()-1].
+ * @param[in] ix Element index [0,...,shape(0)-1].
  * @return Reference to FFT element.
  ***************************************************************************/
 inline
@@ -209,9 +211,24 @@ std::complex<double>& GFft::operator()(const int& ix)
 
 
 /***********************************************************************//**
+ * @brief 2-dimensional FFT element access operator
+ *
+ * @param[in] ix Index in first dimension [0,...,shape(0)-1].
+ * @param[in] iy Index in second dimension [0,...,shape(1)-1].
+ * @return Reference to FFT element.
+ ***************************************************************************/
+inline
+std::complex<double>& GFft::operator()(const int& ix, const int& iy)
+{
+	// Return array element
+    return *(m_data + ix + m_strides[1]*iy);
+}
+
+
+/***********************************************************************//**
  * @brief 1-dimensional FFT element access operator (const variant)
  *
- * @param[in] ix Element index [0,...,size()-1].
+ * @param[in] ix Element index [0,...,shape(0)-1].
  * @return Const reference to FFT element.
  ***************************************************************************/
 inline
@@ -220,6 +237,23 @@ const std::complex<double>& GFft::operator()(const int& ix) const
     // Return array element
     return *(m_data + ix);
 }
+
+
+/***********************************************************************//**
+ * @brief 2-dimensional FFT element access operator (const variant)
+ *
+ * @param[in] ix Index in first dimension [0,...,shape(0)-1].
+ * @param[in] iy Index in second dimension [0,...,shape(1)-1].
+ * @return Const reference to FFT element.
+ ***************************************************************************/
+inline
+const std::complex<double>& GFft::operator()(const int& ix, const int& iy) const
+{
+	// Return array element
+    return *(m_data + ix + m_strides[1]*iy);
+}
+
+
 
 
 /***********************************************************************//**

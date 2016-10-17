@@ -282,7 +282,7 @@ void TestGNumerics::test_ndarray(void)
  ***************************************************************************/
 void TestGNumerics::test_fft(void)
 {
-    // Loop over array lengths
+    // Test 1-dimensional FFT
     for (int n = 2; n < 12; ++n) {
 
         // Skip n=8,9,10 since they can be factorised
@@ -303,9 +303,16 @@ void TestGNumerics::test_fft(void)
         GNdarray back = fft.backward();
 
         // Check FFT results
-        check_fft(array, fft, back);
+        check_fft1(array, fft, back);
 
     } // endfor: looped over array lengths
+
+    // Test 2-dimensional FFT
+    GNdarray array2(8,9);
+    array2(4,4) = 1.0;
+    GFft     fft2(array2);
+    GNdarray back2 = fft2.backward();
+    check_fft2(array2, fft2, back2);
 
     // Exit test
     return;
@@ -313,15 +320,15 @@ void TestGNumerics::test_fft(void)
 
 
 /***********************************************************************//**
- * @brief Check Fast Fourier Transform
+ * @brief Check 1-dimensional Fast Fourier Transform
  *
  * @param[in] array Input array.
  * @param[in] fft Fast Fourier Transform of input array.
  * @param[in] back Backward transform of FFT (should be equal to input array)
  ***************************************************************************/
-void TestGNumerics::check_fft(const GNdarray& array,
-                              const GFft&     fft,
-                              const GNdarray& back)
+void TestGNumerics::check_fft1(const GNdarray& array,
+                               const GFft&     fft,
+                               const GNdarray& back)
 {
     // Get normalisation factor
     double norm = 1.0 / double(array.size());
@@ -337,6 +344,53 @@ void TestGNumerics::check_fft(const GNdarray& array,
         }
         std::complex<double> ref(ref_real, ref_imag);
         test_value(fft(k), ref);
+    }
+
+    // Test backward transformation
+    for (int k = 0; k < array.size(); ++k) {
+        test_value(back(k), array(k));
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check 2-dimensional Fast Fourier Transform
+ *
+ * @param[in] array Input array.
+ * @param[in] fft Fast Fourier Transform of input array.
+ * @param[in] back Backward transform of FFT (should be equal to input array)
+ ***************************************************************************/
+void TestGNumerics::check_fft2(const GNdarray& array,
+                               const GFft&     fft,
+                               const GNdarray& back)
+{
+    // Get normalisation factor
+    double normM = 1.0 / double(array.shape()[0]);
+    double normN = 1.0 / double(array.shape()[1]);
+
+    // Compute reference value and compare with FFT result
+    for (int k = 0; k < array.shape()[0]; ++k) {
+        for (int l = 0; l < array.shape()[1]; ++l) {
+            double ref_real = 0.0;
+            double ref_imag = 0.0;
+            for (int n = 0; n < array.shape()[1]; ++n) {
+                double sum_real = 0.0;
+                double sum_imag = 0.0;
+                for (int m = 0; m < array.shape()[0]; ++m) {
+                    double x = -gammalib::twopi * m * k * normM;
+                    sum_real += array(m,n) * std::cos(x);
+                    sum_imag += array(m,n) * std::sin(x);
+                }
+                double y = -gammalib::twopi * n * l * normN;
+                ref_real += (sum_real * std::cos(y) - sum_imag * std::sin(y));
+                ref_imag += (sum_real * std::sin(y) + sum_imag * std::cos(y));
+            }
+            std::complex<double> ref(ref_real, ref_imag);
+            test_value(fft(k,l), ref);
+        }
     }
 
     // Test backward transformation

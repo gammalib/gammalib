@@ -35,6 +35,8 @@
 #include "GNdarray.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_FORWARD                                  "GFft::forward(GNdarray&)"
+#define G_BACKWARD                                         "GFft::backward()"
 
 
 /*==========================================================================
@@ -277,7 +279,27 @@ GFft* GFft::clone(void) const
  *
  * @param[in] array N-dimensional array.
  *
- * @todo Method should support N-dim arrays, only supports 1-dim so far
+ * GException::feature_not_implemented
+ *             Array dimension is not supported.
+ *
+ * Performs discret Fast Fourier forward transformation for 1- and
+ * 2-dimensional arrays.
+ *
+ * For one dimensional arrays of length \f$N\f$ the transformation is given
+ * by
+ *
+ * \f[
+ *    X_k = \sum_{n=0}^{N-1} z_n e^{-i 2 \pi \frac{k n}{N}}
+ * \f]
+ *
+ * and for two dimensional arrays of length \f$ M \times N\f$ the
+ * transformation is given by
+ *
+ * \f[
+ *    X_{k,l} = \sum_{n=0}^{N-1} \left(
+ *              \sum_{m=0}^{M-1} z_{m,n} e^{-i 2 \pi \frac{m k}{M}} \right)
+ *              e^{-i 2 \pi \frac{n l}{N}}
+ * \f]
  ***************************************************************************/
 void GFft::forward(const GNdarray& array)
 {
@@ -286,26 +308,36 @@ void GFft::forward(const GNdarray& array)
 
     // Continue only if there are elements in the data member
     if (m_size > 0) {
-/*
-        // Loop over all dimensions of array
-        for (int d = 0; d < dim(); ++d) {
 
-            // Loop over all dimensions of array
-            for (int i = 0; i < dim(); ++i) {
+        // Case A: array is 1-dimensional
+        if (array.dim() == 1) {
+            transform(m_data, 1, m_shape[0], m_wavetable[0], true);
+        }
 
-                // Skip
-                if (d == i) {
-                    continue;
-                }
+        // Case B: array is 2-dimensional
+        else if (array.dim() == 2) {
 
-                // Loop over all
-                int n      = shape()[d];
-                int stride = strides()[d];
-                int istart =
-*/
+            // Loop over rows
+            for (int row = 0; row < m_shape[1]; ++row) {
+                transform(m_data + row*m_strides[1], m_strides[0], m_shape[0],
+                          m_wavetable[0], true);
+            }
 
-        // Perform FFT (is only correct for 1D for now)
-        transform(m_data, 1, m_shape[0], m_wavetable[0], true);
+            // Loop over columns
+            for (int col = 0; col < m_shape[0]; ++col) {
+                transform(m_data + col*m_strides[0], m_strides[1], m_shape[1],
+                          m_wavetable[1], true);
+            }
+
+        }
+
+        // ... otherwise throw an exception
+        else {
+            std::string msg = "Fast Fourier Transformation for "+
+                              gammalib::str(array.dim())+"-dimensional array "
+                              "not implemented.";
+            throw GException::feature_not_implemented(G_FORWARD, msg);
+        }
 
     } // endif: there were elements in the FFT data member
 
@@ -319,7 +351,28 @@ void GFft::forward(const GNdarray& array)
  *
  * @return N-dimensional array.
  *
- * @todo Method should support N-dim arrays, only supports 1-dim so far
+ * GException::feature_not_implemented
+ *             Array dimension is not supported.
+ *
+ * Performs the inverse (or backward) discret Fast Fourier forward
+ * transformation for 1- and 2-dimensional arrays.
+ *
+ * For one dimensional arrays of length \f$N\f$ the transformation is given
+ * by
+ *
+ * \f[
+ *    z_k = \frac{1}{N} \sum_{n=0}^{N-1} X_n e^{i 2 \pi \frac{k n}{N}}
+ * \f]
+ *
+ * and for two dimensional arrays of length \f$ M \times N\f$ the
+ * transformation is given by
+ *
+ * \f[
+ *    z_{k,l} = \frac{1}{N} \sum_{n=0}^{N-1} \left(
+ *              \frac{1}{M} \sum_{m=0}^{M-1} X_{m,n}
+ *                          e^{i 2 \pi \frac{m k}{M}} \right)
+ *                          e^{i 2 \pi \frac{n l}{N}}
+ * \f]
  ***************************************************************************/
 GNdarray GFft::backward(void) const
 {
@@ -327,24 +380,66 @@ GNdarray GFft::backward(void) const
     GNdarray array(shape());
 
     // Continue only if there are elements in the array
-    if (array.size() > 0) {
+    if (m_size > 0) {
 
         // Create copy of complex array
-        std::complex<double>* data = new std::complex<double>[array.size()];
-        for (int i = 0; i < array.size(); ++i) {
+        std::complex<double>* data = new std::complex<double>[m_size];
+        for (int i = 0; i < m_size; ++i) {
             *(data+i) = *(m_data+i);
         }
 
-        // Perform FFT (circumvent const correctness)
-        const_cast<GFft*>(this)->transform(data, 1, m_shape[0], m_wavetable[0],
-                                           false);
+        // Case A: array is 1-dimensional
+        if (array.dim() == 1) {
 
-        // Get normalisation factor
-        const double norm  = 1.0 / double(array.size());
+            // Perform backward transformation (circumvent const correctness)
+            const_cast<GFft*>(this)->transform(data, 1, m_shape[0], m_wavetable[0], false);
 
-        // Extract N-dimensional array and normalise with 1/n
-        for (int i = 0; i < array.size(); ++i) {
-            array(i) = (data+i)->real() * norm;
+            // Get normalisation factor
+            const double norm = 1.0 / double(m_shape[0]);
+
+            // Extract 1-dimensional array and normalise with 1/n
+            for (int i = 0; i < m_size; ++i) {
+                array(i) = (data+i)->real() * norm;
+            }
+
+        }
+
+        // Case B: array is 2-dimensional
+        else if (array.dim() == 2) {
+
+            // Loop over rows
+            for (int row = 0; row < m_shape[1]; ++row) {
+                const_cast<GFft*>(this)->transform(data + row*m_strides[1], m_strides[0], m_shape[0],
+                          m_wavetable[0], false);
+            }
+
+            // Loop over columns
+            for (int col = 0; col < m_shape[0]; ++col) {
+                const_cast<GFft*>(this)->transform(data + col*m_strides[0], m_strides[1], m_shape[1],
+                          m_wavetable[1], false);
+            }
+
+            // Get normalisation factor
+            const double norm = 1.0 / double(m_shape[0]*m_shape[1]);
+
+            // Extract 2-dimensional array and normalise with 1/(n*m)
+            for (int i = 0; i < m_size; ++i) {
+                array(i) = (data+i)->real() * norm;
+            }
+
+        }
+
+        // ... otherwise throw an exception
+        else {
+
+            // Delete copy of complex array
+            delete [] data;
+
+            // Throw exception
+            std::string msg = "Fast Fourier Transformation for "+
+                              gammalib::str(array.dim())+"-dimensional array "
+                              "not implemented.";
+            throw GException::feature_not_implemented(G_BACKWARD, msg);
         }
 
         // Delete copy of complex array
@@ -501,15 +596,9 @@ void GFft::set_data(const GNdarray& array)
             *(m_data+i) = std::complex<double>(array(i), 0.0);
         }
 
-        // Save shape
-        m_shape = array.shape();
-
-        // Set strides
-        int stride = 1;
-        for (int i = 0; i < m_shape.size(); ++i) {
-            m_strides.push_back(stride);
-            stride *= m_shape[i];
-        }
+        // Save shape and strides
+        m_shape   = array.shape();
+        m_strides = array.strides();
 
         // Set trigonometric coefficients
         for (int i = 0; i < m_shape.size(); ++i) {
@@ -1319,30 +1408,18 @@ void GFft::factorn(std::complex<double>* in,
             for (int e1 = 1; e1 < factor; ++e1) {
  
                 // Get x
-                double x_real = (in+istride*(i + e1 * m))->real();
-                double x_imag = (in+istride*(i + e1 * m))->imag();
+                std::complex<double> x = *(in+istride*(i + e1 * m));
 
-                // Get w
-                double w_real, w_imag;
-             
-                // Compute indices
+                // Compute index
                 int twiddle = index + (e1-1)*q + k-1;
 
-                // Set trigonometric coefficients for forward transform
-                if (sign == -1) {
-                    w_real = wavetable[twiddle].real();
-                    w_imag = wavetable[twiddle].imag();
-                }
-                // ... otherwise set trigonometric coefficients for backward
-                // tranform: w -> conjugate(w)
-                else {
-                    w_real =  wavetable[twiddle].real();
-                    w_imag = -wavetable[twiddle].imag();
-                }
+                // Get w
+                std::complex<double> w = (sign == -1)
+                                         ? wavetable[twiddle]
+                                         : std::conj(wavetable[twiddle]);
 
-                //
-                *(out+ostride*(j + e1 * p_1)) = std::complex<double>(w_real * x_real - w_imag * x_imag,
-                                                                     w_real * x_imag + w_imag * x_real);
+                // Compute out = w * x
+                *(out+ostride*(j + e1 * p_1)) = w * x;
 
             } // endfor: e1
 

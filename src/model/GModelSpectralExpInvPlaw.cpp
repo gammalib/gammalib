@@ -85,7 +85,7 @@ GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(void) : GModelSpectral()
  * @param[in] prefactor Name of prefactor parameter.
  * @param[in] index Name of index parameter.
  * @param[in] pivot Name of pivot parameter.
- * @param[in] cutoff Name of cutoff parameter.
+ * @param[in] lambda Name of cutoff parameter.
  ***************************************************************************/
 GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(const std::string& type,
                                                    const std::string& prefactor,

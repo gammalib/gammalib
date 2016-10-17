@@ -383,7 +383,7 @@ void GFftWavetable::set_members(const int& n)
  *
  * @exception GException::invalid_argument
  *            Non positive array length specified
- * @expection GException::invalid_value
+ * @exception GException::invalid_value
  *            Product of factorisation factors are not equal to array length
  *
  * Computes the factorisation

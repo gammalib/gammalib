@@ -777,6 +777,7 @@ bool GNdarray::has_same_shape(const GNdarray& array) const
 /***********************************************************************//**
  * @brief Throw exception if array shapes differ
  *
+ * @param[in] method Method that throws exception.
  * @param[in] array Array.
  ***************************************************************************/
 void GNdarray::require_same_shape(const std::string& method,
