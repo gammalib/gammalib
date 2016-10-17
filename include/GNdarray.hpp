@@ -102,7 +102,7 @@ public:
     void                    clear(void);
     GNdarray*               clone(void) const;
     std::string             classname(void) const;
-    int                     dim() const;
+    int                     dim(void) const;
     int                     size(void) const;
     const std::vector<int>& shape(void) const;
     const std::vector<int>& strides(void) const;
@@ -270,7 +270,7 @@ const double& GNdarray::operator()(const std::vector<int>& i) const
  * Returns the dimension of the array.
  ***************************************************************************/
 inline
-int GNdarray::dim() const
+int GNdarray::dim(void) const
 {
     return m_shape.size();
 }
@@ -284,7 +284,7 @@ int GNdarray::dim() const
  * Returns the number of elements in the array.
  ***************************************************************************/
 inline
-int GNdarray::size() const
+int GNdarray::size(void) const
 {
     return m_data.size();
 }

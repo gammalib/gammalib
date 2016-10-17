@@ -80,7 +80,7 @@ public:
     void                    clear(void);
     GFft*                   clone(void) const;
     std::string             classname(void) const;
-    int                     dim() const;
+    int                     dim(void) const;
     int                     size(void) const;
     const std::vector<int>& shape(void) const;
     const std::vector<int>& strides(void) const;
@@ -96,81 +96,89 @@ protected:
     void set_data(const GNdarray& array);
 
     // Low-level FFT methods
-    void transform(std::vector<std::complex<double> >& data,
-                   const int&                          stride,
-                   const int&                          n,
-                   const GFftWavetable&                wavetable,
-                   const bool&                         forward = true);
-    void factor2(const std::vector<std::complex<double> >& in,
-                 const int&                                istride,
-                 std::vector<std::complex<double> >&       out,
-                 const int&                                ostride,
-                 const GFftWavetable&                      wavetable,
-                 const int&                                sign,
-                 const int&                                product,
-                 const int&                                n,
-                 const int&                                index);
-    void factor3(const std::vector<std::complex<double> >& in,
-                 const int&                                istride,
-                 std::vector<std::complex<double> >&       out,
-                 const int&                                ostride,
-                 const GFftWavetable&                      wavetable,
-                 const int&                                sign,
-                 const int&                                product,
-                 const int&                                n,
-                 const int&                                index);
-    void factor4(const std::vector<std::complex<double> >& in,
-                 const int&                                istride,
-                 std::vector<std::complex<double> >&       out,
-                 const int&                                ostride,
-                 const GFftWavetable&                      wavetable,
-                 const int&                                sign,
-                 const int&                                product,
-                 const int&                                n,
-                 const int&                                index);
-    void factor5(const std::vector<std::complex<double> >& in,
-                 const int&                                istride,
-                 std::vector<std::complex<double> >&       out,
-                 const int&                                ostride,
-                 const GFftWavetable&                      wavetable,
-                 const int&                                sign,
-                 const int&                                product,
-                 const int&                                n,
-                 const int&                                index);
-    void factor6(const std::vector<std::complex<double> >& in,
-                 const int&                                istride,
-                 std::vector<std::complex<double> >&       out,
-                 const int&                                ostride,
-                 const GFftWavetable&                      wavetable,
-                 const int&                                sign,
-                 const int&                                product,
-                 const int&                                n,
-                 const int&                                index);
-    void factor7(const std::vector<std::complex<double> >& in,
-                 const int&                                istride,
-                 std::vector<std::complex<double> >&       out,
-                 const int&                                ostride,
-                 const GFftWavetable&                      wavetable,
-                 const int&                                sign,
-                 const int&                                product,
-                 const int&                                n,
-                 const int&                                index);
-    void factorn(std::vector<std::complex<double> >& in,
-                 const int&                          istride,
-                 std::vector<std::complex<double> >& out,
-                 const int&                          ostride,
-                 const GFftWavetable&                wavetable,
-                 const int&                          sign,
-                 const int&                          factor,
-                 const int&                          product,
-                 const int&                          n,
-                 const int&                          index);
+    void transform(std::complex<double>* data,
+                   const int&            stride,
+                   const int&            n,
+                   const GFftWavetable&  wavetable,
+                   const bool&           forward = true);
+    void factor2(const std::complex<double>* in,
+                 const int&                  istride,
+                 std::complex<double>*       out,
+                 const int&                  ostride,
+                 const GFftWavetable&        wavetable,
+                 const int&                  sign,
+                 const int&                  product,
+                 const int&                  n,
+                 const int&                  index);
+    void factor3(const std::complex<double>* in,
+                 const int&                  istride,
+                 std::complex<double>*       out,
+                 const int&                  ostride,
+                 const GFftWavetable&        wavetable,
+                 const int&                  sign,
+                 const int&                  product,
+                 const int&                  n,
+                 const int&                  index);
+    void factor4(const std::complex<double>* in,
+                 const int&                  istride,
+                 std::complex<double>*       out,
+                 const int&                  ostride,
+                 const GFftWavetable&        wavetable,
+                 const int&                  sign,
+                 const int&                  product,
+                 const int&                  n,
+                 const int&                  index);
+    void factor5(const std::complex<double>* in,
+                 const int&                  istride,
+                 std::complex<double>*       out,
+                 const int&                  ostride,
+                 const GFftWavetable&        wavetable,
+                 const int&                  sign,
+                 const int&                  product,
+                 const int&                  n,
+                 const int&                  index);
+    void factor6(const std::complex<double>* in,
+                 const int&                  istride,
+                 std::complex<double>*       out,
+                 const int&                  ostride,
+                 const GFftWavetable&        wavetable,
+                 const int&                  sign,
+                 const int&                  product,
+                 const int&                  n,
+                 const int&                  index);
+    void factor7(const std::complex<double>* in,
+                 const int&                  istride,
+                 std::complex<double>*       out,
+                 const int&                  ostride,
+                 const GFftWavetable&        wavetable,
+                 const int&                  sign,
+                 const int&                  product,
+                 const int&                  n,
+                 const int&                  index);
+    void factorn(std::complex<double>* in,
+                 const int&            istride,
+                 std::complex<double>* out,
+                 const int&            ostride,
+                 const GFftWavetable&  wavetable,
+                 const int&            sign,
+                 const int&            factor,
+                 const int&            product,
+                 const int&            n,
+                 const int&            index);
+    std::vector<std::complex<double> > get_w(const GFftWavetable& wavetable,
+                                             const int&           index,
+                                             const int&           k,
+                                             const int&           q,
+                                             const int&           n,
+                                             const int&           sign) const;
+    std::complex<double> timesi(const std::complex<double>& value) const;
 
     // Protected members
-    std::vector<int>                   m_shape;     //!< Array dimensions
-    std::vector<int>                   m_strides;   //!< Steps in each dimension
-    std::vector<std::complex<double> > m_data;      //!< Array data
-    std::vector<GFftWavetable>         m_wavetable; //!< Trigonometric coefficients
+    int                        m_size;      //!< Size of data array
+    std::complex<double>*      m_data;      //!< Pointer on array data
+    std::vector<int>           m_shape;     //!< Array dimensions
+    std::vector<int>           m_strides;   //!< Steps in each dimension
+    std::vector<GFftWavetable> m_wavetable; //!< Trigonometric coefficients
 };
 
 
@@ -189,28 +197,28 @@ std::string GFft::classname(void) const
 /***********************************************************************//**
  * @brief 1-dimensional FFT element access operator
  *
- * @param[in] ix Element index [0,...,shape(0)-1].
+ * @param[in] ix Element index [0,...,size()-1].
  * @return Reference to FFT element.
  ***************************************************************************/
 inline
 std::complex<double>& GFft::operator()(const int& ix)
 {
 	// Return array element
-    return m_data[ix];
+    return *(m_data + ix);
 }
 
 
 /***********************************************************************//**
  * @brief 1-dimensional FFT element access operator (const variant)
  *
- * @param[in] ix Element index [0,...,shape(0)-1].
+ * @param[in] ix Element index [0,...,size()-1].
  * @return Const reference to FFT element.
  ***************************************************************************/
 inline
 const std::complex<double>& GFft::operator()(const int& ix) const
 {
     // Return array element
-    return m_data[ix];
+    return *(m_data + ix);
 }
 
 
@@ -222,7 +230,7 @@ const std::complex<double>& GFft::operator()(const int& ix) const
  * Returns the dimension of the Fast Fourier Transformation.
  ***************************************************************************/
 inline
-int GFft::dim() const
+int GFft::dim(void) const
 {
     return m_shape.size();
 }
@@ -236,9 +244,9 @@ int GFft::dim() const
  * Returns the number of elements in the array.
  ***************************************************************************/
 inline
-int GFft::size() const
+int GFft::size(void) const
 {
-    return m_data.size();
+    return m_size;
 }
 
 
@@ -338,6 +346,22 @@ GFft operator/(const GFft& a, const GFft& b)
 {
     GFft result = a;
     result /= b;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Return complex value times i
+ *
+ * @param[in] value Complex value.
+ * @return Complex value times i.
+ *
+ * Returns complex value times i.
+ ***************************************************************************/
+inline
+std::complex<double> GFft::timesi(const std::complex<double>& value) const
+{
+    std::complex<double> result(-value.imag(), value.real());
     return result;
 }
 
