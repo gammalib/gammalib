@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-26 September 2016
+17 October 2016
 
 
 1. Introduction
@@ -34,6 +34,7 @@ The following methods have been added:
 - GLog::is_empty()
 - GLog::written_size()
 - GSkyMap::is_empty()
+- GObservations::save_covmat()
 
 The following methods have been removed:
 - <all classes>::eval_gradients()
@@ -138,7 +139,8 @@ None
 
 10. Observation module
 ----------------------
-None
+The GObservations::save_covmat() method computes and saves the covariance
+matrix into a FITS file (#1863).
 
 
 11. Optimization module

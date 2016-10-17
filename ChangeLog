@@ -1,8 +1,9 @@
-2016-09-26
+2016-10-17
 
         * Version 1.2.0 released
         =========================
 
+        Add GObservations::save_covmat() method (#1863)
         Check CTA response table dimension for consistency (#1848)
         Remove eval_gradients() methods and remplace by eval() method with optional gradients argument (#1847)
         Add GTestSuite::test_value() method with automatic precision computation
