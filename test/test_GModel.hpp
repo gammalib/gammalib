@@ -58,6 +58,7 @@ public:
     void                test_radial_shell(void);
     void                test_elliptical_disk(void);
     void                test_elliptical_gauss(void);
+    void                test_spatial_composite(void);
     void                test_spatial_model(void);
     void                test_const(void);
     void                test_gauss(void);
@@ -72,6 +73,7 @@ public:
     void                test_multiplicative(void);
     void                test_nodes(void);
     void                test_filefct(void);
+    void                test_spectral_composite(void);
     void                test_spectral_model(void);
     void                test_temp_const(void);
     void                test_model(void);
@@ -115,6 +117,7 @@ private:
     std::string m_xml_point_multiplicative;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_point_filefct;
+    std::string m_xml_model_spectral_composite;
     std::string m_xml_model_diffuse_const;
     std::string m_xml_model_diffuse_cube;
     std::string m_xml_model_diffuse_map;
@@ -123,6 +126,7 @@ private:
     std::string m_xml_model_radial_shell;
     std::string m_xml_model_elliptical_disk;
     std::string m_xml_model_elliptical_gauss;
+    std::string m_xml_model_spatial_composite;
 
     // Legacy model definition XML files
     std::string m_xml_legacy_radial_disk;

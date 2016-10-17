@@ -43,7 +43,6 @@
 #include "GEbounds.hpp"       // will become obsolete
 #include "GObservation.hpp"
 #include "GModelSky.hpp"
-#include "GModelSpatialPointSource.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF_RADIAL               "GResponse::irf_radial(GEvent&, GSource&,"\
@@ -322,9 +321,8 @@ double GResponse::eval_prob(const GModelSky&    model,
 
         // Set source
         GSource source(model.name(), model.spatial(), srcEng, srcTime);
-        
-        // Get IRF value. This method returns the spatial component of the
-        // source model.
+
+        // Compute IRF value
         double irf = this->irf(event, source, obs);
 
         // If required, apply instrument specific model scaling

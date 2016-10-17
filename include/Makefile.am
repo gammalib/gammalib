@@ -166,6 +166,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialDiffuseConst.hpp \
                      GModelSpatialDiffuseCube.hpp \
                      GModelSpatialDiffuseMap.hpp \
+                     GModelSpatialComposite.hpp \
                      GModelSpectral.hpp \
                      GModelSpectralRegistry.hpp \
                      GModelSpectralBrokenPlaw.hpp \
@@ -181,6 +182,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlawPhotonFlux.hpp \
                      GModelSpectralPlawEnergyFlux.hpp \
+                     GModelSpectralComposite.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalRegistry.hpp \
                      GModelTemporalConst.hpp

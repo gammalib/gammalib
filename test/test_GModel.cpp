@@ -67,6 +67,7 @@ void TestGModel::set(void)
     m_xml_point_multiplicative     = datadir + "/model_point_multiplicative.xml";
     m_xml_model_point_nodes        = datadir + "/model_point_nodes.xml";
     m_xml_model_point_filefct      = datadir + "/model_point_filefct.xml";
+    m_xml_model_spectral_composite = datadir + "/model_spectral_composite.xml";
     m_xml_model_diffuse_const      = datadir + "/model_diffuse_const.xml";
     m_xml_model_diffuse_cube       = datadir + "/model_diffuse_cube.xml";
     m_xml_model_diffuse_map        = datadir + "/model_diffuse_map.xml";
@@ -75,6 +76,7 @@ void TestGModel::set(void)
     m_xml_model_radial_shell       = datadir + "/model_radial_shell.xml";
     m_xml_model_elliptical_disk    = datadir + "/model_elliptical_disk.xml";
     m_xml_model_elliptical_gauss   = datadir + "/model_elliptical_gauss.xml";
+    m_xml_model_spatial_composite  = datadir + "/model_spatial_composite.xml";
 
     // Set legacy model definition XML files
     m_xml_legacy_radial_disk       = datadir + "/legacy_radial_disk.xml";
@@ -116,6 +118,8 @@ void TestGModel::set(void)
            "Test GModelSpatialDiffuseCube");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_map),
            "Test GModelSpatialDiffuseMap");
+    append(static_cast<pfunction>(&TestGModel::test_spatial_composite),
+           "Test GModelSpatialComposite");
     append(static_cast<pfunction>(&TestGModel::test_spatial_model),
            "Test spatial model XML I/O");
 
@@ -146,6 +150,8 @@ void TestGModel::set(void)
            "Test GModelSpectralNodes");
     append(static_cast<pfunction>(&TestGModel::test_filefct),
            "Test GModelSpectralFunc");
+    append(static_cast<pfunction>(&TestGModel::test_spectral_composite),
+           "Test GModelSpectralComposite");
     append(static_cast<pfunction>(&TestGModel::test_spectral_model),
            "Test spectral model XML I/O");
 
@@ -1402,6 +1408,49 @@ void TestGModel::test_elliptical_gauss(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Test GModelSpatialComposite class
+ ***************************************************************************/
+void TestGModel::test_spatial_composite(void)
+{
+    // Test void constructor
+    GModelSpatialComposite model1;
+    test_value(model1.type(), "Composite", "Check void model type");
+
+    // Set sky direction
+    GSkyDir dir = GSkyDir();
+    dir.radec_deg(83.6331, 22.01);
+
+    // Test append method
+    model1.append(GModelSpatialPointSource(dir));
+    model1.append(GModelSpatialRadialGauss(dir, 0.2));
+    test_value(model1.components(), 2);
+    test_value(model1.size(), 5);
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_spatial_composite);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialComposite model2(*element);
+    test_value(model2.size(), 5);
+    test_value(model2.type(), "Composite", "Check model type");
+      
+    // Test access of individual parameters
+    test_value(model2["2:RA"].value(), 83.6331);
+    test_value(model2["2:DEC"].value(), 22.0145);
+    test_value(model2["2:Sigma"].value(), 0.2);
+    test_value(model2["PointSource:RA"].value(), 83.6331);
+    test_value(model2["2:RA"].value(), 83.6331);
+    model2["2:RA"].value(83.1331);
+    test_value(model2["2:RA"].value(), 83.1331);
+    model2["2:DEC"].value(22.51);
+    test_value(model2["2:DEC"].value(), 22.51);
+    model2["2:Sigma"].value(0.6);
+    test_value(model2["2:Sigma"].value(), 0.6);
+
+    // Exit test
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Test GModelSpectralConst class
@@ -2194,6 +2243,51 @@ void TestGModel::test_filefct(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Test GModelSpectralComposite class
+ ***************************************************************************/
+void TestGModel::test_spectral_composite(void)
+{
+    // Test void constructor
+    GModelSpectralComposite model1;
+    test_value(model1.type(), "Composite", "Check void model type");
+
+    // Test append method
+    model1.append(GModelSpectralPlaw(3e-17,-3.5, GEnergy(1, "TeV")));
+    model1.append(GModelSpectralPlaw(5e-17,-2.0, GEnergy(1, "TeV")));
+    test_value(model1.size(), 6);
+    test_value(model1.components(), 2);
+    test_value(model1.eval(GEnergy(1.0, "TeV")), 8.0e-17);
+
+    // Test XML constructor
+    GXml                      xml(m_xml_model_spectral_composite);
+    GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralComposite model2(*element);
+    test_value(model2.size(), 6);
+    test_value(model2.components(), 2);
+    test_value(model2.type(), "Composite", "Check model type");
+
+    // Test access of individual parameters
+    test_value(model2["HardComponent:Prefactor"].value(), 5e-17);
+    test_value(model2["HardComponent:Index"].value(), -2.0);
+    test_value(model2["HardComponent:PivotEnergy"].value(), 1.0e6);
+
+    // Test prefactor method
+    model2["SoftComponent:Prefactor"].value(2.3e-16);
+    test_value(model2["SoftComponent:Prefactor"].value(), 2.3e-16);
+
+    // Test index method
+    model2["SoftComponent:Index"].value(-2.6);
+    test_value(model2["SoftComponent:Index"].value(), -2.6);
+
+    // Test pivot method
+    model2["SoftComponent:PivotEnergy"].value(0.5e6);
+    test_value(model2["SoftComponent:PivotEnergy"].value(), 0.5e6);
+
+    // Exit test
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Test GModelTemporalConst class
@@ -2297,6 +2391,7 @@ void TestGModel::test_spectral_model(void)
     test_xml_model("GModelSpectralLogParabola",    m_xml_model_point_logparabola);
     test_xml_model("GModelSpectralNodes",          m_xml_model_point_nodes);
     test_xml_model("GModelSpectralFunc",           m_xml_model_point_filefct);
+    test_xml_model("GModelSpectralComposite",      m_xml_model_spectral_composite);
 
     // Return
     return;

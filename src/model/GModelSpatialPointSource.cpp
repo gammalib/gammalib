@@ -501,6 +501,7 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print point source information
  *
+ * @param[in] chatter Chattiness.
  * @return String containing point source information.
  ***************************************************************************/
 std::string GModelSpatialPointSource::print(const GChatter& chatter) const

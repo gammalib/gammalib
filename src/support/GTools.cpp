@@ -1180,7 +1180,7 @@ bool gammalib::contains(const std::string& str, const std::string& substring)
     bool result = false;
 
     // checks if substring is in str
-    if (str.find(substring) != std::string::npos){
+    if (str.find(substring) != std::string::npos) {
         result = true;
     }
 
@@ -1193,13 +1193,13 @@ bool gammalib::contains(const std::string& str, const std::string& substring)
  * @brief Checks if a string is contained in a vector of strings
  *
  * @param[in] strings Vector of strings you want to search in.
- * @param[in] string String you are looking for in strings.
+ * @param[in] string string you are looking for in strings.
  * @return True if a string is contained a vector.
  *
  * Checks if a string is contained in a vector of strings
  ***************************************************************************/
-bool gammalib::contains(const std::vector<std::string>& strings,
-                        const std::string&              string)
+bool gammalib::contains(const std::vector<std::string> strings,
+                        const std::string&             string)
 {
     // Compute result
     bool result = std::find(strings.begin(), strings.end(), string) !=

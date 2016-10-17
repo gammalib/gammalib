@@ -48,9 +48,11 @@
 const GModelSky         g_pointsource_seed("PointSource");
 const GModelSky         g_extendedsource_seed("ExtendedSource");
 const GModelSky         g_diffusesource_seed("DiffuseSource");
+const GModelSky         g_compositesource_seed("CompositeSource");
 const GModelRegistry    g_pointsource_registry(&g_pointsource_seed);
 const GModelRegistry    g_extendedsource_registry(&g_extendedsource_seed);
 const GModelRegistry    g_diffusesource_registry(&g_diffusesource_seed);
+const GModelRegistry    g_compositesource_registry(&g_compositesource_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NPRED           "GModelSky::npred(GEnergy&, GTime&, GObservation&)"

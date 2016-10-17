@@ -43,7 +43,8 @@ typedef enum {
     GMODEL_SPATIAL_POINT_SOURCE,
     GMODEL_SPATIAL_RADIAL,
     GMODEL_SPATIAL_ELLIPTICAL,
-    GMODEL_SPATIAL_DIFFUSE
+    GMODEL_SPATIAL_DIFFUSE,
+    GMODEL_SPATIAL_COMPOSITE
 } GClassCode;
 
 /* __ Typemaps ___________________________________________________________ */
