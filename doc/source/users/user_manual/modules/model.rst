@@ -836,7 +836,7 @@ Spectral model components can be combined into a single model using the
 :doxy:`GModelSpectralComposite class`. The class computes
 
 .. math::
-   M_{\rm spectral}(E | t) = \frac{1}{N} \sum_{i=0}^{N-1} M_{\rm spectral}^{(i)}(E | t)
+   M_{\rm spectral}(E | t) = \sum_{i=0}^{N-1} M_{\rm spectral}^{(i)}(E | t)
 
 where :math:`M_{\rm spectral}^{(i)}(E | t)` is any spectral model component
 (including another composite model), and :math:`N` is the number of
