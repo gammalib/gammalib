@@ -82,6 +82,7 @@ public:
                                 double scale = 1.);
     const GModelSpatial* component(const int& index) const;
     const GModelSpatial* component(const std::string& name) const;
+    double               component_scale(const int& index) const;
 
 
 protected:

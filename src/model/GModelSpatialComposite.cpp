@@ -594,6 +594,29 @@ const GModelSpatial* GModelSpatialComposite::component(const std::string& name) 
 	return m_components[index];
 }
 
+/***********************************************************************//**
+ * @brief Returns scale of spatial component
+ *
+ * @param[in] index Index of spatial component [0,...,components()-1].
+ * @return Scale.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of range.
+ *
+ * Returns the scale of a spatial component to the composite model
+ ***************************************************************************/
+double GModelSpatialComposite::component_scale(const int& index) const
+{
+    // Check if index is in validity range
+    if (index < 0 || index >= m_components.size()) {
+        throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
+                index, m_components.size());
+    }
+
+    // Return spatial component
+    return m_component_scales[index];
+}
+
 
 /***********************************************************************//**
  * @brief Print composite spatial model information
