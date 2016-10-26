@@ -63,9 +63,12 @@ public:
     // Other methods
     int                  components(void) const;
     void                 append(const GModelSpatial& component,
-                                const std::string&   name = "");
+                                const std::string&   name = "",
+                                const double& scale = 1.);
     const GModelSpatial* component(const int& index) const;
     const GModelSpatial* component(const std::string& name) const;
+    double               component_scale(const int& index) const;
+    double               sum_of_scales(void) const;
 };
 
 
