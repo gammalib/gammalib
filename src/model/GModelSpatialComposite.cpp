@@ -489,7 +489,7 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
  ***************************************************************************/
 void GModelSpatialComposite::append(const GModelSpatial& component,
                                     const std::string&   name,
-                                    double scale)
+                                    const double& scale)
 {
     // Append model container
     m_components.push_back(component.clone());
