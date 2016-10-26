@@ -86,9 +86,10 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialComposite& model);
-    void free_members(void);
+    void    init_members(void);
+    void    copy_members(const GModelSpatialComposite& model);
+    void    free_members(void);
+    double  sum_of_scales(void) const;
 
     // Protected members
     std::string                 m_type;              //!< Model type

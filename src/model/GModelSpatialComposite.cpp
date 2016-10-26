@@ -234,23 +234,24 @@ GModelSpatialComposite* GModelSpatialComposite::clone(void) const
  * @param[in] gradients Compute gradients?
  * @return Model value.
  *
- * Evaluates the spatial composite model by summing all model components and
- * dividing the sum by the number of components.
+ * Evaluates the spatial composite model by summing all model components,
+ * weighting by their scale and dividing the sum of all scales.
  ***************************************************************************/
 double GModelSpatialComposite::eval(const GPhoton& photon,
                                     const bool&    gradients) const
 {
-    // Initalise value
+    // Initialise value
     double value = 0.0;
     
     // Sum over all components
     for (int i = 0; i < m_components.size(); ++i) {
-        value += m_components[i]->eval(photon, gradients);
+        value += m_components[i]->eval(photon, gradients)
+                * m_component_scales[i];
     }
     
-    // Normalise sum by the number of components
-    if (m_components.size() > 0) {
-        value /= double(m_components.size());
+    // Normalise sum by sum of scales
+    if (sum_of_scales() > 0) {
+        value /= sum_of_scales();
     }
 
     // Return value
@@ -273,8 +274,22 @@ GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
                                    const GTime&   time,
                                    GRan&          ran) const
 {
-    // Randomly choose one model component
-    int index = int(ran.uniform() * double(m_components.size()));
+    // Randomly choose one model component weighted by scale
+
+    // Calculate random number
+    double random = ran.uniform() * sum_of_scales();
+
+    // Find index of chosen model component
+    double sum = 0.;
+    int index = 0;
+    for (int i = 0; i < m_component_scales.size(); ++i) {
+        sum += m_component_scales[i];
+        if (random <= sum) {
+            index = i;
+            break;
+        }
+    }
+
     if (index >= m_components.size()) {
         index = m_components.size();
     }
@@ -305,7 +320,8 @@ bool GModelSpatialComposite::contains(const GSkyDir& dir,
 
     // Loop over all components
     for (int i = 0; i < m_components.size(); ++i) {
-        if (m_components[i]->contains(dir, margin)) {
+        if (m_components[i]->contains(dir, margin)
+                && m_component_scales[i] != 0) {
             containment = true;
             break;
         }
@@ -695,3 +711,25 @@ void GModelSpatialComposite::free_members(void)
     // Return
     return;
 }
+
+/***********************************************************************//**
+ * @brief Returns sum over all scales
+ *
+ * @return sum
+ ***************************************************************************/
+double GModelSpatialComposite::sum_of_scales(void) const
+{
+    // Initialise sum
+    double sum = 0.;
+
+    // Loop over all component scales
+    for (int i = 0; i < m_component_scales.size(); ++i) {
+
+        // Add scale to sum
+        sum += m_component_scales[i];
+    }
+
+    // Return sum
+    return sum;
+}
+
