@@ -617,6 +617,27 @@ double GModelSpatialComposite::component_scale(const int& index) const
     return m_component_scales[index];
 }
 
+/***********************************************************************//**
+ * @brief Returns sum over all scales
+ *
+ * @return sum
+ ***************************************************************************/
+double GModelSpatialComposite::sum_of_scales(void) const
+{
+    // Initialise sum
+    double sum = 0.;
+
+    // Loop over all component scales
+    for (int i = 0; i < m_component_scales.size(); ++i) {
+
+        // Add scale to sum
+        sum += m_component_scales[i];
+    }
+
+    // Return sum
+    return sum;
+}
+
 
 /***********************************************************************//**
  * @brief Print composite spatial model information
@@ -735,24 +756,4 @@ void GModelSpatialComposite::free_members(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Returns sum over all scales
- *
- * @return sum
- ***************************************************************************/
-double GModelSpatialComposite::sum_of_scales(void) const
-{
-    // Initialise sum
-    double sum = 0.;
-
-    // Loop over all component scales
-    for (int i = 0; i < m_component_scales.size(); ++i) {
-
-        // Add scale to sum
-        sum += m_component_scales[i];
-    }
-
-    // Return sum
-    return sum;
-}
 

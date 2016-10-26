@@ -83,6 +83,7 @@ public:
     const GModelSpatial* component(const int& index) const;
     const GModelSpatial* component(const std::string& name) const;
     double               component_scale(const int& index) const;
+    double               sum_of_scales(void) const;
 
 
 protected:
@@ -90,7 +91,6 @@ protected:
     void    init_members(void);
     void    copy_members(const GModelSpatialComposite& model);
     void    free_members(void);
-    double  sum_of_scales(void) const;
 
     // Protected members
     std::string                 m_type;              //!< Model type
