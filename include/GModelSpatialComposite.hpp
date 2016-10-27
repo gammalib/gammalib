@@ -79,10 +79,10 @@ public:
     int                  components(void) const;
     void                 append(const GModelSpatial& component,
                                 const std::string&   name = "",
-                                const double& scale = 1.);
+                                const double&        scale = 1.0);
     const GModelSpatial* component(const int& index) const;
     const GModelSpatial* component(const std::string& name) const;
-    double               component_scale(const int& index) const;
+    double               scale(const int& index) const;
     double               sum_of_scales(void) const;
 
 
@@ -93,10 +93,10 @@ protected:
     void    free_members(void);
 
     // Protected members
-    std::string                 m_type;              //!< Model type
-    std::vector<GModelSpatial*> m_components;        //!< Components
-    std::vector<std::string>    m_component_names;   //!< Component names
-    std::vector<double>         m_component_scales; //!< Component scales
+    std::string                 m_type;       //!< Model type
+    std::vector<GModelSpatial*> m_components; //!< Components
+    std::vector<std::string>    m_names;      //!< Component names
+    std::vector<double>         m_scales;     //!< Component scales
 };
 
 
