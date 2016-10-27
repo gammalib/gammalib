@@ -1423,7 +1423,7 @@ void TestGModel::test_spatial_composite(void)
 
     // Test append method
     model1.append(GModelSpatialPointSource(dir));
-    model1.append(GModelSpatialRadialGauss(dir, 0.2));
+    model1.append(GModelSpatialRadialGauss(dir, 0.2), "", 1.5);
     test_value(model1.components(), 2);
     test_value(model1.size(), 5);
 
@@ -1433,6 +1433,9 @@ void TestGModel::test_spatial_composite(void)
     GModelSpatialComposite model2(*element);
     test_value(model2.size(), 5);
     test_value(model2.type(), "Composite", "Check model type");
+    test_value(model2.scale(0), 1.0);
+    test_value(model2.scale(1), 3.0);
+    test_value(model2.sum_of_scales(), 4.0);
       
     // Test access of individual parameters
     test_value(model2["2:RA"].value(), 83.6331);

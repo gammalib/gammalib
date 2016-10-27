@@ -2883,13 +2883,14 @@ double GCTAResponseIrf::irf_composite(const GEvent&       event,
         GSource src(source.name(), spat, source.energy(), source.time());
 
         // Compute irf value
-        irf += this->irf(event, src, obs);
+        irf += this->irf(event, src, obs) * model->scale(i);
 
     }
 
     // Divide by number of model components
-    if (model->components() > 0) {
-        irf /= double(model->components());
+    double sum = model->sum_of_scales();
+    if (sum > 0.0) {
+        irf /= sum;
     }
 
     // Return IRF value
@@ -3536,13 +3537,15 @@ double GCTAResponseIrf::nroi_composite(const GModelSky&    model,
         sky.spatial(comp->component(i));
 
         // Compute nroi
-        nroi += this->nroi(sky, srcEng, srcTime, obsEng, obsTime, obs);
+        nroi += this->nroi(sky, srcEng, srcTime, obsEng, obsTime, obs) *
+                comp->scale(i);
 
     }
 
     // Divide by number of model components
-    if (comp->components() > 0) {
-        nroi /= double(comp->components());
+    double sum = comp->sum_of_scales();
+    if (sum > 0.0) {
+        nroi /= sum;
     }
 
     // Return nroi
