@@ -540,7 +540,7 @@ double GCTAPsf2D::delta_max(const double& logE,
 /***********************************************************************//**
  * @brief Return the radius that contains a fraction of the events (radians)
  *
- * @param[in] fraction of events (0.0<fraction<1.0)
+ * @param[in] fraction of events (0.0 < fraction < 1.0)
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
@@ -556,16 +556,18 @@ double GCTAPsf2D::delta_max(const double& logE,
  *
  * \f[
  *
- * fraction = \pi * m\_norm * \left( 
- *   \frac{      1 }{m\_width1} e^{m\_width1 * a^2} + 
- *   \frac{m\_norm2}{m\_width2} e^{m\_width2 * a^2} + 
- *   \frac{m\_norm3}{m\_width3} e^{m\_width3 * a^2} \right)
+ * fraction = m\_norm * \left( e^{m\_width1 * a^2} +
+ *                             m\_norm2 * e^{m\_width2 * a^2} +
+ *                             m\_norm3 * e^{m\_width3 * a^2} \right)
  *
  * \f]
  *
- * Calculate the radius from the center that contains 'fraction' percent
- * of the events.  fraction * 100. = Containment % .  Fraction must be
- * 0.0 < fraction < 1.0 .
+ * Calculate the radius from the center that contains @p fraction  of the
+ * events (@p fraction * 100. = Containment % ). Fraction must be
+ *
+ * \f[
+ * 0.0 < fraction < 1.0
+ * \f]
  ***************************************************************************/
 double GCTAPsf2D::containment_radius(const double& fraction, 
                                      const double& logE, 
@@ -592,38 +594,43 @@ double GCTAPsf2D::containment_radius(const double& fraction,
     // Initial radius to start Newton's method with guess fraction * delta_max
     double a = fraction * delta_max(logE, theta, phi, zenith, azimuth, etrue); 
     
-    // Maximum number of newton-raphson loops before giving up
+    // Maximum number of Newton-Raphson loops before giving up
     const int iterlimit = 10000;
     
-    // Do the newton-raphson loops
-    int iter(0);
+    // Do the Newton-Raphson loops
+    int iter = 0;
     for (; iter < iterlimit; ++iter) {
 
-        // ...
+        // Compute square of test radius
         double a2 = a*a;
 
         // Calculate f(a)
-        double fa(0.0);
-        fa += m_norm  * (std::exp( m_width1 * a2) - 1.0) / m_width1;
-        fa += m_norm2 * (std::exp( m_width2 * a2) - 1.0) / m_width2;
-        fa += m_norm3 * (std::exp( m_width3 * a2) - 1.0) / m_width3;
-        fa *= gammalib::pi;
-        fa -= fraction;
-        
-        // Check if we've met the desired accuracy
+        double fa = 0.0;
+        fa       += 1.0 - std::exp(m_width1 * a2);
+        fa       += m_norm2 * (1.0 - std::exp(m_width2 * a2));
+        fa       += m_norm3 * (1.0 - std::exp(m_width3 * a2));
+        fa       *= m_norm;
+        fa       -= fraction;
+
+        // If we've met the desired accuracy then exit the loop
         if (std::abs(fa) < convergence) {
             break;
         }
-        
+
         // Calculate f'(a)
-        double fp(0.0);
-        fp += m_norm  * std::exp(m_width1 * a2);
-        fp += m_norm2 * std::exp(m_width2 * a2);
-        fp += m_norm3 * std::exp(m_width3 * a2);
-        fp *= gammalib::twopi * a;
+        double fp = 0.0;
+        fp       += std::exp(m_width1 * a2);
+        fp       += m_norm2 * std::exp(m_width2 * a2);
+        fp       += m_norm3 * std::exp(m_width3 * a2);
+        fp       *= -2.0 * a * m_norm;
         
         // Calculate next point via x+1 = x - f(a) / f'(a)
-        a = a - fa / fp;
+        if (fp != 0.0) {
+            a -= fa / fp;
+        }
+        else {
+            break;
+        }
     
     } // endfor: Newton-Raphson loops
     
