@@ -349,6 +349,9 @@ None
 The dimension of response tables is now checked for being consistent with the
 axis dimension (#1848).
 
+The formula for the containment radius computation in GCTAPsf2D::containment_radius
+was wrong and has been corrected (#1876).
+
 
 21. COMPTEL interface
 ---------------------

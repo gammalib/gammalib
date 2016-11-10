@@ -6,6 +6,7 @@
         Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
         Make GFilename::is_fits thread safe (#1717).
         Add region() method to GModelSpatial (#1764)
+        Correct containment radius computation in GCTAPsf2D::containment_radius (#1876)
         Add composite spatial and spectral models (#1706)
         Add GObservations::save_covmat() method (#1863)
         Add GFft and GFftWavetable classes (#1731)
