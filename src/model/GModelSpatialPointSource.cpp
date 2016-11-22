@@ -602,6 +602,9 @@ void GModelSpatialPointSource::init_members(void)
     m_pars.push_back(&m_ra);
     m_pars.push_back(&m_dec);
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -615,9 +618,10 @@ void GModelSpatialPointSource::init_members(void)
 void GModelSpatialPointSource::copy_members(const GModelSpatialPointSource& model)
 {
     // Copy members
-    m_type = model.m_type;
-    m_ra   = model.m_ra;
-    m_dec  = model.m_dec;
+    m_type   = model.m_type;
+    m_ra     = model.m_ra;
+    m_dec    = model.m_dec;
+    m_region = model.m_region;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -634,6 +638,22 @@ void GModelSpatialPointSource::copy_members(const GModelSpatialPointSource& mode
  ***************************************************************************/
 void GModelSpatialPointSource::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialPointSource::set_region(void) const
+{
+    // Set sky region centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to zero
+    m_region.radius(0.0);
+
     // Return
     return;
 }

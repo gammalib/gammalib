@@ -34,6 +34,7 @@
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 #include "GFilename.hpp"
 
@@ -79,6 +80,7 @@ public:
                                              const double&  radius) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
+    virtual GSkyRegion*              region(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(const GChatter& chatter = NORMAL) const;
@@ -100,16 +102,18 @@ protected:
     void copy_members(const GModelSpatialDiffuseMap& model);
     void free_members(void);
     void prepare_map(void);
+    void set_region(void) const;
 
     // Protected members
-    std::string m_type;          //!< Model type
-    GModelPar   m_value;         //!< Value
-    GSkyMap     m_map;           //!< Skymap
-    GFilename   m_filename;      //!< Name of skymap
-    GSkyDir     m_centre;        //!< Centre of bounding circle
-    double      m_radius;        //!< Radius of bounding circle
-    bool        m_normalize;     //!< Normalize map (default: true)
-    bool        m_has_normalize; //!< XML has normalize attribute
+    std::string              m_type;          //!< Model type
+    GModelPar                m_value;         //!< Value
+    GSkyMap                  m_map;           //!< Skymap
+    GFilename                m_filename;      //!< Name of skymap
+    GSkyDir                  m_centre;        //!< Centre of bounding circle
+    double                   m_radius;        //!< Radius of bounding circle
+    bool                     m_normalize;     //!< Normalize map (default: true)
+    bool                     m_has_normalize; //!< XML has normalize attribute
+    mutable GSkyRegionCircle m_region;        //!< Bounding circle
 
     // MC simulation cache
     mutable GSkyDir m_mc_centre;           //!< Centre of MC cone
@@ -230,6 +234,21 @@ inline
 bool GModelSpatialDiffuseMap::normalize(void) const
 {
     return (m_normalize);
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the point source.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialDiffuseMap::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALDIFFUSEMAP_HPP */

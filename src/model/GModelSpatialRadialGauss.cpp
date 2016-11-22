@@ -580,6 +580,9 @@ void GModelSpatialRadialGauss::init_members(void)
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -597,8 +600,9 @@ void GModelSpatialRadialGauss::init_members(void)
 void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& model)
 {
     // Copy members
-    m_type  = model.m_type;
-    m_sigma = model.m_sigma;
+    m_type   = model.m_type;
+    m_sigma  = model.m_sigma;
+    m_region = model.m_region;
 
     // Return
     return;
@@ -610,6 +614,22 @@ void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& mode
  ***************************************************************************/
 void GModelSpatialRadialGauss::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialGauss::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to 5 times the Gaussian sigma
+    m_region.radius(m_sigma.value() * 5.0);
+
     // Return
     return;
 }

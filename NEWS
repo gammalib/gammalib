@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-17 October 2016
+22 November 2016
 
 
 1. Introduction
@@ -57,6 +57,7 @@ The following methods have been added:
 - GFits::publish()
 - gammalib::rstrip_chars()
 - GObservations::save_covmat()
+- GModelSpatial::region()
 
 The following methods have been removed:
 - <all classes>::eval_gradients()
@@ -161,6 +162,11 @@ product of spectral model components as a new spectral model (#1861).
 The GModelSpectralComposite and GModelSpatialComposite classes have been
 added that implement composite spectral and spatial models, which are sums
 of models as a new model component (#1706).
+
+A region() method has been added to the GModelSpatial base class and all
+derived classes that returns a pointer to a sky region that bounds the
+spatial model. For the moment, only circular sky regions have been
+implemented (#1764).
 
 
 9. Numerics module

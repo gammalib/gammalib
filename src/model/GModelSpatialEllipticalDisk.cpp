@@ -646,6 +646,9 @@ void GModelSpatialEllipticalDisk::init_members(void)
     m_semimajor_rad  = 0.0;
     m_norm           = 0.0;
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -662,6 +665,9 @@ void GModelSpatialEllipticalDisk::init_members(void)
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::copy_members(const GModelSpatialEllipticalDisk& model)
 {
+    // Copy members
+    m_region = model.m_region;
+
     // Copy precomputation cache
     m_last_semiminor = model.m_last_semiminor;
     m_last_semimajor = model.m_last_semimajor;
@@ -714,6 +720,25 @@ void GModelSpatialEllipticalDisk::update() const
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialEllipticalDisk::set_region(void) const
+{
+    // Set sky region centre to disk centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set maximum model radius
+    double max_radius = (semimajor() > semiminor()) ? semimajor() : semiminor();
+
+    // Set sky region radius to maximum disk radius
+    m_region.radius(max_radius);
 
     // Return
     return;

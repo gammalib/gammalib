@@ -58,6 +58,7 @@ public:
                                         const GTime&   time,
                                         GRan&          ran) const = 0;
     virtual double                   theta_max(void) const = 0;
+    virtual GSkyRegion*              region(void) const = 0;
 
     // Implemented virtual methods
     virtual double eval(const GPhoton& photon,

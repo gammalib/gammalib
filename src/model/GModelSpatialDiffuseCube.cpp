@@ -1047,6 +1047,7 @@ void GModelSpatialDiffuseCube::init_members(void)
     m_logE.clear();
     m_ebounds.clear();
     m_loaded = false;
+    m_region.clear();
 
     // Initialise MC cache
     m_mc_centre.clear();
@@ -1075,6 +1076,7 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
     m_logE     = model.m_logE;
     m_ebounds  = model.m_ebounds;
     m_loaded   = model.m_loaded;
+    m_region   = model.m_region;
 
     // Copy MC cache
     m_mc_centre           = model.m_mc_centre;
@@ -1294,4 +1296,22 @@ double GModelSpatialDiffuseCube::cube_intensity(const GPhoton& photon) const
 
     // Return intensity
     return intensity;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ *
+ * @todo Implement determination of the cube boundary circle
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::set_region(void) const
+{
+    // Set sky region centre to (0,0)
+    m_region.centre(0.0, 0.0);
+
+    // Set sky region radius to 180 degrees (all points included)
+    m_region.radius(180.0);
+
+    // Return
+    return;
 }

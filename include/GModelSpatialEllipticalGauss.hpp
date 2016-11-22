@@ -32,6 +32,7 @@
 #include "GModelSpatialElliptical.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -77,6 +78,7 @@ public:
     virtual bool                          contains(const GSkyDir& dir,
                                                    const double&  margin = 0.0) const;
     virtual double                        theta_max(void) const;
+    virtual GSkyRegion*                   region(void) const;
     virtual void                          read(const GXmlElement& xml);
     virtual void                          write(GXmlElement& xml) const;
     virtual std::string                   print(const GChatter& chatter = NORMAL) const;
@@ -88,9 +90,11 @@ protected:
     void copy_members(const GModelSpatialEllipticalGauss& model);
     void free_members(void);
     void update(void) const;
+    void set_region(void) const;
 
     // Protected members
-    std::string m_type;   //!< Model type
+    std::string              m_type;    //!< Model type
+    mutable GSkyRegionCircle m_region;  //!< Bounding circle
 
     // Cached members used for pre-computations
     mutable double m_last_minor;        //!< Last semi-minor axis
@@ -134,6 +138,21 @@ inline
 std::string GModelSpatialEllipticalGauss::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the spatial model component.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialEllipticalGauss::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALELLIPTICALGAUSS_HPP */

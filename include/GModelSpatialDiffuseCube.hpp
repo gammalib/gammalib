@@ -35,6 +35,7 @@
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GNodeArray.hpp"
 #include "GEbounds.hpp"
 #include "GFilename.hpp"
@@ -87,6 +88,7 @@ public:
                                               const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -120,15 +122,17 @@ protected:
     void   set_energy_boundaries(void);
     void   update_mc_cache(void);
     double cube_intensity(const GPhoton& photon) const;
+    void   set_region(void) const;
 
     // Protected members
-    std::string m_type;        //!< Model type
-    GModelPar   m_value;       //!< Value
-    GFilename   m_filename;    //!< Name of map cube
-    bool        m_loaded;      //!< Signals if map cube has been loaded
-    GSkyMap     m_cube;        //!< Map cube
-    GNodeArray  m_logE;        //!< Log10(energy) values of the maps
-    GEbounds    m_ebounds;     //!< Energy bounds of the maps
+    std::string              m_type;     //!< Model type
+    GModelPar                m_value;    //!< Value
+    GFilename                m_filename; //!< Name of map cube
+    bool                     m_loaded;   //!< Signals if map cube has been loaded
+    GSkyMap                  m_cube;     //!< Map cube
+    GNodeArray               m_logE;     //!< Log10(energy) values of the maps
+    GEbounds                 m_ebounds;  //!< Energy bounds of the maps
+    mutable GSkyRegionCircle m_region;   //!< Bounding circle
 
     // Monte Carlo cache
     mutable GSkyDir             m_mc_centre;           //!< Centre of MC cone
@@ -294,6 +298,21 @@ double GModelSpatialDiffuseCube::mc_norm(const GSkyDir& dir,
                                          const double&  radius) const
 {
     return (value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the point source.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialDiffuseCube::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALDIFFUSECUBE_HPP */

@@ -61,6 +61,7 @@ public:
                                                const double&  margin = 0.0) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
+    virtual GSkyRegion*               region(void) const;
 
     // Other methods
     double  ra(void) const;

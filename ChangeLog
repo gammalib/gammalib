@@ -1,8 +1,9 @@
-2016-10-17
+2016-11-22
 
         * Version 1.2.0 released
         =========================
 
+        Add region() method to GModelSpatial (#1764)
         Add composite spatial and spectral models (#1706)
         Add GObservations::save_covmat() method (#1863)
         Add GFft and GFftWavetable classes (#1731)

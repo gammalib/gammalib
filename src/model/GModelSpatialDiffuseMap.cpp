@@ -853,6 +853,7 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_has_normalize = false;
     m_centre.clear();
     m_radius        = 0.0;
+    m_region.clear();
 
     // Initialise MC cache
     m_mc_centre.clear();
@@ -882,6 +883,7 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_has_normalize = model.m_has_normalize;
     m_centre        = model.m_centre;
     m_radius        = model.m_radius;
+    m_region        = model.m_region;
 
     // Copy MC cache
     m_mc_centre           = model.m_mc_centre;
@@ -984,6 +986,22 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         set_mc_cone(m_centre, m_radius);
 
     } // endif: there were skymap pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialDiffuseMap::set_region(void) const
+{
+    // Set sky region centre to bounding circle centre
+    m_region.centre(m_centre);
+
+    // Set sky region radius to bounding circle radius
+    m_region.radius(m_radius);
 
     // Return
     return;

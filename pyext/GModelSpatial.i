@@ -57,6 +57,7 @@ public:
                                     const double&  margin = 0.0) const = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
+    virtual GSkyRegion*    region(void) const = 0;
 
     // Methods
     GModelPar& at(const int& index);

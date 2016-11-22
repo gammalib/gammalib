@@ -584,6 +584,9 @@ void GModelSpatialRadialDisk::init_members(void)
     m_radius_rad  = 0.0;
     m_norm        = 0.0;
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -603,6 +606,7 @@ void GModelSpatialRadialDisk::copy_members(const GModelSpatialRadialDisk& model)
     // Copy members
     m_type   = model.m_type;
     m_radius = model.m_radius;
+    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_radius = model.m_last_radius;
@@ -653,6 +657,22 @@ void GModelSpatialRadialDisk::update() const
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialDisk::set_region(void) const
+{
+    // Set sky region centre to disk centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to disk radius
+    m_region.radius(m_radius.value());
 
     // Return
     return;

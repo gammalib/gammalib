@@ -32,6 +32,7 @@
 #include "GModelSpatialDiffuse.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -72,6 +73,7 @@ public:
                                                const double&  radius) const;
     virtual bool                       contains(const GSkyDir& dir,
                                                 const double&  margin = 0.0) const;
+    virtual GSkyRegion*                region(void) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;
     virtual std::string                print(const GChatter& chatter = NORMAL) const;
@@ -85,12 +87,14 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialDiffuseConst& model);
     void free_members(void);
+    void set_region(void) const;
 
     // Protected members
-    std::string     m_type;          //!< Model type
-    GModelPar       m_value;         //!< Value
-    mutable GSkyDir m_mc_centre;     //!< Simulation cone centre
-    mutable double  m_mc_cos_radius; //!< Cosine of simulation cone radius
+    std::string              m_type;          //!< Model type
+    GModelPar                m_value;         //!< Value
+    mutable GSkyRegionCircle m_region;        //!< Bounding circle
+    mutable GSkyDir          m_mc_centre;     //!< Simulation cone centre
+    mutable double           m_mc_cos_radius; //!< Cosine of sim. cone radius
 };
 
 
@@ -165,6 +169,21 @@ bool GModelSpatialDiffuseConst::contains(const GSkyDir& dir,
                                          const double&  margin) const
 {
     return (true);
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the point source.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialDiffuseConst::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALDIFFUSECONST_HPP */

@@ -77,6 +77,7 @@ public:
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const = 0;
     virtual double                   theta_max(void) const = 0;
+    virtual GSkyRegion*              region(void) const = 0;
     virtual std::string              print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented virtual base class methods
@@ -107,7 +108,7 @@ protected:
     void copy_members(const GModelSpatialElliptical& model);
     void free_members(void);
 
-    // Proteced members
+    // Protected members
     GModelPar m_ra;        //!< Right Ascension (deg)
     GModelPar m_dec;       //!< Declination (deg)
     GModelPar m_posangle;  //!< Position angle from North, counterclockwise (deg)

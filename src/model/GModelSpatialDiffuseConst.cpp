@@ -535,6 +535,9 @@ void GModelSpatialDiffuseConst::init_members(void)
     m_pars.clear();
     m_pars.push_back(&m_value);
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -550,6 +553,7 @@ void GModelSpatialDiffuseConst::copy_members(const GModelSpatialDiffuseConst& mo
     // Copy members
     m_type          = model.m_type;
     m_value         = model.m_value;
+    m_region        = model.m_region;
     m_mc_centre     = model.m_mc_centre;
     m_mc_cos_radius = model.m_mc_cos_radius;
 
@@ -567,6 +571,22 @@ void GModelSpatialDiffuseConst::copy_members(const GModelSpatialDiffuseConst& mo
  ***************************************************************************/
 void GModelSpatialDiffuseConst::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialDiffuseConst::set_region(void) const
+{
+    // Set sky region centre to (0,0)
+    m_region.centre(0.0, 0.0);
+
+    // Set sky region radius to 180 degrees (all points included)
+    m_region.radius(180.0);
+
     // Return
     return;
 }

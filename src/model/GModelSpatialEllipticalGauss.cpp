@@ -728,6 +728,9 @@ void GModelSpatialEllipticalGauss::init_members(void)
     m_term2             = 0.0;
     m_term3             = 0.0;
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -741,7 +744,8 @@ void GModelSpatialEllipticalGauss::init_members(void)
 void GModelSpatialEllipticalGauss::copy_members(const GModelSpatialEllipticalGauss& model)
 {
     // Copy members
-    m_type = model.m_type;
+    m_type   = model.m_type;
+    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_minor        = model.m_last_minor;
@@ -854,6 +858,26 @@ void GModelSpatialEllipticalGauss::update() const
 
     } // endif: something has changed
     #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialEllipticalGauss::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set maximum model radius
+    double max_radius = (semimajor() > semiminor()) ? semimajor() : semiminor();
+
+    // Set sky region radius to maximum Gaussian sigma times a scaling
+    // factor (actually 3)
+    m_region.radius(max_radius * c_theta_max);
 
     // Return
     return;

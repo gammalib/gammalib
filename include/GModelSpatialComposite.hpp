@@ -32,6 +32,7 @@
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -71,6 +72,7 @@ public:
                                             const double&  radius) const;
     virtual bool                    contains(const GSkyDir& dir,
                                              const double&  margin = 0.0) const;
+    virtual GSkyRegion*             region(void) const;
     virtual void                    read(const GXmlElement& xml);
     virtual void                    write(GXmlElement& xml) const;
     virtual std::string             print(const GChatter& chatter = NORMAL) const;
@@ -88,15 +90,17 @@ public:
 
 protected:
     // Protected methods
-    void    init_members(void);
-    void    copy_members(const GModelSpatialComposite& model);
-    void    free_members(void);
+    void init_members(void);
+    void copy_members(const GModelSpatialComposite& model);
+    void free_members(void);
+    void set_region(void) const;
 
     // Protected members
     std::string                 m_type;       //!< Model type
     std::vector<GModelSpatial*> m_components; //!< Components
     std::vector<std::string>    m_names;      //!< Component names
     std::vector<double>         m_scales;     //!< Component scales
+    mutable GSkyRegionCircle    m_region;     //!< Bounding circle
 };
 
 
@@ -167,6 +171,21 @@ inline
 int GModelSpatialComposite::components(void) const
 {
     return m_components.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the point source.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialComposite::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALCOMPOSITE_HPP */

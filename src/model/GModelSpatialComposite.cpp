@@ -688,10 +688,11 @@ void GModelSpatialComposite::init_members(void)
     // Initialise model type
     m_type = "Composite";
 
-    // Initialise models vector
+    // Initialise other members
     m_components.clear();
     m_names.clear();
     m_scales.clear();
+    m_region.clear();
 
     // Return
     return;
@@ -709,6 +710,7 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
     m_type   = model.m_type;
     m_names  = model.m_names;
     m_scales = model.m_scales;
+    m_region = model.m_region;
 
     // Initialise components
     m_components.clear();
@@ -752,6 +754,24 @@ void GModelSpatialComposite::free_members(void)
 
     }
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ *
+ * @todo Implement computation of sky boundary region
+ ***************************************************************************/
+void GModelSpatialComposite::set_region(void) const
+{
+    // Set sky region centre to (0,0)
+    m_region.centre(0.0, 0.0);
+
+    // Set sky region radius to 180 degrees (all points included)
+    m_region.radius(180.0);
+
     // Return
     return;
 }

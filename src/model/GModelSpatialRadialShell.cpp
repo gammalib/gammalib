@@ -660,6 +660,9 @@ void GModelSpatialRadialShell::init_members(void)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
 
+    // Initialise other members
+    m_region.clear();
+
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius and width shell is not meaningful
     m_last_radius = 0.0;
@@ -687,9 +690,10 @@ void GModelSpatialRadialShell::init_members(void)
 void GModelSpatialRadialShell::copy_members(const GModelSpatialRadialShell& model)
 {
     // Copy members
-    m_type        = model.m_type;
-    m_radius      = model.m_radius;
-    m_width       = model.m_width;
+    m_type   = model.m_type;
+    m_radius = model.m_radius;
+    m_width  = model.m_width;
+    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_radius = model.m_last_radius;
@@ -821,4 +825,20 @@ double GModelSpatialRadialShell::f2(double x)
 
     // Return value
     return f2;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialShell::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to sum of shell radius and width
+    m_region.radius(m_radius.value() + m_width.value());
+
+    // Return
+    return;
 }

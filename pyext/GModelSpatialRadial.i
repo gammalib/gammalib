@@ -58,6 +58,7 @@ public:
     virtual bool                 contains(const GSkyDir& dir,
                                           const double&  margin = 0.0) const = 0;
     virtual double               theta_max(void) const = 0;
+    virtual GSkyRegion*          region(void) const = 0;
 
     // Implemented virtual base class methods
     virtual double eval(const GPhoton& photon,

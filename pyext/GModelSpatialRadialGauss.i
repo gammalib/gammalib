@@ -59,6 +59,7 @@ public:
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
     virtual double                    theta_max(void) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
 

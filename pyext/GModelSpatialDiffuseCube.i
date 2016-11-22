@@ -62,6 +62,7 @@ public:
                                               const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
 
