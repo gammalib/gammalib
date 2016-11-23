@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFitsImageByte.i - FITS Byte image class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 #include "GException.hpp"
 %}
 
+
 /***********************************************************************//**
  * @class GFitsImageByte
  *
@@ -42,7 +43,7 @@ public:
     GFitsImageByte(const int& nx, const int& ny, const unsigned char* pixels = NULL);
     GFitsImageByte(const int& nx, const int& ny, const int& nz, const unsigned char* pixels = NULL);
     GFitsImageByte(const int& nx, const int& ny, const int& nz, const int& nt, const unsigned char* pixels = NULL);
-    GFitsImageByte(const int& naxis, const int* naxes, const unsigned char* pixels = NULL);
+    GFitsImageByte(const std::vector<int>& naxes, const unsigned char* pixels = NULL);
     GFitsImageByte(const GFitsImageByte& image);
     virtual ~GFitsImageByte(void);
 
@@ -64,30 +65,55 @@ public:
  ***************************************************************************/
 %extend GFitsImageByte {
     unsigned char __getitem__(int GFitsImageInx[]) {
-        if (GFitsImageInx[0] == 1)
-            return self->at(GFitsImageInx[1]);
-        else if (GFitsImageInx[0] == 2)
-            return self->at(GFitsImageInx[1], GFitsImageInx[2]);
-        else if (GFitsImageInx[0] == 3)
-            return self->at(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3]);
-        else if (GFitsImageInx[0] == 4)
-            return self->at(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3], GFitsImageInx[4]);
-        else
+        // Check image dimensions
+        for (int i = 0; i < GFitsImageInx[0]; ++i) {
+             if (GFitsImageInx[i+1] < 0 || GFitsImageInx[i+1] >= self->naxes(i)) {
+                throw GException::out_of_range("__getitem__(int)",
+                                               "FITS image axis "+
+                                               gammalib::str(i)+" index",
+                                               GFitsImageInx[i+1],
+                                               self->naxes(i));
+            }
+        }
+        // Return pixel value
+        if (GFitsImageInx[0] == 1) {
+            return (*self)(GFitsImageInx[1]);
+        }
+        else if (GFitsImageInx[0] == 2) {
+            return (*self)(GFitsImageInx[1], GFitsImageInx[2]);
+        }
+        else if (GFitsImageInx[0] == 3) {
+            return (*self)(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3]);
+        }
+        else if (GFitsImageInx[0] == 4) {
+            return (*self)(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3],
+                           GFitsImageInx[4]);
+        }
+        else {
             throw GException::fits_wrong_image_operator("__getitem__(int)",
                                                         self->naxis(), GFitsImageInx[0]);
+        }
     }
     void __setitem__(int GFitsImageInx[], unsigned char value) {
-        if (GFitsImageInx[0] == 1)
+        if (GFitsImageInx[0] == 1) {
             self->at(GFitsImageInx[1]) = value;
-        else if (GFitsImageInx[0] == 2)
+        }
+        else if (GFitsImageInx[0] == 2) {
             self->at(GFitsImageInx[1], GFitsImageInx[2]) = value;
-        else if (GFitsImageInx[0] == 3)
-            self->at(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3]) = value;
-        else if (GFitsImageInx[0] == 4)
-            self->at(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3], GFitsImageInx[4]) = value;
-        else
+        }
+        else if (GFitsImageInx[0] == 3) {
+            self->at(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3]) =
+                     value;
+        }
+        else if (GFitsImageInx[0] == 4) {
+            self->at(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3],
+                     GFitsImageInx[4]) = value;
+        }
+        else {
             throw GException::fits_wrong_image_operator("__setitem__(int)",
-                                                        self->naxis(), GFitsImageInx[0]);
+                                                        self->naxis(),
+                                                        GFitsImageInx[0]);
+        }
     }
     GFitsImageByte copy() {
         return (*self);

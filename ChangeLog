@@ -1,13 +1,85 @@
-2016-03-01  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-11-22
 
-        * Version 1.1.0 released
+        * Version 1.2.0 released
         =========================
 
         Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
         Make GFilename::is_fits thread safe (#1717).
+        Add region() method to GModelSpatial (#1764)
+        Add composite spatial and spectral models (#1706)
+        Add GObservations::save_covmat() method (#1863)
+        Add GFft and GFftWavetable classes (#1731)
+        Add GNdarray class (#1768)
+        Increase precision of gammalib::str() floating point functions
+        Add GFits::publish() methods (#1231)
+        Add GVOTable class (#1231)
+        Add multiplicative spectral model (#1861)
+        Add additional time setting and getting methods (#1856)
+        Check CTA response table dimension for consistency (#1848)
+        Remove eval_gradients() methods and remplace by eval() method with optional gradients argument (#1847)
+        Add GTestSuite::test_value() method with automatic precision computation
+        Add GSkyMap::is_empty() method (#1828)
+        Add GApplication access by index operator (#1838)
+        Add GApplication::pars() and GApplicationPar::current_value() methods (#1838)
+        Add GLog is_open(), is_empty() and written_size() methods (#1837)
+        Fix invalid pointer problem in GLog copies (#1823)
+        Fix GSkyMap::publish() bug for empty sky maps (#1835)
+        Fix loss of application name and version (#1835)
+        Add methods for logging in applications (#1828)
+        Fix removal of Python wrappers after make clean (#1826)
+        Add GModelSpectralExpInvPlaw class (#1800)
+        Add GModelSpectralPlawEnergyFlux class (#1790)
+        Rename GModelSpectralPlaw2 to GModelSpectralPlawPhotonFlux (#1790)
+
+
+2016-07-24
+
+        * Version 1.1.0 released
+        =========================
+
+        Check on model parameters in spectral registry (#1824)
+        Rename spectral model components (#1821)
+        Fix exception handling SWIG interface for Python 3
+        Write same XML element names than those that were read (#1820)
+        Rename spatial model components (#1818)
+        Fix consistency problem in GCTABackground3D (#1815)
+        Models accessing file now support relative file names (#1808)
+        Add GXmlElement and GXmlDocument filename() methods (#1808)
+        Move node parent from GXmlElement to GXmlNode class (#1808)
+        Fix Makefile for example executables (#1806)
+        Include examples in unit tests (#1803)
+        Handle additional columns in GArf class
+        GCTAAeff2D no longer extrapolates beyond response table (#1784)
+        Add GWcsSIN projection class (#1798)
+        Add weights to CTA event cube and event bin (#1789)
+        Remove GCTACubeExposure, GCTACubePsf and GCTACubeBackground elogmeans() methods
+        GCTACubeExposure, GCTACubePsf and GCTACubeBackground use energy values (#1788)
+        GSkyMap::save() now overwrites files (#1787)
+        Add GCTAPsfTable class (#1786)
+        Use std::vector for naxes argument in GFitsImage (#1779)
+        GCTACubePsf and GCTACubeEdisp now save 4D images
+        Change interpolation scheme in GCTABackground3D
+        Add GCsv::append() method (#1773)
+        Add GTestSuite::test_value() string method (#1772)
+        Add component setting methods to GModelSky (#1770)
+        Add GApplication::logFileClose() method
+        Add GModel::read_attributes() and write_attributes() private methods (#1765)
+        Also write test reports in case of an exception (#1746)
+        GCaldb::filename() method now returns GFilename (#1745)
+        Add GCTAObservation filename constructor (#1744)
+        Add gammalib::number() function (#1743)
+        Add GSkyMap::shape() and ndim() methods (#1733)
+        Add GEnergy division operator
+        Use rejection method in GModelSpatialDiffuseMap::mc() (#1725)
+        Add GObservations::nobserved() method (#1723)
+        Use rejection method in GCTABackground3D::mc() (#1722)
+        Use rejection method in GModelSpatialDiffuseCube::mc() (#1722)
+        Add energy dispersion cube for stacked analysis (#1721, #1801)
+        Make GFilename::is_fits thread safe (#1717)
         Revise GTime operators (#1714)
         Add GSkyMap::publish() method to publish map on VO Hub (#1710)
         Add GVOClient::publish() method to publish a FITS HDU (#1710)
+        Remove GCTAOnOffObservations class (#1669)
         Handle FITS extensions in GSkyMap load() and save() methods (#1695)
         Restrict Monte Carlo simulations in GModelSpatialDiffuseConst to simulation cone (#1674)
         Use default GTime in GModelSpectral eval() and eval_gradients() methods (#1672)
@@ -23,13 +95,16 @@
         Add GFilename::fullname() method
         Add GCTAEventList::remove() method
         Handle also additional columns in GCTAEventList::append() method
-        Correct GFitsTableCol::insert() method for empty columns
-        Correct GCTAEdisp2D::compute_ebounds_xxx() methods (#1662)
+        Fix GFitsTableCol::insert() method for empty columns
+        Fix GCTAEdisp2D::compute_ebounds_xxx() methods (#1662)
         Use GFilename in GFits to store filename (#1649)
         Load CTA GTI extension from the HDU name provided by the DSS keyword (#1598)
+        Support Fermi LAT Pass 8 response functions (#1517)
+        Support out of source builds (#1484)
+        Finalize implementation of CTA On/Off fitting (#1044, #1781)
 
 
-2016-01-27  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-01-27
 
         * Bug fix version 1.0.1 released
         ================================
@@ -40,7 +115,7 @@
         Correct diffuse map MC normalisation (#1584)
 
 
-2015-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-12-18
 
         * Version 1.0.0 released
         =========================
@@ -58,7 +133,7 @@
         Resolve Python test problem on El Capitan (#1563)
 
 
-2015-10-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-10-28
 
         * Version 0.11.0 released
         =========================
@@ -89,7 +164,7 @@
         Implement rejection method for skymap Monte Carlo (#1465)
 
 
-2015-05-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-05-22
 
         * Version 0.10.0 released
         =========================
@@ -121,7 +196,7 @@
         Add CTA Prod2 instrument response function (#1464)
 
 
-2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-01-07
 
         * Bug fix version 0.9.1 released
         ================================
@@ -129,7 +204,7 @@
         Fixed bug #1383 (unit test error with recent gcc compiler)
 
 
-2014-11-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-11-13
 
         * Version 0.9.0 released
         ========================
@@ -169,7 +244,7 @@
         Several bug corrections
 
 
-2014-03-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-03-12
 
         * Bug fix Version 0.8.2 released
         ================================
@@ -189,7 +264,7 @@
         Correct LAT PSF computation for sources outside event cube
 
 
-2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-02-05
         
         * Bug fix Version 0.8.1 released
         ================================
@@ -206,7 +281,7 @@
         Correct deadtime computation for CTA non point source response (#1133)
 
 
-2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-01-18
 
         * Version 0.8.0 released
         ========================
@@ -238,7 +313,8 @@
         - GWcslib => GWcs
         - GWcsHPX => GHealpix
 
-2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-12-18
 
         * Version 0.7.0 released
         ========================
@@ -259,7 +335,8 @@
         Rework GTime interface and introduce GTimeReference class
         Add GModelSpectralLogParabola spectral model
 
-2012-09-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-09-17
 
         * Bug fix version 0.6.2 released
         ================================
@@ -271,7 +348,8 @@
         Improve Python bindings configuration
         Add TEST_ENV_DIR to load library path
 
-2012-09-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-09-15
 
         * Bug fix version 0.6.1 released
         ================================
@@ -279,7 +357,8 @@
         Do not require gammalib/__init__.py file to be present
         clang++ compiler takes precedence over g++ compiler
 
-2012-09-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-09-14
 
         * Version 0.6.0 released
         ========================
@@ -293,7 +372,8 @@
         Correct bugs in GSparseMatrix
         Enhance code quality
 
-2012-04-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+2012-04-03
 
         * Version 0.5.0 released
         ========================
@@ -310,7 +390,8 @@
         Add GModelSpectralNodes model
         Correct Npred integration in GCTAModelRadialAcceptance
 
-2011-10-12  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-10-12
 
         * Version 0.4.12 released
         =========================
@@ -318,7 +399,8 @@
         Add missing #include <cstring> to GTools.cpp
         Correct but in python interface for GSymMatrix and GSparseMatrix
 
-2011-10-03  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-10-03
 
         * Version 0.4.11 released
         =========================
@@ -339,7 +421,8 @@
         Replace FITS table column methods by access operators
         Fix bug in GSparseMatrix::cs_transpose
 
-2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-07-20
 
         * Version 0.4.10 released
         =========================
@@ -347,7 +430,8 @@
         Improve configuration script
         Minor bug fixes
 
-2011-07-09  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-07-09
 
         * Version 0.4.9 released
         ========================
@@ -359,7 +443,8 @@
         Add NaN/Inf check in various places (--enable-nan-check)
         Test for presence of Python.h
 
-2011-02-24  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-02-24
 
         * Version 0.4.7 released
         ========================
@@ -367,7 +452,8 @@
         Fix memory leaks in container classes handling pointers
         Add more example scripts
 
-2011-02-21  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-02-21
 
         * Version 0.4.6 released
         ========================
@@ -380,7 +466,8 @@
         Add Doxygen and man support (make doxygen; make doxygen-install)
         Add html documentation
 
-2011-02-02  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-02-02
 
         * Version 0.4.5 released
         ========================
@@ -392,7 +479,8 @@
         Improve automatic configuration, remove autogen.sh
         Adapt for Solaris 2.10
 
-2011-01-06  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2011-01-06
 
         * Version 0.4.4 released
         ========================
@@ -402,7 +490,8 @@
         Correct some bugs and enhance some classes
         Correct and validate Fermi-LAT interface for binned analysis
 
-2010-12-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2010-12-20
 
         * Version 0.4.3 released
         ========================
@@ -412,7 +501,8 @@
         Add more source models
         First working Fermi-LAT interface for binned analysis
 
-2010-11-23  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2010-11-23
 
         * Version 0.4.2 released
         ========================
@@ -420,7 +510,8 @@
         Tag sources with GammaLib-00-04-02
         Enhance FITS interface
 
-2010-11-15  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2010-11-15
 
         * Version 0.4.1 released
         ========================
@@ -430,14 +521,16 @@
         Prototype implementation of application logger
         Cleanup of FITS interface
 
-2010-06-11  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2010-06-11
 
         * Version 0.4.0 released
         ========================
 
         Tag sources with GammaLib-00-04-00
 
-2009-10-09  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+2009-10-09
 
         * Version 0.2.0 released
         ========================

@@ -62,6 +62,11 @@ class GModelSpectralBrokenPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralBrokenPlaw(void);
+    GModelSpectralBrokenPlaw(const std::string& type,
+                             const std::string& prefactor,
+                             const std::string& index1,
+                             const std::string& breakenergy,
+                             const std::string& index2);
     GModelSpectralBrokenPlaw(const double&  prefactor,
                              const double&  index1,
                              const GEnergy& breakenergy,
@@ -79,9 +84,8 @@ public:
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual double                    eval(const GEnergy& srcEng,
-                                           const GTime&   srcTime = GTime()) const;
-    virtual double                    eval_gradients(const GEnergy& srcEng,
-                                                     const GTime&   srcTime = GTime());
+                                           const GTime& srcTime = GTime(),
+                                           const bool& gradients = false) const;
     virtual double                    flux(const GEnergy& emin,
                                            const GEnergy& emax) const;
     virtual double                    eflux(const GEnergy& emin,
@@ -113,10 +117,11 @@ protected:
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
-    GModelPar m_norm;                 //!< Normalization factor
-    GModelPar m_index1;               //!< Spectral index1
-    GModelPar m_index2;               //!< Spectral index2
-    GModelPar m_breakenergy;          //!< Energy of spectral break
+    std::string m_type;                   //!< Model type
+    GModelPar   m_norm;                   //!< Normalization factor
+    GModelPar   m_index1;                 //!< Spectral index1
+    GModelPar   m_index2;                 //!< Spectral index2
+    GModelPar   m_breakenergy;            //!< Energy of spectral break
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;        //!< Last energy value
@@ -161,7 +166,7 @@ std::string GModelSpectralBrokenPlaw::classname(void) const
 inline
 std::string GModelSpectralBrokenPlaw::type(void) const
 {
-    return "BrokenPowerLaw";
+    return (m_type);
 }
 
 

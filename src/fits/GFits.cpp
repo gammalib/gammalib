@@ -30,6 +30,7 @@
 #endif
 #include <cstdio>
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
 #include "GFitsImageByte.hpp"
@@ -43,7 +44,8 @@
 #include "GFitsImageDouble.hpp"
 #include "GFitsAsciiTable.hpp"
 #include "GFitsBinTable.hpp"
-#include "GTools.hpp"
+#include "GVOClient.hpp"
+#include "GVOTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT1                                               "GFits::at(int&)"
@@ -58,9 +60,10 @@
 #define G_INSERT2                "GFits::insert(std::string&, GFitsHDU& hdu)"
 #define G_REMOVE1                                       "GFits::remove(int&)"
 #define G_REMOVE2                               "GFits::remove(std::string&)"
-#define G_OPEN                                    "GFits::open(std::string&)"
+#define G_OPEN                               "GFits::open(GFilename&, bool&)"
 #define G_SAVE                                           "GFits::save(bool&)"
-#define G_SAVETO                         "GFits::saveto(std::string&, bool&)"
+#define G_SAVETO                           "GFits::saveto(GFilename&, bool&)"
+#define G_PUBLISH                "GFits::publish(std::string&, std::string&)"
 #define G_FREE_MEM                                    "GFits::free_members()"
 #define G_NEW_IMAGE                                      "GFits::new_image()"
 
@@ -1294,9 +1297,103 @@ void GFits::close(void)
 
 
 /***********************************************************************//**
+ * @brief Publish FITS HDU on VO Hub
+ *
+ * @param[in] extno Extension number.
+ * @param[in] name Optional name of published ressource.
+ *
+ * Publishes FITS HDU with specified @p extno.
+ ***************************************************************************/
+void GFits::publish(const int& extno, const std::string& name) const
+{
+    // If HDU is an image then publish it as a FITS image
+    if (this->at(extno)->exttype() == GFitsHDU::HT_IMAGE) {
+
+        // Get HDU as an image
+        const GFitsImage* image = this->image(extno);
+
+        // Save extension name
+        std::string extname = image->extname();
+
+        // Optionally set extension name
+        if (!name.empty()) {
+            const_cast<GFitsImage*>(image)->extname(name);
+        }
+
+        // Create VO Client
+        GVOClient client;
+
+        // Publish image using VO client
+        client.publish(*image);
+
+        // Restore extension name
+        const_cast<GFitsImage*>(image)->extname(extname);
+
+    } // endif: HDU was an image
+
+    // ... otherwise publish the HDU as a VO table
+    else {
+
+        // Get HDU as a table
+        const GFitsTable* table = this->table(extno);
+
+        // Save extension name
+        std::string extname = table->extname();
+
+        // Optionally set extension name
+        if (!name.empty()) {
+            const_cast<GFitsTable*>(table)->extname(name);
+        }
+
+        // Create VO Client
+        GVOClient client;
+
+        // Generate VO table FITS table
+        GVOTable votable(*table);
+
+        // Publish VO table using VO client
+        client.publish(votable);
+
+        // Restore extension name
+        const_cast<GFitsTable*>(table)->extname(extname);
+
+    } // endelse: published HDU as VO table
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Publish FITS HDU on VO Hub
+ *
+ * @param[in] extname Extension name.
+ * @param[in] name Optional name of published ressource.
+ *
+ * Publishes FITS HDU with specified @p extname.
+ ***************************************************************************/
+void GFits::publish(const std::string& extname, const std::string& name) const
+{
+    // Get extenion number
+    int extno = this->extno(extname);
+    if (extno == -1) {
+        std::string msg = "Extension \""+extname+"\" not found in FITS file. "
+                          "Please specify a valid extension name.";
+        throw GException::invalid_argument(G_PUBLISH, msg);
+    }
+
+    // Publish FITS HDU
+    publish(extno, name);
+ 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print FITS information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing FITS information.
  ***************************************************************************/
 std::string GFits::print(const GChatter& chatter) const

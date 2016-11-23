@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalGauss.i - Elliptical gauss source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,17 +55,15 @@ public:
     virtual double                        eval(const double&  theta,
                                                const double&  posangle,
                                                const GEnergy& energy,
-                                               const GTime&   time) const;
-    virtual double                        eval_gradients(const double&  theta,
-                                                         const double&  posangle,
-                                                         const GEnergy& energy,
-                                                         const GTime&   time) const;
+                                               const GTime&   time,
+                                               const bool&    gradients = false) const;
     virtual GSkyDir                       mc(const GEnergy& energy,
                                              const GTime& time,
                                              GRan& ran) const;
     virtual bool                          contains(const GSkyDir& dir,
                                                    const double&  margin = 0.0) const;
     virtual double                        theta_max(void) const;
+    virtual GSkyRegion*                   region(void) const;
     virtual void                          read(const GXmlElement& xml);
     virtual void                          write(GXmlElement& xml) const;
 };
@@ -78,10 +76,7 @@ public:
     GModelSpatialEllipticalGauss copy() {
         return (*self);
     }
-    double eval(const GPhoton& photon) const {
-        return self->GModelSpatialElliptical::eval(photon);
-    }
-    double eval_gradients(const GPhoton& photon) const {
-        return self->GModelSpatialElliptical::eval_gradients(photon);
+    double eval(const GPhoton& photon, const bool& gradients) const {
+        return self->GModelSpatialElliptical::eval(photon, gradients);
     }
 };

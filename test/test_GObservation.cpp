@@ -667,15 +667,26 @@ void TestGObservation::test_time(void)
         test_try_failure(e);
     }
 
-    // Test access methods
-    double mjd_ref = 55197.000766018518519;
-    double jd_ref  = 2455197.500766018518519;
-    double t       = 123456.789;
-    GTime time(t);
-    test_value(time.jd(), t/86400.0 + jd_ref);
-    test_value(time.mjd(), t/86400.0 + mjd_ref);
-    test_value(time.secs(), t);
-    test_value(time.days(), t/86400.0);
+    // Test time access methods
+    // Reference times are from
+    // - http://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xTime/xTime.pl
+    GTime time(123456.789);
+    test_value(time.jd(), 2455198.92966648);
+    test_value(time.jd("TT"), 2455198.92966648);
+    test_value(time.jd("TAI"), 2455198.92929398);   // TAI=TT-0.0003725
+    test_value(time.jd("UTC"), 2455198.92890046);
+    test_value(time.mjd(), 55198.42966648);
+    test_value(time.mjd("TT"), 55198.42966648);
+    test_value(time.mjd("TAI"), 55198.42929398);    // TAI=TT-0.0003725
+    test_value(time.mjd("UTC"), 55198.42890046);
+    test_value(time.secs(), 123456.789);
+    test_value(time.secs("TT"), 123456.789);
+    test_value(time.secs("TAI"), 123424.605);       // TAI=TT-32.184
+    test_value(time.secs("UTC"), 123390.60487);     // UTC=TT-66.184126
+    test_value(time.days(), 1.4288979);
+    test_value(time.days("TT"), 1.4288979);
+    test_value(time.days("TAI"), 1.4285254);        // TAI=TT-0.0003725
+    test_value(time.days("UTC"), 1.42813188);       // UTC=TT-0.00076602
     test_assert(time.utc() == "2010-01-02T10:17:37",
                 "GTime::utc(): 2010-01-02T10:17:37 expected, "+
                 time.utc()+" found.");
@@ -693,41 +704,72 @@ void TestGObservation::test_time(void)
     time.days(57.9);
     test_value(time.days(), 57.9);
     time.utc("1994-01-01T00:00:00");
-    test_assert(time.utc() == "1994-01-01T00:00:00",
-                "GTime::utc(): 1994-01-01T00:00:00 expected, "+
-                time.utc()+" found.");
+    test_value(time.utc(), "1994-01-01T00:00:00");
     test_value(time.mjd(), 49353.00069657, 1.0e-6);
     time.utc("1999-12-31T23:59:59");
-    test_assert(time.utc() == "1999-12-31T23:59:59",
-                "GTime::utc(): 1999-12-31T23:59:59 expected, "+
-                time.utc()+" found.");
+    test_value(time.utc(), "1999-12-31T23:59:59");
     test_value(time.mjd(), 51544.00073130, 1.0e-6);
     time.utc("2000-01-01T00:00:00");
-    test_assert(time.utc() == "2000-01-01T00:00:00",
-                "GTime::utc(): 2000-01-01T00:00:00 expected, "+
-                time.utc()+" found.");
+    test_value(time.utc(), "2000-01-01T00:00:00");
     test_value(time.mjd(), 51544.00074287, 1.0e-6);
     time.utc("2006-01-01T00:00:00");
-    test_assert(time.utc() == "2006-01-01T00:00:00",
-                "GTime::utc(): 2006-01-01T00:00:00 expected, "+
-                time.utc()+" found.");
+    test_value(time.utc(), "2006-01-01T00:00:00");
     test_value(time.mjd(), 53736.0007544, 1.0e-6);
     time.utc("2014-10-12T22:08:37");
-    test_assert(time.utc() == "2014-10-12T22:08:37",
-                "GTime::utc(): 2014-10-12T22:08:37 expected, "+
-                time.utc()+" found.");
+    test_value(time.utc(), "2014-10-12T22:08:37");
     test_value(time.mjd(), 56942.92342806, 1.0e-6);
 
+    // Test Julian Day set method for various time systems
+    time.jd(2455198.92966648, "TT");
+    test_value(time.jd(), 2455198.92966648);
+    time.jd(2455198.92929398, "TAI");
+    test_value(time.jd(), 2455198.92966648);
+    time.jd(2455198.92890046, "UTC");
+    test_value(time.jd(), 2455198.92966648);
+
+    // Test Modified Julian Day set method for various time systems
+    time.mjd(55198.42966648, "TT");
+    test_value(time.mjd(), 55198.42966648);
+    time.mjd(55198.42929398, "TAI");
+    test_value(time.mjd(), 55198.42966648);
+    time.mjd(55198.42890046, "UTC");
+    test_value(time.mjd(), 55198.42966648);
+
+    // Test seconds set method for various time systems
+    time.secs(123456.789, "TT");
+    test_value(time.secs(), 123456.789);
+    time.secs(123424.605, "TAI");
+    test_value(time.secs(), 123456.789);
+    time.secs(123390.60487, "UTC");
+    test_value(time.secs(), 123456.789);
+
+    // Test days set method for various time systems
+    time.days(1.4288979, "TT");
+    test_value(time.days(), 1.4288979);
+    time.days(1.4285254, "TAI");
+    test_value(time.days(), 1.4288979);
+    time.days(1.42813188, "UTC");
+    test_value(time.days(), 1.4288979);
+
     // Test convert method
-    time.secs(t);
-    test_value(time.convert(GTimeReference(55197.000766018518519, "days", "TT", "LOCAL")),
-               t/86400.0);
+    double mjd_ref = 55197.000766018518519;
+    time.secs(123456.789);
+    test_value(time.convert(GTimeReference(mjd_ref, "days", "TT", "LOCAL")),
+               1.4288979);
+    test_value(time.convert(GTimeReference(mjd_ref, "days", "TAI", "LOCAL")),
+               1.4285254);
+    test_value(time.convert(GTimeReference(mjd_ref, "days", "UTC", "LOCAL")),
+               1.42813188);
     test_value(time.convert(GTimeReference(0.0, "s", "TT", "LOCAL")),
-               t + mjd_ref*86400.0, 1.0e-6); //!< Poor precision on OpenSolaris
+               123456.789 + mjd_ref*86400.0, 1.0e-6); //!< Poor precision on OpenSolaris
 
     // Test set method
-    time.set(12.3, GTimeReference(55197.000766018518519, "days", "TT", "LOCAL"));
-    test_value(time.days(), 12.3);
+    time.set(1.4288979, GTimeReference(mjd_ref, "days", "TT", "LOCAL"));
+    test_value(time.days(), 1.4288979);
+    time.set(1.4285254, GTimeReference(mjd_ref, "days", "TAI", "LOCAL"));
+    test_value(time.days(), 1.4288979);
+    time.set(1.42813188, GTimeReference(mjd_ref, "days", "UTC", "LOCAL"));
+    test_value(time.days(), 1.4288979);
     time.set(12.3, GTimeReference(0.0, "secs", "TT", "LOCAL"));
     test_value(time.secs(), 12.3 - mjd_ref*86400.0);
 
@@ -740,13 +782,38 @@ void TestGObservation::test_time(void)
 
     // Test setting to different time systems
     time.set(53651.60519889, GTimeReference(0.0, "days", "TT", "LOCAL"));
-    test_assert(time.utc() == "2005-10-08T14:30:25",
-                "GTime::utc(): 2005-10-08T14:30:25 expected, "+
-                time.utc()+" found.");
+    test_value(time.utc(), "2005-10-08T14:30:25");
     time.set(53651.60445602, GTimeReference(0.0, "days", "UTC", "LOCAL"));
-    test_assert(time.utc() == "2005-10-08T14:30:25",
-                "GTime::utc(): 2005-10-08T14:30:25 expected, "+
-                time.utc()+" found.");
+    test_value(time.utc(), "2005-10-08T14:30:25");
+
+    // Test now method (just test that it does not core dump; cannot really
+    // test the value :-)
+    time.now();
+
+    // Test gmst and gast methods. Precision is 1 second since the methods
+    // use UTC instead of UT1. Therefore  use a precision of 2.777e-4 in
+    // the unit tests. The actual precision is even better (not sure why).
+    // References from http://dc.zah.uni-heidelberg.de/apfs/times/q/form
+    time.utc("1994-07-02T09:10:11");     // Largest UTC-UT1 difference
+    test_value(time.gmst(), 3.8483111, 2.777e-4);
+    test_value(time.gast(), 3.8485481, 2.777e-4);
+    test_value(time.lmst(123.456), 19.617911, 2.777e-4);
+    test_value(time.last(123.456), 19.618148, 2.777e-4);
+    time.utc("1997-11-11T11:11:11");
+    test_value(time.gmst(), 14.562163, 2.777e-4);
+    test_value(time.gast(), 14.562068, 2.777e-4);
+    test_value(time.lmst(123.456), 6.331763, 2.777e-4);
+    test_value(time.last(123.456), 6.331668, 2.777e-4);
+    time.utc("2008-10-04T10:30:23");
+    test_value(time.gmst(), 11.405402, 2.777e-4);
+    test_value(time.gast(), 11.405589, 2.777e-4);
+    test_value(time.lmst(123.456), 3.175002, 2.777e-4);
+    test_value(time.last(123.456), 3.175189, 2.777e-4);
+    time.utc("2016-02-29T23:59:59");
+    test_value(time.gmst(), 10.615045, 2.777e-4);
+    test_value(time.gast(), 10.615018, 2.777e-4);
+    test_value(time.lmst(123.456), 2.384645, 2.777e-4);
+    test_value(time.last(123.456), 2.384618, 2.777e-4);
 
     // Test operators
     GTime a(13.72);

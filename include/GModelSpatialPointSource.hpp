@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -43,14 +44,13 @@
  * This class implements a point source as the spatial component of the
  * factorised source model. The point source has two parameters: the Right
  * Ascension and Declination of the point source location.
- *
- * The model is of type "SkyDirFunction".
  ***************************************************************************/
 class GModelSpatialPointSource : public GModelSpatial {
 
 public:
     // Constructors and destructors
     GModelSpatialPointSource(void);
+    GModelSpatialPointSource(const bool& dummy, const std::string& type);
     explicit GModelSpatialPointSource(const GSkyDir& dir);
     GModelSpatialPointSource(const double& ra, const double& dec);
     explicit GModelSpatialPointSource(const GXmlElement& xml);
@@ -66,8 +66,8 @@ public:
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual GClassCode                code(void) const;
-    virtual double                    eval(const GPhoton& photon) const;
-    virtual double                    eval_gradients(const GPhoton& photon) const;
+    virtual double                    eval(const GPhoton& photon,
+                                           const bool& gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
@@ -75,6 +75,7 @@ public:
                                               const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -92,10 +93,13 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialPointSource& model);
     void free_members(void);
+    void set_region(void) const;
 
     // Protected members
-    GModelPar m_ra;          //!< Right Ascension (deg)
-    GModelPar m_dec;         //!< Declination (deg)
+    std::string              m_type;   //!< Model type
+    GModelPar                m_ra;     //!< Right Ascension (deg)
+    GModelPar                m_dec;    //!< Declination (deg)
+    mutable GSkyRegionCircle m_region; //!< Bounding circle
 };
 
 
@@ -114,14 +118,14 @@ std::string GModelSpatialPointSource::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "SkyDirFunction".
+ * @return Model type.
  *
  * Returns the type of the spatial model.
  ***************************************************************************/
 inline
 std::string GModelSpatialPointSource::type(void) const
 {
-    return "SkyDirFunction";
+    return (m_type);
 }
 
 
@@ -214,6 +218,21 @@ double GModelSpatialPointSource::mc_norm(const GSkyDir& dir,
 {
     double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
     return (norm);
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the point source.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialPointSource::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALPOINTSOURCE_HPP */

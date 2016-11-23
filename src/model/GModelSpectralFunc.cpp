@@ -234,6 +234,7 @@ GModelSpectralFunc* GModelSpectralFunc::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Evaluates
@@ -244,9 +245,18 @@ GModelSpectralFunc* GModelSpectralFunc::clone(void) const
  *
  * where
  * - \f${\tt m\_norm}\f$ is the normalization factor.
+ *
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_norm}}
+ * \f]
  ***************************************************************************/
 double GModelSpectralFunc::eval(const GEnergy& srcEng,
-                                const GTime&   srcTime) const
+                                const GTime&   srcTime,
+                                const bool&    gradients) const
 {
     // Interpolate function. This is done in log10-log10 space, but the
     // linear value is returned.
@@ -255,6 +265,17 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng,
 
     // Compute function value
     double value  = m_norm.value() * func;
+
+    // Optionally compute gradients
+    if (gradients) {
+
+        // Compute partial derivatives of the parameter values
+        double g_norm  = (m_norm.is_free())  ? m_norm.scale() * func : 0.0;
+
+        // Set gradients
+        m_norm.factor_gradient(g_norm);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -266,67 +287,6 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng,
         std::cout << " (value=" << value;
         std::cout << ", norm=" << norm();
         std::cout << ", func=" << func;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Evaluates
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- * \f]
- *
- * where
- * - \f${\tt m\_norm}\f$ is the normalization factor.
- *
- * The method also evaluates the partial derivatives of the model with
- * respect to the normalization parameter using
- *
- * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
- *      \frac{S_{\rm E}(E | t)}{{\tt m\_norm}}
- * \f]
- ***************************************************************************/
-double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng,
-                                          const GTime&   srcTime)
-{
-    // Interpolate function. This is done in log10-log10 space, but the
-    // linear value is returned.
-    double arg  = m_log_nodes.interpolate(srcEng.log10MeV(), m_log_values);
-    double func = std::pow(10.0, arg);
-
-    // Compute function value
-    double value  = m_norm.value() * func;
-
-    // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.is_free())  ? m_norm.scale() * func : 0.0;
-
-    // Set gradients
-    m_norm.factor_gradient(g_norm);
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralFunc::eval_gradients";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", norm=" << norm();
-        std::cout << ", func=" << func;
-        std::cout << ", g_norm=" << g_norm;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -619,7 +579,8 @@ void GModelSpectralFunc::read(const GXmlElement& xml)
     }
 
     // Load nodes from file
-    load_nodes(xml.attribute("file"));
+    //load_nodes(xml.attribute("file"));
+    load_nodes(gammalib::xml_file_expand(xml, xml.attribute("file")));
 
     // Return
     return;
@@ -685,7 +646,8 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
     }
 
     // Set file attribute
-    xml.attribute("file", m_filename.url());
+    //xml.attribute("file", m_filename.url());
+    xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return
     return;

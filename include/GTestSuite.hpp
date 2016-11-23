@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GTestSuite.hpp - Abstract test suite base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,7 @@ class GTestSuite;
 typedef void (GTestSuite::*pfunction)(void);
 
 /* __ Includes ___________________________________________________________ */
+#include <complex>
 #include <vector>
 #include <string>
 #include "GLog.hpp"
@@ -78,16 +79,33 @@ public:
     void                      cout(const bool& flag);
     void                      test_assert(const bool&        result,
                                           const std::string& name,
-                                          const std::string& message="");
+                                          const std::string& message = "");
     void                      test_value(const int&         value,
                                          const int&         expected,
-                                         const std::string& name="",
-                                         const std::string& message="");
+                                         const std::string& name = "",
+                                         const std::string& message = "");
     void                      test_value(const double&      value,
                                          const double&      expected,
-                                         const double&      eps = 1.0e-7,
-                                         const std::string& name="",
-                                         const std::string& message="");
+                                         const std::string& name = "",
+                                         const std::string& message = "");
+    void                      test_value(const double&      value,
+                                         const double&      expected,
+                                         const double&      eps,
+                                         const std::string& name = "",
+                                         const std::string& message = "");
+    void                      test_value(const std::complex<double>& value,
+                                         const std::complex<double>& expected,
+                                         const std::string&          name = "",
+                                         const std::string&          message = "");
+    void                      test_value(const std::complex<double>& value,
+                                         const std::complex<double>& expected,
+                                         const double&               eps,
+                                         const std::string&          name = "",
+                                         const std::string&          message = "");
+    void                      test_value(const std::string& value,
+                                         const std::string& expected,
+                                         const std::string& name = "",
+                                         const std::string& message = "");
     void                      test_try(const std::string& name);
     void                      test_try_success(void);
     void                      test_try_failure(const std::string& message = "",

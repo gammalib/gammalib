@@ -1,6 +1,6 @@
 <source_library title="source library">
 <source name="iso_source_v05" type="DiffuseSource">
-	<spectrum file="$(PACKAGE_SOURCE)/inst/lat/test/data/p7repv15/iso_source_v05.txt" type="FileFunction">
+	<spectrum file="iso_source_v05.txt" type="FileFunction">
 		<parameter free="1" max="10" min="0" name="Normalization" scale="1" value="1.0" />
 	</spectrum>
 	<spatialModel type="ConstantValue">
@@ -13,7 +13,7 @@
 		<parameter free="1" max="1" min="-1" name="Index" scale="1" value="0." />
 		<parameter free="0" max="2000" min="50" name="Scale" scale="1" value="100" />
 	</spectrum>
-	<spatialModel type="MapCubeFunction" file="$(PACKAGE_SOURCE)/test/data/test_cube.fits">
+	<spatialModel type="MapCubeFunction" file="test_cube.fits">
 		<parameter free="0" max="1000" min="0.001" name="Normalization" scale="1" value="1" />
 	</spatialModel>
   </source>

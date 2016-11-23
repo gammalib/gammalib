@@ -1,7 +1,7 @@
 /***************************************************************************
- *                       test_LAT.cpp - test LAT classes                   *
+ *                  test_LAT.cpp - test Fermi/LAT classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,8 +29,9 @@
 #include <config.h>
 #endif
 #include <stdlib.h>
-#include <iostream>
 #include <unistd.h>
+#include <iostream>
+#include <cstdlib>     // getenv
 #include "GLATLib.hpp"
 #include "GTools.hpp"
 #include "test_LAT.hpp"
@@ -40,9 +41,11 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string lat_caldb = PACKAGE_SOURCE"/inst/lat/caldb";
-const std::string dirPass6  = PACKAGE_SOURCE"/inst/lat/test/data/p6v3";
-const std::string dirPass7  = PACKAGE_SOURCE"/inst/lat/test/data/p7v6";
+const std::string datadir   = std::getenv("TEST_LAT_DATA");
+const std::string lat_caldb = datadir + "/../../caldb";
+const std::string dirPass6  = datadir + "/p6v3";
+const std::string dirPass7  = datadir + "/p7v6";
+const std::string dirPass8  = datadir + "/p8v2";
 
 
 /***********************************************************************//**
@@ -69,8 +72,12 @@ void TestGLATResponse::set(void)
     name("GLATResponse");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGLATResponse::test_response_p6), "Test P6 response");
-    append(static_cast<pfunction>(&TestGLATResponse::test_response_p7), "Test P7 response");
+    append(static_cast<pfunction>(&TestGLATResponse::test_response_p6),
+           "Test P6 response");
+    append(static_cast<pfunction>(&TestGLATResponse::test_response_p7),
+           "Test P7 response");
+    append(static_cast<pfunction>(&TestGLATResponse::test_response_p8),
+           "Test P8 response");
 
     // Return
     return;
@@ -98,8 +105,12 @@ void TestGLATLtCube::set(void)
     name("GLATLtCube");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p6), "Test P6 livetime cube");
-    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p7), "Test P7 livetime cube");
+    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p6),
+           "Test P6 livetime cube");
+    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p7),
+           "Test P7 livetime cube");
+    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p8),
+           "Test P8 livetime cube");
 
     // Return
     return;
@@ -127,10 +138,18 @@ void TestGLATObservation::set(void)
     name("GLATObservation");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p6), "Test P6 unbinned observation");
-    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p7), "Test P7 unbinned observation");
-    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p6), "Test P6 binned observation");
-    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p7), "Test P7 binned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p6),
+           "Test P6 unbinned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p7),
+           "Test P7 unbinned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p8),
+           "Test P8 unbinned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p6),
+           "Test P6 binned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p7),
+           "Test P7 binned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p8),
+           "Test P8 binned observation");
 
     // Return
     return;
@@ -158,8 +177,12 @@ void TestGLATOptimize::set(void)
     name("LAT optimizers");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p6), "Test P6 binned optimizer");
-    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p7), "Test P7 binned optimizer");
+    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p6),
+           "Test P6 binned optimizer");
+    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p7),
+           "Test P7 binned optimizer");
+    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p8),
+           "Test P8 binned optimizer");
 
     // Return
     return;
@@ -184,7 +207,7 @@ TestGLATOptimize* TestGLATOptimize::clone(void) const
 void TestGLATResponse::test_response_p6(void)
 {
     // Test Pass 6 IRFs
-    test_one_response("P6_v3_diff");
+    test_one_response("P6_V3_DIFFUSE");
 
     // Return
     return;
@@ -198,6 +221,52 @@ void TestGLATResponse::test_response_p7(void)
 {
     // Test Pass 7 IRFs
     test_one_response("P7SOURCE_V6");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test Fermi/LAT Pass 8 response handling
+ ***************************************************************************/
+void TestGLATResponse::test_response_p8(void)
+{
+    // Set Pass 8 response function
+    std::string irf = "P8R2_SOURCE_V6";
+
+    // Test Pass 8 IRFs
+    test_one_response(irf);
+
+    // Test loading of Pass 8 PSF response
+    test_try("Test loading of Pass 8 PSF response");
+    try {
+        GLATResponse rsp;
+        rsp.load(irf+"::psf");
+        rsp.load(irf+"::psf0");
+        rsp.load(irf+"::psf1");
+        rsp.load(irf+"::psf2");
+        rsp.load(irf+"::psf3");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test loading of Pass 8 EDISP response
+    test_try("Test loading of Pass 8 EDISP response");
+    try {
+        GLATResponse rsp;
+        rsp.load(irf+"::edisp");
+        rsp.load(irf+"::edisp0");
+        rsp.load(irf+"::edisp1");
+        rsp.load(irf+"::edisp2");
+        rsp.load(irf+"::edisp3");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Return
     return;
@@ -224,12 +293,8 @@ void TestGLATResponse::test_one_response(const std::string& irf)
     test_try("Test loading the response");
     try {
         GLATResponse rsp;
-        rsp.caldb(lat_caldb);
-        std::cout << ".";
         rsp.load(irf+"::front");
-        std::cout << ".";
         rsp.load(irf+"::back");
-        std::cout << ".";
         rsp.load(irf);
         test_try_success();
     }
@@ -241,7 +306,6 @@ void TestGLATResponse::test_one_response(const std::string& irf)
     test_try("Test saving the response");
     try {
         GLATResponse rsp;
-        rsp.caldb(lat_caldb);
         rsp.load(irf);
         rsp.save(fitsfile);
         test_try_success();
@@ -279,6 +343,21 @@ void TestGLATLtCube::test_ltcube_p7(void)
 {
     // Test various datasets
     test_one_ltcube(dirPass7, 248009.734604);
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test livetime cube handling
+ *
+ * Verifies handling of Fermi/LAT Pass 8 livetime cube.
+ ***************************************************************************/
+void TestGLATLtCube::test_ltcube_p8(void)
+{
+    // Test various datasets
+    test_one_ltcube(dirPass8, 31911.50386047);
 
     // Exit test
     return;
@@ -398,6 +477,21 @@ void TestGLATObservation::test_unbinned_obs_p7(void)
 
 
 /***********************************************************************//**
+ * @brief Test unbinned observation handling
+ *
+ * Verifies handling of Pass 8 unbinned data. 
+ ***************************************************************************/
+void TestGLATObservation::test_unbinned_obs_p8(void)
+{
+    // Test various datasets
+    test_one_unbinned_obs(dirPass8);
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test binned observation handling
  *
  * Verifies the ability to handle Pass 6 binned Fermi/LAT data.
@@ -405,7 +499,7 @@ void TestGLATObservation::test_unbinned_obs_p7(void)
 void TestGLATObservation::test_binned_obs_p6(void)
 {
     // Test various datasets
-    test_one_binned_obs(dirPass6, "P6_v3_diff");
+    test_one_binned_obs(dirPass6, "P6_V3_DIFFUSE");
 
     // Exit test
     return;
@@ -422,6 +516,22 @@ void TestGLATObservation::test_binned_obs_p7(void)
 {
     // Test various datasets
     test_one_binned_obs(dirPass7, "P7SOURCE_V6");
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Test binned observation handling
+ *
+ * Verifies the ability to handle Pass 8 binned Fermi/LAT data.
+ ***************************************************************************/
+void TestGLATObservation::test_binned_obs_p8(void)
+{
+    // Test various datasets
+    test_one_binned_obs(dirPass8, "P8R2_SOURCE_V6");
 
     // Exit test
     return;
@@ -491,7 +601,6 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
     // Test XML loading
     test_try("Test XML loading");
     try {
-        setenv("CALDB", lat_caldb.c_str(), 1);
         obs = GObservations(lat_unbin_xml);
         obs.save(file1);
         test_try_success();
@@ -514,7 +623,8 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
  *
  * Verifies the ability to handle binned Fermi/LAT data.
  ***************************************************************************/
-void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const std::string& irf)
+void TestGLATObservation::test_one_binned_obs(const std::string& datadir,
+                                              const std::string& irf)
 {
     // Set filenames
     std::string lat_cntmap  = datadir+"/cntmap.fits";
@@ -540,7 +650,7 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
 
     // Try loading event list
     GLATEventCube cube(lat_cntmap);
-    test_value(cube.number(), nevents, "Test number of events in cube.");
+    test_value(double(cube.number()), nevents, "Check number of events in cube.");
 
     // Load LAT binned observation from counts map
     test_try("Load LAT binned observation");
@@ -590,7 +700,7 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
     test_try("Test mean PSF");
     try {
         run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
-        run.response(irf, lat_caldb);
+        run.response(irf);
         GSkyDir dir;
         GLATMeanPsf psf(dir, run);
         test_try_success();
@@ -602,7 +712,6 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
     // Test XML loading
     test_try("Test XML loading");
     try {
-        setenv("CALDB", lat_caldb.c_str(), 1);
         obs = GObservations(lat_bin_xml);
         obs.save(file1);
         test_try_success();
@@ -640,7 +749,7 @@ void TestGLATOptimize::test_binned_optimizer_p6(void)
                             1, 0};
 
     // Test various datasets
-    test_one_binned_optimizer(dirPass6, "P6_v3_diff", fit_results);
+    test_one_binned_optimizer(dirPass6, "P6_V3_DIFFUSE", fit_results);
 
     // Exit test
     return;
@@ -680,6 +789,40 @@ void TestGLATOptimize::test_binned_optimizer_p7(void)
 
 
 /***********************************************************************//**
+ * @brief Test binned optimizer handling
+ *
+ * Verifies the ability to handle binned Pass 8 Fermi/LAT optimization.
+ ***************************************************************************/
+void TestGLATOptimize::test_binned_optimizer_p8(void)
+{
+    // Set expected fit results
+    double fit_results[] = {1, 0,
+//                            2.37468, 0.4548979, // Pass 7
+                            1.99669, 1.00881,   // Pass 8
+                            1, 0,
+                            1, 0,
+//                            0.8419824722, 0.06340531926, // Pass 7
+                            1.00878, 0.0940645,          // Pass 8
+                            1, 0,
+                            83.6331, 0,
+                            22.0145, 0,
+                            1.922525774e-06, 1.209507237e-07,
+//                            -2.12421, 0.0493105484, // Pass 7
+                            -2.31512, 0.147089,     // Pass 8
+                            100, 0,
+                            500000, 0,
+                            1, 0};
+
+    // Test various datasets
+    test_one_binned_optimizer(dirPass8, "P8R2_SOURCE_V6", fit_results);
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
  * @brief Test binned optimizer
  *
  * @param[in] datadir Directory of test data.
@@ -704,7 +847,7 @@ void TestGLATOptimize::test_one_binned_optimizer(const std::string& datadir,
     test_try("Setup for optimization");
     try {
         run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
-        run.response(irf, lat_caldb);
+        run.response(irf);
         obs.append(run);
         test_try_success();
     }
@@ -752,7 +895,10 @@ int main(void)
     GTestSuites testsuites("LAT instrument specific class testing");
 
     // Check if data directory exists
-    bool has_data = (access(PACKAGE_SOURCE"/inst/lat/test/data", R_OK) == 0);
+    bool has_data = (access(datadir.c_str(), R_OK) == 0);
+
+    // Set CALDB environment variable
+    setenv("CALDB", lat_caldb.c_str(), 1);
 
     // Initially assume that we pass all tests
     bool success = true;

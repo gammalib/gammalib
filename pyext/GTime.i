@@ -53,17 +53,30 @@ public:
     GTime*         clone(void) const;
     std::string    classname(void) const;
     double         jd(void) const;
+    double         jd(const std::string& timesys) const;
     double         mjd(void) const;
+    double         mjd(const std::string& timesys) const;
     const double&  secs(void) const;
+    double         secs(const std::string& timesys) const;
     double         days(void) const;
+    double         days(const std::string& timesys) const;
     std::string    utc(void) const;
+    double         gmst(void) const;
+    double         gast(void) const;
+    double         lmst(const double& geolon) const;
+    double         last(const double& geolon) const;
     double         convert(const GTimeReference& ref) const;
     void           jd(const double& time);
+    void           jd(const double& time, const std::string& timesys);
     void           mjd(const double& time);
+    void           mjd(const double& time, const std::string& timesys);
     void           secs(const double& seconds);
+    void           secs(const double& seconds, const std::string& timesys);
     void           days(const double& days);
+    void           days(const double& days, const std::string& timesys);
     void           utc(const std::string& time);
     void           set(const double& time, const GTimeReference& ref);
+    void           now(void);
     GTimeReference reference(void) const;
 };
 
@@ -96,10 +109,10 @@ public:
     bool __gt__(const GTime& time) const {
         return ((*self) > time);
     }
-    bool __lte__(const GTime& time) const {
+    bool __le__(const GTime& time) const {
         return ((*self) <= time);
     }
-    bool __gte__(const GTime& time) const {
+    bool __ge__(const GTime& time) const {
         return ((*self) >= time);
     }
     GTime copy() {

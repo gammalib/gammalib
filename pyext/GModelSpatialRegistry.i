@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpatialRegistry.i - Spatial model registry class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,7 +46,7 @@ public:
     // Methods
     std::string    classname(void) const;
     int            size(void) const;
-    GModelSpatial* alloc(const std::string& name) const;
+    GModelSpatial* alloc(const GXmlElement& xml) const;
     std::string    name(const int& index) const;
 };
 

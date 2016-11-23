@@ -78,6 +78,7 @@ public:
     bool               boolean(void);
     int                integer(void);
     double             real(void);
+    const std::string& current_value(void) const;
     const std::string& min(void) const;
     const std::string& max(void) const;
     const std::string& prompt(void) const;
@@ -177,6 +178,18 @@ inline
 const std::string& GApplicationPar::mode(void) const
 {
     return m_mode;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns current parameter value without querying
+ *
+ * @return Current parameter value
+ ***************************************************************************/
+inline
+const std::string& GApplicationPar::current_value(void) const
+{
+    return m_value;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -240,6 +240,7 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  * @param[in] posangle Position angle (counterclockwise from North) (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for an elliptical disk source model. The
@@ -277,6 +278,10 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  * The normalisation constant \f${\tt m\_norm}\f$ which is the inverse of the
  * solid angle subtended by an ellipse is given by
  *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
+ *
  * @todo Quote formula for ellipse solid angle
  *
  * (see the update() method).
@@ -284,7 +289,8 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
 double GModelSpatialEllipticalDisk::eval(const double&  theta,
                                          const double&  posangle,
                                          const GEnergy& energy,
-                                         const GTime&   time) const
+                                         const GTime&   time,
+                                         const bool&    gradients) const
 {
     // Initialise value
     double value = 0.0;
@@ -325,31 +331,6 @@ double GModelSpatialEllipticalDisk::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
- *
- * @param[in] theta Angular distance from disk centre (radians).
- * @param[in] posangle Position angle (counterclockwise from North) (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * Evaluates the function value. No gradient computation is implemented as
- * Elliptical models will be convolved with the instrument response and thus
- * require the numerical computation of the derivatives.
- *
- * See the eval() method for more information.
- ***************************************************************************/
-double GModelSpatialEllipticalDisk::eval_gradients(const double&  theta,
-                                                   const double&  posangle,
-                                                   const GEnergy& energy,
-                                                   const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, posangle, energy, time));
 }
 
 
@@ -455,7 +436,7 @@ double GModelSpatialEllipticalDisk::theta_max(void) const
  * Reads the elliptical disk model information from an XML element. The XML
  * element shall have either the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="EllipticalDisk">
  *       <parameter name="RA"          scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
@@ -465,7 +446,7 @@ double GModelSpatialEllipticalDisk::theta_max(void) const
  *
  * or
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="EllipticalDisk">
  *       <parameter name="GLON"        scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="GLAT"        scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
@@ -544,7 +525,7 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
  * Write the elliptical disk model information into an XML element. The XML
  * element will have the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="EllipticalDisk">
  *       <parameter name="RA"          scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
@@ -618,7 +599,7 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialEllipticalDisk::print(const GChatter& chatter) const
@@ -665,6 +646,9 @@ void GModelSpatialEllipticalDisk::init_members(void)
     m_semimajor_rad  = 0.0;
     m_norm           = 0.0;
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -681,6 +665,9 @@ void GModelSpatialEllipticalDisk::init_members(void)
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::copy_members(const GModelSpatialEllipticalDisk& model)
 {
+    // Copy members
+    m_region = model.m_region;
+
     // Copy precomputation cache
     m_last_semiminor = model.m_last_semiminor;
     m_last_semimajor = model.m_last_semimajor;
@@ -733,6 +720,25 @@ void GModelSpatialEllipticalDisk::update() const
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialEllipticalDisk::set_region(void) const
+{
+    // Set sky region centre to disk centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set maximum model radius
+    double max_radius = (semimajor() > semiminor()) ? semimajor() : semiminor();
+
+    // Set sky region radius to maximum disk radius
+    m_region.radius(max_radius);
 
     // Return
     return;

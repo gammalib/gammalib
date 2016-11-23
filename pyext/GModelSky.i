@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GModelSky.i - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,9 +61,8 @@ public:
     virtual std::string type(void) const;
     virtual bool        is_constant(void) const;
     virtual double      eval(const GEvent& event,
-                             const GObservation& obs) const;
-    virtual double      eval_gradients(const GEvent& event,
-                                       const GObservation& obs) const;
+                             const GObservation& obs,
+                             const bool& gradients = false) const;
     virtual double      npred(const GEnergy& obsEng,
                               const GTime& obsTime,
                               const GObservation& obs) const;
@@ -74,6 +73,9 @@ public:
     GModelSpatial*      spatial(void) const;
     GModelSpectral*     spectral(void) const;
     GModelTemporal*     temporal(void) const;
+    void                spatial(const GModelSpatial* spatial);
+    void                spectral(const GModelSpectral* spectral);
+    void                temporal(const GModelTemporal* temporal);
     double              value(const GPhoton& photon);
     GVector             gradients(const GPhoton& photon);
     GPhotons            mc(const double& area,
@@ -88,4 +90,7 @@ public:
  * @brief GModelSky class extension
  ***************************************************************************/
 %extend GModelSky {
+    GModelSky copy() {
+        return (*self);
+    }
 };

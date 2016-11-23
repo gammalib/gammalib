@@ -855,6 +855,29 @@ void GObservations::eval(void)
 
 
 /***********************************************************************//**
+ * @brief Return total number of observed events
+ *
+ * @return Total number of observed events.
+ *
+ * Returns the total number of observed events that is container in the
+ * observation container.
+ ***************************************************************************/
+int GObservations::nobserved(void) const
+{
+    // Initialise number of observed events
+    int nobserved = 0;
+
+    // Compute number of observed events
+    for (int i = 0; i < size(); ++i) {
+        nobserved += (*this)[i]->nobserved();
+    }
+
+    // Return number of observed events
+    return nobserved;
+}
+
+
+/***********************************************************************//**
  * @brief Print observation list information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -876,6 +899,8 @@ std::string GObservations::print(const GChatter& chatter) const
         result.append(gammalib::str(size()));
         result.append("\n"+gammalib::parformat("Number of models"));
         result.append(gammalib::str(m_models.size()));
+        result.append("\n"+gammalib::parformat("Number of observed events"));
+        result.append(gammalib::str(nobserved()));
         result.append("\n"+gammalib::parformat("Number of predicted events"));
         result.append(gammalib::str(npred()));
 
@@ -930,16 +955,19 @@ void GObservations::init_members(void)
  ***************************************************************************/
 void GObservations::copy_members(const GObservations& obs)
 {
-    // Copy attributes. WARNING: The member m_fct SHALL not be copied to not
-    // corrupt its m_this pointer which should always point to the proper
-    // observation. See note in init_members().
+    // Copy attributes
     m_models = obs.m_models;
+    m_fct    = obs.m_fct;
 
     // Copy observations
     m_obs.clear();
     for (int i = 0; i < obs.m_obs.size(); ++i) {
         m_obs.push_back((obs.m_obs[i]->clone()));
     }
+
+    // Set likelihood function pointer to this instance. This makes sure
+    // that the optimizer points to this instance
+    m_fct.set(this);
 
     // Return
     return;

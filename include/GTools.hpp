@@ -30,10 +30,14 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
+#include <complex>
 #include <cmath>
 #include <cfloat>
-#include "GEnergy.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GFilename;
+class GXmlElement;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -51,6 +55,8 @@ namespace gammalib {
     std::string              strip_whitespace(const std::string& arg);
     std::string              strip_chars(const std::string& arg,
                                          const std::string& chars);
+    std::string              rstrip_chars(const std::string& arg,
+                                          const std::string& chars);
     std::string              expand_env(const std::string& arg);
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);
@@ -64,6 +70,8 @@ namespace gammalib {
     std::string              str(const long long int& value);
     std::string              str(const float& value, const int& precision = 0);
     std::string              str(const double& value, const int& precision = 0);
+    std::string              str(const std::complex<double>& value,
+                                 const int& precision = 0);
     char*                    tochar(const std::string& arg);
     short                    toshort(const std::string& arg);
     unsigned short           toushort(const std::string& arg);
@@ -86,6 +94,7 @@ namespace gammalib {
     std::string              centre(const std::string& s, const int& n,
                                     const char& c = ' ');
     std::string              parformat(const std::string& s, const int& indent = 0);
+    std::string              number(const std::string& noun, const int& number);
     double                   plaw_photon_flux(const double& emin,
                                               const double& emax,
                                               const double& epivot,
@@ -100,6 +109,8 @@ namespace gammalib {
     bool                     is_notanumber(const double& x);
     bool                     contains(const std::string& str,
                                       const std::string& substring);
+    bool                     contains(const std::vector<std::string> strings,
+                                      const std::string& string);
     void                     warning(const std::string& origin,
                                      const std::string& message);
     std::string              xml2str(const std::string& arg);
@@ -119,6 +130,10 @@ namespace gammalib {
     void                     xml_check_par(const std::string& origin,
                                            const std::string& name,
                                            const int&         number);
+    GFilename                xml_file_expand(const GXmlElement& xml,
+                                             const std::string& filename);
+    GFilename                xml_file_reduce(const GXmlElement& xml,
+                                             const std::string& filename);
     int                      recv(int fd, char *buffer, int len, int flags,
                                   int timeout);
 }

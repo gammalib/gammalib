@@ -38,10 +38,15 @@ class GModelSpectralExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralExpPlaw(void);
-    explicit GModelSpectralExpPlaw(const double&  prefactor,
-                                   const double&  index,
-                                   const GEnergy& pivot,
-                                   const GEnergy& cutoff);
+    GModelSpectralExpPlaw(const std::string& type,
+                          const std::string& prefactor,
+                          const std::string& index,
+                          const std::string& pivot,
+                          const std::string& cutoff);
+    GModelSpectralExpPlaw(const double&  prefactor,
+                          const double&  index,
+                          const GEnergy& pivot,
+                          const GEnergy& cutoff);
     explicit GModelSpectralExpPlaw(const GXmlElement& xml);
     GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model);
     virtual ~GModelSpectralExpPlaw(void);
@@ -52,9 +57,8 @@ public:
     virtual std::string            classname(void) const;
     virtual std::string            type(void) const;
     virtual double                 eval(const GEnergy& srcEng,
-                                        const GTime&   srcTime = GTime()) const;
-    virtual double                 eval_gradients(const GEnergy& srcEng,
-                                                  const GTime&   srcTime = GTime());
+                                        const GTime&   srcTime = GTime(),
+                                        const bool&    gradients = false) const;
     virtual double                 flux(const GEnergy& emin,
                                         const GEnergy& emax) const;
     virtual double                 eflux(const GEnergy& emin,

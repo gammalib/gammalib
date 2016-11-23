@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib support module.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,13 +45,14 @@ class Test(gammalib.GPythonTestSuite):
         Set all test functions.
         """
         # Set test name
-        self.name("support")
+        self.name('support')
 
         # Append tests
-        self.append(self.test_node_array, "Test GNodeArray")
-        self.append(self.test_url_file,   "Test GUrlFile")
-        self.append(self.test_url_string, "Test GUrlString")
-        self.append(self.test_filename,   "Test GFilename")
+        self.append(self.test_node_array, 'Test GNodeArray')
+        self.append(self.test_url_file,   'Test GUrlFile')
+        self.append(self.test_url_string, 'Test GUrlString')
+        self.append(self.test_filename,   'Test GFilename')
+        self.append(self.test_csv,        'Test GCsv')
 
         # Return
         return
@@ -96,18 +97,16 @@ class Test(gammalib.GPythonTestSuite):
         Test GUrlFile class.
         """
         # Test file writing
-        url = gammalib.GUrlFile("test_url.dat", "w")
-        self.test_value(url.write("abcd", 4), 4)
-        url.put_char(ord("e"))
+        url = gammalib.GUrlFile('test_url.dat', 'w')
+        self.test_value(url.write('abcd', 4), 4)
+        url.put_char(ord('e'))
         url.close()
 
         # Test file reading
-        buffer = ""
-        url    = gammalib.GUrlFile("test_url.dat", "r")
+        buffer = ''
+        url    = gammalib.GUrlFile('test_url.dat', 'r')
         buffer = url.read(99)
-        self.test_assert(buffer == "abcde",
-                         "Expected \"abcde\" in file, found \""+
-                         buffer+"\"")
+        self.test_value(buffer, 'abcde')
         url.close()
 
         # Return
@@ -120,16 +119,14 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Test writing
         url = gammalib.GUrlString()
-        self.test_value(url.write("abcd", 4), 4)
-        url.put_char(ord("e"))
+        self.test_value(url.write('abcd', 4), 4)
+        url.put_char(ord('e'))
 
         # Test reading
         url.rewind()
-        buffer = ""
+        buffer = ''
         buffer = url.read(99)
-        self.test_assert(buffer == "abcde",
-                         "Expected \"abcde\" in file, found \""+
-                         buffer+"\"")
+        self.test_value(buffer, 'abcde')
         url.close()
 
         # Return
@@ -141,29 +138,60 @@ class Test(gammalib.GPythonTestSuite):
         Test GFilename class.
         """
         # Test assigning file names
-        filename = gammalib.GFilename("myfile.fits")
-        self.test_assert(filename.url() == "myfile.fits",
-                         "Expected \"myfile.fits\", found \""+
-                         filename.url()+"\"")
-        filename = gammalib.GFilename("myfile.fits[EVENTS]")
-        self.test_assert(filename.url() == "myfile.fits",
-                         "Expected \"myfile.fits\", found \""+
-                         filename.url()+"\"")
-        self.test_assert(filename.extname() == "EVENTS",
-                         "Expected extension \"EVENTS\", found \""+
-                         filename.extname()+"\"")
-        filename = gammalib.GFilename("myfile.fits[0]")
-        self.test_assert(filename.url() == "myfile.fits",
-                         "Expected \"myfile.fits\", found \""+
-                         filename.url()+"\"")
+        filename = gammalib.GFilename('myfile.fits')
+        self.test_value(filename.url(), 'myfile.fits')
+        #
+        filename = gammalib.GFilename('myfile.fits[EVENTS]')
+        self.test_value(filename.url(), 'myfile.fits')
+        self.test_value(filename.extname(), 'EVENTS')
+        #
+        filename = gammalib.GFilename('myfile.fits[0]')
+        self.test_value(filename.url(), 'myfile.fits')
         self.test_value(filename.extno(), 0)
-        filename = gammalib.GFilename("myfile.fits[0,2]")
-        self.test_assert(filename.url() == "myfile.fits",
-                         "Expected \"myfile.fits\", found \""+
-                         filename.url()+"\"")
+        #
+        filename = gammalib.GFilename('myfile.fits[0,2]')
+        self.test_value(filename.url(), 'myfile.fits')
         self.test_value(filename.extno(), 0)
         self.test_value(filename.extver(), 2)
         
         # Return
         return
+
+    # Test GCsv class
+    def test_csv(self):
+        """
+        Test GCsv class.
+        """
+        # Create CSV file using the append method
+        csv = gammalib.GCsv()
+        csv.append(['ra','dec','duration'])
+        csv.append(['20.0','-70.0','1800.0'])
+
+        # Test created file
+        self.test_value(csv.size(), 6)
+        self.test_value(csv.ncols(), 3)
+        self.test_value(csv.nrows(), 2)
+        self.test_value(csv[0,0], 'ra')
+        self.test_value(csv[0,1], 'dec')
+        self.test_value(csv[0,2], 'duration')
+        self.test_value(csv[1,0], '20.0')
+        self.test_value(csv[1,1], '-70.0')
+        self.test_value(csv[1,2], '1800.0')
         
+        # Test saving and loading of file
+        csv.save('test_csv_py.dat', ',', True)
+        csv.load('test_csv_py.dat', ',')
+
+        # Test loaded file
+        self.test_value(csv.size(), 6)
+        self.test_value(csv.ncols(), 3)
+        self.test_value(csv.nrows(), 2)
+        self.test_value(csv[0,0], 'ra')
+        self.test_value(csv[0,1], 'dec')
+        self.test_value(csv[0,2], 'duration')
+        self.test_value(csv[1,0], '20.0')
+        self.test_value(csv[1,1], '-70.0')
+        self.test_value(csv[1,2], '1800.0')
+
+        # Return
+        return

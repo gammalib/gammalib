@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GLATPsf.cpp - Fermi-LAT point spread function              *
+ *              GLATPsf.cpp - Fermi LAT point spread function              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsf.cpp
- * @brief Fermi-LAT point spread function class implementation
+ * @brief Fermi LAT point spread function class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -59,6 +59,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs an empty Fermi LAT point spread function.
  ***************************************************************************/
 GLATPsf::GLATPsf(void)
 {
@@ -74,16 +76,18 @@ GLATPsf::GLATPsf(void)
  * @brief File constructor
  *
  * @param[in] filename FITS file name.
+ * @param[in] evtype Event type.
  *
- * Construct instance by loading the point spread function from FITS file.
+ * Constructs a Fermi LAT point spread function by loading the point spread
+ * function for a given event type from a FITS response file.
  ***************************************************************************/
-GLATPsf::GLATPsf(const GFilename& filename)
+GLATPsf::GLATPsf(const GFilename& filename, const std::string& evtype)
 {
     // Initialise class members
     init_members();
 
     // Load PSF from FITS file
-    load(filename);
+    load(filename, evtype);
 
     // Return
     return;
@@ -95,7 +99,8 @@ GLATPsf::GLATPsf(const GFilename& filename)
  *
  * @param[in] psf Point spread function.
  *
- * Construct instance by copying point spread function from another object.
+ * Constructs point spread function by copying point spread function from
+ * another object.
  ***************************************************************************/
 GLATPsf::GLATPsf(const GLATPsf& psf)
 {
@@ -219,11 +224,15 @@ GLATPsf* GLATPsf::clone(void) const
  * @brief Load point spread function from FITS file
  *
  * @param[in] filename FITS file.
+ * @param[in] evtype Event type.
  *
  * Loads Fermi/LAT point spread function from FITS file.
  ***************************************************************************/
-void GLATPsf::load(const GFilename& filename)
+void GLATPsf::load(const GFilename& filename, const std::string& evtype)
 {
+    // Store event type
+    m_evtype = evtype;
+
     // Open FITS file
     GFits fits(filename);
 
@@ -239,7 +248,7 @@ void GLATPsf::load(const GFilename& filename)
  * @brief Save point spread function into FITS file
  *
  * @param[in] filename FITS file.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Saves Fermi/LAT point spread function into FITS file.
  ***************************************************************************/
@@ -267,7 +276,7 @@ void GLATPsf::save(const GFilename& filename, const bool& clobber)
  * @exception GException::invalid_response
  *            Invalid response type or unsupported response version found.
  *
- * Reads the Fermi/LAT point spread function from FITS file. The method
+ * Reads the Fermi LAT point spread function from FITS file. The method
  * determines the PSF version from the information found in the FITS file
  * and allocates the proper PSF version class. It reads the PSF information
  * from the FITS file. 
@@ -276,14 +285,26 @@ void GLATPsf::save(const GFilename& filename, const bool& clobber)
  ***************************************************************************/
 void GLATPsf::read(const GFits& fits)
 {
-    // Clear instance
+    // Clear instance (keep event type)
+    std::string evtype = m_evtype;
     clear();
+    m_evtype = evtype;
 
-    // Get pointer to PSF parameters table
-    const GFitsTable& hdu_rpsf = *fits.table("RPSF");
+    // Set extension names
+    std::string rpsf    = "RPSF";
+    std::string scaling = "PSF_SCALING_PARAMS";
+    if (!fits.contains(rpsf)) {
+        rpsf += "_" + m_evtype;
+    }
+    if (!fits.contains(scaling)) {
+        scaling += "_" + m_evtype;
+    }
 
-    // Get pointer to PSF scaling parameters table
-    const GFitsTable& hdu_scale = *fits.table("PSF_SCALING_PARAMS");
+    // Get PSF parameters table
+    const GFitsTable& hdu_rpsf = *fits.table(rpsf);
+
+    // Get PSF scaling parameters table
+    const GFitsTable& hdu_scale = *fits.table(scaling);
 
     // Determine PSF version (default version is version 1)
     int version = (hdu_rpsf.has_card("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
@@ -299,8 +320,8 @@ void GLATPsf::read(const GFits& fits)
         front = false;
     }
     else {
-        throw GLATException::invalid_response(G_READ, 
-              "Unknown response type "+detnam+".");
+        front = false; // If we are here we should have a Pass 8 response.
+                       // For Pass 8 the setting of this flag is irrelevant.
     }
 
     // Allocate point spread function
@@ -317,7 +338,8 @@ void GLATPsf::read(const GFits& fits)
         break;
     }
 
-    // Set PSF attributes (needed before reading scaling parameters)
+    // Set PSF attributes (needed before reading scaling parameters for
+    // Pass 6 and Pass 7 response functions)
     m_psf->front(front);
 
     // Read PSF scaling parameters
@@ -362,10 +384,11 @@ void GLATPsf::write(GFits& fits) const
 /***********************************************************************//**
  * @brief Returns size of PSF
  *
- * Returns the size of the PSF which is defined as the number of energy bins
- * times the number of cos(theta) bins.
+ * @return Size of point spread function.
  *
- * Returns 0 if no PSF has been allocated.
+ * Returns the size of the PSF which is defined as the number of energy bins
+ * times the number of cos(theta) bins. If no PSF has been allocated, 0 is
+ * returned.
  ***************************************************************************/
 int GLATPsf::size(void) const
 {
@@ -377,9 +400,10 @@ int GLATPsf::size(void) const
 /***********************************************************************//**
  * @brief Returns number of energy bins in PSF
  *
- * Returns the number of energy bins in PSF.
+ * @return Number of energy bins.
  *
- * Returns 0 if no PSF has been allocated.
+ * Returns the number of energy bins in PSF. If no PSF has been allocated,
+ * 0 is returned.
  ***************************************************************************/
 int GLATPsf::nenergies(void) const
 {
@@ -394,9 +418,10 @@ int GLATPsf::nenergies(void) const
 /***********************************************************************//**
  * @brief Returns number of cos(theta) bins in PSF
  *
- * Returns the number of cos(theta) bins in PSF.
+ * @return Number of cos(theta) bins.
  *
- * Returns 0 if no PSF has been allocated.
+ * Returns the number of cos(theta) bins in PSF. If no PSF has been
+ * allocated, 0 is returned.
  ***************************************************************************/
 int GLATPsf::ncostheta(void) const
 {
@@ -411,9 +436,10 @@ int GLATPsf::ncostheta(void) const
 /***********************************************************************//**
  * @brief Returns minimum cos(theta) angle
  *
- * Returns the minimum cos(theta) angle for point spread function access.
+ * @return Minimum cos(theta) angle.
  *
- * Returns 0 if no PSF has been allocated.
+ * Returns the minimum cos(theta) angle for point spread function access. If
+ * no PSF has been allocated, 0 is returned.
  ***************************************************************************/
 double GLATPsf::costhetamin(void) const
 {
@@ -449,52 +475,6 @@ void GLATPsf::costhetamin(const double& ctheta)
 
 
 /***********************************************************************//**
- * @brief Signals if PSF has phi dependence 
- *
- * @todo Implement phi dependence
- ***************************************************************************/
-bool GLATPsf::has_phi(void) const
-{
-    // Return
-    return false;
-}
-
-
-/***********************************************************************//**
- * @brief Signals if PSF is for front section
- *
- * Returns true if PSF is for front section, false otherwise.
- *
- * If no PSF has been allocated, false is returned.
- ***************************************************************************/
-bool GLATPsf::is_front(void) const
-{
-    // Retrieve front section flag
-    bool is_front = (m_psf != NULL) ? m_psf->front() : false;
-    
-    // Return front section flag
-    return is_front;
-}
-
-
-/***********************************************************************//**
- * @brief Signals if PSF is for back section
- *
- * Returns true if PSF is for back section, false otherwise.
- *
- * If no PSF has been allocated, false is returned.
- ***************************************************************************/
-bool GLATPsf::is_back(void) const
-{
-    // Retrieve back section flag
-    bool is_back = (m_psf != NULL) ? !(m_psf->front()) : false;
-    
-    // Return back section flag
-    return is_back;
-}    
-
-
-/***********************************************************************//**
  * @brief Returns PSF version
  *
  * Returns the PSF version number.
@@ -514,7 +494,7 @@ int GLATPsf::version(void) const
 /***********************************************************************//**
  * @brief Print point spread function information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing point spread function information.
  ***************************************************************************/
 std::string GLATPsf::print(const GChatter& chatter) const
@@ -530,19 +510,16 @@ std::string GLATPsf::print(const GChatter& chatter) const
     
         // No PSF has been loaded ...
         if (m_psf == NULL) {
-            result.append("\n"+gammalib::parformat("Version")+"No PSF loaded");
+            result.append("\n"+gammalib::parformat("Version"));
+            result.append("No PSF loaded");
         }
     
         // ... PSF has been loaded
         else {
-            result.append("\n"+gammalib::parformat("Version")+gammalib::str(version()));
-            result.append("\n"+gammalib::parformat("Detector section"));
-            if (is_front()) {
-                result.append("front");
-            }
-            else {
-                result.append("back");
-            }
+            result.append("\n"+gammalib::parformat("Version"));
+            result.append(gammalib::str(version()));
+            result.append("\n"+gammalib::parformat("Event type"));
+            result.append(evtype());
             result.append("\n"+gammalib::parformat("Energy scaling"));
             result.append("sqrt(");
             result.append("("+gammalib::str(m_psf->scale_par1())+"*(E/100)^");
@@ -569,6 +546,7 @@ std::string GLATPsf::print(const GChatter& chatter) const
 void GLATPsf::init_members(void)
 {
     // Initialise members
+    m_evtype.clear();
     m_psf = NULL;
     
     // Return
@@ -584,6 +562,9 @@ void GLATPsf::init_members(void)
 void GLATPsf::copy_members(const GLATPsf& psf)
 {
     // Copy members
+    m_evtype = psf.m_evtype;
+
+    // Clone members
     if (psf.m_psf != NULL) {
         m_psf = psf.m_psf->clone();
     }

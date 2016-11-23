@@ -41,6 +41,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                            "GCTACubePsf::set(GCTAObservation&)"
 #define G_FILL                     "GCTACubePsf::fill(GObservations&, GLog*)"
+#define G_FILL_CUBE     "GCTACubePsf::fill_cube(GCTAObservation&, GSkyMap*, "\
+                                                                     "GLog*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -51,7 +53,6 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 
 /*==========================================================================
@@ -128,7 +129,14 @@ GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
     init_members();
 
     // Store energy boundaries
-    m_ebounds = cube.ebounds();
+    int nebins = cube.ebounds().size();
+    for (int i = 0; i < nebins; ++i) {
+        m_energies.append(cube.ebounds().emin(i));
+    }
+    if (nebins > 0) {
+        m_energies.append(cube.ebounds().emax(nebins-1));
+        
+    }
 
     // Set GNodeArray used for interpolation
     set_eng_axis();
@@ -151,13 +159,16 @@ GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
     set_delta_axis();
 
     // Compute number of sky maps
-    int nmaps = m_ebounds.size() * m_deltas.size();
+    int nmaps = m_energies.size() * m_deltas.size();
 
     // Set PSF cube to event cube
-    m_cube = cube.map();
+    m_cube = cube.counts();
 
     // Set appropriate number of skymaps
     m_cube.nmaps(nmaps);
+
+    // Set cube shape
+    m_cube.shape(m_deltas.size(), m_energies.size());
 
     // Set all PSF cube pixels to zero as we want to have a clean map
     // upon construction
@@ -170,22 +181,21 @@ GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
 
 
 /***********************************************************************//**
- * @brief Mean PSF cube constructor
+ * @brief PSF cube constructor
  *
- * @param[in] wcs     World Coordinate System.
- * @param[in] coords  Coordinate System (CEL or GAL).
- * @param[in] x       X coordinate of sky map centre (deg).
- * @param[in] y       Y coordinate of sky map centre (deg).
- * @param[in] dx      Pixel size in x direction at centre (deg/pixel).
- * @param[in] dy      Pixel size in y direction at centre (deg/pixel).
- * @param[in] nx      Number of pixels in x direction.
- * @param[in] ny      Number of pixels in y direction.
- * @param[in] ebounds Energy boundaries.
- * @param[in] dmax    Maximum delta (deg).
- * @param[in] ndbins  Number of delta bins.
+ * @param[in] wcs      World Coordinate System.
+ * @param[in] coords   Coordinate System (CEL or GAL).
+ * @param[in] x        X coordinate of sky map centre (deg).
+ * @param[in] y        Y coordinate of sky map centre (deg).
+ * @param[in] dx       Pixel size in x direction at centre (deg/pixel).
+ * @param[in] dy       Pixel size in y direction at centre (deg/pixel).
+ * @param[in] nx       Number of pixels in x direction.
+ * @param[in] ny       Number of pixels in y direction.
+ * @param[in] energies Energies.
+ * @param[in] dmax     Maximum delta (deg).
+ * @param[in] ndbins   Number of delta bins.
  *
- * Constructs a mean PSF cube by computing the mean PSF from all CTA
- * observations found in the observation container.
+ * Constructs a PSF cube by specifying the sky map grid and the energies.
  ***************************************************************************/
 GCTACubePsf::GCTACubePsf(const std::string&   wcs,
                          const std::string&   coords,
@@ -195,15 +205,15 @@ GCTACubePsf::GCTACubePsf(const std::string&   wcs,
                          const double&        dy,
                          const int&           nx,
                          const int&           ny,
-                         const GEbounds&      ebounds,
+                         const GEnergies&     energies,
                          const double&        dmax,
                          const int&           ndbins)
 {
     // Initialise class members
     init_members();
 
-    // Store energy boundaries
-    m_ebounds = ebounds;
+    // Store energies
+    m_energies = energies;
 
     // Set energy node array
     set_eng_axis();
@@ -226,10 +236,13 @@ GCTACubePsf::GCTACubePsf(const std::string&   wcs,
     set_delta_axis();
 
     // Compute number of sky maps
-    int nmaps = m_ebounds.size() * m_deltas.size();
-    
+    int nmaps = m_energies.size() * m_deltas.size();
+
     // Create sky map
     m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, nmaps);
+
+    // Set cube shape
+    m_cube.shape(m_deltas.size(), m_energies.size());
 
     // Return
     return;
@@ -356,83 +369,16 @@ GCTACubePsf* GCTACubePsf::clone(void) const
  * @brief Set PSF cube from one CTA observation
  *
  * @param[in] obs CTA observation.
+ *
+ * Sets the PSF cube for one CTA observation.
  ***************************************************************************/
 void GCTACubePsf::set(const GCTAObservation& obs)
 {
     // Clear PSF cube
     clear_cube();
 
-    // Only continue if we have an unbinned observation
-    if (obs.eventtype() == "EventList") {
-
-        // Extract region of interest from CTA observation
-        const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
-        if (list == NULL) {
-            std::string msg = "CTA Observation does not contain an event "
-                              "list. Event list information is needed to "
-                              "retrieve the Region of Interest for each "
-                              "CTA observation.";
-            throw GException::invalid_value(G_SET, msg);
-        }
-        const GCTARoi& roi = list->roi();
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+obs.name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
-            throw GException::invalid_value(G_SET, msg);
-        }
-
-        // Get references on CTA response and pointing direction
-        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        const GSkyDir&         pnt = obs.pointing().dir();
-
-        // Continue only if response is valid
-        if (rsp != NULL) {
-
-            // Loop over all pixels in sky map
-            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-    
-                // Get pixel sky direction
-                GSkyDir dir = m_cube.inx2dir(pixel);
-                
-                // Continue only if pixel is within RoI
-                if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
-
-                    // Compute theta angle with respect to pointing direction
-                    // in radians
-                    double  theta = pnt.dist(dir);
-
-                    // Loop over all exposure cube energy bins
-                    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
-
-                        // Get logE/TeV
-                        double logE = m_ebounds.elogmean(iebin).log10TeV();
-
-                        // Loop over delta values
-                        for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
-
-                            // Compute delta in radians
-                            double delta = m_deltas[idelta] * gammalib::deg2rad;
-
-                            // Set map index
-                            int imap = offset(idelta, iebin);
-
-                            // Set PSF cube
-                            m_cube(pixel, imap) = rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE);
-
-                        } // endfor: looped over delta bins
-
-                    } // endfor: looped over energy bins
-
-                } // endif: pixel was within RoI
-
-            } // endfor: looped over all pixels
-
-        } // endif: response was valid
-
-    } // endif: observation was unbinned
+    // Fill PSF cube
+    fill_cube(obs);
 
     // Compile option: guarantee smooth Psf
     #if defined(G_SMOOTH_PSF)
@@ -448,7 +394,9 @@ void GCTACubePsf::set(const GCTAObservation& obs)
  * @brief Fill PSF cube from observation container
  *
  * @param[in] obs Observation container.
- * @param[in] log Pointer towards logger (default: NULL).
+ * @param[in] log Pointer towards logger.
+ *
+ * Sets the PSF cube from all CTA observations in the observation container.
  ***************************************************************************/
 void GCTACubePsf::fill(const GObservations& obs, GLog* log)
 {
@@ -462,7 +410,8 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
     for (int i = 0; i < obs.size(); ++i) {
 
         // Get observation and continue only if it is a CTA observation
-        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
+        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>
+                                     (obs[i]);
 
         // Skip observation if it's not CTA
         if (cta == NULL) {
@@ -488,104 +437,14 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Extract region of interest from CTA observation
-        GCTARoi roi = cta->roi();
-
-        // Extract energy boundaries from CTA observation
-        GEbounds obs_ebounds = cta->ebounds();
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+cta->name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
-            throw GException::invalid_value(G_FILL, msg);
-        }
-
-        // Get references on CTA response and pointing direction
-        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-        const GSkyDir&         pnt = cta->pointing().dir();
-
-        // Skip observation if we don't have an unbinned observation
-        if (rsp == NULL) {
-            if (log != NULL) {
-                *log << "WARNING: ";
-                *log << cta->instrument();
-                *log << " observation \"" << cta->name();
-                *log << "\" (id=" << cta->id() << ")";
-                *log << " contains no IRF response.";
-                *log << " Skipping this observation." << std::endl;
-            }
-            continue;
-        }
-
-        // Announce observation usage
-        if (log != NULL) {
-            *log << "Including ";
-            *log << cta->instrument();
-            *log << " observation \"" << cta->name();
-            *log << "\" (id=" << cta->id() << ")";
-            *log << " in point spread function cube computation." << std::endl;
-        }
-
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-                    
-            // Continue only if pixel is within RoI
-            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
-
-                // Compute theta angle with respect to pointing
-                // direction in radians
-                double theta = pnt.dist(dir);
-
-                // Loop over all energy bins
-                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
-
-                    // Skip if pixel is not within observation energy boundaries
-                    if (!obs_ebounds.contains(m_ebounds.emin(iebin)+g_energy_margin,
-                                              m_ebounds.emax(iebin)-g_energy_margin)) {
-                        continue;
-                    }
-
-                    // Get logE/TeV
-                    double logE = m_ebounds.elogmean(iebin).log10TeV();
-
-                    // Compute exposure weight
-                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                    cta->livetime();
-
-                    // Accumulate weights
-                    exposure(pixel, iebin) += weight;
-
-                    // Loop over delta values
-                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
-
-                        // Compute delta in radians
-                        double delta = m_deltas[idelta] * gammalib::deg2rad;
-
-                        // Set map index
-                        int imap = offset(idelta, iebin);
-
-                        // Add on PSF cube
-                        m_cube(pixel, imap) +=
-                            rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
-
-                    } // endfor: looped over delta bins
-
-                } // endfor: looped over energy bins
-
-            } // endif: pixel was within RoI
-
-        } // endfor: looped over all pixels
+        // Fill PSF cube
+        fill_cube(*cta, &exposure, log);
 
     } // endfor: looped over observations
 
     // Compute mean PSF cube by dividing though the weights
     for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+        for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
             if (exposure(pixel, iebin) > 0.0) {
                 double norm = 1.0 / exposure(pixel, iebin);
                 for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
@@ -625,15 +484,15 @@ void GCTACubePsf::read(const GFits& fits)
     clear();
 
     // Get HDUs
-    const GFitsImage& hdu_psfcube = *fits.image("Primary");
-    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
-    const GFitsTable& hdu_deltas  = *fits.table("DELTAS");
+    const GFitsImage& hdu_psfcube  = *fits.image("Primary");
+    const GFitsTable& hdu_energies = *fits.table("ENERGIES");
+    const GFitsTable& hdu_deltas   = *fits.table("DELTAS");
 
     // Read cube
     m_cube.read(hdu_psfcube);
 
-    // Read energy boundaries
-    m_ebounds.read(hdu_ebounds);
+    // Read energies
+    m_energies.read(hdu_energies);
 
     // Read delta nodes
     m_deltas.read(hdu_deltas);
@@ -666,8 +525,8 @@ void GCTACubePsf::write(GFits& fits) const
     // Write cube
     m_cube.write(fits);
 
-    // Write energy boundaries
-    m_ebounds.write(fits);
+    // Write energies
+    m_energies.write(fits);
 
     // Write delta nodes
     m_deltas.write(fits, "DELTAS");
@@ -753,12 +612,12 @@ std::string GCTACubePsf::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
 
-        // Append energy intervals
-        if (m_ebounds.size() > 0) {
-            result.append("\n"+m_ebounds.print(chatter));
+        // Append energies
+        if (m_energies.size() > 0) {
+            result.append("\n"+m_energies.print(chatter));
         }
         else {
-            result.append("\n"+gammalib::parformat("Energy intervals") +
+            result.append("\n"+gammalib::parformat("Energies") +
                           "not defined");
         }
 
@@ -802,7 +661,7 @@ void GCTACubePsf::init_members(void)
     // Initialise members
     m_filename.clear();
     m_cube.clear();
-    m_ebounds.clear();
+    m_energies.clear();
     m_elogmeans.clear();
     m_deltas.clear();
     m_deltas_cache.clear();
@@ -833,7 +692,7 @@ void GCTACubePsf::copy_members(const GCTACubePsf& cube)
     // Copy members
     m_filename          = cube.m_filename;
     m_cube              = cube.m_cube;
-    m_ebounds           = cube.m_ebounds;
+    m_energies          = cube.m_energies;
     m_elogmeans         = cube.m_elogmeans;
     m_deltas            = cube.m_deltas;
     m_deltas_cache      = cube.m_deltas_cache;
@@ -884,6 +743,122 @@ void GCTACubePsf::clear_cube(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Fill PSF cube for one observation
+ *
+ * @param[in] obs Observation.
+ * @param[in] exposure Pointer towards exposure map.
+ * @param[in] log Pointer towards logger.
+ *
+ * @exception GException::invalid_value
+ *            No RoI or response found in CTA observation.
+ ***************************************************************************/
+void GCTACubePsf::fill_cube(const GCTAObservation& obs,
+                            GSkyMap*               exposure,
+                            GLog*                  log)
+{
+    // Only continue if we have an event list
+    if (obs.eventtype() == "EventList") {
+
+        // Extract pointing direction, energy boundaries and ROI from
+        // observation
+        GSkyDir  pnt         = obs.pointing().dir();
+        GEbounds obs_ebounds = obs.ebounds();
+        GCTARoi  roi         = obs.roi();
+
+        // Check for RoI sanity
+        if (!roi.is_valid()) {
+            std::string msg = "No RoI information found in "+obs.instrument()+
+                              " observation \""+obs.name()+"\". Run ctselect "
+                              "to specify an RoI for this observation.";
+            throw GException::invalid_value(G_FILL_CUBE, msg);
+        }
+
+        // Extract response from observation
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>
+                                     (obs.response());
+        if (rsp == NULL) {
+            std::string msg = "No valid instrument response function found in "+
+                              obs.instrument()+" observation \""+obs.name()+
+                              "\". Please specify the instrument response "
+                              "function for this observation.";
+            throw GException::invalid_value(G_FILL_CUBE, msg);
+        }
+
+        // Announce observation usage
+        if (log != NULL) {
+            *log << "Including ";
+            *log << obs.instrument();
+            *log << " observation \"" << obs.name();
+            *log << "\" (id=" << obs.id() << ")";
+            *log << " in point spread function cube computation." << std::endl;
+        }
+
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Get pixel sky direction
+            GSkyDir dir = m_cube.inx2dir(pixel);
+                    
+            // Skip pixel if it is outside the RoI
+            if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
+                continue;
+            }
+
+            // Compute theta angle with respect to pointing direction in radians
+            double theta = pnt.dist(dir);
+
+            // Loop over all energy bins
+            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
+
+                // Skip PSF cube energy if the energy is outside the observation
+                // energy. The PSF cube energies are true energies while the
+                // observation energy boundaries are reconstructed energies,
+                // hence this is only an approximation, but probably the only
+                // we can really do.
+                if (!obs_ebounds.contains(m_energies[iebin])) {
+                    continue;
+                }
+
+                // Get logE/TeV
+                double logE = m_energies[iebin].log10TeV();
+
+                // Compute exposure weight
+                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                obs.livetime();
+
+                // If available, accumulate weights
+                if (exposure != NULL) {
+                    (*exposure)(pixel, iebin) += weight;
+                }
+
+                // Loop over delta values
+                for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+
+                    // Compute delta in radians
+                    double delta = m_deltas[idelta] * gammalib::deg2rad;
+
+                    // Set map index
+                    int imap = offset(idelta, iebin);
+
+                    // Add on PSF cube
+                    m_cube(pixel, imap) +=
+                       rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
+
+                } // endfor: looped over delta bins
+
+            } // endfor: looped over energy bins
+
+        } // endfor: looped over all pixels
+
+    } // endif: observation contained an event list
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Update PSF parameter cache
@@ -993,16 +968,16 @@ void GCTACubePsf::set_delta_axis(void)
 void GCTACubePsf::set_eng_axis(void)
 {
     // Get number of bins
-    int bins = m_ebounds.size();
+    int bins = m_energies.size();
 
-    // Clear nodes
+    // Clear node array
     m_elogmeans.clear();
 
     // Compute nodes
     for (int i = 0; i < bins; ++i) {
      
-        // Append logE/TeV
-        m_elogmeans.append(m_ebounds.elogmean(i).log10TeV());
+        // Get logE/TeV
+        m_elogmeans.append(m_energies[i].log10TeV());
 
     }  // endfor: looped over energy bins
 
@@ -1023,7 +998,7 @@ void GCTACubePsf::set_to_smooth(void)
     if (m_deltas.size() > 2) {
 
         // Set first delta bin to value of second bin (capped Psf)
-        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+        for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
             int isrc = offset(1, iebin);
             int idst = offset(0, iebin);
             for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
@@ -1035,7 +1010,7 @@ void GCTACubePsf::set_to_smooth(void)
         int idelta = m_deltas.size()-1;
 
         // Pad mean PSF with zeros in the last delta bin
-        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+        for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
             int imap = offset(idelta, iebin);
             for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
                 m_cube(pixel, imap) = 0.0;

@@ -532,6 +532,9 @@ void GXml::load(const GFilename& filename)
     // Close URL
     url.close();
 
+    // Store filename in XML document
+    m_root.filename(filename);
+
     // Return
     return;
 }
@@ -552,10 +555,13 @@ void GXml::load(const GFilename& filename)
  * @todo Ideally, we would like to extract the URL type from the filename
  * so that any kind of URL can be used for loading.
  ***************************************************************************/
-void GXml::save(const GFilename& filename)
+void GXml::save(const GFilename& filename) const
 {
     // Open XML file for writing
     GUrlFile url(filename.url().c_str(), "w");
+
+    // Store filename in XML document (circumvent const correctness)
+    const_cast<GXmlDocument*>(&m_root)->filename(filename);
 
     // Write XML document
     write(url, 0);
@@ -611,8 +617,8 @@ void GXml::write(GUrl& url, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML object
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @param[in] indent Text indentation (default to 0).
+ * @param[in] chatter Chattiness.
+ * @param[in] indent Text indentation.
  * @return String containing XML object.
  ***************************************************************************/
 std::string GXml::print(const GChatter& chatter, const int& indent) const
@@ -639,7 +645,7 @@ std::string GXml::print(const GChatter& chatter, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML object
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing XML object.
  ***************************************************************************/
 std::string GXml::print(const GChatter& chatter) const
@@ -867,7 +873,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Handle element start tag
     case MT_ELEMENT_START:
         {
-            // Create new element node, set it's parent, append it to the
+            // Create new element node, set its parent, append it to the
             // current node and make it the current node
             GXmlElement element(segment);
             element.parent(*current);
@@ -907,8 +913,11 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Append comment markup
     case MT_COMMENT:
         {
-            // Append comment
-            (*current)->append(GXmlComment(segment));
+            // Create a new comment node, set its parent and append it to the
+            // current node
+            GXmlComment comment(segment);
+            comment.parent(*current);
+            (*current)->append(comment);
         }
         break;
 
@@ -954,8 +963,11 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Processing tag
     case MT_PROCESSING:
         {
-            // Append PI
-            (*current)->append(GXmlPI(segment));
+            // Create a new PI node, set its parent and append it to the
+            // current node
+            GXmlPI pi(segment);
+            pi.parent(*current);
+            (*current)->append(pi);
         }
         break;
 

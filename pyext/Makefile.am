@@ -29,110 +29,199 @@
 # Works only if Python is available
 if WITH_PYTHON
 
+# Set wrapper directory depending on the whether the wrappers were actually
+# shipped with the distribution of whether the wrappers have to be build
+# using swig
+if BUILD_WRAPPERS
+  wrapperdir = $(builddir)
+else
+  wrapperdir = $(srcdir)
+endif
+
 # Set instrument specific SWIG targets
 if WITH_INST_MWL
-  MWL_SWIG_TARGETS = gammalib/mwl_wrap.cpp gammalib/mwl.py
-  MWL_TESTS        = ../inst/mwl/test/test_MWL.py
+  MWL_SWIG_TARGETS = $(wrapperdir)/gammalib/mwl_wrap.cpp \
+                     $(wrapperdir)/gammalib/mwl.py
+  MWL_TESTS        = $(top_srcdir)/inst/mwl/test/test_MWL.py
 endif
 if WITH_INST_CTA
-  CTA_SWIG_TARGETS = gammalib/cta_wrap.cpp gammalib/cta.py
-  CTA_TESTS        = ../inst/cta/test/test_CTA.py
+  CTA_SWIG_TARGETS = $(wrapperdir)/gammalib/cta_wrap.cpp \
+                     $(wrapperdir)/gammalib/cta.py
+  CTA_TESTS        = $(top_srcdir)/inst/cta/test/test_CTA.py
 endif
 if WITH_INST_LAT
-  LAT_SWIG_TARGETS = gammalib/lat_wrap.cpp gammalib/lat.py
-  LAT_TESTS        = ../inst/lat/test/test_LAT.py
+  LAT_SWIG_TARGETS = $(wrapperdir)/gammalib/lat_wrap.cpp \
+                     $(wrapperdir)/gammalib/lat.py
+  LAT_TESTS        = $(top_srcdir)/inst/lat/test/test_LAT.py
 endif
 if WITH_INST_COM
-  COM_SWIG_TARGETS = gammalib/com_wrap.cpp gammalib/com.py
-  COM_TESTS        = ../inst/com/test/test_COM.py
+  COM_SWIG_TARGETS = $(wrapperdir)/gammalib/com_wrap.cpp \
+                     $(wrapperdir)/gammalib/com.py
+  COM_TESTS        = $(top_srcdir)/inst/com/test/test_COM.py
 endif
 INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
                     $(CTA_SWIG_TARGETS) \
                     $(LAT_SWIG_TARGETS) \
                     $(COM_SWIG_TARGETS)
 
+# Set SWIG targets
+PYTHON_WRAPPERS = $(wrapperdir)/gammalib/app_wrap.cpp \
+                  $(wrapperdir)/gammalib/app.py \
+                  $(wrapperdir)/gammalib/base_wrap.cpp \
+                  $(wrapperdir)/gammalib/base.py \
+                  $(wrapperdir)/gammalib/fits_wrap.cpp \
+                  $(wrapperdir)/gammalib/fits.py \
+                  $(wrapperdir)/gammalib/linalg_wrap.cpp \
+                  $(wrapperdir)/gammalib/linalg.py \
+                  $(wrapperdir)/gammalib/model_wrap.cpp \
+                  $(wrapperdir)/gammalib/model.py \
+                  $(wrapperdir)/gammalib/numerics_wrap.cpp \
+                  $(wrapperdir)/gammalib/numerics.py \
+                  $(wrapperdir)/gammalib/obs_wrap.cpp \
+                  $(wrapperdir)/gammalib/obs.py \
+                  $(wrapperdir)/gammalib/opt_wrap.cpp \
+                  $(wrapperdir)/gammalib/opt.py \
+                  $(wrapperdir)/gammalib/sky_wrap.cpp \
+                  $(wrapperdir)/gammalib/sky.py \
+                  $(wrapperdir)/gammalib/support_wrap.cpp \
+                  $(wrapperdir)/gammalib/support.py \
+                  $(wrapperdir)/gammalib/test_wrap.cpp \
+                  $(wrapperdir)/gammalib/test.py \
+                  $(wrapperdir)/gammalib/xml_wrap.cpp \
+                  $(wrapperdir)/gammalib/xml.py \
+                  $(wrapperdir)/gammalib/xspec_wrap.cpp \
+                  $(wrapperdir)/gammalib/xspec.py \
+                  $(wrapperdir)/gammalib/vo_wrap.cpp \
+                  $(wrapperdir)/gammalib/vo.py \
+                  $(INST_SWIG_TARGETS)
+
 # Test scripts to be distributed in $(pyexecdir)/gammalib/tests
 testscripts = gammalib/tests/__init__.py \
-              ../test/test_python.py \
-              ../test/test_GApplication.py \
-              ../test/test_GFits.py \
-              ../test/test_GLinalg.py \
-              ../test/test_GModel.py \
-              ../test/test_GNumerics.py \
-              ../test/test_GObservation.py \
-              ../test/test_GOptimizer.py \
-              ../test/test_GSky.py \
-              ../test/test_GSupport.py \
-              ../test/test_GTest.py \
-              ../test/test_GVO.py \
-              ../test/test_GXml.py \
-              ../test/test_GXspec.py \
+              $(top_srcdir)/test/test_python.py \
+              $(top_srcdir)/test/test_GApplication.py \
+              $(top_srcdir)/test/test_GFits.py \
+              $(top_srcdir)/test/test_GLinalg.py \
+              $(top_srcdir)/test/test_GModel.py \
+              $(top_srcdir)/test/test_GNumerics.py \
+              $(top_srcdir)/test/test_GObservation.py \
+              $(top_srcdir)/test/test_GOptimizer.py \
+              $(top_srcdir)/test/test_GSky.py \
+              $(top_srcdir)/test/test_GSupport.py \
+              $(top_srcdir)/test/test_GTest.py \
+              $(top_srcdir)/test/test_GVO.py \
+              $(top_srcdir)/test/test_GXml.py \
+              $(top_srcdir)/test/test_GXspec.py \
               $(MWL_TESTS) $(CTA_TESTS) $(LAT_TESTS) $(COM_TESTS)
-testdata    = ../test/data/initial_coords.txt \
-              ../test/data/fk5_to_galactic.txt \
-              ../test/data/file.fits.gz
+
+# Test data to be distributed in $(pyexecdir)/gammalib/tests/data
+testdata = $(top_srcdir)/test/data/initial_coords.txt \
+           $(top_srcdir)/test/data/fk5_to_galactic.txt \
+           $(top_srcdir)/test/data/file.fits.gz \
+           $(top_srcdir)/test/data/test_GApplication.par \
+           $(top_srcdir)/test/data/model_point_plaw.xml
 
 # Distribute scripts
-EXTRA_DIST       = $(testscripts) $(testdata)
 testscriptsdir   = $(pyexecdir)/gammalib/tests
 testscripts_DATA = $(testscripts)
 testdatadir      = $(pyexecdir)/gammalib/tests/data
 testdata_DATA    = $(testdata)
 
-# Distribute test data
+# Distribute CTA test data (optionally)
 if WITH_INST_CTA
-  testdatacta       = ../inst/cta/test/data/irf_1dc.xml \
-                      ../inst/cta/test/data/irf_unbinned.xml \
-                      ../inst/cta/test/data/crab_events.fits.gz \
-                      ../inst/cta/test/data/crab_cntmap.fits.gz
+  testdatacta       = $(top_srcdir)/inst/cta/test/data/irf_1dc.xml \
+                      $(top_srcdir)/inst/cta/test/data/irf_unbinned.xml \
+                      $(top_srcdir)/inst/cta/test/data/crab_irf.xml \
+                      $(top_srcdir)/inst/cta/test/data/onoff_model.xml \
+                      $(top_srcdir)/inst/cta/test/data/crab_events.fits.gz \
+                      $(top_srcdir)/inst/cta/test/data/crab_cntmap.fits.gz
   testdatactadir    = $(pyexecdir)/gammalib/tests/cta/data
   testdatacta_DATA  = $(testdatacta)
-  testcaldbcta      = ../inst/cta/test/caldb/cta_dummy_irf.dat \
-                      ../inst/cta/test/caldb/prod1_gauss.fits.gz \
-                      ../inst/cta/test/caldb/prod1_king.fits.gz
+  testcaldbcta      = $(top_srcdir)/inst/cta/test/caldb/cta_dummy_irf.dat \
+                      $(top_srcdir)/inst/cta/test/caldb/prod1_gauss.fits.gz \
+                      $(top_srcdir)/inst/cta/test/caldb/prod1_king.fits.gz
   testcaldbctadir   = $(pyexecdir)/gammalib/tests/cta/caldb
   testcaldbcta_DATA = $(testcaldbcta)
-  testdc1cta        = ../inst/cta/test/caldb/dc1/arf.fits.gz \
-                      ../inst/cta/test/caldb/dc1/psf.fits.gz \
-                      ../inst/cta/test/caldb/dc1/psf_magic.fits.gz \
-                      ../inst/cta/test/caldb/dc1/rmf.fits.gz
+  testdc1cta        = $(top_srcdir)/inst/cta/test/caldb/dc1/arf.fits.gz \
+                      $(top_srcdir)/inst/cta/test/caldb/dc1/psf.fits.gz \
+                      $(top_srcdir)/inst/cta/test/caldb/dc1/psf_magic.fits.gz \
+                      $(top_srcdir)/inst/cta/test/caldb/dc1/rmf.fits.gz
   testdc1ctadir     = $(pyexecdir)/gammalib/tests/cta/caldb/dc1
   testdc1cta_DATA   = $(testdc1cta)
 endif
 
-# Sources that are required for the build. All targets in the list will be built
-# before anything. These are honored by 'make all', 'make check' and 'make install'.
-# We use this here to make sure that all these targets are build by swig before we
-# start compiling the Python modules.
-BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
-                gammalib/base_wrap.cpp gammalib/base.py \
-                gammalib/fits_wrap.cpp gammalib/fits.py \
-                gammalib/linalg_wrap.cpp gammalib/linalg.py \
-                gammalib/model_wrap.cpp gammalib/model.py \
-                gammalib/numerics_wrap.cpp gammalib/numerics.py \
-                gammalib/obs_wrap.cpp gammalib/obs.py \
-                gammalib/opt_wrap.cpp gammalib/opt.py \
-                gammalib/sky_wrap.cpp gammalib/sky.py \
-                gammalib/support_wrap.cpp gammalib/support.py \
-                gammalib/test_wrap.cpp gammalib/test.py \
-                gammalib/xml_wrap.cpp gammalib/xml.py \
-                gammalib/xspec_wrap.cpp gammalib/xspec.py \
-                gammalib/vo_wrap.cpp gammalib/vo.py \
-                $(INST_SWIG_TARGETS)
+# If building of Python wrappers was requested then add them to the build
+# source
+if BUILD_WRAPPERS
+
+# Set SWIG compile command
+SWIGCOMPILE = $(SWIG) -c++ -python -Wall
+
+# Sources that are required for the build. All targets in the list will be
+# built before anything. These are honored by 'make all', 'make check' and
+# 'make install'. We use this here to make sure that all these targets are
+# build by swig before we start compiling the Python modules.
+BUILT_SOURCES = $(PYTHON_WRAPPERS)
+
+# Add the wrappers to the files that will be deleted in a 'make clean'
+CLEAN_FILES = $(BUILT_SOURCES)
+
+# Rule to build SWIG wrappers
+swig: $(BUILT_SOURCES)
+
+# General rule for core modules
+%_wrap.cpp %.py: %.i
+	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -I$(top_srcdir)/pyext -o $@ -outdir gammalib $<; \
+	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
+
+# Rule for MWL module
+if WITH_INST_MWL
+gammalib/mwl.py: gammalib/mwl_wrap.cpp
+gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -I$(top_srcdir)/pyext -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/mwl.Tpi" "gammalib/mwl.Pi"; else rm -f "gammalib/mwl.Tpi"; exit 1; fi
+endif
+
+# Rule for CTA module
+if WITH_INST_CTA
+gammalib/cta.py: gammalib/cta_wrap.cpp
+gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -I$(top_srcdir)/pyext -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/cta.Tpi" "gammalib/cta.Pi"; else rm -f "gammalib/cta.Tpi"; exit 1; fi
+endif
+
+# Rule for LAT module
+if WITH_INST_LAT
+gammalib/lat.py: gammalib/lat_wrap.cpp
+gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -I$(top_srcdir)/pyext -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/lat.Tpi" "gammalib/lat.Pi"; else rm -f "gammalib/lat.Tpi"; exit 1; fi
+endif
+
+# Rule for COM module
+if WITH_INST_COM
+gammalib/com.py: gammalib/com_wrap.cpp
+gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -I$(top_srcdir)/pyext -o gammalib/com_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/com.Tpi" "gammalib/com.Pi"; else rm -f "gammalib/com.Tpi"; exit 1; fi
+endif
+
+# ... otherwise, if building of Python wrappers has not been required then
+# they are located in the source directory and we don't have to build them
+# using swig
+else
+CLEAN_FILES =
+BUILT_SOURCES =
+endif # BUILD_WRAPPERS
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = gammalib/tests $(PYTHON_WRAPPERS)
+dist-hook:
+	cp -r $(srcdir)/*.i $(distdir)
+	cp -r $(srcdir)/gammalib/*.i $(distdir)/gammalib
 
 # Dependencies. Obtain the list of dependencies by executing ls.
 DEPFILES = $(shell ls gammalib/*.Pi 2> /dev/null)
 include $(DEPFILES)
-
-# Set files to be removed in clean. We remove only the SWIG interface files if SWIG
-# is available to rebuild them. 
-if HAVE_SWIG
-  CLEAN_FILES = $(BUILT_SOURCES)
-endif
-CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
-
-# Set SWIG compile command
-SWIGCOMPILE = $(SWIG) -c++ -python -Wall
 
 # Things we want to do when 'make' is invoked.
 all-local: build
@@ -142,70 +231,55 @@ build: $(BUILT_SOURCES)
 	@PYTHON_BUILD_PREFIX@ $(PYTHON) setup.py build_ext
 if IS_ELCAPITAN
 	-for f in build/gammalib/_*.so; do \
-		echo "Post process module "$$f; \
-		install_name_tool -change $(libdir)/libgamma.2.dylib @rpath/libgamma.2.dylib $$f; \
-		install_name_tool -add_rpath $(libdir) $$f; \
-		install_name_tool -add_rpath $(abs_top_srcdir)/src/.libs $$f; \
+		echo "Build post process Python module "$$f; \
+		libgamma=`otool -L $$f | grep -o libgamma.*.dylib`; \
+		install_name_tool -change $(libdir)/$$libgamma @rpath/$$libgamma $$f; \
+		install_name_tool -add_rpath $(abs_top_builddir)/src/.libs $$f; \
 	done
 endif
 
 # Do nothing for 'make check'
 #check-local:
 
-# Install the gammalib extension module
+# Install the gammalib Python module
 install-exec-local:
-	$(PYTHON) setup.py install --prefix=$(prefix)
+if IS_ELCAPITAN
+	-for f in build/gammalib/_*.so; do \
+		echo "Install pre process Python module "$$f; \
+		install_name_tool -rpath $(abs_top_builddir)/src/.libs $(libdir) $$f; \
+	done
+endif
+	$(PYTHON) setup.py install --prefix=$(DESTDIR)$(prefix)
 
-# Remove build directory and test libraries
+# Uninstall the gammalib Python module
+uninstall-local:
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.py
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.pyc
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.so
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/__pycache__
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/tests/*.pyc
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/tests/__pycache__
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib-@VERSION@*.egg-info
+	rm -rf $(DESTDIR)$(datarootdir)/gammalib
+
+# Set files to be removed in 'make clean'
+CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
+
+# Files to be removed in build directory. Only remove wrapper files if the
+# have been built or if the were copied in the build directory
 clean-local:
 	rm -rf build
-	rm -rf gammalib/__init__.py? gammalib/_*.so gammalib/*.pyc
-
-# Rules for building Python wrappers using SWIG. The rules are only active if
-# SWIG is avialable. The is a general rule for core modules and specific rules
-# for each instrument module.
-if HAVE_SWIG
-
-# Rule to build SWIG wrappers
-swig: $(BUILT_SOURCES)
-
-# General rule for core modules
-%_wrap.cpp %.py: %.i
-	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o $@ -outdir gammalib $<; \
-	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
-
-# Rule for MWL module
-if WITH_INST_MWL
-gammalib/mwl.py: gammalib/mwl_wrap.cpp
-gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
-	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
-	then mv -f "gammalib/mwl.Tpi" "gammalib/mwl.Pi"; else rm -f "gammalib/mwl.Tpi"; exit 1; fi
+if BUILD_WRAPPERS
+	rm -rf $(builddir)/gammalib/*.py
+	rm -rf $(builddir)/gammalib/*_wrap.cpp
+else
+	if test "x$(builddir)" != "x$(srcdir)"; then \
+		rm -rf $(builddir)/gammalib/*.py; \
+		rm -rf $(builddir)/gammalib/*_wrap.cpp; \
+	fi
 endif
-
-# Rule for CTA module
-if WITH_INST_CTA
-gammalib/cta.py: gammalib/cta_wrap.cpp
-gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
-	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
-	then mv -f "gammalib/cta.Tpi" "gammalib/cta.Pi"; else rm -f "gammalib/cta.Tpi"; exit 1; fi
-endif
-
-# Rule for LAT module
-if WITH_INST_LAT
-gammalib/lat.py: gammalib/lat_wrap.cpp
-gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
-	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
-	then mv -f "gammalib/lat.Tpi" "gammalib/lat.Pi"; else rm -f "gammalib/lat.Tpi"; exit 1; fi
-endif
-
-# Rule for COM module
-if WITH_INST_COM
-gammalib/com.py: gammalib/com_wrap.cpp
-gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
-	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -o gammalib/com_wrap.cpp -outdir gammalib $<; \
-	then mv -f "gammalib/com.Tpi" "gammalib/com.Pi"; else rm -f "gammalib/com.Tpi"; exit 1; fi
-endif
-
-endif # HAVE_SWIG
+	rm -rf $(builddir)/gammalib/*.pyc
+	rm -rf $(builddir)/gammalib/_*.so
+	rm -rf $(builddir)/gammalib/__pycache__
 
 endif # WITH_PYTHON

@@ -32,21 +32,25 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GHealpix.hpp"
-#include "GModelSpatialDiffuseCube.hpp"
-#include "GModelSpatialRegistry.hpp"
+#include "GEnergies.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
+#include "GXmlElement.hpp"
+#include "GModelSpatialRegistry.hpp"
+#include "GModelSpatialDiffuseCube.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialDiffuseCube g_spatial_cube_seed;
 const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialDiffuseCube g_spatial_cube_legacy_seed(true, "MapCubeFunction");
+const GModelSpatialRegistry    g_spatial_cube_legacy_registry(&g_spatial_cube_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL                     "GModelSpatialDiffuseCube::eval(GSkyDir&)"
-#define G_EVAL_GRADIENTS "GModelSpatialDiffuseCube::eval_gradients(GSkyDir&)"
 #define G_MC          "GModelSpatialDiffuseCube::mc(GEnergy&, GTime&, GRan&)"
 #define G_READ                 "GModelSpatialDiffuseCube::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
@@ -58,7 +62,8 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_CACHE                             //!< Dump MC cache values
+//#define G_DEBUG_MC                                     //!< Debug MC method
+//#define G_DEBUG_MC_CACHE                               //!< Debug MC cache
 
 
 /*==========================================================================
@@ -69,12 +74,37 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty map cube model.
  ***************************************************************************/
 GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(void) :
                           GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty map cube model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const bool&        dummy,
+                                                   const std::string& type) :
+                          GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -280,11 +310,16 @@ GModelSpatialDiffuseCube* GModelSpatialDiffuseCube::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] photon Incident photon.
- * @return Model value.
+ * @param[in] gradients Compute gradients?
+ * @return Sky map intensity (\f$\mbox{ph cm}^{-2}\mbox{sr}^{-1}\mbox{s}^{-1}\f$)
  *
  * Computes the spatial diffuse model as function of photon parameters.
+ *
+ * If the @p gradients flag is true the method will also evaluate the partial
+ * derivatives of the model.
  ***************************************************************************/
-double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
+double GModelSpatialDiffuseCube::eval(const GPhoton& photon,
+                                      const bool&    gradients) const
 {
     // Get log-log interpolated cube intensity
     double intensity = cube_intensity(photon);
@@ -292,44 +327,25 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
     // Set the intensity times the scaling factor as model value
     double value = intensity * m_value.value();
 
+    // Optionally compute partial derivatives
+    if (gradients) {
+
+        // Compute partial derivatives of the parameter value. In case that
+        // the value is negative set the gradient to zero.
+        double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
+        if (value < 0.0) {
+            g_value = 0.0;
+        }
+
+        // Set gradient
+        m_value.factor_gradient(g_value);
+
+    } // endif: computed partial derivatives
+
     // Make sure that value is not negative
     if (value < 0.0) {
         value = 0.0;
     }
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] photon Incident photon.
- * @return Model value.
- *
- * Computes the spatial diffuse model as function of photon parameters and
- * sets the value gradient.
- ***************************************************************************/
-double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
-{
-    // Get log-log interpolated cube intensity
-    double intensity = cube_intensity(photon);
-
-    // Compute the model value
-    double value = intensity * m_value.value();
-
-    // Compute partial derivatives of the parameter value
-    double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
-
-    // Make sure that value is not negative
-    if (value < 0.0) {
-        value   = 0.0;
-        g_value = 0.0;
-    }
-
-    // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseCube*>(this)->m_value.factor_gradient(g_value);
 
     // Return value
     return value;
@@ -345,159 +361,128 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
  * @return Sky direction.
  *
  * @exception GException::invalid_value
- *            No energy boundaries specified, or energy boundaries do not
- *            cover the specified @p energy.
+ *            No map cube defined.
+ *            No energy boundaries defined.
+ *            Simulation cone not defined or does not overlap with map cube.
  *
  * Returns a random sky direction according to the intensity distribution of
- * the model sky map and the specified energy. The method makes use of a
- * cache array that contains the normalised cumulative flux values for each
- * of the sky maps in the cube. The specified energy is used to select the
- * appropriate cache array from the cube. Using a uniform random number, the
- * selected cache array is scanned using a bi-section method to determine
- * the skymap pixel for which the position should be returned. To avoid
- * binning problems, the exact position within the pixel is set by a uniform
- * random number generator (neglecting thus pixel distortions). The
- * fractional skymap pixel is then converted into a sky direction.
+ * the model sky map and the specified energy. The method uses a rejection
+ * method to determine the sky direction.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                                      const GTime&   time,
                                      GRan&          ran) const
 {
-    // Allocate sky direction
-    GSkyDir dir;
-
     // Fetch cube
     fetch_cube();
 
     // Determine number of skymap pixels
     int npix = pixels();
 
-    // Continue only if there are skymap pixels
-    if (npix > 0) {
+    // Throw an exception if there are no sky map pixels
+    if (npix <= 0) {
+        std::string msg = "No map cube defined. Please specify a valid map cube.";
+        throw GException::invalid_value(G_MC, msg);
+    }
 
-        // If no energy boundaries are defined, throw an exception
-        if (m_ebounds.size() < 1) {
-            std::string msg = "The energy boundaries of the maps in the cube"
-                              " have not been defined. Maybe the map cube file"
-                              " is missing the \"ENERGIES\" extension which"
-                              " defines the energy of each map in the cube.\n"
-                              "Please provide the energy information."; 
-            throw GException::invalid_value(G_MC, msg);
+    // Throw an exception if no energy boundaries are defined
+    if (m_ebounds.size() < 1) {
+        std::string msg = "The energy boundaries of the maps in the cube have "
+                          "not been defined. Maybe the map cube file is missing "
+                          "the \"ENERGIES\" extension which defines the energy "
+                          "of each map in the cube. Please provide the energy "
+                          "information.";
+        throw GException::invalid_value(G_MC, msg);
+    }
+
+    // Set energy for interpolation
+    m_logE.set_value(energy.log10MeV());
+
+    // Compute maximum map value within simulation cone by log-log interpolation
+    // of the maximum values that are stored for each map
+    double max       = 0.0;
+    double max_left  = m_mc_max[m_logE.inx_left()];
+    double max_right = m_mc_max[m_logE.inx_right()];
+    if (max_left > 0.0 && max_right > 0.0) {
+        double max_log = m_logE.wgt_left()  * std::log(max_left) +
+                         m_logE.wgt_right() * std::log(max_right);
+        max = std::exp(max_log);
+    }
+    else if (max_left > 0.0) {
+        max = max_left;
+    }
+    else if (max_right > 0.0) {
+        max = max_right;
+    }
+
+    // Throw an exception if the maximum MC intensity is not positive. This
+    // can be the case because the simulation cone has not been defined or
+    // because it does not overlap with the sky map
+    if (max <= 0.0) {
+        std::string msg = "Simulation cone has not been defined or does not "
+                          "overlap with the sky map. Please specify a valid "
+                          "simulation cone.";
+        throw GException::invalid_value(G_MC, msg);
+    }
+
+    // Allocate sky direction
+    GSkyDir dir;
+
+    // Debug option: initialise counter
+    #if defined(G_DEBUG_MC)
+    int num_iterations = 0;
+    #endif
+
+    // Get sky direction
+    while (true) {
+
+        // Debug option: increment counter
+        #if defined(G_DEBUG_MC)
+        num_iterations++;
+        #endif
+
+        // Simulate random sky direction within Monte Carlo simulation cone
+        double theta = std::acos(1.0 - ran.uniform() * m_mc_one_minus_cosrad) *
+                       gammalib::rad2deg;
+        double phi   = 360.0 * ran.uniform();
+        dir = m_mc_centre;
+        dir.rotate_deg(phi, theta);
+
+        // Get map value at simulated sky direction
+        double value       = 0.0;
+        double value_left  = m_cube(dir, m_logE.inx_left());
+        double value_right = m_cube(dir, m_logE.inx_right());
+        if (value_left > 0.0 && value_right > 0.0) {
+            double value_log = m_logE.wgt_left()  * std::log(value_left) +
+                               m_logE.wgt_right() * std::log(value_right);
+            value = std::exp(value_log);
+        }
+        else if (value_left > 0.0) {
+            value = value_left;
+        }
+        else if (value_right > 0.0) {
+            value = value_right;
         }
 
-        // Determine the map that corresponds best to the specified energy.
-        // We first get the maps that are bounding the specified energy and then
-        // select randomly a map according to the log-interpolation
-        // weights
-        m_logE.set_value(energy.log10MeV());
-        int i = m_logE.inx_left();
-        if (ran.uniform() > m_logE.wgt_left()) {
-            i = m_logE.inx_right();
+        // If map value is non-positive then simulate a new sky direction
+        if (value <= 0.0) {
+            continue;
         }
 
         // Get uniform random number
-        double u = ran.uniform();
+        double uniform = ran.uniform() * max;
 
-        // Get pixel index according to random number. We use a bi-section
-        // method to find the corresponding skymap pixel
-        int offset = i * (npix+1);
-        int low    = offset;
-        int high   = offset + npix;
-        while ((high - low) > 1) {
-            int mid = (low+high) / 2;
-            if (u < m_mc_cache[mid]) {
-                high = mid;
-            }
-            else if (m_mc_cache[mid] <= u) {
-                low = mid;
-            }
+        // Exit loop if the random number is not larger than the map cube value
+        if (uniform <= value) {
+            break;
         }
-        int index = low - offset;
 
-        // Convert sky map index to sky map pixel
-        GSkyPixel pixel = m_cube.inx2pix(index);
+    } // endwhile: loop until sky direction was accepted
 
-        // If we have a 2D pixel then randomize pixel values and convert them
-        // into a sky direction
-        if (pixel.is_2D()) {
-
-            // Use a rejection method to find a sky direction
-            while (true) {
-
-                // Draw random sky pixel
-                GSkyPixel test(pixel.x() + ran.uniform() - 0.5,
-                               pixel.y() + ran.uniform() - 0.5);
-
-                // Derive sky direction
-                dir = m_cube.pix2dir(test);
-
-                // Get map value at that sky direction
-                double value = m_cube(dir,i);
-
-                // Get uniform random number up to the maximum
-                double uniform = ran.uniform() * m_mc_max[low];
-
-                // Exit loop if we're not larger than the map value
-                if (uniform <= value) {
-                    break;
-                }
-
-            } // endwhile: rejection method
-
-        } // endif: had a 2D pixel
-
-        // ... otherwise convert pixel into sky direction and randomize
-        // position. We use a while loop to randomize the position within a
-        // circle that enclosed the pixel and retain only directions that
-        // result in the same pixel index and that are compatible with the
-        // density distribution.
-        else {
-
-            // Get pointer on HealPix projection
-            const GHealpix* healpix =
-                static_cast<const GHealpix*>(m_cube.projection());
-
-            // Get enclosing radius
-            double radius = healpix->max_pixrad();
-
-            // Initialize pixel centre
-            dir = m_cube.pix2dir(pixel);
-
-            // Get randomized pixel
-            GSkyDir randomized_dir;
-            double  cosrad = std::cos(radius);
-            while (true) {
-
-                // Get randomized sky direction
-                randomized_dir = dir;
-                double theta   = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) * gammalib::rad2deg;
-                double phi     = 360.0 * ran.uniform();
-                randomized_dir.rotate_deg(phi, theta);
-
-                // Skip if we are not in the actual pixel
-                if (m_cube.dir2inx(randomized_dir) != index) {
-                    continue;
-                }
-
-                // Get map value at that sky direction
-                double value = m_cube(randomized_dir,i);
-
-                // Get uniform random number up to the maximum
-                double uniform = ran.uniform() * m_mc_max[low];
-
-                // Exit loop if we're not larger than the map value
-                if (uniform <= value) {
-                    break;
-                }
-
-            } // endwhile
-
-            // Store randomize sky position
-            dir = randomized_dir;
-
-        } // endelse: we had a HealPix map
-
-    } // endif: there were pixels in sky map
+    // Debug option: log counter
+    #if defined(G_DEBUG_MC)
+    std::cout << num_iterations << " ";
+    #endif
 
     // Return sky direction
     return dir;
@@ -528,52 +513,47 @@ bool GModelSpatialDiffuseCube::contains(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * @exception GException::invalid_value
+ *            Model parameters not found in XML element.
  *
  * Read the map cube information from an XML element. The XML element should
- * have either the format
+ * have the format
  *
- *     <spatialModel type="MapCubeFunction" file="test_file.fits">
- *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
+ *       <parameter name="Normalization" ../>
  *     </spatialModel>
- *
- * or alternatively
- *
- *     <spatialModel type="MapCubeFunction" file="test_file.fits">
- *       <parameter name="Value" scale="1" value="1" min="0.1" max="10" free="0"/>
- *     </spatialModel>
- *
  ***************************************************************************/
 void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
 {
-    // Clear model
-    clear();
-
-    // Verify that XML element has exactly 1 parameters
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Map cube spatial model requires exactly 1 parameter.");
-    }
-
-    // Get pointer on model parameter
-    const GXmlElement* par = xml.element("parameter", 0);
-
-    // Get value
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value") {
+    // If "Normalization" parameter exists then read parameter from this
+    // XML element
+    if (gammalib::xml_has_par(xml, "Normalization")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Normalization");
         m_value.read(*par);
     }
+
+    // ... otherwise try reading parameter from "Value" parameter
+    #if defined(G_LEGACY_XML_FORMAT)
+    else if (gammalib::xml_has_par(xml, "Value")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
+        m_value.read(*par);
+    }
+    #endif
+
+    // ... otherwise throw an exception
     else {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Map cube spatial model requires either \"Value\" or"
-              " \"Normalization\" parameter.");
+        #if defined(G_LEGACY_XML_FORMAT)
+        std::string msg = "Diffuse map cube model requires either "
+                          "\"Normalization\" or \"Value\" parameter.";
+        #else
+        std::string msg = "Diffuse map cube model requires \"Normalization\" "
+                          "parameter.";
+        #endif
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Save filename
-    m_filename = xml.attribute("file");
+    m_filename = gammalib::xml_file_expand(xml, xml.attribute("file"));
 
     // Return
     return;
@@ -595,13 +575,13 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
  * Write the map cube information into an XML element. The XML element will
  * have either the format
  *
- *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
  *     </spatialModel>
  *
  * or alternatively
  *
- *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
  *       <parameter name="Value" scale="1" value="1" min="0.1" max="10" free="0"/>
  *     </spatialModel>
  *
@@ -611,13 +591,13 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "MapCubeFunction");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "MapCubeFunction") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"MapCubeFunction\".");
+              "Spatial model is not of type \""+type()+"\".");
     }
 
     // If XML element has 0 nodes then append parameter node. The name
@@ -649,7 +629,8 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
     }
 
     // Set filename
-    xml.attribute("file", m_filename);
+    //xml.attribute("file", m_filename);
+    xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return
     return;
@@ -772,12 +753,9 @@ GEnergies GModelSpatialDiffuseCube::energies(void)
  * @param[in] radius Simulation cone radius (degrees).
  *
  * Sets the simulation cone centre and radius that defines the directions
- * that will be simulated using the mc() method.
- *
- * @todo I disabled the selection of only pixels within an acceptance code
- *       as these led to problems for maps that were larger than the ROI.
- *       I still need to understand why, and use the selection cone for a
- *       more efficient Monte Carlo simulation.
+ * that will be simulated using the mc() method and pre-computes the maximum
+ * intensity and the spatially integrated flux of each map within the
+ * simulation cone region.
  ***************************************************************************/
 void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                                            const double&  radius) const
@@ -789,8 +767,10 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
         m_mc_centre = centre;
         m_mc_radius = radius;
 
-        // Initialise cache
-        m_mc_cache.clear();
+        // Pre-compute 1 - cosine of radius
+        m_mc_one_minus_cosrad = 1.0 - std::cos(m_mc_radius*gammalib::deg2rad);
+
+        // Initialise Monte Carlo cache
         m_mc_max.clear();
         m_mc_spectrum.clear();
 
@@ -804,170 +784,69 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
         // Continue only if there are pixels and maps
         if (npix > 0 && nmaps > 0) {
 
-            // Reserve space for all pixels in cache
-            m_mc_cache.reserve((npix+1)*nmaps);
-            m_mc_max.reserve((npix+1)*nmaps);
+            // Reserve space in cache
+            m_mc_max.reserve(nmaps);
             m_mc_spectrum.reserve(nmaps);
 
             // Loop over all maps
             for (int i = 0; i < nmaps; ++i) {
 
-                // Compute pixel offset
-                int offset = i * (npix+1);
-
-                // Set first cache value to 0
-                m_mc_cache.push_back(0.0);
-
-                // Initialise cache with cumulative pixel fluxes and compute
-                // total flux in skymap for normalization. Negative pixels
-                // are excluded from the cumulative map.
-                double sum     = 0.0;
-                double sum_map = 0.0;
+                // Compute flux and maximum map intensity within the
+                // simulation cone
+                double total_flux    = 0.0;
+                double max_intensity = 0.0;
                 for (int k = 0; k < npix; ++k) {
-
-                    // Derive effective pixel radius from half opening angle
-                    // that corresponds to the pixel's solid angle. For
-                    // security, the radius is enhanced by 50%.
-                    /*
-                    double pixel_radius =
-                        std::acos(1.0 - m_cube.solidangle(k)/gammalib::twopi) *
-                        gammalib::rad2deg * 1.5;
-                    */
-
-                    // Add up flux with simulation cone radius + effective
-                    // pixel radius. The effective pixel radius is added to
-                    // make sure that all pixels that overlap with the
-                    // simulation cone are taken into account. There is no
-                    // problem of having even pixels outside the simulation
-                    // cone taken into account as long as the mc() method has
-                    // an explicit test of whether a simulated event is
-                    // contained in the simulation cone.
-                    double flux = m_cube.flux(k,i);
-                    if (flux > 0.0) {
-                        //double distance = centre.dist_deg(m_cube.pix2dir(k));
-                        //if (distance <= radius+pixel_radius) {
-                            sum += flux;
-                        //}
-                        sum_map += flux; // sum up total flux in map
-                    }
-
-                    // Push back flux
-                    m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
-                }
-
-                // Normalize cumulative pixel fluxes so that the values in
-                // the cache run from 0 to 1
-                if (sum > 0.0) {
-                    for (int k = 0; k < npix; ++k) {
-                        m_mc_cache[k+offset] /= sum;
+                    double distance = centre.dist_deg(m_cube.pix2dir(k));
+                    if (distance <= radius) {
+                        double flux = m_cube.flux(k,i);
+                        if (flux > 0.0) {
+                            total_flux += flux;
+                        }
+                        double value = m_cube(k,i);
+                        if (value > max_intensity) {
+                            max_intensity = value;
+                        }
                     }
                 }
 
-                // Make sure that last pixel in the cache is >1
-                m_mc_cache[npix+offset] = 1.0001;
+                // Store maximum map intensity
+                m_mc_max.push_back(max_intensity);
 
                 // Store flux as spectral node
                 if (m_logE.size() == nmaps) {
 
-                    // Compute mean energy
+                    // Set map energy
                     GEnergy energy;
                     energy.log10MeV(m_logE[i]);
 
-                    // Only append node if flux > 0
-                    if (sum > 0.0) {
-                        m_mc_spectrum.append(energy, sum);
+                    // Only append node if the integrated flux is positive
+                    // (as we do a log-log interpolation)
+                    if (total_flux > 0.0) {
+                        m_mc_spectrum.append(energy, total_flux);
                     }
 
                 }
 
-                // Do we have a HealPix map?
-                if (m_cube.projection()->code() == "HPX") {
-
-                    // Get pointer on HealPix projection
-                    const GHealpix* healpix =
-                        static_cast<const GHealpix*>(m_cube.projection());
-
-                    // Compute maximum value that may occur from bilinear
-                    // interpolation within this pixel and push this value
-                    // on the stack. We do this by checking values of all
-                    // neighbours.
-                    for (int k = 0; k < npix; ++k) {
-
-                        // Get neighbours
-                        std::vector<int> neighbours = healpix->neighbours(k);
-
-                        // Loop over neighbours
-                        double max = m_cube(k,i);
-                        for (int j = 0; j < neighbours.size(); ++j) {
-                            if (neighbours[j] != -1) {
-                                double value = m_cube(neighbours[j],i);
-                                if (value > max) {
-                                    max = value;
-                                }
-                            }
-                        }
-
-                        // Store maximum
-                        m_mc_max[k+offset] = max;
-
-                    } // endfor: looped over pixels
-
-                } // endif: Healpix projection
-
-                // ... no, then we have a WCS map
-                else {
-
-                    // Compute maximum value that may occur from bilinear
-                    // interpolation within this pixel and push this value
-                    // on the stack. We do this by checking the map values
-                    // at the corners and the centre of each edge.
-                    for (int k = 0; k < npix; ++k) {
-                        GSkyPixel pixel = m_cube.inx2pix(k);
-                        double    max   = m_cube(pixel,i);
-                        for (int ix = -1; ix < 2; ++ix) {
-                            for (int iy = -1; iy < 2; ++iy) {
-                                if (ix != 0 && iy != 0) {
-                                    GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
-                                    if (m_cube.contains(edge)) {
-                                        GSkyDir dir  = m_cube.pix2dir(edge);
-                                        double value = m_cube(dir,i);
-                                        if (value > max) {
-                                            max = value;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        m_mc_max[k+offset] = max;
-                    }
-
-                } // endelse: computed maximum pixel value
-
-                // Make sure that last pixel in the maximum cache has a
-                // well defined value
-                m_mc_max[npix+offset] = 0.0;
-
             } // endfor: looped over all maps
 
-            // Dump cache values for debugging
-            #if defined(G_DEBUG_CACHE)
-            std::cout << "GModelSpatialDiffuseCube::set_mc_cone: cache";
-            std::cout << std::endl;
-            for (int i = 0; i < m_mc_cache.size(); ++i) {
-                std::cout << "i=" << i;
-                std::cout << " cache=" << m_mc_cache[i];
-                std::cout << " max=" << m_mc_max[i] << std::endl;
+            // Log maximum intensity and total flux for debugging
+            #if defined(G_DEBUG_MC_CACHE)
+            std::cout << "GModelSpatialDiffuseCube::set_mc_cone:" << std::endl;
+            std::cout << "  Maximum map intensity:" << std::endl;
+            for (int i = 0; i < m_mc_max.size(); ++i) {
+                GEnergy energy;
+                energy.log10MeV(m_logE[i]);
+                std::cout << "  " << i;
+                std::cout << " " << energy;
+                std::cout << " " << m_mc_max[i] << " ph/cm2/s/sr/MeV";
+                std::cout << std::endl;
             }
-            #endif
-
-            // Dump spectrum for debugging
-            #if defined(G_DEBUG_CACHE)
-            std::cout << "GModelSpatialDiffuseCube::set_mc_cone: spectrum";
-            std::cout << std::endl;
+            std::cout << "  Spatially integrated flux:" << std::endl;
             for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
-                std::cout << i;
+                std::cout << "  " << i;
                 std::cout << " " << m_mc_spectrum.energy(i);
-                std::cout << " " << m_mc_spectrum.intensity(i) << std::endl;
+                std::cout << " " << m_mc_spectrum.intensity(i);
+                std::cout << " ph/cm2/s/MeV" << std::endl;
             }
             #endif
 
@@ -1145,6 +1024,9 @@ std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialDiffuseCube::init_members(void)
 {
+    // Initialise model type
+    m_type = "DiffuseMapCube";
+
     // Initialise Value
     m_value.clear();
     m_value.name("Normalization");
@@ -1165,11 +1047,12 @@ void GModelSpatialDiffuseCube::init_members(void)
     m_logE.clear();
     m_ebounds.clear();
     m_loaded = false;
+    m_region.clear();
 
     // Initialise MC cache
     m_mc_centre.clear();
-    m_mc_radius = -1.0;    //!< Signal that initialisation is needed
-    m_mc_cache.clear();
+    m_mc_radius           = -1.0;    //!< Signal that initialisation is needed
+    m_mc_one_minus_cosrad =  1.0;
     m_mc_max.clear();
     m_mc_spectrum.clear();
 
@@ -1186,19 +1069,21 @@ void GModelSpatialDiffuseCube::init_members(void)
 void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& model)
 {
     // Copy members
+    m_type     = model.m_type;
     m_value    = model.m_value;
     m_filename = model.m_filename;
     m_cube     = model.m_cube;
     m_logE     = model.m_logE;
     m_ebounds  = model.m_ebounds;
     m_loaded   = model.m_loaded;
+    m_region   = model.m_region;
 
     // Copy MC cache
-    m_mc_centre   = model.m_mc_centre;
-    m_mc_radius   = model.m_mc_radius;
-    m_mc_cache    = model.m_mc_cache;
-    m_mc_max      = model.m_mc_max;
-    m_mc_spectrum = model.m_mc_spectrum;
+    m_mc_centre           = model.m_mc_centre;
+    m_mc_radius           = model.m_mc_radius;
+    m_mc_one_minus_cosrad = model.m_mc_one_minus_cosrad;
+    m_mc_max              = model.m_mc_max;
+    m_mc_spectrum         = model.m_mc_spectrum;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -1230,7 +1115,7 @@ void GModelSpatialDiffuseCube::fetch_cube(void) const
     if (!m_loaded && !m_filename.is_empty()) {
 
         // Put in a OMP critical zone
-        #pragma omp critical
+        #pragma omp critical(GModelSpatialDiffuseCube_fetch_cube)
         {
             const_cast<GModelSpatialDiffuseCube*>(this)->load_cube(m_filename);
         } // end of pragma
@@ -1264,11 +1149,7 @@ void GModelSpatialDiffuseCube::load_cube(const GFilename& filename)
     // the environment variables
     m_filename = filename;
 
-    // Get expanded filename
-    //std::string fname = gammalib::expand_env(filename);
-
     // Load cube
-    //m_cube.load(fname);
     m_cube.load(filename);
 
     // Load energies
@@ -1400,9 +1281,9 @@ double GModelSpatialDiffuseCube::cube_intensity(const GPhoton& photon) const
 
         // Perform log-log interpolation
         if (left_intensity > 0.0 && right_intensity > 0.0) {
-            double log_intensity = m_logE.wgt_left()  * std::log10(left_intensity) +
-                                   m_logE.wgt_right() * std::log10(right_intensity);
-            intensity = std::pow(10.0, log_intensity);
+            double log_intensity = m_logE.wgt_left()  * std::log(left_intensity) +
+                                   m_logE.wgt_right() * std::log(right_intensity);
+            intensity = std::exp(log_intensity);
         }
         else if (left_intensity > 0.0) {
             intensity = left_intensity;
@@ -1415,4 +1296,22 @@ double GModelSpatialDiffuseCube::cube_intensity(const GPhoton& photon) const
 
     // Return intensity
     return intensity;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ *
+ * @todo Implement determination of the cube boundary circle
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::set_region(void) const
+{
+    // Set sky region centre to (0,0)
+    m_region.centre(0.0, 0.0);
+
+    // Set sky region radius to 180 degrees (all points included)
+    m_region.radius(180.0);
+
+    // Return
+    return;
 }

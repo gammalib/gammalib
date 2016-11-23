@@ -236,57 +236,7 @@ GModelSpectralGauss* GModelSpectralGauss::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Evaluates
- *
- * \f[
- * S_{\rm E}(E | t) = \frac{m\_norm}{\sqrt{2\pi}m\_sigma}
- *                    \exp(\frac{-(E-m\_mean)^2}{2 m\_sigma^2})
- * \f]
- *
- * where
- * - \f${\tt m\_norm}\f$ is the normalization,
- * - \f${\tt m\_mean}\f$ is the mean energy, and
- * - \f${\tt m\_sigma}\f$ is the energy width.
- ***************************************************************************/
-double GModelSpectralGauss::eval(const GEnergy& srcEng,
-                                 const GTime&   srcTime) const
-{
-    // Get parameter values
-    double energy = srcEng.MeV();
-    double norm   = m_norm.value();
-    double mean   = m_mean.value();
-    double sigma  = m_sigma.value();
-
-    // Compute function value
-    double delta = energy - mean;
-    double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
-    double term2 = delta * delta / (2.0 * sigma * sigma);
-    double value = term1 * std::exp(-term2);
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralGauss::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate model value and gradient
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Evaluates
@@ -301,8 +251,8 @@ double GModelSpectralGauss::eval(const GEnergy& srcEng,
  * - \f${\tt m\_mean}\f$ is the mean energy, and
  * - \f${\tt m\_sigma}\f$ is the energy width.
  *
- * The method also evaluates the partial derivatives of the model with
- * respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
@@ -319,10 +269,10 @@ double GModelSpectralGauss::eval(const GEnergy& srcEng,
  *      \frac{S_{\rm E}(E | t)}{{\tt m\_sigma}}
  *      \left( \frac{(E-m\_mean)^2}{m\_sigma^2} - 1 \right)
  * \f]
- *
  ***************************************************************************/
-double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
-                                           const GTime&   srcTime)
+double GModelSpectralGauss::eval(const GEnergy& srcEng,
+                                 const GTime&   srcTime,
+                                 const bool&    gradients) const
 {
     // Get parameter values
     double energy = srcEng.MeV();
@@ -343,25 +293,30 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
     // Compute function value
     double value = term1 * eterm3;
 
-    // Compute partial derivatives with respect to the parameter factor
-    // values (partial differentials were determined analytically).
-    double g_norm  = (m_norm.is_free())
-                     ? term2 * eterm3 * m_norm.scale() : 0.0;
-    double g_mean  = (m_mean.is_free())
-                     ? value * term4 * m_mean.scale() : 0.0;
-    double g_sigma = (m_sigma.is_free())
-                     ? -term5 * eterm3 * (1.0 - (2.0 * term3)) * m_sigma.scale()
-                     : 0.0;
+    // Optionally compute gradients
+    if (gradients) {
+    
+        // Compute partial derivatives with respect to the parameter factor
+        // values (partial differentials were determined analytically).
+        double g_norm  = (m_norm.is_free())
+                         ? term2 * eterm3 * m_norm.scale() : 0.0;
+        double g_mean  = (m_mean.is_free())
+                         ? value * term4 * m_mean.scale() : 0.0;
+        double g_sigma = (m_sigma.is_free())
+                         ? -term5 * eterm3 * (1.0 - (2.0 * term3)) * m_sigma.scale()
+                         : 0.0;
 
-    // Set gradients
-    m_norm.factor_gradient(g_norm);
-    m_mean.factor_gradient(g_mean);
-    m_sigma.factor_gradient(g_sigma);
+        // Set gradients
+        m_norm.factor_gradient(g_norm);
+        m_mean.factor_gradient(g_mean);
+        m_sigma.factor_gradient(g_sigma);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralGauss::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralGauss::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";

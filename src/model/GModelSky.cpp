@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,9 +48,11 @@
 const GModelSky         g_pointsource_seed("PointSource");
 const GModelSky         g_extendedsource_seed("ExtendedSource");
 const GModelSky         g_diffusesource_seed("DiffuseSource");
+const GModelSky         g_compositesource_seed("CompositeSource");
 const GModelRegistry    g_pointsource_registry(&g_pointsource_seed);
 const GModelRegistry    g_extendedsource_registry(&g_extendedsource_seed);
 const GModelRegistry    g_diffusesource_registry(&g_diffusesource_seed);
+const GModelRegistry    g_compositesource_registry(&g_compositesource_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NPRED           "GModelSky::npred(GEnergy&, GTime&, GObservation&)"
@@ -400,6 +402,81 @@ GModelSky* GModelSky::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Set spatial model component
+ *
+ * @param[in] spatial Pointer to spatial model component.
+ *
+ * Sets the spatial model component of the model.
+ ***************************************************************************/
+void GModelSky::spatial(const GModelSpatial* spatial)
+{
+    // Free spatial model component
+    if (m_spatial  != NULL) delete m_spatial;
+
+    // Clone spatial model component if it exists, otherwise set pointer
+    // to NULL
+    m_spatial = (spatial != NULL) ? spatial->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Set model type dependent on spatial model type
+    set_type();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set spectral model component
+ *
+ * @param[in] spectral Pointer to spectral model component.
+ *
+ * Sets the spectral model component of the model.
+ ***************************************************************************/
+void GModelSky::spectral(const GModelSpectral* spectral)
+{
+    // Free spectral model component
+    if (m_spectral  != NULL) delete m_spectral;
+
+    // Clone spectral model component if it exists, otherwise set pointer
+    // to NULL
+    m_spectral = (spectral != NULL) ? spectral->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set temporal model component
+ *
+ * @param[in] temporal Pointer to temporal model component.
+ *
+ * Sets the temporal model component of the model.
+ ***************************************************************************/
+void GModelSky::temporal(const GModelTemporal* temporal)
+{
+    // Free temporal model component
+    if (m_temporal  != NULL) delete m_temporal;
+
+    // Clone temporal model component if it exists, otherwise set pointer
+    // to NULL
+    m_temporal = (temporal != NULL) ? temporal->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return value of sky model for a given photon
  *
  * @param[in] photon Photon.
@@ -441,10 +518,10 @@ double GModelSky::value(const GPhoton& photon)
 GVector GModelSky::gradients(const GPhoton& photon)
 {
     // Evaluate source model gradients
-    if (m_spatial  != NULL) m_spatial->eval_gradients(photon);
-    if (m_spectral != NULL) m_spectral->eval_gradients(photon.energy(),
-                                                       photon.time());
-    if (m_temporal != NULL) m_temporal->eval_gradients(photon.time());
+    if (m_spatial  != NULL) m_spatial->eval(photon, true);
+    if (m_spectral != NULL) m_spectral->eval(photon.energy(), photon.time(),
+                                             true);
+    if (m_temporal != NULL) m_temporal->eval(photon.time(), true);
 
     // Set vector of gradients
     GVector gradients;
@@ -465,40 +542,21 @@ GVector GModelSky::gradients(const GPhoton& photon)
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
- * @return Value of sky model
+ * @param[in] gradients Compute gradients?
+ * @return Value of sky model.
  *
  * Evalutes the value of the sky model for an @p event of a specific
  * observation @p obs.
+ *
+ * If the @p gradients flag is true the method will also compute the
+ * parameter gradients for all model parameters.
  ***************************************************************************/
-double GModelSky::eval(const GEvent& event, const GObservation& obs) const
+double GModelSky::eval(const GEvent&       event,
+                       const GObservation& obs,
+                       const bool&         gradients) const
 {
     // Evaluate function
-    double value = obs.response()->convolve(*this, event, obs, false);
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate sky model and parameter gradients for a given event of an
- *        observation
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- * @return Value of sky model
- *
- * Evalutes the value of the sky model and of the parameter for an @p event
- * of a specific observation @p obs.
- *
- * While the value of the sky model is returned by the method, the parameter
- * gradients are set as GModelPar members.
- ***************************************************************************/
-double GModelSky::eval_gradients(const GEvent&       event, 
-                                 const GObservation& obs) const
-{
-    // Evaluate function
-    double value = obs.response()->convolve(*this, event, obs, true);
+    double value = obs.response()->convolve(*this, event, obs, gradients);
 
     // Return
     return value;
@@ -624,29 +682,8 @@ void GModelSky::read(const GXmlElement& xml)
     m_spectral = xml_spectral(*spec);
     m_temporal = temporal.clone();
 
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set model TS
-    if (xml.has_attribute("ts")) {
-        std::string ts = xml.attribute("ts");
-        this->ts(gammalib::todouble(ts));
-    }
-
-    // Set TS computation flag
-    if (xml.has_attribute("tscalc")) {
-        bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
-        this->tscalc(tscalc);
-    }
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Read instrument scales
-    read_scales(xml);
-
-    // Set observation identifiers
-    ids(xml.attribute("id"));
+    // Read model attributes
+    read_attributes(xml);
 
     // Set parameter pointers
     set_pointers();
@@ -706,29 +743,6 @@ void GModelSky::write(GXmlElement& xml) const
         if (spatial()  != NULL) src->append(GXmlElement("spatialModel"));
     }
 
-    // Set model attributes
-    src->attribute("name", name());
-    src->attribute("type", type());
-    std::string instruments = this->instruments();
-    if (instruments.length() > 0) {
-        src->attribute("instrument", instruments);
-    }
-    std::string identifiers = ids();
-    if (identifiers.length() > 0) {
-        src->attribute("id", identifiers);
-    }
-
-    // If available, set TS attribute
-    if (m_has_ts) {
-        src->attribute("ts", gammalib::str(ts(), 3));
-    }
-
-    // If tscalc parameter was available, then write it to XML
-    if (m_has_tscalc) {
-        std::string ts_calc = tscalc() ? "1" : "0";
-        src->attribute("tscalc", ts_calc);
-    }
-
     // Write spectral model
     if (spectral() != NULL) {
         GXmlElement* spec = src->element("spectrum", 0);
@@ -741,8 +755,8 @@ void GModelSky::write(GXmlElement& xml) const
         spatial()->write(*spat);
     }
 
-    // Write instrument scales
-    write_scales(*src);
+    // Write model attributes
+    write_attributes(*src);
 
     // Return
     return;
@@ -1139,32 +1153,18 @@ void GModelSky::set_type(void)
 
 
 /***********************************************************************//**
- * @brief Construct spatial model from XML element
+ * @brief Return pointer to spatial model from XML element
  *
- * @param[in] spatial XML element containing spatial model information.
+ * @param[in] spatial XML element.
  * @return Pointer to spatial model.
  *
- * @exception GException::model_invalid_spatial
- *            Invalid spatial model type encountered.
+ * Returns pointer to spatial model that is defined in an XML element.
  ***************************************************************************/
 GModelSpatial* GModelSky::xml_spatial(const GXmlElement& spatial) const
 {
-    // Get spatial model type
-    std::string type = spatial.attribute("type");
-
     // Get spatial model
     GModelSpatialRegistry registry;
-    GModelSpatial*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(spatial);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
-    }
+    GModelSpatial*        ptr = registry.alloc(spatial);
 
     // Return pointer
     return ptr;
@@ -1172,32 +1172,18 @@ GModelSpatial* GModelSky::xml_spatial(const GXmlElement& spatial) const
 
 
 /***********************************************************************//**
- * @brief Construct spectral model from XML element
+ * @brief Return pointer to spectral model from XML element
  *
- * @param[in] spectral XML element containing spectral model information.
+ * @param[in] spectral XML element.
  * @return Pointer to spectral model.
  *
- * @exception GException::model_invalid_spectral
- *            Invalid spatial model type encountered.
+ * Returns pointer to spectral model that is defined in an XML element.
  ***************************************************************************/
 GModelSpectral* GModelSky::xml_spectral(const GXmlElement& spectral) const
 {
-    // Get spectral model type
-    std::string type = spectral.attribute("type");
-
     // Get spectral model
     GModelSpectralRegistry registry;
-    GModelSpectral*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(spectral);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
-    }
+    GModelSpectral*        ptr = registry.alloc(spectral);
 
     // Return pointer
     return ptr;
@@ -1205,32 +1191,18 @@ GModelSpectral* GModelSky::xml_spectral(const GXmlElement& spectral) const
 
 
 /***********************************************************************//**
- * @brief Construct temporal model from XML element
+ * @brief Return pointer to temporal model from XML element
  *
- * @param[in] temporal XML element containing temporal model information.
+ * @param[in] temporal XML element.
  * @return Pointer to temporal model.
  *
- * @exception GException::model_invalid_temporal
- *            Invalid spatial model type encountered.
+ * Returns pointer to temporal model that is defined in an XML element.
  ***************************************************************************/
 GModelTemporal* GModelSky::xml_temporal(const GXmlElement& temporal) const
 {
-    // Get temporal model type
-    std::string type = temporal.attribute("type");
-
     // Get temporal model
     GModelTemporalRegistry registry;
-    GModelTemporal*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(temporal);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_temporal(G_XML_TEMPORAL, type);
-    }
+    GModelTemporal*        ptr = registry.alloc(temporal);
 
     // Return pointer
     return ptr;

@@ -425,6 +425,9 @@ void GPha::save(const GFilename& filename, const bool& clobber) const
  ***************************************************************************/
 void GPha::read(const GFitsTable& table)
 {
+    // Clear spectrum
+    clear();
+
     // Get data column
     const GFitsTableCol* col_data = table["COUNTS"];
 
@@ -450,6 +453,9 @@ void GPha::read(const GFitsTable& table)
     for (int i = 0; i < length; ++i) {
         m_counts[i] = col_data->real(i);
     }
+
+    // Read keywords
+    m_exposure = (table.has_card("EXPOSURE")) ? table.real("EXPOSURE") : 0.0;
 
     // Return
     return;
@@ -522,6 +528,9 @@ void GPha::write(GFits& fits) const
         hdu.append(col_grpg);
         hdu.append(col_area);
         hdu.append(col_back);
+
+        // Write keywords
+        hdu.card("EXPOSURE", m_exposure, "[s] Deadtime corrected exposure time");
 
         // Append HDU to FITS file
         fits.append(hdu);
@@ -603,6 +612,7 @@ void GPha::init_members(void)
     m_underflow = 0.0;
     m_overflow  = 0.0;
     m_outflow   = 0.0;
+    m_exposure  = 0.0;
 
     // Return
     return;
@@ -623,6 +633,7 @@ void GPha::copy_members(const GPha& pha)
     m_overflow  = pha.m_overflow;
     m_outflow   = pha.m_outflow;
     m_ebounds   = pha.m_ebounds;
+    m_exposure  = pha.m_exposure;
 
     // Return
     return;

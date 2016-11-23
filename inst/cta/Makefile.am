@@ -1,4 +1,26 @@
-## Process this file with automake to produce Makefile.in
+#############################################################################
+# Makefile.am for cta module                                                #
+# ------------------------------------------------------------------------- #
+# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# ------------------------------------------------------------------------- #
+#                                                                           #
+#  This program is free software: you can redistribute it and/or modify     #
+#  it under the terms of the GNU General Public License as published by     #
+#  the Free Software Foundation, either version 3 of the License, or        #
+#  (at your option) any later version.                                      #
+#                                                                           #
+#  This program is distributed in the hope that it will be useful,          #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+#  GNU General Public License for more details.                             #
+#                                                                           #
+#  You should have received a copy of the GNU General Public License        #
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
+#                                                                           #
+#############################################################################
+
+# Set sub directories
+SUBDIRS = test
 
 # Darwin support
 MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
@@ -16,7 +38,6 @@ sources = src/GCTASupport.cpp \
           src/GCTAException.cpp \
           src/GCTAObservation.cpp \
           src/GCTAOnOffObservation.cpp \
-          src/GCTAOnOffObservations.cpp \
           src/GCTAEventList.cpp \
           src/GCTAEventAtom.cpp \
           src/GCTAEventCube.cpp \
@@ -35,6 +56,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAPsfVector.cpp \
           src/GCTAPsf2D.cpp \
           src/GCTAPsfKing.cpp \
+          src/GCTAPsfTable.cpp \
           src/GCTAEdisp.cpp \
           src/GCTAEdispPerfTable.cpp \
           src/GCTAEdispRmf.cpp \
@@ -45,6 +67,7 @@ sources = src/GCTASupport.cpp \
           src/GCTACubeExposure.cpp \
           src/GCTACubeBackground.cpp \
           src/GCTACubePsf.cpp \
+          src/GCTACubeEdisp.cpp \
           src/GCTACubeSource.cpp \
           src/GCTACubeSourcePoint.cpp \
           src/GCTACubeSourceDiffuse.cpp \
@@ -66,7 +89,6 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAException.hpp \
                      include/GCTAObservation.hpp \
                      include/GCTAOnOffObservation.hpp \
-                     include/GCTAOnOffObservations.hpp \
                      include/GCTAEventList.hpp \
                      include/GCTAEventAtom.hpp \
                      include/GCTAEventCube.hpp \
@@ -87,6 +109,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAPsfVector.hpp \
                      include/GCTAPsf2D.hpp \
                      include/GCTAPsfKing.hpp \
+                     include/GCTAPsfTable.hpp \
                      include/GCTAEdisp.hpp \
                      include/GCTAEdispPerfTable.hpp \
                      include/GCTAEdispRmf.hpp \
@@ -96,6 +119,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTABackground3D.hpp \
                      include/GCTACubeExposure.hpp \
                      include/GCTACubePsf.hpp \
+                     include/GCTACubeEdisp.hpp \
                      include/GCTACubeBackground.hpp \
                      include/GCTACubeSource.hpp \
                      include/GCTACubeSourcePoint.hpp \
@@ -132,3 +156,9 @@ caldb_prod2_south2dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_5h
 caldb_prod2_south2_DATA  = caldb/data/cta/prod2/bcf/South_5h/irf_file.fits.gz
 caldb_prod2_south3dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_50h
 caldb_prod2_south3_DATA  = caldb/data/cta/prod2/bcf/South_50h/irf_file.fits.gz
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = README.md caldb pyext \
+             include/GCTALib.hpp \
+             src/GCTAResponse_helpers.hpp src/GCTASupport.hpp \
+             test/test_CTA.hpp test/test_CTA.py test/caldb test/data

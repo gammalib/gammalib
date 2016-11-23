@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GApplication.cpp - test GApplication classes            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>     // setenv
+#include <cstdio>
 #include "test_GApplication.hpp"
 
 /* __ Globals ____________________________________________________________ */
@@ -42,10 +44,16 @@ void TestGApplication::set(void)
     name("GApplication");
 
     // Append tests
-    append(static_cast<pfunction>(&TestGApplication::test_constructor), "Test GLog constructor");
-    append(static_cast<pfunction>(&TestGApplication::test_stream_logger), "Test stream logger");
-    append(static_cast<pfunction>(&TestGApplication::test_C_logger), "Test C logger");
-    append(static_cast<pfunction>(&TestGApplication::test_GApplicationPar), "Test GApplicationPar class");
+    append(static_cast<pfunction>(&TestGApplication::test_GLog),
+           "Test GLog constructor");
+    append(static_cast<pfunction>(&TestGApplication::test_GLog_stream),
+           "Test stream logger");
+    append(static_cast<pfunction>(&TestGApplication::test_GLog_C),
+           "Test C logger");
+    append(static_cast<pfunction>(&TestGApplication::test_GApplicationPar),
+           "Test GApplicationPar class");
+    append(static_cast<pfunction>(&TestGApplication::test_GApplication),
+           "Test GApplication class");
 
     // Return
     return;
@@ -65,15 +73,109 @@ TestGApplication* TestGApplication::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Test GLog constructor
+ * @brief Test GLog class
  **************************************************************************/
-void TestGApplication::test_constructor(void)
+void TestGApplication::test_GLog(void)
 {
     // Void constructor
     GLog log1;
 
-    // Copy constructor
+    // Check empty logger
+    test_assert(log1.is_empty(), "Check whether logger is empty");
+    test_value(log1.size(), 0, "Check whether logger size is 0");
+    test_assert(!log1.is_open(), "Check whether log file is closed");
+
+    // Copy empty logger
     GLog log2 = log1;
+
+    // Check whether copied logger isempty
+    test_assert(log2.is_empty(), "Check whether copied logger is empty");
+    test_value(log2.size(), 0, "Check whether copied logger size is 0");
+    test_assert(!log2.is_open(), "Check whether copied log file is closed");
+
+    // Write a few characters and check the logger size
+    log2 << "Honeymoon";
+    test_value(log2.size(), 9, "Check logger size in memory");
+
+    // Flush to disk for a closed file. This should make the text disappear.
+    log2.flush(true);
+    test_value(log2.size(), 0,
+               "Check logger size in memory after flushing without file");
+    test_assert(log2.is_empty(),
+                "Check whether logger is empty after flushing without file");
+    
+    // Open log file and check whether it's open now
+    log2.open("test_logfile.log", true);
+    test_assert(log2.is_open(), "Check whether log file is now open");
+
+    // Write a few characters and check the logger size
+    log2 << "Honeymoon";
+    test_value(log2.size(), 9, "Check logger size in memory");
+
+    // Flush to disk and check again the logger size
+    log2.flush(true);
+    test_value(log2.size(), 9,
+               "Check logger size on disk after flushing to disk");
+    test_assert(!log2.is_empty(),
+                "Check whether logger is not empty after flushing to disk");
+
+    // Write more characters and check the logger size
+    log2 << " and Milk!";
+    test_value(log2.size(), 19, "Check logger size on disk+memory");
+
+    // Close log file and check whether the logger is empty again
+    log2.close();
+    test_assert(log2.is_empty(), "Check whether logger is empty again");
+    test_value(log2.size(), 0, "Check whether logger size is again 0");
+
+    // Open log file again and check whether it's open now
+    log1.open("test_logfile.log", true);
+    test_assert(log1.is_open(), "Check whether log file is now open");
+
+    // Write a few characters and check the logger size
+    log1 << "Honeymoon";
+    test_value(log1.size(), 9, "Check logger size in memory");
+
+    // Copy filled logger
+    log2 = log1;
+
+    // Now fill both loggers with more characters
+    log1 << " and";
+    log2 << " Milk!";
+
+    // Check the logger size in memory. They should be different.
+    test_value(log1.size(), 13, "Check logger 1 size in memory");
+    test_value(log2.size(), 15, "Check logger 2 size in memory");
+
+    // Check the written sizes of the loggers.
+    test_value(log1.written_size(), 13, "Check logger 1 written size");
+    test_value(log2.written_size(),  6, "Check logger 2 written size");
+
+    // Flush both loggers. Each logger flushes what he has.
+    log1.flush(true);
+    log2.flush(true);
+
+    // Check that logger size on disk. Both loggers flushed their
+    // content, first logger 1, then logger 2, and the sum should
+    // be on disk. Both logger sizes are now identical.
+    test_value(log1.size(), 19, "Check logger 1 size on disk");
+    test_value(log2.size(), 19, "Check logger 2 size on disk");
+
+    // Close loggers
+    log1.close();
+    log2.close();
+
+    // Check if log file exists
+    char line[100];
+    FILE *fp = fopen("test_logfile.log", "r");
+    test_assert(fp != NULL, "Check if logfile exists");
+
+    // If log file exists then check it and close file
+    if (fp != NULL) {
+        fgets(line, 100, fp);
+        test_value(line, "Honeymoon and Milk!", "Check log file content");
+        fclose(fp);
+    }
 
     // Return
     return; 
@@ -83,7 +185,7 @@ void TestGApplication::test_constructor(void)
 /***********************************************************************//**
  * @brief Test stream logger
  **************************************************************************/
-void TestGApplication::test_stream_logger(void)
+void TestGApplication::test_GLog_stream(void)
 {
     // Test
     GLog log;
@@ -106,7 +208,7 @@ void TestGApplication::test_stream_logger(void)
 /***********************************************************************//**
  * @brief Test C logger
  **************************************************************************/
-void TestGApplication::test_C_logger(void)
+void TestGApplication::test_GLog_C(void)
 {
     // Test
     GLog log;
@@ -351,11 +453,171 @@ void TestGApplication::test_GApplicationPar(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Test GApplication class
+ **************************************************************************/
+void TestGApplication::test_GApplication(void)
+{
+    // Allocate application
+    GApplication app1("test_GApplication", "1.0.0");
+
+    // Test name and version
+    test_value(app1.name(), "test_GApplication", "Check application name");
+    test_value(app1.version(), "1.0.0", "Check application version");
+
+    // Open log file
+    app1.logFileOpen();
+
+    // Test log filename
+    test_value(app1.par_filename(), "test_GApplication.par",
+               "Check application parameter file name");
+    test_value(app1.log_filename(), "test_application.log",
+               "Check application log file name");
+
+    // Write something into the logfile and close it
+    app1.log_string(SILENT, "Silent", false);
+    app1.log_string(TERSE, "Terse", false);
+    app1.log_string(NORMAL, "Normal", false);
+    app1.log_string(EXPLICIT, "Explicit", false);
+    app1.log_string(VERBOSE, "Verbose", false);
+    app1.log_string(TERSE, "");
+    app1.log_value(NORMAL, "String parameter", "3.14");
+    app1.log_value(NORMAL, "Floating parameter", 3.14);
+    app1.log_value(NORMAL, "Integer parameter", 3);
+    app1.log_value(VERBOSE, "Verbose string parameter", "3.14!!");
+    app1.log_value(VERBOSE, "Verbose floating parameter", 99.9);
+    app1.log_value(VERBOSE, "Verbose integer parameter", -1);
+    app1.log_header1(NORMAL, "Header 1");
+    app1.log_header2(NORMAL, "Header 2");
+    app1.log_header3(NORMAL, "Header 3");
+    app1.log_header1(VERBOSE, "Verbose header 1");
+    app1.log_header2(VERBOSE, "Verbose header 2");
+    app1.log_header3(VERBOSE, "Verbose header 3");
+    app1.log_parameters(NORMAL);
+    app1.log_parameters(VERBOSE);
+    app1.log_trailer();
+    app1.logFileClose();
+
+    // Check if log file exists
+    char line[200];
+    FILE *fp = fopen("test_application.log", "r");
+    test_assert(fp != NULL, "Check if logfile exists");
+
+    // If log file exists then check it line by line
+    if (fp != NULL) {
+
+        // Test header
+        fgets(line, 100, fp);
+        test_value(line, "***************************************************"
+                         "*****************************\n",
+                         "Check log file line 1");
+        fgets(line, 100, fp);
+        test_value(line, "*                               test_GApplication  "
+                         "                            *\n",
+                         "Check log file line 2");
+        fgets(line, 100, fp);
+        test_value(line, "* -------------------------------------------------"
+                         "--------------------------- *\n",
+                         "Check log file line 3");
+        fgets(line, 100, fp);
+        test_value(line, "* Version: 1.0.0                                   "
+                         "                            *\n",
+                         "Check log file line 4");
+        fgets(line, 100, fp);
+        test_value(line, "***************************************************"
+                         "*****************************\n",
+                         "Check log file line 5");
+
+        // Test logging of strings
+        fgets(line, 100, fp);
+        test_value(line, "SilentTerseNormal\n", "Check log file line 6");
+
+        // Test logging of user parameter
+        fgets(line, 100, fp);
+        test_value(line, " String parameter ..........: 3.14\n",
+                         "Check log file line 7");
+        fgets(line, 100, fp);
+        test_value(line, " Floating parameter ........: 3.14\n",
+                         "Check log file line 8");
+        fgets(line, 100, fp);
+        test_value(line, " Integer parameter .........: 3\n",
+                         "Check log file line 9");
+
+        // Test logging of header 1
+        fgets(line, 100, fp);
+        test_value(line, "\n", "Check log file line 10");
+        fgets(line, 100, fp);
+        test_value(line, "+==========+\n", "Check log file line 11");
+        fgets(line, 100, fp);
+        test_value(line, "| Header 1 |\n", "Check log file line 12");
+        fgets(line, 100, fp);
+        test_value(line, "+==========+\n", "Check log file line 13");
+
+        // Test logging of header 2
+        fgets(line, 100, fp);
+        test_value(line, "+----------+\n", "Check log file line 14");
+        fgets(line, 100, fp);
+        test_value(line, "| Header 2 |\n", "Check log file line 15");
+        fgets(line, 100, fp);
+        test_value(line, "+----------+\n", "Check log file line 16");
+
+        // Test logging of header 3
+        fgets(line, 100, fp);
+        test_value(line, "=== Header 3 ===\n", "Check log file line 17");
+
+        // Test logging of parameters
+        fgets(line, 100, fp);
+        test_value(line, "+============+\n", "Check log file line 18");
+        fgets(line, 100, fp);
+        test_value(line, "| Parameters |\n", "Check log file line 19");
+        fgets(line, 100, fp);
+        test_value(line, "+============+\n", "Check log file line 20");
+        fgets(line, 100, fp);
+        test_value(line, " chatter ...................: 2\n",
+                         "Check log file line 21");
+        fgets(line, 100, fp);
+        test_value(line, " clobber ...................: yes\n",
+                         "Check log file line 22");
+        fgets(line, 100, fp);
+        test_value(line, " debug .....................: no\n",
+                         "Check log file line 23");
+        fgets(line, 100, fp);
+        test_value(line, " mode ......................: ql\n",
+                         "Check log file line 24");
+        fgets(line, 100, fp);
+        test_value(line, " logfile ...................: test_application.log\n",
+                         "Check log file line 25");
+        fgets(line, 32, fp);
+        test_value(line, "Application \"test_GApplication\"",
+                         "Check log file line 26");
+
+        // Empty remaining characters (not checked since they are machine
+        // dependent)
+        fgets(line, 200, fp);
+        fgets(line, 100, fp);
+        test_value(line, "\n", "Check log file line 27");
+        fgets(line, 32, fp);
+        test_value(line, "Application \"test_GApplication\"",
+                         "Check log file line 28");
+
+        // Close log file
+        fclose(fp);
+
+    } // endif: log file existed
+
+    // Return
+    return; 
+}
+
+
 /***************************************************************************
  * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
+    // Set PFILES environment variable
+    setenv("PFILES", "data", 1);
+
     // Allocate test suit container
     GTestSuites testsuites("GApplication");
 

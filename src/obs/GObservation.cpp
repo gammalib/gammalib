@@ -290,12 +290,7 @@ double GObservation::model(const GModels& models,
                 // is used, don't compute model gradients as we cannot
                 // use them. This is somehow a kluge, but makes the
                 // code faster
-                if (response()->use_edisp()) {
-                    model += mptr->eval(event, *this);
-                }
-                else {
-                    model += mptr->eval_gradients(event, *this);
-                }
+                model += mptr->eval(event, *this, !response()->use_edisp());
 
                 // Optionally determine model gradients. If the model has a
                 // gradient then use it, unless we have energy dispersion.
@@ -349,6 +344,29 @@ double GObservation::model(const GModels& models,
 
     // Return
     return model;
+}
+
+
+/***********************************************************************//**
+ * @brief Return total number of observed events
+ *
+ * @returns Total number of observed events.
+ *
+ * Returns the total number of observed events.
+ ***************************************************************************/
+int GObservation::nobserved(void) const
+{
+    // Initialise number of observed events
+    int nobserved = 0;
+
+    // Extract number of observed events from event contained
+    const GEvents* events = this->events();
+    if (events != NULL) {
+        nobserved = events->number();
+    }
+
+    // Return number of observed events
+    return nobserved;
 }
 
 

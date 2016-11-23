@@ -1,8 +1,23 @@
-## Process this file with automake to produce Makefile.in
-
-# we use srcdir/src for "private" includes
-# we use srcdir/include for the static global include files
-# we use builddir/src for the generated include files to get found
+#############################################################################
+# Makefile.am for source module                                             #
+# ------------------------------------------------------------------------- #
+# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# ------------------------------------------------------------------------- #
+#                                                                           #
+#  This program is free software: you can redistribute it and/or modify     #
+#  it under the terms of the GNU General Public License as published by     #
+#  the Free Software Foundation, either version 3 of the License, or        #
+#  (at your option) any later version.                                      #
+#                                                                           #
+#  This program is distributed in the hope that it will be useful,          #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+#  GNU General Public License for more details.                             #
+#                                                                           #
+#  You should have received a copy of the GNU General Public License        #
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
+#                                                                           #
+#############################################################################
 
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
@@ -33,16 +48,16 @@ MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
 
 # Optional instrument specific libraries
 if WITH_INST_MWL
-  INST_MWL = ../inst/mwl/libmwl.la
+  INST_MWL = $(top_builddir)/inst/mwl/libmwl.la
 endif
 if WITH_INST_CTA
-  INST_CTA = ../inst/cta/libcta.la
+  INST_CTA = $(top_builddir)/inst/cta/libcta.la
 endif
 if WITH_INST_LAT
-  INST_LAT = ../inst/lat/liblat.la
+  INST_LAT = $(top_builddir)/inst/lat/liblat.la
 endif
 if WITH_INST_COM
-  INST_COM = ../inst/com/libcom.la
+  INST_COM = $(top_builddir)/inst/com/libcom.la
 endif
 
 # Scripts to be distributed
@@ -53,20 +68,20 @@ scripts = gammalib-setup \
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(sources)
-libgamma_la_LIBADD = base/libbase.la \
-                     support/libsupport.la \
-                     linalg/liblinalg.la \
-                     numerics/libnumerics.la \
-                     fits/libfits.la \
-                     xml/libxml.la \
-                     vo/libvo.la \
-                     xspec/libxspec.la \
-                     sky/libsky.la \
-                     opt/libopt.la \
-                     obs/libobs.la \
-                     model/libmodel.la \
-                     app/libapp.la \
-                     test/libtest.la \
+libgamma_la_LIBADD = $(builddir)/base/libbase.la \
+                     $(builddir)/support/libsupport.la \
+                     $(builddir)/linalg/liblinalg.la \
+                     $(builddir)/numerics/libnumerics.la \
+                     $(builddir)/fits/libfits.la \
+                     $(builddir)/xml/libxml.la \
+                     $(builddir)/vo/libvo.la \
+                     $(builddir)/xspec/libxspec.la \
+                     $(builddir)/sky/libsky.la \
+                     $(builddir)/opt/libopt.la \
+                     $(builddir)/obs/libobs.la \
+                     $(builddir)/model/libmodel.la \
+                     $(builddir)/app/libapp.la \
+                     $(builddir)/test/libtest.la \
                      $(INST_MWL) \
                      $(INST_CTA) \
                      $(INST_LAT) \

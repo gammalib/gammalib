@@ -38,8 +38,18 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralPlaw     g_spectral_plaw_seed;
-const GModelSpectralRegistry g_spectral_plaw_registry(&g_spectral_plaw_seed);
+const GModelSpectralPlaw     g_spectral_plaw_seed1("PowerLaw",
+                                                   "Prefactor",
+                                                   "Index",
+                                                   "PivotEnergy");
+const GModelSpectralRegistry g_spectral_plaw_registry1(&g_spectral_plaw_seed1);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralPlaw     g_spectral_plaw_seed2("PowerLaw",
+                                                   "Prefactor",
+                                                   "Index",
+                                                   "Scale");
+const GModelSpectralRegistry g_spectral_plaw_registry2(&g_spectral_plaw_seed2);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC      "GModelSpectralPlaw::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
@@ -66,6 +76,36 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type and parameter name constructor
+ *
+ * @param[in] type Model type.
+ * @param[in] prefactor Name of prefactor parameter.
+ * @param[in] index Name of index parameter.
+ * @param[in] pivot Name of pivot parameter.
+ ***************************************************************************/
+GModelSpectralPlaw::GModelSpectralPlaw(const std::string& type,
+                                       const std::string& prefactor,
+                                       const std::string& index,
+                                       const std::string& pivot) :
+                    GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Set parameter names
+    m_norm.name(prefactor);
+    m_index.name(index);
+    m_pivot.name(pivot);
 
     // Return
     return;
@@ -236,6 +276,7 @@ GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Evaluates
@@ -250,59 +291,8 @@ GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
  * - \f${\tt m\_index}\f$ is the spectral index, and
  * - \f${\tt m\_pivot}\f$ is the pivot energy.
  *
- * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
- ***************************************************************************/
-double GModelSpectralPlaw::eval(const GEnergy& srcEng,
-                                const GTime&   srcTime) const
-{
-    // Update the evaluation cache
-    update_eval_cache(srcEng);
-
-    // Compute function value
-    double value = m_norm.value() * m_last_power;
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralPlaw::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", m_norm=" << m_norm.value();
-        std::cout << ", m_index=" << m_index.value();
-        std::cout << ", m_pivot=" << m_pivot.value();
-        std::cout << ", m_last_power=" << m_last_power;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Evaluates
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- * \f]
- *
- * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
- * - \f${\tt m\_index}\f$ is the spectral index, and
- * - \f${\tt m\_pivot}\f$ is the pivot energy.
- *
- * The method also evaluates the partial derivatives of the model with
- * respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
@@ -322,8 +312,9 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng,
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
-double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
-                                          const GTime&   srcTime)
+double GModelSpectralPlaw::eval(const GEnergy& srcEng,
+                                const GTime&   srcTime,
+                                const bool&    gradients) const
 {
     // Update the evaluation cache
     update_eval_cache(srcEng);
@@ -331,32 +322,36 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
     // Compute function value
     double value = m_norm.value() * m_last_power;
 
-    // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.is_free())
-                     ? m_norm.scale() * m_last_power : 0.0;
-    double g_index = (m_index.is_free())
-                     ? value * m_index.scale() * m_last_log_e_norm : 0.0;
-    double g_pivot = (m_pivot.is_free())
-                     ? -value * m_last_index / m_pivot.factor_value() : 0.0;
+    // Optionally compute gradients
+    if (gradients) {
 
-    // Set gradients
-    m_norm.factor_gradient(g_norm);
-    m_index.factor_gradient(g_index);
-    m_pivot.factor_gradient(g_pivot);
+        // Compute partial derivatives of the parameter values
+        double g_norm  = (m_norm.is_free())
+                         ? m_norm.scale() * m_last_power : 0.0;
+        double g_index = (m_index.is_free())
+                         ? value * m_index.scale() * m_last_log_e_norm : 0.0;
+        double g_pivot = (m_pivot.is_free())
+                         ? -value * m_last_index / m_pivot.factor_value() : 0.0;
+
+        // Set gradients
+        m_norm.factor_gradient(g_norm);
+        m_index.factor_gradient(g_index);
+        m_pivot.factor_gradient(g_pivot);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralPlaw::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralPlaw::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", e_norm=" << m_last_e_norm;
-        std::cout << ", power=" << m_last_power;
-        std::cout << ", g_norm=" << g_norm;
-        std::cout << ", g_index=" << g_index;
-        std::cout << ", g_pivot=" << g_pivot;
+        std::cout << ", m_norm=" << m_norm.value();
+        std::cout << ", m_index=" << m_index.value();
+        std::cout << ", m_pivot=" << m_pivot.value();
+        std::cout << ", m_last_power=" << m_last_power;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -513,64 +508,21 @@ GEnergy GModelSpectralPlaw::mc(const GEnergy& emin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing power law model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
- * Reads the spectral information from an XML element. The format of the XML
- * elements is
- *
- *     <spectrum type="PowerLaw">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
- *
- * @todo Add parameter validity check
+ * Reads the spectral information from an XML element.
  ***************************************************************************/
 void GModelSpectralPlaw::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Power law model requires exactly 3 parameters.");
-    }
+    // Get parameter pointers
+    const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
+    const GXmlElement* index = gammalib::xml_get_par(G_READ, xml, m_index.name());
+    const GXmlElement* pivot = gammalib::xml_get_par(G_READ, xml, m_pivot.name());
 
-    // Extract model parameters
-    int npar[] = {0, 0, 0};
-    for (int i = 0; i < 3; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            m_norm.read(*par);
-            npar[0]++;
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            m_index.read(*par);
-            npar[1]++;
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.read(*par);
-            npar[2]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Prefactor\", \"Index\" and \"Scale\" parameters.");
-    }
+    // Read parameters
+    m_norm.read(*norm);
+    m_index.read(*index);
+    m_pivot.read(*pivot);
 
     // Return
     return;
@@ -580,82 +532,35 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
  * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type "PowerLaw"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ *            Existing XML element is not of the expected type.
  *
- * Writes the spectral information into an XML element. The format of the XML
- * element is
- *
- *     <spectrum type="PowerLaw">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
+ * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralPlaw::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "PowerLaw");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "PowerLaw") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"PowerLaw\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 3 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(GXmlElement("parameter name=\"Index\""));
-        xml.append(GXmlElement("parameter name=\"Scale\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* index = gammalib::xml_need_par(G_WRITE, xml, m_index.name());
+    GXmlElement* pivot = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
 
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Power law model requires exactly 3 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0};
-    for (int i = 0; i < 3; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            npar[1]++;
-            m_index.write(*par);
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.write(*par);
-            npar[2]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Prefactor\", \"Index\" and \"Scale\" parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    m_index.write(*index);
+    m_pivot.write(*pivot);
 
     // Return
     return;
@@ -704,6 +609,9 @@ std::string GModelSpectralPlaw::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralPlaw::init_members(void)
 {
+    // Initialise model type
+    m_type = "PowerLaw";
+
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Prefactor");
@@ -770,6 +678,7 @@ void GModelSpectralPlaw::init_members(void)
 void GModelSpectralPlaw::copy_members(const GModelSpectralPlaw& model)
 {
     // Copy members
+    m_type  = model.m_type;
     m_norm  = model.m_norm;
     m_index = model.m_index;
     m_pivot = model.m_pivot;
@@ -816,7 +725,7 @@ void GModelSpectralPlaw::free_members(void)
  *
  * @param[in] energy Energy.
  *
- * Updates the precomputation cache for eval() and eval_gradients() methods.
+ * Updates the precomputation cache for eval() method.
  ***************************************************************************/
 void GModelSpectralPlaw::update_eval_cache(const GEnergy& energy) const
 {

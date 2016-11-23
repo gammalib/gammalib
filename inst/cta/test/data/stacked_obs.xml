@@ -1,0 +1,8 @@
+<observation_list title="observation library">
+  <observation name="Crab" id="00001" instrument="CTA">
+    <parameter name="CountsCube"   file="stacked_cntcube.fits"/>
+    <parameter name="ExposureCube" file="stacked_expcube.fits"/>
+    <parameter name="PsfCube"      file="stacked_psfcube.fits"/>
+    <parameter name="BkgCube"      file="stacked_bkgcube.fits"/>
+  </observation>
+</observation_list>

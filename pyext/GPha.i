@@ -55,6 +55,8 @@ public:
     const double&    underflow(void) const;
     const double&    overflow(void) const;
     const double&    outflow(void) const;
+    void             exposure(const double& exposure);
+    const double&    exposure(void) const;
     void             fill(const GEnergy& energy, const double& value = 1.0);
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,

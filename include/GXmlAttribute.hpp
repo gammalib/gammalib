@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlAttribute.hpp - XML attribute class definition            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,8 +48,9 @@
  * - @p type has a value of "singleton"
  * - @p name has a value of "gamma-ray"
  *
- * The hyphens are stored together with the attribute value. Allowed hyphens
- * are " and '.
+ * The hyphens are stripped from the attribute value before storing in the
+ * name-value pair constructor. Hyphens are added when writing an attribute
+ * using the write() method. Allowed hyphens are " and '.
  ***************************************************************************/
 class GXmlAttribute : public GBase {
 
@@ -68,10 +69,10 @@ public:
     GXmlAttribute*     clone(void) const;
     std::string        classname(void) const;
     void               write(GUrl& url) const;
-    const std::string& name(void) const { return m_name; }
-    std::string        value(void) const;
-    void               name(const std::string& name) { m_name=name; }
-    void               value(std::string value);
+    const std::string& name(void) const;
+    const std::string& value(void) const;
+    void               name(const std::string& name);
+    void               value(const std::string& value);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -82,7 +83,7 @@ protected:
 
     // Protected data members
     std::string m_name;     //!< Attribute name
-    std::string m_value;    //!< Attribute value including hyphens
+    std::string m_value;    //!< Attribute value
 };
 
 
@@ -95,6 +96,55 @@ inline
 std::string GXmlAttribute::classname(void) const
 {
     return ("GXmlAttribute");
+}
+
+
+/***********************************************************************//**
+ * @brief Return attribute name
+ *
+ * @return Attribute name.
+ ***************************************************************************/
+inline
+const std::string& GXmlAttribute::name(void) const
+{
+    return (m_name);
+}
+
+
+/***********************************************************************//**
+ * @brief Set attribute name
+ *
+ * @param[in] name Attribute name.
+ ***************************************************************************/
+inline
+void GXmlAttribute::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return attribute value
+ *
+ * @return Attribute value.
+ ***************************************************************************/
+inline
+const std::string& GXmlAttribute::value(void) const
+{
+    return (m_value);
+}
+
+/***********************************************************************//**
+ * @brief Set attribute value
+ *
+ * @param[in] value Attribute value.
+ ***************************************************************************/
+inline
+void GXmlAttribute::value(const std::string& value)
+{
+    m_value = value;
+    return;
 }
 
 #endif /* GXMLATTRIBUTE_HPP */

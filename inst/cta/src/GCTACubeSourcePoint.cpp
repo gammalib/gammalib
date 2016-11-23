@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTACubeSourcePoint.cpp - CTA cube analysis point source class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -257,7 +257,7 @@ void GCTACubeSourcePoint::set(const std::string&   name,
     for (int i = 0; i < cube->npix(); ++i) {
 
         // Get cube pixel sky direction
-        GSkyDir obsDir = cube->map().inx2dir(i);
+        GSkyDir obsDir = cube->counts().inx2dir(i);
 
         // Determine angular distance between point source direction and
         // cube pixel sky direction (radians)

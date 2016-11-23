@@ -28,12 +28,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>     // getenv
 #include "test_GXspec.hpp"
 #include "GTools.hpp"
 
 
 /* __ Constants __________________________________________________________ */
-const std::string rmfname = PACKAGE_SOURCE"/test/data/rmf.fits";
+const std::string datadir = std::getenv("TEST_DATA");
+const std::string rmfname = datadir + "/rmf.fits";
 
 
 /***********************************************************************//**

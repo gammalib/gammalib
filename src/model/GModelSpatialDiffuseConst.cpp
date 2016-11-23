@@ -39,6 +39,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialDiffuseConst g_spatial_const_seed;
 const GModelSpatialRegistry     g_spatial_const_registry(&g_spatial_const_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialDiffuseConst g_spatial_const_legacy_seed(true, "ConstantValue");
+const GModelSpatialRegistry     g_spatial_const_legacy_registry(&g_spatial_const_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC_NORM     "GModelSpatialDiffuseConst::mc_norm(GSkyDir&, double&)"
@@ -61,13 +65,36 @@ const GModelSpatialRegistry     g_spatial_const_registry(&g_spatial_const_seed);
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Construct empty isotropic spatial model.
+ * Constructs empty isotropic spatial model.
  ***************************************************************************/
 GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(void) :
                            GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty isotropic spatial model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const bool&        dummy,
+                                                     const std::string& type) :
+                           GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -245,6 +272,7 @@ GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
  * @brief Evaluate isotropic spatial model value
  *
  * @param[in] photon Incident photon.
+ * @param[in] gradients Compute gradients?
  * @return Model value (\f$sr^{-1}\f$).
  *
  * Evaluates the isotropic spatial model for a given @p photon, characterised
@@ -258,39 +286,9 @@ GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
  *
  * where \f$v\f$ is the value() parameter, which is divided by the solid
  * angle \f$4\pi\f$ of the celestial sphere. 
- ***************************************************************************/
-double GModelSpatialDiffuseConst::eval(const GPhoton& photon) const
-{
-    // Set normalization constant
-    const double norm = 1.0 / gammalib::fourpi;
-
-    // Compute model value
-    double value = norm * m_value.value();
-
-    // Return model value
-    return (value);
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate isotropic spatial model value and parameter gradient
  *
- * @param[in] photon Incident photon.
- * @return Model value (\f$sr^{-1}\f$).
- *
- * Evaluates the isotropic spatial model for a given @p photon, characterised
- * by a sky direction, energy and arrival time \f$(\vec{p},E,t)\f$, and
- * computes the gradient of the value() parameter. By definition, the
- * isotropic spatial model and gradient are independent of sky direction,
- * energy and time. The model value is given by
- *
- * \f[
- *    M_\mathrm{S}(\vec{p}|E,t) = \frac{v}{4\pi}
- * \f]
- *
- * where \f$v\f$ is the value() parameter, which is divided by the solid
- * angle \f$4\pi\f$ of the celestial sphere. The value() gradient is given
- * by
+ * If the @p gradients flag is true the method will also evaluate the partial
+ * derivatives of the model. The value() gradient is given by
  *
  * \f[
  *    \frac{\partial M_\mathrm{S}(\vec{p}|E,t)}{\partial v_v} =
@@ -300,7 +298,8 @@ double GModelSpatialDiffuseConst::eval(const GPhoton& photon) const
  * where \f$v=v_v v_s\f$ is the factorisation of the value() parameter into
  * a value \f$v_v\f$ and scale \f$v_s\f$ term.
  ***************************************************************************/
-double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
+double GModelSpatialDiffuseConst::eval(const GPhoton& photon,
+                                       const bool&    gradients) const
 {
     // Set normalization constant
     const double norm = 1.0 / gammalib::fourpi;
@@ -308,14 +307,19 @@ double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
     // Compute model value
     double value = norm * m_value.value();
 
-    // Compute partial derivatives of the parameter values
-    double g_norm = (m_value.is_free()) ? norm * m_value.scale() : 0.0;
+    // Optionally compute partial derivatives
+    if (gradients) {
 
-    // Set gradient (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseConst*>(this)->m_value.factor_gradient(g_norm);
+        // Compute partial derivatives of the parameter values
+        double g_norm = (m_value.is_free()) ? norm * m_value.scale() : 0.0;
 
-    // Return value
-    return value;
+        // Set gradient
+        m_value.factor_gradient(g_norm);
+
+    } // endif: computed partial derivatives
+
+    // Return model value
+    return (value);
 }
 
 
@@ -410,16 +414,13 @@ double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
  * Read the isotropic source model information from an XML element. The XML
  * element is expected to have the following format:
  *
- *     <spatialModel type="ConstantValue">
+ *     <spatialModel type="DiffuseIsotropic">
  *       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
  *     </spatialModel>
  *
  ***************************************************************************/
 void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
 {
-    // Clear model
-    clear();
-
     // Get value parameter
     const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
 
@@ -442,7 +443,7 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
  * Write the isotropic source model information into an XML element. The XML
  * element will have the following format:
  *
- *     <spatialModel type="ConstantValue">
+ *     <spatialModel type="DiffuseIsotropic">
  *       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
  *     </spatialModel>
  *
@@ -451,13 +452,13 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "ConstantValue");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "ConstantValue") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"ConstantValue\".");
+              "Spatial model is not of type \""+type()+"\".");
     }
 
     // Get or create Value parameter
@@ -513,6 +514,9 @@ std::string GModelSpatialDiffuseConst::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialDiffuseConst::init_members(void)
 {
+    // Initialise model type
+    m_type = "DiffuseIsotropic";
+
     // Initialise Value
     m_value.clear();
     m_value.name("Value");
@@ -531,6 +535,9 @@ void GModelSpatialDiffuseConst::init_members(void)
     m_pars.clear();
     m_pars.push_back(&m_value);
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -544,7 +551,9 @@ void GModelSpatialDiffuseConst::init_members(void)
 void GModelSpatialDiffuseConst::copy_members(const GModelSpatialDiffuseConst& model)
 {
     // Copy members
+    m_type          = model.m_type;
     m_value         = model.m_value;
+    m_region        = model.m_region;
     m_mc_centre     = model.m_mc_centre;
     m_mc_cos_radius = model.m_mc_cos_radius;
 
@@ -562,6 +571,22 @@ void GModelSpatialDiffuseConst::copy_members(const GModelSpatialDiffuseConst& mo
  ***************************************************************************/
 void GModelSpatialDiffuseConst::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialDiffuseConst::set_region(void) const
+{
+    // Set sky region centre to (0,0)
+    m_region.centre(0.0, 0.0);
+
+    // Set sky region radius to 180 degrees (all points included)
+    m_region.radius(180.0);
+
     // Return
     return;
 }

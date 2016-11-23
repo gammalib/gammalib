@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCaldb.cpp - Calibration database class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -398,8 +398,8 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
  * @param[in] mission Mission name (case insensitive).
  * @param[in] instrument Instrument name (case insensitive; optional).
  *
- * @exception GException::file_not_found
- *            CIF not found.
+ * @exception GException::file_error
+ *            Calibration Index File not found.
  *
  * The calibration directory path is given by one of the following
  *
@@ -412,16 +412,15 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
  ***************************************************************************/
 std::string GCaldb::cifname(const std::string& mission, const std::string& instrument)
 {
-    // Get path to calibration directory
-    std::string cif = path(mission, instrument);
+    // Set calibration index filename
+    std::string cif = path(mission, instrument) + "/caldb.indx";
 
-    // Add calibration index filename
-    cif += "/caldb.indx";
-
-    // Verify that CIF exists
-    if (access(cif.c_str(), F_OK) != 0) {
-        throw GException::file_not_found(G_CIFNAME, cif,
-              "Calibration Index File (CIF) not found.");
+    // Check if file exists
+    GFilename filename(cif);
+    if (!filename.exists()) {
+        std::string msg = "Calibration Index File (CIF) \""+
+                          cif+"\" not found.";
+        throw GException::file_error(G_CIFNAME, msg);
     }
 
     // Return cif
@@ -505,15 +504,15 @@ void GCaldb::close(void)
  * @todo time should support "now" and probably be implemented using < condition.
  * @todo expr should support arbitrary Boolean expressions.
  ***************************************************************************/
-std::string GCaldb::filename(const std::string& detector,
-                             const std::string& filter,
-                             const std::string& codename,
-                             const std::string& date,
-                             const std::string& time,
-                             const std::string& expr)
+GFilename GCaldb::filename(const std::string& detector,
+                           const std::string& filter,
+                           const std::string& codename,
+                           const std::string& date,
+                           const std::string& time,
+                           const std::string& expr)
 {
     // Initialise empty filename
-    std::string filename;
+    GFilename filename;
 
     // Continue only if CIF is opened
     if (m_cif != NULL) {

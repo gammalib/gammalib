@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GModelSky.hpp - Sky model class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -92,10 +92,8 @@ class GObservation;
  *
  * The class has two methods for model evaluation that evaluate the model
  * for a specific event, given an observation. The eval() method returns
- * the model value, the eval_gradients() returns the model value and sets
- * the analytical gradients for all model parameters.
- * Note that the eval() and eval_gradients() methods call protected
- * methods that handle time dispersion, energy dispersion and the point
+ * the model value. Note that the eval() method calls protected methods that
+ * handle time dispersion, energy dispersion and the point
  * spread function (spatial dispersion). Dispersion is handled by
  * integrating over the relevant intervals of the source properties.
  * Integration of the model is done by three nested integrals.
@@ -149,9 +147,8 @@ public:
     virtual std::string type(void) const;
     virtual bool        is_constant(void) const;
     virtual double      eval(const GEvent& event,
-                             const GObservation& obs) const;
-    virtual double      eval_gradients(const GEvent& event,
-                                       const GObservation& obs) const;
+                             const GObservation& obs,
+                             const bool& gradients = false) const;
     virtual double      npred(const GEnergy& obsEng,
                               const GTime& obsTime,
                               const GObservation& obs) const;
@@ -163,6 +160,9 @@ public:
     GModelSpatial*      spatial(void) const;
     GModelSpectral*     spectral(void) const;
     GModelTemporal*     temporal(void) const;
+    void                spatial(const GModelSpatial* spatial);
+    void                spectral(const GModelSpectral* spectral);
+    void                temporal(const GModelTemporal* temporal);
     double              value(const GPhoton& photon);
     GVector             gradients(const GPhoton& photon);
     GPhotons            mc(const double& area,

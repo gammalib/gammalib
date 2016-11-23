@@ -132,13 +132,17 @@ class GFilename;
  *     models.read(xml);               // Read models from GXml object
  *
  * The sum of all models in the container are evaluated for a given @p event
- * and @p observation using the eval() or eval_gradients() methods:
+ * and @p observation using the eval() method:
  *
  *     double value = models.eval(event, observation);
- *     double value = models.eval_gradients(event, observation);
  *
- * The eval_gradients() method sets the parameter gradients for all free
- * model parameters that have an analytical parameter gradient.
+ * If the eval() method is called with the optional gradients parameter set
+ * to true, i.e.
+ *
+ *     double value = models.eval(event, observation, true);
+ *
+ * the method computes also the parameter gradients for all free model
+ * parameters that have an analytical parameter gradient.
  *
  * The only member of GModels is a list of model pointers. The class handles
  * the proper allocation and deallocation of the model memory.
@@ -182,9 +186,10 @@ public:
     void           read(const GXml& xml);
     void           write(GXml& xml) const;
     int            npars(void) const;
-    GOptimizerPars pars(void);
-    double         eval(const GEvent& event, const GObservation& obs) const;
-    double         eval_gradients(const GEvent& event, const GObservation& obs) const;
+    GOptimizerPars pars(void) const;
+    double         eval(const GEvent& event,
+                        const GObservation& obs,
+                        const bool& gradients = false) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:

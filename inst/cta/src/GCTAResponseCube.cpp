@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.cpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,7 @@
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialShell.hpp"
 #include "GModelSpatialElliptical.hpp"
+#include "GModelSpatialComposite.hpp"
 #include "GModelSpatialDiffuse.hpp"
 #include "GPhoton.hpp"
 #include "GSource.hpp"
@@ -159,6 +160,43 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
     m_exposure = exposure;
     m_psf      = psf;
     m_background = background;
+
+    // Signal that no energy dispersion was given
+    m_has_edisp = false;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Response constructor
+ *
+ * @param[in] exposure CTA cube analysis exposure.
+ * @param[in] psf CTA cube analysis point spread function.
+ * @param[in] edisp CTA cube energy dispersion response.
+ * @param[in] background CTA cube background response.
+ *
+ * Constructs CTA cube analysis response from a cube analysis exposure,
+ * a point spread function cube, an energy dispersion cube and a background cube.
+ **************************************************************************/
+GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
+                                   const GCTACubePsf&        psf,
+								   const GCTACubeEdisp&      edisp,
+                                   const GCTACubeBackground& background) :
+                  GCTAResponse()
+{
+    // Initialise members
+    init_members();
+
+    // Set members
+    m_exposure   = exposure;
+    m_psf        = psf;
+    m_edisp      = edisp;
+    m_background = background;
+
+    // Signal that edisp is available
+    m_has_edisp = true;
 
     // Return
     return;
@@ -280,7 +318,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
     // Get event attributes
     const GSkyDir& obsDir = dir.dir();
-    //const GEnergy& obsEng = event.energy();
+    const GEnergy& obsEng = event.energy();
 
     // Get photon attributes
     const GSkyDir& srcDir  = photon.dir();
@@ -312,6 +350,17 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
             // Get PSF component
             irf *= psf()(srcDir, delta, srcEng);
+
+            // Multiply-in energy dispersion
+            if (use_edisp() && irf > 0.0) {
+
+                // Determine fraction of reconstructed and true energy
+                double migra = obsEng.TeV() / srcEng.TeV();
+
+				// Multiply-in energy dispersion
+				irf *= edisp()(srcDir, migra, srcEng);
+
+            } // endif: energy dispersion was available and psf was non-zero
 
             // Divide by livetime
             irf /= livetime;
@@ -368,6 +417,9 @@ double GCTAResponseCube::irf(const GEvent&       event,
             break;
         case GMODEL_SPATIAL_DIFFUSE:
             irf = irf_diffuse(event, source, obs);
+            break;
+        case GMODEL_SPATIAL_COMPOSITE:
+            irf = irf_composite(event, source, obs);
             break;
         default:
             break;
@@ -426,17 +478,13 @@ double GCTAResponseCube::nroi(const GModelSky&    model,
 /***********************************************************************//**
  * @brief Return true energy boundaries for a specific observed energy
  *
- * @param[in] obsEnergy Observed Energy.
- * @return True energy boundaries for given observed energy.
+ * @param[in] obsEng Observed photon energy.
+ * @return Boundaries in true energy.
  ***************************************************************************/
-GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
+GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEng) const
 {
-    // Initialise an empty boundary object
-    GEbounds ebounds;
-
-    // Throw an exception
-    std::string msg = "Energy dispersion not implemented.";
-    throw GException::feature_not_implemented(G_EBOUNDS, msg);
+	// Get energy boundaries from energy dispersion
+	GEbounds ebounds = m_edisp.ebounds(obsEng);
 
     // Return energy boundaries
     return ebounds;
@@ -448,13 +496,15 @@ GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
  *
  * @param[in] xml XML element.
  *
- * Reads response information from an XML element. The Exposure, Psf and
- * background cubes are specified using
+ * Reads response information from an XML element. The Exposure, Psf,
+ * background cubes, and optionally the energy dispersion cube, are specified
+ * using
  *
  *      <observation name="..." id="..." instrument="...">
  *        ...
  *        <parameter name="ExposureCube" file="..."/>
  *        <parameter name="PsfCube"      file="..."/>
+ *        <parameter name="EdispCube"    file="..."/>
  *        <parameter name="BkgCube"      file="..."/>
  *      </observation>
  *
@@ -466,20 +516,32 @@ void GCTAResponseCube::read(const GXmlElement& xml)
 
     // Get exposure cube information and load cube
     const GXmlElement* exppar  = gammalib::xml_get_par(G_READ, xml, "ExposureCube");
-    std::string        expname = gammalib::strip_whitespace(exppar->attribute("file"));
+    std::string        expname = gammalib::xml_file_expand(xml,
+                                           exppar->attribute("file"));
 
     // Get PSF cube information and load cube
     const GXmlElement* psfpar  = gammalib::xml_get_par(G_READ, xml, "PsfCube");
-    std::string        psfname = gammalib::strip_whitespace(psfpar->attribute("file"));
+    std::string        psfname = gammalib::xml_file_expand(xml,
+                                           psfpar->attribute("file"));
 
     // Get background cube information and load cube
     const GXmlElement* bkgpar  = gammalib::xml_get_par(G_READ, xml, "BkgCube");
-    std::string        bkgname = gammalib::strip_whitespace(bkgpar->attribute("file"));
+    std::string        bkgname = gammalib::xml_file_expand(xml,
+                                           bkgpar->attribute("file"));
 
     // Load cubes
     m_exposure.load(expname);
     m_psf.load(psfname);
     m_background.load(bkgname);
+
+    // Optionally load energy dispersion cube
+    if (gammalib::xml_has_par(xml, "EdispCube")) {
+		const GXmlElement* edisppar  = gammalib::xml_get_par(G_READ, xml, "EdispCube");
+		std::string        edispname = gammalib::xml_file_expand(xml,
+                                                 edisppar->attribute("file"));
+		m_edisp.load(edispname);
+		m_has_edisp = true;
+    }
 
     // Return
     return;
@@ -492,12 +554,14 @@ void GCTAResponseCube::read(const GXmlElement& xml)
  * @param[in] xml XML element.
  *
  * Writes response information into an XML element. The Exposure, Psf
- * and background cubes are specified using
+ * and background cubes, and optionally the energy dispersion cube, are
+ * specified using
  *
  *      <observation name="..." id="..." instrument="...">
  *        ...
  *        <parameter name="ExposureCube" file="..."/>
  *        <parameter name="PsfCube"      file="..."/>
+ *        <parameter name="EdispCube"    file="..."/>
  *        <parameter name="BkgCube"      file="..."/>
  *      </observation>
  *
@@ -505,21 +569,30 @@ void GCTAResponseCube::read(const GXmlElement& xml)
 void GCTAResponseCube::write(GXmlElement& xml) const
 {
     // Add exposure cube filename
-    std::string filename = gammalib::strip_whitespace(m_exposure.filename());
+    std::string filename = gammalib::xml_file_reduce(xml, m_exposure.filename());
     if (!(filename.empty())) {
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "ExposureCube");
         par->attribute("file", filename);
     }
 
     // Add PSF cube filename
-    filename = gammalib::strip_whitespace(m_psf.filename());
+    filename = gammalib::xml_file_reduce(xml, m_psf.filename());
     if (!(filename.empty())) {
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "PsfCube");
         par->attribute("file", filename);
     }
 
+    // Optionally add energy dispersions cube filename
+    if (m_has_edisp) {
+		filename = gammalib::xml_file_reduce(xml, m_edisp.filename());
+		if (!(filename.empty())) {
+			GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
+			par->attribute("file", filename);
+		}
+    }
+
     // Add background cube filename
-    filename = gammalib::strip_whitespace(m_background.filename());
+    filename = gammalib::xml_file_reduce(xml, m_background.filename());
     if (!(filename.empty())) {
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "BkgCube");
         par->attribute("file", filename);
@@ -567,6 +640,11 @@ std::string GCTAResponseCube::print(const GChatter& chatter) const
         // Append point spread function information
         result.append("\n"+m_psf.print(chatter));
 
+        // Optionally append energy dispersion information
+        if (m_has_edisp) {
+			result.append("\n"+m_edisp.print(chatter));
+        }
+
         // Append background information
         result.append("\n"+m_background.print(chatter));
 
@@ -591,8 +669,10 @@ void GCTAResponseCube::init_members(void)
     // Initialise members
     m_exposure.clear();
     m_psf.clear();
+    m_edisp.clear();
     m_background.clear();
     m_apply_edisp = false;
+    m_has_edisp   = false;
 
     // Initialise cache
     m_cache.clear();
@@ -612,8 +692,10 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
     // Copy members
     m_exposure    = rsp.m_exposure;
     m_psf         = rsp.m_psf;
+    m_edisp       = rsp.m_edisp;
     m_background  = rsp.m_background;
     m_apply_edisp = rsp.m_apply_edisp;
+    m_has_edisp   = rsp.m_has_edisp;
 
     // Copy cache
     for (int i = 0; i < rsp.m_cache.size(); ++i) {
@@ -1066,6 +1148,9 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     // Get point source direction
     GSkyDir srcDir = ptsrc->dir();
 
+    // Get energy of source model
+    GEnergy srcEng = source.energy();
+
     // Get pointer on CTA event bin
     if (!event.is_bin()) {
         std::string msg = "The current event is not a CTA event bin. "
@@ -1080,6 +1165,9 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     // direction in radians
     double delta = bin->dir().dir().dist(srcDir);
 
+    // Determine fraction of reconstructed and true energy
+    double migra = bin->energy().TeV() / srcEng.TeV();
+
     // Get maximum angular separation for PSF (in radians)
     double delta_max = psf().delta_max();
 
@@ -1091,7 +1179,7 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     if ((livetime > 0.0) && (delta <= delta_max)) {
 
         // Get exposure
-        irf = exposure()(srcDir, source.energy());
+        irf = exposure()(srcDir, srcEng);
 
         // Multiply-in PSF
         if (irf > 0.0) {
@@ -1100,7 +1188,15 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
             irf /= livetime;
 
             // Get PSF component
-            irf *= psf()(srcDir, delta, source.energy());
+            irf *= psf()(srcDir, delta, srcEng);
+
+            // Multiply-in energy dispersion
+            if (use_edisp() && irf > 0.0) {
+
+                // Multiply-in energy dispersion
+                irf *= edisp()(srcDir, migra, srcEng);
+
+            } // endif: energy dispersion was available and psf was non-zero
 
             // Apply deadtime correction
             irf *= exposure().deadc();
@@ -1156,12 +1252,18 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     const GEnergy& obsEng  = bin->energy();
     const GTime&   obsTime = bin->time();
 
+    // Get energy of source model
+    GEnergy srcEng = source.energy();
+
     // Get pointer to radial model
     const GModelSpatialRadial* model = static_cast<const GModelSpatialRadial*>(source.model());
 
     // Compute angle between model centre and measured photon direction
     // (radians)
     double rho_obs = model->dir().dist(obsDir);
+
+    // Determine fraction of reconstructed and true energy
+    double migra = bin->energy().TeV() / srcEng.TeV();
 
     // Get livetime (in seconds)
     double livetime = exposure().livetime();
@@ -1181,6 +1283,14 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
 
             // Get PSF component
             irf *= psf_radial(model, rho_obs, obsDir, obsEng, obsTime);
+
+            // Multiply-in energy dispersion
+            if (use_edisp() && irf > 0.0) {
+
+                // Multiply-in energy dispersion
+                irf *= edisp()(obsDir, migra, srcEng);
+
+            } // endif: energy dispersion was available and psf was non-zero
 
             // Apply deadtime correction
             irf *= exposure().deadc();
@@ -1236,6 +1346,9 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
     const GEnergy& obsEng  = bin->energy();
     const GTime&   obsTime = bin->time();
 
+    // Get energy of source model
+    GEnergy srcEng = source.energy();
+
     // Get pointer to elliptical model
     const GModelSpatialElliptical* model = static_cast<const GModelSpatialElliptical*>(source.model());
 
@@ -1243,6 +1356,9 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
     // position angle (radians)
     double rho_obs      = model->dir().dist(obsDir);
     double posangle_obs = model->dir().posang(obsDir);
+
+    // Determine fraction of reconstructed and true energy
+    double migra = bin->energy().TeV() / srcEng.TeV();
 
     // Get livetime (in seconds)
     double livetime = exposure().livetime();
@@ -1262,6 +1378,14 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
 
             // Get PSF component
             irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, obsEng, obsTime);
+
+            // Multiply-in energy dispersion
+            if (use_edisp() && irf > 0.0) {
+
+                // Multiply-in energy dispersion
+                irf *= edisp()(obsDir, migra, srcEng);
+
+            } // endif: energy dispersion was available and psf was non-zero
 
             // Apply deadtime correction
             irf *= exposure().deadc();
@@ -1345,8 +1469,20 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
 
     } // endelse: there was a cache entry for this model
 
-    // Determine IRF value
-    irf = cache->irf(bin->ipix(), bin->ieng());
+    // If energy dispersion is available then compute IRF using the true
+    // photon energy and multiply in the energy dispersion ...
+    if (use_edisp()) {
+    	irf = cache->irf(bin->ipix(), source.energy());
+		if (irf > 0.0) {
+			irf *= edisp()(bin->dir().dir(), bin->energy()/source.energy(),
+                           source.energy());
+		}
+    }
+
+    // ... otherwise compute the IRF at the observed energy
+    else {
+    	irf = cache->irf(bin->ipix(), bin->ieng());
+    }
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -1357,6 +1493,52 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
         std::cout << std::endl;
     }
     #endif
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to composite source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to composite source.
+ *
+ * Returns the instrument response to a specified composite source.
+ ***************************************************************************/
+double GCTAResponseCube::irf_composite(const GEvent&       event,
+                                       const GSource&      source,
+                                       const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to composite model
+    const GModelSpatialComposite* model =
+        dynamic_cast<const GModelSpatialComposite*>(source.model());
+
+    // Loop over model components
+    for (int i = 0; i < model->components(); ++i) {
+
+        // Get pointer to spatial component
+        GModelSpatial* spat = const_cast<GModelSpatial*>(model->component(i));
+
+        // Create new GSource object
+        GSource src(source.name(), spat, source.energy(), source.time());
+
+        // Compute irf value
+        irf += this->irf(event, source, obs) * model->scale(i);
+
+    }
+
+    // Divide by number of model components
+    double sum = model->sum_of_scales();
+    if (sum > 0.0) {
+        irf /= sum;
+    }
 
     // Return IRF value
     return irf;

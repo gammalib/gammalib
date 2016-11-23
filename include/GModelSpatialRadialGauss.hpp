@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.hpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GXmlElement.hpp"
@@ -50,6 +51,7 @@ class GModelSpatialRadialGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialGauss(void);
+    GModelSpatialRadialGauss(const bool& dummy, const std::string& type);
     GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
     explicit GModelSpatialRadialGauss(const GXmlElement& xml);
     GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
@@ -65,16 +67,15 @@ public:
     virtual std::string               type(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
-                                           const GTime& time) const;
-    virtual double                    eval_gradients(const double& theta,
-                                                     const GEnergy& energy,
-                                                     const GTime& time) const;
+                                           const GTime&   time,
+                                           const bool&    gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
     virtual double                    theta_max(void) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -88,9 +89,12 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialRadialGauss& model);
     void free_members(void);
+    void set_region(void) const;
 
     // Protected members
-    GModelPar m_sigma;      //!< Gaussian width (deg)
+    std::string              m_type;   //!< Model type
+    GModelPar                m_sigma;  //!< Gaussian width (deg)
+    mutable GSkyRegionCircle m_region; //!< Bounding circle
 };
 
 
@@ -109,14 +113,14 @@ std::string GModelSpatialRadialGauss::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "GaussFunction".
+ * @return Model type.
  *
  * Returns the type of the radial Gauss model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialGauss::type(void) const
 {
-    return "GaussFunction";
+    return (m_type);
 }
 
 
@@ -146,6 +150,21 @@ void GModelSpatialRadialGauss::sigma(const double& sigma)
 {
     m_sigma.value(sigma);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the spatial model component.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialRadialGauss::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALRADIALGAUSS_HPP */

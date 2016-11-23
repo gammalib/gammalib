@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GLATObservation.cpp - Fermi/LAT observation class           *
+ *             GLATObservation.cpp - Fermi LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.cpp
- * @brief Fermi/LAT observation class implementation
+ * @brief Fermi LAT observation class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -207,24 +207,23 @@ void GLATObservation::response(const GResponse& rsp)
  * @brief Set response function
  *
  * @param[in] irfname Name of instrument response function.
- * @param[in] caldb Optional path to calibration database.
  *
  * Set the LAT response function using the IRF name and the path to the
- * calibration database. The IFR name has to be one of
- * name
- * name::front
- * name::back
- * where name is the response name (e.g. P6_v3). Note that the name is case
- * sensitive for the moment.
+ * calibration database. The IRF name has to be one of
+ *
+ *      name (is equivalent to front+back)
+ *      name::front
+ *      name::back
+ *      name::psf(0-3)
+ *      name::edisp(0-3)
+ *
+ * where name is the response name (for example "P8R2_SOURCE_V6"). Note that
+ * the name is case sensitive, but the event typ is not case sensitive.
  ***************************************************************************/
-void GLATObservation::response(const std::string& irfname,
-                               const std::string& caldb)
+void GLATObservation::response(const std::string& irfname)
 {
     // Clear LAT response function
     m_response.clear();
-
-    // Set calibration database
-    m_response.caldb(caldb);
 
     // Load instrument response function
     m_response.load(irfname);
@@ -341,9 +340,23 @@ void GLATObservation::read(const GXmlElement& xml)
 
     // Load data
     if (unbin_ok) {
+
+        // Expand file names
+        ft1file = gammalib::xml_file_expand(xml, ft1file);
+        ft2file = gammalib::xml_file_expand(xml, ft2file);
+        ltfile  = gammalib::xml_file_expand(xml, ltfile);
+
+        // Load files
         load_unbinned(ft1file, ft2file, ltfile);
     }
     else {
+
+        // Expand file names
+        cntfile = gammalib::xml_file_expand(xml, cntfile);
+        expfile = gammalib::xml_file_expand(xml, expfile);
+        ltfile  = gammalib::xml_file_expand(xml, ltfile);
+
+        // Load files
         load_binned(cntfile, expfile, ltfile);
     }
     
@@ -435,31 +448,31 @@ void GLATObservation::write(GXmlElement& xml) const
 
         // Handle FT1
         if (par->attribute("name") == "FT1") {
-            par->attribute("file", m_ft1file);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_ft1file));
             npar[0]++;
         }
 
         // Handle CountsMap
         else if (par->attribute("name") == "CountsMap") {
-            par->attribute("file", m_cntfile);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_cntfile));
             npar[0]++;
         }
 
         // Handle FT2
         else if (par->attribute("name") == "FT2") {
-            par->attribute("file", m_ft2file);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_ft2file));
             npar[1]++;
         }
 
         // Handle ExposureMap
         else if (par->attribute("name") == "ExposureMap") {
-            par->attribute("file", m_expfile);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_expfile));
             npar[1]++;
         }
 
         // Handle LiveTimeCube
         else if (par->attribute("name") == "LiveTimeCube") {
-            par->attribute("file", m_ltfile);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_ltfile));
             npar[2]++;
         }
 

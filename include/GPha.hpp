@@ -82,6 +82,8 @@ public:
     const double&    underflow(void) const;
     const double&    overflow(void) const;
     const double&    outflow(void) const;
+    void             exposure(const double& exposure);
+    const double&    exposure(void) const;
     void             fill(const GEnergy& energy, const double& value = 1.0);
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,
@@ -103,6 +105,7 @@ protected:
     double              m_underflow;  //!< Number of underflowing events
     double              m_overflow;   //!< Number of overflowing events
     double              m_outflow;    //!< Number of outflowing events
+    double              m_exposure;   //!< Exposure time (sec)
     GEbounds            m_ebounds;    //!< Energy boundaries
 };
 
@@ -171,7 +174,7 @@ int GPha::size(void) const
 inline
 const GEbounds& GPha::ebounds(void) const
 {
-    return m_ebounds;
+    return (m_ebounds);
 }
 
 
@@ -186,7 +189,7 @@ const GEbounds& GPha::ebounds(void) const
 inline
 const double& GPha::underflow(void) const
 {
-    return m_underflow;
+    return (m_underflow);
 }
 
 
@@ -201,7 +204,7 @@ const double& GPha::underflow(void) const
 inline
 const double& GPha::overflow(void) const
 {
-    return m_overflow;
+    return (m_overflow);
 }
 
 
@@ -215,7 +218,36 @@ const double& GPha::overflow(void) const
 inline
 const double& GPha::outflow(void) const
 {
-    return m_outflow;
+    return (m_outflow);
+}
+
+
+/***********************************************************************//**
+ * @brief Return exposure time
+ *
+ * @return Exposure time (seconds).
+ *
+ * Returns the exposure time in seconds.
+ ***************************************************************************/
+inline
+const double& GPha::exposure(void) const
+{
+    return (m_exposure);
+}
+
+
+/***********************************************************************//**
+ * @brief Set exposure time
+ *
+ * @param[in] exposure Exposure time (seconds).
+ *
+ * Set the exposure time in seconds.
+ ***************************************************************************/
+inline
+void GPha::exposure(const double& exposure)
+{
+    m_exposure = exposure;
+    return;
 }
 
 

@@ -5,13 +5,15 @@ depcomp
 pyext/build/
 .libs
 .deps
-test/*.fits
-test/.samp
-examples/python/*.fits
 inst/cta/test/*.xml
 inst/cta/test/*.fits
 inst/cta/test/*.fits.gz
+inst/cta/test/dev/*.fits
 inst/spi/test/data/*.xml
+inst/com/test/*.trs
+inst/cta/test/*.trs
+inst/lat/test/*.trs
+inst/mwl/test/*.trs
 
 # Generated files
 pyext/gammalib/*.py
@@ -36,6 +38,8 @@ m4/lt~obsolete.m4
 *.dvi
 *.idx
 *.out
+*.gcda
+*.gcno
 .DS_Store
 .libs
 .deps
@@ -78,26 +82,7 @@ src/template/test_GClass
 doc/Doxyfile.bak
 testconf.sh
 
-test/test_url.dat
-test/*.xml
-test/reports/*.xml
-test/*.trs
-test/region.reg
-
-examples/python/*.xml
-examples/python/*.html
-examples/cpp/*/*.fits
-examples/cpp/createfits/createfits
-examples/cpp/createskymap/createskymap
-examples/cpp/createxml/createxml
-examples/cpp/createxml/my_xml_file.xml
-examples/cpp/readmodel/readmodel
-examples/cpp/numerics/numerics
-examples/cpp/optimize/optimize
-examples/cpp/interpolate/interpolate
-examples/cpp/readmodel/readmodel
-
-# Binaries
+# Test folder
 test/test_GApplication
 test/test_GFits
 test/test_GMatrix
@@ -113,8 +98,30 @@ test/test_GVector
 test/test_GXml
 test/test_GXspec
 test/test_GVO
-test/test_LAT
-test/test_MWL
-test/test_CTA
-test/test_COM
+inst/lat/test/test_LAT
+inst/mwl/test/test_MWL
+inst/cta/test/test_CTA
+inst/com/test/test_COM
+test/region.reg
+test/.samp
+test/test_python.sh
+test/test_examples.sh
+test/*.fits
+test/*.xml
+test/*.trs
+test/*.html
+test/test_csv*.dat
+test/test_url.dat
+test/reports/*.xml
+test/dev/*.fits
+test/dev/*.xml
 
+# Examples folder
+examples/cpp/createfits
+examples/cpp/createskymap
+examples/cpp/createxml
+examples/cpp/readmodel
+examples/cpp/numerics
+examples/cpp/optimize
+examples/cpp/interpolate
+examples/cpp/readmodel

@@ -39,8 +39,26 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralLogParabola g_spectral_logparabola_seed;
-const GModelSpectralRegistry    g_spectral_logparabola_registry(&g_spectral_logparabola_seed);
+const GModelSpectralLogParabola g_spectral_logp_seed1("LogParabola",
+                                                      "Prefactor",
+                                                      "Index",
+                                                      "PivotEnergy",
+                                                      "Curvature");
+const GModelSpectralRegistry    g_spectral_logp_registry1(&g_spectral_logp_seed1);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralLogParabola g_spectral_logp_seed2("LogParabola",
+                                                      "norm",
+                                                      "alpha",
+                                                      "Eb",
+                                                      "beta");
+const GModelSpectralLogParabola g_spectral_logp_seed3("LogParabola",
+                                                      "Prefactor",
+                                                      "Index",
+                                                      "Scale",
+                                                      "Curvature");
+const GModelSpectralRegistry    g_spectral_logp_registry2(&g_spectral_logp_seed2);
+const GModelSpectralRegistry    g_spectral_logp_registry3(&g_spectral_logp_seed3);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX          "GModelSpectralLogParabola::flux(GEnergy&, GEnergy&)"
@@ -70,6 +88,39 @@ GModelSpectralLogParabola::GModelSpectralLogParabola(void) : GModelSpectral()
 {
     // Initialise private members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type and parameter name constructor
+ *
+ * @param[in] type Model type.
+ * @param[in] prefactor Name of prefactor parameter.
+ * @param[in] index Name of index parameter.
+ * @param[in] pivot Name of pivot parameter.
+ * @param[in] curvature Name of curvature parameter.
+ ***************************************************************************/
+GModelSpectralLogParabola::GModelSpectralLogParabola(const std::string& type,
+                                                     const std::string& prefactor,
+                                                     const std::string& index,
+                                                     const std::string& pivot,
+                                                     const std::string& curvature) :
+                           GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Set parameter names
+    m_norm.name(prefactor);
+    m_index.name(index);
+    m_pivot.name(pivot);
+    m_curvature.name(curvature);
 
     // Return
     return;
@@ -245,6 +296,7 @@ GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Computes
@@ -261,58 +313,8 @@ GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
  * - \f${\tt m\_curvature}\f$ is the spectral curvature, and
  * - \f${\tt m\_pivot}\f$ is the pivot energy.
  *
- * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
- ***************************************************************************/
-double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
-                                       const GTime&   srcTime) const
-{
-    // Update the evaluation cache
-    update_eval_cache(srcEng);
-
-    // Compute function value
-    double value = m_norm.value() * m_last_power;
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralLogParabola::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", power=" << m_last_power;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Computes
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- *    \left( \frac{E}{\tt m\_pivot} \right)^{{\tt m\_index} +
- *    {\tt m\_curvature} \, \ln \frac{E}{\tt m\_pivot}}
- * \f]
- *
- * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
- * - \f${\tt m\_index}\f$ is the spectral index,
- * - \f${\tt m\_curvature}\f$ is the spectral curvature, and
- * - \f${\tt m\_pivot}\f$ is the pivot energy.
- *
- * The method also evaluates the partial derivatives of the model with
- * respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
@@ -338,8 +340,9 @@ double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
-double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng,
-                                                 const GTime&   srcTime)
+double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
+                                       const GTime&   srcTime,
+                                       const bool&    gradients) const
 {
     // Update the evaluation cache
     update_eval_cache(srcEng);
@@ -347,38 +350,38 @@ double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng,
     // Compute function value
     double value = m_norm.value() * m_last_power;
 
-    // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.is_free())
-                     ? m_norm.scale() * m_last_power : 0.0;
-    double g_index = (m_index.is_free())
-                     ? value * m_index.scale() * m_last_log_e_norm : 0.0;
-    double g_curvature = (m_curvature.is_free())
-                         ? value * m_curvature.scale() * m_last_log_e_norm * 
-                           m_last_log_e_norm : 0.0;
-    double g_pivot = (m_pivot.is_free())
-                     ? -value * (m_last_exponent + m_curvature.value() *
-                       m_last_log_e_norm) / m_pivot.factor_value() : 0.0;
+    // Optionally compute gradients
+    if (gradients) {
 
-    // Set gradients
-    m_norm.factor_gradient(g_norm);
-    m_index.factor_gradient(g_index);
-    m_curvature.factor_gradient(g_curvature);
-    m_pivot.factor_gradient(g_pivot);
+        // Compute partial derivatives of the parameter values
+        double g_norm  = (m_norm.is_free())
+                         ? m_norm.scale() * m_last_power : 0.0;
+        double g_index = (m_index.is_free())
+                         ? value * m_index.scale() * m_last_log_e_norm : 0.0;
+        double g_curvature = (m_curvature.is_free())
+                             ? value * m_curvature.scale() * m_last_log_e_norm *
+                             m_last_log_e_norm : 0.0;
+        double g_pivot = (m_pivot.is_free())
+                         ? -value * (m_last_exponent + m_curvature.value() *
+                         m_last_log_e_norm) / m_pivot.factor_value() : 0.0;
+
+        // Set gradients
+        m_norm.factor_gradient(g_norm);
+        m_index.factor_gradient(g_index);
+        m_curvature.factor_gradient(g_curvature);
+        m_pivot.factor_gradient(g_pivot);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralLogParabola::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralLogParabola::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", e_norm=" << m_last_e_norm;
         std::cout << ", power=" << m_last_power;
-        std::cout << ", g_norm=" << g_norm;
-        std::cout << ", g_index=" << g_index;
-        std::cout << ", g_curvature=" << g_curvature;
-        std::cout << ", g_pivot=" << g_pivot;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -569,101 +572,34 @@ GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing logparabola model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
- * Read the spectral log parabola information from an XML element. The format
- * of the XML elements is
- *
- *     <spectrum type="LogParabola">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Curvature" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
- *
- * or for compliance with Fermi-LAT
- *
- *     <spectrum type="LogParabola">
- *       <parameter name="norm"  scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="alpha" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="beta"  scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Eb"    scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
- *
- * @todo Add parameter validity check
+ * Read the spectral log parabola information from an XML element.
  ***************************************************************************/
 void GModelSpectralLogParabola::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "LogParabola model requires exactly 4 parameters.");
-    }
+    // Get parameter pointers
+    const GXmlElement* norm      = gammalib::xml_get_par(G_READ, xml, m_norm.name());
+    const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, m_index.name());
+    const GXmlElement* curvature = gammalib::xml_get_par(G_READ, xml, m_curvature.name());
+    const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, m_pivot.name());
 
-    // Extract model parameters
-    int npar[] = {0, 0, 0,0};
-    for (int i = 0; i < 4; ++i) {
+    // Read parameters
+    m_norm.read(*norm);
+    m_index.read(*index);
+    m_curvature.read(*curvature);
+    m_pivot.read(*pivot);
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor" ||
-        	par->attribute("name") == "norm") {
-            m_norm.read(*par);
-            npar[0]++;
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index"){
-            m_index.read(*par);
-            npar[1]++;
-        }
-
-        // Change sign if index is defined Fermi-like
-        else if(par->attribute("name") == "alpha") {
-        	m_index.read(*par);
-        	m_index.min(-m_index.max());
-        	m_index.max(-m_index.min());
-        	m_index.value(-m_index.value());
-        	npar[1]++;
-        }
-
-        // Handle curvature
-        else if (par->attribute("name") == "Curvature") {
-            m_curvature.read(*par);
-            npar[2]++;
-        }
-
-        // Change sign if curvature is defined Fermi-like
-        else if(par->attribute("name") == "beta") {
-        	m_curvature.read(*par);
-        	m_curvature.min(-m_curvature.max());
-        	m_curvature.max(-m_curvature.min());
-        	m_curvature.value(-m_curvature.value());
-        	npar[2]++;
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale" ||
-			     par->attribute("name") == "Eb") {
-            m_pivot.read(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3]  != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "LogParabola requires \"Prefactor\" or \"norm\","
-              " \"Index\" or \"alpha\", \"Curvature\" or \"beta\""
-              " and \"Scale\" or \"Eb\" parameters.");
+    // In case that legacy parameters were used we need to negate the index
+    // and curvature because they are differently defined
+    if (gammalib::xml_has_par(xml, "alpha") &&
+        gammalib::xml_has_par(xml, "beta")) {
+        m_index.min(-m_index.max());
+        m_index.max(-m_index.min());
+        m_index.value(-m_index.value());
+        m_curvature.min(-m_curvature.max());
+        m_curvature.max(-m_curvature.min());
+        m_curvature.value(-m_curvature.value());
     }
 
     // Return
@@ -674,24 +610,12 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of type "LogParabola"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
- * Write the LogParabola model information into an XML element. The format
- * of the XML elements is
- *
- *     <spectrum type="LogParabola">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Curvature" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
+ * Write the LogParabola model information into an XML element.
  ***************************************************************************/
 void GModelSpectralLogParabola::write(GXmlElement& xml) const
 {
@@ -706,59 +630,31 @@ void GModelSpectralLogParabola::write(GXmlElement& xml) const
               "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 4 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(GXmlElement("parameter name=\"Index\""));
-        xml.append(GXmlElement("parameter name=\"Curvature\""));
-        xml.append(GXmlElement("parameter name=\"Scale\""));
+    // Check if parameters are Fermi/LAT style and need to be negated
+    GModelPar inx = m_index;
+    GModelPar crv = m_curvature;
+    if (inx.name() == "alpha") {
+        inx.min(-inx.max());
+        inx.max(-inx.min());
+        inx.value(-inx.value());
+    }
+    if (crv.name() == "beta") {
+        crv.min(-crv.max());
+        crv.max(-crv.min());
+        crv.value(-crv.value());
     }
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "LogParabola law model requires exactly 4 parameters.");
-    }
+    // Get XML parameters
+    GXmlElement* norm      = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* index     = gammalib::xml_need_par(G_WRITE, xml, inx.name());
+    GXmlElement* curvature = gammalib::xml_need_par(G_WRITE, xml, crv.name());
+    GXmlElement* pivot     = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
 
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0,0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor"){
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            npar[1]++;
-            m_index.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Curvature"){
-              npar[2]++;
-              m_curvature.write(*par);
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.write(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "LogParabola requires \"Prefactor\", \"Index\", \"Curvature\""
-              " and \"Scale\" parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    inx.write(*index);
+    crv.write(*curvature);
+    m_pivot.write(*pivot);
 
     // Return
     return;
@@ -807,6 +703,9 @@ std::string GModelSpectralLogParabola::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralLogParabola::init_members(void)
 {
+    // Initialise model type
+    m_type = "LogParabola";
+
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Prefactor");
@@ -886,10 +785,11 @@ void GModelSpectralLogParabola::init_members(void)
 void GModelSpectralLogParabola::copy_members(const GModelSpectralLogParabola& model)
 {
     // Copy members
-    m_norm  = model.m_norm;
-    m_index = model.m_index;
+    m_type      = model.m_type;
+    m_norm      = model.m_norm;
+    m_index     = model.m_index;
     m_curvature = model.m_curvature;
-    m_pivot = model.m_pivot;
+    m_pivot     = model.m_pivot;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -936,7 +836,7 @@ void GModelSpectralLogParabola::free_members(void)
  *
  * @param[in] energy Energy.
  *
- * Updates the precomputation cache for eval() and eval_gradients() methods.
+ * Updates the precomputation cache for eval() method.
  ***************************************************************************/
 void GModelSpectralLogParabola::update_eval_cache(const GEnergy& energy) const
 {

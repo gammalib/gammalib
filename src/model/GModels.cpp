@@ -829,7 +829,7 @@ int GModels::npars(void) const
  * container. The optimizer parameter container will thus contains a flat
  * array of a model parameters.
  ***************************************************************************/
-GOptimizerPars GModels::pars(void)
+GOptimizerPars GModels::pars(void) const
 {
     // Initialise parameter container
     GOptimizerPars pars;
@@ -853,11 +853,18 @@ GOptimizerPars GModels::pars(void)
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @param[in] gradients Compute gradients?
+ * @return Value of models.
  *
  * Evaluates the sum of all models for the specified event and observation.
  * Only valid models are considered in this evaluation.
+ *
+ * If the @p gradients flag is true the method will also set the parameter
+ * gradients of the model parameters.
  ***************************************************************************/
-double GModels::eval(const GEvent& event, const GObservation& obs) const
+double GModels::eval(const GEvent&       event,
+                     const GObservation& obs,
+                     const bool&         gradients) const
 {
     // Initialise function value
     double value = 0.0;
@@ -865,33 +872,8 @@ double GModels::eval(const GEvent& event, const GObservation& obs) const
     // Evaluate function for all models
     for (int i = 0; i < size(); ++i) {
         if (m_models[i]->is_valid(obs.instrument(), obs.id())) {
-            value += m_models[i]->eval(event, obs);
+            value += m_models[i]->eval(event, obs, gradients);
         }    
-    }
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate sum and gradients of all models
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- *
- * Evaluates the sum and the parameter gradients of all models for the
- * specified event and observation.
- ***************************************************************************/
-double GModels::eval_gradients(const GEvent& event,
-                               const GObservation& obs) const
-{
-    // Initialise function value
-    double value = 0.0;
-
-    // Evaluate function for all models
-    for (int i = 0; i < size(); ++i) {
-        value += m_models[i]->eval_gradients(event, obs);
     }
 
     // Return

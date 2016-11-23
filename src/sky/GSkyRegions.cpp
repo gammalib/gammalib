@@ -545,7 +545,7 @@ void GSkyRegions::save(const GFilename& filename) const
 /***********************************************************************//**
  * @brief Print regions
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness
  * @return String containing region container information.
  *
  * Prints all regions into a string.

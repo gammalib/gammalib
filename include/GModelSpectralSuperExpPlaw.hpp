@@ -68,6 +68,12 @@ class GModelSpectralSuperExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
 	GModelSpectralSuperExpPlaw(void);
+    GModelSpectralSuperExpPlaw(const std::string& type,
+                               const std::string& prefactor,
+                               const std::string& index1,
+                               const std::string& pivot,
+                               const std::string& cutoff,
+                               const std::string& index2);
     GModelSpectralSuperExpPlaw(const double&  prefactor,
                                const double&  index1,
                                const GEnergy& pivot,
@@ -86,9 +92,8 @@ public:
     virtual std::string                 classname(void) const;
     virtual std::string                 type(void) const;
     virtual double                      eval(const GEnergy& srcEng,
-                                             const GTime&   srcTime = GTime()) const;
-    virtual double                      eval_gradients(const GEnergy& srcEng,
-                                                       const GTime&   srcTime = GTime());
+                                             const GTime&   srcTime = GTime(),
+                                             const bool&    gradients = false) const;
     virtual double                      flux(const GEnergy& emin,
                                              const GEnergy& emax) const;
     virtual double                      eflux(const GEnergy& emin,
@@ -166,11 +171,12 @@ protected:
     };
 
     // Protected members
-    GModelPar m_norm;    //!< Normalization factor
-    GModelPar m_index1;  //!< Spectral index
-    GModelPar m_index2;  //!< Index of cutoff
-    GModelPar m_ecut;    //!< Exponential cut off energy
-    GModelPar m_pivot;   //!< Pivot energy
+    std::string m_type;              //!< Model type
+    GModelPar   m_norm;              //!< Normalization factor
+    GModelPar   m_index1;            //!< Spectral index
+    GModelPar   m_index2;            //!< Index of cutoff
+    GModelPar   m_ecut;              //!< Exponential cut off energy
+    GModelPar   m_pivot;             //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;   //!< Last energy value
@@ -212,7 +218,7 @@ std::string GModelSpectralSuperExpPlaw::classname(void) const
 inline
 std::string GModelSpectralSuperExpPlaw::type(void) const
 {
-    return "PLSuperExpCutoff";
+    return (m_type);
 }
 
 

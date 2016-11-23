@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFitsImage.i - Abstract FITS image base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,7 @@
 #include "GFitsImageUShort.hpp"
 #include "GTools.hpp"
 %}
+
 
 /***********************************************************************//**
  * @brief Tuple to index conversion to provide pixel access.
@@ -100,7 +101,7 @@ public:
     GFitsImage(const int& bitpix, const int& nx, const int& ny);
     GFitsImage(const int& bitpix, const int& nx, const int& ny, const int& nz);
     GFitsImage(const int& bitpix, const int& nx, const int& ny, const int& nz, const int& nt);
-    GFitsImage(const int& bitpix, const int& naxis, const int* naxes);
+    GFitsImage(const int& bitpix, const std::vector<int>& naxes);
     GFitsImage(const GFitsImage& image);
     virtual ~GFitsImage(void);
 

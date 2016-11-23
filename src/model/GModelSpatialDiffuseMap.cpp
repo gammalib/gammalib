@@ -40,8 +40,13 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialDiffuseMap g_spatial_map_seed;
 const GModelSpatialRegistry   g_spatial_map_registry(&g_spatial_map_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialDiffuseMap g_spatial_map_legacy_seed(true, "SpatialMap");
+const GModelSpatialRegistry   g_spatial_map_legacy_registry(&g_spatial_map_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_MC           "GModelSpatialDiffuseMap::mc(GEnergy&, GTime&, GRan&)"
 #define G_READ                  "GModelSpatialDiffuseMap::read(GXmlElement&)"
 #define G_WRITE                "GModelSpatialDiffuseMap::write(GXmlElement&)"
 
@@ -50,8 +55,8 @@ const GModelSpatialRegistry   g_spatial_map_registry(&g_spatial_map_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_CACHE              //!< Debug Monte Carlo Cache computation
-//#define G_DEBUG_PREPARE            //!< Debug map preparation
+//#define G_DEBUG_MC                                     //!< Debug MC method
+//#define G_DEBUG_MC_CACHE                               //!< Debug MC cache
 
 
 /*==========================================================================
@@ -62,6 +67,8 @@ const GModelSpatialRegistry   g_spatial_map_registry(&g_spatial_map_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty spatial map model.
  ***************************************************************************/
 GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(void) :
                          GModelSpatialDiffuse()
@@ -75,12 +82,35 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(void) :
 
 
 /***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty spatial map model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const bool&        dummy,
+                                                 const std::string& type) :
+                         GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief XML constructor
  *
  * @param[in] xml XML element.
  *
  * Constructs spatial map model by extracting information from an XML
- * element. See the method read() for more information about the expected
+ * element. See the read() method for more information about the expected
  * structure of the XML element.
  ***************************************************************************/
 GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GXmlElement& xml) :
@@ -98,14 +128,15 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GXmlElement& xml) :
 
 
 /***********************************************************************//**
- * @brief Filename constructor
+ * @brief File name constructor
  *
  * @param[in] filename File name.
- * @param[in] value Normalization factor (defaults to 1).
- * @param[in] normalize Normalize map (defaults to true).
+ * @param[in] value Normalization factor.
+ * @param[in] normalize Normalize map?
  *
- * Constructs spatial map model by loading a skymap from the file specified
- * by @p filename and by setting the normalization @p value.
+ * Constructs spatial map model by loading a sky map from the file specified
+ * by @p filename and by setting the @p value by which the map will be
+ * multiplied (or normalized).
  ***************************************************************************/
 GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GFilename& filename,
                                                  const double&    value,
@@ -115,13 +146,13 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GFilename& filename,
     // Initialise members
     init_members();
 
-    // Set normalization parameter
+    // Set normalisation parameter
     m_value.value(value);
 
     // Set normalization flag
     m_normalize = normalize;
 
-    // Load skymap
+    // Load sky map
     load(filename);
 
     // Return
@@ -133,11 +164,11 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GFilename& filename,
  * @brief Sky map constructor
  *
  * @param[in] map Sky map.
- * @param[in] value Normalization factor (defaults to 1).
- * @param[in] normalize Normalize map (defaults to true).
+ * @param[in] value Normalization factor.
+ * @param[in] normalize Normalize map.
  *
  * Constructs spatial map model by setting the sky @p map and by setting the
- * normalization @p value.
+ * @p value by which the map will be multiplied (or normalized).
  ***************************************************************************/
 GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GSkyMap& map,
                                                  const double&  value,
@@ -153,8 +184,10 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GSkyMap& map,
     // Set normalization flag
     m_normalize = normalize;
 
-    // Set and prepare skymap
+    // Set sky map
     m_map = map;
+
+    // Prepare sky map
     prepare_map();
 
     // Return
@@ -166,6 +199,8 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GSkyMap& map,
  * @brief Copy constructor
  *
  * @param[in] model Spatial map model.
+ *
+ * Construct a spatial map model by copying another spatial map model.
  ***************************************************************************/
 GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model) :
                          GModelSpatialDiffuse(model)
@@ -205,6 +240,8 @@ GModelSpatialDiffuseMap::~GModelSpatialDiffuseMap(void)
  *
  * @param[in] model Spatial map model.
  * @return Spatial map model.
+ *
+ * Assigns a spatial map model to another spatial map model.
  ***************************************************************************/
 GModelSpatialDiffuseMap& GModelSpatialDiffuseMap::operator=(const GModelSpatialDiffuseMap& model)
 {
@@ -237,7 +274,7 @@ GModelSpatialDiffuseMap& GModelSpatialDiffuseMap::operator=(const GModelSpatialD
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear diffuse map
+ * @brief Clear spatial map model
  ***************************************************************************/
 void GModelSpatialDiffuseMap::clear(void)
 {
@@ -257,9 +294,9 @@ void GModelSpatialDiffuseMap::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone diffuse map
+ * @brief Clone spatial map model
  *
- * @return Pointer to deep copy of diffuse map model.
+ * @return Pointer to deep copy of spatial map model.
  ***************************************************************************/
 GModelSpatialDiffuseMap* GModelSpatialDiffuseMap::clone(void) const
 {
@@ -269,46 +306,35 @@ GModelSpatialDiffuseMap* GModelSpatialDiffuseMap::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return intensity of skymap
+ * @brief Return intensity of sky map
  *
  * @param[in] photon Incident photon.
- * @return Sky map intensity.
+ * @param[in] gradients Compute gradients?
+ * @return Sky map intensity (\f$\mbox{ph cm}^{-2}\mbox{sr}^{-1}\mbox{s}^{-1}\f$)
  *
- * Returns the intensity of the skymap at the specified sky direction
+ * Returns the intensity of the sky map at the specified sky direction
  * multiplied by the normalization factor. If the sky direction falls outside
- * the skymap, an intensity of 0 is returned.
+ * the sky map, an intensity of 0 is returned.
+ *
+ * If the @p gradients flag is true the method will also evaluate the partial
+ * derivatives of the model.
  ***************************************************************************/
-double GModelSpatialDiffuseMap::eval(const GPhoton& photon) const
+double GModelSpatialDiffuseMap::eval(const GPhoton& photon,
+                                     const bool&    gradients) const
 {
     // Get skymap intensity
     double intensity = m_map(photon.dir());
 
-    // Return intensity times normalization factor
-    return (intensity * m_value.value());
-}
+    // Optionally compute partial derivatives
+    if (gradients) {
 
+        // Compute partial derivatives of the parameter values
+        double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
 
-/***********************************************************************//**
- * @brief Return intensity of skymap and gradient
- *
- * @param[in] photon Incident photon.
- * @return Sky map intensity.
- *
- * Returns the intensity of the skymap at the specified sky direction
- * multiplied by the normalization factor. The method also sets the gradient
- * with respect to the normalization factor. If the sky direction falls
- * outside the skymap, an intensity of 0 is returned.
- ***************************************************************************/
-double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
-{
-    // Get skymap intensity
-    double intensity = m_map(photon.dir());
+        // Set gradient
+        m_value.factor_gradient(g_value);
 
-    // Compute partial derivatives of the parameter values
-    double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
-
-    // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseMap*>(this)->m_value.factor_gradient(g_value);
+    } // endif: computed partial derivatives
 
     // Return intensity times normalization factor
     return (intensity * m_value.value());
@@ -323,121 +349,81 @@ double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Draws a random sky direction from the intensity distribution of the model
- * sky map.
+ * @exception GException::invalid_value
+ *            Simulation cone not defined or does not overlap with sky map.
+ *            No sky map defined.
  *
- * The method makes use of a cache array that contains the normalized
- * cumulative flux values of the skymap. Using a uniform random number, this
- * cache array is scanned using a bi-section method to determine the skymap
- * pixel for which the position should be returned.
- *
- * Within that pixel, a rejection method is used to draw a sky direction
- * that follows the intensity distribution that is obtained when calling the
- * interpolation operator. This assures that even for coarse binning of the
- * sky map the simulation corresponds to the model.
- *
- * Note that the set_mc_cone() method needs to be called before this method
- * is called the first time.
+ * Returns a random sky direction according to the intensity distribution of
+ * the model sky map. The method uses a rejection method to determine the sky
+ * direction.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
                                     const GTime&   time,
                                     GRan&          ran) const
 {
-    // Allocate sky direction
-    GSkyDir dir;
+    // Throw an exception if the maximum MC intensity is not positive. This
+    // can be the case because the simulation cone has not been defined or
+    // because it does not overlap with the sky map
+    if (m_mc_max <= 0.0) {
+        std::string msg = "Simulation cone has not been defined or does not "
+                          "overlap with the sky map. Please specify a valid "
+                          "simulation cone.";
+        throw GException::invalid_value(G_MC, msg);
+    }
 
     // Determine number of skymap pixels
     int npix = m_map.npix();
 
-    // Continue only if there are skymap pixels
-    if (npix > 0) {
+    // Throw an exception if there are no sky map pixels
+    if (npix <= 0) {
+        std::string msg = "No sky map defined. Please specify a valid sky map.";
+        throw GException::invalid_value(G_MC, msg);
+    }
 
-        // Get pixel index from CDF
-        int index = ran.cdf(m_mc_cache);
+    // Allocate sky direction
+    GSkyDir dir;
 
-        // Convert sky map index to sky map pixel
-        GSkyPixel pixel = m_map.inx2pix(index);
+    // Debug option: initialise counter
+    #if defined(G_DEBUG_MC)
+    int num_iterations = 0;
+    #endif
 
-        // If we have a 2D pixel then randomize pixel values and convert them
-        // into a sky direction
-        if (pixel.is_2D()) {
+    // Get sky direction
+    while (true) {
 
-            // Use a rejection method to find a sky direction
-            while (true) {
+        // Debug option: increment counter
+        #if defined(G_DEBUG_MC)
+        num_iterations++;
+        #endif
 
-                // Draw random sky pixel
-                GSkyPixel test(pixel.x() + ran.uniform() - 0.5,
-                               pixel.y() + ran.uniform() - 0.5);
+        // Simulate random sky direction within Monte Carlo simulation cone
+        double theta = std::acos(1.0 - ran.uniform() * m_mc_one_minus_cosrad) *
+                       gammalib::rad2deg;
+        double phi   = 360.0 * ran.uniform();
+        dir = m_mc_centre;
+        dir.rotate_deg(phi, theta);
 
-                // Derive sky direction
-                dir = m_map.pix2dir(test);
+        // Get map value at simulated sky direction. If the map value is non-
+        // positive then simulate a new sky direction.
+        double value = m_map(dir);
+        if (value <= 0.0) {
+            continue;
+        }
 
-                // Get map value at that sky direction
-                double value = m_map(dir);
+        // Get uniform random number
+        double uniform = ran.uniform() * m_mc_max;
 
-                // Get uniform random number up to the maximum
-                double uniform = ran.uniform() * m_mc_max[index];
+        // Exit loop if the random number is not larger than the sky map value
+        if (uniform <= value) {
+            break;
+        }
 
-                // Exit loop if we're not larger than the map value
-                if (uniform <= value) {
-                    break;
-                }
+    } // endwhile: loop until sky direction was accepted
 
-            } // endwhile: rejection method
-
-        } // endif: had a 2D pixel
-
-        // ... otherwise convert pixel into sky direction and randomize
-        // position. We use a while loop to randomize the position within a
-        // circle that enclosed the pixel and retain only directions that
-        // result in the same pixel index and that are compatible with the
-        // density distribution.
-        else {
-
-            // Get pointer on HealPix projection
-            const GHealpix* healpix = static_cast<const GHealpix*>(m_map.projection());
-
-            // Get enclosing radius
-            double radius = healpix->max_pixrad();
-
-            // Initialize pixel centre
-            dir = m_map.pix2dir(pixel);
-
-            // Get randomized pixel
-            GSkyDir randomized_dir;
-            double  cosrad = std::cos(radius);
-            while (true) {
-
-                // Get randomized sky direction
-                randomized_dir = dir;
-                double theta   = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) * gammalib::rad2deg;
-                double phi     = 360.0 * ran.uniform();
-                randomized_dir.rotate_deg(phi, theta);
-
-                // Skip if we are not in the actual pixel
-                if (m_map.dir2inx(randomized_dir) != index) {
-                    continue;
-                }
-
-                // Get map value at that sky direction
-                double value = m_map(randomized_dir);
-
-                // Get uniform random number up to the maximum
-                double uniform = ran.uniform() * m_mc_max[index];
-
-                // Exit loop if we're not larger than the map value
-                if (uniform <= value) {
-                    break;
-                }
-
-            } // endwhile
-
-            // Store randomize sky position
-            dir = randomized_dir;
-
-        } // endelse: we had a HealPix map
-
-    } // endif: there were pixels in sky map
+    // Debug option: log counter
+    #if defined(G_DEBUG_MC)
+    std::cout << num_iterations << " ";
+    #endif
 
     // Return sky direction
     return dir;
@@ -509,37 +495,53 @@ bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * @exception GException::invalid_value
+ *            Model parameters not found in XML element.
  *
- * Read the skymap information from an XML element. The XML element is
- * required to have 1 parameter named either "Normalization" or "Prefactor".
+ * Reads the spatial information for a diffuse map from an XML element. The
+ * expected format of the XML element is
  *
- * If the attribute @a normalize="0" or @ normalize="false" is present the
- * diffuse map will not be normalised to unity flux upon loading.
+ *     <spatialModel type="DiffuseMap" file="myfile.fits" normalize="1">
+ *       <parameter name="Normalization" ../>
+ *     </spatialModel>
+ *
+ * The @p file attribute provides the filename of the diffuse map FITS file.
+ * The filename may be either an absolute filename (starting with '/') or a
+ * relative filename. If no access path is given, the file is expected to
+ * reside in the same location as the XML file.
+ *
+ * The @p normalize attribute specifies whether the sky map should be
+ * normalized to unity flux or not. If the attribute is not given, the map
+ * will be automatically normalized. To prevent normalization,
+ * @p normalize="0" needs to be specified.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 1 parameters
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Spatial map model requires exactly 1 parameter.");
-    }
-
-    // Get pointer on model parameter
-    const GXmlElement* par = xml.element("parameter", 0);
-
-    // Get value
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Prefactor") {
+    // If "Normalization" parameter exists then read parameter from this
+    // XML element
+    if (gammalib::xml_has_par(xml, "Normalization")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Normalization");
         m_value.read(*par);
     }
+
+    // ... otherwise try reading parameter from "Prefactor" parameter
+    #if defined(G_LEGACY_XML_FORMAT)
+    else if (gammalib::xml_has_par(xml, "Prefactor")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Prefactor");
+        m_value.read(*par);
+    }
+    #endif
+
+    // ... otherwise throw an exception
     else {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Spatial map model requires either \"Prefactor\" or"
-              " \"Normalization\" parameter.");
+        #if defined(G_LEGACY_XML_FORMAT)
+        std::string msg = "Diffuse map model requires either "
+                          "\"Normalization\" or \"Prefactor\" parameter.";
+        #else
+        std::string msg = "Diffuse map model requires \"Normalization\" "
+                          "parameter.";
+        #endif
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Get optional normalization attribute
@@ -553,8 +555,8 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
         }
     }
 
-    // Load skymap
-    load(xml.attribute("file"));
+    // Load sky map.
+    load(gammalib::xml_file_expand(xml, xml.attribute("file")));
 
     // Return
     return;
@@ -573,25 +575,38 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the map cube information into an XML element. The XML element has to
- * be of type "MapCubeFunction" and will have 1 parameter leaf named either
- * "Value" or "Normalization" (default).
+ * Writes the spatial information for a diffuse map into an XML element. The
+ * format of the XML element is
+ *
+ *     <spatialModel type="DiffuseMap" file="myfile.fits" normalize="1">
+ *       <parameter name="Prefactor" value="1" min="0.1" max="10" scale="1" free="0"/>
+ *     </spatialModel>
+ *
+ * The @p file attribute provides the filename of the diffuse map FITS file.
+ * The filename may be either an absolute filename (starting with '/') or a
+ * relative filename. If no access path is given, the file is expected to
+ * reside in the same location as the XML file.
+ *
+ * The @p normalize attribute specifies whether the sky map should be
+ * normalized to unity flux or not. The attribute will only be written if the
+ * normalization is disabled.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "SpatialMap");
+        xml.attribute("type", type());
     }
-
-    // Set model filename
-    xml.attribute("file", m_filename);
 
     // Verify model type
-    if (xml.attribute("type") != "SpatialMap") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"SpatialMap\".");
+              "Spatial model is not of type \""+type()+"\".");
     }
+
+    // Set sky map file name
+    //xml.attribute("file", m_filename);
+    xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // If XML element has 0 nodes then append parameter node. The name
     // of the node is "Prefactor" as this is the Fermi/LAT standard.
@@ -643,13 +658,9 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
  * @param[in] radius Simulation cone radius (degrees).
  *
  * Sets the simulation cone centre and radius that defines the directions
- * that will be simulated using the mc() method.
- *
- * The method initialises a cache for Monte Carlo sampling of the skymap.
- * This Monte Carlo cache consists of a linear array that maps a value
- * between 0 and 1 into the skymap pixel. A second array contains the
- * maximum expected value for each pixel which is also used in Monte Carlo
- * sampling.
+ * that will be simulated using the mc() method and pre-computes the maximum
+ * intensity and the spatially integrated flux of the map within the
+ * simulation cone region.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
                                           const double&  radius) const
@@ -661,9 +672,11 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
         m_mc_centre = centre;
         m_mc_radius = radius;
 
-        // Initialise cache
-        m_mc_cache.clear();
-        m_mc_max.clear();
+        // Pre-compute 1 - cosine of radius
+        m_mc_one_minus_cosrad = 1.0 - std::cos(m_mc_radius*gammalib::deg2rad);
+
+        // Initialise map maximum and normalisation
+        m_mc_max  = 0.0;
         m_mc_norm = 0.0;
 
         // Determine number of skymap pixels
@@ -672,63 +685,36 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
         // Continue only if there are pixels
         if (npix > 0) {
 
-            // Reserve space for all pixels in cache
-            m_mc_cache.reserve(npix+1);
-            m_mc_max.reserve(npix);
-
-            // Set first cache value to 0
-            m_mc_cache.push_back(0.0);
-
-            // Initialise cache with cumulative pixel fluxes and compute
-            // total flux in skymap for normalization. Negative pixels are
-            // excluded from the cumulative map. Invalid pixels are also
-            // filtered.
+            // Compute flux and maximum map intensity within the simulation cone
             double sum     = 0.0;
             double sum_map = 0.0;
             for (int i = 0; i < npix; ++i) {
 
-                // Derive effective pixel radius from half opening angle
-                // that corresponds to the pixel's solid angle. For security,
-                // the radius is enhanced by 50%.
-                double pixel_radius =
-                    std::acos(1.0 - m_map.solidangle(i)/gammalib::twopi) *
-                    gammalib::rad2deg * 1.5;
+                // Get map flux, intensity and distance from MC cone centre
+                double flux      = m_map.flux(i);
+                double intensity = m_map(i);
+                double distance  = centre.dist_deg(m_map.pix2dir(i));
 
-                // Add up flux with simulation cone radius + effective pixel
-                // radius. The effective pixel radius is added to make sure
-                // that all pixels that overlap with the simulation cone are
-                // taken into account. There is no problem of having even
-                // pixels outside the simulation cone taken into account as
-                // long as the mc() method has an explicit test of whether a
-                // simulated event is contained in the simulation cone.
-                double flux = m_map.flux(i);
+                // Add flux if positive
                 if (flux > 0.0) {
-                    double distance = centre.dist_deg(m_map.pix2dir(i));
-                    if (distance <= radius+pixel_radius) {
-                        sum += flux;
+                    if (distance <= radius) {
+                        sum += flux; // flux within simulation cone
                     }
-                    sum_map += flux; // sum up total flux in map
+                    sum_map += flux; // total flux
+                }
+    
+                // Update maximum intensity
+                if (distance <= radius) {
+                    if (intensity > m_mc_max) {
+                        m_mc_max = intensity;
+                    }
                 }
 
-                // Push back flux
-                m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
-
-            } // endfor: looped over pixels
-
-            // Normalize fluxes in the cache so that the values in the cache
-            // run from 0 to 1.
-            if (sum > 0.0) {
-                for (int i = 0; i < npix; ++i) {
-                    m_mc_cache[i] /= sum;
-                }
-            }
-
-            // Make sure that last pixel in the cache is >1
-            m_mc_cache[npix] = 1.0001;
+            } // endfor: looped over all map pixels
 
             // Set the normalization factor for the MC simulations. In case
-            // that the map is normalized, this is the fraction of the flux
-            // that is comprised within the simulation cone. For non-normalized
+            // that the map is normalised, this is the fraction of the flux
+            // that is comprised within the simulation cone. For non-normalised
             // maps, this is simply the flux comprised within the simulation
             // cone.
             if (sum_map > 0.0) {
@@ -740,79 +726,18 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
                 }
             }
 
-            // Do we have a HealPix map?
-            if (m_map.projection()->code() == "HPX") {
-
-                // Get pointer on HealPix projection
-                const GHealpix* healpix =
-                    static_cast<const GHealpix*>(m_map.projection());
-
-                // Compute maximum value that may occur from bilinear
-                // interpolation within this pixel and push this value on the
-                // stack. We do this by checking values of all neighbours.
-                for (int i = 0; i < npix; ++i) {
-
-                    // Get neighbours
-                    std::vector<int> neighbours = healpix->neighbours(i);
-
-                    // Loop over neighbours
-                    double max = m_map(i);
-                    for (int j = 0; j < neighbours.size(); ++j) {
-                        if (neighbours[j] != -1) {
-                            double value = m_map(neighbours[j]);
-                            if (value > max) {
-                                max = value;
-                            }
-                        }
-                    }
-
-                    // Store maximum
-                    m_mc_max.push_back(max);
-
-                } // endfor: looped over pixels
-
-            } // endif: Healpix projection
-
-            // ... no, then we have a WCS map
-            else {
-
-                // Compute maximum value that may occur from bilinear
-                // interpolation within this pixel and push this value on the
-                // stack. We do this by checking the map values at the corners
-                // and the centre of each edge.
-                for (int i = 0; i < npix; ++i) {
-                    GSkyPixel pixel = m_map.inx2pix(i);
-                    double    max   = m_map(pixel);
-                    for (int ix = -1; ix < 2; ++ix) {
-                        for (int iy = -1; iy < 2; ++iy) {
-                            if (ix != 0 && iy != 0) {
-                                GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
-                                if (m_map.contains(edge)) {
-                                    GSkyDir dir  = m_map.pix2dir(edge);
-                                    double value = m_map(dir);
-                                    if (value > max) {
-                                        max = value;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    m_mc_max.push_back(max);
-                }
-
-            } // endelse: computed maximum pixel value
-
-            // Dump cache values for debugging
-            #if defined(G_DEBUG_CACHE)
-            std::cout << "GModelSpatialDiffuseMap::set_mc_cone: cache";
-            std::cout << std::endl;
-            for (int i = 0; i < m_mc_cache.size(); ++i) {
-                std::cout << "i=" << i;
-                std::cout << " c=" << m_mc_cache[i] << std::endl;
-            }
+            // Log maximum intensity and total flux for debugging
+            #if defined(G_DEBUG_MC_CACHE)
+            std::cout << "GModelSpatialDiffuseMap::set_mc_cone:" << std::endl;
+            std::cout << "  Maximum map intensity:";
+            std::cout << m_mc_max << " ph/cm2/s/sr" << std::endl;
+            std::cout << "  Spatially integrated flux:" << std::endl;
+            std::cout << sum << " ph/cm2/s" << std::endl;
+            std::cout << "  Map normalisation:" << std::endl;
+            std::cout << m_mc_norm << " ph/cm2/s" << std::endl;
             #endif
 
-        } // endif: there were cube pixels
+        } // endif: there were map pixels
 
     } // endif: simulation cone has changed
 
@@ -824,7 +749,7 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
 /***********************************************************************//**
  * @brief Print map information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String with diffuse map model information.
  ***************************************************************************/
 std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
@@ -882,7 +807,7 @@ void GModelSpatialDiffuseMap::load(const GFilename& filename)
     // variables
     m_filename = filename;
 
-    // Load skymap
+    // Load sky map
     m_map.load(m_filename);
 
     // Prepare sky map
@@ -904,9 +829,12 @@ void GModelSpatialDiffuseMap::load(const GFilename& filename)
  ***************************************************************************/
 void GModelSpatialDiffuseMap::init_members(void)
 {
+    // Initialise model type
+    m_type = "DiffuseMap";
+
     // Initialise Value
     m_value.clear();
-    m_value.name("Prefactor");
+    m_value.name("Normalization");
     m_value.value(1.0);
     m_value.scale(1.0);
     m_value.range(0.001, 1000.0);
@@ -925,13 +853,14 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_has_normalize = false;
     m_centre.clear();
     m_radius        = 0.0;
+    m_region.clear();
 
     // Initialise MC cache
     m_mc_centre.clear();
-    m_mc_radius = -1.0;   //!< Signal initialisation
-    m_mc_norm = 0.0;
-    m_mc_cache.clear();
-    m_mc_max.clear();
+    m_mc_radius           = -1.0;   //!< Signal initialisation
+    m_mc_one_minus_cosrad =  1.0;
+    m_mc_norm             =  0.0;
+    m_mc_max              =  0.0;
 
     // Return
     return;
@@ -946,6 +875,7 @@ void GModelSpatialDiffuseMap::init_members(void)
 void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
 {
     // Copy members
+    m_type          = model.m_type;
     m_value         = model.m_value;
     m_map           = model.m_map;
     m_filename      = model.m_filename;
@@ -953,13 +883,14 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_has_normalize = model.m_has_normalize;
     m_centre        = model.m_centre;
     m_radius        = model.m_radius;
+    m_region        = model.m_region;
 
     // Copy MC cache
-    m_mc_centre     = model.m_mc_centre;
-    m_mc_radius     = model.m_mc_radius;
-    m_mc_norm       = model.m_mc_norm;
-    m_mc_cache      = model.m_mc_cache;
-    m_mc_max        = model.m_mc_max;
+    m_mc_centre           = model.m_mc_centre;
+    m_mc_radius           = model.m_mc_radius;
+    m_mc_one_minus_cosrad = model.m_mc_one_minus_cosrad;
+    m_mc_norm             = model.m_mc_norm;
+    m_mc_max              = model.m_mc_max;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -983,12 +914,14 @@ void GModelSpatialDiffuseMap::free_members(void)
 /***********************************************************************//**
  * @brief Prepare sky map after loading
  *
- * Prepares a sky map after loading. The map is normalized so that the total
- * flux in the map amounts to 1 ph/cm2/s. Negative skymap pixels are set to
- * zero intensity.
+ * Prepares a sky map after loading. Negative, infinite or undefined skymap
+ * pixels are set to zero intensity. The method also determine the centre
+ * and radius of a circle enclosing the map, and the Monte Carlo simulation
+ * cone is set to this circle.
  *
- * Note that if the GSkyMap object contains multiple maps, only the first
- * map is used.
+ * If normalize() is true, the map is furthermore normalised so that the
+ * total flux in the map amounts to 1 ph/cm2/s. Negative skymap pixels are
+ * set to zero intensity.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::prepare_map(void)
 {
@@ -1049,7 +982,26 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 
         } // endelse: computed map centre and radius
 
+        // Set simulation cone
+        set_mc_cone(m_centre, m_radius);
+
     } // endif: there were skymap pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialDiffuseMap::set_region(void) const
+{
+    // Set sky region centre to bounding circle centre
+    m_region.centre(m_centre);
+
+    // Set sky region radius to bounding circle radius
+    m_region.radius(m_radius);
 
     // Return
     return;

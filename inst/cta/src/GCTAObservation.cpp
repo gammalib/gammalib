@@ -45,10 +45,10 @@
 #include "GCTARoi.hpp"
 
 /* __ Globals ____________________________________________________________ */
-const GCTAObservation      g_obs_cta_seed("CTA");
-const GCTAObservation      g_obs_hess_seed("HESS");
-const GCTAObservation      g_obs_magic_seed("MAGIC");
-const GCTAObservation      g_obs_veritas_seed("VERITAS");
+const GCTAObservation      g_obs_cta_seed(true, "CTA");
+const GCTAObservation      g_obs_hess_seed(true, "HESS");
+const GCTAObservation      g_obs_magic_seed(true, "MAGIC");
+const GCTAObservation      g_obs_veritas_seed(true, "VERITAS");
 const GObservationRegistry g_obs_cta_registry(&g_obs_cta_seed);
 const GObservationRegistry g_obs_hess_registry(&g_obs_hess_seed);
 const GObservationRegistry g_obs_magic_registry(&g_obs_magic_seed);
@@ -62,8 +62,10 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_EBOUNDS                                "GCTAObservation::ebounds()"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
-#define G_LOAD               "GCTAObservation::load(GFilename&, GFilename&, "\
+#define G_LOAD1              "GCTAObservation::load(GFilename&, GFilename&, "\
                                                     "GFilename&, GFilename&)"
+#define G_LOAD2              "GCTAObservation::load(GFilename&, GFilename&, "\
+                                        "GFilename&, GFilename&, GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -96,15 +98,20 @@ GCTAObservation::GCTAObservation(void) : GObservation()
 /***********************************************************************//**
  * @brief Instrument constructor
  *
+ * @param[in] dummy Dummy flag.
  * @param[in] instrument Instrument name.
  *
- * Constructs an empty CTA observation for a given instrument. This enables
- * using the CTA specific interface for any other VHE instrument. Note that
- * each other VHE instruments needs a specific registry at the beginning
- * of the GCTAObservation.cpp file. So far the following instruments are
- * supported: CTA, HESS, VERITAS, MAGIC.
+ * Constructs an empty CTA observation for a given instrument.
+ *
+ * This method is specifically used allocation of global class instances for
+ * observation registry. By specifying explicit instrument names it is
+ * possible to use the "CTA" module are for other Imaging Air Cherenkov
+ * Telescopes. So far, the following instrument codes are supported:
+ * "CTA", "HESS", "VERITAS", "MAGIC".
  ***************************************************************************/
-GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
+GCTAObservation::GCTAObservation(const bool&        dummy,
+                                 const std::string& instrument) :
+                 GObservation()
 {
     // Initialise members
     init_members();
@@ -118,15 +125,35 @@ GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
 
 
 /***********************************************************************//**
- * @brief Stacked cube analysis constructor
+ * @brief Unbinned or binned analysis constructor
+ *
+ * @param[in] filename Event list or counts cube FITS file name.
+ *
+ * Constructs a CTA observation from either an event list of a counts cube.
+ ***************************************************************************/
+GCTAObservation::GCTAObservation(const GFilename& filename) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Load data
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Stacked analysis constructor
  *
  * @param[in] cntcube Counts cube file name.
  * @param[in] expcube Exposure cube file name.
- * @param[in] psfcube Psf cube file name.
- * @param[in] bkgcube Backgorund cube file name.
+ * @param[in] psfcube Point spread function cube file name.
+ * @param[in] bkgcube Background cube file name.
  *
- * Constructs a CTA observation from a counts cube, an exposure cube, a Psf
- * cube and a background cube.
+ * Constructs a CTA observation from a counts cube, an exposure cube, a point
+ * spread function cube, and a background cube.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const GFilename& cntcube,
                                  const GFilename& expcube,
@@ -138,6 +165,35 @@ GCTAObservation::GCTAObservation(const GFilename& cntcube,
 
     // Load data
     load(cntcube, expcube, psfcube, bkgcube);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Stacked analysis with energy dispersion constructor
+ *
+ * @param[in] cntcube Counts cube file name.
+ * @param[in] expcube Exposure cube file name.
+ * @param[in] psfcube Point spread function cube file name.
+ * @param[in] edispcube Energy dispersion cube file name.
+ * @param[in] bkgcube Background cube file name.
+ *
+ * Constructs a CTA observation from a counts cube, an exposure cube, a point
+ * spread function cube, an energy dispersion cube, and a background cube.
+ ***************************************************************************/
+GCTAObservation::GCTAObservation(const GFilename& cntcube,
+                                 const GFilename& expcube,
+                                 const GFilename& psfcube,
+                                 const GFilename& edispcube,
+                                 const GFilename& bkgcube) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Load data
+    load(cntcube, expcube, psfcube, edispcube, bkgcube);
 
     // Return
     return;
@@ -386,6 +442,47 @@ void GCTAObservation::response(const GCTACubeExposure&   expcube,
 
 
 /***********************************************************************//**
+ * @brief Set CTA response function
+ *
+ * @param[in] expcube Exposure cube.
+ * @param[in] psfcube Psf cube.
+ * @param[in] edispcube Edisp cube.
+ * @param[in] bkgcube Background cube.
+ *
+ * Sets the CTA response function fur cube analysis by specifying the
+ * exposure cube, the Psf cube, the exposure cube and the background cube.
+ * The method also copies over the ontime, the livetime and the deadtime
+ * correction factor from the exposure cube.
+ ***************************************************************************/
+void GCTAObservation::response(const GCTACubeExposure&   expcube,
+                               const GCTACubePsf&        psfcube,
+							   const GCTACubeEdisp&      edispcube,
+                               const GCTACubeBackground& bkgcube)
+{
+    // Free response
+    if (m_response != NULL) delete m_response;
+    m_response = NULL;
+
+    // Allocate fresh response function
+    GCTAResponseCube* rsp = new GCTAResponseCube(expcube,
+                                                 psfcube,
+                                                 edispcube,
+                                                 bkgcube);
+
+    // Store pointer
+    m_response = rsp;
+
+    // Copy over time information from exposure cube
+    ontime(expcube.ontime());
+    livetime(expcube.livetime());
+    deadc(expcube.deadc());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Get Region of Interest
  *
  * @return Region of Interest.
@@ -480,7 +577,7 @@ GEbounds GCTAObservation::ebounds(void) const
  *            Invalid parameter names found in XML element.
  *
  * Reads information for a CTA observation from an XML element. This method
- * handles to variants: a first where an event list of counts cube is
+ * handles two variants: a first where an event list of counts cube is
  * given and a second where the observation definition information is
  * provided by parameter tags.
  *
@@ -531,15 +628,18 @@ GEbounds GCTAObservation::ebounds(void) const
  *        ...
  *        <parameter name="ExposureCube" file="..."/>
  *        <parameter name="PsfCube"      file="..."/>
+ *        <parameter name="EdispCube"    file="..."/>
  *        <parameter name="BkgCube"      file="..."/>
  *      </observation>
- *   
+ *
+ * Note that the @p EdispCube is an optional parameter.
+ *
  * Optional user energy thresholds can be specified by adding the @a emin
  * and @a emax attributes to the @p observation tag:
  *
  *     <observation name="..." id="..." instrument="..." emin="..." emax="...">
  *
- * The method does no load the events into memory but stores the file name
+ * The method does not load the events into memory but stores the file name
  * of the event file. The events are only loaded when required. This reduces
  * the memory needs for an CTA observation object and allows for loading
  * of event information upon need.
@@ -581,7 +681,8 @@ void GCTAObservation::read(const GXmlElement& xml)
             (par->attribute("name") == "CountsCube")) {
 
             // Read eventlist file name
-            std::string filename = par->attribute("file");
+            std::string filename = gammalib::xml_file_expand(xml,
+                                             par->attribute("file"));
 
             // Load events
             load(filename);
@@ -594,7 +695,7 @@ void GCTAObservation::read(const GXmlElement& xml)
         else if (par->attribute("name") == "Background") {
 
             // Read background file name
-            m_bgdfile = par->attribute("file");
+            m_bgdfile = gammalib::xml_file_expand(xml, par->attribute("file"));
 
         }
 
@@ -746,27 +847,29 @@ void GCTAObservation::read(const GXmlElement& xml)
  * @exception GException::invalid_value
  *            No valid events found in observation.
  *
- * Writes information for a CTA observation into an XML element. This method
- * handles to variants: a first where an event list of counts cube is
- * given and a second where the observation definition information is
- * provided by parameter tags. Note that in both bases, a valid event
- * type needs to be set (either @a EventList or @a CountsCube).
+ * Writes information for a CTA observation into an XML element.
  *
- * The XML format for an event list is
+ * Dependent on the content of the CTA observation, different XML formats
+ * will be written. If the CTA observation contains an event list that
+ * has been loaded from disk, the method will write the file name of the
+ * event list using the format
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="EventList" file="..."/>
  *       ...
  *     </observation>
  *
- * and for a counts cube is
+ * If the CTA observation contains a counts cube that has been loaded from
+ * disk, the method will write the file name of the counts cube using the
+ * format
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="CountsCube" file="..."/>
  *       ...
  *     </observation>
  *
- * The second variant without event information has the following format
+ * In all other cases the method will only write the metadata information
+ * for the CTA observation using the format
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="Pointing" ra="..." dec="..."/>
@@ -774,15 +877,19 @@ void GCTAObservation::read(const GXmlElement& xml)
  *       ...
  *     </observation>
  *
- * In addition, calibration information can be specified using the format
+ * In case that response information is available and that the response
+ * information has been either loaded or saved to disk, the method will
+ * write the reponse information into the XML file. If the response for
+ * an unbinned or binned observation has been loaded from the calibration
+ * database, the format
  *
  *     <observation name="..." id="..." instrument="...">
  *       ...
  *       <parameter name="Calibration" database="..." response="..."/>
  *     </observation>
  *
- * If even more control is required over the response, individual file names
- * can be specified using
+ * will be written. If the response has been loaded from individual files,
+ * the format
  *
  *     <observation name="..." id="..." instrument="...">
  *       ...
@@ -792,16 +899,21 @@ void GCTAObservation::read(const GXmlElement& xml)
  *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
- * In case that a @a CountsCube is handled, the stacked response can also be
- * provided in the format
+ * will be written. If the observation contains information about the
+ * response to a stacked analysis, the format
  *
- *      <observation name="..." id="..." instrument="...">
- *        ...
- *        <parameter name="ExposureCube" file="..."/>
- *        <parameter name="PsfCube"      file="..."/>
- *        <parameter name="BkgCube"      file="..."/>
- *      </observation>
- *   
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="ExposureCube" file="..."/>
+ *       <parameter name="PsfCube"      file="..."/>
+ *       <parameter name="EdispCube"    file="..."/>
+ *       <parameter name="BkgCube"      file="..."/>
+ *     </observation>
+ *
+ * will be written. Note that the @p EdispCube parameter will only be
+ * written in case that an energy dispersion cube had been defined (energy
+ * dispersion is optional).
+ *
  * If user energy thresholds are defined (i.e. threshold values are >0) the
  * additional @a emin and @a emax attributes will be written to the
  * @p observation tag:
@@ -841,7 +953,7 @@ void GCTAObservation::write(GXmlElement& xml) const
 
         // Write event file name
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, evttype);
-        par->attribute("file", m_eventfile.url());
+        par->attribute("file", gammalib::xml_file_reduce(xml, m_eventfile.url()));
 
     }
 
@@ -1012,9 +1124,9 @@ void GCTAObservation::write(GFits& fits, const std::string& evtname,
 
 
 /***********************************************************************//**
- * @brief Load event list or counts cube from FITS file
+ * @brief Load unbinned or binned analysis data
  *
- * @param[in] filename FITS file name.
+ * @param[in] filename Event list or counts cube FITS file name.
  *
  * Loads either an event list or a counts cube from a FITS file.
  ***************************************************************************/
@@ -1038,15 +1150,15 @@ void GCTAObservation::load(const GFilename& filename)
 
 
 /***********************************************************************//**
- * @brief Load stacked cube from FITS files
+ * @brief Load stacked analysis data
  *
  * @param[in] cntcube Counts cube file name.
  * @param[in] expcube Exposure cube file name.
- * @param[in] psfcube Psf cube file name.
+ * @param[in] psfcube Point spread function cube file name.
  * @param[in] bkgcube Background cube file name.
  *
- * Loads a counts map, an exposure cube, a Psf cube and a background cube
- * for stacked cube analysis.
+ * Loads a counts cube, an exposure cube, a point spread function cube, and a
+ * background cube for stacked analysis.
  ***************************************************************************/
 void GCTAObservation::load(const GFilename& cntcube,
                            const GFilename& expcube,
@@ -1060,20 +1172,70 @@ void GCTAObservation::load(const GFilename& cntcube,
     if (dynamic_cast<const GCTAEventCube*>(events()) == NULL) {
         std::string msg = "Specified file \""+cntcube.url()+"\" is not a CTA "
                           "counts cube. Please provide a counts cube.";
-        throw GException::invalid_argument(G_LOAD, msg);
+        throw GException::invalid_argument(G_LOAD1, msg);
     }
 
     // Load exposure cube
     GCTACubeExposure exposure(expcube);
 
-    // Load Psf cube
+    // Load point spread function cube
     GCTACubePsf psf(psfcube);
 
     // Load background cube
     GCTACubeBackground background(bkgcube);
 
-    // Attach exposure cube, Psf cube and background cube as response
+    // Set exposure cube, point spread function cube, and background cube
+    // as response for this observation
     response(exposure, psf, background);
+ 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load stacked analysis data with energy dispersion
+ *
+ * @param[in] cntcube Counts cube file name.
+ * @param[in] expcube Exposure cube file name.
+ * @param[in] psfcube Point spread function cube file name.
+ * @param[in] edispcube Energy dispersion cube file name.
+ * @param[in] bkgcube Background cube file name.
+ *
+ * Loads a counts cube, an exposure cube, a point spread function cube, a
+ * energy dispersion cube and a background cube for stacked analysis.
+ ***************************************************************************/
+void GCTAObservation::load(const GFilename& cntcube,
+                           const GFilename& expcube,
+                           const GFilename& psfcube,
+                           const GFilename& edispcube,
+                           const GFilename& bkgcube) {
+
+    // Load counts cube FITS file
+    load(cntcube);
+
+    // Check whether we have an event cube
+    if (dynamic_cast<const GCTAEventCube*>(events()) == NULL) {
+        std::string msg = "Specified file \""+cntcube.url()+"\" is not a CTA "
+                          "counts cube. Please provide a counts cube.";
+        throw GException::invalid_argument(G_LOAD2, msg);
+    }
+
+    // Load exposure cube
+    GCTACubeExposure exposure(expcube);
+
+    // Load point spread function cube
+    GCTACubePsf psf(psfcube);
+
+    // Load energy dispersion cube
+    GCTACubeEdisp edisp(edispcube);
+
+    // Load background cube
+    GCTACubeBackground background(bkgcube);
+
+    // Set exposure cube, point spread function cube, energy dispersion
+    // cube, and background cube as response for this observation
+    response(exposure, psf, edisp, background);
  
     // Return
     return;

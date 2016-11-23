@@ -38,9 +38,13 @@ class GModelSpectralPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
-    explicit GModelSpectralPlaw(const double&  prefactor,
-                                const double&  index,
-                                const GEnergy& pivot);
+    GModelSpectralPlaw(const std::string& type,
+                       const std::string& prefactor,
+                       const std::string& index,
+                       const std::string& pivot);
+    GModelSpectralPlaw(const double&  prefactor,
+                       const double&  index,
+                       const GEnergy& pivot);
     explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
@@ -51,9 +55,8 @@ public:
     virtual std::string         classname(void) const;
     virtual std::string         type(void) const;
     virtual double              eval(const GEnergy& srcEng,
-                                     const GTime&   srcTime = GTime()) const;
-    virtual double              eval_gradients(const GEnergy& srcEng,
-                                               const GTime&   srcTime = GTime());
+                                     const GTime&   srcTime = GTime(),
+                                     const bool&    gradients = false) const;
     virtual double              flux(const GEnergy& emin,
                                      const GEnergy& emax) const;
     virtual double              eflux(const GEnergy& emin,

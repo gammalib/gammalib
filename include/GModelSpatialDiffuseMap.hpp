@@ -34,6 +34,7 @@
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 #include "GFilename.hpp"
 
@@ -51,6 +52,7 @@ class GModelSpatialDiffuseMap : public GModelSpatialDiffuse {
 public:
     // Constructors and destructors
     GModelSpatialDiffuseMap(void);
+    GModelSpatialDiffuseMap(const bool& dummy, const std::string& type);
     explicit GModelSpatialDiffuseMap(const GXmlElement& xml);
     GModelSpatialDiffuseMap(const GFilename& filename,
                             const double&    value = 1.0,
@@ -69,8 +71,8 @@ public:
     virtual GModelSpatialDiffuseMap* clone(void) const;
     virtual std::string              classname(void) const;
     virtual std::string              type(void) const;
-    virtual double                   eval(const GPhoton& photon) const;
-    virtual double                   eval_gradients(const GPhoton& photon) const;
+    virtual double                   eval(const GPhoton& photon,
+                                          const bool& gradients = false) const;
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime& time,
                                         GRan& ran) const;
@@ -78,6 +80,7 @@ public:
                                              const double&  radius) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
+    virtual GSkyRegion*              region(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(const GChatter& chatter = NORMAL) const;
@@ -99,22 +102,25 @@ protected:
     void copy_members(const GModelSpatialDiffuseMap& model);
     void free_members(void);
     void prepare_map(void);
+    void set_region(void) const;
 
     // Protected members
-    GModelPar m_value;         //!< Value
-    GSkyMap   m_map;           //!< Skymap
-    GFilename m_filename;      //!< Name of skymap
-    GSkyDir   m_centre;        //!< Centre of bounding circle
-    double    m_radius;        //!< Radius of bounding circle
-    bool      m_normalize;     //!< Normalize map (default: true)
-    bool      m_has_normalize; //!< XML has normalize attribute
+    std::string              m_type;          //!< Model type
+    GModelPar                m_value;         //!< Value
+    GSkyMap                  m_map;           //!< Skymap
+    GFilename                m_filename;      //!< Name of skymap
+    GSkyDir                  m_centre;        //!< Centre of bounding circle
+    double                   m_radius;        //!< Radius of bounding circle
+    bool                     m_normalize;     //!< Normalize map (default: true)
+    bool                     m_has_normalize; //!< XML has normalize attribute
+    mutable GSkyRegionCircle m_region;        //!< Bounding circle
 
     // MC simulation cache
-    mutable GSkyDir             m_mc_centre; //!< Centre of MC cone
-    mutable double              m_mc_radius; //!< Radius of MC cone
-    mutable double              m_mc_norm;   //!< Map normalization
-    mutable std::vector<double> m_mc_cache;  //!< Monte Carlo cache
-    mutable std::vector<double> m_mc_max;    //!< Monte Carlo maximum
+    mutable GSkyDir m_mc_centre;           //!< Centre of MC cone
+    mutable double  m_mc_radius;           //!< Radius of MC cone
+    mutable double  m_mc_one_minus_cosrad; //!< 1-cosine of radius
+    mutable double  m_mc_norm;             //!< Map normalization
+    mutable double  m_mc_max;              //!< Map maximum for MC
 };
 
 
@@ -133,14 +139,14 @@ std::string GModelSpatialDiffuseMap::classname(void) const
 /***********************************************************************//**
  * @brief Return spatial model type
  *
- * @return "SpatialMap".
+ * @return Model type.
  *
  * Returns the type of the spatial map model.
  ***************************************************************************/
 inline
 std::string GModelSpatialDiffuseMap::type(void) const
 {
-    return "SpatialMap";
+    return (m_type);
 }
 
 
@@ -228,6 +234,21 @@ inline
 bool GModelSpatialDiffuseMap::normalize(void) const
 {
     return (m_normalize);
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the point source.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialDiffuseMap::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALDIFFUSEMAP_HPP */

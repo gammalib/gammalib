@@ -38,6 +38,11 @@ class GModelSpectralBrokenPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralBrokenPlaw(void);
+    GModelSpectralBrokenPlaw(const std::string& type,
+                             const std::string& prefactor,
+                             const std::string& index1,
+                             const std::string& breakenergy,
+                             const std::string& index2);
     GModelSpectralBrokenPlaw(const double&  prefactor,
                              const double&  index1,
                              const GEnergy& breakenergy,
@@ -52,9 +57,8 @@ public:
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual double                    eval(const GEnergy& srcEng,
-                                           const GTime&   srcTime = GTime()) const;
-    virtual double                    eval_gradients(const GEnergy& srcEng,
-                                                     const GTime&   srcTime = GTime());
+                                           const GTime&   srcTime = GTime(),
+                                           const bool&    gradients = false) const;
     virtual double                    flux(const GEnergy& emin,
                                            const GEnergy& emax) const;
     virtual double                    eflux(const GEnergy& emin,

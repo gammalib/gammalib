@@ -51,6 +51,7 @@
 #define G_CONSTRUCT_MAP        "GSkyMap::GSkyMap(std::string&, std::string&,"\
                       " double&, double&, double& double&, int&, int&, int&)"
 #define G_NMAPS                                        "GSkyMap::nmaps(int&)"
+#define G_SHAPE                           "GSkyMap::shape(std::vector<int>&)"
 #define G_OP_UNARY_ADD                        "GSkyMap::operator+=(GSkyMap&)"
 #define G_OP_UNARY_SUB                        "GSkyMap::operator-=(GSkyMap&)"
 #define G_OP_UNARY_MUL                        "GSkyMap::operator-=(GSkyMap&)"
@@ -95,6 +96,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs an empty sky map.
  ***************************************************************************/
 GSkyMap::GSkyMap(void)
 {
@@ -110,6 +113,9 @@ GSkyMap::GSkyMap(void)
  * @brief FITS file constructor
  *
  * @param[in] filename FITS file name.
+ *
+ * Constructs a sky map by loading data from a FITS file. See the load()
+ * method for more information about the FITS formats that are supported.
  ***************************************************************************/
 GSkyMap::GSkyMap(const GFilename& filename)
 {
@@ -130,12 +136,13 @@ GSkyMap::GSkyMap(const GFilename& filename)
  * @param[in] coords Coordinate System (CEL or GAL).
  * @param[in] nside Nside parameter.
  * @param[in] order Pixel ordering (RING or NEST).
- * @param[in] nmaps Number of maps in set (default=1).
+ * @param[in] nmaps Number of maps in set.
  *
  * @exception GException::skymap_bad_par
  *            Invalid sky map parameter.
  *
- * Constructs sky map in Healpix pixelisation.
+ * Constructs @p nmaps identical all sky maps in Healpix pixelisation. All
+ * pixels of the sky maps will be initialised to values of zero.
  ***************************************************************************/
 GSkyMap::GSkyMap(const std::string& coords,
                  const int&         nside,
@@ -155,9 +162,10 @@ GSkyMap::GSkyMap(const std::string& coords,
     GHealpix* projection = new GHealpix(nside, order, coords);
     m_proj               = projection;
 
-    // Set number of pixels and number of maps
+    // Set number of pixels, number of maps and shape of maps
     m_num_pixels = projection->npix();
     m_num_maps   = nmaps;
+    m_shape.push_back(nmaps);
 
     // Allocate pixels
     alloc_pixels();
@@ -183,7 +191,9 @@ GSkyMap::GSkyMap(const std::string& coords,
  * @exception GException::skymap_bad_par
  *            Invalid sky map parameter.
  *
- * Constructs sky map in World Coordinate System projection.
+ * Constructs @p nmaps identical all sky maps in World Coordinate System
+ * projection. All pixels of the sky maps will be initialised to values of
+ * zero.
  ***************************************************************************/
 GSkyMap::GSkyMap(const std::string& wcs,
                  const std::string& coords,
@@ -224,11 +234,12 @@ GSkyMap::GSkyMap(const std::string& wcs,
     set_wcs(wcs, coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2, 
             cd, pv2);
 
-    // Set number of pixels and number of maps
+    // Set number of pixels, number of maps and shape of maps
     m_num_x      = nx;
     m_num_y      = ny;
     m_num_pixels = m_num_x * m_num_y;
     m_num_maps   = nmaps;
+    m_shape.push_back(nmaps);
 
     // Allocate pixels
     alloc_pixels();
@@ -242,6 +253,8 @@ GSkyMap::GSkyMap(const std::string& wcs,
  * @brief Copy constructor
  *
  * @param[in] map Sky map.
+ *
+ * Constructs sky maps by copying data from another sky map object.
  ***************************************************************************/
 GSkyMap::GSkyMap(const GSkyMap& map)
 {
@@ -280,6 +293,8 @@ GSkyMap::~GSkyMap(void)
  *
  * @param[in] map Sky map.
  * @return Sky map.
+ *
+ * Assigns one sky map to another.
  ***************************************************************************/
 GSkyMap& GSkyMap::operator=(const GSkyMap& map)
 {
@@ -308,7 +323,7 @@ GSkyMap& GSkyMap::operator=(const GSkyMap& map)
  * @param[in] value Value.
  * @return Sky map.
  *
- * Sets all pixels to the specified @p value.
+ * Sets all sky map pixels to the specified @p value.
  ***************************************************************************/
 GSkyMap& GSkyMap::operator=(const double& value)
 {
@@ -335,7 +350,7 @@ GSkyMap& GSkyMap::operator=(const double& value)
  *            Mismatch between number of maps in skymap object.
  *
  * Adds the content of @p map to the skymap. The operator only works on sky
- * maps with an identical number of layers. The content is added by
+ * maps with an identical number of maps. The content is added by
  * bi-linearily interpolating the values in the source sky map, allowing thus
  * for a reprojection of sky map values.
  *
@@ -1043,7 +1058,122 @@ void GSkyMap::nmaps(const int& nmaps)
         // Set number of maps
         m_num_maps = nmaps;
 
+        // Set shape of maps to linear array since we do not know how to
+        // arrange the new maps
+        m_shape.clear();
+        m_shape.push_back(nmaps);
+
     } // endif: map had pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set one-dimensional shape of maps
+ *
+ * @param[in] s1 Axis length of first dimension.
+ ***************************************************************************/
+void GSkyMap::shape(const int& s1)
+{
+    // Initialise vector
+    std::vector<int> shape;
+
+    // Set vector elements
+    shape.push_back(s1);
+
+    // Call vector method
+    this->shape(shape);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set two-dimensional shape of maps
+ *
+ * @param[in] s1 Axis length of first dimension.
+ * @param[in] s2 Axis length of second dimension.
+ ***************************************************************************/
+void GSkyMap::shape(const int& s1, const int& s2)
+{
+    // Initialise vector
+    std::vector<int> shape;
+
+    // Set vector elements
+    shape.push_back(s1);
+    shape.push_back(s2);
+
+    // Call vector method
+    this->shape(shape);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set three-dimensional shape of maps
+ *
+ * @param[in] s1 Axis length of first dimension.
+ * @param[in] s2 Axis length of second dimension.
+ * @param[in] s3 Axis length of second dimension.
+ ***************************************************************************/
+void GSkyMap::shape(const int& s1, const int& s2, const int& s3)
+{
+    // Initialise vector
+    std::vector<int> shape;
+
+    // Set vector elements
+    shape.push_back(s1);
+    shape.push_back(s2);
+    shape.push_back(s3);
+
+    // Call vector method
+    this->shape(shape);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set shape of maps
+ *
+ * @param[in] shape Shape vector.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid shape factorisation specified.
+ *
+ * Defines a shape for the maps in the object. The shape specifies how the
+ * maps are arranged in a n-dimensional array.
+ ***************************************************************************/
+void GSkyMap::shape(const std::vector<int>& shape)
+{
+    // Computes the resulting number of maps
+    int nmaps = 0;
+    if (shape.size() > 0) {
+        nmaps = 1;
+        for (int i = 0; i < shape.size(); ++i) {
+            nmaps *= shape[i];
+        }
+    }
+
+    // Throw an exception if resulting number of maps is not equal to the
+    // existing number of maps
+    if (nmaps != m_num_maps) {
+        std::string msg = "Sky map shaping requires "+gammalib::str(nmaps)+
+                          " maps while "+gammalib::str(m_num_maps)+" maps "
+                          "are available. Please specify an appropriate "
+                          "factorisation or modify the number of available "
+                          "maps.";
+        throw GException::invalid_argument(G_SHAPE, msg);
+    }
+
+    // Set shape
+    m_shape = shape;
 
     // Return
     return;
@@ -1624,7 +1754,7 @@ bool GSkyMap::contains(const GSkyPixel& pixel) const
  * @brief Extract maps into a new sky map object
  *
  * @param[in] map First map to extract
- * @param[in] nmaps Number of maps to extract (default: 1)
+ * @param[in] nmaps Number of maps to extract
  * @return Extracted map(s).
  *
  * @exception GException::out_of_range
@@ -1685,6 +1815,10 @@ GSkyMap GSkyMap::extract(const int& map, const int& nmaps) const
     // Set number of maps
     result.m_num_maps = nmaps;
 
+    // Reset shape of maps since we do not know how to arrange the maps
+    result.m_shape.clear();
+    result.m_shape.push_back(nmaps);
+
     // Return map
     return result;
 }
@@ -1725,6 +1859,10 @@ void GSkyMap::stack_maps(void)
 
         // Set number of maps to 1
         m_num_maps = 1;
+
+        // Reset shape of maps
+        m_shape.clear();
+        m_shape.push_back(m_num_maps);
 
     } // endif: map had pixels
 
@@ -1839,13 +1977,13 @@ void GSkyMap::load(const GFilename& filename)
  * @brief Save sky map into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
- * Saves the sky map into a FITS file. If the file exists already the method
- * will append the sky map to the FITS file in case that the @p clobber
- * parameter is set to true.
+ * Saves the sky map into a FITS file. If the file exists already and the
+ * @p clobber parameter is true, the method will overwrite the content of
+ * the existing file. Otherwise, an exception is thrown.
  ***************************************************************************/
-void GSkyMap::save(const GFilename& filename, bool clobber) const
+void GSkyMap::save(const GFilename& filename, const bool& clobber) const
 {
     // Continue only if we have data to save
     if (m_proj != NULL) {
@@ -1871,21 +2009,15 @@ void GSkyMap::save(const GFilename& filename, bool clobber) const
                 hdu->extname(filename.extname());
             }
 
-            // Open or create FITS file (without extension name since the
-            // requested extension may not yet exist in the file)
-            GFits fits(filename.url(), true);
-
-            // If the FITS file contains already an extension with the same
-            // name then remove now this extension
-            if (fits.contains(filename.extname())) {
-                fits.remove(filename.extname());
-            }
+            // Initialise empty FITS file
+            GFits fits;
 
             // Append sky map to FITS file
             fits.append(*hdu);
 
-            // Save FITS file
-            fits.save(clobber);
+            // Save FITS file (without extension name which was extracted
+            // earlier and set in the HDU)
+            fits.saveto(filename.url(), clobber);
 
             // Delete HDU
             delete hdu;
@@ -1936,16 +2068,26 @@ void GSkyMap::read(const GFitsHDU& hdu)
 
 
 /***********************************************************************//**
- * @brief Write skymap into FITS file
+ * @brief Write sky map into FITS file
  *
  * @param[in] file FITS file pointer.
+ * @param[in] extname Sky map extension name.
+ * @return Pointer to written HDU.
+ *
+ * Write the sky map into a FITS file. Optionally, the extension name of
+ * the FITS HDU can be specified using the @p extname parameter. The method
+ * returns a pointer to the appended HDU. If no HDU has been appended, for
+ * example because the sky map is empty, the method will return NULL.
  ***************************************************************************/
-void GSkyMap::write(GFits& file) const
+GFitsHDU* GSkyMap::write(GFits& file, const std::string& extname) const
 {
+    // Initialise pointer to appended HDU
+    GFitsHDU* hdu_appended = NULL;
+
     // Continue only if we have data to save
     if (m_proj != NULL) {
 
-        // Initialise HDU pointer
+        // Initialise local HDU pointer
         GFitsHDU* hdu = NULL;
 
         // Case A: Skymap is Healpix
@@ -1960,16 +2102,24 @@ void GSkyMap::write(GFits& file) const
 
         // Append HDU to FITS file.
         if (hdu != NULL) {
-            file.append(*hdu);
-        }
 
-        // Delete HDU
-        if (hdu != NULL) delete hdu;
+            // Optionally set extension name
+            if (extname.length() > 0) {
+                hdu->extname(extname);
+            }
+
+            // Append HDU and recover the pointer to the appended HDU
+            hdu_appended = file.append(*hdu);
+
+            // Delete HDU
+            if (hdu != NULL) delete hdu;
+
+        } // endif: there was a valid HDU
 
     } // endif: we had data to save
 
-    // Return
-    return;
+    // Return pointer to appended HDU
+    return hdu_appended;
 }
 
 
@@ -1979,27 +2129,34 @@ void GSkyMap::write(GFits& file) const
  * @param[in] name Name of sky map.
  *
  * Publishes the sky map on a Virtual Observatory Hub. If no Hub is currently
- * active, the method will start a new Hub.
+ * active, the method will start a new Hub. If on sky map has been allocated
+ * the method does nothing.
  ***************************************************************************/
-void  GSkyMap::publish(const std::string& name) const
+void GSkyMap::publish(const std::string& name) const
 {
     // Create FITS file containing the sky map
     GFits fits;
-    write(fits);
 
-    // Get last FITS HDU
-    GFitsHDU* hdu = fits[fits.size()-1];
+    // Write sky map into FITS file and return a pointer to the written HDU.
+    // This method returns a NULL pointer if no sky map projection exists,
+    // which typically is true for empty sky maps.
+    GFitsHDU* hdu = write(fits);
 
-    // Optionally set extension name
-    if (!name.empty()) {
-        hdu->extname(name);
-    }
+    // Continue only if HDU pointer is valid
+    if (hdu != NULL) {
 
-    // Create VO Client
-    GVOClient client;
+        // Optionally set extension name
+        if (!name.empty()) {
+            hdu->extname(name);
+        }
 
-    // Publish map using VO client
-    client.publish(*hdu);
+        // Create VO Client
+        GVOClient client;
+
+        // Publish map using VO client
+        client.publish(*hdu);
+
+    } // endif: HDU pointer was valid
 
     // Return
     return;
@@ -2009,7 +2166,7 @@ void  GSkyMap::publish(const std::string& name) const
 /***********************************************************************//**
  * @brief Print sky map
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing sky map information.
  ***************************************************************************/
 std::string GSkyMap::print(const GChatter& chatter) const
@@ -2023,16 +2180,37 @@ std::string GSkyMap::print(const GChatter& chatter) const
         // Append header
         result.append("=== GSkyMap ===");
 
-        // Append information
+        // Append number of pixels and number of maps
         result.append("\n"+gammalib::parformat("Number of pixels"));
         result.append(gammalib::str(m_num_pixels));
-        result.append("\n"+gammalib::parformat("Number of maps"));
-        result.append(gammalib::str(m_num_maps));
+
+        // Append WCS dimension information
         if (m_proj != NULL && m_proj->size() == 2) {
             result.append("\n"+gammalib::parformat("X axis dimension"));
             result.append(gammalib::str(m_num_x));
             result.append("\n"+gammalib::parformat("Y axis dimension"));
             result.append(gammalib::str(m_num_y));
+        }
+
+        // Append number of maps
+        result.append("\n"+gammalib::parformat("Number of maps"));
+        result.append(gammalib::str(m_num_maps));
+
+        // Append shape of maps
+        result.append("\n"+gammalib::parformat("Shape of maps"));
+        if (m_shape.size() > 0) {
+            std::string shape = "(";
+            for (int i = 0; i < m_shape.size(); ++i) {
+                if (i > 0) {
+                    shape += ", ";
+                }
+                shape += gammalib::str(m_shape[i]);
+            }
+            shape += ")";
+            result.append(shape);
+        }
+        else {
+            result.append("not defined");
         }
 
         // Append sky projection information
@@ -2068,6 +2246,7 @@ void GSkyMap::init_members(void)
     m_num_maps   = 0;
     m_num_x      = 0;
     m_num_y      = 0;
+    m_shape.clear();
     m_proj       = NULL;
     m_pixels     = NULL;
 
@@ -2118,6 +2297,7 @@ void GSkyMap::copy_members(const GSkyMap& map)
     m_num_maps   = map.m_num_maps;
     m_num_x      = map.m_num_x;
     m_num_y      = map.m_num_y;
+    m_shape      = map.m_shape;
 
     // Copy computation cache
     m_hascache  = map.m_hascache;
@@ -2156,12 +2336,6 @@ void GSkyMap::free_members(void)
     // Signal free pointers
     m_proj       = NULL;
     m_pixels     = NULL;
-
-    // Reset number of pixels
-    m_num_pixels = 0;
-    m_num_maps   = 0;
-    m_num_x      = 0;
-    m_num_y      = 0;
 
     // Return
     return;
@@ -2293,6 +2467,10 @@ void GSkyMap::read_healpix(const GFitsTable& table)
     std::cout << "m_num_maps=" << m_num_maps << std::endl;
     #endif
 
+    // Initialise shape of maps
+    m_shape.clear();
+    m_shape.push_back(m_num_maps);
+
     // Allocate pixels to hold the map
     alloc_pixels();
 
@@ -2360,34 +2538,50 @@ void GSkyMap::read_healpix(const GFitsTable& table)
  *
  * @param[in] image FITS image.
  *
+ * @exception GException::invalid_argument
+ *            FITS image has less than two dimensions
  * @exception GException::invalid_value
- *            WCS image has an invalid dimension or covers a too large
- *            range.
+ *            Sky map covers more than 360 deg in longitude or 180 deg in
+ *            latitude
+ *
+ * Reads sky maps from a FITS image extension containing a set of maps given
+ * in World Coordinate System. The method handles general n-dimensional
+ * images and sets the map shape attribute according to the number of map
+ * dimensions found in the FITS HDU.
  ***************************************************************************/
 void GSkyMap::read_wcs(const GFitsImage& image)
 {
+    // Throw an exception if the FITS image is not at least a 2D image
+    if (image.naxis() < 2) {
+        std::string msg = "Sky map has "+gammalib::str(image.naxis())+
+                          " dimensions, which is less than the two dimensions"
+                          " that are required for a WCS image.";
+        throw GException::invalid_argument(G_READ_WCS, msg);
+    }
+
     // Allocate WCS
     alloc_wcs(image);
 
     // Read projection information from FITS header
     m_proj->read(image);
 
-    // Extract map dimension and number of maps from image
+    // Clear map shape
+    m_shape.clear();
+
+    // Extract map dimension, number of maps and map shape from FITS image
+    m_num_x = image.naxes(0);
+    m_num_y = image.naxes(1);
     if (image.naxis() == 2) {
-        m_num_x    = image.naxes(0);
-        m_num_y    = image.naxes(1);
         m_num_maps = 1;
-    }
-    else if (image.naxis() >= 3) {
-        m_num_x    = image.naxes(0);
-        m_num_y    = image.naxes(1);
-        m_num_maps = image.naxes(2);
+        m_shape.push_back(m_num_maps);
     }
     else {
-        std::string msg = "Skymap has a dimension of "+
-                          gammalib::str(image.naxis())+" but only dimensions "
-                          "of 2 or 3 are supported.";
-        throw GException::invalid_value(G_READ_WCS, msg);
+        m_num_maps = image.naxes(2);
+        m_shape.push_back(m_num_maps);
+        for (int i = 3; i < image.naxis(); ++i) {
+            m_num_maps *= image.naxes(i);
+            m_shape.push_back(image.naxes(i));
+        }
     }
     #if defined(G_READ_WCS_DEBUG)
     std::cout << "m_num_x=" << m_num_x << std::endl;
@@ -2405,23 +2599,10 @@ void GSkyMap::read_wcs(const GFitsImage& image)
     alloc_pixels();
 
     // Read image
-    if (image.naxis() == 2) {
-        double* ptr = m_pixels;
-        for (int iy = 0; iy < m_num_y; ++iy) {
-            for (int ix = 0; ix < m_num_x; ++ix) {
-                *ptr++ = image.pixel(ix,iy);
-            }
-        }
-    }
-    else {
-        double* ptr = m_pixels;
-        for (int imap = 0; imap < m_num_maps; ++imap) {
-            for (int iy = 0; iy < m_num_y; ++iy) {
-                for (int ix = 0; ix < m_num_x; ++ix) {
-                    *ptr++ = image.pixel(ix,iy,imap);
-                }
-            }
-        }
+    double* ptr  = m_pixels;
+    int     size = m_num_pixels * m_num_maps;
+    for (int i = 0; i < size; ++i) {
+        *ptr++ = (double)image.pixel(i);
     }
 
     // Check if the map is too large
@@ -2569,15 +2750,22 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
     // Continue only if we have pixels
     if (size > 0) {
 
-        // Set axis parameters for image construction
-        int naxis   = (m_num_maps == 1) ? 2 : 3;
-        int naxes[] = {m_num_x, m_num_y, m_num_maps};
+        // Set dimension vector of all axes. In case that only one map
+        // exists then create simply a 2D image
+        std::vector<int> naxes;
+        naxes.push_back(m_num_x);
+        naxes.push_back(m_num_y);
+        if (m_num_maps > 1) {
+            for (int i = 0; i < ndim(); ++i) {
+                naxes.push_back(m_shape[i]);
+            }
+        }
 
         // Allocate image
-        hdu = new GFitsImageDouble(naxis, naxes);
+        hdu = new GFitsImageDouble(naxes);
 
         // Store data in image
-        if (naxis == 2) {
+        if (naxes.size() == 2) {
             double* ptr = m_pixels;
             for (int iy = 0; iy < m_num_y; ++iy) {
                 for (int ix = 0; ix < m_num_x; ++ix) {
@@ -2627,7 +2815,7 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
  * @return Solid angle (steradians).
  *
  * Estimate the solid angle subtended by 4 sky directions using Huilier's
- * theroem.
+ * theorem.
  *
  * Below, the definiton of the pixel cornes and sides are shown as used
  * within the code.
@@ -2716,7 +2904,7 @@ double GSkyMap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
  * @return Solid angle (steradians).
  *
  * Estimate the solid angle subtended by 3 sky directions using Huilier's
- * theroem.
+ * theorem.
  *
  * Below, the definiton of the pixel cornes and sides are shown as used
  * within the code.

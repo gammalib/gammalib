@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.hpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include <vector>
 #include "GContainer.hpp"
 #include "GUrl.hpp"
+#include "GFilename.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GXmlElement;
@@ -91,14 +92,19 @@ public:
     virtual void               remove(const int& index);
     virtual void               reserve(const int& num);
     virtual void               extend(const GXmlNode& node);
+    GXmlNode*                  parent(void) const;
+    void                       parent(GXmlNode* parent);
+    GFilename                  filename(void) const;
     virtual int                elements(void) const;
     virtual int                elements(const std::string& name) const;
     virtual GXmlElement*       element(const int& index);
     virtual const GXmlElement* element(const int& index) const;
     virtual GXmlElement*       element(const std::string& name);
     virtual const GXmlElement* element(const std::string& name) const;
-    virtual GXmlElement*       element(const std::string& name, const int& index);
-    virtual const GXmlElement* element(const std::string& name, const int& index) const;
+    virtual GXmlElement*       element(const std::string& name,
+                                       const int&         index);
+    virtual const GXmlElement* element(const std::string& name,
+                                       const int&         index) const;
     virtual void               write(GUrl& url, const int& indent) const = 0;
     virtual NodeType           type(void) const = 0;
     virtual std::string        print(const GChatter& chatter = NORMAL,
@@ -113,6 +119,7 @@ protected:
     int  extract_index(std::string& tag) const;
 
     // Protected data members
+    GXmlNode*              m_parent;  //!< Pointer on parent node
     std::vector<GXmlNode*> m_nodes;   //!< Pointer to child nodes
 };
 
@@ -150,6 +157,31 @@ inline
 void GXmlNode::reserve(const int& num)
 {
     m_nodes.reserve(num);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return parent XML node
+ *
+ * @return Parent of XML node.
+ ***************************************************************************/
+inline
+GXmlNode* GXmlNode::parent(void) const
+{
+    return (m_parent);
+}
+
+
+/***********************************************************************//**
+ * @brief Set parent of XML node
+ *
+ * @param[in] parent Parent of XML node.
+ ***************************************************************************/
+inline
+void GXmlNode::parent(GXmlNode* parent)
+{
+    m_parent = parent;
     return;
 }
 

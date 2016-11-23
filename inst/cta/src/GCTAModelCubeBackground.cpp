@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelCubeBackground.cpp - CTA cube background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,9 +44,7 @@ const GCTAModelCubeBackground g_cta_inst_background_seed;
 const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL        "GCTAModelCubeBackground::eval(GEvent&, GObservation&)"
-#define G_EVAL_GRADIENTS   "GCTAModelCubeBackground::eval_gradients(GEvent&,"\
-                                                            " GObservation&)"
+#define G_EVAL "GCTAModelCubeBackground::eval(GEvent&, GObservation&, bool&)"
 #define G_NPRED            "GCTAModelCubeBackground::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_MC              "GCTAModelCubeBackground::mc(GObservation&, GRan&)"
@@ -251,13 +249,18 @@ GCTAModelCubeBackground* GCTAModelCubeBackground::clone(void) const
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @param[in] gradients Compute gradients?
  * @return Function value.
  *
  * @exception GException::invalid_argument
  *            Specified observation is not of the expected type.
+ *
+ * If the @p gradients flag is true the method will also set the parameter
+ * gradients of the model parameters.
  ***************************************************************************/
 double GCTAModelCubeBackground::eval(const GEvent&       event,
-                                     const GObservation& obs) const
+                                     const GObservation& obs,
+                                     const bool&         gradients) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
@@ -287,89 +290,38 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
     //double logE = event.energy().log10TeV();
     double spat = bgd((*dir), event.energy());
     double spec = (spectral() != NULL)
-                  ? spectral()->eval(event.energy(), event.time()) : 1.0;
+                  ? spectral()->eval(event.energy(), event.time(), gradients)
+                  : 1.0;
     double temp = (temporal() != NULL)
-                  ? temporal()->eval(event.time()) : 1.0;
+                  ? temporal()->eval(event.time(), gradients) : 1.0;
 
     // Compute value. Note that background rates are already per
     // livetime, hence no deadtime correction is needed here.
     double value = spat * spec * temp;
 
-    // Return value
-    return value;
-}
+    // If gradients were requested then multiply factors to spectral and
+    // temporal gradients
+    if (gradients) {
 
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- * @return Function value.
- *
- * @exception GException::invalid_argument
- *            Specified observation is not of the expected type.
- ***************************************************************************/
-double GCTAModelCubeBackground::eval_gradients(const GEvent&       event,
-                                               const GObservation& obs) const
-{
-    // Get pointer on CTA observation
-    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-    if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Get pointer on CTA IRF response
-    const GCTAResponseCube* rsp = dynamic_cast<const GCTAResponseCube*>(cta->response());
-    if (rsp == NULL) {
-        std::string msg = "Specified observation does not contain a"
-                          " cube response.\n" + obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Extract CTA instrument direction from event
-    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        std::string msg = "No CTA instrument direction found in event.";
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Retrieve reference to CTA cube background
-    const GCTACubeBackground& bgd = rsp->background();
-
-    // Evaluate function
-    //double logE = event.energy().log10TeV();
-    double spat = bgd((*dir), event.energy());
-    double spec = (spectral() != NULL)
-                  ? spectral()->eval_gradients(event.energy(), event.time())
-                  : 1.0;
-    double temp = (temporal() != NULL)
-                  ? temporal()->eval_gradients(event.time())
-                  : 1.0;
-
-    // Compute value. Note that background rates are already per
-    // livetime, hence no deadtime correction is needed here.
-    double value = spat * spec * temp;
-
-    // Multiply factors to spectral gradients
-    if (spectral() != NULL) {
-        double fact = spat * temp;
-        if (fact != 1.0) {
-            for (int i = 0; i < spectral()->size(); ++i)
-                (*spectral())[i].factor_gradient( (*spectral())[i].factor_gradient() * fact );
+        // Multiply factors to spectral gradients
+        if (spectral() != NULL) {
+            double fact = spat * temp;
+            if (fact != 1.0) {
+                for (int i = 0; i < spectral()->size(); ++i)
+                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact );
+            }
         }
-    }
 
-    // Multiply factors to temporal gradients
-    if (temporal() != NULL) {
-        double fact = spat * spec;
-        if (fact != 1.0) {
-            for (int i = 0; i < temporal()->size(); ++i)
-                (*temporal())[i].factor_gradient( (*temporal())[i].factor_gradient() * fact );
+        // Multiply factors to temporal gradients
+        if (temporal() != NULL) {
+            double fact = spat * spec;
+            if (fact != 1.0) {
+                for (int i = 0; i < temporal()->size(); ++i)
+                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact );
+            }
         }
-    }
+
+    } // endif: gradients were requested
 
     // Return value
     return value;
@@ -570,20 +522,8 @@ void GCTAModelCubeBackground::read(const GXmlElement& xml)
         m_temporal = constant.clone();
     }
 
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Set observation identifiers
-    ids(xml.attribute("id"));
-
-    // Check flag if TS value should be computed
-    bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
-
-    // Set flag if TS value should be computed
-    this->tscalc(tscalc);
+    // Read model attributes
+    read_attributes(xml);
 
     // Set parameter pointers
     set_pointers();
@@ -652,17 +592,6 @@ void GCTAModelCubeBackground::write(GXmlElement& xml) const
         if (write_temporal)     src->append(GXmlElement("temporalModel"));
     }
 
-    // Set model type, name and optionally instruments
-    src->attribute("name", name());
-    src->attribute("type", type());
-    if (instruments().length() > 0) {
-        src->attribute("instrument", instruments());
-    }
-    std::string identifiers = ids();
-    if (identifiers.length() > 0) {
-        src->attribute("id", identifiers);
-    }
-
     // Write spectral model
     if (spectral() != NULL) {
         GXmlElement* spec = src->element("spectrum", 0);
@@ -676,6 +605,9 @@ void GCTAModelCubeBackground::write(GXmlElement& xml) const
             temporal()->write(*temp);
         }
     }
+
+    // Write model attributes
+    write_attributes(*src);
 
     // Return
     return;
@@ -861,33 +793,18 @@ bool GCTAModelCubeBackground::valid_model(void) const
 
 
 /***********************************************************************//**
- * @brief Construct spectral model from XML element
+ * @brief Return pointer to spectral model from XML element
  *
- * @param[in] spectral XML element containing spectral model information.
+ * @param[in] spectral XML element.
+ * @return Pointer to spectral model.
  *
- * @exception GException::model_invalid_spectral
- *            Invalid spectral model type encountered.
- *
- * Returns pointer to a spectral model that is defined in an XML element.
+ * Returns pointer to spectral model that is defined in an XML element.
  ***************************************************************************/
 GModelSpectral* GCTAModelCubeBackground::xml_spectral(const GXmlElement& spectral) const
 {
-    // Get spectral model type
-    std::string type = spectral.attribute("type");
-
     // Get spectral model
     GModelSpectralRegistry registry;
-    GModelSpectral*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(spectral);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
-    }
+    GModelSpectral*        ptr = registry.alloc(spectral);
 
     // Return pointer
     return ptr;
@@ -895,33 +812,18 @@ GModelSpectral* GCTAModelCubeBackground::xml_spectral(const GXmlElement& spectra
 
 
 /***********************************************************************//**
- * @brief Construct temporal model from XML element
+ * @brief Return pointer to temporal model from XML element
  *
- * @param[in] temporal XML element containing temporal model information.
+ * @param[in] temporal XML element.
+ * @return Pointer to temporal model.
  *
- * @exception GException::model_invalid_temporal
- *            Invalid temporal model type encountered.
- *
- * Returns pointer to a temporal model that is defined in an XML element.
+ * Returns pointer to temporal model that is defined in an XML element.
  ***************************************************************************/
 GModelTemporal* GCTAModelCubeBackground::xml_temporal(const GXmlElement& temporal) const
 {
-    // Get temporal model type
-    std::string type = temporal.attribute("type");
-
     // Get temporal model
     GModelTemporalRegistry registry;
-    GModelTemporal*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(temporal);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_temporal(G_XML_TEMPORAL, type);
-    }
+    GModelTemporal*        ptr = registry.alloc(temporal);
 
     // Return pointer
     return ptr;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.cpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialGauss g_radial_gauss_seed;
 const GModelSpatialRegistry    g_radial_gauss_registry(&g_radial_gauss_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialRadialGauss g_radial_gauss_legacy_seed(true, "GaussFunction");
+const GModelSpatialRegistry    g_radial_gauss_legacy_registry(&g_radial_gauss_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                 "GModelSpatialRadialGauss::read(GXmlElement&)"
@@ -59,11 +63,36 @@ const GModelSpatialRegistry    g_radial_gauss_registry(&g_radial_gauss_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty radial Gaussian model.
  ***************************************************************************/
 GModelSpatialRadialGauss::GModelSpatialRadialGauss(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty radial Gaussian model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialRadialGauss::GModelSpatialRadialGauss(const bool&        dummy,
+                                                   const std::string& type) :
+                          GModelSpatialRadial()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -228,6 +257,7 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * @param[in] theta Angular distance from Gaussian centre (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for a Gaussian source model using
@@ -242,12 +272,17 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * - \f$\theta\f$ is the angular separation from the centre of the model, and
  * - \f$\sigma\f$ is the Gaussian width.
  *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
+ *
  * @todo The Gaussian function is only correct in the small angle
  *       approximation.
  ***************************************************************************/
 double GModelSpatialRadialGauss::eval(const double&  theta,
                                       const GEnergy& energy,
-                                      const GTime&   time) const
+                                      const GTime&   time,
+                                      const bool&    gradients) const
 {
     // Compute value
     double sigma_rad = sigma() * gammalib::deg2rad;
@@ -271,26 +306,6 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] theta Angular distance from Gaussian centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * This method simply calls the eval() method as no analytical gradients
- * will be computed. See the eval() method for more details.
- ***************************************************************************/
-double GModelSpatialRadialGauss::eval_gradients(const double&  theta,
-                                                const GEnergy& energy,
-                                                const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, energy, time));
 }
 
 
@@ -371,7 +386,7 @@ double GModelSpatialRadialGauss::theta_max(void) const
  * Reads the radial Gauss model information from an XML element. The XML
  * element shall have either the format 
  *
- *     <spatialModel type="GaussFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -379,7 +394,7 @@ double GModelSpatialRadialGauss::theta_max(void) const
  *
  * or
  *
- *     <spatialModel type="GaussFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="GLON"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -449,7 +464,7 @@ void GModelSpatialRadialGauss::read(const GXmlElement& xml)
  * Writes the radial disk model information into an XML element. The XML
  * element will have the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -548,6 +563,8 @@ std::string GModelSpatialRadialGauss::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialRadialGauss::init_members(void)
 {
+    // Initialise model type
+    m_type = "RadialGaussian";
 
     // Initialise Gaussian sigma
     m_sigma.clear();
@@ -562,6 +579,9 @@ void GModelSpatialRadialGauss::init_members(void)
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);
+
+    // Initialise other members
+    m_region.clear();
 
     // Return
     return;
@@ -580,7 +600,9 @@ void GModelSpatialRadialGauss::init_members(void)
 void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& model)
 {
     // Copy members
-    m_sigma = model.m_sigma;
+    m_type   = model.m_type;
+    m_sigma  = model.m_sigma;
+    m_region = model.m_region;
 
     // Return
     return;
@@ -592,6 +614,22 @@ void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& mode
  ***************************************************************************/
 void GModelSpatialRadialGauss::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialGauss::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to 5 times the Gaussian sigma
+    m_region.radius(m_sigma.value() * 5.0);
+
     // Return
     return;
 }

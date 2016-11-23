@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.hpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Christoph Deil                              *
+ *  copyright (C) 2011-2016 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -49,6 +50,7 @@ class GModelSpatialRadialDisk : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialDisk(void);
+    GModelSpatialRadialDisk(const bool& dummy, const std::string& type);
     GModelSpatialRadialDisk(const GSkyDir& dir, const double& radius);
     explicit GModelSpatialRadialDisk(const GXmlElement& xml);
     GModelSpatialRadialDisk(const GModelSpatialRadialDisk& model);
@@ -64,16 +66,15 @@ public:
     virtual std::string              type(void) const;
     virtual double                   eval(const double&  theta,
                                           const GEnergy& energy,
-                                          const GTime&   time) const;
-    virtual double                   eval_gradients(const double&  theta,
-                                                    const GEnergy& energy,
-                                                    const GTime&   time) const;
+                                          const GTime&   time,
+                                          const bool&    gradients = false) const;
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime&   time,
                                         GRan&          ran) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
     virtual double                   theta_max(void) const;
+    virtual GSkyRegion*              region(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(const GChatter& chatter = NORMAL) const;
@@ -88,9 +89,12 @@ protected:
     void copy_members(const GModelSpatialRadialDisk& model);
     void free_members(void);
     void update(void) const;
+    void set_region(void) const;
 
     // Protected members
-    GModelPar m_radius;    //!< Disk radius (degrees)
+    std::string              m_type;   //!< Model type
+    GModelPar                m_radius; //!< Disk radius (degrees)
+    mutable GSkyRegionCircle m_region; //!< Bounding circle
 
     // Cached members used for pre-computations
     mutable double m_last_radius;   //!< Last disk radius
@@ -114,14 +118,14 @@ std::string GModelSpatialRadialDisk::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "DiskFunction".
+ * @return Model type.
  *
  * Returns the type of the radial disk model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialDisk::type(void) const
 {
-    return "DiskFunction";
+    return (m_type);
 }
 
 
@@ -151,6 +155,21 @@ void GModelSpatialRadialDisk::radius(const double& radius)
 {
     m_radius.value(radius);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the spatial model component.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialRadialDisk::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALRADIALDISK_HPP */

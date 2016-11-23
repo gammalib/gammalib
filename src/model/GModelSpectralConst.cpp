@@ -37,8 +37,12 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralConst    g_spectral_const_seed;
-const GModelSpectralRegistry g_spectral_const_registry(&g_spectral_const_seed);
+const GModelSpectralConst    g_spectral_const_seed1("Constant", "Normalization");
+const GModelSpectralRegistry g_spectral_const_registry1(&g_spectral_const_seed1);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralConst    g_spectral_const_seed2("ConstantValue", "Value");
+const GModelSpectralRegistry g_spectral_const_registry2(&g_spectral_const_seed2);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                "GModelSpectralConst::flux(GEnergy&, GEnergy&)"
@@ -67,6 +71,30 @@ GModelSpectralConst::GModelSpectralConst(void) : GModelSpectral()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type and parameter name constructor
+ *
+ * @param[in] type Model type.
+ * @param[in] value Name of value parameter.
+ ***************************************************************************/
+GModelSpectralConst::GModelSpectralConst(const std::string& type,
+                                         const std::string& value) :
+                     GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Set parameter names
+    m_norm.name(value);
 
     // Return
     return;
@@ -226,34 +254,7 @@ GModelSpectralConst* GModelSpectralConst::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Evaluates
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- * \f]
- *
- * where
- * \f${\tt m\_norm}\f$ is the normalization constant in units of 
- * ph/cm2/s/MeV.
- ***************************************************************************/
-double GModelSpectralConst::eval(const GEnergy& srcEng,
-                                 const GTime&   srcTime) const
-{
-    // Compute function value
-    double value = m_norm.value();
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate model value and gradient
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Evaluates
@@ -266,25 +267,30 @@ double GModelSpectralConst::eval(const GEnergy& srcEng,
  * \f${\tt m\_norm}\f$ is the normalization constant in units of 
  * ph/cm2/s/MeV.
  *
- * The method also evaluates the partial derivative of the model with respect
- * to the m_norm parameter using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} = 1
  * \f]
  ***************************************************************************/
-double GModelSpectralConst::eval_gradients(const GEnergy& srcEng,
-                                           const GTime&   srcTime)
+double GModelSpectralConst::eval(const GEnergy& srcEng,
+                                 const GTime&   srcTime,
+                                 const bool&    gradients) const
 {
     // Compute function value
     double value = m_norm.value();
 
-    // Compute partial derivatives of the parameter values
-    double g_norm = (m_norm.is_free()) ? m_norm.scale() : 0.0;
+    // Optionally compute gradients
+    if (gradients) {
 
-    // Set factor gradient (the parameter gradient is obtained by dividing
-    // the factor gradient by the scale factor)
-    m_norm.factor_gradient(g_norm);
+        // Compute partial derivatives of the parameter values
+        double g_norm = (m_norm.is_free()) ? m_norm.scale() : 0.0;
+
+        // Set factor gradient
+        m_norm.factor_gradient(g_norm);
+
+    } // endif: gradient computation was requested
 
     // Return
     return value;
@@ -412,47 +418,17 @@ GEnergy GModelSpectralConst::mc(const GEnergy& emin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing power law model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter name found in XML element.
- *
- * Reads the spectral information from an XML element having either the
- * format
- *
- *     <spectrum type="ConstantValue">
- *       <parameter name="Value" scale="1" min="0" max="1000" value="1" free="1"/>
- *     </spectrum>
- *
- * or the format
- *
- *     <spectrum type="ConstantValue">
- *       <parameter name="Normalization" scale="1" min="0" max="1000" value="1" free="1"/>
- *     </spectrum>
+ * Reads the spectral information from an XML element.
  ***************************************************************************/
 void GModelSpectralConst::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Spectral constant requires exactly 1 parameter.");
-    }
+    // Get parameter pointers
+    const GXmlElement* norm = gammalib::xml_get_par(G_READ, xml, m_norm.name());
 
-    // Get parameter element
-    const GXmlElement* par = xml.element("parameter", 0);
-
-    // Get value
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value") {
-        m_norm.read(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_READ, xml,
-                          "Spectral constant requires either"
-                          " \"Normalization\" or \"Value\" parameter.");
-    }
+    // Read parameters
+    m_norm.read(*norm);
 
     // Return
     return;
@@ -462,61 +438,31 @@ void GModelSpectralConst::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of type "ConstantValue"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
- * Writes the spectral information into an XML element with the format
- *
- *     <spectrum type="ConstantValue">
- *       <parameter name="Value" scale="1" min="0" max="1000" value="1" free="1"/>
- *     </spectrum>
+ * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralConst::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "ConstantValue");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "ConstantValue") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"ConstantValue\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append parameter node. The name
-    // of the node is "Value" as this is the Fermi-LAT standard.
-    // We thus assure that the XML files will be compatible with
-    // Fermi-LAT.
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Value\""));
-    }
+    // Get normalisation parameter
+    GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
 
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Spectral constant requires exactly 1 parameter.");
-    }
-
-    // Get parameter element
-    GXmlElement* par = xml.element("parameter", 0);
-
-    // Set parameyter
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value") {
-        m_norm.write(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-                          "Spectral constant requires either"
-                          " \"Normalization\" or \"Value\" parameter.");
-    }
+    // Write normalisation parameter
+    m_norm.write(*par);
 
     // Return
     return;
@@ -565,9 +511,12 @@ std::string GModelSpectralConst::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralConst::init_members(void)
 {
+    // Initialise model type
+    m_type = "Constant";
+
     // Initialise constant normalisation
     m_norm.clear();
-    m_norm.name("Value");
+    m_norm.name("Normalization");
     m_norm.scale(1.0);
     m_norm.value(1.0);         // default: 1.0
     m_norm.range(0.0, 1000.0); // range:   [0, 1000]
@@ -592,6 +541,7 @@ void GModelSpectralConst::init_members(void)
 void GModelSpectralConst::copy_members(const GModelSpectralConst& model)
 {
     // Copy members
+    m_type = model.m_type;
     m_norm = model.m_norm;
 
     // Set parameter pointer(s)

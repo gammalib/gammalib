@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.cpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,9 +46,7 @@ const GCTAModelIrfBackground g_cta_inst_background_seed;
 const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL         "GCTAModelIrfBackground::eval(GEvent&, GObservation&)"
-#define G_EVAL_GRADIENTS    "GCTAModelIrfBackground::eval_gradients(GEvent&,"\
-                                                            " GObservation&)"
+#define G_EVAL  "GCTAModelIrfBackground::eval(GEvent&, GObservation&, bool&)"
 #define G_NPRED             "GCTAModelIrfBackground::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_MC               "GCTAModelIrfBackground::mc(GObservation&, GRan&)"
@@ -274,15 +272,20 @@ GCTAModelIrfBackground* GCTAModelIrfBackground::clone(void) const
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @param[in] gradients Compute gradients?
  * @return Function value.
  *
  * @exception GException::invalid_argument
  *            Specified observation is not of the expected type.
  *
+ * If the @p gradients flag is true the method will also set the parameter
+ * gradients of the model parameters.
+ *
  * @todo Make sure that DETX and DETY are always set in GCTAInstDir.
  ***************************************************************************/
-double GCTAModelIrfBackground::eval(const GEvent& event,
-                                    const GObservation& obs) const
+double GCTAModelIrfBackground::eval(const GEvent&       event,
+                                    const GObservation& obs,
+                                    const bool&         gradients) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
@@ -322,79 +325,10 @@ double GCTAModelIrfBackground::eval(const GEvent& event,
     double logE = event.energy().log10TeV();
     double spat = (*bgd)(logE, inst_dir.detx(), inst_dir.dety());
     double spec = (spectral() != NULL)
-                  ? spectral()->eval(event.energy(), event.time()) : 1.0;
-    double temp = (temporal() != NULL)
-                  ? temporal()->eval(event.time()) : 1.0;
-
-    // Compute value
-    double value = spat * spec * temp;
-
-    // Apply deadtime correction
-    value *= obs.deadc(event.time());
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- * @return Function value.
- *
- * @exception GException::invalid_argument
- *            Specified observation is not of the expected type.
- *
- * @todo Make sure that DETX and DETY are always set in GCTAInstDir.
- ***************************************************************************/
-double GCTAModelIrfBackground::eval_gradients(const GEvent& event,
-                                              const GObservation& obs) const
-{
-    // Get pointer on CTA observation
-    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-    if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Get pointer on CTA IRF response
-    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-    if (rsp == NULL) {
-        std::string msg = "Specified observation does not contain an"
-                          " IRF response.\n" + obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Retrieve pointer to CTA background
-    const GCTABackground* bgd = rsp->background();
-    if (bgd == NULL) {
-        std::string msg = "Specified observation contains no background"
-                          " information.\n" + obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Extract CTA instrument direction from event
-    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        std::string msg = "No CTA instrument direction found in event.";
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Set DETX and DETY in instrument direction
-    GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
-
-    // Evaluate function
-    double logE = event.energy().log10TeV();
-    double spat = (*bgd)(logE, inst_dir.detx(), inst_dir.dety());
-    double spec = (spectral() != NULL)
-                  ? spectral()->eval_gradients(event.energy(), event.time())
+                  ? spectral()->eval(event.energy(), event.time(), gradients)
                   : 1.0;
     double temp = (temporal() != NULL)
-                  ? temporal()->eval_gradients(event.time())
-                  : 1.0;
+                  ? temporal()->eval(event.time(), gradients) : 1.0;
 
     // Compute value
     double value = spat * spec * temp;
@@ -403,23 +337,29 @@ double GCTAModelIrfBackground::eval_gradients(const GEvent& event,
     double deadc = obs.deadc(event.time());
     value       *= deadc;
 
-    // Multiply factors to spectral gradients
-    if (spectral() != NULL) {
-        double fact = spat * temp * deadc;
-        if (fact != 1.0) {
-            for (int i = 0; i < spectral()->size(); ++i)
-                (*spectral())[i].factor_gradient( (*spectral())[i].factor_gradient() * fact );
-        }
-    }
+    // If gradients were requested then multiply factors to spectral and
+    // temporal gradients
+    if (gradients) {
 
-    // Multiply factors to temporal gradients
-    if (temporal() != NULL) {
-        double fact = spat * spec * deadc;
-        if (fact != 1.0) {
-            for (int i = 0; i < temporal()->size(); ++i)
-                (*temporal())[i].factor_gradient( (*temporal())[i].factor_gradient() * fact );
+        // Multiply factors to spectral gradients
+        if (spectral() != NULL) {
+            double fact = spat * temp * deadc;
+            if (fact != 1.0) {
+                for (int i = 0; i < spectral()->size(); ++i)
+                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact );
+            }
         }
-    }
+
+        // Multiply factors to temporal gradients
+        if (temporal() != NULL) {
+            double fact = spat * spec * deadc;
+            if (fact != 1.0) {
+                for (int i = 0; i < temporal()->size(); ++i)
+                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact );
+            }
+        }
+
+    } // endif: gradients were requested
 
     // Return value
     return value;
@@ -659,7 +599,7 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
         for (int i = 0; i < spectral.nodes(); ++i) {
             GEnergy energy    = spectral.energy(i);
             double  intensity = spectral.intensity(i);
-            double  norm      = m_spectral->eval(energy, events->tstart());
+            double  norm      = m_spectral->eval(energy);
             spectral.intensity(i, norm*intensity);
         }
 
@@ -827,20 +767,8 @@ void GCTAModelIrfBackground::read(const GXmlElement& xml)
         m_temporal = constant.clone();
     }
 
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Set observation identifiers
-    ids(xml.attribute("id"));
-
-    // Check flag if TS value should be computed
-    bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
-
-    // Set flag if TS value should be computed
-    this->tscalc(tscalc);
+    // Read model attributes
+    read_attributes(xml);
 
     // Set parameter pointers
     set_pointers();
@@ -909,17 +837,6 @@ void GCTAModelIrfBackground::write(GXmlElement& xml) const
         if (write_temporal)     src->append(GXmlElement("temporalModel"));
     }
 
-    // Set model type, name and optionally instruments
-    src->attribute("name", name());
-    src->attribute("type", type());
-    if (instruments().length() > 0) {
-        src->attribute("instrument", instruments());
-    }
-    std::string identifiers = ids();
-    if (identifiers.length() > 0) {
-        src->attribute("id", identifiers);
-    }
-
     // Write spectral model
     if (spectral() != NULL) {
         GXmlElement* spec = src->element("spectrum", 0);
@@ -933,6 +850,9 @@ void GCTAModelIrfBackground::write(GXmlElement& xml) const
             temporal()->write(*temp);
         }
     }
+
+    // Write model attributes
+    write_attributes(*src);
 
     // Return
     return;
@@ -1118,33 +1038,18 @@ bool GCTAModelIrfBackground::valid_model(void) const
 
 
 /***********************************************************************//**
- * @brief Construct spectral model from XML element
+ * @brief Return pointer to spectral model from XML element
  *
- * @param[in] spectral XML element containing spectral model information.
+ * @param[in] spectral XML element.
+ * @return Pointer to spectral model.
  *
- * @exception GException::model_invalid_spectral
- *            Invalid spectral model type encountered.
- *
- * Returns pointer to a spectral model that is defined in an XML element.
+ * Returns pointer to spectral model that is defined in an XML element.
  ***************************************************************************/
 GModelSpectral* GCTAModelIrfBackground::xml_spectral(const GXmlElement& spectral) const
 {
-    // Get spectral model type
-    std::string type = spectral.attribute("type");
-
     // Get spectral model
     GModelSpectralRegistry registry;
-    GModelSpectral*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(spectral);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
-    }
+    GModelSpectral*        ptr = registry.alloc(spectral);
 
     // Return pointer
     return ptr;
@@ -1152,33 +1057,18 @@ GModelSpectral* GCTAModelIrfBackground::xml_spectral(const GXmlElement& spectral
 
 
 /***********************************************************************//**
- * @brief Construct temporal model from XML element
+ * @brief Return pointer to temporal model from XML element
  *
- * @param[in] temporal XML element containing temporal model information.
+ * @param[in] temporal XML element.
+ * @return Pointer to temporal model.
  *
- * @exception GException::model_invalid_temporal
- *            Invalid temporal model type encountered.
- *
- * Returns pointer to a temporal model that is defined in an XML element.
+ * Returns pointer to temporal model that is defined in an XML element.
  ***************************************************************************/
 GModelTemporal* GCTAModelIrfBackground::xml_temporal(const GXmlElement& temporal) const
 {
-    // Get temporal model type
-    std::string type = temporal.attribute("type");
-
     // Get temporal model
     GModelTemporalRegistry registry;
-    GModelTemporal*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(temporal);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_temporal(G_XML_TEMPORAL, type);
-    }
+    GModelTemporal*        ptr = registry.alloc(temporal);
 
     // Return pointer
     return ptr;

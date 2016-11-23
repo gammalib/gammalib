@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialPolynom.cpp - Radial Polynom CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -243,6 +243,8 @@ GCTAModelRadialPolynom* GCTAModelRadialPolynom::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] offset Offset angle [degrees].
+ * @param[in] gradients Compute gradients?
+ * @return Function value
  *
  * Evaluates the radial polynomial model for a given offset. The model is
  * defined as
@@ -250,8 +252,18 @@ GCTAModelRadialPolynom* GCTAModelRadialPolynom::clone(void) const
  * where
  * \f$\theta\f$ is the offset angle (in degrees), and
  * \f$c_i\f$ are the polynomial coefficients.
+ *
+ * If the @p gradients flag is true the method will also compute the partial
+ * derivatives of the parameters. The partial derivative of the Polynom are
+ * given by
+ * \f[\frac{df}{d{c_i}_v} = {c_i}_s \theta^i\f]
+ * where 
+ * \f${c_i}_v\f$ is the value part, 
+ * \f${c_i}_s\f$ is the scaling part, and 
+ * \f$c_i = {c_i}_v {c_i}_s\f$. 
  ***************************************************************************/
-double GCTAModelRadialPolynom::eval(const double& offset) const
+double GCTAModelRadialPolynom::eval(const double& offset,
+                                    const bool&   gradients) const
 {
     // Initialise result
     double value = 0.0;
@@ -267,6 +279,28 @@ double GCTAModelRadialPolynom::eval(const double& offset) const
         for (int i = ncoeffs-2; i >= 0; i--) {
             value = value * offset + m_coeffs[i].value();
         }
+
+        // Optionally compute partial derivatives
+        if (gradients) {
+
+            // Initialise theta^i for the first coefficient
+            double offset_power = 1.0;
+
+            // Compute gradients for all coefficients
+            for (int i = 0; i < ncoeffs; ++i) {
+
+                // Compute gradient
+                double grad = offset_power * m_coeffs[i].scale();
+
+                // Store gradient
+                m_coeffs[i].factor_gradient(grad);
+
+                // Increase offset power for next coefficient
+                offset_power *= offset;
+
+            } // endfor: looped over all coefficients
+
+        } // endif: computed partial derivatives
 
     } // endif: there were coefficients
 
@@ -278,84 +312,6 @@ double GCTAModelRadialPolynom::eval(const double& offset) const
         std::cout << " (value=" << value;
         for (int i = 0; i < ncoeffs; ++i) {
             std::cout << ", c" << i << "=" << m_coeffs[i].value();
-        }
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] offset Offset angle [degrees].
- *
- * Evaluates the Polynom model for a given offset. The Polynom model is
- * defined as
- * Evaluates the Polynom model for a given offset. The Polynomian model is
- * defined as
- * \f[f(\theta) = \sum_{i=0}^m c_i \theta^i\f]
- * where
- * \f$\theta\f$ is the offset angle (in degrees), and
- * \f$c_i\f$ are the polynomial coefficients.
- *
- * The partial derivative of the Polynom are given by
- * \f[\frac{df}{d{c_i}_v} = {c_i}_s \theta^i\f]
- * where 
- * \f${c_i}_v\f$ is the value part, 
- * \f${c_i}_s\f$ is the scaling part, and 
- * \f$c_i = {c_i}_v {c_i}_s\f$. 
- *
- * Note that this method implements a function which is unity for
- * \f$\theta=0\f$.
- ***************************************************************************/
-double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
-{
-    // Initialise result
-    double value = 0.0;
-
-    // Determine polynomial degree
-    int ncoeffs = m_coeffs.size();
-    
-    // Compute value and gradients (only if there are coefficients)
-    if (ncoeffs > 0) {
-
-        // Compute value
-        value = m_coeffs[ncoeffs-1].value();
-        for (int i = ncoeffs-2; i >= 0; i--) {
-            value = value * offset + m_coeffs[i].value();
-        }
-
-        // Initialise theta^i for the first coefficient
-        double offset_power = 1.0;
-
-        // Compute gradients for all coefficients
-        for (int i = 0; i < ncoeffs; ++i) {
-
-            // Compute gradient
-            double grad = offset_power * m_coeffs[i].scale();
-
-            // Store gradient
-            const_cast<GCTAModelRadialPolynom*>(this)->m_coeffs[i].factor_gradient(grad);
-
-            // Increase offset power for next coefficient
-            offset_power *= offset;
-
-        } // endfor: looped over all coefficients
-
-    } // endif: there were coefficients
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GCTAModelRadialPolynom::eval_gradients";
-        std::cout << "(offset=" << offset << "): NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        for (int i = 0; i < ncoeffs; ++i) {
-            std::cout << ", c_" << i << "=" << m_coeffs[i].value();
         }
         std::cout << ")" << std::endl;
     }

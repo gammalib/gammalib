@@ -36,6 +36,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <unistd.h>     // dup
 #include "GLog.hpp"
 #include "GTools.hpp"
 
@@ -459,12 +460,20 @@ void GLog::clear(void)
 
 
 /***********************************************************************//**
- * @brief Return the number of characters that are actually in the buffer
+ * @brief Return the number of characters in the log file
+ *
+ * @return Number of characters in log file.
  ***************************************************************************/
-int GLog::size(void) const
+long int GLog::size(void) const
 {
-    // Return
-    return m_buffer.size();
+    // Determine the number of characters written to disk
+    long int size = (m_file != NULL) ? std::ftell(m_file) : 0;
+
+    // Add in buffer size
+    size += m_buffer.size();
+
+    // Return total size
+    return size;
 }
 
 
@@ -532,17 +541,18 @@ void GLog::close(void)
 void GLog::init_members(void)
 {
     // Initialise members
-    m_max_length = 8192;
-    m_indent     = 0;
-    m_stdout     = false;
-    m_stderr     = false;
-    m_use_date   = false;
-    m_linestart  = true;
-    m_file       = NULL;
+    m_max_length   = 8192;
+    m_indent       = 0;
+    m_written_size = 0;
+    m_stdout       = false;
+    m_stderr       = false;
+    m_use_date     = false;
+    m_linestart    = true;
+    m_file         = NULL;
+    m_chatter      = NORMAL;
     m_filename.clear();
     m_name.clear();
     m_buffer.clear();
-    m_chatter    = NORMAL;
 
     // Return
     return;
@@ -552,22 +562,41 @@ void GLog::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] log Object from which members which should be copied.
+ * @param[in] log Logger.
+ *
+ * Copy all class members from @p log to the current logger instance. This
+ * method will flush the buffer of @p log before copying. It will duplicate
+ * the file pointer on the log file so that the copy can safely work on the
+ * file without having to worry that the file pointer goes out of scope.
  ***************************************************************************/
 void GLog::copy_members(const GLog& log)
 {
-    // Copy attributes
+    // Force flushing the buffer before doing the copy. This assures that the
+    // log file is left in a clean state, and in particular, that logging
+    // will be done in order. We have to circument const correctness for
+    // doing this.
+    const_cast<GLog*>(&log)->flush(true);
+
+    // Copy buffer attributes
     m_max_length = log.m_max_length;
     m_indent     = log.m_indent;
     m_stdout     = log.m_stdout;
     m_stderr     = log.m_stderr;
     m_use_date   = log.m_use_date;
     m_linestart  = log.m_linestart;
-    m_file       = log.m_file;
     m_filename   = log.m_filename;
     m_name       = log.m_name;
     m_buffer     = log.m_buffer;
     m_chatter    = log.m_chatter;
+
+    // Copy file pointer by duplicating the file descriptor and opening
+    // the duplicated file descriptor
+    if (log.m_file != NULL) {
+        m_file = fdopen(dup(fileno(log.m_file)), "a");
+    }
+    else {
+        m_file = NULL;
+    }
 
     // Return
     return;
@@ -597,16 +626,17 @@ void GLog::free_members(void)
  *
  * @param[in] force If true, force flushing.
  *
- * Flush string buffer if it is full or if flushing is enforced. This method
- * writes the output string in the relevant streams. It decomposes the
- * buffer in lines that a separated by a '\n' character. The following
- * streams are currently implemented (and will be filled in parallel):
- * stdout, stderr, and an ASCII file.
+ * Flush string buffer if it is full or if flushing is enforced.
+ *
+ * This method writes the output string in the relevant streams. It
+ * decomposes the buffer in lines that a separated by a '\n' character.
+ * The following streams are currently implemented (and will be filled in
+ * parallel): stdout, stderr, and - if available - an ASCII file.
  ***************************************************************************/
 void GLog::flush(const bool& force)
 {
     // Check if buffer should be flushed
-    bool flush = (force || size() > m_max_length);
+    bool flush = (force || m_buffer.size() > m_max_length);
 
     // Flush buffer
     if (flush) {
@@ -634,6 +664,9 @@ void GLog::flush(const bool& force)
             }
 
         } // endwhile: flush until empty
+
+        // And now flush the kernel buffer
+        std::fflush(m_file);
 
     } // endif: flush was required
 
@@ -777,10 +810,10 @@ std::string GLog::prefix(void) const
 void GLog::append(std::string arg)
 {
     // If the buffer is empty and at the beginning of a line or if the last
-    // charater is a \n, prepend a prefix at the beginning of the string to
-    // be inserted.
+    // character is a \n then prepend a prefix at the beginning of the string
+    // to be inserted.
     if ((m_buffer.size() == 0 && m_linestart) ||
-        m_buffer[m_buffer.size()-1] == '\n') {
+        (m_buffer.size() >  0 && m_buffer[m_buffer.size()-1] == '\n')) {
 
         // Prepend prefix
         arg.insert(0, prefix());
@@ -805,6 +838,9 @@ void GLog::append(std::string arg)
     // Add string to buffer
     m_buffer.append(arg);
 
+    // Increment written number of characters
+    m_written_size += arg.size();
+
     // Flush Buffer
     flush();
 
@@ -820,10 +856,3 @@ void GLog::append(std::string arg)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

@@ -48,17 +48,18 @@
 class GEnergy : public GBase {
 
     // Operator friends
-    friend GEnergy operator+(const GEnergy &a, const GEnergy &b);
-    friend GEnergy operator-(const GEnergy &a, const GEnergy &b);
-    friend GEnergy operator*(const double &a, const GEnergy &b);
-    friend GEnergy operator*(const GEnergy &a, const double &b);
-    friend GEnergy operator/(const GEnergy &a, const double &b);
-    friend bool    operator==(const GEnergy &a, const GEnergy &b);
-    friend bool    operator!=(const GEnergy &a, const GEnergy &b);
-    friend bool    operator<(const GEnergy &a, const GEnergy &b);
-    friend bool    operator<=(const GEnergy &a, const GEnergy &b);
-    friend bool    operator>(const GEnergy &a, const GEnergy &b);
-    friend bool    operator>=(const GEnergy &a, const GEnergy &b);
+    friend GEnergy operator+(const GEnergy& a, const GEnergy& b);
+    friend GEnergy operator-(const GEnergy& a, const GEnergy& b);
+    friend GEnergy operator*(const double& a, const GEnergy& b);
+    friend GEnergy operator*(const GEnergy& a, const double& b);
+    friend GEnergy operator/(const GEnergy& a, const double& b);
+    friend double  operator/(const GEnergy& a, const GEnergy& b);
+    friend bool    operator==(const GEnergy& a, const GEnergy& b);
+    friend bool    operator!=(const GEnergy& a, const GEnergy& b);
+    friend bool    operator<(const GEnergy& a, const GEnergy& b);
+    friend bool    operator<=(const GEnergy& a, const GEnergy& b);
+    friend bool    operator>(const GEnergy& a, const GEnergy& b);
+    friend bool    operator>=(const GEnergy& a, const GEnergy& b);
 
 public:
     // Constructors and destructors
@@ -268,6 +269,20 @@ GEnergy operator/(const GEnergy& a, const double& b)
     GEnergy result;
     result.m_energy = a.m_energy / b;
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Energy division operator friend
+ *
+ * @param[in] a Energy.
+ * @param[in] b Energy.
+ * @return Fraction of energies.
+ ***************************************************************************/
+inline
+double operator/(const GEnergy& a, const GEnergy& b)
+{
+    return (a.m_energy / b.m_energy);
 }
 
 

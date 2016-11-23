@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATResponse.cpp - Fermi/LAT response class              *
+ *                GLATResponse.cpp - Fermi LAT response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.cpp
- * @brief Fermi/LAT response class implementation
+ * @brief Fermi LAT response class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -169,7 +169,7 @@ GLATResponse& GLATResponse::operator=(const GLATResponse& rsp)
 ***************************************************************************/
 void GLATResponse::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free class members
     free_members();
     this->GResponse::free_members();
 
@@ -194,32 +194,6 @@ GLATResponse* GLATResponse::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Set path to the calibration database
- *
- * @param[in] caldb Path to calibration database
- *
- * @exception GException::caldb_not_found
- *            Calibration database repository not found.
- *
- * This method stores the CALDB root directory as the path to the LAT
- * calibration database.
- *
- * @todo Make use of the LAT CALDB to translate IRF names into filenames.
- ***************************************************************************/
-void GLATResponse::caldb(const std::string& caldb)
-{
-    // Allocate calibration database
-    GCaldb db(caldb);
-
-    // Store the path to the calibration database
-    m_caldb = db.rootdir();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Return value of point source IRF
  *
  * @param[in] event Observed event.
@@ -229,7 +203,7 @@ void GLATResponse::caldb(const std::string& caldb)
  * @exception GLATException::bad_instdir_type
  *            Instrument direction is not a valid LAT instrument direction.
  *
- * @todo The IRF value is not devided by ontime of the event, but it is
+ * @todo The IRF value is not divided by ontime of the event, but it is
  *       already time integrated.
  ***************************************************************************/
 double GLATResponse::irf(const GEvent&       event,
@@ -495,7 +469,7 @@ double GLATResponse::irf(const GLATEventBin& event,
  * @param[in] obsEng Observed photon energy.
  * @param[in] obsTime Observed photon arrival time.
  * @param[in] obs Observation.
- * @return 0.0
+ * @return 0
  *
  * @exception GException::feature_not_implemented
  *            Method is not implemented.
@@ -541,81 +515,132 @@ GEbounds GLATResponse::ebounds(const GEnergy& obsEnergy) const
 /***********************************************************************//**
  * @brief Load Fermi LAT response from calibration database
  *
- * @param[in] rspname Response name (name/name::front/name::back).
+ * @param[in] rspname Response name.
  *
- * @exception GException::rsp_invalid_type
+ * @exception GException::invalid_argument
  *            Invalid response type encountered.
  *
  * Loads the specified Fermi LAT response from the calibration database.
+ * The following response names are supported (case insensitive):
  *
- * @todo Add a more generic calibration database interface. For this we need
- *       first to develop a clear vision about how the calibration database
- *       is organized. Probably it is best to introduce a generic base class
- *       for the calibration database and each instrument implements then
- *       it's specific interface.
+ *      name (is equivalent to front+back)
+ *      name::front
+ *      name::back
+ *      name::psf(0-3)
+ *      name::edisp(0-3)
+ *
+ * where name is the response name (for example "P8R2_SOURCE_V6"). Note that
+ * the name is case sensitive, but the event typ is not case sensitive.
  ***************************************************************************/
 void GLATResponse::load(const std::string& rspname)
 {
-    // Save calibration database name
-    std::string caldb = m_caldb;
+    // Set possible response types
+    static const std::string type_names[] = {"FRONT",
+                                             "BACK",
+                                             "PSF0",
+                                             "PSF1",
+                                             "PSF2",
+                                             "PSF3",
+                                             "EDISP0",
+                                             "EDISP1",
+                                             "EDISP2",
+                                             "EDISP3"};
 
     // Clear instance
     clear();
 
-    // Restore calibration database name
-    m_caldb = caldb;
+    // Allocate Fermi LAT calibration database
+    GCaldb caldb("glast", "lat");
 
-    // Determine response types to be loaded
+    // Determine response types to be loaded. If no event type has been
+    // specified then load both front and back response.
+    int event_type = 0;
     std::vector<std::string> array = gammalib::split(rspname, ":");
     if (array.size() == 1) {
-        m_rspname  = array[0];
-        m_has_front = true;
-        m_has_back  = true;
+        m_rspname   = array[0];
+        event_type  = 3;      // 0x0000000011
     }
     else if (array.size() == 3) {
-        m_rspname = array[0];
-        if (gammalib::strip_whitespace(gammalib::tolower(array[2])) == "front") {
-            m_has_front = true;
+        m_rspname          = array[0];
+        std::string evtype = gammalib::strip_whitespace(gammalib::tolower(array[2]));
+        if (evtype == "front") {
+            event_type = 1;   // 0x0000000001
         }
-        else if (gammalib::strip_whitespace(gammalib::tolower(array[2])) == "back") {
-            m_has_back  = true;
+        else if (evtype == "back") {
+            event_type = 2;   // 0x0000000010
+        }
+        else if (evtype == "psf0") {
+            event_type = 4;   // 0x0000000100
+        }
+        else if (evtype == "psf1") {
+            event_type = 8;   // 0x0000001000
+        }
+        else if (evtype == "psf2") {
+            event_type = 16;  // 0x0000010000
+        }
+        else if (evtype == "psf3") {
+            event_type = 32;  // 0x0000100000
+        }
+        else if (evtype == "psf") {
+            event_type = 60;  // 0x0000111100
+        }
+        else if (evtype == "edisp0") {
+            event_type = 64;  // 0x0001000000
+        }
+        else if (evtype == "edisp1") {
+            event_type = 128; // 0x0010000000
+        }
+        else if (evtype == "edisp2") {
+            event_type = 256; // 0x0100000000
+        }
+        else if (evtype == "edisp3") {
+            event_type = 512; // 0x1000000000
+        }
+        else if (evtype == "edisp") {
+            event_type = 960; // 0x1111000000
         }
         else {
-            throw GException::rsp_invalid_type(G_LOAD, array[2]);
+            std::string msg = "Invalid response type \""+array[2]+"\". "
+                              "Expect one of \"FRONT\", \"BACK\", "
+                              "\"PSF(0-3)\", or \"EDISP(0-3)\" "
+                              "(case insensitive).";
+            throw GException::invalid_argument(G_LOAD, msg);
         }
     }
     else {
-        throw GException::rsp_invalid_type(G_LOAD, m_rspname);
+        std::string msg = "Invalid response \""+m_rspname+"\".";
+        throw GException::invalid_argument(G_LOAD, msg);
     }
 
-    // Set caldb access path
-    caldb += "/data/glast/lat/bcf/";
+    // Loop over all possible response types and append the relevant
+    // response function components to the response
+    for (int i = 0; i < 10; ++i) {
 
-    // Load front IRF if requested
-    if (m_has_front) {
-        std::string aeffname  = caldb + "ea/aeff_"  + m_rspname + "_front.fits";
-        std::string psfname   = caldb + "psf/psf_"   + m_rspname + "_front.fits";
-        std::string edispname = caldb + "edisp/edisp_" + m_rspname + "_front.fits";
-        GLATAeff*  aeff  = new GLATAeff(aeffname);
-        GLATPsf*   psf   = new GLATPsf(psfname);
-        GLATEdisp* edisp = new GLATEdisp(edispname);
+        // Set bitmask for this response type
+        int bitmask = 1 << i;
+
+        // Fall through if this response type is not requested
+        if ((event_type & bitmask) == 0) {
+            continue;
+        }
+
+        // Get response using the GCaldb interface
+        std::string expr      = "VERSION("+gammalib::toupper(m_rspname)+")";
+        GFilename   aeffname  = caldb.filename(type_names[i],"","EFF_AREA","","",expr);
+        GFilename   psfname   = caldb.filename(type_names[i],"","RPSF","","",expr);
+        GFilename   edispname = caldb.filename(type_names[i],"","EDISP","","",expr);
+
+        // Load IRF components
+        GLATAeff*  aeff  = new GLATAeff(aeffname, type_names[i]);
+        GLATPsf*   psf   = new GLATPsf(psfname, type_names[i]);
+        GLATEdisp* edisp = new GLATEdisp(edispname, type_names[i]);
+
+        // Push IRF components on the response stack
         m_aeff.push_back(aeff);
         m_psf.push_back(psf);
         m_edisp.push_back(edisp);
-    }
 
-    // Load back IRF if requested
-    if (m_has_back) {
-        std::string aeffname  = caldb + "ea/aeff_"  + m_rspname + "_back.fits";
-        std::string psfname   = caldb + "psf/psf_"   + m_rspname + "_back.fits";
-        std::string edispname = caldb + "edisp/edisp_" + m_rspname + "_back.fits";
-        GLATAeff*  aeff  = new GLATAeff(aeffname);
-        GLATPsf*   psf   = new GLATPsf(psfname);
-        GLATEdisp* edisp = new GLATEdisp(edispname);
-        m_aeff.push_back(aeff);
-        m_psf.push_back(psf);
-        m_edisp.push_back(edisp);
-    }
+    } // endfor: looped over response types
 
     // Return
     return;
@@ -625,38 +650,12 @@ void GLATResponse::load(const std::string& rspname)
 /***********************************************************************//**
  * @brief Save Fermi LAT response in calibration database
  *
- * @param[in] rspname Response name (name/name::front/name::back).
- *
- * Saves Fermi LAT response in a set of FITS files with names
- * aeff_<rspname>_[front/back].fits,
- * psf_<rspname>_[front/back].fits, and
- * edisp_<rspname>_[front/back].fits.
+ * @param[in] rspname Response name.
  *
  * @todo Not yet implemented.
  ***************************************************************************/
 void GLATResponse::save(const std::string& rspname) const
 {
-    // Allocate FITS file
-    GFits file;
-
-    // Open FITS file
-    file.open(rspname, true);
-
-    // Save effective area
-    //aeff_append(file);
-
-    // Append PSF HDUs
-    //psf_append(file);
-
-    // Save energy dispersions
-    //edisp_append(file);
-
-    // Save efficiency factors
-    //eff_append(file);
-
-    // Save FITS file
-    file.save();
-
     // Return
     return;
 }
@@ -722,7 +721,7 @@ GLATEdisp* GLATResponse::edisp(const int& index) const
 /***********************************************************************//**
  * @brief Print Fermi-LAT response information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing response information.
  ***************************************************************************/
 std::string GLATResponse::print(const GChatter& chatter) const
@@ -737,21 +736,12 @@ std::string GLATResponse::print(const GChatter& chatter) const
         result.append("=== GLATResponse ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("Calibration database")+m_caldb);
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
-        result.append("\n"+gammalib::parformat("Section(s)"));
-        if (m_has_front && m_has_back) {
-            result.append("front & back");
+        result.append("\n"+gammalib::parformat("Event types"));
+        for (int i = 0; i < size(); ++i) {
+            result.append(m_aeff[i]->evtype()+" ");
         }
-        else if (m_has_front) {
-            result.append("front");
-        }
-        else if (m_has_back) {
-            result.append("back");
-        }
-        else {
-            result.append("unknown");
-        }
+
         if (chatter > TERSE) {
             for (int i = 0; i < size(); ++i) {
                 result.append("\n"+m_aeff[i]->print(gammalib::reduce(chatter)));
@@ -778,27 +768,16 @@ std::string GLATResponse::print(const GChatter& chatter) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Do we need the handoff stuff there???
  ***************************************************************************/
 void GLATResponse::init_members(void)
 {
     // Initialise members
-    m_caldb.clear();
     m_rspname.clear();
-    m_has_front   = false;
-    m_has_back    = false;
     m_force_mean = false;
     m_aeff.clear();
     m_psf.clear();
     m_edisp.clear();
     m_ptsrc.clear();
-    
-    // By default use HANDOFF response database.
-    char* handoff = std::getenv("HANDOFF_IRF_DIR");
-    if (handoff != NULL) {
-        m_caldb.assign(handoff);
-    }
 
     // Return
     return;
@@ -813,25 +792,22 @@ void GLATResponse::init_members(void)
 void GLATResponse::copy_members(const GLATResponse& rsp)
 {
     // Copy members
-    m_caldb      = rsp.m_caldb;
     m_rspname    = rsp.m_rspname;
-    m_has_front   = rsp.m_has_front;
-    m_has_back    = rsp.m_has_back;
     m_force_mean = rsp.m_force_mean;
 
-    // Clone Aeff
+    // Clone Aeff response components
     m_aeff.clear();
     for (int i = 0; i < rsp.m_aeff.size(); ++i) {
         m_aeff.push_back(rsp.m_aeff[i]->clone());
     }
     
-    // Clone Psf
+    // Clone Psf response components
     m_psf.clear();
     for (int i = 0; i < rsp.m_psf.size(); ++i) {
         m_psf.push_back(rsp.m_psf[i]->clone());
     }
 
-    // Clone Edisp
+    // Clone Edisp response components
     m_edisp.clear();
     for (int i = 0; i < rsp.m_edisp.size(); ++i) {
         m_edisp.push_back(rsp.m_edisp[i]->clone());

@@ -35,14 +35,15 @@
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GNodeArray.hpp"
-#include "GXmlElement.hpp"
 #include "GEbounds.hpp"
-#include "GEnergies.hpp"
 #include "GFilename.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
+class GEnergies;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -60,6 +61,7 @@ class GModelSpatialDiffuseCube : public GModelSpatialDiffuse {
 public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
+    GModelSpatialDiffuseCube(const bool& dummy, const std::string& type);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
     GModelSpatialDiffuseCube(const GFilename& filename,
                              const double&    value = 1.0);
@@ -77,8 +79,8 @@ public:
     virtual GModelSpatialDiffuseCube* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
-    virtual double                    eval(const GPhoton& photon) const;
-    virtual double                    eval_gradients(const GPhoton& photon) const;
+    virtual double                    eval(const GPhoton& photon,
+                                           const bool& gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
@@ -86,6 +88,7 @@ public:
                                               const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -107,7 +110,6 @@ public:
     void                       load(const GFilename& filename);
     void                       save(const GFilename& filename,
                                     const bool&      clobber = false) const;
-    //void                       read(const GFits& file);
     void                       write(GFits& file) const;
 
 protected:
@@ -120,21 +122,24 @@ protected:
     void   set_energy_boundaries(void);
     void   update_mc_cache(void);
     double cube_intensity(const GPhoton& photon) const;
+    void   set_region(void) const;
 
     // Protected members
-    GModelPar  m_value;       //!< Value
-    GFilename  m_filename;    //!< Name of map cube
-    bool       m_loaded;      //!< Signals if map cube has been loaded
-    GSkyMap    m_cube;        //!< Map cube
-    GNodeArray m_logE;        //!< Log10(energy) values of the maps
-    GEbounds   m_ebounds;     //!< Energy bounds of the maps
+    std::string              m_type;     //!< Model type
+    GModelPar                m_value;    //!< Value
+    GFilename                m_filename; //!< Name of map cube
+    bool                     m_loaded;   //!< Signals if map cube has been loaded
+    GSkyMap                  m_cube;     //!< Map cube
+    GNodeArray               m_logE;     //!< Log10(energy) values of the maps
+    GEbounds                 m_ebounds;  //!< Energy bounds of the maps
+    mutable GSkyRegionCircle m_region;   //!< Bounding circle
 
     // Monte Carlo cache
-    mutable GSkyDir             m_mc_centre;   //!< Centre of MC cone
-    mutable double              m_mc_radius;   //!< Radius of MC cone
-    mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
-    mutable std::vector<double> m_mc_max;      //!< Maximum values for MC
-    mutable GModelSpectralNodes m_mc_spectrum; //!< Map cube spectrum
+    mutable GSkyDir             m_mc_centre;           //!< Centre of MC cone
+    mutable double              m_mc_radius;           //!< Radius of MC cone (degrees)
+    mutable double              m_mc_one_minus_cosrad; //!< 1-cosine of radius
+    mutable std::vector<double> m_mc_max;              //!< Maximum values for MC
+    mutable GModelSpectralNodes m_mc_spectrum;         //!< Map cube spectrum
 };
 
 
@@ -153,14 +158,14 @@ std::string GModelSpatialDiffuseCube::classname(void) const
 /***********************************************************************//**
  * @brief Return spatial model type
  *
- * @return "MapCubeFunction".
+ * @return Model type.
  *
  * Returns the type of the spatial map cube model.
  ***************************************************************************/
 inline
 std::string GModelSpatialDiffuseCube::type(void) const
 {
-    return "MapCubeFunction";
+    return (m_type);
 }
 
 
@@ -293,6 +298,21 @@ double GModelSpatialDiffuseCube::mc_norm(const GSkyDir& dir,
                                          const double&  radius) const
 {
     return (value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the point source.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialDiffuseCube::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALDIFFUSECUBE_HPP */

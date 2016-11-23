@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GLATAeff.cpp - Fermi-LAT effective area                *
+ *                  GLATAeff.cpp - Fermi LAT effective area                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATAeff.cpp
- * @brief Fermi-LAT effective area class implementation
+ * @brief Fermi LAT effective area class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -75,18 +75,19 @@ GLATAeff::GLATAeff(void)
  * @brief File constructor
  *
  * @param[in] filename FITS file name.
+ * @param[in] evtype Event type.
  *
  * Construct instance by loading the information from a FITS file. Both the
  * effective area information and the efficiency factor parameters are loaded
  * when available.
  ***************************************************************************/
-GLATAeff::GLATAeff(const GFilename& filename)
+GLATAeff::GLATAeff(const GFilename& filename, const std::string& evtype)
 {
     // Initialise class members
     init_members();
 
     // Load effective area from file
-    load(filename);
+    load(filename, evtype);
 
     // Return
     return;
@@ -254,13 +255,17 @@ GLATAeff* GLATAeff::clone(void) const
  * @brief Load effective area from FITS file
  *
  * @param[in] filename FITS file.
+ * @param[in] evtype Event type.
  *
  * This method loads the effective area information, and if available, the
  * efficiency factors, from the FITS response file. See the GLATAeff::read
  * method for details.
  ***************************************************************************/
-void GLATAeff::load(const GFilename& filename)
+void GLATAeff::load(const GFilename& filename, const std::string& evtype)
 {
+    // Store event type
+    m_evtype = evtype;
+
     // Open FITS file
     GFits fits(filename);
 
@@ -304,28 +309,41 @@ void GLATAeff::save(const GFilename& filename, const bool& clobber)
  * @param[in] fits FITS file.
  *
  * Reads the effective area and efficiency parameter information form the
- * FITS file. The effective area is read from the extension EFFECTIVE AREA,
- * the efficiency parameter information from the extension EFFICIENCY_PARAMS.
- * If the latter extension does not exist, no efficiency parameters will be
- * loaded.
+ * FITS file. The effective area is read from the extension EFFECTIVE AREA
+ * (or EFFECTIVE AREA_<evtype> for Pass 8), the efficiency parameter
+ * information from the extension EFFICIENCY_PARAMS (or 
+ * EFFICIENCY_PARAMS_<evtype> for Pass 8). If the latter extension does not
+ * exist, no efficiency parameters will be loaded.
  *
  * @todo Implement reading of Phi-dependence information.
  ***************************************************************************/
 void GLATAeff::read(const GFits& fits)
 {
-    // Clear instance
+    // Clear instance (keep event type)
+    std::string evtype = m_evtype;
     clear();
+    m_evtype = evtype;
+
+    // Set extension names
+    std::string effarea  = "EFFECTIVE AREA";
+    std::string effparms = "EFFICIENCY_PARAMS";
+    if (!fits.contains(effarea)) {
+        effarea += "_" + m_evtype;
+    }
+    if (!fits.contains(effparms)) {
+        effparms += "_" + m_evtype;
+    }
 
     // Get pointer to effective area HDU
-    const GFitsTable& hdu_aeff = *fits.table("EFFECTIVE AREA");
+    const GFitsTable& hdu_aeff = *fits.table(effarea);
 
     // Read effective area
     read_aeff(hdu_aeff);
 
     // Read efficiency factors from appropriate HDU. Does nothing if the
     // HDU does not exist.
-    if (fits.contains("EFFICIENCY_PARAMS")) {
-        const GFitsTable& hdu_eff = *fits.table("EFFICIENCY_PARAMS");
+    if (fits.contains(effparms)) {
+        const GFitsTable& hdu_eff = *fits.table(effparms);
         read_efficiency(hdu_eff);
     }
 
@@ -452,16 +470,7 @@ std::string GLATAeff::print(const GChatter& chatter) const
                       gammalib::str(nenergies()));
         result.append("\n"+gammalib::parformat("Number of cos theta bins") +
                       gammalib::str(ncostheta()));
-        result.append("\n"+gammalib::parformat("Detector section"));
-        if (m_front) {
-            result.append("front");
-        }
-        else if (m_back) {
-            result.append("back");
-        }
-        else {
-            result.append("unknown");
-        }
+        result.append("\n"+gammalib::parformat("Detector section")+m_evtype);
         result.append("\n"+gammalib::parformat("Efficiency factors"));
         if (has_efficiency()) {
             result.append("present");
@@ -489,11 +498,10 @@ std::string GLATAeff::print(const GChatter& chatter) const
 void GLATAeff::init_members(void)
 {
     // Initialise members
+    m_evtype.clear();
     m_aeff_bins.clear();
     m_aeff.clear();
     m_min_ctheta = 0.0;
-    m_front      = false;
-    m_back       = false;
     m_eff_func1  = NULL;
     m_eff_func2  = NULL;
 
@@ -510,11 +518,10 @@ void GLATAeff::init_members(void)
 void GLATAeff::copy_members(const GLATAeff& aeff)
 {
     // Copy attributes
+    m_evtype     = aeff.m_evtype;
     m_aeff_bins  = aeff.m_aeff_bins;
     m_aeff       = aeff.m_aeff;
     m_min_ctheta = aeff.m_min_ctheta;
-    m_front      = aeff.m_front;
-    m_back       = aeff.m_back;
 
     // Clone functors
     m_eff_func1 = (aeff.m_eff_func1 != NULL) ? aeff.m_eff_func1->clone() : NULL;
@@ -588,9 +595,11 @@ void GLATAeff::read_aeff(const GFitsTable& hdu)
     } // endif: there were effective area bins
 
     // Set detector section using the DETNAM keyword in the HDU
+    /*
     std::string detnam = gammalib::strip_whitespace(hdu.string("DETNAM"));
     m_front            = (detnam == "FRONT");
     m_back             = (detnam == "BACK");
+    */
 
     // Return
     return;
@@ -631,19 +640,34 @@ void GLATAeff::read_efficiency(const GFitsTable& hdu)
     std::vector<double> par1;
     std::vector<double> par2;
 
-    // If we have a front section then read the front parameters
-    if (m_front) {
+    // If we have 2 rows in the table we have a Pass 8 response and hence
+    // the table only applies to the specific event type
+    if (ptr->length() == 2) {
         for (int i = 0; i < 6; ++i) {
             par1.push_back(ptr->real(0,i));
             par2.push_back(ptr->real(1,i));
         }
     }
 
-    // If we have a back section then read the back parameters
-    else if (m_back) {
-        for (int i = 0; i < 6; ++i) {
-            par1.push_back(ptr->real(2,i));
-            par2.push_back(ptr->real(3,i));
+    // ... otherwise we have an earlier response, and the front parameters
+    // are stored in the first 2 rows while the back parameters are stored
+    // in the second 2 rows
+    else {
+    
+        // If we have a front section then read the front parameters
+        if (m_evtype == "FRONT") {
+            for (int i = 0; i < 6; ++i) {
+                par1.push_back(ptr->real(0,i));
+                par2.push_back(ptr->real(1,i));
+            }
+        }
+
+        // If we have a back section then read the back parameters
+        else if (m_evtype == "BACK") {
+            for (int i = 0; i < 6; ++i) {
+                par1.push_back(ptr->real(2,i));
+                par2.push_back(ptr->real(3,i));
+            }
         }
     }
 

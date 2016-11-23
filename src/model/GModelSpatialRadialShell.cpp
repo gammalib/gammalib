@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.cpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Christoph Deil                              *
+ *  copyright (C) 2011-2016 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialShell g_radial_shell_seed;
 const GModelSpatialRegistry    g_radial_shell_registry(&g_radial_shell_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialRadialShell g_radial_shell_legacy_seed(true, "ShellFunction");
+const GModelSpatialRegistry    g_radial_shell_legacy_registry(&g_radial_shell_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                 "GModelSpatialRadialShell::read(GXmlElement&)"
@@ -60,11 +64,36 @@ const GModelSpatialRegistry    g_radial_shell_registry(&g_radial_shell_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty radial shell model.
  ***************************************************************************/
 GModelSpatialRadialShell::GModelSpatialRadialShell(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty radial shell model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialRadialShell::GModelSpatialRadialShell(const bool&        dummy,
+                                                   const std::string& type) :
+                          GModelSpatialRadial()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -229,11 +258,12 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate function (in units of sr^-1)
  *
  * @param[in] theta Angular distance from shell centre (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial part for a shell source model. The shell source
@@ -261,10 +291,15 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
  * 
  * Here, \f$\theta_{\rm in}\f$ and \f$\theta_{\rm out}\f$ are the shell inner
  * and outer radius.
+ *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
  ***************************************************************************/
 double GModelSpatialRadialShell::eval(const double&  theta,
                                       const GEnergy& energy,
-                                      const GTime&   time) const
+                                      const GTime&   time,
+                                      const bool&    gradients) const
 {
     // Update precomputation cache
     update();
@@ -299,26 +334,6 @@ double GModelSpatialRadialShell::eval(const double&  theta,
 
     // Return normalised value
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] theta Angular distance from shell centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * This method simply calls the eval() method as no analytical gradients will
- * be computed. See the eval() method for details.
- ***************************************************************************/
-double GModelSpatialRadialShell::eval_gradients(const double&  theta,
-                                                const GEnergy& energy,
-                                                const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, energy, time));
 }
 
 
@@ -417,7 +432,7 @@ double GModelSpatialRadialShell::theta_max(void) const
  * Reads the radial shell model information from an XML element. The XML
  * element shall have either the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialShell">
  *       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
@@ -426,7 +441,7 @@ double GModelSpatialRadialShell::theta_max(void) const
  *
  * or
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialShell">
  *       <parameter name="GLON"   scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="GLAT"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
@@ -513,7 +528,7 @@ void GModelSpatialRadialShell::read(const GXmlElement& xml)
  * Writes the radial shell model information into an XML element. The XML
  * element will have the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialShell">
  *       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
@@ -616,6 +631,9 @@ std::string GModelSpatialRadialShell::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialRadialShell::init_members(void)
 {
+    // Initialise model type
+    m_type = "RadialShell";
+
     // Initialise Radius
     m_radius.clear();
     m_radius.name("Radius");
@@ -641,6 +659,9 @@ void GModelSpatialRadialShell::init_members(void)
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
+
+    // Initialise other members
+    m_region.clear();
 
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius and width shell is not meaningful
@@ -669,8 +690,10 @@ void GModelSpatialRadialShell::init_members(void)
 void GModelSpatialRadialShell::copy_members(const GModelSpatialRadialShell& model)
 {
     // Copy members
-    m_radius      = model.m_radius;
-    m_width       = model.m_width;
+    m_type   = model.m_type;
+    m_radius = model.m_radius;
+    m_width  = model.m_width;
+    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_radius = model.m_last_radius;
@@ -802,4 +825,20 @@ double GModelSpatialRadialShell::f2(double x)
 
     // Return value
     return f2;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialShell::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to sum of shell radius and width
+    m_region.radius(m_radius.value() + m_width.value());
+
+    // Return
+    return;
 }

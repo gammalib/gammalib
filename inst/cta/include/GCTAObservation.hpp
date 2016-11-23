@@ -44,6 +44,7 @@ class GCaldb;
 class GGti;
 class GCTACubeExposure;
 class GCTACubePsf;
+class GCTACubeEdisp;
 class GCTACubeBackground;
 class GCTARoi;
 
@@ -63,10 +64,16 @@ class GCTAObservation : public GObservation {
 public:
     // Constructors and destructors
     GCTAObservation(void);
-    explicit GCTAObservation(const std::string& instrument);
+    GCTAObservation(const bool& dummy, const std::string& instrument);
+    explicit GCTAObservation(const GFilename& filename);
     GCTAObservation(const GFilename& cntcube,
                     const GFilename& expcube,
                     const GFilename& psfcube,
+                    const GFilename& bkgcube);
+    GCTAObservation(const GFilename& cntcube,
+                    const GFilename& expcube,
+                    const GFilename& psfcube,
+                    const GFilename& edispcube,
                     const GFilename& bkgcube);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
@@ -100,12 +107,21 @@ public:
                              const GFilename& expcube,
                              const GFilename& psfcube,
                              const GFilename& bkgcube);
+    void                load(const GFilename& cntcube,
+                             const GFilename& expcube,
+                             const GFilename& psfcube,
+                             const GFilename& edispcube,
+                             const GFilename& bkgcube);
     void                save(const GFilename& filename,
                              const bool&      clobber = false) const;
     void                response(const std::string& rspname,
                                  const GCaldb&      caldb);
     void                response(const GCTACubeExposure&   expcube,
                                  const GCTACubePsf&        psfcube,
+                                 const GCTACubeBackground& bkgcube);
+    void                response(const GCTACubeExposure&   expcube,
+                                 const GCTACubePsf&        psfcube,
+								 const GCTACubeEdisp&      edispcube,
                                  const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,6 +47,9 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
+#include "GEnergy.hpp"
+#include "GFilename.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Compile options ____________________________________________________ */
 
@@ -90,7 +93,7 @@ std::string gammalib::strip_chars(const std::string& arg,
         std::string::size_type start = arg.find_first_not_of(chars);
         std::string::size_type stop  = arg.find_last_not_of(chars);
 
-        // Continue only is start and stop are valid
+        // Continue only if start and stop are valid
         if (start != std::string::npos && stop != std::string::npos) {
 
             // Continue only if stop is larger then or equal to  start
@@ -99,6 +102,37 @@ std::string gammalib::strip_chars(const std::string& arg,
             }
 
         } // endif: start and stop were valid
+
+    } // endif: argument was not empty
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Strip trailing character from string
+ *
+ * @param[in] arg String from which character should be stripped.
+ * @param[in] chars Character(s) to be stripped.
+ * @return String with stripped characters.
+ ***************************************************************************/
+std::string gammalib::rstrip_chars(const std::string& arg,
+                                   const std::string& chars)
+{
+    // Initialise empty result string
+    std::string result;
+
+    // Continue only if argument is not empty
+    if (!arg.empty()) {
+
+        // Get stop
+        std::string::size_type stop = arg.find_last_not_of(chars);
+
+        // Continue only if stop is valid
+        if (stop != std::string::npos) {
+            result = arg.substr(0, stop+1);
+        }
 
     } // endif: argument was not empty
 
@@ -444,21 +478,36 @@ std::string gammalib::str(const long long int& value)
  * @brief Convert single precision value into string
  *
  * @param[in] value Single precision value to be converted into string.
- * @param[in] precision Floating point precision (optional).
+ * @param[in] precision Floating point precision.
  * @return String with single precision value.
+ *
+ * Converts a single precision value into a string. Any positive
+ * @p precision argument specifies the exact number of digits after the
+ * comma.
  ***************************************************************************/
 std::string gammalib::str(const float& value, const int& precision)
 {
+    // Allocate output stream
     std::ostringstream s_value;
+
+    // If specified then set the requested fixed point precision. Otherwise
+    // use a precision that should be sufficient for floating point values.
     if (precision > 0) {
         s_value.precision(precision);
         s_value.setf(std::ios::fixed, std::ios::floatfield);
     }
-    s_value << value;
-    if (precision > 0) {
-        s_value.unsetf(std::ios::floatfield);
+    else {
+        s_value.precision(7);
     }
-    return s_value.str();
+
+    // Put floating point value in stream
+    s_value << value;
+
+    // Convert to a string
+    std::string result = s_value.str();
+
+    // Return result
+    return result;
 }
 
 
@@ -466,22 +515,82 @@ std::string gammalib::str(const float& value, const int& precision)
  * @brief Convert double precision value into string
  *
  * @param[in] value Double precision value to be converted into string.
- * @param[in] precision Floating point precision (optional).
+ * @param[in] precision Floating point precision.
  * @return String with double precision value.
+ *
+ * Converts a double precision value into a string. Any positive
+ * @p precision argument specifies the exact number of digits after the
+ * comma.
  ***************************************************************************/
 std::string gammalib::str(const double& value, const int& precision)
 {
+    // Allocate output stream
     std::ostringstream s_value;
+
+    // If specified then set the requested fixed point precision. Otherwise
+    // use a precision that should be sufficient for floating point values.
     if (precision > 0) {
         s_value.precision(precision);
         s_value.setf(std::ios::fixed, std::ios::floatfield);
     }
-    s_value << value;
-    if (precision > 0) {
-        s_value.unsetf(std::ios::floatfield);
+    else {
+        s_value.precision(15);
     }
-    return s_value.str();
+
+    // Put double precision floating point value in stream
+    s_value << value;
+
+    // Convert to a string
+    std::string result = s_value.str();
+
+    // Return result
+    return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Convert complex value into string
+ *
+ * @param[in] value Complex value to be converted into string.
+ * @param[in] precision Floating point precision.
+ * @return String with complex value.
+ *
+ * Converts a complex value into a string. Any positive @p precision argument
+ * specifies the exact number of digits after the comma.
+ ***************************************************************************/
+std::string gammalib::str(const std::complex<double>& value,
+                          const int&                  precision)
+{
+    // Allocate output stream
+    std::ostringstream s_value;
+
+    // If specified then set the requested fixed point precision. Otherwise
+    // use a precision that should be sufficient for floating point values.
+    if (precision > 0) {
+        s_value.precision(precision);
+        s_value.setf(std::ios::fixed, std::ios::floatfield);
+    }
+    else {
+        s_value.precision(15);
+    }
+
+    // Put double precision floating point value in stream
+    s_value << value.real();
+    if (value.imag() < 0.0) {
+        s_value << "-";
+    }
+    else {
+        s_value << "+";
+    }
+    s_value << std::abs(value.imag()) << "j";
+
+    // Convert to a string
+    std::string result = s_value.str();
+
+    // Return result
+    return result;
+}
+
 
 
 /***********************************************************************//**
@@ -862,7 +971,7 @@ std::string gammalib::centre(const std::string& s, const int& n, const char& c)
  * @brief Convert string in parameter format
  *
  * @param[in] s String to be converted.
- * @param[in] indent Indentation of parameter (default: 0).
+ * @param[in] indent Indentation of parameter.
  * @return Parameter string.
  *
  * Converts and string into the parameter format of type "s ......: " with a
@@ -876,6 +985,31 @@ std::string gammalib::parformat(const std::string& s, const int& indent)
 
     // Set result
     std::string result = " " + s + " " + fill(".", n_right) + ": ";
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert singular noun into number noun
+ *
+ * @param[in] noun Singular noun.
+ * @param[in] number Number of instance of noun.
+ * @return Converted noun.
+ *
+ * Converts a singular noun into a number noun by appending a "s" to the
+ * noun if the @p number of the instances of the noun is not one.
+ ***************************************************************************/
+std::string gammalib::number(const std::string& noun, const int& number)
+{
+    // Copy input noun
+    std::string result(noun);
+
+    // Append "s" if number if not one
+    if (number != 1) {
+        result += "s";
+    }
 
     // Return result
     return result;
@@ -1034,8 +1168,8 @@ bool gammalib::dir_exists(const std::string& dirname)
 /***********************************************************************//**
  * @brief Checks if a substring is in a string
  *
- * @param[in] str string you want to search in.
- * @param[in] substring string you are looking for in str.
+ * @param[in] str String you want to search in.
+ * @param[in] substring String you are looking for in @p str.
  * @return True if a string contains a sub string.
  *
  * Checks if substring is contained in str
@@ -1046,9 +1180,30 @@ bool gammalib::contains(const std::string& str, const std::string& substring)
     bool result = false;
 
     // checks if substring is in str
-    if (str.find(substring) != std::string::npos){
+    if (str.find(substring) != std::string::npos) {
         result = true;
     }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks if a string is contained in a vector of strings
+ *
+ * @param[in] strings Vector of strings you want to search in.
+ * @param[in] string string you are looking for in strings.
+ * @return True if a string is contained a vector.
+ *
+ * Checks if a string is contained in a vector of strings
+ ***************************************************************************/
+bool gammalib::contains(const std::vector<std::string> strings,
+                        const std::string&             string)
+{
+    // Compute result
+    bool result = std::find(strings.begin(), strings.end(), string) !=
+                  strings.end();
 
     // Return result
     return result;
@@ -1466,6 +1621,66 @@ void gammalib::xml_check_par(const std::string& origin,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Expand file name provided as XML attribute for loading
+ *
+ * @param[in] xml XML element.
+ * @param[in] filename File name.
+ * @return Expanded file name.
+ *
+ * Expands file name provided as XML attribute for loading. If the file name
+ * is not empty and has no path it is assumed that the file is located in the
+ * same directory as the XML file, and the XML file access path is prepended
+ * to the file name.
+ ***************************************************************************/
+GFilename gammalib::xml_file_expand(const GXmlElement& xml,
+                                    const std::string& filename)
+{
+    // Set file name
+    GFilename fname(filename);
+
+    // If the file name is not empty and has no path we assume that the file
+    // name is a relative file name with respect to the XML file access path
+    // and we therefore prepend the XML file access path to the file name
+    if (!fname.is_empty() && fname.path().length() == 0) {
+        fname = xml.filename().path() + fname;
+    }
+
+    // Return file name
+    return fname;
+}
+
+
+/***********************************************************************//**
+ * @brief Reduce file name provided for writing as XML attribute
+ *
+ * @param[in] xml XML element.
+ * @param[in] filename File name.
+ * @return Reduced file name.
+ *
+ * Reduces file name provided for writing as XML attribute. If the file name
+ * is not empty and has the same access path as the XML file it is assumed
+ * that both files are located in the same directory, and the access path is
+ * stripped from the file name.
+ ***************************************************************************/
+GFilename gammalib::xml_file_reduce(const GXmlElement& xml,
+                                    const std::string& filename)
+{
+    // Set file name
+    GFilename fname(filename);
+
+    // If the file name is not empty and has the same access path as the XML
+    // file it is assumed that both files are located in the same directory,
+    // and the access path is stripped from the file name.
+    if (!fname.is_empty() && fname.path() == xml.filename().path()) {
+        fname = fname.file();
+    }
+
+    // Return file name
+    return fname;
 }
 
 

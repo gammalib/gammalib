@@ -30,7 +30,7 @@
 #endif
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
-#include <stdlib.h>
+#include <cstdlib>                            // for system
 #include "test_GSky.hpp"
 #include "GTools.hpp"
 
@@ -43,6 +43,10 @@
 #define G_WCS_FORTH_BACK_PIXEL_DEBUG
 #define G_WCS_COPY_DEBUG
 
+/* __ Constants __________________________________________________________ */
+const std::string datadir    = std::getenv("TEST_DATA");
+const std::string sky_region = datadir + "/test_circle_region.reg";
+
 
 /***********************************************************************//**
  * @brief Set parameters and tests
@@ -53,18 +57,30 @@ void TestGSky::set(void){
     name("GSky");
   
     // Append tests
-    append(static_cast<pfunction>(&TestGSky::test_GWcs),"Test GWcs");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyPixel),"Test GSkyPixel");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_healpix_construct),"Test Healpix GSkyMap constructors");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_healpix_io),"Test Healpix GSkyMap I/O");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_wcs_construct),"Test WCS GSkyMap constructors");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_wcs_io),"Test WCS GSkyMap I/O");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyMap),"Test GSkyMap");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_io),"Test GSkyMap I/O");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
-    append(static_cast<pfunction>(&TestGSky::test_GHorizDir),"Test GHorizDir");
+    append(static_cast<pfunction>(&TestGSky::test_GWcs),
+           "Test GWcs");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyPixel),
+           "Test GSkyPixel");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_healpix_construct),
+           "Test Healpix GSkyMap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_healpix_io),
+           "Test Healpix GSkyMap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_wcs_construct),
+           "Test WCS GSkyMap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_wcs_io),
+           "Test WCS GSkyMap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap),
+           "Test GSkyMap");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_io),
+           "Test GSkyMap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),
+           "Test GSkyRegions");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),
+           "Test GSkyRegionCircle constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),
+           "Test GSkyRegionCircle logic");
+    append(static_cast<pfunction>(&TestGSky::test_GHorizDir),
+           "Test GHorizDir");
 
     // Return
     return;
@@ -92,7 +108,11 @@ TestGSky* TestGSky::clone(void) const
  * @param[in] crpix1 Reference pixel in X
  * @param[in] crpix2 Reference pixel in Y
  ***************************************************************************/
-double TestGSky::wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2)
+double TestGSky::wcs_forth_back_pixel(GWcs*   wcs,
+                                      int     nx,
+                                      int     ny,
+                                      double& crpix1,
+                                      double& crpix2)
 {
     // Initialise maximal distance
     double dist_max = 0.0;
@@ -172,7 +192,11 @@ double TestGSky::wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1,
  * @param[in] crpix1 Reference pixel in X
  * @param[in] crpix2 Reference pixel in Y
  ***************************************************************************/
-double TestGSky::wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2)
+double TestGSky::wcs_copy(GWcs*   wcs,
+                          int     nx,
+                          int     ny,
+                          double& crpix1,
+                          double& crpix2)
 {
     // Make a copy using clone
     GWcs* cpy = wcs->clone();
@@ -402,8 +426,8 @@ void TestGSky::test_GWcs(void)
     double crval2 = 22.01;
     double crpix1 = 100.5;
     double crpix2 = 100.5;
-    double cdelt1 =   0.5;
-    double cdelt2 =   0.5;
+    double cdelt1 =   0.1;
+    double cdelt2 =   0.1;
     int    nx     =   200;
     int    ny     =   200;
 
@@ -446,7 +470,9 @@ void TestGSky::test_GWcs(void)
             try {
                 double tol = 0.0;
                 if ((tol = wcs_forth_back_pixel(cel, nx, ny, crpix1, crpix2)) > 1.0e-10) {
-                    throw exception_failure("CEL forth-back transformation tolerance 1.0e-10 exceeded: "+gammalib::str(tol));
+                    throw exception_failure("CEL forth-back transformation"
+                                            " tolerance 1.0e-10 exceeded: "+
+                                            gammalib::str(tol));
                 }
                 test_try_success(); 
             }
@@ -459,7 +485,9 @@ void TestGSky::test_GWcs(void)
             try {
                 double tol = 0.0;
                 if ((tol = wcs_forth_back_pixel(gal, nx, ny, crpix1, crpix2)) > 1.0e-10) {
-                    throw exception_failure("GAL forth-back transformation tolerance 1.0e-10 exceeded: "+gammalib::str(tol));
+                    throw exception_failure("GAL forth-back transformation"
+                                            " tolerance 1.0e-10 exceeded: "+
+                                            gammalib::str(tol));
                 }
                 test_try_success();
             }
@@ -472,7 +500,8 @@ void TestGSky::test_GWcs(void)
             try {
                 double tol = 0.0;
                 if ((tol = wcs_copy(cel, nx, ny, crpix1, crpix2)) > 1.0e-4) {
-                    throw exception_failure("CEL copy tolerance 1.0e-4 exceeded: "+gammalib::str(tol));
+                    throw exception_failure("CEL copy tolerance 1.0e-4"
+                                            " exceeded: "+gammalib::str(tol));
                 }
                 test_try_success();
             }
@@ -485,7 +514,8 @@ void TestGSky::test_GWcs(void)
             try {
                 double tol = 0.0;
                 if ((tol = wcs_copy(gal, nx, ny, crpix1, crpix2)) > 1.0e-4) {
-                    throw exception_failure("GAL copy tolerance 1.0e-4 exceeded: "+gammalib::str(tol));
+                    throw exception_failure("GAL copy tolerance 1.0e-4"
+                                            " exceeded: "+gammalib::str(tol));
                 }
                 test_try_success();
             }
@@ -739,7 +769,11 @@ void TestGSky::test_GSkyMap_wcs_construct(void)
                 GSkyDir   dir_back = map1.pix2dir(pixel);
                 double    dist     = dir.dist_deg(dir_back);
                 if (dist > eps) {
-                    throw exception_failure("Sky direction differs: dir="+dir.print()+" pixel="+pixel.print()+" dir_back"+ dir_back.print()+" dist="+gammalib::str(dist)+" deg");
+                    throw exception_failure("Sky direction differs: dir="+
+                                            dir.print()+" pixel="+
+                                            pixel.print()+" dir_back"+
+                                            dir_back.print()+" dist="+
+                                            gammalib::str(dist)+" deg");
                 }
             }
         }
@@ -751,7 +785,6 @@ void TestGSky::test_GSkyMap_wcs_construct(void)
 
     // Exit test
     return;
-
 }
 
 
@@ -797,7 +830,8 @@ void TestGSky::test_GSkyMap_wcs_io(void)
             }
         }
         if (diff > 0) {
-            throw exception_error("Loaded file "+file1+" differs from saved file .");
+            throw exception_error("Loaded file "+file1+
+                                  " differs from saved file.");
         }
         test_try_success();
     }
@@ -817,7 +851,8 @@ void TestGSky::test_GSkyMap_wcs_io(void)
             }
         }
         if (diff > 0) {
-            throw exception_error("Loaded file "+file2+" differs from saved file .");
+            throw exception_error("Loaded file "+file2+
+                                  " differs from saved file.");
         }
         test_try_success();
     }
@@ -837,10 +872,39 @@ void TestGSky::test_GSkyMap_wcs_io(void)
  ***************************************************************************/
 void TestGSky::test_GSkyMap(void)
 {
+    // Remove result files
+    system("rm -rf test_map_src.fits");
+    system("rm -rf test_map_dst.fits");
+    system("rm -rf test_map_shape*.fits");
+
+    // Define empty sky map
+    GSkyMap empty_map;
+ 
+    // Test that empty map is indeed empty
+	test_assert(empty_map.is_empty(), "Check for empty sky map");
+	test_value(empty_map.nmaps(), 0, "Check for no sky maps");
+	test_value(empty_map.npix(), 0, "Check number of empty sky map pixels");
+	test_value(empty_map.nx(), 0, "Check number of empty sky map X pixels");
+	test_value(empty_map.ny(), 0, "Check number of empty sky map X pixels");
+	test_value(empty_map.ndim(), 0, "Check empty sky map dimension");
+	test_value(empty_map.shape().size(), 0, "Check empty sky map shape");
+ 
+    // Test that writing, publishing and printing of empty sky map does not
+    // lead to a segmentation fault
+    empty_map.save("test_empty_map.fits", true);
+    empty_map.publish("Empty sky map");
+    empty_map.print();
+ 
     // Define several maps for comparison
     GSkyMap map_src("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 2);
     GSkyMap map_dst("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
     GSkyMap map_new("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
+
+    // Test map dimensions and shape
+	test_value(map_src.nmaps(), 2, "Check that sky map contains 2 maps");
+	test_value(map_src.ndim(), 1, "Check that sky map has one dimension");
+	test_value(map_src.shape().size(), 1, "Check that sky map has a shape size of 1");
+	test_value(map_src.shape()[0], 2, "Check that sky map has 2 maps");
 
     // Fill map pixels
     double total_src = 0.0;
@@ -1027,6 +1091,96 @@ void TestGSky::test_GSkyMap(void)
 	test_value(total_extract, total_src, 1.0e-3, "Test extract() method with 2 maps");
 	test_value(map_extract.nmaps(), 2, "Test extract() method with 2 maps");    
 
+    // Define one more map for shaping manipulation
+    GSkyMap map_shape0("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10);
+
+    // Test map dimensions and shape
+	test_value(map_shape0.nmaps(), 1, "Check that sky map contains one map");
+	test_value(map_shape0.ndim(), 1, "Check that sky map has one dimension");
+	test_value(map_shape0.shape().size(), 1, "Check that sky map has a shape size of 1");
+	test_value(map_shape0.shape()[0], 1, "Check that sky map has one map");
+
+    // Save map
+    map_shape0.save("test_map_shape0.fits", true);
+
+    // Load map
+    GSkyMap map_load_shape0("test_map_shape0.fits");
+
+    // Test map dimensions and shape
+	test_value(map_load_shape0.nmaps(), 1, "Check that sky map contains one map");
+	test_value(map_load_shape0.ndim(), 1, "Check that sky map has one dimension");
+	test_value(map_load_shape0.shape().size(), 1, "Check that sky map has a shape size of 1");
+	test_value(map_load_shape0.shape()[0], 1, "Check that sky map has one map");
+
+    // Define one more map for shaping manipulation
+    GSkyMap map_shape("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 12);
+
+    // Test initial map dimensions and shape
+	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_shape.ndim(), 1, "Check that sky map has one dimension");
+	test_value(map_shape.shape().size(), 1, "Check that sky map has a shape size of 1");
+	test_value(map_shape.shape()[0], 12, "Check that sky map has 12 maps");
+
+    // Save map
+    map_shape.save("test_map_shape1.fits", true);
+
+    // Load map
+    GSkyMap map_load_shape1("test_map_shape1.fits");
+
+    // Test loaded map dimensions and shape
+	test_value(map_load_shape1.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_load_shape1.ndim(), 1, "Check that sky map has one dimension");
+	test_value(map_load_shape1.shape().size(), 1, "Check that sky map has a shape size of 1");
+	test_value(map_load_shape1.shape()[0], 12, "Check that sky map has 12 maps");
+
+    // Set new map shape
+    map_shape.shape(3,4);
+
+    // Test map dimensions and shape
+	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_shape.ndim(), 2, "Check that sky map has two dimensions");
+	test_value(map_shape.shape().size(), 2, "Check that sky map has a shape size of 2");
+	test_value(map_shape.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
+	test_value(map_shape.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
+
+    // Save map
+    map_shape.save("test_map_shape2.fits", true);
+
+    // Load map
+    GSkyMap map_load_shape2("test_map_shape2.fits");
+
+    // Test map dimensions and shape
+	test_value(map_load_shape2.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_load_shape2.ndim(), 2, "Check that sky map has two dimensions");
+	test_value(map_load_shape2.shape().size(), 2, "Check that sky map has a shape size of 2");
+	test_value(map_load_shape2.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
+	test_value(map_load_shape2.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
+
+    // Set new map shape
+    map_shape.shape(2,3,2);
+
+    // Test map dimensions and shape
+	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_shape.ndim(), 3, "Check that sky map has three dimensions");
+	test_value(map_shape.shape().size(), 3, "Check that sky map has a shape size of 3");
+	test_value(map_shape.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
+	test_value(map_shape.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
+	test_value(map_shape.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
+
+    // Save map
+    map_shape.save("test_map_shape3.fits", true);
+
+    // Load map
+    GSkyMap map_load_shape3("test_map_shape3.fits");
+
+    // Test map dimensions and shape
+	test_value(map_load_shape3.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_load_shape3.ndim(), 3, "Check that sky map has three dimensions");
+	test_value(map_load_shape3.shape().size(), 3, "Check that sky map has a shape size of 3");
+	test_value(map_load_shape3.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
+	test_value(map_load_shape3.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
+	test_value(map_load_shape3.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
+
     // Exit test
     return;
 }
@@ -1050,6 +1204,7 @@ void TestGSky::test_GSkyMap_io(void)
     GSkyMap healpix2("GAL", 2, "RING", 1);
     GSkyMap wcs1("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10);
     GSkyMap wcs2("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 5, 5);
+    GSkyMap wcs3("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 5, 5, 12);
     for (int i = 0; i < healpix1.npix(); ++i) {
         healpix1(i) = double(i+1);
     }
@@ -1062,11 +1217,20 @@ void TestGSky::test_GSkyMap_io(void)
     for (int i = 0; i < wcs2.npix(); ++i) {
         wcs2(i) = 3.0*double(i+1);
     }
-    healpix1.save(filename+"[HEALPIX1]", true);
-    wcs1.save(filename+"[WCS1]", true);
-    healpix2.save(filename+"[HEALPIX2]", true);
-    wcs2.save(filename+"[WCS2]", true);
-
+    for (int k = 0; k < 12; ++k) {
+        for (int i = 0; i < wcs3.npix(); ++i) {
+            wcs3(i,k) = 3.0*double(i+k+1);
+        }
+    }
+    GFits fits(filename, true);
+    healpix1.write(fits, "HEALPIX1");
+    wcs1.write(fits, "WCS1");
+    healpix2.write(fits, "HEALPIX2");
+    wcs2.write(fits, "WCS2");
+    wcs3.shape(2,2,3);
+    wcs3.write(fits, "WCS3");
+    fits.save(true);
+    
     // Load HEALPix map and check content
     GSkyMap map1(filename+"[HEALPIX1]");
 	test_value(map1.npix(), healpix1.npix(), "Check number of HEALPix pixels");    
@@ -1078,7 +1242,7 @@ void TestGSky::test_GSkyMap_io(void)
     }
 	test_value(failures1, 0, "Check number of invalid HEALPix pixel values");    
 
-    // Load WCS map and check content
+    // Load WCS1 map and check content
     GSkyMap map2(filename+"[WCS1]");
 	test_value(map2.npix(), wcs1.npix(), "Check number of WCS pixels");    
     int failures2(0);
@@ -1088,6 +1252,21 @@ void TestGSky::test_GSkyMap_io(void)
         }
     }
 	test_value(failures2, 0, "Check number of invalid WCS pixel values");    
+
+    // Load WCS3 map and check content
+    GSkyMap map3(filename+"[WCS3]");
+	test_value(map3.npix(),  wcs3.npix(), "Check number of WCS pixels");
+	test_value(map3.nmaps(), wcs3.nmaps(), "Check number of WCS maps");
+	test_value(map3.ndim(),  wcs3.ndim(), "Check dimension of WCS maps");
+    int failures3(0);
+    for (int k = 0; k < 12; ++k) {
+        for (int i = 0; i < map3.npix(); ++i) {
+            if (std::abs(map3(i,k)-3.0*double(i+k+1)) > 1.0e-6) {
+                failures3++;
+            }
+        }
+    }
+	test_value(failures3, 0, "Check number of invalid WCS pixel values");
 
     // Exit test
     return;
@@ -1226,16 +1405,13 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
  ***************************************************************************/
  void TestGSky::test_GSkyRegions_io(void)
 {
-	// Set filenames
-	const std::string filename = "data/test_circle_region.reg";
-
     // Allocate regions
     GSkyRegions regions;
 
 	// Test regions loading
 	test_try("Test regions loading");
 	try {
-		regions.load(filename);
+		regions.load(sky_region);
 		test_try_success();
 	}
 	catch (std::exception &e) {

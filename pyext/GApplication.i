@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GApplication.i - GammaLib application base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,9 @@
  * @class GApplication
  *
  * @brief GammaLib application Python interface definition.
+ *
+ * The GApplication class is the base class for all tools and scripts that
+ * will be based on GammaLib.
  ***************************************************************************/
 class GApplication : public GBase {
 public:
@@ -49,28 +52,52 @@ public:
     GApplication(const GApplication& app);
     ~GApplication(void);
 
+    // Public methods
+    double telapse(void) const;
+    double celapse(void) const;
+    void   logFileOpen(const bool& clobber = true);
+    void   logFileClose(void);
+
+    // Ignore base class methods and make methods private in Python by
+    // prepending an underscore
+    %ignore                  clear;
+    %ignore                  clone;
+    %ignore                  classname;
+    %rename(_name)           name;
+    %rename(_version)        version;
+    %rename(_logTerse)       logTerse;
+    %rename(_logNormal)      logNormal;
+    %rename(_logExplicit)    logExplicit;
+    %rename(_logVerbose)     logVerbose;
+    %rename(_logDebug)       logDebug;
+    %rename(_clobber)        clobber;
+    %rename(_par_filename)   par_filename;
+    %rename(_log_filename)   log_filename;
+    %rename(_log_header)     log_header;
+    %rename(_log_trailer)    log_trailer;
+    %rename(_need_help)      need_help;
+    %rename(_log)            log;
+
     // Methods
-    void               clear(void);
-    GApplication*      clone(void) const;
-    std::string        classname(void) const;
-    const std::string& name(void) const;
-    const std::string& version(void) const;
-    double             telapse(void) const;
-    double             celapse(void) const;
-    void               logFileOpen(const bool& clobber = true);
-    bool               logTerse(void) const;
-    bool               logNormal(void) const;
-    bool               logExplicit(void) const;
-    bool               logVerbose(void) const;
-    bool               logDebug(void) const;
-    bool               clobber(void) const;
-    bool               has_par(const std::string& name) const;
-    const std::string& par_filename(void) const;
-    const std::string& log_filename(void) const;
-    void               log_header(void);
-    void               log_trailer(void);
-    void               log_parameters(void);
-    const bool&        need_help(void) const;
+    void                    clear(void);
+    GApplication*           clone(void) const;
+    std::string             classname(void) const;
+    const std::string&      name(void) const;
+    const std::string&      version(void) const;
+    bool                    logTerse(void) const;
+    bool                    logNormal(void) const;
+    bool                    logExplicit(void) const;
+    bool                    logVerbose(void) const;
+    bool                    logDebug(void) const;
+    bool                    clobber(void) const;
+    bool                    has_par(const std::string& name) const;
+    const std::string&      par_filename(void) const;
+    const std::string&      log_filename(void) const;
+    void                    log_header(void);
+    void                    log_trailer(void);
+    const bool&             need_help(void) const;
+    const GApplicationPars& pars(void) const;
+    void                    pars(const GApplicationPars& pars);
 
     // Public members
     GLog log;   //!< Application logger
@@ -78,9 +105,37 @@ public:
 
 
 /***********************************************************************//**
- * @brief GApplication class extension
+ * @brief GApplication Python class extension
+ ***************************************************************************/
+%pythoncode %{
+# Log the value of a parameter
+def _log_value(self, chatter, name, value):
+    string = gammalib.parformat(str(name))+str(value)
+    self._log_string(chatter, string)
+GApplication._log_value = _log_value
+%}
+
+
+/***********************************************************************//**
+ * @brief GApplication C++ class extension
  ***************************************************************************/
 %extend GApplication {
+    void _log_string(const int& chatter, const std::string& string,
+                     const bool& linefeed = true) {
+        self->log_string(GChatter(chatter), string, linefeed);
+    }
+    void _log_header1(const int& chatter, const std::string& header) {
+        self->log_header1(GChatter(chatter), header);
+    }
+    void _log_header2(const int& chatter, const std::string& header) {
+        self->log_header2(GChatter(chatter), header);
+    }
+    void _log_header3(const int& chatter, const std::string& header) {
+        self->log_header3(GChatter(chatter), header);
+    }
+    void _log_parameters(const int& chatter) {
+        self->log_parameters(GChatter(chatter));
+    }
     GApplicationPar& __getitem__(const std::string& name) {
         return (*self)[name];
     }
@@ -161,6 +216,27 @@ public:
                                                msg);
         } 
         return;
+    }
+    GApplicationPar& __getitem__(const int& index) {
+        if (index >= 0 && index < self->pars().size()) {
+            return (*self)[index];
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", "Application "
+                                           "parameter index",
+                                           index, self->pars().size());
+        }
+    }
+    void __setitem__(const int& index, const GApplicationPar& val) {
+        if (index >= 0 && index < self->pars().size()) {
+            (*self)[index] = val;
+            return;
+        }
+        else {
+            throw GException::out_of_range("__setitem__(int)", "Application "
+                                           "parameter index",
+                                           index, self->pars().size());
+        }
     }
     GApplication copy() {
         return (*self);

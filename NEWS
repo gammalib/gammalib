@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 1.1.0
+New Features and Important Changes in GammaLib 1.2.0
 
 Author(s) : Juergen Knoedlseder
 
-1 March 2016
+22 November 2016
 
 
 1. Introduction
@@ -13,96 +13,119 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-The following methods have been added to the public interface:
-- GObservation::events() (non-const variant)
-- GFilename::operator std::string()
-- GFilename::exists()
-- GFilename::is_fits()
-- GFilename::remove()
-- GFilaname::protocol()
-- GFilename::path()
-- GFilename::file()
-- GCTAResponseTable::axis(std::string)
-- GCTAResponseTable::table(std::string)
-- GCTAResponseTable::has_axis(std::string)
-- GCTAResponseTable::has_table(std::string)
-- friend GTime  operator+(const GTime&  time,    const double& seconds)
-- friend GTime  operator+(const double& seconds, const GTime&  time)
-- friend GTime  operator-(const GTime&  time,    const double& seconds)
-- friend double operator-(const GTime&  a,       const GTime&  b)
-- GTime::operator+=(const double& seconds)
-- GTime::operator-=(const double& seconds)
+The following classes have been added:
+- GModelSpectralExpInvPlaw
+- GModelSpectralPlawEnergyFlux
+- GModelSpectralMultiplicative
+- GModelSpectralComposite
+- GModelSpatialComposite
+- GVOTable
+- GNdarray
+- GFft
+- GFftWavetable
+
+The following classes have been removed:
+- ...
+
+The following classes have been renamed:
+- GModelSpectralPlawPhotonFlux, was GModelSpectralPlaw2
+
+The following methods have been added:
+- GApplication::log_string()
+- GApplication::log_value()
+- GApplication::log_header1()
+- GApplication::log_header2()
+- GApplication::log_header3()
+- GApplication::operator[](const int& index)
+- GApplication::pars()
+- GApplicationPar::current_value()
+- GLog::is_open()
+- GLog::is_empty()
+- GLog::written_size()
+- GSkyMap::is_empty()
+- GTime::jd(const std::string& timesys)
+- GTime::mjd(const std::string& timesys)
+- GTime::secs(const std::string& timesys)
+- GTime::days(const std::string& timesys)
+- GTime::jd(const double& time, const std::string& timesys)
+- GTime::mjd(const double& time, const std::string& timesys)
+- GTime::secs(const double& time, const std::string& timesys)
+- GTime::days(const double& time, const std::string& timesys)
+- GTime::gmst()
+- GTime::gast()
+- GTime::lmst(const double& geolon)
+- GTime::last(const double& geolon)
+- GTime::now()
+- GFits::publish()
+- gammalib::rstrip_chars()
+- GObservations::save_covmat()
+- GModelSpatial::region()
 
 The following methods have been removed:
-- GFilename::size()
-- gammalib::file_exists()
-- gammalib::file_exists_gzip()
-- gammalib::is_fits()
-- GTime::operator+=(const GTime& time)
-- GTime::operator-=(const GTime& time)
-- GTime::operator*=(const double& scale)
-- GTime::operator/=(const double& scale)
-- friend GTime operator+(const GTime &a, const GTime &b)
-- friend GTime operator-(const GTime &a, const GTime &b)
-- friend GTime operator* (const GTime &time, const double &s)
-- friend GTime operator*(const double &s, const GTime &time)
-- friend GTime operator*(const GTime &time, const double &s)
-- friend GTime operator/(const GTime &time, const double &s)
+- <all classes>::eval_gradients()
+  The eval_gradients() methods duplicate much of the code of the eval()
+  methods. To increase the maintainability of the code, the eval_gradients()
+  methods have been removed, and the computation of partial derivatives is
+  now done by the eval() methods if the optional gradients argument is set
+  to true.
 
 The following methods have been renamed:
-- GCTAResponseTable::tables(), was GCTAResponseTable::size()
-- GCTAResponseTable::axis_bins(), was GCTAResponseTable::axis()
-- GFilename::is_empty(), was GFilename::empty()
-- GFilename::url(), was GFilename::filename()
+- GModelSpectralPlawPhotonFlux::flux(), was GModelSpectralPlaw2::integral()
+- GLog::buffer_size(), was GLog::max_size()
 
-The following classes now use GFilename for filenames arguments instead
-of std::string:
-- GApplicationPar
-- GApplicationPars
-- GArf
-- GCsv
-- GEbounds
-- GEnergies
-- GEventCube, GCOMEventCube, GCTAEventCube, GLATEventCube, GMWLSpectrum
-- GEventList, GCTAEventList, GLATEventList
-- GEvents
-- GGti
-- GLog
-- GModelSpatialDiffuseCube
-- GModelSpatialDiffuseMap
-- GModelSpectralFunc
-- GModels
-- GNodeArray
-- GObservations
-- GPha
-- GRmf
-- GSkyMap
-- GSkyRegions
-- GTestSuites
-- GXml
-- GCTAAeff, GCTAAeff2D, GCTAAeffArf, GCTAAeffPerfTable
-- GCTABackground, GCTABackground3D, GCTABackgroundPerfTable
-- GCTACubeBackground, GCTACubeExposure, GCTACubePsf
-- GCTAEdisp, GCTAEdisp2D, GCTAEdispPerfTable, GCTAEdispRmf
-- GCTAObservation
-- GCTAOnOffObservations
-- GCTAPointing
-- GCTAPsf, GCTAPsf2D, GCTAPsfKing, GCTAPsfPerfTable, GCTAPsfVector
+The arguments for the following methods have been changed:
+- GApplication::log_parameters() now has a mandatory GChatter argument
+- <all classes>::eval() has now an optional gradients parameter (see above)
 
-The return value has been changed for the following methods:
-- GFits::filename() returns now GFilename instead of std::string
-- GCTAObservation::eventtype() returns now std::string instead of const std::string&
+The return value of the following methods has been changed:
+- GSkyMap::write() now returns a pointer to GFitsHDU instead of void
 
 
 3. Configuration
 -----------------
-None
+The Python wrappers were always removed when typing "make clean", even if
+they had been shipped with the code. Now, the Python wrappers are only
+removed in a "make clean" if they have been built (#1826).
 
 
 4. Application module
 ---------------------
-The GApplicationPar::filename() methods now take and return GFilename objects
-instead of std::string objects (#1671).
+The GApplication::log_parameters() method now takes a mandatory GChatter
+argument to enable displaying of parameters only above a given chattiness
+level. This avoids a log-level check in the client code. For the same
+purpose, the GApplication methods log_string(), log_value(), log_header1(),
+log_header2(), and log_header3() have been introduced. There are three
+variants of log_value() for strings, integers and double precision values
+(#1828).
+
+The application name and version and now conserved in a GApplication::clear()
+method call and the application is properly initialised like in the call of
+a constructor (#1835).
+
+The GLog::copy_members() method simply copied the file pointer, hence after
+a copy of a log instance there were two instances holding the same pointer
+to the file, and as soon as one instance closes the log file the file
+pointer in the second instance became invalid. This has been fixed by
+duplicating the file descriptor and opening the log file in the copied
+instance using the duplicated descriptor. This solves the problems (#1823).
+
+A GLog::is_open() method has been added to assess whether a log file is
+actually opened. The GLog::is_empty() method has been added to assess whether
+a log file is actually empty (#1837).
+
+The GLog::size() method now returns the actual size of the log file, including
+the number of characters on disk.
+
+The GLog::max_size() method has been renamed to GLog::buffer_size since this
+is more explicit (#1837).
+
+GApplication::pars() methods have been added to allow to retrieve or to set all
+application parameters. The GApplicationPar::current_value() method has been
+added to retrieve the current parameter value without querying for the parameter
+(#1838).
+
+Operators have been added to GApplication that allow the access of application
+parameters by index (#1838).
 
 
 5. Base module
@@ -112,12 +135,9 @@ None
 
 6. FITS I/O Interface
 ---------------------
-The GFitsTableCol::insert() method did not work corretly for an empty column
-since it de-allocated memory without having necessarily memory on disk. This
-was corrected by allocating now memory after inserting elements into an empty
-FITS column.
-
-GFits now uses the GFilename class to store the FITS filename (fixes #1649).
+Add GFits::publish() methods that publish a FITS HDU to an Virtual Observatory
+hub. If the FITS HDU is an image it will be published as a FITS image, which
+table HDUs will be published as VO tables (#1231).
 
 
 7. Linear algebra module
@@ -127,20 +147,28 @@ None
 
 8. Model module
 ---------------
-Sky directions drawn by GModelSpatialDiffuseConst::mc() are now restricted
-to the simulation cone that has previously been defined using the mc_norm()
-method. This speeds up considerbly the Monte Carlo simulations for an
-isotropic diffuse model (#1674). 
+The GModelSpectralPlaw2 class has been renamed to GModelSpectralPlawPhotonFlux
+and the integral() methods were renamed to flux(). A new class
+GModelSpectralPlawEnergyFlux has been added that handles integral energy
+fluxes as opposed to GModelSpectralPlawPhotonFlux that handles integral
+photon fluxes. Unit tests have been added for the new class (#1790).
 
-The GModelSpectral eval() and eval_gradients() methods use an empty GTim()
-object as default time argument since all spectral models are so far time-
-independent. This avoids that a user needs to specify a dummy time argument
-(#1672).
+The GModelSpectralExpInvPlaw class has been added that uses a cut-off
+parameter instead of a cut-off energy for the exponentially cut-off
+power law. The cut-off parameter is the inverse of the cut-off energy
+(#1800).
 
-The set_mc_cone() methods of the GModelSpatialDiffuseCube class and the
-GModelSpatialDiffuseMap class now recompute only the Monte Carlo acceptance
-cone in case that the cone centre or radius have changed since the last
-computation. This speeds up the computations (#1673).
+The GModelSpectralMultiplicative class has been added that implements the
+product of spectral model components as a new spectral model (#1861).
+
+The GModelSpectralComposite and GModelSpatialComposite classes have been
+added that implement composite spectral and spatial models, which are sums
+of models as a new model component (#1706).
+
+A region() method has been added to the GModelSpatial base class and all
+derived classes that returns a pointer to a sky region that bounds the
+spatial model. For the moment, only circular sky regions have been
+implemented (#1764).
 
 Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
 The method deals with pre-computation and normalization of the profiles,
@@ -153,25 +181,29 @@ the same results (#1520).
 
 9. Numerics module
 ------------------
-None
+The GNdarray class has been added that implements a n-dimensional double
+precision floating point array (#1768).
+
+The GFft class has been added that performs a Fast Fourier Transformation
+of a n-dimensional array. The GFftWavetable class is a support class for
+GFft that provides the trigonometric coefficients for a factorisation. For
+the moment, GFft does only support 1-dimensional and 2-dimensional arrays
+(#1731).
 
 
 10. Observation module
 ----------------------
-A non-const GObservation::events() method has been added to allow for
-the manipulation of events within an observation without the need to
-create a local copy.
+Time setting and getting methods for Julian Days, Modified Julian Days,
+native seconds and native days are now available in the GTime class that
+allow specifying the time system. Currently, TT, TAI and UTC are supported.
+Methods have also been added to the GTime class that return the Greenwich
+mean and apparent siderial times, and the local mean and apparent siderial
+times that depend on the geographic longitude. Finally, a now() method has
+been added to the GTime class that sets the time to the current time (see
+#1856).
 
-The argument of GObservation::deadc(GTime) now defaults to GTime() so
-that no argument is needed when calling the method. This reflects the
-fact that the deadtime correction is often computed as an average value
-over the observation, and does in fact not depend on time (#1670).
-
-The GTime operators have been revised as time is implemented as an
-absolute quantity, while addition and subtraction of GTime objects are
-relative operations. The GTime arguments of the operators have thus be
-replaced by double precision values that specify relative time in seconds.
-The multiplication and division operators have been removed (#1714).
+The GObservations::save_covmat() method computes and saves the covariance
+matrix into a FITS file (#1863).
 
 
 11. Optimization module
@@ -181,31 +213,23 @@ None
 
 12. Sky module
 --------------
-The GSkyMap load() and save() methods now support the handling of FITS
-extension names. Users can now specify with which extension name a sky
-map is written to a FITS file, and from which extension name it should
-be loaded. This allows to have multiple sky maps in the same file, and
-to mix also HEALPix and WCS maps in the same file (#1695).
+The GSkyMap::write() method now returns a pointer to the written GFitsHDU
+object. In case that no sky map is written, for example because none has been
+defined so far, the method returns NONE. The GSkyMap::publish() method will
+detect the NONE value and will do nothing if no sky map exists (#1835).
 
-A GSkyMap::publish() method has been added that publishes the sky map
-on a Virtual Observatory Hub. This finally makes GammaLib interoperable
-with VO imaging tools (#1231).
+The GSkyMap::is_empty() method signals whether a sky map contains no pixels
+or no maps (#1828).
 
 
 13. Support module
 ------------------
-The GFilename class has been extended and some methods have been renamed.
-The full filename including and FITS extension is now returned by an
-implicit type conversion operator std::string(). The filename() method has
-been renamed to url(), and the methods exists(), is_fits() and remove()
-have been added to replace functions of the GTools module that were used
-for this purpose in the past. Furthermore, the method protocol() returns
-the access protocol (e.g. http, ftp, file) of the file name, the method
-path() returns the path of th file name, and the method file() returns the
-file name without the path.
+The gammalib::rstrip_chars() function has been added to right strip characters
+from a string.
 
-Put FITS access in a critical OMP zone to make GFilename::is_fits() thread
-safe (#1717).
+The gammalib::str() functions for single and double precision floating point
+numbers now have an increased precision so that significant digits are no
+longer lost.
 
 
 14. XML module
@@ -215,9 +239,9 @@ None
 
 15. VO module
 -------------
-A GVOClient::publish() method was added that allows publishing of a FITS
-image to the Hub. The FITS image will be saved into a temporary storage
-location and the Hub will be informed that an image is available.
+A GVOTable class has been added that allows handling of VO tables, including
+transformation of FITS tables into VO tables and sending VO tables through the
+VO hub to other applications (#1231).
 
 
 16. Xspec module
@@ -227,7 +251,10 @@ None
 
 17. Test module
 ---------------
-None
+A GTestSuite::test_value() method for double precision values has been added
+that automatically requires a relative precision of 1.0e-7. The default value
+for "eps" has been removed from the former double precision test_value()
+method. This should allow writing of more compact unit tests.
 
 
 18. Multi-wavelength interface
@@ -242,43 +269,8 @@ None
 
 20. CTA interface
 -----------------
-The response table instrument response functions now rely on the FITS table
-column names to determine the information instead of hard-wired column indices
-(#1656).
-
-Event fetching and disposal has been implemented in the GCTAEventList class by
-additing the fetch() and dispose() methods. Now, events are only loaded upon
-request and can be dispatched after user to save memory. The event fetching and
-disposal logic has been removed from GCTAObservation (#1648).
-
-Add GCTAEventList::remove() method to remove events from an event list.
-
-The GCTAEventList::append() method now also appends empty elements to the
-additional columns so that all event list columns have finally the same length.
-
-The GCTAEdisp2D::compute_ebounds_obs() and GCTAEdisp2::compute_ebounds_src()
-methods have been corrected so that they return the energy intervals covered by
-valid matrix elements. With the code before there were problems with not setting
-correctly the maximum energies of the intervals (#1662).
-
-The extension name for the GTI HDU is now determined from the data sub-space
-keyword provided in the events FITS file header. This allows to have multiple
-GTIs (and also event lists) in a single FITS file. We do however require that
-the event and GTI extension reside in the same FITS file. The name of the GTI
-extension can be recovered using the GCTAEventList::gtiname() method. This
-satisfies the feature request #1598.
-
-A second variant of a write() method has been added to GCTAEventList that allows
-specifying the events and Good Time Intervals FITS extension names. The standard
-write() method will call this new write() method using the events extension name
-extracted from the file name and the GTI extension name set by the m_gti_extname
-member. The GCTAObservation::write() method was also extended and now has two
-optional arguments that allow specifying the events and Good Time Interval FITS
-extension names. These are simply forwared to the new GCTAEventList::write().
-The GCTAObservation::save() method has now a special logic that decodes any
-optionally specified extension in the format [EVENTS;GTI] into an events and a
-Good Time Intervals extension name. These changes satisfy the feature request
-#1598.
+The dimension of response tables is now checked for being consistent with the
+axis dimension (#1848).
 
 
 21. COMPTEL interface

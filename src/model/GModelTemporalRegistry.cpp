@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelTemporalRegistry.cpp - Temporal model registry class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,11 +28,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GModelPar.hpp"
+#include "GModelTemporal.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ALLOC                 "GModelTemporalRegistry::alloc(GXmlElement&)"
 #define G_NAME                           "GModelTemporalRegistry::name(int&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -61,7 +64,7 @@ GModelTemporalRegistry::GModelTemporalRegistry(void)
     #if G_DEBUG_REGISTRY
     std::cout << "GModelTemporalRegistry(void): ";
     for (int i = 0; i < size(); ++i) {
-        std::cout << "\"" << names()[i] << "\" ";
+        std::cout << "\"" << models()[i]->type() << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -75,6 +78,9 @@ GModelTemporalRegistry::GModelTemporalRegistry(void)
  * @brief Model constructor
  *
  * @param[in] model Model.
+ *
+ * Construct registry by adding a model to the registry. This is the standard
+ * constructor that is used to register a new model to GammaLib.
  ***************************************************************************/
 GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
 {
@@ -88,21 +94,17 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     #endif
 
     // Allocate new registry
-    std::string*           new_names  = new std::string[size()+1];
     const GModelTemporal** new_models = new const GModelTemporal*[size()+1];
 
     // Save old registry
     for (int i = 0; i < size(); ++i) {
-        new_names[i]  = names()[i];
         new_models[i] = models()[i];
     }
 
     // Add new model to registry
-    new_names[size()]  = model->type();
     new_models[size()] = model;
 
     // Set pointers on new registry
-    names().assign(new_names);
     models().assign(new_models);
 
     // Increment number of models in registry
@@ -112,7 +114,7 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     #if G_DEBUG_REGISTRY
     std::cout << "GModelTemporalRegistry(const GModelTemporal*): ";
     for (int i = 0; i < size(); ++i) {
-        std::cout << "\"" << names()[i] << "\" ";
+        std::cout << "\"" << models()[i]->type() << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -193,27 +195,45 @@ GModelTemporalRegistry& GModelTemporalRegistry::operator=(const GModelTemporalRe
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate temporal model of given name
+ * @brief Allocate temporal model that is found in XML element
  *
- * @param[in] name Temporal model name.
- * @return Pointer to temporal model (NULL if name is not registered).
+ * @param[in] xml XML element.
+ * @return Pointer to temporal model.
  *
- * Returns a pointer to a temporal model instance of the specified name.
- * If the name has not been found in the registry, a NULL pointer is
- * returned.
+ * @exception GException::invalid_value
+ *            No appropriate temporal model found in XML element.
+ *
+ * Returns a pointer to a temporal model instance that corresponds to the
+ * type found in an XML element. If no appropriate model is found the method
+ * will throw an exception.
  ***************************************************************************/
-GModelTemporal* GModelTemporalRegistry::alloc(const std::string& name) const
+GModelTemporal* GModelTemporalRegistry::alloc(const GXmlElement& xml) const
 {
     // Initialise temporal model
     GModelTemporal* model = NULL;
 
-    // Search for model in registry
+    // Search for model type in registry
     for (int i = 0; i < size(); ++i) {
-        if (names()[i] == name) {
+        if (models()[i]->type() == xml.attribute("type")) {
             model = models()[i]->clone();
             break;
         }
     }
+
+    // If no model has been found then throw an exception
+    if (model == NULL) {
+        std::string msg = "Temporal model of type \""+xml.attribute("type")+
+                          "\" not found in registry. Possible temporal model "
+                          "types are:";
+        for (int i = 0; i < size(); ++i) {
+            msg += " \""+models()[i]->type()+"\"";
+        }
+        msg += ".";
+        throw GException::invalid_value(G_ALLOC, msg);
+    }
+
+    // Read model from XML element
+    model->read(xml);
 
     // Return temporal model
     return model;
@@ -234,19 +254,20 @@ std::string GModelTemporalRegistry::name(const int& index) const
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_NAME, index, 0, size()-1);
+        throw GException::out_of_range(G_NAME, "Temporal model index", index,
+                                       size());
     }
     #endif
 
     // Return name
-    return (names()[index]);
+    return (models()[index]->type());
 }
 
 
 /***********************************************************************//**
  * @brief Print registry information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return Registry content.
  ***************************************************************************/
 std::string GModelTemporalRegistry::print(const GChatter& chatter) const
@@ -267,8 +288,15 @@ std::string GModelTemporalRegistry::print(const GChatter& chatter) const
         // NORMAL: Append models
         if (chatter >= NORMAL) {
             for (int i = 0; i < size(); ++i) {
-                result.append("\n"+gammalib::parformat(names()[i]));
-                result.append(models()[i]->type());
+                result.append("\n"+gammalib::parformat(models()[i]->type()));
+                for (int k = 0; k < models()[i]->size(); ++k) {
+                    if (k > 0) {
+                        result.append(", ");
+                    }
+                    result.append("\"");
+                    result.append((*(models()[i]))[k].name());
+                    result.append("\"");
+                }
             }
         }
 

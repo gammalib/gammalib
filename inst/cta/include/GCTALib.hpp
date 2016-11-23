@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTALib.hpp - CTA Support Header files                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,7 +37,6 @@
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAOnOffObservation.hpp"
-#include "GCTAOnOffObservations.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTAEventCube.hpp"
@@ -58,6 +57,7 @@
 #include "GCTAPsfVector.hpp"
 #include "GCTAPsf2D.hpp"
 #include "GCTAPsfKing.hpp"
+#include "GCTAPsfTable.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTAEdispRmf.hpp"
@@ -68,6 +68,7 @@
 #include "GCTACubeExposure.hpp"
 #include "GCTACubeBackground.hpp"
 #include "GCTACubePsf.hpp"
+#include "GCTACubeEdisp.hpp"
 #include "GCTACubeSource.hpp"
 #include "GCTACubeSourcePoint.hpp"
 #include "GCTACubeSourceDiffuse.hpp"

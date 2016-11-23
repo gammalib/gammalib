@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialEllipticalGauss.cpp - Elliptical gauss source model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,11 @@ namespace {
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialEllipticalGauss g_elliptical_gauss_seed;
-const GModelSpatialRegistry g_elliptical_gauss_registry(&g_elliptical_gauss_seed);
+const GModelSpatialRegistry        g_elliptical_gauss_registry(&g_elliptical_gauss_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialEllipticalGauss g_elliptical_gauss_legacy_seed(true, "EllipticalGauss");
+const GModelSpatialRegistry        g_elliptical_gauss_legacy_registry(&g_elliptical_gauss_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ             "GModelSpatialEllipticalGauss::read(GXmlElement&)"
@@ -72,6 +76,29 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(void) :
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty elliptical Gaussian model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const bool&        dummy,
+                                                           const std::string& type) :
+                              GModelSpatialElliptical()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -246,6 +273,7 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  * @param[in] posangle Position angle (counterclockwise from North) (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for an elliptical Gaussian source model.
@@ -282,6 +310,10 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  *    {\tt m\_norm} = \frac{1}{2 \pi \times a \times b}
  * \f]
  *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
+ *
  * @warning
  * The above formula for an elliptical Gaussian are accurate for small
  * angles, with semimajor and semiminor axes below a few degrees. This
@@ -296,7 +328,8 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
 double GModelSpatialEllipticalGauss::eval(const double&  theta,
                                           const double&  posangle,
                                           const GEnergy& energy,
-                                          const GTime&   time) const
+                                          const GTime&   time,
+                                          const bool&    gradients) const
 {
     // Initialise value
     double value = 0.0;
@@ -355,31 +388,6 @@ double GModelSpatialEllipticalGauss::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
- *
- * @param[in] theta Angular distance from gaussian centre (radians).
- * @param[in] posangle Position angle (counterclockwise from North) (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * Evaluates the function value. No gradient computation is implemented as
- * elliptical models will be convolved with the instrument response and thus
- * require the numerical computation of the derivatives.
- *
- * See the eval() method for more information.
- ***************************************************************************/
-double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
-                                                    const double&  posangle,
-                                                    const GEnergy& energy,
-                                                    const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, posangle, energy, time));
 }
 
 
@@ -498,7 +506,7 @@ double GModelSpatialEllipticalGauss::theta_max(void) const
  * Reads the elliptical gauss model information from an XML element. The XML
  * element shall have either the format 
  *
- *     <spatialModel type="EllipticalGauss">
+ *     <spatialModel type="EllipticalGaussian">
  *       <parameter name="RA"          scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
@@ -508,7 +516,7 @@ double GModelSpatialEllipticalGauss::theta_max(void) const
  *
  * or
  *
- *     <spatialModel type="EllipticalGauss">
+ *     <spatialModel type="EllipticalGaussian">
  *       <parameter name="GLON"        scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="GLAT"        scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
@@ -587,7 +595,7 @@ void GModelSpatialEllipticalGauss::read(const GXmlElement& xml)
  * Write the elliptical gauss model information into an XML element. The XML
  * element will have the format 
  *
- *     <spatialModel type="EllipticalGauss">
+ *     <spatialModel type="EllipticalGaussian">
  *       <parameter name="RA"          scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
@@ -700,6 +708,9 @@ std::string GModelSpatialEllipticalGauss::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::init_members(void)
 {
+    // Initialise model type
+    m_type = "EllipticalGaussian";
+
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius is not meaningful
     m_last_minor        = 0.0;
@@ -717,6 +728,9 @@ void GModelSpatialEllipticalGauss::init_members(void)
     m_term2             = 0.0;
     m_term3             = 0.0;
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -729,6 +743,10 @@ void GModelSpatialEllipticalGauss::init_members(void)
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::copy_members(const GModelSpatialEllipticalGauss& model)
 {
+    // Copy members
+    m_type   = model.m_type;
+    m_region = model.m_region;
+
     // Copy precomputation cache
     m_last_minor        = model.m_last_minor;
     m_last_major        = model.m_last_major;
@@ -840,6 +858,26 @@ void GModelSpatialEllipticalGauss::update() const
 
     } // endif: something has changed
     #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialEllipticalGauss::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set maximum model radius
+    double max_radius = (semimajor() > semiminor()) ? semimajor() : semiminor();
+
+    // Set sky region radius to maximum Gaussian sigma times a scaling
+    // factor (actually 3)
+    m_region.radius(max_radius * c_theta_max);
 
     // Return
     return;

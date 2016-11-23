@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GXmlElement.i - XML element node class definition           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,8 +52,6 @@ public:
     void                 attribute(const std::string& name, const std::string& value);
     bool                 has_attribute(const std::string& name) const;
     void                 remove_attribute(const std::string& name);
-    GXmlNode*            parent(void) const;
-    void                 parent(GXmlNode* parent);
     virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const;
 };

@@ -32,7 +32,7 @@
 #include "GFilename.hpp"
 #include "GSkyMap.hpp"
 #include "GNodeArray.hpp"
-#include "GEbounds.hpp"
+#include "GEnergies.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
@@ -55,6 +55,15 @@ public:
     explicit GCTACubeBackground(const GFilename& filename);
     explicit GCTACubeBackground(const GCTAEventCube& cube);
     GCTACubeBackground(const GCTACubeBackground& bgd);
+    GCTACubeBackground(const std::string&   wcs,
+                       const std::string&   coords,
+                       const double&        x,
+                       const double&        y,
+                       const double&        dx,
+                       const double&        dy,
+                       const int&           nx,
+                       const int&           ny,
+                       const GEnergies&     energies);
     virtual ~GCTACubeBackground(void);
 
     // Operators
@@ -74,8 +83,7 @@ public:
     void                save(const GFilename& filename,
                              const bool&      clobber = false) const;
     const GSkyMap&      cube(void) const;
-    const GEbounds&     ebounds(void) const;
-    const GNodeArray&   elogmeans(void) const;
+    const GEnergies&    energies(void) const;
     const GFilename&    filename(void) const;
     std::string         print(const GChatter& chatter = NORMAL) const;
 
@@ -90,7 +98,7 @@ private:
     // Members
     mutable GFilename m_filename;  //!< Name of background response file
     GSkyMap           m_cube;      //!< Background cube
-    GEbounds          m_ebounds;   //!< Energy bounds for the background cube
+    GEnergies         m_energies;  //!< Energy values for the background cube
     GNodeArray        m_elogmeans; //!< Mean energy for the background cube
 
     // Response table computation cache for 1D access
@@ -130,26 +138,14 @@ const GSkyMap& GCTACubeBackground::cube(void) const
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries
+ * @brief Return energies
  *
- * @return Energy boundaries.
+ * @return Energies
  ***************************************************************************/
 inline
-const GEbounds& GCTACubeBackground::ebounds(void) const
+const GEnergies& GCTACubeBackground::energies(void) const
 {
-    return (m_ebounds);
-}
-
-
-/***********************************************************************//**
- * @brief Return geometric mean of background cube energies
- *
- * @return Node array of geometric mean of background cube energies.
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubeBackground::elogmeans(void) const
-{
-    return (m_elogmeans);
+    return (m_energies);
 }
 
 
