@@ -77,43 +77,47 @@ public:
     const GFitsHDU* operator[](const std::string& extname) const;
 
     // Methods
-    void               clear(void);
-    GFits*             clone(void) const;
-    std::string        classname(void) const;
-    GFitsHDU*          at(const int& extno);
-    const GFitsHDU*    at(const int& extno) const;
-    GFitsHDU*          at(const std::string& extname);
-    const GFitsHDU*    at(const std::string& extname) const;
-    GFitsImage*        image(const int& extno);
-    const GFitsImage*  image(const int& extno) const;
-    GFitsImage*        image(const std::string& extname);
-    const GFitsImage*  image(const std::string& extname) const;
-    GFitsTable*        table(const int& extno);
-    const GFitsTable*  table(const int& extno) const;
-    GFitsTable*        table(const std::string& extname);
-    const GFitsTable*  table(const std::string& extname) const;
-    int                size(void) const;
-    bool               is_empty(void) const;
-    GFitsHDU*          set(const int& extno, const GFitsHDU& hdu);
-    GFitsHDU*          set(const std::string& extname, const GFitsHDU& hdu);
-    GFitsHDU*          append(const GFitsHDU& hdu);
-    GFitsHDU*          insert(const int& extno, const GFitsHDU& hdu);
-    GFitsHDU*          insert(const std::string& extname, const GFitsHDU& hdu);
-    void               remove(const int& extno);
-    void               remove(const std::string& extname);
-    void               reserve(const int& num);
-    void               extend(const GFits& fits);
-    bool               contains(const int& extno) const;
-    bool               contains(const std::string& extname) const;
-    const GFilename&   filename(void) const;
-    int                extno(const std::string& extname) const;
-    void               open(const GFilename& filename,
-                            const bool&      create = false);
-    void               save(const bool& clobber = false);
-    void               saveto(const GFilename& filename,
-                              const bool&      clobber = false);
-    void               close(void);
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    void              clear(void);
+    GFits*            clone(void) const;
+    std::string       classname(void) const;
+    GFitsHDU*         at(const int& extno);
+    const GFitsHDU*   at(const int& extno) const;
+    GFitsHDU*         at(const std::string& extname);
+    const GFitsHDU*   at(const std::string& extname) const;
+    GFitsImage*       image(const int& extno);
+    const GFitsImage* image(const int& extno) const;
+    GFitsImage*       image(const std::string& extname);
+    const GFitsImage* image(const std::string& extname) const;
+    GFitsTable*       table(const int& extno);
+    const GFitsTable* table(const int& extno) const;
+    GFitsTable*       table(const std::string& extname);
+    const GFitsTable* table(const std::string& extname) const;
+    int               size(void) const;
+    bool              is_empty(void) const;
+    GFitsHDU*         set(const int& extno, const GFitsHDU& hdu);
+    GFitsHDU*         set(const std::string& extname, const GFitsHDU& hdu);
+    GFitsHDU*         append(const GFitsHDU& hdu);
+    GFitsHDU*         insert(const int& extno, const GFitsHDU& hdu);
+    GFitsHDU*         insert(const std::string& extname, const GFitsHDU& hdu);
+    void              remove(const int& extno);
+    void              remove(const std::string& extname);
+    void              reserve(const int& num);
+    void              extend(const GFits& fits);
+    bool              contains(const int& extno) const;
+    bool              contains(const std::string& extname) const;
+    const GFilename&  filename(void) const;
+    int               extno(const std::string& extname) const;
+    void              open(const GFilename& filename,
+                           const bool&      create = false);
+    void              save(const bool& clobber = false);
+    void              saveto(const GFilename& filename,
+                             const bool&      clobber = false);
+    void              close(void);
+    void              publish(const int& extno,
+                              const std::string& name = "") const;
+    void              publish(const std::string& extname,
+                              const std::string& name = "") const;
+    std::string       print(const GChatter& chatter = NORMAL) const;
 
     // Complex single precision type
     typedef struct {

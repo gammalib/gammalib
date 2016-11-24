@@ -210,64 +210,7 @@ GModelSpectralNodes* GModelSpectralNodes::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Computes
- *
- * \f[
- *    S_{\rm E}(E | t) =
- *    10^{(\log {\tt m\_values[i]}) w_{i} + 
- *        (\log {\tt m\_values[i+1]}) w_{i+1}}
- * \f]
- *
- * where
- * - \f${\tt m\_values[i]}\f$ is the intensity of node \f$i\f$,
- * - \f${\tt m\_values[i+1]}\f$ is the intensity of node \f$i+1\f$,
- * - \f$w_{i}\f$ is the weighting of node \f$i\f$,
- * - \f$w_{i+1}\f$ is the weighting of node \f$i+1\f$, and
- * - \f${\tt m\_energies[i]} <= E <= {\tt m\_energies[i+1]}\f$.
- *
- * The weightings \f$w_{i}\f$ and \f$w_{i+1}\f$ are computed by linear
- * interpolation (in the log-log plane) between the nodes
- * \f$(\log {\tt m\_energies[i]}, \log{\tt m\_values[i]})\f$
- * and
- * \f$(\log {\tt m\_energies[i+1]}, \log{\tt m\_values[i+1]})\f$
- * to the requested energy \f$\log E\f$.
- ***************************************************************************/
-double GModelSpectralNodes::eval(const GEnergy& srcEng,
-                                 const GTime&   srcTime) const
-{
-    // Update evaluation cache
-    update_eval_cache();
-
-    // Interpolate function. This is done in log10-log10 space, but the
-    // linear value is returned.
-    double exponent = m_log_energies.interpolate(srcEng.log10MeV(), m_log_values);
-    double value    = std::pow(10.0, exponent);
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralNodes::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", exponent=" << exponent;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Computes
@@ -292,16 +235,17 @@ double GModelSpectralNodes::eval(const GEnergy& srcEng,
  * \f$(\log {\tt m\_energies[i+1]}, \log{\tt m\_values[i+1]})\f$
  * to the requested energy \f$\log E\f$.
  *
- * The method also evaluates the partial derivatives of the model with
- * respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the partial
+ * derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_values[i]}} =
  *      \frac{S_{\rm E}(E | t) \, w_i}{{\tt m\_values[i]}}
  * \f]
  ***************************************************************************/
-double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng,
-                                           const GTime&   srcTime)
+double GModelSpectralNodes::eval(const GEnergy& srcEng,
+                                 const GTime&   srcTime,
+                                 const bool&    gradients) const
 {
     // Update evaluation cache
     update_eval_cache();
@@ -322,27 +266,32 @@ double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng,
     // Compute linear value
     double value = std::pow(10.0, exponent);
 
-    // Initialise gradients
-    for (int i = 0; i < m_values.size(); ++i) {
-        m_values[i].factor_gradient(0.0);
-    }
+    // Optionally compute partial derivatives
+    if (gradients) {
 
-    // Gradient for left node
-    if (m_values[inx_left].is_free()) {
-        double grad = value * wgt_left / m_values[inx_left].factor_value();
-        m_values[inx_left].factor_gradient(grad);
-    }
+        // Initialise gradients
+        for (int i = 0; i < m_values.size(); ++i) {
+            m_values[i].factor_gradient(0.0);
+        }
 
-    // Gradient for right node
-    if (m_values[inx_right].is_free()) {
-        double grad = value * wgt_right / m_values[inx_right].factor_value();
-        m_values[inx_right].factor_gradient(grad);
-    }
+        // Gradient for left node
+        if (m_values[inx_left].is_free()) {
+            double grad = value * wgt_left / m_values[inx_left].factor_value();
+            m_values[inx_left].factor_gradient(grad);
+        }
+
+        // Gradient for right node
+        if (m_values[inx_right].is_free()) {
+            double grad = value * wgt_right / m_values[inx_right].factor_value();
+            m_values[inx_right].factor_gradient(grad);
+        }
+
+    } // endif: computed partial derivatives
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralNodes::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralNodes::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";

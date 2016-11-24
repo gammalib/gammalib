@@ -45,16 +45,20 @@ public:
 
     // Methods
     void               clear(void);
-    int                size(void) const;
+    long int           size(void) const;
+    long int           written_size(void) const;
     std::string        classname(void) const;
-    void               open(const GFilename& filename, const bool& clobber = false);
+    bool               is_open(void) const;
+    bool               is_empty(void) const;
+    void               open(const GFilename& filename,
+                            const bool&      clobber = false);
     void               close(void);
     void               flush(const bool& force = false);
     void               date(const bool& flag);
     void               cout(const bool& flag);
     void               cerr(const bool& flag);
     void               name(const std::string& name);
-    void               max_size(const int& size);
+    void               buffer_size(const int& size);
     void               indent(const int& indent);
     void               chatter(const GChatter& chatter);
     void               header0(const std::string& arg);
@@ -65,7 +69,7 @@ public:
     const bool&        cout(void) const;
     const bool&        cerr(void) const;
     const std::string& name(void) const;
-    const int&         max_size(void) const;
+    const int&         buffer_size(void) const;
     const int&         indent(void) const;
     const GChatter&    chatter(void) const;
     const GFilename&   filename(void) const;

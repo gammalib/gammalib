@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GObservations_likelihood.cpp - Likelihood function class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,10 +30,14 @@
 #endif
 #include "GObservations.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GEvent.hpp"
 #include "GEventList.hpp"
 #include "GEventCube.hpp"
 #include "GEventBin.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableStringCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 
 /* __ OpenMP section _____________________________________________________ */
 #ifdef _OPENMP
@@ -583,6 +587,106 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
 }
 
 
+/***********************************************************************//**
+ * @brief Compute covariance matrix
+ *
+ * @return Covariance matrix.
+ *
+ * The covariance matrix is calculated as the inverse of the curvature
+ * matrix. The method retrieves the model scaling factors from the models
+ * that are stored with the observations and multiplies the covariance
+ * matrix with the scaling factors of the model parameters. Hence the
+ * covariance matrix is covariance with respect to the true model values.
+ ***************************************************************************/
+GMatrixSparse GObservations::likelihood::covariance(void) const
+{
+    // Compute covariance matrix (circumvent const correctness)
+    GMatrixSparse covmat =
+        const_cast<GObservations::likelihood*>(this)->curvature()->invert();
+
+    // Get model parameters
+    GOptimizerPars pars = m_this->m_models.pars();
+
+    // Multiply covariance matrix elements with scale factors
+    for (int row = 0; row < covmat.rows(); ++row) {
+        for (int col = 0; col < covmat.columns(); ++col) {
+            covmat(row,col) *= pars[row]->scale() * pars[col]->scale();
+        }
+    }
+
+    // Return covariance matrix
+    return covmat;
+}
+
+
+/***********************************************************************//**
+ * @brief Save likelihood fit results into FITS file.
+ *
+ * @param[in] filename FITS filename.
+ *
+ * Saves the likelihood fit results into a FITS file. For the moment the
+ * method only writes the covariance matrix.
+ ***************************************************************************/
+void GObservations::likelihood::save(const GFilename& filename) const
+{
+    // Get covariance matrix
+    GMatrixSparse covmat = covariance();
+
+    // Create covariance matrix entry names
+    std::vector<std::string> covmat_entries;
+    for (int i = 0 ; i < m_this->m_models.size(); ++i) {
+	    for (int j = 0; j < m_this->m_models[i]->size(); ++j) {
+            covmat_entries.push_back(m_this->m_models[i]->at(j).name() + "(" +
+                                     m_this->m_models[i]->name() + ")");
+        }
+    }
+
+    // Create binary table and columns
+    int size = covmat_entries.size();
+    GFitsBinTable       covmat_table;
+    GFitsTableStringCol par("Parameters", 1, 50, size);
+    GFitsTableDoubleCol cov("Covariance", 1, size*size);
+
+    // Fill tables
+    int counter = 0;
+    for (int i = 0; i < size; ++i) {
+        par(0, i) = covmat_entries[i];
+        for (int j = 0; j < size; ++j) {
+            cov(0, counter) = covmat(i,j);
+            ++counter;
+        }
+    }
+
+    // Set dimension for covariance matrix column
+    std::vector<int> dim;
+    dim.push_back(size);
+    dim.push_back(size);
+    cov.dim(dim);
+
+    // Append columns to table
+    covmat_table.append(par);
+    covmat_table.append(cov);
+
+    // Set extension name
+    covmat_table.extname("Covariance Matrix");
+
+    // Allocate FITS object
+    GFits fits;
+
+    // Append covariance matrix table to FITS object
+    fits.append(covmat_table);
+
+    // Save FITS file to disk
+    fits.saveto(filename, true);
+
+    // Close FITS object
+    fits.close();
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
@@ -614,15 +718,19 @@ void GObservations::likelihood::init_members(void)
 void GObservations::likelihood::copy_members(const likelihood& fct)
 {
     // Copy attributes
-    m_value  = fct.m_value;
-    m_npred  = fct.m_npred;
-    m_this   = fct.m_this;
+    m_value = fct.m_value;
+    m_npred = fct.m_npred;
+    m_this  = fct.m_this;
 
     // Clone gradient if it exists
-    if (fct.m_gradient != NULL) m_gradient = new GVector(*fct.m_gradient);
+    if (fct.m_gradient != NULL) {
+        m_gradient = new GVector(*fct.m_gradient);
+    }
 
     // Clone curvature matrix if it exists
-    if (fct.m_curvature != NULL) m_curvature = new GMatrixSparse(*fct.m_curvature);
+    if (fct.m_curvature != NULL) {
+        m_curvature = new GMatrixSparse(*fct.m_curvature);
+    }
 
     // Return
     return;

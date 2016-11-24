@@ -142,6 +142,8 @@ protected:
                                 const std::string& reference);
     void        notify_image_load(const client& client,
                                   const GXml&   xml);
+    void        notify_table_load(const GVOHub::client& client,
+                               const GXml&           xml);
     std::string	random_string(const size_t& length) const;
     std::string hub_url(void) const;
 

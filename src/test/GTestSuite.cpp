@@ -458,6 +458,33 @@ void GTestSuite::test_value(const int&         value,
  *
  * @param[in] value Double precision value to test.
  * @param[in] expected Expected double precision value.
+ * @param[in] name Test case name.
+ * @param[in] message Test case message.
+ *
+ * Test if the @p value is equal to the @p expected value within a relative
+ * precision of 1.0e-7.
+ ***************************************************************************/
+void GTestSuite::test_value(const double&      value,
+                            const double&      expected,
+                            const std::string& name,
+                            const std::string& message)
+{
+    // Compute precision
+    double eps = (expected != 0.0) ? 1.0e-7 * std::abs(expected) : 1.0e-7;
+
+    // Test double precision value
+    test_value(value, expected, eps, name, message);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test a double precision value
+ *
+ * @param[in] value Double precision value to test.
+ * @param[in] expected Expected double precision value.
  * @param[in] eps Precision of the test.
  * @param[in] name Test case name.
  * @param[in] message Test case message.
@@ -490,6 +517,103 @@ void GTestSuite::test_value(const double&      value,
     // If value is not between in interval [expected-eps, expected+eps]
     // then signal test as failed and increment the number of failures
     if (value > expected + eps || value < expected - eps) {
+        testcase->has_passed(false);
+        m_failures++;
+    }
+
+    // If no message is specified then build message from test result
+    std::string formated_message;
+    if (message != "") {
+        formated_message = message;
+    }
+    else {
+        formated_message = "Value "+gammalib::str(value)+" not within "+
+                           gammalib::str(expected)+" +/- "+gammalib::str(eps)+
+                           " (value-expected = "+gammalib::str(value-expected)+
+                           ").";
+    }
+
+    // Set message
+    testcase->message(formated_message);
+
+    // Log the result (".","F" or, "E")
+    std::cout << testcase->print();
+
+    // Add test case to test suite
+    m_tests.push_back(testcase);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test a complex value
+ *
+ * @param[in] value Complex value to test.
+ * @param[in] expected Expected complex value.
+ * @param[in] name Test case name.
+ * @param[in] message Test case message.
+ *
+ * Test if the @p value is equal to the @p expected value within a relative
+ * precision of 1.0e-7.
+ ***************************************************************************/
+void GTestSuite::test_value(const std::complex<double>& value,
+                            const std::complex<double>& expected,
+                            const std::string&          name,
+                            const std::string&          message)
+{
+    // Compute precision
+    double eps = (expected != 0.0) ? 1.0e-7 * std::abs(expected) : 1.0e-7;
+
+    // Test double precision value
+    test_value(value, expected, eps, name, message);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test a complex value
+ *
+ * @param[in] value Complex value to test.
+ * @param[in] expected Expected complex value.
+ * @param[in] eps Precision of the test.
+ * @param[in] name Test case name.
+ * @param[in] message Test case message.
+ *
+ * Test if the value is comprised in the interval
+ * [expected-eps, expected+eps].
+ ***************************************************************************/
+void GTestSuite::test_value(const std::complex<double>& value,
+                            const std::complex<double>& expected,
+                            const double&               eps,
+                            const std::string&          name,
+                            const std::string&          message)
+{
+    // Set test case name. If no name is specify then build the name from
+    // the actual test parameters.
+    std::string formated_name;
+    if (name != "") {
+        formated_name = format_name(name);
+    }
+    else {
+        formated_name = format_name("Test if "+gammalib::str(value)+
+                                    " is comprised within "+
+                                    gammalib::str(expected)+" +/- "+
+                                    gammalib::str(eps));
+    }
+
+    // Create a test case of failure type
+    GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST, formated_name);
+
+    // If value is not between in interval [expected-eps, expected+eps]
+    // then signal test as failed and increment the number of failures
+    if ((value.real() > expected.real() + eps) ||
+        (value.real() < expected.real() - eps) ||
+        (value.imag() > expected.imag() + eps) ||
+        (value.imag() < expected.imag() - eps)) {
         testcase->has_passed(false);
         m_failures++;
     }
@@ -898,7 +1022,7 @@ void GTestSuite::init_members(void)
 
     // Set logger parameters
     cout(true);
-    m_log.max_size(1);
+    m_log.buffer_size(1);
 
     // Return
     return;

@@ -22,55 +22,23 @@ The central C++ class of the model module is the abstract base class
 using the :doxy:`GModels` container C++ class.
 
 
-Evaluating models for observations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Models are evaluated by observations using the ``GObservation::model``
-method. The ``GObservation::npred`` provides the number of predicted 
-events by all models within the relevant dataspace for a given observation.
-
-:ref:`fig_calltree_model` shows the call tree of the 
-``GObservation::model`` (left) and ``GObservation::npred`` (right) 
-methods.
-
-For model evaluation, the :doxy:``GObservation::model`` method loops over all 
-models in the :doxy:`GModels` container and calls the 
-:doxy:`GModel::eval_gradients` method of each model. 
-For :doxy:`GModelSky` models this method invokes the :doxy:`GResponse::convolve`
-method that calls among others the :doxy:`GResponse::irf` method.
-That method needs to be implement for each instruments.
-
-The ``GObservation::npred`` method performs an integration over observed 
-time, observed energy and observed arrival direction. 
-The integrate over observed time is for the moment a simple multiplication
-with ontime.
-The integral over observed energy is performed by the 
-``GObservation::npred_spec`` method that calls the
-:doxy:`GModel::eval_gradients` method.
-For :doxy:`GModelSky` models this method calls the :doxy:`GResponse::nroi`
-method that needs to be implement for each instruments.
-
-.. _fig_calltree_model:
-
-.. figure:: calltree_model.png
-   :width: 70%
-   :align: center
-
-   *Call tree for model evaluation*
-
-
 Sky models
 ~~~~~~~~~~
 
+Model factorisation
+^^^^^^^^^^^^^^^^^^^
+
 Sky models describe the spatial, spectral and temporal properties of a 
-gamma-ray source using the following factorization:
+gamma-ray source using the following factorisation:
 
 .. math::
-   M(\alpha,\delta,E,t) = M_{\rm spatial}(\alpha,\delta | E,t) \times
-                          M_{\rm spectral}(E | t) \times 
-                          M_{\rm temporal}(t)
+   M(p,E,t) = M_{\rm spatial}(p | E,t) \times
+              M_{\rm spectral}(E | t) \times
+              M_{\rm temporal}(t)
 
-The spatial model component :math:`M_{\rm spatial}(\alpha,\delta|E,t)`
+(:math:`M(p,E,t)` is given in units of
+:math:`photons \,\, cm^{-2} s^{-1} MeV^{-1} sr^{-1}`).
+The spatial model component :math:`M_{\rm spatial}(p|E,t)`
 is defined by the abstract :doxy:`GModelSpatial` class, the spectral
 model component :math:`M_{\rm spectral}(E|t)` is defined by the
 abstract :doxy:`GModelSpectral` class and the temporal component
@@ -82,27 +50,94 @@ morphology of the source.
 It satisfies
 
 .. math::
-   \int_{\Omega} M_{\rm spatial}(\alpha,\delta|E,t) d\Omega = 1
+   \int_{\Omega} M_{\rm spatial}(p|E,t) \, d\Omega = 1
 
 for all :math:`E` and :math:`t`, hence the spatial component does not
 impact the spatially integrated spectral and temporal properties of the
 source (the integration is done here over the spatial parameters
-:math:`\alpha` and :math:`\delta` in a spherical coordinate system).
+:math:`p` in a spherical coordinate system).
+The units of the spatial model component are
+:math:`[M_{\rm spatial}] = {\rm sr}^{-1}`.
 
 The spectral model component describes the spatially integrated time
 dependent spectral distribution of the source.
 It satisfies
 
 .. math::
-   \int_{E} M_{\rm spectral}(E | t) dE = \Phi
+   \int_{E} M_{\rm spectral}(E | t) \, dE = \Phi
 
 for all :math:`t`, where :math:`\Phi` is the spatially and spectrally
 integrated total source flux. The spectral component does not impact
 the temporal properties of the integrated flux :math:`\Phi`.
+The units of the spectral model component
+are :math:`[M_{\rm spectral}] = {\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1}`.
 
 The temporal model component describes the relative variation of the
 source flux with respect to the mean value given by the spectral model
 component.
+The temporal model component is unit less.
+
+
+XML model definition format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sky models can be defined using an XML file format that is inspired by the format
+used for the Large Area Telescope (LAT) aboard NASA's Fermi satellite. To
+illustrate the format, the definition of a point source at the position of
+the Crab nebula with a power spectral shape is shown below. The tags
+``<spatialModel>``, ``<spectrum>`` and ``<temporalModel>`` describe the
+spatial, spectral and temporal model components defined above. The
+``<temporalModel>`` tag can be omitted, which will automatically allocate a
+constant temporal component for the model.
+
+Each source model needs to have a unique name specified by the ``name``
+attributes. The ``type`` attribute specifies the type of the model and
+needs to be one of ``PointSource``, ``ExtendedSource``, ``DiffuseSource``
+and ``CompositeSource``. Optional attributes include:
+
+* ``id``, specifying an identifier string for a model that can be used to tie
+  the source model to one or several observations;,
+* ``ts``, specifying the Test Statistic value of the source model component, and
+* ``tscalc``, specifying whether the Test Statistic value should be computed
+  in a maximum-likelihood computation.
+
+.. code-block:: xml
+
+  <?xml version="1.0" standalone="no"?>
+  <source_library title="source library">
+    <source name="Crab" type="PointSource">
+      <spatialModel type="PointSource">
+        <parameter name="RA"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+        <parameter name="DEC" scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      </spatialModel>
+      <spectrum type="PowerLaw">
+        <parameter name="Prefactor"   scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+        <parameter name="Index"       scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+        <parameter name="PivotEnergy" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
+      </spectrum>
+      <temporalModel type="Constant">
+        <parameter name="Normalization" scale="1.0" value="1.0" min="0.1" max="10.0" free="0"/>
+      </temporalModel>
+    </source>
+  </source_library>
+
+To accomodate for possible calibration biases for different instruments,
+instrument specific scaling factors can be specified as part of a model.
+In the example below, the model will be multiplied by a factor of 1 for ``LAT``
+and a factor of 0.5 for ``CTA``.
+
+.. code-block:: xml
+
+  <?xml version="1.0" standalone="no"?>
+  <source_library title="source library">
+    <source name="Crab" type="PointSource">
+      ...
+      <scaling>
+        <instrument name="LAT" scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
+        <instrument name="CTA" scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
+      </scaling>
+    </source>
+  </source_library>
 
 
 Spatial components
@@ -316,6 +351,45 @@ format:
   </source>
 
 
+Composite model
+===============
+
+Spatial model components can be combined into a single model using the
+:doxy:`GModelSpatialComposite class`. The class computes
+
+.. math::
+   M_{\rm spatial}(p|E,t) = \frac{1}{N} \sum_{i=0}^{N-1} M_{\rm spatial}^{(i)}(p|E,t)
+
+where :math:`M_{\rm spatial}^{(i)}(p|E,t)` is any spatial model component
+(including another composite model), and :math:`N` is the number of
+model components that are combined.
+
+An example of an XML file for a composite spatial model is shown below. In
+this example, a point source is added to a radial Gaussian source to form
+a composite spatial model. All spatial parameters of the composite model are
+fitted.
+
+.. code-block:: xml
+
+  <source name="Crab" type="CompositeSource">
+    <spatialModel type="Composite">
+      <spatialModel type="PointSource" component="PointSource">
+        <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+        <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      </spatialModel>
+      <spatialModel type="RadialGaussian">
+        <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+        <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+        <parameter name="Sigma" scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
+      </spatialModel>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+
+
 Spectral components
 ^^^^^^^^^^^^^^^^^^^
 
@@ -383,9 +457,6 @@ differential flux values.
 The energy values are assumed to be in units of MeV, the flux values are
 normally assumed to be in units of
 :math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1}`.
-The only exception to this rule is the isotropic diffuse model
-:doxy:`GModelSpatialDiffuseConst` for which the flux values are given
-in units of :math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1} {\rm sr}^{-1}`.
 
 The only parameter of the model is a multiplicative normalization:
 
@@ -445,17 +516,17 @@ format:
     <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
-An alternative power law function is defined by the :doxy:`GModelSpectralPlaw2`
-class that uses the integral photon flux as parameter rather than the
-Prefactor:
+An alternative power law function is defined by the
+:doxy:`GModelSpectralPlawPhotonFlux` class that uses the integral photon flux
+as parameter rather than the ``Prefactor``:
 
 .. math::
-    \frac{dN}{dE} = \frac{N(\gamma+1)E^{\gamma}}
+    \frac{dN}{dE} = \frac{F_{\rm ph}(\gamma+1)E^{\gamma}}
                          {E_{\rm max}^{\gamma+1} - E_{\rm min}^{\gamma+1}}
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`N` = ``PhotonFlux``
+* :math:`F_{\rm ph}` = ``PhotonFlux``
 * :math:`\gamma` = ``Index``
 * :math:`E_{\rm min}` = ``LowerLimit``
 * :math:`E_{\rm max}` = ``UpperLimit``
@@ -466,9 +537,9 @@ is:
 .. code-block:: xml
 
    <spectrum type="PowerLaw">
-    <parameter scale="1e-07" name="PhotonFlux" min="1e-07" max="1000.0"    value="1.0" free="1"/>
-    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
-    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+    <parameter scale="1e-07" name="PhotonFlux" min="1e-07" max="1000.0"    value="1.0"      free="1"/>
+    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0"     free="1"/>
+    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0"    free="0"/>
     <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
    </spectrum>
 
@@ -478,20 +549,56 @@ format:
 .. code-block:: xml
 
    <spectrum type="PowerLaw2">
-    <parameter scale="1e-07" name="Intergal"   min="1e-07" max="1000.0"    value="1.0" free="1"/>
-    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
-    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+    <parameter scale="1e-07" name="Intergal"   min="1e-07" max="1000.0"    value="1.0"      free="1"/>
+    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0"     free="1"/>
+    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0"    free="0"/>
     <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
    </spectrum>
 
 .. note::
 
-   The UpperLimit and LowerLimit parameters are always treated as fixed and,
-   as should be apparent from this definition, the flux given by the Integral
-   parameter is over the range (LowerLimit, UpperLimit). Use of this model
-   allows the errors on the integrated flux to be evaluated directly by
-   likelihood, obviating the need to propagate the errors if one is using
-   the PowerLaw form.
+   The ``UpperLimit`` and ``LowerLimit`` parameters are always treated as fixed
+   and, as should be apparent from this definition, the flux given by the
+   ``PhotonFlux`` parameter is over the range [``LowerLimit``, ``UpperLimit``].
+   Use of this model allows the errors on the integrated photon flux to be
+   evaluated directly by likelihood, obviating the need to propagate the errors
+   if one is using the PowerLaw form.
+
+Another alternative power law function is defined by the
+:doxy:`GModelSpectralPlawEnergyFlux` class that uses the integral energy flux
+as parameter rather than the ``Prefactor``:
+
+.. math::
+    \frac{dN}{dE} = \frac{F_{\rm E}(\gamma+2)E^{\gamma}}
+                         {E_{\rm max}^{\gamma+2} - E_{\rm min}^{\gamma+2}}
+
+where the parameters in the XML definition have the following mappings:
+
+* :math:`F_{\rm E}` = ``EnergyFlux``
+* :math:`\gamma` = ``Index``
+* :math:`E_{\rm min}` = ``LowerLimit``
+* :math:`E_{\rm max}` = ``UpperLimit``
+
+The XML format for specifying a power law defined by the integral energy flux
+is:
+
+.. code-block:: xml
+
+   <spectrum type="PowerLaw">
+    <parameter scale="1e-07" name="EnergyFlux" min="1e-07" max="1000.0"    value="1.0"      free="1"/>
+    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0"     free="1"/>
+    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0"    free="0"/>
+    <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
+   </spectrum>
+
+.. note::
+
+   The ``UpperLimit`` and ``LowerLimit`` parameters are always treated as fixed
+   and, as should be apparent from this definition, the flux given by the
+   ``EnergyFlux`` parameter is over the range [``LowerLimit``, ``UpperLimit``].
+   Use of this model allows the errors on the integrated energy flux to be
+   evaluated directly by likelihood, obviating the need to propagate the errors
+   if one is using the PowerLaw form.
 
 
 Exponentially cut-off power law
@@ -532,6 +639,33 @@ format:
     <parameter name="Index"     scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
     <parameter name="Cutoff"    scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="1"/>
     <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
+   </spectrum>
+
+An alternative exponentially cut-off power law function is defined by the 
+:doxy:`GModelSpectralExpInvPlaw` class which makes use of the inverse of the 
+cut-off energy for function parametrisation:
+
+.. math::
+    \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma}
+                    \exp \left( -\lambda E \right)
+
+where the parameters in the XML definition have the following mappings:
+
+* :math:`k_0` = ``Prefactor``
+* :math:`\gamma` = ``Index``
+* :math:`E_0` = ``PivotEnergy``
+* :math:`\lambda` = ``InverseCutoffEnergy``
+
+The XML format for specifying an exponentially cut-off power law using this 
+alternative parametrisation is:
+
+.. code-block:: xml
+
+   <spectrum type="ExponentialCutoffPowerLaw">
+    <parameter name="Prefactor"           scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index"               scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="InverseCutoffEnergy" scale="1e-6"  value="1.0"  min="0.0"   max="100.0"  free="1"/>
+    <parameter name="PivotEnergy"         scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
 
@@ -695,6 +829,71 @@ where
 * ``beta`` = -``Curvature``
 
 
+Composite model
+===============
+
+Spectral model components can be combined into a single model using the
+:doxy:`GModelSpectralComposite class`. The class computes
+
+.. math::
+   M_{\rm spectral}(E | t) = \sum_{i=0}^{N-1} M_{\rm spectral}^{(i)}(E | t)
+
+where :math:`M_{\rm spectral}^{(i)}(E | t)` is any spectral model component
+(including another composite model), and :math:`N` is the number of
+model components that are combined.
+
+The XML format for specifying a composite spectral model is:
+
+.. code-block:: xml
+
+    <spectrum type="Composite">
+      <spectrum type="PowerLaw" component="SoftComponent">     
+        <parameter name="Prefactor"   scale="1e-17" value="3"  min="1e-07" max="1000.0" free="1"/>
+        <parameter name="Index"       scale="-1"    value="3.5" min="0.0"   max="+5.0"   free="1"/>
+        <parameter name="PivotEnergy" scale="1e6"   value="1"  min="0.01"  max="1000.0" free="0"/>
+      </spectrum>
+      <spectrum type="PowerLaw" component="HardComponent">     
+        <parameter name="Prefactor"   scale="1e-17" value="5"  min="1e-07" max="1000.0" free="1"/>
+        <parameter name="Index"       scale="-1"    value="2.0" min="0.0"   max="+5.0"   free="1"/>
+        <parameter name="PivotEnergy" scale="1e6"   value="1"  min="0.01"  max="1000.0" free="0"/>
+      </spectrum>
+    </spectrum>
+
+
+Multiplicative model
+====================
+
+Another composite spectral model is the multiplicative spectral model that is
+implemented by the :doxy:`GModelSpectralMultiplicative class`. The class
+computes
+
+.. math::
+   M_{\rm spectral}(E | t) = \prod_{i=0}^{N-1} M_{\rm spectral}^{(i)}(E | t)
+
+where :math:`M_{\rm spectral}^{(i)}(E | t)` is any spectral model component
+(including another composite or multiplicative model), and :math:`N` is the
+number of model components that are multiplied. This model can for example
+be used to model any kind of gamma-ray absorption.
+
+The XML format for specifying a multiplicative spectral model is:
+
+.. code-block:: xml
+
+    <spectrum type="Multiplicative">
+      <spectrum type="PowerLaw">
+        <parameter name="Prefactor"   scale="1e-17" value="1.0"  min="1e-07" max="1000.0" free="1"/>
+        <parameter name="Index"       scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+        <parameter name="PivotEnergy" scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
+      </spectrum>
+      <spectrum type="ExponentialCutoffPowerLaw">
+        <parameter name="Prefactor"    scale="1.0" value="1.0" min="1e-07" max="1000.0" free="0"/>
+        <parameter name="Index"        scale="1.0" value="0.0" min="-2.0"  max="+2.0"   free="0"/>
+        <parameter name="CutoffEnergy" scale="1e6" value="1.0" min="0.01"  max="1000.0" free="1"/>
+        <parameter name="PivotEnergy"  scale="1e6" value="1.0" min="0.01"  max="1000.0" free="0"/>
+      </spectrum>
+    </spectrum>
+
+
 Temporal components
 ^^^^^^^^^^^^^^^^^^^
 
@@ -715,3 +914,13 @@ The XML format for specifying a constant temporal model is:
 
 Background models
 ~~~~~~~~~~~~~~~~~
+
+Background models differ from sky models in that those models are not convolved
+with the instrument response function, and directly provide the number of
+predicted background counts as function of measured event properties.
+Background models need to be implemented in the instrument specific models.
+All background models derive from the abstract :doxy:`GModelData` base
+class.
+
+
+

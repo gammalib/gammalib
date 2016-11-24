@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialElliptical.cpp - Abstract elliptical spatial model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -161,43 +161,25 @@ GModelSpatialElliptical& GModelSpatialElliptical::operator=(const GModelSpatialE
  * @brief Return model value
  *
  * @param[in] photon Incident Photon.
+ * @param[in] gradients Compute gradients?
+ * @return Value of spatial elliptical model.
  *
  * Evaluates the elliptical spatial model value for a specific incident
  * @p photon.
+ *
+ * If the @p gradients flag is true the method will also compute the
+ * parameter gradients for all model parameters.
  ***************************************************************************/
-double GModelSpatialElliptical::eval(const GPhoton& photon) const
+double GModelSpatialElliptical::eval(const GPhoton& photon,
+                                     const bool&    gradients) const
 {
     // Compute distance from source and position angle (in radians)
     const GSkyDir& srcDir = photon.dir();
-    double theta          = dir().dist(srcDir);
-    double posang         = dir().posang(srcDir);
+    double         theta  = dir().dist(srcDir);
+    double         posang = dir().posang(srcDir);
 
     // Evaluate model
-    double value = eval(theta, posang, photon.energy(), photon.time());
-
-    // Return result
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Return model value and set analytical gradients
- *
- * @param[in] photon Incident Photon.
- *
- * Evaluates the elliptical spatial model value and analytical model
- * parameter gradients for a specific incident @p photon.
- ***************************************************************************/
-double GModelSpatialElliptical::eval_gradients(const GPhoton& photon) const
-{
-    // Compute distance from source and position angle (in radians)
-    const GSkyDir& srcDir = photon.dir();
-    double theta          = dir().dist(srcDir);
-    double posang         = dir().posang(srcDir);
-
-    // Evaluate model and set gradients
-    double value = eval_gradients(theta, posang, photon.energy(),
-                                  photon.time());
+    double value = eval(theta, posang, photon.energy(), photon.time(), gradients);
 
     // Return result
     return value;

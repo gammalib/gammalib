@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GModelSpectralPlaw2.i - Spectral power law model class          *
+ *    GModelSpectralPlawPhotonFlux.i - Spectral power law model class      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,61 +19,60 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpectralPlaw2.i
+ * @file GModelSpectralPlawPhotonFlux.i
  * @brief Flux normalized power law spectral model class Python interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelSpectralPlaw2.hpp"
+#include "GModelSpectralPlawPhotonFlux.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelSpectralPlaw2
+ * @class GModelSpectralPlawPhotonFlux
  *
  * @brief Flux normalized power law spectral model class
  ***************************************************************************/
-class GModelSpectralPlaw2 : public GModelSpectral {
+class GModelSpectralPlawPhotonFlux : public GModelSpectral {
 public:
     // Constructors and destructors
-    GModelSpectralPlaw2(void);
-    GModelSpectralPlaw2(const std::string& type,
-                        const std::string& integral,
-                        const std::string& index,
-                        const std::string& emin,
-                        const std::string& emax);
-    GModelSpectralPlaw2(const double&  integral,
-                        const double&  index,
-                        const GEnergy& emin,
-                        const GEnergy& emax);
-    explicit GModelSpectralPlaw2(const GXmlElement& xml);
-    GModelSpectralPlaw2(const GModelSpectralPlaw2& model);
-    virtual ~GModelSpectralPlaw2(void);
+    GModelSpectralPlawPhotonFlux(void);
+    GModelSpectralPlawPhotonFlux(const std::string& type,
+                                 const std::string& flux,
+                                 const std::string& index,
+                                 const std::string& emin,
+                                 const std::string& emax);
+    GModelSpectralPlawPhotonFlux(const double&  flux,
+                                 const double&  index,
+                                 const GEnergy& emin,
+                                 const GEnergy& emax);
+    explicit GModelSpectralPlawPhotonFlux(const GXmlElement& xml);
+    GModelSpectralPlawPhotonFlux(const GModelSpectralPlawPhotonFlux& model);
+    virtual ~GModelSpectralPlawPhotonFlux(void);
 
     // Implemented pure virtual methods
-    virtual void                 clear(void);
-    virtual GModelSpectralPlaw2* clone(void) const;
-    virtual std::string          classname(void) const;
-    virtual std::string          type(void) const;
-    virtual double               eval(const GEnergy& srcEng,
-                                      const GTime&   srcTime = GTime()) const;
-    virtual double               eval_gradients(const GEnergy& srcEng,
-                                                const GTime&   srcTime = GTime());
-    virtual double               flux(const GEnergy& emin,
-                                      const GEnergy& emax) const;
-    virtual double               eflux(const GEnergy& emin,
-                                       const GEnergy& emax) const;
-    virtual GEnergy              mc(const GEnergy& emin,
-                                    const GEnergy& emax,
-                                    const GTime&   time,
-                                    GRan&          ran) const;
-    virtual void                 read(const GXmlElement& xml);
-    virtual void                 write(GXmlElement& xml) const;
+    virtual void                          clear(void);
+    virtual GModelSpectralPlawPhotonFlux* clone(void) const;
+    virtual std::string                   classname(void) const;
+    virtual std::string                   type(void) const;
+    virtual double                        eval(const GEnergy& srcEng,
+                                               const GTime&   srcTime = GTime(),
+                                               const bool&    gradients = false) const;
+    virtual double                        flux(const GEnergy& emin,
+                                               const GEnergy& emax) const;
+    virtual double                        eflux(const GEnergy& emin,
+                                                const GEnergy& emax) const;
+    virtual GEnergy                       mc(const GEnergy& emin,
+                                             const GEnergy& emax,
+                                             const GTime&   time,
+                                             GRan&          ran) const;
+    virtual void                          read(const GXmlElement& xml);
+    virtual void                          write(GXmlElement& xml) const;
 
     // Other methods
-    double  integral(void) const;
-    void    integral(const double& integral);
+    double  flux(void) const;
+    void    flux(const double& flux);
     double  index(void) const;
     void    index(const double& index);
     GEnergy emin(void) const;
@@ -84,10 +83,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GModelSpectralPlaw2 class extension
+ * @brief GModelSpectralPlawPhotonFlux class extension
  ***************************************************************************/
-%extend GModelSpectralPlaw2 {
-    GModelSpectralPlaw2 copy() {
+%extend GModelSpectralPlawPhotonFlux {
+    GModelSpectralPlawPhotonFlux copy() {
         return (*self);
     }
 };

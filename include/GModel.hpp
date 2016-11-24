@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.hpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,11 +46,10 @@ class GObservation;
  *
  * @brief Abstract model class
  *
- * This class implements a parametric model. The class has two methods for
- * model evaluation: eval() and eval_gradients().
- * The eval() method evaluates the model for a given event and observation.
- * In addition, eval_gradients() also sets the parameter gradients of the
- * model.
+ * This class implements a parametric model. The eval() method evaluates the
+ * model for a given event and observation. If the gradients parameter is set
+ * to true, the eval() method also computes analytical parameter gradients if
+ * they exist.
  *
  * A model has the following attributes:
  * - @p name
@@ -118,9 +117,8 @@ public:
     virtual std::string type(void) const = 0;
     virtual bool        is_constant(void) const = 0;
     virtual double      eval(const GEvent& event,
-                             const GObservation& obs) const = 0;
-    virtual double      eval_gradients(const GEvent& event,
-                                       const GObservation& obs) const = 0;
+                             const GObservation& obs,
+                             const bool& gradients = false) const = 0;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;

@@ -37,6 +37,9 @@
 #include "GXmlElement.hpp"
 #include "GRan.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GSkyRegion;
+
 
 /***********************************************************************//**
  * @class GModelSpatialDiffuse
@@ -62,14 +65,15 @@ public:
     virtual GModelSpatialDiffuse* clone(void) const = 0;
     virtual std::string           classname(void) const = 0;
     virtual std::string           type(void) const = 0;
-    virtual double                eval(const GPhoton& photon) const = 0;
-    virtual double                eval_gradients(const GPhoton& photon) const = 0;
+    virtual double                eval(const GPhoton& photon,
+                                       const bool& gradients = false) const = 0;
     virtual GSkyDir               mc(const GEnergy& energy, const GTime& time,
                                      GRan& ran) const = 0;
     virtual double                mc_norm(const GSkyDir& dir,
                                           const double&  radius) const = 0;
     virtual bool                  contains(const GSkyDir& dir,
                                            const double&  margin = 0.0) const = 0;
+    virtual GSkyRegion*           region(void) const = 0;
     virtual void                  read(const GXmlElement& xml) = 0;
     virtual void                  write(GXmlElement& xml) const = 0;
     virtual std::string           print(const GChatter& chatter = NORMAL) const = 0;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GMatrixSparse.cpp - Test sparse matrix class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1277,8 +1277,7 @@ void TestGMatrixSparse::matrix_print(void)
  
     // Test the print method
     std::string output = m_test.print();
-    test_assert((output == reference), "Test matrix printing",
-                "Unexpected print() output:\n"+output+"\nExpected:\n"+reference);
+    test_value(output, reference);
 
     // Allocate big matrix
     GMatrixSparse big(30, 40);
@@ -1297,7 +1296,7 @@ void TestGMatrixSparse::matrix_print(void)
     ref_big.append(" Pending element ...........: (29,39)=68\n");
     ref_big.append(" Number of allocated cells .: 1536\n");
     ref_big.append(" Memory block size .........: 512\n");
-    ref_big.append(" Sparse matrix fill ........: 0.999167\n");
+    ref_big.append(" Sparse matrix fill ........: 0.999166666666667\n");
     ref_big.append(" Pending element ...........: 68\n");
     ref_big.append(" Fill stack size ...........: 0 (none)\n");
     ref_big.append(" 0, 1, 2, 3, 4, 5, 6, ... 33, 34, 35, 36, 37, 38, 39\n");
@@ -1318,8 +1317,7 @@ void TestGMatrixSparse::matrix_print(void)
  
     // Test the print method
     output = big.print();
-    test_assert((output == ref_big), "Test big matrix printing",
-                "Unexpected print() output:\n"+output+"\nExpected:\n"+ref_big);
+    test_value(output, ref_big);
 
     // Return
     return;

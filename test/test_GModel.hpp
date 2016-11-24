@@ -58,17 +58,22 @@ public:
     void                test_radial_shell(void);
     void                test_elliptical_disk(void);
     void                test_elliptical_gauss(void);
+    void                test_spatial_composite(void);
     void                test_spatial_model(void);
     void                test_const(void);
     void                test_gauss(void);
     void                test_plaw(void);
-    void                test_plaw2(void);
+    void                test_plaw_phflux(void);
+    void                test_plaw_eflux(void);
     void                test_eplaw(void);
+    void                test_einvplaw(void);
     void                test_bplaw(void);
     void                test_supeplaw(void);
     void                test_logparabola(void);
+    void                test_multiplicative(void);
     void                test_nodes(void);
     void                test_filefct(void);
+    void                test_spectral_composite(void);
     void                test_spectral_model(void);
     void                test_temp_const(void);
     void                test_model(void);
@@ -102,13 +107,17 @@ private:
     std::string m_xml_model_point_const;
     std::string m_xml_model_point_gauss;
     std::string m_xml_model_point_plaw;
-    std::string m_xml_model_point_plaw2;
+    std::string m_xml_model_point_plaw_phflux;
+    std::string m_xml_model_point_plaw_eflux;
     std::string m_xml_model_point_eplaw;
+    std::string m_xml_model_point_einvplaw;
     std::string m_xml_model_point_bplaw;
     std::string m_xml_model_point_supeplaw;
     std::string m_xml_model_point_logparabola;
+    std::string m_xml_point_multiplicative;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_point_filefct;
+    std::string m_xml_model_spectral_composite;
     std::string m_xml_model_diffuse_const;
     std::string m_xml_model_diffuse_cube;
     std::string m_xml_model_diffuse_map;
@@ -117,6 +126,7 @@ private:
     std::string m_xml_model_radial_shell;
     std::string m_xml_model_elliptical_disk;
     std::string m_xml_model_elliptical_gauss;
+    std::string m_xml_model_spatial_composite;
 
     // Legacy model definition XML files
     std::string m_xml_legacy_radial_disk;

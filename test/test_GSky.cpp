@@ -876,6 +876,24 @@ void TestGSky::test_GSkyMap(void)
     system("rm -rf test_map_src.fits");
     system("rm -rf test_map_dst.fits");
     system("rm -rf test_map_shape*.fits");
+
+    // Define empty sky map
+    GSkyMap empty_map;
+ 
+    // Test that empty map is indeed empty
+	test_assert(empty_map.is_empty(), "Check for empty sky map");
+	test_value(empty_map.nmaps(), 0, "Check for no sky maps");
+	test_value(empty_map.npix(), 0, "Check number of empty sky map pixels");
+	test_value(empty_map.nx(), 0, "Check number of empty sky map X pixels");
+	test_value(empty_map.ny(), 0, "Check number of empty sky map X pixels");
+	test_value(empty_map.ndim(), 0, "Check empty sky map dimension");
+	test_value(empty_map.shape().size(), 0, "Check empty sky map shape");
+ 
+    // Test that writing, publishing and printing of empty sky map does not
+    // lead to a segmentation fault
+    empty_map.save("test_empty_map.fits", true);
+    empty_map.publish("Empty sky map");
+    empty_map.print();
  
     // Define several maps for comparison
     GSkyMap map_src("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 2);

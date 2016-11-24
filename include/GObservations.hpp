@@ -157,6 +157,8 @@ public:
         void          set(GObservations* obs);
         double        npred(void) const;
         GMatrixSparse hessian(const GOptimizerPars& pars);
+        GMatrixSparse covariance(void) const;
+        void          save(const GFilename& filename) const;
 
     protected:
         // Protected methods
@@ -165,11 +167,11 @@ public:
         void           free_members(void);
 
         // Protected data members
-        double         m_value;       //!< Function value
-        double         m_npred;       //!< Total number of predicted events
-        GVector*       m_gradient;    //!< Pointer to gradient vector
-        GMatrixSparse* m_curvature;   //!< Pointer to curvature matrix
-        GObservations* m_this;        //!< Pointer to GObservations object
+        double         m_value;     //!< Function value
+        double         m_npred;     //!< Total number of predicted events
+        GVector*       m_gradient;  //!< Pointer to gradient vector
+        GMatrixSparse* m_curvature; //!< Pointer to curvature matrix
+        GObservations* m_this;      //!< Pointer to GObservations object
     };
 
     // Optimizer function access method

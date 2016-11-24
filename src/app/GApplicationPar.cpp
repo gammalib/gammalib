@@ -414,18 +414,8 @@ void GApplicationPar::real(const double& value)
         throw GException::invalid_value(G_REAL_SET, msg);
     }
 
-    // Set value string at highest precision
-    std::string value_string = gammalib::str(value, 15);
-
-    // Strip trailing zeros
-    std::string::size_type start = 0;
-    std::string::size_type stop = value_string.find_last_not_of("0");
-    if (stop != std::string::npos) {
-        if (start <= stop) {
-            std::string tmp = value_string.substr(start, stop-start+1);
-            value_string    = tmp;
-        }
-    }
+    // Set value string
+    std::string value_string = gammalib::str(value);
 
     // Set value
     set_value(value_string);

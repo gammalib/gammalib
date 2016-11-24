@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelTemporalConst.i - Temporal constant model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,10 +48,12 @@ public:
     virtual GModelTemporalConst* clone(void) const;
     virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
-    virtual double               eval(const GTime& srcTime) const;
-    virtual double               eval_gradients(const GTime& srcTime);
-    virtual GTimes               mc(const double& rate, const GTime& tmin,
-                                    const GTime& tmax, GRan& ran) const;
+    virtual double               eval(const GTime& srcTime,
+                                      const bool&  gradients = false) const;
+    virtual GTimes               mc(const double& rate,
+                                    const GTime&  tmin,
+                                    const GTime&  tmax,
+                                    GRan&         ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
 

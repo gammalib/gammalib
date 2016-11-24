@@ -254,34 +254,7 @@ GModelSpectralConst* GModelSpectralConst::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Evaluates
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- * \f]
- *
- * where
- * \f${\tt m\_norm}\f$ is the normalization constant in units of 
- * ph/cm2/s/MeV.
- ***************************************************************************/
-double GModelSpectralConst::eval(const GEnergy& srcEng,
-                                 const GTime&   srcTime) const
-{
-    // Compute function value
-    double value = m_norm.value();
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate model value and gradient
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Evaluates
@@ -294,25 +267,30 @@ double GModelSpectralConst::eval(const GEnergy& srcEng,
  * \f${\tt m\_norm}\f$ is the normalization constant in units of 
  * ph/cm2/s/MeV.
  *
- * The method also evaluates the partial derivative of the model with respect
- * to the m_norm parameter using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} = 1
  * \f]
  ***************************************************************************/
-double GModelSpectralConst::eval_gradients(const GEnergy& srcEng,
-                                           const GTime&   srcTime)
+double GModelSpectralConst::eval(const GEnergy& srcEng,
+                                 const GTime&   srcTime,
+                                 const bool&    gradients) const
 {
     // Compute function value
     double value = m_norm.value();
 
-    // Compute partial derivatives of the parameter values
-    double g_norm = (m_norm.is_free()) ? m_norm.scale() : 0.0;
+    // Optionally compute gradients
+    if (gradients) {
 
-    // Set factor gradient (the parameter gradient is obtained by dividing
-    // the factor gradient by the scale factor)
-    m_norm.factor_gradient(g_norm);
+        // Compute partial derivatives of the parameter values
+        double g_norm = (m_norm.is_free()) ? m_norm.scale() : 0.0;
+
+        // Set factor gradient
+        m_norm.factor_gradient(g_norm);
+
+    } // endif: gradient computation was requested
 
     // Return
     return value;

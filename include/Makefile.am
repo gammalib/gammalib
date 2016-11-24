@@ -44,6 +44,9 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GDerivative.hpp \
                      GFunction.hpp \
                      GMath.hpp \
+                     GNdarray.hpp \
+                     GFft.hpp \
+                     GFftWavetable.hpp \
                      GFits.hpp \
                      GFitsHDU.hpp \
                      GFitsHeader.hpp \
@@ -85,6 +88,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GXmlPI.hpp \
                      GVOClient.hpp \
                      GVOHub.hpp \
+                     GVOTable.hpp \
                      GPha.hpp \
                      GArf.hpp \
                      GRmf.hpp \
@@ -164,18 +168,23 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialDiffuseConst.hpp \
                      GModelSpatialDiffuseCube.hpp \
                      GModelSpatialDiffuseMap.hpp \
+                     GModelSpatialComposite.hpp \
                      GModelSpectral.hpp \
                      GModelSpectralRegistry.hpp \
                      GModelSpectralBrokenPlaw.hpp \
                      GModelSpectralConst.hpp \
+                     GModelSpectralExpInvPlaw.hpp \
                      GModelSpectralExpPlaw.hpp \
                      GModelSpectralSuperExpPlaw.hpp \
                      GModelSpectralFunc.hpp \
                      GModelSpectralGauss.hpp \
                      GModelSpectralLogParabola.hpp \
+                     GModelSpectralMultiplicative.hpp \
                      GModelSpectralNodes.hpp \
                      GModelSpectralPlaw.hpp \
-                     GModelSpectralPlaw2.hpp \
+                     GModelSpectralPlawPhotonFlux.hpp \
+                     GModelSpectralPlawEnergyFlux.hpp \
+                     GModelSpectralComposite.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalRegistry.hpp \
                      GModelTemporalConst.hpp

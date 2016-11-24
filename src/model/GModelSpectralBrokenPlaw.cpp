@@ -90,8 +90,9 @@ GModelSpectralBrokenPlaw::GModelSpectralBrokenPlaw(void) : GModelSpectral()
  *
  * @param[in] type Model type.
  * @param[in] prefactor Name of prefactor parameter.
- * @param[in] index Name of index parameter.
- * @param[in] pivot Name of pivot parameter.
+ * @param[in] index1 Name of index1 parameter.
+ * @param[in] breakenergy Name of breakenergy parameter.
+ * @param[in] index2 Name of index2 parameter.
  ***************************************************************************/
 GModelSpectralBrokenPlaw::GModelSpectralBrokenPlaw(const std::string& type,
                                                    const std::string& prefactor,
@@ -287,6 +288,7 @@ GModelSpectralBrokenPlaw* GModelSpectralBrokenPlaw::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Evaluates
@@ -301,60 +303,8 @@ GModelSpectralBrokenPlaw* GModelSpectralBrokenPlaw::clone(void) const
  * - \f${\tt m\_index}\f$ is the spectral index, and
  * - \f${\tt m\_breakenergy}\f$ is the breakenergy energy.
  *
- * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
- ***************************************************************************/
-double GModelSpectralBrokenPlaw::eval(const GEnergy& srcEng,
-                                      const GTime&   srcTime) const
-{
-    // Update the evaluation cache
-    update_eval_cache(srcEng);
-
-    // Compute function value
-    double value = m_norm.value() * m_last_power;
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralBrokenPlaw::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", m_norm=" << m_norm.value();
-        std::cout << ", m_index1=" << m_index1.value();
-        std::cout << ", m_breakenergy=" << m_breakenergy.value();
-        std::cout << ", m_index2=" << m_index2.value();
-        std::cout << ", m_last_power=" << m_last_power;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Evaluates
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- *    \left( \frac{E}{\tt m\_breakenergy} \right)^{\tt m\_index}
- * \f]
- *
- * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
- * - \f${\tt m\_index}\f$ is the spectral index, and
- * - \f${\tt m\_breakenergy}\f$ is the breakenergy energy.
- *
- * The method also evaluates the partial derivatives of the model with
- * respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
@@ -374,8 +324,9 @@ double GModelSpectralBrokenPlaw::eval(const GEnergy& srcEng,
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
-double GModelSpectralBrokenPlaw::eval_gradients(const GEnergy& srcEng,
-                                                const GTime&   srcTime)
+double GModelSpectralBrokenPlaw::eval(const GEnergy& srcEng,
+                                      const GTime&   srcTime,
+                                      const bool&    gradients) const
 {
     // Update the evaluation cache
     update_eval_cache(srcEng);
@@ -383,46 +334,52 @@ double GModelSpectralBrokenPlaw::eval_gradients(const GEnergy& srcEng,
     // Compute function value
     double value = m_norm.value() * m_last_power;
 
-    // Compute normalisation gradient
-    double g_norm  = (m_norm.is_free())
-                     ? m_norm.scale() * m_last_power : 0.0;
-    m_norm.factor_gradient(g_norm);
+    // Optionally compute gradients
+    if (gradients) {
 
-    // Compute index and break value gradients
-    if (srcEng.MeV() < m_breakenergy.value()) {
-        double g_index = (m_index1.is_free()) 
-                         ? value * m_index1.scale() * m_last_log_e_norm
-                         : 0.0;
-        double g_break = (m_breakenergy.is_free())
-                         ? -value * m_last_index1 / m_breakenergy.factor_value()
-                         : 0.0;
-        m_index1.factor_gradient(g_index);
-        m_index2.factor_gradient(0.0);
-        m_breakenergy.factor_gradient(g_break);
-    }
-    else {
-        double g_index = (m_index2.is_free()) 
-                         ? value * m_index2.scale() * m_last_log_e_norm
-                         : 0.0;
-        double g_break = (m_breakenergy.is_free())
-                         ? -value * m_last_index2 / m_breakenergy.factor_value()
-                         : 0.0;
-        m_index1.factor_gradient(0.0);
-        m_index2.factor_gradient(g_index);
-        m_breakenergy.factor_gradient(g_break);
-    }
+        // Compute normalisation gradient
+        double g_norm  = (m_norm.is_free()) ? m_norm.scale() * m_last_power : 0.0;
+        m_norm.factor_gradient(g_norm);
+
+        // Compute index and break value gradients
+        if (srcEng.MeV() < m_breakenergy.value()) {
+            double g_index = (m_index1.is_free())
+                             ? value * m_index1.scale() * m_last_log_e_norm
+                             : 0.0;
+            double g_break = (m_breakenergy.is_free())
+                             ? -value * m_last_index1 / m_breakenergy.factor_value()
+                             : 0.0;
+            m_index1.factor_gradient(g_index);
+            m_index2.factor_gradient(0.0);
+            m_breakenergy.factor_gradient(g_break);
+        }
+        else {
+            double g_index = (m_index2.is_free())
+                             ? value * m_index2.scale() * m_last_log_e_norm
+                             : 0.0;
+            double g_break = (m_breakenergy.is_free())
+                             ? -value * m_last_index2 / m_breakenergy.factor_value()
+                             : 0.0;
+            m_index1.factor_gradient(0.0);
+            m_index2.factor_gradient(g_index);
+            m_breakenergy.factor_gradient(g_break);
+        }
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralBrokenPlaw::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralBrokenPlaw::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", e_norm=" << m_last_e_norm;
-        std::cout << ", power=" << m_last_power;
-        std::cout << ", g_norm=" << g_norm;
+        std::cout << ", m_norm=" << m_norm.value();
+        std::cout << ", m_index1=" << m_index1.value();
+        std::cout << ", m_breakenergy=" << m_breakenergy.value();
+        std::cout << ", m_index2=" << m_index2.value();
+        std::cout << ", m_last_power=" << m_last_power;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -871,7 +828,7 @@ void GModelSpectralBrokenPlaw::free_members(void)
  *
  * @param[in] energy Energy.
  *
- * Updates the precomputation cache for eval() and eval_gradients() methods.
+ * Updates the precomputation cache for eval() the method.
  ***************************************************************************/
 void GModelSpectralBrokenPlaw::update_eval_cache(const GEnergy& energy) const
 {

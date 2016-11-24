@@ -167,13 +167,13 @@ or:
 
 .. _sec_response:
 
+
 Handling the instrument response
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The instrument response to incoming gamma-rays is described by the abstract
 :doxy:`GResponse` class from which an instrument specific implemention needs to
-be derived.
-The general instrument response function
+be derived. The general instrument response function
 :math:`R(p', E', t' | d, p, E, t)`
 is provided by the :doxy:`GResponse::irf(GEvent&, GPhoton&, GObservation&)` method.
 :math:`R` is defined as the effective detection area per time, energy and solid 
@@ -200,7 +200,7 @@ Energies (:math:`E'` and :math:`E`) are implemented by the :doxy:`GEnergy` class
 times (:math:`t'` and :math:`t`) are represented by the :doxy:`GTime` class.
 
 Assuming that the photon intensity received from a gamma-ray source is described
-by the source model :math:`S(p, E, t)`
+by the source model :math:`M(p, E, t)`
 (in units of :math:`photons \,\, cm^{-2} s^{-1} MeV^{-1} sr^{-1}`)
 the probability of measuring an event at position :math:`p'` with 
 energy :math:`E'` at time :math:`t'` from the source is given by
@@ -208,21 +208,22 @@ energy :math:`E'` at time :math:`t'` from the source is given by
 .. math::
     P(p', E', t'| d) = 
     \int_{0}^{t'+\Delta t} \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
-    S(p, E, t) \, R(p', E', t' | d, p, E, t)
+    M(p, E, t) \, R(p', E', t' | d, p, E, t)
     \, {\rm d}p \, {\rm d}E \,{\rm d}t
     :label: model
 
 (in units of :math:`counts \,\, s^{-1} MeV^{-1} sr^{-1}`).
 The terms :math:`\Delta t` and :math:`\Delta E` account for the statistical
 jitter related to the measurement process and are of the order of a few time
-the rms in the time and energy measurements.
+the rms in the time and energy measurements. The evaluation of this function
+is implemented by the :doxy:`GResponse::convolve` method.
 
 The integration over sky positions :math:`p`, expressed as a zenith angle
 :math:`\theta` and an azimuth angle :math:`\phi`, is given by
 
 .. math::
     P_{p}(p', E', t' | d, E, t) = 
-    \int_{\theta, \phi} S(\theta, \phi, E, t) \,
+    \int_{\theta, \phi} M(\theta, \phi, E, t) \,
     R(p', E', t' | d, \theta, \phi, E, t)
     \sin \theta \, {\rm d}\theta \, {\rm d}\phi
     :label: pirf
@@ -233,9 +234,18 @@ takes the :doxy:`GSource` class instead of the :doxy:`GPhoton` class as argument
 :doxy:`GSource` differs from :doxy:`GPhoton` in that the photon arrival direction
 :math:`p` is replaced by the spatial component :doxy:`GModelSpatial` of a source
 model.
-Equation :eq:`pirf` is used by the :doxy:`GModelSky::eval` and
-:doxy:`GModelSky::eval_gradients` methods for computation of the instrument
-response to a source model (see :ref:`fig_calltree_model`). 
+Equation :eq:`pirf` is used by the :doxy:`GModelSky::eval` method for
+computation of the instrument response to a source model.
+The following figure shows in the left panel the call tree of the model
+convolution:
+
+.. _fig_calltree_model:
+
+.. figure:: calltree_model.png
+   :width: 50%
+   :align: center
+
+   *Call tree for model evaluation and IRF convolution*
 
 A maximum likelihood analysis of the data generally needs the computation of the
 predicted number of events within the selection region for each source model.
@@ -271,7 +281,8 @@ The integration over the region of interest
     N_{\rm ROI} = \int_{\rm ROI} (p', E', t'| d) \, {\rm d}p'
 
 is provided by the 
-:doxy:`GResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)` method.
+:doxy:`GResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)` method
+(see figure above for the call tree).
 
 A final word about deadtime corrections.
 Deadtime corrections need to be taken into account at the level of the instrument

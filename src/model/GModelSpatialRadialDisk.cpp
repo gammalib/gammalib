@@ -259,6 +259,7 @@ GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
  * @param[in] theta Angular distance from disk centre (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for a disk source model using
@@ -281,10 +282,15 @@ GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
  *   sky direction of interest, and
  * - \f${\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)} \f$ is a normalization
  *   constant (see the update() method for details).
+ *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
  ***************************************************************************/
 double GModelSpatialRadialDisk::eval(const double&  theta,
                                      const GEnergy& energy,
-                                     const GTime&   time) const
+                                     const GTime&   time,
+                                     const bool&    gradients) const
 {
     // Update precomputation cache
     update();
@@ -306,29 +312,6 @@ double GModelSpatialRadialDisk::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
- *
- * @param[in] theta Angular distance from disk centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * Evaluates the function value. No gradient computation is implemented as
- * radial models will be convolved with the instrument response and thus
- * require the numerical computation of the derivatives.
- *
- * See the eval() method for more information.
- ***************************************************************************/
-double GModelSpatialRadialDisk::eval_gradients(const double&  theta,
-                                               const GEnergy& energy,
-                                               const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, energy, time));
 }
 
 
@@ -601,6 +584,9 @@ void GModelSpatialRadialDisk::init_members(void)
     m_radius_rad  = 0.0;
     m_norm        = 0.0;
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -620,6 +606,7 @@ void GModelSpatialRadialDisk::copy_members(const GModelSpatialRadialDisk& model)
     // Copy members
     m_type   = model.m_type;
     m_radius = model.m_radius;
+    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_radius = model.m_last_radius;
@@ -670,6 +657,22 @@ void GModelSpatialRadialDisk::update() const
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialDisk::set_region(void) const
+{
+    // Set sky region centre to disk centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to disk radius
+    m_region.radius(m_radius.value());
 
     // Return
     return;

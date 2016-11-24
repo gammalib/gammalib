@@ -273,6 +273,7 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  * @param[in] posangle Position angle (counterclockwise from North) (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for an elliptical Gaussian source model.
@@ -309,6 +310,10 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  *    {\tt m\_norm} = \frac{1}{2 \pi \times a \times b}
  * \f]
  *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
+ *
  * @warning
  * The above formula for an elliptical Gaussian are accurate for small
  * angles, with semimajor and semiminor axes below a few degrees. This
@@ -323,7 +328,8 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
 double GModelSpatialEllipticalGauss::eval(const double&  theta,
                                           const double&  posangle,
                                           const GEnergy& energy,
-                                          const GTime&   time) const
+                                          const GTime&   time,
+                                          const bool&    gradients) const
 {
     // Initialise value
     double value = 0.0;
@@ -382,31 +388,6 @@ double GModelSpatialEllipticalGauss::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
- *
- * @param[in] theta Angular distance from gaussian centre (radians).
- * @param[in] posangle Position angle (counterclockwise from North) (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * Evaluates the function value. No gradient computation is implemented as
- * elliptical models will be convolved with the instrument response and thus
- * require the numerical computation of the derivatives.
- *
- * See the eval() method for more information.
- ***************************************************************************/
-double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
-                                                    const double&  posangle,
-                                                    const GEnergy& energy,
-                                                    const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, posangle, energy, time));
 }
 
 
@@ -747,6 +728,9 @@ void GModelSpatialEllipticalGauss::init_members(void)
     m_term2             = 0.0;
     m_term3             = 0.0;
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -760,7 +744,8 @@ void GModelSpatialEllipticalGauss::init_members(void)
 void GModelSpatialEllipticalGauss::copy_members(const GModelSpatialEllipticalGauss& model)
 {
     // Copy members
-    m_type = model.m_type;
+    m_type   = model.m_type;
+    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_minor        = model.m_last_minor;
@@ -873,6 +858,26 @@ void GModelSpatialEllipticalGauss::update() const
 
     } // endif: something has changed
     #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialEllipticalGauss::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set maximum model radius
+    double max_radius = (semimajor() > semiminor()) ? semimajor() : semiminor();
+
+    // Set sky region radius to maximum Gaussian sigma times a scaling
+    // factor (actually 3)
+    m_region.radius(max_radius * c_theta_max);
 
     // Return
     return;

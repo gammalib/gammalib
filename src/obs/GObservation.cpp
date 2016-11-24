@@ -290,12 +290,7 @@ double GObservation::model(const GModels& models,
                 // is used, don't compute model gradients as we cannot
                 // use them. This is somehow a kluge, but makes the
                 // code faster
-                if (response()->use_edisp()) {
-                    model += mptr->eval(event, *this);
-                }
-                else {
-                    model += mptr->eval_gradients(event, *this);
-                }
+                model += mptr->eval(event, *this, !response()->use_edisp());
 
                 // Optionally determine model gradients. If the model has a
                 // gradient then use it, unless we have energy dispersion.

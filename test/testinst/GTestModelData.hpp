@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GTestModelData.hpp - Test data model class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -90,14 +90,10 @@ public:
     virtual std::string     classname(void) const { return "GTestModelData"; }
     virtual std::string     type(void) const {return "=== GTestModelData ===";}
     virtual bool            is_constant(void) const {return true;}
-    virtual double          eval(const GEvent& event,
-                                 const GObservation& obs) const { 
-                                double result = m_modelTps->eval(event.time());
-                                return result;
-                            }
-    virtual double          eval_gradients(const GEvent& event,
-                                           const GObservation& obs) const {
-                                double result = m_modelTps->eval_gradients(event.time());
+    virtual double          eval(const GEvent&       event,
+                                 const GObservation& obs,
+                                 const bool&         gradients ) const {
+                                double result = m_modelTps->eval(event.time(), gradients);
                                 return result;
                             }
     virtual double          npred(const GEnergy& obsEng, const GTime& obsTime,

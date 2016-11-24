@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GOptimizerPar.hpp - Optimizer parameter class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -122,7 +122,7 @@ public:
     const double& scale(void) const;
     void          factor_value(const double& value);
     void          factor_error(const double& error);
-    void          factor_gradient(const double& gradient);
+    void          factor_gradient(const double& gradient) const;
     void          factor_min(const double& min);
     void          factor_max(const double& max);
     void          factor_range(const double& min, const double& max);
@@ -162,18 +162,18 @@ protected:
     void free_members(void);
 
     // Proteced data members
-    std::string m_name;            //!< Parameter name
-    std::string m_unit;            //!< Parameter unit
-    double      m_factor_value;    //!< Parameter value factor
-    double      m_factor_error;    //!< Uncertainty in parameter value factor
-    double      m_factor_gradient; //!< Function gradient factor
-    double      m_factor_min;      //!< Parameter minimum factor
-    double      m_factor_max;      //!< Parameter maximum factor
-    double      m_scale;           //!< Parameter scaling (true = factor * scale)
-    bool        m_free;            //!< Parameter is free
-    bool        m_has_min;          //!< Parameter has minimum boundary
-    bool        m_has_max;          //!< Parameter has maximum boundary
-    bool        m_has_grad;         //!< Parameter has analytic gradient
+    std::string    m_name;            //!< Parameter name
+    std::string    m_unit;            //!< Parameter unit
+    double         m_factor_value;    //!< Parameter value factor
+    double         m_factor_error;    //!< Uncertainty in parameter value factor
+    double         m_factor_min;      //!< Parameter minimum factor
+    double         m_factor_max;      //!< Parameter maximum factor
+    mutable double m_factor_gradient; //!< Function gradient factor
+    double         m_scale;           //!< Parameter scaling (true = factor * scale)
+    bool           m_free;            //!< Parameter is free
+    bool           m_has_min;          //!< Parameter has minimum boundary
+    bool           m_has_max;          //!< Parameter has maximum boundary
+    bool           m_has_grad;         //!< Parameter has analytic gradient
 };
 
 
@@ -376,7 +376,7 @@ void GOptimizerPar::factor_error(const double& error)
  * Sets the parameter gradient factor.
  ***************************************************************************/
 inline
-void GOptimizerPar::factor_gradient(const double& gradient)
+void GOptimizerPar::factor_gradient(const double& gradient) const
 {
     m_factor_gradient = gradient;
     return;

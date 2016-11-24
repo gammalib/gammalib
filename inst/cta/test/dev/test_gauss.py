@@ -39,9 +39,9 @@ def gauss(dir, sigma):
     t  = GTime()
     f1 = GModelSpatialRadialGauss(s, sigma)
     f2 = GModelSpatialRadialGauss(s, sigma + dh)
-    v1 = f1.eval_gradients(GPhoton(dir, e, t))
+    v1 = f1.eval(GPhoton(dir, e, t), True)
     g1 = f1[2].gradient()
-    v2 = f2.eval_gradients(GPhoton(dir, e, t))
+    v2 = f2.eval(GPhoton(dir, e, t), True)
     g2 = f2[2].gradient()
     g  = (v2 - v1) / dh
 

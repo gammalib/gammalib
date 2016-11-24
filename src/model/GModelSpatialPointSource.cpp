@@ -278,41 +278,26 @@ GModelSpatialPointSource* GModelSpatialPointSource::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] photon Incident photon.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial part for a point source model. It implements a delta
  * function with respect to the coordinates of the source. For numerical
  * reasons, a certain tolerance is accepted (typically 0.1 arcsec, i.e. well
  * below the angular resolution of gamma-ray telescopes).
+ *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Point source parameter gradients
+ * need to be computed numerically.
  ***************************************************************************/
-double GModelSpatialPointSource::eval(const GPhoton& photon) const
+double GModelSpatialPointSource::eval(const GPhoton& photon,
+                                      const bool&    gradients) const
 {
     // Set value dependent on source distance
     double value = (photon.dir().dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] photon Incident photon.
- * @return Model value.
- *
- * Evaluates the spatial part for a point source model and the gradient.
- * It implements a delta function with respect to the coordinates of the
- * source.  For numerical reasons a certain tolerance is accepted (typically
- * 0.1 arcsec, i.e. well below the angular resolution of gamma-ray
- * telescopes).
- *
- * This method does not provide valid parameter gradients.
- ***************************************************************************/
-double GModelSpatialPointSource::eval_gradients(const GPhoton& photon) const
-{
-    // Return value
-    return (eval(photon));
 }
 
 
@@ -516,6 +501,7 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print point source information
  *
+ * @param[in] chatter Chattiness.
  * @return String containing point source information.
  ***************************************************************************/
 std::string GModelSpatialPointSource::print(const GChatter& chatter) const
@@ -616,6 +602,9 @@ void GModelSpatialPointSource::init_members(void)
     m_pars.push_back(&m_ra);
     m_pars.push_back(&m_dec);
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -629,9 +618,10 @@ void GModelSpatialPointSource::init_members(void)
 void GModelSpatialPointSource::copy_members(const GModelSpatialPointSource& model)
 {
     // Copy members
-    m_type = model.m_type;
-    m_ra   = model.m_ra;
-    m_dec  = model.m_dec;
+    m_type   = model.m_type;
+    m_ra     = model.m_ra;
+    m_dec    = model.m_dec;
+    m_region = model.m_region;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -648,6 +638,22 @@ void GModelSpatialPointSource::copy_members(const GModelSpatialPointSource& mode
  ***************************************************************************/
 void GModelSpatialPointSource::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialPointSource::set_region(void) const
+{
+    // Set sky region centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to zero
+    m_region.radius(0.0);
+
     // Return
     return;
 }

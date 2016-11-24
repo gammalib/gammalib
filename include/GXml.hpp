@@ -210,7 +210,7 @@ public:
     GXmlElement*       element(const std::string& name, const int& index);
     const GXmlElement* element(const std::string& name, const int& index) const;
     void               load(const GFilename& filename);
-    void               save(const GFilename& filename);
+    void               save(const GFilename& filename) const;
     void               read(const GUrl& url);
     void               write(GUrl& url, const int& indent = 0) const;
     std::string        print(const GChatter& chatter = NORMAL) const;

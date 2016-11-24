@@ -93,7 +93,7 @@ std::string gammalib::strip_chars(const std::string& arg,
         std::string::size_type start = arg.find_first_not_of(chars);
         std::string::size_type stop  = arg.find_last_not_of(chars);
 
-        // Continue only is start and stop are valid
+        // Continue only if start and stop are valid
         if (start != std::string::npos && stop != std::string::npos) {
 
             // Continue only if stop is larger then or equal to  start
@@ -102,6 +102,37 @@ std::string gammalib::strip_chars(const std::string& arg,
             }
 
         } // endif: start and stop were valid
+
+    } // endif: argument was not empty
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Strip trailing character from string
+ *
+ * @param[in] arg String from which character should be stripped.
+ * @param[in] chars Character(s) to be stripped.
+ * @return String with stripped characters.
+ ***************************************************************************/
+std::string gammalib::rstrip_chars(const std::string& arg,
+                                   const std::string& chars)
+{
+    // Initialise empty result string
+    std::string result;
+
+    // Continue only if argument is not empty
+    if (!arg.empty()) {
+
+        // Get stop
+        std::string::size_type stop = arg.find_last_not_of(chars);
+
+        // Continue only if stop is valid
+        if (stop != std::string::npos) {
+            result = arg.substr(0, stop+1);
+        }
 
     } // endif: argument was not empty
 
@@ -447,21 +478,36 @@ std::string gammalib::str(const long long int& value)
  * @brief Convert single precision value into string
  *
  * @param[in] value Single precision value to be converted into string.
- * @param[in] precision Floating point precision (optional).
+ * @param[in] precision Floating point precision.
  * @return String with single precision value.
+ *
+ * Converts a single precision value into a string. Any positive
+ * @p precision argument specifies the exact number of digits after the
+ * comma.
  ***************************************************************************/
 std::string gammalib::str(const float& value, const int& precision)
 {
+    // Allocate output stream
     std::ostringstream s_value;
+
+    // If specified then set the requested fixed point precision. Otherwise
+    // use a precision that should be sufficient for floating point values.
     if (precision > 0) {
         s_value.precision(precision);
         s_value.setf(std::ios::fixed, std::ios::floatfield);
     }
-    s_value << value;
-    if (precision > 0) {
-        s_value.unsetf(std::ios::floatfield);
+    else {
+        s_value.precision(7);
     }
-    return s_value.str();
+
+    // Put floating point value in stream
+    s_value << value;
+
+    // Convert to a string
+    std::string result = s_value.str();
+
+    // Return result
+    return result;
 }
 
 
@@ -469,22 +515,82 @@ std::string gammalib::str(const float& value, const int& precision)
  * @brief Convert double precision value into string
  *
  * @param[in] value Double precision value to be converted into string.
- * @param[in] precision Floating point precision (optional).
+ * @param[in] precision Floating point precision.
  * @return String with double precision value.
+ *
+ * Converts a double precision value into a string. Any positive
+ * @p precision argument specifies the exact number of digits after the
+ * comma.
  ***************************************************************************/
 std::string gammalib::str(const double& value, const int& precision)
 {
+    // Allocate output stream
     std::ostringstream s_value;
+
+    // If specified then set the requested fixed point precision. Otherwise
+    // use a precision that should be sufficient for floating point values.
     if (precision > 0) {
         s_value.precision(precision);
         s_value.setf(std::ios::fixed, std::ios::floatfield);
     }
-    s_value << value;
-    if (precision > 0) {
-        s_value.unsetf(std::ios::floatfield);
+    else {
+        s_value.precision(15);
     }
-    return s_value.str();
+
+    // Put double precision floating point value in stream
+    s_value << value;
+
+    // Convert to a string
+    std::string result = s_value.str();
+
+    // Return result
+    return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Convert complex value into string
+ *
+ * @param[in] value Complex value to be converted into string.
+ * @param[in] precision Floating point precision.
+ * @return String with complex value.
+ *
+ * Converts a complex value into a string. Any positive @p precision argument
+ * specifies the exact number of digits after the comma.
+ ***************************************************************************/
+std::string gammalib::str(const std::complex<double>& value,
+                          const int&                  precision)
+{
+    // Allocate output stream
+    std::ostringstream s_value;
+
+    // If specified then set the requested fixed point precision. Otherwise
+    // use a precision that should be sufficient for floating point values.
+    if (precision > 0) {
+        s_value.precision(precision);
+        s_value.setf(std::ios::fixed, std::ios::floatfield);
+    }
+    else {
+        s_value.precision(15);
+    }
+
+    // Put double precision floating point value in stream
+    s_value << value.real();
+    if (value.imag() < 0.0) {
+        s_value << "-";
+    }
+    else {
+        s_value << "+";
+    }
+    s_value << std::abs(value.imag()) << "j";
+
+    // Convert to a string
+    std::string result = s_value.str();
+
+    // Return result
+    return result;
+}
+
 
 
 /***********************************************************************//**
@@ -1062,8 +1168,8 @@ bool gammalib::dir_exists(const std::string& dirname)
 /***********************************************************************//**
  * @brief Checks if a substring is in a string
  *
- * @param[in] str string you want to search in.
- * @param[in] substring string you are looking for in str.
+ * @param[in] str String you want to search in.
+ * @param[in] substring String you are looking for in @p str.
  * @return True if a string contains a sub string.
  *
  * Checks if substring is contained in str
@@ -1074,9 +1180,30 @@ bool gammalib::contains(const std::string& str, const std::string& substring)
     bool result = false;
 
     // checks if substring is in str
-    if (str.find(substring) != std::string::npos){
+    if (str.find(substring) != std::string::npos) {
         result = true;
     }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks if a string is contained in a vector of strings
+ *
+ * @param[in] strings Vector of strings you want to search in.
+ * @param[in] string string you are looking for in strings.
+ * @return True if a string is contained a vector.
+ *
+ * Checks if a string is contained in a vector of strings
+ ***************************************************************************/
+bool gammalib::contains(const std::vector<std::string> strings,
+                        const std::string&             string)
+{
+    // Compute result
+    bool result = std::find(strings.begin(), strings.end(), string) !=
+                  strings.end();
 
     // Return result
     return result;

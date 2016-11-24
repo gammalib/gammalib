@@ -296,6 +296,7 @@ GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
  * Computes
@@ -312,58 +313,8 @@ GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
  * - \f${\tt m\_curvature}\f$ is the spectral curvature, and
  * - \f${\tt m\_pivot}\f$ is the pivot energy.
  *
- * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
- ***************************************************************************/
-double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
-                                       const GTime&   srcTime) const
-{
-    // Update the evaluation cache
-    update_eval_cache(srcEng);
-
-    // Compute function value
-    double value = m_norm.value() * m_last_power;
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralLogParabola::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", power=" << m_last_power;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @return Model value (ph/cm2/s/MeV).
- *
- * Computes
- *
- * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- *    \left( \frac{E}{\tt m\_pivot} \right)^{{\tt m\_index} +
- *    {\tt m\_curvature} \, \ln \frac{E}{\tt m\_pivot}}
- * \f]
- *
- * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
- * - \f${\tt m\_index}\f$ is the spectral index,
- * - \f${\tt m\_curvature}\f$ is the spectral curvature, and
- * - \f${\tt m\_pivot}\f$ is the pivot energy.
- *
- * The method also evaluates the partial derivatives of the model with
- * respect to the parameters using
+ * If the @p gradients flag is true the method will also compute the
+ * partial derivatives of the model with respect to the parameters using
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
@@ -389,8 +340,9 @@ double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
-double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng,
-                                                 const GTime&   srcTime)
+double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
+                                       const GTime&   srcTime,
+                                       const bool&    gradients) const
 {
     // Update the evaluation cache
     update_eval_cache(srcEng);
@@ -398,38 +350,38 @@ double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng,
     // Compute function value
     double value = m_norm.value() * m_last_power;
 
-    // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.is_free())
-                     ? m_norm.scale() * m_last_power : 0.0;
-    double g_index = (m_index.is_free())
-                     ? value * m_index.scale() * m_last_log_e_norm : 0.0;
-    double g_curvature = (m_curvature.is_free())
-                         ? value * m_curvature.scale() * m_last_log_e_norm * 
-                           m_last_log_e_norm : 0.0;
-    double g_pivot = (m_pivot.is_free())
-                     ? -value * (m_last_exponent + m_curvature.value() *
-                       m_last_log_e_norm) / m_pivot.factor_value() : 0.0;
+    // Optionally compute gradients
+    if (gradients) {
 
-    // Set gradients
-    m_norm.factor_gradient(g_norm);
-    m_index.factor_gradient(g_index);
-    m_curvature.factor_gradient(g_curvature);
-    m_pivot.factor_gradient(g_pivot);
+        // Compute partial derivatives of the parameter values
+        double g_norm  = (m_norm.is_free())
+                         ? m_norm.scale() * m_last_power : 0.0;
+        double g_index = (m_index.is_free())
+                         ? value * m_index.scale() * m_last_log_e_norm : 0.0;
+        double g_curvature = (m_curvature.is_free())
+                             ? value * m_curvature.scale() * m_last_log_e_norm *
+                             m_last_log_e_norm : 0.0;
+        double g_pivot = (m_pivot.is_free())
+                         ? -value * (m_last_exponent + m_curvature.value() *
+                         m_last_log_e_norm) / m_pivot.factor_value() : 0.0;
+
+        // Set gradients
+        m_norm.factor_gradient(g_norm);
+        m_index.factor_gradient(g_index);
+        m_curvature.factor_gradient(g_curvature);
+        m_pivot.factor_gradient(g_pivot);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralLogParabola::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralLogParabola::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", e_norm=" << m_last_e_norm;
         std::cout << ", power=" << m_last_power;
-        std::cout << ", g_norm=" << g_norm;
-        std::cout << ", g_index=" << g_index;
-        std::cout << ", g_curvature=" << g_curvature;
-        std::cout << ", g_pivot=" << g_pivot;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -884,7 +836,7 @@ void GModelSpectralLogParabola::free_members(void)
  *
  * @param[in] energy Energy.
  *
- * Updates the precomputation cache for eval() and eval_gradients() methods.
+ * Updates the precomputation cache for eval() method.
  ***************************************************************************/
 void GModelSpectralLogParabola::update_eval_cache(const GEnergy& energy) const
 {

@@ -28,7 +28,6 @@
 #include "GTools.hpp"
 %}
 
-
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
     const double MeV2erg    =  1.6021765e-6;
@@ -42,6 +41,8 @@ namespace gammalib {
     std::string              strip_whitespace(const std::string& arg);
     std::string              strip_chars(const std::string& arg,
                                          const std::string& chars);
+    std::string              rstrip_chars(const std::string& arg,
+                                          const std::string& chars);
     std::string              expand_env(const std::string& arg);
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);
@@ -68,6 +69,8 @@ namespace gammalib {
     bool                     is_notanumber(const double& x);
     bool                     contains(const std::string& str,
                                       const std::string& substring);
+    bool                     contains(const std::vector<std::string>& strings,
+                                      const std::string& string);
     void                     warning(const std::string& origin,
                                      const std::string& message);
     std::string              xml2str(const std::string& arg);

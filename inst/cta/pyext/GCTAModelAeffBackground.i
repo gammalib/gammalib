@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTAModelAeffBackground.i - CTA IRF background model class        *
+ *        GCTAModelAeffBackground.i - CTA Aeff background model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,21 +44,20 @@ public:
     virtual ~GCTAModelAeffBackground(void);
 
     // Implemented pure virtual methods
-    virtual void                    clear(void);
+    virtual void                     clear(void);
     virtual GCTAModelAeffBackground* clone(void) const;
-    virtual std::string             classname(void) const;
-    virtual std::string             type(void) const;
-    virtual bool                    is_constant(void) const;
-    virtual double                  eval(const GEvent& event,
-                                         const GObservation& obs) const;
-    virtual double                  eval_gradients(const GEvent& event,
-                                                   const GObservation& obs) const;
-    virtual double                  npred(const GEnergy& obsEng,
-                                          const GTime& obsTime,
-                                          const GObservation& obs) const;
-    virtual GCTAEventList*          mc(const GObservation& obs, GRan& ran) const;
-    virtual void                    read(const GXmlElement& xml);
-    virtual void                    write(GXmlElement& xml) const;
+    virtual std::string              classname(void) const;
+    virtual std::string              type(void) const;
+    virtual bool                     is_constant(void) const;
+    virtual double                   eval(const GEvent& event,
+                                          const GObservation& obs,
+                                          const bool& gradients = false) const;
+    virtual double                   npred(const GEnergy& obsEng,
+                                           const GTime& obsTime,
+                                           const GObservation& obs) const;
+    virtual GCTAEventList*           mc(const GObservation& obs, GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
 
     // Other methods
     GModelSpectral* spectral(void) const;

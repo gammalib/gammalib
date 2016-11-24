@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GNumerics.hpp - test numerics modules              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,6 +68,14 @@ public:
     virtual void           set(void);
     virtual TestGNumerics* clone(void) const;
     virtual std::string    classname(void) const { return "TestGNumerics"; }
+    void                   test_ndarray(void);
+    void                   test_fft(void);
+    void                   check_fft1(const GNdarray& array,
+                                      const GFft&     fft,
+                                      const GNdarray& back);
+    void                   check_fft2(const GNdarray& array,
+                                      const GFft&     fft,
+                                      const GNdarray& back);
     void                   test_integral(void);
     void                   test_romberg_integration(void);
     void                   test_adaptive_simpson_integration(void);

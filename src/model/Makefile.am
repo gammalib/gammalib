@@ -50,18 +50,23 @@ sources = GModelPar.cpp \
           GModelSpatialDiffuseConst.cpp \
           GModelSpatialDiffuseCube.cpp \
           GModelSpatialDiffuseMap.cpp \
+          GModelSpatialComposite.cpp \
           GModelSpectral.cpp \
           GModelSpectralRegistry.cpp \
           GModelSpectralBrokenPlaw.cpp \
           GModelSpectralConst.cpp \
+          GModelSpectralExpInvPlaw.cpp \
           GModelSpectralExpPlaw.cpp \
           GModelSpectralSuperExpPlaw.cpp \
           GModelSpectralFunc.cpp \
           GModelSpectralGauss.cpp \
           GModelSpectralLogParabola.cpp \
+          GModelSpectralMultiplicative.cpp \
           GModelSpectralNodes.cpp \
           GModelSpectralPlaw.cpp \
-          GModelSpectralPlaw2.cpp \
+          GModelSpectralPlawPhotonFlux.cpp \
+          GModelSpectralPlawEnergyFlux.cpp \
+          GModelSpectralComposite.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \

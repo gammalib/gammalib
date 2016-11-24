@@ -46,6 +46,11 @@
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAOnOffObservation.hpp"
 
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 /* __ Globals ____________________________________________________________ */
 const GCTAOnOffObservation g_onoff_obs_cta_seed;
 const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
@@ -88,7 +93,7 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
  *
  * Constructs empty On/Off observation.
  ***************************************************************************/
-GCTAOnOffObservation::GCTAOnOffObservation(void)
+GCTAOnOffObservation::GCTAOnOffObservation(void) : GObservation()
 {
     // Initialise private members
     init_members();
@@ -103,7 +108,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(void)
  *
  * @param[in] obs On/Off observation.
  ***************************************************************************/
-GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs)
+GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs) :
+                      GObservation(obs)
 { 
     // Initialise private
     init_members();
@@ -135,7 +141,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
                                            const GEbounds&        etrue,
                                            const GEbounds&        ereco,
                                            const GSkyRegions&     on,
-                                           const GSkyRegions&     off)
+                                           const GSkyRegions&     off) : 
+                      GObservation()
 {
     // Initialise private
     init_members();
@@ -191,6 +198,9 @@ GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation
 { 
     // Execute only if object is not identical
     if (this != &obs) {
+
+        // Copy base class members
+        this->GObservation::operator=(obs);
 
         // Free members
         free_members();
@@ -524,7 +534,11 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 {
     // Timing measurement
     #if defined(G_LIKELIHOOD_DEBUG)
+    #ifdef _OPENMP
+    double t_start = omp_get_wtime();
+    #else
     clock_t t_start = clock();
+    #endif
     #endif
 	
     // Initialise statistics
@@ -1390,8 +1404,10 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                 // and the livetime (s)
                 value += spectral->flux(emin, emax) * norm_flux;
 								
-                // Determine the model gradients at the current energy
-                spectral->eval_gradients(emean);
+                // Determine the model gradients at the current energy. The
+                // eval() method needs a time in case that the spectral model
+                // has a time dependence. We simply use a dummy time here.
+                spectral->eval(emean, GTime(), true);
 
                 // Loop over spectral model parameters
                 for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
@@ -1445,8 +1461,8 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
  *       background models; that's not very satisfactory ...
  ***********************************************************************/
 double GCTAOnOffObservation::N_bgd(const GModels& models,
-							           const int&     ibin,
-						               GVector*       grad) const
+                                   const int&     ibin,
+                                   GVector*       grad) const
 {
 	// Get total number of model parameters
 	int npars = models.npars();
@@ -1505,8 +1521,10 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                 // Determine the number of background events in model by
                 // computing the model normalization at the mean bin energy bin
                 // and multiplying the normalisation with the number of
-                // background events
-                value += spectral->eval_gradients(emean) * norm;
+                // background events. The eval() method needs a time in case
+                // that the spectral model has a time dependence. We simply
+                // use a dummy time here.
+                value += spectral->eval(emean, GTime(), true) * norm;
 
                 // Compute the parameter gradients for all spectral model
                 // parameters
