@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.hpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *

@@ -6,7 +6,7 @@
            <parameter name="Mean"          scale="1e6"   value="5.0"  min="0.01"  max="100.0"  free="1"/>
            <parameter name="Sigma"         scale="1e6"   value="1.0"  min="0.01"  max="100.0"  free="1"/>
         </spectrum>
-        <spatialModel type="SkyDirFunction">
+        <spatialModel type="PointSource">
             <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
             <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
         </spatialModel>

@@ -73,7 +73,7 @@ GCTAEventCube::GCTAEventCube(void) : GEventCube()
  *
  * @param[in] filename Counts cube filename.
  *
- * Construct instance of events cube a counts cube file.
+ * Constructs instance of events cube from a counts cube file.
  ***************************************************************************/
 GCTAEventCube::GCTAEventCube(const GFilename& filename) : GEventCube()
 {
@@ -95,11 +95,12 @@ GCTAEventCube::GCTAEventCube(const GFilename& filename) : GEventCube()
  * @param[in] ebds Energy boundaries.
  * @param[in] gti Good Time intervals.
  *
- * Construct instance of events cube from sky map, energy boundaries and
- * Good Time Intervals.
+ * Constructs instance of events cube from a sky map, energy boundaries and
+ * Good Time Intervals. All event cube weights are set to unity.
  ***************************************************************************/
-GCTAEventCube::GCTAEventCube(const GSkyMap& map, const GEbounds& ebds,
-                             const GGti& gti) : GEventCube()
+GCTAEventCube::GCTAEventCube(const GSkyMap&  map,
+                             const GEbounds& ebds,
+                             const GGti&     gti) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -108,6 +109,51 @@ GCTAEventCube::GCTAEventCube(const GSkyMap& map, const GEbounds& ebds,
     m_map = map;
     this->ebounds(ebds);
     this->gti(gti);
+
+    // Set sky directions
+    set_directions();
+
+    // Set energies
+    set_energies();
+
+    // Set times
+    set_times();
+
+    // Set all weights to unity
+    m_weights = m_map;
+    m_weights = 1.0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] map Sky map.
+ * @param[in] weights Event cube weights.
+ * @param[in] ebds Energy boundaries.
+ * @param[in] gti Good Time intervals.
+ *
+ * Constructs instance of events cube from a sky map, a map of weights,
+ * energy boundaries and Good Time Intervals.
+ ***************************************************************************/
+GCTAEventCube::GCTAEventCube(const GSkyMap&  map,
+                             const GSkyMap&  weights,
+                             const GEbounds& ebds,
+                             const GGti&     gti) : GEventCube()
+{
+    // Initialise members
+    init_members();
+
+    // Set sky map, energy boundaries and GTI
+    m_map = map;
+    this->ebounds(ebds);
+    this->gti(gti);
+
+    // Set weight map
+    m_weights = weights;
 
     // Set sky directions
     set_directions();
@@ -267,7 +313,7 @@ GCTAEventCube* GCTAEventCube::clone(void) const
 int GCTAEventCube::size(void) const
 {
     // Compute number of bins
-    int nbins = m_map.npix() * m_map.nmaps(); 
+    int nbins = m_map.npix() * m_map.nmaps();
 
     // Return number of bins
     return nbins;
@@ -318,6 +364,9 @@ int GCTAEventCube::naxis(const int& axis) const
  *
  * @param[in] filename FITS filename.
  *
+ * Loads the event cube from a FITS file. See the read() method for more
+ * information about the structure of the FITS file.
+ *
  * The method clears the object before loading, thus any events residing in
  * the object before loading will be lost.
  ***************************************************************************/
@@ -344,9 +393,10 @@ void GCTAEventCube::load(const GFilename& filename)
  * @brief Save CTA event cube into FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite existing FITS file (default=false).
+ * @param[in] clobber Overwrite existing FITS file.
  *
- * Save the CTA event cube into FITS file.
+ * Save the CTA event cube into FITS file. See the write() method for more
+ * information about the structure of the FITS file.
  ***************************************************************************/
 void GCTAEventCube::save(const GFilename& filename,
                          const bool&      clobber) const
@@ -370,19 +420,29 @@ void GCTAEventCube::save(const GFilename& filename,
  *
  * @param[in] fits FITS file.
  *
- * It is assumed that the counts map resides in the primary extension of the
- * FITS file, the energy boundaries reside in the EBOUNDS extension and the
- * Good Time Intervals reside in the GTI extension.  The method clears the
- * object before loading, thus any events residing in the object before
- * loading will be lost.
+ * Read an event cube from a FITS file. The following HDUs will be read
+ *
+ *      COUNTS - Counts cube (or primary extension if COUNTS does not exist)
+ *      WEIGHTS - Weights for each counts cube bin (optional)
+ *      EBOUNDS - Energy boundaries
+ *      GTI - Good Time Intervals
+ *
+ * The method clears the event cube before reading, thus any events residing
+ * in the event cube will be lost.
  ***************************************************************************/
 void GCTAEventCube::read(const GFits& fits)
 {
     // Clear object
     clear();
 
+    // Set counts cube HDU
+    std::string counts_hdu("Primary");
+    if (fits.contains("COUNTS")) {
+        counts_hdu = "COUNTS";
+    }
+    
     // Get HDUs
-    const GFitsImage& hdu_cntmap  = *fits.image("Primary");
+    const GFitsImage& hdu_cntmap  = *fits.image(counts_hdu);
     const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
     const GFitsTable& hdu_gti     = *fits.table("GTI");
 
@@ -395,6 +455,23 @@ void GCTAEventCube::read(const GFits& fits)
     // Load GTIs
     read_gti(hdu_gti);
 
+    // If a WEIGHTS HDU exist then load it from the FITS file ...
+    if (fits.contains("WEIGHTS")) {
+
+        // Get WEIGHTS HDU
+        const GFitsImage& hdu_weights = *fits.image("WEIGHTS");
+
+        // Read HDU
+        m_weights.read(hdu_weights);
+
+    }
+
+    // ... otherwise set the weight map to unity
+    else {
+        m_weights = m_map;
+        m_weights = 1.0;
+    }
+
     // Return
     return;
 }
@@ -404,11 +481,46 @@ void GCTAEventCube::read(const GFits& fits)
  * @brief Write CTA event cube into FITS file.
  *
  * @param[in] fits FITS file.
+ *
+ * Writes CTA event cube into a FITS file. The following HDUs will be written
+ *
+ *      COUNTS - Counts cube
+ *      WEIGHTS - Weights for each counts cube bin
+ *      EBOUNDS - Energy boundaries
+ *      GTI - Good Time Intervals
+ *
+ * The counts cube will be written as a double precision sky map. The
+ * weighing cube contains the weight for each counts cube, computed as the
+ * fraction of the event bin that has been selected in filling the counts
+ * cube. This allows to account for proper stacking of observations with
+ * different energy thresholds, or different regions of interest. The energy
+ * boundaries for all counts cube layers are also written, as well as the
+ * Good Time Intervals that have been used in generating the counts cube.
  ***************************************************************************/
 void GCTAEventCube::write(GFits& fits) const
 {
-    // Write cube
-    m_map.write(fits);
+    // Remove HDUs if they exist already
+    if (fits.contains("GTI")) {
+        fits.remove("GTI");
+    }
+    if (fits.contains("EBOUNDS")) {
+        fits.remove("EBOUNDS");
+    }
+    if (fits.contains("WEIGHTS")) {
+        fits.remove("WEIGHTS");
+    }
+    if (fits.contains("COUNTS")) {
+        fits.remove("COUNTS");
+    }
+    if (fits.contains("Primary")) {
+        fits.remove("Primary");
+    }
+
+    // Write counts cube
+    m_map.write(fits, "COUNTS");
+
+    // Write cube weighting
+    m_weights.write(fits, "WEIGHTS");
 
     // Write energy boundaries
     ebounds().write(fits);
@@ -425,6 +537,10 @@ void GCTAEventCube::write(GFits& fits) const
  * @brief Return number of events in cube
  *
  * @return Number of events in cube, rounded to nearest integer value.
+ *
+ * Returns the total number of events in the cube, rounded to the nearest
+ * integer value. All cube bins with a negative content will be excluded
+ * from the sum.
  ***************************************************************************/
 int GCTAEventCube::number(void) const
 {
@@ -449,15 +565,24 @@ int GCTAEventCube::number(void) const
 
 
 /***********************************************************************//**
- * @brief Set event cube from sky map
+ * @brief Set event cube counts from sky map
+ *
+ * @param[in] counts Event cube counts sky map.
+ *
+ * Sets event cube counts from sky map. The methods also sets all weights to
+ * unity.
  ***************************************************************************/
-void GCTAEventCube::map(const GSkyMap& map)
+void GCTAEventCube::counts(const GSkyMap& counts)
 {
     // Store sky map
-    m_map = map;
+    m_map = counts;
 
     // Compute sky directions
     set_directions();
+
+    // Set all weights to unity
+    m_weights = m_map;
+    m_weights = 1.0;
 
     // Return
     return;
@@ -467,7 +592,7 @@ void GCTAEventCube::map(const GSkyMap& map)
 /***********************************************************************//**
  * @brief Return energy of cube layer
  *
- * @param[in] index Event cube layer index [0,...,naxis(2)-1]
+ * @param[in] index Event cube layer index [0,...,ebins()-1]
  * @return Energy of event cube layer
  *
  * @exception GException::out_of_range
@@ -493,7 +618,7 @@ const GEnergy& GCTAEventCube::energy(const int& index) const
 /***********************************************************************//**
  * @brief Print event cube information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing event cube information.
  ***************************************************************************/
 std::string GCTAEventCube::print(const GChatter& chatter) const
@@ -562,6 +687,7 @@ void GCTAEventCube::init_members(void)
 {
     // Initialise members
     m_map.clear();
+    m_weights.clear();
     m_bin.clear();
     m_time.clear();
     m_dirs.clear();
@@ -569,6 +695,9 @@ void GCTAEventCube::init_members(void)
     m_energies.clear();
     m_ewidth.clear();
     m_ontime = 0.0;
+
+    // Prepare event bin
+    init_bin();
 
     // Return
     return;
@@ -579,18 +708,29 @@ void GCTAEventCube::init_members(void)
  * @brief Copy class members
  *
  * @param[in] cube Event cube.
+ *
+ * This method copies the class members from another event cube in the actual
+ * object. It also prepares the event bin member that will be returned in
+ * case of an operator access to the class.
  ***************************************************************************/
 void GCTAEventCube::copy_members(const GCTAEventCube& cube)
 {
-    // Copy members
+    // Copy members. Note that the event bin is not copied as it will
+    // be initialised later. The event bin serves just as a container of
+    // pointers, hence we do not want to copy over the pointers from the
+    // original class.
     m_map        = cube.m_map;
-    m_bin        = cube.m_bin;
+    m_weights    = cube.m_weights;
+    //m_bin        = cube.m_bin;
     m_time       = cube.m_time;
     m_dirs       = cube.m_dirs;
     m_solidangle = cube.m_solidangle;
     m_energies   = cube.m_energies;
     m_ewidth     = cube.m_ewidth;
     m_ontime     = cube.m_ontime;
+
+    // Prepare event bin
+    init_bin();
 
     // Return
     return;
@@ -634,8 +774,6 @@ void GCTAEventCube::read_cntmap(const GFitsImage& hdu)
  * @param[in] hdu Energy boundaries table.
  *
  * Read the energy boundaries from the HDU.
- *
- * @todo Energy bounds read method should take const GFitsTable* as argument
  ***************************************************************************/
 void GCTAEventCube::read_ebds(const GFitsTable& hdu)
 {
@@ -655,7 +793,7 @@ void GCTAEventCube::read_ebds(const GFitsTable& hdu)
  *
  * @param[in] hdu GTI table.
  *
- * Reads the Good Time Intervals from the GTI extension.
+ * Reads the Good Time Intervals from the HDU.
  ***************************************************************************/
 void GCTAEventCube::read_gti(const GFitsTable& hdu)
 {
@@ -799,6 +937,26 @@ void GCTAEventCube::set_times(void)
 
 
 /***********************************************************************//**
+ * @brief Initialise event bin
+ *
+ * This method initialises the event bin. The event bin is cleared and all
+ * fixed pointers are set.
+ ***************************************************************************/
+void GCTAEventCube::init_bin(void)
+{
+    // Free any existing memory
+    m_bin.free_members();
+
+    // Set fixed pointers (those will not be set in set_bin)
+    m_bin.m_time   = &m_time;
+    m_bin.m_ontime = &m_ontime;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set event bin
  *
  * @param[in] index Event index [0,...,size()-1].
@@ -842,11 +1000,12 @@ void GCTAEventCube::set_bin(const int& index)
     // Set pointers
     m_bin.m_counts     = const_cast<double*>(&(m_map.pixels()[index]));
     m_bin.m_energy     = &(m_energies[m_bin.m_ieng]);
-    m_bin.m_time       = &m_time;
+    //m_bin.m_time       = &m_time;
     m_bin.m_dir        = &(m_dirs[m_bin.m_ipix]);
     m_bin.m_solidangle = &(m_solidangle[m_bin.m_ipix]);
     m_bin.m_ewidth     = &(m_ewidth[m_bin.m_ieng]);
-    m_bin.m_ontime     = &m_ontime;
+    //m_bin.m_ontime     = &m_ontime;
+    m_bin.m_weight     = const_cast<double*>(&(m_weights.pixels()[index]));
 
     // Return
     return;

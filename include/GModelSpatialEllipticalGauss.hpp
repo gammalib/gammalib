@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialEllipticalGauss.hpp - Elliptical gauss source model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,7 @@ class GModelSpatialEllipticalGauss : public GModelSpatialElliptical {
 public:
     // Constructors and destructors
     GModelSpatialEllipticalGauss(void);
+    GModelSpatialEllipticalGauss(const bool& dummy, const std::string& type);
     GModelSpatialEllipticalGauss(const GSkyDir& dir,
                                  const double&  major,
                                  const double&  minor,
@@ -91,6 +92,9 @@ protected:
     void free_members(void);
     void update(void) const;
 
+    // Protected members
+    std::string m_type;   //!< Model type
+
     // Cached members used for pre-computations
     mutable double m_last_minor;        //!< Last semi-minor axis
     mutable double m_last_major;        //!< Last semi-major axis
@@ -125,14 +129,14 @@ std::string GModelSpatialEllipticalGauss::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "EllipticalGauss".
+ * @return Model type.
  *
  * Returns the type of the elliptical gauss model.
  ***************************************************************************/
 inline
 std::string GModelSpatialEllipticalGauss::type(void) const
 {
-    return "EllipticalGauss";
+    return (m_type);
 }
 
 #endif /* GMODELSPATIALELLIPTICALGAUSS_HPP */

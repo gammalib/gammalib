@@ -89,6 +89,8 @@ private:
     void init_members(void);
     void copy_members(const GCTAAeff2D& aeff);
     void free_members(void);
+    void set_indices(void);
+    void set_boundaries(void);
 
     // Members
     GFilename         m_filename;      //!< Name of Aeff response file
@@ -97,6 +99,10 @@ private:
     int               m_inx_theta;     //!< Theta index
     int               m_inx_aeff;      //!< Effective area (true energy)
     int               m_inx_aeff_reco; //!< Effective area (reconstructed energy)
+    double            m_logE_min;      //!< Minimum logE (log10(E/TeV))
+    double            m_logE_max;      //!< Maximum logE (log10(E/TeV))
+    double            m_theta_min;     //!< Minimum theta (radians)
+    double            m_theta_max;     //!< Maximum theta (radians)
 };
 
 
@@ -120,7 +126,6 @@ std::string GCTAAeff2D::classname(void) const
 inline
 GFilename GCTAAeff2D::filename(void) const
 {
-    // Return filename
     return m_filename;
 }
 
@@ -129,23 +134,14 @@ GFilename GCTAAeff2D::filename(void) const
  * @brief Return response table
  *
  * @return Response table.
+ *
+ * Returns the response table of the effective area. The effective area
+ * values are given in units of cm2.
  ***************************************************************************/
 inline
 const GCTAResponseTable& GCTAAeff2D::table(void) const
 {
     return m_aeff;
-}
-
-
-/***********************************************************************//**
- * @brief Assign response table
- *
- * @param[in] table Response table.
- ***************************************************************************/
-inline
-void GCTAAeff2D::table(const GCTAResponseTable& table)
-{
-     m_aeff = table;
 }
 
 #endif /* GCTAAEFF2D_HPP */

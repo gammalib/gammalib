@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include <stdlib.h>
 #include <unistd.h>
+#include <cstdlib>     // getenv
 #include "GTools.hpp"
 #include "test_COM.hpp"
 
@@ -38,15 +39,15 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir       = PACKAGE_SOURCE"/inst/com/test/data";
-const std::string com_caldb     = PACKAGE_SOURCE"/inst/com/caldb";
-const std::string com_iaq       = "ENERG(1.0-3.0)MeV";        // 1-3 MeV
-const std::string com_dre       = datadir+"/m50439_dre.fits"; // 1-3 MeV
-const std::string com_drb       = datadir+"/m34997_drg.fits";
-const std::string com_drg       = datadir+"/m34997_drg.fits";
-const std::string com_drx       = datadir+"/m32171_drx.fits";
-const std::string com_obs       = datadir+"/obs.xml";
-const std::string com_model     = datadir+"/crab.xml";
+const std::string datadir   = std::getenv("TEST_COM_DATA");
+const std::string com_caldb = datadir + "/../../caldb";
+const std::string com_iaq   = "ENERG(1.0-3.0)MeV";        // 1-3 MeV
+const std::string com_dre   = datadir+"/m50439_dre.fits"; // 1-3 MeV
+const std::string com_drb   = datadir+"/m34997_drg.fits";
+const std::string com_drg   = datadir+"/m34997_drg.fits";
+const std::string com_drx   = datadir+"/m32171_drx.fits";
+const std::string com_obs   = datadir+"/obs.xml";
+const std::string com_model = datadir+"/crab.xml";
 
 
 /***********************************************************************//**
@@ -58,8 +59,10 @@ void TestGCOMResponse::set(void)
     name("GCOMResponse");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCOMResponse::test_inst_dir), "Test instrument direction");
-    append(static_cast<pfunction>(&TestGCOMResponse::test_response), "Test response");
+    append(static_cast<pfunction>(&TestGCOMResponse::test_inst_dir),
+           "Test instrument direction");
+    append(static_cast<pfunction>(&TestGCOMResponse::test_response),
+           "Test response");
 
     // Return
     return;
@@ -87,9 +90,12 @@ void TestGCOMObservation::set(void)
     name("GCOMObservation");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCOMObservation::test_binned_obs), "Test binned observation");
-    append(static_cast<pfunction>(&TestGCOMObservation::test_event_bin), "Test event bin");
-    append(static_cast<pfunction>(&TestGCOMObservation::test_event_cube), "Test event cube");
+    append(static_cast<pfunction>(&TestGCOMObservation::test_binned_obs),
+           "Test binned observation");
+    append(static_cast<pfunction>(&TestGCOMObservation::test_event_bin),
+           "Test event bin");
+    append(static_cast<pfunction>(&TestGCOMObservation::test_event_cube),
+           "Test event cube");
 
     // Return
     return;
@@ -117,7 +123,8 @@ void TestGCOMOptimize::set(void)
     name("COMPTEL optimizers");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCOMOptimize::test_binned_optimizer), "Test binned optimizer");
+    append(static_cast<pfunction>(&TestGCOMOptimize::test_binned_optimizer),
+           "Test binned optimizer");
 
     // Return
     return;
@@ -313,73 +320,140 @@ void TestGCOMObservation::test_binned_obs(void)
  ***************************************************************************/
 void TestGCOMObservation::test_event_bin(void)
 {
-    // Test COMPTEL event bin methods (one by one)
-    test_try("Test event bin methods");
-    try {
-        // Event bin void constructor
-        GCOMEventBin bin;
-
-        // Copy constructor
-        GCOMEventBin bin2(bin);
-
-        // Assignment operator
-        GCOMEventBin bin3 = bin;
-
-        // clear method
-        bin.clear();
-
-        // clone method
-        GCOMEventBin* bin4 = bin.clone();
-
-        // size method
-        test_value(bin.size(), 0.0, 1.0e-10, "Test size() method.");
-        test_value(bin4->size(), 0.0, 1.0e-10, "Test size() method.");
-        delete bin4;
-
-        // dir method
-        GCOMInstDir dir = bin.dir();
-
-        // energy method
-        GEnergy energy = bin.energy();
-
-        // time method
-        GTime time = bin.time();
-
-        // counts method
-        test_value(bin.counts(), 0.0, 1.0e-10, "Test counts() method for zero counts.");
-
-        // error method
-        test_value(bin.error(), 0.0, 1.0e-10, "Test error() method for zero counts.");
-
-        // counts setting
-        bin.counts(1.0);
-        test_value(bin.counts(), 1.0, 1.0e-10, "Test counts() method for one count.");
-        test_value(bin.error(), 1.0, 1.0e-10, "Test error() method for one count.");
-
-        // print method
-        std::string text = bin.print();
-        test_assert(text == "1", "Test print() method.");
-
-        // solidangle method
-        test_value(bin.solidangle(), 0.0, 1.0e-10, "Test solidangle() method.");
-
-        // ewidth method
-        GEnergy ewidth = bin.ewidth();
-
-        // ontime method
-        test_value(bin.ontime(), 0.0, 1.0e-10, "Test ontime() method.");
-
-        // If we arrived here, signal success
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test COMPTEL event bin operations
+    // Test event bin void constructor
     GCOMEventBin bin;
-    bin.counts(3.3);
-    test_value(bin.counts(), 3.3, 1.0e-10, "Test counts() method for 3.3 counts.");
+    test_value(bin.classname(), "GCOMEventBin", "Check classname() for empty bin");
+    test_value(bin.size(), 0.0, 1.0e-10, "Check size() for empty bin");
+    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for empty bin");
+    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for empty bin");
+    test_value(bin.dir().phibar(), 0.0, 1.0e-10,
+               "Check dir().phibar() for empty bin");
+    test_value(bin.energy().MeV(), 0.0, 1.0e-10, "Check energy() for empty bin");
+    test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for empty bin");
+    test_value(bin.counts(), 0.0, 1.0e-10, "Check counts() for empty bin");
+    test_value(bin.error(),  0.0, 1.0e-10, "Check error() for empty bin");
+    test_value(bin.index(), -1, "Check index() for empty bin");
+    test_value(bin.solidangle(), 0.0, 1.0e-10, "Check solidangle() for empty bin");
+    test_value(bin.ewidth().MeV(), 0.0, 1.0e-10, "Check ewidth() for empty bin");
+    test_value(bin.ontime(), 0.0, 1.0e-10, "Check ontime() for empty bin");
+    test_value(bin.print(), "0", "Check print() for empty bin");
+
+    // Test setting of bin attributes (for the moment we can only set the
+    // number of counts, but this should change in the future)
+    bin.counts(4.0);
+    test_value(bin.size(), 0.0, 1.0e-10, "Check size() for filled bin");
+    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin.dir().phibar(), 0.0, 1.0e-10,
+               "Check dir().phibar() for filled bin");
+    test_value(bin.energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for filled bin");
+    test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for filled bin");
+    test_value(bin.counts(), 4.0, 1.0e-10, "Check counts() for filled bin");
+    test_value(bin.error(),  2.0, 1.0e-10, "Check error() for filled bin");
+    test_value(bin.index(), -1, "Check index() for filled bin");
+    test_value(bin.solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for filled bin");
+    test_value(bin.ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for filled bin");
+    test_value(bin.ontime(), 0.0, 1.0e-10, "Check ontime() for filled bin");
+    test_value(bin.print(), "4", "Check print() for filled bin");
+
+    // Test copy constructor
+    GCOMEventBin bin2(bin);
+    test_value(bin2.size(), 0.0, 1.0e-10, "Check size() for copied bin");
+    test_value(bin2.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for copied bin");
+    test_value(bin2.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for copied bin");
+    test_value(bin2.dir().phibar(), 0.0, 1.0e-10,
+               "Check dir().phibar() for copied bin");
+    test_value(bin2.energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for copied bin");
+    test_value(bin2.time().secs(), 0.0, 1.0e-10, "Check time() for copied bin");
+    test_value(bin2.counts(), 4.0, 1.0e-10, "Check counts() for copied bin");
+    test_value(bin2.error(),  2.0, 1.0e-10, "Check error() for copied bin");
+    test_value(bin2.index(), -1, "Check index() for copied bin");
+    test_value(bin2.solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for copied bin");
+    test_value(bin2.ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for copied bin");
+    test_value(bin2.ontime(), 0.0, 1.0e-10, "Check ontime() for copied bin");
+    test_value(bin2.print(), "4", "Check print() for copied bin");
+
+    // Assignment operator
+    GCOMEventBin bin3 = bin;
+    test_value(bin3.size(), 0.0, 1.0e-10, "Check size() for assigned bin");
+    test_value(bin3.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for assigned bin");
+    test_value(bin3.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for assigned bin");
+    test_value(bin3.dir().phibar(), 0.0, 1.0e-10,
+               "Check dir().phibar() for assigned bin");
+    test_value(bin3.energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for assigned bin");
+    test_value(bin3.time().secs(), 0.0, 1.0e-10,
+               "Check time() for assigned bin");
+    test_value(bin3.counts(), 4.0, 1.0e-10, "Check counts() for assigned bin");
+    test_value(bin3.error(),  2.0, 1.0e-10, "Check error() for assigned bin");
+    test_value(bin3.index(), -1, "Check index() for assigned bin");
+    test_value(bin3.solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for assigned bin");
+    test_value(bin3.ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for assigned bin");
+    test_value(bin3.ontime(), 0.0, 1.0e-10, "Check ontime() for assigned bin");
+    test_value(bin3.print(), "4", "Check print() for assigned bin");
+
+    // clone method
+    GCOMEventBin* bin4 = bin.clone();
+    test_value(bin4->size(), 0.0, 1.0e-10, "Check size() for cloned bin");
+    test_value(bin4->dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for cloned bin");
+    test_value(bin4->dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for cloned bin");
+    test_value(bin4->dir().phibar(), 0.0, 1.0e-10,
+               "Check dir().phibar() for cloned bin");
+    test_value(bin4->energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for cloned bin");
+    test_value(bin4->time().secs(), 0.0, 1.0e-10,
+               "Check time() for cloned bin");
+    test_value(bin4->counts(), 4.0, 1.0e-10, "Check counts() for cloned bin");
+    test_value(bin4->error(),  2.0, 1.0e-10, "Check error() for cloned bin");
+    test_value(bin4->index(), -1, "Check index() for cloned bin");
+    test_value(bin4->solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for cloned bin");
+    test_value(bin4->ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for cloned bin");
+    test_value(bin4->ontime(), 0.0, 1.0e-10, "Check ontime() for cloned bin");
+    test_value(bin4->print(), "4", "Check print() for cloned bin");
+
+    // clear method
+    bin.clear();
+    test_value(bin.classname(), "GCOMEventBin",
+               "Check classname() for cleared bin");
+    test_value(bin.size(), 0.0, 1.0e-10, "Check size() for cleared bin");
+    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for cleared bin");
+    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for cleared bin");
+    test_value(bin.dir().phibar(), 0.0, 1.0e-10,
+               "Check dir().phibar() for cleared bin");
+    test_value(bin.energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for cleared bin");
+    test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for cleared bin");
+    test_value(bin.counts(), 0.0, 1.0e-10, "Check counts() for cleared bin");
+    test_value(bin.error(),  0.0, 1.0e-10, "Check error() for cleared bin");
+    test_value(bin.index(), -1, "Check index() for cleared bin");
+    test_value(bin.solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for cleared bin");
+    test_value(bin.ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for cleared bin");
+    test_value(bin.ontime(), 0.0, 1.0e-10, "Check ontime() for cleared bin");
+    test_value(bin.print(), "0", "Check print() for cleared bin");
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelPar.cpp - Model parameter class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -217,17 +217,28 @@ GModelPar* GModelPar::clone(void) const
  *
  * Each of the attributes are optional, with the following scheme for
  * assigning default values in case that the attribute was not found:
- * - @p value sets @p m_factor_value (defaults to 0.0)
- * - @p error sets @p m_factor_error (defaults to 0.0)
- * - @p scale sets @p m_scale (defaults to 1.0)
- * - @p min sets @p m_factor_min (will remove_min() if not found)
- * - @p max sets @p m_factor_max (will remove_max() if not found)
- * - @p free sets @p m_free (papameter will be fixed if not found)
+ * 
+ *     @p name sets @p m_name (defaults to "Unknown")
+ *     @p value sets @p m_factor_value (defaults to 0.0)
+ *     @p error sets @p m_factor_error (defaults to 0.0)
+ *     @p scale sets @p m_scale (defaults to 1.0)
+ *     @p min sets @p m_factor_min (will remove_min() if not found)
+ *     @p max sets @p m_factor_max (will remove_max() if not found)
+ *     @p free sets @p m_free (papameter will be fixed if not found)
  ***************************************************************************/
 void GModelPar::read(const GXmlElement& xml)
 {
+    // Get name
+    std::string arg = xml.attribute("name");
+    if (arg != "") {
+        m_name = arg;
+    }
+    else {
+        m_name = "Unknown";
+    }
+
     // Get value
-    std::string arg = xml.attribute("value");
+    arg = xml.attribute("value");
     if (arg != "") {
         m_factor_value = gammalib::todouble(arg);
     }
@@ -330,15 +341,20 @@ void GModelPar::read(const GXmlElement& xml)
  *     <parameter name=".." value=".." error=".." scale=".." min=".." max="..' free="..">
  *
  * The following attributes will be set:
- * - @p value
- * - @p error (only in case that the parameter is free)
- * - @p scale
- * - @p min (only in case that a minimum exists)
- * - @p max (only in case that a maximum exists)
- * - @p free
+ *
+ *     @p name
+ *     @p value
+ *     @p error (only in case that the parameter is free)
+ *     @p scale
+ *     @p min (only in case that a minimum exists)
+ *     @p max (only in case that a maximum exists)
+ *     @p free
  ***************************************************************************/
 void GModelPar::write(GXmlElement& xml) const
 {
+    // Set name
+    xml.attribute("name", m_name);
+
     // Set value
     xml.attribute("value", gammalib::str(m_factor_value));
 

@@ -33,7 +33,7 @@
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GSkyMap.hpp"
-#include "GEbounds.hpp"
+#include "GEnergies.hpp"
 #include "GNodeArray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -72,7 +72,7 @@ public:
                 const double&        dy,
                 const int&           nx,
                 const int&           ny,
-                const GEbounds&      ebounds,
+                const GEnergies&     energies,
                 const double&        dmax,
                 const int&           ndbins);
     virtual ~GCTACubePsf(void);
@@ -89,10 +89,9 @@ public:
     std::string       classname(void) const;
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs, GLog* log = NULL);
-    const GSkyMap&    map(void) const;
-    const GEbounds&   ebounds(void) const;
+    const GSkyMap&    cube(void) const;
+    const GEnergies&  energies(void) const;
     const GNodeArray& deltas(void) const;
-    const GNodeArray& elogmeans(void) const;
     double            delta_max(void) const;
     int               offset(const int& idelta, const int& iebin) const;
     void              read(const GFits& fits);
@@ -109,6 +108,8 @@ protected:
     void copy_members(const GCTACubePsf& cube);
     void free_members(void);
     void clear_cube(void);
+    void fill_cube(const GCTAObservation& obs, GSkyMap* exposure = NULL,
+                   GLog* log = NULL);
     void update(const double& delta, const double& logE) const;
     void set_delta_axis(void);
     void set_eng_axis(void);
@@ -117,7 +118,7 @@ protected:
     // Data
     mutable GFilename m_filename;          //!< Filename
     GSkyMap           m_cube;              //!< PSF cube
-    GEbounds          m_ebounds;           //!< Energy bounds for the PSF cube
+    GEnergies         m_energies;          //!< Energy values for the PSF cube
     GNodeArray        m_elogmeans;         //!< Mean log10TeV energy for the PSF cube
     GNodeArray        m_deltas;            //!< Delta bins (deg) for the PSF cube
     GNodeArray        m_deltas_cache;      //!< Internal delta bins (rad)
@@ -158,21 +159,21 @@ std::string GCTACubePsf::classname(void) const
  * cube.
  ***************************************************************************/
 inline
-const GSkyMap& GCTACubePsf::map(void) const
+const GSkyMap& GCTACubePsf::cube(void) const
 {
     return (m_cube);
 }
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries
+ * @brief Return energies
  *
- * @return Energy boundaris
+ * @return Energies
  ***************************************************************************/
 inline
-const GEbounds& GCTACubePsf::ebounds(void) const
+const GEnergies& GCTACubePsf::energies(void) const
 {
-    return (m_ebounds);
+    return (m_energies);
 }
 
 
@@ -201,18 +202,6 @@ double GCTACubePsf::delta_max(void) const
     
     // Return
     return (delta_max * gammalib::deg2rad);
-}
-
-
-/***********************************************************************//**
- * @brief Return arithmetic mean of log10 energies
- *
- * @return Arithmetic mean of log10 energies.
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubePsf::elogmeans(void) const
-{
-    return (m_elogmeans);
 }
 
 

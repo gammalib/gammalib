@@ -1070,8 +1070,8 @@ std::string GEbounds::print(const GChatter& chatter) const
             if (size() > 1) {
                 for (int i = 0; i < size(); ++i) {
                     result.append("\n");
-                    result.append(gammalib::parformat("Energy interval "));
-                    result.append(gammalib::str(i));
+                    result.append(gammalib::parformat("Energy interval "+
+                                  gammalib::str(i)));
                     result.append(emin(i).print());
                     result.append(" - ");
                     result.append(emax(i).print());

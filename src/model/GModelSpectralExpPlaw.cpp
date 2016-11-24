@@ -39,8 +39,20 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralExpPlaw  g_spectral_expplaw_seed;
-const GModelSpectralRegistry g_spectral_expplaw_registry(&g_spectral_expplaw_seed);
+const GModelSpectralExpPlaw  g_spectral_eplaw_seed1("ExponentialCutoffPowerLaw",
+                                                    "Prefactor",
+                                                    "Index",
+                                                    "PivotEnergy",
+                                                    "CutoffEnergy");
+const GModelSpectralRegistry g_spectral_eplaw_registry1(&g_spectral_eplaw_seed1);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralExpPlaw  g_spectral_eplaw_seed2("ExpCutoff",
+                                                    "Prefactor",
+                                                    "Index",
+                                                    "Scale",
+                                                    "Cutoff");
+const GModelSpectralRegistry g_spectral_eplaw_registry2(&g_spectral_eplaw_seed2);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC   "GModelSpectralExpPlaw::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
@@ -67,6 +79,39 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(void) : GModelSpectral()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type and parameter name constructor
+ *
+ * @param[in] type Model type.
+ * @param[in] prefactor Name of prefactor parameter.
+ * @param[in] index Name of index parameter.
+ * @param[in] pivot Name of pivot parameter.
+ * @param[in] cutoff Name of cutoff parameter.
+ ***************************************************************************/
+GModelSpectralExpPlaw::GModelSpectralExpPlaw(const std::string& type,
+                                             const std::string& prefactor,
+                                             const std::string& index,
+                                             const std::string& pivot,
+                                             const std::string& cutoff) :
+                       GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Set parameter names
+    m_norm.name(prefactor);
+    m_index.name(index);
+    m_pivot.name(pivot);
+    m_ecut.name(cutoff);
 
     // Return
     return;
@@ -564,70 +609,23 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing power law model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
- * Reads the spectral information from an XML element. The format of the XML
- * elements is
- *
- *     <spectrum type="ExpCutoff">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Cutoff"    scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
+ * Reads the spectral information from an XML element.
  ***************************************************************************/
 void GModelSpectralExpPlaw::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Power law model requires exactly 4 parameters.");
-    }
+    // Get parameter pointers
+    const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
+    const GXmlElement* index = gammalib::xml_get_par(G_READ, xml, m_index.name());
+    const GXmlElement* ecut  = gammalib::xml_get_par(G_READ, xml, m_ecut.name());
+    const GXmlElement* pivot = gammalib::xml_get_par(G_READ, xml, m_pivot.name());
 
-    // Extract model parameters
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            m_norm.read(*par);
-            npar[0]++;
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            m_index.read(*par);
-            npar[1]++;
-        }
-
-        // Handle cutoff
-        else if (par->attribute("name") == "Cutoff") {
-            m_ecut.read(*par);
-            npar[2]++;
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.read(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Prefactor\", \"Index\", \"Cutoff\" and \"Scale\""
-              " parameters.");
-    }
+    // Read parameters
+    m_norm.read(*norm);
+    m_index.read(*index);
+    m_ecut.read(*ecut);
+    m_pivot.read(*pivot);
 
     // Return
     return;
@@ -637,91 +635,37 @@ void GModelSpectralExpPlaw::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
  * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type "ExpCutoff"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ *            Existing XML element is not of the expected type.
  *
- * Writes the spectral information into an XML element. The format of the XML
- * element is
- *
- *     <spectrum type="ExpCutoff">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Cutoff"    scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
+ * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralExpPlaw::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "ExpCutoff");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "ExpCutoff") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"ExpCutoff\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 4 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(GXmlElement("parameter name=\"Index\""));
-        xml.append(GXmlElement("parameter name=\"Cutoff\""));
-        xml.append(GXmlElement("parameter name=\"Scale\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* index = gammalib::xml_need_par(G_WRITE, xml, m_index.name());
+    GXmlElement* ecut  = gammalib::xml_need_par(G_WRITE, xml, m_ecut.name());
+    GXmlElement* pivot = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Power law model requires exactly 4 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            npar[1]++;
-            m_index.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Cutoff") {
-            npar[2]++;
-            m_ecut.write(*par);
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.write(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Prefactor\", \"Index\", \"Cutoff\" and \"Scale\""
-              " parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    m_index.write(*index);
+    m_ecut.write(*ecut);
+    m_pivot.write(*pivot);
 
     // Return
     return;
@@ -770,6 +714,9 @@ std::string GModelSpectralExpPlaw::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralExpPlaw::init_members(void)
 {
+    // Initialise model type
+    m_type = "ExponentialCutoffPowerLaw";
+
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Prefactor");
@@ -793,7 +740,7 @@ void GModelSpectralExpPlaw::init_members(void)
 
     // Initialise cut off energy
     m_ecut.clear();
-    m_ecut.name("Cutoff");
+    m_ecut.name("CutoffEnergy");
     m_ecut.unit("MeV");
     m_ecut.scale(1.0);
     m_ecut.value(1000.0);       // default: 1000.0
@@ -848,6 +795,7 @@ void GModelSpectralExpPlaw::init_members(void)
 void GModelSpectralExpPlaw::copy_members(const GModelSpectralExpPlaw& model)
 {
     // Copy members
+    m_type  = model.m_type;
     m_norm  = model.m_norm;
     m_index = model.m_index;
     m_ecut  = model.m_ecut;

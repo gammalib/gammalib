@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GModel.hpp - Test model module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,15 +74,31 @@ public:
     void                test_model(void);
     void                test_models(void);
     void                test_model_registry(void);
+    void                test_legacy_model_radial_disk(void);
+    void                test_legacy_model_radial_gauss(void);
+    void                test_legacy_model_radial_shell(void);
+    void                test_legacy_model_elliptical_gauss(void);
+    void                test_legacy_model_diffuse_const(void);
+    void                test_legacy_model_diffuse_map(void);
+    void                test_legacy_model_diffuse_cube(void);
+    void                test_legacy_model_point_const(void);
+    void                test_legacy_model_point_plaw(void);
+    void                test_legacy_model_point_plaw2(void);
+    void                test_legacy_model_point_eplaw(void);
+    void                test_legacy_model_point_supeplaw(void);
+    void                test_legacy_model_point_logparabola(void);
 
 private:        
     // Private methods
     void test_xml_model(const std::string& name, const std::string& filename);
     
-    // Private attributes
+    // Test files
     std::string m_map_file;
     std::string m_cube_file;
+    std::string m_filefct;
     std::string m_xml_file;
+
+    // Model definiton XML files
     std::string m_xml_model_point_const;
     std::string m_xml_model_point_gauss;
     std::string m_xml_model_point_plaw;
@@ -101,6 +117,21 @@ private:
     std::string m_xml_model_radial_shell;
     std::string m_xml_model_elliptical_disk;
     std::string m_xml_model_elliptical_gauss;
+
+    // Legacy model definition XML files
+    std::string m_xml_legacy_radial_disk;
+    std::string m_xml_legacy_radial_gauss;
+    std::string m_xml_legacy_radial_shell;
+    std::string m_xml_legacy_elliptical_gauss;
+    std::string m_xml_legacy_diffuse_const;
+    std::string m_xml_legacy_diffuse_map;
+    std::string m_xml_legacy_diffuse_cube;
+    std::string m_xml_legacy_point_const;
+    std::string m_xml_legacy_point_plaw;
+    std::string m_xml_legacy_point_plaw2;
+    std::string m_xml_legacy_point_eplaw;
+    std::string m_xml_legacy_point_supeplaw;
+    std::string m_xml_legacy_point_logparabola;
 };
 
 #endif /* TEST_GMODEL_HPP */

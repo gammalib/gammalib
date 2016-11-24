@@ -53,6 +53,7 @@ namespace gammalib {
     std::string              right(const std::string& s, int n, char c = ' ');
     std::string              centre(const std::string& s, int n, char c = ' ');
     std::string              parformat(const std::string& s, const int& indent = 0);
+    std::string              number(const std::string& noun, const int& number);
     double                   plaw_photon_flux(const double& emin,
                                               const double& emax,
                                               const double& epivot,
@@ -86,6 +87,10 @@ namespace gammalib {
     void                     xml_check_par(const std::string& origin,
                                            const std::string& name,
                                            const int&         number);
+    GFilename                xml_file_expand(const GXmlElement& xml,
+                                             const std::string& filename);
+    GFilename                xml_file_reduce(const GXmlElement& xml,
+                                             const std::string& filename);
     int                      recv(int fd, char *buffer, int len, int flags,
                                   int timeout);
 }

@@ -18,12 +18,12 @@
       <parameter error="0.0716234477" free="1" max="1" min="-1" name="Index" scale="1" value="0.08682762462" />
       <parameter free="0" max="2000" min="50" name="Scale" scale="1" value="100" />
     </spectrum>
-    <spatialModel file="/lustre/fs8/group/hess/user/aschulz/lat_data/fssc_files/diffuse/p7rep/gll_iem_v05.fit" type="MapCubeFunction">
+    <spatialModel file="gll_iem_v05.fit" type="MapCubeFunction">
       <parameter free="0" max="1000" min="0.001" name="Normalization" scale="1" value="1" />
     </spatialModel>
   </source>
   <source name="iso_source_v05" type="DiffuseSource">
-    <spectrum file="/lustre/fs8/group/hess/user/aschulz/lat_data/fssc_files/diffuse/p7rep/iso_source_v05.txt" type="FileFunction">
+    <spectrum file="iso_source_v05.txt" type="FileFunction">
       <parameter error="0.6855552052" free="1" max="10" min="0" name="Normalization" scale="1" value="2.875818636" />
     </spectrum>
     <spatialModel type="ConstantValue">

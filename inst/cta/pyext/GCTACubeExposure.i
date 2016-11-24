@@ -54,7 +54,7 @@ public:
                      const double&        dy,
                      const int&           nx,
                      const int&           ny,
-                     const GEbounds&      ebounds);
+                     const GEnergies&     energies);
     virtual ~GCTACubeExposure(void);
     
     // Interpolation Operator
@@ -67,9 +67,8 @@ public:
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs, GLog* log = NULL);
     const GSkyMap&     cube(void) const;
-    const GEbounds&    ebounds(void) const;
+    const GEnergies&   energies(void) const;
     const GGti&        gti(void) const;
-    const GNodeArray&  elogmeans(void) const;
     const double&      livetime(void) const;
     const double&      ontime(void) const;
     double             deadc(void) const;

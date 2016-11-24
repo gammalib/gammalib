@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>   // getenv
+#include <cstdlib>     // getenv
 #include <vector>
 #include "GTools.hpp"
 #include "test_GSupport.hpp"
@@ -38,6 +38,10 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+
+/* __ Constants __________________________________________________________ */
+const std::string datadir  = std::getenv("TEST_DATA");
+const std::string csv_file = datadir + "/csv.dat";
 
 
 /***********************************************************************//**
@@ -49,13 +53,22 @@ void TestGSupport::set(void){
     name("GSupport");
 
     // Append tests
-    append(static_cast<pfunction>(&TestGSupport::test_tools), "Test GTools");
-    append(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
-    append(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
-    append(static_cast<pfunction>(&TestGSupport::test_bilinear), "Test GBilinear");
-    append(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
-    append(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
-    append(static_cast<pfunction>(&TestGSupport::test_filename), "Test GFilename");
+    append(static_cast<pfunction>(&TestGSupport::test_tools),
+           "Test GTools");
+    append(static_cast<pfunction>(&TestGSupport::test_expand_env),
+           "Test Environment variable");
+    append(static_cast<pfunction>(&TestGSupport::test_node_array),
+           "Test GNodeArray");
+    append(static_cast<pfunction>(&TestGSupport::test_bilinear),
+           "Test GBilinear");
+    append(static_cast<pfunction>(&TestGSupport::test_url_file),
+           "Test GUrlFile");
+    append(static_cast<pfunction>(&TestGSupport::test_url_string),
+           "Test GUrlString");
+    append(static_cast<pfunction>(&TestGSupport::test_filename),
+           "Test GFilename");
+    append(static_cast<pfunction>(&TestGSupport::test_csv),
+           "Test GCsv");
 
     // Return
     return;
@@ -81,6 +94,27 @@ TestGSupport* TestGSupport::clone(void) const
  ***************************************************************************/
 void TestGSupport::test_tools(void)
 {
+    // Strip whitespace
+    test_assert(gammalib::strip_whitespace("  World  ") == "World",
+                "gammalib::strip_whitespace(\"  World  \")");
+    test_assert(gammalib::strip_whitespace("World  ") == "World",
+                "gammalib::strip_whitespace(\"World  \")");
+    test_assert(gammalib::strip_whitespace("  World") == "World",
+                "gammalib::strip_whitespace(\"  World\")");
+
+    // Strip characters
+    test_assert(gammalib::strip_chars("xxWorldyy", "xy") == "World",
+                "gammalib::strip_chars(\"xxWorldyy\")");
+    test_assert(gammalib::strip_chars("Worldxy", "xy") == "World",
+                "gammalib::strip_chars(\"Worldxy\")");
+    test_assert(gammalib::strip_chars("xxWorld", "x") == "World",
+                "gammalib::strip_chars(\"xxWorld\")");
+
+    // Test noun number conversion
+    test_assert(gammalib::number("World", 0) == "Worlds", "Zero Worlds");
+    test_assert(gammalib::number("World", 1) == "World", "One World");
+    test_assert(gammalib::number("World", 2) == "Worlds", "Two Worlds");
+
     // Test XML to string conversion
     std::string s_in  = "Hallo World, you \"are\" my 'nice' <planet> & place";
     std::string s_ref = "Hallo World, you &quot;are&quot; my &apos;nice&apos;"
@@ -837,6 +871,106 @@ void TestGSupport::test_filename(void)
 
 
 /***********************************************************************//**
+ * @brief Test GCsv class
+ *
+ * Test the GCsv class.
+ ***************************************************************************/
+void TestGSupport::test_csv(void)
+{
+    // Test void constructor
+    GCsv csv1;
+    test_value(csv1.size(), 0);
+    test_value(csv1.ncols(), 0);
+    test_value(csv1.nrows(), 0);
+
+    // Test rows and columns constructor
+    GCsv csv2(3,4);
+    test_value(csv2.size(), 12);
+    test_value(csv2.ncols(), 4);
+    test_value(csv2.nrows(), 3);
+
+    // Test filename constructor
+    GCsv csv3(csv_file, ",");
+    test_value(csv3.size(), 12);
+    test_value(csv3.ncols(), 3);
+    test_value(csv3.nrows(), 4);
+
+    // Test copy constructor
+    GCsv csv4(csv3);
+    test_value(csv3.size(), 12);
+    test_value(csv3.ncols(), 3);
+    test_value(csv3.nrows(), 4);
+
+    // Test clear method
+    csv4.clear();
+    test_value(csv4.size(), 0);
+    test_value(csv4.ncols(), 0);
+    test_value(csv4.nrows(), 0);
+
+    // Test clone method
+    GCsv* csv5 = csv3.clone();
+    test_value(csv5->size(), 12);
+    test_value(csv5->ncols(), 3);
+    test_value(csv5->nrows(), 4);
+
+    // Test append method
+    std::vector<std::string> row1;
+    std::vector<std::string> row2;
+    row1.push_back("ra");
+    row1.push_back("dec");
+    row1.push_back("durations");
+    row2.push_back("10.0");
+    row2.push_back("-10.0");
+    row2.push_back("1000.0");
+    csv4.append(row1);
+    csv4.append(row2);
+    test_value(csv4.size(), 6);
+    test_value(csv4.ncols(), 3);
+    test_value(csv4.nrows(), 2);
+
+    // Test operator access method
+    test_value(csv4(0,0), "ra");
+    test_value(csv4(0,1), "dec");
+    test_value(csv4(0,2), "durations");
+    test_value(csv4(1,0), "10.0");
+    test_value(csv4(1,1), "-10.0");
+    test_value(csv4(1,2), "1000.0");
+
+    // Test access methods
+    test_value(csv4.string(1,0), "10.0");
+    test_value(csv4.real(1,0), 10.0);
+    test_value(csv4.integer(1,0), 10);
+
+    // Test set methods
+    csv4.string(1,0,"11.0");
+    test_value(csv4.string(1,0), "11.0");
+    csv4.real(1,0, 12.0);
+    test_value(csv4.real(1,0), 12.0);
+    csv4.integer(1,0, 13);
+    test_value(csv4.integer(1,0), 13);
+
+    // Test save method (make sure that former result is overwritten)
+    csv4.save("test_csv.dat", ",", true);
+ 
+    // Test load method
+    GCsv csv6;
+    csv6.load("test_csv.dat", ",");
+    test_value(csv6.size(), 6);
+    test_value(csv6.ncols(), 3);
+    test_value(csv6.nrows(), 2);
+    test_value(csv6(0,0), "ra");
+    test_value(csv6(0,1), "dec");
+    test_value(csv6(0,2), "durations");
+    test_value(csv6(1,0), "13");
+    test_value(csv6(1,1), "-10.0");
+    test_value(csv6(1,2), "1000.0");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Main test entry point
  ***************************************************************************/
 int main(void)
@@ -849,6 +983,8 @@ int main(void)
 
     // Create and append test suite
     TestGSupport test;
+
+    // Append test to the container
     testsuites.append(test);
 
     // Run the testsuites

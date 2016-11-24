@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeaderCard.hpp - FITS header card class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,8 +40,6 @@
  * This class implements a FITS header card. A header card consists of a
  * keyname (string), a value (string, floating point, integer or logical)
  * and a comment (string). COMMENT or HISTORY cards do not have a value.
- *
- * @todo Many more datatypes may exist for a header card.
  ***************************************************************************/
 class GFitsHeaderCard : public GBase {
 
@@ -64,32 +62,32 @@ public:
     GFitsHeaderCard& operator=(const GFitsHeaderCard& card);
 
     // Methods
-    void             clear(void);
-    GFitsHeaderCard* clone(void) const;
-    std::string      classname(void) const;
-    void             keyname(const std::string& keyname);
-    std::string      keyname(void) const;
-    void             value(const std::string& value);
-    void             value(const bool& value);
-    void             value(const float& value);
-    void             value(const double& value);
-    void             value(const unsigned short& value);
-    void             value(const short& value);
-    void             value(const unsigned int& value);
-    void             value(const int& value);
-    void             value(const long& value);
-    void             value(const unsigned long& value);
-    void             value(const long long& value);
-    std::string      value(void) const;
-    int              decimals(void) const;
-    void             unit(const std::string& unit);
-    std::string      unit(void) const;
-    void             comment(const std::string& comment);
-    std::string      comment(void) const;
-    std::string      string(void) const;
-    double           real(void) const;
-    int              integer(void) const;
-    std::string      print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GFitsHeaderCard*   clone(void) const;
+    std::string        classname(void) const;
+    void               keyname(const std::string& keyname);
+    const std::string& keyname(void) const;
+    void               value(const std::string& value);
+    void               value(const bool& value);
+    void               value(const float& value);
+    void               value(const double& value);
+    void               value(const unsigned short& value);
+    void               value(const short& value);
+    void               value(const unsigned int& value);
+    void               value(const int& value);
+    void               value(const long& value);
+    void               value(const unsigned long& value);
+    void               value(const long long& value);
+    const std::string& value(void) const;
+    const int&         decimals(void) const;
+    void               unit(const std::string& unit);
+    const std::string& unit(void) const;
+    void               comment(const std::string& comment);
+    const std::string& comment(void) const;
+    std::string        string(void) const;
+    double             real(void) const;
+    int                integer(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods
@@ -106,12 +104,12 @@ private:
     // Private data area
     std::string m_keyname;         //!< Name of the card
     std::string m_value;           //!< Value of the card as read from file
-    void*       m_value_dtype;     //!< Value in native data type
-    int         m_dtype;           //!< Native data type
-    int         m_value_decimals;  //!< Decimals of value (for float)
     std::string m_unit;            //!< Unit of the card value
     std::string m_comment;         //!< Card comment
+    int         m_dtype;           //!< Native data type
+    int         m_value_decimals;  //!< Decimals of value (for float)
     bool        m_comment_write;   //!< Signals that comment should be written
+    void*       m_value_dtype;     //!< Value in native data type
 };
 
 
@@ -157,7 +155,7 @@ void GFitsHeaderCard::comment(const std::string& comment)
  * @brief Return header card keyname
   ***************************************************************************/
 inline
-std::string GFitsHeaderCard::keyname(void) const
+const std::string& GFitsHeaderCard::keyname(void) const
 {
     return m_keyname;
 }
@@ -167,7 +165,7 @@ std::string GFitsHeaderCard::keyname(void) const
  * @brief Return header card value
   ***************************************************************************/
 inline
-std::string GFitsHeaderCard::value(void) const
+const std::string& GFitsHeaderCard::value(void) const
 {
     return m_value;
 }
@@ -177,7 +175,7 @@ std::string GFitsHeaderCard::value(void) const
  * @brief Return header card decimals
   ***************************************************************************/
 inline
-int GFitsHeaderCard::decimals(void) const
+const int& GFitsHeaderCard::decimals(void) const
 {
     return m_value_decimals;
 }
@@ -187,7 +185,7 @@ int GFitsHeaderCard::decimals(void) const
  * @brief Return header card value unit
   ***************************************************************************/
 inline
-std::string GFitsHeaderCard::unit(void) const
+const std::string& GFitsHeaderCard::unit(void) const
 {
     return m_unit;
 }
@@ -197,7 +195,7 @@ std::string GFitsHeaderCard::unit(void) const
  * @brief Return header card comment
   ***************************************************************************/
 inline
-std::string GFitsHeaderCard::comment(void) const
+const std::string& GFitsHeaderCard::comment(void) const
 {
     return m_comment;
 }

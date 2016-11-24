@@ -855,6 +855,29 @@ void GObservations::eval(void)
 
 
 /***********************************************************************//**
+ * @brief Return total number of observed events
+ *
+ * @return Total number of observed events.
+ *
+ * Returns the total number of observed events that is container in the
+ * observation container.
+ ***************************************************************************/
+int GObservations::nobserved(void) const
+{
+    // Initialise number of observed events
+    int nobserved = 0;
+
+    // Compute number of observed events
+    for (int i = 0; i < size(); ++i) {
+        nobserved += (*this)[i]->nobserved();
+    }
+
+    // Return number of observed events
+    return nobserved;
+}
+
+
+/***********************************************************************//**
  * @brief Print observation list information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -876,6 +899,8 @@ std::string GObservations::print(const GChatter& chatter) const
         result.append(gammalib::str(size()));
         result.append("\n"+gammalib::parformat("Number of models"));
         result.append(gammalib::str(m_models.size()));
+        result.append("\n"+gammalib::parformat("Number of observed events"));
+        result.append(gammalib::str(nobserved()));
         result.append("\n"+gammalib::parformat("Number of predicted events"));
         result.append(gammalib::str(npred()));
 

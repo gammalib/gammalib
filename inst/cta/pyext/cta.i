@@ -165,7 +165,6 @@
 /* __ CTA ________________________________________________________________ */
 %include "GCTAObservation.i"
 %include "GCTAOnOffObservation.i"
-%include "GCTAOnOffObservations.i"
 %include "GCTAEventCube.i"
 %include "GCTAEventList.i"
 %include "GCTAEventBin.i"
@@ -186,6 +185,7 @@
 %include "GCTAPsfVector.i"
 %include "GCTAPsf2D.i"
 %include "GCTAPsfKing.i"
+%include "GCTAPsfTable.i"
 %include "GCTAEdisp.i"
 %include "GCTAEdispPerfTable.i"
 %include "GCTAEdispRmf.i"
@@ -196,6 +196,7 @@
 %include "GCTACubeExposure.i"
 %include "GCTACubeBackground.i"
 %include "GCTACubePsf.i"
+%include "GCTACubeEdisp.i"
 %include "GCTAModelCubeBackground.i"
 %include "GCTAModelIrfBackground.i"
 %include "GCTAModelAeffBackground.i"

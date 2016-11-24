@@ -31,7 +31,14 @@ Acknowledging or citing GammaLib
 --------------------------------
 
 If you use GammaLib for work/research presented in a publication we ask you
-that you include the following standard acknowledgment:
+to include the formal reference
+
+   J. Knoedlseder, M. Mayer, C. Deil, J.-B. Cayrou, E. Owen, N. Kelley-Hoskins,
+   C.-C. Lu, R. Buehler, F. Forest, T. Louge, H. Siejkowski, K. Kosack,
+   L. Gerard, A. Schulz, P. Martin, D. Sanchez, S. Ohm, T. Hassan, and
+   S. Brau-Nogue, 2016, A&A, in press (`arXiv:1606.00393 <http://arxiv.org/abs/1606.00393>`_)
+
+in your paper and that you add the following acknowledgment:
 
    *This research made use of GammaLib, a community-developed toolbox for
    the high-level analysis of astronomical gamma-ray data.*

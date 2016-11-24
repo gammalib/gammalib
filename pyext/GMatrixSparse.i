@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrixSparse.i - Sparse matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,9 +37,6 @@
  * @class GMatrixSparse
  *
  * @brief Sparse matrix class definition
- *
- * GMatrixSparse implements a sparse matrix storage class. It derives from
- * the abstract base class GMatrixBase.
  ***************************************************************************/
 class GMatrixSparse : public GMatrixBase {
 public:
@@ -64,7 +61,6 @@ public:
     virtual GMatrixSparse& operator-=(const GMatrixSparse& matrix);
     virtual GMatrixSparse& operator*=(const GMatrixSparse& matrix);
     virtual GMatrixSparse& operator*=(const double& scalar);
-    virtual GMatrixSparse& operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
     virtual void           clear(void);
@@ -76,7 +72,8 @@ public:
     virtual GVector        column(const int& column) const;
     virtual void           column(const int& column, const GVector& vector);
     virtual void           add_to_row(const int& row, const GVector& vector);
-    virtual void           add_to_column(const int& column, const GVector& vector);
+    virtual void           add_to_column(const int&     column,
+                                         const GVector& vector);
     virtual double         fill(void) const;
     virtual double         min(void) const;
     virtual double         max(void) const;
@@ -91,9 +88,10 @@ public:
     GMatrixSparse invert(void) const;
     GVector       solve(const GVector& vector) const;
     GMatrixSparse abs(void) const;
-    GMatrixSparse cholesky_decompose(bool compress = true);
-    GVector       cholesky_solver(const GVector& vector, bool compress = true);
-    GMatrixSparse cholesky_invert(bool compress = true);
+    GMatrixSparse cholesky_decompose(const bool& compress = true);
+    GVector       cholesky_solver(const GVector& vector,
+                                  const bool&    compress = true);
+    GMatrixSparse cholesky_invert(const bool& compress = true);
     void          set_mem_block(const int& block);
     void          stack_init(const int& size = 0, const int& entries = 0);
     int           stack_push_column(const GVector& vector, const int& col);
@@ -123,8 +121,23 @@ public:
     GMatrixSparse __mul__(const double &scalar) {
         return ((*self) * scalar);
     }
+    // Python 2.x
     GMatrixSparse __div__(const double &scalar) {
         return ((*self) / scalar);
+    }
+    // Python 3.x
+    GMatrixSparse __truediv__(const double& scalar) const {
+        return ((*self) / scalar);
+    }
+    // Python 2.x operator/=
+    GMatrixSparse __idiv__(const double& scalar) {
+        self->operator/=(scalar);
+        return (*self);
+    }
+    // Python 3.x operator/=
+    GMatrixSparse __itruediv__(const double& scalar) {
+        self->operator/=(scalar);
+        return (*self);
     }
     GMatrixSparse copy() {
         return (*self);

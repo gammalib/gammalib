@@ -66,10 +66,15 @@ class GModelSpectralLogParabola : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralLogParabola(void);
-    explicit GModelSpectralLogParabola(const double&  prefactor,
-                                       const double&  index,
-                                       const GEnergy& pivot,
-                                       const double&  curvature);
+    GModelSpectralLogParabola(const std::string& type,
+                              const std::string& prefactor,
+                              const std::string& index,
+                              const std::string& pivot,
+                              const std::string& curvature);
+    GModelSpectralLogParabola(const double&  prefactor,
+                              const double&  index,
+                              const GEnergy& pivot,
+                              const double&  curvature);
     explicit GModelSpectralLogParabola(const GXmlElement& xml);
     GModelSpectralLogParabola(const GModelSpectralLogParabola& model);
     virtual ~GModelSpectralLogParabola(void);
@@ -162,10 +167,11 @@ protected:
 
 
     // Protected members
-    GModelPar m_norm;         //!< Normalization factor
-    GModelPar m_index;        //!< Spectral index
-    GModelPar m_curvature;    //!< Curvature
-    GModelPar m_pivot;        //!< Pivot energy
+    std::string m_type;                //!< Model type
+    GModelPar   m_norm;                //!< Normalization factor
+    GModelPar   m_index;               //!< Spectral index
+    GModelPar   m_curvature;           //!< Curvature
+    GModelPar   m_pivot;               //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;     //!< Last energy value
@@ -209,7 +215,7 @@ std::string GModelSpectralLogParabola::classname(void) const
 inline
 std::string GModelSpectralLogParabola::type(void) const
 {
-    return "LogParabola";
+    return (m_type);
 }
 
 

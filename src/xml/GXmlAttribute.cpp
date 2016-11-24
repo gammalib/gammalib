@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GXmlAttribute.cpp - XML attribute class implementation          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,12 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
+//#include "GException.hpp"
 #include "GTools.hpp"
 #include "GXmlAttribute.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_VALUE                           "GXmlAttribute::value(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -85,18 +84,36 @@ GXmlAttribute::GXmlAttribute(const GXmlAttribute& attr)
  * @param[in] name Attribute name.
  * @param[in] value Attribute value.
  *
- * Construct attribute form a p@ name and a @p value. Predefined entities
+ * Construct attribute form a @p name and a @p value. Predefined entities
  * (e.g. &quot;) in attribute values are automatically converted into normal
- * characters.
+ * characters. The constructor strips any existing " or ' leading and
+ * trailing hyphens from the @p value string.
  ***************************************************************************/
 GXmlAttribute::GXmlAttribute(const std::string& name, const std::string& value)
 {
     // Initialise members
     init_members();
 
+    // Create working copy of attribute value
+    std::string v(value);
+
+    // Strip any pair of leading and trailing hyphens
+    int n = v.length();
+    if (n >= 2) {
+        if (((v[0] ==  '"') && (v[n-1] ==  '"')) ||
+            ((v[0] == '\'') && (v[n-1] == '\''))) {
+            if (n > 2) {
+                v = v.substr(1, n-2);
+            }
+            else {
+                v = "";
+            }
+        }
+    }
+
     // Set attribute
     this->name(name);
-    this->value(gammalib::xml2str(value));
+    this->value(gammalib::xml2str(v));
 
     // Return
     return;
@@ -195,11 +212,8 @@ GXmlAttribute* GXmlAttribute::clone(void) const
  ***************************************************************************/
 void GXmlAttribute::write(GUrl& url) const
 {
-    // Get value without quotation marks
-    std::string value = m_value.substr(1, m_value.length()-2);
-
-    // Convert value to XML format
-    value = "\""+gammalib::str2xml(value)+"\"";
+    // Convert value into XML format and add hyphens
+    std::string value = "\""+gammalib::str2xml(m_value)+"\"";
 
     // Write attribute into URL
     url.printf(" %s=%s", m_name.c_str(), value.c_str());
@@ -212,7 +226,7 @@ void GXmlAttribute::write(GUrl& url) const
 /***********************************************************************//**
  * @brief Print element attribute
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing element attribute.
  ***************************************************************************/
 std::string GXmlAttribute::print(const GChatter& chatter) const
@@ -224,110 +238,12 @@ std::string GXmlAttribute::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append attribute to string
-        result.append(" "+m_name+"="+m_value);
+        result.append(" "+m_name+"=\""+m_value+"\"");
 
     } // endif: chatter was not silent
 
     // Return
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Returns attribute value
- *
- * @return String containing the attribute value without hyphens.
- *
- * Returns the attribute value by stripping the hyphens.
- ***************************************************************************/
-std::string GXmlAttribute::value(void) const
-{
-    // Initialise attribute value
-    std::string value = "";
-
-    // Extract value by stripping hyphens
-    int n = m_value.length();
-    if (n > 2) {
-        value = m_value.substr(1, n-2);
-    }
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Set attribute value
- *
- * @param[in] value Attribute value.
- *
- * @exception GException::xml_attribute_value
- *            Invalid XML attribute value.
- *
- * Sets the value of the attribute. The method automatically adds the proper
- * hyphens to the value string if they do not exist.
- ***************************************************************************/
-void GXmlAttribute::value(std::string value)
-{
-    // Get length of value string
-    int n = value.length();
-
-    // Count hyphens and signal their presence at start/end
-    int  n_hyphens1 = 0;
-    int  n_hyphens2 = 0;
-    bool has_hyphens1 = (n >= 2 && value[0] == '\'' && value[n-1] == '\'');
-    bool has_hyphens2 = (n >= 2 && value[0] ==  '"' && value[n-1] ==  '"');
-    for (int i = 0; i < n; ++i) {
-        if (value[i] == '\'') n_hyphens1++;
-        if (value[i] ==  '"') n_hyphens2++;
-    }
-
-    // Case A: value has ' start and end hyphens. Keep value as is if no other
-    // ' hyphens are found. Otherwise, if more than 2 ' but no " hyphen is found
-    // then enclose the value in " hyphens. Finally, if more than 2 ' and at
-    // least one " hyphen is found we have an invalid value and throw an
-    // exception.
-    if (has_hyphens1) {
-        if (n_hyphens1 > 2 && n_hyphens2 == 0) {
-            value = "\"" + value + "\"";
-        }
-        else if (n_hyphens1 > 2 && n_hyphens2 > 0) {
-            throw GException::xml_attribute_value(G_VALUE, value);
-        }
-    }
-
-    // Case B: value has " start and end hyphens. Keep value as is if no other
-    // " hyphens are found. Otherwise, if more than 2 " but no ' hyphen is found
-    // then enclose the value in ' hyphens. Finally, if more than 2 " and at
-    // least one ' hyphen is found we have an invalid value and throw an
-    // exception.
-    else if (has_hyphens2) {
-        if (n_hyphens1 == 0 && n_hyphens2 > 2) {
-            value = "'" + value + "'";
-        }
-        else if (n_hyphens1 > 0 && n_hyphens2 > 2) {
-            throw GException::xml_attribute_value(G_VALUE, value);
-        }
-    }
-
-    // Case C: value has no start and end hyphens.
-    else {
-        if (n_hyphens1 >= 0 && n_hyphens2 == 0) {
-            value = "\"" + value + "\"";
-        }
-        else if (n_hyphens1 == 0 && n_hyphens2 > 0) {
-            value = "'" + value + "'";
-        }
-        else {
-            throw GException::xml_attribute_value(G_VALUE, value);
-        }
-    }
-
-    // Set value
-    m_value = value;
-
-    // Return
-    return;
 }
 
 

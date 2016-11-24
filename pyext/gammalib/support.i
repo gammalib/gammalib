@@ -34,6 +34,8 @@
 #include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GEnergy.hpp"
+#include "GFilename.hpp"
 %}
 
 /* __ Include standard typemaps for vectors and strings __________________ */

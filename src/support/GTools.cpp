@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,6 +47,9 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
+#include "GEnergy.hpp"
+#include "GFilename.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Compile options ____________________________________________________ */
 
@@ -862,7 +865,7 @@ std::string gammalib::centre(const std::string& s, const int& n, const char& c)
  * @brief Convert string in parameter format
  *
  * @param[in] s String to be converted.
- * @param[in] indent Indentation of parameter (default: 0).
+ * @param[in] indent Indentation of parameter.
  * @return Parameter string.
  *
  * Converts and string into the parameter format of type "s ......: " with a
@@ -876,6 +879,31 @@ std::string gammalib::parformat(const std::string& s, const int& indent)
 
     // Set result
     std::string result = " " + s + " " + fill(".", n_right) + ": ";
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert singular noun into number noun
+ *
+ * @param[in] noun Singular noun.
+ * @param[in] number Number of instance of noun.
+ * @return Converted noun.
+ *
+ * Converts a singular noun into a number noun by appending a "s" to the
+ * noun if the @p number of the instances of the noun is not one.
+ ***************************************************************************/
+std::string gammalib::number(const std::string& noun, const int& number)
+{
+    // Copy input noun
+    std::string result(noun);
+
+    // Append "s" if number if not one
+    if (number != 1) {
+        result += "s";
+    }
 
     // Return result
     return result;
@@ -1466,6 +1494,66 @@ void gammalib::xml_check_par(const std::string& origin,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Expand file name provided as XML attribute for loading
+ *
+ * @param[in] xml XML element.
+ * @param[in] filename File name.
+ * @return Expanded file name.
+ *
+ * Expands file name provided as XML attribute for loading. If the file name
+ * is not empty and has no path it is assumed that the file is located in the
+ * same directory as the XML file, and the XML file access path is prepended
+ * to the file name.
+ ***************************************************************************/
+GFilename gammalib::xml_file_expand(const GXmlElement& xml,
+                                    const std::string& filename)
+{
+    // Set file name
+    GFilename fname(filename);
+
+    // If the file name is not empty and has no path we assume that the file
+    // name is a relative file name with respect to the XML file access path
+    // and we therefore prepend the XML file access path to the file name
+    if (!fname.is_empty() && fname.path().length() == 0) {
+        fname = xml.filename().path() + fname;
+    }
+
+    // Return file name
+    return fname;
+}
+
+
+/***********************************************************************//**
+ * @brief Reduce file name provided for writing as XML attribute
+ *
+ * @param[in] xml XML element.
+ * @param[in] filename File name.
+ * @return Reduced file name.
+ *
+ * Reduces file name provided for writing as XML attribute. If the file name
+ * is not empty and has the same access path as the XML file it is assumed
+ * that both files are located in the same directory, and the access path is
+ * stripped from the file name.
+ ***************************************************************************/
+GFilename gammalib::xml_file_reduce(const GXmlElement& xml,
+                                    const std::string& filename)
+{
+    // Set file name
+    GFilename fname(filename);
+
+    // If the file name is not empty and has the same access path as the XML
+    // file it is assumed that both files are located in the same directory,
+    // and the access path is stripped from the file name.
+    if (!fname.is_empty() && fname.path() == xml.filename().path()) {
+        fname = fname.file();
+    }
+
+    // Return file name
+    return fname;
 }
 
 

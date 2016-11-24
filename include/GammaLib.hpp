@@ -154,8 +154,9 @@
 #include "GWcsCAR.hpp"
 #include "GWcsMER.hpp"
 #include "GWcsMOL.hpp"
-#include "GWcsTAN.hpp"
+#include "GWcsSIN.hpp"
 #include "GWcsSTG.hpp"
+#include "GWcsTAN.hpp"
 
 /* __ Observation handling _______________________________________________ */
 #include "GEnergy.hpp"

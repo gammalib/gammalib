@@ -38,8 +38,20 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralBrokenPlaw     g_spectral_plaw_seed;
-const GModelSpectralRegistry g_spectral_plaw_registry(&g_spectral_plaw_seed);
+const GModelSpectralBrokenPlaw g_spectral_blaw_seed1("BrokenPowerLaw",
+                                                     "Prefactor",
+                                                     "Index1",
+                                                     "BreakEnergy",
+                                                     "Index2");
+const GModelSpectralRegistry   g_spectral_blaw_registry1(&g_spectral_blaw_seed1);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralBrokenPlaw g_spectral_blaw_seed2("BrokenPowerLaw",
+                                                     "Prefactor",
+                                                     "Index1",
+                                                     "BreakValue",
+                                                     "Index2");
+const GModelSpectralRegistry   g_spectral_blaw_registry2(&g_spectral_blaw_seed2);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC       "GModelSpectralBrokenPlaw::mc(GEnergy&, GEnergy&, GTime&,"\
@@ -67,6 +79,38 @@ GModelSpectralBrokenPlaw::GModelSpectralBrokenPlaw(void) : GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type and parameter name constructor
+ *
+ * @param[in] type Model type.
+ * @param[in] prefactor Name of prefactor parameter.
+ * @param[in] index Name of index parameter.
+ * @param[in] pivot Name of pivot parameter.
+ ***************************************************************************/
+GModelSpectralBrokenPlaw::GModelSpectralBrokenPlaw(const std::string& type,
+                                                   const std::string& prefactor,
+                                                   const std::string& index1,
+                                                   const std::string& breakenergy,
+                                                   const std::string& index2) :
+                          GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Set parameter names
+    m_norm.name(prefactor);
+    m_index1.name(index1);
+    m_breakenergy.name(breakenergy);
+    m_index2.name(index2);
 
     // Return
     return;
@@ -588,71 +632,23 @@ GEnergy GModelSpectralBrokenPlaw::mc(const GEnergy& emin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing power law model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
- * Reads the spectral information from an XML element. The format of the XML
- * elements is
- *
- *     <spectrum type="BrokenPowerLaw">
- *       <parameter name="Prefactor" scale=".." value=".." max=".." min=".." free=".."/>
- *       <parameter name="Index1" scale=".." value=".." max=".." min=".." free=".."/>
- *       <parameter name="BreakValue" scale=".." value=".." max=".." min=".." free=".."/>
- *       <parameter name="Index2" scale=".." value=".." max=".." min=".." free=".."/>
- *     </spectrum>
- *
- * @todo Add parameter validity check
+ * Reads the spectral information from an XML element.
  ***************************************************************************/
 void GModelSpectralBrokenPlaw::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Broken Power law model requires exactly 4 parameters.");
-    }
+    // Get remaining XML parameters
+    const GXmlElement* prefactor   = gammalib::xml_get_par(G_READ, xml, m_norm.name());
+    const GXmlElement* index1      = gammalib::xml_get_par(G_READ, xml, m_index1.name());
+    const GXmlElement* breakenergy = gammalib::xml_get_par(G_READ, xml, m_breakenergy.name());
+    const GXmlElement* index2      = gammalib::xml_get_par(G_READ, xml, m_index2.name());
 
-    // Extract model parameters
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            m_norm.read(*par);
-            npar[0]++;
-        }
-
-        // Handle index1
-        else if (par->attribute("name") == "Index1") {
-            m_index1.read(*par);
-            npar[1]++;
-        }
-
-        // Handle breakenergy energy
-        else if (par->attribute("name") == "BreakValue") {
-            m_breakenergy.read(*par);
-            npar[2]++;
-        }
-        // Handle index2
-        else if (par->attribute("name") == "Index2") {
-            m_index2.read(*par);
-            npar[3]++;
-        }
-
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] !=1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Prefactor\", \"Index1\", \"BreakValue\" and  \"Index2\" parameters.");
-    }
+    // Read parameters
+    m_norm.read(*prefactor);
+    m_index1.read(*index1);
+    m_breakenergy.read(*breakenergy);
+    m_index2.read(*index2);
 
     // Return
     return;
@@ -662,91 +658,37 @@ void GModelSpectralBrokenPlaw::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_
- *            Existing XML element is not of type "BrokenPowerLaw"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * @exception GException::model_invalid_spectral
+ *            Existing XML element is not of the expected type.
  *
- * Writes the spectral information into an XML element. The format of the XML
- * element is
- *
- *     <spectrum type="BrokenPowerLaw">
- *       <parameter name="Prefactor" scale=".." value=".." max=".." min=".." free=".."/>
- *       <parameter name="Index1" scale=".." value=".." max=".." min=".." free=".."/>
- *       <parameter name="BreakValue" scale=".." value=".." max=".." min=".." free=".."/>
- *       <parameter name="Index2" scale=".." value=".." max=".." min=".." free=".."/>
- *     </spectrum>
- *
+ * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralBrokenPlaw::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "BrokenPowerLaw");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "BrokenPowerLaw") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"BrokenPowerLaw\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 4 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(GXmlElement("parameter name=\"Index1\""));
-        xml.append(GXmlElement("parameter name=\"BreakValue\""));
-        xml.append(GXmlElement("parameter name=\"Index2\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm        = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* index1      = gammalib::xml_need_par(G_WRITE, xml, m_index1.name());
+    GXmlElement* index2      = gammalib::xml_need_par(G_WRITE, xml, m_index2.name());
+    GXmlElement* breakenergy = gammalib::xml_need_par(G_WRITE, xml, m_breakenergy.name());
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Broken Power law model requires exactly 4 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle index1
-        else if (par->attribute("name") == "Index1") {
-            npar[1]++;
-            m_index1.write(*par);
-        }
-
-        // Handle break energy
-        else if (par->attribute("name") == "BreakValue") {
-            npar[2]++;
-            m_breakenergy.write(*par);
-        }
-
-        // Handle index2
-        else if (par->attribute("name") == "Index2") {
-            npar[3]++;
-            m_index2.write(*par);
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Prefactor\", \"Index1\", \"BreakValue\"  and \"Index2\"  parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    m_index1.write(*index1);
+    m_index2.write(*index2);
+    m_breakenergy.write(*breakenergy);
 
     // Return
     return;
@@ -795,6 +737,9 @@ std::string GModelSpectralBrokenPlaw::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralBrokenPlaw::init_members(void)
 {
+    // Initialise model type
+    m_type = "BrokenPowerLaw";
+
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Prefactor");
@@ -828,7 +773,7 @@ void GModelSpectralBrokenPlaw::init_members(void)
 
     // Initialise break energy
     m_breakenergy.clear();
-    m_breakenergy.name("BreakValue");
+    m_breakenergy.name("BreakEnergy");
     m_breakenergy.unit("MeV");
     m_breakenergy.scale(1.0);
     m_breakenergy.value(100.0);  // default: 100
@@ -876,6 +821,7 @@ void GModelSpectralBrokenPlaw::init_members(void)
 void GModelSpectralBrokenPlaw::copy_members(const GModelSpectralBrokenPlaw& model)
 {
     // Copy members
+    m_type        = model.m_type;
     m_norm        = model.m_norm;
     m_index1      = model.m_index1;
     m_breakenergy = model.m_breakenergy;

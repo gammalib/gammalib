@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_GXml.cpp - Test xml module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,8 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>     // getenv
 #include "test_GXml.hpp"
 #include "GTools.hpp"
+
+/* __ Constants __________________________________________________________ */
 
 
 /***********************************************************************//**
@@ -40,15 +43,23 @@ void TestGXml::set(void)
     // Test name
     name("GXml");
 
+    // Set datadir
+    std::string datadir = std::getenv("TEST_DATA");
+
     // Set XML filename
-    m_xml_file = "data/test.xml";
+    m_xml_file = datadir + "/test.xml";
 
     // Append tests
-    append(static_cast<pfunction>(&TestGXml::test_GXml_attributes), "Test XML attributes");
-    append(static_cast<pfunction>(&TestGXml::test_GXml_elements), "Test XML elements");
-    append(static_cast<pfunction>(&TestGXml::test_GXml_construct),"Test XML constructors");
-    append(static_cast<pfunction>(&TestGXml::test_GXml_load),"Test XML load");
-    append(static_cast<pfunction>(&TestGXml::test_GXml_access), "Test XML access");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_attributes),
+           "Test XML attributes");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_elements),
+           "Test XML elements");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_construct),
+           "Test XML constructors");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_load),
+           "Test XML load");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_access),
+           "Test XML access");
 
     // Return
     return; 
@@ -68,94 +79,38 @@ TestGXml* TestGXml::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Test XML arrtibutes
+ * @brief Test XML attributes
  **************************************************************************/
 void TestGXml::test_GXml_attributes(void)
 {
-    // Test valid attributes
-    test_try("Test valid attributes");
-    try {
-        GXmlAttribute attr("test", "1.0");
-        test_assert(attr.value() == "1.0","Test if value()= 1.0","Unexpected attribute "+attr.value());
-
-        attr.value("\"1.0\"");
-        test_assert(attr.value() == "1.0","Test if value()= 1.0","Unexpected attribute "+attr.value());
-
-        attr.value("'1.0'");
-        test_assert(attr.value() == "1.0","Test if value()= 1.0","Unexpected attribute "+attr.value());
-
-        attr.value("''1.0'");
-        test_assert(attr.value() == "''1.0'",
-                              "Test if value()= ''1.0'",
-                              "Unexpected attribute "+attr.value());
-
-        attr.value("'1.0");
-        test_assert(attr.value() == "'1.0",
-                              "Test if value()= '1.0",
-                              "Unexpected attribute "+attr.value());
-
-        attr.value("1.0'");
-        test_assert(attr.value() == "1.0'",
-                              "Test if value()= 1.0'",
-                              "Unexpected attribute "+attr.value());
-
-        attr.value("\"1.0");
-        test_assert(attr.value() == "\"1.0",
-                              "Test if value()= \"1.0",
-                              "Unexpected attribute "+attr.value());
-
-
-        attr.value("1.0\"");
-        test_assert(attr.value() == "1.0\"",
-                              "Test if value()= 1.0\"",
-                              "Unexpected attribute "+attr.value());
-
-        attr.value("\"\"1.0\"");
-        test_assert(attr.value() == "\"\"1.0\"",
-                              "Test if value()= \"\"1.0\"",
-                              "Unexpected attribute "+attr.value());
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test invalid attributes
-    test_try("Test invalid attributes 1");
-    try {
-        GXmlAttribute attr("test", "\"\"1.0'\"");
-        test_try_failure();
-    }
-    catch (GException::xml_attribute_value &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    test_try("Test invalid attributes 2");
-    try {
-        GXmlAttribute attr("test", "''1.0\"");
-        test_try_failure();
-    }
-    catch (GException::xml_attribute_value &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    test_try("Test invalid attributes 3");
-    try {
-        GXmlAttribute attr("test", "\"1.0'");
-        test_try_failure();
-    }
-    catch (GException::xml_attribute_value &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test attribute name-value constructors
+    GXmlAttribute attr1("test", "1.0");
+    test_assert(attr1.value() == "1.0", "Test if value()= 1.0",
+                "Unexpected attribute "+attr1.value());
+    GXmlAttribute attr2("test", "\"1.0\"");
+    test_assert(attr2.value() == "1.0", "Test if value()= 1.0",
+                "Unexpected attribute "+attr2.value());
+    GXmlAttribute attr3("test", "'1.0'");
+    test_assert(attr3.value() == "1.0", "Test if value()= 1.0",
+                "Unexpected attribute "+attr3.value());
+    GXmlAttribute attr4("test", "''1.0'");
+    test_assert(attr4.value() == "'1.0", "Test if value()= '1.0",
+                "Unexpected attribute "+attr4.value());
+    GXmlAttribute attr5("test", "'1.0");
+    test_assert(attr5.value() == "'1.0", "Test if value()= '1.0",
+                "Unexpected attribute "+attr5.value());
+    GXmlAttribute attr6("test", "1.0'");
+    test_assert(attr6.value() == "1.0'", "Test if value()= 1.0'",
+                "Unexpected attribute "+attr6.value());
+    GXmlAttribute attr7("test", "\"1.0");
+    test_assert(attr7.value() == "\"1.0", "Test if value()= \"1.0",
+                "Unexpected attribute "+attr7.value());
+    GXmlAttribute attr8("test", "1.0\"");
+    test_assert(attr8.value() == "1.0\"", "Test if value()= 1.0\"",
+                "Unexpected attribute "+attr8.value());
+    GXmlAttribute attr9("test", "\"\"1.0\"");
+    test_assert(attr9.value() == "\"1.0", "Test if value()= \"1.0",
+                "Unexpected attribute "+attr9.value());
 
     // Return
     return;
@@ -319,55 +274,39 @@ void TestGXml::test_GXml_access(void)
     // Test root document access
     GXml xml;
     xml.load(m_xml_file);
-    test_assert(xml.size() == 3,
-                "Test if xml.children()==3",
-                "Unexpected number of children in document "+
-                gammalib::str(xml.size()));
+    test_value(xml.size(), 3, "Check number of child elements");
 
     // Test node access
     for (int i = 0; i < xml.size(); ++i) {
         GXmlNode* ptr = xml[i];
-        test_assert(ptr != 0, "Test node access");
+        test_assert(ptr != 0, "Check XML node access");
     }
-    test_assert(xml.elements() == 1,
-                "Test if xml.elements()==1",
-                "Unexpected number of child elements in document "+
-                gammalib::str(xml.elements()));
+    test_value(xml.elements(), 1, "Check number of child elements");
 
     // Test node access
     for (int i = 0; i < xml.elements(); ++i) {
         GXmlNode* ptr = xml.element(i);
-        test_assert(ptr != 0, "Test xml element access");
+        test_assert(ptr != 0, "Check XML element access");
     }
-    test_assert(xml.elements("source_library") == 1,
-                "Test if the source_library = 1",
-                "Unexpected number of child elements in document "+
-                gammalib::str(xml.elements("source_library")));
+    test_value(xml.elements("source_library"), 1, "Check number of child elements");
 
     // Test element access
     for (int i = 0; i < xml.elements("source_library"); ++i) {
         GXmlElement* ptr = xml.element("source_library", i);
-        test_assert(ptr->name() == "source_library",
-                    "Test name",
-                    "Unexpected element name "+ptr->name());
+        test_value(ptr->name(), "source_library", "Check element name");
     }
 
     // Test hierarchy access
     GXmlElement* ptr = NULL;
     ptr = xml.element("source_library");
-    test_assert(ptr->name() == "source_library", "Test hierarchy access",
-                "Unexpected element name "+ptr->name());
+    test_value(ptr->name(), "source_library", "Check hierarchy level 1");
     ptr = xml.element("source_library > source");
-    test_assert(ptr->name() == "source", "Test hierarchy access",
-                "Unexpected element name "+ptr->name());
+    test_value(ptr->name(),  "source", "Check hierarchy level 2");
     ptr = xml.element("source_library > source > spectrum");
-    test_assert(ptr->name() == "spectrum", "Test hierarchy access",
-                "Unexpected element name "+ptr->name());
+    test_value(ptr->name(), "spectrum", "Check hierarchy level 3");
     ptr = xml.element("source_library > source > spectrum > parameter[2]");
-    test_assert(ptr->name() == "parameter", "Test hierarchy access",
-                "Unexpected element name "+ptr->name());
-    test_assert(ptr->attribute("name") == "Scale", "Test hierarchy access",
-                "Unexpected element attribute "+ptr->attribute("name"));
+    test_value(ptr->name(), "parameter", "Check hierarchy level 4");
+    test_value(ptr->attribute("name"), "PivotEnergy", "Check for attribute");
 
     // Return
     return;

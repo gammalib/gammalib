@@ -18,7 +18,6 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
 #                                                                           #
 #############################################################################
-
 from distutils.core import setup, Extension
 from distutils import sysconfig
 import glob
@@ -37,34 +36,41 @@ core_modules = ['app', 'base', 'fits', 'linalg', 'model', 'numerics', \
 # Detect execution mode
 is_build = True
 if (len(sys.argv) >= 2):
-	if (sys.argv[1] == 'install'):
-		is_build = False
+    if (sys.argv[1] == 'install'):
+        is_build = False
 if is_build:
-	sys.stdout.write("Python extension module building:\n")
+    print('Python extension module building:')
 else:
-	sys.stdout.write("Python extension module installation:\n")
+    print('Python extension module installation:')
+
+# Set prefix
+prefix = '@prefix@'
+if (len(sys.argv) >= 3):
+    if (sys.argv[2].find('--prefix') != -1):
+        start  = sys.argv[2].find('=') + 1
+        prefix = sys.argv[2][start:]
 
 # Darwin MacPorts kluge: Remove -L/opt/local/lib path from LDSHARED as this
 # overrides the GammaLib settings. Otherwise, MacPorts libraries would be
 # used instead of the libraries selected by GammaLib
 if sys.platform.lower().startswith("darwin"):
-	
-	# Get configuration variables
-	cvars = sysconfig.get_config_vars()
-	
-	# Extract LDSHARED
-	ldshared_old = cvars.get('LDSHARED')
-	ldshared_new = ''
-	ldshared_rm  = ''
-	for option in ldshared_old.split(' '):
-		if option.lstrip().find('-L/opt/local/lib') != 0:
-			ldshared_new += option + ' '
-		else:
-			ldshared_rm += option + ' '
-	if (len(ldshared_rm) > 0):
-		sys.stdout.write("Removed following option(s) from LDSHARED: "+ldshared_rm+"\n")	
-	# Set LDSHARED
-	cvars['LDSHARED'] = ldshared_new
+
+    # Get configuration variables
+    cvars = sysconfig.get_config_vars()
+
+    # Extract LDSHARED
+    ldshared_old = cvars.get('LDSHARED')
+    ldshared_new = ''
+    ldshared_rm  = ''
+    for option in ldshared_old.split(' '):
+        if option.lstrip().find('-L/opt/local/lib') != 0:
+            ldshared_new += option + ' '
+        else:
+            ldshared_rm += option + ' '
+    if (len(ldshared_rm) > 0):
+        print('Removed following option(s) from LDSHARED: '+ldshared_rm)
+    # Set LDSHARED
+    cvars['LDSHARED'] = ldshared_new
 
 # Set default include directories, install files, library paths and libraries
 include_dirs         = ['@top_srcdir@/include']
@@ -74,57 +80,57 @@ runtime_library_dirs = ['../src/.libs']
 libraries            = ['gamma']
 
 # Add install directory to runtime library path
-if os.path.exists('@prefix@/lib'):
-	runtime_library_dirs.append('@prefix@/lib')
+if os.path.exists(prefix+'/lib'):
+    runtime_library_dirs.append(prefix+'/lib')
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
-	sys.stdout.write("Link cfitsio into Python module.\n")
-	libraries.append('cfitsio')
+    print('Link cfitsio into Python module.')
+    libraries.append('cfitsio')
 
 # Add readline library only if available
 if '@WITH_READLINE_TRUE@' != '#':
-	sys.stdout.write("Link readline into Python module.\n")
-	libraries.append('@LIB_READLINE@')
-	libraries.append('@LIB_NCURSES@')
+    print('Link readline into Python module.')
+    libraries.append('@LIB_READLINE@')
+    libraries.append('@LIB_NCURSES@')
 
 # Add extra libraries
 extra_libs = ('@PYTHON_EXTRA_LIBS@').split(',')
 for extra_lib in extra_libs:
-	if len(extra_lib) > 0:
-		libraries.append(extra_lib)
+    if len(extra_lib) > 0:
+        libraries.append(extra_lib)
 
 # Get extra library paths (for cfitsio, readline, ncurses)
 extra_lib_paths = ('@LDFLAGS@').split(' ')
 for extra_lib_path in extra_lib_paths:
-	if extra_lib_path.lstrip().find('-L') == 0:
-		dir = extra_lib_path.lstrip().lstrip('-L')
-		if len(dir) > 0:
-			library_dirs.append(dir)
-			runtime_library_dirs.append(dir)
+    if extra_lib_path.lstrip().find('-L') == 0:
+        dir = extra_lib_path.lstrip().lstrip('-L')
+        if len(dir) > 0:
+            library_dirs.append(dir)
+            runtime_library_dirs.append(dir)
 
 # Get extra include directories
 extra_inc_paths = ('@CPPFLAGS@').split(' ')
 for extra_inc_path in extra_inc_paths:
-	if extra_inc_path.lstrip().find('-I') == 0:
-		dir = extra_inc_path.lstrip().lstrip('-I')
-		if len(dir) > 0:
-			include_dirs.append(dir)
+    if extra_inc_path.lstrip().find('-I') == 0:
+        dir = extra_inc_path.lstrip().lstrip('-I')
+        if len(dir) > 0:
+            include_dirs.append(dir)
 
 # Add definitions for instrument specific modules
 inst_modules = []
 if '@WITH_INST_MWL_TRUE@' != '#':
-	sys.stdout.write("Include multi-wavelength interface in gammalib Python module.\n")
-	inst_modules.append('mwl')
+    print('Include multi-wavelength interface in gammalib Python module.')
+    inst_modules.append('mwl')
 if '@WITH_INST_CTA_TRUE@' != '#':
-	sys.stdout.write("Include CTA instrument interface in gammalib Python module.\n")
-	inst_modules.append('cta')
+    print('Include CTA instrument interface in gammalib Python module.')
+    inst_modules.append('cta')
 if '@WITH_INST_LAT_TRUE@' != '#':
-	sys.stdout.write("Include Fermi/LAT instrument interface in gammalib Python module.\n")
-	inst_modules.append('lat')
+    print('Include Fermi/LAT instrument interface in gammalib Python module.')
+    inst_modules.append('lat')
 if '@WITH_INST_COM_TRUE@' != '#':
-	sys.stdout.write("Include COMPTEL instrument interface in gammalib Python module.\n")
-	inst_modules.append('com')
+    print('Include COMPTEL instrument interface in gammalib Python module.')
+    inst_modules.append('com')
 
 # Set extension definition for core modules
 all_modules = []
@@ -133,11 +139,11 @@ py_modules  = []
 
 # Optionally enable OpenMP
 if '@OPENMP_TRUE@' != '#':
-	extra_compile_args = ['@OPENMP_CXXFLAGS@']
-	extra_link_args    = ['@OPENMP_CXXFLAGS@']
+    extra_compile_args = ['@OPENMP_CXXFLAGS@']
+    extra_link_args    = ['@OPENMP_CXXFLAGS@']
 else:
-	extra_compile_args = []
-	extra_link_args    = []
+    extra_compile_args = []
+    extra_link_args    = []
 
 # Optionally add link flag for El Capitan post-processing of modules
 if '@IS_ELCAPITAN_TRUE@' != '#':
@@ -145,127 +151,59 @@ if '@IS_ELCAPITAN_TRUE@' != '#':
 
 # Loop over all core modules
 for module in core_modules:
-	
-	# Define module
-	ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
-	                       include_dirs=include_dirs, \
-                           libraries=libraries,
-                           library_dirs=library_dirs,
-                           runtime_library_dirs=runtime_library_dirs,
-                           extra_compile_args=extra_compile_args,
-                           extra_link_args=extra_link_args)
-	all_modules.append(module)
-	ext_modules.append(ext_module)
-	py_modules.append(pkg_name+'.'+module)
 
-# Set extension definition for instrument dependent modules
-for module in inst_modules:
+    # In case that wrappers were not built then copy the module wrapper files
+    # from the source to the build directory
+    if '@BUILD_WRAPPERS_FALSE@' != '#' and is_build:
+        py_file  = pkg_name+'/'+module+'.py'
+        cpp_file = pkg_name+'/'+module+'_wrap.cpp'
+        os.system('cp %s %s' % ('@srcdir@/'+cpp_file, '@builddir@/'+cpp_file))
+        os.system('cp %s %s' % ('@srcdir@/'+py_file,  '@builddir@/'+py_file))
 
-	# Define paths
-	pyext_path   = '@top_srcdir@/inst/'+module+'/pyext'
-	include_path = '@top_srcdir@/inst/'+module+'/include'
-	
-	# Set include directories for module
-	include_inst_dirs = include_dirs
-	include_inst_dirs.append(include_path)
-	
-	# Add SWIG files to install_files
-	install_files.extend(glob.glob(pyext_path+'/*.i'))
-	
-	# Define module
-	ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
+    # Define module
+    ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
                            include_dirs=include_dirs, \
                            libraries=libraries,
                            library_dirs=library_dirs,
                            runtime_library_dirs=runtime_library_dirs,
                            extra_compile_args=extra_compile_args,
                            extra_link_args=extra_link_args)
-	all_modules.append(module)
-	ext_modules.append(ext_module)
-	py_modules.append(pkg_name+'.'+module)
+    all_modules.append(module)
+    ext_modules.append(ext_module)
+    py_modules.append(pkg_name+'.'+module)
 
-# Build list of class names
-classes = []
-casts   = []
-for module in all_modules:
+# Set extension definition for instrument dependent modules
+for module in inst_modules:
 
-	# Set file names
-	filename = pkg_name+"/"+module+".py"
-	infile  = open(filename, 'r')
+    # Set include directories for module
+    include_inst_dirs = include_dirs
+    include_inst_dirs.append('@top_srcdir@/inst/'+module+'/include')
 
-	# Loop over all lines of input file
-	for line in infile:
+    # Add SWIG files to install_files
+    install_files.extend(glob.glob('@top_srcdir@/inst/'+module+'/pyext/*.i'))
 
-		# Search class names
-		if line.find("class G") != -1:
-			pos  = line.find("(")
-			name = line[6:pos]
-			classes.append(name)
+    # In case that wrappers were not built then copy the module wrapper files
+    # from the source to the build directory
+    if '@BUILD_WRAPPERS_FALSE@' != '#' and is_build:
+        py_file  = pkg_name+'/'+module+'.py'
+        cpp_file = pkg_name+'/'+module+'_wrap.cpp'
+        os.system('cp %s %s' % ('@srcdir@/'+cpp_file, '@builddir@/'+cpp_file))
+        os.system('cp %s %s' % ('@srcdir@/'+py_file,  '@builddir@/'+py_file))
 
-		# Search casts
-		elif line.find("def cast_") != -1:
-			pos     = line.find("(")
-			name    = line[4:pos]
-			casts.append(name)
-
-	# Close file
-	infile.close()
-
-# Sort
-classes.sort()
-casts.sort()
-
-# Build names string
-names   = ""
-n_names = 0
-for name in classes:
-	if n_names > 0:
-		names += ", "
-	names   += "'"+name+"'"
-	n_names += 1
-for name in casts:
-	if n_names > 0:
-		names += ", "
-	names   += "'"+name+"'"
-	n_names += 1
-
-# Create gammalib/__init__.py file (build only)
-if is_build:
-    file = open(pkg_name+'/__init__.py', 'w')
-    file.write('# This file is created automatically by setup.py\n')
-    file.write('# Please do not modify, unless you exactly know what you do.\n')
-    file.write('__all__ = [')
-    file.write(names)
-    file.write(']\n')
-    for module in all_modules:
-        file.write('from gammalib.'+module+' import *\n')
-
-    # Remove useless and annoying `*_swigregister` entries from the namespace
-    # see https://cta-redmine.irap.omp.eu/issues/832
-    file.write("""
-bad_entries = [entry for entry in list(locals())
-               if entry.endswith('_swigregister')]
-for entry in bad_entries:
-    del locals()[entry]
-del gammalib.gammalib
-""")
-
-    # Add test function
-    # see https://cta-redmine.irap.omp.eu/issues/1486
-    file.write("""
-def test():
-    from gammalib.tests import test_python
-    test_python.test(installed=True)
-""")
-
-    # Add version
-    file.write("\n__version__ = '@PACKAGE_VERSION@'\n")
-    
-    # Close file
-    file.close()
+    # Define module
+    ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
+                           include_dirs=include_inst_dirs, \
+                           libraries=libraries,
+                           library_dirs=library_dirs,
+                           runtime_library_dirs=runtime_library_dirs,
+                           extra_compile_args=extra_compile_args,
+                           extra_link_args=extra_link_args)
+    all_modules.append(module)
+    ext_modules.append(ext_module)
+    py_modules.append(pkg_name+'.'+module)
 
 # Set data files to install.
-data_files=[('@prefix@/share/gammalib/swig', install_files)]
+data_files=[(prefix+'/share/gammalib/swig', install_files)]
 
 # Setup
 setup(name='@PACKAGE_NAME@',
@@ -281,24 +219,24 @@ setup(name='@PACKAGE_NAME@',
       ext_modules=ext_modules,
       py_modules=py_modules,
       data_files=data_files,
-      license="GNU GPL v3",
-      long_description="Versatile toolbox for the analysis of astronomical gamma-ray data",
-      platforms=["Linux", "Solaris", "Mac OS-X", "Unix", "BSD"],
-	  )
+      license='GNU GPL v3',
+      long_description='Versatile toolbox for the analysis of astronomical gamma-ray data',
+      platforms=['Linux', 'Solaris', 'Mac OS-X', 'Unix', 'BSD'],
+      )
 
 # Post-processing. A symbolic link is created to the directory containing the
 # shared wrapper libraries so that we can add this directory to the PYTHONPATH
 # for testing.
 if is_build:
-	try:
-		os.chdir('build')
-		os.remove('gammalib')
-		sys.stdout.write("Removed symbolic link build/gammalib.\n")
-	except:
-		pass
-	try:
-		path = glob.glob('lib.*/gammalib')
-		os.symlink(path[0], 'gammalib')
-		sys.stdout.write("Created symbolic link build/gammalib.\n")
-	except:
-		sys.stdout.write("WARNING: Failed to create symbolic link build/gammalib.\n")
+    try:
+        os.chdir('build')
+        os.remove('gammalib')
+        print('Removed symbolic link build/gammalib.')
+    except:
+        pass
+    try:
+        path = glob.glob('lib.*/gammalib')
+        os.symlink(path[0], 'gammalib')
+        print('Created symbolic link build/gammalib.')
+    except:
+        print('WARNING: Failed to create symbolic link build/gammalib.')

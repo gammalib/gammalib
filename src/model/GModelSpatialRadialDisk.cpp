@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.cpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Christoph Deil                              *
+ *  copyright (C) 2011-2016 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialDisk g_radial_disk_seed;
 const GModelSpatialRegistry   g_radial_disk_registry(&g_radial_disk_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialRadialDisk g_radial_disk_legacy_seed(true, "DiskFunction");
+const GModelSpatialRegistry   g_radial_disk_legacy_registry(&g_radial_disk_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                  "GModelSpatialRadialDisk::read(GXmlElement&)"
@@ -59,11 +63,36 @@ const GModelSpatialRegistry   g_radial_disk_registry(&g_radial_disk_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty radial disk model.
  ***************************************************************************/
 GModelSpatialRadialDisk::GModelSpatialRadialDisk(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty radial disk model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialRadialDisk::GModelSpatialRadialDisk(const bool&        dummy,
+                                                 const std::string& type) :
+                         GModelSpatialRadial()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -378,7 +407,7 @@ double GModelSpatialRadialDisk::theta_max(void) const
  * Reads the radial disk model information from an XML element. The XML
  * element shall have either the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialDisk">
  *       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Radius" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -386,7 +415,7 @@ double GModelSpatialRadialDisk::theta_max(void) const
  *
  * or
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialDisk">
  *       <parameter name="GLON"   scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="GLAT"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Radius" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -454,7 +483,7 @@ void GModelSpatialRadialDisk::read(const GXmlElement& xml)
  * Writes the radial disk model information into an XML element. The XML
  * element will have the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialDisk">
  *       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Radius" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -549,6 +578,9 @@ std::string GModelSpatialRadialDisk::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialRadialDisk::init_members(void)
 {
+    // Initialise model type
+    m_type = "RadialDisk";
+
     // Initialise Radius
     m_radius.clear();
     m_radius.name("Radius");
@@ -586,6 +618,7 @@ void GModelSpatialRadialDisk::init_members(void)
 void GModelSpatialRadialDisk::copy_members(const GModelSpatialRadialDisk& model)
 {
     // Copy members
+    m_type   = model.m_type;
     m_radius = model.m_radius;
 
     // Copy precomputation cache

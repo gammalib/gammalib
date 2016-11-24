@@ -32,7 +32,7 @@
 #include "GBase.hpp"
 #include "GFilename.hpp"
 #include "GSkyMap.hpp"
-#include "GEbounds.hpp"
+#include "GEnergies.hpp"
 #include "GNodeArray.hpp"
 #include "GGti.hpp"
 
@@ -69,7 +69,7 @@ public:
                      const double&        dy,
                      const int&           nx,
                      const int&           ny,
-                     const GEbounds&      ebounds);
+                     const GEnergies&     energies);
     virtual ~GCTACubeExposure(void);
 
     // Operators
@@ -83,9 +83,8 @@ public:
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs, GLog* log = NULL);
     const GSkyMap&     cube(void) const;
-    const GEbounds&    ebounds(void) const;
+    const GEnergies&   energies(void) const;
     const GGti&        gti(void) const;
-    const GNodeArray&  elogmeans(void) const;
     const double&      livetime(void) const;
     const double&      ontime(void) const;
     double             deadc(void) const;
@@ -102,6 +101,7 @@ protected:
     void init_members(void);
     void copy_members(const GCTACubeExposure& exp);
     void free_members(void);
+    void fill_cube(const GCTAObservation& obs, GLog* log = NULL);
     void update(const double& logE) const;
     void set_eng_axis(void);
     void read_attributes(const GFitsHDU& hdu);
@@ -110,7 +110,7 @@ protected:
     // Members
     mutable GFilename m_filename;  //!< Filename
     GSkyMap           m_cube;      //!< Average Exposure cube
-    GEbounds          m_ebounds;   //!< Energy bounds for the Exposure cube
+    GEnergies         m_energies;  //!< Energy values for the Exposure cube
     GNodeArray        m_elogmeans; //!< Mean energy for the Exposure cube
     GGti              m_gti;       //!< Good time interval for the Exposure cube
 
@@ -154,26 +154,14 @@ const GSkyMap& GCTACubeExposure::cube(void) const
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries
+ * @brief Return energies
  *
- * @return Energy boundaries
+ * @return Energies
  ***************************************************************************/
 inline
-const GEbounds& GCTACubeExposure::ebounds(void) const
+const GEnergies& GCTACubeExposure::energies(void) const
 {
-    return (m_ebounds);
-}
-
-
-/***********************************************************************//**
- * @brief Return arithmetic mean of log10 energies
- *
- * @return Arithmetic mean of log10 energies.
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubeExposure::elogmeans(void) const
-{
-    return (m_elogmeans);
+    return (m_energies);
 }
 
 

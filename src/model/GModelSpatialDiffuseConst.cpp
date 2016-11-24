@@ -39,6 +39,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialDiffuseConst g_spatial_const_seed;
 const GModelSpatialRegistry     g_spatial_const_registry(&g_spatial_const_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialDiffuseConst g_spatial_const_legacy_seed(true, "ConstantValue");
+const GModelSpatialRegistry     g_spatial_const_legacy_registry(&g_spatial_const_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC_NORM     "GModelSpatialDiffuseConst::mc_norm(GSkyDir&, double&)"
@@ -61,13 +65,36 @@ const GModelSpatialRegistry     g_spatial_const_registry(&g_spatial_const_seed);
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Construct empty isotropic spatial model.
+ * Constructs empty isotropic spatial model.
  ***************************************************************************/
 GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(void) :
                            GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty isotropic spatial model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const bool&        dummy,
+                                                     const std::string& type) :
+                           GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -410,16 +437,13 @@ double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
  * Read the isotropic source model information from an XML element. The XML
  * element is expected to have the following format:
  *
- *     <spatialModel type="ConstantValue">
+ *     <spatialModel type="DiffuseIsotropic">
  *       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
  *     </spatialModel>
  *
  ***************************************************************************/
 void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
 {
-    // Clear model
-    clear();
-
     // Get value parameter
     const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
 
@@ -442,7 +466,7 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
  * Write the isotropic source model information into an XML element. The XML
  * element will have the following format:
  *
- *     <spatialModel type="ConstantValue">
+ *     <spatialModel type="DiffuseIsotropic">
  *       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
  *     </spatialModel>
  *
@@ -451,13 +475,13 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "ConstantValue");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "ConstantValue") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"ConstantValue\".");
+              "Spatial model is not of type \""+type()+"\".");
     }
 
     // Get or create Value parameter
@@ -513,6 +537,9 @@ std::string GModelSpatialDiffuseConst::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialDiffuseConst::init_members(void)
 {
+    // Initialise model type
+    m_type = "DiffuseIsotropic";
+
     // Initialise Value
     m_value.clear();
     m_value.name("Value");
@@ -544,6 +571,7 @@ void GModelSpatialDiffuseConst::init_members(void)
 void GModelSpatialDiffuseConst::copy_members(const GModelSpatialDiffuseConst& model)
 {
     // Copy members
+    m_type          = model.m_type;
     m_value         = model.m_value;
     m_mc_centre     = model.m_mc_centre;
     m_mc_cos_radius = model.m_mc_cos_radius;

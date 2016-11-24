@@ -532,6 +532,9 @@ void GXml::load(const GFilename& filename)
     // Close URL
     url.close();
 
+    // Store filename in XML document
+    m_root.filename(filename);
+
     // Return
     return;
 }
@@ -556,6 +559,9 @@ void GXml::save(const GFilename& filename)
 {
     // Open XML file for writing
     GUrlFile url(filename.url().c_str(), "w");
+
+    // Store filename in XML document
+    m_root.filename(filename);
 
     // Write XML document
     write(url, 0);
@@ -867,7 +873,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Handle element start tag
     case MT_ELEMENT_START:
         {
-            // Create new element node, set it's parent, append it to the
+            // Create new element node, set its parent, append it to the
             // current node and make it the current node
             GXmlElement element(segment);
             element.parent(*current);
@@ -907,8 +913,11 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Append comment markup
     case MT_COMMENT:
         {
-            // Append comment
-            (*current)->append(GXmlComment(segment));
+            // Create a new comment node, set its parent and append it to the
+            // current node
+            GXmlComment comment(segment);
+            comment.parent(*current);
+            (*current)->append(comment);
         }
         break;
 
@@ -954,8 +963,11 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Processing tag
     case MT_PROCESSING:
         {
-            // Append PI
-            (*current)->append(GXmlPI(segment));
+            // Create a new PI node, set its parent and append it to the
+            // current node
+            GXmlPI pi(segment);
+            pi.parent(*current);
+            (*current)->append(pi);
         }
         break;
 

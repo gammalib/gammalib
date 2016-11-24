@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GLATEdisp.cpp - Fermi-LAT energy dispersion               *
+ *               GLATEdisp.cpp - Fermi LAT energy dispersion               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEdisp.cpp
- * @brief Fermi-LAT energy dispersion class implementation.
+ * @brief Fermi LAT energy dispersion class implementation.
  * @author Juergen Knoedlseder
  */
 
@@ -73,17 +73,18 @@ GLATEdisp::GLATEdisp(void)
  * @brief File constructor
  *
  * @param[in] filename FITS file name.
+ * @param[in] evtype Event type.
  *
  * Construct instance by loading the energy dispersion information from FITS
  * file.
  ***************************************************************************/
-GLATEdisp::GLATEdisp(const GFilename& filename)
+GLATEdisp::GLATEdisp(const GFilename& filename, const std::string& evtype)
 {
     // Initialise class members
     init_members();
 
     // Load energy dispersion from file
-    load(filename);
+    load(filename, evtype);
 
     // Return
     return;
@@ -193,9 +194,13 @@ GLATEdisp* GLATEdisp::clone(void) const
  * @brief Load energy dispersion from FITS file
  *
  * @param[in] filename FITS file.
+ * @param[in] evtype Event type.
  ***************************************************************************/
-void GLATEdisp::load(const GFilename& filename)
+void GLATEdisp::load(const GFilename& filename, const std::string& evtype)
 {
+    // Store event type
+    m_evtype = evtype;
+
     // Open FITS file
     GFits fits(filename);
 
@@ -238,12 +243,24 @@ void GLATEdisp::save(const GFilename& filename, const bool& clobber)
  ***************************************************************************/
 void GLATEdisp::read(const GFits& fits)
 {
-    // Clear instance
+    // Clear instance (keep event type)
+    std::string evtype = m_evtype;
     clear();
+    m_evtype = evtype;
+
+    // Set extension names
+    std::string engdisp = "ENERGY DISPERSION";
+    std::string escales = "EDISP_SCALING_PARAMS";
+    if (!fits.contains(engdisp)) {
+        engdisp += "_" + m_evtype;
+    }
+    if (!fits.contains(escales)) {
+        escales += "_" + m_evtype;
+    }
 
     // Get pointer to effective area HDU
-    const GFitsTable& hdu_edisp = *fits.table("ENERGY DISPERSION");
-    //const GFitsTable& hdu_scale = *fits.table("EDISP_SCALING_PARAMS");
+    const GFitsTable& hdu_edisp = *fits.table(engdisp);
+    const GFitsTable& hdu_scale = *fits.table(escales);
 
     // Read energy dispersion
     read_edisp(hdu_edisp);
@@ -310,6 +327,7 @@ std::string GLATEdisp::print(const GChatter& chatter) const
 void GLATEdisp::init_members(void)
 {
     // Initialise members
+    m_evtype.clear();
     m_edisp_bins.clear();
     m_norm.clear();
     m_ls1.clear();
@@ -328,6 +346,7 @@ void GLATEdisp::init_members(void)
 void GLATEdisp::copy_members(const GLATEdisp& edisp)
 {
     // Copy members
+    m_evtype     = edisp.m_evtype;
     m_edisp_bins = edisp.m_edisp_bins;
     m_norm       = edisp.m_norm;
     m_ls1        = edisp.m_ls1;
@@ -368,7 +387,7 @@ void GLATEdisp::read_edisp(const GFitsTable& hdu)
     // Continue only if there are bins
     int size = m_edisp_bins.size();
     if (size > 0) {
-
+/*
         // Allocate arrays
         m_norm.reserve(size);
         m_ls1.reserve(size);
@@ -392,7 +411,7 @@ void GLATEdisp::read_edisp(const GFitsTable& hdu)
             m_norm.push_back(norm->real(0,i));
             m_ls1.push_back(ls1->real(0,i));
         }
-
+*/
     } // endif: there were bins
 
     // Return

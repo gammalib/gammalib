@@ -38,6 +38,12 @@ class GModelSpectralSuperExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralSuperExpPlaw(void);
+    GModelSpectralSuperExpPlaw(const std::string& type,
+                               const std::string& prefactor,
+                               const std::string& index1,
+                               const std::string& pivot,
+                               const std::string& cutoff,
+                               const std::string& index2);
     GModelSpectralSuperExpPlaw(const double&  prefactor,
                                const double&  index1,
                                const GEnergy& pivot,

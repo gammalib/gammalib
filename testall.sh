@@ -2,7 +2,7 @@
 #
 # Run all test and example scripts that come with the package
 #
-# Copyright (C) 2011-2015 Juergen Knoedlseder
+# Copyright (C) 2011-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,41 +19,20 @@
 # =====================================================================
 base=$PWD
 
-
-# examples/cpp
-# ===============
+# test/dev
+# ========
 echo
-echo "=====> examples/cpp"
-cd examples/cpp
-cd createfits; rm -f createfits; make; ./createfits; cd ..
-cd createskymap; rm -f createskymap; make; ./createskymap; cd ..
-cd createxml; rm -f createxml; make; ./createxml; cd ..
-cd interpolate; rm -f interpolate; make; ./interpolate; cd ..
-cd numerics; rm -f numerics; make; ./numerics; cd ..
-cd optimize; rm -f optimize; make; ./optimize; cd ..
-cd readmodel; rm -f readmodel; make; ./readmodel; cd ..
-cd $base
-
-
-# examples/python
-# ===============
-echo
-echo "=====> examples/python"
-cd examples/python
+echo "=====> test/dev"
+cd test/dev
 ./example_model_xml_io.py
 ./example_radial_models.py
-./matrix_howto.py
-./models_howto.py
-./xml_howto.py
-./xml_html_create.py
 cd $base
 
-
-# inst/cta/test
-# =============
+# inst/cta/test/dev
+# =================
 echo
-echo "=====> inst/cta/test"
-cd inst/cta/test
+echo "=====> inst/cta/test/dev"
+cd inst/cta/test/dev
 ./example_binned_ml_fit.py
 ./example_make_model.py
 ./example_sim_photons.py
@@ -63,24 +42,21 @@ cd inst/cta/test
 ./test_sim_edisp.py
 cd $base
 
-
-# inst/lat/test
-# =============
+# inst/lat/test/dev
+# =================
 echo
-echo "=====> inst/lat/test"
-cd inst/lat/test
+echo "=====> inst/lat/test/dev"
+cd inst/lat/test/dev
 ./test_python.py
 cd $base
 
-
-# inst/mwl/test
-# =============
+# inst/mwl/test/dev
+# =================
 echo
-echo "=====> inst/mwl/test"
-cd inst/mwl/test
+echo "=====> inst/mwl/test/dev"
+cd inst/mwl/test/dev
 ./test_python.py
 cd $base
-
 
 # Signal completion
 # =================

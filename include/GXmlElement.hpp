@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GXmlElement.hpp - XML element node class definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,11 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GUrl.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlAttribute.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GUrl;
 
 
 /***********************************************************************//**
@@ -64,11 +66,10 @@ public:
     const std::string&   name(void) const;
     void                 name(const std::string& name);
     std::string          attribute(const std::string& name) const;
-    void                 attribute(const std::string& name, const std::string& value);
+    void                 attribute(const std::string& name,
+                                   const std::string& value);
     bool                 has_attribute(const std::string& name) const;
     void                 remove_attribute(const std::string& name);
-    GXmlNode*            parent(void) const;
-    void                 parent(GXmlNode* parent);
     virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL,
@@ -85,7 +86,6 @@ protected:
 
     // Protected data members
     std::string                 m_name;     //!< Element name
-    GXmlNode*                   m_parent;   //!< Pointer on parent node
     std::vector<GXmlAttribute*> m_attr;     //!< Attributes
 };
 
@@ -123,31 +123,6 @@ inline
 void GXmlElement::name(const std::string& name)
 {
     m_name = name;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return parent of XML element
- *
- * @return Parent of XML element.
- ***************************************************************************/
-inline
-GXmlNode* GXmlElement::parent(void) const
-{
-    return (m_parent);
-}
-
-
-/***********************************************************************//**
- * @brief Set parent of XML element
- *
- * @param[in] parent Parent of XML element.
- ***************************************************************************/
-inline
-void GXmlElement::parent(GXmlNode* parent)
-{
-    m_parent = parent;
     return;
 }
 

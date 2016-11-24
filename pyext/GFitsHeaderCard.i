@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFitsHeaderCard.i - FITS header card class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,31 +55,31 @@ public:
     virtual ~GFitsHeaderCard(void);
 
     // Methods
-    void             clear(void);
-    GFitsHeaderCard* clone(void) const;
-    std::string      classname(void) const;
-    void             keyname(const std::string& keyname);
-    std::string      keyname(void) const;
-    void             value(const std::string& value);
-    void             value(const bool& value);
-    void             value(const float& value);
-    void             value(const double& value);
-    void             value(const unsigned short& value);
-    void             value(const short& value);
-    void             value(const unsigned int& value);
-    void             value(const int& value);
-    void             value(const long& value);
-    void             value(const unsigned long& value);
-    void             value(const long long& value);
-    std::string      value(void) const;
-    int              decimals(void) const;
-    void             unit(const std::string& unit);
-    std::string      unit(void) const;
-    void             comment(const std::string& comment);
-    std::string      comment(void) const;
-    std::string      string(void);
-    double           real(void);
-    int              integer(void);
+    void               clear(void);
+    GFitsHeaderCard*   clone(void) const;
+    std::string        classname(void) const;
+    void               keyname(const std::string& keyname);
+    const std::string& keyname(void) const;
+    void               value(const std::string& value);
+    void               value(const bool& value);
+    void               value(const float& value);
+    void               value(const double& value);
+    void               value(const unsigned short& value);
+    void               value(const short& value);
+    void               value(const unsigned int& value);
+    void               value(const int& value);
+    void               value(const long& value);
+    void               value(const unsigned long& value);
+    void               value(const long long& value);
+    const std::string& value(void) const;
+    const int&         decimals(void) const;
+    void               unit(const std::string& unit);
+    const std::string& unit(void) const;
+    void               comment(const std::string& comment);
+    const std::string& comment(void) const;
+    std::string        string(void) const;
+    double             real(void) const;
+    int                integer(void) const;
 };
 
 

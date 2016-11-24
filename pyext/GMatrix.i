@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrix.i - General Matrix class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,9 +38,6 @@
  * @class GMatrix
  *
  * @brief General matrix class definition
- *
- * GMatrix implements a general matrix storage class. It derives from the
- * abstract base class GMatrixBase.
  ***************************************************************************/
 class GMatrix : public GMatrixBase {
 public:
@@ -60,7 +57,6 @@ public:
     virtual GMatrix&      operator-=(const GMatrix& matrix);
     virtual GMatrix&      operator*=(const GMatrix& matrix);
     virtual GMatrix&      operator*=(const double& scalar);
-    virtual GMatrix&      operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
     virtual void          clear(void);
@@ -72,7 +68,8 @@ public:
     virtual GVector       column(const int& column) const;
     virtual void          column(const int& column, const GVector& vector);
     virtual void          add_to_row(const int& row, const GVector& vector);
-    virtual void          add_to_column(const int& column, const GVector& vector);
+    virtual void          add_to_column(const int&     column,
+                                        const GVector& vector);
     virtual double        fill(void) const;
     virtual double        min(void) const;
     virtual double        max(void) const;
@@ -110,8 +107,23 @@ public:
     GMatrix __mul__(const double &scalar) {
         return ((*self) * scalar);
     }
+    // Python 2.x
     GMatrix __div__(const double &scalar) {
         return ((*self) / scalar);
+    }
+    // Python 3.x
+    GMatrix __truediv__(const double& scalar) const {
+        return ((*self) / scalar);
+    }
+    // Python 2.x operator/=
+    GMatrix __idiv__(const double& scalar) {
+        self->operator/=(scalar);
+        return (*self);
+    }
+    // Python 3.x operator/=
+    GMatrix __itruediv__(const double& scalar) {
+        self->operator/=(scalar);
+        return (*self);
     }
     GMatrix copy() {
         return (*self);

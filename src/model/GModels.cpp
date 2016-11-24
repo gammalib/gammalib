@@ -829,7 +829,7 @@ int GModels::npars(void) const
  * container. The optimizer parameter container will thus contains a flat
  * array of a model parameters.
  ***************************************************************************/
-GOptimizerPars GModels::pars(void)
+GOptimizerPars GModels::pars(void) const
 {
     // Initialise parameter container
     GOptimizerPars pars;

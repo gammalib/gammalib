@@ -58,7 +58,7 @@ public:
                 const double&        dy,
                 const int&           nx,
                 const int&           ny,
-                const GEbounds&      ebounds,
+                const GEnergies&     energies,
                 const double&        dmax,
                 const int&           ndbins);
     virtual ~GCTACubePsf(void);
@@ -74,10 +74,9 @@ public:
     std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs, GLog* log = NULL);
-    const GSkyMap&     map(void) const;
-    const GEbounds&    ebounds(void) const;
+    const GSkyMap&     cube(void) const;
+    const GEnergies&   energies(void) const;
     const GNodeArray&  deltas(void) const;
-    const GNodeArray&  elogmeans(void) const;
     double             delta_max(void) const;
     int                offset(const int& idelta, const int& iebin) const;
     void               read(const GFits& fits);

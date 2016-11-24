@@ -36,6 +36,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                               "GCsv::operator()(int&, int&)"
+#define G_APPEND                    "GCsv::append(std::vector<std::string>&)"
 #define G_LOAD                         "GCsv::load(GFilename&, std::string&)"
 #define G_SAVE                  "GCsv::save(GFilename&, std::string&, bool&)"
 
@@ -246,6 +247,48 @@ void GCsv::clear(void)
 GCsv* GCsv::clone(void) const
 {
     return new GCsv(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Append list of strings
+ *
+ * @param[in] list List of strings.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid number of elements in list.
+ *
+ * Appends a list of strings to the CSV table. If the table is empty, the
+ * number of elements in the list will determine the number of columns of
+ * the table. If a table exists already, the method will throw an exception
+ * if the number of elements in the list does not correspond to the number
+ * of table columns.
+ ***************************************************************************/
+void GCsv::append(const std::vector<std::string>& list)
+{
+    // If we have already rows then check columns size ...
+    if (m_rows > 0) {
+        if (m_cols != list.size()) {
+            std::string msg = "Invalid attempt to append "+
+                              gammalib::str(list.size())+" elements to a CSV "
+                              "table with "+gammalib::str(m_cols)+" columns.";
+            throw GException::invalid_argument(G_APPEND, msg);
+        }
+    }
+
+    // ... otherwise store the number of columns
+    else {
+        m_cols = list.size();
+    }
+
+    // Append
+    m_data.push_back(list);
+
+    // Increment number of rows
+    m_rows++;
+
+    // Return
+    return;
 }
 
 
@@ -482,7 +525,9 @@ void GCsv::save(const GFilename&   filename,
         // Write columns
         for (int col = 0; col < m_cols; ++col) {
             std::fputs(m_data[row][col].c_str(), fptr);
-            std::fputs(sep.c_str(), fptr);
+            if (col < m_cols-1) {
+                std::fputs(sep.c_str(), fptr);
+            }
         }
 
         // Write linebreak
@@ -525,7 +570,7 @@ std::string GCsv::print(const GChatter& chatter) const
             result.append("default");
         }
         else {
-        result.append(gammalib::str(m_precision));
+            result.append(gammalib::str(m_precision));
         }
 
     } // endif: chatter was not silent

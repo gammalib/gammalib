@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATLtCubeMap.cpp - Fermi LAT livetime cube map class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include "GLATLtCubeMap.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GEnergy.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COSTHETA                            "GLATLtCubeMap::costheta(int&)"

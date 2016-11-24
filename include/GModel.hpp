@@ -154,9 +154,11 @@ protected:
     void         init_members(void);
     void         copy_members(const GModel& model);
     void         free_members(void);
+    void         read_attributes(const GXmlElement& xml);
+    void         write_attributes(GXmlElement& xml) const;
+    std::string  print_attributes(void) const;
     void         read_scales(const GXmlElement& xml);
     void         write_scales(GXmlElement& xml) const;
-    std::string  print_attributes(void) const;
 
     // Protected members
     std::string              m_name;         //!< Model name

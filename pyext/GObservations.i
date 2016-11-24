@@ -68,6 +68,7 @@ public:
     void           errors_hessian(void);
     void           eval(void);
     double         logL(void) const;
+    int            nobserved(void) const;
     double         npred(void) const;
 
     // Optimizer function access method

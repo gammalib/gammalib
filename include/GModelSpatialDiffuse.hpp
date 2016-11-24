@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialDiffuse.hpp - Abstract diffuse spatial model base class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *

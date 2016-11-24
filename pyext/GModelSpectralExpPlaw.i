@@ -38,10 +38,15 @@ class GModelSpectralExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralExpPlaw(void);
-    explicit GModelSpectralExpPlaw(const double&  prefactor,
-                                   const double&  index,
-                                   const GEnergy& pivot,
-                                   const GEnergy& cutoff);
+    GModelSpectralExpPlaw(const std::string& type,
+                          const std::string& prefactor,
+                          const std::string& index,
+                          const std::string& pivot,
+                          const std::string& cutoff);
+    GModelSpectralExpPlaw(const double&  prefactor,
+                          const double&  index,
+                          const GEnergy& pivot,
+                          const GEnergy& cutoff);
     explicit GModelSpectralExpPlaw(const GXmlElement& xml);
     GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model);
     virtual ~GModelSpectralExpPlaw(void);

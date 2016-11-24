@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsImageUShort.cpp - Unsigned short FITS image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -164,17 +164,16 @@ GFitsImageUShort::GFitsImageUShort(const int& nx, const int& ny,
 /***********************************************************************//**
  * @brief Pixel array constructor
  *
- * @param[in] naxis Image dimension (0,1,2,3,4).
- * @param[in] naxes Number of pixels in each dimension.
+ * @param[in] naxes Vector of number of pixels in each dimension.
  * @param[in] pixels Optional pointer to image pixel array
  *
  * Construct instance of GFitsImageUShort by specifying the image dimension and
  * the number of pixels in each dimension. Note that this constructor does
  * not allocate any memory for the actual image.
  ***************************************************************************/
-GFitsImageUShort::GFitsImageUShort(const int& naxis, const int* naxes,
-                                   const unsigned short* pixels) :
-                  GFitsImage(G_BITPIX, naxis, naxes)
+GFitsImageUShort::GFitsImageUShort(const std::vector<int>& naxes,
+                                   const unsigned short*   pixels) :
+                  GFitsImage(G_BITPIX, naxes)
 {
     // Initialise class members for clean destruction
     init_members();

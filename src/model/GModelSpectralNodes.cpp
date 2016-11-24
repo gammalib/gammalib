@@ -614,13 +614,13 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
  *
  *     <spectrum type="NodeFunction">
  *       <node>
- *         <parameter name="Energy"    scale=".." value=".." min=".." max=".." free=".."/>
- *         <parameter name="Intensity" scale=".." value=".." min=".." max=".." free=".."/>
+ *         <parameter name="Energy"    ../>
+ *         <parameter name="Intensity" ../>
  *       </node>
  *       ...
  *       <node>
- *         <parameter name="Energy"    scale=".." value=".." min=".." max=".." free=".."/>
- *         <parameter name="Intensity" scale=".." value=".." min=".." max=".." free=".."/>
+ *         <parameter name="Energy"    ../>
+ *         <parameter name="Intensity" ../>
  *       </node>
  *     </spectrum>
  *
@@ -727,21 +727,19 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
  *            Existing XML element is not of required type
  * @exception GException::model_invalid_parnum
  *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
  *     <spectrum type="NodeFunction">
  *       <node>
- *         <parameter name="Energy"    scale=".." value=".." min=".." max=".." free=".."/>
- *         <parameter name="Intensity" scale=".." value=".." min=".." max=".." free=".."/>
+ *         <parameter name="Energy"    ../>
+ *         <parameter name="Intensity" ../>
  *       </node>
  *       ...
  *       <node>
- *         <parameter name="Energy"    scale=".." value=".." min=".." max=".." free=".."/>
- *         <parameter name="Intensity" scale=".." value=".." min=".." max=".." free=".."/>
+ *         <parameter name="Energy"    ../>
+ *         <parameter name="Intensity" ../>
  *       </node>
  *     </spectrum>
  ***************************************************************************/
@@ -781,45 +779,23 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
         // Get node
         GXmlElement* node = xml.element("node", i);
 
-        // If XML element has 0 leafes then append energy and intensity
-        // element
-        if (node->elements() == 0) {
-            node->append(GXmlElement("parameter name=\"Energy\""));
-            node->append(GXmlElement("parameter name=\"Intensity\""));
-        }
+        // Get copy of parameters so that we can change their names
+        GModelPar energy    = m_energies[i];
+        GModelPar intensity = m_values[i];
 
-        // Verify that node XML element has exactly 2 parameters
-        if (node->elements() != 2 || node->elements("parameter") != 2) {
-            throw GException::model_invalid_parnum(G_WRITE, xml,
-                  "Node requires exactly 2 parameters.");
-        }
+        // Set names since we appended for internal usage the indices to the
+        // parameter names, and we want to get rid of them for writing the
+        // model into the XML element
+        energy.name("Energy");
+        intensity.name("Intensity");
 
-        // Set or update model parameter attributes
-        int npar[] = {0, 0};
-        for (int k = 0; k < 2; ++k) {
+        // Get XML parameters
+        GXmlElement* eng = gammalib::xml_need_par(G_WRITE, *node, energy.name());
+        GXmlElement* val = gammalib::xml_need_par(G_WRITE, *node, intensity.name());
 
-            // Get parameter element
-            GXmlElement* par = node->element("parameter", k);
-
-            // Handle prefactor
-            if (par->attribute("name") == "Energy") {
-                npar[0]++;
-                m_energies[i].write(*par);
-            }
-
-            // Handle index
-            else if (par->attribute("name") == "Intensity") {
-                npar[1]++;
-                m_values[i].write(*par);
-            }
-
-        } // endfor: looped over parameters
-
-        // Check of all required parameters are present
-        if (npar[0] != 1 || npar[1] != 1) {
-            throw GException::model_invalid_parnames(G_WRITE, xml,
-                  "Require \"Energy\" and \"Intensity\" parameters.");
-        }
+        // Write parameters
+        energy.write(*eng);
+        intensity.write(*val);
 
     } // endfor: looped over nodes
 

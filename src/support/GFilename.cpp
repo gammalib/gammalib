@@ -264,7 +264,7 @@ bool GFilename::is_fits(void) const
     // Put the code into a critical zone as it might be called from within
     // a parallelized thread.
     #if defined(HAVE_LIBCFITSIO)
-    #pragma omp critical
+    #pragma omp critical(GFilename_is_fits)
     {
         int       status = 0;
         fitsfile* fptr   = NULL;

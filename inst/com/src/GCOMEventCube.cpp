@@ -647,7 +647,10 @@ void GCOMEventCube::init_members(void)
  ***************************************************************************/
 void GCOMEventCube::copy_members(const GCOMEventCube& cube)
 {
-    // Copy members
+    // Copy members. Note that the event bin is not copied as it will
+    // be initialised later. The event bin serves just as a container of
+    // pointers, hence we do not want to copy over the pointers from the
+    // original class.
     m_dir        = cube.m_dir;
     m_map        = cube.m_map;
     m_time       = cube.m_time;
