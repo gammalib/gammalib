@@ -28,13 +28,13 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+//#include <iomanip>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GXmlElement.hpp"
 #include "GModelSpatialRadialProfileDMZhao.hpp"
 #include "GModelSpatialRegistry.hpp"
-#include <iomanip>
 
 /* __ Constants __________________________________________________________ */
 
@@ -230,6 +230,7 @@ double GModelSpatialRadialProfileDMZhao::theta_min(void) const
     return m_theta_min.value();
 }
 
+
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
  *
@@ -259,11 +260,6 @@ double GModelSpatialRadialProfileDMZhao::theta_max(void) const
     // Always chose the lesser of ( mass_radius theta, theta_max )
     if (m_theta_max.value() * gammalib::deg2rad < theta) {
         theta = m_theta_max.value() * gammalib::deg2rad;
-    }
-
-    // always chose the lesser of ( mass_radius theta, theta_max )
-    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
-      theta = m_theta_max.value() * gammalib::deg2rad ;
     }
     
     // Return value
@@ -655,8 +651,8 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
     double value = 0.0;
     
     // Set up integration limits
-    double los_min = m_halo_distance.value() - m_mass_radius ;
-    double los_max = m_halo_distance.value() + m_mass_radius ;
+    double los_min = m_halo_distance.value() - m_mass_radius;
+    double los_max = m_halo_distance.value() + m_mass_radius;
     
     // Set up integral
     halo_kernel_los integrand(m_scale_radius.value(),
@@ -687,6 +683,7 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
     // Return value
     return value;
 }
+
 
 /***********************************************************************//**
  * @brief Kernel for zhao halo density profile squared
@@ -887,30 +884,39 @@ double GModelSpatialRadialProfileDMZhao::jfactor( const double& angle ) const
   return jfactor ;
 }
 
+
 /***********************************************************************//**
  * @brief Update precomputation cache
  *
  * Computes the m_mass_radius calculation, determining the radius around
- * the halo that contains 99.99% of the mass.  For a zhao halo profile,
+ * the halo that contains 99.99% of the mass. For a Zhao halo profile,
  * this is just 10.0 * scale_radius .
- *
  ***************************************************************************/
 void GModelSpatialRadialProfileDMZhao::update() const
 {
   
-  // Update if scale radius has changed
-  if ( m_last_scale_radius != scale_radius() ) {
+    // Update if scale radius has changed
+    if (m_last_scale_radius != scale_radius()) {
     
-    // Store last values
-    m_last_scale_radius = scale_radius() ;
+        // Store last values
+        m_last_scale_radius = scale_radius();
     
-    // perform precomputations
-    m_mass_radius = 10.0 * scale_radius() ;
+        // perform precomputations
+        m_mass_radius = 10.0 * scale_radius();
 
-  }
+    }
+
+    // Return
+    return;
 }
 
-double GModelSpatialRadialProfileDMZhao::prof_val( const double& theta )
+
+/***********************************************************************//**
+ * @brief Compute profile value
+ *
+ * @return Profile value
+ ***************************************************************************/
+double GModelSpatialRadialProfileDMZhao::prof_val(const double& theta)
 {
-  return this->profile_value(theta) ;
+    return this->profile_value(theta);
 }

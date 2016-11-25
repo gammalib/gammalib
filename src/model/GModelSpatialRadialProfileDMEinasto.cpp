@@ -260,11 +260,6 @@ double GModelSpatialRadialProfileDMEinasto::theta_max(void) const
     if (m_theta_max.value() * gammalib::deg2rad < theta) {
         theta = m_theta_max.value() * gammalib::deg2rad;
     }
-
-    // always chose the lesser of ( mass_radius theta, theta_max )
-    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
-      theta = m_theta_max.value() * gammalib::deg2rad ;
-    }
     
     // Return value
     return theta;
@@ -631,6 +626,7 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
     return value;
 }
 
+
 /***********************************************************************//**
  * @brief Kernel for halo density profile squared
  *
@@ -741,6 +737,7 @@ void GModelSpatialRadialProfileDMEinasto::update() const
  * Calculates the halo's mass density at a given radial distance from the halo
  * center.
  *
+ * @todo This should be done using a proper numerical integration
  ***************************************************************************/
 double GModelSpatialRadialProfileDMEinasto::mass_density( const double& radius ) const
 {
@@ -790,11 +787,10 @@ double GModelSpatialRadialProfileDMEinasto::jfactor( const double& angle ) const
       r      = minradian + (i * dr);
       jfactor += profile_value(r) * r * dr;
 
-  }
+    }
   
   // J-Factor = 2 * pi * Int[ profile(r) * r * dr , {r,minradian,angle} ]
   jfactor *= gammalib::twopi;
   
   return jfactor ;
 }
-

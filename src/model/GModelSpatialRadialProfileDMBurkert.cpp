@@ -266,9 +266,9 @@ double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
       theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
     }
     
-    // always chose the lesser of ( mass_radius theta, theta_max )
-    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
-      theta = m_theta_max.value() * gammalib::deg2rad ;
+    // Always chose the lesser of ( mass_radius theta, theta_max )
+    if (m_theta_max.value() * gammalib::deg2rad < theta ) {
+        theta = m_theta_max.value() * gammalib::deg2rad;
     }
     
     // Return value
@@ -588,6 +588,7 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
     // Return value
     return value;
 }
+
 
 /***********************************************************************//**
  * @brief Kernel for halo density profile squared
