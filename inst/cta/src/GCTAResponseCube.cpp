@@ -1530,7 +1530,7 @@ double GCTAResponseCube::irf_composite(const GEvent&       event,
         GSource src(source.name(), spat, source.energy(), source.time());
 
         // Compute irf value
-        irf += this->irf(event, source, obs) * model->scale(i);
+        irf += this->irf(event, src, obs) * model->scale(i);
 
     }
 
