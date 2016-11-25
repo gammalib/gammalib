@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GModelSpatialRadialProfileDMZhao.i - Einasto radial profile class   *
+ *  GModelSpatialRadialProfileDMZhao.i - Zhao radial profile class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialRadialProfileDMZhao.hpp
- * @brief Radial Dark Matter halo for Einasto Density Profile
+ * @brief Radial Dark Matter halo for Zhao Density Profile
  * @author Nathan Kelley-Hoskins
  */
 %{
@@ -32,7 +32,7 @@
 /**************************************************************************
  * @class GModelSpatialRadialProfileDMZhao
  *
- * @brief Radial DM Einasto profile source model class
+ * @brief Radial DM Zhao profile source model class
  *
  * This class implements the spatial component of the factorised source
  * model for a Dark Matter Zhao halo radial profile.
@@ -47,26 +47,24 @@ public:
     virtual ~GModelSpatialRadialProfileDMZhao(void);
 
     // Implemented pure virtual base class methods
-    virtual void                             clear(void);
+    virtual void                              clear(void);
     virtual GModelSpatialRadialProfileDMZhao* clone(void) const;
-    virtual std::string                      classname(void) const;
-    virtual std::string                      type(void) const;
-    virtual double                           theta_min(void) const;
-    virtual double                           theta_max(void) const;
-    virtual void                             read(const GXmlElement& xml);
-    virtual void                             write(GXmlElement& xml) const;
-    double prof_val(const double& theta ) ;
+    virtual std::string                       classname(void) const;
+    virtual std::string                       type(void) const;
+    virtual double                            theta_min(void) const;
+    virtual double                            theta_max(void) const;
+    virtual void                              read(const GXmlElement& xml);
+    virtual void                              write(GXmlElement& xml) const;
+
+    // Other methods
+    double scale_radius(void) const;
+    void   scale_radius(const double& scale_radius);
+    double prof_val(const double& theta);
 };
 
 
 /***********************************************************************//**
  * @brief GModelSpatialRadialGauss class extension
- *
- * The eval(GSkyDir&) and eval_gradients(GSkyDir&) need to be defined in the
- * extension to force swig to build also the interface for these methods that
- * are implemented in the base class only. It's not clear to me why these
- * methods are not inherited automatically. Maybe this could also be handled
- * by a %typemap(typecheck) construct.
  ***************************************************************************/
 %extend GModelSpatialRadialProfileDMZhao {
     GModelSpatialRadialProfileDMZhao copy() {
