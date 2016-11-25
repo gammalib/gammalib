@@ -1,7 +1,7 @@
 /***************************************************************************
- * GModelSpatialRadialProfileDMEinasto.cpp - DMEinasto radial profile class *
+ * GModelSpatialRadialProfileDMEinasto.cpp - Einasto radial profile class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,7 +40,7 @@
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialProfileDMEinasto g_radial_disk_seed;
-const GModelSpatialRegistry           g_radial_disk_registry(&g_radial_disk_seed);
+const GModelSpatialRegistry               g_radial_disk_registry(&g_radial_disk_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ   "GModelSpatialRadialProfileDMEinasto::read(GXmlElement&)"
@@ -65,7 +65,7 @@ const GModelSpatialRegistry           g_radial_disk_registry(&g_radial_disk_seed
  * Constructs empty radial DMEinasto profile
  ***************************************************************************/
 GModelSpatialRadialProfileDMEinasto::GModelSpatialRadialProfileDMEinasto(void) :
-                                 GModelSpatialRadialProfile()
+                                     GModelSpatialRadialProfile()
 {
     // Initialise members
     init_members();
@@ -85,7 +85,7 @@ GModelSpatialRadialProfileDMEinasto::GModelSpatialRadialProfileDMEinasto(void) :
  * expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialRadialProfileDMEinasto::GModelSpatialRadialProfileDMEinasto(const GXmlElement& xml) :
-                                 GModelSpatialRadialProfile()
+                                     GModelSpatialRadialProfile()
 {
     // Initialise members
     init_members();
@@ -106,7 +106,7 @@ GModelSpatialRadialProfileDMEinasto::GModelSpatialRadialProfileDMEinasto(const G
  * Copies radial DMEinasto profile model from another radial profile model.
  ***************************************************************************/
 GModelSpatialRadialProfileDMEinasto::GModelSpatialRadialProfileDMEinasto(const GModelSpatialRadialProfileDMEinasto& model) :
-                                 GModelSpatialRadialProfile(model)
+                                     GModelSpatialRadialProfile(model)
 {
     // Initialise members
     init_members();
@@ -227,7 +227,7 @@ double GModelSpatialRadialProfileDMEinasto::theta_min(void) const
     update();
     
     // Return value
-    return m_theta_min.value() ;
+    return m_theta_min.value();
 }
 
 /***********************************************************************//**
@@ -241,27 +241,28 @@ double GModelSpatialRadialProfileDMEinasto::theta_max(void) const
     // update precomputation cache
     update();
     
-    double theta = 0.0 ;
+    double theta = 0.0;
     
-    // if earth is within the significant radius, then theta_max must
-    // contain the entire profile (180deg)
-    if ( m_halo_distance.value() < m_mass_radius ) {
-      theta = gammalib::pi ;
+    // If Earth is within the significant radius, then theta_max must
+    // contain the entire profile (180deg) ...
+    if (m_halo_distance.value() < m_mass_radius) {
+        theta = gammalib::pi;
+    }
     
-    // if the halo is far enough away (further than the mass radius)
-    // then we just need to deal with the angles within the sphere of the
-    // significant radius.
-    } else {
-      theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
+    // ... otherwise if the halo is far enough away (further than the mass
+    // radius) then we just need to deal with the angles within the sphere
+    // of the significant radius.
+    else {
+        theta = std::atan(m_mass_radius / m_halo_distance.value());
     }
 
-    // always chose the lesser of ( mass_radius theta, theta_max )
-    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
-      theta = m_theta_max.value() * gammalib::deg2rad ;
+    // Always chose the lesser of ( mass_radius theta, theta_max )
+    if (m_theta_max.value() * gammalib::deg2rad < theta) {
+        theta = m_theta_max.value() * gammalib::deg2rad;
     }
     
     // Return value
-    return theta ;
+    return theta;
 }
 
 
@@ -436,7 +437,7 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_theta_min.clear();
     m_theta_min.name("Theta Min");
     m_theta_min.unit("degrees");
-    m_theta_min.value( 180.0 ); // can only go from halo center to opposite halo center
+    m_theta_min.value(180.0); // can only go from halo center to opposite halo center
     m_theta_min.min(1.0e-6); // arbitrarily chosen
     m_theta_min.fix(); // should always be fixed!
     m_theta_min.scale(1.0);
@@ -447,7 +448,7 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_theta_max.clear();
     m_theta_max.name("Theta Max");
     m_theta_max.unit("degrees");
-    m_theta_max.value( 1.0e-6 ); // can only go from halo center to opposite halo center
+    m_theta_max.value(1.0e-6); // can only go from halo center to opposite halo center
     m_theta_max.min(1.0e-10); // arbitrarily chosen
     m_theta_max.fix(); // should always be fixed!
     m_theta_max.scale(1.0);
@@ -455,16 +456,16 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_theta_max.has_grad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)
-    m_pars.push_back(&m_scale_radius );
+    m_pars.push_back(&m_scale_radius);
     m_pars.push_back(&m_halo_distance);
-    m_pars.push_back(&m_alpha        );
-    m_pars.push_back(&m_theta_min    );
-    m_pars.push_back(&m_theta_max    );
+    m_pars.push_back(&m_alpha);
+    m_pars.push_back(&m_theta_min);
+    m_pars.push_back(&m_theta_max);
     
     // Initialize precomputation cache. Note that zero values flag
     // uninitialised, as a zero radius is not meaningful
-    m_last_scale_radius = 0.0 ;
-    m_mass_radius = 0.0 ;
+    m_last_scale_radius = 0.0;
+    m_mass_radius       = 0.0;
 
     // Return
     return;
@@ -483,15 +484,15 @@ void GModelSpatialRadialProfileDMEinasto::copy_members(const GModelSpatialRadial
     // Copy members. We do not have to push back the members on the parameter
     // stack as this should have been done by init_members() that was called
     // before. Otherwise we would have sigma twice on the stack.
-    m_scale_radius  = model.m_scale_radius  ;
-    m_halo_distance = model.m_halo_distance ;
-    m_alpha         = model.m_alpha         ;
-    m_theta_min     = model.m_theta_min     ;
-    m_theta_max     = model.m_theta_max     ;
+    m_scale_radius  = model.m_scale_radius;
+    m_halo_distance = model.m_halo_distance;
+    m_alpha         = model.m_alpha;
+    m_theta_min     = model.m_theta_min;
+    m_theta_max     = model.m_theta_max;
 
     // copy cache values
-    m_last_scale_radius = model.m_last_scale_radius ;
-    m_mass_radius       = model.m_mass_radius       ;
+    m_last_scale_radius = model.m_last_scale_radius;
+    m_mass_radius       = model.m_mass_radius;
     
     // Return
     return;
@@ -521,43 +522,44 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
     update();
     
     // initialize integral value
-    double value = 0.0 ;
+    double value = 0.0;
     
     // Set up integration limits
-    double los_min = m_halo_distance.value() - m_mass_radius ;
-    double los_max = m_halo_distance.value() + m_mass_radius ;
+    double los_min = m_halo_distance.value() - m_mass_radius;
+    double los_max = m_halo_distance.value() + m_mass_radius;
     
     // handle case where observer is within halo mass radius
-    if ( los_min < 0.0 ) {
-      los_min = 0.0 ;
+    if (los_min < 0.0) {
+        los_min = 0.0;
     }
     
     // Set up integral
-    halo_kernel_los integrand( m_scale_radius.value(),
-                               m_halo_distance.value(),
-                               m_alpha.value(),
-                               theta ) ;
-    GIntegral integral(&integrand) ;
-    integral.max_iter( 30 ) ;
+    halo_kernel_los integrand(m_scale_radius.value(),
+                              m_halo_distance.value(),
+                              m_alpha.value(),
+                              theta);
+    GIntegral integral(&integrand);
+    integral.max_iter(30);
     
     // also play with eps() or max_iter(), bounds()
     
     // Set up integration boundaries
     // As there is usually an infinity at the halo center, this splits
     // the integral at the m_halo_distance.
-    std::vector<double> bounds ;
-    bounds.push_back( los_min ) ;
-    bounds.push_back( los_max ) ;
-    bounds.push_back( m_halo_distance.value() );
+    std::vector<double> bounds;
+    bounds.push_back(los_min);
+    bounds.push_back(los_max);
+    bounds.push_back(m_halo_distance.value());
     
     // Compute value
-    value = integral.romberg( bounds ) ;
+    value = integral.romberg(bounds);
     
     std::cout << "profile_value=" << value << std::endl;
 
     // Return value
     return value;
 }
+
 
 /***********************************************************************//**
  * @brief Kernel for halo density profile squared
@@ -593,52 +595,56 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
  ***************************************************************************/
 double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval( const double &los )
 {
+    // PLEASE ADD COMMENTS
+    double g = 0.0;
+    g  = los * los;
+    g += m_halo_distance * m_halo_distance;
+    g -= 2.0 * los * m_halo_distance * std::cos(m_theta);
+    g  = std::sqrt(g);
+    g /= m_scale_radius;
   
-  double g = 0.0 ;
-  g  = los * los ;
-  g += m_halo_distance * m_halo_distance ;
-  g -= 2.0 * los * m_halo_distance * std::cos(m_theta) ;
-  g  = sqrt(g) ;
-  g /= m_scale_radius ;
+    double f = 0.0;
+    f  = std::pow(g, m_alpha);
+    f -= 1.0;
+    f *= -2.0 / m_alpha;
+    f  = std::exp(f);
   
-  double f = 0.0 ;
-  f  = pow( g , m_alpha ) ;
-  f -= 1.0 ;
-  f *= -2.0 / m_alpha ;
-  f  = std::exp( f ) ;
-  
-  // squared, for annihilating dm
-  // would just be f if it was decaying dm
-  f = f * f ;
+    // squared, for annihilating dm
+    // would just be f if it was decaying dm
+    f = f * f ;
 
-  //std::cout << "kernel::eval  los=" << los << "  theta=" << m_theta << "  d=" << m_halo_distance << "  rs=" << m_scale_radius << "  alpha=" << m_alpha << "  g=" << g << "  f=" << std::setprecision(12)<< f << std::endl;
-  
-  return f;
+    //std::cout << "kernel::eval  los=" << los << "  theta=" << m_theta << "  d=" << m_halo_distance << "  rs=" << m_scale_radius << "  alpha=" << m_alpha << "  g=" << g << "  f=" << std::setprecision(12)<< f << std::endl;
 
+    // Return function value
+    return f;
 }
+
 
 /***********************************************************************//**
  * @brief Update precomputation cache
  *
  * Computes the m_mass_radius calculation, determining the radius around
- * the halo that contains 99.99% of the mass.  For an einasto halo profile,
+ * the halo that contains 99.99% of the mass. For an Einasto halo profile,
  * this is just 10.0 * scale_radius .
- *
  ***************************************************************************/
 void GModelSpatialRadialProfileDMEinasto::update() const
 {
   
-  // Update if scale radius has changed
-  if ( m_last_scale_radius != scale_radius() ) {
+    // Update if scale radius has changed
+    if (m_last_scale_radius != scale_radius()) {
     
-    // Store last values
-    m_last_scale_radius = scale_radius() ;
+        // Store last values
+        m_last_scale_radius = scale_radius();
     
-    // perform precomputations
-    m_mass_radius = 10.0 * scale_radius() ;
+        // perform precomputations
+        m_mass_radius = 10.0 * scale_radius();
 
-  }
+    }
+
+    // Return
+    return;
 }
+
 
 /***********************************************************************//**
  * @brief Calculate Halo J Factor
@@ -649,30 +655,31 @@ void GModelSpatialRadialProfileDMEinasto::update() const
  * Calculates the halo's j-factor of the halo by integrating across the 
  * profile between two angles.
  *
+ * @todo This should be done using a proper numerical integration
  ***************************************************************************/
-double GModelSpatialRadialProfileDMEinasto::j_factor( const double& minangle, const double& maxangle, const int& npoints) const
+double GModelSpatialRadialProfileDMEinasto::j_factor(const double& minangle,
+                                                     const double& maxangle,
+                                                     const int&    npoints) const
 {
+    // init variables
+    double minradian = minangle * gammalib::deg2rad;
+    double maxradian = maxangle * gammalib::deg2rad;
+    double dr        = (maxradian - minradian) / npoints;
+    double r         = 0.0;
+    double total     = 0.0;
   
-  // init variables
-  double minradian = minangle * gammalib::deg2rad ; 
-  double maxradian = maxangle * gammalib::deg2rad ;
-  double dr    = ( maxradian - minradian ) / npoints ;
-  double r     = 0.0  ;
-  double total = 0.0  ;
+    // loop over different radii in the profile
+    for (int i = 0; i < npoints; ++i) {
+
+        // integration:  Int[ profile(r) * r * dr ]
+        r      = minradian + (i * dr);
+        total += profile_value(r) * r * dr;
+
+    }
   
-  // loop over different radii in the profile
-  for (int i = 0; i<npoints; ++i)
-  {
+    // 2 * pi * Int[ profile(r) * r * dr
+    total *= gammalib::twopi;
 
-    // integration:  Int[ profile(r) * r * dr ]
-    r = minradian + ( i * dr ) ;
-    total += profile_value( r ) * r * dr ; 
-
-  }
-  
-  // 2 * pi * Int[ profile(r) * r * dr
-  total *= gammalib::twopi ;
-
-  return total ;
+    // Return J factor
+    return total;
 }
-

@@ -1,7 +1,7 @@
 /***************************************************************************
- * GModelSpatialRadialProfileDMBurkert.cpp - DMBurkert radial profile class *
+ * GModelSpatialRadialProfileDMBurkert.cpp - Burkert radial profile class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialRadialProfileDMBurkert.cpp
- * @brief Radial DM Einasto profile model class implementation
+ * @brief Radial DM Burkert profile model class implementation
  * @author Nathan Kelley-Hoskins
  */
 
@@ -40,7 +40,7 @@
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialProfileDMBurkert g_radial_disk_seed;
-const GModelSpatialRegistry           g_radial_disk_registry(&g_radial_disk_seed);
+const GModelSpatialRegistry               g_radial_disk_registry(&g_radial_disk_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ   "GModelSpatialRadialProfileDMBurkert::read(GXmlElement&)"
@@ -65,7 +65,7 @@ const GModelSpatialRegistry           g_radial_disk_registry(&g_radial_disk_seed
  * Constructs empty radial DMBurkert profile
  ***************************************************************************/
 GModelSpatialRadialProfileDMBurkert::GModelSpatialRadialProfileDMBurkert(void) :
-                                 GModelSpatialRadialProfile()
+                                     GModelSpatialRadialProfile()
 {
     // Initialise members
     init_members();
@@ -85,7 +85,7 @@ GModelSpatialRadialProfileDMBurkert::GModelSpatialRadialProfileDMBurkert(void) :
  * expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialRadialProfileDMBurkert::GModelSpatialRadialProfileDMBurkert(const GXmlElement& xml) :
-                                 GModelSpatialRadialProfile()
+                                     GModelSpatialRadialProfile()
 {
     // Initialise members
     init_members();
@@ -106,7 +106,7 @@ GModelSpatialRadialProfileDMBurkert::GModelSpatialRadialProfileDMBurkert(const G
  * Copies radial DMBurkert profile model from another radial profile model.
  ***************************************************************************/
 GModelSpatialRadialProfileDMBurkert::GModelSpatialRadialProfileDMBurkert(const GModelSpatialRadialProfileDMBurkert& model) :
-                                 GModelSpatialRadialProfile(model)
+                                     GModelSpatialRadialProfile(model)
 {
     // Initialise members
     init_members();
@@ -227,7 +227,7 @@ double GModelSpatialRadialProfileDMBurkert::theta_min(void) const
     update();
 
     // Return value
-    return m_theta_min.value() ;
+    return m_theta_min.value();
 }
 
 /***********************************************************************//**
@@ -237,31 +237,32 @@ double GModelSpatialRadialProfileDMBurkert::theta_min(void) const
  ***************************************************************************/
 double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
 {
-    
+    // Update
     update();
 
     // initialize value
-    double theta = 0.0 ;
+    double theta = 0.0;
     
-    // if earth is within the significant radius, then we must integrate
-    // the entire profile
+    // If Earth is within the significant radius, then we must integrate
+    // the entire profile ...
     if ( m_halo_distance.value() < m_mass_radius ) {
-      theta = gammalib::pi ;
-    
-    // if the halo is far enough away (further than the significant radius)
-    // then we just need to deal with the angles within the sphere of the
-    // significant radius.
-    } else {
-      theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
+        theta = gammalib::pi;
     }
     
-    // always chose the lesser of ( mass_radius theta, theta_max )
-    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
-      theta = m_theta_max.value() * gammalib::deg2rad ;
+    // ... otherwise, if the halo is far enough away (further than the
+    // significant radius) then we just need to deal with the angles within
+    // the sphere of the significant radius
+    else {
+        theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
+    }
+    
+    // Always chose the lesser of ( mass_radius theta, theta_max )
+    if (m_theta_max.value() * gammalib::deg2rad < theta ) {
+        theta = m_theta_max.value() * gammalib::deg2rad;
     }
     
     // Return value
-    return theta ;
+    return theta;
 }
 
 
@@ -274,23 +275,23 @@ double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
  * The XML element shall have either the format 
  *
  *     <spatialModel type="DMBurkertProfile">
- *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="RA"            scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"           scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Sigma"         scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
  *       <parameter name="Scale Radius"  scale="1.0" value="21.5" min="1.0e-6" free="1"/>
  *       <parameter name="Halo Distance" scale="1.0" value="7.94" min="1.0e-6" free="1"/>
- *       <parameter name="Alpha"         scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
+ *       <parameter name="Theta Max"     scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
  *     </spatialModel>
  *
  * or
  *
  *     <spatialModel type="DMBurkertProfile">
- *       <parameter name="GLON"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="GLON"          scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="GLAT"          scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Sigma"         scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
  *       <parameter name="Scale Radius"  scale="1.0" value="21.5" min="1.0e-6" free="1"/>
  *       <parameter name="Halo Distance" scale="1.0" value="7.94" min="1.0e-6" free="1"/>
- *       <parameter name="Alpha"         scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
+ *       <parameter name="Theta Max"     scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
  *     </spatialModel>
  ***************************************************************************/
 void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
@@ -323,9 +324,12 @@ void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
  * The XML element will have the format 
  *
  *     <spatialModel type="DMBurkertProfile">
- *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="RA"            scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"           scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Sigma"         scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="Scale Radius"  scale="1.0" value="21.5" min="1.0e-6" free="1"/>
+ *       <parameter name="Halo Distance" scale="1.0" value="7.94" min="1.0e-6" free="1"/>
+ *       <parameter name="Theta Max"     scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
  *     </spatialModel>
  ***************************************************************************/
 void GModelSpatialRadialProfileDMBurkert::write(GXmlElement& xml) const
@@ -419,9 +423,9 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
     m_theta_min.clear();
     m_theta_min.name("Theta Min");
     m_theta_min.unit("degrees");
-    m_theta_min.value( 1.0e-6 ); // 
-    m_theta_min.min(1.0e-10); // arbitrarily chosen
-    m_theta_min.fix(); // should always be fixed!
+    m_theta_min.value(1.0e-6);
+    m_theta_min.min(1.0e-10);     // arbitrarily chosen
+    m_theta_min.fix();            // should always be fixed!
     m_theta_min.scale(1.0);
     m_theta_min.gradient(0.0);
     m_theta_min.has_grad(false);  // Radial components never have gradients
@@ -430,18 +434,18 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
     m_theta_max.clear();
     m_theta_max.name("Theta Max");
     m_theta_max.unit("degrees");
-    m_theta_max.value( 180.0 ); // can only go from halo center to opposite halo center
-    m_theta_max.min(1.0e-6); // arbitrarily chosen
-    m_theta_max.fix(); // should always be fixed!
+    m_theta_max.value(180.0);     // can only go from halo center to opposite halo center
+    m_theta_max.min(1.0e-6);      // arbitrarily chosen
+    m_theta_max.fix();            // should always be fixed!
     m_theta_max.scale(1.0);
     m_theta_max.gradient(0.0);
     m_theta_max.has_grad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)
-    m_pars.push_back(&m_scale_radius );
+    m_pars.push_back(&m_scale_radius);
     m_pars.push_back(&m_halo_distance);
-    m_pars.push_back(&m_theta_max    );
-    m_pars.push_back(&m_theta_min    );
+    m_pars.push_back(&m_theta_max);
+    m_pars.push_back(&m_theta_min);
     
     // Initialize precomputation cache. Note that zero values flag
     // uninitialised, as a zero radius is not meaningful
@@ -465,14 +469,14 @@ void GModelSpatialRadialProfileDMBurkert::copy_members(const GModelSpatialRadial
     // Copy members. We do not have to push back the members on the parameter
     // stack as this should have been done by init_members() that was called
     // before. Otherwise we would have sigma twice on the stack.
-    m_scale_radius  = model.m_scale_radius  ;
-    m_halo_distance = model.m_halo_distance ;
-    m_theta_min     = model.m_theta_min     ;
-    m_theta_max     = model.m_theta_max     ;
+    m_scale_radius  = model.m_scale_radius;
+    m_halo_distance = model.m_halo_distance;
+    m_theta_min     = model.m_theta_min;
+    m_theta_max     = model.m_theta_max;
 
     // copy cache values
-    m_last_scale_radius = model.m_last_scale_radius ;
-    m_mass_radius       = model.m_mass_radius       ;
+    m_last_scale_radius = model.m_last_scale_radius;
+    m_mass_radius       = model.m_mass_radius;
     
     // Return
     return;
@@ -503,25 +507,25 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
     update();
 
     // initialize integral value
-    double value = 0.0 ;
+    double value = 0.0;
     
     // Set up integration limits
-    double los_min = m_halo_distance.value() - m_mass_radius ;
-    double los_max = m_halo_distance.value() + m_mass_radius ;
+    double los_min = m_halo_distance.value() - m_mass_radius;
+    double los_max = m_halo_distance.value() + m_mass_radius;
     
-    // handle case where observer is within halo mass radius
+    // Handle case where observer is within halo mass radius
     if ( los_min < 0.0 ) {
-      los_min = 0.0 ;
+        los_min = 0.0 ;
     }
     
     // Set up integral
-    halo_kernel_los integrand( m_scale_radius.value(),
-                               m_halo_distance.value(),
-                               theta ) ;
-    GIntegral integral(&integrand) ;
+    halo_kernel_los integrand(m_scale_radius.value(),
+                              m_halo_distance.value(),
+                              theta);
+    GIntegral integral(&integrand);
     
     // Compute value
-    value = integral.romberg( los_min, los_max ) ;
+    value = integral.romberg(los_min, los_max);
 
     //double tm = theta_max() ;
     //std::cout << "burkert  theta_max=" << tm << std::setprecision(10) << "  theta=" << theta << "  d=" << m_halo_distance.value() << "  mr=" << m_mass_radius << "  rs=" << m_scale_radius.value() << "  value=" << value << std::endl;
@@ -529,6 +533,7 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
     // Return value
     return value;
 }
+
 
 /***********************************************************************//**
  * @brief Kernel for halo density profile squared
@@ -558,52 +563,55 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
  * @return unit
  *
  ***************************************************************************/
-double GModelSpatialRadialProfileDMBurkert::halo_kernel_los::eval( const double &los )
+double GModelSpatialRadialProfileDMBurkert::halo_kernel_los::eval(const double &los)
 {
+    // PLEASE ADD COMMENTS
+    double r = 0.0;
+    r  = los * los;
+    r += m_halo_distance * m_halo_distance;
+    r -= 2.0 * los * m_halo_distance * std::cos(m_theta);
+    r  = std::sqrt(r);
   
-  double r = 0.0 ;
-  r  = los * los ;
-  r += m_halo_distance * m_halo_distance ;
-  r -= 2.0 * los * m_halo_distance * std::cos(m_theta) ;
-  r  = sqrt(r) ;
-  
-  double bot = ( m_scale_radius + r ) ;
-  bot *= (m_scale_radius*m_scale_radius) + (r*r) ; 
+    double bot = (m_scale_radius + r);
+    bot *= (m_scale_radius*m_scale_radius) + (r*r);
 
-  double f = m_scale_radius * m_scale_radius * m_scale_radius ;
-  f /= bot ;
+    double f = m_scale_radius * m_scale_radius * m_scale_radius;
+    f /= bot;
   
-  // squared, for annihilating dm
-  // would just be f if it was decaying dm
-  f  = f * f ;
+    // squared, for annihilating dm
+    // would just be f if it was decaying dm
+    f  = f * f;
   
-  //std::cout << "kernel::eval  los=" << los << "  d=" << m_halo_distance << "  theta=" << m_theta << "  r=" << r << "  rs=" << m_scale_radius << "  f=" << f << "  bot=" << bot << std::endl;
-  return f;
-
+    //std::cout << "kernel::eval  los=" << los << "  d=" << m_halo_distance << "  theta=" << m_theta << "  r=" << r << "  rs=" << m_scale_radius << "  f=" << f << "  bot=" << bot << std::endl;
+  
+    // Return function value
+    return f;
 }
+
 
 /***********************************************************************//**
  * @brief Update precomputation cache
  *
  * Computes the mass_radius calculation, determining the radius around
- * the halo that contains 99.99% of the mass.  For an einasto halo profile,
- * this is just 80.0 * scale_radius .
- *
+ * the halo that contains 99.99% of the mass. For an Burket halo profile,
+ * this is just 80.0 * scale_radius.
  ***************************************************************************/
 void GModelSpatialRadialProfileDMBurkert::update() const
 {
-  // Update if scale radius has changed
-  if ( m_last_scale_radius != scale_radius() ) {
+    // Update if scale radius has changed
+    if (m_last_scale_radius != scale_radius()) {
     
-    // Store last values
-    m_last_scale_radius = scale_radius() ;
+        // Store last values
+        m_last_scale_radius = scale_radius();
 
-    // perform precomputations
-    // set the mass radius to 80*scale_radius, meaning
-    // 99.99% of the mass is contained within the mass radius,
-    // and integration only needs to worry about whats inside this radius.
-    m_mass_radius = 80.0 * scale_radius() ;
+        // perform precomputations
+        // set the mass radius to 80*scale_radius, meaning
+        // 99.99% of the mass is contained within the mass radius,
+        // and integration only needs to worry about whats inside this radius.
+        m_mass_radius = 80.0 * scale_radius();
     
-   } 
+    }
+
+    // Return
+    return;
 }
-   

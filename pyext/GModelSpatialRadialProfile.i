@@ -55,17 +55,16 @@ public:
     virtual double                      theta_max(void) const = 0;
 
     // Implemented pure virtual base class methods
-    virtual double  eval(const double&  theta,
-                         const GEnergy& energy,
-                         const GTime&   time) const;
-    virtual double  eval_gradients(const double&  theta,
-                                   const GEnergy& energy,
-                                   const GTime&   time) const;
-    virtual GSkyDir mc(const GEnergy& energy,
-                       const GTime&   time,
-                       GRan&          ran) const;
-    virtual bool    contains(const GSkyDir& dir,
-                             const double&  margin = 0.0) const;
+    virtual double      eval(const double&  theta,
+                             const GEnergy& energy,
+                             const GTime&   time,
+                             const bool&    gradients = false) const;
+    virtual GSkyDir     mc(const GEnergy& energy,
+                           const GTime&   time,
+                           GRan&          ran) const;
+    virtual bool        contains(const GSkyDir& dir,
+                                 const double&  margin = 0.0) const;
+    virtual GSkyRegion* region(void) const;
 
     // Implement other methods
     int  num_nodes(void) const;

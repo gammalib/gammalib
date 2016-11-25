@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GModelSpatialRadialProfileDMBurkert.hpp - DM Einasto profile class    *
+ *   GModelSpatialRadialProfileDMBurkert.hpp - DM Burkert profile class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialRadialProfileDMBurkert.hpp
- * @brief Dark Matter Einasto profile model class interface definition
+ * @brief Dark Matter Burkert profile model class interface definition
  * @author Nathan Kelley-Hoskins
  */
 
@@ -41,10 +41,10 @@ class GXmlElement;
 /**************************************************************************
  * @class GModelSpatialRadialProfileDMBurkert
  *
- * @brief Radial Dark Matter Einasto profile source model class
+ * @brief Radial Dark Matter Burkert profile source model class
  *
  * This class implements the spatial component of the factorised source
- * model for a radial Dark Matter profile, using an Einasto density halo.
+ * model for a radial Dark Matter profile, using an Burkert density halo.
  ***************************************************************************/
 class GModelSpatialRadialProfileDMBurkert : public GModelSpatialRadialProfile {
 
@@ -59,19 +59,19 @@ public:
     virtual GModelSpatialRadialProfileDMBurkert& operator=(const GModelSpatialRadialProfileDMBurkert& model);
 
     // Implemented pure virtual base class methods
-    virtual void                             clear(void);
+    virtual void                                 clear(void);
     virtual GModelSpatialRadialProfileDMBurkert* clone(void) const;
-    virtual std::string                      classname(void) const;
-    virtual std::string                      type(void) const;
-    virtual double                           theta_min(void) const;
-    virtual double                           theta_max(void) const;
-    virtual void                             read(const GXmlElement& xml);
-    virtual void                             write(GXmlElement& xml) const;
-    virtual std::string                      print(const GChatter& chatter = NORMAL) const;
+    virtual std::string                          classname(void) const;
+    virtual std::string                          type(void) const;
+    virtual double                               theta_min(void) const;
+    virtual double                               theta_max(void) const;
+    virtual void                                 read(const GXmlElement& xml);
+    virtual void                                 write(GXmlElement& xml) const;
+    virtual std::string                          print(const GChatter& chatter = NORMAL) const;
     
     // Other methods
-    double scale_radius(void) const ;
-    void   scale_radius(const double& scale_radius ) ;
+    double scale_radius(void) const;
+    void   scale_radius(const double& scale_radius);
 
 protected:
     // Protected methods
@@ -83,29 +83,29 @@ protected:
 
     // Integration kernel for line-of-sight integral
     class halo_kernel_los : public GFunction {
-      public :
+    public :
         halo_kernel_los(const double& scale_radius ,
                         const double& halo_distance,
-                        const double& theta        ) :
+                        const double& theta) :
                         m_scale_radius(scale_radius),
                         m_halo_distance(halo_distance),
                         m_theta(theta) {}
-        double eval( const double& los ) ;
-      protected :
-        double m_scale_radius  ;
-        double m_halo_distance ;
-        double m_theta         ;
-    } ;
+        double eval(const double& los);
+    protected :
+        double m_scale_radius;
+        double m_halo_distance;
+        double m_theta;
+    };
 
     // Protected members
-    GModelPar m_theta_min     ; //!< maximum theta angle
-    GModelPar m_theta_max     ; //!< maximum theta angle
-    GModelPar m_scale_radius  ; //!< scale radius of halo profile
-    GModelPar m_halo_distance ; //!< distance from earth to halo center
+    GModelPar m_theta_min;     //!< Minimum theta angle
+    GModelPar m_theta_max;     //!< Maximum theta angle
+    GModelPar m_scale_radius;  //!< Scale radius of halo profile
+    GModelPar m_halo_distance; //!< Distance from Earth to halo center
     
     // Cached members used for precomputation
-    mutable double m_last_scale_radius ;
-    mutable double m_mass_radius       ;
+    mutable double m_last_scale_radius;
+    mutable double m_mass_radius;
 };
 
 
