@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GModelSpatialRadialProfileDMZhao.hpp - DM Einasto profile class    *
+ *   GModelSpatialRadialProfileDMZhao.hpp - DM Zhao profile class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialRadialProfileDMZhao.hpp
- * @brief Dark Matter Einasto profile model class interface definition
+ * @brief Dark Matter Zhao profile model class interface definition
  * @author Nathan Kelley-Hoskins
  */
 
@@ -41,10 +41,10 @@ class GXmlElement;
 /**************************************************************************
  * @class GModelSpatialRadialProfileDMZhao
  *
- * @brief Radial Dark Matter Einasto profile source model class
+ * @brief Radial Dark Matter Zhao profile source model class
  *
  * This class implements the spatial component of the factorised source
- * model for a radial Dark Matter profile, using an Einasto density halo.
+ * model for a radial Dark Matter profile, using an Zhao density halo.
  ***************************************************************************/
 class GModelSpatialRadialProfileDMZhao : public GModelSpatialRadialProfile {
 
@@ -59,20 +59,20 @@ public:
     virtual GModelSpatialRadialProfileDMZhao& operator=(const GModelSpatialRadialProfileDMZhao& model);
 
     // Implemented pure virtual base class methods
-    virtual void                             clear(void);
+    virtual void                              clear(void);
     virtual GModelSpatialRadialProfileDMZhao* clone(void) const;
-    virtual std::string                      classname(void) const;
-    virtual std::string                      type(void) const;
-    virtual double                           theta_min(void) const;
-    virtual double                           theta_max(void) const;
-    virtual void                             read(const GXmlElement& xml);
-    virtual void                             write(GXmlElement& xml) const;
-    virtual std::string                      print(const GChatter& chatter = NORMAL) const;
+    virtual std::string                       classname(void) const;
+    virtual std::string                       type(void) const;
+    virtual double                            theta_min(void) const;
+    virtual double                            theta_max(void) const;
+    virtual void                              read(const GXmlElement& xml);
+    virtual void                              write(GXmlElement& xml) const;
+    virtual std::string                       print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double scale_radius(void) const ;
-    void   scale_radius(const double& scale_radius ) ;
-    double prof_val(const double& theta ) ;
+    double scale_radius(void) const;
+    void   scale_radius(const double& scale_radius);
+    double prof_val(const double& theta);
 
 protected:
     // Protected methods
@@ -84,38 +84,39 @@ protected:
 
     // Integration kernel for line-of-sight integral
     class halo_kernel_los : public GFunction {
-      public :
-        halo_kernel_los(const double& scale_radius ,
+    public :
+        halo_kernel_los(const double& scale_radius,
                         const double& halo_distance,
-                        const double& alpha        ,
-                        const double& beta         ,
-                        const double& gamma        ,
-                        const double& theta        ) :
+                        const double& alpha,
+                        const double& beta,
+                        const double& gamma,
+                        const double& theta) :
                         m_scale_radius(scale_radius),
                         m_halo_distance(halo_distance),
                         m_alpha(alpha),
                         m_beta(beta),
                         m_gamma(gamma),
                         m_theta(theta) {}
-        double eval( const double& los ) ;
-      protected :
-        double m_scale_radius  ;
-        double m_halo_distance ;
-        double m_alpha         ;
-        double m_beta          ;
-        double m_gamma         ;
-        double m_theta         ;
+        double eval(const double& los);
+    protected :
+        double m_scale_radius;
+        double m_halo_distance;
+        double m_alpha;
+        double m_beta;
+        double m_gamma;
+        double m_theta;
     } ;
 
     // Protected members
-    GModelPar m_scale_radius  ; //!< scale radius of halo profile
-    GModelPar m_halo_distance ; //!< distance from earth to halo center
-    GModelPar m_alpha         ; //!< power index, inverse transition region width
-    GModelPar m_beta          ; //!< power index, slope at >> m_scale_radius
-    GModelPar m_gamma         ; //!< power index, slope at << m_scale_radius
-    GModelPar m_theta_min     ; //!< minimum theta angle
-    GModelPar m_theta_max     ; //!< maximum theta angle
+    GModelPar m_theta_min;     //!< Minimum theta angle
+    GModelPar m_theta_max;     //!< Maximum theta angle
+    GModelPar m_scale_radius;  //!< Scale radius of halo profile
+    GModelPar m_halo_distance; //!< Distance from earth to halo center
+    GModelPar m_alpha;         //!< Power index, inverse transition region width
+    GModelPar m_beta;          //!< Power index, slope at >> m_scale_radius
+    GModelPar m_gamma;         //!< Power index, slope at << m_scale_radius
 
+    // Protected cached members
     mutable double m_last_scale_radius ;
     mutable double m_mass_radius ;
 };

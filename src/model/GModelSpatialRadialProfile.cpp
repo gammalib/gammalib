@@ -180,6 +180,7 @@ GModelSpatialRadialProfile& GModelSpatialRadialProfile::operator=(const GModelSp
  * @param[in] theta Angular distance from model centre (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluate the radial profile model for a given angular distance @p theta
@@ -188,7 +189,8 @@ GModelSpatialRadialProfile& GModelSpatialRadialProfile::operator=(const GModelSp
  ***************************************************************************/
 double GModelSpatialRadialProfile::eval(const double&  theta,
                                         const GEnergy& energy,
-                                        const GTime&   time) const
+                                        const GTime&   time,
+                                        const bool&    gradients) const
 {
     // Get pre-computation cache index
     int icache = cache_index();
@@ -213,29 +215,6 @@ double GModelSpatialRadialProfile::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
- *
- * @param[in] theta Angular distance from model centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * Evaluates the function value. No gradient computation is implemented as
- * radial models will be convolved with the instrument response and thus
- * require the numerical computation of the derivatives.
- *
- * See the eval() method for more information.
- ***************************************************************************/
-double GModelSpatialRadialProfile::eval_gradients(const double&  theta,
-                                                  const GEnergy& energy,
-                                                  const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, energy, time));
 }
 
 
@@ -315,6 +294,7 @@ void GModelSpatialRadialProfile::init_members(void)
 {
     // Initialise members
     m_num_nodes = 100;
+    m_region.clear();
 
     // Initialise pre-computation cache
     m_profile.clear();
@@ -334,6 +314,7 @@ void GModelSpatialRadialProfile::copy_members(const GModelSpatialRadialProfile& 
     // Copy members
     m_num_nodes = model.m_num_nodes;
     m_profile   = model.m_profile;
+    m_region    = model.m_region;
 
     // Return
     return;
@@ -465,4 +446,20 @@ int GModelSpatialRadialProfile::cache_index(void) const
 
     // Return index
     return (index);
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialProfile::set_region(void) const
+{
+    // Set sky region centre to disk centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to maximum theta angle
+    m_region.radius(theta_max()*gammalib::rad2deg);
+
+    // Return
+    return;
 }

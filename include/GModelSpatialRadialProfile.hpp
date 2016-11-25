@@ -31,6 +31,7 @@
 #include <string>
 #include "GModelSpatialRadial.hpp"
 #include "GNodeArray.hpp"
+#include "GSkyRegionCircle.hpp"
 
 /* __ Forward declaration ________________________________________________ */
 class GXmlElement;
@@ -67,17 +68,16 @@ public:
     virtual std::string                 print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented pure virtual base class methods
-    virtual double  eval(const double&  theta,
-                         const GEnergy& energy,
-                         const GTime&   time) const;
-    virtual double  eval_gradients(const double&  theta,
-                                   const GEnergy& energy,
-                                   const GTime&   time) const;
-    virtual GSkyDir mc(const GEnergy& energy,
-                       const GTime&   time,
-                       GRan&          ran) const;
-    virtual bool    contains(const GSkyDir& dir,
-                             const double&  margin = 0.0) const;
+    virtual double      eval(const double&  theta,
+                             const GEnergy& energy,
+                             const GTime&   time,
+                             const bool&    gradients = false) const;
+    virtual GSkyDir     mc(const GEnergy& energy,
+                           const GTime&   time,
+                           GRan&          ran) const;
+    virtual bool        contains(const GSkyDir& dir,
+                                 const double&  margin = 0.0) const;
+    virtual GSkyRegion* region(void) const;
 
     // Implement other methods
     int  num_nodes(void) const;
@@ -90,9 +90,11 @@ protected:
     void           free_members(void);
     int            cache_index(void) const;
     virtual double profile_value(const double& theta) const = 0;
+    void           set_region(void) const;
 
     // Protected members
-    int m_num_nodes;                        //!< Number of profile nodes
+    int                      m_num_nodes; //!< Number of profile nodes
+    mutable GSkyRegionCircle m_region;    //!< Bounding circle
 
     // Pre-computed radial profile
     struct profile {
@@ -134,6 +136,21 @@ void GModelSpatialRadialProfile::num_nodes(const int& number)
 {
     m_num_nodes = number;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the spatial model component.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialRadialProfile::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALRADIALPROFILE_HPP */
