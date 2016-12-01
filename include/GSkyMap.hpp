@@ -90,6 +90,7 @@ public:
     // Constructors and destructors
     GSkyMap(void);
     explicit GSkyMap(const GFilename& filename);
+    explicit GSkyMap(const GFitsHDU& hdu);
     GSkyMap(const std::string& coords,
             const int&         nside,
             const std::string& order,

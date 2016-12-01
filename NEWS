@@ -58,6 +58,7 @@ The following methods have been added:
 - gammalib::rstrip_chars()
 - GObservations::save_covmat()
 - GModelSpatial::region()
+- GSkyMap(const GFitsHDU&)
 
 The following methods have been removed:
 - <all classes>::eval_gradients()
@@ -213,6 +214,9 @@ detect the NONE value and will do nothing if no sky map exists (#1835).
 
 The GSkyMap::is_empty() method signals whether a sky map contains no pixels
 or no maps (#1828).
+
+A FITS HDU constructor was added to the GSkyMap class that allows constructing
+a sky map from a FITS HDU.
 
 
 13. Support module

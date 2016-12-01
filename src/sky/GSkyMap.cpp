@@ -131,6 +131,27 @@ GSkyMap::GSkyMap(const GFilename& filename)
 
 
 /***********************************************************************//**
+ * @brief FITS HDU constructor
+ *
+ * @param[in] hdu FITS HDU.
+ *
+ * Constructs a sky map by fetching data from a FITS HDU. See the read()
+ * method for more information.
+ ***************************************************************************/
+GSkyMap::GSkyMap(const GFitsHDU& hdu)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Read skymap from HDU
+    read(hdu);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Healpix sky map constructor
  *
  * @param[in] coords Coordinate System (CEL or GAL).
