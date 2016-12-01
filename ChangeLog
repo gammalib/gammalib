@@ -5,6 +5,7 @@
 
         Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
         Make GFilename::is_fits thread safe (#1717).
+        Add GSkyMap FITS HDU constructor
         Add leap second for 1-1-2017 (#1887)
         Add region() method to GModelSpatial (#1764)
         Correct containment radius computation in GCTAPsf2D::containment_radius (#1876)
