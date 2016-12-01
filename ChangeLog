@@ -1,8 +1,9 @@
-2016-11-22
+2016-12-01
 
         * Version 1.2.0 released
         =========================
 
+        Add leap second for 1-1-2017 (#1887)
         Add region() method to GModelSpatial (#1764)
         Add composite spatial and spectral models (#1706)
         Add GObservations::save_covmat() method (#1863)

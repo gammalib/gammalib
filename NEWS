@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-22 November 2016
+1 December 2016
 
 
 1. Introduction
@@ -194,6 +194,9 @@ been added to the GTime class that sets the time to the current time (see
 
 The GObservations::save_covmat() method computes and saves the covariance
 matrix into a FITS file (#1863).
+
+A leap second has been added to GTime::leap_seconds() for 1 January 2017
+(#1887).
 
 
 11. Optimization module
