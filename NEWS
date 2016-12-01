@@ -282,6 +282,9 @@ been added to the GTime class that sets the time to the current time (see
 The GObservations::save_covmat() method computes and saves the covariance
 matrix into a FITS file (#1863).
 
+A leap second has been added to GTime::leap_seconds() for 1 January 2017
+(#1887).
+
 
 11. Optimization module
 -----------------------
