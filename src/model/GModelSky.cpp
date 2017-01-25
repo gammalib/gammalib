@@ -645,7 +645,13 @@ double GModelSky::npred(const GEnergy&      obsEng,
  *       <spatialModel type="..">
  *         ..
  *       </spatialModel>
+ *       <temporal type="..">
+ *         ..
+ *       </temporal>
  *     </source>
+ *
+ * The temporal element is optional. In no temporal element is specified a
+ * constant component with unity normalization will be assumed.
  *
  * Optionally, the model may also contain scale parameters following the
  * format:
@@ -657,6 +663,9 @@ double GModelSky::npred(const GEnergy&      obsEng,
  *       <spatialModel type="..">
  *         ..
  *       </spatialModel>
+ *       <temporal type="..">
+ *         ..
+ *       </temporal>
  *       <scaling>
  *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
  *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
@@ -674,13 +683,19 @@ void GModelSky::read(const GXmlElement& xml)
     const GXmlElement* spec = xml.element("spectrum", 0);
     const GXmlElement* spat = xml.element("spatialModel", 0);
 
-    // Allocate constant
-    GModelTemporalConst temporal;
-
-    // Clone spatial and spectral models
+    // Set spatial and spectral models
     m_spatial  = xml_spatial(*spat);
     m_spectral = xml_spectral(*spec);
-    m_temporal = temporal.clone();
+
+    // Handle optional temporal model
+    if (xml.elements("temporal") > 0) {
+        const GXmlElement* temp = xml.element("temporal", 0);
+        m_temporal = xml_temporal(*temp);
+    }
+    else {
+        GModelTemporalConst temporal;
+        m_temporal = temporal.clone();
+    }
 
     // Read model attributes
     read_attributes(xml);
@@ -711,11 +726,18 @@ void GModelSky::read(const GXmlElement& xml)
  *       <spatialModel type="..">
  *         ..
  *       </spatialModel>
+ *       <temporal type="..">
+ *         ..
+ *       </temporal>
  *       <scaling>
  *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
  *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
  *       </scaling>
  *     </source>
+ *
+ * For compatibility reasons the temporal element will only be written if it
+ * is a non-constant component or a constant component with a normalization
+ * that differs from unity.
  *
  * The scaling element will only be written optionally in case that instrument
  * dependent scaling factors exist (see GModel::write_scales() for more
@@ -736,11 +758,21 @@ void GModelSky::write(GXmlElement& xml) const
         }
     }
 
+    // If the temporal model is not a constant with unit normalization then
+    // set cons to a NULL pointer
+    GModelTemporalConst* cons = dynamic_cast<GModelTemporalConst*>(temporal());
+    if (cons != NULL) {
+        if (cons->norm() != 1.0) {
+            cons = NULL;
+        }
+    }
+
     // If no source with corresponding name was found then append one
     if (src == NULL) {
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
         if (spatial()  != NULL) src->append(GXmlElement("spatialModel"));
+        if (temporal() != NULL && cons == NULL) src->append(GXmlElement("temporal"));
     }
 
     // Write spectral model
@@ -753,6 +785,13 @@ void GModelSky::write(GXmlElement& xml) const
     if (spatial() != NULL) {
         GXmlElement* spat = src->element("spatialModel", 0);
         spatial()->write(*spat);
+    }
+
+    // Write temporal model (only if not a constant with unit normalization
+    // factor)
+    if (temporal() != NULL && cons == NULL) {
+        GXmlElement* temp = src->element("temporal", 0);
+        temporal()->write(*temp);
     }
 
     // Write model attributes
