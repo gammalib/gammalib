@@ -309,11 +309,12 @@ GTimes GModelTemporalFunc::mc(const double& rate, const GTime&  tmin,
     // Update Monte Carlo cache
     mc_update(tmin, tmax);
 
-    // Continue only if mean rate is positive and cache is not empty
-    if (m_mc_rate > 0.0 && m_mc_cum.size() > 0) {
+    // Continue only if effective duration is positive and cache is not empty
+    if (m_mc_eff_duration > 0.0 && m_mc_cum.size() > 0) {
 
-        // Compute mean event rate (in events per seconds)
-        double lambda = rate * norm() * m_mc_rate;
+        // Compute mean number of times by multiplying the rate with the
+        // effective duration and the normalization factor
+        double lambda = rate * norm() * m_mc_eff_duration;
 
         // Compute number of times to be sampled
         int ntimes = int(ran.poisson(lambda)+0.5);
@@ -514,7 +515,7 @@ void GModelTemporalFunc::init_members(void)
     // Initialise cache
     m_mc_tmin.clear();
     m_mc_tmax.clear();
-    m_mc_rate = 0.0;
+    m_mc_eff_duration = 0.0;
     m_mc_cum.clear();
     m_mc_slope.clear();
     m_mc_offset.clear();
@@ -543,14 +544,14 @@ void GModelTemporalFunc::copy_members(const GModelTemporalFunc& model)
     m_tmax     = model.m_tmax;
 
     // Copy cache
-    m_mc_tmin   = model.m_mc_tmin;
-    m_mc_tmax   = model.m_mc_tmax;
-    m_mc_rate   = model.m_mc_rate;
-    m_mc_cum    = model.m_mc_cum;
-    m_mc_slope  = model.m_mc_slope;
-    m_mc_offset = model.m_mc_offset;
-    m_mc_time   = model.m_mc_time;
-    m_mc_dt     = model.m_mc_dt;
+    m_mc_tmin         = model.m_mc_tmin;
+    m_mc_tmax         = model.m_mc_tmax;
+    m_mc_eff_duration = model.m_mc_eff_duration;
+    m_mc_cum          = model.m_mc_cum;
+    m_mc_slope        = model.m_mc_slope;
+    m_mc_offset       = model.m_mc_offset;
+    m_mc_time         = model.m_mc_time;
+    m_mc_dt           = model.m_mc_dt;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -665,7 +666,7 @@ void GModelTemporalFunc::mc_update(const GTime& tmin,
         m_mc_tmax = tmax;
         
         // Initialise cache
-        m_mc_rate = 0.0;
+        m_mc_eff_duration = 0.0;
         m_mc_cum.clear();
         m_mc_slope.clear();
         m_mc_offset.clear();
@@ -718,9 +719,9 @@ void GModelTemporalFunc::mc_update(const GTime& tmin,
                 slope  /= renorm;
                 offset /= renorm;
 
-                // Update mean rate and duration
-                m_mc_rate += cum;
-                duration  += dt;
+                // Update effective duration and real duration
+                m_mc_eff_duration += cum;
+                duration          += dt;
 
                 // Put mean normalization and integral on stack
                 m_mc_cum.push_back(cum);
@@ -738,11 +739,6 @@ void GModelTemporalFunc::mc_update(const GTime& tmin,
             double norm = m_mc_cum[m_mc_cum.size()-1];
             for (int i = 0; i < m_mc_cum.size(); ++i) {
                 m_mc_cum[i] /= norm;
-            }
-
-            // Compute mean rate
-            if (duration > 0.0) {
-                m_mc_rate /= duration;
             }
 
         } // endif: time interval overlaps

@@ -110,14 +110,14 @@ protected:
     GTime               m_tmax;       //!< Maximum time of model
 
     // Cached members for MC
-    mutable GTime               m_mc_tmin;   //!< Minimum time
-    mutable GTime               m_mc_tmax;   //!< Maximum time
-    mutable double              m_mc_rate;   //!< Mean rate
-    mutable std::vector<double> m_mc_cum;    //!< Cumulative distribution
-    mutable std::vector<double> m_mc_slope;  //!< Slope of interval
-    mutable std::vector<double> m_mc_offset; //!< Offset of interval
-    mutable std::vector<double> m_mc_time;   //!< Start time of interval
-    mutable std::vector<double> m_mc_dt;     //!< Length of interval
+    mutable GTime               m_mc_tmin;         //!< Minimum time
+    mutable GTime               m_mc_tmax;         //!< Maximum time
+    mutable double              m_mc_eff_duration; //!< Effective duration
+    mutable std::vector<double> m_mc_cum;          //!< Cumulative distribution
+    mutable std::vector<double> m_mc_slope;        //!< Slope of interval
+    mutable std::vector<double> m_mc_offset;       //!< Offset of interval
+    mutable std::vector<double> m_mc_time;         //!< Start time of interval
+    mutable std::vector<double> m_mc_dt;           //!< Length of interval
 };
 
 
