@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-24 January 2017
+25 January 2017
 
 
 1. Introduction
@@ -17,6 +17,7 @@ The following classes have been added:
 - GModelSpectralMultiplicative
 - GModelSpectralComposite
 - GModelSpatialComposite
+- GModelTemporalFunc
 - GVOTable
 - GNdarray
 - GFft
@@ -168,6 +169,11 @@ A region() method has been added to the GModelSpatial base class and all
 derived classes that returns a pointer to a sky region that bounds the
 spatial model. For the moment, only circular sky regions have been
 implemented (#1764).
+
+The GModelTemporalFunc class has been added to implement a temporal file
+function for the simulation of transient sources. A unit test has been
+added and the mc() and eval() methods have been validated using a dedicated
+test script (#1914).
 
 
 9. Numerics module

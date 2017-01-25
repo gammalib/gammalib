@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GammaLib.hpp - Gamma-Ray Astronomy Library Header file         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -228,5 +228,6 @@
 #include "GModelTemporal.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
+#include "GModelTemporalFunc.hpp"
 
 #endif /* GAMMALIB_HPP */
