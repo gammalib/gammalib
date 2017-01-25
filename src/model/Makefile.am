@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for model module                                              #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -70,6 +70,7 @@ sources = GModelPar.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \
+          GModelTemporalFunc.cpp \
           GException_model.cpp
 
 # Build libtool library

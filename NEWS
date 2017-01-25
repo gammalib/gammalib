@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.2.0
 
 Author(s) : Juergen Knoedlseder
 
-22 November 2016
+25 January 2017
 
 
 1. Introduction
@@ -19,6 +19,7 @@ The following classes have been added:
 - GModelSpectralMultiplicative
 - GModelSpectralComposite
 - GModelSpatialComposite
+- GModelTemporalFunc
 - GVOTable
 - GNdarray
 - GFft
@@ -186,6 +187,7 @@ derived classes that returns a pointer to a sky region that bounds the
 spatial model. For the moment, only circular sky regions have been
 implemented (#1764).
 
+<<<<<<< 07173c405cafbc8d89c98b9c0a90a52c9a0ee0ab
 Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
 The method deals with pre-computation and normalization of the profiles,
 and implements the eval(), eval_grandients() and mc() method. The class
@@ -255,6 +257,12 @@ explicit and homogenous:
 By default the old model names are still supported. Support of the old model
 names can be turned off by specifying the --disable-legacy-model-names option
 to the ./configure script (#1821).
+=======
+The GModelTemporalFunc class has been added to implement a temporal file
+function for the simulation of transient sources. A unit test has been
+added and the mc() and eval() methods have been validated using a dedicated
+test script (#1914).
+>>>>>>> Add GModelTemporalFunc class (#1914)
 
 
 9. Numerics module

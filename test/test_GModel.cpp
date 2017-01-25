@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,10 +48,11 @@ void TestGModel::set(void)
     std::string datadir = std::getenv("TEST_DATA");
 
     // Set test files
-    m_map_file  = datadir + "/cena_lobes_parkes.fits";
-    m_cube_file = datadir + "/test_cube.fits";
-    m_filefct   = datadir + "/filefunction.txt";
-    m_xml_file  = datadir + "/crab.xml";
+    m_map_file     = datadir + "/cena_lobes_parkes.fits";
+    m_cube_file    = datadir + "/test_cube.fits";
+    m_filefct      = datadir + "/filefunction.txt";
+    m_temp_filefct = datadir + "/temp_filefunction.fits";
+    m_xml_file     = datadir + "/crab.xml";
 
     // Set model definiton XML files
     m_xml_model_point_const        = datadir + "/model_point_const.xml";
@@ -77,6 +78,7 @@ void TestGModel::set(void)
     m_xml_model_elliptical_disk    = datadir + "/model_elliptical_disk.xml";
     m_xml_model_elliptical_gauss   = datadir + "/model_elliptical_gauss.xml";
     m_xml_model_spatial_composite  = datadir + "/model_spatial_composite.xml";
+    m_xml_model_point_temp_filefct = datadir + "/model_temporal_filefct.xml";
 
     // Set legacy model definition XML files
     m_xml_legacy_radial_disk       = datadir + "/legacy_radial_disk.xml";
@@ -158,6 +160,8 @@ void TestGModel::set(void)
     // Append temporal model tests
     append(static_cast<pfunction>(&TestGModel::test_temp_const),
            "Test GModelTemporalConst");
+    append(static_cast<pfunction>(&TestGModel::test_temp_filefct),
+           "Test GModelTemporalFunc");
 
     // Append genereric model tests
     append(static_cast<pfunction>(&TestGModel::test_model), "Test GModel");
@@ -2138,6 +2142,58 @@ void TestGModel::test_temp_const(void)
     // Test value method
     model3.norm(3.9);
     test_value(model3.norm(), 3.9);
+
+    // Test operator access
+    const char* strarray[] = {"Normalization"};
+    for (int i = 0; i < 1; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelTemporalFunc class
+ ***************************************************************************/
+void TestGModel::test_temp_filefct(void)
+{
+    // Test void constructor
+    GModelTemporalFunc model1;
+    test_value(model1.type(), "FileFunction", "Check void model type");
+
+    // Test value constructor
+    GModelTemporalFunc model2(m_temp_filefct, 2.0);
+    test_value(model2.filename().url(), m_temp_filefct,
+                "Check temporal file function data file name");
+    test_value(model2.norm(), 2.0);
+   
+    // Test XML constructor
+    GXml               xml(m_xml_model_point_temp_filefct);
+    GXmlElement*       element = xml.element(0)->element(0)->element("temporal", 0);
+    GModelTemporalFunc model3(*element);
+    test_value(model3.size(), 1);
+    test_value(model3.type(), "FileFunction", "Check model type");
+    test_value(model3.filename().url(), m_temp_filefct,
+               "Check temporal file function data file name");
+    test_value(model3.norm(), 1.0);
+
+    // Test filename method
+    model3.filename(m_temp_filefct);
+    test_value(model3.filename().url(), m_temp_filefct,
+               "Check temporal file function data file name");
+
+    // Test norm method
+    model3.norm(3.0);
+    test_value(model3.norm(), 3.0);
 
     // Test operator access
     const char* strarray[] = {"Normalization"};

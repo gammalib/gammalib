@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          model.i - Model module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -165,3 +165,4 @@
 %include "GModelTemporal.i"
 %include "GModelTemporalRegistry.i"
 %include "GModelTemporalConst.i"
+%include "GModelTemporalFunc.i"
