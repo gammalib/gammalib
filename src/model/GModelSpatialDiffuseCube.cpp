@@ -363,11 +363,15 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon,
  * @exception GException::invalid_value
  *            No map cube defined.
  *            No energy boundaries defined.
- *            Simulation cone not defined or does not overlap with map cube.
+ * @exception GException::invalid_return_value
+ *            Simulation cone not defined, does not overlap with map cube or
+ *            map cube is empty for the specified energy.
  *
  * Returns a random sky direction according to the intensity distribution of
  * the model sky map and the specified energy. The method uses a rejection
- * method to determine the sky direction.
+ * method to determine the sky direction. If no sky direction could be
+ * determined, the method throws an GException::invalid_return_value
+ * exception.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                                      const GTime&   time,
@@ -430,7 +434,7 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                   "restrict the simulated energies to values where the map "
                   "cube is non-zero within the simulation cone.";
         }
-        throw GException::invalid_value(G_MC, msg);
+        throw GException::invalid_return_value(G_MC, msg);
     }
 
     // Allocate sky direction

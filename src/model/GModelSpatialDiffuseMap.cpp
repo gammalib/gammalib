@@ -350,12 +350,15 @@ double GModelSpatialDiffuseMap::eval(const GPhoton& photon,
  * @return Sky direction.
  *
  * @exception GException::invalid_value
- *            Simulation cone not defined or does not overlap with sky map.
  *            No sky map defined.
+ * @exception GException::invalid_return_value
+ *            Simulation cone not defined, does not overlap with map or map
+ *            is empty.
  *
  * Returns a random sky direction according to the intensity distribution of
  * the model sky map. The method uses a rejection method to determine the sky
- * direction.
+ * direction. If no sky direction could be determined, the method throws an
+ * GException::invalid_return_value exception.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
                                     const GTime&   time,
@@ -368,7 +371,7 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
         std::string msg = "Simulation cone has not been defined or does not "
                           "overlap with the sky map. Please specify a valid "
                           "simulation cone.";
-        throw GException::invalid_value(G_MC, msg);
+        throw GException::invalid_return_value(G_MC, msg);
     }
 
     // Determine number of skymap pixels

@@ -3,7 +3,7 @@
         * Version 1.2.0 released
         =========================
 
-        Improve exception message in GModelSpatialDiffuseCube::mc (#1915)
+        Monte Carlo for empty maps or map cubes no longer throws an exception (#1915)
         Add GModelTemporalFunc call (#1914)
         Add GSkyMap FITS HDU constructor
         Add leap second for 1-1-2017 (#1887)

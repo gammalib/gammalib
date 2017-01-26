@@ -175,8 +175,10 @@ function for the simulation of transient sources. A unit test has been
 added and the mc() and eval() methods have been validated using a dedicated
 test script (#1914).
 
-Improve the exception message for empty map cubes in GModelSpatialDiffuseCube::mc
-(#1915).
+The GModelSpatialDiffuseMap::mc and GModelSpatialDiffuseCube::mc methods
+now throw an GException::invalid_return_value exception that is catched
+in the GModelSky::mc method and leads to the skipping of the concerned
+photon. This allows handling of empty diffuse maps or map cubes (#1915).
 
 
 9. Numerics module
