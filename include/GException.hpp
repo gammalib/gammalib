@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GException.hpp - Exception handler                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,6 +80,13 @@ public:
         invalid_argument(const std::string& origin,
                          const std::string& argument,
                          const std::string& message);
+    };
+
+    // Invalid return value
+    class invalid_return_value : public GExceptionHandler {
+    public:
+        invalid_return_value(const std::string& origin,
+                             const std::string& message);
     };
 
     // Out of range

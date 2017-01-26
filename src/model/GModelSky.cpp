@@ -942,8 +942,15 @@ GPhotons GModelSky::mc(const double& area,
                 std::cout << "    Energy=" << photon.energy() << std::endl;
                 #endif
 
-                // Set incident photon direction
-                photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
+                // Set incident photon direction. If an invalid_return_value
+                // exception occurs the sky direction returned by the spatial
+                // Monte Carlo method is invalid and the photon is skipped.
+                try {
+                    photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
+                }
+                catch (GException::invalid_return_value) {
+                    continue;
+                }
 
                 // Debug option: dump direction
                 #if defined(G_DUMP_MC_DETAIL)
