@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.2.0
 
 Author(s) : Juergen Knoedlseder
 
-25 January 2017
+26 January 2017
 
 
 1. Introduction
@@ -263,6 +263,9 @@ function for the simulation of transient sources. A unit test has been
 added and the mc() and eval() methods have been validated using a dedicated
 test script (#1914).
 >>>>>>> Add GModelTemporalFunc class (#1914)
+
+Improve the exception message for empty map cubes in GModelSpatialDiffuseCube::mc
+(#1915).
 
 
 9. Numerics module

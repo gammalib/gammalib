@@ -416,12 +416,20 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
     }
 
     // Throw an exception if the maximum MC intensity is not positive. This
-    // can be the case because the simulation cone has not been defined or
-    // because it does not overlap with the sky map
+    // can happen if the simulation cone has not been defined or if there is
+    // no overlap with the sky map or if the sky map is empty
     if (max <= 0.0) {
-        std::string msg = "Simulation cone has not been defined or does not "
-                          "overlap with the sky map. Please specify a valid "
-                          "simulation cone.";
+        std::string msg;
+        if (m_mc_max.size() == 0) {
+            msg = "Simulation cone has not been defined. Please specify a "
+                  "valid simulation cone before calling the method.";
+        }
+        else {
+            msg = "The map cube is empty at "+energy.print()+" within the "
+                  "simulation cone. Please specify a valid map cube or "
+                  "restrict the simulated energies to values where the map "
+                  "cube is non-zero within the simulation cone.";
+        }
         throw GException::invalid_value(G_MC, msg);
     }
 
