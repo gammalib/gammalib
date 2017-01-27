@@ -48,11 +48,12 @@ void TestGModel::set(void)
     std::string datadir = std::getenv("TEST_DATA");
 
     // Set test files
-    m_map_file     = datadir + "/cena_lobes_parkes.fits";
-    m_cube_file    = datadir + "/test_cube.fits";
-    m_filefct      = datadir + "/filefunction.txt";
-    m_temp_filefct = datadir + "/temp_filefunction.fits";
-    m_xml_file     = datadir + "/crab.xml";
+    m_map_file        = datadir + "/cena_lobes_parkes.fits";
+    m_cube_file       = datadir + "/test_cube.fits";
+    m_filefct         = datadir + "/filefunction.txt";
+    m_temp_filefct    = datadir + "/temp_filefunction.fits";
+    m_temp_phasecurve = datadir + "/model_temporal_phasecurve.fits";
+    m_xml_file        = datadir + "/crab.xml";
 
     // Set model definiton XML files
     m_xml_model_point_const        = datadir + "/model_point_const.xml";
@@ -78,7 +79,10 @@ void TestGModel::set(void)
     m_xml_model_elliptical_disk    = datadir + "/model_elliptical_disk.xml";
     m_xml_model_elliptical_gauss   = datadir + "/model_elliptical_gauss.xml";
     m_xml_model_spatial_composite  = datadir + "/model_spatial_composite.xml";
-    m_xml_model_point_temp_filefct = datadir + "/model_temporal_filefct.xml";
+
+    // Set temporal model definition XML files
+    m_xml_model_point_temp_filefct    = datadir + "/model_temporal_filefct.xml";
+    m_xml_model_point_temp_phasecurve = datadir + "/model_temporal_phasecurve.xml";
 
     // Set legacy model definition XML files
     m_xml_legacy_radial_disk       = datadir + "/legacy_radial_disk.xml";
@@ -162,6 +166,8 @@ void TestGModel::set(void)
            "Test GModelTemporalConst");
     append(static_cast<pfunction>(&TestGModel::test_temp_filefct),
            "Test GModelTemporalFunc");
+    append(static_cast<pfunction>(&TestGModel::test_temp_phasecurve),
+           "Test GModelTemporalPhaseCurve");
 
     // Append genereric model tests
     append(static_cast<pfunction>(&TestGModel::test_model), "Test GModel");
@@ -2198,6 +2204,73 @@ void TestGModel::test_temp_filefct(void)
     // Test operator access
     const char* strarray[] = {"Normalization"};
     for (int i = 0; i < 1; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelTemporalPhaseCurve class
+ ***************************************************************************/
+void TestGModel::test_temp_phasecurve(void)
+{
+    // Test void constructor
+    GModelTemporalPhaseCurve model1;
+    test_value(model1.type(), "PhaseCurve", "Check void model type");
+
+    // Test value constructor
+    GModelTemporalPhaseCurve model2(m_temp_phasecurve, 2.0);
+    test_value(model2.filename().url(), m_temp_phasecurve,
+               "Check phase curve file name");
+    test_value(model2.norm(), 2.0);
+   
+    // Test XML constructor
+    GXml                     xml(m_xml_model_point_temp_phasecurve);
+    GXmlElement*             element = xml.element(0)->element(0)->element("temporal", 0);
+    GModelTemporalPhaseCurve model3(*element);
+    test_value(model3.size(), 6);
+    test_value(model3.type(), "PhaseCurve", "Check model type");
+    test_value(model3.filename().url(), m_temp_phasecurve,
+               "Check phase curve file name");
+    test_value(model3.norm(), 1.0);
+    test_value(model3.mjd().mjd(), 51544.5);
+    test_value(model3.phase(), 0.0);
+    test_value(model3.f0(), 1.0);
+    test_value(model3.f1(), 0.1);
+    test_value(model3.f2(), 0.01);
+
+    // Test filename method
+    model3.filename(m_temp_phasecurve);
+    test_value(model3.filename().url(), m_temp_phasecurve,
+               "Check phase curve file name");
+
+    // Test parameter methods
+    model3.norm(3.0);
+    test_value(model3.norm(), 3.0);
+    model3.mjd(GTime(3.0, "s"));
+    test_value(model3.mjd().secs(), 3.0);
+    model3.phase(0.3);
+    test_value(model3.phase(), 0.3);
+    model3.f0(3.0);
+    test_value(model3.f0(), 3.0);
+    model3.f1(3.0);
+    test_value(model3.f1(), 3.0);
+    model3.f2(3.0);
+    test_value(model3.f2(), 3.0);
+
+    // Test operator access
+    const char* strarray[] = {"Normalization", "MJD", "Phase", "F0", "F1", "F2"};
+    for (int i = 0; i < 6; ++i) {
         std::string keyname(strarray[i]);
         model3[keyname].remove_range(); // To allow setting of any value
         model3[keyname].value(2.1);

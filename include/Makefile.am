@@ -188,4 +188,5 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalRegistry.hpp \
                      GModelTemporalConst.hpp \
-                     GModelTemporalFunc.hpp
+                     GModelTemporalFunc.hpp \
+                     GModelTemporalPhaseCurve.hpp

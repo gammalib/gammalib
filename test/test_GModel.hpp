@@ -77,6 +77,7 @@ public:
     void                test_spectral_model(void);
     void                test_temp_const(void);
     void                test_temp_filefct(void);
+    void                test_temp_phasecurve(void);
     void                test_model(void);
     void                test_models(void);
     void                test_model_registry(void);
@@ -103,6 +104,7 @@ private:
     std::string m_cube_file;
     std::string m_filefct;
     std::string m_temp_filefct;
+    std::string m_temp_phasecurve;
     std::string m_xml_file;
 
     // Model definiton XML files
@@ -130,6 +132,7 @@ private:
     std::string m_xml_model_elliptical_gauss;
     std::string m_xml_model_spatial_composite;
     std::string m_xml_model_point_temp_filefct;
+    std::string m_xml_model_point_temp_phasecurve;
 
     // Legacy model definition XML files
     std::string m_xml_legacy_radial_disk;

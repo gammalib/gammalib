@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.2.0
 
 Author(s) : Juergen Knoedlseder
 
-26 January 2017
+27 January 2017
 
 
 1. Introduction
@@ -20,6 +20,7 @@ The following classes have been added:
 - GModelSpectralComposite
 - GModelSpatialComposite
 - GModelTemporalFunc
+- GModelTemporalPhaseCurve
 - GVOTable
 - GNdarray
 - GFft
@@ -268,6 +269,11 @@ The GModelSpatialDiffuseMap::mc and GModelSpatialDiffuseCube::mc methods
 now throw an GException::invalid_return_value exception that is catched
 in the GModelSky::mc method and leads to the skipping of the concerned
 photon. This allows handling of empty diffuse maps or map cubes (#1915).
+
+The GModelTemporalPhaseCurve class has been added to impelement a phase
+curve as temporal component of a model. The phase curve can be used to
+model pulsar light curves or the temporal variation of gamma-ray binaries
+(#1916).
 
 
 9. Numerics module

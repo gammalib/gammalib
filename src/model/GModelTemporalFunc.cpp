@@ -77,7 +77,7 @@ GModelTemporalFunc::GModelTemporalFunc(void) : GModelTemporal()
  * @param[in] filename File name of nodes.
  * @param[in] norm Normalization factor.
  *
- * Constructs spectral file function model from a list of nodes that is found
+ * Constructs temporal file function model from a list of nodes that is found
  * in the specified FITS file. See the load_nodes() method for more
  * information about the expected structure of the file.
  ***************************************************************************/
@@ -104,8 +104,8 @@ GModelTemporalFunc::GModelTemporalFunc(const GFilename& filename,
  *
  * @param[in] xml XML element.
  *
- * Constructs constant temporal model by extracting information from an XML
- * element. See the read() method for more information about the expected
+ * Constructs temporal file function model by extracting information from an
+ * XML element. See the read() method for more information about the expected
  * structure of the XML element.
  ***************************************************************************/
 GModelTemporalFunc::GModelTemporalFunc(const GXmlElement& xml) :
@@ -362,7 +362,8 @@ GTimes GModelTemporalFunc::mc(const double& rate, const GTime&  tmin,
  *
  * @param[in] xml XML element.
  *
- * Writes the temporal information from an XML element having the format
+ * Reads the temporal information from an XML element. The XML element should
+ * have the format
  *
  *     <temporalModel type="FileFunction" file="..">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
@@ -604,7 +605,7 @@ void GModelTemporalFunc::load_nodes(const GFilename& filename)
 
     // Extract columns
     GFitsTableCol* time_col  = (*table)["TIME"];
-    GFitsTableCol* time_norm = (*table)["NORM"];
+    GFitsTableCol* norm_col = (*table)["NORM"];
 
     // Check that there are at least two nodes in table
     if (time_col->length() < 2) {
@@ -616,11 +617,11 @@ void GModelTemporalFunc::load_nodes(const GFilename& filename)
     }
 
     // Check that both columns are consistent
-    if (time_col->length() != time_norm->length()) {
+    if (time_col->length() != norm_col->length()) {
         std::string msg = "\"TIME\" and \"NORM\" columns have inconsistent "
                           "number of rows ("+
                           gammalib::str(time_col->length())+", "+
-                          gammalib::str(time_norm->length())+"). Please "
+                          gammalib::str(norm_col->length())+"). Please "
                           "specify a valid temporal file function.";
         throw GException::invalid_value(G_LOAD_NODES, msg);
     }
@@ -628,7 +629,7 @@ void GModelTemporalFunc::load_nodes(const GFilename& filename)
     // Extract nodes
     for (int i = 0; i < time_col->length(); ++i) {
         m_nodes.append(time_col->real(i));
-        m_values.push_back(time_norm->real(i));
+        m_values.push_back(norm_col->real(i));
     }
 
     // Set minimum and maximum times (assumes that times are ordered)
@@ -637,9 +638,6 @@ void GModelTemporalFunc::load_nodes(const GFilename& filename)
 
     // Close FITS file
     fits.close();
-
-    // Set pre-computation cache
-    //set_cache();
 
     // Return
     return;
