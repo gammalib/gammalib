@@ -296,7 +296,7 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
         // Simulate next event time
         time += ran.exp(lambda);
 
-        // Add time if it is not beyod the stop time
+        // Add time if it is not beyond the stop time
         if (time <= tstop) {
             GTime event;
             event.secs(time);

@@ -66,6 +66,7 @@ sources = GModelPar.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \
           GModelTemporalFunc.cpp \
+          GModelTemporalPhaseCurve.cpp \
           GException_model.cpp
 
 # Build libtool library

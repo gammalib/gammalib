@@ -161,3 +161,4 @@
 %include "GModelTemporalRegistry.i"
 %include "GModelTemporalConst.i"
 %include "GModelTemporalFunc.i"
+%include "GModelTemporalPhaseCurve.i"

@@ -229,5 +229,6 @@
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
 #include "GModelTemporalFunc.hpp"
+#include "GModelTemporalPhaseCurve.hpp"
 
 #endif /* GAMMALIB_HPP */
