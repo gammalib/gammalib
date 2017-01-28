@@ -17,7 +17,7 @@ The following classes have been added:
 - GModelSpectralMultiplicative
 - GModelSpectralComposite
 - GModelSpatialComposite
-- GModelTemporalFunc
+- GModelTemporalLightCurve
 - GModelTemporalPhaseCurve
 - GVOTable
 - GNdarray
@@ -171,10 +171,11 @@ derived classes that returns a pointer to a sky region that bounds the
 spatial model. For the moment, only circular sky regions have been
 implemented (#1764).
 
-The GModelTemporalFunc class has been added to implement a temporal file
-function for the simulation of transient sources. A unit test has been
-added and the mc() and eval() methods have been validated using a dedicated
-test script (#1914).
+The GModelTemporalLightCurve class has been added to implement a light
+curve as temporal component of a model. The light curve is defined by
+nodes in a FITS file. It can be used for the simulation of transient
+sources. A unit test has been added and the mc() and eval() methods
+have been validated using a dedicated test script (#1914).
 
 The GModelSpatialDiffuseMap::mc and GModelSpatialDiffuseCube::mc methods
 now throw an GException::invalid_return_value exception that is catched

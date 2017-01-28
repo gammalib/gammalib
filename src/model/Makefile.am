@@ -65,7 +65,7 @@ sources = GModelPar.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \
-          GModelTemporalFunc.cpp \
+          GModelTemporalLightCurve.cpp \
           GModelTemporalPhaseCurve.cpp \
           GException_model.cpp
 

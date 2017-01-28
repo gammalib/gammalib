@@ -5,7 +5,7 @@
 
         Add GModelTemporalPhaseCurve class (#1916)
         Monte Carlo for empty maps or map cubes no longer throws an exception (#1915)
-        Add GModelTemporalFunc class (#1914)
+        Add GModelTemporalLightCurve class (#1914)
         Add GSkyMap FITS HDU constructor
         Add leap second for 1-1-2017 (#1887)
         Add region() method to GModelSpatial (#1764)

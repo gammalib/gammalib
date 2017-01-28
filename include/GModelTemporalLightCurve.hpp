@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GModelTemporalFunc.hpp - Temporal file function model class       *
+ *     GModelTemporalLightCurve.hpp - Temporal light curve model class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelTemporalFunc.hpp
- * @brief File function temporal model class interface definition
+ * @file GModelTemporalLightCurve.hpp
+ * @brief Light curve model class interface definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GMODELTEMPORALFUNC_HPP
-#define GMODELTEMPORALFUNC_HPP
+#ifndef GMODELTEMPORALLIGHTCURVE_HPP
+#define GMODELTEMPORALLIGHTCURVE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
@@ -43,9 +43,9 @@ class GXmlElement;
 
 
 /***********************************************************************//**
- * @class GModelTemporalFunc
+ * @class GModelTemporalLightCurve
  *
- * @brief File function temporal model class
+ * @brief Light curve model class
  *
  * This class implements a light curve defined by nodes given specified in
  * a FITS file. The model is defined by
@@ -59,32 +59,32 @@ class GXmlElement;
  * in a FITS file, and
  * \f${\tt m\_norm}$\f is a normalisation constant.
  ***************************************************************************/
-class GModelTemporalFunc : public GModelTemporal {
+class GModelTemporalLightCurve : public GModelTemporal {
 
 public:
     // Constructors and destructors
-    GModelTemporalFunc(void);
-    explicit GModelTemporalFunc(const GXmlElement& xml);
-    GModelTemporalFunc(const GFilename& filename,
-                       const double&    norm = 1.0);
-    GModelTemporalFunc(const GModelTemporalFunc& model);
-    virtual ~GModelTemporalFunc(void);
+    GModelTemporalLightCurve(void);
+    explicit GModelTemporalLightCurve(const GXmlElement& xml);
+    GModelTemporalLightCurve(const GFilename& filename,
+                             const double&    norm = 1.0);
+    GModelTemporalLightCurve(const GModelTemporalLightCurve& model);
+    virtual ~GModelTemporalLightCurve(void);
 
     // Operators
-    virtual GModelTemporalFunc& operator=(const GModelTemporalFunc& model);
+    virtual GModelTemporalLightCurve& operator=(const GModelTemporalLightCurve& model);
 
     // Implemented virtual base class methods
-    virtual void                clear(void);
-    virtual GModelTemporalFunc* clone(void) const;
-    virtual std::string         classname(void) const;
-    virtual std::string         type(void) const;
-    virtual double              eval(const GTime& srcTime,
-                                     const bool& gradients = false) const;
-    virtual GTimes              mc(const double& rate, const GTime& tmin,
-                                   const GTime& tmax, GRan& ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
-    virtual std::string         print(const GChatter& chatter = NORMAL) const;
+    virtual void                      clear(void);
+    virtual GModelTemporalLightCurve* clone(void) const;
+    virtual std::string               classname(void) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const GTime& srcTime,
+                                           const bool& gradients = false) const;
+    virtual GTimes                    mc(const double& rate, const GTime& tmin,
+                                         const GTime& tmax, GRan& ran) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
+    virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const GFilename& filename(void) const;
@@ -95,7 +95,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GModelTemporalFunc& model);
+    void copy_members(const GModelTemporalLightCurve& model);
     void free_members(void);
     void load_nodes(const GFilename& filename);
     void mc_update(const GTime& tmin, const GTime& tmax) const;
@@ -124,26 +124,26 @@ protected:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GModelTemporalFunc").
+ * @return String containing the class name ("GModelTemporalLightCurve").
  ***************************************************************************/
 inline
-std::string GModelTemporalFunc::classname(void) const
+std::string GModelTemporalLightCurve::classname(void) const
 {
-    return ("GModelTemporalFunc");
+    return ("GModelTemporalLightCurve");
 }
 
 
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "FileFunction".
+ * @return "LightCurve".
  *
  * Returns the type of the temporal model.
  ***************************************************************************/
 inline
-std::string GModelTemporalFunc::type(void) const
+std::string GModelTemporalLightCurve::type(void) const
 {
-    return "FileFunction";
+    return "LightCurve";
 }
 
 
@@ -155,7 +155,7 @@ std::string GModelTemporalFunc::type(void) const
  * Returns the normalization factor.
  ***************************************************************************/
 inline
-double GModelTemporalFunc::norm(void) const
+double GModelTemporalLightCurve::norm(void) const
 {
     return (m_norm.value());
 }
@@ -169,7 +169,7 @@ double GModelTemporalFunc::norm(void) const
  * Sets the normalization factor.
  ***************************************************************************/
 inline
-void GModelTemporalFunc::norm(const double& norm)
+void GModelTemporalLightCurve::norm(const double& norm)
 {
     m_norm.value(norm);
     return;
@@ -184,7 +184,7 @@ void GModelTemporalFunc::norm(const double& norm)
  * Returns the name of the file function node file.
  ***************************************************************************/
 inline
-const GFilename& GModelTemporalFunc::filename(void) const
+const GFilename& GModelTemporalLightCurve::filename(void) const
 {
     return (m_filename);
 }
@@ -198,10 +198,10 @@ const GFilename& GModelTemporalFunc::filename(void) const
  * Loads the nodes from a file function node file and sets the filename.
  ***************************************************************************/
 inline
-void GModelTemporalFunc::filename(const GFilename& filename)
+void GModelTemporalLightCurve::filename(const GFilename& filename)
 {
     load_nodes(filename);
     return;
 }
 
-#endif /* GMODELTEMPORALFUNC_HPP */
+#endif /* GMODELTEMPORALLIGHTCURVE_HPP */

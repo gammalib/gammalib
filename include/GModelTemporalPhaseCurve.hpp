@@ -60,7 +60,7 @@ class GXmlElement;
  * \f$f$\f is the variation frequency at the reference time,
  * \f$\dot{f}$\f is the first derivative of the variation frequency at the
  * reference time, and
- * \f$\dot{f}$\f is the second derivative of the variation frequency at the
+ * \f$\ddot{f}$\f is the second derivative of the variation frequency at the
  * reference time.
  *
  * The temporal variation is then computed using
@@ -69,9 +69,9 @@ class GXmlElement;
  *    S_{\rm t}(t) = r(\Phi(t)) \times {\tt m\_norm}
  * \f]
  *
- * \f$r(\Phi(t))$\f is the rate defined by linear interpolation between the
- * nodes in a FITS file, and
- * \f${\tt m\_norm}$\f is a normalisation constant.
+ * where \f$r(\Phi(t))$\f is the rate defined by linear interpolation between
+ * the nodes in a FITS file, and \f${\tt m\_norm}$\f is a normalisation
+ * constant.
  ***************************************************************************/
 class GModelTemporalPhaseCurve : public GModelTemporal {
 

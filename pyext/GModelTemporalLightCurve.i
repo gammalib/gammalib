@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GModelTemporalFunc.i - Temporal file function model class        *
+ *      GModelTemporalLightCurve.i - Temporal light curve model class      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,43 +19,43 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelTemporalFunc.i
- * @brief File function temporal model class interface definition
+ * @file GModelTemporalLightCurve.i
+ * @brief Light curve model class interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelTemporalFunc.hpp"
+#include "GModelTemporalLightCurve.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelTemporalFunc
+ * @class GModelTemporalLightCurve
  *
- * @brief File function temporal model class
+ * @brief Light curve model class
  ***************************************************************************/
-class GModelTemporalFunc : public GModelTemporal {
+class GModelTemporalLightCurve : public GModelTemporal {
 
 public:
     // Constructors and destructors
-    GModelTemporalFunc(void);
-    explicit GModelTemporalFunc(const GXmlElement& xml);
-    GModelTemporalFunc(const GFilename& filename,
-                       const double&    norm = 1.0);
-    GModelTemporalFunc(const GModelTemporalFunc& model);
-    virtual ~GModelTemporalFunc(void);
+    GModelTemporalLightCurve(void);
+    explicit GModelTemporalLightCurve(const GXmlElement& xml);
+    GModelTemporalLightCurve(const GFilename& filename,
+                             const double&    norm = 1.0);
+    GModelTemporalLightCurve(const GModelTemporalLightCurve& model);
+    virtual ~GModelTemporalLightCurve(void);
 
     // Implemented virtual base class methods
-    virtual void                clear(void);
-    virtual GModelTemporalFunc* clone(void) const;
-    virtual std::string         classname(void) const;
-    virtual std::string         type(void) const;
-    virtual double              eval(const GTime& srcTime,
-                                     const bool& gradients = false) const;
-    virtual GTimes              mc(const double& rate, const GTime& tmin,
-                                   const GTime& tmax, GRan& ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
+    virtual void                      clear(void);
+    virtual GModelTemporalLightCurve* clone(void) const;
+    virtual std::string               classname(void) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const GTime& srcTime,
+                                           const bool& gradients = false) const;
+    virtual GTimes                    mc(const double& rate, const GTime& tmin,
+                                         const GTime& tmax, GRan& ran) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
 
     // Other methods
     const GFilename& filename(void) const;
@@ -66,10 +66,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GModelTemporalFunc class extension
+ * @brief GModelTemporalLightCurve class extension
  ***************************************************************************/
-%extend GModelTemporalFunc {
-    GModelTemporalFunc copy() {
+%extend GModelTemporalLightCurve {
+    GModelTemporalLightCurve copy() {
         return (*self);
     }
 };
