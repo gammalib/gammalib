@@ -51,7 +51,7 @@ void TestGModel::set(void)
     m_map_file        = datadir + "/cena_lobes_parkes.fits";
     m_cube_file       = datadir + "/test_cube.fits";
     m_filefct         = datadir + "/filefunction.txt";
-    m_temp_filefct    = datadir + "/temp_filefunction.fits";
+    m_temp_lightcurve = datadir + "/model_temporal_lightcurve.fits";
     m_temp_phasecurve = datadir + "/model_temporal_phasecurve.fits";
     m_xml_file        = datadir + "/crab.xml";
 
@@ -81,7 +81,7 @@ void TestGModel::set(void)
     m_xml_model_spatial_composite  = datadir + "/model_spatial_composite.xml";
 
     // Set temporal model definition XML files
-    m_xml_model_point_temp_filefct    = datadir + "/model_temporal_filefct.xml";
+    m_xml_model_point_temp_lightcurve = datadir + "/model_temporal_lightcurve.xml";
     m_xml_model_point_temp_phasecurve = datadir + "/model_temporal_phasecurve.xml";
 
     // Set legacy model definition XML files
@@ -164,8 +164,8 @@ void TestGModel::set(void)
     // Append temporal model tests
     append(static_cast<pfunction>(&TestGModel::test_temp_const),
            "Test GModelTemporalConst");
-    append(static_cast<pfunction>(&TestGModel::test_temp_filefct),
-           "Test GModelTemporalFunc");
+    append(static_cast<pfunction>(&TestGModel::test_temp_lightcurve),
+           "Test GModelTemporalLightCurve");
     append(static_cast<pfunction>(&TestGModel::test_temp_phasecurve),
            "Test GModelTemporalPhaseCurve");
 
@@ -2168,34 +2168,34 @@ void TestGModel::test_temp_const(void)
 
 
 /***********************************************************************//**
- * @brief Test GModelTemporalFunc class
+ * @brief Test GModelTemporalLightCurve class
  ***************************************************************************/
-void TestGModel::test_temp_filefct(void)
+void TestGModel::test_temp_lightcurve(void)
 {
     // Test void constructor
-    GModelTemporalFunc model1;
-    test_value(model1.type(), "FileFunction", "Check void model type");
+    GModelTemporalLightCurve model1;
+    test_value(model1.type(), "LightCurve", "Check void model type");
 
     // Test value constructor
-    GModelTemporalFunc model2(m_temp_filefct, 2.0);
-    test_value(model2.filename().url(), m_temp_filefct,
-                "Check temporal file function data file name");
+    GModelTemporalLightCurve model2(m_temp_lightcurve, 2.0);
+    test_value(model2.filename().url(), m_temp_lightcurve,
+               "Check light curve data file name");
     test_value(model2.norm(), 2.0);
    
     // Test XML constructor
-    GXml               xml(m_xml_model_point_temp_filefct);
-    GXmlElement*       element = xml.element(0)->element(0)->element("temporal", 0);
-    GModelTemporalFunc model3(*element);
+    GXml         xml(m_xml_model_point_temp_lightcurve);
+    GXmlElement* element = xml.element(0)->element(0)->element("temporal", 0);
+    GModelTemporalLightCurve model3(*element);
     test_value(model3.size(), 1);
-    test_value(model3.type(), "FileFunction", "Check model type");
-    test_value(model3.filename().url(), m_temp_filefct,
-               "Check temporal file function data file name");
+    test_value(model3.type(), "LightCurve", "Check model type");
+    test_value(model3.filename().url(), m_temp_lightcurve,
+               "Check light curve data file name");
     test_value(model3.norm(), 1.0);
 
     // Test filename method
-    model3.filename(m_temp_filefct);
-    test_value(model3.filename().url(), m_temp_filefct,
-               "Check temporal file function data file name");
+    model3.filename(m_temp_lightcurve);
+    test_value(model3.filename().url(), m_temp_lightcurve,
+               "Check light curve data file name");
 
     // Test norm method
     model3.norm(3.0);
@@ -2235,8 +2235,8 @@ void TestGModel::test_temp_phasecurve(void)
     test_value(model2.norm(), 2.0);
    
     // Test XML constructor
-    GXml                     xml(m_xml_model_point_temp_phasecurve);
-    GXmlElement*             element = xml.element(0)->element(0)->element("temporal", 0);
+    GXml         xml(m_xml_model_point_temp_phasecurve);
+    GXmlElement* element = xml.element(0)->element(0)->element("temporal", 0);
     GModelTemporalPhaseCurve model3(*element);
     test_value(model3.size(), 6);
     test_value(model3.type(), "PhaseCurve", "Check model type");

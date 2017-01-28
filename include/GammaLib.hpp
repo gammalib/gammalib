@@ -230,7 +230,7 @@
 #include "GModelTemporal.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
-#include "GModelTemporalFunc.hpp"
+#include "GModelTemporalLightCurve.hpp"
 #include "GModelTemporalPhaseCurve.hpp"
 
 #endif /* GAMMALIB_HPP */

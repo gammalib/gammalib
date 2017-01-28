@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GModelTemporalFunc.cpp - Temporal file function model class       *
+ *     GModelTemporalLightCurve.cpp - Temporal light curve model class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelTemporalFunc.cpp
- * @brief File function temporal model class interface implementation
+ * @file GModelTemporalLightCurve.cpp
+ * @brief Light curve model class interface implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,20 +30,20 @@
 #endif
 #include "GTools.hpp"
 #include "GException.hpp"
-#include "GModelTemporalFunc.hpp"
+#include "GModelTemporalLightCurve.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GFits.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelTemporalFunc     g_temporal_func_seed;
-const GModelTemporalRegistry g_temporal_func_registry(&g_temporal_func_seed);
+const GModelTemporalLightCurve g_temporal_lightcurve_seed;
+const GModelTemporalRegistry   g_temporal_lightcurve_registry(&g_temporal_lightcurve_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                       "GModelTemporalFunc::read(GXmlElement&)"
-#define G_WRITE                     "GModelTemporalFunc::write(GXmlElement&)"
-#define G_LOAD_NODES             "GModelTemporalFunc::load_nodes(GFilename&)"
+#define G_READ                 "GModelTemporalLightCurve::read(GXmlElement&)"
+#define G_WRITE               "GModelTemporalLightCurve::write(GXmlElement&)"
+#define G_LOAD_NODES       "GModelTemporalLightCurve::load_nodes(GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -61,7 +61,7 @@ const GModelTemporalRegistry g_temporal_func_registry(&g_temporal_func_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelTemporalFunc::GModelTemporalFunc(void) : GModelTemporal()
+GModelTemporalLightCurve::GModelTemporalLightCurve(void) : GModelTemporal()
 {
     // Initialise members
     init_members();
@@ -77,13 +77,13 @@ GModelTemporalFunc::GModelTemporalFunc(void) : GModelTemporal()
  * @param[in] filename File name of nodes.
  * @param[in] norm Normalization factor.
  *
- * Constructs temporal file function model from a list of nodes that is found
- * in the specified FITS file. See the load_nodes() method for more
- * information about the expected structure of the file.
+ * Constructs light curve model from a list of nodes that is found in the
+ * specified FITS file. See the load_nodes() method for more information
+ * about the expected structure of the file.
  ***************************************************************************/
-GModelTemporalFunc::GModelTemporalFunc(const GFilename& filename,
-                                       const double&    norm) :
-                    GModelTemporal()
+GModelTemporalLightCurve::GModelTemporalLightCurve(const GFilename& filename,
+                                                   const double&    norm) :
+                          GModelTemporal()
 {
     // Initialise members
     init_members();
@@ -104,12 +104,12 @@ GModelTemporalFunc::GModelTemporalFunc(const GFilename& filename,
  *
  * @param[in] xml XML element.
  *
- * Constructs temporal file function model by extracting information from an
- * XML element. See the read() method for more information about the expected
+ * Constructs light curve model by extracting information from an XML
+ * element. See the read() method for more information about the expected
  * structure of the XML element.
  ***************************************************************************/
-GModelTemporalFunc::GModelTemporalFunc(const GXmlElement& xml) :
-                    GModelTemporal()
+GModelTemporalLightCurve::GModelTemporalLightCurve(const GXmlElement& xml) :
+                          GModelTemporal()
 {
     // Initialise members
     init_members();
@@ -125,10 +125,10 @@ GModelTemporalFunc::GModelTemporalFunc(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model File function temporal model.
+ * @param[in] model Light curve model.
  ***************************************************************************/
-GModelTemporalFunc::GModelTemporalFunc(const GModelTemporalFunc& model) : 
-                    GModelTemporal(model)
+GModelTemporalLightCurve::GModelTemporalLightCurve(const GModelTemporalLightCurve& model) : 
+                          GModelTemporal(model)
 {
     // Initialise members
     init_members();
@@ -144,7 +144,7 @@ GModelTemporalFunc::GModelTemporalFunc(const GModelTemporalFunc& model) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelTemporalFunc::~GModelTemporalFunc(void)
+GModelTemporalLightCurve::~GModelTemporalLightCurve(void)
 {
     // Free members
     free_members();
@@ -163,10 +163,10 @@ GModelTemporalFunc::~GModelTemporalFunc(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model File function temporal model.
- * @return File function temporal model.
+ * @param[in] model Light curve model.
+ * @return Light curve model.
  ***************************************************************************/
-GModelTemporalFunc& GModelTemporalFunc::operator=(const GModelTemporalFunc& model)
+GModelTemporalLightCurve& GModelTemporalLightCurve::operator=(const GModelTemporalLightCurve& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -197,9 +197,9 @@ GModelTemporalFunc& GModelTemporalFunc::operator=(const GModelTemporalFunc& mode
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear file function temporal model
+ * @brief Clear light curve model
  ***************************************************************************/
-void GModelTemporalFunc::clear(void)
+void GModelTemporalLightCurve::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -215,14 +215,14 @@ void GModelTemporalFunc::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone file function temporal model
+ * @brief Clone light curve model
  *
- * @return Pointer to deep copy of file function temporal model.
+ * @return Pointer to deep copy of light curve model.
  ***************************************************************************/
-GModelTemporalFunc* GModelTemporalFunc::clone(void) const
+GModelTemporalLightCurve* GModelTemporalLightCurve::clone(void) const
 {
     // Clone constant temporal model
-    return new GModelTemporalFunc(*this);
+    return new GModelTemporalLightCurve(*this);
 }
 
 
@@ -231,7 +231,7 @@ GModelTemporalFunc* GModelTemporalFunc::clone(void) const
  *
  * @param[in] srcTime True photon arrival time (not used).
  * @param[in] gradients Compute gradients?
- * @return Value of temporal model.
+ * @return Value of light curve model.
  *
  * Computes
  *
@@ -240,9 +240,9 @@ GModelTemporalFunc* GModelTemporalFunc::clone(void) const
  * \f]
  *
  * where
- * \f$r(t)\f$ is the linear interpolation between the nodes of the file
- * function and
- * \f${\tt m\_norm}\f$ is the normalization constant.
+ * \f$r(t)\f$ is the light curve, computed by linear interpolation between
+ * the nodes in a FITS file, and \f${\tt m\_norm}\f$ is the normalization
+ * constant.
  *
  * If the @p gradients flag is true the method will also evaluate the partial
  * derivatives of the model with respect to the normalization parameter using
@@ -251,8 +251,8 @@ GModelTemporalFunc* GModelTemporalFunc::clone(void) const
  *    \frac{\delta S_{\rm t}(t)}{\delta {\tt m\_norm}} = r(t)
  * \f]
  ***************************************************************************/
-double GModelTemporalFunc::eval(const GTime& srcTime,
-                                const bool&  gradients) const
+double GModelTemporalLightCurve::eval(const GTime& srcTime,
+                                      const bool&  gradients) const
 {
     // Initialise value
     double value = 0.0;
@@ -298,10 +298,10 @@ double GModelTemporalFunc::eval(const GTime& srcTime,
  * @param[in,out] ran Random number generator.
  *
  * This method returns a vector of random event times between @p tmin and
- * @p tmax assuming a light curve specified by a file function.
+ * @p tmax assuming a light curve specified in a FITS file.
  ***************************************************************************/
-GTimes GModelTemporalFunc::mc(const double& rate, const GTime&  tmin,
-                              const GTime&  tmax, GRan& ran) const
+GTimes GModelTemporalLightCurve::mc(const double& rate, const GTime&  tmin,
+                                    const GTime&  tmax, GRan& ran) const
 {
     // Allocates empty vector of times
     GTimes times;
@@ -365,11 +365,11 @@ GTimes GModelTemporalFunc::mc(const double& rate, const GTime&  tmin,
  * Reads the temporal information from an XML element. The XML element should
  * have the format
  *
- *     <temporalModel type="FileFunction" file="..">
+ *     <temporalModel type="LightCurve" file="..">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
  *     </temporalModel>
  ***************************************************************************/
-void GModelTemporalFunc::read(const GXmlElement& xml)
+void GModelTemporalLightCurve::read(const GXmlElement& xml)
 {
     // Get parameter pointers
     const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
@@ -395,11 +395,11 @@ void GModelTemporalFunc::read(const GXmlElement& xml)
  *
  * Writes the temporal information into an XML element in the format
  *
- *     <temporalModel type="Constant">
+ *     <temporalModel type="LightCurve" file="..">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
  *     </temporalModel>
  ***************************************************************************/
-void GModelTemporalFunc::write(GXmlElement& xml) const
+void GModelTemporalLightCurve::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
@@ -428,12 +428,12 @@ void GModelTemporalFunc::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print file function information
+ * @brief Print light curve information
  *
  * @param[in] chatter Chattiness.
- * @return String containing model information.
+ * @return String containing light curve information.
  ***************************************************************************/
-std::string GModelTemporalFunc::print(const GChatter& chatter) const
+std::string GModelTemporalLightCurve::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -442,10 +442,10 @@ std::string GModelTemporalFunc::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GModelTemporalFunc ===");
+        result.append("=== GModelTemporalLightCurve ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("Function file"));
+        result.append("\n"+gammalib::parformat("Light curve file"));
         result.append(m_filename.url());
         result.append("\n"+gammalib::parformat("Number of parameters"));
         result.append(gammalib::str(size()));
@@ -488,7 +488,7 @@ std::string GModelTemporalFunc::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelTemporalFunc::init_members(void)
+void GModelTemporalLightCurve::init_members(void)
 {
     // Initialise normalisation parameter
     m_norm.clear();
@@ -531,9 +531,9 @@ void GModelTemporalFunc::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Constant temporal model
+ * @param[in] model Light curve model.
  ***************************************************************************/
-void GModelTemporalFunc::copy_members(const GModelTemporalFunc& model)
+void GModelTemporalLightCurve::copy_members(const GModelTemporalLightCurve& model)
 {
     // Copy members
     m_norm     = model.m_norm;
@@ -566,7 +566,7 @@ void GModelTemporalFunc::copy_members(const GModelTemporalFunc& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelTemporalFunc::free_members(void)
+void GModelTemporalLightCurve::free_members(void)
 {
     // Return
     return;
@@ -581,11 +581,11 @@ void GModelTemporalFunc::free_members(void)
  * @exception GException::invalid_value
  *            File function FITS file is invalid
  *
- * Load the temporal file function from a FITS file. The file function is
+ * Load the light curve nodes from a FITS file. The light curve nodes are
  * expected in the first extension of the FITS file, containing two mandatory
  * columns with names "TIME" and "NORM".
  ***************************************************************************/
-void GModelTemporalFunc::load_nodes(const GFilename& filename)
+void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
 {
     // Clear nodes and values
     m_nodes.clear();
@@ -626,8 +626,37 @@ void GModelTemporalFunc::load_nodes(const GFilename& filename)
         throw GException::invalid_value(G_LOAD_NODES, msg);
     }
 
+    // Set number of nodes
+    int nodes = time_col->length();
+
+    // Check that time values are in ascending order and that no node is
+    // larger than one
+    double last_time = -1.0;
+    for (int i = 0; i < nodes; ++i) {
+
+        // Check if time has increased
+        if (last_time >= 0.0 && time_col->real(i) <= last_time) {
+            std::string msg = "Time "+gammalib::str(time_col->real(i))+
+                              " in row "+gammalib::str(i+1)+" of \"TIME\" "
+                              "column is equal to or smaller than preceeding "
+                              "value. Please provide a light curve file with "
+                              "monotonically increasing times.";
+            throw GException::invalid_value(G_LOAD_NODES, msg);
+        }
+
+        // Check if value is <= 1
+        if (norm_col->real(i) > 1.0) {
+            std::string msg = "Value "+gammalib::str(norm_col->real(i))+" at "
+                              "time "+gammalib::str(time_col->real(i))+" is "
+                              "above 1. Please provide a light curve file with "
+                              "normalizations not exceeding 1.";
+            throw GException::invalid_value(G_LOAD_NODES, msg);
+        }
+        
+    } // endfor: looped over nodes
+
     // Extract nodes
-    for (int i = 0; i < time_col->length(); ++i) {
+    for (int i = 0; i < nodes; ++i) {
         m_nodes.append(time_col->real(i));
         m_values.push_back(norm_col->real(i));
     }
@@ -653,7 +682,7 @@ void GModelTemporalFunc::load_nodes(const GFilename& filename)
  * This method sets up an array of indices and the cumulative distribution
  * function needed for MC simulations.
  ***************************************************************************/
-void GModelTemporalFunc::mc_update(const GTime& tmin,
+void GModelTemporalLightCurve::mc_update(const GTime& tmin,
                                    const GTime& tmax) const
 {
     // Update the cache only if the time interval has changed

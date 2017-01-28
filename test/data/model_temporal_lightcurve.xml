@@ -10,7 +10,7 @@
       <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
       <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
     </spatialModel>
-    <temporal type="FileFunction" file="temp_filefunction.fits">
+    <temporal type="LightCurve" file="model_temporal_lightcurve.fits">
       <parameter name="Normalization" scale="1" value="1.0" min="0.0" max="1000.0" free="0"/>
     </temporal>
   </source>
