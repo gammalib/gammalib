@@ -320,9 +320,9 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
  *
  * Writes the temporal information from an XML element having the format
  *
- *     <temporalModel type="Constant">
+ *     <temporal type="Constant">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
- *     </temporalModel>
+ *     </temporal>
  ***************************************************************************/
 void GModelTemporalConst::read(const GXmlElement& xml)
 {
@@ -363,9 +363,9 @@ void GModelTemporalConst::read(const GXmlElement& xml)
  *
  * Writes the temporal information into an XML element in the format
  *
- *     <temporalModel type="Constant">
+ *     <temporal type="Constant">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
- *     </temporalModel>
+ *     </temporal>
  ***************************************************************************/
 void GModelTemporalConst::write(GXmlElement& xml) const
 {
