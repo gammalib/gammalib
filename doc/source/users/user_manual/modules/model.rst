@@ -880,12 +880,12 @@ The XML format for specifying a multiplicative spectral model is:
 .. code-block:: xml
 
     <spectrum type="Multiplicative">
-      <spectrum type="PowerLaw">
+      <spectrum type="PowerLaw" component="PowerLawComponent">
         <parameter name="Prefactor"   scale="1e-17" value="1.0"  min="1e-07" max="1000.0" free="1"/>
         <parameter name="Index"       scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
         <parameter name="PivotEnergy" scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
       </spectrum>
-      <spectrum type="ExponentialCutoffPowerLaw">
+      <spectrum type="ExponentialCutoffPowerLaw" component="CutoffComponent">
         <parameter name="Prefactor"    scale="1.0" value="1.0" min="1e-07" max="1000.0" free="0"/>
         <parameter name="Index"        scale="1.0" value="0.0" min="-2.0"  max="+2.0"   free="0"/>
         <parameter name="CutoffEnergy" scale="1e6" value="1.0" min="0.01"  max="1000.0" free="1"/>
@@ -914,9 +914,9 @@ The XML format for specifying a constant temporal model is:
 
 .. code-block:: xml
 
-   <temporalModel type="Constant">
+   <temporal type="Constant">
      <parameter name="Normalization" scale="1.0" value="1.0" min="0.1" max="10.0" free="0"/>
-   </temporalModel>
+   </temporal>
 
 
 Light Curve
@@ -995,7 +995,7 @@ The parameters in the XML definition have the following mappings:
 
 * :math:`N_0` = ``Normalization``
 * :math:`t_0` = ``MJD``
-* :math:`Phi_0` = ``Phase``
+* :math:`\Phi_0` = ``Phase``
 * :math:`f` = ``F0``
 * :math:`\dot{f}` = ``F1``
 * :math:`\ddot{f}` = ``F2``
