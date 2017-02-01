@@ -639,7 +639,7 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
                 // statisics
                 #if defined(G_DUMP_MC)
                 std::cout << " Interval " << itime;
-                std::cout << " times=" << n_events << std::endl;
+                std::cout << " events=" << n_events << std::endl;
                 int n_killed_by_deadtime = 0;
                 int n_killed_by_roi      = 0;
                 #endif

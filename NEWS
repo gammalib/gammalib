@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.2.0
 
 Author(s) : Juergen Knoedlseder
 
-27 January 2017
+1 February 2017
 
 
 1. Introduction
@@ -385,6 +385,10 @@ axis dimension (#1848).
 
 The formula for the containment radius computation in GCTAPsf2D::containment_radius
 was wrong and has been corrected (#1876).
+
+The GCTABackground3D::mc() method now verifies that the specified energy is within
+the validity range of the background template. Otherwise an exception is thrown
+(#1918).
 
 
 21. COMPTEL interface

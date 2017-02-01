@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.cpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,13 +39,11 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                          "GCTABackground3D::read(GFitsTable&)"
+#define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_ZERO_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
-//#define G_TINY_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
-//#define G_NO_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_MC_INIT
@@ -500,6 +498,18 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
         init_mc_cache();
     }
 
+    // Determine energy range of response table
+    GEnergy emin = m_mc_spectrum.energy(0);
+    GEnergy emax = m_mc_spectrum.energy(m_mc_spectrum.nodes()-1);
+    if (energy < emin || energy > emax) {
+        std::string msg = "Event energy "+energy.print()+" is outside the "
+                          "energy range ["+emin.print()+", "+emax.print()+"] "
+                          "covered by the background response table. Please "
+                          "restrict the energy range of the simulation to the "
+                          "validity range of the background response table.";
+        throw GException::invalid_value(G_MC, msg);
+    }
+
     // Allocate instrument direction
     GCTAInstDir dir;
 
@@ -787,6 +797,9 @@ void GCTABackground3D::free_members(void)
 /***********************************************************************//**
  * @brief Initialise Monte Carlo cache
  *
+ * @exception GException::invalid_value
+ *            Background response table was empty.
+ *
  * Initialises the cache for Monte Carlo sampling.
  ***************************************************************************/
 void GCTABackground3D::init_mc_cache(void) const
@@ -904,17 +917,13 @@ void GCTABackground3D::init_mc_cache(void) const
 
     } // endfor: looped over energy bins
 
-    // Dump maximum rate
-    #if defined(G_DEBUG_MC_INIT)
-    for (int i = 0; i < m_mc_max.size(); ++i) {
-        double logE = m_logE_min + (i+0.5) * logE_bin;
-        GEnergy energy;
-        energy.log10(logE, m_background.axis_lo_unit(m_inx_energy));
-        std::cout << "Energy=" << energy;
-        std::cout << " Rate_max=" << max_rate;
-        std::cout << " events/s/sr/MeV";
+    // Make sure that spectrum is not empty (if this is the case the entire
+    // background response table was empty)
+    if (m_mc_spectrum.nodes() == 0) {
+        std::string msg = "Background response table is empty. Please provide "
+                          "a valid three-dimensional background template.";
+        throw GException::invalid_value(G_READ, msg);
     }
-    #endif
 
     // Return
     return;
