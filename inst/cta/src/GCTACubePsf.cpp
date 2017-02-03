@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTACubePsf.cpp - CTA cube analysis point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2017 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -787,71 +787,89 @@ void GCTACubePsf::fill_cube(const GCTAObservation& obs,
             throw GException::invalid_value(G_FILL_CUBE, msg);
         }
 
-        // Announce observation usage
-        if (log != NULL) {
-            *log << "Including ";
-            *log << obs.instrument();
-            *log << " observation \"" << obs.name();
-            *log << "\" (id=" << obs.id() << ")";
-            *log << " in point spread function cube computation." << std::endl;
+        // Skip observation if livetime is zero
+        if (obs.livetime() == 0.0) {
+            if (log != NULL) {
+                *log << "Skipping unbinned ";
+                *log << obs.instrument();
+                *log << " observation ";
+                *log << "\"" << obs.name() << "\"";
+                *log << " (id=" << obs.id() << ") due to zero livetime";
+                *log << std::endl;
+            }
         }
 
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // ... otherwise continue
+        else {
 
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-                    
-            // Skip pixel if it is outside the RoI
-            if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
-                continue;
+            // Announce observation usage
+            if (log != NULL) {
+                *log << "Including ";
+                *log << obs.instrument();
+                *log << " observation \"" << obs.name();
+                *log << "\" (id=" << obs.id() << ")";
+                *log << " in point spread function cube computation." << std::endl;
             }
 
-            // Compute theta angle with respect to pointing direction in radians
-            double theta = pnt.dist(dir);
+            // Loop over all pixels in sky map
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
 
-            // Loop over all energy bins
-            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
-
-                // Skip PSF cube energy if the energy is outside the observation
-                // energy. The PSF cube energies are true energies while the
-                // observation energy boundaries are reconstructed energies,
-                // hence this is only an approximation, but probably the only
-                // we can really do.
-                if (!obs_ebounds.contains(m_energies[iebin])) {
+                // Get pixel sky direction
+                GSkyDir dir = m_cube.inx2dir(pixel);
+                    
+                // Skip pixel if it is outside the RoI
+                if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
                     continue;
                 }
 
-                // Get logE/TeV
-                double logE = m_energies[iebin].log10TeV();
+                // Compute theta angle with respect to pointing direction in
+                // radians
+                double theta = pnt.dist(dir);
 
-                // Compute exposure weight
-                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                obs.livetime();
+                // Loop over all energy bins
+                for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
 
-                // If available, accumulate weights
-                if (exposure != NULL) {
-                    (*exposure)(pixel, iebin) += weight;
-                }
+                    // Skip PSF cube energy if the energy is outside the
+                    // observation energy. The PSF cube energies are true
+                    // energies while the observation energy boundaries are
+                    // reconstructed energies, hence this is only an
+                    // approximation, but probably the only we can really do.
+                    if (!obs_ebounds.contains(m_energies[iebin])) {
+                        continue;
+                    }
 
-                // Loop over delta values
-                for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                    // Get logE/TeV
+                    double logE = m_energies[iebin].log10TeV();
 
-                    // Compute delta in radians
-                    double delta = m_deltas[idelta] * gammalib::deg2rad;
+                    // Compute exposure weight
+                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                    obs.livetime();
 
-                    // Set map index
-                    int imap = offset(idelta, iebin);
+                    // If available, accumulate weights
+                    if (exposure != NULL) {
+                        (*exposure)(pixel, iebin) += weight;
+                    }
 
-                    // Add on PSF cube
-                    m_cube(pixel, imap) +=
-                       rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
+                    // Loop over delta values
+                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
 
-                } // endfor: looped over delta bins
+                        // Compute delta in radians
+                        double delta = m_deltas[idelta] * gammalib::deg2rad;
 
-            } // endfor: looped over energy bins
+                        // Set map index
+                        int imap = offset(idelta, iebin);
 
-        } // endfor: looped over all pixels
+                        // Add on PSF cube
+                        m_cube(pixel, imap) +=
+                            rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
+
+                    } // endfor: looped over delta bins
+
+                } // endfor: looped over energy bins
+
+            } // endfor: looped over all pixels
+
+        } // endelse: livetime was not zero
 
     } // endif: observation contained an event list
 

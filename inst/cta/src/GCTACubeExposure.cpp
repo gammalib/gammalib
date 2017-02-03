@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTACubeExposure.cpp - CTA cube analysis exposure class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2017 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -656,56 +656,74 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
             throw GException::invalid_value(G_FILL_CUBE, msg);
         }
 
-        // Announce observation usage
-        if (log != NULL) {
-            *log << "Including ";
-            *log << obs.instrument();
-            *log << " observation \"" << obs.name();
-            *log << "\" (id=" << obs.id() << ")";
-            *log << " in exposure cube computation." << std::endl;
+        // Skip observation if livetime is zero
+        if (obs.livetime() == 0.0) {
+            if (log != NULL) {
+                *log << "Skipping unbinned ";
+                *log << obs.instrument();
+                *log << " observation ";
+                *log << "\"" << obs.name() << "\"";
+                *log << " (id=" << obs.id() << ") due to zero livetime";
+                *log << std::endl;
+            }
         }
 
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // ... otherwise continue
+        else {
 
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-
-            // Skip pixel if it is outside the RoI
-            if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
-                continue;
+            // Announce observation usage
+            if (log != NULL) {
+                *log << "Including ";
+                *log << obs.instrument();
+                *log << " observation \"" << obs.name();
+                *log << "\" (id=" << obs.id() << ")";
+                *log << " in exposure cube computation." << std::endl;
             }
-                
-            // Compute theta angle with respect to pointing direction in radians
-            double theta = pnt.dist(dir);
 
-            // Loop over all exposure cube energies
-            for (int iebin = 0; iebin < m_energies.size(); ++iebin){
+            // Loop over all pixels in sky map
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
 
-                // Skip exposure cube energy if the energy is outside the
-                // observation energy. The exposure cube energies are true
-                // energies while the observation energy boundaries are
-                // reconstructed energies, hence this is only an approximation,
-                // but probably the only we can really do.
-                if (!obs_ebounds.contains(m_energies[iebin])) {
+                // Get pixel sky direction
+                GSkyDir dir = m_cube.inx2dir(pixel);
+
+                // Skip pixel if it is outside the RoI
+                if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
                     continue;
                 }
+                
+                // Compute theta angle with respect to pointing direction in
+                // radians
+                double theta = pnt.dist(dir);
 
-                // Get logE/TeV
-                double logE = m_energies[iebin].log10TeV();
+                // Loop over all exposure cube energies
+                for (int iebin = 0; iebin < m_energies.size(); ++iebin){
 
-                // Add to exposure cube (effective area * livetime)
-                m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                        obs.livetime();
+                    // Skip exposure cube energy if the energy is outside the
+                    // observation energy. The exposure cube energies are true
+                    // energies while the observation energy boundaries are
+                    // reconstructed energies, hence this is only an
+                    // approximation, but probably the only we can really do.
+                    if (!obs_ebounds.contains(m_energies[iebin])) {
+                        continue;
+                    }
 
-            } // endfor: looped over energy bins
+                    // Get logE/TeV
+                    double logE = m_energies[iebin].log10TeV();
 
-        } // endfor: looped over all pixels
+                    // Add to exposure cube (effective area * livetime)
+                    m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                            obs.livetime();
 
-        // Append GTIs and increment livetime
-        m_gti.extend(obs.gti());
-        m_livetime += obs.livetime();
-        
+                } // endfor: looped over energy bins
+
+            } // endfor: looped over all pixels
+
+            // Append GTIs and increment livetime
+            m_gti.extend(obs.gti());
+            m_livetime += obs.livetime();
+
+        } // endelse: livetime was not zero
+
     } // endif: observation contained an event list
 
     // Return

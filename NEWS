@@ -297,6 +297,9 @@ The GCTABackground3D::mc() method now verifies that the specified energy is with
 the validity range of the background template. Otherwise an exception is thrown
 (#1918).
 
+Observations with zero livetime are now skipped in building the cubes for stacked
+analysis for CTA (#1920).
+
 
 21. COMPTEL interface
 ---------------------
