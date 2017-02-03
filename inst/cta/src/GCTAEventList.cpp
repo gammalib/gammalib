@@ -380,13 +380,6 @@ void GCTAEventList::read(const GFits& fits)
         m_has_phase = false;
     }
 
-    // If the file name contains an expression then load the events now
-    // (we apparently can't do this later properly, not fully sure why this
-    // is the case)
-    if (m_filename.has_expression()) {
-        read_events(events);
-    }
-
     // Read GTI extension name from data sub-space keyword
     std::string gti_extname = gammalib::read_ds_gti_extname(events);
 
@@ -431,6 +424,12 @@ void GCTAEventList::read(const GFits& fits)
 
     // Read energy boundaries from data sub-space keyword
     m_ebounds = gammalib::read_ds_ebounds(events);
+
+    // If the file name contains an expression then load the events now.
+    // We do this at the end to make sure that the GTI has been set before.
+    if (m_filename.has_expression()) {
+        read_events(events);
+    }
 
     // Return
     return;
