@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventCube.cpp  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -640,12 +640,12 @@ std::string GCTAEventCube::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Number of energy bins") +
                       gammalib::str(ebins()));
 
-        // Append GTI intervals
+        // Append GTI interval
         result.append("\n"+gammalib::parformat("Time interval"));
         if (gti().size() > 0) {
-            result.append(gammalib::str(tstart().secs()) +
-                          " - " +
-                          gammalib::str(tstop().secs())+" sec");
+            result.append(gammalib::str(tstart().mjd()));
+            result.append(" - ");
+            result.append(gammalib::str(tstop().mjd())+" days");
         }
         else {
             result.append("not defined");
@@ -659,6 +659,17 @@ std::string GCTAEventCube::print(const GChatter& chatter) const
             else {
                 result.append("\n"+gammalib::parformat("Energy intervals") +
                               "not defined");
+            }
+        }
+        else {
+            result.append("\n"+gammalib::parformat("Energy interval"));
+            if (ebounds().size() > 0) {
+                result.append(gammalib::str(emin().TeV()));
+                result.append(" - ");
+                result.append(gammalib::str(emax().TeV())+" TeV");
+            }
+            else {
+                result.append("not defined");
             }
         }
 
