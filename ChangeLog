@@ -1,8 +1,9 @@
-2017-02-01
+2017-02-03
 
         * Version 1.2.0 released
         =========================
 
+        Correct handling of time references in GGti::extend() method (#1922)
         Check that MC energy is comprised in validity range for CTA 3D background template (#1918)
         Add GModelTemporalPhaseCurve class (#1916)
         Monte Carlo for empty maps or map cubes no longer throws an exception (#1915)

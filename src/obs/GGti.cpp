@@ -544,10 +544,10 @@ void GGti::extend(const GGti& gti)
 
         // Append intervals. Convert to GTI reference on the fly.
         for (int i = 0; i < gti.size(); ++i, ++inx) {
-            double tstart = gti.m_start[i].convert(gti.reference());
-            double tstop  = gti.m_stop[i].convert(gti.reference());
-            start[inx].set(tstart, this->reference());
-            stop[inx].set(tstop,   this->reference());
+            double tstart = gti.m_start[i].convert(m_reference);
+            double tstop  = gti.m_stop[i].convert(m_reference);
+            start[inx].set(tstart, m_reference);
+            stop[inx].set(tstop,   m_reference);
         }
 
         // Free memory
@@ -1028,7 +1028,7 @@ bool GGti::contains(const GTime& time) const
 /***********************************************************************//**
  * @brief Print Good Time Intervals
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing Good Time Interval information.
  ***************************************************************************/
 std::string GGti::print(const GChatter& chatter) const

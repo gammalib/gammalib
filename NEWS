@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.2.0
 
-1 February 2017
+3 February 2017
 
 
 1. Introduction
@@ -216,6 +216,9 @@ matrix into a FITS file (#1863).
 
 A leap second has been added to GTime::leap_seconds() for 1 January 2017
 (#1887).
+
+The handling of time references was corrected in GGti::extend() so that
+times now reflect correctly any changes in the time reference (#1922).
 
 
 11. Optimization module
