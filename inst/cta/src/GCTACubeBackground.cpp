@@ -337,8 +337,13 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
         ebounds.append(m_energies[i], m_energies[i]);
     }
 
+    // Set dummy GTI needed to genrate an event cube. It is not important what
+    // the actually value is since it will be overwritten later in any case,
+    // but it's important that there is one time slice
+    GGti gti(GTime(0.0), GTime(1.0));
+
     // Initialise event cube to evaluate models
-    GCTAEventCube eventcube = GCTAEventCube(m_cube, ebounds, obs[0]->events()->gti());
+    GCTAEventCube eventcube = GCTAEventCube(m_cube, ebounds, gti);
 
     // Initialise total livetime
     double total_livetime = 0.0;
@@ -453,16 +458,16 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
     // Re-normalize cube to get units of counts/MeV/s/sr
     if (total_livetime > 0.0) {
 
-      // Loop over all bins in background cube and divide the content
-      // by the total livetime.
-      for (int i = 0; i < eventcube.size(); ++i) {
-          GCTAEventBin* bin  = eventcube[i];
-          double        rate = bin->counts() / total_livetime;
-          bin->counts(rate);
-      }
+        // Loop over all bins in background cube and divide the content
+        // by the total livetime.
+        for (int i = 0; i < eventcube.size(); ++i) {
+            GCTAEventBin* bin  = eventcube[i];
+            double        rate = bin->counts() / total_livetime;
+            bin->counts(rate);
+        }
 
-      // Set background cube values from event cube
-      m_cube = eventcube.counts();
+        // Set background cube values from event cube
+        m_cube = eventcube.counts();
 
     } // endif: livetime was positive
 
