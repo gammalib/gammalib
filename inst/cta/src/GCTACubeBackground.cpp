@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTACubeBackground.cpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Michael Mayer                               *
+ *  copyright (C) 2015-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -373,6 +373,22 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
+        // Get observation livetime
+        double livetime = cta->livetime();
+
+        // Skip observation if livetime is zero
+        if (livetime == 0.0) {
+            if (log != NULL) {
+                *log << "Skipping unbinned ";
+                *log << cta->instrument();
+                *log << " observation ";
+                *log << "\"" << cta->name() << "\"";
+                *log << " (id=" << cta->id() << ") due to zero livetime";
+                *log << std::endl;
+            }
+            continue;
+        }
+
         // Announce observation usage
         if (log != NULL) {
             *log << "Including ";
@@ -398,9 +414,6 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
         // Set GTI of actual observations as the GTI of the event cube
         eventcube.gti(cta->gti());
-
-        // Get observation livetime
-        double livetime = cta->livetime();
 
         // Loop over all bins in background cube
         for (int i = 0; i < eventcube.size(); ++i) {

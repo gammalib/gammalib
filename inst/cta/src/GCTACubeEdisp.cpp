@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTACubeEdisp.cpp - CTA cube analysis energy dispersion class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                                    *
+ *  copyright (C) 2016-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -880,82 +880,101 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
             throw GException::invalid_value(G_FILL_CUBE, msg);
         }
 
-        // Announce observation usage
-        if (log != NULL) {
-            *log << "Including ";
-            *log << obs.instrument();
-            *log << " observation \"" << obs.name();
-            *log << "\" (id=" << obs.id() << ")";
-            *log << " in energy dispersion cube computation." << std::endl;
+        // Skip observation if livetime is zero
+        if (obs.livetime() == 0.0) {
+            if (log != NULL) {
+                *log << "Skipping unbinned ";
+                *log << obs.instrument();
+                *log << " observation ";
+                *log << "\"" << obs.name() << "\"";
+                *log << " (id=" << obs.id() << ") due to zero livetime";
+                *log << std::endl;
+            }
         }
 
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // ... otherwise continue
+        else {
 
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-
-            // Skip pixel if it is outside the RoI
-            if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
-                continue;
+            // Announce observation usage
+            if (log != NULL) {
+                *log << "Including ";
+                *log << obs.instrument();
+                *log << " observation \"" << obs.name();
+                *log << "\" (id=" << obs.id() << ")";
+                *log << " in energy dispersion cube computation." << std::endl;
             }
-            
-            // Compute theta angle with respect to pointing direction in radians
-            double theta = pnt.dist(dir);
 
-            // Loop over all energy bins
-            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
+            // Loop over all pixels in sky map
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
 
-                // Skip energy dispersion cube energy if the energy is
-                // outside the observation energy. The energy dispersion cube
-                // energies are true energies while the observation energy
-                // boundaries are reconstructed energies, hence this is only
-                // an approximation, but probably the only we can really do.
-                if (!obs_ebounds.contains(m_energies[iebin])) {
+                // Get pixel sky direction
+                GSkyDir dir = m_cube.inx2dir(pixel);
+
+                // Skip pixel if it is outside the RoI
+                if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
                     continue;
                 }
+            
+                // Compute theta angle with respect to pointing direction in
+                // radians
+                double theta = pnt.dist(dir);
 
-                // Get log10 of true energy in TeV
-                double logEsrc = m_energies[iebin].log10TeV();
+                // Loop over all energy bins
+                for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
 
-                // Compute exposure weight
-                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
-                                obs.livetime();
-
-                // If available, accumulate weights
-                if (exposure != NULL) {
-                    (*exposure)(pixel, iebin) += weight;
-                }
-
-                // Loop over delta values
-                for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
-
-                    // Compute energy migration fraction
-                    double migra = m_migras[imigra];
-
-                    // Skip migra bin if zero
-                    if (migra <= 0.0) {
+                    // Skip energy dispersion cube energy if the energy is
+                    // outside the observation energy. The energy dispersion
+                    // cube energies are true energies while the observation
+                    // energy boundaries are reconstructed energies, hence
+                    // this is only an approximation, but probably the only
+                    // we can really do.
+                    if (!obs_ebounds.contains(m_energies[iebin])) {
                         continue;
                     }
 
-                    // Compute log10 of reconstructed energy in TeV
-                    double  logEobs = std::log10(migra) + logEsrc;
-                    GEnergy Eobs(std::pow(10.0, logEobs), "TeV");
+                    // Get log10 of true energy in TeV
+                    double logEsrc = m_energies[iebin].log10TeV();
 
-                    // Set map index
-                    int imap = offset(imigra, iebin);
+                    // Compute exposure weight
+                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
+                                    obs.livetime();
 
-                    // Add energy dispersion cube value
-                    m_cube(pixel, imap) += rsp->edisp(Eobs,
-                                                      theta, 0.0,
-                                                      0.0, 0.0,
-                                                      logEsrc) * weight;
+                    // If available, accumulate weights
+                    if (exposure != NULL) {
+                        (*exposure)(pixel, iebin) += weight;
+                    }
 
-                } // endfor: looped over migration bins
+                    // Loop over delta values
+                    for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
+
+                        // Compute energy migration fraction
+                        double migra = m_migras[imigra];
+
+                        // Skip migra bin if zero
+                        if (migra <= 0.0) {
+                            continue;
+                        }
+
+                        // Compute log10 of reconstructed energy in TeV
+                        double  logEobs = std::log10(migra) + logEsrc;
+                        GEnergy Eobs(std::pow(10.0, logEobs), "TeV");
+
+                        // Set map index
+                        int imap = offset(imigra, iebin);
+
+                        // Add energy dispersion cube value
+                        m_cube(pixel, imap) += rsp->edisp(Eobs,
+                                                          theta, 0.0,
+                                                          0.0, 0.0,
+                                                          logEsrc) * weight;
+
+                    } // endfor: looped over migration bins
                 
-            } // endfor: looped over energy bins
+                } // endfor: looped over energy bins
 
-        } // endfor: looped over all pixels
+            } // endfor: looped over all pixels
+
+        } // endelse: livetime was not zero
 
     } // endif: observation contained an event list
 
