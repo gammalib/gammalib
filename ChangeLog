@@ -1,4 +1,4 @@
-2017-02-03
+2017-02-23
 
         * Version 1.2.0 released
         =========================
@@ -6,6 +6,7 @@
         Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
         Make GFilename::is_fits thread safe (#1717).
         Improve exception message in GModelSpatialDiffuseCube::mc (#1915)
+        Reduce length of LAT response filenames by unzipping a number of energy dispersion files (#1931)
         Skip zero livetime observations in stacked cubes for CTA (#1920)
         Correct handling of time references in GGti::extend() method (#1922)
         Check that MC energy is comprised in validity range for CTA 3D background template (#1918)

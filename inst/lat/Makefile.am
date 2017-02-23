@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for lat module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -158,31 +158,31 @@ caldb_edisp = caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_EDISP.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT010E_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT010E_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT010E_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT010E_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT010_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT010_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT010_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT010_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT015S_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT015S_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT015S_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT015S_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT020E_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT020E_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT020E_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT020E_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT020_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT020_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT020_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT020_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100E_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100E_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100E_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100E_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100S_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100S_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100S_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100S_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100_V6_PSF.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEANVETO_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEANVETO_V6_EDISP.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEANVETO_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEANVETO_V6_PSF.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEAN_V6_EDISP.fits.gz \
