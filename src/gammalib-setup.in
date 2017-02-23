@@ -26,8 +26,9 @@ fi
 #
 # Set parameters
 # ==============
-prefix="@prefix@"
-exec_prefix="@exec_prefix@"
+#prefix="@prefix@"
+prefix=$GAMMALIB
+#exec_prefix="@exec_prefix@"
 gammalib_bin="@bindir@"
 gammalib_lib="@libdir@@TEST_ENV_DIR@"
 uname_system=`uname`
