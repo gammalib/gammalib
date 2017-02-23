@@ -3,6 +3,7 @@
         * Version 1.2.0 released
         =========================
 
+        Use $GAMMALIB instead of prefix in setup script (#1929)
         Reduce length of LAT response filenames by unzipping a number of energy dispersion files (#1931)
         Skip zero livetime observations in stacked cubes for CTA (#1920)
         Correct handling of time references in GGti::extend() method (#1922)
