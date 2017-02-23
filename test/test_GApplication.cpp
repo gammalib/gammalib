@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GApplication.cpp - test GApplication classes            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -615,8 +615,11 @@ void TestGApplication::test_GApplication(void)
  ***************************************************************************/
 int main(void)
 {
+    // Set test data directory
+    std::string datadir = std::getenv("TEST_DATA");
+
     // Set PFILES environment variable
-    setenv("PFILES", "data", 1);
+    setenv("PFILES", datadir.c_str(), 1);
 
     // Allocate test suit container
     GTestSuites testsuites("GApplication");

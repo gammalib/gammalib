@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib model module
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import os
 import gammalib
 
 
@@ -34,6 +35,9 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
+
+        # Set test data directory
+        self._datadir = os.environ['TEST_DATA']
 
         # Return
         return
@@ -57,10 +61,13 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test GModels class
         """
+        # Set model filename
+        filename = self._datadir + '/model_point_plaw.xml'
+
         # Read model container and create a copy of its first model (the
         # copy is needed since the model container will go out of scope
         # later)
-        models = gammalib.GModels('data/model_point_plaw.xml')
+        models = gammalib.GModels(filename)
         model  = models[0].copy()
         name   = model.name()
 
