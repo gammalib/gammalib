@@ -1,7 +1,7 @@
 /***************************************************************************
  *             test_GApplication.hpp - Test GApplication class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,10 +47,11 @@ public:
     virtual void              set(void);
     virtual TestGApplication* clone(void) const;
     virtual std::string       classname(void) const { return "TestGApplication"; }
-    void                      test_constructor(void);
-    void                      test_stream_logger(void);
-    void                      test_C_logger(void);
+    void                      test_GLog(void);
+    void                      test_GLog_stream(void);
+    void                      test_GLog_C(void);
     void                      test_GApplicationPar(void);
+    void                      test_GApplication(void);
 };
 
 #endif /* TEST_GAPPLICATION_HPP */

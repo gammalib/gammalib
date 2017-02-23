@@ -32,6 +32,7 @@
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -77,16 +78,15 @@ public:
     virtual std::string               type(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
-                                           const GTime& time) const;
-    virtual double                    eval_gradients(const double& theta,
-                                                     const GEnergy& energy,
-                                                     const GTime& time) const;
+                                           const GTime&   time,
+                                           const bool&    gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
     virtual double                    theta_max(void) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -105,11 +105,13 @@ protected:
     void          update(void) const;
     static double f1(double x);
     static double f2(double x);
+    void          set_region(void) const;
 
     // Protected members
-    std::string     m_type;          //!< Model type
-    GModelPar       m_radius;        //!< Inner shell radius (deg)
-    GModelPar       m_width;         //!< Shell thickness (deg)
+    std::string              m_type;   //!< Model type
+    GModelPar                m_radius; //!< Inner shell radius (deg)
+    GModelPar                m_width;  //!< Shell thickness (deg)
+    mutable GSkyRegionCircle m_region; //!< Bounding circle
 
     // Cached members used for pre-computations
     mutable double  m_last_radius;   //!< Last shell radius (deg)
@@ -203,6 +205,21 @@ void GModelSpatialRadialShell::width(const double& width)
 {
     m_width.value(width);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the spatial model component.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialRadialShell::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALRADIALSHELL_HPP */

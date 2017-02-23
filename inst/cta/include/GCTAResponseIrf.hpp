@@ -176,6 +176,9 @@ private:
     double    irf_diffuse(const GEvent&       event,
                           const GSource&      source,
                           const GObservation& obs) const;
+    double    irf_composite(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const;
     double    nroi_ptsrc(const GModelSky&    model,
                          const GEnergy&      srcEng,
                          const GTime&        srcTime,
@@ -200,6 +203,12 @@ private:
                            const GEnergy&      obsEng,
                            const GTime&        obsTime,
                            const GObservation& obs) const;
+    double    nroi_composite(const GModelSky&    model,
+                             const GEnergy&      srcEng,
+                             const GTime&        srcTime,
+                             const GEnergy&      obsEng,
+                             const GTime&        obsTime,
+                             const GObservation& obs) const;
 
     // Private data members
     GCaldb          m_caldb;          //!< Calibration database

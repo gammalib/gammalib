@@ -412,7 +412,7 @@ std::string GSkyRegionCircle::write(void) const
 /***********************************************************************//**
  * @brief Print circular region
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness
  * @return String containing region information.
  ***************************************************************************/
 std::string GSkyRegionCircle::print(const GChatter& chatter) const
@@ -423,15 +423,16 @@ std::string GSkyRegionCircle::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Append string
+        // Append header
     	result.append("=== GSkyRegionCircle ===");
-    	result.append("\n(");
-        result.append(gammalib::str(m_centre.ra_deg()));
-        result.append(",");
-        result.append(gammalib::str(m_centre.dec_deg()));
-        result.append(",");
-        result.append(gammalib::str(m_radius));
-        result.append(")");
+
+        // Append sky circle information
+        result.append("\n"+gammalib::parformat("Right Ascension of centre"));
+        result.append(gammalib::str(m_centre.ra_deg())+" deg");
+        result.append("\n"+gammalib::parformat("Declination of centre"));
+        result.append(gammalib::str(m_centre.dec_deg())+" deg");
+        result.append("\n"+gammalib::parformat("Radius"));
+        result.append(gammalib::str(m_radius)+" deg");
 
     } // endif: chatter was not silent
 

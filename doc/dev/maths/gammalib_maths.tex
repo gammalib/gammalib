@@ -347,9 +347,9 @@ The parameter value gradients for the power law are given by
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{PowerLaw2}
+\subsection{PowerLawPhotonFlux}
 
-This flavour of the power law spectral model uses the integral flux $f$ within the
+This flavour of the power law spectral model uses the integral photon flux $f$ within the
 energy range $E_{\rm min}$ and $E_{\rm max}$ as free parameter instead of
 the normalization $k$.
 The integral flux $f$ is given by
@@ -380,7 +380,7 @@ is obtained from Eq.~(\ref{eq:fluxint}).
 Each of the 4 parameters is factorised into a scaling factor and a value, e.g.
 $f=f_s f_v$ and $\gamma=\gamma_s \gamma_v$.
 It is assumed that $E_{\rm min}$ and $E_{\rm max}$ are fixed parameters,
-and {\tt GModelSpectralPlaw2::eval\_gradients} returns valid gradients only for 
+and {\tt GModelSpectralPlawPhotonFlux::eval\_gradients} returns valid gradients only for 
 $f_v$ and $\gamma_v$.
 
 The flux value gradient $f_v$ is given by
@@ -427,6 +427,90 @@ Note that for $\gamma \ne -1$
   \frac{\left( E_{\rm max}^{\gamma+1} \ln E_{\rm max} - 
                     E_{\rm min}^{\gamma+1} \ln E_{\rm min} \right)}
           {\left( E_{\rm max}^{\gamma+1}-E_{\rm min}^{\gamma+1} \right)}
+\end{equation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{PowerLawEnergyFlux}
+
+This flavour of the power law spectral model uses the integral energy flux $F$ within the
+energy range $E_{\rm min}$ and $E_{\rm max}$ as free parameter instead of
+the normalization $k$.
+The integral energy flux $F$ is given by
+\begin{equation}
+F = \int_{E_{\rm min}}^{E_{\rm max}} I(E) {\rm d}E
+\label{eq:fluxint}
+\end{equation}
+The power law model is then defined by
+\begin{equation}
+I(E) = \tilde{k} \, E^{\gamma}
+\end{equation}
+where
+\begin{equation}
+   \tilde{k} = \left \{
+   \begin{array}{l l}
+      \displaystyle
+      \frac{F}{\ln E_{\rm max} - \ln E_{\rm min}} 
+        & \mbox{if $\gamma = -2$} \\
+     \\
+     \displaystyle
+      \frac{F (2+\gamma)}{E_{\rm max}^{\gamma+2}-E_{\rm min}^{\gamma+2}} 
+        & \mbox{else}
+   \end{array}
+   \right .
+\end{equation}
+is obtained from Eq.~(\ref{eq:fluxenergy}).
+
+Each of the 4 parameters is factorised into a scaling factor and a value, e.g.
+$F=F_s F_v$ and $\gamma=\gamma_s \gamma_v$.
+It is assumed that $E_{\rm min}$ and $E_{\rm max}$ are fixed parameters,
+and {\tt GModelSpectralPlawEnergyFlux::eval\_gradients} returns valid gradients only for 
+$F_v$ and $\gamma_v$.
+
+The flux value gradient $f_v$ is given by
+\begin{equation}
+\frac{\delta I}{\delta F_v} = 
+  \frac{\delta I}{\delta F} \frac{\delta F}{\delta F_v} = 
+  \frac{\delta I}{\delta F} F_s = 
+  \frac{\delta \tilde{k}}{\delta F} \, E^{\gamma} F_s = 
+  \frac{\tilde{k}}{F} \, E^{\gamma} F_s = 
+  \frac{I(E)}{F} F_s =
+  \frac{I(E)}{F_v}
+\end{equation}
+
+The index value gradient $\gamma_v$ is given by
+\begin{equation}
+\frac{\delta I}{\delta \gamma_v} =
+  \frac{\delta I}{\delta \gamma} \frac{\delta \gamma}{\delta \gamma_v} = 
+  \frac{\delta I}{\delta \gamma} \gamma_s = 
+  \left( \frac{\delta \tilde{k}}{\delta \gamma} \, E^{\gamma} + \tilde{k} \, E^{\gamma} \ln E \right)  \gamma_s =
+  \left( \frac{1}{\tilde{k}} \frac{\delta \tilde{k}}{\delta \gamma} + \ln E \right) \tilde{k} E^{\gamma} \gamma_s =
+  \left( \frac{1}{\tilde{k}} \frac{\delta \tilde{k}}{\delta \gamma} + \ln E \right) I(E) \gamma_s
+\end{equation}
+where
+\begin{equation}
+   \frac{\delta \tilde{k}}{\delta \gamma} = \left \{
+   \begin{array}{l l}
+     \displaystyle
+     0 & \mbox{if $\gamma = -2$} \\
+     \\
+     \\
+     \displaystyle
+      \frac{F \left( E_{\rm max}^{\gamma+2}-E_{\rm min}^{\gamma+2} \right) -
+              F (1+\gamma) \left( E_{\rm max}^{\gamma+2} \ln E_{\rm max} - 
+                                      E_{\rm min}^{\gamma+2} \ln E_{\rm min} \right)}
+              {\left( E_{\rm max}^{\gamma+2}-E_{\rm min}^{\gamma+2} \right)^2}
+         & \mbox{else}
+   \end{array}
+   \right .
+\end{equation}
+Note that for $\gamma \ne -2$
+\begin{equation}
+\frac{1}{\tilde{k}} \frac{\delta \tilde{k}}{\delta \gamma} =
+  \frac{1}{2+\gamma} -
+  \frac{\left( E_{\rm max}^{\gamma+2} \ln E_{\rm max} - 
+                    E_{\rm min}^{\gamma+2} \ln E_{\rm min} \right)}
+          {\left( E_{\rm max}^{\gamma+2}-E_{\rm min}^{\gamma+2} \right)}
 \end{equation}
 
 \end{document} 

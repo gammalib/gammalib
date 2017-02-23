@@ -44,9 +44,7 @@ const GCTAModelCubeBackground g_cta_inst_background_seed;
 const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL        "GCTAModelCubeBackground::eval(GEvent&, GObservation&)"
-#define G_EVAL_GRADIENTS   "GCTAModelCubeBackground::eval_gradients(GEvent&,"\
-                                                            " GObservation&)"
+#define G_EVAL "GCTAModelCubeBackground::eval(GEvent&, GObservation&, bool&)"
 #define G_NPRED            "GCTAModelCubeBackground::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_MC              "GCTAModelCubeBackground::mc(GObservation&, GRan&)"
@@ -251,13 +249,18 @@ GCTAModelCubeBackground* GCTAModelCubeBackground::clone(void) const
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @param[in] gradients Compute gradients?
  * @return Function value.
  *
  * @exception GException::invalid_argument
  *            Specified observation is not of the expected type.
+ *
+ * If the @p gradients flag is true the method will also set the parameter
+ * gradients of the model parameters.
  ***************************************************************************/
 double GCTAModelCubeBackground::eval(const GEvent&       event,
-                                     const GObservation& obs) const
+                                     const GObservation& obs,
+                                     const bool&         gradients) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
@@ -287,89 +290,38 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
     //double logE = event.energy().log10TeV();
     double spat = bgd((*dir), event.energy());
     double spec = (spectral() != NULL)
-                  ? spectral()->eval(event.energy(), event.time()) : 1.0;
+                  ? spectral()->eval(event.energy(), event.time(), gradients)
+                  : 1.0;
     double temp = (temporal() != NULL)
-                  ? temporal()->eval(event.time()) : 1.0;
+                  ? temporal()->eval(event.time(), gradients) : 1.0;
 
     // Compute value. Note that background rates are already per
     // livetime, hence no deadtime correction is needed here.
     double value = spat * spec * temp;
 
-    // Return value
-    return value;
-}
+    // If gradients were requested then multiply factors to spectral and
+    // temporal gradients
+    if (gradients) {
 
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- * @return Function value.
- *
- * @exception GException::invalid_argument
- *            Specified observation is not of the expected type.
- ***************************************************************************/
-double GCTAModelCubeBackground::eval_gradients(const GEvent&       event,
-                                               const GObservation& obs) const
-{
-    // Get pointer on CTA observation
-    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-    if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Get pointer on CTA IRF response
-    const GCTAResponseCube* rsp = dynamic_cast<const GCTAResponseCube*>(cta->response());
-    if (rsp == NULL) {
-        std::string msg = "Specified observation does not contain a"
-                          " cube response.\n" + obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Extract CTA instrument direction from event
-    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        std::string msg = "No CTA instrument direction found in event.";
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Retrieve reference to CTA cube background
-    const GCTACubeBackground& bgd = rsp->background();
-
-    // Evaluate function
-    //double logE = event.energy().log10TeV();
-    double spat = bgd((*dir), event.energy());
-    double spec = (spectral() != NULL)
-                  ? spectral()->eval_gradients(event.energy(), event.time())
-                  : 1.0;
-    double temp = (temporal() != NULL)
-                  ? temporal()->eval_gradients(event.time())
-                  : 1.0;
-
-    // Compute value. Note that background rates are already per
-    // livetime, hence no deadtime correction is needed here.
-    double value = spat * spec * temp;
-
-    // Multiply factors to spectral gradients
-    if (spectral() != NULL) {
-        double fact = spat * temp;
-        if (fact != 1.0) {
-            for (int i = 0; i < spectral()->size(); ++i)
-                (*spectral())[i].factor_gradient( (*spectral())[i].factor_gradient() * fact );
+        // Multiply factors to spectral gradients
+        if (spectral() != NULL) {
+            double fact = spat * temp;
+            if (fact != 1.0) {
+                for (int i = 0; i < spectral()->size(); ++i)
+                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact );
+            }
         }
-    }
 
-    // Multiply factors to temporal gradients
-    if (temporal() != NULL) {
-        double fact = spat * spec;
-        if (fact != 1.0) {
-            for (int i = 0; i < temporal()->size(); ++i)
-                (*temporal())[i].factor_gradient( (*temporal())[i].factor_gradient() * fact );
+        // Multiply factors to temporal gradients
+        if (temporal() != NULL) {
+            double fact = spat * spec;
+            if (fact != 1.0) {
+                for (int i = 0; i < temporal()->size(); ++i)
+                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact );
+            }
         }
-    }
+
+    } // endif: gradients were requested
 
     // Return value
     return value;

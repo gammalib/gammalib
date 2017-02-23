@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.cpp  -  exception handlers                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -79,6 +79,29 @@ GException::invalid_argument::invalid_argument(const std::string& origin,
 
     // Set message string
     m_message = "Invalid argument.";
+    if (message.length() > 0) {
+        m_message += (" " + message);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid return value
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::invalid_return_value::invalid_return_value(const std::string& origin,
+                                                       const std::string& message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message string
+    m_message = "Invalid return value.";
     if (message.length() > 0) {
         m_message += (" " + message);
     }

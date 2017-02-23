@@ -32,6 +32,7 @@
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -65,8 +66,8 @@ public:
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual GClassCode                code(void) const;
-    virtual double                    eval(const GPhoton& photon) const;
-    virtual double                    eval_gradients(const GPhoton& photon) const;
+    virtual double                    eval(const GPhoton& photon,
+                                           const bool& gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
@@ -74,6 +75,7 @@ public:
                                               const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -91,11 +93,13 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialPointSource& model);
     void free_members(void);
+    void set_region(void) const;
 
     // Protected members
-    std::string m_type;   //!< Model type
-    GModelPar   m_ra;     //!< Right Ascension (deg)
-    GModelPar   m_dec;    //!< Declination (deg)
+    std::string              m_type;   //!< Model type
+    GModelPar                m_ra;     //!< Right Ascension (deg)
+    GModelPar                m_dec;    //!< Declination (deg)
+    mutable GSkyRegionCircle m_region; //!< Bounding circle
 };
 
 
@@ -214,6 +218,21 @@ double GModelSpatialPointSource::mc_norm(const GSkyDir& dir,
 {
     double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
     return (norm);
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the point source.
+ ***************************************************************************/
+inline
+GSkyRegion* GModelSpatialPointSource::region(void) const
+{
+    set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIALPOINTSOURCE_HPP */

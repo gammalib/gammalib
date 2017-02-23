@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          model.i - Model module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -141,10 +141,12 @@
 %include "GModelSpatialDiffuseConst.i"
 %include "GModelSpatialDiffuseCube.i"
 %include "GModelSpatialDiffuseMap.i"
+%include "GModelSpatialComposite.i"
 %include "GModelSpectral.i"
 %include "GModelSpectralRegistry.i"
 %include "GModelSpectralBrokenPlaw.i"
 %include "GModelSpectralConst.i"
+%include "GModelSpectralExpInvPlaw.i"
 %include "GModelSpectralExpPlaw.i"
 %include "GModelSpectralSuperExpPlaw.i"
 %include "GModelSpectralFunc.i"
@@ -152,7 +154,11 @@
 %include "GModelSpectralLogParabola.i"
 %include "GModelSpectralNodes.i"
 %include "GModelSpectralPlaw.i"
-%include "GModelSpectralPlaw2.i"
+%include "GModelSpectralPlawPhotonFlux.i"
+%include "GModelSpectralPlawEnergyFlux.i"
+%include "GModelSpectralComposite.i"
 %include "GModelTemporal.i"
 %include "GModelTemporalRegistry.i"
 %include "GModelTemporalConst.i"
+%include "GModelTemporalLightCurve.i"
+%include "GModelTemporalPhaseCurve.i"

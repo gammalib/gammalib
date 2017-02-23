@@ -49,6 +49,8 @@ const int header_width = 80;                                //!< Header width
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs an empty application.
  ***************************************************************************/
 GApplication::GApplication(void)
 {
@@ -66,9 +68,13 @@ GApplication::GApplication(void)
  * @param[in] name Application name.
  * @param[in] version Application version.
  *
- * Constructs an application from an application @p name and @p version. The
- * application parameters will be loaded from the parameter file. No log
- * file will be opened.
+ * Constructs an application from an application @p name and @p version. The 
+ * constructor will set the parameter filename to "<name>.par" and the log
+ * filename to "<name>".log. The parameters will be loaded from the parameter
+ * file.
+ *
+ * No log file will be opened. To open the log file an explicit call to the
+ * logFileOpen() method is required.
  *
  * This constructor should be used for Python scripts.
  ***************************************************************************/
@@ -88,6 +94,9 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     // Initialise application parameters
     m_pars.load(par_filename());
 
+    // Signal that application parameters have been loaded
+    m_pars_loaded = true;
+
     // Set log filename and chattiness
     set_log_filename();
     set_log_chatter();
@@ -106,9 +115,12 @@ GApplication::GApplication(const std::string& name, const std::string& version)
  * @param[in] argv Command line arguments
  *
  * Constructs an application from an application @p name, @p version and a
- * number @p argc of command line arguments @p argv. The application
- * parameters will be loaded from the parameter file and the log file will
- * be opened.
+ * number @p argc of command line arguments @p argv. The constructor will
+ * set the parameter filename to "<name>.par" and the log filename to
+ * "<name>".log. The parameters will be loaded from the parameter file.
+ *
+ * No log file will be opened. To open the log file an explicit call to the
+ * logFileOpen() method is required.
  *
  * This constructor should be used for C++ applications.
  ***************************************************************************/
@@ -149,12 +161,12 @@ GApplication::GApplication(const std::string& name, const std::string& version,
         // Initialise application parameters
         m_pars.load(par_filename(), m_args);
 
+        // Signal that application parameters have been loaded
+        m_pars_loaded = true;
+
         // Set log filename and chattiness
         set_log_filename();
         set_log_chatter();
-
-        // Initialise the application logger
-        logFileOpen();
 
     } // endif: no --help option specified
 
@@ -238,11 +250,34 @@ GApplication& GApplication::operator=(const GApplication& app)
  ***************************************************************************/
 void GApplication::clear(void)
 {
+    // Save application name and version as we need them to reconstruct
+    // the application after freeing and initialising its members
+    std::string name    = m_name;
+    std::string version = m_version;
+
     // Free members
     free_members();
 
     // Initialise members
     init_members();
+
+    // Recover saved application name and version
+    m_name    = name;
+    m_version = version;
+
+    // Set default parfile and logfile name
+    m_parfile = name+".par";
+    m_logfile = name+".log";
+
+    // Initialise application parameters
+    m_pars.load(par_filename());
+
+    // Signal that application parameters have been loaded
+    m_pars_loaded = true;
+
+    // Set log filename and chattiness
+    set_log_filename();
+    set_log_chatter();
 
     // Return
     return;
@@ -312,7 +347,10 @@ void GApplication::logFileOpen(const bool& clobber)
         // Initialise the application logger
         log.open(log_filename(), clobber);
 
-    }
+        // Write header into log file
+        log_header();
+
+    } // endif: file name was not empty
 
     // Set logger chattiness
     set_log_chatter();
@@ -325,15 +363,28 @@ void GApplication::logFileOpen(const bool& clobber)
 /***********************************************************************//**
  * @brief Close log file
  *
- * Logs trailer and close application log file.
+ * Close the log file. In case that some characters have been written
+ * through the logger a trailer will be appended to the logger before
+ * closing the log file. The trailer informs about the computation time
+ * used by the application.
  ***************************************************************************/
 void GApplication::logFileClose(void)
 {
-    // Put trailer in log file
-    log_trailer();
+    // Continue only if log file is open and if something has been written
+    // through this logger. This avoid writing trailers for logger than
+    // have not been used.
+    if (log.is_open() && (log.written_size() > 0)) {
 
-    // Close log file
-    log.close();
+        // Write line feed before trailer into logger
+        log << std::endl;
+            
+        // Write trailer into logger
+        log_trailer();
+
+        // Close log file
+        log.close();
+
+    } // endif: log file was open
 
     // Return
     return;
@@ -498,50 +549,241 @@ void GApplication::log_trailer(void)
 
 
 /***********************************************************************//**
+ * @brief Write string in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] string String
+ * @param[in] linefeed Terminate string with linefeed?
+ *
+ * Writes a string into the log file if chattiness is at least @p chatter.
+ * If @p linefeed is true the string is terminated with a linefeed.
+ ***************************************************************************/
+void GApplication::log_string(const GChatter&    chatter,
+                              const std::string& string,
+                              const bool&        linefeed)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << string;
+        if (linefeed) {
+            log << std::endl;
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write parameter value in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] name Parameter name string
+ * @param[in] value Value string
+ *
+ * Writes a parameter value into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_value(const GChatter&    chatter,
+                             const std::string& name,
+                             const std::string& value)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << gammalib::parformat(name);
+        log << value << std::endl;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write parameter value in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] name Parameter name string
+ * @param[in] value Integer value
+ *
+ * Writes a parameter value into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_value(const GChatter&    chatter,
+                             const std::string& name,
+                             const int&         value)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << gammalib::parformat(name);
+        log << value << std::endl;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write parameter value in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] name Parameter name string
+ * @param[in] value Floating point value
+ *
+ * Writes a parameter value into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_value(const GChatter&    chatter,
+                             const std::string& name,
+                             const double&      value)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << gammalib::parformat(name);
+        log << value << std::endl;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write header 1 in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] header Header string
+ *
+ * Writes a header of level 1 into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_header1(const GChatter&    chatter,
+                               const std::string& header)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log << std::endl;
+        log.header1(header);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write header 2 in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] header Header string
+ *
+ * Writes a header of level 2 into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_header2(const GChatter&    chatter,
+                               const std::string& header)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log.header2(header);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write header 3 in log file
+ *
+ * @param[in] chatter Minimum required chattiness
+ * @param[in] header Header string
+ *
+ * Writes a header of level 3 into the log file if chattiness is at least
+ * @p chatter.
+ ***************************************************************************/
+void GApplication::log_header3(const GChatter&    chatter,
+                               const std::string& header)
+{
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
+
+    // Only write message if chattiness is at least equal to the minimum
+    // required chattiness
+    if (chattiness >= chatter) {
+        log.header3(header);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Write application parameters in log file
+ *
+ * @param[in] chatter Minimum required chattiness
  *
  * Writes all application parameters in the log file. For parameters that
  * have not yet been queried the method does not write the current value
  * but signals [not queried].
  ***************************************************************************/
-void GApplication::log_parameters(void)
+void GApplication::log_parameters(const GChatter& chatter)
 {
-    // Write header
-    log.header1("Parameters");
+    // Get chattiness of application
+    GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
 
-    // Count number of written parameters
-    int written = 0;
+    // Only write parameters if the chattiness is at least equal to the
+    // minimum required chattiness
+    if (chattiness >= chatter) {
 
-    // Write parameters in logger
-    for (int i = 0; i < m_pars.size(); ++i) {
+        // Write header
+        log.header1("Parameters");
 
-        // Skip all parameters that still need to be queried as we
-        // do not yet know their value
-        //if (m_pars.m_pars[i].is_query()) {
-        //    continue;
-        //}
+        // Write parameters in logger
+        for (int i = 0; i < m_pars.size(); ++i) {
 
-        // Add line feed
-        if (written > 0) {
-            log << std::endl;
-        }
+            // Set parameter name
+            std::string name = " " + m_pars.m_pars[i].name() + " ";
+            name = name + gammalib::fill(".", 28-name.length()) + ": ";
 
-        // Set parameter name
-        std::string name = " " + m_pars.m_pars[i].name() + " ";
-        name = name + gammalib::fill(".", 28-name.length()) + ": ";
+            // Write parameter
+            if (m_pars.m_pars[i].is_query()) {
+                log << name << "[not queried]" << std::endl;
+            }
+            else {
+                log << name << m_pars.m_pars[i].m_value << std::endl;
+            }
 
-        // Write parameter
-        if (m_pars.m_pars[i].is_query()) {
-            log << name << "[not queried]";
-        }
-        else {
-            log << name << m_pars.m_pars[i].m_value;
-        }
+        } // endfor: looped over all parameters
 
-        // Increment number of written parameters
-        written++;
-
-    }
+    } // endif: chattiness satisfied minimum required level
 
     // Return
     return;
@@ -551,7 +793,7 @@ void GApplication::log_parameters(void)
 /***********************************************************************//**
  * @brief Print application
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing application information.
  ***************************************************************************/
 std::string GApplication::print(const GChatter& chatter) const
@@ -614,7 +856,8 @@ void GApplication::init_members(void)
     m_logfile.clear();
     m_args.clear();
     m_pars.clear();
-    m_need_help = false;
+    m_pars_loaded = false;
+    m_need_help   = false;
 
     // Save the execution calendar start time
     std::time(&m_tstart);
@@ -631,6 +874,8 @@ void GApplication::init_members(void)
  * @brief Copy class members
  *
  * @param[in] app Application.
+ *
+ * Copies all class members.
  ***************************************************************************/
 void GApplication::copy_members(const GApplication& app)
 {
@@ -638,15 +883,16 @@ void GApplication::copy_members(const GApplication& app)
     log = app.log;
 
     // Copy protected attributes
-    m_name      = app.m_name;
-    m_version   = app.m_version;
-    m_parfile   = app.m_parfile;
-    m_logfile   = app.m_logfile;
-    m_args      = app.m_args;
-    m_tstart    = app.m_tstart;
-    m_cstart    = app.m_cstart;
-    m_pars      = app.m_pars;
-    m_need_help = app.m_need_help;
+    m_name        = app.m_name;
+    m_version     = app.m_version;
+    m_parfile     = app.m_parfile;
+    m_logfile     = app.m_logfile;
+    m_args        = app.m_args;
+    m_tstart      = app.m_tstart;
+    m_cstart      = app.m_cstart;
+    m_pars        = app.m_pars;
+    m_pars_loaded = app.m_pars_loaded;
+    m_need_help   = app.m_need_help;
 
     // Return
     return;
@@ -658,14 +904,13 @@ void GApplication::copy_members(const GApplication& app)
  ***************************************************************************/
 void GApplication::free_members(void)
 {
-    // Save application parameters
-    m_pars.save(par_filename());
-
-    // Put trailer in log file
-    log_trailer();
+    // Save application parameters if they have been loaded
+    if (m_pars_loaded) {
+        m_pars.save(par_filename());
+    }
 
     // Close log file
-    log.close();
+    logFileClose();
 
     // Return
     return;

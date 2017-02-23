@@ -39,7 +39,7 @@ def show_model(model):
 
     # Get model values
     values      = [model.eval(theta) for theta in thetas]
-    values_grad = [model.eval_gradients(theta) for theta in thetas]
+    values_grad = [model.eval(theta, True) for theta in thetas]
 
     # Create figure
     plt.figure(1)

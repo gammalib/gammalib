@@ -131,6 +131,27 @@ GSkyMap::GSkyMap(const GFilename& filename)
 
 
 /***********************************************************************//**
+ * @brief FITS HDU constructor
+ *
+ * @param[in] hdu FITS HDU.
+ *
+ * Constructs a sky map by fetching data from a FITS HDU. See the read()
+ * method for more information.
+ ***************************************************************************/
+GSkyMap::GSkyMap(const GFitsHDU& hdu)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Read skymap from HDU
+    read(hdu);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Healpix sky map constructor
  *
  * @param[in] coords Coordinate System (CEL or GAL).
@@ -2072,16 +2093,22 @@ void GSkyMap::read(const GFitsHDU& hdu)
  *
  * @param[in] file FITS file pointer.
  * @param[in] extname Sky map extension name.
+ * @return Pointer to written HDU.
  *
  * Write the sky map into a FITS file. Optionally, the extension name of
- * the FITS HDU can be specified using the @p extname parameter.
+ * the FITS HDU can be specified using the @p extname parameter. The method
+ * returns a pointer to the appended HDU. If no HDU has been appended, for
+ * example because the sky map is empty, the method will return NULL.
  ***************************************************************************/
-void GSkyMap::write(GFits& file, const std::string& extname) const
+GFitsHDU* GSkyMap::write(GFits& file, const std::string& extname) const
 {
+    // Initialise pointer to appended HDU
+    GFitsHDU* hdu_appended = NULL;
+
     // Continue only if we have data to save
     if (m_proj != NULL) {
 
-        // Initialise HDU pointer
+        // Initialise local HDU pointer
         GFitsHDU* hdu = NULL;
 
         // Case A: Skymap is Healpix
@@ -2102,8 +2129,8 @@ void GSkyMap::write(GFits& file, const std::string& extname) const
                 hdu->extname(extname);
             }
 
-            // Append HDU
-            file.append(*hdu);
+            // Append HDU and recover the pointer to the appended HDU
+            hdu_appended = file.append(*hdu);
 
             // Delete HDU
             if (hdu != NULL) delete hdu;
@@ -2112,8 +2139,8 @@ void GSkyMap::write(GFits& file, const std::string& extname) const
 
     } // endif: we had data to save
 
-    // Return
-    return;
+    // Return pointer to appended HDU
+    return hdu_appended;
 }
 
 
@@ -2123,27 +2150,34 @@ void GSkyMap::write(GFits& file, const std::string& extname) const
  * @param[in] name Name of sky map.
  *
  * Publishes the sky map on a Virtual Observatory Hub. If no Hub is currently
- * active, the method will start a new Hub.
+ * active, the method will start a new Hub. If on sky map has been allocated
+ * the method does nothing.
  ***************************************************************************/
-void  GSkyMap::publish(const std::string& name) const
+void GSkyMap::publish(const std::string& name) const
 {
     // Create FITS file containing the sky map
     GFits fits;
-    write(fits);
 
-    // Get last FITS HDU
-    GFitsHDU* hdu = fits[fits.size()-1];
+    // Write sky map into FITS file and return a pointer to the written HDU.
+    // This method returns a NULL pointer if no sky map projection exists,
+    // which typically is true for empty sky maps.
+    GFitsHDU* hdu = write(fits);
 
-    // Optionally set extension name
-    if (!name.empty()) {
-        hdu->extname(name);
-    }
+    // Continue only if HDU pointer is valid
+    if (hdu != NULL) {
 
-    // Create VO Client
-    GVOClient client;
+        // Optionally set extension name
+        if (!name.empty()) {
+            hdu->extname(name);
+        }
 
-    // Publish map using VO client
-    client.publish(*hdu);
+        // Create VO Client
+        GVOClient client;
+
+        // Publish map using VO client
+        client.publish(*hdu);
+
+    } // endif: HDU pointer was valid
 
     // Return
     return;
@@ -2153,7 +2187,7 @@ void  GSkyMap::publish(const std::string& name) const
 /***********************************************************************//**
  * @brief Print sky map
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing sky map information.
  ***************************************************************************/
 std::string GSkyMap::print(const GChatter& chatter) const

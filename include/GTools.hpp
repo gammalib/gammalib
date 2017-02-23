@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
+#include <complex>
 #include <cmath>
 #include <cfloat>
 
@@ -54,6 +55,8 @@ namespace gammalib {
     std::string              strip_whitespace(const std::string& arg);
     std::string              strip_chars(const std::string& arg,
                                          const std::string& chars);
+    std::string              rstrip_chars(const std::string& arg,
+                                          const std::string& chars);
     std::string              expand_env(const std::string& arg);
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);
@@ -67,6 +70,8 @@ namespace gammalib {
     std::string              str(const long long int& value);
     std::string              str(const float& value, const int& precision = 0);
     std::string              str(const double& value, const int& precision = 0);
+    std::string              str(const std::complex<double>& value,
+                                 const int& precision = 0);
     char*                    tochar(const std::string& arg);
     short                    toshort(const std::string& arg);
     unsigned short           toushort(const std::string& arg);
@@ -104,6 +109,8 @@ namespace gammalib {
     bool                     is_notanumber(const double& x);
     bool                     contains(const std::string& str,
                                       const std::string& substring);
+    bool                     contains(const std::vector<std::string> strings,
+                                      const std::string& string);
     void                     warning(const std::string& origin,
                                      const std::string& message);
     std::string              xml2str(const std::string& arg);

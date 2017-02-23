@@ -258,11 +258,12 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate function (in units of sr^-1)
  *
  * @param[in] theta Angular distance from shell centre (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial part for a shell source model. The shell source
@@ -290,10 +291,15 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
  * 
  * Here, \f$\theta_{\rm in}\f$ and \f$\theta_{\rm out}\f$ are the shell inner
  * and outer radius.
+ *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
  ***************************************************************************/
 double GModelSpatialRadialShell::eval(const double&  theta,
                                       const GEnergy& energy,
-                                      const GTime&   time) const
+                                      const GTime&   time,
+                                      const bool&    gradients) const
 {
     // Update precomputation cache
     update();
@@ -328,26 +334,6 @@ double GModelSpatialRadialShell::eval(const double&  theta,
 
     // Return normalised value
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] theta Angular distance from shell centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * This method simply calls the eval() method as no analytical gradients will
- * be computed. See the eval() method for details.
- ***************************************************************************/
-double GModelSpatialRadialShell::eval_gradients(const double&  theta,
-                                                const GEnergy& energy,
-                                                const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, energy, time));
 }
 
 
@@ -674,6 +660,9 @@ void GModelSpatialRadialShell::init_members(void)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
 
+    // Initialise other members
+    m_region.clear();
+
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius and width shell is not meaningful
     m_last_radius = 0.0;
@@ -701,9 +690,10 @@ void GModelSpatialRadialShell::init_members(void)
 void GModelSpatialRadialShell::copy_members(const GModelSpatialRadialShell& model)
 {
     // Copy members
-    m_type        = model.m_type;
-    m_radius      = model.m_radius;
-    m_width       = model.m_width;
+    m_type   = model.m_type;
+    m_radius = model.m_radius;
+    m_width  = model.m_width;
+    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_radius = model.m_last_radius;
@@ -835,4 +825,20 @@ double GModelSpatialRadialShell::f2(double x)
 
     // Return value
     return f2;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialShell::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to sum of shell radius and width
+    m_region.radius(m_radius.value() + m_width.value());
+
+    // Return
+    return;
 }

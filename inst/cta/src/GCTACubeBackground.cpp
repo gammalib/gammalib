@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTACubeBackground.cpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Michael Mayer                               *
+ *  copyright (C) 2015-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -337,8 +337,13 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
         ebounds.append(m_energies[i], m_energies[i]);
     }
 
+    // Set dummy GTI needed to genrate an event cube. It is not important what
+    // the actually value is since it will be overwritten later in any case,
+    // but it's important that there is one time slice
+    GGti gti(GTime(0.0), GTime(1.0));
+
     // Initialise event cube to evaluate models
-    GCTAEventCube eventcube = GCTAEventCube(m_cube, ebounds, obs[0]->events()->gti());
+    GCTAEventCube eventcube = GCTAEventCube(m_cube, ebounds, gti);
 
     // Initialise total livetime
     double total_livetime = 0.0;
@@ -373,6 +378,22 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
+        // Get observation livetime
+        double livetime = cta->livetime();
+
+        // Skip observation if livetime is zero
+        if (livetime == 0.0) {
+            if (log != NULL) {
+                *log << "Skipping unbinned ";
+                *log << cta->instrument();
+                *log << " observation ";
+                *log << "\"" << cta->name() << "\"";
+                *log << " (id=" << cta->id() << ") due to zero livetime";
+                *log << std::endl;
+            }
+            continue;
+        }
+
         // Announce observation usage
         if (log != NULL) {
             *log << "Including ";
@@ -398,9 +419,6 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
         // Set GTI of actual observations as the GTI of the event cube
         eventcube.gti(cta->gti());
-
-        // Get observation livetime
-        double livetime = cta->livetime();
 
         // Loop over all bins in background cube
         for (int i = 0; i < eventcube.size(); ++i) {
@@ -440,16 +458,16 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
     // Re-normalize cube to get units of counts/MeV/s/sr
     if (total_livetime > 0.0) {
 
-      // Loop over all bins in background cube and divide the content
-      // by the total livetime.
-      for (int i = 0; i < eventcube.size(); ++i) {
-          GCTAEventBin* bin  = eventcube[i];
-          double        rate = bin->counts() / total_livetime;
-          bin->counts(rate);
-      }
+        // Loop over all bins in background cube and divide the content
+        // by the total livetime.
+        for (int i = 0; i < eventcube.size(); ++i) {
+            GCTAEventBin* bin  = eventcube[i];
+            double        rate = bin->counts() / total_livetime;
+            bin->counts(rate);
+        }
 
-      // Set background cube values from event cube
-      m_cube = eventcube.counts();
+        // Set background cube values from event cube
+        m_cube = eventcube.counts();
 
     } // endif: livetime was positive
 

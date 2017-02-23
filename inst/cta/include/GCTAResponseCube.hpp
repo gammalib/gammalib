@@ -136,6 +136,9 @@ private:
     double irf_diffuse(const GEvent&       event,
                        const GSource&      source,
                        const GObservation& obs) const;
+    double irf_composite(const GEvent&       event,
+                         const GSource&      source,
+                         const GObservation& obs) const;
 
     // Private data members
     GCTACubeExposure   m_exposure;    //!< Exposure cube

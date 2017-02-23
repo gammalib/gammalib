@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAModelRadialPolynom.i - Radial Polynom model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,8 +49,8 @@ public:
     virtual GCTAModelRadialPolynom* clone(void) const;
     virtual std::string             classname(void) const;
     virtual std::string             type(void) const;
-    virtual double                  eval(const double& offset) const;
-    virtual double                  eval_gradients(const double& offset) const;
+    virtual double                  eval(const double& offset,
+                                         const bool& gradients = false) const;
     virtual GCTAInstDir             mc(const GCTAInstDir& dir, GRan& ran) const;
     virtual double                  omega(void) const;
     virtual void                    read(const GXmlElement& xml);

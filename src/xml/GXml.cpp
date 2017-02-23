@@ -555,13 +555,13 @@ void GXml::load(const GFilename& filename)
  * @todo Ideally, we would like to extract the URL type from the filename
  * so that any kind of URL can be used for loading.
  ***************************************************************************/
-void GXml::save(const GFilename& filename)
+void GXml::save(const GFilename& filename) const
 {
     // Open XML file for writing
     GUrlFile url(filename.url().c_str(), "w");
 
-    // Store filename in XML document
-    m_root.filename(filename);
+    // Store filename in XML document (circumvent const correctness)
+    const_cast<GXmlDocument*>(&m_root)->filename(filename);
 
     // Write XML document
     write(url, 0);
@@ -617,8 +617,8 @@ void GXml::write(GUrl& url, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML object
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @param[in] indent Text indentation (default to 0).
+ * @param[in] chatter Chattiness.
+ * @param[in] indent Text indentation.
  * @return String containing XML object.
  ***************************************************************************/
 std::string GXml::print(const GChatter& chatter, const int& indent) const
@@ -645,7 +645,7 @@ std::string GXml::print(const GChatter& chatter, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML object
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing XML object.
  ***************************************************************************/
 std::string GXml::print(const GChatter& chatter) const

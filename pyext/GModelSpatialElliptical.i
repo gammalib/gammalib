@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialElliptical.i - Abstract elliptical spatial model class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,21 +50,19 @@ public:
     virtual double                   eval(const double&  theta,
                                           const double&  posangle,
                                           const GEnergy& energy,
-                                          const GTime&   time) const = 0;
-    virtual double                   eval_gradients(const double&  theta,
-                                                    const double&  posangle,
-                                                    const GEnergy& energy,
-                                                    const GTime&   time) const = 0;
+                                          const GTime&   time,
+                                          const bool&    gradients = false) const = 0;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const = 0;
     virtual GSkyDir                  mc(const GEnergy& energy,
-                                        const GTime& time,
-                                        GRan& ran) const = 0;
+                                        const GTime&   time,
+                                        GRan&          ran) const = 0;
     virtual double                   theta_max(void) const = 0;
+    virtual GSkyRegion*              region(void) const = 0;
 
     // Implemented virtual methods
-    virtual double eval(const GPhoton& photon) const;
-    virtual double eval_gradients(const GPhoton& photon) const;
+    virtual double eval(const GPhoton& photon,
+                        const bool&    gradients = false) const;
     virtual double mc_norm(const GSkyDir& dir, const double&  radius) const;
     virtual void   read(const GXmlElement& xml);
     virtual void   write(GXmlElement& xml) const;

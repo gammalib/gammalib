@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelTemporalConst.cpp - Temporal constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -225,30 +225,8 @@ GModelTemporalConst* GModelTemporalConst::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] srcTime True photon arrival time (not used).
- *
- * Computes
- *
- * \f[
- *    S_{\rm t}(t) = {\tt m\_norm}
- * \f]
- *
- * where
- * \f${\tt m\_norm}\f$ is the normalization constant.
- ***************************************************************************/
-double GModelTemporalConst::eval(const GTime& srcTime) const
-{
-    // Compute function value
-    double value = norm();
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] srcTime True photon arrival time (not used).
+ * @param[in] gradients Compute gradients?
+ * @return Value to temporal model.
  *
  * Computes
  *
@@ -259,24 +237,29 @@ double GModelTemporalConst::eval(const GTime& srcTime) const
  * where
  * \f${\tt m\_norm}\f$ is the normalization constant.
  *
- * The method also evaluates the partial derivatives of the model with
- * respect to the normalization parameter using
+ * If the @p gradients flag is true the method will also evaluate the partial
+ * derivatives of the model with respect to the normalization parameter using
  *
  * \f[
  *    \frac{\delta S_{\rm t}(t)}{\delta {\tt m\_norm}} = 1
  * \f]
  ***************************************************************************/
-double GModelTemporalConst::eval_gradients(const GTime& srcTime)
+double GModelTemporalConst::eval(const GTime& srcTime,
+                                 const bool&  gradients) const
 {
     // Compute function value
     double value = m_norm.value();
 
-    // Compute partial derivatives of the parameter values
-    double g_norm = (m_norm.is_free()) ? m_norm.scale() : 0.0;
+    // Optionally compute partial derivatives
+    if (gradients) {
 
-    // Set factor gradient (the parameter gradient is obtained by dividing
-    // the factor gradient by the scale factor)
-    m_norm.factor_gradient(g_norm);
+        // Compute partial derivatives of the parameter values
+        double g_norm = (m_norm.is_free()) ? m_norm.scale() : 0.0;
+
+        // Set factor gradient
+        m_norm.factor_gradient(g_norm);
+
+    } // endif: computed partial derivatives
 
     // Return
     return value;
@@ -313,7 +296,7 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
         // Simulate next event time
         time += ran.exp(lambda);
 
-        // Add time if it is not beyod the stop time
+        // Add time if it is not beyond the stop time
         if (time <= tstop) {
             GTime event;
             event.secs(time);
@@ -337,9 +320,9 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
  *
  * Writes the temporal information from an XML element having the format
  *
- *     <temporalModel type="Constant">
+ *     <temporal type="Constant">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
- *     </temporalModel>
+ *     </temporal>
  ***************************************************************************/
 void GModelTemporalConst::read(const GXmlElement& xml)
 {
@@ -380,9 +363,9 @@ void GModelTemporalConst::read(const GXmlElement& xml)
  *
  * Writes the temporal information into an XML element in the format
  *
- *     <temporalModel type="Constant">
+ *     <temporal type="Constant">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
- *     </temporalModel>
+ *     </temporal>
  ***************************************************************************/
 void GModelTemporalConst::write(GXmlElement& xml) const
 {

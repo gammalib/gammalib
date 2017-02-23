@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GammaLib.hpp - Gamma-Ray Astronomy Library Header file         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,9 @@
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
 #include "GMath.hpp"
+#include "GNdarray.hpp"
+#include "GFft.hpp"
+#include "GFftWavetable.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"
@@ -109,6 +112,7 @@
 /* __ VO module __________________________________________________________ */
 #include "GVOClient.hpp"
 #include "GVOHub.hpp"
+#include "GVOTable.hpp"
 
 /* __ XSPEC module _______________________________________________________ */
 #include "GArf.hpp"
@@ -204,20 +208,27 @@
 #include "GModelSpatialDiffuseConst.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialDiffuseMap.hpp"
+#include "GModelSpatialComposite.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelSpectralBrokenPlaw.hpp"
 #include "GModelSpectralConst.hpp"
 #include "GModelSpectralExpPlaw.hpp"
+#include "GModelSpectralExpInvPlaw.hpp"
 #include "GModelSpectralSuperExpPlaw.hpp"
 #include "GModelSpectralFunc.hpp"
 #include "GModelSpectralGauss.hpp"
 #include "GModelSpectralLogParabola.hpp"
+#include "GModelSpectralMultiplicative.hpp"
 #include "GModelSpectralNodes.hpp"
 #include "GModelSpectralPlaw.hpp"
-#include "GModelSpectralPlaw2.hpp"
+#include "GModelSpectralPlawPhotonFlux.hpp"
+#include "GModelSpectralPlawEnergyFlux.hpp"
+#include "GModelSpectralComposite.hpp"
 #include "GModelTemporal.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
+#include "GModelTemporalLightCurve.hpp"
+#include "GModelTemporalPhaseCurve.hpp"
 
 #endif /* GAMMALIB_HPP */

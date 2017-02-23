@@ -43,9 +43,7 @@ const GCOMModelDRBFitting g_com_drb_fitting_seed;
 const GModelRegistry      g_com_drb_fitting_registry(&g_com_drb_fitting_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL             "GCOMModelDRBFitting::eval(GEvent&,GObservation&)"
-#define G_EVAL_GRADIENTS       "GCOMModelDRBFitting::eval_gradients(GEvent&,"\
-                                                             "GObservation&)"
+#define G_EVAL     "GCOMModelDRBFitting::eval(GEvent&, GObservation&, bool&)"
 #define G_READ                      "GCOMModelDRBFitting::read(GXmlElement&)"
 #define G_WRITE                    "GCOMModelDRBFitting::write(GXmlElement&)"
 
@@ -229,6 +227,7 @@ GCOMModelDRBFitting* GCOMModelDRBFitting::clone(void) const
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @param[in] gradients Compute gradients?
  * @return Background model value.
  *
  * @exception GException::invalid_argument
@@ -238,7 +237,8 @@ GCOMModelDRBFitting* GCOMModelDRBFitting::clone(void) const
  * Evaluates the COMPTEL DRB fitting model.
  ***************************************************************************/
 double GCOMModelDRBFitting::eval(const GEvent&       event,
-                                 const GObservation& obs) const
+                                 const GObservation& obs,
+                                 const bool&         gradients) const
 {
     // Extract COMPTEL observation
     const GCOMObservation* observation = dynamic_cast<const GCOMObservation*>(&obs);
@@ -262,107 +262,11 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
     // Initialise value
     double value = 0.0;
 
-    // Get bin index
-    int index = bin->index();
-
-    // Get bin size.
-    double size = bin->size();
-    
-    // Continue only if bin size is positive
-    if (size > 0.0) {
-
-        // Initialise scaling factor
-        double scale = 1.0;
-
-        // Get DRB model value
-        value = observation->drb().pixels()[index] / size;
-
-        // If model is a scaling factor then use the single parameter as such
-        if (m_scale) {
-            scale = m_values[0].value();
+    // Optionally initialise gradients
+    if (gradients) {
+        for (int i = 0; i < m_values.size(); ++i) {
+            m_values[i].factor_gradient(0.0);
         }
-
-        // ... otherwise perform a linear interpolation
-        else {
-
-            // Get Phibar value
-            double phibar = bin->dir().phibar();
-
-            // Update evaluation cache
-            update_cache();
-
-            // Set node array for linear interpolation
-            m_nodes.set_value(phibar);
-
-            // Get scale factor
-            scale = m_values[m_nodes.inx_left()].value()  * m_nodes.wgt_left() +
-                    m_values[m_nodes.inx_right()].value() * m_nodes.wgt_right();
-
-        } // endelse: performed linear interpolation
-
-        // Compute background value
-        value *= scale;
-
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-            std::cout << "*** ERROR: GCOMModelDRBFitting::eval";
-            std::cout << "(index=" << index << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (value=" << value;
-            std::cout << ", scale=" << scale;
-            std::cout << ")" << std::endl;
-        }
-        #endif
-
-    } // endif: binsize was positive
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- * @return Background model value.
- *
- * @exception GCOMException::bad_observation_type
- *            Observation is not a COMPTEL observation.
- * @exception GCOMException::bad_event_type
- *            Event is not a COMPTEL event bin.
- *
- * Evaluates the COMPTEL DRB fitting model value and sets the parameter
- * gradients.
- ***************************************************************************/
-double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
-                                           const GObservation& obs) const
-{
-    // Extract COMPTEL observation
-    const GCOMObservation* observation = dynamic_cast<const GCOMObservation*>(&obs);
-    if (observation == NULL) {
-        std::string cls = std::string(typeid(&obs).name());
-        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
-                          "observations. Please specify a COMPTEL observation "
-                          "as argument.";
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Extract COMPTEL event bin
-    const GCOMEventBin* bin = dynamic_cast<const GCOMEventBin*>(&event);
-    if (bin == NULL) {
-        std::string cls = std::string(typeid(&event).name());
-        std::string msg = "Event of type \""+cls+"\" is  not a COMPTEL event. "
-                          "Please specify a COMPTEL event as argument.";
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Initialise value and gradients
-    double value = 0.0;
-    for (int i = 0; i < m_values.size(); ++i) {
-        const_cast<GCOMModelDRBFitting*>(this)->m_values[i].factor_gradient(0.0);
     }
 
     // Get bin index
@@ -380,20 +284,26 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
         // Get DRB model value
         value = observation->drb().pixels()[index] / size;
 
-
-        // If model is a scaling factor then use the single parameter as such
+        // If the model has a single scaling factor then use the first
+        // parameter as scaling factor of the model
         if (m_scale) {
 
             // Get scale factor
             scale = m_values[0].value();
-        
-            // Compute partial derivative
-            double grad = (m_values[0].is_free()) ? value * m_values[0].scale() : 0.0;
 
-            // Set gradient (circumvent const correctness)
-            const_cast<GCOMModelDRBFitting*>(this)->m_values[0].factor_gradient(grad);
+            // Optionally compute gradients
+            if (gradients) {
 
-        }
+                // Compute partial derivative
+                double grad = (m_values[0].is_free())
+                              ? value * m_values[0].scale() : 0.0;
+
+                // Set gradient
+                m_values[0].factor_gradient(grad);
+
+            } // endif: gradient computation was requested
+
+        } // endif: model is a scaling factor
 
         // ... otherwise perform a linear interpolation
         else {
@@ -417,17 +327,22 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
             scale = m_values[inx_left].value()  * wgt_left +
                     m_values[inx_right].value() * wgt_right;
 
-            // Gradient for left node
-            if (m_values[inx_left].is_free()) {
-                double grad = wgt_left * value * m_values[inx_left].scale();
-                const_cast<GCOMModelDRBFitting*>(this)->m_values[inx_left].factor_gradient(grad);
-            }
+            // Optionally compute gradients
+            if (gradients) {
 
-            // Gradient for right node
-            if (m_values[inx_right].is_free()) {
-                double grad = wgt_right * value * m_values[inx_right].scale();
-                const_cast<GCOMModelDRBFitting*>(this)->m_values[inx_right].factor_gradient(grad);
-            }
+                // Compute partial derivatives
+                double g_left  = (m_values[inx_left].is_free())
+                                 ? wgt_left * value * m_values[inx_left].scale()
+                                 : 0.0;
+                double g_right = (m_values[inx_right].is_free())
+                                 ? wgt_right * value * m_values[inx_right].scale()
+                                 : 0.0;
+
+                // Set gradients
+                m_values[inx_left].factor_gradient(g_left);
+                m_values[inx_right].factor_gradient(g_right);
+
+            } // endif: gradient computation was requested
 
         } // endelse: performed linear interpolation
 
@@ -437,7 +352,7 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
         if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-            std::cout << "*** ERROR: GCOMModelDRBFitting::eval_gradients";
+            std::cout << "*** ERROR: GCOMModelDRBFitting::eval";
             std::cout << "(index=" << index << "):";
             std::cout << " NaN/Inf encountered";
             std::cout << " (value=" << value;

@@ -257,6 +257,7 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * @param[in] theta Angular distance from Gaussian centre (radians).
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
+ * @param[in] gradients Compute gradients?
  * @return Model value.
  *
  * Evaluates the spatial component for a Gaussian source model using
@@ -271,12 +272,17 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * - \f$\theta\f$ is the angular separation from the centre of the model, and
  * - \f$\sigma\f$ is the Gaussian width.
  *
+ * The method will not compute analytical parameter gradients, even if the
+ * @p gradients argument is set to true. Radial disk parameter gradients
+ * need to be computed numerically.
+ *
  * @todo The Gaussian function is only correct in the small angle
  *       approximation.
  ***************************************************************************/
 double GModelSpatialRadialGauss::eval(const double&  theta,
                                       const GEnergy& energy,
-                                      const GTime&   time) const
+                                      const GTime&   time,
+                                      const bool&    gradients) const
 {
     // Compute value
     double sigma_rad = sigma() * gammalib::deg2rad;
@@ -300,26 +306,6 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] theta Angular distance from Gaussian centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @return Model value.
- *
- * This method simply calls the eval() method as no analytical gradients
- * will be computed. See the eval() method for more details.
- ***************************************************************************/
-double GModelSpatialRadialGauss::eval_gradients(const double&  theta,
-                                                const GEnergy& energy,
-                                                const GTime&   time) const
-{
-    // Return value
-    return (eval(theta, energy, time));
 }
 
 
@@ -594,6 +580,9 @@ void GModelSpatialRadialGauss::init_members(void)
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);
 
+    // Initialise other members
+    m_region.clear();
+
     // Return
     return;
 }
@@ -611,8 +600,9 @@ void GModelSpatialRadialGauss::init_members(void)
 void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& model)
 {
     // Copy members
-    m_type  = model.m_type;
-    m_sigma = model.m_sigma;
+    m_type   = model.m_type;
+    m_sigma  = model.m_sigma;
+    m_region = model.m_region;
 
     // Return
     return;
@@ -624,6 +614,22 @@ void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& mode
  ***************************************************************************/
 void GModelSpatialRadialGauss::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialRadialGauss::set_region(void) const
+{
+    // Set sky region centre to Gaussian centre
+    m_region.centre(m_ra.value(), m_dec.value());
+
+    // Set sky region radius to 5 times the Gaussian sigma
+    m_region.radius(m_sigma.value() * 5.0);
+
     // Return
     return;
 }

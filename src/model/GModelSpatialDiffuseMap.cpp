@@ -309,43 +309,32 @@ GModelSpatialDiffuseMap* GModelSpatialDiffuseMap::clone(void) const
  * @brief Return intensity of sky map
  *
  * @param[in] photon Incident photon.
+ * @param[in] gradients Compute gradients?
  * @return Sky map intensity (\f$\mbox{ph cm}^{-2}\mbox{sr}^{-1}\mbox{s}^{-1}\f$)
  *
  * Returns the intensity of the sky map at the specified sky direction
  * multiplied by the normalization factor. If the sky direction falls outside
  * the sky map, an intensity of 0 is returned.
+ *
+ * If the @p gradients flag is true the method will also evaluate the partial
+ * derivatives of the model.
  ***************************************************************************/
-double GModelSpatialDiffuseMap::eval(const GPhoton& photon) const
+double GModelSpatialDiffuseMap::eval(const GPhoton& photon,
+                                     const bool&    gradients) const
 {
     // Get skymap intensity
     double intensity = m_map(photon.dir());
 
-    // Return intensity times normalization factor
-    return (intensity * m_value.value());
-}
+    // Optionally compute partial derivatives
+    if (gradients) {
 
+        // Compute partial derivatives of the parameter values
+        double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
 
-/***********************************************************************//**
- * @brief Return intensity of sky map and gradient
- *
- * @param[in] photon Incident photon.
- * @return Sky map intensity (\f$\mbox{ph cm}^{-2}\mbox{sr}^{-1}\mbox{s}^{-1}\f$)
- *
- * Returns the intensity of the sky map at the specified sky direction
- * multiplied by the normalization factor. The method also sets the gradient
- * with respect to the normalization factor. If the sky direction falls
- * outside the sky map, an intensity of 0 is returned.
- ***************************************************************************/
-double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
-{
-    // Get skymap intensity
-    double intensity = m_map(photon.dir());
+        // Set gradient
+        m_value.factor_gradient(g_value);
 
-    // Compute partial derivatives of the parameter values
-    double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
-
-    // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseMap*>(this)->m_value.factor_gradient(g_value);
+    } // endif: computed partial derivatives
 
     // Return intensity times normalization factor
     return (intensity * m_value.value());
@@ -361,12 +350,15 @@ double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
  * @return Sky direction.
  *
  * @exception GException::invalid_value
- *            Simulation cone not defined or does not overlap with sky map.
  *            No sky map defined.
+ * @exception GException::invalid_return_value
+ *            Simulation cone not defined, does not overlap with map or map
+ *            is empty.
  *
  * Returns a random sky direction according to the intensity distribution of
  * the model sky map. The method uses a rejection method to determine the sky
- * direction.
+ * direction. If no sky direction could be determined, the method throws an
+ * GException::invalid_return_value exception.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
                                     const GTime&   time,
@@ -379,7 +371,7 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
         std::string msg = "Simulation cone has not been defined or does not "
                           "overlap with the sky map. Please specify a valid "
                           "simulation cone.";
-        throw GException::invalid_value(G_MC, msg);
+        throw GException::invalid_return_value(G_MC, msg);
     }
 
     // Determine number of skymap pixels
@@ -864,6 +856,7 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_has_normalize = false;
     m_centre.clear();
     m_radius        = 0.0;
+    m_region.clear();
 
     // Initialise MC cache
     m_mc_centre.clear();
@@ -893,6 +886,7 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_has_normalize = model.m_has_normalize;
     m_centre        = model.m_centre;
     m_radius        = model.m_radius;
+    m_region        = model.m_region;
 
     // Copy MC cache
     m_mc_centre           = model.m_mc_centre;
@@ -995,6 +989,22 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         set_mc_cone(m_centre, m_radius);
 
     } // endif: there were skymap pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set boundary sky region
+ ***************************************************************************/
+void GModelSpatialDiffuseMap::set_region(void) const
+{
+    // Set sky region centre to bounding circle centre
+    m_region.centre(m_centre);
+
+    // Set sky region radius to bounding circle radius
+    m_region.radius(m_radius);
 
     // Return
     return;

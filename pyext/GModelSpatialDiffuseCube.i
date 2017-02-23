@@ -53,15 +53,16 @@ public:
     virtual GModelSpatialDiffuseCube* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
-    virtual double                    eval(const GPhoton& photon) const;
-    virtual double                    eval_gradients(const GPhoton& photon) const;
+    virtual double                    eval(const GPhoton& photon,
+                                           const bool& gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
-                                         const GTime& time,
-                                         GRan& ran) const;
+                                         const GTime&   time,
+                                         GRan&          ran) const;
     virtual double                    mc_norm(const GSkyDir& dir,
                                               const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
+    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
 

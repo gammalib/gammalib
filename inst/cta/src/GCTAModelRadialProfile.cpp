@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialProfile.cpp - Radial Profile CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -224,6 +224,8 @@ GCTAModelRadialProfile* GCTAModelRadialProfile::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] offset Offset angle [degrees].
+ * @param[in] gradients Compute gradients?
+ * @return Function value
  *
  * Evaluates the Profile model for a given offset. The Profile model is
  * defined as
@@ -234,10 +236,11 @@ GCTAModelRadialProfile* GCTAModelRadialProfile::clone(void) const
  * \f$c_1\f$ is the width of the central plateau (core), and
  * \f$c_2\f$ is the size of the tail (tail).
  *
- * Note that this method implements a function which is unity for
- * \f$\theta=0\f$.
+ * Note that no analytical partial derivatives are implemented for this
+ * function.
  ***************************************************************************/
-double GCTAModelRadialProfile::eval(const double& offset) const
+double GCTAModelRadialProfile::eval(const double& offset,
+                                    const bool&   gradients) const
 {
     // Compute value
     double arg   = 1.0 + std::pow(offset / width(), core());
@@ -258,22 +261,6 @@ double GCTAModelRadialProfile::eval(const double& offset) const
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate function and gradients
- *
- * @param[in] offset Offset angle [degrees].
- *
- * This method simply calls GCTAModelRadialProfile::eval() as no analytical
- * gradients will be computed. See GCTAModelRadialProfile::eval() for details
- * about the implemented method.
- ***************************************************************************/
-double GCTAModelRadialProfile::eval_gradients(const double& offset) const
-{
-    // Return value
-    return (eval(offset));
 }
 
 

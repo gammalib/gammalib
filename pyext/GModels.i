@@ -68,8 +68,9 @@ public:
     void           write(GXml& xml) const;
     int            npars(void) const;
     GOptimizerPars pars(void) const;
-    double         eval(const GEvent& event, const GObservation& obs) const;
-    double         eval_gradients(const GEvent& event, const GObservation& obs) const;
+    double         eval(const GEvent& event,
+                        const GObservation& obs,
+                        const bool& gradients = false) const;
 };
 
 

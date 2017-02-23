@@ -78,17 +78,17 @@
 
 
 /***********************************************************************//**
- * @brief Tuple to index conversion using variable dimensions (1,...,4)
+ * @brief Tuple to index conversion using variable dimensions
  *
  * The following function provides conversion between a Python tuple and
  * an integer array. This allows index access via tuples, such as in
  * a[3,5,10] = 10.0 or c = a[2,9].
  ***************************************************************************/
 %{
-static int var_tuple_to_index(PyObject *input, int *ptr) {
+static int var_tuple_to_index(PyObject *input, int *ptr, int dim) {
     if (PySequence_Check(input)) {
         int size = PyObject_Length(input);
-        if (size > 4) {
+        if (size > dim) {
             PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
             return 0;
         }
@@ -116,8 +116,8 @@ static int var_tuple_to_index(PyObject *input, int *ptr) {
     }
 }
 %}
-%typemap(in) int GTuple[ANY] (int temp[5]) {
-   if (!var_tuple_to_index($input,temp)) {
+%typemap(in) int GTuple[ANY] (int temp[11]) {
+   if (!var_tuple_to_index($input,temp,10)) {
       return NULL;
    }
    $1 = &temp[0];

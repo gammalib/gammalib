@@ -116,7 +116,9 @@ testscripts = gammalib/tests/__init__.py \
 # Test data to be distributed in $(pyexecdir)/gammalib/tests/data
 testdata = $(top_srcdir)/test/data/initial_coords.txt \
            $(top_srcdir)/test/data/fk5_to_galactic.txt \
-           $(top_srcdir)/test/data/file.fits.gz
+           $(top_srcdir)/test/data/file.fits.gz \
+           $(top_srcdir)/test/data/test_GApplication.par \
+           $(top_srcdir)/test/data/model_point_plaw.xml
 
 # Distribute scripts
 testscriptsdir   = $(pyexecdir)/gammalib/tests
@@ -263,12 +265,20 @@ uninstall-local:
 # Set files to be removed in 'make clean'
 CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
 
-# Files to be removed in build directory
+# Files to be removed in build directory. Only remove wrapper files if the
+# have been built or if the were copied in the build directory
 clean-local:
 	rm -rf build
+if BUILD_WRAPPERS
 	rm -rf $(builddir)/gammalib/*.py
-	rm -rf $(builddir)/gammalib/*.pyc
 	rm -rf $(builddir)/gammalib/*_wrap.cpp
+else
+	if test "x$(builddir)" != "x$(srcdir)"; then \
+		rm -rf $(builddir)/gammalib/*.py; \
+		rm -rf $(builddir)/gammalib/*_wrap.cpp; \
+	fi
+endif
+	rm -rf $(builddir)/gammalib/*.pyc
 	rm -rf $(builddir)/gammalib/_*.so
 	rm -rf $(builddir)/gammalib/__pycache__
 

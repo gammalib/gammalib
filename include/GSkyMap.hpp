@@ -90,6 +90,7 @@ public:
     // Constructors and destructors
     GSkyMap(void);
     explicit GSkyMap(const GFilename& filename);
+    explicit GSkyMap(const GFitsHDU& hdu);
     GSkyMap(const std::string& coords,
             const int&         nside,
             const std::string& order,
@@ -131,6 +132,7 @@ public:
     void                    clear(void);
     GSkyMap*                clone(void) const;
     std::string             classname(void) const;
+    bool                    is_empty(void) const;
     const int&              npix(void) const;
     const int&              nx(void) const;
     const int&              ny(void) const;
@@ -163,7 +165,7 @@ public:
     void                    save(const GFilename& filename,
                                  const bool&      clobber = false) const;
     void                    read(const GFitsHDU& hdu);
-    void                    write(GFits& file,
+    GFitsHDU*               write(GFits& file,
                                   const std::string& extname = "") const;
     void                    publish(const std::string& name = "") const;
     std::string             print(const GChatter& chatter = NORMAL) const;
@@ -285,6 +287,20 @@ inline
 std::string GSkyMap::classname(void) const
 {
     return ("GSkyMap");
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if sky map is empty
+ *
+ * @return True if sky map is empty, false otherwise.
+ *
+ * Signals if a sky map has no pixels or maps.
+ ***************************************************************************/
+inline
+bool GSkyMap::is_empty(void) const
+{
+    return ((m_num_pixels == 0) || (m_num_maps == 0));
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadial.cpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -162,38 +162,23 @@ GModelSpatialRadial& GModelSpatialRadial::operator=(const GModelSpatialRadial& m
  * @brief Return model value
  *
  * @param[in] photon Incident Photon.
+ * @param[in] gradients Compute gradients?
+ * @return Value of spatial radial model.
  *
  * Evaluates the radial spatial model value for a specific incident
  * @p photon.
+ *
+ * If the @p gradients flag is true the method will also compute the
+ * parameter gradients for all model parameters.
  ***************************************************************************/
-double GModelSpatialRadial::eval(const GPhoton& photon) const
+double GModelSpatialRadial::eval(const GPhoton& photon,
+                                 const bool&    gradients) const
 {
     // Compute distance from source (in radians)
     double theta = photon.dir().dist(dir());
 
     // Evaluate model
-    double value = eval(theta, photon.energy(), photon.time());
-
-    // Return result
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Return model value and set analytical gradients
- *
- * @param[in] photon Incident Photon.
- *
- * Evaluates the radial spatial model value and analytical model parameter
- * gradients for a specific incident @p photon.
- ***************************************************************************/
-double GModelSpatialRadial::eval_gradients(const GPhoton& photon) const
-{
-    // Compute distance from source (in radians)
-    double theta = photon.dir().dist(dir());
-
-    // Evaluate model and set gradients
-    double value = eval_gradients(theta, photon.energy(), photon.time());
+    double value = eval(theta, photon.energy(), photon.time(), gradients);
 
     // Return result
     return value;

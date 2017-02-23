@@ -95,25 +95,25 @@ TestGSupport* TestGSupport::clone(void) const
 void TestGSupport::test_tools(void)
 {
     // Strip whitespace
-    test_assert(gammalib::strip_whitespace("  World  ") == "World",
-                "gammalib::strip_whitespace(\"  World  \")");
-    test_assert(gammalib::strip_whitespace("World  ") == "World",
-                "gammalib::strip_whitespace(\"World  \")");
-    test_assert(gammalib::strip_whitespace("  World") == "World",
-                "gammalib::strip_whitespace(\"  World\")");
+    test_value(gammalib::strip_whitespace("  World  "), "World");
+    test_value(gammalib::strip_whitespace("World  "), "World");
+    test_value(gammalib::strip_whitespace("  World"), "World");
 
     // Strip characters
-    test_assert(gammalib::strip_chars("xxWorldyy", "xy") == "World",
-                "gammalib::strip_chars(\"xxWorldyy\")");
-    test_assert(gammalib::strip_chars("Worldxy", "xy") == "World",
-                "gammalib::strip_chars(\"Worldxy\")");
-    test_assert(gammalib::strip_chars("xxWorld", "x") == "World",
-                "gammalib::strip_chars(\"xxWorld\")");
+    test_value(gammalib::strip_chars("xxWorldyy", "xy"), "World");
+    test_value(gammalib::strip_chars("Worldxy", "xy"), "World");
+    test_value(gammalib::strip_chars("xxWorld", "x"), "World");
+
+    // Right strip characters
+    test_value(gammalib::rstrip_chars("xxWorldyy", "xy"), "xxWorld");
+    test_value(gammalib::rstrip_chars("Worldxy", "xy"), "World");
+    test_value(gammalib::rstrip_chars("xxWorld", "x"), "xxWorld");
+    test_value(gammalib::rstrip_chars("0.0012300", "0"), "0.00123");
 
     // Test noun number conversion
-    test_assert(gammalib::number("World", 0) == "Worlds", "Zero Worlds");
-    test_assert(gammalib::number("World", 1) == "World", "One World");
-    test_assert(gammalib::number("World", 2) == "Worlds", "Two Worlds");
+    test_value(gammalib::number("World", 0), "Worlds");
+    test_value(gammalib::number("World", 1), "World");
+    test_value(gammalib::number("World", 2), "Worlds");
 
     // Test XML to string conversion
     std::string s_in  = "Hallo World, you \"are\" my 'nice' <planet> & place";
@@ -121,17 +121,26 @@ void TestGSupport::test_tools(void)
                         " &lt;planet&gt; &amp; place";
     std::string s_out;
     s_out = gammalib::str2xml(s_in);
-    test_assert(s_out == s_ref, "gammalib::str2xml()",
-                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
+    test_value(s_out, s_ref);
     s_out = gammalib::xml2str(s_out);
-    test_assert(s_out == s_in, "gammalib::str2xml()",
-                "Unexpected string \""+s_out+"\" (expected \""+s_in+"\")");
+    test_value(s_out, s_in);
 
     // Test power law flux computations
     test_value(gammalib::plaw_energy_flux(2.0, 3.0, 2.5, -1.0), 2.5);
     test_value(gammalib::plaw_energy_flux(2.0, 3.0, 2.5, -2.5), 2.56453824468);
     test_value(gammalib::plaw_photon_flux(2.0, 3.0, 2.5, -1.0), 1.01366277027);
     test_value(gammalib::plaw_photon_flux(2.0, 3.0, 2.5, -2.5), 1.06136118604);
+
+    // Create vector of strings
+    std::vector<std::string> strings;
+    strings.push_back("This");
+    strings.push_back("is");
+    strings.push_back("a");
+    strings.push_back("vector");
+    test_assert(gammalib::contains(strings, "a"), "\"a\" in vector");
+    test_assert(gammalib::contains(strings, "vector"), "\"vector\" in vector");
+    test_assert(!gammalib::contains(strings, "b"), "\"b\" not in vector");
+    test_assert(!gammalib::contains(strings, "isavector"), "\"isavector\" not in vector");
 
     // Return
     return;

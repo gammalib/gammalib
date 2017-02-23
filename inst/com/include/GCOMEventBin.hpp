@@ -177,7 +177,6 @@ inline
 void GCOMEventBin::counts(const double& counts)
 {
     *m_counts = counts;
-std::cout << *m_counts << std::endl;
     return;
 }
 

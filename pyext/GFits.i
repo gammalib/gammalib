@@ -88,6 +88,10 @@ public:
     void             saveto(const GFilename& filename,
                             const bool&      clobber = false);
     void             close(void);
+    void             publish(const int& extno,
+                             const std::string& name = "") const;
+    void             publish(const std::string& extname,
+                             const std::string& name = "") const;
 };
 
 

@@ -48,9 +48,11 @@
 const GModelSky         g_pointsource_seed("PointSource");
 const GModelSky         g_extendedsource_seed("ExtendedSource");
 const GModelSky         g_diffusesource_seed("DiffuseSource");
+const GModelSky         g_compositesource_seed("CompositeSource");
 const GModelRegistry    g_pointsource_registry(&g_pointsource_seed);
 const GModelRegistry    g_extendedsource_registry(&g_extendedsource_seed);
 const GModelRegistry    g_diffusesource_registry(&g_diffusesource_seed);
+const GModelRegistry    g_compositesource_registry(&g_compositesource_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NPRED           "GModelSky::npred(GEnergy&, GTime&, GObservation&)"
@@ -516,10 +518,10 @@ double GModelSky::value(const GPhoton& photon)
 GVector GModelSky::gradients(const GPhoton& photon)
 {
     // Evaluate source model gradients
-    if (m_spatial  != NULL) m_spatial->eval_gradients(photon);
-    if (m_spectral != NULL) m_spectral->eval_gradients(photon.energy(),
-                                                       photon.time());
-    if (m_temporal != NULL) m_temporal->eval_gradients(photon.time());
+    if (m_spatial  != NULL) m_spatial->eval(photon, true);
+    if (m_spectral != NULL) m_spectral->eval(photon.energy(), photon.time(),
+                                             true);
+    if (m_temporal != NULL) m_temporal->eval(photon.time(), true);
 
     // Set vector of gradients
     GVector gradients;
@@ -540,40 +542,21 @@ GVector GModelSky::gradients(const GPhoton& photon)
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
- * @return Value of sky model
+ * @param[in] gradients Compute gradients?
+ * @return Value of sky model.
  *
  * Evalutes the value of the sky model for an @p event of a specific
  * observation @p obs.
+ *
+ * If the @p gradients flag is true the method will also compute the
+ * parameter gradients for all model parameters.
  ***************************************************************************/
-double GModelSky::eval(const GEvent& event, const GObservation& obs) const
+double GModelSky::eval(const GEvent&       event,
+                       const GObservation& obs,
+                       const bool&         gradients) const
 {
     // Evaluate function
-    double value = obs.response()->convolve(*this, event, obs, false);
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate sky model and parameter gradients for a given event of an
- *        observation
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- * @return Value of sky model
- *
- * Evalutes the value of the sky model and of the parameter for an @p event
- * of a specific observation @p obs.
- *
- * While the value of the sky model is returned by the method, the parameter
- * gradients are set as GModelPar members.
- ***************************************************************************/
-double GModelSky::eval_gradients(const GEvent&       event, 
-                                 const GObservation& obs) const
-{
-    // Evaluate function
-    double value = obs.response()->convolve(*this, event, obs, true);
+    double value = obs.response()->convolve(*this, event, obs, gradients);
 
     // Return
     return value;
@@ -662,7 +645,13 @@ double GModelSky::npred(const GEnergy&      obsEng,
  *       <spatialModel type="..">
  *         ..
  *       </spatialModel>
+ *       <temporal type="..">
+ *         ..
+ *       </temporal>
  *     </source>
+ *
+ * The temporal element is optional. In no temporal element is specified a
+ * constant component with unity normalization will be assumed.
  *
  * Optionally, the model may also contain scale parameters following the
  * format:
@@ -674,6 +663,9 @@ double GModelSky::npred(const GEnergy&      obsEng,
  *       <spatialModel type="..">
  *         ..
  *       </spatialModel>
+ *       <temporal type="..">
+ *         ..
+ *       </temporal>
  *       <scaling>
  *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
  *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
@@ -691,13 +683,19 @@ void GModelSky::read(const GXmlElement& xml)
     const GXmlElement* spec = xml.element("spectrum", 0);
     const GXmlElement* spat = xml.element("spatialModel", 0);
 
-    // Allocate constant
-    GModelTemporalConst temporal;
-
-    // Clone spatial and spectral models
+    // Set spatial and spectral models
     m_spatial  = xml_spatial(*spat);
     m_spectral = xml_spectral(*spec);
-    m_temporal = temporal.clone();
+
+    // Handle optional temporal model
+    if (xml.elements("temporal") > 0) {
+        const GXmlElement* temp = xml.element("temporal", 0);
+        m_temporal = xml_temporal(*temp);
+    }
+    else {
+        GModelTemporalConst temporal;
+        m_temporal = temporal.clone();
+    }
 
     // Read model attributes
     read_attributes(xml);
@@ -728,11 +726,18 @@ void GModelSky::read(const GXmlElement& xml)
  *       <spatialModel type="..">
  *         ..
  *       </spatialModel>
+ *       <temporal type="..">
+ *         ..
+ *       </temporal>
  *       <scaling>
  *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
  *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
  *       </scaling>
  *     </source>
+ *
+ * For compatibility reasons the temporal element will only be written if it
+ * is a non-constant component or a constant component with a normalization
+ * that differs from unity.
  *
  * The scaling element will only be written optionally in case that instrument
  * dependent scaling factors exist (see GModel::write_scales() for more
@@ -753,11 +758,21 @@ void GModelSky::write(GXmlElement& xml) const
         }
     }
 
+    // If the temporal model is not a constant with unit normalization then
+    // set cons to a NULL pointer
+    GModelTemporalConst* cons = dynamic_cast<GModelTemporalConst*>(temporal());
+    if (cons != NULL) {
+        if (cons->norm() != 1.0) {
+            cons = NULL;
+        }
+    }
+
     // If no source with corresponding name was found then append one
     if (src == NULL) {
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
         if (spatial()  != NULL) src->append(GXmlElement("spatialModel"));
+        if (temporal() != NULL && cons == NULL) src->append(GXmlElement("temporal"));
     }
 
     // Write spectral model
@@ -770,6 +785,13 @@ void GModelSky::write(GXmlElement& xml) const
     if (spatial() != NULL) {
         GXmlElement* spat = src->element("spatialModel", 0);
         spatial()->write(*spat);
+    }
+
+    // Write temporal model (only if not a constant with unit normalization
+    // factor)
+    if (temporal() != NULL && cons == NULL) {
+        GXmlElement* temp = src->element("temporal", 0);
+        temporal()->write(*temp);
     }
 
     // Write model attributes
@@ -920,8 +942,15 @@ GPhotons GModelSky::mc(const double& area,
                 std::cout << "    Energy=" << photon.energy() << std::endl;
                 #endif
 
-                // Set incident photon direction
-                photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
+                // Set incident photon direction. If an invalid_return_value
+                // exception occurs the sky direction returned by the spatial
+                // Monte Carlo method is invalid and the photon is skipped.
+                try {
+                    photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
+                }
+                catch (GException::invalid_return_value) {
+                    continue;
+                }
 
                 // Debug option: dump direction
                 #if defined(G_DUMP_MC_DETAIL)

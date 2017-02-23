@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelAeffBackground.hpp - CTA Aeff background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,9 +64,8 @@ public:
     virtual std::string              type(void) const;
     virtual bool                     is_constant(void) const;
     virtual double                   eval(const GEvent& event,
-                                          const GObservation& obs) const;
-    virtual double                   eval_gradients(const GEvent& event,
-                                                    const GObservation& obs) const;
+                                          const GObservation& obs,
+                                          const bool& gradients = false) const;
     virtual double                   npred(const GEnergy& obsEng,
                                            const GTime& obsTime,
                                            const GObservation& obs) const;

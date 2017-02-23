@@ -38,7 +38,7 @@
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
-%include "std_vector.i"
+%include std_vector.i
 namespace std {
    %template(vectori) vector<int>;
    %template(vectord) vector<double>;

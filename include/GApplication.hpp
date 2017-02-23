@@ -59,33 +59,55 @@ public:
 
     // Operators
     GApplication&          operator=(const GApplication& app);
+    GApplicationPar&       operator[](const int& index);
+    const GApplicationPar& operator[](const int& index) const;
     GApplicationPar&       operator[](const std::string& name);
     const GApplicationPar& operator[](const std::string& name) const;
 
     // Methods
-    void               clear(void);
-    GApplication*      clone(void) const;
-    std::string        classname(void) const;
-    const std::string& name(void) const;
-    const std::string& version(void) const;
-    double             telapse(void) const;
-    double             celapse(void) const;
-    void               logFileOpen(const bool& clobber = true);
-    void               logFileClose(void);
-    bool               logTerse(void) const;
-    bool               logNormal(void) const;
-    bool               logExplicit(void) const;
-    bool               logVerbose(void) const;
-    bool               logDebug(void) const;
-    bool               clobber(void) const;
-    bool               has_par(const std::string& name) const;
-    const std::string& par_filename(void) const;
-    const std::string& log_filename(void) const;
-    void               log_header(void);
-    void               log_trailer(void);
-    void               log_parameters(void);
-    const bool&        need_help(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    void                    clear(void);
+    GApplication*           clone(void) const;
+    std::string             classname(void) const;
+    const std::string&      name(void) const;
+    const std::string&      version(void) const;
+    double                  telapse(void) const;
+    double                  celapse(void) const;
+    void                    logFileOpen(const bool& clobber = true);
+    void                    logFileClose(void);
+    bool                    logTerse(void) const;
+    bool                    logNormal(void) const;
+    bool                    logExplicit(void) const;
+    bool                    logVerbose(void) const;
+    bool                    logDebug(void) const;
+    bool                    clobber(void) const;
+    bool                    has_par(const std::string& name) const;
+    const std::string&      par_filename(void) const;
+    const std::string&      log_filename(void) const;
+    void                    log_header(void);
+    void                    log_trailer(void);
+    void                    log_string(const GChatter& chatter,
+                                       const std::string& string,
+                                       const bool&        linefeed = true);
+    void                    log_value(const GChatter&    chatter,
+                                      const std::string& name,
+                                      const std::string& value);
+    void                    log_value(const GChatter&    chatter,
+                                      const std::string& name,
+                                      const int&         value);
+    void                    log_value(const GChatter&    chatter,
+                                      const std::string& name,
+                                      const double&      value);
+    void                    log_header1(const GChatter&    chatter,
+                                        const std::string& header);
+    void                    log_header2(const GChatter&    chatter,
+                                        const std::string& header);
+    void                    log_header3(const GChatter&    chatter,
+                                        const std::string& header);
+    void                    log_parameters(const GChatter& chatter);
+    const bool&             need_help(void) const;
+    const GApplicationPars& pars(void) const;
+    void                    pars(const GApplicationPars& pars);
+    std::string             print(const GChatter& chatter = NORMAL) const;
 
     // Public members
     GLog log;   //!< Application logger
@@ -99,15 +121,16 @@ protected:
     void set_log_filename(void);
 
     // Protected data members
-    std::string              m_name;       //!< Application name
-    std::string              m_version;    //!< Application version
-    std::string              m_parfile;    //!< Parameter filename
-    std::string              m_logfile;    //!< Log filename
-    std::vector<std::string> m_args;       //!< Command line arguments
-    std::time_t              m_tstart;     //!< Calendar start time of execution
-    std::clock_t             m_cstart;     //!< Clock start time of execution
-    GApplicationPars         m_pars;       //!< Application parameters
-    bool                     m_need_help;  //!< --help specified
+    std::string              m_name;        //!< Application name
+    std::string              m_version;     //!< Application version
+    std::string              m_parfile;     //!< Parameter filename
+    std::string              m_logfile;     //!< Log filename
+    std::vector<std::string> m_args;        //!< Command line arguments
+    std::time_t              m_tstart;      //!< Calendar start time of execution
+    std::clock_t             m_cstart;      //!< Clock start time of execution
+    GApplicationPars         m_pars;        //!< Application parameters
+    bool                     m_pars_loaded; //!< Application parameters loaded
+    bool                     m_need_help;   //!< --help specified
 };
 
 
@@ -127,6 +150,9 @@ std::string GApplication::classname(void) const
  * @brief Parameter access operator
  *
  * @param[in] name Parameter name.
+ * @return Reference to application parameter.
+ *
+ * Returns a reference to the application parameter with the given @p name.
  ***************************************************************************/
 inline
 GApplicationPar& GApplication::operator[](const std::string& name)
@@ -139,11 +165,47 @@ GApplicationPar& GApplication::operator[](const std::string& name)
  * @brief Parameter access operator (const version)
  *
  * @param[in] name Parameter name.
+ * @return Constant reference to application parameter
+ *
+ * Returns a const reference to the application parameter with the given
+ * @p name.
  ***************************************************************************/
 inline
 const GApplicationPar& GApplication::operator[](const std::string& name) const
 {
     return (m_pars[name]);
+}
+
+
+/***********************************************************************//**
+ * @brief Parameter access operator
+ *
+ * @param[in] index Parameter index [0,...,pars().size()-1].
+ * @return Reference to application parameter
+ *
+ * Returns a reference to the application parameter with the given @p index.
+ * No range checking is performed for the index.
+ ***************************************************************************/
+inline
+GApplicationPar& GApplication::operator[](const int& index)
+{
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Parameter access operator (const version)
+ *
+ * @param[in] index Parameter index [0,...,pars().size()-1].
+ * @return Constant reference to application parameter
+ *
+ * Returns a const reference to the application parameter with the given
+ * @p index. No range checking is performed for the index.
+ ***************************************************************************/
+inline
+const GApplicationPar& GApplication::operator[](const int& index) const
+{
+    return (m_pars[index]);
 }
 
 
@@ -223,6 +285,31 @@ const bool& GApplication::need_help(void) const
 {
     // Return
     return (m_need_help);
+}
+
+
+/***********************************************************************//**
+ * @brief Return application parameters
+ *
+ * @return Application parameters.
+ ***************************************************************************/
+inline
+const GApplicationPars& GApplication::pars(void) const
+{
+    return m_pars;
+}
+
+
+/***********************************************************************//**
+ * @brief Set application parameters
+ *
+ * @param[in] pars Application parameters.
+ ***************************************************************************/
+inline
+void GApplication::pars(const GApplicationPars& pars)
+{
+    m_pars = pars;
+    return;
 }
 
 #endif /* GAPPLICATION_HPP */

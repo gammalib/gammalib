@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for model module                                              #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -45,21 +45,28 @@ sources = GModelPar.cpp \
           GModelSpatialDiffuseConst.cpp \
           GModelSpatialDiffuseCube.cpp \
           GModelSpatialDiffuseMap.cpp \
+          GModelSpatialComposite.cpp \
           GModelSpectral.cpp \
           GModelSpectralRegistry.cpp \
           GModelSpectralBrokenPlaw.cpp \
           GModelSpectralConst.cpp \
+          GModelSpectralExpInvPlaw.cpp \
           GModelSpectralExpPlaw.cpp \
           GModelSpectralSuperExpPlaw.cpp \
           GModelSpectralFunc.cpp \
           GModelSpectralGauss.cpp \
           GModelSpectralLogParabola.cpp \
+          GModelSpectralMultiplicative.cpp \
           GModelSpectralNodes.cpp \
           GModelSpectralPlaw.cpp \
-          GModelSpectralPlaw2.cpp \
+          GModelSpectralPlawPhotonFlux.cpp \
+          GModelSpectralPlawEnergyFlux.cpp \
+          GModelSpectralComposite.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \
+          GModelTemporalLightCurve.cpp \
+          GModelTemporalPhaseCurve.cpp \
           GException_model.cpp
 
 # Build libtool library
