@@ -26,23 +26,23 @@ fi
 #
 # Set parameters
 # ==============
-#prefix="@prefix@"
-#exec_prefix="@exec_prefix@"
-#gammalib_bin="@bindir@"
-#gammalib_lib="@libdir@@TEST_ENV_DIR@"
-#python_dir="@pythondir@"
-#python_exec_dir="@pyexecdir@"
-#pkgconfig_dir="@libdir@/pkgconfig"
-#man_dir="@datadir@/doc/gammalib/man"
-#caldb_dir="@datadir@/caldb"
-prefix="$GAMMALIB"
-gammalib_bin="$GAMMALIB/bin"
-gammalib_lib="$GAMMALIB/lib@TEST_ENV_DIR@"
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+gammalib_bin="@bindir@"
+gammalib_lib="@libdir@@TEST_ENV_DIR@"
 python_dir="@pythondir@"
 python_exec_dir="@pyexecdir@"
-pkgconfig_dir="$GAMMALIB/lib/pkgconfig"
-man_dir="$GAMMALIB/share/doc/gammalib/man"
-caldb_dir="$GAMMALIB/share/caldb"
+pkgconfig_dir="@libdir@/pkgconfig"
+man_dir="@datadir@/doc/gammalib/man"
+caldb_dir="@datadir@/caldb"
+#prefix="$GAMMALIB"
+#gammalib_bin="$GAMMALIB/bin"
+#gammalib_lib="$GAMMALIB/lib@TEST_ENV_DIR@"
+#python_dir="@pythondir@"
+#python_exec_dir="@pyexecdir@"
+#pkgconfig_dir="$GAMMALIB/lib/pkgconfig"
+#man_dir="$GAMMALIB/share/doc/gammalib/man"
+#caldb_dir="$GAMMALIB/share/caldb"
 uname_system=`uname`
 
 #
