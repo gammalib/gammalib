@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile for gammalib Python extension module                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2016 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -175,32 +175,32 @@ swig: $(BUILT_SOURCES)
 
 # Rule for MWL module
 if WITH_INST_MWL
-$(top_builddir)/pyext/gammalib/mwl.py: $(top_builddir)/pyext/gammalib/mwl_wrap.cpp
-$(top_builddir)/pyext/gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
+$(wrapperdir)/gammalib/mwl.py: $(wrapperdir)/gammalib/mwl_wrap.cpp
+$(wrapperdir)/gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -I$(top_srcdir)/pyext -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/mwl.Tpi" "gammalib/mwl.Pi"; else rm -f "gammalib/mwl.Tpi"; exit 1; fi
 endif
 
 # Rule for CTA module
 if WITH_INST_CTA
-$(top_builddir)/pyext/gammalib/cta.py: $(top_builddir)/pyext/gammalib/cta_wrap.cpp
-$(top_builddir)/pyext/gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
+$(wrapperdir)/gammalib/cta.py: $(wrapperdir)/gammalib/cta_wrap.cpp
+$(wrapperdir)/gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -I$(top_srcdir)/pyext -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/cta.Tpi" "gammalib/cta.Pi"; else rm -f "gammalib/cta.Tpi"; exit 1; fi
 endif
 
 # Rule for LAT module
 if WITH_INST_LAT
-$(top_builddir)/pyext/gammalib/lat.py: $(top_builddir)/pyext/gammalib/lat_wrap.cpp
-$(top_builddir)/pyext/gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
+$(wrapperdir)/gammalib/lat.py: $(wrapperdir)/gammalib/lat_wrap.cpp
+$(wrapperdir)/gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -I$(top_srcdir)/pyext -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/lat.Tpi" "gammalib/lat.Pi"; else rm -f "gammalib/lat.Tpi"; exit 1; fi
 endif
 
 # Rule for COM module
 if WITH_INST_COM
-$(top_builddir)/pyext/gammalib/com.py: $(top_builddir)/pyext/gammalib/com_wrap.cpp
-$(top_builddir)/pyext/gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
+$(wrapperdir)/gammalib/com.py: $(wrapperdir)/gammalib/com_wrap.cpp
+$(wrapperdir)/gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -I$(top_srcdir)/pyext -o gammalib/com_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/com.Tpi" "gammalib/com.Pi"; else rm -f "gammalib/com.Tpi"; exit 1; fi
 endif
