@@ -165,8 +165,8 @@ sphinx-install:
 
 # Add clean wrappers rule
 clean-wrappers:
-	rm -rf $(builddir)/pyext/gammalib/*.py
-	rm -rf $(builddir)/pyext/gammalib/*_wrap.cpp
+	rm -rf $(top_builddir)/pyext/gammalib/*.py
+	rm -rf $(top_builddir)/pyext/gammalib/*_wrap.cpp
 
 # Add documentation rule:
 doc: doxygen sphinx

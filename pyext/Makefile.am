@@ -33,7 +33,7 @@ if WITH_PYTHON
 # shipped with the distribution of whether the wrappers have to be build
 # using swig
 if BUILD_WRAPPERS
-  wrapperdir = $(builddir)
+  wrapperdir = $(top_builddir)/pyext
 else
   wrapperdir = $(srcdir)
 endif
@@ -175,32 +175,32 @@ swig: $(BUILT_SOURCES)
 
 # Rule for MWL module
 if WITH_INST_MWL
-gammalib/mwl.py: gammalib/mwl_wrap.cpp
-gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
+$(top_builddir)/pyext/gammalib/mwl.py: $(top_builddir)/pyext/gammalib/mwl_wrap.cpp
+$(top_builddir)/pyext/gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -I$(top_srcdir)/pyext -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/mwl.Tpi" "gammalib/mwl.Pi"; else rm -f "gammalib/mwl.Tpi"; exit 1; fi
 endif
 
 # Rule for CTA module
 if WITH_INST_CTA
-gammalib/cta.py: gammalib/cta_wrap.cpp
-gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
+$(top_builddir)/pyext/gammalib/cta.py: $(top_builddir)/pyext/gammalib/cta_wrap.cpp
+$(top_builddir)/pyext/gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -I$(top_srcdir)/pyext -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/cta.Tpi" "gammalib/cta.Pi"; else rm -f "gammalib/cta.Tpi"; exit 1; fi
 endif
 
 # Rule for LAT module
 if WITH_INST_LAT
-gammalib/lat.py: gammalib/lat_wrap.cpp
-gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
+$(top_builddir)/pyext/gammalib/lat.py: $(top_builddir)/pyext/gammalib/lat_wrap.cpp
+$(top_builddir)/pyext/gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -I$(top_srcdir)/pyext -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/lat.Tpi" "gammalib/lat.Pi"; else rm -f "gammalib/lat.Tpi"; exit 1; fi
 endif
 
 # Rule for COM module
 if WITH_INST_COM
-gammalib/com.py: gammalib/com_wrap.cpp
-gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
+$(top_builddir)/pyext/gammalib/com.py: $(top_builddir)/pyext/gammalib/com_wrap.cpp
+$(top_builddir)/pyext/gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -I$(top_srcdir)/pyext -o gammalib/com_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/com.Tpi" "gammalib/com.Pi"; else rm -f "gammalib/com.Tpi"; exit 1; fi
 endif
@@ -270,16 +270,16 @@ CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
 clean-local:
 	rm -rf build
 if BUILD_WRAPPERS
-	rm -rf $(builddir)/gammalib/*.py
-	rm -rf $(builddir)/gammalib/*_wrap.cpp
+	rm -rf $(top_builddir)/pyext/gammalib/*.py
+	rm -rf $(top_builddir)/pyext/gammalib/*_wrap.cpp
 else
-	if test "x$(builddir)" != "x$(srcdir)"; then \
-		rm -rf $(builddir)/gammalib/*.py; \
-		rm -rf $(builddir)/gammalib/*_wrap.cpp; \
+	if test "x$(top_builddir)" != "x$(top_srcdir)"; then \
+		rm -rf $(top_builddir)/pyext/gammalib/*.py; \
+		rm -rf $(top_builddir)/pyext/gammalib/*_wrap.cpp; \
 	fi
 endif
-	rm -rf $(builddir)/gammalib/*.pyc
-	rm -rf $(builddir)/gammalib/_*.so
-	rm -rf $(builddir)/gammalib/__pycache__
+	rm -rf $(top_builddir)/pyext/gammalib/*.pyc
+	rm -rf $(top_builddir)/pyext/gammalib/_*.so
+	rm -rf $(top_builddir)/pyext/gammalib/__pycache__
 
 endif # WITH_PYTHON

@@ -204,13 +204,13 @@ all-local:
 
 # Files to be removed in build directory
 clean-local:
-	rm -rf $(builddir)/*.fits
-	rm -rf $(builddir)/*.log
-	rm -rf $(builddir)/*.html
-	rm -rf $(builddir)/*.xml
-	rm -rf $(builddir)/*.reg
-	rm -rf $(builddir)/*.dat
-	rm -rf $(builddir)/reports/*.xml
+	rm -rf $(top_builddir)/test/*.fits
+	rm -rf $(top_builddir)/test/*.log
+	rm -rf $(top_builddir)/test/*.html
+	rm -rf $(top_builddir)/test/*.xml
+	rm -rf $(top_builddir)/test/*.reg
+	rm -rf $(top_builddir)/test/*.dat
+	rm -rf $(top_builddir)/test/reports/*.xml
 
 # Tests to be done on installed version
 if WITH_PYTHON

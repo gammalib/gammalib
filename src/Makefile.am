@@ -68,20 +68,20 @@ scripts = gammalib-setup \
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(sources)
-libgamma_la_LIBADD = $(builddir)/base/libbase.la \
-                     $(builddir)/support/libsupport.la \
-                     $(builddir)/linalg/liblinalg.la \
-                     $(builddir)/numerics/libnumerics.la \
-                     $(builddir)/fits/libfits.la \
-                     $(builddir)/xml/libxml.la \
-                     $(builddir)/vo/libvo.la \
-                     $(builddir)/xspec/libxspec.la \
-                     $(builddir)/sky/libsky.la \
-                     $(builddir)/opt/libopt.la \
-                     $(builddir)/obs/libobs.la \
-                     $(builddir)/model/libmodel.la \
-                     $(builddir)/app/libapp.la \
-                     $(builddir)/test/libtest.la \
+libgamma_la_LIBADD = $(top_builddir)/src/base/libbase.la \
+                     $(top_builddir)/src/support/libsupport.la \
+                     $(top_builddir)/src/linalg/liblinalg.la \
+                     $(top_builddir)/src/numerics/libnumerics.la \
+                     $(top_builddir)/src/fits/libfits.la \
+                     $(top_builddir)/src/xml/libxml.la \
+                     $(top_builddir)/src/vo/libvo.la \
+                     $(top_builddir)/src/xspec/libxspec.la \
+                     $(top_builddir)/src/sky/libsky.la \
+                     $(top_builddir)/src/opt/libopt.la \
+                     $(top_builddir)/src/obs/libobs.la \
+                     $(top_builddir)/src/model/libmodel.la \
+                     $(top_builddir)/src/app/libapp.la \
+                     $(top_builddir)/src/test/libtest.la \
                      $(INST_MWL) \
                      $(INST_CTA) \
                      $(INST_LAT) \
