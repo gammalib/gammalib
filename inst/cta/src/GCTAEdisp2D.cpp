@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdisp2D.cpp - CTA 2D energy dispersion class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Florent Forest                              *
+ *  copyright (C) 2015-2017 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                               "GCTAEdisp2D::read(GFitsTable&)"
+#define G_MC    "GCTAEdisp2D::mc(GRan&, double&, double&, double&, double&, "\
+                                                                   "double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -363,7 +365,7 @@ void GCTAEdisp2D::read(const GFitsTable& table)
                 sums.push_back(sum);
 
             } // endfor: looped over Etrue
-            
+
         } // endfor: looped over theta
 
         // Normalize vectors of migration matrix for all etrue and theta.
@@ -378,7 +380,7 @@ void GCTAEdisp2D::read(const GFitsTable& table)
                 }
             }
         }
-    
+
     } // endfor: made 2 passes
 
     // Set maximum energy dispersion value
@@ -500,8 +502,12 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  * @param[in] zenith Zenith angle in Earth system (rad).
  * @param[in] azimuth Azimuth angle in Earth system (rad).
  *
+ * @exception GException::invalid_return_value
+ *            No energy dispersion information found for parameters
+ *
  * Draws observed energy value given a true energy @p logEsrc and offset
- * angle @p theta.
+ * angle @p theta. If no energy dispersion information is available the
+ * method will return the true photon energy.
  ***************************************************************************/
 GEnergy GCTAEdisp2D::mc(GRan&         ran,
                         const double& logEsrc,
@@ -515,10 +521,24 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
     double   emin    = ebounds.emin().log10TeV();
     double   emax    = ebounds.emax().log10TeV();
 
+    // Throw an exception if no valid energy dispersion information is
+    // available
+    if (emin == emax) {
+        std::string msg = "No valid energy dispersion information available "
+                          "for true photon energy "+ebounds.emin().print()+
+                          ", offset angle "+
+                          gammalib::str(theta*gammalib::rad2deg)+" deg "
+                          " and azimuth angle "+
+                          gammalib::str(phi*gammalib::rad2deg)+" deg. Either "
+                          "provide an energy response matrix covering these "
+                          "parameters or restrict the parameter space.";
+        throw GException::invalid_return_value(G_MC, msg);
+    }
+
     // Find energy by rejection method
     double ewidth  = emax - emin;
-    double logEobs = 0.5*(emin+emax);
-    if (m_max_edisp > 0.0) {
+    double logEobs = logEsrc;
+    if (m_max_edisp > 0.0 && ewidth > 0.0) {
         double f       = 0.0;
         double ftest   = 1.0;
         while (ftest > f) {

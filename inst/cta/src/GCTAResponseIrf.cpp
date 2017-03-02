@@ -489,11 +489,11 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
     // If energy dispersion is requested then integrate over the relevant
     // true photon energies ...
     if (use_edisp()) {
-    
+
         // Retrieve true energy boundaries
         double   obsLogEng = obsEng.log10TeV();
         GEbounds ebounds   = edisp()->ebounds_src(obsLogEng);
-    
+
         // Loop over all boundaries
         for (int i = 0; i < ebounds.size(); ++i) {
 
@@ -515,7 +515,7 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
                 emin  = std::log(emin);
                 emax  = std::log(emax);
                 nroi += integral.romberg(emin, emax);
-    
+
             } // endif: interval was valid
 
         } // endfor: looped over energy intervals
@@ -524,7 +524,7 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
 
     // ... otherwise evaluate
     else {
-    
+
         // No energy dispersion
         const GEnergy& srcEng = obsEng;
 
@@ -535,7 +535,7 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
 
         // Compute response
         nroi = npred_spatial * npred_spectral * npred_temporal;
-        
+
     } // endelse: no energy dispersion requested
 
     // If required, apply instrument specific model scaling
@@ -1152,7 +1152,7 @@ void GCTAResponseIrf::load_aeff(const GFilename& filename)
                 m_aeff = new GCTAAeffArf(filename);
 
             } // endif: load as GCTAAeffArf
-            
+
             else {
 
                 // Close file
@@ -1160,7 +1160,7 @@ void GCTAResponseIrf::load_aeff(const GFilename& filename)
 
                 // Allocate Aeff from file
                 m_aeff = new GCTAAeff2D(filename);
-                
+
             } // endelse: load as GCTAAeff2D
 
         } // endif: extension name is not empty
@@ -1270,13 +1270,13 @@ void GCTAResponseIrf::load_psf(const GFilename& filename)
 
             // Check for King profile specific table columns
             if (table.contains("GAMMA") && table.contains("SIGMA")) {
-            
+
                 // Close FITS file
                 fits.close();
 
                 // Allocate King profile PSF
                 m_psf = new GCTAPsfKing(filename);
-                
+
             }
 
             // ... otherwise check for Gaussian profile specific table
@@ -1284,36 +1284,36 @@ void GCTAResponseIrf::load_psf(const GFilename& filename)
             else if (table.contains("SCALE")  && table.contains("SIGMA_1") &&
                      table.contains("AMPL_2") && table.contains("SIGMA_2") &&
                      table.contains("AMPL_3") && table.contains("SIGMA_3")) {
-            
+
                 // Close FITS file
                 fits.close();
 
                 // Allocate Gaussian profile PSF
                 m_psf = new GCTAPsf2D(filename);
-                
+
             }
 
             // ... otherwise check for PSF table specific table columns
             else if (table.contains("RAD_LO") && table.contains("RAD_HI") &&
                      table.contains("RPSF")) {
-            
+
                 // Close FITS file
                 fits.close();
 
                 // Allocate PSF table
                 m_psf = new GCTAPsfTable(filename);
-                
+
             }
-            
+
             // ... otherwise try opening as vector PSF
             else {
-            
+
                 // Close FITS file
                 fits.close();
 
                 // Allocate vector PSF
                 m_psf = new GCTAPsfVector(filename);
-                
+
             }
 
         } // endif: extension name is not empty
@@ -1331,7 +1331,7 @@ void GCTAResponseIrf::load_psf(const GFilename& filename)
 
     // ... otherwise load file as a performance table
     else {
-    
+
         // Allocate a performance table
         m_psf = new GCTAPsfPerfTable(filename);
 
@@ -1405,24 +1405,24 @@ void GCTAResponseIrf::load_edisp(const GFilename& filename)
 
             // Check for 2D migration matrix
             if (table.contains("MIGRA_LO") && table.contains("MIGRA_HI")) {
-            
+
                 // Close FITS file
                 fits.close();
 
                 // Allocate 2D migration matrix
                 m_edisp = new GCTAEdisp2D(filename);
-                
+
             }
 
             // ... otherwise allocate RMF
             else {
-            
+
                 // Close FITS file
                 fits.close();
 
                 // Allocate Gaussian profile PSF
                 m_edisp = new GCTAEdispRmf(filename);
-                
+
             }
 
         } // endif: extension name is not empty
@@ -2232,7 +2232,7 @@ double GCTAResponseIrf::irf_ptsrc(const GEvent&       event,
 
     // Set Photon
     GPhoton photon(src->dir(), source.energy(), source.time());
-    
+
     // Compute IRF
     double irf = this->irf(event, photon, obs);
 
