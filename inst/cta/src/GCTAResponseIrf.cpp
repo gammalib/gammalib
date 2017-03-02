@@ -644,31 +644,42 @@ GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
         double deadc = obs.deadc(photon.time());
         if (deadc >= 1.0 || ran.uniform() <= deadc) {
 
-            // Simulate offset from photon arrival direction
-            double delta = psf()->mc(ran, srcLogEng, theta, phi, zenith, azimuth) *
-                           gammalib::rad2deg;
-            double alpha = 360.0 * ran.uniform();
+            // Simulate PSF and energy dispersion. Skip event if exception
+            // occurs
+           try {
 
-            // Rotate sky direction by offset
-            GSkyDir sky_dir = photon.dir();
-            sky_dir.rotate_deg(alpha, delta);
+                // Simulate offset from photon arrival direction.
+                double delta = psf()->mc(ran, srcLogEng, theta, phi, zenith, azimuth) *
+                               gammalib::rad2deg;
+                double alpha = 360.0 * ran.uniform();
 
-            // Set measured photon arrival direction in instrument direction
-            GCTAInstDir inst_dir = pnt.instdir(sky_dir);
+                // Rotate sky direction by offset
+                GSkyDir sky_dir = photon.dir();
+                sky_dir.rotate_deg(alpha, delta);
 
-            // Set measured photon energy
-            GEnergy energy = photon.energy();
-            if (use_edisp()) {
-                energy = edisp()->mc(ran, srcLogEng, theta, phi, zenith, azimuth);
+                // Set measured photon arrival direction in instrument direction
+                GCTAInstDir inst_dir = pnt.instdir(sky_dir);
+
+                // Set measured photon energy
+                GEnergy energy = photon.energy();
+                if (use_edisp()) {
+                    energy = edisp()->mc(ran, srcLogEng, theta, phi, zenith, azimuth);
+                }
+
+                // Allocate event
+                event = new GCTAEventAtom;
+
+                // Set event attributes
+                event->dir(inst_dir);
+                event->energy(energy);
+                event->time(photon.time());
+
+            } // endtry: PSF and energy dispersion simulation successful
+
+            // ... otherwise catch exception
+            catch (GException::invalid_return_value) {
+                ;
             }
-
-            // Allocate event
-            event = new GCTAEventAtom;
-
-            // Set event attributes
-            event->dir(inst_dir);
-            event->energy(energy);
-            event->time(photon.time());
 
         } // endif: detector was alive
 
