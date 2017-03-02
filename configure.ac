@@ -1436,6 +1436,7 @@ AC_CONFIG_FILES([Makefile
                  examples/Makefile
                  examples/cpp/Makefile
                  gammalib.pc
+                 gammalib.spec
                  testconf.sh],
                 [if test -f test/test_python.sh; then chmod +x test/test_python.sh; fi;
                  if test -f test/test_examples.sh; then chmod +x test/test_examples.sh; fi;

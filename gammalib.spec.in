@@ -1,0 +1,150 @@
+%global _enable_debug_package 0
+%global debug_package %{nil}
+%global __os_install_post /usr/lib/rpm/brp-compress %{nil}
+#%define _binaries_in_noarch_packages_terminate_build   0
+%define PKGNAME @PACKAGE_NAME@
+%define VERSION @PACKAGE_VERSION@
+# TODO fix %define RELEASE 1
+%define RELEASE 1
+
+Name: %{PKGNAME}
+Summary: Versatile toolbox for scientific analysis of astronomical gamma-ray data
+Version: %{VERSION}
+Release: %{RELEASE}
+License: GPLv3
+Group: Development/Libraries
+#Source0: %{PKGNAME}-%VERSION.tar.gz
+Source0: http://cta.irap.omp.eu/ctools/releases/gammalib/%{PKGNAME}-%VERSION.tar.gz
+BuildArch: noarch
+BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
+#BuildRequires: ncurses
+#BuildRequires: readline
+#BuildRequires: libstdc++-devel
+#BuildRequires: gcc-c++
+#BuildRequires: automake 
+#BuildRequires: autoconf 
+#BuildRequires: libtool
+#BuildRequires: swig
+#BuildRequires: doxygen
+#BuildRequires: python-devel
+#BuildRequires: ncurses
+#BuildRequires: readline
+#BuildRequires: cfitsio
+# Requires: liste des packages requis pour l'installation
+#Requires: ncurses
+#Requires: readline
+#Requires: gcc-c++
+#Requires: cfitsio
+#
+Prefix: /usr/local/gamma
+#
+URL: http://gammalib.sourceforge.net/
+
+#Description (max 79 caractères par ligne)
+%description
+GammaLib is a versatile toolbox for the high-level analysis of astronomical
+gamma-ray data. It consists of a C++ library and a Python module that exposes
+the full functionality of the library to Python.
+The library provides an abstract data analysis framework that is independent
+of any specific gamma-ray telescope. Instrument specific aspects,
+such as handling of data formats and response functions, are implemented
+as isolated and well defined modules sharing an identical abstract interface.
+This enables a joint multi-instrument analysis of data, allowing for
+consistent broad-band spectral fitting or imaging.
+So far, GammaLib supports analysis of data obtained with COMPTEL, Fermi/LAT,
+and Cherenkov telescopes (CTA, H.E.S.S., MAGIC, VERITAS).
+
+# Préparation du package
+%prep
+%setup -q
+
+# Nettoyer le dossier temporaire (eventuellement precedents rpmbuild)
+rm -rf $HOME%{prefix}
+
+# Compilation du logiciel (execute ./configure et make)
+./configure -prefix=$HOME%{prefix}/%{PKGNAME}
+
+make
+
+%check
+make check
+
+# Installation de l'application (execute make install)
+%install
+export DONT_STRIP=1
+make install
+
+#=================================================#
+# TODO : Add Information to RPM File             #
+#=================================================#
+
+# TODO : fix folder and option
+#      option 1 : this file is at the root of the package, and will not be installed
+#      option 2 : this file is saved in %{prefix}/%{PKGNAME} folder
+#
+# --> How to extract files,
+#      option 1:
+#         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /ctools.dist
+#         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /Licence.txt
+#      option 2: result in $HOME/usr/local/gamma/ctools
+#         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /usr/local/gamma/ctools/ctools.dist
+#         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /usr/local/gamma/ctools/Licence.txt
+
+# Add information to rpm file
+
+# Option 1 : cat <<EOF > $RPM_BUILD_ROOT/%{PKGNAME}.dist
+# Option 2 selected
+cat <<EOF > $HOME/%{prefix}/%{PKGNAME}/%{PKGNAME}.dist
+<license file="COPYING"/>
+<title>'%{PKGNAME}'</title>
+<organization>irap.omp.eu</organization>
+<description>CTA Science Analysis Tools</description>
+EOF
+
+
+# Add additional files to production folder
+# Option 1 : cp COPYING $RPM_BUILD_ROOT/License.txt
+# Option 2 selected
+cp COPYING $HOME/%{prefix}/%{PKGNAME}/License.txt
+
+# copie des fichiers de $HOME/usr dans cp -R $HOME/usr $HOME/rpm/BUILDROOT/%{PKGNAME}-1.x86_64/
+cp -R $HOME/usr $RPM_BUILD_ROOT/
+
+echo "============ Installation ==============="
+install -m 0755 -d /%{prefix}
+
+# Nettoyage du package
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+# Pre installation
+%pre
+# TODO : Création des utilisateurs, des groupes etc...
+
+# Post installation
+%post
+# TODO : Test installation ?
+# TODO : Ajout des scripts en crontab
+
+# Pré désinstallation
+%preun
+# TODO : Backup database, configuration files etc...
+
+# Post désinstallation
+%postun
+# TODO : Suppression utilisateur etc...
+
+%changelog
+* Wed Mar 1 2017 SYLVIE BRAU-NOGUE (sylvie.brau-nogue@irap.omp.eu)
+- Packaging scripts included in the Makefile
+
+# Fichier embarqués
+%files
+%defattr(-,root,root,-)
+/*
+# Add the list of documentation files that are included in this package to the %doc directive
+%doc COPYING ChangeLog
+# TODO : Affiner le placement des fichiers
+
+
+
