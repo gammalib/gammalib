@@ -55,9 +55,9 @@ class GXmlElement;
  * \f]
  *
  * where
- * \f$r(t)$\f is the rate defined by linear interpolation between the nodes
+ * \f$r(t)\f$ is the rate defined by linear interpolation between the nodes
  * in a FITS file, and
- * \f${\tt m\_norm}$\f is a normalisation constant.
+ * \f${\tt m\_norm}\f$ is a normalisation constant.
  ***************************************************************************/
 class GModelTemporalLightCurve : public GModelTemporal {
 
