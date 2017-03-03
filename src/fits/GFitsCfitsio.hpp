@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsCfitsio.hpp  - CFITSIO interface header              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@
 #define __ffdelt(A, B) ffdelt(A, B)
 #define __ffdhdu(A, B, C) ffdhdu(A, B, C)
 #define __ffdrow(A, B, C, D) ffdrow(A, B, C, D)
+#define __ffflus(A, B) ffflus(A, B)
 #define __ffgabc(A, B, C, D, E, F) ffgabc(A, B, C, D, E, F)
 #define __ffgcv(A, B, C, D, E, F, G, H, I, J) ffgcv(A, B, C, D, E, F, G, H, I, J)
 #define __ffgcvb(A, B, C, D, E, F, G, H, I) ffgcvb(A, B, C, D, E, F, G, H, I)
