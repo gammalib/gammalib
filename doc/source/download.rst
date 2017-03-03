@@ -14,10 +14,11 @@ Releases
 --------
 
 The latest GammaLib release is
-`gammalib-1.1.0 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.1.0.tar.gz>`_
-(24 July 2016).
+`gammalib-1.2.0 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.2.0.tar.gz>`_
+(3 March 2017).
 
 To download an older release, click on the corresponding release number:
+`1.1.0 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.1.0.tar.gz>`_
 `1.0.1 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.0.1.tar.gz>`_
 `1.0.0 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.0.0.tar.gz>`_
 `0.11.0 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-0.11.0.tar.gz>`_
@@ -35,6 +36,16 @@ To download an older release, click on the corresponding release number:
 `0.4.10 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-00-04-10.tar.gz>`_
 `0.4.9 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-00-04-09.tar.gz>`_
 `0.4.7 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-00-04-07.tar.gz>`_
+
+
+Development release
+-------------------
+
+The current GammaLib development release is ``gammalib-1.3.0.dev1``.
+This release reflects the status of the current ``devel`` branch of
+the GammaLib git repository.
+
+* `GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.3.0.dev1.tar.gz>`_ source code tarball
 
 
 Git repository
