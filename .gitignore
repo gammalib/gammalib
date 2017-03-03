@@ -5,6 +5,7 @@ depcomp
 pyext/build/
 .libs
 .deps
+gammalib-*
 inst/cta/test/*.xml
 inst/cta/test/*.fits
 inst/cta/test/*.fits.gz
