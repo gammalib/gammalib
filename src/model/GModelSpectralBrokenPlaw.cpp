@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralBrokenPlaw.cpp - Broken power law spectrum class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Anneli Schulz                               *
+ *  copyright (C) 2013-2017 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -294,32 +294,53 @@ GModelSpectralBrokenPlaw* GModelSpectralBrokenPlaw::clone(void) const
  * Evaluates
  *
  * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- *    \left( \frac{E}{\tt m\_breakenergy} \right)^{\tt m\_index}
+ *    S_{\rm E}(E | t) = k_0 \times \left \{
+ *    \begin{eqnarray}
+ *     \left( \frac{E}{E_b} \right)^{\gamma_1} & {\rm if\,\,} E < E_b \\
+ *     \left( \frac{E}{E_b} \right)^{\gamma_2} & {\rm otherwise}
+ *    \end{eqnarray}
+ *    \right .
  * \f]
  *
  * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
- * - \f${\tt m\_index}\f$ is the spectral index, and
- * - \f${\tt m\_breakenergy}\f$ is the breakenergy energy.
+ * \f$k_0\f$ is the normalization or prefactor,
+ * \f$\gamma_1\f$ is the spectral index before the break,
+ * \f$\gamma_2\f$ is the spectral index after the break, and
+ * \f$E_b\f$ is the break energy.
  *
  * If the @p gradients flag is true the method will also compute the
  * partial derivatives of the model with respect to the parameters using
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
- *      \frac{S_{\rm E}(E | t)}{{\tt m\_norm}}
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta k_0} =
+ *      \frac{S_{\rm E}(E | t)}{k_0}
  * \f]
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_index}} =
- *      S_{\rm E}(E | t) \, \ln(E/{\tt m_breakenergy})
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta \gamma_1} = \left \{
+ *    \begin{eqnarray}
+ *      S_{\rm E}(E | t) \, \ln(E/E_b) & {\rm if\,\,} E < E_b \\
+ *      0 & {\rm otherwise}
+ *    \end{eqnarray}
+ *    \right .
  * \f]
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_breakenergy}} =
- *      -S_{\rm E}(E | t) \,
- *      \left( \frac{{\tt m\_index}}{{\tt m\_breakenergy}} \right)
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta \gamma_2} = \left \{
+ *    \begin{eqnarray}
+ *      0                              & {\rm if\,\,} E < E_b \\
+ *      S_{\rm E}(E | t) \, \ln(E/E_b) & {\rm otherwise}
+ *    \end{eqnarray}
+ *    \right .
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta E_b} = k_0 \times \left \{
+ *    \begin{eqnarray}
+ *      -S_{\rm E}(E | t) \, \left( \frac{\gamma_1}{E_b} \right) & {\rm if\,\,} E < E_b \\
+ *      -S_{\rm E}(E | t) \, \left( \frac{\gamma_2}{E_b} \right) & {\rm otherwise}
+ *    \end{eqnarray}
+ *    \right .
  * \f]
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.

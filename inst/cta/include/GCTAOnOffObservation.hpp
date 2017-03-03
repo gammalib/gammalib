@@ -320,7 +320,7 @@ const GRmf& GCTAOnOffObservation::rmf(void) const
 inline
 int GCTAOnOffObservation::nobserved(void) const
 {
-    return (m_on_spec.counts());
+    return ((int)(m_on_spec.counts()+0.5));
 }
 
 #endif /* GCTAONOFFOBSERVATION_HPP */

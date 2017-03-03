@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralBrokenPlaw.hpp - Broken power law spectrum class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Anneli Schulz                               *
+ *  copyright (C) 2013-2017 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,14 +48,19 @@ class GXmlElement;
  * by
  *
  * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
- *    \left( \frac{E}{\tt m\_breakenergy} \right)^{\tt m\_index1}
+ *    S_{\rm E}(E | t) = k_0 \times \left \{
+ *    \begin{eqnarray}
+ *     \left( \frac{E}{E_b} \right)^{\gamma_1} & {\rm if\,\,} E < E_b \\
+ *     \left( \frac{E}{E_b} \right)^{\gamma_2} & {\rm otherwise}
+ *    \end{eqnarray}
+ *    \right .
  * \f]
  *
  * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
- * - \f${\tt m\_index1}\f$ is the spectral index1, and
- * - \f${\tt m\_breakenergy}\f$ is the breakenergy energy.
+ * \f$k_0\f$ is the normalization or prefactor,
+ * \f$\gamma_1\f$ is the spectral index before the break,
+ * \f$\gamma_2\f$ is the spectral index after the break, and
+ * \f$E_b\f$ is the break energy.
  ***************************************************************************/
 class GModelSpectralBrokenPlaw : public GModelSpectral {
 

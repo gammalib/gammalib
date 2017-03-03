@@ -47,7 +47,7 @@ class GXmlElement;
  * @brief Temporal phase curve model class
  *
  * This class implements a temporal variation based on the phase
- * \f$\Phi(t)$\f that is computed using
+ * \f$\Phi(t)\f$ that is computed using
  *
  * \f[
  *    \Phi(t) = \Phi_0 + f(t-t_0) + \frac{1}{2}\dot{f} (t-t_0)^2 +
@@ -55,12 +55,12 @@ class GXmlElement;
  * \f]
  *
  * where
- * \f$t_0$\f is a reference time,
- * \f$\Phi_0$\f is the phase at the reference time,
- * \f$f$\f is the variation frequency at the reference time,
- * \f$\dot{f}$\f is the first derivative of the variation frequency at the
+ * \f$t_0\f$ is a reference time,
+ * \f$\Phi_0\f$ is the phase at the reference time,
+ * \f$f\f$ is the variation frequency at the reference time,
+ * \f$\dot{f}\f$ is the first derivative of the variation frequency at the
  * reference time, and
- * \f$\ddot{f}$\f is the second derivative of the variation frequency at the
+ * \f$\ddot{f}\f$ is the second derivative of the variation frequency at the
  * reference time.
  *
  * The temporal variation is then computed using
@@ -69,8 +69,8 @@ class GXmlElement;
  *    S_{\rm t}(t) = r(\Phi(t)) \times {\tt m\_norm}
  * \f]
  *
- * where \f$r(\Phi(t))$\f is the rate defined by linear interpolation between
- * the nodes in a FITS file, and \f${\tt m\_norm}$\f is a normalisation
+ * where \f$r(\Phi(t))\f$ is the rate defined by linear interpolation between
+ * the nodes in a FITS file, and \f${\tt m\_norm}\f$ is a normalisation
  * constant.
  ***************************************************************************/
 class GModelTemporalPhaseCurve : public GModelTemporal {
@@ -247,9 +247,9 @@ GTime GModelTemporalPhaseCurve::mjd(void) const
  * Sets the reference Modified Julian Day.
  ***************************************************************************/
 inline
-void GModelTemporalPhaseCurve::mjd(const GTime& time)
+void GModelTemporalPhaseCurve::mjd(const GTime& mjd)
 {
-    m_mjd.value(time.mjd());
+    m_mjd.value(mjd.mjd());
     return;
 }
 
