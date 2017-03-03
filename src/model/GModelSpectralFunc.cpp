@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralFunc.cpp - Spectral function model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -324,7 +324,7 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
         // Get energy range in MeV
         double e_min = emin.MeV();
         double e_max = emax.MeV();
-    
+
         // Determine left node index for minimum energy
         m_lin_nodes.set_value(e_min);
         int inx_emin = m_lin_nodes.inx_left();
@@ -332,7 +332,7 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
         // Determine left node index for maximum energy
         m_lin_nodes.set_value(e_max);
         int inx_emax = m_lin_nodes.inx_left();
-    
+
         // If both energies are within the same nodes then simply
         // integrate over the energy interval using the appropriate power
         // law parameters
@@ -343,7 +343,7 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
                                               m_epivot[inx_emin],
                                               m_gamma[inx_emin]);
         }
-    
+
         // ... otherwise integrate over the nodes where emin and emax
         // resides and all the remaining nodes
         else {
@@ -371,12 +371,12 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
                                                e_max,
                                                m_epivot[inx_emax],
                                                m_gamma[inx_emax]);
-        
+
         } // endelse: emin and emax not between same nodes
-    
+
         // Multiply flux by normalisation factor
         flux *= m_norm.value();
-    
+
     } // endif: integration range was valid
 
     // Return
@@ -408,11 +408,11 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
 
     // Compute only if integration range is valid
     if (emin < emax) {
-    
+
         // Get energy range in MeV
         double e_min = emin.MeV();
         double e_max = emax.MeV();
-    
+
         // Determine left node index for minimum energy
         m_lin_nodes.set_value(e_min);
         int inx_emin = m_lin_nodes.inx_left();
@@ -420,7 +420,7 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
         // Determine left node index for maximum energy
         m_lin_nodes.set_value(e_max);
         int inx_emax = m_lin_nodes.inx_left();
-    
+
         // If both energies are within the same nodes then simply
         // integrate over the energy interval using the appropriate power
         // law parameters
@@ -462,12 +462,12 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
                                                 m_epivot[inx_emax],
                                                 m_gamma[inx_emax]) *
                                                 gammalib::MeV2erg;
-        
+
         } // endelse: emin and emax not between same nodes
-    
+
         // Multiply flux by normalisation factor
         eflux *= norm();
-    
+
     } // endif: integration range was valid
 
     // Return flux
@@ -503,7 +503,7 @@ GEnergy GModelSpectralFunc::mc(const GEnergy& emin,
 
     // Allocate energy
     GEnergy energy;
-    
+
     // Update cache
     mc_update(emin, emax);
 
@@ -535,7 +535,7 @@ GEnergy GModelSpectralFunc::mc(const GEnergy& emin,
         double eng   = std::exp(u * (e_max - e_min) + e_min);
         energy.MeV(eng);
     }
-    
+
     // Return energy
     return energy;
 }
@@ -730,7 +730,7 @@ void GModelSpectralFunc::init_members(void)
     m_lin_values.clear();
     m_log_values.clear();
     m_filename.clear();
-    
+
     // Initialise cache
     m_mc_emin.clear();
     m_mc_emax.clear();
@@ -758,7 +758,7 @@ void GModelSpectralFunc::copy_members(const GModelSpectralFunc& model)
     m_lin_values = model.m_lin_values;
     m_log_values = model.m_log_values;
     m_filename   = model.m_filename;
-    
+
     // Copy pre-computation cache
     m_prefactor  = model.m_prefactor;
     m_gamma      = model.m_gamma;
@@ -843,7 +843,7 @@ void GModelSpectralFunc::load_nodes(const GFilename& filename)
     // Setup nodes
     double last_energy = 0.0;
     for (int i = 0; i < csv.nrows(); ++i) {
-    
+
         // Get log10 of node energy and value. Make sure they are valid.
         double log10energy;
         double log10value;
@@ -861,24 +861,24 @@ void GModelSpectralFunc::load_nodes(const GFilename& filename)
             throw GException::file_function_value(G_LOAD_NODES, filename.url(),
                   csv.real(i,1), "Intensity value must be positive.");
         }
-        
+
         // Make sure that energies are increasing
         if (csv.real(i,0) <= last_energy) {
             throw GException::file_function_value(G_LOAD_NODES, filename.url(),
                   csv.real(i,0), "Energy values must be monotonically increasing.");
         }
-        
+
         // Append log10 of node energy and value    
         m_lin_nodes.append(csv.real(i,0));
         m_log_nodes.append(log10energy);
         m_lin_values.push_back(csv.real(i,1));
         m_log_values.push_back(log10value);
-        
+
         // Store last energy for monotonically increasing check
         last_energy = csv.real(i,0);
-        
+
     } // endfor: looped over nodes
-    
+
     // Set pre-computation cache
     set_cache();
 
@@ -898,26 +898,26 @@ void GModelSpectralFunc::set_cache(void) const
     m_epivot.clear();
     m_flux.clear();
     m_eflux.clear();
-    
+
     // Loop over all nodes-1
     for (int i = 0; i < m_lin_nodes.size()-1; ++i) {
-    
+
         // Get energies and function values
         double emin = m_lin_nodes[i];
         double emax = m_lin_nodes[i+1];
         double fmin = m_lin_values[i];
         double fmax = m_lin_values[i+1];
-    
+
         // Compute pivot energy (MeV). We use here the geometric mean of
         // the node boundaries.
         double epivot = std::sqrt(emin*emax);
-        
+
         // Compute spectral index
         double gamma = std::log(fmin/fmax) / std::log(emin/emax);
-        
+
         // Compute power law normalisation
         double prefactor = fmin / std::pow(emin/epivot, gamma);
-        
+
         // Compute photon flux between nodes
         double flux = prefactor *
                       gammalib::plaw_photon_flux(emin, emax, epivot, gamma);
@@ -928,14 +928,14 @@ void GModelSpectralFunc::set_cache(void) const
 
         // Convert energy flux from MeV/cm2/s to erg/cm2/s
         eflux *= gammalib::MeV2erg;
-        
+
         // Push back values on pre-computation cache
         m_prefactor.push_back(prefactor);
         m_gamma.push_back(gamma);
         m_epivot.push_back(epivot);
         m_flux.push_back(flux);
         m_eflux.push_back(eflux);
-    
+
     } // endfor: looped over all nodes
 
     // Return
@@ -957,11 +957,11 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin,
 {
     // Check if we need to update the cache
     if (emin != m_mc_emin || emax != m_mc_emax) {
-    
+
         // Store new energy interval
         m_mc_emin = emin;
         m_mc_emax = emax;
-        
+
         // Initialise cache
         m_mc_cum.clear();
         m_mc_min.clear();
@@ -971,13 +971,13 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin,
         // Get energy range in MeV
         double e_min = emin.MeV();
         double e_max = emax.MeV();
-    
+
         // Continue only if e_max > e_min
         if (e_max > e_min) {
-        
+
             // Allocate flux
             double flux;
-    
+
             // Determine left node index for minimum energy
             m_lin_nodes.set_value(e_min);
             int inx_emin = m_lin_nodes.inx_left();
@@ -985,7 +985,7 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin,
             // Determine left node index for maximum energy
             m_lin_nodes.set_value(e_max);
             int inx_emax = m_lin_nodes.inx_left();
-    
+
             // If both energies are within the same node then just
             // add this one node on the stack
             if (inx_emin == inx_emax) {
@@ -999,7 +999,7 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin,
                 m_mc_max.push_back(e_max);
                 m_mc_exp.push_back(m_gamma[inx_emin]);
             }
-    
+
             // ... otherwise integrate over the nodes where emin and emax
             // resides and all the remaining nodes
             else {
@@ -1039,7 +1039,7 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin,
                 m_mc_min.push_back(m_lin_nodes[inx_emax]);
                 m_mc_max.push_back(e_max);
                 m_mc_exp.push_back(m_gamma[inx_emax]);
-        
+
             } // endelse: emin and emax not between same nodes
 
             // Build cumulative distribution
@@ -1047,8 +1047,10 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin,
                 m_mc_cum[i] += m_mc_cum[i-1];
             }
             double norm = m_mc_cum[m_mc_cum.size()-1];
-            for (int i = 0; i < m_mc_cum.size(); ++i) {
-                m_mc_cum[i] /= norm;
+            if (norm > 0.0) {
+                for (int i = 0; i < m_mc_cum.size(); ++i) {
+                    m_mc_cum[i] /= norm;
+                }
             }
 
             // Set MC values
@@ -1056,23 +1058,43 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin,
 
                 // Compute exponent
                 double exponent = m_mc_exp[i] + 1.0;
-                
+
                 // Exponent dependend computation
                 if (std::abs(exponent) > 1.0e-11) {
-                    m_mc_exp[i] = exponent;
-                    m_mc_min[i] = std::pow(m_mc_min[i], exponent);
-                    m_mc_max[i] = std::pow(m_mc_max[i], exponent);
+
+                    // If the exponent is too small then use lower energy
+                    // boundary
+                    if (exponent < -50.0) {
+                        m_mc_exp[i] = 0.0;
+                        m_mc_min[i] = std::log(m_mc_min[i]);
+                        m_mc_max[i] = m_mc_min[i];
+                    }
+
+                    // ... otherwise if exponent is too large then use
+                    // upper energy boundary
+                    else if (exponent > +50.0) {
+                        m_mc_exp[i] = 0.0;
+                        m_mc_min[i] = std::log(m_mc_max[i]);
+                        m_mc_max[i] = m_mc_min[i];
+                    }
+
+                    // ... otherwise use transformation formula
+                    else {
+                        m_mc_exp[i] = exponent;
+                        m_mc_min[i] = std::pow(m_mc_min[i], exponent);
+                        m_mc_max[i] = std::pow(m_mc_max[i], exponent);
+                    }
                 }
                 else {
                     m_mc_exp[i] = 0.0;
                     m_mc_min[i] = std::log(m_mc_min[i]);
                     m_mc_max[i] = std::log(m_mc_max[i]);
                 }
-            
+
             } // endfor: set MC values
-            
+
         } // endif: e_max > e_min
-        
+
     } // endif: Update was required
 
 
