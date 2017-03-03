@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-* Version: 1.2.0 (12 August 2016)
+* Version: 1.3.0.dev1 (12 August 2016)
 * Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
@@ -184,7 +184,7 @@ If everything works successfully you should see
 or
 
     ============================================================================
-    Testsuite summary for gammalib 1.2.0
+    Testsuite summary for gammalib 1.3.0.dev1
     ============================================================================
     # TOTAL: 21
     # PASS:  21
