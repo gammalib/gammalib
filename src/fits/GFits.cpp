@@ -1211,6 +1211,12 @@ void GFits::save(const bool& clobber)
         }
     }
 
+    // Flush file to disk
+    status = __ffflus(FPTR(m_fitsfile), &status);
+    if (status != 0) {
+        throw GException::fits_error(G_SAVE, status);
+    }
+
     // Signal that file needs not to be created anymore
     m_created = false;
     
