@@ -158,7 +158,7 @@ protected:
     mutable std::vector<double> m_epivot;       //!< Power-law pivot energies
     mutable std::vector<double> m_flux;         //!< Photon fluxes
     mutable std::vector<double> m_eflux;        //!< Energy fluxes
-    
+
     // Cached members for MC
     mutable GEnergy             m_mc_emin;      //!< Minimum energy
     mutable GEnergy             m_mc_emax;      //!< Maximum energy
