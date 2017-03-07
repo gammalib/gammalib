@@ -88,53 +88,53 @@ help:
 
 # Generate binary package
 pkg:
-    @case `uname -s` in \
-        Darwin*) \
-            echo "Build Mac OS X installation image"; \
-            dev/pkgbuild-macosx.sh $(PACKAGE_VERSION); \
-            ;; \
-        Linux*) \
-            if type lsb_release >/dev/null 2>&1; then \
-                case `lsb_release -irs` in \
-                    CentOS*) \
-                        echo "CentOS supported"; \
-                        dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION); \
-                        ;; \
-                    *) \
-                        echo "Linux OS not supported"; \
-                        ;; \
-                esac \
-            fi \
-            ;; \
-        *) \
-            echo "OS not supported"; \
-            ;; \
-        esac
+	@case `uname -s` in \
+		Darwin*) \
+			echo "Build Mac OS X installation image"; \
+			dev/pkgbuild-macosx.sh $(PACKAGE_VERSION); \
+			;; \
+		Linux*) \
+			if type lsb_release >/dev/null 2>&1; then \
+				case `lsb_release -irs` in \
+					CentOS*) \
+						echo "CentOS supported"; \
+						dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION); \
+						;; \
+					*) \
+						echo "Linux OS not supported"; \
+						;; \
+				esac \
+			fi \
+			;; \
+		*) \
+			echo "OS not supported"; \
+			;; \
+	esac
 
 # Check binary package
 pkgcheck:
-    @case `uname -s` in \
-        Darwin*) \
-            echo "Check Mac OS X installation image"; \
-            dev/pkgcheck-macosx.sh $(PACKAGE_VERSION); \
-            ;; \
-        Linux*) \
-            if type lsb_release >/dev/null 2>&1; then \
-                case `lsb_release -irs` in \
-                    CentOS*) \
-                        echo "CentOS supported"; \
-                        dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION); \
-                        ;; \
-                    *) \
-                        echo "Linux OS not supported"; \
-                        ;; \
-                esac \
-            fi \
-            ;; \
-        *) \
-            echo "OS not supported"; \
-            ;; \
-        esac
+	@case `uname -s` in \
+		Darwin*) \
+			echo "Check Mac OS X installation image"; \
+			dev/pkgcheck-macosx.sh $(PACKAGE_VERSION); \
+			;; \
+		Linux*) \
+			if type lsb_release >/dev/null 2>&1; then \
+				case `lsb_release -irs` in \
+					CentOS*) \
+						echo "CentOS supported"; \
+						dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION); \
+						;; \
+					*) \
+						echo "Linux OS not supported"; \
+						;; \
+				esac \
+			fi \
+			;; \
+		*) \
+			echo "OS not supported"; \
+			;; \
+	esac
 
 # Add static-analysis rule:
 static-analysis: cppcheck sloccount cppncss

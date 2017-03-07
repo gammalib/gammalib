@@ -88,19 +88,67 @@ mkdir -p $HOME/rpmbuild/{RPMS,SRPMS,BUILD,SOURCES,SPECS,tmp}
 # Install ncurses #
 # =============== #
 # TODO : eventuellement fixer le numero de version du paquet
-rpm -qa | grep ncurses || sudo yum install ncurses
+# rpm -qa | grep ncurses || sudo yum install ncurses
+
+if ! rpm -qa | grep -q ncurses; then
+   echo "ncurses need to be installed"
+   sudo yum install ncurses
+   if ! rpm -qa | grep -q ncurses; then
+      echo "================================================================================================="
+      echo "ERROR : ncurses need to be installed manually"
+      echo "   "
+      echo "================================================================================================="
+      exit
+   fi
+fi
+v=$(rpm --qf '%{VERSION}\n' -q ncurses)
+echo "ncurses $v checked"
 
 # ================ #
 # Install readline #
 # ================ #
 # TODO : eventuellement fixer le numero de version du paquet
-rpm -qa | grep readline || sudo yum install readline
+# rpm -qa | grep readline || sudo yum install readline
+
+if ! rpm -qa | grep -q readline; then
+   echo "readline need to be installed"
+   sudo yum install readline
+   if ! rpm -qa | grep -q readline; then
+      echo "================================================================================================="
+      echo "ERROR : readline need to be installed manually"
+      echo "   "
+      echo "================================================================================================="
+      exit
+   fi
+fi
+v=$(rpm --qf '%{VERSION}\n' -q readline)
+echo "readline $v checked"
 
 # =============== #
 # Install cfitsio #
 # =============== #
 # TODO : eventuellement fixer le numero de version du paquet
-rpm -qa | grep cfitsio || sudo yum install cfitsio
+# rpm -qa | grep cfitsio || sudo yum install cfitsio
+
+if ! rpm -qa | grep -q cfitsio; then
+   echo "cfitsio need to be installed"
+   sudo yum install cfitsio-devel
+   if ! rpm -qa | grep -q cfitsio; then
+      echo "================================================================================================="
+      echo " ERROR : cfitsio need to be installed"
+      echo "================================================================================================="
+      echo "You can download the latest version of CFITSIO on http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html"
+      echo "   "
+      echo "or "
+      echo "   "
+      echo "cfitsio rpm can be found in the epel-release repository ; Try : sudo yum install cfitsio-devel"
+      echo "   "
+      echo "================================================================================================="
+      exit
+   fi
+fi
+v=$(rpm --qf '%{VERSION}\n' -q cfitsio)
+echo "cfitsio $v checked"
 
 
 # ======================================== #
@@ -109,15 +157,21 @@ rpm -qa | grep cfitsio || sudo yum install cfitsio
 cp $PACKNAME.spec $WRKDIR/SPECS/
 
 # ================================================================== #
-# Install GammaLib
+# Check if Gammalib installed and version
 # No need to install Gammalib since this script follows a 'make dist'#
 # ================================================================== #
-# Check gammalib version
-rpm --qf '%{VERSION}\n' -q gammalib
+# 
+v=$(rpm --qf '%{VERSION}\n' -q gammalib)
 
-# ================================================================== #
-# Install ctools                                                     #
-# No need to install ctools ; rpmbuild will package from 'scratch'   #
+if ! rpm -qa | grep -q gammalib; then
+    echo "================================================================================================="
+    echo "$v"
+    echo "================================================================================================="
+else
+v=$(rpm --qf '%{VERSION}\n' -q gammalib)
+    echo "gammalib $v already installed"
+fi
+
 # ================================================================== #
 # Just copy dist in SOURCES dir                                      #
 # ================================================================== #

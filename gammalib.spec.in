@@ -31,10 +31,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 #BuildRequires: readline
 #BuildRequires: cfitsio
 # Requires: liste des packages requis pour l'installation
-#Requires: ncurses
-#Requires: readline
+Requires: ncurses
+Requires: readline
 #Requires: gcc-c++
-#Requires: cfitsio
+Requires: cfitsio
 #
 Prefix: /usr/local/gamma
 #

@@ -19,9 +19,8 @@
 #
 # -------------------------------------------------------------------------
 #
-# This script checks the ctools CentOS package by installing it into the
-# /usr/local/gamma directory and running the Python tests.
-#
+# This script tests a CentOS package prior to release. It is assumed that
+# the package has been installed in a local directory $LOCALINSTALL/gammalib.
 # ==========================================================================
 
 if [ $# -ne 2 ] ;  then
@@ -86,21 +85,70 @@ cd $WRKDIR
 #  --prefix=<dir>            relocate the package to <dir>, if relocatable  #
 # ========================================================================= #
 
-sudo rpm -U --prefix=$LOCALINSTALL $RPMFILE &>  $LOGRPMFILE
+if ! rpm -qa | grep -q ncurses; then
+  echo "ncurses need to be installed"
+  sudo yum install ncurses
+  if ! rpm -qa | grep -q ncurses; then
+     echo "================================================================================================="
+     echo "ERROR : ncurses need to be installed manually"
+     echo "================================================================================================="
+     exit
+  fi
+fi
+v=$(rpm --qf '%{VERSION}\n' -q ncurses)
+echo "ncurses $v checked"
 
+if ! rpm -qa | grep -q readline; then
+  echo "readline need to be installed"
+  sudo yum install readline
+  if ! rpm -qa | grep -q readline; then
+     echo "================================================================================================="
+     echo "ERROR : readline need to be installed manually"
+     echo "================================================================================================="
+     exit
+  fi
+fi
+v=$(rpm --qf '%{VERSION}\n' -q readline)
+echo "readline $v checked"
+
+if ! rpm -qa | grep -q cfitsio; then
+   echo "cfitsio need to be installed"
+   sudo yum install cfitsio-devel
+   if ! rpm -qa | grep -q cfitsio; then
+      echo "================================================================================================="
+      echo " ERROR : cfitsio need to be installed"
+      echo "================================================================================================="
+      echo "You can download the latest version of CFITSIO on http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html"
+      echo "   "
+      echo "or "
+      echo "   "
+      echo "cfitsio rpm can be found in the epel-release repository ; Try : sudo yum install cfitsio-devel"
+      echo "   "
+      echo "================================================================================================="
+      exit
+   fi
+fi
+v=$(rpm --qf '%{VERSION}\n' -q cfitsio)
+echo "cfitsio $v checked"
+
+if ! sudo rpm -U --prefix=$LOCALINSTALL $RPMFILE &>  $LOGRPMFILE ; then
+  echo "Cannot install gammalib package"
+  cat  $LOGRPMFILE
+  exit
+fi
 
 # ================= #
 # Configure package #
 # ================= #
 export GAMMALIB=$LOCALINSTALL/gammalib
 source $GAMMALIB/bin/gammalib-init.sh
-
+ARCH=`lsb_release -irs`
 
 # ============ #
 # Test package #
 # ============ #
+# TODO : update following section with consistent set of tests
 python -c 'import gammalib; gammalib.test()' | tee -a $LOGFILE
-
 
 # ======================= #
 # Uninstall package       #
@@ -121,3 +169,4 @@ sudo rm -rf $LOCALINSTALL
 #if [ -d "$LOCALINSTALL/ctools.backup" ]; then
 #    mv $LOCALINSTALL/ctools.backup $LOCALINSTALL/ctools
 #fi
+
