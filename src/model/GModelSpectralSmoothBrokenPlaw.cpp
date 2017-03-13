@@ -92,11 +92,12 @@ GModelSpectralSmoothBrokenPlaw::GModelSpectralSmoothBrokenPlaw(void) :
 /***********************************************************************//**
  * @brief Model type and parameter name constructor
  *
- * @param[in] type Model type.
- * @param[in] prefactor Name of prefactor parameter.
- * @param[in] index1 Name of index1 parameter.
- * @param[in] breakenergy Name of breakenergy parameter.
- * @param[in] index2 Name of index2 parameter.
+ * @param[in] type          Model type.
+ * @param[in] prefactor     Name of prefactor parameter.
+ * @param[in] index1        Name of index1 parameter.
+ * @param[in] breakenergy   Name of breakenergy parameter.
+ * @param[in] index2        Name of index2 parameter.
+ * @param[in] beta          Name of beta parameter
  ***************************************************************************/
 GModelSpectralSmoothBrokenPlaw::GModelSpectralSmoothBrokenPlaw(
                                         const std::string& type,
@@ -118,6 +119,7 @@ GModelSpectral()
     m_index1.name(index1);
     m_breakenergy.name(breakenergy);
     m_index2.name(index2);
+    m_beta.name(beta);
     
     // Return
     return;
@@ -127,10 +129,11 @@ GModelSpectral()
 /***********************************************************************//**
  * @brief Parameter constructor
  *
- * @param[in] prefactor Power law pre factor (ph/cm2/s/MeV).
- * @param[in] index1 Power law index1.
- * @param[in] breakenergy break energy.
- * @param[in] index2 Power law index1.
+ * @param[in] prefactor     Power law pre factor (ph/cm2/s/MeV).
+ * @param[in] index1        Power law index1.
+ * @param[in] breakenergy   Break energy.
+ * @param[in] index2        Power law index1.
+ * @param[in] beta          Break smoothness parameter
  *
  * Constructs a spectral power law using the model parameters
  *
@@ -138,6 +141,7 @@ GModelSpectral()
  *     spectral @p index1
  *     Energy @p breakenergy of spectral break
  *     spectral @p index2
+ *     spectral @p beta
  ***************************************************************************/
 GModelSpectralSmoothBrokenPlaw::GModelSpectralSmoothBrokenPlaw(
                                         const double&  prefactor,
@@ -155,6 +159,7 @@ GModelSpectral()
     m_index1.value(index1);
     m_breakenergy.value(breakenergy.MeV());  // Internally stored in MeV
     m_index2.value(index2);
+    m_beta.value(beta);
     
     // Perform autoscaling of parameter
     autoscale();
@@ -370,39 +375,37 @@ double GModelSpectralSmoothBrokenPlaw::eval(const GEnergy& srcEng,
     if (gradients) {
         
         // Compute normalisation gradient
-        double g_norm  = (m_norm.is_free()) ? m_norm.scale() * m_last_power : 0.0;
-        m_norm.factor_gradient(g_norm);
+        double g_norm  = (m_norm.is_free())
+                ? m_norm.scale() * m_last_power
+                : 0.0;
         
         // Compute index and break value gradients
-        if (srcEng.MeV() < m_breakenergy.value()) {
-            double g_index = (m_index1.is_free())
-            ? value * m_index1.scale() * m_last_log_e_norm
-            : 0.0;
-            double g_break = (m_breakenergy.is_free())
-            ? -value * m_last_index1 / m_breakenergy.factor_value()
-            : 0.0;
-            m_index1.factor_gradient(g_index);
-            m_index2.factor_gradient(0.0);
-            m_breakenergy.factor_gradient(g_break);
-        }
-        else {
-            double g_index = (m_index2.is_free())
-            ? value * m_index2.scale() * m_last_log_e_norm
-            : 0.0;
-            double g_break = (m_breakenergy.is_free())
-            ? -value * m_last_index2 / m_breakenergy.factor_value()
-            : 0.0;
-            m_index1.factor_gradient(0.0);
-            m_index2.factor_gradient(g_index);
-            m_breakenergy.factor_gradient(g_break);
-        }
+        double g_index1 = (m_index1.is_free())
+                ? value * m_index1.scale() * m_last_log_e_norm
+                : 0.0;
+        double g_index2 = (m_index2.is_free())
+                ? value * m_index2.scale() * m_last_log_e_norm
+                : 0.0;
+        double g_break = (m_breakenergy.is_free())
+                ? -value * m_last_index1 / m_breakenergy.factor_value()
+                : 0.0;
+        double g_beta  = (m_beta.is_free())
+                ? value
+                : 0.0;
+        
+        // Store the gradient values
+        m_norm.factor_gradient(g_norm);
+        m_index1.factor_gradient(g_index1);
+        m_index2.factor_gradient(0.0);
+        m_breakenergy.factor_gradient(g_break);
+        m_beta.factor_gradient();
         
     } // endif: gradient computation was requested
     
     // Compile option: Check for NaN/Inf
 #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralBrokenPlaw::eval";
+        std::cout << "*** ERROR: GModelSpectralSmoothBrokenPlaw::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
@@ -412,6 +415,7 @@ double GModelSpectralSmoothBrokenPlaw::eval(const GEnergy& srcEng,
         std::cout << ", m_breakenergy=" << m_breakenergy.value();
         std::cout << ", m_index2=" << m_index2.value();
         std::cout << ", m_last_power=" << m_last_power;
+        std::cout << ", m_last_beta=" << m_last_beta;
         std::cout << ")" << std::endl;
     }
 #endif
@@ -685,7 +689,7 @@ void GModelSpectralSmoothBrokenPlaw::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print brokenpowerlaw information
+ * @brief Print smooth broken powerlaw information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing model information.
@@ -699,7 +703,7 @@ std::string GModelSpectralSmoothBrokenPlaw::print(const GChatter& chatter) const
     if (chatter != SILENT) {
         
         // Append header
-        result.append("=== GModelSpectralBrokenPlaw ===");
+        result.append("=== GModelSpectralSmoothBrokenPlaw ===");
         
         // Append information
         result.append("\n"+gammalib::parformat("Number of parameters"));
@@ -727,7 +731,7 @@ std::string GModelSpectralSmoothBrokenPlaw::print(const GChatter& chatter) const
 void GModelSpectralSmoothBrokenPlaw::init_members(void)
 {
     // Initialise model type
-    m_type = "BrokenPowerLaw";
+    m_type = "SmoothBrokenPowerLaw";
     
     // Initialise powerlaw normalisation
     m_norm.clear();
@@ -786,12 +790,14 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_pars.push_back(&m_index1);
     m_pars.push_back(&m_breakenergy);
     m_pars.push_back(&m_index2);
+    m_pars.push_back(&m_beta);
     
     // Initialise eval cache
     m_last_energy.clear();
     m_last_index1      = 1.0e30;
     m_last_index2      = 1.0e30;
     m_last_breakenergy = 1.0e30;
+    m_last_beta        = 1.0e30;
     m_last_e_norm      = 0.0;
     m_last_log_e_norm  = 0.0;
     m_last_power       = 0.0;
@@ -805,7 +811,6 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     // Initialise MC cache
     m_mc_emin = 0.0;
     m_mc_emax = 0.0;
-    
     
     // Return
     return;
@@ -825,6 +830,7 @@ void GModelSpectralSmoothBrokenPlaw::copy_members(const GModelSpectralSmoothBrok
     m_index1      = model.m_index1;
     m_breakenergy = model.m_breakenergy;
     m_index2      = model.m_index2;
+    m_beta        = model.m_beta;
     
     // Set parameter pointer(s)
     m_pars.clear();
@@ -832,12 +838,14 @@ void GModelSpectralSmoothBrokenPlaw::copy_members(const GModelSpectralSmoothBrok
     m_pars.push_back(&m_index1);
     m_pars.push_back(&m_breakenergy);
     m_pars.push_back(&m_index2);
+    m_pars.push_back(&m_beta);
     
     // Copy eval cache
     m_last_energy      = model.m_last_energy;
     m_last_index1      = model.m_last_index1;
     m_last_breakenergy = model.m_last_breakenergy;
     m_last_index2      = model.m_last_index2;
+    m_last_beta        = model.m_last_beta;
     m_last_e_norm      = model.m_last_e_norm;
     m_last_log_e_norm  = model.m_last_log_e_norm;
     m_last_power       = model.m_last_power;
@@ -879,19 +887,22 @@ void GModelSpectralSmoothBrokenPlaw::update_eval_cache(const GEnergy& energy) co
     double index1      = m_index1.value();
     double breakenergy = m_breakenergy.value();
     double index2      = m_index2.value();
+    double beta        = m_beta.value();
     
-    // If the energy or one of the parameters index1, index2 or breakenergy
-    // energy has changed then recompute the cache
+    // If the energy or one of the parameters index1, index2, breakenergy
+    // energy, or beta has changed then recompute the cache
     if ((m_last_energy       != energy) ||
         (m_last_index1       != index1)  ||
         (m_last_index2       != index2)  ||
-        (m_last_breakenergy  != breakenergy)) {
+        (m_last_breakenergy  != breakenergy) ||
+        (m_last_beta         != beta)) {
         
         // Store actual energy and parameter values
         m_last_energy       = energy;
         m_last_index1       = index1;
         m_last_index2       = index2;
         m_last_breakenergy  = breakenergy;
+        m_last_beta         = beta;
         
         // Compute and store value
         double eng        = energy.MeV();
