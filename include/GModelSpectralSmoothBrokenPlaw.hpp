@@ -2,7 +2,7 @@
  *               GModelSpectralSmoothBrokenPlaw.cpp -                      *
  *             Smoothly broken power law spectrum class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Joshua Cardenzana                                *
+ *  copyright (C) 2017 by Josh Cardenzana                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -22,7 +22,7 @@
 /**
  * @file GModelSpectralSmoothBrokenPlaw.hpp
  * @brief Smoothly broken power law spectrum class definition
- * @author Joshua Cardenzana
+ * @author Josh Cardenzana
  */
 
 #ifndef GMODELSPECTRALSMOOTHBROKENPLAW_HPP
@@ -171,7 +171,7 @@ std::string GModelSpectralSmoothBrokenPlaw::classname(void) const
  *
  * @return "PowerLaw".
  *
- * Returns the type of the spectral broken power law model.
+ * Returns the type of the spectral smoothly broken power law model.
  ***************************************************************************/
 inline
 std::string GModelSpectralSmoothBrokenPlaw::type(void) const
@@ -297,4 +297,32 @@ void GModelSpectralSmoothBrokenPlaw::breakenergy(const GEnergy& breakenergy)
     return;
 }
 
+
+/***********************************************************************//**
+* @brief Returns break smoothness parameter beta
+*
+* @return break smoothness parameter.
+*
+* Returns the break smoothness parameter 'beta'.
+***************************************************************************/
+inline
+double GModelSpectralSmoothBrokenPlaw::beta(void) const
+{
+    return (m_beta.value());
+}
+
+
+/***********************************************************************//**
+* @brief Set break smoothness
+*
+* @param[in] beta break smoothness parameter.
+*
+* Sets the beta break smoothness parameter.
+***************************************************************************/
+inline
+void GModelSpectralSmoothBrokenPlaw::beta(const double& beta)
+{
+    m_beta.value(beta);
+    return;
+}
 #endif /* GMODELSPECTRALSMOOTHBROKENPLAW_HPP */
