@@ -212,6 +212,7 @@
 #include "GModelSpectral.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelSpectralBrokenPlaw.hpp"
+#include "GModelSpectralSmoothBrokenPlaw.hpp"
 #include "GModelSpectralConst.hpp"
 #include "GModelSpectralExpPlaw.hpp"
 #include "GModelSpectralExpInvPlaw.hpp"
