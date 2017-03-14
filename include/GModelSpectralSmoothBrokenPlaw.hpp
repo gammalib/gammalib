@@ -31,6 +31,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GModelSpectral.hpp"
+#include "GFunction.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
 
@@ -129,6 +130,61 @@ protected:
     void free_members(void);
     void update_eval_cache(const GEnergy& energy) const;
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
+    
+    // Class to determine to the integral photon flux
+    class flux_kern : public GFunction {
+    public:
+        // Constructor
+        flux_kern(const double&  prefactor,
+                  const double&  index1,
+                  const GEnergy& pivot,
+                  const double&  index2,
+                  const GEnergy& breakenergy,
+                  const double&  beta) :
+            m_prefactor(prefactor),
+            m_index1(index1),
+            m_index2(index2),
+            m_pivot(pivot),
+            m_breakenergy(breakenergy),
+            m_beta(beta)
+        {};
+        
+        // Method
+        double eval(const double& x) {
+            double xpivot = x/m_pivot.MeV();
+            double xbreak = x/m_breakenergy.MeV();
+            return m_prefactor * std::pow(xpivot, m_index1) *
+            std::pow(1.0 + std::pow(xbreak,(m_index1-m_index2)/m_beta),-m_beta);
+        }
+        
+        // Members
+    protected:
+        double  m_prefactor; //!< Normalization
+        double  m_index1;	 //!< Spectral index1
+        double  m_index2;    //!< Spectral index2
+        GEnergy m_pivot;	 //!< Pivot energy
+        GEnergy m_breakenergy; //!< Break energy
+        double  m_beta;      //!< Break smoothness parameter
+    };
+    
+    // Class to determine the integral energy flux, derivation of flux_kern
+    class eflux_kern : public flux_kern {
+    public:
+        // Constructor
+        eflux_kern(const double&  prefactor,
+                   const double&  index1,
+                   const GEnergy& pivot,
+                   const double&  index2,
+                   const GEnergy& breakenergy,
+                   const double&  beta):
+            flux_kern(prefactor, index1, pivot, index2, breakenergy, beta)
+        {};
+        
+        // Method
+        double eval(const double& x) {
+            return x * flux_kern::eval(x);
+        }
+    };
     
     // Protected members
     std::string m_type;                   //!< Model type
