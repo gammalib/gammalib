@@ -31,6 +31,7 @@
 #endif
 #include <cmath>
 #include "GException.hpp"
+#include "GIntegral.hpp"
 #include "GTools.hpp"
 #include "GRan.hpp"
 #include "GModelSpectralSmoothBrokenPlaw.hpp"
@@ -469,7 +470,7 @@ double GModelSpectralSmoothBrokenPlaw::eval(const GEnergy& srcEng,
  * where
  * - [@p emin, @p emax] is an energy interval, and
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
- * The integration is done analytically.
+ * The integration is done numerically.
  ***************************************************************************/
 double GModelSpectralSmoothBrokenPlaw::flux(const GEnergy& emin,
                                             const GEnergy& emax) const
@@ -480,38 +481,18 @@ double GModelSpectralSmoothBrokenPlaw::flux(const GEnergy& emin,
     // Compute only if integration range is valid
     if (emin < emax) {
         
-        // First case: emin < breakenergy < emax
-        if (emin.MeV() < m_breakenergy.value() && m_breakenergy.value() < emax.MeV()) {
-            
-            // Compute photon flux
-            flux = m_norm.value() *
-            (gammalib::plaw_photon_flux(emin.MeV(),
-                                        m_breakenergy.value(),
-                                        m_breakenergy.value(),
-                                        m_index1.value()) +
-             gammalib::plaw_photon_flux(m_breakenergy.value(),
-                                        emax.MeV(),
-                                        m_breakenergy.value(),
-                                        m_index2.value()));
-        }
+        // Initialise function to integrate
+        flux_kern kernel(prefactor(), index1(), pivot(),
+                         index2(), breakenergy(), beta());
         
-        // Second case: breakenergy > emax:
-        else if (m_breakenergy.value() > emax.MeV()) {
-            flux = m_norm.value() *
-            gammalib::plaw_photon_flux(emin.MeV(),
-                                       emax.MeV(),
-                                       m_breakenergy.value(),
-                                       m_index1.value());
-        }
+        // Initialise integral class with function
+        GIntegral integral(&kernel);
         
-        // Third case breakenergy < emin:
-        else if (m_breakenergy.value() < emin.MeV()) {
-            flux = m_norm.value() *
-            gammalib::plaw_photon_flux(emin.MeV(),
-                                       emax.MeV(),
-                                       m_breakenergy.value(),
-                                       m_index2.value());
-        }
+        // Set integration precision
+        integral.eps(1.0e-8);
+        
+        // Calculate integral between emin and emax
+        flux = integral.romberg(emin.MeV(), emax.MeV());
         
     } // endif: integration range was valid
     
@@ -536,10 +517,10 @@ double GModelSpectralSmoothBrokenPlaw::flux(const GEnergy& emin,
  * where
  * - [@p emin, @p emax] is an energy interval, and
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
- * The integration is done analytically.
+ * The integration is done numerically.
  ***************************************************************************/
 double GModelSpectralSmoothBrokenPlaw::eflux(const GEnergy& emin,
-                                       const GEnergy& emax) const
+                                             const GEnergy& emax) const
 {
     // Initialise flux
     double eflux = 0.0;
@@ -547,36 +528,20 @@ double GModelSpectralSmoothBrokenPlaw::eflux(const GEnergy& emin,
     // Compute only if integration range is valid
     if (emin < emax) {
         
-        // First case: emin < breakenergy < emax
-        if (emin.MeV() < m_breakenergy.value() && m_breakenergy.value() < emax.MeV()) {
-            eflux = m_norm.value() *
-            (gammalib::plaw_energy_flux(emin.MeV(),
-                                        m_breakenergy.value(),
-                                        m_breakenergy.value(),
-                                        m_index1.value()) +
-             gammalib::plaw_energy_flux(m_breakenergy.value(),
-                                        emax.MeV(),
-                                        m_breakenergy.value(),
-                                        m_index2.value()));
-        }
+        // Initialise function to integrate
+        eflux_kern kernel(prefactor(), index1(), pivot(),
+                          index2(), breakenergy(), beta());
         
-        // Second case: breakenergy > emax:
-        else if (m_breakenergy.value() > emax.MeV()) {
-            eflux = m_norm.value() *
-            gammalib::plaw_energy_flux(emin.MeV(),
-                                       emax.MeV(),
-                                       m_breakenergy.value(),
-                                       m_index1.value());
-        }
+        // Initialise integral class with function
+        GIntegral integral(&kernel);
         
-        // Third case breakenergy < emin:
-        else if (m_breakenergy.value() < emin.MeV()) {
-            eflux = m_norm.value() *
-            gammalib::plaw_energy_flux(emin.MeV(),
-                                       emax.MeV(),
-                                       m_breakenergy.value(),
-                                       m_index2.value());
-        }
+        // Set integration precision
+        integral.eps(1.0e-8);
+        
+        // Calculate integral between emin and emax
+        eflux = integral.romberg(emin.MeV(), emax.MeV());
+        
+        // Convert from MeV/cm2/s to erg/cm2/s
         eflux *= gammalib::MeV2erg;
         
     } // endif: integration range was valid
@@ -598,7 +563,7 @@ double GModelSpectralSmoothBrokenPlaw::eflux(const GEnergy& emin,
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
  *
- * Returns Monte Carlo energy by randomly drawing from a broken power law.
+ * Returns Monte Carlo energy by randomly drawing from a smoothly broken power law.
  ***************************************************************************/
 GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
                                            const GEnergy& emax,
