@@ -69,13 +69,15 @@ public:
     GModelSpectralSmoothBrokenPlaw(const std::string& type,
                                    const std::string& prefactor,
                                    const std::string& index1,
-                                   const std::string& breakenergy,
+                                   const std::string& pivot,
                                    const std::string& index2,
+                                   const std::string& breakenergy,
                                    const std::string& beta);
     GModelSpectralSmoothBrokenPlaw(const double&  prefactor,
                                    const double&  index1,
-                                   const GEnergy& breakenergy,
+                                   const GEnergy& pivot,
                                    const double&  index2,
+                                   const GEnergy& breakenergy,
                                    const double&  beta);
     explicit GModelSpectralSmoothBrokenPlaw(const GXmlElement& xml);
     GModelSpectralSmoothBrokenPlaw(const GModelSpectralSmoothBrokenPlaw& model);
@@ -105,14 +107,18 @@ public:
     virtual std::string                     print(const GChatter& chatter = NORMAL) const;
     
     // Other methods
+    // Methods for getting the current values
     double  prefactor(void) const;
     double  index1(void) const;
     double  index2(void) const;
+    GEnergy pivot(void) const;
     GEnergy breakenergy(void) const;
     double  beta(void) const;
+    // Methods for setting the parameter values
     void    prefactor(const double& prefactor);
     void    index1(const double& index1);
     void    index2(const double& index2);
+    void    pivot(const GEnergy& pivot);
     void    breakenergy(const GEnergy& breakenergy);
     void    beta(const double& beta);
     
@@ -129,6 +135,7 @@ protected:
     GModelPar   m_norm;                   //!< Normalization factor
     GModelPar   m_index1;                 //!< Spectral index1
     GModelPar   m_index2;                 //!< Spectral index2
+    GModelPar   m_pivot;                  //!< Pivot energy
     GModelPar   m_breakenergy;            //!< Energy of spectral break
     GModelPar   m_beta;                   //!< Break smoothness
     
@@ -136,11 +143,16 @@ protected:
     mutable GEnergy m_last_energy;        //!< Last energy value
     mutable double  m_last_index1;        //!< Last index1 parameter
     mutable double  m_last_index2;        //!< Last index2 parameter
+    mutable double  m_last_pivot;         //!< Last pivot parameter
     mutable double  m_last_breakenergy;   //!< Last breakenergy parameter
     mutable double  m_last_beta;          //!< Last beta parameter
-    mutable double  m_last_e_norm;        //!< Last E/Ebreakenergy value
-    mutable double  m_last_log_e_norm;    //!< Last ln(E/Ebreakenergy) value
-    mutable double  m_last_power;         //!< Last power value
+    mutable double  m_last_epivot_norm;   //!< Last E/Epivot value
+    mutable double  m_last_ebreak_norm;   //!< Last E/Ebreakenergy value
+    mutable double  m_last_log_epivot_norm; //!< Last ln(E/Epivot) value
+    mutable double  m_last_log_ebreak_norm; //!< Last ln(E/Ebreakenergy) value
+    mutable double  m_last_epivot_pow;    //!< Last pow(E/Epivot,index1) value
+    mutable double  m_last_ebreak_pow;    //!< Last pow(E/Ebreakenergy,(index1-index2)/beta)
+//    mutable double  m_last_power;         //!< Last power value
     mutable double  m_mc_emin;            //!< Minimum energy
     mutable double  m_mc_emax;            //!< Maximum energy
     mutable double  m_mc_exponent1;       //!< Exponent (index1+1)
@@ -210,7 +222,7 @@ void GModelSpectralSmoothBrokenPlaw::prefactor(const double& prefactor)
 
 
 /***********************************************************************//**
- * @brief Return power law index1
+ * @brief Return smoothly broken power law index1
  *
  * @return Power law index1.
  *
@@ -224,7 +236,7 @@ double GModelSpectralSmoothBrokenPlaw::index1(void) const
 
 
 /***********************************************************************//**
- * @brief Set power law index1
+ * @brief Set smoothly broken power law index1
  *
  * @param[in] index1 Power law index1.
  *
@@ -239,7 +251,7 @@ void GModelSpectralSmoothBrokenPlaw::index1(const double& index1)
 
 
 /***********************************************************************//**
- * @brief Return power law index2
+ * @brief Return smoothly broken power law index2
  *
  * @return Power law index2.
  *
@@ -253,7 +265,7 @@ double GModelSpectralSmoothBrokenPlaw::index2(void) const
 
 
 /***********************************************************************//**
- * @brief Set power law index2
+ * @brief Set smoothly broken power law index2
  *
  * @param[in] index2 Power law index2.
  *
@@ -263,6 +275,37 @@ inline
 void GModelSpectralSmoothBrokenPlaw::index2(const double& index2)
 {
     m_index2.value(index2);
+    return;
+}
+
+
+/***********************************************************************//**
+* @brief Return pivot energy
+*
+* @return Smoothly broken power law pivot energy.
+*
+* Returns the smoothly broken power law scale energy.
+***************************************************************************/
+inline
+GEnergy GModelSpectralSmoothBrokenPlaw::pivot(void) const
+{
+    GEnergy energy;
+    energy.MeV(m_pivot.value());
+    return energy;
+}
+
+
+/***********************************************************************//**
+* @brief Set pivot energy
+*
+* @param[in] pivot Smoothly broken power law pivot energy.
+*
+* Sets the power law index2.
+***************************************************************************/
+inline
+void GModelSpectralSmoothBrokenPlaw::pivot(const GEnergy& pivot)
+{
+    m_pivot.value(pivot.MeV());
     return;
 }
 
