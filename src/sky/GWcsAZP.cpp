@@ -242,14 +242,9 @@ std::string GWcsAZP::print(const GChatter& chatter) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * This method sets up the World Coordinate System by calling wcs_set().
  ***************************************************************************/
 void GWcsAZP::init_members(void)
 {
-    // Setup World Coordinate System
-    wcs_set();
-    
     // Return
     return;
 }
