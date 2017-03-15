@@ -240,9 +240,6 @@ std::string GWcsGLS::print(const GChatter& chatter) const
  ***************************************************************************/
 void GWcsGLS::init_members(void)
 {
-    // Setup World Coordinate System
-    wcs_set();
-
     // Return
     return;
 }

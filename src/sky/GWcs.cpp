@@ -850,13 +850,17 @@ double GWcs::cdelt(const int& inx) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- * Code adapted from wcs.c::wcsini().
+ * Code adapted from wcs.c::wcsini(). In addition, the method sets up the
+ * World Coordinate System by calling wcs_set().
  ***************************************************************************/
 void GWcs::init_members(void)
 {
     // Initialise World Coordinate System with 0 axes
     wcs_ini(0);
-    
+ 
+    // Setup World Coordinate System
+    wcs_set();
+   
     // Return
     return;
 }
