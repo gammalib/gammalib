@@ -87,6 +87,9 @@ None
 The GWcsGLS and GWcsSFL classes have been added to support the GLS and SFL
 World Coordinate System projections (#1851).
 
+The GWcs base class now also supports CD keywords instead of CDELT keywords
+(#1951).
+
 
 13. Support module
 ------------------

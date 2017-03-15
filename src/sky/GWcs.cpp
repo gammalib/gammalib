@@ -222,15 +222,16 @@ void GWcs::read(const GFitsHDU& hdu)
     // Clear object
     clear();
 
-    // Get standard keywords
+    // Get standard keywords. Get bin size either from CDELT1/CDELT2 or
+    // CD1_1/CD2_2
     std::string ctype1 = hdu.string("CTYPE1");
     std::string ctype2 = hdu.string("CTYPE2");
     double      crval1 = hdu.real("CRVAL1");
     double      crval2 = hdu.real("CRVAL2");
     double      crpix1 = hdu.real("CRPIX1");
     double      crpix2 = hdu.real("CRPIX2");
-    double      cdelt1 = hdu.real("CDELT1");
-    double      cdelt2 = hdu.real("CDELT2");
+    double      cdelt1 = (hdu.has_card("CDELT1")) ? hdu.real("CDELT1") : hdu.real("CD1_1");
+    double      cdelt2 = (hdu.has_card("CDELT2")) ? hdu.real("CDELT2") : hdu.real("CD2_2");
 
     // Determine coordinate system
     std::string coords;
