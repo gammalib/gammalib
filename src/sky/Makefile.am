@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for sky module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -26,7 +26,7 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GSkyDir.cpp \
-	  GHorizDir.cpp \
+          GHorizDir.cpp \
           GSkyPixel.cpp \
           GSkyMap.cpp \
           GSkyRegions.cpp \
@@ -39,9 +39,11 @@ sources = GSkyDir.cpp \
           GWcsAIT.cpp \
           GWcsAZP.cpp \
           GWcsCAR.cpp \
+          GWcsGLS.cpp \
           GWcsMER.cpp \
           GWcsMOL.cpp \
           GWcsSIN.cpp \
+          GWcsSFL.cpp \
           GWcsSTG.cpp \
           GWcsTAN.cpp \
           GException_sky.cpp

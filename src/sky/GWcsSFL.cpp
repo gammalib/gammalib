@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GWcsAIT.cpp - Aitoff (AIT) projection class               *
+ *           GWcsSFL.cpp - Sanson-Flamsteed (SFL) projection class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcsAIT.cpp
- * @brief Aitoff (AIT) projection class implementation
+ * @file GWcsSFL.cpp
+ * @brief Sanson-Flamsteed (SFL) projection class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,14 +30,11 @@
 #endif
 #include "GException.hpp"
 #include "GMath.hpp"
-#include "GTools.hpp"
-#include "GWcsAIT.hpp"
+#include "GWcsSFL.hpp"
 #include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PRJ_X2S    "GWcsAIT::prj_x2s(int, int, int, int, double*, double*,"\
-                                                   " double*, double*, int*)"
-#define G_PRJ_S2X    "GWcsAIT::prj_s2x(int, int, int, int, double*, double*,"\
+#define G_PRJ_X2S    "GWcsSFL::prj_x2s(int, int, int, int, double*, double*,"\
                                                    " double*, double*, int*)"
 
 /* __ Macros _____________________________________________________________ */
@@ -45,15 +42,14 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_PRJ                             //!< Debug GWcsAIT::prj_x2s
 
 /* __ Local prototypes ___________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GWcsAIT      g_wcs_ait_seed;
-const GWcsRegistry g_wcs_ait_registry(&g_wcs_ait_seed);
+const GWcsSFL      g_wcs_sfl_seed;
+const GWcsRegistry g_wcs_sfl_registry(&g_wcs_sfl_seed);
 
 
 /*==========================================================================
@@ -65,7 +61,7 @@ const GWcsRegistry g_wcs_ait_registry(&g_wcs_ait_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsAIT::GWcsAIT(void) : GWcs()
+GWcsSFL::GWcsSFL(void) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -76,7 +72,7 @@ GWcsAIT::GWcsAIT(void) : GWcs()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Projection constructor
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
@@ -86,12 +82,11 @@ GWcsAIT::GWcsAIT(void) : GWcs()
  * @param[in] cdelt1 Increment in x direction at reference pixel [deg].
  * @param[in] cdelt2 Increment in y direction at reference pixel [deg].
  ***************************************************************************/
-GWcsAIT::GWcsAIT(const std::string& coords,
+GWcsSFL::GWcsSFL(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2) :
                  GWcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
-
 {
     // Initialise class members
     init_members();
@@ -106,7 +101,7 @@ GWcsAIT::GWcsAIT(const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsAIT::GWcsAIT(const GWcsAIT& wcs) : GWcs(wcs)
+GWcsSFL::GWcsSFL(const GWcsSFL& wcs) : GWcs(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -122,7 +117,7 @@ GWcsAIT::GWcsAIT(const GWcsAIT& wcs) : GWcs(wcs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GWcsAIT::~GWcsAIT(void)
+GWcsSFL::~GWcsSFL(void)
 {
     // Free members
     free_members();
@@ -144,7 +139,7 @@ GWcsAIT::~GWcsAIT(void)
  * @param[in] wcs World Coordinate System.
  * @return World Coordinate System.
  ***************************************************************************/
-GWcsAIT& GWcsAIT::operator=(const GWcsAIT& wcs)
+GWcsSFL& GWcsSFL::operator=(const GWcsSFL& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
@@ -175,11 +170,11 @@ GWcsAIT& GWcsAIT::operator=(const GWcsAIT& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear Sanson-Flamsteed projection
  *
- * This method properly resets the object to an initial state.
+ * Resets the Sanson-Flamsteed projection to an clean initial state.
  ***************************************************************************/
-void GWcsAIT::clear(void)
+void GWcsSFL::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -197,24 +192,23 @@ void GWcsAIT::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone Sanson-Flamsteed projection
  *
- * @return Pointer to deep copy of Aitoff projection.
+ * @return Pointer to deep copy of Sanson-Flamsteed projection.
  ***************************************************************************/
-GWcsAIT* GWcsAIT::clone(void) const
+GWcsSFL* GWcsSFL::clone(void) const
 {
-    return new GWcsAIT(*this);
+    return new GWcsSFL(*this);
 }
 
 
-
 /***********************************************************************//**
- * @brief Print WCS information
+ * @brief Print Sanson-Flamsteed projection information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing WCS information.
+ * @param[in] chatter Chattiness.
+ * @return String containing Sanson-Flamsteed projection information.
  ***************************************************************************/
-std::string GWcsAIT::print(const GChatter& chatter) const
+std::string GWcsSFL::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -223,7 +217,7 @@ std::string GWcsAIT::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GWcsAIT ===");
+        result.append("=== GWcsSFL ===");
 
         // Append information
         result.append(wcs_print(chatter));
@@ -246,7 +240,7 @@ std::string GWcsAIT::print(const GChatter& chatter) const
  *
  * This method sets up the World Coordinate System by calling wcs_set().
  ***************************************************************************/
-void GWcsAIT::init_members(void)
+void GWcsSFL::init_members(void)
 {
     // Setup World Coordinate System
     wcs_set();
@@ -261,7 +255,7 @@ void GWcsAIT::init_members(void)
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-void GWcsAIT::copy_members(const GWcsAIT& wcs)
+void GWcsSFL::copy_members(const GWcsSFL& wcs)
 {
     // Return
     return;
@@ -271,7 +265,7 @@ void GWcsAIT::copy_members(const GWcsAIT& wcs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GWcsAIT::free_members(void)
+void GWcsSFL::free_members(void)
 {
     // Return
     return;
@@ -282,44 +276,39 @@ void GWcsAIT::free_members(void)
  * @brief Setup of projection
  *
  * This method sets up the projection information. The method has been
- * adapted from the wcslib function prj.c::aitset.
- *
- * @exception GException::wcs_invalid_parameter
- *            PV(1) or PV(2) are invalid.
+ * adapted from the wcslib function prj.c::sflset.
  *
  *   Given and/or returned:
  *      m_r0      Reset to 180/pi if 0.
- *      m_phi0    Reset to  0.0 if undefined.
- *      m_theta0  Reset to  0.0 if undefined.
+ *      m_phi0    Reset to 0.0 if undefined.
+ *      m_theta0  Reset to 0.0 if undefined.
  *
  *   Returned:
  *      m_x0      Fiducial offset in x.
  *      m_y0      Fiducial offset in y.
- *      m_w[0]    2*r0**2
- *      m_w[1]    1/(2*r0)**2
- *      m_w[2]    1/(4*r0)**2
- *      m_w[3]    1/(2*r0)
+ *      m_w[0]    r0*(pi/180)
+ *      m_w[1]    (180/pi)/r0
  ***************************************************************************/
-void GWcsAIT::prj_set(void) const
+void GWcsSFL::prj_set(void) const
 {
     // Signal that projection has been set (needs to be done before calling
     // the prj_off() method to avoid an endless loop)
     m_prjset = true;
 
     // Initialise projection parameters
-    m_w.assign(4, 0.0);
+    m_w.assign(2, 0.0);
     
-    // Set undefined parameters
+    // Precompute
     if (m_r0 == 0.0) {
         m_r0 = gammalib::rad2deg;
+        m_w[0] = 1.0;
+        m_w[1] = 1.0;
     }
-    
-    // Precompute 
-    m_w[0] = 2.0 * m_r0 * m_r0;
-    m_w[1] = 1.0 / (2.0 * m_w[0]);
-    m_w[2] = m_w[1] / 4.0;
-    m_w[3] = 1.0 / (2.0 * m_r0);
-    
+    else {
+        m_w[0] = m_r0 * gammalib::deg2rad;
+        m_w[1] = 1.0 / m_w[0];
+    }
+
     // Compute fiducial offset
     prj_off(0.0, 0.0);
     
@@ -343,25 +332,18 @@ void GWcsAIT::prj_set(void) const
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * @exception GException::wcs_invalid_x_y
- *            One or more of the (x,y) coordinates were invalid, as indicated
- *            by the stat vector.
- *
  * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
- * This method has been adapted from the wcslib function prj.c::aitx2s().
+ * This method has been adapted from the wcslib function prj.c::sflx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
  * setup previously (as this will be done by the constructor).
  ***************************************************************************/
-void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt, 
+void GWcsSFL::prj_x2s(int nx, int ny, int sxy, int spt,
                       const double* x, const double* y,
                       double* phi, double* theta, int* stat) const
 {
-    // Set tolerance
-    const double tol = 1.0e-13;
-
     // Initialize projection if required
     if (!m_prjset) {
         prj_set();
@@ -383,20 +365,17 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
     // Initialise status code and statistics
     int status    = 0;
     int n_invalid = 0;
-    
+
+
     // Do x dependence
     const double* xp     = x;
     int           rowoff = 0;
     int           rowlen = nx * spt;
     for (int ix = 0; ix < nx; ++ix, rowoff += spt, xp += sxy) {
-        double  xj     = *xp + m_x0;
-        double  s      = 1.0 - xj * xj * m_w[2];
-        double  t      = xj * m_w[3];
-        double* phip   = phi   + rowoff;
-        double* thetap = theta + rowoff;
-        for (int iy = 0; iy < my; ++iy, phip += rowlen, thetap += rowlen) {
-            *phip   = s;
-            *thetap = t;
+        double  s    = m_w[1] * (*xp + m_x0);
+        double* phip = phi + rowoff;
+        for (int iy = 0; iy < my; ++iy, phip += rowlen) {
+            *phip = s;
         }
     }
 
@@ -407,75 +386,44 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
     int*          statp  = stat;
     for (int iy = 0; iy < ny; ++iy, yp += sxy) {
         double yj  = *yp + m_y0;
-        double yj2 = yj * yj * m_w[1];
+        double s   = std::cos(yj/m_r0);
+
+        // Initialise status
+        int istat = 0;
+
+        // Invert s
+        if (s == 0.0) {
+            istat = 1;
+            status = 3;
+            n_invalid++;
+            #if defined(G_DEBUG_PRJ)
+            std::cout << "prj_x2s(Phi)..:";
+            std::cout << " nx=" << nx;
+            std::cout << " ny=" << ny;
+            std::cout << " ix=" << ix;
+            std::cout << " iy=" << iy;
+            std::cout << " yp=" << *yp;
+            std::cout << " yj=" << yj;
+            std::cout << " phip=" << *phip;
+            std::cout << " s=" << s;
+            std::cout << std::endl;
+            #endif
+        }
+        else {
+            s = 1.0 / s;
+        }
+
+        // ...
+        double t = m_w[1] * yj;
+
+        // ...
         for (int ix = 0; ix < mx; ++ix, phip += spt, thetap += spt) {
-
-            // Initialise status
-            int istat = 0;
-
-            // Compute Phi
-            double s = *phip - yj2;
-            if (s < 0.5) {
-                if (s < 0.5-tol) {
-                    istat  = 1;
-                    status = 3;
-                    n_invalid++;
-                    #if defined(G_DEBUG_PRJ)
-                    std::cout << "prj_x2s(Phi)..:";
-                    std::cout << " nx=" << nx;
-                    std::cout << " ny=" << ny;
-                    std::cout << " ix=" << ix;
-                    std::cout << " iy=" << iy;
-                    std::cout << " yp=" << *yp;
-                    std::cout << " yj=" << yj;
-                    std::cout << " yj2=" << yj2;
-                    std::cout << " phip=" << *phip;
-                    std::cout << " s=" << s;
-                    std::cout << std::endl;
-                    #endif
-                }
-                s = 0.5;
-            }
-            double z  = std::sqrt(s);
-            double x0 = 2.0*z*z - 1.0;
-            double y0 = z*(*thetap);
-            if (x0 == 0.0 && y0 == 0.0) {
-                *phip = 0.0;
-            }
-            else {
-                *phip = 2.0 * gammalib::atan2d(y0, x0);
-            }
-
-            // Compute Theta
-            double t = z*yj/m_r0;
-            if (std::abs(t) > 1.0) {
-                if (std::abs(t) > 1.0+tol) {
-                    if (istat == 0) {
-                        istat  = 1;
-                        status = 3;
-                        n_invalid++;
-                    }
-                    #if defined(G_DEBUG_PRJ)
-                    std::cout << "prj_x2s(Theta):";
-                    std::cout << " x0=" << x0;
-                    std::cout << " y0=" << y0;
-                    std::cout << " phip=" << *phip;
-                    std::cout << " z=" << z;
-                    std::cout << " yj=" << yj;
-                    std::cout << " m_r0=" << m_r0;
-                    std::cout << " t=" << t;
-                    std::cout << std::endl;
-                    #endif
-                }
-                t = (t < 0) ? -90.0 : 90.0;
-            }
-            else {
-                t = gammalib::asind(t);
-            }
+            *phip     *= s;
             *thetap    = t;
             *(statp++) = istat;
         }
-    }
+
+    } // endfor: y dependence
 
     // Handle status code
     if (status == 3) {
@@ -502,19 +450,15 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * @exception GException::wcs_invalid_phi_theta
- *            One or more of the (phi,theta) coordinates were invalid, as
- *            indicated by the stat vector.
- *
  * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
  *
- * This method has been adapted from the wcslib function prj.c::aits2x().
+ * This method has been adapted from the wcslib function prj.c::sfls2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
  * setup previously (as this will be done by the constructor).
  ***************************************************************************/
-void GWcsAIT::prj_s2x(int nphi, int ntheta, int spt, int sxy,
+void GWcsSFL::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,
                       double* x, double* y, int* stat) const
 {
@@ -536,26 +480,15 @@ void GWcsAIT::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         ntheta = nphi;
     }
 
-    // Initialise status code and statistics
-    int status    = 0;
-    int n_invalid = 0;
-    
     // Do phi dependence
     const double* phip   = phi;
     int           rowoff = 0;
     int           rowlen = nphi * sxy;
     for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sxy, phip += spt) {
-        double w = (*phip)/2.0;
-        double sinphi;
-        double cosphi;
-        gammalib::sincosd(w, &sinphi, &cosphi);
+        double  xi = m_w[0] * (*phip);
         double* xp = x + rowoff;
-        double* yp = y + rowoff;
-        for (int itheta = 0; itheta < mtheta; ++itheta) {
-            *xp = sinphi;
-            *yp = cosphi;
-            xp += rowlen;
-            yp += rowlen;
+        for (int itheta = 0; itheta < mtheta; ++itheta, xp += rowlen) {
+            *xp = xi;
         }
     }
 
@@ -565,25 +498,13 @@ void GWcsAIT::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     double*       yp     = y;
     int*          statp  = stat;
     for (int itheta = 0; itheta < ntheta; ++itheta, thetap += spt) {
-    
-        // Compute sin(theta) and cos(theta)
-        double sinthe;
-        double costhe;
-        gammalib::sincosd(*thetap, &sinthe, &costhe);
-
-        // Do phi dependence
+        double xi  = gammalib::cosd(*thetap);
+        double eta = m_w[0] * (*thetap) - m_y0;
         for (int iphi = 0; iphi < mphi; ++iphi, xp += sxy, yp += sxy) {
-            double w   = std::sqrt(m_w[0]/(1.0 + costhe * (*yp)));
-            *xp        = 2.0 * w * costhe * (*xp) - m_x0;
-            *yp        = w * sinthe - m_y0;
+            *xp = xi * (*xp) - m_x0;
+            *yp = eta;
             *(statp++) = 0;
-        } // endfor: phi
-
-    } // endfor: theta
-  
-    // Handle status code
-    if (status == 4) {
-        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
+        }
     }
     
     // Return
