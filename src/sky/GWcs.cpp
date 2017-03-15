@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.cpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1267,8 +1267,8 @@ void GWcs::wcs_set_ctype(void) const
         }
 
         // Add projection name to comment
-        m_ctype_c.at(m_lng).append(name());
-        m_ctype_c.at(m_lng).append(" projection");
+        m_ctype_c.at(m_lat).append(name());
+        m_ctype_c.at(m_lat).append(" projection");
     }
 
     //TODO: Set spectral keyword
