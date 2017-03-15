@@ -150,11 +150,11 @@ protected:
         {};
         
         // Method
-        double eval(const double& x) {
-            double xpivot = x/m_pivot.MeV();
-            double xbreak = x/m_breakenergy.MeV();
-            return m_prefactor * std::pow(xpivot, m_index1) *
-            std::pow(1.0 + std::pow(xbreak,(m_index1-m_index2)/m_beta),-m_beta);
+        double eval(const double& energy) {
+            double epivot = energy / m_pivot.MeV();
+            double ebreak = energy / m_breakenergy.MeV();
+            return m_prefactor * std::pow(epivot, m_index1) *
+            std::pow(1.0 + std::pow(ebreak,(m_index1-m_index2)/m_beta),-m_beta);
         }
         
         // Members
@@ -181,8 +181,8 @@ protected:
         {};
         
         // Method
-        double eval(const double& x) {
-            return x * flux_kern::eval(x);
+        double eval(const double& energy) {
+            return energy * flux_kern::eval(energy);
         }
     };
     
@@ -208,7 +208,7 @@ protected:
     mutable double  m_last_log_ebreak_norm; //!< Last ln(E/Ebreakenergy) value
     mutable double  m_last_epivot_pow;    //!< Last pow(E/Epivot,index1) value
     mutable double  m_last_ebreak_pow;    //!< Last pow(E/Ebreakenergy,(index1-index2)/beta)
-//    mutable double  m_last_power;         //!< Last power value
+
     mutable double  m_mc_emin;            //!< Minimum energy
     mutable double  m_mc_emax;            //!< Maximum energy
     mutable double  m_mc_exponent1;       //!< Exponent (index1+1)

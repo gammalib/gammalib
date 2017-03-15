@@ -570,10 +570,10 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
                                            const GTime&   time,
                                            GRan&          ran) const
 {
-    // Throw an exception if energy range is invalid
+    // Throw exception if energy range is not valid
     if (emin >= emax) {
         throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
-                                         "Minimum energy < maximum energy required.");
+                            "Minimum energy < maximum energy required.");
     }
     
     // Allocate energy
@@ -582,33 +582,53 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
     // Update cache
     update_mc_cache(emin, emax);
     
-    // Determine in which bin we reside
-    int inx = 0;
-    if (m_mc_cum.size() > 1) {
-        double u = ran.uniform();
-        for (inx = m_mc_cum.size()-1; inx > 0; --inx) {
-            if (m_mc_cum[inx-1] <= u)
-                break;
-        }
-    }
+    // Initialise energy
+    double eng;
     
-    // Get random energy for specific bin
-    if (m_mc_exp[inx] != 0.0) {
-        double e_min = m_mc_min[inx];
-        double e_max = m_mc_max[inx];
-        double u     = ran.uniform();
-        double eng   = (u > 0.0)
-        ? std::exp(std::log(u * (e_max - e_min) + e_min) / m_mc_exp[inx])
-        : 0.0;
-        energy.MeV(eng);
-    }
-    else {
-        double e_min = m_mc_min[inx];
-        double e_max = m_mc_max[inx];
-        double u     = ran.uniform();
-        double eng   = std::exp(u * (e_max - e_min) + e_min);
-        energy.MeV(eng);
-    }
+    // Initialse acceptance fraction
+    double acceptance_fraction;
+    
+    // Use rejection method to draw a random energy. We first draw
+    // analytically from a power law, and then compare the power law
+    // at the drawn energy to the curved function. This
+    // gives an acceptance fraction, and we accept the energy only if
+    // a uniform random number is <= the acceptance fraction.
+    do {
+        
+        // Get uniform random number
+        double u = ran.uniform();
+        
+        // Case A: Corresponding mc Plaw-Index is not -1
+        if (m_mc_exponent != 0.0) {
+            if (u > 0.0) {
+                eng = std::exp(std::log(u * m_mc_pow_ewidth + m_mc_pow_emin) /
+                               m_mc_exponent);
+            }
+            else {
+                eng = 0.0;
+            }
+        }
+        
+        // Case B: Corresponding mc Plaw-Index is  -1
+        else {
+            eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
+        }
+        
+        // Compute powerlaw at given energy
+        double e_norm = eng / m_pivot.value();
+        double plaw   = m_mc_norm * std::pow(e_norm, m_mc_exponent-1.0);
+        
+        // Compute logparabola at given energy
+        double logparabola = prefactor() *
+        std::pow(e_norm,index()+curvature()*std::log(e_norm));
+        
+        // Compute acceptance fraction
+        acceptance_fraction = logparabola / plaw;
+        
+    } while (ran.uniform() > acceptance_fraction);
+    
+    // Set energy
+    energy.MeV(eng);
     
     // Return energy
     return energy;
@@ -627,14 +647,18 @@ void GModelSpectralSmoothBrokenPlaw::read(const GXmlElement& xml)
     // Get remaining XML parameters
     const GXmlElement* prefactor   = gammalib::xml_get_par(G_READ, xml, m_norm.name());
     const GXmlElement* index1      = gammalib::xml_get_par(G_READ, xml, m_index1.name());
-    const GXmlElement* breakenergy = gammalib::xml_get_par(G_READ, xml, m_breakenergy.name());
+    const GXmlElement* pivot       = gammalib::xml_get_par(G_READ, xml, m_pivot.name());
     const GXmlElement* index2      = gammalib::xml_get_par(G_READ, xml, m_index2.name());
+    const GXmlElement* breakenergy = gammalib::xml_get_par(G_READ, xml, m_breakenergy.name());
+    const GXmlElement* beta        = gammalib::xml_get_par(G_READ, xml, m_beta.name());
     
     // Read parameters
     m_norm.read(*prefactor);
     m_index1.read(*index1);
-    m_breakenergy.read(*breakenergy);
+    m_pivot.read(*pivot);
     m_index2.read(*index2);
+    m_breakenergy.read(*breakenergy);
+    m_beta.read(*beta);
     
     // Return
     return;
@@ -668,13 +692,17 @@ void GModelSpectralSmoothBrokenPlaw::write(GXmlElement& xml) const
     GXmlElement* norm        = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
     GXmlElement* index1      = gammalib::xml_need_par(G_WRITE, xml, m_index1.name());
     GXmlElement* index2      = gammalib::xml_need_par(G_WRITE, xml, m_index2.name());
+    GXmlElement* pivot       = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
     GXmlElement* breakenergy = gammalib::xml_need_par(G_WRITE, xml, m_breakenergy.name());
+    GXmlElement* beta        = gammalib::xml_need_par(G_WRITE, xml, m_beta.name());
     
     // Write parameters
     m_norm.write(*norm);
     m_index1.write(*index1);
+    m_pivot.write(*pivot);
     m_index2.write(*index2);
     m_breakenergy.write(*breakenergy);
+    m_beta.write(*beta);
     
     // Return
     return;
@@ -947,7 +975,7 @@ void GModelSpectralSmoothBrokenPlaw::update_eval_cache(const GEnergy& energy) co
  * Updates the precomputation cache for Monte Carlo simulations.
  ***************************************************************************/
 void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
-                                               const GEnergy& emax) const
+                                                     const GEnergy& emax) const
 {
     // Check if we need to update the cache
     if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
