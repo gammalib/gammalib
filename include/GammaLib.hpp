@@ -156,9 +156,11 @@
 #include "GWcsAIT.hpp"
 #include "GWcsAZP.hpp"
 #include "GWcsCAR.hpp"
+#include "GWcsGLS.hpp"
 #include "GWcsMER.hpp"
 #include "GWcsMOL.hpp"
 #include "GWcsSIN.hpp"
+#include "GWcsSFL.hpp"
 #include "GWcsSTG.hpp"
 #include "GWcsTAN.hpp"
 

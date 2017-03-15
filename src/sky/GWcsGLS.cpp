@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GWcsCAR.cpp - Plate carree (CAR) projection class           *
+ *          GWcsGLS.cpp - Global Sinusoidal (GLS) projection class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Jurgen Knodlseder                           *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcsCAR.cpp
- * @brief Plate carree (CAR) projection class implementation
+ * @file GWcsGLS.cpp
+ * @brief Global Sinusoidal (GLS) projection class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,7 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GMath.hpp"
-#include "GWcsCAR.hpp"
+#include "GWcsGLS.hpp"
 #include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -46,8 +46,8 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GWcsCAR      g_wcs_car_seed;
-const GWcsRegistry g_wcs_car_registry(&g_wcs_car_seed);
+const GWcsGLS      g_wcs_gls_seed;
+const GWcsRegistry g_wcs_gls_registry(&g_wcs_gls_seed);
 
 
 /*==========================================================================
@@ -59,7 +59,7 @@ const GWcsRegistry g_wcs_car_registry(&g_wcs_car_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsCAR::GWcsCAR(void) : GWcs()
+GWcsGLS::GWcsGLS(void) : GWcsSFL()
 {
     // Initialise class members
     init_members();
@@ -70,7 +70,7 @@ GWcsCAR::GWcsCAR(void) : GWcs()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Projection constructor
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
@@ -80,12 +80,11 @@ GWcsCAR::GWcsCAR(void) : GWcs()
  * @param[in] cdelt1 Increment in x direction at reference pixel [deg].
  * @param[in] cdelt2 Increment in y direction at reference pixel [deg].
  ***************************************************************************/
-GWcsCAR::GWcsCAR(const std::string& coords,
+GWcsGLS::GWcsGLS(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2) :
-                 GWcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
-
+                 GWcsSFL(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
 {
     // Initialise class members
     init_members();
@@ -100,7 +99,7 @@ GWcsCAR::GWcsCAR(const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsCAR::GWcsCAR(const GWcsCAR& wcs) : GWcs(wcs)
+GWcsGLS::GWcsGLS(const GWcsGLS& wcs) : GWcsSFL(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -116,7 +115,7 @@ GWcsCAR::GWcsCAR(const GWcsCAR& wcs) : GWcs(wcs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GWcsCAR::~GWcsCAR(void)
+GWcsGLS::~GWcsGLS(void)
 {
     // Free members
     free_members();
@@ -136,14 +135,15 @@ GWcsCAR::~GWcsCAR(void)
  * @brief Assignment operator
  *
  * @param[in] wcs World Coordinate System.
+ * @return World Coordinate System.
  ***************************************************************************/
-GWcsCAR& GWcsCAR::operator=(const GWcsCAR& wcs)
+GWcsGLS& GWcsGLS::operator=(const GWcsGLS& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
 
         // Copy base class members
-        this->GWcs::operator=(wcs);
+        this->GWcsSFL::operator=(wcs);
 
         // Free members
         free_members();
@@ -168,20 +168,22 @@ GWcsCAR& GWcsCAR::operator=(const GWcsCAR& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear Global Sinusoidal projection
  *
- * This method properly resets the object to an initial state.
+ * Resets the Global Sinusoidal projection to an clean initial state.
  ***************************************************************************/
-void GWcsCAR::clear(void)
+void GWcsGLS::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
+    this->GWcsSFL::free_members();
     this->GWcs::free_members();
     this->GSkyProjection::free_members();
 
     // Initialise members
     this->GSkyProjection::init_members();
     this->GWcs::init_members();
+    this->GWcsSFL::init_members();
     init_members();
 
     // Return
@@ -190,24 +192,23 @@ void GWcsCAR::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone Global Sinusoidal projection
  *
- * @return Pointer to deep copy of World Coordinate System.
+ * @return Pointer to deep copy of Global Sinusoidal projection.
  ***************************************************************************/
-GWcsCAR* GWcsCAR::clone(void) const
+GWcsGLS* GWcsGLS::clone(void) const
 {
-    return new GWcsCAR(*this);
+    return new GWcsGLS(*this);
 }
 
 
-
 /***********************************************************************//**
- * @brief Print WCS information
+ * @brief Print Global Sinusoidal projection information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing WCS information.
+ * @param[in] chatter Chattiness.
+ * @return String containing Global Sinusoidal projection information.
  ***************************************************************************/
-std::string GWcsCAR::print(const GChatter& chatter) const
+std::string GWcsGLS::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -216,7 +217,7 @@ std::string GWcsCAR::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GWcsCAR ===");
+        result.append("=== GWcsGLS ===");
 
         // Append information
         result.append(wcs_print(chatter));
@@ -236,14 +237,12 @@ std::string GWcsCAR::print(const GChatter& chatter) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * This method sets up the World Coordinate System by calling wcs_set().
  ***************************************************************************/
-void GWcsCAR::init_members(void)
+void GWcsGLS::init_members(void)
 {
     // Setup World Coordinate System
     wcs_set();
-    
+
     // Return
     return;
 }
@@ -254,7 +253,7 @@ void GWcsCAR::init_members(void)
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-void GWcsCAR::copy_members(const GWcsCAR& wcs)
+void GWcsGLS::copy_members(const GWcsGLS& wcs)
 {
     // Return
     return;
@@ -264,202 +263,8 @@ void GWcsCAR::copy_members(const GWcsCAR& wcs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GWcsCAR::free_members(void)
+void GWcsGLS::free_members(void)
 {
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Setup of projection
- *
- * This method sets up the projection information. The method has been
- * adapted from the wcslib function prj.c::carset.
- *
- *   Given and/or returned:
- *      m_r0      Reset to 180/pi if 0.
- *      m_phi0    Reset to 0.0 if undefined.
- *      m_theta0  Reset to 0.0 if undefined.
- *
- *   Returned:
- *      m_x0      Fiducial offset in x.
- *      m_y0      Fiducial offset in y.
- *      m_w[0]    r0*(pi/180)
- *      m_w[1]    (180/pi)/r0
- ***************************************************************************/
-void GWcsCAR::prj_set(void) const
-{
-    // Signal that projection has been set (needs to be done before calling
-    // the prj_off() method to avoid an endless loop)
-    m_prjset = true;
-
-    // Initialise projection parameters
-    m_w.clear();
-    
-    // Precompute 
-    if (m_r0 == 0.0) {
-        m_r0 = gammalib::rad2deg;
-        m_w.push_back(1.0);
-        m_w.push_back(1.0);
-    } 
-    else {
-        m_w.push_back(m_r0 * gammalib::deg2rad);
-        m_w.push_back(1.0/m_w[0]);
-    }
-    
-    // Compute fiducial offset
-    prj_off(0.0, 0.0);
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Cartesian-to-spherical deprojection
- *
- * @param[in] nx X vector length.
- * @param[in] ny Y vector length (0=no replication).
- * @param[in] sxy Input vector step.
- * @param[in] spt Output vector step.
- * @param[in] x Vector of projected x coordinates.
- * @param[in] y Vector of projected y coordinates.
- * @param[out] phi Longitude of the projected point in native spherical
- *                 coordinates [deg].
- * @param[out] theta Latitude of the projected point in native spherical
- *                   coordinates [deg].
- * @param[out] stat Status return value for each vector element (always 0)
- *
- * Deproject Cartesian (x,y) coordinates in the plane of projection to native
- * spherical coordinates (phi,theta).
- *
- * This method has been adapted from the wcslib function prj.c::carx2s().
- * The interface follows very closely that of wcslib. In contrast to the
- * wcslib routine, however, the method assumes that the projection has been
- * setup previously (as this will be done by the constructor).
- ***************************************************************************/
-void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt, 
-                      const double* x, const double* y,
-                      double* phi, double* theta, int* stat) const
-{
-    // Initialize projection if required
-    if (!m_prjset) {
-        prj_set();
-    }
-
-    // Set value replication length mx,my
-    int mx;
-    int my;
-    if (ny > 0) {
-        mx = nx;
-        my = ny;
-    } 
-    else {
-        mx = 1;
-        my = 1;
-        ny = nx;
-    }
-    
-    // Do x dependence
-    const double* xp     = x;
-    int           rowoff = 0;
-    int           rowlen = nx * spt;
-    for (int ix = 0; ix < nx; ++ix, rowoff += spt, xp += sxy) {
-        double  s    = m_w[1] * (*xp + m_x0);
-        double* phip = phi + rowoff;
-        for (int iy = 0; iy < my; ++iy, phip += rowlen) {
-            *phip = s;
-        }
-    }
-
-    // Do y dependence
-    const double* yp     = y;
-    double*       thetap = theta;
-    int*          statp  = stat;
-    for (int iy = 0; iy < ny; ++iy, yp += sxy) {
-        double t = m_w[1] * (*yp + m_y0);
-        for (int ix = 0; ix < mx; ++ix, thetap += spt) {
-            *thetap    = t;
-            *(statp++) = 0;
-        }
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Generic spherical-to-Cartesian projection
- *
- * @param[in] nphi Longitude vector length.
- * @param[in] ntheta Latitude vector length (0=no replication).
- * @param[in] spt Input vector step.
- * @param[in] sxy Output vector step.
- * @param[in] phi Longitude vector of the projected point in native spherical
- *                coordinates [deg].
- * @param[in] theta Latitude vector of the projected point in native spherical
- *                  coordinates [deg].
- * @param[out] x Vector of projected x coordinates.
- * @param[out] y Vector of projected y coordinates.
- * @param[out] stat Status return value for each vector element (always 0)
- *
- * Project native spherical coordinates (phi,theta) to Cartesian (x,y)
- * coordinates in the plane of projection.
- *
- * This method has been adapted from the wcslib function prj.c::cars2x().
- * The interface follows very closely that of wcslib. In contrast to the
- * wcslib routine, however, the method assumes that the projection has been
- * setup previously (as this will be done by the constructor).
- ***************************************************************************/
-void GWcsCAR::prj_s2x(int nphi, int ntheta, int spt, int sxy,
-                      const double* phi, const double* theta,
-                      double* x, double* y, int* stat) const
-{
-    // Initialize projection if required
-    if (!m_prjset) {
-        prj_set();
-    }
-
-    // Set value replication length mphi,mtheta
-    int mphi;
-    int mtheta;
-    if (ntheta > 0) {
-        mphi   = nphi;
-        mtheta = ntheta;
-    } 
-    else {
-        mphi   = 1;
-        mtheta = 1;
-        ntheta = nphi;
-    }
-
-    // Do phi dependence
-    const double* phip   = phi;
-    int           rowoff = 0;
-    int           rowlen = nphi * sxy;
-    for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sxy, phip += spt) {
-        double  xi = m_w[0] * (*phip) - m_x0;
-        double* xp = x + rowoff;
-        for (int itheta = 0; itheta < mtheta; ++itheta, xp += rowlen) {
-            *xp = xi;
-        }
-    }
-
-
-    // Do theta dependence
-    const double* thetap = theta;
-    double*       yp     = y;
-    int*          statp  = stat;
-    for (int itheta = 0; itheta < ntheta; ++itheta, thetap += spt) {
-        double eta = m_w[0] * (*thetap) - m_y0;
-        for (int iphi = 0; iphi < mphi; ++iphi, yp += sxy) {
-            *yp = eta;
-            *(statp++) = 0;
-        }
-    }
-    
     // Return
     return;
 }

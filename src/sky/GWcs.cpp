@@ -920,8 +920,9 @@ void GWcs::copy_members(const GWcs& wcs)
     m_x0     = wcs.m_x0;
     m_y0     = wcs.m_y0;
     m_w      = wcs.m_w;
-    for (int i = 0; i < PVN; ++i)
+    for (int i = 0; i < PVN; ++i) {
         m_pv[i] = wcs.m_pv[i];
+    }
 
     // Return
     return;
@@ -1147,7 +1148,12 @@ void GWcs::wcs_set(void) const
         
         //TODO: Do we have PVi_ma keyvalues?
         
-        //TODO: Do simple alias translations
+        // Do simple alias translations
+        if (code() == "GLS") {
+            m_offset = true;
+            m_phi0   = 0.0;
+            m_theta0 = m_crval[m_lat];
+        }
         
         // Initialize the celestial transformation routines
         m_r0 = 0.0; // Forces initialisation
