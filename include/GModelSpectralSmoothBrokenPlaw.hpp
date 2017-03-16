@@ -211,10 +211,11 @@ protected:
 
     mutable double  m_mc_emin;            //!< Minimum energy
     mutable double  m_mc_emax;            //!< Maximum energy
-    mutable double  m_mc_exponent1;       //!< Exponent (index1+1)
-    mutable double  m_mc_exponent2;       //!< Exponent (index2+1)
-    mutable double  m_mc_pow_emin;        //!< Power of minimum energy
-    mutable double  m_mc_pow_ewidth;      //!< Power of energy width
+    mutable double  m_mc_plaw_prefactor;  //!< Prefactor for comparison p-laws
+    mutable double  m_mc_exponentS;       //!< Exponent (index+1) for softer index
+    mutable double  m_mc_exponentH;       //!< Exponent (index+1) for harder index
+    mutable double  m_mc_pow_ewidth_low;  //!< width of energy range below break
+    mutable double  m_mc_norm;            //!< Normalization term for energy generation
     mutable std::vector<double> m_mc_cum; //!< Cumulative distribution
     mutable std::vector<double> m_mc_min; //!< Lower boundary for MC
     mutable std::vector<double> m_mc_max; //!< Upper boundary for MC

@@ -583,10 +583,10 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
     update_mc_cache(emin, emax);
     
     // Initialise energy
-    double eng;
+    double eng(0.0);
     
     // Initialse acceptance fraction
-    double acceptance_fraction;
+    double acceptance_fraction(0.0);
     
     // Use rejection method to draw a random energy. We first draw
     // analytically from a power law, and then compare the power law
@@ -595,35 +595,45 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
     // a uniform random number is <= the acceptance fraction.
     do {
         
+        double e_norm(0.0), plaw(0.0);
+        
         // Get uniform random number
         double u = ran.uniform();
         
-        // Case A: Corresponding mc Plaw-Index is not -1
-        if (m_mc_exponent != 0.0) {
-            if (u > 0.0) {
-                eng = std::exp(std::log(u * m_mc_pow_ewidth + m_mc_pow_emin) /
-                               m_mc_exponent);
+        // Case A: random number suggests energy less than breakenergy
+        if (u <= (m_mc_pow_ewidth_low/m_mc_norm)) {
+            if (m_mc_exponentH != 0.0) {
+                eng = std::exp(std::log(u * m_mc_norm +
+                        std::pow(m_mc_emin, m_mc_exponentH)) / m_mc_exponentH);
+            } else {
+                // TODO: Implement special handling
             }
-            else {
-                eng = 0.0;
+            
+            // Compute powerlaw at given energy
+            e_norm = eng / m_breakenergy.value();
+            plaw   = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentH-1.0);
+            
+        } else {
+            if (m_mc_exponentS != 0.0) {
+                eng = std::exp(std::log(u * m_mc_norm +
+                        std::pow(breakenergy().MeV(), m_mc_exponentS) -
+                        m_mc_pow_ewidth_low) / m_mc_exponentS) ;
+            } else {
+                // TODO: Implement special handling
             }
+            
+            // Compute powerlaw at given energy
+            e_norm = eng / m_breakenergy.value();
+            plaw   = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentS-1.0);
+            
         }
-        
-        // Case B: Corresponding mc Plaw-Index is  -1
-        else {
-            eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
-        }
-        
-        // Compute powerlaw at given energy
-        double e_norm = eng / m_pivot.value();
-        double plaw   = m_mc_norm * std::pow(e_norm, m_mc_exponent-1.0);
         
         // Compute logparabola at given energy
-        double logparabola = prefactor() *
-        std::pow(e_norm,index()+curvature()*std::log(e_norm));
+        double sb_plaw = prefactor() * std::pow(eng/m_pivot.value(),index1()) *
+            std::pow(1.0 + std::pow(e_norm,(index1()-index2())/beta()), -beta());
         
         // Compute acceptance fraction
-        acceptance_fraction = logparabola / plaw;
+        acceptance_fraction = sb_plaw / plaw;
         
     } while (ran.uniform() > acceptance_fraction);
     
@@ -838,14 +848,13 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_last_ebreak_pow  = 1.0e30;
     
     // Initialise MC cache
-    m_mc_exponent1  = 0.0;
-    m_mc_exponent2  = 0.0;
-    m_mc_pow_emin   = 0.0;
-    m_mc_pow_ewidth = 0.0;
-    
-    // Initialise MC cache
-    m_mc_emin = 0.0;
-    m_mc_emax = 0.0;
+    m_mc_emin           = 0.0;
+    m_mc_emax           = 0.0;
+    m_mc_plaw_prefactor = 0.0;
+    m_mc_exponentS      = 0.0;
+    m_mc_exponentH      = 0.0;
+    m_mc_pow_ewidth_low = 0.0;
+    m_mc_norm           = 0.0;
     
     // Return
     return;
@@ -892,12 +901,13 @@ void GModelSpectralSmoothBrokenPlaw::copy_members(const GModelSpectralSmoothBrok
     m_last_ebreak_pow  = model.m_last_ebreak_pow;
     
     // Copy MC cache
-    m_mc_emin       = model.m_mc_emin;
-    m_mc_emax       = model.m_mc_emax;
-    m_mc_exponent1  = model.m_mc_exponent1;
-    m_mc_exponent2  = model.m_mc_exponent2;
-    m_mc_pow_emin   = model.m_mc_pow_emin;
-    m_mc_pow_ewidth = model.m_mc_pow_ewidth;
+    m_mc_emin           = model.m_mc_emin;
+    m_mc_emax           = model.m_mc_emax;
+    m_mc_plaw_prefactor = model.m_mc_plaw_prefactor;
+    m_mc_exponentS      = model.m_mc_exponentS;
+    m_mc_exponentH      = model.m_mc_exponentH;
+    m_mc_pow_ewidth_low = model.m_mc_pow_ewidth_low;
+    m_mc_norm           = model.m_mc_norm;
     
     // Return
     return;
@@ -984,97 +994,27 @@ void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
         m_mc_emin = emin.MeV();
         m_mc_emax = emax.MeV();
         
-        // Initialise cache
-        m_mc_cum.clear();
-        m_mc_min.clear();
-        m_mc_max.clear();
-        m_mc_exp.clear();
+        /* Predefine some variables */
         
-        // Get energy range in MeV
-        double e_min = emin.MeV();
-        double e_max = emax.MeV();
+        // Prefactor for comparison power law functions
+        m_mc_plaw_prefactor = prefactor() * std::pow(breakenergy()/pivot(),index1());
         
-        // Continue only if e_max > e_min
-        if (e_max > e_min) {
-            
-            // Allocate flux
-            double flux;
-            
-            // Determine left node index for minimum and maximum energy
-            int inx_emin = (e_min < m_breakenergy.value() ) ? 0 : 1;
-            int inx_emax = (e_max < m_breakenergy.value() ) ? 0 : 1;
-            
-            // If both energies are within the same node then just
-            // add this one node on the stack
-            if (inx_emin == inx_emax) {
-                double exp_valid = (e_min < m_breakenergy.value())
-                ? m_index1.value() : m_index2.value();
-                flux = m_norm.value() *
-                gammalib::plaw_photon_flux(e_min,
-                                           e_max,
-                                           m_breakenergy.value(),
-                                           exp_valid);
-                m_mc_cum.push_back(flux);
-                m_mc_min.push_back(e_min);
-                m_mc_max.push_back(e_max);
-                m_mc_exp.push_back(exp_valid);
-            }
-            
-            // ... otherwise integrate over both nodes
-            else {
-                // just enter the values for first pl: bin [0]
-                flux = m_norm.value() *
-                gammalib::plaw_photon_flux(e_min,
-                                           m_breakenergy.value(),
-                                           m_breakenergy.value(),
-                                           m_index1.value());
-                m_mc_cum.push_back(flux);
-                m_mc_exp.push_back(m_index1.value());
-                m_mc_min.push_back(e_min);
-                m_mc_max.push_back(m_breakenergy.value());
-                
-                // and for
-                flux = m_norm.value() *
-                gammalib::plaw_photon_flux(m_breakenergy.value(),
-                                           e_max,
-                                           m_breakenergy.value(),
-                                           m_index2.value());
-                m_mc_cum.push_back(flux);
-                m_mc_exp.push_back(m_index2.value());
-                m_mc_max.push_back(e_max);
-                m_mc_min.push_back(m_breakenergy.value());
-            } // endelse: emin and emax not between same nodes
-            
-            // Build cumulative distribution
-            for (int i = 1; i < m_mc_cum.size(); ++i) {
-                m_mc_cum[i] += m_mc_cum[i-1];
-            }
-            double norm = m_mc_cum[m_mc_cum.size()-1];
-            for (int i = 0; i < m_mc_cum.size(); ++i) {
-                m_mc_cum[i] /= norm;
-            }
-            
-            // Set MC values
-            for (int i = 0; i < m_mc_cum.size(); ++i) {
-                
-                // Compute exponent
-                double exponent = m_mc_exp[i] + 1.0;
-                
-                // Exponent dependend computation
-                if (std::abs(exponent) > 1.0e-11) {
-                    m_mc_exp[i] = exponent;
-                    m_mc_min[i] = std::pow(m_mc_min[i], exponent);
-                    m_mc_max[i] = std::pow(m_mc_max[i], exponent);
-                }
-                else {
-                    m_mc_exp[i] = 0.0;
-                    m_mc_min[i] = std::log(m_mc_min[i]);
-                    m_mc_max[i] = std::log(m_mc_max[i]);
-                }
-                
-            } // endfor: set MC values
-            
-        } // endif: e_max > e_min
+        // Find out which index is softer
+        if (index1() < index2()) {
+            m_mc_exponentS = index1() + 1.0 ;
+            m_mc_exponentH = index2() + 1.0 ;
+        } else {
+            m_mc_exponentS = index2() + 1.0 ;
+            m_mc_exponentH = index1() + 1.0 ;
+        }
+        
+        // Get the range of the energy range below the break energy
+        m_mc_pow_ewidth_low = std::pow(breakenergy().MeV(), m_mc_exponentH) -
+                              std::pow(m_mc_emin, m_mc_exponentH);
+        
+        // Get the normalization term
+        m_mc_norm = m_mc_pow_ewidth_low + (std::pow(m_mc_emax,m_mc_exponentS) -
+                                std::pow(breakenergy().MeV(),m_mc_exponentS));
         
     } // endif: Update was required
     
