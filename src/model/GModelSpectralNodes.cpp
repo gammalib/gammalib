@@ -47,6 +47,7 @@ const GModelSpectralRegistry g_spectral_nodes_registry(&g_spectral_nodes_seed);
 #define G_MC     "GModelSpectralNodes::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                      "GModelSpectralNodes::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralNodes::write(GXmlElement&)"
+#define G_APPEND             "GModelSpectralNodes::append(GEnergy&, double&)"
 #define G_INSERT       "GModelSpectralNodes::insert(int&, GEnergy&, double&)"
 #define G_REMOVE                          "GModelSpectralNodes::remove(int&)"
 #define G_ENERGY_GET                      "GModelSpectralNodes::energy(int&)"
@@ -569,6 +570,8 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
  *            Invalid number of model parameters found in XML element.
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter name found in XML element.
+ * @exception GException::invalid_value
+ *            Energy or intensity are not positive.
  *
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
@@ -585,7 +588,6 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
  *       </node>
  *     </spectrum>
  *
- * @todo Check that all energies and intensities are positive
  * @todo Check that nodes are ordered
  * @todo Check that energy boundaries are not overlapping
  ***************************************************************************/
@@ -646,6 +648,23 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
         if (npar[0] != 1 || npar[1] != 1) {
             throw GException::model_invalid_parnames(G_READ, xml,
                   "Require \"Energy\" and \"Intensity\" parameters.");
+        }
+
+        // Throw an exception if either energy or intensity is not positive
+        if (energy.value() <= 0.0) {
+            std::string msg = "Non positive energy "+
+                              gammalib::str(energy.value())+" MeV encountered "
+                              "in model definition XML file. Please specify "
+                              "only nodes with positive energy.";
+            throw GException::invalid_value(G_READ, msg);
+        }
+        if (intensity.value() <= 0.0) {
+            std::string msg = "Non positive intensity "+
+                              gammalib::str(intensity.value())+" ph/cm2/s/MeV "
+                              "encountered  in model definition XML file. "
+                              "Please specify only nodes with positive "
+                              "intensity.";
+            throw GException::invalid_value(G_READ, msg);
         }
 
         // Set parameter names
@@ -771,11 +790,28 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
  * @param[in] energy Node energy.
  * @param[in] intensity Node intensity.
  *
+ * @exception GException::invalid_argument
+ *            Non-positive energy or intensity specified.
+ *
  * Appends one node to the node function.
  ***************************************************************************/
 void GModelSpectralNodes::append(const GEnergy& energy,
                                  const double&  intensity)
 {
+    // Throw an exception if either energy or intensity is not positive
+    if (energy.MeV() <= 0.0) {
+        std::string msg = "Non-positive energy "+energy.print()+" not allowed. "
+                          "Please specify only positive energies.";
+        throw GException::invalid_argument(G_APPEND, msg);
+    }
+    if (intensity <= 0.0) {
+        std::string msg = "Non-positive intensity "+
+                          gammalib::str(intensity)+" ph/cm2/s/MeV "
+                          "not allowed. Please specify only positive "
+                          "intensities.";
+        throw GException::invalid_argument(G_APPEND, msg);
+    }
+
     // Allocate node parameters
     GModelPar e_par;
     GModelPar i_par;
@@ -816,6 +852,8 @@ void GModelSpectralNodes::append(const GEnergy& energy,
  *
  * @exception GException::out_of_range
  *            Node index is out of range.
+ * @exception GException::invalid_argument
+ *            Non-positive energy or intensity specified.
  *
  * Inserts a node into the node function before the node with the specified
  * @p index.
@@ -837,6 +875,20 @@ void GModelSpectralNodes::insert(const int&     index,
         }
     }
     #endif
+
+    // Throw an exception if either energy or intensity is not positive
+    if (energy.MeV() <= 0.0) {
+        std::string msg = "Non-positive energy "+energy.print()+" not allowed. "
+                          "Please specify only positive energies.";
+        throw GException::invalid_argument(G_INSERT, msg);
+    }
+    if (intensity <= 0.0) {
+        std::string msg = "Non-positive intensity "+
+                          gammalib::str(intensity)+" ph/cm2/s/MeV "
+                          "not allowed. Please specify only positive "
+                          "intensities.";
+        throw GException::invalid_argument(G_INSERT, msg);
+    }
 
     // Allocate node parameters
     GModelPar e_par;
@@ -997,6 +1049,8 @@ GEnergy GModelSpectralNodes::energy(const int& index) const
  *
  * @exception GException::out_of_range
  *            Index is out of range.
+ * @exception GException::invalid_argument
+ *            Non-positive energy specified.
  *
  * Sets the energy of node @p index.
  ***************************************************************************/
@@ -1008,6 +1062,13 @@ void GModelSpectralNodes::energy(const int& index, const GEnergy& energy)
         throw GException::out_of_range(G_ENERGY_SET, index, nodes()-1);
     }
     #endif
+
+    // Throw an exception if energy is not positive
+    if (energy.MeV() <= 0.0) {
+        std::string msg = "Non-positive energy "+energy.print()+" not allowed. "
+                          "Please specify only positive energies.";
+        throw GException::invalid_argument(G_ENERGY_SET, msg);
+    }
 
     // Set energy
     m_energies[index].value(energy.MeV());
@@ -1053,6 +1114,8 @@ double GModelSpectralNodes::intensity(const int& index) const
  *
  * @exception GException::out_of_range
  *            Index is out of range.
+ * @exception GException::invalid_argument
+ *            Non-positive intensity specified.
  *
  * Set the intensity of node @p index.
  ***************************************************************************/
@@ -1064,6 +1127,15 @@ void GModelSpectralNodes::intensity(const int& index, const double& intensity)
         throw GException::out_of_range(G_INTENSITY_SET, index, nodes()-1);
     }
     #endif
+
+    // Throw an exception if either energy or intensity is not positive
+    if (intensity <= 0.0) {
+        std::string msg = "Non-positive intensity "+
+                          gammalib::str(intensity)+" ph/cm2/s/MeV "
+                          "not allowed. Please specify only positive "
+                          "intensities.";
+        throw GException::invalid_argument(G_INSERT, msg);
+    }
 
     // Set intensity
     m_values[index].value(intensity);
@@ -1079,7 +1151,7 @@ void GModelSpectralNodes::intensity(const int& index, const double& intensity)
 /***********************************************************************//**
  * @brief Print node function information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing node function information.
  ***************************************************************************/
 std::string GModelSpectralNodes::print(const GChatter& chatter) const
