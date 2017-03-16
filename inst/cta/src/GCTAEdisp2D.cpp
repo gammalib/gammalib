@@ -206,6 +206,11 @@ double GCTAEdisp2D::operator()(const double& logEobs,
     // Compute edisp
     edisp = m_edisp(m_inx_matrix, arg[0], arg[1], arg[2]);
 
+    // Make sure that energy dispersion is non-negative
+    if (edisp < 0.0) {
+        edisp = 0.0;
+    }
+
     // Return
     return edisp;
 }
