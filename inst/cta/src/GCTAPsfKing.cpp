@@ -583,9 +583,10 @@ double GCTAPsfKing::containment_radius(const double& fraction,
     update(logE, theta);
 
     // Use analytic calculation
-    double arg    = std::pow(1.0 - fraction, 1.0/(1.0-m_par_gamma));
-    double radius = m_par_sigma * std::pow(2.0 * m_par_gamma * (arg - 1.0), 0.5);
-    
+    double arg1   = std::pow(1.0 - fraction, 1.0/(1.0-m_par_gamma));
+    double arg2   = 2.0 * m_par_gamma * (arg1 - 1.0);
+    double radius = (arg2 > 0) ? m_par_sigma * std::sqrt(arg2) : 0.0;
+
     // Return radius containing fraction of events
     return radius;
 }
@@ -708,9 +709,6 @@ void GCTAPsfKing::free_members(void)
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle.
  *
- * @exception GException::invalid_value
- *            No valid point spread function information has been found.
- *
  * This method updates the PSF parameter cache. As the performance table PSF
  * only depends on energy, the only parameter on which the cache values
  * depend is the energy.
@@ -736,12 +734,12 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
         // Check for parameter sanity
         if (m_par_gamma <= 0.0 || m_par_sigma <= 0.0) {
             m_par_norm = 0.0;
-            std::string msg = "King function parameters m_par_gamma and"
-                              " m_par_sigma are zero (for "
-                              " parameter space logE=" +
-                              gammalib::str(logE) + " and theta=" + 
-                              gammalib::str(theta) + 
-                              "), setting normalization m_norm to zero."; 
+            std::string msg = "King function parameters gamma="+
+                              gammalib::str(m_par_gamma)+" or sigma="+
+                              gammalib::str(m_par_sigma)+" are not positive "
+                              "for logE="+gammalib::str(logE)+" and theta="+
+                              gammalib::str(theta)+". Setting normalization "
+                              "to zero.";
             gammalib::warning(G_UPDATE, msg);
         }
         else {   
