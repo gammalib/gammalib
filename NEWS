@@ -270,7 +270,7 @@ None
 
 20. CTA interface
 -----------------
-None
+Correct the containment radius computation in GCTAPsf2D (#1876).
 
 
 21. COMPTEL interface
