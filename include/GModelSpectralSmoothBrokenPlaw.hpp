@@ -216,10 +216,6 @@ protected:
     mutable double  m_mc_exponentH;       //!< Exponent (index+1) for harder index
     mutable double  m_mc_pow_ewidth_low;  //!< width of energy range below break
     mutable double  m_mc_norm;            //!< Normalization term for energy generation
-    mutable std::vector<double> m_mc_cum; //!< Cumulative distribution
-    mutable std::vector<double> m_mc_min; //!< Lower boundary for MC
-    mutable std::vector<double> m_mc_max; //!< Upper boundary for MC
-    mutable std::vector<double> m_mc_exp; //!< Exponent for MC
 };
 
 

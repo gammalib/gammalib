@@ -600,32 +600,66 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
         // Get uniform random number
         double u = ran.uniform();
         
-        // Case A: random number suggests energy less than breakenergy
-        if (u <= (m_mc_pow_ewidth_low/m_mc_norm)) {
-            if (m_mc_exponentH != 0.0) {
-                eng = std::exp(std::log(u * m_mc_norm +
-                        std::pow(m_mc_emin, m_mc_exponentH)) / m_mc_exponentH);
-            } else {
-                // TODO: Implement special handling
+        // Case 1: indices are the same (things are simple)
+        if (m_mc_exponentH == m_mc_exponentS) {
+            // Case 1A: Both indices are -1
+            if (m_mc_exponentH == 0.0) {
+                eng = std::exp(u * m_mc_norm + std::log(m_mc_emin));
+                
             }
-            
-            // Compute powerlaw at given energy
-            e_norm = eng / m_breakenergy.value();
-            plaw   = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentH-1.0);
-            
-        } else {
-            if (m_mc_exponentS != 0.0) {
+            // Case 1B: Indices are not equal to -1
+            else {
                 eng = std::exp(std::log(u * m_mc_norm +
-                        std::pow(breakenergy().MeV(), m_mc_exponentS) -
-                        m_mc_pow_ewidth_low) / m_mc_exponentS) ;
-            } else {
-                // TODO: Implement special handling
+                      std::pow(m_mc_emin,m_mc_exponentH)) / m_mc_exponentH);
             }
-            
-            // Compute powerlaw at given energy
+            // There is no differentiation between the powerlaws when the
+            // exponents are the same.
             e_norm = eng / m_breakenergy.value();
-            plaw   = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentS-1.0);
+            plaw = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentH-1.0);
             
+        }
+        // Case 2: indices are different (things are more complicated)
+        else {
+        
+            // Case 2A: Random number suggests energy less than breakenergy
+            if (u <= (m_mc_pow_ewidth_low/m_mc_norm)) {
+                
+                // Case 2A-1: Hard index is not -1
+                if (m_mc_exponentH != 0.0) {
+                    eng = std::exp(std::log(u * m_mc_norm +
+                          std::pow(m_mc_emin, m_mc_exponentH)) / m_mc_exponentH);
+                }
+                
+                // Case 2A-2: Hard index is -1
+                else {
+                    eng = std::exp(u * m_mc_norm + std::log(m_mc_emin));
+                }
+                
+                // Compute powerlaw at given energy
+                e_norm = eng / m_breakenergy.value();
+                plaw   = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentH-1.0);
+                
+            }
+            // Case 2B: Random number suggests energy above breakenergy
+            else {
+                // Case 2B-1: Soft index is not -1
+                if (m_mc_exponentS != 0.0) {
+                    eng = std::exp(std::log(u * m_mc_norm +
+                          std::pow(breakenergy().MeV(), m_mc_exponentS) -
+                          m_mc_pow_ewidth_low) / m_mc_exponentS) ;
+                }
+                // Case 2B-2: Soft index is -1
+                else {
+                    eng = std::exp(u * m_mc_norm +
+                                   std::log(m_breakenergy.value()) -
+                                   m_mc_pow_ewidth_low);
+                }
+                
+                // Compute powerlaw at given energy
+                e_norm = eng / m_breakenergy.value();
+                plaw   = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentS-1.0);
+                
+            }
         }
         
         // Compute logparabola at given energy
@@ -987,6 +1021,9 @@ void GModelSpectralSmoothBrokenPlaw::update_eval_cache(const GEnergy& energy) co
 void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
                                                      const GEnergy& emax) const
 {
+    // Update the eval cache
+    update_eval_cache(emin);
+    
     // Check if we need to update the cache
     if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
         
@@ -997,25 +1034,59 @@ void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
         /* Predefine some variables */
         
         // Prefactor for comparison power law functions
-        m_mc_plaw_prefactor = prefactor() * std::pow(breakenergy()/pivot(),index1());
+        m_mc_plaw_prefactor = prefactor() * std::pow(m_last_breakenergy/m_last_pivot,
+                                                     m_last_index1);
         
-        // Find out which index is softer
-        if (index1() < index2()) {
-            m_mc_exponentS = index1() + 1.0 ;
-            m_mc_exponentH = index2() + 1.0 ;
-        } else {
-            m_mc_exponentS = index2() + 1.0 ;
-            m_mc_exponentH = index1() + 1.0 ;
+        // Find out which index is harder. This is important since the
+        // smoothly broken power law follows the hard index below the break
+        // energy and the softer index above the break energy.
+        
+        // CASE: index1 is harder
+        if (index1() > index2()) {
+            m_mc_exponentH = m_last_index1 + 1.0 ;   // Hard index + 1
+            m_mc_exponentS = m_last_index2 + 1.0 ;   // Soft index + 1
+            
+        }
+        // CASE: index2 is harder, or index1==index2
+        else {
+            m_mc_exponentH = m_last_index2 + 1.0 ;   // Hard index + 1
+            m_mc_exponentS = m_last_index1 + 1.0 ;   // Soft index + 1
         }
         
-        // Get the range of the energy range below the break energy
-        m_mc_pow_ewidth_low = std::pow(breakenergy().MeV(), m_mc_exponentH) -
-                              std::pow(m_mc_emin, m_mc_exponentH);
+        // Now handle the cases where the hard exponent is -1
+        if (m_mc_exponentH == 0.0) {
+            
+            // CASE: both exponents are -1
+            if (m_mc_exponentS == 0.0) {
+                m_mc_pow_ewidth_low = 0.0 ;
+                m_mc_norm = std::log(m_mc_emax) - std::log(m_mc_emin);
+            }
+            // CASE: Only harder exponent is -1
+            else {
+                m_mc_pow_ewidth_low = std::log(m_last_breakenergy/m_mc_emin);
+                m_mc_norm = m_mc_pow_ewidth_low + std::pow(m_mc_emax,m_mc_exponentS) -
+                            std::pow(m_last_breakenergy,m_mc_exponentS);
+            }
+        }
         
-        // Get the normalization term
-        m_mc_norm = m_mc_pow_ewidth_low + (std::pow(m_mc_emax,m_mc_exponentS) -
-                                std::pow(breakenergy().MeV(),m_mc_exponentS));
+        // CASE: Only softer exponent is -1
+        else if (m_mc_exponentS == 0.0) {
+            m_mc_pow_ewidth_low = std::pow(m_last_breakenergy,m_mc_exponentH) -
+                                  std::pow(m_mc_emin, m_mc_exponentH) ;
+            m_mc_norm = m_mc_pow_ewidth_low + std::log(m_mc_emax) -
+                        std::log(m_last_breakenergy) ;
+        }
         
+        // CASE: Neither exponent is -1.
+        else {
+            // Get the width of the energy range below the break energy
+            m_mc_pow_ewidth_low = std::pow(m_last_breakenergy, m_mc_exponentH) -
+                                  std::pow(m_mc_emin, m_mc_exponentH);
+            
+            // Get the normalization term
+            m_mc_norm = m_mc_pow_ewidth_low + (std::pow(m_mc_emax,m_mc_exponentS) -
+                                               std::pow(m_last_breakenergy,m_mc_exponentS));
+        }
     } // endif: Update was required
     
     // Return
