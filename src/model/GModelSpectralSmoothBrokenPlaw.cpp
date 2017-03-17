@@ -40,24 +40,23 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralSmoothBrokenPlaw g_spectral_blaw_seed1("SmoothBrokenPowerLaw",
-                                                           "Prefactor",
-                                                           "Index1",
-                                                           "PivotEnergy",
-                                                           "Index2",
-                                                           "BreakEnergy",
-                                                           "BreakSmoothness");
-const GModelSpectralRegistry  g_spectral_blaw_registry1(&g_spectral_blaw_seed1);
-#if defined(G_LEGACY_XML_FORMAT)
-const GModelSpectralSmoothBrokenPlaw g_spectral_blaw_seed2("SmoothBrokenPowerLaw",
-                                                           "Prefactor",
-                                                           "Index1",
-                                                           "Scale",
-                                                           "Index2",
-                                                           "BreakValue",
-                                                           "Beta");
-const GModelSpectralRegistry  g_spectral_blaw_registry2(&g_spectral_blaw_seed2);
-#endif
+const GModelSpectralSmoothBrokenPlaw g_spectral_sblaw_seed1("SmoothBrokenPowerLaw",
+                                                            "Prefactor",
+                                                            "Index1",
+                                                            "PivotEnergy",
+                                                            "Index2",
+                                                            "BreakEnergy",
+                                                            "BreakSmoothness");
+const GModelSpectralSmoothBrokenPlaw g_spectral_sblaw_seed2("SmoothBrokenPowerLaw",
+                                                            "Prefactor",
+                                                            "Index1",
+                                                            "Scale",
+                                                            "Index2",
+                                                            "BreakValue",
+                                                            "Beta");
+const GModelSpectralRegistry  g_spectral_sblaw_registry1(&g_spectral_sblaw_seed1);
+const GModelSpectralRegistry  g_spectral_sblaw_registry2(&g_spectral_sblaw_seed2);
+
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC   "GModelSpectralSmoothBrokenPlaw::mc(GEnergy&, GEnergy&, GTime&,"\
@@ -851,7 +850,7 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     
     // Initialize beta (break smoothness parameter)
     m_beta.clear();
-    m_beta.name("Beta");
+    m_beta.name("BreakSmoothness");
     m_beta.scale(1.0);
     m_beta.value(1.0);
     m_beta.range(0.01,10.0);
