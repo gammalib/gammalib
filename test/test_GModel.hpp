@@ -68,6 +68,7 @@ public:
     void                test_eplaw(void);
     void                test_einvplaw(void);
     void                test_bplaw(void);
+    void                test_smoothbplaw(void);
     void                test_supeplaw(void);
     void                test_logparabola(void);
     void                test_multiplicative(void);
@@ -116,6 +117,7 @@ private:
     std::string m_xml_model_point_eplaw;
     std::string m_xml_model_point_einvplaw;
     std::string m_xml_model_point_bplaw;
+    std::string m_xml_model_point_smoothbplaw;
     std::string m_xml_model_point_supeplaw;
     std::string m_xml_model_point_logparabola;
     std::string m_xml_point_multiplicative;
