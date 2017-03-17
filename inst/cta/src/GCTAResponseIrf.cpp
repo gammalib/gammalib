@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -728,13 +728,7 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
         std::string xml_rspname = gammalib::strip_whitespace(par->attribute("response"));
 
         // Set calibration database
-        GCaldb caldb;
-        if (gammalib::dir_exists(xml_caldb)) {
-            caldb.rootdir(xml_caldb);
-        }
-        else {
-            caldb.open("cta", xml_caldb);
-        }
+        GCaldb caldb("cta", xml_caldb);
         this->caldb(caldb);
 
         // Load response
