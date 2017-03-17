@@ -4,6 +4,7 @@
         =========================
 
         Add GCTAResponseIrf::rspname() method
+        Do no longer interpret a CTA calibration database as file path (#1969)
         GWcs now supports CD keywords instead of CDELT (#1951)
         Correct GCTAPsf2D containment radius computation (#1876)
         Add GLS and SFL WCS projections (#1851)

@@ -272,8 +272,13 @@ None
 -----------------
 Correct the containment radius computation in GCTAPsf2D (#1876).
 
+<<<<<<< e5273b1bc5555d288c392209930e187b0d086474
 The GCTAResponseIrf::rspname method has been added that returns the name
 of the response function (attribute m_rspname).
+=======
+Do no longer interpret a CTA calibration database as a file path in the
+GCTAResponseIrf::read() method (#1969).
+>>>>>>> Do no longer interpret a CTA calibration database as file path in GCTAResponseIrf::read (#1969)
 
 
 21. COMPTEL interface
