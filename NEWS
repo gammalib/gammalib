@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0
 
-16 March 2017
+17 March 2017
 
 
 1. Introduction
@@ -130,6 +130,9 @@ None
 20. CTA interface
 -----------------
 Correct the containment radius computation in GCTAPsf2D (#1876).
+
+Do no longer interpret a CTA calibration database as a file path in the
+GCTAResponseIrf::read() method (#1969).
 
 
 21. COMPTEL interface

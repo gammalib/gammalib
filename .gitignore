@@ -45,12 +45,14 @@ m4/lt~obsolete.m4
 .libs
 .deps
 *.fits~
-*.cpp~ 
+*.cpp~
 *.hpp~
 *.i~
 *.xml~
 *.ac~
 *.am~
+ChangeLog~
+NEWS~
 *.plist
 clang_output_*
 .gitignore~
