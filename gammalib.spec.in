@@ -4,8 +4,7 @@
 #%define _binaries_in_noarch_packages_terminate_build   0
 %define PKGNAME @PACKAGE_NAME@
 %define VERSION @PACKAGE_VERSION@
-# TODO fix %define RELEASE 1
-%define RELEASE 1
+%define RELEASE 1%{?dist}
 
 Name: %{PKGNAME}
 Summary: Versatile toolbox for scientific analysis of astronomical gamma-ray data
@@ -33,7 +32,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 # Requires: liste des packages requis pour l'installation
 Requires: ncurses
 Requires: readline
-#Requires: gcc-c++
 Requires: cfitsio
 #
 Prefix: /usr/local/gamma

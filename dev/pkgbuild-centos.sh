@@ -30,13 +30,18 @@
 # ============================================= #
 # Get ctools/GammaLib version from command line #
 # ============================================= #
-if [ $# -ne 2 ] ;  then
-echo "Please specify package name and version in the form 'package x.y.z'"
+if [ $# -ne 4 ] ;  then
+echo "Please specify package name version package and Gammalib version in the form 'package x.y.z platform gammalib-version'"
 exit 1
 fi
 PACKNAME=$1
 VERSION=$2
+PLATFORM=$3
+GVERSION=$4
 
+echo " ================================================================= "
+echo " Build $PACKNAME rpm package, Version $VERSION, Platform $PLATFORM "
+echo " ================================================================= "
 
 # =============================== #
 # Set software component versions #
@@ -65,19 +70,31 @@ RELEASE=1
 #
 #
 # SBN : Liste à fixer.
+TMPDIR=$HOME/usr
 WRKDIR=$HOME/rpmbuild
 SRCDIR=$WRKDIR/SOURCES
 PKGDIR=$WRKDIR/RPMS
-PRODDIR=$WRKDIR/RPMS/noarch
-RPMFILE=$PRODDIR/$PACKAGE-$RELEASE.noarch.rpm
+PRODDIR=$WRKDIR/RPMS/$PLATFORM
+RPMFILE=$PRODDIR/$PACKAGE-$RELEASE-*$PLATFORM.rpm
 #
 LOGFILE=$HOME/pkg_build/pkg_build.log
 LOGDEPILE=$HOME/pkg_build/pkg_dependencies_rpm.log
+
+# ==================================================== #
+#  TODO : Create a secure RPM repository
+# ==================================================== #
+# Temporary solution, to be fixed
+YUMREPO=$HOME/YUM-REPO
 
 # ======================= #
 # Clean package directory #
 # ======================= #
 rm -rf $WRKDIR
+
+# ========================= #
+# Clean temporary directory #
+# ========================= #
+rm -rf $TMPDIR
 
 # ============================= #
 # Create package directory tree #
@@ -91,16 +108,17 @@ mkdir -p $HOME/rpmbuild/{RPMS,SRPMS,BUILD,SOURCES,SPECS,tmp}
 # rpm -qa | grep ncurses || sudo yum install ncurses
 
 if ! rpm -qa | grep -q ncurses; then
-   echo "ncurses need to be installed"
-   sudo yum install ncurses
-   if ! rpm -qa | grep -q ncurses; then
-      echo "================================================================================================="
-      echo "ERROR : ncurses need to be installed manually"
-      echo "   "
-      echo "================================================================================================="
-      exit
-   fi
+    echo "ncurses need to be installed"
+    sudo yum install ncurses
+    if ! rpm -qa | grep -q ncurses; then
+        echo "================================================================================================="
+        echo "ERROR : ncurses need to be installed manually"
+        echo "   "
+        echo "================================================================================================="
+        exit
+    fi
 fi
+# Check ncurses version
 v=$(rpm --qf '%{VERSION}\n' -q ncurses)
 echo "ncurses $v checked"
 
@@ -111,16 +129,17 @@ echo "ncurses $v checked"
 # rpm -qa | grep readline || sudo yum install readline
 
 if ! rpm -qa | grep -q readline; then
-   echo "readline need to be installed"
-   sudo yum install readline
-   if ! rpm -qa | grep -q readline; then
-      echo "================================================================================================="
-      echo "ERROR : readline need to be installed manually"
-      echo "   "
-      echo "================================================================================================="
-      exit
-   fi
+    echo "readline need to be installed"
+    sudo yum install readline
+    if ! rpm -qa | grep -q readline; then
+        echo "================================================================================================="
+        echo "ERROR : readline need to be installed manually"
+        echo "   "
+        echo "================================================================================================="
+        exit
+    fi
 fi
+# Check readline version
 v=$(rpm --qf '%{VERSION}\n' -q readline)
 echo "readline $v checked"
 
@@ -131,46 +150,30 @@ echo "readline $v checked"
 # rpm -qa | grep cfitsio || sudo yum install cfitsio
 
 if ! rpm -qa | grep -q cfitsio; then
-   echo "cfitsio need to be installed"
-   sudo yum install cfitsio-devel
-   if ! rpm -qa | grep -q cfitsio; then
-      echo "================================================================================================="
-      echo " ERROR : cfitsio need to be installed"
-      echo "================================================================================================="
-      echo "You can download the latest version of CFITSIO on http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html"
-      echo "   "
-      echo "or "
-      echo "   "
-      echo "cfitsio rpm can be found in the epel-release repository ; Try : sudo yum install cfitsio-devel"
-      echo "   "
-      echo "================================================================================================="
-      exit
-   fi
+    echo "cfitsio need to be installed"
+    sudo yum install cfitsio-devel
+    if ! rpm -qa | grep -q cfitsio; then
+        echo "================================================================================================="
+        echo " ERROR : cfitsio need to be installed"
+        echo "================================================================================================="
+        echo "You can download the latest version of CFITSIO on http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html"
+        echo "   "
+        echo "or "
+        echo "   "
+        echo "cfitsio rpm can be found in the epel-release repository ; Try : sudo yum install cfitsio-devel"
+        echo "   "
+        echo "================================================================================================="
+        exit
+    fi
 fi
+# Check cfitsio version
 v=$(rpm --qf '%{VERSION}\n' -q cfitsio)
 echo "cfitsio $v checked"
-
 
 # ======================================== #
 # Copy package configuration file (*.spec) #
 # ======================================== #
 cp $PACKNAME.spec $WRKDIR/SPECS/
-
-# ================================================================== #
-# Check if Gammalib installed and version
-# No need to install Gammalib since this script follows a 'make dist'#
-# ================================================================== #
-# 
-v=$(rpm --qf '%{VERSION}\n' -q gammalib)
-
-if ! rpm -qa | grep -q gammalib; then
-    echo "================================================================================================="
-    echo "$v"
-    echo "================================================================================================="
-else
-v=$(rpm --qf '%{VERSION}\n' -q gammalib)
-    echo "gammalib $v already installed"
-fi
 
 # ================================================================== #
 # Just copy dist in SOURCES dir                                      #
@@ -187,14 +190,38 @@ cp $PACKAGE.tar.gz $SRCDIR/
 # Build centOS package #
 # ====================== #
 
-rpmbuild -ba $WRKDIR/SPECS/$PACKNAME.spec -v
+rpmbuild --target $PLATFORM -ba $WRKDIR/SPECS/$PACKNAME.spec -v
+
+# ==================================================== #
+# Sign package with an environment variable is set by the pass phrase during login
+# for example in .bashrc file
+# > GPG_PASSPHRASE="tombelaneige"
+# > export GPG_PASSPHRASE
+# Another possibility to create a specific file in .gnupg directory
+# > at login script, extract pass phrase from this file
+# ==================================================== #
+(\
+	echo set timeout -1;\
+	echo spawn rpmsign --addsign $PKGDIR/*/*.rpm;\
+	echo expect -re \"pass\";\
+	echo send -- \"$GPG_PASSPHRASE\\r\";\
+	echo expect eof;\
+) | expect
+
 
 echo " ===================================================="
 echo " Packaging DONE :"
 echo " New package is located at $PRODDIR"
-echo " rpm file : $PACKAGE-$RELEASE.noarch.rpm"
-echo " ===================================================="
-echo "  "
-rpm -qip $RPMFILE
+for package in $(find $PRODDIR -iname *.rpm ); do 
+     echo " rpm file : $package"
+     echo " ===================================================="
+     echo "  "     
+     rpm -qip $package; 
 
+	# ==================================================== #
+	#  TODO : Move package in a secure RPM repository
+	# ==================================================== #
+	# Temporary solution, to be fixed
+     cp $package $YUMREPO
+done
 exit
