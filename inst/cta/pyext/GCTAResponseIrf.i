@@ -72,6 +72,7 @@ public:
                              const GObservation& obs, GRan& ran) const;
     void                  caldb(const GCaldb& caldb);
     const GCaldb&         caldb(void) const;
+    const std::string&    rspname(void) const;
     void                  load(const std::string& rspname);
     void                  load_aeff(const GFilename& filename);
     void                  load_psf(const GFilename& filename);

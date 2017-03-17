@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponseIrf.hpp - CTA instrument response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -101,6 +101,7 @@ public:
                              const GObservation& obs, GRan& ran) const;
     void                  caldb(const GCaldb& caldb);
     const GCaldb&         caldb(void) const;
+    const std::string&    rspname(void) const;
     void                  load(const std::string& rspname);
     void                  load_aeff(const GFilename& filename);
     void                  load_psf(const GFilename& filename);
@@ -337,6 +338,18 @@ void GCTAResponseIrf::caldb(const GCaldb& caldb)
 {
     m_caldb = caldb;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return response name
+ *
+ * @return Response name.
+ ***************************************************************************/
+inline
+const std::string& GCTAResponseIrf::rspname(void) const
+{
+    return m_rspname;
 }
 
 
