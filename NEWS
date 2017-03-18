@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0
 
-17 March 2017
+18 March 2017
 
 
 1. Introduction
@@ -23,6 +23,7 @@ The following classes have been renamed:
 
 The following methods have been added:
 - GCTAResponseIrf::rspname
+- GCTARoi::contains
 
 The following methods have been removed:
 - ...
@@ -136,6 +137,9 @@ of the response function (attribute m_rspname).
 
 Do no longer interpret a CTA calibration database as a file path in the
 GCTAResponseIrf::read() method (#1969).
+
+Add GCTARoi::contains() method that checks whether an instrument direction
+is contained within the region of interest.
 
 
 21. COMPTEL interface
