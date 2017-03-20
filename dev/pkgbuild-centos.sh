@@ -31,7 +31,7 @@
 # Get ctools/GammaLib version from command line #
 # ============================================= #
 if [ $# -ne 4 ] ;  then
-echo "Please specify package name version package and Gammalib version in the form 'package x.y.z platform gammalib-version'"
+echo "Please specify package name version platform in the form 'package x.y.z platform '"
 exit 1
 fi
 PACKNAME=$1

@@ -14,7 +14,7 @@ License: GPLv3
 Group: Development/Libraries
 #Source0: %{PKGNAME}-%VERSION.tar.gz
 Source0: http://cta.irap.omp.eu/ctools/releases/gammalib/%{PKGNAME}-%VERSION.tar.gz
-BuildArch: noarch
+#BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 #BuildRequires: ncurses
 #BuildRequires: readline
@@ -92,20 +92,20 @@ make install
 
 # Option 1 : cat <<EOF > $RPM_BUILD_ROOT/%{PKGNAME}.dist
 # Option 2 selected
-cat <<EOF > $HOME/%{prefix}/%{PKGNAME}/%{PKGNAME}.dist
-<license file="COPYING"/>
-<title>'%{PKGNAME}'</title>
-<organization>irap.omp.eu</organization>
-<description>CTA Science Analysis Tools</description>
-EOF
+#cat <<EOF > $HOME/%{prefix}/%{PKGNAME}/%{PKGNAME}.dist
+#<license file="COPYING"/>
+#<title>'%{PKGNAME}'</title>
+#<organization>irap.omp.eu</organization>
+#<description>CTA Science Analysis Tools</description>
+#EOF
 
 
 # Add additional files to production folder
 # Option 1 : cp COPYING $RPM_BUILD_ROOT/License.txt
 # Option 2 selected
-cp COPYING $HOME/%{prefix}/%{PKGNAME}/License.txt
+#cp COPYING $HOME/%{prefix}/%{PKGNAME}/License.txt
 
-# copie des fichiers de $HOME/usr dans cp -R $HOME/usr $HOME/rpm/BUILDROOT/%{PKGNAME}-1.x86_64/
+# copie des fichiers de $HOME/usr dans cp -R $HOME/usr $HOME/rpm/BUILDROOT/%{PKGNAME}-1.platform/
 cp -R $HOME/usr $RPM_BUILD_ROOT/
 
 echo "============ Installation ==============="

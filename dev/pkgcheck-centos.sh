@@ -23,46 +23,97 @@
 # the package has been installed in a local directory $LOCALINSTALL/gammalib.
 # ==========================================================================
 
-if [ $# -ne 2 ] ;  then
-echo "Please specify package name and version in the form 'package x.y.z'"
+# ============================================= #
+# Get ctools/GammaLib version from command line #
+# ============================================= #
+if [ $# -ne 4 ] ;  then
+echo "Please specify package name version platform in the form 'package x.y.z platform '"
 exit 1
 fi
 PACKNAME=$1
 VERSION=$2
-# TODO : next step to fix RELEASE is not updated for now
-RELEASE=1
+PLATFORM=$3
+GVERSION=$4
 
+echo " ================================================================= "
+echo " Check $PACKNAME rpm package, Version $VERSION, Platform $PLATFORM "
+echo " ================================================================= "
 
 # =============================== #
 # Set software component versions #
 # =============================== #
-PACKAGE=$PACKNAME-$VERSION-$RELEASE
+#CFITSIO=cfitsio3410
+#NCURSES=ncurses-5.9
+#READLINE=readline-6.3
+CFITSIO=cfitsio
+NCURSES=ncurses
+READLINE=readline
+#
+PACKAGE=$PACKNAME-$VERSION
+# TODO : next step to fix RELEASE is not updated for now
+RELEASE=1
 
+# ==================================================== #
+#  TODO : Create a secure RPM repository
+# Temporary solution, to be fixed
+# ==================================================== #
+YUMREPO=$HOME/YUM-REPO
 
 # ============== #
 # Set parameters #
 # ============== #
-INSTALLDIR=/usr/local/gamma
-WRKDIR=$HOME/pkg_check
-LOCALINSTALL=$WRKDIR$INSTALLDIR
 #
-PKGDIR=$HOME/rpmbuild/RPMS/noarch
-RPMFILE=$PKGDIR/$PACKAGE.noarch.rpm
+# System Configuration Hypothesis with file ~/.rpmmacros.
+# This file must contain at least the follwing lines :
+# %packager KNODLSEDER
+# %_topdir %(echo $HOME)/rpmbuild
+# %_tmppath %(echo $HOME)/rpmbuild/tmp
+# %_smp_mflags  -j3
+# %__arch_install_post   /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot
+#
+#
+# SBN : Liste à fixer.
+TMPDIR=$HOME/usr
+WRKDIR=$HOME/pkg_check
+SRCDIR=$WRKDIR/SOURCES
+PKGDIR=$WRKDIR/RPMS
+
+# ========================================================================= #
+# Fix packages directory                                                    #
+# ========================================================================= #
+# If 'make pkg' produce multi-platform rpm, rpm files will be archived in $YUMREPO directory
+#PRODDIR=$WRKDIR/RPMS/$PLATFORM
+PRODIR=$YUMREPO
+#
+RPMFILE=$PRODIR/$PACKAGE-$RELEASE.*$PLATFORM.rpm
+#
+# ========================================================================= #
+# Install package in local directory                                        #
+# ========================================================================= #
+# 2 options with rpm                                                        #
+#  --relocate <old>=<new>    relocate files from path <old> to <new>        #
+#sudo rpm -U --relocate=$INSTALLDIR=$LOCALINSTALL $RPMFILE &>  $LOGRPMFILE  #
+# or                                                                        #
+#  --prefix=<dir>            relocate the package to <dir>, if relocatable  #
+# ========================================================================= #
+INSTALLDIR=/usr/local/gamma
+# LOCALINSTALL=$WRKDIR$INSTALLDIR  # <= another option, not selected for the moment
+LOCALINSTALL=$HOME/$INSTALLDIR
 #
 LOGFILE=$WRKDIR/pkg_check.log
 LOGRPMFILE=$WRKDIR/pkg_check_rpm.log
 
+# ========================= #
+# Clean temporary directory #
+# ========================= #
+rm -rf $TMPDIR
 
 # ============================= #
 # Secure installation directory #
 # ============================= #
-# SBN : pas besoin              #
-# ============================= #
-
-#if [ -d "$LOCALINSTALL/ctools" ]; then
-#    mv $LOCALINSTALL/ctools $LOCALINSTALL/ctools.backup
-#fi
-
+if [ -d "$LOCALINSTALL/$PACKNAME" ]; then
+    mv $LOCALINSTALL/$PACKNAME $LOCALINSTALL/$PACKNAME.backup
+fi
 
 # ======================= #
 # Clean working directory #
@@ -74,16 +125,6 @@ sudo rm -rf $WRKDIR
 # ====================================== #
 mkdir -p $WRKDIR
 cd $WRKDIR
-
-# ========================================================================= #
-# Install package in local directory                                        #
-# ========================================================================= #
-# 2 options with rpm                                                        #
-#  --relocate <old>=<new>    relocate files from path <old> to <new>        #
-#sudo rpm -U --relocate=$INSTALLDIR=$LOCALINSTALL $RPMFILE &>  $LOGRPMFILE  #
-# or                                                                        #
-#  --prefix=<dir>            relocate the package to <dir>, if relocatable  #
-# ========================================================================= #
 
 if ! rpm -qa | grep -q ncurses; then
   echo "ncurses need to be installed"
@@ -131,17 +172,24 @@ fi
 v=$(rpm --qf '%{VERSION}\n' -q cfitsio)
 echo "cfitsio $v checked"
 
-if ! sudo rpm -U --prefix=$LOCALINSTALL $RPMFILE &>  $LOGRPMFILE ; then
-  echo "Cannot install gammalib package"
-  cat  $LOGRPMFILE
-  exit
+# ======================================================================= #
+# Finally install package $HOME/$YUMREPO/$PACKAGE-$RELEASE-*$PLATFORM.rpm #
+# ======================================================================= #
+if ! sudo rpm -U --prefix=/$LOCALINSTALL $RPMFILE &>  $LOGRPMFILE ; then
+   echo "================================================================================================="
+   echo "ERROR : Cannot install $PACKAGE package"
+   echo "================================================================================================="
+   cat  $LOGRPMFILE
+   echo "   "
+   echo "================================================================================================="
+   exit
 fi
 
 # ================= #
 # Configure package #
 # ================= #
-export GAMMALIB=$LOCALINSTALL/gammalib
-source $GAMMALIB/bin/gammalib-init.sh
+export GAMMALIB=$LOCALINSTALL/$PACKNAME
+source $GAMMALIB/bin/$PACKNAME-init.sh
 ARCH=`lsb_release -irs`
 
 # ============ #
@@ -158,15 +206,12 @@ sudo yum remove $PACKNAME
 # ======================= #
 # Clean package directory #
 # ======================= #
-sudo rm -rf $LOCALINSTALL
+sudo rm -rf $TMPDIR
 
 # ============================== #
 # Recover installation directory #
 # ============================== #
-# SBN : pas besoin              #
-# ============================= #
-
-#if [ -d "$LOCALINSTALL/ctools.backup" ]; then
-#    mv $LOCALINSTALL/ctools.backup $LOCALINSTALL/ctools
-#fi
+if [ -d "$LOCALINSTALL/$PACKNAME.backup" ]; then
+    mv $LOCALINSTALL/$PACKNAME.backup $LOCALINSTALL/$PACKNAME
+fi
 
