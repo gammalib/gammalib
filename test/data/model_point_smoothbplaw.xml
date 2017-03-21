@@ -4,10 +4,10 @@
         <spectrum type="SmoothBrokenPowerLaw">
             <parameter name="Prefactor"   scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
             <parameter name="Index1"      scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
-            <parameter name="Scale"       scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
+            <parameter name="PivotEnergy" scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
             <parameter name="Index2"      scale="-1"    value="2.70" min="0.01"  max="+5.0"   free="1"/>
-            <parameter name="BreakValue"  scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
-            <parameter name="Beta"        scale="1.0"   value="0.2"  min="0.01"  max="10"     free="1"/>
+            <parameter name="BreakEnergy" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
+            <parameter name="BreakSmoothness" scale="1.0" value="0.2" min="0.01" max="10.0"     free="1"/>
         </spectrum>
         <spatialModel type="PointSource">
             <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
@@ -18,10 +18,10 @@
         <spectrum type="SmoothBrokenPowerLaw">
             <parameter name="Prefactor"   scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
             <parameter name="Index1"      scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
-            <parameter name="PivotEnergy" scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
+            <parameter name="Scale"       scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
             <parameter name="Index2"      scale="-1"    value="2.70" min="0.01"  max="+5.0"   free="1"/>
-            <parameter name="BreakEnergy" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
-            <parameter name="BreakSmoothness" scale="1.0" value="0.2" min="0.01" max="10"     free="1"/>
+            <parameter name="BreakValue"  scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
+            <parameter name="Beta"        scale="1.0"   value="0.2"  min="0.01"  max="10.0"     free="1"/>
         </spectrum>
         <spatialModel type="PointSource">
             <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />

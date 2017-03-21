@@ -131,7 +131,7 @@ protected:
     void update_eval_cache(const GEnergy& energy) const;
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
     
-    // Class to determine to the integral photon flux
+    // Class to determine the integral photon flux
     class flux_kern : public GFunction {
     public:
         // Constructor

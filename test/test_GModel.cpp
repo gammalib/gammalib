@@ -1858,63 +1858,66 @@ void TestGModel::test_smoothbplaw(void)
     test_value(model2.pivot().MeV(), 100.0);
     test_value(model2.index2(), -2.8);
     test_value(model2.breakenergy().MeV(), 1000.0);
-    test_value(model2.beta(), 4.0);
+    test_value(model2.beta(), 2.0);
+    
     
     // Test XML constructor - 1
-    GXml                     xml(m_xml_model_point_smoothbplaw);
-    GXmlElement*             element = xml.element(0)->element(0)->element("spectrum", 0);
-    GModelSpectralSmoothBrokenPlaw model3(*element);
-    test_value(model3.size(), 4);
-    test_value(model3.type(), "SmoothBrokenPowerLaw", "Check model type");
-    test_value(model3.prefactor(), 5.7e-16);
-    test_value(model3.index1(), -2.48);
-    test_value(model3.pivot().TeV(), 1.0);
-    test_value(model3.index2(), -2.70);
-    test_value(model3.breakenergy().TeV(), 0.3);
+    GModels models(m_xml_model_point_smoothbplaw);
+    GModelSpectralSmoothBrokenPlaw* model3 = static_cast<GModelSpectralSmoothBrokenPlaw*>(
+                                            static_cast<GModelSky*>(
+                                                models[0])->spectral());
+    test_value(model3->size(), 6);
+    test_value(model3->type(), "SmoothBrokenPowerLaw", "Check model type");
+    test_value(model3->prefactor(), 5.7e-16);
+    test_value(model3->index1(), -2.48);
+    test_value(model3->pivot().TeV(), 1.0);
+    test_value(model3->index2(), -2.70);
+    test_value(model3->breakenergy().TeV(), 0.3);
     
     // Test XML constructor - 2
-    GXmlElement*             element2 = xml.element(0)->element(1)->element("spectrum", 0);
-    GModelSpectralSmoothBrokenPlaw model4(*element2);
-    test_value(model4.size(), 4);
-    test_value(model4.type(), "SmoothBrokenPowerLaw", "Check model type");
-    test_value(model4.prefactor(), 5.7e-16);
-    test_value(model4.index1(), -2.48);
-    test_value(model4.pivot().TeV(), 1.0);
-    test_value(model4.index2(), -2.70);
-    test_value(model4.breakenergy().TeV(), 0.3);
+    GModelSpectralSmoothBrokenPlaw* model4 = static_cast<GModelSpectralSmoothBrokenPlaw*>(
+                                            static_cast<GModelSky*>(
+                                                models[1])->spectral());
+    test_value(model4->size(), 6);
+    test_value(model4->type(), "SmoothBrokenPowerLaw", "Check model type");
+    test_value(model4->prefactor(), 5.7e-16);
+    test_value(model4->index1(), -2.48);
+    test_value(model4->pivot().TeV(), 1.0);
+    test_value(model4->index2(), -2.70);
+    test_value(model4->breakenergy().TeV(), 0.3);
     
     // Test prefactor method
-    model3.prefactor(2.3e-16);
-    test_value(model3.prefactor(), 2.3e-16);
+    model3->prefactor(2.3e-16);
+    test_value(model3->prefactor(), 2.3e-16);
     
     // Test index1 method
-    model3.index1(-2.6);
-    test_value(model3.index1(), -2.6);
+    model3->index1(-2.6);
+    test_value(model3->index1(), -2.6);
     
     // Test pivot method
-    model3.pivot(GEnergy(0.5, "TeV"));
-    test_value(model3.pivot().TeV(), 0.5);
+    model3->pivot(GEnergy(0.5, "TeV"));
+    test_value(model3->pivot().TeV(), 0.5);
     
     // Test index2 method
-    model3.index2(-3.6);
-    test_value(model3.index2(), -3.6);
+    model3->index2(-3.6);
+    test_value(model3->index2(), -3.6);
 
     // Test breakenergy method
-    model3.breakenergy(GEnergy(0.5, "TeV"));
-    test_value(model3.breakenergy().TeV(), 0.5);
+    model3->breakenergy(GEnergy(0.5, "TeV"));
+    test_value(model3->breakenergy().TeV(), 0.5);
     
     // Test operator access
-    const char* strarray[] = {"Prefactor", "Index1", "Pivot", "Index2",
-                              "BreakEnergy", "Beta"};
+    const char* strarray[] = {"Prefactor", "Index1", "PivotEnergy", "Index2",
+                              "BreakEnergy", "BreakSmoothness"};
     for (int i = 0; i < 4; ++i) {
         std::string keyname(strarray[i]);
-        model3[keyname].remove_range(); // To allow setting of any value
-        model3[keyname].value(2.1);
-        model3[keyname].error(1.9);
-        model3[keyname].gradient(0.8);
-        test_value(model3[keyname].value(), 2.1);
-        test_value(model3[keyname].error(), 1.9);
-        test_value(model3[keyname].gradient(), 0.8);
+        (*model3)[keyname].remove_range(); // To allow setting of any value
+        (*model3)[keyname].value(2.1);
+        (*model3)[keyname].error(1.9);
+        (*model3)[keyname].gradient(0.8);
+        test_value((*model3)[keyname].value(), 2.1);
+        test_value((*model3)[keyname].error(), 1.9);
+        test_value((*model3)[keyname].gradient(), 0.8);
     }
     
     // Exit test
