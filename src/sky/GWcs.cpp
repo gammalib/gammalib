@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.cpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -222,15 +222,16 @@ void GWcs::read(const GFitsHDU& hdu)
     // Clear object
     clear();
 
-    // Get standard keywords
+    // Get standard keywords. Get bin size either from CDELT1/CDELT2 or
+    // CD1_1/CD2_2
     std::string ctype1 = hdu.string("CTYPE1");
     std::string ctype2 = hdu.string("CTYPE2");
     double      crval1 = hdu.real("CRVAL1");
     double      crval2 = hdu.real("CRVAL2");
     double      crpix1 = hdu.real("CRPIX1");
     double      crpix2 = hdu.real("CRPIX2");
-    double      cdelt1 = hdu.real("CDELT1");
-    double      cdelt2 = hdu.real("CDELT2");
+    double      cdelt1 = (hdu.has_card("CDELT1")) ? hdu.real("CDELT1") : hdu.real("CD1_1");
+    double      cdelt2 = (hdu.has_card("CDELT2")) ? hdu.real("CDELT2") : hdu.real("CD2_2");
 
     // Determine coordinate system
     std::string coords;
@@ -849,13 +850,17 @@ double GWcs::cdelt(const int& inx) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- * Code adapted from wcs.c::wcsini().
+ * Code adapted from wcs.c::wcsini(). In addition, the method sets up the
+ * World Coordinate System by calling wcs_set().
  ***************************************************************************/
 void GWcs::init_members(void)
 {
     // Initialise World Coordinate System with 0 axes
     wcs_ini(0);
-    
+ 
+    // Setup World Coordinate System
+    wcs_set();
+   
     // Return
     return;
 }
@@ -920,8 +925,9 @@ void GWcs::copy_members(const GWcs& wcs)
     m_x0     = wcs.m_x0;
     m_y0     = wcs.m_y0;
     m_w      = wcs.m_w;
-    for (int i = 0; i < PVN; ++i)
+    for (int i = 0; i < PVN; ++i) {
         m_pv[i] = wcs.m_pv[i];
+    }
 
     // Return
     return;
@@ -1147,7 +1153,12 @@ void GWcs::wcs_set(void) const
         
         //TODO: Do we have PVi_ma keyvalues?
         
-        //TODO: Do simple alias translations
+        // Do simple alias translations
+        if (code() == "GLS") {
+            m_offset = true;
+            m_phi0   = 0.0;
+            m_theta0 = m_crval[m_lat];
+        }
         
         // Initialize the celestial transformation routines
         m_r0 = 0.0; // Forces initialisation
@@ -1256,8 +1267,8 @@ void GWcs::wcs_set_ctype(void) const
         }
 
         // Add projection name to comment
-        m_ctype_c.at(m_lng).append(name());
-        m_ctype_c.at(m_lng).append(" projection");
+        m_ctype_c.at(m_lat).append(name());
+        m_ctype_c.at(m_lat).append(" projection");
     }
 
     //TODO: Set spectral keyword

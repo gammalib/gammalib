@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib sky module.
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,8 +77,10 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self.test_skymap_ait, "Test AIT projection map")
         self.append(self.test_skymap_azp, "Test AZP projection map")
         self.append(self.test_skymap_car, "Test CAR projection map")
+        self.append(self.test_skymap_gls, "Test GLS projection map")
         self.append(self.test_skymap_mer, "Test MER projection map")
         self.append(self.test_skymap_mol, "Test MOL projection map")
+        self.append(self.test_skymap_sfl, "Test SFL projection map")
         self.append(self.test_skymap_sin, "Test SIN projection map")
         self.append(self.test_skymap_stg, "Test STG projection map")
         self.append(self.test_skymap_tan, "Test TAN projection map")
@@ -322,6 +324,17 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GLS projection
+    def test_skymap_gls(self):
+        """
+        Test GLS projection.
+        """
+        # Execute generic test
+        self.test_skymap_proj("GLS")
+
+        # Return
+        return
+
     # Test MER projection
     def test_skymap_mer(self):
         """
@@ -351,6 +364,17 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Execute generic test
         self.test_skymap_proj("SIN")
+
+        # Return
+        return
+
+    # Test SFL projection
+    def test_skymap_sfl(self):
+        """
+        Test SFL projection.
+        """
+        # Execute generic test
+        self.test_skymap_proj("SFL")
 
         # Return
         return

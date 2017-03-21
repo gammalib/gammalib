@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCTARoi.i - CTA region of interest class                *
+ *           GWcsGLS.i - Global Sinusoidal (GLS) projection class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Jurgen Knodlseder                           *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,54 +19,47 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTARoi.i
- * @brief CTA region of interest class interface definition
+ * @file GWcsGLS.i
+ * @brief Global Sinusoidal (GLS) projection class Python interface
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTARoi.hpp"
+#include "GWcsGLS.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTARoi
+ * @class GWcsGLS
  *
- * @brief CTA region of interest class
+ * @brief Global Sinusoidal (GLS) projection class definition
  ***************************************************************************/
-class GCTARoi : public GRoi {
+class GWcsGLS : public GWcsSFL {
 
 public:
     // Constructors and destructors
-    GCTARoi(void);
-    explicit GCTARoi(const GXmlElement& xml);
-    GCTARoi(const GCTAInstDir& centre, const double& radius);
-    GCTARoi(const GCTARoi& roi);
-    virtual ~GCTARoi(void);
+    GWcsGLS(void);
+    GWcsGLS(const std::string& coords,
+            const double& crval1, const double& crval2,
+            const double& crpix1, const double& crpix2,
+            const double& cdelt1, const double& cdelt2);
+    GWcsGLS(const GWcsGLS& wcs);
+    virtual ~GWcsGLS(void);
 
-    // Implemented pure virtual base class methods
+    // Implemented pure virtual methods
     virtual void        clear(void);
-    virtual GCTARoi*    clone(void) const;
+    virtual GWcsGLS*    clone(void) const;
     virtual std::string classname(void) const;
-    virtual bool        contains(const GEvent& event) const;
-
-    // Other methods
-    bool                is_valid(void) const;
-    bool                contains(const GCTAInstDir& dir) const;
-    const GCTAInstDir&  centre(void) const;
-    const double&       radius(void) const;
-    void                centre(const GCTAInstDir& centre);
-    void                radius(const double& radius);
-    void                read(const GXmlElement& xml);
-    void                write(GXmlElement& xml) const;
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GCTARoi class extension
+ * @brief GWcsGLS class extension
  ***************************************************************************/
-%extend GCTARoi {
-    GCTARoi copy() {
+%extend GWcsGLS {
+    GWcsGLS copy() {
         return (*self);
     }
 };

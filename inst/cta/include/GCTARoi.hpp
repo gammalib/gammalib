@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTARoi.hpp - CTA region of interest class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,6 +67,7 @@ public:
 
     // Other methods
     bool                is_valid(void) const;
+    bool                contains(const GCTAInstDir& dir) const;
     const GCTAInstDir&  centre(void) const;
     const double&       radius(void) const;
     void                centre(const GCTAInstDir& centre);

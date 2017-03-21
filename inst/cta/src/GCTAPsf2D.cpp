@@ -459,7 +459,7 @@ void GCTAPsf2D::save(const GFilename& filename, const bool& clobber) const
  *
  * @param[in] ran Random number generator.
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
+ * @param[in] theta Offset angle in camera system (rad).
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
@@ -542,7 +542,7 @@ double GCTAPsf2D::delta_max(const double& logE,
  *
  * @param[in] fraction of events (0.0 < fraction < 1.0)
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
+ * @param[in] theta Offset angle in camera system (rad).
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
@@ -577,6 +577,11 @@ double GCTAPsf2D::containment_radius(const double& fraction,
                                      const double& azimuth,
                                      const bool&   etrue) const
 {
+    // Set maximum number of Newton-Raphson loops before giving up and
+    // required accuracy
+    const int    itermax     = 20;
+    const double convergence = 1.0e-6;
+
     // Check input argument
     if (fraction <= 0.0 || fraction >= 1.0) {
         std::string message = "Containment fraction "+
@@ -584,31 +589,39 @@ double GCTAPsf2D::containment_radius(const double& fraction,
                               "0.0 and 1.0, not inclusive.";
         throw GException::invalid_argument(G_CONTAINMENT_RADIUS, message);
     }
-    
+
     // Update the parameter cache
     update(logE, theta);
 
-    // Required accuracy
-    const double convergence = 1.0e-6;
-    
-    // Initial radius to start Newton's method with guess fraction * delta_max
-    double a = fraction * delta_max(logE, theta, phi, zenith, azimuth, etrue); 
-    
-    // Maximum number of Newton-Raphson loops before giving up
-    const int iterlimit = 10000;
-    
+    // Set minimum and maximum radius (avoid starting at zero radius)
+    double amax = delta_max(logE, theta, phi, zenith, azimuth, etrue);
+    double amin = 0.000001 * amax;
+
+    // Set initial radius to start Newton's method
+    double a = 0.20 * amax;
+
+    // Set normalisation constants
+    double norm1 = (m_width1 != 0.0) ? -gammalib::pi/m_width1 : 0.0;
+    double norm2 = (m_width2 != 0.0) ? -gammalib::pi/m_width2 * m_norm2 : 0.0;
+    double norm3 = (m_width3 != 0.0) ? -gammalib::pi/m_width3 * m_norm3 : 0.0;
+
     // Do the Newton-Raphson loops
     int iter = 0;
-    for (; iter < iterlimit; ++iter) {
+    for (; iter < itermax; ++iter) {
 
         // Compute square of test radius
         double a2 = a*a;
 
+        // Precompute exponentials
+        double exp1 = std::exp(m_width1 * a2);
+        double exp2 = std::exp(m_width2 * a2);
+        double exp3 = std::exp(m_width3 * a2);
+
         // Calculate f(a)
         double fa = 0.0;
-        fa       += 1.0 - std::exp(m_width1 * a2);
-        fa       += m_norm2 * (1.0 - std::exp(m_width2 * a2));
-        fa       += m_norm3 * (1.0 - std::exp(m_width3 * a2));
+        fa       += norm1 * (1.0 - exp1);
+        fa       += norm2 * (1.0 - exp2);
+        fa       += norm3 * (1.0 - exp3);
         fa       *= m_norm;
         fa       -= fraction;
 
@@ -619,30 +632,35 @@ double GCTAPsf2D::containment_radius(const double& fraction,
 
         // Calculate f'(a)
         double fp = 0.0;
-        fp       += std::exp(m_width1 * a2);
-        fp       += m_norm2 * std::exp(m_width2 * a2);
-        fp       += m_norm3 * std::exp(m_width3 * a2);
+        fp       += norm1 * exp1 * m_width1;
+        fp       += norm2 * exp2 * m_width2;
+        fp       += norm3 * exp3 * m_width3;
         fp       *= -2.0 * a * m_norm;
-        
+
         // Calculate next point via x+1 = x - f(a) / f'(a)
         if (fp != 0.0) {
             a -= fa / fp;
+            if (a < amin) {
+                a = amin;
+            }
+            if (a > amax) {
+                a = amax;
+            }
         }
         else {
             break;
         }
-    
+
     } // endfor: Newton-Raphson loops
-    
+
     // Warn the user if we didn't converge
-    if (iter == iterlimit-1) {
-        std::string message = "Unable to converge within " +
-                              gammalib::str(convergence)   + 
-                              " of the root in less than " + 
-                              gammalib::str(iterlimit) + " iterations." ;
-        gammalib::warning(G_CONTAINMENT_RADIUS, message);
+    if (iter == itermax-1) {
+        std::string msg = "Unable to converge within " +
+                          gammalib::str(convergence)+" of the root in less "
+                          "than "+gammalib::str(itermax)+" iterations." ;
+        gammalib::warning(G_CONTAINMENT_RADIUS, msg);
     }
-    
+
     // Return containment radius
     return a;
 }

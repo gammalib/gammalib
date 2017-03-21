@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTARoi.cpp - CTA region of interest class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -222,10 +222,24 @@ bool GCTARoi::contains(const GEvent& event) const
     // If instrument direction is a CTA instrument direction then check on
     // containment
     if (dir != NULL) {
-        if (m_centre.dir().dist_deg(dir->dir()) <= m_radius) {
-            contains = true;
-        }
+        contains = this->contains(*dir);
     }
+
+    // Return containment flag
+    return contains;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if region of interest contains an instrument direction
+ *
+ * @return True if region of interest contains instrument direction, false
+ * otherwise
+ ***************************************************************************/
+bool GCTARoi::contains(const GCTAInstDir& dir) const
+{
+    // Set containment flag
+    bool contains = (m_centre.dir().dist_deg(dir.dir()) <= m_radius);
 
     // Return containment flag
     return contains;

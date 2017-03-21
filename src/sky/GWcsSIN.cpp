@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GWcsSIN.cpp - Orthographic/synthesis (SIN) projection class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -240,14 +240,9 @@ std::string GWcsSIN::print(const GChatter& chatter) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * This method sets up the World Coordinate System by calling wcs_set().
  ***************************************************************************/
 void GWcsSIN::init_members(void)
 {
-    // Setup World Coordinate System
-    wcs_set();
-    
     // Return
     return;
 }
@@ -300,6 +295,10 @@ void GWcsSIN::free_members(void)
  ***************************************************************************/
 void GWcsSIN::prj_set(void) const
 {
+    // Signal that projection has been set (needs to be done before calling
+    // the prj_off() method to avoid an endless loop)
+    m_prjset = true;
+
     // Initialise projection parameters
     m_w.assign(4,0.0);
     
@@ -322,9 +321,6 @@ void GWcsSIN::prj_set(void) const
     
     // Compute fiducial offset
     prj_off(0.0, 90.0);
-    
-    // Signal that projection has been set
-    m_prjset = true;
     
     // Return
     return;

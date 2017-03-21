@@ -118,9 +118,11 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsAIT.hpp \
                      GWcsAZP.hpp \
                      GWcsCAR.hpp \
+                     GWcsGLS.hpp \
                      GWcsMER.hpp \
                      GWcsMOL.hpp \
                      GWcsSIN.hpp \
+                     GWcsSFL.hpp \
                      GWcsSTG.hpp \
                      GWcsTAN.hpp \
                      GEnergy.hpp \

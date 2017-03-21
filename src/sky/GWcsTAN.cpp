@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GWcsTAN.cpp - Gnomonic (TAN) projection class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -238,14 +238,9 @@ std::string GWcsTAN::print(const GChatter& chatter) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * This method sets up the World Coordinate System by calling wcs_set().
  ***************************************************************************/
 void GWcsTAN::init_members(void)
 {
-    // Setup World Coordinate System
-    wcs_set();
-    
     // Return
     return;
 }
@@ -290,6 +285,10 @@ void GWcsTAN::free_members(void)
  ***************************************************************************/
 void GWcsTAN::prj_set(void) const
 {
+    // Signal that projection has been set (needs to be done before calling
+    // the prj_off() method to avoid an endless loop)
+    m_prjset = true;
+
     // Initialise projection parameters
     m_w.clear();
     
@@ -300,9 +299,6 @@ void GWcsTAN::prj_set(void) const
     
     // Compute fiducial offset
     prj_off(0.0, 90.0);
-    
-    // Signal that projection has been set
-    m_prjset = true;
     
     // Return
     return;
