@@ -47,6 +47,7 @@ const GModelSpectralSmoothBrokenPlaw g_spectral_sblaw_seed1("SmoothBrokenPowerLa
                                                             "Index2",
                                                             "BreakEnergy",
                                                             "BreakSmoothness");
+const GModelSpectralRegistry  g_spectral_sblaw_registry1(&g_spectral_sblaw_seed1);
 const GModelSpectralSmoothBrokenPlaw g_spectral_sblaw_seed2("SmoothBrokenPowerLaw",
                                                             "Prefactor",
                                                             "Index1",
@@ -54,9 +55,7 @@ const GModelSpectralSmoothBrokenPlaw g_spectral_sblaw_seed2("SmoothBrokenPowerLa
                                                             "Index2",
                                                             "BreakValue",
                                                             "Beta");
-const GModelSpectralRegistry  g_spectral_sblaw_registry1(&g_spectral_sblaw_seed1);
 const GModelSpectralRegistry  g_spectral_sblaw_registry2(&g_spectral_sblaw_seed2);
-
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC   "GModelSpectralSmoothBrokenPlaw::mc(GEnergy&, GEnergy&, GTime&,"\
@@ -121,8 +120,9 @@ GModelSpectral()
     // Set parameter names
     m_norm.name(prefactor);
     m_index1.name(index1);
-    m_breakenergy.name(breakenergy);
+    m_pivot.name(pivot);
     m_index2.name(index2);
+    m_breakenergy.name(breakenergy);
     m_beta.name(beta);
     
     // Return
@@ -391,13 +391,18 @@ double GModelSpectralSmoothBrokenPlaw::eval(const GEnergy& srcEng,
         
         // Compute index1 and index2 value gradients
         double g_index1 = (m_index1.is_free())
-                ? value * m_index1.scale() / (1.0+m_last_ebreak_pow) *
+                ? value * m_index1.scale() * (m_last_log_epivot_norm -
+                  ((m_last_ebreak_pow * m_last_log_ebreak_norm) /
+                   (m_last_ebreak_pow + 1.0)))
+        /*
+         value * m_index1.scale() / (1.0+m_last_ebreak_pow) *
                   (m_last_log_epivot_norm+(m_last_log_epivot_norm-m_last_log_ebreak_norm)*
                   m_last_ebreak_pow)
+         */
                 : 0.0;
         double g_index2 = (m_index2.is_free())
-                ? value * m_index2.scale() / (1.0+m_last_ebreak_pow) *
-                  m_last_log_ebreak_norm * m_last_ebreak_pow
+                ? value * m_index2.scale() * m_last_log_ebreak_norm *
+                  m_last_ebreak_pow / (1.0 + m_last_ebreak_pow)
                 : 0.0;
         // Compute pivot and break energy value gradients
         double g_pivot = (m_pivot.is_free())
@@ -613,7 +618,7 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
             }
             // There is no differentiation between the powerlaws when the
             // exponents are the same.
-            e_norm = eng / m_breakenergy.value();
+            e_norm = eng / breakenergy().MeV();
             plaw = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentH-1.0);
             
         }
@@ -635,7 +640,7 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
                 }
                 
                 // Compute powerlaw at given energy
-                e_norm = eng / m_breakenergy.value();
+                e_norm = eng / breakenergy().MeV();
                 plaw   = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentH-1.0);
                 
             }
@@ -650,19 +655,19 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
                 // Case 2B-2: Soft index is -1
                 else {
                     eng = std::exp(u * m_mc_norm +
-                                   std::log(m_breakenergy.value()) -
+                                   std::log(breakenergy().MeV()) -
                                    m_mc_pow_ewidth_low);
                 }
                 
                 // Compute powerlaw at given energy
-                e_norm = eng / m_breakenergy.value();
+                e_norm = eng / breakenergy().MeV();
                 plaw   = m_mc_plaw_prefactor * std::pow(e_norm, m_mc_exponentS-1.0);
                 
             }
         }
         
         // Compute logparabola at given energy
-        double sb_plaw = prefactor() * std::pow(eng/m_pivot.value(),index1()) *
+        double sb_plaw = prefactor() * std::pow(eng/pivot().MeV(),index1()) *
             std::pow(1.0 + std::pow(e_norm,(index1()-index2())/beta()), -beta());
         
         // Compute acceptance fraction
@@ -690,16 +695,16 @@ void GModelSpectralSmoothBrokenPlaw::read(const GXmlElement& xml)
     // Get remaining XML parameters
     const GXmlElement* prefactor   = gammalib::xml_get_par(G_READ, xml, m_norm.name());
     const GXmlElement* index1      = gammalib::xml_get_par(G_READ, xml, m_index1.name());
-    const GXmlElement* pivot       = gammalib::xml_get_par(G_READ, xml, m_pivot.name());
     const GXmlElement* index2      = gammalib::xml_get_par(G_READ, xml, m_index2.name());
+    const GXmlElement* pivot       = gammalib::xml_get_par(G_READ, xml, m_pivot.name());
     const GXmlElement* breakenergy = gammalib::xml_get_par(G_READ, xml, m_breakenergy.name());
     const GXmlElement* beta        = gammalib::xml_get_par(G_READ, xml, m_beta.name());
     
     // Read parameters
     m_norm.read(*prefactor);
     m_index1.read(*index1);
-    m_pivot.read(*pivot);
     m_index2.read(*index2);
+    m_pivot.read(*pivot);
     m_breakenergy.read(*breakenergy);
     m_beta.read(*beta);
     
@@ -871,6 +876,7 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_last_energy.clear();
     m_last_index1      = 1.0e30;
     m_last_index2      = 1.0e30;
+    m_last_pivot       = 1.0e30;
     m_last_breakenergy = 1.0e30;
     m_last_beta        = 1.0e30;
     m_last_epivot_norm = 1.0e30;
@@ -966,29 +972,28 @@ void GModelSpectralSmoothBrokenPlaw::free_members(void)
  ***************************************************************************/
 void GModelSpectralSmoothBrokenPlaw::update_eval_cache(const GEnergy& energy) const
 {
-    // Get parameter values (takes 2 multiplications which are difficult
-    // to avoid)
-    double index1      = m_index1.value();
-    double index2      = m_index2.value();
-    double pivot       = m_pivot.value();
-    double breakenergy = m_breakenergy.value();
-    double beta        = m_beta.value();
+    // Get parameter values
+    double index1    = m_index1.value();
+    double index2    = m_index2.value();
+    double pivot_eng = pivot().MeV();
+    double break_eng = breakenergy().MeV();
+    double beta      = m_beta.value();
     
     // If the energy or one of the parameters index1, index2, breakenergy
     // energy, or beta has changed then recompute the cache
     if ((m_last_energy       != energy) ||
         (m_last_index1       != index1) ||
         (m_last_index2       != index2) ||
-        (m_last_pivot        != pivot)  ||
-        (m_last_breakenergy  != breakenergy) ||
+        (m_last_pivot        != pivot_eng) ||
+        (m_last_breakenergy  != break_eng) ||
         (m_last_beta         != beta)) {
         
         // Store actual energy and parameter values
         m_last_energy       = energy;
         m_last_index1       = index1;
         m_last_index2       = index2;
-        m_last_pivot        = pivot;
-        m_last_breakenergy  = breakenergy;
+        m_last_pivot        = pivot_eng;
+        m_last_breakenergy  = break_eng;
         m_last_beta         = beta;
         
         // Compute and store value
@@ -1020,9 +1025,6 @@ void GModelSpectralSmoothBrokenPlaw::update_eval_cache(const GEnergy& energy) co
 void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
                                                      const GEnergy& emax) const
 {
-    // Update the eval cache
-    update_eval_cache(emin);
-    
     // Check if we need to update the cache
     if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
         
@@ -1033,8 +1035,8 @@ void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
         /* Predefine some variables */
         
         // Prefactor for comparison power law functions
-        m_mc_plaw_prefactor = prefactor() * std::pow(m_last_breakenergy/m_last_pivot,
-                                                     m_last_index1);
+        m_mc_plaw_prefactor = prefactor() * std::pow(breakenergy().MeV()/pivot().MeV(),
+                                                     index1());
         
         // Find out which index is harder. This is important since the
         // smoothly broken power law follows the hard index below the break
@@ -1042,14 +1044,14 @@ void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
         
         // CASE: index1 is harder
         if (index1() > index2()) {
-            m_mc_exponentH = m_last_index1 + 1.0 ;   // Hard index + 1
-            m_mc_exponentS = m_last_index2 + 1.0 ;   // Soft index + 1
+            m_mc_exponentH = index1() + 1.0 ;   // Hard index + 1
+            m_mc_exponentS = index2() + 1.0 ;   // Soft index + 1
             
         }
         // CASE: index2 is harder, or index1==index2
         else {
-            m_mc_exponentH = m_last_index2 + 1.0 ;   // Hard index + 1
-            m_mc_exponentS = m_last_index1 + 1.0 ;   // Soft index + 1
+            m_mc_exponentH = index2() + 1.0 ;   // Hard index + 1
+            m_mc_exponentS = index1() + 1.0 ;   // Soft index + 1
         }
         
         // Now handle the cases where the hard exponent is -1
@@ -1062,29 +1064,29 @@ void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
             }
             // CASE: Only harder exponent is -1
             else {
-                m_mc_pow_ewidth_low = std::log(m_last_breakenergy/m_mc_emin);
+                m_mc_pow_ewidth_low = std::log(breakenergy().MeV()/m_mc_emin);
                 m_mc_norm = m_mc_pow_ewidth_low + std::pow(m_mc_emax,m_mc_exponentS) -
-                            std::pow(m_last_breakenergy,m_mc_exponentS);
+                            std::pow(breakenergy().MeV(),m_mc_exponentS);
             }
         }
         
         // CASE: Only softer exponent is -1
         else if (m_mc_exponentS == 0.0) {
-            m_mc_pow_ewidth_low = std::pow(m_last_breakenergy,m_mc_exponentH) -
+            m_mc_pow_ewidth_low = std::pow(breakenergy().MeV(),m_mc_exponentH) -
                                   std::pow(m_mc_emin, m_mc_exponentH) ;
             m_mc_norm = m_mc_pow_ewidth_low + std::log(m_mc_emax) -
-                        std::log(m_last_breakenergy) ;
+                        std::log(breakenergy().MeV()) ;
         }
         
         // CASE: Neither exponent is -1.
         else {
             // Get the width of the energy range below the break energy
-            m_mc_pow_ewidth_low = std::pow(m_last_breakenergy, m_mc_exponentH) -
+            m_mc_pow_ewidth_low = std::pow(breakenergy().MeV(), m_mc_exponentH) -
                                   std::pow(m_mc_emin, m_mc_exponentH);
             
             // Get the normalization term
             m_mc_norm = m_mc_pow_ewidth_low + (std::pow(m_mc_emax,m_mc_exponentS) -
-                                               std::pow(m_last_breakenergy,m_mc_exponentS));
+                                               std::pow(breakenergy().MeV(),m_mc_exponentS));
         }
     } // endif: Update was required
     
