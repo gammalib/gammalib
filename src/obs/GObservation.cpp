@@ -352,17 +352,17 @@ double GObservation::model(const GModels& models,
  *
  * @returns Total number of observed events.
  *
- * Returns the total number of observed events.
+ * Returns the total number of observed events. If the observation does not
+ * contain any events the method returns zero.
  ***************************************************************************/
 int GObservation::nobserved(void) const
 {
     // Initialise number of observed events
     int nobserved = 0;
 
-    // Extract number of observed events from event contained
-    const GEvents* events = this->events();
-    if (events != NULL) {
-        nobserved = events->number();
+    // Extract number of observed events
+    if (m_events != NULL) {
+        nobserved = m_events->number();
     }
 
     // Return number of observed events
