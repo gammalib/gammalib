@@ -55,12 +55,20 @@ class GXmlElement;
  * \f]
  *
  * where
- * \f$k_0\f$ is the normalization or prefactor,
- * \f$\gamma_1\f$ is the spectral index before the break,
- * \f$\gamma_2\f$ is the spectral index after the break,
- * \f$E_0\f$ is the pivot energy,
- * \f$E_b\f$ is the break energy, and
- * \f$\beta\f$ defines the break smoothness (larger = smoother transition)
+ * - \f$k_0\f$ is the normalization or prefactor,
+ * - \f$\gamma_1\f$ is the spectral index before the break,
+ * - \f$\gamma_2\f$ is the spectral index after the break,
+ * - \f$E_0\f$ is the pivot energy,
+ * - \f$E_b\f$ is the break energy,
+ * - \f$\beta\f$ defines the break smoothness (larger = smoother transition)
+ * 
+ * Notes: 
+ * - The pivot energy should be set far away from the expected break energy
+ *   value.
+ * - When the two indices are close together, the beta parameter becomes poorly 
+ *   constrained. Since the beta parameter also scales the indices, this can 
+ *   cause very large errors in the estimates of the various spectral parameters. 
+ *   In this case, consider fixing beta.
  ***************************************************************************/
 class GModelSpectralSmoothBrokenPlaw : public GModelSpectral {
     
@@ -237,7 +245,7 @@ std::string GModelSpectralSmoothBrokenPlaw::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "PowerLaw".
+ * @return "SmoothBrokenPowerLaw".
  *
  * Returns the type of the spectral smoothly broken power law model.
  ***************************************************************************/
@@ -356,7 +364,7 @@ GEnergy GModelSpectralSmoothBrokenPlaw::pivot(void) const
 *
 * @param[in] pivot Smoothly broken power law pivot energy.
 *
-* Sets the power law index2.
+* Sets the smoothly broken power law pivot energy.
 ***************************************************************************/
 inline
 void GModelSpectralSmoothBrokenPlaw::pivot(const GEnergy& pivot)
@@ -385,9 +393,9 @@ GEnergy GModelSpectralSmoothBrokenPlaw::breakenergy(void) const
 /***********************************************************************//**
  * @brief Set breakenergy energy
  *
- * @param[in] breakenergy breakenergy energy.
+ * @param[in] breakenergy break energy.
  *
- * Sets the breakenergy energy.
+ * Sets the "breakenergy" energy.
  ***************************************************************************/
 inline
 void GModelSpectralSmoothBrokenPlaw::breakenergy(const GEnergy& breakenergy)
