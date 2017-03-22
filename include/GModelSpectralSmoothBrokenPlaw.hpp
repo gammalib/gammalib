@@ -40,7 +40,6 @@ class GRan;
 class GTime;
 class GXmlElement;
 
-// TODO: Updated class documentation
 /***********************************************************************//**
  * @class GModelSpectralSmoothBrokenPlaw
  *
@@ -50,17 +49,18 @@ class GXmlElement;
  * defined by
  *
  * \f[
- *    S_{\rm E}(E | t) = k_0 \times \left \{
- *     \left( \frac{E}{E_b} \right)^{\gamma_2} & {\rm otherwise}
- *    \right .
+ *    S_{\rm E}(E | t) = k_0 \left( \frac{E}{E_0} \right)^{\gamma_1}
+ *     \left[ 1 + \left( \frac{E}{E_b} \right)^{\frac{\gamma_1 - \gamma_2}{\beta}}
+ *     \right]^{-\beta}
  * \f]
  *
  * where
  * \f$k_0\f$ is the normalization or prefactor,
  * \f$\gamma_1\f$ is the spectral index before the break,
- * \f$\gamma_2\f$ is the spectral index after the break, and
- * \f$E_b\f$ is the break energy.
- * \f$\beta\f$ defines the break smoothness
+ * \f$\gamma_2\f$ is the spectral index after the break,
+ * \f$E_0\f$ is the pivot energy,
+ * \f$E_b\f$ is the break energy, and
+ * \f$\beta\f$ defines the break smoothness (larger = smoother transition)
  ***************************************************************************/
 class GModelSpectralSmoothBrokenPlaw : public GModelSpectral {
     
@@ -159,12 +159,12 @@ protected:
         
         // Members
     protected:
-        double  m_prefactor; //!< Normalization
-        double  m_index1;	 //!< Spectral index1
-        double  m_index2;    //!< Spectral index2
-        GEnergy m_pivot;	 //!< Pivot energy
-        GEnergy m_breakenergy; //!< Break energy
-        double  m_beta;      //!< Break smoothness parameter
+        double  m_prefactor;    //!< Normalization
+        double  m_index1;       //!< Spectral index1
+        double  m_index2;       //!< Spectral index2
+        GEnergy m_pivot;        //!< Pivot energy
+        GEnergy m_breakenergy;  //!< Break energy
+        double  m_beta;         //!< Break smoothness parameter
     };
     
     // Class to determine the integral energy flux, derivation of flux_kern
@@ -216,6 +216,9 @@ protected:
     mutable double  m_mc_exponentH;       //!< Exponent (index+1) for harder index
     mutable double  m_mc_pow_ewidth_low;  //!< width of energy range below break
     mutable double  m_mc_norm;            //!< Normalization term for energy generation
+    mutable double  m_mc_exponent_ratio;  //!< Ratio of (m_mc_exponentS/m_mc_exponentH)
+    mutable double  m_mc_ebreak;          //!< Break energy (depending on the energy range,
+                                          //!< this may not actually be the break energy)
 };
 
 
