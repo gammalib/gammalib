@@ -323,11 +323,13 @@ GModelSpectralSmoothBrokenPlaw* GModelSpectralSmoothBrokenPlaw::clone(void) cons
  *     \right]^{-\beta}
  * \f]
  *
- * where
- * \f$k_0\f$ is the normalization or prefactor,
- * \f$\gamma_1\f$ is the spectral index before the break,
- * \f$\gamma_2\f$ is the spectral index after the break, and
- * \f$E_b\f$ is the break energy.
+ * where:
+ * - \f$k_0\f$ is the normalization or prefactor,
+ * - \f$\gamma_1\f$ is the spectral index before the break,
+ * - \f$\gamma_2\f$ is the spectral index after the break,
+ * - \f$E_0\f$ is the pivot energy,
+ * - \f$E_b\f$ is the break energy,
+ * - \f$\beta\f$ is the break smoothness.
  *
  * If the @p gradients flag is true the method will also compute the
  * partial derivatives of the model with respect to the parameters using
@@ -338,30 +340,41 @@ GModelSpectralSmoothBrokenPlaw* GModelSpectralSmoothBrokenPlaw::clone(void) cons
  * \f]
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta \gamma_1} = \left \{
- *    \begin{eqnarray}
- *      S_{\rm E}(E | t) \, \ln(E/E_b) & {\rm if\,\,} E < E_b \\
- *      0 & {\rm otherwise}
- *    \end{eqnarray}
- *    \right .
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta \gamma_1} =
+ *      S_{\rm E}(E | t) \left[ \ln\left( \frac{E}{E_0} \right) -
+ *      \frac{\left(\frac{E}{E_b}\right)^{\frac{\gamma_1 - \gamma_2}{\beta}} 
+ *            \ln\left( \frac{E}{E_b} \right)}
+ *           {\left(\frac{E}{E_b}\right)^{\frac{\gamma_1 - \gamma_2}{\beta}} + 1}\right]
  * \f]
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta \gamma_2} = \left \{
- *    \begin{eqnarray}
- *      0                              & {\rm if\,\,} E < E_b \\
- *      S_{\rm E}(E | t) \, \ln(E/E_b) & {\rm otherwise}
- *    \end{eqnarray}
- *    \right .
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta \gamma_2} =
+ *      S_{\rm E}(E | t) 
+ *      \frac{\left(\frac{E}{E_b}\right)^{\frac{\gamma_1 - \gamma_2}{\beta}}
+ *            \ln\left( \frac{E}{E_b} \right)}
+ *           {\left(\frac{E}{E_b}\right)^{\frac{\gamma_1 - \gamma_2}{\beta}} + 1}
  * \f]
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta E_b} = k_0 \times \left \{
- *    \begin{eqnarray}
- *      -S_{\rm E}(E | t) \, \left( \frac{\gamma_1}{E_b} \right) & {\rm if\,\,} E < E_b \\
- *      -S_{\rm E}(E | t) \, \left( \frac{\gamma_2}{E_b} \right) & {\rm otherwise}
- *    \end{eqnarray}
- *    \right .
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta E_0} = 
+ *      S_{\rm E}(E | t) \frac{\gamma_1}{E_0}
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta E_b} =
+ *      S_{\rm E}(E | t) \frac{\left(\gamma_1 - \gamma_2 \right)
+ *          \left( \frac{E}{E_b} \right)^{\frac{\gamma_1 - \gamma_2}{\beta}}}
+        {E_b \left(1 + \left(\frac{E}{E_b}\right)^{\frac{\gamma_1 - \gamma_2}{\beta}} \right)}
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta \beta} = S_{\rm E}(E | t)
+ *      \left[
+ *         \frac{ \left( \frac{E}{E_b} \right)^{\frac{\gamma_1 - \gamma_2}{\beta}}
+ *               \ln \left( \left( \frac{E}{E_b}\right)^{ \frac{\gamma_1 - \gamma_2}{\beta}} \right)}
+ *              {1 + \left(\frac{E}{E_b}\right)^{\frac{\gamma_1 - \gamma_2}{\beta}}}
+ *         - \ln \left( 1 + \left(\frac{E}{E_b}\right)^{\frac{\gamma_1 - \gamma_2}{\beta}} \right)
+ *      \right]
  * \f]
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
