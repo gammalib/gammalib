@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 1.3.0
+New Features and Important Changes in GammaLib 1.3.0.dev1
 
 Author(s) : Juergen Knoedlseder
 
-18 March 2017
+22 March 2017
 
 
 1. Introduction
@@ -26,6 +26,7 @@ The following classes have been renamed:
 The following methods have been added:
 - GCTAResponseIrf::rspname
 - GCTARoi::contains
+- GCTAEdisp2D::fetch
 
 The following methods have been removed:
 - ...
@@ -283,6 +284,10 @@ GCTAResponseIrf::read() method (#1969).
 
 Add GCTARoi::contains() method that checks whether an instrument direction
 is contained within the region of interest.
+
+Lazy loading of the energy dispersion in GCTAEdisp2D has been implemented by
+adding a fetch() method to the class. Now the energy dispersion is only loaded
+when needed, for example for function evaluation or Monte Carlo sampling (#1940).
 
 
 21. COMPTEL interface
