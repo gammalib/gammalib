@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEnergies.cpp - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GFilename.hpp"
 #include "GEnergies.hpp"
+#include "GEbounds.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -87,6 +88,26 @@ GEnergies::GEnergies(const GFilename& filename)
 
     // Load energies
     load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Energy boundaries constructor
+ *
+ * @param[in] ebounds Energy boundaries.
+ *
+ * Constructs energy container from energy boundaries.
+ ***************************************************************************/
+GEnergies::GEnergies(const GEbounds& ebounds)
+{
+    // Initialise members
+    init_members();
+
+    // Set energies from energy boundaries
+    set(ebounds);
 
     // Return
     return;
@@ -379,6 +400,52 @@ void GEnergies::extend(const GEnergies& energies)
 
     } // endif: energy container was not empty
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energies from energy boundaries
+ *
+ * @param[in] ebounds Energy boundaries.
+ *
+ * Sets the energies from energy boundaries. Each unique minimum and maximum
+ * energy boundary will be appended as energy to the container.
+ ***************************************************************************/
+void GEnergies::set(const GEbounds& ebounds)
+{
+    // Initialise members
+    clear();
+
+    // Get number of energy boundaries
+    int num = ebounds.size();
+
+    // Append energy boundaries
+    for (int i = 0; i < num; ++i) {
+
+        // Loop over minimum and maximum boundaries
+        for (int j = 0; j < 2; ++j) {
+
+            // Get energy
+            GEnergy energy = (j == 0) ? ebounds.emin(i) : ebounds.emax(i);
+
+            // Append energy if it does not yet exist in the container
+            bool    not_found = true;
+            for (int k = 0; k < m_energies.size(); ++k) {
+                if (energy == m_energies[k]) {
+                    not_found = false;
+                    break;
+                }
+            }
+            if (not_found) {
+                m_energies.push_back(energy);
+            }
+
+        } // endfor: looped over minimum and maximum boundaries
+
+    } // endfor: looped over energy boundaries
+
     // Return
     return;
 }

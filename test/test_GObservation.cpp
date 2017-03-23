@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2017 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -269,6 +269,29 @@ void TestGObservation::test_ebounds(void)
     test_value(load2.size(), 1, "GEbounds should have 1 element.");
     test_value(load2.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(load2.emax().MeV(), 10.0, 1.0e-10, "Maximum energy should be 10.");
+
+    // Check XML write and read methods
+    GXmlElement element;
+    ebds.write(element);
+    GEbounds xml1(element);
+    test_value(xml1.size(), 1, "XML write and read methods");
+    test_value(xml1.emin().MeV(),  1.0, 1.0e-10, "XML write and read methods");
+    test_value(xml1.emax().MeV(), 10.0, 1.0e-10, "XML write and read methods");
+
+    // Check energies constructor method
+    GEnergies energies1(3, GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"), false);
+    GEbounds ebds1(energies1);
+    test_value(ebds1.size(), 2, "GEnergies constructor (3 elements)");
+    test_value(ebds1.emin().MeV(),  1.0, 1.0e-10, "GEnergies constructor (3 elements)");
+    test_value(ebds1.emax(0).MeV(), 5.5, 1.0e-10, "GEnergies constructor (3 elements)");
+    test_value(ebds1.emax().MeV(), 10.0, 1.0e-10, "GEnergies constructor (3 elements)");
+
+    // Check energies constructor method
+    GEnergies energies2(1, GEnergy(1.0, "MeV"), GEnergy(1.0, "MeV"), false);
+    GEbounds ebds2(energies2);
+    test_value(ebds2.size(), 1, "GEnergies constructor (1 element)");
+    test_value(ebds2.emin().MeV(), 1.0, 1.0e-10, "GEnergies constructor (1 element)");
+    test_value(ebds2.emax().MeV(), 1.0, 1.0e-10, "GEnergies constructor (1 element)");
 
     // Return
     return;
@@ -1162,6 +1185,20 @@ void TestGObservation::test_energies(void)
     test_value(energies[0].MeV(), 1.0, 1.0e-10, "Energy 0 should be 1 MeV.");
     test_value(energies[1].MeV(), 10.0, 1.0e-10, "Energy 1 should be 10 MeV.");
     test_value(energies[2].MeV(), 100.0, 1.0e-10, "Energy 2 should be 100 MeV.");
+
+    // Check energy boundary set method
+    GEbounds ebds1(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"), false);
+    energies.set(ebds1);
+    test_value(energies.size(), 3, "GEbounds constructor (3 elements)");
+    test_value(energies[0].MeV(), 1.0, 1.0e-10, "GEbounds constructor (3 elements)");
+    test_value(energies[1].MeV(), 2.0, 1.0e-10, "GEbounds constructor (3 elements)");
+    test_value(energies[2].MeV(), 3.0, 1.0e-10, "GEbounds constructor (3 elements)");
+
+    // Check energy boundary set method
+    GEbounds ebds2(1, GEnergy(1.0, "MeV"), GEnergy(1.0, "MeV"));
+    energies.set(ebds2);
+    test_value(energies.size(), 1, "GEbounds constructor (1 element)");
+    test_value(energies[0].MeV(), 1.0, 1.0e-10, "GEbounds constructor (1 element)");
 
     // Return
     return;

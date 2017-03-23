@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEbounds.hpp - Energy boundaries class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,7 @@ class GXmlElement;
 class GFits;
 class GFitsTable;
 class GFilename;
+class GEnergies;
 
 
 /***********************************************************************//**
@@ -58,6 +59,7 @@ public:
     GEbounds(void);
     explicit GEbounds(const GFilename& filename);
     explicit GEbounds(const GXmlElement& xml);
+    explicit GEbounds(const GEnergies& energies);
     GEbounds(const GEbounds& ebds);
     GEbounds(const GEnergy& emin, const GEnergy& emax);
     GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
@@ -80,6 +82,7 @@ public:
     void           remove(const int& index);
     void           reserve(const int& num);
     void           extend(const GEbounds& ebds);
+    void           set(const GEnergies& energies);
     void           set_lin(const int& num, const GEnergy& emin, const GEnergy& emax);
     void           set_log(const int& num, const GEnergy& emin, const GEnergy& emax);
     void           load(const GFilename& filename);
