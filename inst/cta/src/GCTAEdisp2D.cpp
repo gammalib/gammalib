@@ -45,6 +45,7 @@
 #define G_READ                               "GCTAEdisp2D::read(GFitsTable&)"
 #define G_MC    "GCTAEdisp2D::mc(GRan&, double&, double&, double&, double&, "\
                                                                    "double&)"
+#define G_FETCH                                        "GCTAEdisp2D::fetch()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -191,6 +192,9 @@ double GCTAEdisp2D::operator()(const double& logEobs,
                                const double& zenith,
                                const double& azimuth) const
 {
+    // Make sure that energy dispersion is online
+    fetch();
+
     // Initalize edisp
     double edisp = 0.0;
 
@@ -407,6 +411,9 @@ void GCTAEdisp2D::read(const GFitsTable& table)
  ***************************************************************************/
 void GCTAEdisp2D::write(GFitsBinTable& table) const
 {
+    // Make sure that energy dispersion is online
+    fetch();
+
     // Write background table
     m_edisp.write(table);
 
@@ -427,17 +434,8 @@ void GCTAEdisp2D::write(GFitsBinTable& table) const
  ***************************************************************************/
 void GCTAEdisp2D::load(const GFilename& filename)
 {
-    // Open FITS file
-    GFits fits(filename);
-
-    // Get energy dispersion table
-    const GFitsTable& table = *fits.table(filename.extname("ENERGY DISPERSION"));
-
-    // Read energy dispersion from table
-    read(table);
-
-    // Close FITS file
-    fits.close();
+    // Clear object
+    clear();
 
     // Store filename
     m_filename = filename;
@@ -521,6 +519,9 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
                         const double& zenith,
                         const double& azimuth) const
 {
+    // Make sure that energy dispersion is online
+    fetch();
+
     // Get boundaries for observed energy
     GEbounds ebounds = ebounds_obs(logEsrc, theta, phi, zenith, azimuth);
     double   emin    = ebounds.emin().log10TeV();
@@ -582,6 +583,9 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
                                   const double& zenith,
                                   const double& azimuth) const
 {
+    // Make sure that energy dispersion is online
+    fetch();
+
     // Compute only if parameters changed
     if (!m_ebounds_obs_computed || theta != m_last_theta_obs) {
 
@@ -644,6 +648,9 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
                                   const double& zenith,
                                   const double& azimuth) const
 {
+    // Make sure that energy dispersion is online
+    fetch();
+
     // Compute only if parameters changed
     if (!m_ebounds_src_computed || theta != m_last_theta_src) {
 
@@ -687,9 +694,101 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
 
 
 /***********************************************************************//**
+ * @brief Fetch energy dispersion
+ *
+ * @exception GException::file_error
+ *            File not found.
+ *            Unable to load energy dispersion.
+ * @exception GException::invalid_value
+ *            No file name has been specified.
+ *
+ * Fetches the energy dispersion by reading it from a FITS file. This method
+ * does nothing if the energy dispersion is already loaded, if there is
+ * nothing to fetch, or if the m_filename member is empty.
+ *
+ * The method is thread save. The method checks whether the file from which
+ * the energy dispersion should be loaded actually exists.
+ ***************************************************************************/
+void GCTAEdisp2D::fetch(void) const
+{
+    // Continue only if energy dispersion has not yet been fetched
+    if (!m_fetched) {
+
+        // Continue only if the file name is not empty
+        if (!m_filename.is_empty()) {
+
+            // Throw an exception if the file does not exist
+            if (!m_filename.exists()) {
+                std::string msg = "File \""+m_filename+"\" not found. Cannot "
+                                  "fetch energy dispersion. Maybe the file has "
+                                  "been deleted in the meantime.";
+                GException::file_error(G_FETCH, msg);
+            }
+
+            // Signal that energy dispersion will be fetched (has to come
+            // before reading since the ebounds_obs() and ebounds_src() methods
+            // will otherwise call the fetch() method recursively.
+            m_fetched = true;
+
+            // Initialise exception flag
+            bool has_exception = false;
+
+            // Load energy dispersion. Catch any exception. Put the code into
+            // a critical zone as it might be called from within a parallelized
+            // thread.
+            #pragma omp critical
+            {
+            try {
+
+
+                // Open FITS file
+                GFits fits(m_filename);
+
+                // Initialise energy dispersion extension name
+                std::string extname = m_filename.extname("ENERGY DISPERSION");
+
+                // Get energy dispersion table
+                const GFitsTable& table = *fits.table(extname);
+
+                // Read energy dispersion from table
+                const_cast<GCTAEdisp2D*>(this)->read(table);
+
+                // Close FITS file
+                fits.close();
+
+            }
+            catch (...) {
+                has_exception = true;
+            }
+            }
+
+            // Throw an exception if an exception has occured
+            if (has_exception) {
+                std::string msg = "Unable to load energy dispersion from "
+                                  "file \""+m_filename+"\".";
+                throw GException::file_error(G_FETCH, msg);
+            }
+
+        } // endif: filename was not empty
+
+        // Throw an exception if the FITS file name is not known
+        else {
+            std::string msg = "Unable to fetch energy dispersion since no "
+                              "filename is specified.";
+            throw GException::invalid_value(G_FETCH, msg);
+        }
+    
+    } // endif: energy dispersion had not yet been fetched
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print energy dispersion information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing energy dispersion information.
  ***************************************************************************/
 std::string GCTAEdisp2D::print(const GChatter& chatter) const
@@ -699,6 +798,9 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
 
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
+
+        // Make sure that energy dispersion is online
+        fetch();
 
         // Compute energy boundaries in TeV
         double emin = m_edisp.axis_lo(m_inx_etrue,0);
@@ -754,6 +856,7 @@ void GCTAEdisp2D::init_members(void)
     // Initialise members
     m_filename.clear();
     m_edisp.clear();
+    m_fetched    = false;
     m_inx_etrue  = 0;
     m_inx_migra  = 1;
     m_inx_theta  = 2;
@@ -787,6 +890,7 @@ void GCTAEdisp2D::copy_members(const GCTAEdisp2D& edisp)
     // Copy members
     m_filename   = edisp.m_filename;
     m_edisp      = edisp.m_edisp;
+    m_fetched    = edisp.m_fetched;
     m_inx_etrue  = edisp.m_inx_etrue;
     m_inx_migra  = edisp.m_inx_migra;
     m_inx_theta  = edisp.m_inx_theta;

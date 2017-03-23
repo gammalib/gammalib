@@ -385,10 +385,17 @@ double GIntegral::romberg(std::vector<double> bounds, const int& order)
     // Initialise integral
     double value = 0.0;
 
+    // Initialise integration status information
+    int calls = 0;
+
     // Add integral of all intervals
     for (int i = 0; i < bounds.size()-1; ++i) {
         value += romberg(bounds[i], bounds[i+1], order);
+        calls += m_calls;
     }
+
+    // Set integration status information
+    m_calls = calls;
 
     // Return value
     return value;

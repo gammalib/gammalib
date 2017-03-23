@@ -1441,7 +1441,7 @@ std::string GCTAObservation::print(const GChatter& chatter) const
             if (m_events != NULL) {
                 result.append("\n"+m_events->print(reduced_chatter));
             }
-        
+
         } // endif: appended detailed information
 
     } // endif: chatter was not silent

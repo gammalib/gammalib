@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdisp2D.hpp - CTA 2D energy dispersion class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Florent Forest                              *
+ *  copyright (C) 2015-2017 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -90,12 +90,14 @@ public:
     std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Methods
+    void                     fetch(void) const;
     const GCTAResponseTable& table(void) const;
     void                     table(const GCTAResponseTable& table);
     void                     read(const GFitsTable& table);
     void                     write(GFitsBinTable& table) const;
     void                     save(const GFilename& filename,
                                   const bool&      clobber = false) const;
+
 private:
     // Methods
     void init_members(void);
@@ -133,6 +135,7 @@ private:
     // Members
     mutable GFilename m_filename;   //!< Name of Edisp response file
     GCTAResponseTable m_edisp;      //!< Edisp response table
+    mutable bool      m_fetched;    //!< Signals that Edisp has been fetched
     int               m_inx_etrue;  //!< True energy index
     int               m_inx_migra;  //!< Migration index
     int               m_inx_theta;  //!< Theta index
