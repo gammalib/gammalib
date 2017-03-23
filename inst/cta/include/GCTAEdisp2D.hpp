@@ -189,6 +189,7 @@ GFilename GCTAEdisp2D::filename(void) const
 inline
 const GCTAResponseTable& GCTAEdisp2D::table(void) const
 {
+    fetch();
     return (m_edisp);
 }
 
