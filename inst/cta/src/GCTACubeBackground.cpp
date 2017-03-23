@@ -113,6 +113,8 @@ GCTACubeBackground::GCTACubeBackground(const GCTAEventCube& cube)
     init_members();
 
     // Store energy boundaries
+    m_energies.set(cube.ebounds());
+    /*
     int nebins = cube.ebounds().size();
     for (int i = 0; i < nebins; ++i) {
         m_energies.append(cube.ebounds().emin(i));
@@ -121,6 +123,7 @@ GCTACubeBackground::GCTACubeBackground(const GCTAEventCube& cube)
         m_energies.append(cube.ebounds().emax(nebins-1));
         
     }
+    */
 
     // Set GNodeArray used for interpolation
     set_eng_axis();

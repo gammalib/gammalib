@@ -158,6 +158,9 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
     // Initialise class members
     init_members();
 
+    // Store energy boundaries
+    m_energies.set(cube.ebounds());
+    /*
     // Use the energy bin boundaries of the event cube as the node energies
     // of the energy dispersion cube.
     m_energies.clear();
@@ -168,6 +171,7 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
             m_energies.append(cube.ebounds().emax(i));
         }
     }
+    */
 
     // Set energy node array used for interpolation
     set_eng_axis();

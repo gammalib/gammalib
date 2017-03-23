@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEbounds.cpp - Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GTools.hpp"
 #include "GFilename.hpp"
 #include "GEbounds.hpp"
+#include "GEnergies.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -110,6 +111,26 @@ GEbounds::GEbounds(const GXmlElement& xml)
 
     // Read energy boundaries from XML element
     read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Energy container constructor
+ *
+ * @param[in] energies Energy container.
+ *
+ * Constructs energy boundaries from an energy container.
+ ***************************************************************************/
+GEbounds::GEbounds(const GEnergies& energies)
+{
+    // Initialise members
+    init_members();
+
+    // Set energy boundaries from energy container
+    set(energies);
 
     // Return
     return;
@@ -488,6 +509,53 @@ void GEbounds::extend(const GEbounds& ebds)
         set_attributes();
 
     } // endif: energy boundaries were not empty
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy boundaries from energy container
+ *
+ * @param[in] energies Energy container.
+ *
+ * Sets the energy boundaries from an energy container. Each two subsequent
+ * energies in the energy container will form an energy boundary. This
+ * means that n energies will lead to n-1 energy boundaries with the
+ * following mapping:
+ *
+ *      [energies[0], energies[1]]
+ *      [energies[1], energies[2]]
+ *      ...
+ *      [energies[n-2], energies[n-1]]
+ *
+ * If there is only one energy in the container the following empty energy
+ * boundary will be appended:
+ *
+ *      [energies[0], energies[0]]
+ ***************************************************************************/
+void GEbounds::set(const GEnergies& energies)
+{
+    // Initialise members
+    clear();
+
+    // Get number of energies in container
+    int num = energies.size();
+
+    // If there is only one energy in the container then append an empty
+    // energy boundary
+    if (num == 1) {
+        append(energies[0], energies[0]);
+    }
+
+    // ... otherwise if there is more than one energy in the container
+    // then append subsequent energies as boundaries
+    else if (num > 1) {
+        for (int i = 0; i < num-1; ++i) {
+            append(energies[i], energies[i+1]);
+        }
+    }
 
     // Return
     return;

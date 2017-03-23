@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GEnergies.i - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,6 +42,7 @@ public:
     // Constructors and destructors
     GEnergies(void);
     explicit GEnergies(const GFilename& filename);
+    explicit  GEnergies(const GEbounds& ebounds);
     GEnergies(const GEnergies& energies);
     GEnergies(const int& num, const GEnergy& emin, const GEnergy& emax,
               const bool& log = true);
@@ -59,6 +60,7 @@ public:
     void        remove(const int& index);
     void        reserve(const int& num);
     void        extend(const GEnergies& energies);
+    void        set(const GEbounds& ebounds);
     void        set_lin(const int& num, const GEnergy& emin,
                                         const GEnergy& emax);
     void        set_log(const int& num, const GEnergy& emin,
