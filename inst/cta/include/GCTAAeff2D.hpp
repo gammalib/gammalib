@@ -37,6 +37,11 @@
 class GFitsTable;
 class GFitsBinTable;
 
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_aeff2d = "EFFECTIVE AREA";
+}
+
 
 /***********************************************************************//**
  * @class GCTAAeff2D

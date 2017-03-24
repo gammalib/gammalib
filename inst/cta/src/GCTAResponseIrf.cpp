@@ -45,6 +45,7 @@
 #include "GModelSpatialRadialShell.hpp"
 #include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialComposite.hpp"
+#include "GArf.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTAResponse_helpers.hpp"
@@ -1088,11 +1089,11 @@ void GCTAResponseIrf::load(const std::string& rspname)
  *
  * If the file is a FITS file, the method will either use the extension name
  * specified with the filename, or if no extension name is given, search for
- * an "EFFECTIVE AREA" or "SPECRESP" extension in the file and open the
- * corresponding FITS table. If a column named "SPECRESP" is found in the
+ * an `EFFECTIVE AREA` or `SPECRESP` extension in the file and open the
+ * corresponding FITS table. If a column named `SPECRESP` is found in the
  * table, a GCTAAeffArf object will be allocated. Otherwise, a GCTAAeff2D
  * object will be allocated. In both cases, the method will extract the
- * optional "LO_THRES" and "HI_THRES" save energy thresholds from the FITS
+ * optional `LO_THRES` and `HI_THRES` save energy thresholds from the FITS
  * file header.
  *
  * If the file is not a FITS file, it will be interpreted as a
@@ -1125,11 +1126,11 @@ void GCTAResponseIrf::load_aeff(const GFilename& filename)
             extname = filename.extname();
         }
         else {
-            if (fits.contains("EFFECTIVE AREA")) {
-                extname = "EFFECTIVE AREA";
+            if (fits.contains(gammalib::extname_cta_aeff2d)) {
+                extname = gammalib::extname_cta_aeff2d;
             }
-            else if (fits.contains("SPECRESP")) {
-                extname = "SPECRESP";
+            else if (fits.contains(gammalib::extname_arf)) {
+                extname = gammalib::extname_arf;
             }
         }
 
@@ -1148,7 +1149,7 @@ void GCTAResponseIrf::load_aeff(const GFilename& filename)
             }
 
             // Check for specific table column
-            if (table.contains("SPECRESP")) {
+            if (table.contains(gammalib::extname_arf)) {
 
                 // Close file
                 fits.close();
@@ -1212,13 +1213,13 @@ void GCTAResponseIrf::load_aeff(const GFilename& filename)
  *       PSF
  *       PSF_2D_TABLE
  *
- * in the file and open the corresponding FITS table. If columns named "GAMMA"
- * and "SIGMA" are found in the table, a GCTAPsfKing object will be allocated.
+ * in the file and open the corresponding FITS table. If columns named `GAMMA`
+ * and `SIGMA` are found in the table, a GCTAPsfKing object will be allocated.
  *
- * If columns named "SCALE", "SIGMA_1", "AMPL_2", "SIGMA_2", "AMPL_3" and
- * "SIGMA_3" are found in the table, a GCTAPsf2D object will be allocated.
+ * If columns named `SCALE`, `SIGMA_1`, `AMPL_2`, `SIGMA_2`, `AMPL_3` and
+ * `SIGMA_3` are found in the table, a GCTAPsf2D object will be allocated.
  *
- * If columns named "RAD_LO", "RAD_HI", and "RPSF" are found in the table, a
+ * If columns named `RAD_LO`, `RAD_HI`, and `RPSF` are found in the table, a
  * GCTAPsfTable object will be allocated.
  *
  * Otherwise, a CTAPsfVector object will be allocated.
@@ -1359,7 +1360,7 @@ void GCTAResponseIrf::load_psf(const GFilename& filename)
  *
  * If the file is a FITS file, the method will either use the extension name
  * specified with the filename, or if no extension name is given, search for
- * an "ENERGY DISPERSION" or "MATRIX" extension in the file and open the
+ * an `ENERGY DISPERSION` or `MATRIX` extension in the file and open the
  * corresponding FITS table. If columns named "MIGRA_LO" and "MIGRA_HI" are
  * found in the table, a GCTAEdisp2D object will be allocated. Otherwise, a
  * GCTAEdispRmf object will be allocated.
@@ -1387,18 +1388,18 @@ void GCTAResponseIrf::load_edisp(const GFilename& filename)
         GFits fits(filename);
 
         // Get the extension name. If an extension name has been specified
-        // then use this name, otherwise use either the "EFFECTIVE AREA"
-        // or the "SPECRESP" extension.
+        // then use this name, otherwise use either the "ENERGY DISPERSION"
+        // or the "MATRIX" extension.
         std::string extname = "";
         if (filename.has_extname()) {
             extname = filename.extname();
         }
         else {
-            if (fits.contains("ENERGY DISPERSION")) {
-                extname = "ENERGY DISPERSION";
+            if (fits.contains(gammalib::extname_cta_edisp2d)) {
+                extname = gammalib::extname_cta_edisp2d;
             }
-            else if (fits.contains("MATRIX")) {
-                extname = "MATRIX";
+            else if (fits.contains(gammalib::extname_rmf)) {
+                extname = gammalib::extname_rmf;
             }
         }
 

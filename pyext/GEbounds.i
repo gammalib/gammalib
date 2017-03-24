@@ -70,7 +70,7 @@ public:
                         const std::string& unit = "keV") const;
     void           read(const GFitsTable& table);
     void           write(GFits& file,
-                         const std::string& extname = "EBOUNDS",
+                         const std::string& extname = gammalib::extname_ebounds,
                          const std::string& unit = "keV") const;
     void           read(const GXmlElement& xml);
     void           write(GXmlElement& xml) const;

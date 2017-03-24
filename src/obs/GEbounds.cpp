@@ -642,7 +642,7 @@ void GEbounds::set_log(const int& num, const GEnergy& emin, const GEnergy& emax)
  * Loads the energy boundaries from a FITS file.
  *
  * If no extension name is provided, the energy boundaries are loaded from
- * the "EBOUNDS" extension.
+ * the `EBOUNDS` extension.
  ***************************************************************************/
 void GEbounds::load(const GFilename& filename)
 {
@@ -650,7 +650,7 @@ void GEbounds::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get energy boundary table
-    const GFitsTable& table = *fits.table(filename.extname("EBOUNDS"));
+    const GFitsTable& table = *fits.table(filename.extname(gammalib::extname_ebounds));
 
     // Read energy boundaries from table
     read(table);
@@ -673,7 +673,7 @@ void GEbounds::load(const GFilename& filename)
  * Saves energy boundaries into a FITS file. If a file with the given
  * @p filename does not yet exist it will be created, otherwise the method
  * opens the existing file. Energy boundaries can only be appended to an
- * existing file if the @p clobber flag is set to `true` (otherwise an
+ * existing file if the @p clobber flag is set to "true" (otherwise an
  * exception is thrown).
  *
  * The method will append a binary FITS table containing the energy
@@ -683,7 +683,7 @@ void GEbounds::load(const GFilename& filename)
  *      myfile.fits[ENERGY BOUNDARIES]
  *
  * will save the energy boundaries in the `ENERGY BOUNDARIES` extension of
- * the `myfile.fits` file. If the extension exists already in the file it
+ * the "myfile.fits" file. If the extension exists already in the file it
  * will be replaced, otherwise a new extension will be created. If no
  * extension name is provided, the method will use `EBOUNDS` as the default
  * extension name for energy boundaries.
@@ -697,7 +697,7 @@ void GEbounds::save(const GFilename&   filename,
     GFits fits(filename.url(), true);
 
     // Write energy boundaries to FITS file
-    write(fits, filename.extname("EBOUNDS"), unit);
+    write(fits, filename.extname(gammalib::extname_ebounds), unit);
 
     // Save to file
     fits.save(clobber);
@@ -762,8 +762,8 @@ void GEbounds::read(const GFitsTable& table)
  * @brief Write energy boundaries into FITS object
  *
  * @param[in] fits FITS file.
- * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS")
- * @param[in] unit Energy units (defaults to "keV")
+ * @param[in] extname Energy boundary extension name.
+ * @param[in] unit Energy units.
  *
  * Writes the energy boundaries into a FITS object. The @p unit parameter
  * specifies in which unit the energies are written. By default, the energy
@@ -801,7 +801,7 @@ void GEbounds::write(GFits&             fits,
         fits.remove(extname);
     }
 
-    // Append EBOUNDS table to FITS file
+    // Append energy boundary table to FITS file
     fits.append(table);
 
     // Return

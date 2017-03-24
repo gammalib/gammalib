@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.hpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Michael Mayer                               *
+ *  copyright (C) 2013-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,11 @@
 /* __ Forward declarations _______________________________________________ */
 class GRan;
 class GFitsTable;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_psfking = "POINT SPREAD FUNCTION";
+}
 
 
 /***********************************************************************//**

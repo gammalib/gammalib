@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -998,7 +998,7 @@ void GCTAObservation::write(GXmlElement& xml) const
  * depending of the information provided in the FITS file. If an extension
  * name is specified, the method checks whether the extension exists and
  * loads the extension as event list. Otherwise, it checks whether the file
- * contains an "EVENTS" extension and loads the extension as event list.
+ * contains an `EVENTS` extension and loads the extension as event list.
  * If none of the above are satistified, the method loads a counts cube.
  ***************************************************************************/
 void GCTAObservation::read(const GFits& fits)
@@ -1012,7 +1012,7 @@ void GCTAObservation::read(const GFits& fits)
     GFilename filename(fits.filename());
 
     // Get extension name
-    std::string extname = filename.extname("EVENTS");
+    std::string extname = filename.extname(gammalib::extname_cta_events);
 
     // If FITS file contains an EVENTS extension we have an unbinned
     // observation ...
@@ -1060,8 +1060,8 @@ void GCTAObservation::read(const GFits& fits)
  * @brief Write observation into FITS file.
  *
  * @param[in] fits FITS file.
- * @param[in] evtname Events FITS extension name (default: "EVENTS").
- * @param[in] gtiname Good Time Intervals FITS extension name (default: "GTI").
+ * @param[in] evtname Events FITS extension name.
+ * @param[in] gtiname Good Time Intervals FITS extension name.
  *
  * Writes the observation into a FITS file.
  *
@@ -1264,7 +1264,7 @@ void GCTAObservation::load(const GFilename& cntcube,
  * If the CTA observation contains an event cube, the method will write the
  * cube into the primary image, followed by binary tables containing the
  * energy boundaries and the Good Time Intervals. The extension names of
- * these binary tables are "EBOUNDS" and "GTI", and cannot be modified.
+ * these binary tables are `EBOUNDS` and `GTI`, and cannot be modified.
  ***************************************************************************/
 void GCTAObservation::save(const GFilename& filename,
                            const bool&      clobber) const
@@ -1274,8 +1274,8 @@ void GCTAObservation::save(const GFilename& filename,
     // The specific format that is implemented is [events;gti], where the
     // part before the semi-colon is the events extension name and the part
     // after the semi-colon is the Good Time Intervals extension name.
-    std::string evtname = "EVENTS";
-    std::string gtiname = "GTI";
+    std::string evtname = gammalib::extname_cta_events;
+    std::string gtiname = gammalib::extname_gti;
     if (filename.has_extname()) {
         std::vector<std::string> extnames = gammalib::split(filename.extname(), ";");
         if (extnames.size() > 0) {

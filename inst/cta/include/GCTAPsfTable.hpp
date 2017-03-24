@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAPsfTable.hpp - CTA point spread function table class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,11 @@
 /* __ Forward declarations _______________________________________________ */
 class GRan;
 class GFitsTable;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_psftable = "POINT SPREAD FUNCTION";
+}
 
 
 /***********************************************************************//**

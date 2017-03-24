@@ -39,6 +39,11 @@ class GFitsTable;
 class GFilename;
 class GEnergies;
 
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_ebounds = "EBOUNDS";
+}
+
 
 /***********************************************************************//**
  * @class GEbounds
@@ -91,7 +96,7 @@ public:
                         const std::string& unit = "keV") const;
     void           read(const GFitsTable& table);
     void           write(GFits& file,
-                         const std::string& extname = "EBOUNDS",
+                         const std::string& extname = gammalib::extname_ebounds,
                          const std::string& unit = "keV") const;
     void           read(const GXmlElement& xml);
     void           write(GXmlElement& xml) const;

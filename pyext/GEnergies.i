@@ -70,7 +70,7 @@ public:
                      const bool&      clobber = false) const;
     void        read(const GFitsTable& table);
     void        write(GFits& file,
-                      const std::string& extname = "ENERGIES") const;
+                      const std::string& extname = gammalib::extname_energies) const;
 };
 
 

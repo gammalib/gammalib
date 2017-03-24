@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.cpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -580,7 +580,7 @@ void GGti::extend(const GGti& gti)
  * Loads the Good Time Intervals from FITS file.
  *
  * If no extension name is provided in the @p filename, the Good Time
- * Intervals are loaded from the "GTI" extension.
+ * Intervals are loaded from the `GTI` extension.
  ***************************************************************************/
 void GGti::load(const GFilename& filename)
 {
@@ -588,7 +588,7 @@ void GGti::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get GTI table
-    const GFitsTable& table = *fits.table(filename.extname("GTI"));
+    const GFitsTable& table = *fits.table(filename.extname(gammalib::extname_gti));
 
     // Read GTI from table
     read(table);
@@ -632,7 +632,7 @@ void GGti::save(const GFilename& filename, const bool& clobber) const
     GFits fits(filename.url(), true);
 
     // Write GTI to FITS object
-    write(fits, filename.extname("GTI"));
+    write(fits, filename.extname(gammalib::extname_gti));
 
     // Save to file
     fits.save(clobber);
@@ -685,14 +685,14 @@ void GGti::read(const GFitsTable& table)
  * @brief Write Good Time Intervals and time reference into FITS object
  *
  * @param[in] fits FITS file.
- * @param[in] extname GTI extension name (defaults to "GTI")
+ * @param[in] extname GTI extension name.
  *
  * Writes Good Time Intervals and time reference into a FITS object. If an
  * extension with the same name does already exist in the FITS object, the
  * values in that extension will be replaced.
  *
  * The start and stop tims of the Good Time Intervals will be written into
- * double precision columns named "START" and "STOP".
+ * double precision columns named `START` and `STOP`.
  ***************************************************************************/
 void GGti::write(GFits& fits, const std::string& extname) const
 {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.hpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,11 @@
 /* __ Forward declarations _______________________________________________ */
 class GFits;
 class GFitsBinTable;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_background3d = "BACKGROUND";
+}
 
 
 /***********************************************************************//**

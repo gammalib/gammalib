@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.hpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,12 @@
 class GFilename;
 class GFits;
 class GFitsTable;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_lat_edisp       = "ENERGY DISPERSION";
+    const std::string extname_lat_edisp_scale = "EDISP_SCALING_PARAMS";
+}
 
 
 /***********************************************************************//**

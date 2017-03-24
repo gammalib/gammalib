@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -354,8 +354,8 @@ void GLATEventCube::save(const GFilename& filename,
  * @param[in] fits FITS file.
  *
  * It is assumed that the counts map resides in the primary extension of the
- * FITS file, the energy boundaries reside in the EBOUNDS extension and the
- * Good Time Intervals reside in the GTI extension.  The method clears the
+ * FITS file, the energy boundaries reside in the `EBOUNDS` extension and the
+ * Good Time Intervals reside in the `GTI` extension.  The method clears the
  * object before loading, thus any events residing in the object before
  * loading will be lost.
  ***************************************************************************/
@@ -366,8 +366,8 @@ void GLATEventCube::read(const GFits& fits)
 
     // Get HDUs
     const GFitsImage& hdu_cntmap  = *fits.image("Primary");
-    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
-    const GFitsTable& hdu_gti     = *fits.table("GTI");
+    const GFitsTable& hdu_ebounds = *fits.table(gammalib::extname_ebounds);
+    const GFitsTable& hdu_gti     = *fits.table(gammalib::extname_gti);
 
     // Load counts map
     read_cntmap(hdu_cntmap);

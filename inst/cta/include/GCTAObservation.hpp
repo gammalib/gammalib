@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.hpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GObservation.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
+#include "GCTAEventList.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GTime;
@@ -100,8 +101,8 @@ public:
     bool                has_events(void) const;
     void                read(const GFits& fits);
     void                write(GFits& fits,
-                              const std::string& evtname = "EVENTS",
-                              const std::string& gtiname = "GTI") const;
+                              const std::string& evtname = gammalib::extname_cta_events,
+                              const std::string& gtiname = gammalib::extname_gti) const;
     void                load(const GFilename& filename);
     void                load(const GFilename& cntcube,
                              const GFilename& expcube,

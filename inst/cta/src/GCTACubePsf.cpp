@@ -478,8 +478,8 @@ void GCTACubePsf::read(const GFits& fits)
 
     // Get HDUs
     const GFitsImage& hdu_psfcube  = *fits.image("Primary");
-    const GFitsTable& hdu_energies = *fits.table("ENERGIES");
-    const GFitsTable& hdu_deltas   = *fits.table("DELTAS");
+    const GFitsTable& hdu_energies = *fits.table(gammalib::extname_energies);
+    const GFitsTable& hdu_deltas   = *fits.table(gammalib::extname_deltas);
 
     // Read cube
     m_cube.read(hdu_psfcube);
@@ -522,10 +522,10 @@ void GCTACubePsf::write(GFits& fits) const
     m_energies.write(fits);
 
     // Write delta nodes
-    m_deltas.write(fits, "DELTAS");
+    m_deltas.write(fits, gammalib::extname_deltas);
 
     // Set the nodes unit to "deg"
-    (*fits.table("DELTAS"))["Value"]->unit("deg");
+    (*fits.table(gammalib::extname_deltas))["Value"]->unit("deg");
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.hpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,11 @@
 /* __ Forward declarations _______________________________________________ */
 class GFits;
 class GFitsTable;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_rmf = "MATRIX";
+}
 
 
 /***********************************************************************//**

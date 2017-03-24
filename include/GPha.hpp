@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPha.hpp - XSPEC Pulse Height Analyzer class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,11 @@
 class GEnergy;
 class GFits;
 class GFitsTable;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_pha = "SPECTRUM";
+}
 
 
 /***********************************************************************//**

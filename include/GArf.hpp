@@ -38,6 +38,11 @@
 class GFits;
 class GFitsTable;
 
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_arf = "SPECRESP";
+}
+
 
 /***********************************************************************//**
  * @class GArf

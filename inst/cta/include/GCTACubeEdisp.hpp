@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTACubeEdisp.hpp - CTA cube analysis energy dispersion class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                                    *
+ *  copyright (C) 2016-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,6 +42,11 @@ class GFilename;
 class GObservations;
 class GCTAEventCube;
 class GCTAObservation;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_migras = "MIGRAS";
+}
 
 
 /***********************************************************************//**

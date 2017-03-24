@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventList.hpp - Fermi/LAT event list class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,11 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_lat_events = "EVENTS";
+}
 
 
 /***********************************************************************//**

@@ -39,6 +39,11 @@
 class GFilename;
 class GEbounds;
 
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_energies = "ENERGIES";
+}
+
 
 /***********************************************************************//**
  * @class GEnergies
@@ -92,7 +97,7 @@ public:
                         const bool&      clobber = false) const;
     void           read(const GFitsTable& table);
     void           write(GFits& file,
-                         const std::string& extname = "ENERGIES") const;
+                         const std::string& extname = gammalib::extname_energies) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
   
 protected:

@@ -356,7 +356,7 @@ void GCTAAeff2D::write(GFitsBinTable& table) const
  * @param[in] filename FITS file name.
  *
  * Loads the effective area from a FITS file. If no extension name is given
- * the effective area will be loaded from the "EFFECTIVE AREA" extension.
+ * the effective area will be loaded from the `EFFECTIVE AREA` extension.
  ***************************************************************************/
 void GCTAAeff2D::load(const GFilename& filename)
 {
@@ -364,7 +364,8 @@ void GCTAAeff2D::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get effective area table
-    const GFitsTable& table = *fits.table(filename.extname("EFFECTIVE AREA"));
+    const GFitsTable& table =
+          *fits.table(filename.extname(gammalib::extname_cta_aeff2d));
 
     // Read effective area from table
     read(table);
@@ -391,7 +392,7 @@ void GCTAAeff2D::load(const GFilename& filename)
  * opens the existing file. The method will create a (or replace an existing)
  * effective area extension. The extension name can be specified as part
  * of the @p filename, or if no extension name is given, is assumed to be
- * "EFFECTIVE AREA".
+ * `EFFECTIVE AREA`.
  *
  * An existing file will only be modified if the @p clobber flag is set to
  * true.
@@ -399,7 +400,7 @@ void GCTAAeff2D::load(const GFilename& filename)
 void GCTAAeff2D::save(const GFilename& filename, const bool& clobber) const
 {
     // Get extension name
-    std::string extname = filename.extname("EFFECTIVE AREA");
+    std::string extname = filename.extname(gammalib::extname_cta_aeff2d);
 
     // Open or create FITS file (without extension name since the requested
     // extension may not yet exist in the file)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATAeff.cpp - Fermi LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -309,10 +309,10 @@ void GLATAeff::save(const GFilename& filename, const bool& clobber)
  * @param[in] fits FITS file.
  *
  * Reads the effective area and efficiency parameter information form the
- * FITS file. The effective area is read from the extension EFFECTIVE AREA
- * (or EFFECTIVE AREA_<evtype> for Pass 8), the efficiency parameter
- * information from the extension EFFICIENCY_PARAMS (or 
- * EFFICIENCY_PARAMS_<evtype> for Pass 8). If the latter extension does not
+ * FITS file. The effective area is read from the extension `EFFECTIVE AREA`
+ * (or `EFFECTIVE AREA_<evtype>` for Pass 8), the efficiency parameter
+ * information from the extension `EFFICIENCY_PARAMS` (or
+ * `EFFICIENCY_PARAMS_<evtype>` for Pass 8). If the latter extension does not
  * exist, no efficiency parameters will be loaded.
  *
  * @todo Implement reading of Phi-dependence information.
@@ -325,8 +325,8 @@ void GLATAeff::read(const GFits& fits)
     m_evtype = evtype;
 
     // Set extension names
-    std::string effarea  = "EFFECTIVE AREA";
-    std::string effparms = "EFFICIENCY_PARAMS";
+    std::string effarea  = gammalib::extname_lat_aeff;
+    std::string effparms = gammalib::extname_lat_efficiency;
     if (!fits.contains(effarea)) {
         effarea += "_" + m_evtype;
     }
@@ -702,7 +702,7 @@ void GLATAeff::write_aeff(GFits& file) const
         GFitsBinTable* hdu_aeff = new GFitsBinTable;
 
         // Set table attributes
-        hdu_aeff->extname("EFFECTIVE AREA");
+        hdu_aeff->extname(gammalib::extname_lat_aeff);
 
         // Write boundaries into table
         m_aeff_bins.write(*hdu_aeff);

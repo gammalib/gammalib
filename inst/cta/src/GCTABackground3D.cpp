@@ -401,7 +401,7 @@ void GCTABackground3D::write(GFitsBinTable& table) const
  * Loads the background from a FITS file.
  *
  * If no extension name is provided, the background will be loaded from the
- * "BACKGROUND" extension.
+ * `BACKGROUND` extension.
  ***************************************************************************/
 void GCTABackground3D::load(const GFilename& filename)
 {
@@ -409,7 +409,8 @@ void GCTABackground3D::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get background table
-    const GFitsTable& table = *fits.table(filename.extname("BACKGROUND"));
+    const GFitsTable& table =
+          *fits.table(filename.extname(gammalib::extname_cta_background3d));
 
     // Read effective area from table
     read(table);
@@ -436,7 +437,7 @@ void GCTABackground3D::load(const GFilename& filename)
  * existing file. The method will create a (or replace an existing)
  * background extension. The extension name can be specified as part
  * of the @p filename, or if no extension name is given, is assumed to be
- * "BACKGROUND".
+ * `BACKGROUND`.
  *
  * An existing file will only be modified if the @p clobber flag is set to
  * true.
@@ -444,7 +445,7 @@ void GCTABackground3D::load(const GFilename& filename)
 void GCTABackground3D::save(const GFilename& filename, const bool& clobber) const
 {
     // Get extension name
-    std::string extname = filename.extname("BACKGROUND");
+    std::string extname = filename.extname(gammalib::extname_cta_background3d);
 
     // Open or create FITS file (without extension name since the requested
     // extension may not yet exist in the file)

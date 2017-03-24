@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPha.cpp - XSPEC Pulse Height Analyzer class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -344,21 +344,21 @@ void GPha::load(const GFilename& filename)
     GFits fits(filename.url());
 
     // Get PHA table
-    const GFitsTable& pha = *fits.table("SPECTRUM");
+    const GFitsTable& pha = *fits.table(gammalib::extname_pha);
 
     // Read PHA data
     read(pha);
 
-    // Optionally read EBOUNDS data
-    if (fits.contains("EBOUNDS")) {
+    // Optionally read energy boundaries
+    if (fits.contains(gammalib::extname_ebounds)) {
 
-        // Get EBOUNDS table
-        const GFitsTable& ebounds = *fits.table("EBOUNDS");
+        // Get energy boundary table
+        const GFitsTable& ebounds = *fits.table(gammalib::extname_ebounds);
 
-        // Read EBOUNDS data
+        // Read energy boundaries
         m_ebounds.read(ebounds);
 
-    } // endif: has EBOUNDS table
+    } // endif: had energy boundary table
 
     // Close FITS file
     fits.close();
@@ -484,11 +484,11 @@ void GPha::read(const GFitsTable& table)
 void GPha::write(GFits& fits) const
 {
     // Remove extensions if they exist already
-    if (fits.contains("EBOUNDS")) {
-        fits.remove("EBOUNDS");
+    if (fits.contains(gammalib::extname_ebounds)) {
+        fits.remove(gammalib::extname_ebounds);
     }
-    if (fits.contains("SPECTRUM")) {
-        fits.remove("SPECTRUM");
+    if (fits.contains(gammalib::extname_pha)) {
+        fits.remove(gammalib::extname_pha);
     }
 
     // Set column length
@@ -517,7 +517,7 @@ void GPha::write(GFits& fits) const
         }
 
         // Set table attributes
-        hdu.extname("SPECTRUM");
+        hdu.extname(gammalib::extname_pha);
 
         // Append columns to table
         hdu.append(col_chan);

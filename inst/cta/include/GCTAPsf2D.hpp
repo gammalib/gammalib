@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.hpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,7 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-//#include "GRan.hpp"
 #include "GFilename.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAResponseTable.hpp"
@@ -37,6 +36,11 @@
 /* __ Forward declarations _______________________________________________ */
 class GRan;
 class GFitsBinTable;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_psf2d = "POINT SPREAD FUNCTION";
+}
 
 
 /***********************************************************************//**

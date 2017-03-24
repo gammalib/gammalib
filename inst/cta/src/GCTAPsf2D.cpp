@@ -385,7 +385,7 @@ void GCTAPsf2D::write(GFitsBinTable& table) const
  * Loads the point spread function from a FITS file.
  *
  * If no extension name is provided, the point spread function will be loaded
- * from the "POINT SPREAD FUNCTION" extension.
+ * from the `POINT SPREAD FUNCTION` extension.
  ***************************************************************************/
 void GCTAPsf2D::load(const GFilename& filename)
 {
@@ -393,7 +393,8 @@ void GCTAPsf2D::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get PSFa table
-    const GFitsTable& table = *fits.table(filename.extname("POINT SPREAD FUNCTION"));
+    const GFitsTable& table =
+          *fits.table(filename.extname(gammalib::extname_cta_psf2d));
 
     // Read PSF from table
     read(table);
@@ -413,17 +414,17 @@ void GCTAPsf2D::load(const GFilename& filename)
  * @brief Save point spread function table into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Save the point spread function into a FITS file.
  *
  * If no extension name is provided, the point spread function will be saved
- * into the "POINT SPREAD FUNCTION" extension.
+ * into the `POINT SPREAD FUNCTION` extension.
  ***************************************************************************/
 void GCTAPsf2D::save(const GFilename& filename, const bool& clobber) const
 {
     // Get extension name
-    std::string extname = filename.extname("POINT SPREAD FUNCTION");
+    std::string extname = filename.extname(gammalib::extname_cta_psf2d);
 
     // Open or create FITS file (without extension name since the requested
     // extension may not yet exist in the file)
