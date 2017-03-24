@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEdisp.cpp - Fermi LAT energy dispersion               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -249,8 +249,8 @@ void GLATEdisp::read(const GFits& fits)
     m_evtype = evtype;
 
     // Set extension names
-    std::string engdisp = "ENERGY DISPERSION";
-    std::string escales = "EDISP_SCALING_PARAMS";
+    std::string engdisp = gammalib::extname_lat_edisp;
+    std::string escales = gammalib::extname_lat_edisp_scale;
     if (!fits.contains(engdisp)) {
         engdisp += "_" + m_evtype;
     }
@@ -436,7 +436,7 @@ void GLATEdisp::write_edisp(GFits& file) const
         GFitsBinTable* hdu_edisp = new GFitsBinTable;
 
         // Set table attributes
-        hdu_edisp->extname("ENERGY DISPERSION");
+        hdu_edisp->extname(gammalib::extname_lat_edisp);
 
         // Write boundaries into table
         m_edisp_bins.write(*hdu_edisp);

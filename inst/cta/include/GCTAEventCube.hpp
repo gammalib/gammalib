@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEventCube.hpp - CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,12 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_counts  = "COUNTS";
+    const std::string extname_cta_weights = "WEIGHTS";
+}
 
 
 /***********************************************************************//**

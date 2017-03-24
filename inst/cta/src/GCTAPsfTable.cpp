@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAPsfTable.cpp - CTA point spread function table class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -355,7 +355,7 @@ void GCTAPsfTable::write(GFitsBinTable& table) const
  * Loads the point spread function from a FITS file.
  *
  * If no extension name is provided, the point spread function will be loaded
- * from the "POINT SPREAD FUNCTION" extension.
+ * from the `POINT SPREAD FUNCTION` extension.
  ***************************************************************************/
 void GCTAPsfTable::load(const GFilename& filename)
 {
@@ -363,7 +363,8 @@ void GCTAPsfTable::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get PSF table
-    const GFitsTable& table = *fits.table(filename.extname("POINT SPREAD FUNCTION"));
+    const GFitsTable& table =
+          *fits.table(filename.extname(gammalib::extname_cta_psftable));
 
     // Read PSF from table
     read(table);
@@ -382,14 +383,14 @@ void GCTAPsfTable::load(const GFilename& filename)
  * @brief Save point spread function table into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Saves point spread function into a FITS file. If a file with the given
  * @p filename does not yet exist it will be created, otherwise the method
  * opens the existing file. The method will create a (or replace an existing)
  * point spread function extension. The extension name can be specified as
  * part of the @p filename, or if no extension name is given, is assumed to
- * be "POINT SPREAD FUNCTION".
+ * be `POINT SPREAD FUNCTION`.
  *
  * An existing file will only be modified if the @p clobber flag is set to
  * true.
@@ -397,7 +398,7 @@ void GCTAPsfTable::load(const GFilename& filename)
 void GCTAPsfTable::save(const GFilename& filename, const bool& clobber) const
 {
     // Get extension name
-    std::string extname = filename.extname("POINT SPREAD FUNCTION");
+    std::string extname = filename.extname(gammalib::extname_cta_psftable);
 
     // Open or create FITS file (without extension name since the requested
     // extension may not yet exist in the file)

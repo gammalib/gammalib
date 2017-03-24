@@ -520,7 +520,7 @@ void GCTACubeBackground::read(const GFits& fits)
 
     // Get HDUs
     const GFitsImage& hdu_bgdcube  = *fits.image("Primary");
-    const GFitsTable& hdu_energies = *fits.table("ENERGIES");
+    const GFitsTable& hdu_energies = *fits.table(gammalib::extname_energies);
 
     // Read cube
     m_cube.read(hdu_bgdcube);

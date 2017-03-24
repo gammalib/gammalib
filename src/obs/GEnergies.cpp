@@ -610,7 +610,7 @@ void GEnergies::set_log(const int&     num,
  * Loads the energies from FITS file.
  *
  * If no extension name is provided, the energies are loaded from the
- * "ENERGIES" extension.
+ * `ENERGIES` extension.
  ***************************************************************************/
 void GEnergies::load(const GFilename& filename)
 {
@@ -618,7 +618,7 @@ void GEnergies::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get energies table
-    const GFitsTable& table = *fits.table(filename.extname("ENERGIES"));
+    const GFitsTable& table = *fits.table(filename.extname(gammalib::extname_energies));
 
     // Read energies from table
     read(table);
@@ -661,7 +661,7 @@ void GEnergies::save(const GFilename& filename, const bool& clobber) const
     GFits fits(filename.url(), true);
 
     // Write energies to FITS file
-    write(fits, filename.extname("ENERGIES"));
+    write(fits, filename.extname(gammalib::extname_energies));
 
     // Save to file
     fits.save(clobber);
@@ -718,7 +718,7 @@ void GEnergies::read(const GFitsTable& table)
  * @brief Write energies into FITS object
  *
  * @param[in] fits FITS file.
- * @param[in] extname Energy extension name (default: "ENERGIES")
+ * @param[in] extname Energy extension name.
  *
  * Writes energies into FITS object.
  ***************************************************************************/
@@ -747,7 +747,7 @@ void GEnergies::write(GFits& fits, const std::string& extname) const
         fits.remove(extname);
     }
 
-    // Append ENERGIES table to FITS file
+    // Append energies table to FITS file
     fits.append(table);
 
     // Return

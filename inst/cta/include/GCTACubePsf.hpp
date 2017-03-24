@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTACubePsf.hpp - CTA cube analysis point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2017 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,11 @@ class GFilename;
 class GObservations;
 class GCTAEventCube;
 class GCTAObservation;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_deltas = "DELTAS";
+}
 
 
 

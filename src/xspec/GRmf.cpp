@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.cpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -387,7 +387,7 @@ void GRmf::load(const GFilename& filename)
     m_ebds_measured.load(filename.url());
 
     // Get RMF table
-    const GFitsTable& table = *fits.table("MATRIX");
+    const GFitsTable& table = *fits.table(gammalib::extname_rmf);
 
     // Read RMF data
     read(table);
@@ -547,11 +547,11 @@ void GRmf::read(const GFitsTable& table)
 void GRmf::write(GFits& fits, const std::string& unit) const
 {
     // Remove extensions if they exist already
-    if (fits.contains("MATRIX")) {
-        fits.remove("MATRIX");
+    if (fits.contains(gammalib::extname_rmf)) {
+        fits.remove(gammalib::extname_rmf);
     }
-    if (fits.contains("EBOUNDS")) {
-        fits.remove("EBOUNDS");
+    if (fits.contains(gammalib::extname_ebounds)) {
+        fits.remove(gammalib::extname_ebounds);
     }
 
     // Set table length
@@ -648,7 +648,7 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         energy_hi.unit(unit);
 
         // Set table attributes
-        hdu.extname("MATRIX");
+        hdu.extname(gammalib::extname_rmf);
 
         // Append columns to table
         hdu.append(energy_lo);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.cpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2017 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1007,7 +1007,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
  *
  * Compute the background rate in units of events/s/MeV in all Off regions
  * and stores the background rate as additional column with name
- * "BACKGROUND" in the Auxiliary Response File (ARF).
+ * `BACKGROUND` in the Auxiliary Response File (ARF).
  *
  * @todo Should implement integration of background model over region.
  * @todo Allow general region, not only circles.

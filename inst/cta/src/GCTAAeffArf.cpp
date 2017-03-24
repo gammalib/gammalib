@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeffArf.cpp - CTA ARF effective area class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,7 @@
 #include "GFilename.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
+#include "GArf.hpp"
 #include "GCTAAeffArf.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTAResponse_helpers.hpp"
@@ -245,7 +246,7 @@ GCTAAeffArf* GCTAAeffArf::clone(void) const
  * Loads the effective area from an ARF FITS file.
  *
  * If no extension name is provided, the effective area will be loaded from
- * the "SPECRESP" extension.
+ * the `SPECRESP` extension.
  ***************************************************************************/
 void GCTAAeffArf::load(const GFilename& filename)
 {
@@ -253,7 +254,7 @@ void GCTAAeffArf::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get ARF table
-    const GFitsTable& table = *fits.table(filename.extname("SPECRESP"));
+    const GFitsTable& table = *fits.table(filename.extname(gammalib::extname_arf));
 
     // Read ARF from table
     read(table);

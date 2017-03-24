@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventList.hpp - CTA event list class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,11 @@ class GFilename;
 class GFitsHDU;
 class GFitsTable;
 class GFitsBinTable;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_events = "EVENTS";
+}
 
 
 /***********************************************************************//**
@@ -100,7 +105,8 @@ protected:
     virtual void set_times(void) { return; }
     void         read_events(const GFitsTable& table) const;
     void         write_events(GFitsBinTable& table) const;
-    void         write_ds_keys(GFitsHDU& hdu, const std::string& gtiname = "GTI") const;
+    void         write_ds_keys(GFitsHDU& hdu,
+                               const std::string& gtiname = gammalib::extname_gti) const;
     int          irf_cache_init(const std::string& name) const;
     int          irf_cache_index(const std::string& name) const;
 

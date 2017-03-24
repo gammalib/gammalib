@@ -399,7 +399,7 @@ void GArf::load(const GFilename& filename)
     GFits fits(filename.url());
 
     // Get ARF table
-    const GFitsTable& table = *fits.table("SPECRESP");
+    const GFitsTable& table = *fits.table(gammalib::extname_arf);
 
     // Read ARF data
     read(table);
@@ -554,8 +554,8 @@ void GArf::write(GFits& fits) const
 {
     // If the FITS object contains already an extension with the same
     // name then remove now this extension
-    if (fits.contains("SPECRESP")) {
-        fits.remove("SPECRESP");
+    if (fits.contains(gammalib::extname_arf)) {
+        fits.remove(gammalib::extname_arf);
     }
 
     // Set column length
@@ -585,7 +585,7 @@ void GArf::write(GFits& fits) const
         specresp.unit("cm^2");
 
         // Set table attributes
-        hdu.extname("SPECRESP");
+        hdu.extname(gammalib::extname_arf);
 
         // Append columns to table
         hdu.append(energy_lo);

@@ -39,7 +39,7 @@
 #include "GCTAEventList.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_FILL_CUBE "GCTACubeExposure::fill_cube(GCTAObservation&, GLog*)"
+#define G_FILL_CUBE    "GCTACubeExposure::fill_cube(GCTAObservation&, GLog*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -386,8 +386,8 @@ void GCTACubeExposure::read(const GFits& fits)
 
     // Get HDUs
     const GFitsImage& hdu_expcube  = *fits.image("Primary");
-    const GFitsTable& hdu_energies = *fits.table("ENERGIES");
-    const GFitsTable& hdu_gti      = *fits.table("GTI");
+    const GFitsTable& hdu_energies = *fits.table(gammalib::extname_energies);
+    const GFitsTable& hdu_gti      = *fits.table(gammalib::extname_gti);
 
     // Read cube
     m_cube.read(hdu_expcube);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventList.cpp - Fermi/LAT event list class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -299,7 +299,7 @@ void GLATEventList::read(const GFits& file)
     clear();
 
     // Get HDU (pointer is always valid)
-    const GFitsTable& hdu = *file.table("EVENTS");
+    const GFitsTable& hdu = *file.table(gammalib::extname_lat_events);
 
     // Read event data
     read_events(hdu);
@@ -309,8 +309,8 @@ void GLATEventList::read(const GFits& file)
 
     // If we have a GTI extension, then read Good Time Intervals from that
     // extension
-    if (file.contains("GTI")) {
-        const GFitsTable& gti = *file.table("GTI");
+    if (file.contains(gammalib::extname_gti)) {
+        const GFitsTable& gti = *file.table(gammalib::extname_gti);
         m_gti.read(gti);
     }
 

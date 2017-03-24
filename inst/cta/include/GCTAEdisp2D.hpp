@@ -39,6 +39,11 @@ class GRan;
 class GFits;
 class GFitsBinTable;
 
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_cta_edisp2d = "ENERGY DISPERSION";
+}
+
 
 /***********************************************************************//**
  * @class GCTAEdisp2D

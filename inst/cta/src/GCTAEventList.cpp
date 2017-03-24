@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventList.cpp - CTA event list class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -325,17 +325,17 @@ void GCTAEventList::save(const GFilename& filename,
  *
  * Reads the event list from a FITS file.
  *
- * The events will be read by default from the extension "EVENTS" unless
+ * The events will be read by default from the extension `EVENTS` unless
  * an extension name is explicitly specified in the FITS file name. The
  * FITS header of the extension will be scanned for data sub-space keywords
  * to extract the energy boundaries, the region of interest, as well as the
  * extension name for the Good Time Intervals. If no extension name for
  * Good Time Intervals is found it is expected that the Good Time Intervals
- * reside in the "GTI" extension.
+ * reside in the `GTI` extension.
  *
  * If a Good Time Intervals is found in the same FITS file, the Good Time
  * Intervals will be loaded. Otherwise, a single Good Time Interval will
- * be assumed based on the "TSTART" and "TSTOP" keywords found in the header
+ * be assumed based on the `TSTART` and `TSTOP` keywords found in the header
  * of the event list.
  *
  * The method clears the event list before reading, thus any events that
@@ -356,7 +356,7 @@ void GCTAEventList::read(const GFits& fits)
     m_filename = fits.filename();
 
     // Initialise events extension name
-    std::string extname = fits.filename().extname("EVENTS");
+    std::string extname = fits.filename().extname(gammalib::extname_cta_events);
 
     // Get event list HDU
     const GFitsTable& events = *fits.table(extname);
@@ -385,7 +385,7 @@ void GCTAEventList::read(const GFits& fits)
 
     // If no GTI extension name was found then
     if (gti_extname.empty()) {
-        gti_extname = "GTI";
+        gti_extname = gammalib::extname_gti;
     }
 
     // If GTI extension is present in FITS file then read Good Time Intervals
@@ -443,7 +443,7 @@ void GCTAEventList::read(const GFits& fits)
  *
  * Writes the CTA event list and the Good Time intervals into a FITS file.
  *
- * The events will be written by default into the extension "EVENTS" unless
+ * The events will be written by default into the extension `EVENTS` unless
  * an extension name is explicitly specified in the FITS file name. The
  * method also writes the data sub-space keywords in the FITS header of the
  * events table.
@@ -451,15 +451,16 @@ void GCTAEventList::read(const GFits& fits)
  * In addition, the method will also append a table containing the Good Time
  * Intervals of the events to the FITS file. The extension name for the Good
  * Time Intervals is either taken from the m_gti_extname member, or if empty,
- * is set to "GTI".
+ * is set to `GTI`.
  ***************************************************************************/
 void GCTAEventList::write(GFits& fits) const
 {
     // Set event extension name
-    std::string evtname = fits.filename().extname("EVENTS");
+    std::string evtname = fits.filename().extname(gammalib::extname_cta_events);
 
     // Set GTI extension name
-    std::string gtiname = (m_gti_extname.empty()) ? "GTI" : m_gti_extname;
+    std::string gtiname = (m_gti_extname.empty())
+                          ? gammalib::extname_gti : m_gti_extname;
 
     // Write events and GTIs
     write(fits, evtname, gtiname);
@@ -662,7 +663,7 @@ void GCTAEventList::fetch(void) const
                 GFits fits(m_filename);
 
                 // Initialise events extension name
-                std::string extname = fits.filename().extname("EVENTS");
+                std::string extname = fits.filename().extname(gammalib::extname_cta_events);
 
                 // Get event list HDU
                 const GFitsTable& events = *fits.table(extname);
@@ -869,7 +870,7 @@ void GCTAEventList::init_members(void)
     m_columns.clear();
     m_filename.clear();
     m_num_events  = 0;
-    m_gti_extname = "GTI"; //!< Default GTI extension name
+    m_gti_extname = gammalib::extname_gti; //!< Default GTI extension name
     m_has_phase   = false;
     m_has_detxy   = true;
 
@@ -1075,7 +1076,7 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
     fetch();
 
     // Set extension name
-    hdu.extname("EVENTS");
+    hdu.extname(gammalib::extname_cta_events);
 
     // If there are events then write them now
     if (size() > 0) {

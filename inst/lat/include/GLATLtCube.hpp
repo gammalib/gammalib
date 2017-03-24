@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATLtCube.hpp - Fermi/LAT livetime cube class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,13 @@ class GSkyDir;
 class GEnergy;
 class GLATAeff;
 class GLATPsf;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_lat_exposure     = "EXPOSURE";
+    const std::string extname_lat_wgtexposure  = "WEIGHTED_EXPOSURE";
+    const std::string extname_lat_cthetabounds = "CTHETABOUNDS";
+}
 
 
 /***********************************************************************//**

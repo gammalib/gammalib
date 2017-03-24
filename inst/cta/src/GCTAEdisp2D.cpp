@@ -430,7 +430,7 @@ void GCTAEdisp2D::write(GFitsBinTable& table) const
  * Loads the energy dispersion from a FITS file.
  *
  * If no extension name is provided, the energy dispersion will be loaded
- * from the "ENERGY DISPERSION" extension.
+ * from the `ENERGY DISPERSION` extension.
  ***************************************************************************/
 void GCTAEdisp2D::load(const GFilename& filename)
 {
@@ -456,7 +456,7 @@ void GCTAEdisp2D::load(const GFilename& filename)
  * opens the existing file. The method will create a (or replace an existing)
  * energy dispersion extension. The extension name can be specified as part
  * of the @p filename, or if no extension name is given, is assumed to be
- * "ENERGY DISPERSION".
+ * `ENERGY DISPERSION`.
  *
  * An existing file will only be modified if the @p clobber flag is set to
  * true.
@@ -464,7 +464,7 @@ void GCTAEdisp2D::load(const GFilename& filename)
 void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
 {
     // Get extension name
-    std::string extname = filename.extname("ENERGY DISPERSION");
+    std::string extname = filename.extname(gammalib::extname_cta_edisp2d);
 
     // Open or create FITS file (without extension name since the requested
     // extension may not yet exist in the file)
@@ -745,7 +745,8 @@ void GCTAEdisp2D::fetch(void) const
                 GFits fits(m_filename);
 
                 // Initialise energy dispersion extension name
-                std::string extname = m_filename.extname("ENERGY DISPERSION");
+                std::string extname =
+                            m_filename.extname(gammalib::extname_cta_edisp2d);
 
                 // Get energy dispersion table
                 const GFitsTable& table = *fits.table(extname);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATLtCube.cpp - Fermi/LAT livetime cube class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -399,10 +399,10 @@ void GLATLtCube::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get HDUs
-    const GFitsTable& hdu_exposure          = *fits.table("EXPOSURE");
-    const GFitsTable& hdu_weighted_exposure = *fits.table("WEIGHTED_EXPOSURE");
-    //const GFitsTable& hdu_cthetabounds      = *fits.table("CTHETABOUNDS");
-    const  GFitsTable& hdu_gti               = *fits.table("GTI");
+    const GFitsTable& hdu_exposure          = *fits.table(gammalib::extname_lat_exposure);
+    const GFitsTable& hdu_weighted_exposure = *fits.table(gammalib::extname_lat_wgtexposure);
+    //const GFitsTable& hdu_cthetabounds      = *fits.table(gammalib::extname_lat_cthetabounds);
+    const  GFitsTable& hdu_gti               = *fits.table(gammalib::extname_gti);
 
     // Load exposure
     m_exposure.read(hdu_exposure);

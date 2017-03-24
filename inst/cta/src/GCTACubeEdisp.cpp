@@ -496,8 +496,8 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
  *
  * Reads the energy dispersion cube from a FITS file. The energy dispersion
  * cube values are expected in the primary extension of the FITS file, the
- * true energy boundaries are expected in the "ENERGIES" extension, and the
- * migration values are expected in the "MIGRAS" extension.
+ * true energy boundaries are expected in the `ENERGIES` extension, and the
+ * migration values are expected in the `MIGRAS` extension.
  ***************************************************************************/
 void GCTACubeEdisp::read(const GFits& fits)
 {
@@ -506,8 +506,8 @@ void GCTACubeEdisp::read(const GFits& fits)
 
     // Get HDUs
     const GFitsImage& hdu_edispcube = *fits.image("Primary");
-    const GFitsTable& hdu_energies  = *fits.table("ENERGIES");
-    const GFitsTable& hdu_migras    = *fits.table("MIGRAS");
+    const GFitsTable& hdu_energies  = *fits.table(gammalib::extname_energies);
+    const GFitsTable& hdu_migras    = *fits.table(gammalib::extname_cta_migras);
 
     // Read energy dispersion cube
     m_cube.read(hdu_edispcube);
@@ -536,17 +536,17 @@ void GCTACubeEdisp::read(const GFits& fits)
  *
  * Write the energy dispersion cube into a FITS file. The energy dispersion
  * cube values are written into the primary extension of the FITS file, the
- * true energy boundaries are written into the "EBOUNDS" extension, and the
- * migration values are written into the "MIGRAS" extension.
+ * true energy boundaries are written into the `ENERGIES` extension, and the
+ * migration values are written into the `MIGRAS` extension.
  ***************************************************************************/
 void GCTACubeEdisp::write(GFits& fits) const
 {
     // Remove extensions from FITS file
-    if (fits.contains("MIGRAS")) {
-        fits.remove("MIGRAS");
+    if (fits.contains(gammalib::extname_cta_migras)) {
+        fits.remove(gammalib::extname_cta_migras);
     }
-    if (fits.contains("ENERGIES")) {
-        fits.remove("ENERGIES");
+    if (fits.contains(gammalib::extname_energies)) {
+        fits.remove(gammalib::extname_energies);
     }
     if (fits.contains("Primary")) {
         fits.remove("Primary");
@@ -556,10 +556,10 @@ void GCTACubeEdisp::write(GFits& fits) const
     m_cube.write(fits);
 
     // Write energy boundaries
-    m_energies.write(fits, "ENERGIES");
+    m_energies.write(fits, gammalib::extname_energies);
 
     // Write migration nodes
-    m_migras.write(fits, "MIGRAS");
+    m_migras.write(fits, gammalib::extname_cta_migras);
 
     // Return
     return;

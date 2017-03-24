@@ -437,14 +437,14 @@ void GCTAEventCube::read(const GFits& fits)
 
     // Set counts cube HDU
     std::string counts_hdu("Primary");
-    if (fits.contains("COUNTS")) {
-        counts_hdu = "COUNTS";
+    if (fits.contains(gammalib::extname_cta_counts)) {
+        counts_hdu = gammalib::extname_cta_counts;
     }
     
     // Get HDUs
     const GFitsImage& hdu_cntmap  = *fits.image(counts_hdu);
-    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
-    const GFitsTable& hdu_gti     = *fits.table("GTI");
+    const GFitsTable& hdu_ebounds = *fits.table(gammalib::extname_ebounds);
+    const GFitsTable& hdu_gti     = *fits.table(gammalib::extname_gti);
 
     // Load counts map
     read_cntmap(hdu_cntmap);
@@ -456,10 +456,10 @@ void GCTAEventCube::read(const GFits& fits)
     read_gti(hdu_gti);
 
     // If a WEIGHTS HDU exist then load it from the FITS file ...
-    if (fits.contains("WEIGHTS")) {
+    if (fits.contains(gammalib::extname_cta_weights)) {
 
         // Get WEIGHTS HDU
-        const GFitsImage& hdu_weights = *fits.image("WEIGHTS");
+        const GFitsImage& hdu_weights = *fits.image(gammalib::extname_cta_weights);
 
         // Read HDU
         m_weights.read(hdu_weights);
@@ -500,27 +500,27 @@ void GCTAEventCube::read(const GFits& fits)
 void GCTAEventCube::write(GFits& fits) const
 {
     // Remove HDUs if they exist already
-    if (fits.contains("GTI")) {
-        fits.remove("GTI");
+    if (fits.contains(gammalib::extname_gti)) {
+        fits.remove(gammalib::extname_gti);
     }
-    if (fits.contains("EBOUNDS")) {
-        fits.remove("EBOUNDS");
+    if (fits.contains(gammalib::extname_ebounds)) {
+        fits.remove(gammalib::extname_ebounds);
     }
-    if (fits.contains("WEIGHTS")) {
-        fits.remove("WEIGHTS");
+    if (fits.contains(gammalib::extname_cta_weights)) {
+        fits.remove(gammalib::extname_cta_weights);
     }
-    if (fits.contains("COUNTS")) {
-        fits.remove("COUNTS");
+    if (fits.contains(gammalib::extname_cta_counts)) {
+        fits.remove(gammalib::extname_cta_counts);
     }
     if (fits.contains("Primary")) {
         fits.remove("Primary");
     }
 
     // Write counts cube
-    m_map.write(fits, "COUNTS");
+    m_map.write(fits, gammalib::extname_cta_counts);
 
     // Write cube weighting
-    m_weights.write(fits, "WEIGHTS");
+    m_weights.write(fits, gammalib::extname_cta_weights);
 
     // Write energy boundaries
     ebounds().write(fits);
