@@ -64,6 +64,7 @@ void TestGModel::set(void)
     m_xml_model_point_eplaw        = datadir + "/model_point_eplaw.xml";
     m_xml_model_point_einvplaw     = datadir + "/model_point_einvplaw.xml";
     m_xml_model_point_bplaw        = datadir + "/model_point_bplaw.xml";
+    m_xml_model_point_smoothbplaw  = datadir + "/model_point_smoothbplaw.xml";
     m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
     m_xml_model_point_logparabola  = datadir + "/model_point_logparabola.xml";
     m_xml_point_multiplicative     = datadir + "/model_point_multiplicative.xml";
@@ -96,6 +97,7 @@ void TestGModel::set(void)
     m_xml_legacy_point_plaw        = datadir + "/legacy_point_plaw.xml";
     m_xml_legacy_point_plaw2       = datadir + "/legacy_point_plaw2.xml";
     m_xml_legacy_point_eplaw       = datadir + "/legacy_point_eplaw.xml";
+    m_xml_legacy_point_smoothbplaw = datadir + "/legacy_point_smoothbplaw.xml";
     m_xml_legacy_point_supeplaw    = datadir + "/legacy_point_supeplaw.xml";
     m_xml_legacy_point_logparabola = datadir + "/legacy_point_logparabola.xml";
 
@@ -148,6 +150,8 @@ void TestGModel::set(void)
            "Test GModelSpectralSuperExpPlaw");
     append(static_cast<pfunction>(&TestGModel::test_bplaw),
            "Test GModelSpectralBrokenPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_smoothbplaw),
+           "Test GModelSpectralSmoothBrokenPlaw");
     append(static_cast<pfunction>(&TestGModel::test_logparabola),
            "Test GModelSpectralLogParabola");
     append(static_cast<pfunction>(&TestGModel::test_multiplicative),
@@ -201,6 +205,8 @@ void TestGModel::set(void)
            "Test GModelSpectralPlaw legacy model");
     append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_plaw2),
            "Test GModelSpectralPlaw2 legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_smoothbplaw),
+           "Test GModelSpectralSmoothBrokenPlaw legacy model");
     append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_eplaw),
            "Test GModelSpectralExpPlaw legacy model");
     append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_supeplaw),
@@ -1839,6 +1845,78 @@ void TestGModel::test_bplaw(void)
 
 
 /***********************************************************************//**
+ * @brief Test GModelSpectralSmoothBrokenPlaw class
+ ***************************************************************************/
+void TestGModel::test_smoothbplaw(void)
+{
+    // Test void constructor
+    GModelSpectralSmoothBrokenPlaw model1;
+    test_value(model1.type(), "SmoothBrokenPowerLaw", "Check void model type");
+    
+    // Test value constructor
+    GModelSpectralSmoothBrokenPlaw model2(2.0, -2.1, GEnergy(100.0, "MeV"), -2.8,
+                                          GEnergy(1000.0, "MeV"), 2.0);
+    test_value(model2.prefactor(), 2.0);
+    test_value(model2.index1(), -2.1);
+    test_value(model2.pivot().MeV(), 100.0);
+    test_value(model2.index2(), -2.8);
+    test_value(model2.breakenergy().MeV(), 1000.0);
+    test_value(model2.beta(), 2.0);
+    
+    
+    // Test XML constructor
+    GXml         xml(m_xml_model_point_smoothbplaw);
+    GXmlElement* element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralSmoothBrokenPlaw model3(*element);
+    test_value(model3.size(), 6);
+    test_value(model3.type(), "SmoothBrokenPowerLaw", "Check model type");
+    test_value(model3.prefactor(), 5.7e-16);
+    test_value(model3.index1(), -2.48);
+    test_value(model3.pivot().TeV(), 1.0);
+    test_value(model3.index2(), -2.70);
+    test_value(model3.breakenergy().TeV(), 0.3);
+    
+    
+    // Test prefactor method
+    model3.prefactor(2.3e-16);
+    test_value(model3.prefactor(), 2.3e-16);
+    
+    // Test index1 method
+    model3.index1(-2.6);
+    test_value(model3.index1(), -2.6);
+    
+    // Test pivot method
+    model3.pivot(GEnergy(0.5, "TeV"));
+    test_value(model3.pivot().TeV(), 0.5);
+    
+    // Test index2 method
+    model3.index2(-3.6);
+    test_value(model3.index2(), -3.6);
+
+    // Test breakenergy method
+    model3.breakenergy(GEnergy(0.5, "TeV"));
+    test_value(model3.breakenergy().TeV(), 0.5);
+    
+    // Test operator access
+    const char* strarray[] = {"Prefactor", "Index1", "PivotEnergy", "Index2",
+                              "BreakEnergy", "BreakSmoothness"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+    
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test GModelSpectralLogParabola class
  ***************************************************************************/
 void TestGModel::test_logparabola(void)
@@ -2346,6 +2424,7 @@ void TestGModel::test_spectral_model(void)
     test_xml_model("GModelSpectralExpPaw",         m_xml_model_point_eplaw);
     test_xml_model("GModelSpectralExpInvPaw",      m_xml_model_point_einvplaw);
     test_xml_model("GModelSpectralBrokenPlaw",     m_xml_model_point_bplaw);
+    test_xml_model("GModelSpectralSmoothBrokenPlaw",m_xml_model_point_smoothbplaw);
     test_xml_model("GModelSpectralSuperExpPlaw",   m_xml_model_point_supeplaw);
     test_xml_model("GModelSpectralLogParabola",    m_xml_model_point_logparabola);
     test_xml_model("GModelSpectralNodes",          m_xml_model_point_nodes);
@@ -3097,6 +3176,52 @@ void TestGModel::test_legacy_model_point_plaw2(void)
     test_value(spectral->index(), -2.0, 1.0e-7, "Check index");
     test_value(spectral->emin().MeV(), 100.0, 1.0e-7, "Check minimum energy");
     test_value(spectral->emax().MeV(), 500000.0, 1.0e-7, "Check maximum energy");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test smooth broken power law legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_point_smoothbplaw(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_point_smoothbplaw);
+
+    // Extract spectral component
+    GModelSpectralSmoothBrokenPlaw* spectral =
+                        static_cast<GModelSpectralSmoothBrokenPlaw*>
+                        (static_cast<GModelSky*>(models[0])->spectral());
+
+
+    // Test model values
+    test_value(spectral->size(), 6);
+    test_value(spectral->type(), "SmoothBrokenPowerLaw");
+    test_value(spectral->prefactor(), 5.7e-16);
+    test_value(spectral->index1(), -2.48);
+    test_value(spectral->pivot().TeV(), 1.0);
+    test_value(spectral->index2(), -2.70);
+    test_value(spectral->breakenergy().TeV(), 0.3);
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_point_smoothbplaw.xml");
+    models.clear();
+    models.load("test_xml_legacy_point_smoothbplaw.xml");
+
+    // Extract spectral component
+    spectral = static_cast<GModelSpectralSmoothBrokenPlaw*>
+               (static_cast<GModelSky*>(models[0])->spectral());
+
+    // Test model values
+    test_value(spectral->size(), 6);
+    test_value(spectral->type(), "SmoothBrokenPowerLaw");
+    test_value(spectral->prefactor(), 5.7e-16);
+    test_value(spectral->index1(), -2.48);
+    test_value(spectral->pivot().TeV(), 1.0);
+    test_value(spectral->index2(), -2.70);
+    test_value(spectral->breakenergy().TeV(), 0.3);
 
     // Exit test
     return;

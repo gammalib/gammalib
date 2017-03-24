@@ -61,6 +61,7 @@ sources = GModelPar.cpp \
           GModelSpectralPlaw.cpp \
           GModelSpectralPlawPhotonFlux.cpp \
           GModelSpectralPlawEnergyFlux.cpp \
+          GModelSpectralSmoothBrokenPlaw.cpp \
           GModelSpectralComposite.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \

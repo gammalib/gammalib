@@ -1,9 +1,10 @@
-2017-03-23
+2017-03-24
 
         * Version 1.3.0 released
         =========================
 
         Add conversion methods between GEbounds and GEnergies (#1977)
+        Add GModelSpectralSmoothBrokenPlaw class (#1948)
         Implement lazy loading of energy dispersion in GCTAEdisp2D (#1940)
         Add GCTARoi::contains method
         Do no longer interpret a CTA calibration database as file path (#1969)
