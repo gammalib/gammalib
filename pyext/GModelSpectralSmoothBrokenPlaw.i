@@ -1,6 +1,6 @@
 /***************************************************************************
- *               GModelSpectralSmoothBrokenPlaw.i -                      *
- *             Smoothly broken power law spectrum class                    *
+ *                  GModelSpectralSmoothBrokenPlaw.i                       *
+ *               Smoothly broken power law spectrum class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2017 by Josh Cardenzana                                  *
  * ----------------------------------------------------------------------- *
@@ -25,9 +25,9 @@
  * @author Josh Cardenzana
  */
 %{
-    /* Put headers and other declarations here that are needed for compilation */
+/* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpectralSmoothBrokenPlaw.hpp"
-    %}
+%}
 
 
 /***********************************************************************//**
@@ -57,23 +57,23 @@ public:
     virtual ~GModelSpectralSmoothBrokenPlaw(void);
     
     // Implemented pure virtual methods
-    virtual void                      clear(void);
+    virtual void                            clear(void);
     virtual GModelSpectralSmoothBrokenPlaw* clone(void) const;
-    virtual std::string               classname(void) const;
-    virtual std::string               type(void) const;
-    virtual double                    eval(const GEnergy& srcEng,
-                                           const GTime&   srcTime = GTime(),
-                                           const bool&    gradients = false) const;
-    virtual double                    flux(const GEnergy& emin,
-                                           const GEnergy& emax) const;
-    virtual double                    eflux(const GEnergy& emin,
-                                            const GEnergy& emax) const;
-    virtual GEnergy                   mc(const GEnergy& emin,
-                                         const GEnergy& emax,
-                                         const GTime&   time,
-                                         GRan&          ran) const;
-    virtual void                      read(const GXmlElement& xml);
-    virtual void                      write(GXmlElement& xml) const;
+    virtual std::string                     classname(void) const;
+    virtual std::string                     type(void) const;
+    virtual double                          eval(const GEnergy& srcEng,
+                                                 const GTime& srcTime = GTime(),
+                                                 const bool& gradients = false) const;
+    virtual double                          flux(const GEnergy& emin,
+                                                 const GEnergy& emax) const;
+    virtual double                          eflux(const GEnergy& emin,
+                                                  const GEnergy& emax) const;
+    virtual GEnergy                         mc(const GEnergy& emin,
+                                               const GEnergy& emax,
+                                               const GTime&   time,
+                                               GRan&          ran) const;
+    virtual void                            read(const GXmlElement& xml);
+    virtual void                            write(GXmlElement& xml) const;
     
     // Other methods
     double  prefactor(void) const;
@@ -81,6 +81,7 @@ public:
     double  index2(void) const;
     GEnergy pivot(void) const;
     GEnergy breakenergy(void) const;
+    double  beta(void) const;
     void    prefactor(const double& prefactor);
     void    index1(const double& index1);
     void    index2(const double& index2);
