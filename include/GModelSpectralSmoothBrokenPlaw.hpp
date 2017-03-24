@@ -1,6 +1,6 @@
 /***************************************************************************
- *               GModelSpectralSmoothBrokenPlaw.cpp -                      *
- *             Smoothly broken power law spectrum class                    *
+ *                 GModelSpectralSmoothBrokenPlaw.hpp                      *
+ *               Smoothly broken power law spectrum class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2017 by Josh Cardenzana                                  *
  * ----------------------------------------------------------------------- *
@@ -40,6 +40,7 @@ class GRan;
 class GTime;
 class GXmlElement;
 
+
 /***********************************************************************//**
  * @class GModelSpectralSmoothBrokenPlaw
  *
@@ -65,13 +66,13 @@ class GXmlElement;
  * Notes: 
  * - The pivot energy should be set far away from the expected break energy
  *   value.
- * - When the two indices are close together, the beta parameter becomes poorly 
- *   constrained. Since the beta parameter also scales the indices, this can 
- *   cause very large errors in the estimates of the various spectral parameters. 
- *   In this case, consider fixing beta.
+ * - When the two indices are close together, the beta parameter becomes
+ *   poorly constrained. Since the beta parameter also scales the indices, this
+ *   can cause very large errors in the estimates of the various spectral
+ *   parameters. In this case, consider fixing beta.
  ***************************************************************************/
 class GModelSpectralSmoothBrokenPlaw : public GModelSpectral {
-    
+
 public:
     // Constructors and destructors
     GModelSpectralSmoothBrokenPlaw(void);
@@ -116,14 +117,12 @@ public:
     virtual std::string                     print(const GChatter& chatter = NORMAL) const;
     
     // Other methods
-    // Methods for getting the current values
     double  prefactor(void) const;
     double  index1(void) const;
     double  index2(void) const;
     GEnergy pivot(void) const;
     GEnergy breakenergy(void) const;
     double  beta(void) const;
-    // Methods for setting the parameter values
     void    prefactor(const double& prefactor);
     void    index1(const double& index1);
     void    index2(const double& index2);
@@ -149,15 +148,14 @@ protected:
                   const double&  index2,
                   const GEnergy& breakenergy,
                   const double&  beta) :
-            m_prefactor(prefactor),
-            m_index1(index1),
-            m_index2(index2),
-            m_pivot(pivot),
-            m_breakenergy(breakenergy),
-            m_beta(beta)
-        {};
+                  m_prefactor(prefactor),
+                  m_index1(index1),
+                  m_index2(index2),
+                  m_pivot(pivot),
+                  m_breakenergy(breakenergy),
+                  m_beta(beta) {};
         
-        // Method
+        // Evaluation method
         double eval(const double& energy) {
             double epivot = energy / m_pivot.MeV();
             double ebreak = energy / m_breakenergy.MeV();
@@ -185,10 +183,10 @@ protected:
                    const double&  index2,
                    const GEnergy& breakenergy,
                    const double&  beta):
-            flux_kern(prefactor, index1, pivot, index2, breakenergy, beta)
-        {};
+                   flux_kern(prefactor, index1, pivot, index2, breakenergy, beta)
+                   {};
         
-        // Method
+        // Evaluation method
         double eval(const double& energy) {
             return energy * flux_kern::eval(energy);
         }
@@ -204,18 +202,18 @@ protected:
     GModelPar   m_beta;                   //!< Break smoothness
     
     // Cached members used for pre-computations
-    mutable GEnergy m_last_energy;        //!< Last energy value
-    mutable double  m_last_index1;        //!< Last index1 parameter
-    mutable double  m_last_index2;        //!< Last index2 parameter
-    mutable double  m_last_pivot;         //!< Last pivot parameter
-    mutable double  m_last_breakenergy;   //!< Last breakenergy parameter
-    mutable double  m_last_beta;          //!< Last beta parameter
-    mutable double  m_last_epivot_norm;   //!< Last E/Epivot value
-    mutable double  m_last_ebreak_norm;   //!< Last E/Ebreakenergy value
+    mutable GEnergy m_last_energy;          //!< Last energy value
+    mutable double  m_last_index1;          //!< Last index1 parameter
+    mutable double  m_last_index2;          //!< Last index2 parameter
+    mutable double  m_last_pivot;           //!< Last pivot parameter
+    mutable double  m_last_breakenergy;     //!< Last breakenergy parameter
+    mutable double  m_last_beta;            //!< Last beta parameter
+    mutable double  m_last_epivot_norm;     //!< Last E/Epivot value
+    mutable double  m_last_ebreak_norm;     //!< Last E/Ebreakenergy value
     mutable double  m_last_log_epivot_norm; //!< Last ln(E/Epivot) value
     mutable double  m_last_log_ebreak_norm; //!< Last ln(E/Ebreakenergy) value
-    mutable double  m_last_epivot_pow;    //!< Last pow(E/Epivot,index1) value
-    mutable double  m_last_ebreak_pow;    //!< Last pow(E/Ebreakenergy,(index1-index2)/beta)
+    mutable double  m_last_epivot_pow;      //!< Last pow(E/Epivot,index1) value
+    mutable double  m_last_ebreak_pow;      //!< Last pow(E/Ebreakenergy,(index1-index2)/beta)
 
     mutable double  m_mc_emin;            //!< Minimum energy
     mutable double  m_mc_emax;            //!< Maximum energy

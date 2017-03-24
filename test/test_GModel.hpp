@@ -92,6 +92,7 @@ public:
     void                test_legacy_model_point_const(void);
     void                test_legacy_model_point_plaw(void);
     void                test_legacy_model_point_plaw2(void);
+    void                test_legacy_model_point_smoothbplaw(void);
     void                test_legacy_model_point_eplaw(void);
     void                test_legacy_model_point_supeplaw(void);
     void                test_legacy_model_point_logparabola(void);
@@ -147,6 +148,7 @@ private:
     std::string m_xml_legacy_point_const;
     std::string m_xml_legacy_point_plaw;
     std::string m_xml_legacy_point_plaw2;
+    std::string m_xml_legacy_point_smoothbplaw;
     std::string m_xml_legacy_point_eplaw;
     std::string m_xml_legacy_point_supeplaw;
     std::string m_xml_legacy_point_logparabola;
