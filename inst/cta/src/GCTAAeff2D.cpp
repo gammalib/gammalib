@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeff2D.cpp - CTA 2D effective area class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -317,6 +317,22 @@ void GCTAAeff2D::read(const GFitsTable& table)
 
     // Set table boundaries
     set_boundaries();
+
+    // Optionally set energy boundaries from header keywords if they exist.
+    // The "LO_THRES" and "HI_THRES" keywords give the energy boundaries in
+    // TeV.
+    if (table.has_card("LO_THRES")) {
+        double value = table.real("LO_THRES");
+        if (value > 0.0) {
+            m_logE_min = std::log10(value);
+        }
+    }
+    if (table.has_card("HI_THRES")) {
+        double value = table.real("HI_THRES");
+        if (value > 0.0) {
+            m_logE_max = std::log10(value);
+        }
+    }
 
     // Return
     return;
