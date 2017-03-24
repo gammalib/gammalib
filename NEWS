@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.3.0.dev1
 
 Author(s) : Juergen Knoedlseder
 
-23 March 2017
+24 March 2017
 
 
 1. Introduction
@@ -16,6 +16,7 @@ made since the last release of GammaLib.
 The following classes have been added:
 - GWcsGLS
 - GWcsSFL
+- GModelSpectralSmoothBrokenPlaw
 
 The following classes have been removed:
 - ...
@@ -211,6 +212,9 @@ None
 The GModelSpectralNodes class now throws an exception if the energy or
 intensity of a node is set to a non-positive value (#990).
 >>>>>>> GModelSpectralNodes throws exception for non-positive energy or intensity (#990)
+
+The GModelSpectralSmoothBrokenPlaw class that implements a smoothly broken
+power law spectrum has been added (#1948).
 
 
 9. Numerics module
