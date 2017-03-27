@@ -221,11 +221,6 @@ protected:
     mutable double  m_mc_plaw_prefactor;  //!< Prefactor for comparison p-laws
     mutable double  m_mc_exponentS;       //!< Exponent (index+1) for softer index
     mutable double  m_mc_exponentH;       //!< Exponent (index+1) for harder index
-    mutable double  m_mc_pow_ewidth_low;  //!< width of energy range below break
-    mutable double  m_mc_norm;            //!< Normalization term for energy generation
-    mutable double  m_mc_exponent_ratio;  //!< Ratio of (m_mc_exponentS/m_mc_exponentH)
-    mutable double  m_mc_ebreak;          //!< Break energy (depending on the energy range,
-                                          //!< this may not actually be the break energy)
     mutable GModelSpectralBrokenPlaw m_mc_brokenplaw;
 };
 
