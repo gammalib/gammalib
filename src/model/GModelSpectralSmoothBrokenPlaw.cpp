@@ -593,9 +593,6 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
     // Update cache
     update_mc_cache(emin, emax);
     
-    // Initialise energy
-    double eng(0.0);
-    
     // Initialse acceptance fraction
     double acceptance_fraction(0.0);
     
@@ -605,7 +602,7 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
     // gives an acceptance fraction, and we accept the energy only if
     // a uniform random number is <= the acceptance fraction.
     do {
-        
+        /*
         double e_norm(0.0), plaw(0.0);
         
         // Get uniform random number
@@ -635,8 +632,6 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
         
         // Case 2: indices are different (things are more complicated)
         else {
-        
-            double break_u = m_mc_pow_ewidth_low/m_mc_norm;
             
             // Case 2A: Random number suggests energy less than breakenergy
             if (u <= (m_mc_pow_ewidth_low/m_mc_norm)) {
@@ -680,18 +675,14 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
                 
             }
         }
+        */
         
-        // Compute logparabola at given energy
-        double sb_plaw = prefactor() * std::pow(eng/pivot().MeV(),index1()) *
-            std::pow(1.0 + std::pow(e_norm,(index1()-index2())/beta()), -beta());
+        energy = m_mc_brokenplaw.mc(emin, emax, time, ran);
         
         // Compute acceptance fraction
-        acceptance_fraction = sb_plaw / plaw;
+        acceptance_fraction = eval(energy) / m_mc_brokenplaw.eval(energy);
         
     } while (ran.uniform() > acceptance_fraction);
-    
-    // Set energy
-    energy.MeV(eng);
     
     // Return energy
     return energy;
@@ -910,6 +901,7 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_mc_pow_ewidth_low = 0.0;
     m_mc_norm           = 0.0;
     m_mc_exponent_ratio = 1.0;
+    m_mc_brokenplaw = GModelSpectralBrokenPlaw();
     
     // Return
     return;
@@ -965,6 +957,7 @@ void GModelSpectralSmoothBrokenPlaw::copy_members(
     m_mc_pow_ewidth_low = model.m_mc_pow_ewidth_low;
     m_mc_norm           = model.m_mc_norm;
     m_mc_exponent_ratio = model.m_mc_exponent_ratio;
+    m_mc_brokenplaw = model.m_mc_brokenplaw;
     
     // Return
     return;
@@ -1049,7 +1042,7 @@ void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
         // Store new energy interval
         m_mc_emin = emin.MeV();
         m_mc_emax = emax.MeV();
-        
+
         /* Predefine some variables */
         
         // Prefactor for comparison power law functions
@@ -1071,12 +1064,20 @@ void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
             m_mc_exponentH = index2() + 1.0;   // Hard index + 1
             m_mc_exponentS = index1() + 1.0;   // Soft index + 1
         }
-        
-        // Store the ratio of the two exponents
-        m_mc_exponent_ratio = m_mc_exponentS / m_mc_exponentH;
-        
+
+        m_mc_brokenplaw = GModelSpectralBrokenPlaw(m_mc_plaw_prefactor,
+                                                   m_mc_exponentH-1.0,
+                                                   breakenergy(),
+                                                   m_mc_exponentS-1.0);
+        /*
         // Create a break energy variable that select the appropriate range
         m_mc_ebreak = breakenergy().MeV();
+        
+        // Store the ratio of the two exponents
+        m_mc_exponent_ratio = (m_mc_exponentS / m_mc_exponentH) *
+        std::pow(m_mc_ebreak, m_mc_exponentS - m_mc_exponentH);
+        
+        
         if (m_mc_emax <= m_mc_ebreak) {
             m_mc_ebreak = m_mc_emax;
         }
@@ -1121,6 +1122,7 @@ void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
             m_mc_norm = m_mc_pow_ewidth_low + (std::pow(m_mc_emax,m_mc_exponentS) -
                                                std::pow(m_mc_ebreak,m_mc_exponentS));
         }
+         */
     } // endif: Update was required
     
     // Return
