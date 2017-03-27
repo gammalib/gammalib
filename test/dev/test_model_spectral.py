@@ -88,11 +88,11 @@ if __name__ == '__main__':
 
     # Allocate spectral model
     model = gammalib.GModelSpectralSmoothBrokenPlaw(5.7e-16,
-                                                    -2.48,
+                                                    -1.5,
                                                     gammalib.GEnergy(0.3, 'TeV'),
-                                                    -3.5,
+                                                    -4.5,
                                                     gammalib.GEnergy(1.0, 'TeV'),
-                                                    0.2)
+                                                    2.0)
 
     # Evaluate model
     eval_model(model, ntrials=1000000)
