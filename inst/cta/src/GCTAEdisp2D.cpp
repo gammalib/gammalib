@@ -198,22 +198,33 @@ double GCTAEdisp2D::operator()(const double& logEobs,
     // Initalize edisp
     double edisp = 0.0;
 
-    // Compute Eobs/Esrc
-    double EobsOverEsrc = std::exp((logEobs-logEsrc) * gammalib::ln10);
+    // Continue only if logEsrc and theta are in validity range
+    if ((logEsrc >= m_logEsrc_min)  && (logEsrc <= m_logEsrc_max) &&
+        (theta   >= m_theta_min)    && (theta   <= m_theta_max)) {
 
-    // Setup argument vector
-    double arg[3];
-    arg[m_inx_etrue] = logEsrc;
-    arg[m_inx_migra] = EobsOverEsrc;
-    arg[m_inx_theta] = theta;
+        // Compute Eobs/Esrc
+        double EobsOverEsrc = std::exp((logEobs-logEsrc) * gammalib::ln10);
 
-    // Compute edisp
-    edisp = m_edisp(m_inx_matrix, arg[0], arg[1], arg[2]);
+        // Continue only if migration is in validity range
+        if ((EobsOverEsrc >= m_migra_min)  && (EobsOverEsrc <= m_migra_max)) {
 
-    // Make sure that energy dispersion is non-negative
-    if (edisp < 0.0) {
-        edisp = 0.0;
-    }
+            // Setup argument vector
+            double arg[3];
+            arg[m_inx_etrue] = logEsrc;
+            arg[m_inx_migra] = EobsOverEsrc;
+            arg[m_inx_theta] = theta;
+
+            // Compute edisp
+            edisp = m_edisp(m_inx_matrix, arg[0], arg[1], arg[2]);
+
+            // Make sure that energy dispersion is non-negative
+            if (edisp < 0.0) {
+                edisp = 0.0;
+            }
+
+        } // endif: migration was in valid range
+
+    } // endif: true energy and offset angle was in valid range
 
     // Return
     return edisp;
@@ -260,6 +271,41 @@ GCTAEdisp2D* GCTAEdisp2D::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Assign response table
+ *
+ * @param[in] table Response table.
+ *
+ * Assigns the response table for an energy dispersion.
+ ***************************************************************************/
+void GCTAEdisp2D::table(const GCTAResponseTable& table)
+{
+    // Assign response table
+    m_edisp = table;
+
+    // Set indices
+    set_indices();
+
+    // Set true energy axis to logarithmic scale
+    m_edisp.axis_log10(m_inx_etrue);
+
+    // Set offset angle axis to radians
+    m_edisp.axis_radians(m_inx_theta);
+
+    // Normalize energy dispersion table
+    normalize_table();
+
+    // Set maximum energy dispersion value
+    set_max_edisp();
+
+    // Set table boundaries
+    set_boundaries();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Read energy dispersion from FITS table
  *
  * @param[in] table FITS table.
@@ -291,12 +337,6 @@ void GCTAEdisp2D::read(const GFitsTable& table)
     // Read energy dispersion table
     m_edisp.read(table);
 
-    // Get mandatory indices (throw exception if not found)
-    m_inx_etrue  = m_edisp.axis("ETRUE");
-    m_inx_migra  = m_edisp.axis("MIGRA");
-    m_inx_theta  = m_edisp.axis("THETA");
-    m_inx_matrix = m_edisp.table("MATRIX");
-
     // Throw an exception if the table is not two-dimensional
     if (m_edisp.axes() != 3) {
         std::string msg = "Expected three-dimensional energy dispersion "
@@ -307,93 +347,23 @@ void GCTAEdisp2D::read(const GFitsTable& table)
         throw GException::invalid_value(G_READ, msg);
     }
 
+    // Set table indices
+    set_indices();
+
     // Set true energy axis to logarithmic scale
     m_edisp.axis_log10(m_inx_etrue);
 
     // Set offset angle axis to radians
     m_edisp.axis_radians(m_inx_theta);
 
-    // Get axes dimensions
-    int etrue_size = m_edisp.axis_bins(m_inx_etrue);
-    int migra_size = m_edisp.axis_bins(m_inx_migra);
-    int theta_size = m_edisp.axis_bins(m_inx_theta);
-
-    // Now normalize the migration matrix vectors. We do this by integrating
-    // for each true energy and offset angle the measured energy. We perform
-    // here two passes as the ebounds_obs() method depends on the content of
-    // the matrix, and by having two passes we are sure that we get a
-    // consistent energy interval.
-    for (int pass = 0; pass < 2; ++pass) {
-
-        // Initialise sums
-        std::vector<double> sums;
-        sums.reserve(theta_size*etrue_size);
-
-        // Loop over offset angle.
-        for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
-
-            // Get offset angle (in radians)
-            double theta = 0.5 * (m_edisp.axis_lo(m_inx_theta,i_theta) +
-                                  m_edisp.axis_hi(m_inx_theta,i_theta)) *
-                           gammalib::deg2rad;
-
-            // Loop over true photon energy
-            for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
-
-                // Get energy
-                double emin    = std::log10(m_edisp.axis_lo(m_inx_etrue,i_etrue));
-                double emax    = std::log10(m_edisp.axis_hi(m_inx_etrue,i_etrue));
-                double logEsrc = 0.5*(emin+emax);
-
-                // Initialise integration
-                double sum = 0.0;
-
-                // Get integration boundaries
-                GEbounds ebounds = ebounds_obs(logEsrc, theta);
-
-                // Loop over all energy intervals
-                for (int i = 0; i < ebounds.size(); ++i) {
-
-                    // Get energy boundaries
-                    emin = ebounds.emin(i).log10TeV();
-                    emax = ebounds.emax(i).log10TeV();
-
-                    // Setup integration function
-                    edisp_kern integrand(this, logEsrc, theta);
-                    GIntegral  integral(&integrand);
-
-                    // Set integration precision
-                    integral.eps(1.0e-6);
-
-                    // Do Romberg integration
-                    sum += integral.romberg(emin, emax);
-
-                } // endfor: looped over energy intervals
-
-                // Store sum
-                sums.push_back(sum);
-
-            } // endfor: looped over Etrue
-
-        } // endfor: looped over theta
-
-        // Normalize vectors of migration matrix for all etrue and theta.
-        for (int i_theta = 0, inx = 0; i_theta < theta_size; ++i_theta) {
-            for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue, ++inx) {
-                double sum = sums[inx];
-                if (sum > 0.0) {
-                    int offset = i_etrue + (i_theta*migra_size) * etrue_size;
-                    for (int k = 0, i = offset; k < migra_size; ++k, i += etrue_size) {
-                        m_edisp(m_inx_matrix,i) /= sum;
-                    }
-                }
-            }
-        }
-
-    } // endfor: made 2 passes
+    // Normalize energy dispersion table
+    normalize_table();
 
     // Set maximum energy dispersion value
     set_max_edisp();
+
+    // Set table boundaries
+    set_boundaries();
 
     // Return
     return;
@@ -857,11 +827,17 @@ void GCTAEdisp2D::init_members(void)
     // Initialise members
     m_filename.clear();
     m_edisp.clear();
-    m_fetched    = false;
-    m_inx_etrue  = 0;
-    m_inx_migra  = 1;
-    m_inx_theta  = 2;
-    m_inx_matrix = 0;
+    m_fetched     = false;
+    m_inx_etrue   = 0;
+    m_inx_migra   = 1;
+    m_inx_theta   = 2;
+    m_inx_matrix  = 0;
+    m_logEsrc_min = 0.0;
+    m_logEsrc_max = 0.0;
+    m_migra_min   = 0.0;
+    m_migra_max   = 0.0;
+    m_theta_min   = 0.0;
+    m_theta_max   = 0.0;
 
     // Initialise computation cache
     m_ebounds_obs_computed = false;
@@ -889,13 +865,19 @@ void GCTAEdisp2D::init_members(void)
 void GCTAEdisp2D::copy_members(const GCTAEdisp2D& edisp)
 {
     // Copy members
-    m_filename   = edisp.m_filename;
-    m_edisp      = edisp.m_edisp;
-    m_fetched    = edisp.m_fetched;
-    m_inx_etrue  = edisp.m_inx_etrue;
-    m_inx_migra  = edisp.m_inx_migra;
-    m_inx_theta  = edisp.m_inx_theta;
-    m_inx_matrix = edisp.m_inx_matrix;
+    m_filename    = edisp.m_filename;
+    m_edisp       = edisp.m_edisp;
+    m_fetched     = edisp.m_fetched;
+    m_inx_etrue   = edisp.m_inx_etrue;
+    m_inx_migra   = edisp.m_inx_migra;
+    m_inx_theta   = edisp.m_inx_theta;
+    m_inx_matrix  = edisp.m_inx_matrix;
+    m_logEsrc_min = edisp.m_logEsrc_min;
+    m_logEsrc_max = edisp.m_logEsrc_max;
+    m_migra_min   = edisp.m_migra_min;
+    m_migra_max   = edisp.m_migra_max;
+    m_theta_min   = edisp.m_theta_min;
+    m_theta_max   = edisp.m_theta_max;
 
     // Copy computation cache
     m_ebounds_obs_computed = edisp.m_ebounds_obs_computed;
@@ -1063,7 +1045,8 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
     const double eps = 1.0e-12;
 
     // Determine number of true energy bins
-    int n_bins = m_edisp.axis_bins(m_inx_etrue);
+    int n_bins   = m_edisp.axis_bins(m_inx_etrue);
+    int n_migras = m_edisp.axis_bins(m_inx_migra);
 
     // Loop over Eobs
     for (int iobs = 0; iobs < n_bins; ++iobs) {
@@ -1080,32 +1063,19 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
         bool   maxFound   = false;
 
         // Find minimum boundary
-        for (int isrc = 0; isrc < n_bins; ++isrc) {
+        for (int imigra = 0; imigra < n_migras; ++imigra) {
 
-            // Set Esrc
-            double Esrc    = std::sqrt(m_edisp.axis_hi(m_inx_etrue,isrc) *
-                                       m_edisp.axis_lo(m_inx_etrue,isrc));
-            double logEsrc = std::log10(Esrc);
+            // Get mean migra
+            double migra = 0.5 * (m_edisp.axis_lo(m_inx_migra,imigra) +
+                                  m_edisp.axis_lo(m_inx_migra,imigra));
 
-            // Get matrix term
-            double edisp = operator()(logEobs, logEsrc, theta);
-
-            // Find first non-negligible matrix term
-            if (edisp >= eps) {
-                minFound   = true;
-                logEsrcMin = logEsrc;
-                break;
+            // Fall through if migration is zero
+            if (migra == 0.0) {
+                continue;
             }
 
-        } // endfor: find minimum boundary
-
-        // Find maximum boundary
-        for (int isrc = n_bins-1; isrc >= 0; isrc--) {
-
-            // Set Esrc
-            double Esrc    = std::sqrt(m_edisp.axis_hi(m_inx_etrue,isrc) *
-                                       m_edisp.axis_lo(m_inx_etrue,isrc));
-            double logEsrc = std::log10(Esrc);
+            // Compute log10 of true energy
+            double logEsrc = logEobs - std::log10(migra);
 
             // Get matrix term
             double edisp = operator()(logEobs, logEsrc, theta);
@@ -1114,6 +1084,33 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
             if (edisp >= eps) {
                 maxFound   = true;
                 logEsrcMax = logEsrc;
+                break;
+            }
+
+        } // endfor: find minimum boundary
+
+        // Find maximum boundary
+        for (int imigra = n_migras-1; imigra >= 0; imigra--) {
+
+            // Get mean migra
+            double migra = 0.5 * (m_edisp.axis_lo(m_inx_migra,imigra) +
+                                  m_edisp.axis_lo(m_inx_migra,imigra));
+
+            // Fall through if migration is zero
+            if (migra == 0.0) {
+                continue;
+            }
+
+            // Compute log10 of true energy
+            double logEsrc = logEobs - std::log10(migra);
+
+            // Get matrix term
+            double edisp = operator()(logEobs, logEsrc, theta);
+
+            // Find first non-negligible matrix term
+            if (edisp >= eps) {
+                minFound   = true;
+                logEsrcMin = logEsrc;
                 break;
             }
 
@@ -1143,6 +1140,56 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
 
 
 /***********************************************************************//**
+ * @brief Set table indices
+ *
+ * Sets the data members m_inx_etrue, m_inx_migra, m_inx_theta, and
+ * m_inx_matrix.
+ ***************************************************************************/
+void GCTAEdisp2D::set_indices(void)
+{
+    // Get mandatory indices (throw exception if not found)
+    m_inx_etrue  = m_edisp.axis("ETRUE");
+    m_inx_migra  = m_edisp.axis("MIGRA");
+    m_inx_theta  = m_edisp.axis("THETA");
+    m_inx_matrix = m_edisp.table("MATRIX");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy dispersion boundaries
+ *
+ * Sets the data members m_logEsrc_min, m_logEsrc_max, m_migra_min,
+ * m_migra_max, m_theta_min and m_theta_max that define the validity range
+ * of the energy dispersion.
+ ***************************************************************************/
+void GCTAEdisp2D::set_boundaries(void)
+{
+    // Get number of bins
+    int netrue = m_edisp.axis_bins(m_inx_etrue);
+    int nmigra = m_edisp.axis_bins(m_inx_migra);
+    int ntheta = m_edisp.axis_bins(m_inx_theta);
+
+    // Compute minimum and maximum logEsrc boundaries
+    m_logEsrc_min = std::log10(m_edisp.axis_lo(m_inx_etrue, 0));
+    m_logEsrc_max = std::log10(m_edisp.axis_hi(m_inx_etrue, netrue-1));
+
+    // Compute minimum and maximum migration boundaries
+    m_migra_min = m_edisp.axis_lo(m_inx_migra, 0);
+    m_migra_max = m_edisp.axis_hi(m_inx_migra, nmigra-1);
+
+    // Compute minimum and maximum theta boundaries
+    m_theta_min = m_edisp.axis_lo(m_inx_theta, 0)        * gammalib::deg2rad;
+    m_theta_max = m_edisp.axis_hi(m_inx_theta, ntheta-1) * gammalib::deg2rad;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set maximum energy dispersion value
  ***************************************************************************/
 void GCTAEdisp2D::set_max_edisp(void) const
@@ -1157,6 +1204,95 @@ void GCTAEdisp2D::set_max_edisp(void) const
             m_max_edisp = value;
         }
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Normalize energy dispersion table
+ ***************************************************************************/
+void GCTAEdisp2D::normalize_table(void)
+{
+    // Get axes dimensions
+    int etrue_size = m_edisp.axis_bins(m_inx_etrue);
+    int migra_size = m_edisp.axis_bins(m_inx_migra);
+    int theta_size = m_edisp.axis_bins(m_inx_theta);
+
+    // Now normalize the migration matrix vectors. We do this by integrating
+    // for each true energy and offset angle the measured energy. We perform
+    // here two passes as the ebounds_obs() method depends on the content of
+    // the matrix, and by having two passes we are sure that we get a
+    // consistent energy interval.
+    for (int pass = 0; pass < 2; ++pass) {
+
+        // Initialise sums
+        std::vector<double> sums;
+        sums.reserve(theta_size*etrue_size);
+
+        // Loop over offset angle.
+        for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
+
+            // Get offset angle (in radians)
+            double theta = 0.5 * (m_edisp.axis_lo(m_inx_theta,i_theta) +
+                                  m_edisp.axis_hi(m_inx_theta,i_theta)) *
+                           gammalib::deg2rad;
+
+            // Loop over true photon energy
+            for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
+
+                // Get energy
+                double emin    = std::log10(m_edisp.axis_lo(m_inx_etrue,i_etrue));
+                double emax    = std::log10(m_edisp.axis_hi(m_inx_etrue,i_etrue));
+                double logEsrc = 0.5*(emin+emax);
+
+                // Initialise integration
+                double sum = 0.0;
+
+                // Get integration boundaries
+                GEbounds ebounds = ebounds_obs(logEsrc, theta);
+
+                // Loop over all energy intervals
+                for (int i = 0; i < ebounds.size(); ++i) {
+
+                    // Get energy boundaries
+                    emin = ebounds.emin(i).log10TeV();
+                    emax = ebounds.emax(i).log10TeV();
+
+                    // Setup integration function
+                    edisp_kern integrand(this, logEsrc, theta);
+                    GIntegral  integral(&integrand);
+
+                    // Set integration precision
+                    integral.eps(1.0e-6);
+
+                    // Do Romberg integration
+                    sum += integral.romberg(emin, emax);
+
+                } // endfor: looped over energy intervals
+
+                // Store sum
+                sums.push_back(sum);
+
+            } // endfor: looped over Etrue
+
+        } // endfor: looped over theta
+
+        // Normalize vectors of migration matrix for all etrue and theta.
+        for (int i_theta = 0, inx = 0; i_theta < theta_size; ++i_theta) {
+            for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue, ++inx) {
+                double sum = sums[inx];
+                if (sum > 0.0) {
+                    int offset = i_etrue + (i_theta*migra_size) * etrue_size;
+                    for (int k = 0, i = offset; k < migra_size; ++k, i += etrue_size) {
+                        m_edisp(m_inx_matrix,i) /= sum;
+                    }
+                }
+            }
+        }
+
+    } // endfor: made 2 passes
 
     // Return
     return;
