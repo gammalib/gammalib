@@ -34,6 +34,7 @@
 #include "GFunction.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
+#include "GModelSpectralBrokenPlaw.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
@@ -225,6 +226,7 @@ protected:
     mutable double  m_mc_exponent_ratio;  //!< Ratio of (m_mc_exponentS/m_mc_exponentH)
     mutable double  m_mc_ebreak;          //!< Break energy (depending on the energy range,
                                           //!< this may not actually be the break energy)
+    mutable GModelSpectralBrokenPlaw m_mc_brokenplaw;
 };
 
 

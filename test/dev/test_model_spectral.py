@@ -90,7 +90,7 @@ if __name__ == '__main__':
     model = gammalib.GModelSpectralSmoothBrokenPlaw(5.7e-16,
                                                     -2.48,
                                                     gammalib.GEnergy(0.3, 'TeV'),
-                                                    -2.70,
+                                                    -3.5,
                                                     gammalib.GEnergy(1.0, 'TeV'),
                                                     0.2)
 
