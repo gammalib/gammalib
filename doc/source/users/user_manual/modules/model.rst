@@ -758,6 +758,56 @@ format:
    </spectrum>
 
 
+Smoothly broken power law
+=========================
+
+The :doxy:`GModelSpectralSmoothBrokenPlaw` class implements the smoothly broken
+power law function
+
+.. math::
+
+   \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma_1}
+                   \left[ 1 +
+                   \left( \frac{E}{E_b} \right)^{\frac{\gamma_1 - \gamma_2}{\beta}}
+                   \right]^{-\beta}
+
+where the parameters in the XML definition have the following mappings:
+
+* :math:`k_0` = ``Prefactor``
+* :math:`\gamma_1` = ``Index1``
+* :math:`E_0` = ``PivotEnergy``
+* :math:`\gamma_2` = ``Index2``
+* :math:`E_b` = ``BreakEnergy``
+* :math:`\beta` = ``BreakSmoothness``
+
+The XML format for specifying a smoothly broken power law is:
+
+.. code-block:: xml
+
+   <spectrum type="SmoothBrokenPowerLaw">
+     <parameter name="Prefactor"       scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+     <parameter name="Index1"          scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+     <parameter name="PivotEnergy"     scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
+     <parameter name="Index2"          scale="-1"    value="2.70" min="0.01"  max="+5.0"   free="1"/>
+     <parameter name="BreakEnergy"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
+     <parameter name="BreakSmoothness" scale="1.0"   value="0.2"  min="0.01"  max="10.0"   free="0"/>
+   </spectrum>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
+
+.. code-block:: xml
+
+   <spectrum type="SmoothBrokenPowerLaw">
+     <parameter name="Prefactor"   scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+     <parameter name="Index1"      scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+     <parameter name="Scale"       scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
+     <parameter name="Index2"      scale="-1"    value="2.70" min="0.01"  max="+5.0"   free="1"/>
+     <parameter name="BreakValue"  scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
+     <parameter name="Beta"        scale="1.0"   value="0.2"  min="0.01"  max="10.0"   free="0"/>
+   </spectrum>
+
+
 Gaussian
 ========
 
