@@ -137,7 +137,7 @@ protected:
     void copy_members(const GModelSpectralSmoothBrokenPlaw& model);
     void free_members(void);
     void update_eval_cache(const GEnergy& energy) const;
-    void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
+    void update_mc_cache(void) const;
     
     // Class to determine the integral photon flux
     class flux_kern : public GFunction {
@@ -216,12 +216,13 @@ protected:
     mutable double  m_last_epivot_pow;      //!< Last pow(E/Epivot,index1) value
     mutable double  m_last_ebreak_pow;      //!< Last pow(E/Ebreakenergy,(index1-index2)/beta)
 
-    mutable double  m_mc_emin;            //!< Minimum energy
-    mutable double  m_mc_emax;            //!< Maximum energy
-    mutable double  m_mc_plaw_prefactor;  //!< Prefactor for comparison p-laws
-    mutable double  m_mc_exponentS;       //!< Exponent (index+1) for softer index
-    mutable double  m_mc_exponentH;       //!< Exponent (index+1) for harder index
-    mutable GModelSpectralBrokenPlaw m_mc_brokenplaw;
+    // Cached members for Monte-Carlo simulations
+    mutable double                   m_mc_prefactor;   //!< Last pre factor
+    mutable double                   m_mc_index1;      //!< Last first index
+    mutable double                   m_mc_index2;      //!< Last second index
+    mutable double                   m_mc_pivot;       //!< Last pivot energy
+    mutable double                   m_mc_breakenergy; //!< Last break energy
+    mutable GModelSpectralBrokenPlaw m_mc_brokenplaw;  //!< Broken power plaw
 };
 
 

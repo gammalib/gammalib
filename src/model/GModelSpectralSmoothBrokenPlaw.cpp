@@ -590,8 +590,8 @@ GEnergy GModelSpectralSmoothBrokenPlaw::mc(const GEnergy& emin,
     // Allocate energy
     GEnergy energy;
     
-    // Update cache
-    update_mc_cache(emin, emax);
+    // Update Monte Carlo cache
+    update_mc_cache();
     
     // Initialse acceptance fraction
     double acceptance_fraction(0.0);
@@ -819,13 +819,13 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_last_ebreak_pow      = 1.0e30;
     
     // Initialise MC cache
-    m_mc_emin           = 0.0;
-    m_mc_emax           = 0.0;
-    m_mc_plaw_prefactor = 0.0;
-    m_mc_exponentS      = 0.0;
-    m_mc_exponentH      = 0.0;
-    m_mc_brokenplaw = GModelSpectralBrokenPlaw();
-    
+    m_mc_prefactor   = 1.0e30;
+    m_mc_index1      = 1.0e30;
+    m_mc_index2      = 1.0e30;
+    m_mc_pivot       = 1.0e30;
+    m_mc_breakenergy = 1.0e30;
+    m_mc_brokenplaw  = GModelSpectralBrokenPlaw();
+
     // Return
     return;
 }
@@ -872,12 +872,12 @@ void GModelSpectralSmoothBrokenPlaw::copy_members(
     m_last_ebreak_pow      = model.m_last_ebreak_pow;
     
     // Copy MC cache
-    m_mc_emin           = model.m_mc_emin;
-    m_mc_emax           = model.m_mc_emax;
-    m_mc_plaw_prefactor = model.m_mc_plaw_prefactor;
-    m_mc_exponentS      = model.m_mc_exponentS;
-    m_mc_exponentH      = model.m_mc_exponentH;
-    m_mc_brokenplaw     = model.m_mc_brokenplaw;
+    m_mc_prefactor   = model.m_mc_prefactor;
+    m_mc_index1      = model.m_mc_index1;
+    m_mc_index2      = model.m_mc_index2;
+    m_mc_pivot       = model.m_mc_pivot;
+    m_mc_breakenergy = model.m_mc_breakenergy;
+    m_mc_brokenplaw  = model.m_mc_brokenplaw;
     
     // Return
     return;
@@ -948,47 +948,39 @@ void GModelSpectralSmoothBrokenPlaw::update_eval_cache(const GEnergy& energy) co
 /***********************************************************************//**
  * @brief Update Monte Carlo pre computation cache
  *
- * @param[in] emin Minimum photon energy.
- * @param[in] emax Maximum photon energy.
- *
  * Updates the precomputation cache for Monte Carlo simulations.
  ***************************************************************************/
-void GModelSpectralSmoothBrokenPlaw::update_mc_cache(const GEnergy& emin,
-                                                     const GEnergy& emax) const
+void GModelSpectralSmoothBrokenPlaw::update_mc_cache(void) const
 {
     // Check if we need to update the cache
-    if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
-        
-        // Store new energy interval
-        m_mc_emin = emin.MeV();
-        m_mc_emax = emax.MeV();
+    if (prefactor()         != m_mc_prefactor ||
+        index1()            != m_mc_index1    ||
+        index2()            != m_mc_index2    ||
+        pivot().MeV()       != m_mc_pivot     ||
+        breakenergy().MeV() != m_mc_breakenergy) {
 
-        /* Predefine some variables */
-        
-        // Prefactor for comparison broken power law function
-        m_mc_plaw_prefactor = prefactor() * std::pow(breakenergy().MeV()/pivot().MeV(),
-                                                     index1());
-        
-        // Find out which index is harder. This is important since the
-        // smoothly broken power law follows the hard index below the break
-        // energy and the softer index above the break energy.
-        
-        // CASE: index1 is harder
-        if (index1() > index2()) {
-            m_mc_exponentH = index1() + 1.0;   // Hard index + 1
-            m_mc_exponentS = index2() + 1.0;   // Soft index + 1
-        }
+        // Set parameters for which Monte Carlo cache was computed
+        m_mc_prefactor = prefactor();
+        m_mc_index1      = index1();
+        m_mc_index2      = index2();
+        m_mc_pivot       = pivot().MeV();
+        m_mc_breakenergy = breakenergy().MeV();
 
-        // CASE: index2 is harder, or index1==index2
-        else {
-            m_mc_exponentH = index2() + 1.0;   // Hard index + 1
-            m_mc_exponentS = index1() + 1.0;   // Soft index + 1
-        }
+        // Compute prefactor at pivot energy
+        double pre = prefactor() *
+                     std::pow(breakenergy().MeV()/pivot().MeV(), index1());
 
-        m_mc_brokenplaw = GModelSpectralBrokenPlaw(m_mc_plaw_prefactor,
-                                                   m_mc_exponentH-1.0,
+        // Find out which index is harder. This is important since the smoothly
+        // broken power law follows the hard index below the break energy and
+        // the softer index above the break energy.
+        double index1 = (m_mc_index1 > m_mc_index2) ? m_mc_index1 : m_mc_index2;
+        double index2 = (m_mc_index1 > m_mc_index2) ? m_mc_index2 : m_mc_index1;
+
+        // Set broken power law for Monte Carlo simulations
+        m_mc_brokenplaw = GModelSpectralBrokenPlaw(pre,
+                                                   index1,
                                                    breakenergy(),
-                                                   m_mc_exponentS-1.0);
+                                                   index2);
         
     } // endif: Update was required
     
