@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-24 March 2017
+27 March 2017
 
 
 1. Introduction
@@ -153,6 +153,12 @@ is contained within the region of interest.
 Lazy loading of the energy dispersion in GCTAEdisp2D has been implemented by
 adding a fetch() method to the class. Now the energy dispersion is only loaded
 when needed, for example for function evaluation or Monte Carlo sampling (#1940).
+
+The GCTAEdisp2D::compute_ebounds_src method now loops over the migration to
+enhance the precision in the true energy boundaries that are returned by this
+method. In addition, the validity range of the table is now stored in members
+of the class, and a non-zero energy dispersion is only returned for valid
+elements of the response table.
 
 
 21. COMPTEL interface

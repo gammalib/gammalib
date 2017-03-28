@@ -119,7 +119,10 @@ private:
                              const double& phi = 0.0,
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0) const;
+    void set_indices(void);
+    void set_boundaries(void);
     void set_max_edisp(void) const;
+    void normalize_table(void);
 
     // Protected classes
     class edisp_kern : public GFunction {
@@ -138,13 +141,19 @@ private:
     };
 
     // Members
-    mutable GFilename m_filename;   //!< Name of Edisp response file
-    GCTAResponseTable m_edisp;      //!< Edisp response table
-    mutable bool      m_fetched;    //!< Signals that Edisp has been fetched
-    int               m_inx_etrue;  //!< True energy index
-    int               m_inx_migra;  //!< Migration index
-    int               m_inx_theta;  //!< Theta index
-    int               m_inx_matrix; //!< Matrix
+    mutable GFilename m_filename;    //!< Name of Edisp response file
+    GCTAResponseTable m_edisp;       //!< Edisp response table
+    mutable bool      m_fetched;     //!< Signals that Edisp has been fetched
+    int               m_inx_etrue;   //!< True energy index
+    int               m_inx_migra;   //!< Migration index
+    int               m_inx_theta;   //!< Theta index
+    int               m_inx_matrix;  //!< Matrix
+    double            m_logEsrc_min; //!< Minimum logE (log10(E/TeV))
+    double            m_logEsrc_max; //!< Maximum logE (log10(E/TeV))
+    double            m_migra_min;   //!< Minimum migration
+    double            m_migra_max;   //!< Maximum migration
+    double            m_theta_min;   //!< Minimum theta (radians)
+    double            m_theta_max;   //!< Maximum theta (radians)
 
     // Computation cache
     mutable bool                  m_ebounds_obs_computed;
@@ -196,19 +205,6 @@ const GCTAResponseTable& GCTAEdisp2D::table(void) const
 {
     fetch();
     return (m_edisp);
-}
-
-
-/***********************************************************************//**
- * @brief Set response table
- *
- * @param[in] table Response table.
- ***************************************************************************/
-inline
-void GCTAEdisp2D::table(const GCTAResponseTable& table)
-{
-    m_edisp = table;
-    return;
 }
 
 #endif /* GCTAEDISP2D_HPP */
