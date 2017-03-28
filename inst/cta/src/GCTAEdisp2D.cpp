@@ -291,14 +291,14 @@ void GCTAEdisp2D::table(const GCTAResponseTable& table)
     // Set offset angle axis to radians
     m_edisp.axis_radians(m_inx_theta);
 
+    // Set table boundaries
+    set_boundaries();
+
     // Normalize energy dispersion table
     normalize_table();
 
     // Set maximum energy dispersion value
     set_max_edisp();
-
-    // Set table boundaries
-    set_boundaries();
 
     // Return
     return;
@@ -356,14 +356,14 @@ void GCTAEdisp2D::read(const GFitsTable& table)
     // Set offset angle axis to radians
     m_edisp.axis_radians(m_inx_theta);
 
+    // Set table boundaries
+    set_boundaries();
+
     // Normalize energy dispersion table
     normalize_table();
 
     // Set maximum energy dispersion value
     set_max_edisp();
-
-    // Set table boundaries
-    set_boundaries();
 
     // Return
     return;
