@@ -31,6 +31,10 @@ def eval_model(model, emin=0.030, emax=100.0, ntrials=1000):
     """
     Evaluates model.
     """
+    # Set number of energy bins
+    n_model = 1000
+    n_hist  = 50
+
     # Set energy boundaries
     e_min = gammalib.GEnergy(emin, 'TeV')
     e_max = gammalib.GEnergy(emax, 'TeV')
@@ -38,10 +42,10 @@ def eval_model(model, emin=0.030, emax=100.0, ntrials=1000):
     # Generate model spectrum
     sum     = 0.0
     flux    = model.flux(e_min, e_max)
-    norm    = float(ntrials)/flux
+    norm    = float(ntrials)/flux*n_model/n_hist
     x       = []
     y       = []
-    ebounds = gammalib.GEbounds(100, e_min, e_max)
+    ebounds = gammalib.GEbounds(n_model, e_min, e_max)
     for i in range(len(ebounds)):
         energy = ebounds.elogmean(i)
         value  = model.eval(energy) * norm * ebounds.ewidth(i).MeV()
@@ -49,7 +53,7 @@ def eval_model(model, emin=0.030, emax=100.0, ntrials=1000):
         if value > 1.0:
             x.append(energy.TeV())
             y.append(value)
-    print(sum, ntrials)
+    print(sum*n_hist/n_model, ntrials)
     
     # Generate Monte Carlo spectrum
     energies = []
@@ -63,8 +67,8 @@ def eval_model(model, emin=0.030, emax=100.0, ntrials=1000):
     plt.figure()
 
     # Create histogram
-    plt.hist(energies, bins=np.logspace(math.log10(emin), math.log10(emax), 50),
-             log=True)
+    plt.hist(energies, bins=np.logspace(math.log10(emin), math.log10(emax),
+             n_hist), log=True)
     plt.gca().set_xscale("log")
 
     # Show model
