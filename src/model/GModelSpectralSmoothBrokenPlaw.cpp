@@ -733,8 +733,8 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
 {
     // Initialise model type
     m_type = "SmoothBrokenPowerLaw";
-    
-    // Initialise powerlaw normalisation
+
+    // Initialise pre factor
     m_norm.clear();
     m_norm.name("Prefactor");
     m_norm.unit("ph/cm2/s/MeV");
@@ -744,8 +744,8 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_norm.free();
     m_norm.gradient(0.0);
     m_norm.has_grad(true);
-    
-    // Initialise powerlaw index1
+
+    // Initialise index1
     m_index1.clear();
     m_index1.name("Index1");
     m_index1.scale(1.0);
@@ -754,37 +754,37 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_index1.free();
     m_index1.gradient(0.0);
     m_index1.has_grad(true);
-    
-    // Initialise powerlaw index2
+
+    // Initialise index2
     m_index2.clear();
     m_index2.name("Index2");
     m_index2.scale(1.0);
-    m_index2.value(-2.0);        // default: -2.0
+    m_index2.value(-3.0);        // default: -2.0
     m_index2.range(-10.0,+10.0); // range:   [-10,+10]
     m_index2.free();
     m_index2.gradient(0.0);
     m_index2.has_grad(true);
-    
-    // Initialise break energy
+
+    // Initialise pivot energy
     m_pivot.clear();
     m_pivot.name("PivotEnergy");
     m_pivot.unit("MeV");
-    m_pivot.scale(1.0);
-    m_pivot.value(1.0e5);  // default: 100 GeV
+    m_pivot.scale(1.0e5);
+    m_pivot.value(1.0);          // default: 100 GeV
     m_pivot.fix();
     m_pivot.gradient(0.0);
     m_pivot.has_grad(true);
-    
+
     // Initialise break energy
     m_breakenergy.clear();
     m_breakenergy.name("BreakEnergy");
     m_breakenergy.unit("MeV");
-    m_breakenergy.scale(1.0);
-    m_breakenergy.value(100.0);  // default: 100
-    m_breakenergy.fix();
+    m_breakenergy.scale(1.0e5);
+    m_breakenergy.value(1.0);    // default: 100 GeV
+    m_breakenergy.free();
     m_breakenergy.gradient(0.0);
     m_breakenergy.has_grad(true);
-    
+
     // Initialize beta (break smoothness parameter)
     m_beta.clear();
     m_beta.name("BreakSmoothness");
@@ -794,7 +794,7 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_beta.free();
     m_beta.gradient(0.0);
     m_beta.has_grad(true);
-    
+
     // Set parameter pointer(s)
     m_pars.clear();
     m_pars.push_back(&m_norm);
@@ -803,7 +803,7 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_pars.push_back(&m_index2);
     m_pars.push_back(&m_breakenergy);
     m_pars.push_back(&m_beta);
-    
+
     // Initialise eval cache
     m_last_energy.clear();
     m_last_index1          = 1.0e30;
@@ -817,7 +817,7 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
     m_last_log_ebreak_norm = 1.0e30;
     m_last_epivot_pow      = 1.0e30;
     m_last_ebreak_pow      = 1.0e30;
-    
+
     // Initialise MC cache
     m_mc_prefactor   = 1.0e30;
     m_mc_index1      = 1.0e30;
