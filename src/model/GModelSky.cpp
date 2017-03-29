@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -863,14 +863,16 @@ GPhotons GModelSky::mc(const double& area,
             // function spectral model that is the product of the diffuse
             // cube node function and the spectral model evaluated at the
             // energies of the node function
-            GModelSpatialDiffuseCube* cube = dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
+            GModelSpatialDiffuseCube* cube =
+                         dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
             if (cube != NULL) {
 
                 // Set MC cone
                 cube->set_mc_cone(dir, radius);
 
                 // Allocate node function to replace the spectral component
-                GModelSpectralNodes* nodes = new GModelSpectralNodes(cube->spectrum());
+                GModelSpectralNodes* nodes =
+                                     new GModelSpectralNodes(cube->spectrum());
                 for (int i = 0; i < nodes->nodes(); ++i) {
                     GEnergy energy    = nodes->energy(i);
                     double  intensity = nodes->intensity(i);
@@ -884,11 +886,18 @@ GPhotons GModelSky::mc(const double& area,
                 // Set the spectral model pointer to the node function
                 spectral = nodes;
 
+                // Kluge: if there are no nodes then the spectral->flux method
+                // will throw an exception. We therefore set here the use_model
+                // flag to false in case that there are no spectral nodes
+                if (nodes->nodes() == 0) {
+                    use_model = false;
+                }
+
             } // endif: spatial model was a diffuse cube
 
             // Compute flux within [emin, emax] in model from spectral
             // component (units: ph/cm2/s)
-            double flux = spectral->flux(emin, emax);
+            double flux = (use_model) ? spectral->flux(emin, emax) : 0.0;
 
             // Derive expecting counting rate within simulation surface
             // (units: ph/s)
@@ -902,72 +911,88 @@ GPhotons GModelSky::mc(const double& area,
             std::cout << "norm=" << norm << ")" << std::endl;
             #endif
 
-            // Get photon arrival times from temporal model
-            GTimes times = m_temporal->mc(rate, tmin, tmax, ran);
+            // Continue only if rate is positive
+            if (rate > 0.0) {
 
-            // Debug option: dump number of times
-            #if defined(G_DUMP_MC_DETAIL)
-            std::cout << "  Times=" << times.size() << std::endl;
-            #endif
+                // Get photon arrival times from temporal model
+                GTimes times = m_temporal->mc(rate, tmin, tmax, ran);
 
-            // Reserve space for photons
-            if (times.size() > 0) {
-                photons.reserve(times.size());
-            }
-
-            // Loop over photons
-            for (int i = 0; i < times.size(); ++i) {
-
-                // Debug option: dump photon index
+                // Debug option: dump number of times
                 #if defined(G_DUMP_MC_DETAIL)
-                std::cout << "  Photon=" << i << std::endl;
+                std::cout << "  Times=" << times.size() << std::endl;
                 #endif
 
-                // Allocate photon
-                GPhoton photon;
-
-                // Set photon arrival time
-                photon.time(times[i]);
-
-                // Debug option: dump time
-                #if defined(G_DUMP_MC_DETAIL)
-                std::cout << "    Time=" << times[i] << std::endl;
-                #endif
-
-                // Set photon energy
-                photon.energy(spectral->mc(emin, emax, photon.time(), ran));
-
-                // Debug option: dump energy
-                #if defined(G_DUMP_MC_DETAIL)
-                std::cout << "    Energy=" << photon.energy() << std::endl;
-                #endif
-
-                // Set incident photon direction. If an invalid_return_value
-                // exception occurs the sky direction returned by the spatial
-                // Monte Carlo method is invalid and the photon is skipped.
-                try {
-                    photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
-                }
-                catch (GException::invalid_return_value) {
-                    continue;
+                // Reserve space for photons
+                if (times.size() > 0) {
+                    photons.reserve(times.size());
                 }
 
-                // Debug option: dump direction
-                #if defined(G_DUMP_MC_DETAIL)
-                std::cout << "    Direction=" << photon.dir() << std::endl;
-                #endif
+                // Loop over photons
+                for (int i = 0; i < times.size(); ++i) {
 
-                // Append photon
-                if (dir.dist_deg(photon.dir()) <= radius) {
-                    photons.append(photon);
-                }
+                    // Debug option: dump photon index
+                    #if defined(G_DUMP_MC_DETAIL)
+                    std::cout << "  Photon=" << i << std::endl;
+                    #endif
 
-            } // endfor: looped over photons
+                    // Allocate photon
+                    GPhoton photon;
+
+                    // Set photon arrival time
+                    photon.time(times[i]);
+
+                    // Debug option: dump time
+                    #if defined(G_DUMP_MC_DETAIL)
+                    std::cout << "    Time=" << times[i] << std::endl;
+                    #endif
+
+                    // Set photon energy. If an invalid_return_value exception
+                    // occurs the energy returned by the spectral Monte Carlo
+                    // method is invalid and the photon is skipped.
+                    try {
+                        photon.energy(spectral->mc(emin, emax, photon.time(),
+                                                   ran));
+                    }
+                    catch (GException::invalid_return_value) {
+                        continue;
+                    }
+
+                    // Debug option: dump energy
+                    #if defined(G_DUMP_MC_DETAIL)
+                    std::cout << "    Energy=" << photon.energy() << std::endl;
+                    #endif
+
+                    // Set incident photon direction. If an invalid_return_value
+                    // exception occurs the sky direction returned by the
+                    // spatial Monte Carlo method is invalid and the photon is
+                    // skipped.
+                    try {
+                        photon.dir(m_spatial->mc(photon.energy(), photon.time(),
+                                                 ran));
+                    }
+                    catch (GException::invalid_return_value) {
+                        continue;
+                    }
+
+                    // Debug option: dump direction
+                    #if defined(G_DUMP_MC_DETAIL)
+                    std::cout << "    Direction=" << photon.dir() << std::endl;
+                    #endif
+
+                    // Append photon
+                    if (dir.dist_deg(photon.dir()) <= radius) {
+                        photons.append(photon);
+                    }
+
+                } // endfor: looped over photons
+
+            } // endif: rate was positive
 
             // Free spectral model if required
             if (free_spectral) delete spectral;
 
         } // endif: model was used
+
     } // endif: model was valid
 
     // Return photon list
@@ -978,7 +1003,7 @@ GPhotons GModelSky::mc(const double& area,
 /***********************************************************************//**
  * @brief Print model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSky::print(const GChatter& chatter) const
