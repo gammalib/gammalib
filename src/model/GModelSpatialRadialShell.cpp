@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.cpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Christoph Deil                              *
+ *  copyright (C) 2011-2017 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ const GModelSpatialRegistry    g_radial_shell_legacy_registry(&g_radial_shell_le
 #endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_MC          "GModelSpatialRadialShell::mc(GEnergy&, GTime&, GRan&)"
 #define G_READ                 "GModelSpatialRadialShell::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialRadialShell::write(GXmlElement&)"
 
@@ -317,7 +318,7 @@ double GModelSpatialRadialShell::eval(const double&  theta,
         }
         result *= m_norm;
     }
-    
+
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(result) || gammalib::is_infinite(result)) {
@@ -345,6 +346,9 @@ double GModelSpatialRadialShell::eval(const double&  theta,
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
+ * @exception GException::invalid_return_value
+ *            Invalid u_max value
+ *
  * Draws an arbitrary sky position from the 2D shell distribution.
  ***************************************************************************/
 GSkyDir GModelSpatialRadialShell::mc(const GEnergy& energy,
@@ -354,15 +358,22 @@ GSkyDir GModelSpatialRadialShell::mc(const GEnergy& energy,
     // Update precomputation cache
     update();
 
-    // Simulate offset from photon arrival direction
+    // Initialise simulation
     #if defined(G_DEBUG_MC)
-    int    n_samples     = 0;
+    int    n_samples = 0;
     #endif
-    double sin_theta_max = std::sin(m_theta_out);
-    double u_max         = m_norm * sin_theta_max * sin_theta_max;
-    double value         = 0.0;
-    double u             = 1.0;
-    double theta         = 0.0;
+    double u_max     = m_norm * m_x_out;
+    double value     = 0.0;
+    double u         = 1.0;
+    double theta     = 0.0;
+
+    // Throw an exception if the maximum value is zero
+    if (u_max <= 0.0) {
+        std::string msg = "Non positive maximum radial shell model value.";
+        throw GException::invalid_return_value(G_MC, msg);
+    }
+
+    // Simulate offset from photon arrival direction using a rejection method
     do {
         theta = ran.uniform() * m_theta_out;
         value = eval(theta, energy, time) * std::sin(theta);
@@ -754,7 +765,7 @@ void GModelSpatialRadialShell::update() const
         // Store last values
         m_last_radius = radius();
         m_last_width  = width();
-        
+
         // Perform precomputations
         m_theta_in           = radius() * gammalib::deg2rad;
         m_theta_out          = (radius() + width()) * gammalib::deg2rad;
@@ -769,7 +780,7 @@ void GModelSpatialRadialShell::update() const
         m_x_out              = sin_theta_out * sin_theta_out;
 
     } // endif: update required
-    
+
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(m_norm) || gammalib::is_infinite(m_norm)) {

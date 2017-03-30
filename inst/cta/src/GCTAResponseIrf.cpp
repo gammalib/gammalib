@@ -648,7 +648,6 @@ GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
             // Simulate PSF and energy dispersion. Skip event if exception
             // occurs
            try {
-
                 // Simulate offset from photon arrival direction.
                 double delta = psf()->mc(ran, srcLogEng, theta, phi, zenith, azimuth) *
                                gammalib::rad2deg;
