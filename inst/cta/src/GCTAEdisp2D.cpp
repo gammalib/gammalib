@@ -476,7 +476,8 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  * @param[in] azimuth Azimuth angle in Earth system (rad).
  *
  * @exception GException::invalid_return_value
- *            No energy dispersion information found for parameters
+ *            No energy dispersion information found for parameters or
+ *            energy dispersion matrix is invalid.
  *
  * Draws observed energy value given a true energy @p logEsrc and offset
  * angle @p theta. If no energy dispersion information is available the
@@ -497,32 +498,72 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
     double   emin    = ebounds.emin().log10TeV();
     double   emax    = ebounds.emax().log10TeV();
 
-    // Throw an exception if no valid energy dispersion information is
-    // available
-    if (emin == emax) {
+    // Throw an exception if minimum energy is equal or larger than maximum
+    // energy (this means that no energy dispersion information is available
+    // for that energy)
+    if (emin >= emax) {
         std::string msg = "No valid energy dispersion information available "
                           "for true photon energy "+ebounds.emin().print()+
                           ", offset angle "+
                           gammalib::str(theta*gammalib::rad2deg)+" deg "
                           " and azimuth angle "+
                           gammalib::str(phi*gammalib::rad2deg)+" deg. Either "
-                          "provide an energy response matrix covering these "
+                          "provide an energy dispersion matrix covering these "
                           "parameters or restrict the parameter space.";
         throw GException::invalid_return_value(G_MC, msg);
     }
 
+    // Throw an exception if maximum energy dispersion is zero
+    if (m_max_edisp <= 0.0) {
+        std::string msg = "Energy dispersion matrix is empty. Please provide "
+                          "a valid energy dispersion matrix.";
+        throw GException::invalid_return_value(G_MC, msg);
+    }
+
+    // Initialise rejection method
+    double    ewidth               = emax - emin;
+    double    logEobs              = logEsrc;
+    double    f                    = 0.0;
+    double    ftest                = 1.0;
+    int       zeros                = 0;
+    const int max_subsequent_zeros = 10;
+
     // Find energy by rejection method
-    double ewidth  = emax - emin;
-    double logEobs = logEsrc;
-    if (m_max_edisp > 0.0 && ewidth > 0.0) {
-        double f       = 0.0;
-        double ftest   = 1.0;
-        while (ftest > f) {
+    while (ftest > f) {
+
+        // Draw random observed energy and evaluate energy dispersion matrix
+        // until a non-zero energy dispersion value is found. Subsequent zero
+        // energy dispersion values may indicate that there is no valid energy
+        // dispersion information available. After a limited number of
+        // subsequent zeros the loop is terminated with an exception
+        int zeros = 0;
+        do {
             logEobs = emin + ewidth * ran.uniform();
             f       = operator()(logEobs, logEsrc, theta, phi, zenith, azimuth);
-            ftest   = ran.uniform() * m_max_edisp;
-        }
-    }
+            if (f == 0.0) {
+                zeros++;
+                if (zeros > max_subsequent_zeros) {
+                    std::string msg = "No valid energy dispersion information "
+                                      "available  for true photon energy "+
+                                      ebounds.emin().print()+", offset angle "+
+                                      gammalib::str(theta*gammalib::rad2deg)+
+                                      " deg and azimuth angle "+
+                                      gammalib::str(phi*gammalib::rad2deg)+
+                                      " deg. Either provide an energy "
+                                      "dispersion matrix covering these "
+                                      "parameters or restrict the parameter "
+                                      "space.";
+                    throw GException::invalid_return_value(G_MC, msg);
+                }
+            }
+        } while (f == 0);
+
+        // Get uniform random value between zero and the maximum energy
+        // dispersion value. The loop is quite if the random number is smaller
+        // than the energy dispersion value
+        ftest   = ran.uniform() * m_max_edisp;
+
+    } // endwhile:
 
     // Set observed energy
     GEnergy energy;
