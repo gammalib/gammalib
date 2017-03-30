@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseCube.cpp - Spatial map cube model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -796,33 +796,47 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
         // Continue only if there are pixels and maps
         if (npix > 0 && nmaps > 0) {
 
+            // Initial vectors for total flux and maximum intensity
+            std::vector<double> total_flux(nmaps, 0.0);
+            std::vector<double> max_intensity(nmaps, 0.0);
+
+            // Loop over all map pixels
+            for (int k = 0; k < npix; ++k) {
+
+                // Continue only if pixel is within MC cone
+                double distance = centre.dist_deg(m_cube.pix2dir(k));
+                if (distance <= radius) {
+
+                    // Loop over all maps
+                    for (int i = 0; i < nmaps; ++i) {
+
+                        // Update total flux
+                        double flux = m_cube.flux(k,i);
+                        if (flux > 0.0) {
+                            total_flux[i] += flux;
+                        }
+
+                        // Update maximum intensity
+                        double value = m_cube(k,i);
+                        if (value > max_intensity[i]) {
+                            max_intensity[i] = value;
+                        }
+
+                    } // endfor: looped over all maps
+
+                } // endif: pixel within MC cone
+
+            } // endfor: looped over all pixels
+
             // Reserve space in cache
             m_mc_max.reserve(nmaps);
             m_mc_spectrum.reserve(nmaps);
 
-            // Loop over all maps
+            // Set maximum intensity and spectrum vectors
             for (int i = 0; i < nmaps; ++i) {
 
-                // Compute flux and maximum map intensity within the
-                // simulation cone
-                double total_flux    = 0.0;
-                double max_intensity = 0.0;
-                for (int k = 0; k < npix; ++k) {
-                    double distance = centre.dist_deg(m_cube.pix2dir(k));
-                    if (distance <= radius) {
-                        double flux = m_cube.flux(k,i);
-                        if (flux > 0.0) {
-                            total_flux += flux;
-                        }
-                        double value = m_cube(k,i);
-                        if (value > max_intensity) {
-                            max_intensity = value;
-                        }
-                    }
-                }
-
                 // Store maximum map intensity
-                m_mc_max.push_back(max_intensity);
+                m_mc_max.push_back(max_intensity[i]);
 
                 // Store flux as spectral node
                 if (m_logE.size() == nmaps) {
@@ -833,8 +847,8 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
 
                     // Only append node if the integrated flux is positive
                     // (as we do a log-log interpolation)
-                    if (total_flux > 0.0) {
-                        m_mc_spectrum.append(energy, total_flux);
+                    if (total_flux[i] > 0.0) {
+                        m_mc_spectrum.append(energy, total_flux[i]);
                     }
 
                 }
