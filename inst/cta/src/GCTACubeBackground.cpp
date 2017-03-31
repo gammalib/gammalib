@@ -57,7 +57,6 @@
 //#define G_DEBUG_CACHE
 
 /* __ Constants __________________________________________________________ */
-const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 
 /*==========================================================================
@@ -345,7 +344,8 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
     for (int i = 0; i < obs.size(); ++i) {
 
         // Get observation and continue only if it is a CTA observation
-        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
+        const GCTAObservation* cta =
+              dynamic_cast<const GCTAObservation*>(obs[i]);
 
         // Skip observation if it's not CTA
         if (cta == NULL) {
@@ -726,7 +726,7 @@ void GCTACubeBackground::set_eng_axis(void)
 
     // Compute nodes
     for (int i = 0; i < bins; ++i) {
-     
+
         // Get logE/TeV
         m_elogmeans.append(m_energies[i].log10TeV());
 

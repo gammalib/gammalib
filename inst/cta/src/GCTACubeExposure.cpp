@@ -238,7 +238,7 @@ GCTACubeExposure& GCTACubeExposure::operator=(const GCTACubeExposure& cube)
  * @return Exposure (in units of cm2 s)
  ***************************************************************************/
 double GCTACubeExposure::operator()(const GSkyDir& dir, const GEnergy& energy) const
-{ 
+{
     // Set indices and weighting factors for interpolation
     update(energy.log10TeV());
 
@@ -364,7 +364,7 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
 
         // Fill exposure cube
         fill_cube(*cta, log);
-        
+
     } // endfor: looped over observations
 
     // Return
@@ -566,7 +566,7 @@ void GCTACubeExposure::init_members(void)
     m_inx_right = 0;
     m_wgt_left  = 0.0;
     m_wgt_right = 0.0;
-   
+
     // Return
     return;
 }
@@ -621,6 +621,9 @@ void GCTACubeExposure::free_members(void)
  ***************************************************************************/
 void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
 {
+    // Set energy margin
+    static const GEnergy margin(1.0, "MeV");
+
     // Only continue if we have an event list
     if (obs.eventtype() == "EventList") {
 
@@ -683,7 +686,7 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
                 if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
                     continue;
                 }
-                
+
                 // Compute theta angle with respect to pointing direction in
                 // radians
                 double theta = pnt.dist(dir);
@@ -696,7 +699,13 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
                     // energies while the observation energy boundaries are
                     // reconstructed energies, hence this is only an
                     // approximation, but probably the only we can really do.
-                    if (!obs_ebounds.contains(m_energies[iebin])) {
+                    // We allow here for a small margin in case of rounding
+                    // errors in the energy boundaries.
+//std::cout << obs_ebounds.emin() << " <= " << m_energies[iebin] << " <= " << obs_ebounds.emax() << std::endl;
+                    if (!(obs_ebounds.contains(m_energies[iebin])        ||
+                          obs_ebounds.contains(m_energies[iebin]-margin) ||
+                          obs_ebounds.contains(m_energies[iebin]+margin))) {
+//std::cout << "Skip" << std::endl;
                         continue;
                     }
 
@@ -766,7 +775,7 @@ void GCTACubeExposure::set_eng_axis(void)
 
     // Compute nodes
     for (int i = 0; i < bins; ++i) {
-     
+
         // Get logE/TeV
         m_elogmeans.append(m_energies[i].log10TeV());
 

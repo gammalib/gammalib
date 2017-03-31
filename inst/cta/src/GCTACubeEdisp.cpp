@@ -57,7 +57,6 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 
 /*==========================================================================
@@ -642,10 +641,10 @@ GEbounds GCTACubeEdisp::ebounds(const GEnergy& obsEng) const
         throw GException::invalid_value(G_EBOUNDS, msg);
     }
 
-	// If ebounds were not computed, before, compute them now
-	if (m_ebounds.empty()) {
-		compute_ebounds();
-	}
+    // If ebounds were not computed, before, compute them now
+    if (m_ebounds.empty()) {
+        compute_ebounds();
+    }
 
     // Return the index of the energy boundaries that are just below the
     // observed energy. As the energy dispersion decreases with increasing
@@ -751,7 +750,7 @@ void GCTACubeEdisp::init_members(void)
     m_wgt3 = 0.0;
     m_wgt4 = 0.0;
     m_ebounds.clear();
-   
+
     // Return
     return;
 }
@@ -833,6 +832,9 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                               GSkyMap*               exposure,
                               GLog*                  log)
 {
+    // Set energy margin
+    static const GEnergy margin(1.0, "MeV");
+
     // Only continue if we have an event list
     if (obs.eventtype() == "EventList") {
 
@@ -906,7 +908,7 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                 if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
                     continue;
                 }
-            
+
                 // Compute theta angle with respect to pointing direction in
                 // radians
                 double theta = pnt.dist(dir);
@@ -920,7 +922,11 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                     // energy boundaries are reconstructed energies, hence
                     // this is only an approximation, but probably the only
                     // we can really do.
-                    if (!obs_ebounds.contains(m_energies[iebin])) {
+                    // We allow here for a small margin in case of rounding
+                    // errors in the energy boundaries.
+                    if (!(obs_ebounds.contains(m_energies[iebin])        ||
+                          obs_ebounds.contains(m_energies[iebin]-margin) ||
+                          obs_ebounds.contains(m_energies[iebin]+margin))) {
                         continue;
                     }
 
@@ -961,7 +967,7 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                                                           logEsrc) * weight;
 
                     } // endfor: looped over migration bins
-                
+
                 } // endfor: looped over energy bins
 
             } // endfor: looped over all pixels
@@ -989,9 +995,9 @@ void GCTACubeEdisp::update(const double& migra, const double& logEsrc) const
 {
     // Set node array for energy interpolation
     m_elogmeans.set_value(logEsrc);
-   
+
     // Set node array for delta interpolation
-	m_migras.set_value(migra);
+    m_migras.set_value(migra);
 
     // Set indices for bi-linear interpolation
     m_inx1 = offset(m_migras.inx_left(),  m_elogmeans.inx_left());
@@ -1022,7 +1028,7 @@ void GCTACubeEdisp::set_eng_axis(void)
     for (int i = 0; i < m_energies.size(); ++i) {
         m_elogmeans.append(m_energies[i].log10TeV());
     }
-    
+
     // Return
     return;
 }
@@ -1039,29 +1045,29 @@ void GCTACubeEdisp::set_eng_axis(void)
  ***************************************************************************/
 void GCTACubeEdisp::compute_ebounds() const
 {
-	// Set epsilon
-	const double eps = 1.0e-12;
+    // Set epsilon
+    const double eps = 1.0e-12;
 
     // Clear energy boundary vector
     m_ebounds.clear();
 
     // Loop over all energies
-	for (int i = 0; i < m_energies.size(); i++) {
+    for (int i = 0; i < m_energies.size(); i++) {
 
-		// Initialise results
-		double migra_min = 0.0;
-		double migra_max = 0.0;
-		bool   minFound  = false;
-		bool   maxFound  = false;
+        // Initialise results
+        double migra_min = 0.0;
+        double migra_max = 0.0;
+        bool   minFound  = false;
+        bool   maxFound  = false;
 
-		// Compute map of sky ranges to be considered
-		int mapmin = m_migras.size() * i;
-		int mapmax = m_migras.size() * (i + 1);
+        // Compute map of sky ranges to be considered
+        int mapmin = m_migras.size() * i;
+        int mapmax = m_migras.size() * (i + 1);
 
-		// Loop over sky map entries from lower migra
-		for (int imap = mapmin; imap < mapmax; ++imap) {
+        // Loop over sky map entries from lower migra
+        for (int imap = mapmin; imap < mapmax; ++imap) {
 
-			// Get maximum energy dispersion term for all sky pixels
+            // Get maximum energy dispersion term for all sky pixels
             double edisp = 0.0;
             for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
                 double value = m_cube(pixel, imap);
@@ -1070,19 +1076,19 @@ void GCTACubeEdisp::compute_ebounds() const
                 }
             }
 
-			// Find first non-negligible energy dispersion term
-			if (edisp >= eps) {
-				minFound  = true;
-				migra_min = m_migras[imap - mapmin];
-				break;
-			}
+            // Find first non-negligible energy dispersion term
+            if (edisp >= eps) {
+                minFound  = true;
+                migra_min = m_migras[imap - mapmin];
+                break;
+            }
 
-		} // endfor: loop over maps
+        } // endfor: loop over maps
 
-		// Loop over sky map entries from high migra
-		for (int imap = mapmax-1; imap >= mapmin; --imap) {
+        // Loop over sky map entries from high migra
+        for (int imap = mapmax-1; imap >= mapmin; --imap) {
 
-			// Get maximum energy dispersion term for all sky pixels
+            // Get maximum energy dispersion term for all sky pixels
             double edisp = 0.0;
             for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
                 double value = m_cube(pixel, imap);
@@ -1091,37 +1097,37 @@ void GCTACubeEdisp::compute_ebounds() const
                 }
             }
 
-			// Find first non-negligible energy dispersion term
-			if (edisp >= eps) {
-				maxFound  = true;
-				migra_max = m_migras[imap - mapmin];
-				break;
-			}
+            // Find first non-negligible energy dispersion term
+            if (edisp >= eps) {
+                maxFound  = true;
+                migra_max = m_migras[imap - mapmin];
+                break;
+            }
 
-		} // endfor: loop over maps
+        } // endfor: loop over maps
 
-		// Initialise energy boundaries
-		GEnergy emin;
-		GEnergy emax;
+        // Initialise energy boundaries
+        GEnergy emin;
+        GEnergy emax;
 
-		// Compute energy boundaries if they were found and if they are
+        // Compute energy boundaries if they were found and if they are
         // valid
-		if (minFound && maxFound && migra_min > 0.0 && migra_max > 0.0 &&
+        if (minFound && maxFound && migra_min > 0.0 && migra_max > 0.0 &&
             migra_max > migra_min) {
-			emin = m_energies[i] * migra_min;
-			emax = m_energies[i] * migra_max;
-		}
-    
+            emin = m_energies[i] * migra_min;
+            emax = m_energies[i] * migra_max;
+        }
+
         // ... otherwise we set the interval to a zero interval for safety
-		else {
-			emin.log10TeV(0.0);
-			emax.log10TeV(0.0);
-		}
+        else {
+            emin.log10TeV(0.0);
+            emax.log10TeV(0.0);
+        }
 
-		// Append energy boundaries
-		m_ebounds.push_back(GEbounds(emin, emax));
+        // Append energy boundaries
+        m_ebounds.push_back(GEbounds(emin, emax));
 
-	} // endfor: looped over all energies
+    } // endfor: looped over all energies
 
     // Return
     return;

@@ -267,7 +267,7 @@ GCTACubePsf::~GCTACubePsf(void)
  * @param[in] cube Mean PSF cube.
  * @return Mean PSF cube.
  ***************************************************************************/
-GCTACubePsf& GCTACubePsf::operator= (const GCTACubePsf& cube)
+GCTACubePsf& GCTACubePsf::operator=(const GCTACubePsf& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -669,7 +669,7 @@ void GCTACubePsf::init_members(void)
     m_wgt2 = 0.0;
     m_wgt3 = 0.0;
     m_wgt4 = 0.0;
-   
+
     // Return
     return;
 }
@@ -752,6 +752,9 @@ void GCTACubePsf::fill_cube(const GCTAObservation& obs,
                             GSkyMap*               exposure,
                             GLog*                  log)
 {
+    // Set energy margin
+    static const GEnergy margin(1.0, "MeV");
+
     // Only continue if we have an event list
     if (obs.eventtype() == "EventList") {
 
@@ -809,7 +812,7 @@ void GCTACubePsf::fill_cube(const GCTAObservation& obs,
 
                 // Get pixel sky direction
                 GSkyDir dir = m_cube.inx2dir(pixel);
-                    
+
                 // Skip pixel if it is outside the RoI
                 if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
                     continue;
@@ -827,7 +830,11 @@ void GCTACubePsf::fill_cube(const GCTAObservation& obs,
                     // energies while the observation energy boundaries are
                     // reconstructed energies, hence this is only an
                     // approximation, but probably the only we can really do.
-                    if (!obs_ebounds.contains(m_energies[iebin])) {
+                    // We allow here for a small margin in case of rounding
+                    // errors in the energy boundaries.
+                    if (!(obs_ebounds.contains(m_energies[iebin])        ||
+                          obs_ebounds.contains(m_energies[iebin]-margin) ||
+                          obs_ebounds.contains(m_energies[iebin]+margin))) {
                         continue;
                     }
 
@@ -876,7 +883,7 @@ void GCTACubePsf::fill_cube(const GCTAObservation& obs,
  *
  * @param[in] delta Angular separation between true and measured photon
  *            directions (radians).
- * @param[in] logE Log10 true photon energy (TeV). 
+ * @param[in] logE Log10 true photon energy (TeV).
  *
  * This method updates the PSF parameter cache.
  ***************************************************************************/
@@ -892,7 +899,7 @@ void GCTACubePsf::update(const double& delta, const double& logE) const
 
     // Set node array for energy interpolation
     m_elogmeans.set_value(logE);
-   
+
     // Set indices for bi-linear interpolation
     m_inx1 = offset(m_deltas_cache.inx_left(),  m_elogmeans.inx_left());
     m_inx2 = offset(m_deltas_cache.inx_left(),  m_elogmeans.inx_right());
@@ -986,7 +993,7 @@ void GCTACubePsf::set_eng_axis(void)
 
     // Compute nodes
     for (int i = 0; i < bins; ++i) {
-     
+
         // Get logE/TeV
         m_elogmeans.append(m_energies[i].log10TeV());
 
@@ -1016,7 +1023,7 @@ void GCTACubePsf::set_to_smooth(void)
                 m_cube(pixel, idst) = m_cube(pixel, isrc);
             }
         }
-    
+
         // Get index of last delta bin
         int idelta = m_deltas.size()-1;
 
