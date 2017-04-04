@@ -67,7 +67,8 @@ None
 
 6. FITS I/O Interface
 ---------------------
-None
+FITS image type conversion constructors have been added to convert a FITS
+image of any type into a specific storage class (#1986).
 
 
 7. Linear algebra module

@@ -54,7 +54,7 @@
  ***************************************************************************/
 GFitsImageFloat::GFitsImageFloat(void) : GFitsImage()
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Return
@@ -73,7 +73,7 @@ GFitsImageFloat::GFitsImageFloat(void) : GFitsImage()
 GFitsImageFloat::GFitsImageFloat(const int& nx, const float* pixels) :
                  GFitsImage(G_BITPIX, nx)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -97,7 +97,7 @@ GFitsImageFloat::GFitsImageFloat(const int& nx, const int& ny,
                                  const float* pixels) :
                  GFitsImage(G_BITPIX, nx, ny)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -122,7 +122,7 @@ GFitsImageFloat::GFitsImageFloat(const int& nx, const int& ny, const int& nz,
                                  const float* pixels) :
                  GFitsImage(G_BITPIX, nx, ny, nz)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -148,7 +148,7 @@ GFitsImageFloat::GFitsImageFloat(const int& nx, const int& ny, const int& nz,
                                  const int& nt, const float* pixels) :
                  GFitsImage(G_BITPIX, nx, ny, nz, nt)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data from pixels
@@ -173,11 +173,44 @@ GFitsImageFloat::GFitsImageFloat(const std::vector<int>& naxes,
                                  const float*            pixels) :
                  GFitsImage(G_BITPIX, naxes)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data from pixels
     construct_data(pixels);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Type conversion constructor
+ *
+ * @param[in] image FITS image.
+ *
+ * This constructor performs the conversion of any image type into a single
+ * precision floating point image.
+ ***************************************************************************/
+GFitsImageFloat::GFitsImageFloat(const GFitsImage& image) :
+                 GFitsImage(image)
+{
+    // Initialise class members
+    init_members();
+
+    // Copy pixels
+    if (m_num_pixels > 0) {
+        m_pixels = new float[m_num_pixels];
+        for (int i = 0; i < m_num_pixels; ++i) {
+            m_pixels[i] = (float)image.pixel(i);
+        }
+    }
+
+    // Set number of bits per pixel
+    m_bitpix = G_BITPIX;
+
+    // Update header card
+    header()["BITPIX"].value(G_BITPIX);
 
     // Return
     return;
@@ -192,7 +225,7 @@ GFitsImageFloat::GFitsImageFloat(const std::vector<int>& naxes,
 GFitsImageFloat::GFitsImageFloat(const GFitsImageFloat& image) :
                  GFitsImage(image)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members

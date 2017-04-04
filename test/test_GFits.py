@@ -148,6 +148,17 @@ class Test(gammalib.GPythonTestSuite):
         img8.extname("ULong")
         img9.extname("UShort")
 
+        # Test image types by checking the bitpix values
+        self.test_value(img1.bitpix(), 8)
+        self.test_value(img2.bitpix(), -64)
+        self.test_value(img3.bitpix(), -32)
+        self.test_value(img4.bitpix(), 32)
+        self.test_value(img5.bitpix(), 64)
+        self.test_value(img6.bitpix(), 10)
+        self.test_value(img7.bitpix(), 16)
+        self.test_value(img8.bitpix(), 40)
+        self.test_value(img9.bitpix(), 20)
+
         # Append images to FITS file
         fits.append(img1)
         fits.append(img2)
@@ -174,6 +185,17 @@ class Test(gammalib.GPythonTestSuite):
         # Re-open FITS file
         fits = gammalib.GFits(file1)
 
+        # Test image types by checking the bitpix values
+        self.test_value(fits[0].bitpix(), 8)
+        self.test_value(fits[1].bitpix(), -64)
+        self.test_value(fits[2].bitpix(), -32)
+        self.test_value(fits[3].bitpix(), 32)
+        self.test_value(fits[4].bitpix(), 64)
+        #self.test_value(fits[5].bitpix(), 10) # Not supported in older cfitsio
+        self.test_value(fits[5].bitpix(), 16)
+        self.test_value(fits[6].bitpix(), 40)
+        self.test_value(fits[7].bitpix(), 20)
+
         # Get double precision image, take square root of pixel and save in
         # another file
         img_double = fits.image("Double")
@@ -186,6 +208,26 @@ class Test(gammalib.GPythonTestSuite):
 
         # Close FITS file
         fits.close()
+
+        # Test type conversion constructors
+        img = gammalib.GFitsImageByte(img6)
+        self.test_value(img.bitpix(), 8)
+        img = gammalib.GFitsImageDouble(img1)
+        self.test_value(img.bitpix(), -64)
+        img = gammalib.GFitsImageFloat(img1)
+        self.test_value(img.bitpix(), -32)
+        img = gammalib.GFitsImageLong(img1)
+        self.test_value(img.bitpix(), 32)
+        img = gammalib.GFitsImageLongLong(img1)
+        self.test_value(img.bitpix(), 64)
+        img = gammalib.GFitsImageSByte(img1)
+        self.test_value(img.bitpix(), 10)
+        img = gammalib.GFitsImageShort(img1)
+        self.test_value(img.bitpix(), 16)
+        img = gammalib.GFitsImageULong(img1)
+        self.test_value(img.bitpix(), 40)
+        img = gammalib.GFitsImageUShort(img1)
+        self.test_value(img.bitpix(), 20)
 
         # Return
         return

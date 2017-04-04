@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFitsImageByte.cpp - FITS Byte image class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,7 +54,7 @@
  ***************************************************************************/
 GFitsImageByte::GFitsImageByte(void) : GFitsImage()
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Return
@@ -73,7 +73,7 @@ GFitsImageByte::GFitsImageByte(void) : GFitsImage()
 GFitsImageByte::GFitsImageByte(const int& nx, const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, nx)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -97,7 +97,7 @@ GFitsImageByte::GFitsImageByte(const int& nx, const int& ny,
                                const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, nx, ny)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -122,7 +122,7 @@ GFitsImageByte::GFitsImageByte(const int& nx, const int& ny, const int& nz,
                                const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, nx, ny, nz)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -148,7 +148,7 @@ GFitsImageByte::GFitsImageByte(const int& nx, const int& ny, const int& nz,
                                const int& nt, const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, nx, ny, nz, nt)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -173,11 +173,44 @@ GFitsImageByte::GFitsImageByte(const std::vector<int>& naxes,
                                const unsigned char*    pixels) :
                 GFitsImage(G_BITPIX, naxes)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
     construct_data(pixels);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Type conversion constructor
+ *
+ * @param[in] image FITS image.
+ *
+ * This constructor performs the conversion of any image type into a byte
+ * image.
+ ***************************************************************************/
+GFitsImageByte::GFitsImageByte(const GFitsImage& image) :
+                GFitsImage(image)
+{
+    // Initialise class members
+    init_members();
+
+    // Copy pixels
+    if (m_num_pixels > 0) {
+        m_pixels = new unsigned char[m_num_pixels];
+        for (int i = 0; i < m_num_pixels; ++i) {
+            m_pixels[i] = (unsigned char)image.pixel(i);
+        }
+    }
+
+    // Set number of bits per pixel
+    m_bitpix = G_BITPIX;
+
+    // Update header card
+    header()["BITPIX"].value(G_BITPIX);
 
     // Return
     return;
@@ -192,7 +225,7 @@ GFitsImageByte::GFitsImageByte(const std::vector<int>& naxes,
 GFitsImageByte::GFitsImageByte(const GFitsImageByte& image) :
                 GFitsImage(image)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
@@ -239,7 +272,7 @@ GFitsImageByte& GFitsImageByte::operator=(const GFitsImageByte& image)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise private members
         init_members();
 
         // Copy members

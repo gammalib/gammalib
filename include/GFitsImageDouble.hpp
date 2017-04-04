@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsImageDouble.hpp - Double precision FITS image class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@ public:
     GFitsImageDouble(const int& nx, const int& ny, const int& nz, const double* pixels = NULL);
     GFitsImageDouble(const int& nx, const int& ny, const int& nz, const int& nt, const double* pixels = NULL);
     GFitsImageDouble(const std::vector<int>& naxes, const double* pixels = NULL);
+    GFitsImageDouble(const GFitsImage& image);
     GFitsImageDouble(const GFitsImageDouble& image);
     virtual ~GFitsImageDouble(void);
 
