@@ -95,7 +95,11 @@ public:
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
     const std::string& gtiname(void) const;
-
+    void  has_phase(const bool& is_set);
+    void  has_detxy(const bool& is_set);
+    const bool& has_phase() const;
+    const bool& has_detxy() const;
+    
 protected:
     // Protected methods
     void         init_members(void);
@@ -200,6 +204,50 @@ inline
 const std::string& GCTAEventList::gtiname(void) const
 {
     return (m_gti_extname);
+}
+
+
+/***********************************************************************//**
+ * @brief Set the 'm_has_phase' parameter forcing phase information to be saved
+ ***************************************************************************/
+inline
+void GCTAEventList::has_phase(const bool& is_set)
+{
+    m_has_phase = is_set;
+}
+
+
+/***********************************************************************//**
+ * @brief Set the 'm_has_detxy' parameter forcing detector coordinates to be saved
+ ***************************************************************************/
+inline
+void GCTAEventList::has_detxy(const bool& is_set)
+{
+    m_has_detxy = is_set;
+}
+
+
+/*************************************************************************
+ * @brief Return whether or not phase information is saved
+ *
+ * @return Whether or not 'm_has_phase' was set.
+ ***************************************************************************/
+inline
+const bool& GCTAEventList::has_phase() const
+{
+    return m_has_phase;
+}
+
+
+/*************************************************************************
+ * @brief Return whether or not detector coordinates are saved
+ *
+ * @return Current value of 'm_has_detxy'.
+ ***************************************************************************/
+inline
+const bool& GCTAEventList::has_detxy() const
+{
+    return m_has_detxy;
 }
 
 #endif /* GCTAEVENTLIST_HPP */
