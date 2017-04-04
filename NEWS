@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-27 March 2017
+4 April 2017
 
 
 1. Introduction
@@ -44,7 +44,9 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-None
+The Python unit tests now raise exceptions instead of exiting with a non-
+zero return code so that the user is not thrown out of Python after calling
+gammalib.test() (#1983).
 
 
 4. Application module
