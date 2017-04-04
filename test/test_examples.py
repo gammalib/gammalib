@@ -269,4 +269,3 @@ if __name__ == '__main__':
     # Raise an exception in case of failure
     if not success:
         raise RuntimeError('At least one error occured during the test.')
-    #sys.exit(rc)
