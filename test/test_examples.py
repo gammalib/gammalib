@@ -2,7 +2,7 @@
 # ==========================================================================
 # This scripts performs unit tests for the example executables
 #
-# Copyright (C) 2016 Juergen Knoedlseder
+# Copyright (C) 2016-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -266,5 +266,7 @@ if __name__ == '__main__':
     else:
         rc = 1
 
-    # Exit with return code
-    sys.exit(rc)
+    # Raise an exception in case of failure
+    if not success:
+        raise RuntimeError('At least one error occured during the test.')
+    #sys.exit(rc)
