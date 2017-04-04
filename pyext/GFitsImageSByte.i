@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsImageSByte.i - Signed Byte FITS image class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     GFitsImageSByte(const int& nx, const int& ny, const int& nz, const char* pixels = NULL);
     GFitsImageSByte(const int& nx, const int& ny, const int& nz, const int& nt, const char* pixels = NULL);
     GFitsImageSByte(const std::vector<int>& naxes, const char* pixels = NULL);
+    GFitsImageSByte(const GFitsImage& image);
     GFitsImageSByte(const GFitsImageSByte& image);
     virtual ~GFitsImageSByte(void);
 

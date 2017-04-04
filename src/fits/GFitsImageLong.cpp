@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsImageLong.cpp - Long integer FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,7 +54,7 @@
  ***************************************************************************/
 GFitsImageLong::GFitsImageLong(void) : GFitsImage()
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Return
@@ -73,7 +73,7 @@ GFitsImageLong::GFitsImageLong(void) : GFitsImage()
 GFitsImageLong::GFitsImageLong(const int& nx, const long* pixels) :
                 GFitsImage(G_BITPIX, nx)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -96,7 +96,7 @@ GFitsImageLong::GFitsImageLong(const int& nx, const long* pixels) :
 GFitsImageLong::GFitsImageLong(const int& nx, const int& ny, const long* pixels) :
                 GFitsImage(G_BITPIX, nx, ny)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -121,7 +121,7 @@ GFitsImageLong::GFitsImageLong(const int& nx, const int& ny, const int& nz,
                                const long* pixels) :
                 GFitsImage(G_BITPIX, nx, ny, nz)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -147,7 +147,7 @@ GFitsImageLong::GFitsImageLong(const int& nx, const int& ny, const int& nz,
                                const int& nt, const long* pixels) :
                 GFitsImage(G_BITPIX, nx, ny, nz, nt)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -172,11 +172,44 @@ GFitsImageLong::GFitsImageLong(const std::vector<int>& naxes,
                                const long*             pixels) :
                 GFitsImage(G_BITPIX, naxes)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
     construct_data(pixels);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Type conversion constructor
+ *
+ * @param[in] image FITS image.
+ *
+ * This constructor performs the conversion of any image type into a long
+ * integer image.
+ ***************************************************************************/
+GFitsImageLong::GFitsImageLong(const GFitsImage& image) :
+                GFitsImage(image)
+{
+    // Initialise class members
+    init_members();
+
+    // Copy pixels
+    if (m_num_pixels > 0) {
+        m_pixels = new long[m_num_pixels];
+        for (int i = 0; i < m_num_pixels; ++i) {
+            m_pixels[i] = (long)image.pixel(i);
+        }
+    }
+
+    // Set number of bits per pixel
+    m_bitpix = G_BITPIX;
+
+    // Update header card
+    header()["BITPIX"].value(G_BITPIX);
 
     // Return
     return;
@@ -191,7 +224,7 @@ GFitsImageLong::GFitsImageLong(const std::vector<int>& naxes,
 GFitsImageLong::GFitsImageLong(const GFitsImageLong& image) :
                 GFitsImage(image)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
@@ -237,7 +270,7 @@ GFitsImageLong& GFitsImageLong::operator=(const GFitsImageLong& image)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise private members
         init_members();
 
         // Copy members

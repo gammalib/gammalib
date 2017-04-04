@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsImageULong.i - Unsigned long image FITS class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     GFitsImageULong(const int& nx, const int& ny, const int& nz, const unsigned long* pixels = NULL);
     GFitsImageULong(const int& nx, const int& ny, const int& nz, const int& nt, const unsigned long* pixels = NULL);
     GFitsImageULong(const std::vector<int>& naxes, const unsigned long* pixels = NULL);
+    GFitsImageULong(const GFitsImage& image);
     GFitsImageULong(const GFitsImageULong& image);
     virtual ~GFitsImageULong(void);
 

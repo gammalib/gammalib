@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsImageDouble.cpp - Double precision FITS image class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,7 +54,7 @@
  ***************************************************************************/
 GFitsImageDouble::GFitsImageDouble(void) : GFitsImage()
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Return
@@ -73,7 +73,7 @@ GFitsImageDouble::GFitsImageDouble(void) : GFitsImage()
 GFitsImageDouble::GFitsImageDouble(const int& nx, const double* pixels) :
                   GFitsImage(G_BITPIX, nx)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -97,7 +97,7 @@ GFitsImageDouble::GFitsImageDouble(const int& nx, const int& ny,
                                    const double* pixels) :
                   GFitsImage(G_BITPIX, nx, ny)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -122,7 +122,7 @@ GFitsImageDouble::GFitsImageDouble(const int& nx, const int& ny, const int& nz,
                                    const double* pixels) :
                   GFitsImage(G_BITPIX, nx, ny, nz)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -148,7 +148,7 @@ GFitsImageDouble::GFitsImageDouble(const int& nx, const int& ny, const int& nz,
                                    const int& nt, const double* pixels) :
                   GFitsImage(G_BITPIX, nx, ny, nz, nt)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -173,7 +173,7 @@ GFitsImageDouble::GFitsImageDouble(const std::vector<int>& naxes,
                                    const double*           pixels) :
                   GFitsImage(G_BITPIX, naxes)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Construct data
@@ -185,6 +185,41 @@ GFitsImageDouble::GFitsImageDouble(const std::vector<int>& naxes,
 
 
 /***********************************************************************//**
+ * @brief Type conversion constructor
+ *
+ * @param[in] image FITS image.
+ *
+ * This constructor performs the conversion of any image type into a double
+ * precision floating point image.
+ ***************************************************************************/
+GFitsImageDouble::GFitsImageDouble(const GFitsImage& image) :
+                  GFitsImage(image)
+{
+    // Initialise class members
+    init_members();
+
+    // Copy pixels
+    if (m_num_pixels > 0) {
+        m_pixels = new double[m_num_pixels];
+        for (int i = 0; i < m_num_pixels; ++i) {
+            m_pixels[i] = (double)image.pixel(i);
+        }
+    }
+
+    // Set number of bits per pixel
+    m_bitpix = G_BITPIX;
+
+    // Update header card
+    header()["BITPIX"].value(G_BITPIX);
+
+    // Return
+    return;
+}
+
+
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] image FITS image.
@@ -192,7 +227,7 @@ GFitsImageDouble::GFitsImageDouble(const std::vector<int>& naxes,
 GFitsImageDouble::GFitsImageDouble(const GFitsImageDouble& image) :
                   GFitsImage(image)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
@@ -238,7 +273,7 @@ GFitsImageDouble& GFitsImageDouble::operator=(const GFitsImageDouble& image)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise private members
         init_members();
 
         // Copy members

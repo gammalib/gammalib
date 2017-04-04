@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsImageShort.i - Short integer FITS image class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     GFitsImageShort(const int& nx, const int& ny, const int& nz, const short* pixels = NULL);
     GFitsImageShort(const int& nx, const int& ny, const int& nz, const int& nt, const short* pixels = NULL);
     GFitsImageShort(const std::vector<int>& naxes, const short* pixels = NULL);
+    GFitsImageShort(const GFitsImage& image);
     GFitsImageShort(const GFitsImageShort& image);
     virtual ~GFitsImageShort(void);
 
