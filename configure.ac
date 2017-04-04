@@ -826,9 +826,10 @@ AC_SUBST(OPENMP_LIB_LDFLAGS)
 # Python binding requires Python and either the files gammalib_wrap.cpp and #
 # gammalib.py or swig to create these files.  The following conditionals    #
 # are set:                                                                  #
-# WITH_PYTHON   - Python bindings will be built                             #
-# HAVE_SWIG     - swig is available                                         #
-# HAVE_WRAPPERS - wrappers are available                                    #
+# WITH_PYTHON    - Python bindings will be built                            #
+# HAVE_SWIG      - swig is available                                        #
+# HAVE_WRAPPERS  - wrappers are available                                   #
+# BUILD_WRAPPERS - build the Python wrappers                                #
 #############################################################################
 # Initialise flags
 enable_python="no"
@@ -838,7 +839,8 @@ has_swig="no"
 has_wrappers="no"
 build_wrappers="no"
 
-# Check if ...
+# Check if the code is a git clone. In that case the systems switches to
+# developer mode which forces building of the Python interface with SWIG.
 AC_CHECK_FILE([.git/HEAD],
               [from_git=yes;build_wrappers="yes"],
               [from_git=no])
