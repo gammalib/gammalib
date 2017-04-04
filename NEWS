@@ -50,6 +50,12 @@ The Python unit tests now raise exceptions instead of exiting with a non-
 zero return code so that the user is not thrown out of Python after calling
 gammalib.test() (#1983).
 
+If the code originates from the Git repository the configuration now switches
+to developer mode which implies that the Python bindings are always built.
+This solves the problem that occured for developers that could not get rid
+of existing Python wrappers, even if they modified the Python interface
+(#1985).
+
 
 4. Application module
 ---------------------

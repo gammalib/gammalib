@@ -2,7 +2,7 @@
 # Configuration for GammaLib - a versatile toolbox for high-level analysis  #
 #                              of astronomical gamma-ray data               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2006-2016 Juergen Knoedlseder                               #
+# Copyright (C) 2006-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -838,6 +838,11 @@ has_swig="no"
 has_wrappers="no"
 build_wrappers="no"
 
+# Check if ...
+AC_CHECK_FILE([.git/HEAD],
+              [from_git=yes;build_wrappers="yes"],
+              [from_git=no])
+
 # Python binding enabled?
 AC_ARG_ENABLE([python-binding],
               AS_HELP_STRING([--enable-python-binding],
@@ -1485,21 +1490,36 @@ else
   fi
 fi
 
+# Dump developer configuration
+if test "x$from_git" = "xyes"; then
+  echo "  * Developer configuration      (yes)"
+else
+  echo "  * End user configuration       (yes)"
+fi
+
 # Dump Python bindings information
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "x$has_python" = "xyes"; then
     if test "x$has_python_h" = "xyes"; then
-      if test "x$has_wrappers" = "xyes"; then
-        if test "x$has_swig" = "xyes"; then
-          echo "  * Make Python binding          (yes)   use swig for updates"
+      if test "x$build_wrappers" = "xyes"; then
+        if test "x$has_wrappers" = "xyes"; then
+          if test "x$has_swig" = "xyes"; then
+            echo "  * Make Python binding          (yes)   use swig for updates"
+          else
+            echo "  * Make Python binding          (yes)   use wrappers"
+          fi
         else
-          echo "  * Make Python binding          (yes)   use wrappers"
+          if test "x$has_swig" = "xyes"; then
+            echo "  * Make Python binding          (yes)   use swig for building"
+          else
+            echo "  - Make Python binding          (no)    swig required to build wrappers"
+          fi
         fi
       else
-        if test "x$has_swig" = "xyes"; then
-          echo "  * Make Python binding          (yes)   use swig for building"
+        if test "x$has_wrappers" = "xyes"; then
+          echo "  - Make Python binding          (yes)   use existing wrappers"
         else
-          echo "  - Make Python binding          (no)    swig required to build wrappers"
+          echo "  - Make Python binding          (no)    wrappers not found"
         fi
       fi
     else
