@@ -23,11 +23,13 @@ The following classes have been renamed:
 - ...
 
 The following methods have been added:
-- GCTAResponseIrf::rspname
-- GCTARoi::contains
-- GCTAEdisp2D::fetch
-- GEbounds::set
-- GEnergies::set
+- GCTAResponseIrf::rspname()
+- GCTARoi::contains(GCTAInstDir&)
+- GCTAEdisp2D::fetch()
+- GEbounds::set(GEnergies&)
+- GEbounds::emin(int&, GEnergy&)
+- GEbounds::emax(int&, GEnergy&)
+- GEnergies::set(GEbounds&)
 
 The following methods have been removed:
 - ...

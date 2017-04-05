@@ -356,6 +356,13 @@ void TestGObservation::test_ebounds(void)
     test_value(ebds2.emin().MeV(), 1.0, 1.0e-10, "GEnergies constructor (1 element)");
     test_value(ebds2.emax().MeV(), 1.0, 1.0e-10, "GEnergies constructor (1 element)");
 
+    // Check energy boundary setter method
+    ebds2.emin(0, GEnergy(123.0, "MeV"));
+    ebds2.emax(0, GEnergy(511.0, "MeV"));
+    test_value(ebds2.size(), 1, "Energy boundary setter");
+    test_value(ebds2.emin().MeV(), 123.0, 1.0e-10, "Energy boundary setter");
+    test_value(ebds2.emax().MeV(), 511.0, 1.0e-10, "Energy boundary setter");
+
     // Return
     return;
 }
