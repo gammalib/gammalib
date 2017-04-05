@@ -370,8 +370,10 @@ void GModelTemporalPhaseCurve::read(const GXmlElement& xml)
     m_f2.read(*f2);
 
     // Load nodes from file
-    load_nodes(gammalib::xml_file_expand(xml, xml.attribute("file")));
-
+    if (xml.attribute("file").size() != 0) {
+        load_nodes(gammalib::xml_file_expand(xml, xml.attribute("file")));
+    }
+    
     // Return
     return;
 }
