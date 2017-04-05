@@ -46,8 +46,10 @@
 #define G_READ_XML                             "GEbounds::read(GXmlElement&)"
 #define G_WRITE_XML                           "GEbounds::write(GXmlElement&)"
 #define G_REMOVE                                     "GEbounds::remove(int&)"
-#define G_EMIN                                         "GEbounds::emin(int&)"
-#define G_EMAX                                         "GEbounds::emax(int&)"
+#define G_EMIN_SET                           "GEbounds::emin(int&, GEnergy&)"
+#define G_EMAX_SET                           "GEbounds::emax(int&, GEnergy&)"
+#define G_EMIN_GET                                     "GEbounds::emin(int&)"
+#define G_EMAX_GET                                     "GEbounds::emax(int&)"
 #define G_EMEAN                                       "GEbounds::emean(int&)"
 #define G_ELOGMEAN                                 "GEbounds::elogmean(int&)"
 #define G_EWIDTH                                     "GEbounds::ewidth(int&)"
@@ -977,6 +979,72 @@ int GEbounds::index(const GEnergy& eng) const
 
 
 /***********************************************************************//**
+ * @brief Set minimum energy for a given energy interval
+ *
+ * @param[in] index Energy interval index (0,...,size()-1).
+ * @param[in] energy Minimum energy of interval.
+ *
+ * @exception GException::out_of_range
+ *            Specified index is out of range.
+ *
+ * Sets the minimum energy for the energy interval @p index.
+ ***************************************************************************/
+void GEbounds::emin(const int& index, const GEnergy& energy)
+{
+    #if defined(G_RANGE_CHECK)
+    // Throw an exception if index is outside valid range
+    if (index < 0 || index >= m_num) {
+        throw GException::out_of_range(G_EMIN_SET,
+                                       "Minimum energy of interval",
+                                       index, m_num);
+    }
+    #endif
+
+    // Set minimum energy
+    m_min[index] = energy;
+
+    // Set attributes
+    set_attributes();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum energy for a given energy interval
+ *
+ * @param[in] index Energy interval index (0,...,size()-1).
+ * @param[in] energy Maximum energy of interval.
+ *
+ * @exception GException::out_of_range
+ *            Specified index is out of range.
+ *
+ * Sets the maximum energy for the energy interval @p index.
+ ***************************************************************************/
+void GEbounds::emax(const int& index, const GEnergy& energy)
+{
+    #if defined(G_RANGE_CHECK)
+    // Throw an exception if index is outside valid range
+    if (index < 0 || index >= m_num) {
+        throw GException::out_of_range(G_EMAX_SET,
+                                       "Maximum energy of interval",
+                                       index, m_num);
+    }
+    #endif
+
+    // Set maximum energy
+    m_max[index] = energy;
+
+    // Set attributes
+    set_attributes();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns minimum energy for a given energy interval
  *
  * @param[in] index Energy interval index (0,...,size()-1).
@@ -988,13 +1056,15 @@ int GEbounds::index(const GEnergy& eng) const
 GEnergy GEbounds::emin(const int& index) const
 {
     #if defined(G_RANGE_CHECK)
-    // If index is outside boundary then throw an error
+    // Throw an exception if index is outside valid range
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_EMIN, index, 0, m_num-1);
+        throw GException::out_of_range(G_EMIN_GET,
+                                       "Minimum energy of interval",
+                                       index, m_num);
     }
     #endif
 
-    // Return
+    // Return minimum energy
     return (m_min[index]);
 }
 
@@ -1011,13 +1081,15 @@ GEnergy GEbounds::emin(const int& index) const
 GEnergy GEbounds::emax(const int& index) const
 {
     #if defined(G_RANGE_CHECK)
-    // If index is outside boundary then throw an error
+    // Throw an exception if index is outside valid range
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_EMAX, index, 0, m_num-1);
+        throw GException::out_of_range(G_EMAX_GET,
+                                       "Maximum energy of interval",
+                                       index, m_num);
     }
     #endif
 
-    // Return
+    // Return maximum energy
     return (m_max[index]);
 }
 

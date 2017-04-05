@@ -77,6 +77,8 @@ public:
     int            index(const GEnergy& eng) const;
     const GEnergy& emin(void) const;
     const GEnergy& emax(void) const;
+    void           emin(const int& index, const GEnergy& energy);
+    void           emax(const int& index, const GEnergy& energy);
     GEnergy        emin(const int& index) const;
     GEnergy        emax(const int& index) const;
     GEnergy        emean(const int& index) const;
