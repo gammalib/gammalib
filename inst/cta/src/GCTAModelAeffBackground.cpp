@@ -565,9 +565,12 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
             GEnergy energy   = spectral_ebounds.elogmean(i);
             double intensity = aeff_integral(obs, energy.log10TeV());
             double  norm     = m_spectral->eval(energy, events->tstart());
-            spectral.append(energy, norm * intensity);
+	    if(norm * intensity > 0){
+	      spectral.append(energy, norm * intensity);
+	    }   
         }
-
+	
+	
         // Loop over all energy boundaries
         for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
 
@@ -640,6 +643,7 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
                     double acceptance_fraction = 0.0;
 
                     // Start rejection method loop
+		    int numberoftrys=0;
                     do {
 
                         // Throw random offset and azimuth angle in
@@ -650,10 +654,17 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
 
                         // Compute function value at this offset angle
                         double value = (*aeff)(energy.log10TeV(), offset, phi, pnt.zenith(), pnt.azimuth(), false);
-
+			
+			// std::cout << "value: " << value << ", max_aeff: " << max_aeff << std::endl;
+			if(numberoftrys==1000&&value==0){
+			  std::cout << "PSF not found"<<std::endl;
+			  break;
+			}
                         // Compute acceptance fraction
                         acceptance_fraction = value / max_aeff;
 
+			numberoftrys++;
+			
                     } while (ran.uniform() > acceptance_fraction);
 
                     // Convert CTA pointing direction in instrument system
