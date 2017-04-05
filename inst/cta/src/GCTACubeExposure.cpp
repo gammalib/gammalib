@@ -701,11 +701,9 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
                     // approximation, but probably the only we can really do.
                     // We allow here for a small margin in case of rounding
                     // errors in the energy boundaries.
-//std::cout << obs_ebounds.emin() << " <= " << m_energies[iebin] << " <= " << obs_ebounds.emax() << std::endl;
                     if (!(obs_ebounds.contains(m_energies[iebin])        ||
                           obs_ebounds.contains(m_energies[iebin]-margin) ||
                           obs_ebounds.contains(m_energies[iebin]+margin))) {
-//std::cout << "Skip" << std::endl;
                         continue;
                     }
 

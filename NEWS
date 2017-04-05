@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.3.0.dev1
 
 Author(s) : Juergen Knoedlseder
 
-4 April 2017
+5 April 2017
 
 
 1. Introduction
@@ -55,6 +55,10 @@ to developer mode which implies that the Python bindings are always built.
 This solves the problem that occured for developers that could not get rid
 of existing Python wrappers, even if they modified the Python interface
 (#1985).
+
+The shared libraries needed by the Python wrappers are now copied into a
+build/gammalib directory for unit testing instead of creating a symbolic
+link since on shared VM file systems symbolic links may not work (#1987).
 
 
 4. Application module
