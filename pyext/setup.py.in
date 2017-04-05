@@ -1,7 +1,7 @@
 #############################################################################
 # Disutils setup file for gammalib Python extension module                  #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2016 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -24,6 +24,7 @@ import glob
 import os
 import sys
 import re
+import shutil
 
 # Define package name
 pkg_name = 'gammalib'
@@ -228,19 +229,34 @@ setup(name='@PACKAGE_NAME@',
       platforms=['Linux', 'Solaris', 'Mac OS-X', 'Unix', 'BSD'],
       )
 
-# Post-processing. A symbolic link is created to the directory containing the
-# shared wrapper libraries so that we can add this directory to the PYTHONPATH
-# for testing.
+# Post-processing. The shared wrapper libraries are copied into the
+# build/gammalib directory and this directory is appended to the PYTHONPATH
+# so that shared libraries can be accessed during unit testing. This kluge
+# is needed since the name of the build directory where the shared libraries
+# reside is not known when building the Makefile.
 if is_build:
+
+    # Remove existing build/gammalib directory
     try:
-        os.chdir('build')
-        os.remove('gammalib')
-        print('Removed symbolic link build/gammalib.')
+        os.remove('build/gammalib')
+        print('Removed "build/gammalib" directory.')
     except:
         pass
+
+    # Create build/gammalib directory
     try:
-        path = glob.glob('lib.*/gammalib')
-        os.symlink(path[0], 'gammalib')
-        print('Created symbolic link build/gammalib.')
+        os.mkdir('build/gammalib')
+        print('Created "build/gammalib" directory.')
+    except (OSError):
+        print('Directory "build/gammalib" exists already.')
     except:
-        print('WARNING: Failed to create symbolic link build/gammalib.')
+        print('ERROR: Failed to create directory "build/gammalib".')
+        raise
+
+    # Copy over shared libraries from lib.*/gammalib folder
+    files = glob.glob('build/lib.*/gammalib/_*.so')
+    for file in files:
+        dst = os.path.join('build/gammalib', os.path.basename(file))
+        shutil.copy2(file, dst)
+        print('Copied %s -> %s' % (file, dst))
+    print('Copied shared libraries into "build/gammalib" directory.')

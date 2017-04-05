@@ -1,8 +1,9 @@
-2017-04-04
+2017-04-05
 
         * Version 1.3.0 released
         =========================
 
+        Copy shared Python libraries instead of creating a symbolic link (#1987)
         Added FITS image conversion operators (#1986)
         If code originates from Git, always compile the Python bindings (#1985)
         Raise exception instead of exiting with return code in Python tests (#1983)
