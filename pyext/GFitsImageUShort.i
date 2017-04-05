@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsImageUShort.i - Unsigned short FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ public:
     GFitsImageUShort(const int& nx, const int& ny, const int& nz, const unsigned short* pixels = NULL);
     GFitsImageUShort(const int& nx, const int& ny, const int& nz, const int& nt, const unsigned short* pixels = NULL);
     GFitsImageUShort(const std::vector<int>& naxes, const unsigned short* pixels = NULL);
+    GFitsImageUShort(const GFitsImage& image);
     GFitsImageUShort(const GFitsImageUShort& image);
     virtual ~GFitsImageUShort(void);
 

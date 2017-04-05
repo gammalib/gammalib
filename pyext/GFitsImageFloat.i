@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsImageFloat.i - Single precision FITS image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     GFitsImageFloat(const int& nx, const int& ny, const int& nz, const float* pixels = NULL);
     GFitsImageFloat(const int& nx, const int& ny, const int& nz, const int& nt, const float* pixels = NULL);
     GFitsImageFloat(const std::vector<int>& naxes, const float* pixels = NULL);
+    GFitsImageFloat(const GFitsImage& image);
     GFitsImageFloat(const GFitsImageFloat& image);
     virtual ~GFitsImageFloat(void);
 

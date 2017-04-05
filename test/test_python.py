@@ -2,7 +2,7 @@
 # ==========================================================================
 # This scripts performs unit tests for the GammaLib Python bindings.
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -219,8 +219,9 @@ def test(installed=False):
     if installed:
         os.system('rm -rf %s' % (path))
 
-    # Exit with return code
-    sys.exit(rc)
+    # Raise an exception in case of failure
+    if not success:
+        raise RuntimeError('At least one error occured during the test.')
 
 
 # ======================== #

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-27 March 2017
+4 April 2017
 
 
 1. Introduction
@@ -44,7 +44,15 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-None
+The Python unit tests now raise exceptions instead of exiting with a non-
+zero return code so that the user is not thrown out of Python after calling
+gammalib.test() (#1983).
+
+If the code originates from the Git repository the configuration now switches
+to developer mode which implies that the Python bindings are always built.
+This solves the problem that occured for developers that could not get rid
+of existing Python wrappers, even if they modified the Python interface
+(#1985).
 
 
 4. Application module
@@ -59,7 +67,8 @@ None
 
 6. FITS I/O Interface
 ---------------------
-None
+FITS image type conversion constructors have been added to convert a FITS
+image of any type into a specific storage class (#1986).
 
 
 7. Linear algebra module

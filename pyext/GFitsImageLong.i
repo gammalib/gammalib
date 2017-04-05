@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsImageLong.i - Long integer FITS image class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     GFitsImageLong(const int& nx, const int& ny, const int& nz, const long* pixels = NULL);
     GFitsImageLong(const int& nx, const int& ny, const int& nz, const int& nt, const long* pixels = NULL);
     GFitsImageLong(const std::vector<int>& naxes, const long* pixels = NULL);
+    GFitsImageLong(const GFitsImage& image);
     GFitsImageLong(const GFitsImageLong& image);
     virtual ~GFitsImageLong(void);
 
