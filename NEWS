@@ -25,13 +25,17 @@ The following classes have been renamed:
 - ...
 
 The following methods have been added:
-- GCTAResponseIrf::rspname()
-- GCTARoi::contains(GCTAInstDir&)
-- GCTAEdisp2D::fetch()
 - GEbounds::set(GEnergies&)
 - GEbounds::emin(int&, GEnergy&)
 - GEbounds::emax(int&, GEnergy&)
 - GEnergies::set(GEbounds&)
+- GCTAResponseIrf::rspname()
+- GCTARoi::contains(GCTAInstDir&)
+- GCTAEdisp2D::fetch()
+- GCTAAeff::ebounds()
+- GCTAAeff2D::ebounds()
+- GCTAAeffArf::ebounds()
+- GCTAAeffPerfTable::ebounds()
 
 The following methods have been removed:
 - ...
@@ -86,8 +90,6 @@ None
 
 8. Model module
 ---------------
-<<<<<<< 75428cb593eb469cbb2c5e92cd69369745621430
-<<<<<<< a04a0c419578a4a97a02adb16951d2025d2adfba
 Sky directions drawn by GModelSpatialDiffuseConst::mc() are now restricted
 to the simulation cone that has previously been defined using the mc_norm()
 method. This speeds up considerbly the Monte Carlo simulations for an
@@ -126,8 +128,6 @@ derived classes that returns a pointer to a sky region that bounds the
 spatial model. For the moment, only circular sky regions have been
 implemented (#1764).
 
-<<<<<<< 1136c32c5b08f8fea14ee2e0d1898f5f6e5c72a0
-<<<<<<< 07173c405cafbc8d89c98b9c0a90a52c9a0ee0ab
 Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
 The method deals with pre-computation and normalization of the profiles,
 and implements the eval(), eval_grandients() and mc() method. The class
@@ -303,13 +303,11 @@ None
 -----------------
 Correct the containment radius computation in GCTAPsf2D (#1876).
 
-<<<<<<< e5273b1bc5555d288c392209930e187b0d086474
-The GCTAResponseIrf::rspname method has been added that returns the name
+The GCTAResponseIrf::rspname() method has been added that returns the name
 of the response function (attribute m_rspname).
-=======
+
 Do no longer interpret a CTA calibration database as a file path in the
 GCTAResponseIrf::read() method (#1969).
->>>>>>> Do no longer interpret a CTA calibration database as file path in GCTAResponseIrf::read (#1969)
 
 Add GCTARoi::contains() method that checks whether an instrument direction
 is contained within the region of interest.
@@ -318,11 +316,15 @@ Lazy loading of the energy dispersion in GCTAEdisp2D has been implemented by
 adding a fetch() method to the class. Now the energy dispersion is only loaded
 when needed, for example for function evaluation or Monte Carlo sampling (#1940).
 
-The GCTAEdisp2D::compute_ebounds_src method now loops over the migration to
+The GCTAEdisp2D::compute_ebounds_src() method now loops over the migration to
 enhance the precision in the true energy boundaries that are returned by this
 method. In addition, the validity range of the table is now stored in members
 of the class, and a non-zero energy dispersion is only returned for valid
 elements of the response table.
+
+An GCTAAeff::ebounds() method has been added to the abstract interface for
+effective area responses to return the valid energy range of the effective
+area (#1989).
 
 
 21. COMPTEL interface

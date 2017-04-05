@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAAeff.i - CTA effective area base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,7 @@ public:
                             const double& zenith,
                             const double& azimuth,
                             const bool&   etrue = true) const = 0;
+    virtual GEbounds    ebounds(void) const = 0;
 };
 
 

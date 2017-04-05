@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAAeffPerfTable.hpp - CTA performance table effective area class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,8 +30,9 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GFits.hpp"
-#include "GCTAAeff.hpp"
+#include "GEbounds.hpp"
 #include "GNodeArray.hpp"
+#include "GCTAAeff.hpp"
 
 
 /***********************************************************************//**
@@ -72,6 +73,7 @@ public:
                            const double& zenith,
                            const double& azimuth,
                            const bool&   etrue = true) const;
+    GEbounds           ebounds(void) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Methods
@@ -84,12 +86,16 @@ private:
     void init_members(void);
     void copy_members(const GCTAAeffPerfTable& aeff);
     void free_members(void);
+    void set_boundaries(void);
 
     // Members
-    GFilename           m_filename;  //!< Name of Aeff response file
-    GNodeArray          m_logE;      //!< log(E) nodes for Aeff interpolation
-    std::vector<double> m_aeff;      //!< Effective area in cm2
-    double              m_sigma;     //!< Sigma for offset angle computation (0=none)
+    GFilename           m_filename; //!< Name of Aeff response file
+    GNodeArray          m_logE;     //!< log(E) nodes for Aeff interpolation
+    std::vector<double> m_aeff;     //!< Effective area in cm2
+    GEbounds            m_ebounds;  //!< Energy boundaries
+    double              m_sigma;    //!< Sigma for offset angle computation (0=none)
+    double              m_logE_min; //!< Minimum logE (log10(E/TeV))
+    double              m_logE_max; //!< Maximum logE (log10(E/TeV))
 };
 
 
@@ -108,12 +114,24 @@ std::string GCTAAeffPerfTable::classname(void) const
 /***********************************************************************//**
  * @brief Return filename
  *
- * @return Returns filename from which effective area was loaded.
+ * @return Filename from which effective area was loaded.
  ***************************************************************************/
 inline
 GFilename GCTAAeffPerfTable::filename(void) const
 {
     return m_filename;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy boundaries
+ *
+ * @return Energy boundaries of effective area
+ ***************************************************************************/
+inline
+GEbounds GCTAAeffPerfTable::ebounds(void) const
+{
+    return m_ebounds;
 }
 
 

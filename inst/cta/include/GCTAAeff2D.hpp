@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GFilename.hpp"
+#include "GEbounds.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAResponseTable.hpp"
 
@@ -79,6 +80,7 @@ public:
                     const double& zenith,
                     const double& azimuth,
                     const bool&   etrue = true) const;
+    GEbounds    ebounds(void) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
     // Methods
@@ -100,10 +102,11 @@ private:
     // Members
     GFilename         m_filename;      //!< Name of Aeff response file
     GCTAResponseTable m_aeff;          //!< Aeff response table
+    GEbounds          m_ebounds;       //!< Energy boundaries
     int               m_inx_energy;    //!< Energy index
     int               m_inx_theta;     //!< Theta index
     int               m_inx_aeff;      //!< Effective area (true energy)
-    int               m_inx_aeff_reco; //!< Effective area (reconstructed energy)
+    int               m_inx_aeff_reco; //!< Effective area (reco. energy)
     double            m_logE_min;      //!< Minimum logE (log10(E/TeV))
     double            m_logE_max;      //!< Maximum logE (log10(E/TeV))
     double            m_theta_min;     //!< Minimum theta (radians)
@@ -126,12 +129,24 @@ std::string GCTAAeff2D::classname(void) const
 /***********************************************************************//**
  * @brief Return filename
  *
- * @return Returns filename from which effective area was loaded
+ * @return Filename from which effective area was loaded
  ***************************************************************************/
 inline
 GFilename GCTAAeff2D::filename(void) const
 {
     return m_filename;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy boundaries
+ *
+ * @return Energy boundaries of effective area
+ ***************************************************************************/
+inline
+GEbounds GCTAAeff2D::ebounds(void) const
+{
+    return m_ebounds;
 }
 
 

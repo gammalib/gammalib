@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAAeffArf.i - CTA ARF effective area class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,7 @@ public:
                      const double& zenith,
                      const double& azimuth,
                      const bool& etrue = true) const;
+    GEbounds     ebounds(void) const;
 
     // Methods
     int           size(void) const;

@@ -193,7 +193,7 @@ double GCTAAeff2D::operator()(const double& logE,
                               const bool&   etrue) const
 {
     // Initialise effective area
-    double aeff(0.0);
+    double aeff = 0.0;
 
     // Continue only if logE and theta are in validity range
     if ((logE  >= m_logE_min)  && (logE  <= m_logE_max) &&
@@ -323,12 +323,14 @@ void GCTAAeff2D::read(const GFitsTable& table)
     // TeV.
     if (table.has_card("LO_THRES")) {
         double value = table.real("LO_THRES");
+        m_ebounds.emin(0, GEnergy(value, "TeV"));
         if (value > 0.0) {
             m_logE_min = std::log10(value);
         }
     }
     if (table.has_card("HI_THRES")) {
         double value = table.real("HI_THRES");
+        m_ebounds.emax(0, GEnergy(value, "TeV"));
         if (value > 0.0) {
             m_logE_max = std::log10(value);
         }
@@ -591,6 +593,7 @@ void GCTAAeff2D::init_members(void)
     // Initialise members
     m_filename.clear();
     m_aeff.clear();
+    m_ebounds.clear();
     m_inx_energy    = 0;
     m_inx_theta     = 1;
     m_inx_aeff      = 0;
@@ -615,6 +618,7 @@ void GCTAAeff2D::copy_members(const GCTAAeff2D& aeff)
     // Copy members
     m_filename      = aeff.m_filename;
     m_aeff          = aeff.m_aeff;
+    m_ebounds       = aeff.m_ebounds;
     m_inx_energy    = aeff.m_inx_energy;
     m_inx_theta     = aeff.m_inx_theta;
     m_inx_aeff      = aeff.m_inx_aeff;
@@ -664,23 +668,35 @@ void GCTAAeff2D::set_indices(void)
 /***********************************************************************//**
  * @brief Set effective area boundaries
  *
- * Sets the data members m_logE_min, m_logE_max, m_theta_min and m_theta_max
- * that define the validity range of the effective area.
+ * Sets the data members m_ebounds, m_logE_min, m_logE_max, m_theta_min
+ * and m_theta_max that define the validity range of the effective area.
  ***************************************************************************/
 void GCTAAeff2D::set_boundaries(void)
 {
-    // Compute minimum and maximum logE boundaries
-    m_logE_min = std::log10(m_aeff.axis_lo(m_inx_aeff, 0));
-    m_logE_max = std::log10(m_aeff.axis_hi(m_inx_aeff,
-                                           m_aeff.axis_bins(m_inx_aeff)-1));
+    // Clear energy boundaries
+    m_ebounds.clear();
 
-    // Compute minimum and maximum theta boundaries
-    m_theta_min = m_aeff.axis_lo(m_inx_theta, 0) *
-                  gammalib::deg2rad;
-    m_theta_max = m_aeff.axis_hi(m_inx_theta, m_aeff.axis_bins(m_inx_theta)-1) *
-                  gammalib::deg2rad;
+    // Get number of energy and theta bins
+    int neng   = m_aeff.axis_bins(m_inx_aeff);
+    int ntheta = m_aeff.axis_bins(m_inx_theta);
+
+    // Get energy boundaries
+    GEnergy emin(m_aeff.axis_lo(m_inx_aeff, 0),
+                 m_aeff.axis_lo_unit(m_inx_aeff));
+    GEnergy emax(m_aeff.axis_hi(m_inx_aeff, neng-1),
+                 m_aeff.axis_hi_unit(m_inx_aeff));
+
+    // Set energy boundaries
+    m_ebounds.append(emin, emax);
+
+    // Set logE boundaries
+    m_logE_min = emin.log10TeV();
+    m_logE_max = emax.log10TeV();
+
+    // Compute theta boundaries
+    m_theta_min = m_aeff.axis_lo(m_inx_theta, 0)        * gammalib::deg2rad;
+    m_theta_max = m_aeff.axis_hi(m_inx_theta, ntheta-1) * gammalib::deg2rad;
 
     // Return
     return;
 }
-
