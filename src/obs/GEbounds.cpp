@@ -41,6 +41,8 @@
 #include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SET_LIN               "GEbounds::set_lin(int&, GEnergy&, GEnergy&)"
+#define G_SET_LOG               "GEbounds::set_log(int&, GEnergy&, GEnergy&)"
 #define G_READ_XML                             "GEbounds::read(GXmlElement&)"
 #define G_WRITE_XML                           "GEbounds::write(GXmlElement&)"
 #define G_REMOVE                                     "GEbounds::remove(int&)"
@@ -569,28 +571,47 @@ void GEbounds::set(const GEnergies& energies)
  * @param[in] emin Minimum energy of first interval.
  * @param[in] emax Maximum energy of last interval.
  *
+ * @exception GException::invalid_argument
+ *            Minimum energy is larger than the maximum energy.
+ *
  * Creates @p num linearly spaced energy boundaries running from @p emin to
- * @p emax.
+ * @p emax. If @p num is not a positive integer, no energy
+ * boundaries will be set.
  ***************************************************************************/
 void GEbounds::set_lin(const int& num, const GEnergy& emin, const GEnergy& emax)
 {
     // Initialise members
     clear();
 
-    // Compute bin width
-    GEnergy ebin = (emax - emin)/double(num); 
+    // Continue only if the requested number of energy boundaries is positive
+    if (num > 0) {
 
-    // Append boundaries
-    GEnergy min = emin;
-    GEnergy max = emin + ebin;
-    for (int i = 0; i < num; ++i) {
-        append(min, max);
-        min += ebin;
-        max += ebin;
-    }
+        // Throw an exception if the maximum energy is smaller than the
+        // minimum energy
+        if (emin > emax) {
+            std::string msg = "Minimum energy "+emin.print()+" is larger than "
+                              "maximum energy "+emax.print()+". Please provide "
+                              "a minimum energy that is not larger than the "
+                              "maximum energy.";
+            throw GException::invalid_argument(G_SET_LIN, msg);
+        }
 
-    // Set attributes
-    set_attributes();
+        // Compute bin width
+        GEnergy ebin = (emax - emin)/double(num);
+
+        // Append boundaries
+        GEnergy min = emin;
+        GEnergy max = emin + ebin;
+        for (int i = 0; i < num; ++i) {
+            append(min, max);
+            min += ebin;
+            max += ebin;
+        }
+
+        // Set attributes
+        set_attributes();
+
+    } // endif: number of energy boundaries was positive
 
     // Return
     return;
@@ -604,30 +625,64 @@ void GEbounds::set_lin(const int& num, const GEnergy& emin, const GEnergy& emax)
  * @param[in] emin Minimum energy of first interval.
  * @param[in] emax Maximum energy of last interval.
  *
+ * @exception GException::invalid_argument
+ *            Minimum or maximum energy are not positive or minimum energy
+ *            is larger than the maximum energy.
+ *
  * Creates @p num logarithmically spaced energy boundaries running from
- * @p emin to @p emax.
+ * @p emin to @p emax. If @p num is not a positive integer, no energy
+ * boundaries will be set.
  ***************************************************************************/
 void GEbounds::set_log(const int& num, const GEnergy& emin, const GEnergy& emax)
 {
     // Initialise members
     clear();
 
-    // Compute bin width
-    double elogmin = std::log10(emin.MeV());
-    double elogmax = std::log10(emax.MeV());
-    double elogbin = (elogmax - elogmin)/double(num);
+    // Continue only if the requested number of energy boundaries is positive
+    if (num > 0) {
 
-    // Append boundaries
-    GEnergy min;
-    GEnergy max;
-    for (int i = 0; i < num; ++i) {
-        min.MeV(std::pow(10.0, double(i)*elogbin   + elogmin));
-        max.MeV(std::pow(10.0, double(i+1)*elogbin + elogmin));
-        append(min, max);
-    }
+        // Throw an exception if the minimum or maximum energy is not positive
+        if (emin.MeV() <= 0.0) {
+            std::string msg = "Non-positive minimum energy "+emin.print()+
+                              " specified. Please provide a positive minimum "
+                              "energy value.";
+            throw GException::invalid_argument(G_SET_LOG, msg);
+        }
+        if (emax.MeV() <= 0.0) {
+            std::string msg = "Non-positive maximum energy "+emax.print()+
+                              " specified. Please provide a positive minimum "
+                              "energy value.";
+            throw GException::invalid_argument(G_SET_LOG, msg);
+        }
 
-    // Set attributes
-    set_attributes();
+        // Throw an exception if the maximum energy is smaller than the
+        // minimum energy
+        if (emin > emax) {
+            std::string msg = "Minimum energy "+emin.print()+" is larger than "
+                              "maximum energy "+emax.print()+". Please provide "
+                              "a minimum energy that is not larger than the "
+                              "maximum energy.";
+            throw GException::invalid_argument(G_SET_LOG, msg);
+        }
+
+        // Compute bin width
+        double elogmin = std::log10(emin.MeV());
+        double elogmax = std::log10(emax.MeV());
+        double elogbin = (elogmax - elogmin)/double(num);
+
+        // Append boundaries
+        GEnergy min;
+        GEnergy max;
+        for (int i = 0; i < num; ++i) {
+            min.MeV(std::pow(10.0, double(i)*elogbin   + elogmin));
+            max.MeV(std::pow(10.0, double(i+1)*elogbin + elogmin));
+            append(min, max);
+        }
+
+        // Set attributes
+        set_attributes();
+
+    } // endif: number of energy boundaries was positive
 
     // Return
     return;
