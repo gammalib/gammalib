@@ -242,15 +242,78 @@ void TestGObservation::test_ebounds(void)
         test_try_failure(e);
     }
 
+    // Check constructing of linear invalid energy boundaries
+    test_try("Test constructing of linear invalid energy boundaries");
+    try {
+        GEbounds bad(10, GEnergy(100.0, "MeV"), GEnergy(10.0, "MeV"), false);
+        test_try_failure("Constructing of linear invalid energy boundaries "
+                         "shall throw an exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Check constructing of logarithmic invalid energy boundaries
+    test_try("Test constructing of logarithmic invalid energy boundaries");
+    try {
+        GEbounds bad(10, GEnergy(100.0, "MeV"), GEnergy(10.0, "MeV"), true);
+        test_try_failure("Constructing of logarithmic invalid energy "
+                         "boundaries shall throw an exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Check constructing of logarithmic invalid energy boundaries
+    test_try("Test constructing of logarithmic invalid energy boundaries");
+    try {
+        GEbounds bad(10, GEnergy(0.0, "MeV"), GEnergy(10.0, "MeV"), true);
+        test_try_failure("Constructing of logarithmic invalid energy "
+                         "boundaries shall throw an exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Check constructing of logarithmic invalid energy boundaries
+    test_try("Test constructing of logarithmic invalid energy boundaries");
+    try {
+        GEbounds bad(10, GEnergy(10.0, "MeV"), GEnergy(0.0, "MeV"), true);
+        test_try_failure("Constructing of logarithmic invalid energy "
+                         "boundaries shall throw an exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Check energy containment
     GEbounds containment(1, GEnergy(100.0, "MeV"), GEnergy(1000.0, "MeV"));
-    test_assert(containment.contains(GEnergy(200.0, "MeV")), "Energy 200 MeV should be contained.");
-    test_assert(!containment.contains(GEnergy(10.0, "MeV")), "Energy 10 MeV should not be contained.");
-    test_assert(!containment.contains(GEnergy(2000.0, "MeV")), "Energy 2000 MeV should not be contained.");
-    test_assert(containment.contains(GEnergy(200.0, "MeV"), GEnergy(800.0, "MeV")), "Energy bin [200,800] MeV should be contained.");
-    test_assert(!containment.contains(GEnergy(80.0, "MeV"), GEnergy(800.0, "MeV")), "Energy bin [80,800] MeV should not be contained.");
-    test_assert(!containment.contains(GEnergy(200.0, "MeV"), GEnergy(2000.0, "MeV")), "Energy bin [200,2000] MeV should not be contained.");
-    test_assert(!containment.contains(GEnergy(80.0, "MeV"), GEnergy(2000.0, "MeV")), "Energy bin [80,2000] MeV should not be contained.");
+    test_assert(containment.contains(GEnergy(200.0, "MeV")),
+                "Energy 200 MeV should be contained.");
+    test_assert(!containment.contains(GEnergy(10.0, "MeV")),
+                "Energy 10 MeV should not be contained.");
+    test_assert(!containment.contains(GEnergy(2000.0, "MeV")),
+                "Energy 2000 MeV should not be contained.");
+    test_assert(containment.contains(GEnergy(200.0, "MeV"), GEnergy(800.0, "MeV")),
+                "Energy bin [200,800] MeV should be contained.");
+    test_assert(!containment.contains(GEnergy(80.0, "MeV"), GEnergy(800.0, "MeV")),
+                "Energy bin [80,800] MeV should not be contained.");
+    test_assert(!containment.contains(GEnergy(200.0, "MeV"), GEnergy(2000.0, "MeV")),
+                "Energy bin [200,2000] MeV should not be contained.");
+    test_assert(!containment.contains(GEnergy(80.0, "MeV"), GEnergy(2000.0, "MeV")),
+                "Energy bin [80,2000] MeV should not be contained.");
 
     // Remove test file
     GFilename filename("test_ebounds.fits");

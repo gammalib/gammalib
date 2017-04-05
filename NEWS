@@ -241,6 +241,12 @@ A set() method has been added to GEbounds and GEnergies to allow converting
 energy boundaries into an energy container and vice versa. In addition,
 conversion constructors have been added (#1977).
 
+The GEbounds::set_lin() and GEbounds::set_log() method now throw exceptions
+if the minimum energy is larger than the maximum energy. In addition, the
+GEbounds::set_log() method throws an exception if either the minimum or
+maximum energy are zero. Furthermore, the methods clear the energy boundaries
+if the requested number of intervals is non-zero (#1989). 
+
 
 11. Optimization module
 -----------------------
