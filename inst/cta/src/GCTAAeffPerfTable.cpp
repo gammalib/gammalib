@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAAeffPerfTable.hpp - CTA performance table effective area class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -158,16 +158,19 @@ GCTAAeffPerfTable& GCTAAeffPerfTable::operator=(const GCTAAeffPerfTable& aeff)
  * @brief Return effective area in units of cm2
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Defaults to 0.0.
- * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
+ * @param[in] theta Offset angle in camera system (rad).
+ * @param[in] phi Azimuth angle in camera system (rad). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  * @param[in] etrue Use true energy (true/false). Not used.
  *
  * Returns the effective area in units of cm2 for a given energy and
  * offset angle. The effective area is linearily interpolated in
  * log10(energy). The method assures that the effective area value never
  * becomes negative.
+ *
+ * Outside the energy range that is covered by the performance table the
+ * effective area will be set to zero.
  ***************************************************************************/
 double GCTAAeffPerfTable::operator()(const double& logE, 
                                      const double& theta, 
@@ -176,22 +179,30 @@ double GCTAAeffPerfTable::operator()(const double& logE,
                                      const double& azimuth,
                                      const bool&   etrue) const
 {
-    // Get effective area value in cm2
-    double aeff = m_logE.interpolate(logE, m_aeff);
+    // Initialise effective area
+    double aeff = 0.0;
 
-    // Make sure that effective area is not negative
-    if (aeff < 0.0) {
-        aeff = 0.0;
-    }
+    // Continue only if logE is in validity range
+    if ((logE >= m_logE_min)  && (logE <= m_logE_max)) {
 
-    // Optionally add in Gaussian offset angle dependence
-    if (m_sigma != 0.0) {
-        double offset = theta * gammalib::rad2deg;
-        double arg    = offset * offset / m_sigma;
-        double scale  = std::exp(-0.5 * arg * arg);
-        aeff         *= scale;
-    }
-    
+        // Get effective area value in cm2
+        aeff = m_logE.interpolate(logE, m_aeff);
+
+        // Make sure that effective area is not negative
+        if (aeff < 0.0) {
+            aeff = 0.0;
+        }
+
+        // Optionally add in Gaussian offset angle dependence
+        if (m_sigma != 0.0) {
+            double offset = theta * gammalib::rad2deg;
+            double arg    = offset * offset / m_sigma;
+            double scale  = std::exp(-0.5 * arg * arg);
+            aeff         *= scale;
+        }
+
+    } // endif: logE in validity range
+
     // Return effective area value
     return aeff;
 }
@@ -294,6 +305,9 @@ void GCTAAeffPerfTable::load(const GFilename& filename)
     // Store filename
     m_filename = filename;
 
+    // Set the energy boundaries
+    set_boundaries();
+
     // Return
     return;
 }
@@ -329,7 +343,7 @@ double GCTAAeffPerfTable::max(const double& logE,
 /***********************************************************************//**
  * @brief Print effective area information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing effective area information.
  ***************************************************************************/
 std::string GCTAAeffPerfTable::print(const GChatter& chatter) const
@@ -340,10 +354,6 @@ std::string GCTAAeffPerfTable::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Compute energy boundaries in TeV
-        double emin = std::pow(10.0, m_logE[0]);
-        double emax = std::pow(10.0, m_logE[size()-1]);
-
         // Append header
         result.append("=== GCTAAeffPerfTable ===");
 
@@ -351,11 +361,9 @@ std::string GCTAAeffPerfTable::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
                       gammalib::str(size()));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
-        result.append(gammalib::str(emin) +
-                      " - " +
-                      gammalib::str(emax) +
-                      " TeV");
+        result.append("\n"+gammalib::parformat("Energy range"));
+        result.append(m_ebounds.emin().print() + " - " +
+                      m_ebounds.emax().print());
 
         // Append offset angle dependence
         if (m_sigma == 0) {
@@ -390,7 +398,10 @@ void GCTAAeffPerfTable::init_members(void)
     m_filename.clear();
     m_logE.clear();
     m_aeff.clear();
-    m_sigma = 3.0;
+    m_ebounds.clear();
+    m_sigma    = 3.0;
+    m_logE_min = 0.0;
+    m_logE_max = 0.0;
 
     // Return
     return;
@@ -408,7 +419,10 @@ void GCTAAeffPerfTable::copy_members(const GCTAAeffPerfTable& aeff)
     m_filename = aeff.m_filename;
     m_logE     = aeff.m_logE;
     m_aeff     = aeff.m_aeff;
+    m_ebounds  = aeff.m_ebounds;
     m_sigma    = aeff.m_sigma;
+    m_logE_min = aeff.m_logE_min;
+    m_logE_max = aeff.m_logE_max;
 
     // Return
     return;
@@ -420,6 +434,37 @@ void GCTAAeffPerfTable::copy_members(const GCTAAeffPerfTable& aeff)
  ***************************************************************************/
 void GCTAAeffPerfTable::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set effective area boundaries
+ *
+ * Sets the data members m_ebounds, m_logE_min and m_logE_max that define
+ * the validity range of the effective area.
+ ***************************************************************************/
+void GCTAAeffPerfTable::set_boundaries(void)
+{
+    // Clear energy boundaries
+    m_ebounds.clear();
+
+    // Set log10 of minimum and maximum energies. Since the energy values are
+    // given at the bin centre we subtract half of the distance to the second
+    // bin from the minimum energy and we add half of the distance to the before
+    // last bin to the maximum energy
+    m_logE_min = m_logE[0]               - 0.5*(m_logE[1] - m_logE[0]);
+    m_logE_max = m_logE[m_logE.size()-1] + 0.5*(m_logE[m_logE.size()-1] -
+                                                m_logE[m_logE.size()-2]);
+
+    // Set energy boundaries
+    GEnergy emin;
+    GEnergy emax;
+    emin.log10TeV(m_logE_min);
+    emax.log10TeV(m_logE_max);
+    m_ebounds.append(emin, emax);
+
     // Return
     return;
 }

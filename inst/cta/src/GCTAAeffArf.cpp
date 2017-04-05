@@ -162,16 +162,20 @@ GCTAAeffArf& GCTAAeffArf::operator=(const GCTAAeffArf& aeff)
  * @brief Return effective area in units of cm2
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Defaults to 0.0.
- * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
+ * @param[in] theta Offset angle in camera system (rad).
+ * @param[in] phi Azimuth angle in camera system (rad). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  * @param[in] etrue Use true energy (true/false). Not used.
+ * @return Effective area in cm2.
  *
  * Returns the effective area in units of cm2 for a given energy and
  * offset angle. The effective area is linearily interpolated in
  * log10(energy). The method assures that the effective area value never
  * becomes negative.
+ *
+ * Outside the energy range that is covered by the ARF vector the effective
+ * area will be set to zero.
  ***************************************************************************/
 double GCTAAeffArf::operator()(const double& logE, 
                                const double& theta, 
@@ -180,22 +184,30 @@ double GCTAAeffArf::operator()(const double& logE,
                                const double& azimuth,
                                const bool&   etrue) const
 {
-    // Get effective area value in cm2
-    double aeff = m_logE.interpolate(logE, m_aeff);
+    // Initialise effective area
+    double aeff = 0.0;
 
-    // Make sure that effective area is not negative
-    if (aeff < 0.0) {
-        aeff = 0.0;
-    }
+    // Continue only if logE is in validity range
+    if ((logE  >= m_logE_min)  && (logE  <= m_logE_max)) {
 
-    // Optionally add in Gaussian offset angle dependence
-    if (m_sigma != 0.0) {
-        double offset = theta * gammalib::rad2deg;
-        double arg    = offset * offset / m_sigma;
-        double scale  = exp(-0.5 * arg * arg);
-        aeff         *= scale;
-    }
-    
+        // Get effective area value in cm2
+        aeff = m_logE.interpolate(logE, m_aeff);
+
+        // Make sure that effective area is not negative
+        if (aeff < 0.0) {
+            aeff = 0.0;
+        }
+
+        // Optionally add in Gaussian offset angle dependence
+        if (m_sigma != 0.0) {
+            double offset = theta * gammalib::rad2deg;
+            double arg    = offset * offset / m_sigma;
+            double scale  = exp(-0.5 * arg * arg);
+            aeff         *= scale;
+        }
+
+    } // endif: logE in validity range
+
     // Return effective area value
     return aeff;
 }
@@ -291,6 +303,7 @@ void GCTAAeffArf::read(const GFitsTable& table)
     // Clear arrays
     m_logE.clear();
     m_aeff.clear();
+    m_ebounds.clear();
 
     // Get pointers to table columns
     const GFitsTableCol* energy_lo = table["ENERG_LO"];
@@ -298,30 +311,9 @@ void GCTAAeffArf::read(const GFitsTable& table)
     const GFitsTableCol* specresp  = table["SPECRESP"];
 
     // Determine unit conversion factors (default: TeV and cm^2)
-    std::string u_energy_lo = gammalib::tolower(gammalib::strip_whitespace(energy_lo->unit()));
-    std::string u_energy_hi = gammalib::tolower(gammalib::strip_whitespace(energy_hi->unit()));
-    std::string u_specresp  = gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
-    double c_energy_lo = 1.0;
-    double c_energy_hi = 1.0;
+    std::string u_specresp  = gammalib::tolower(
+                              gammalib::strip_whitespace(specresp->unit()));
     double c_specresp  = 1.0;
-    if (u_energy_lo == "kev") {
-        c_energy_lo = 1.0e-9;
-    }
-    else if (u_energy_lo == "mev") {
-        c_energy_lo = 1.0e-6;
-    }
-    else if (u_energy_lo == "gev") {
-        c_energy_lo = 1.0e-3;
-    }
-    if (u_energy_hi == "kev") {
-        c_energy_hi = 1.0e-9;
-    }
-    else if (u_energy_hi == "mev") {
-        c_energy_hi = 1.0e-6;
-    }
-    else if (u_energy_hi == "gev") {
-        c_energy_hi = 1.0e-3;
-    }
     if (u_specresp == "m^2" || u_specresp == "m2") {
         c_specresp = 10000.0;
     }
@@ -331,11 +323,13 @@ void GCTAAeffArf::read(const GFitsTable& table)
 
     // Set nodes
     for (int i = 0; i < num; ++i) {
-    
-        // Compute log10 mean energy in TeV
-        double e_min = energy_lo->real(i) * c_energy_lo;
-        double e_max = energy_hi->real(i) * c_energy_hi;
-        double logE  = 0.5 * (log10(e_min) + log10(e_max));
+
+        // Compute energy boundaries
+        GEnergy emin(energy_lo->real(i), energy_lo->unit());
+        GEnergy emax(energy_hi->real(i), energy_hi->unit());
+
+        // Compute log10 of mean energy in TeV
+        double logE = 0.5 * (emin.log10TeV() + emax.log10TeV());
 
         // Initialise scale factor
         double scale = m_scale;
@@ -348,6 +342,13 @@ void GCTAAeffArf::read(const GFitsTable& table)
         m_aeff.push_back(aeff);
 
     } // endfor: looped over nodes
+
+    // Set energy boundaries
+    GEnergy emin(energy_lo->real(0),     energy_lo->unit());
+    GEnergy emax(energy_hi->real(num-1), energy_hi->unit());
+    m_logE_min = emin.log10TeV();
+    m_logE_max = emax.log10TeV();
+    m_ebounds.append(emin, emax);
     
     // Disable offset angle dependence
     m_sigma = 0.0;
@@ -462,7 +463,7 @@ double GCTAAeffArf::max(const double& logE,
 /***********************************************************************//**
  * @brief Print effective area information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing effective area information.
  ***************************************************************************/
 std::string GCTAAeffArf::print(const GChatter& chatter) const
@@ -473,10 +474,6 @@ std::string GCTAAeffArf::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Compute energy boundaries in TeV
-        double emin = std::pow(10.0, m_logE[0]);
-        double emax = std::pow(10.0, m_logE[size()-1]);
-
         // Append header
         result.append("=== GCTAAeffArf ===");
 
@@ -484,11 +481,9 @@ std::string GCTAAeffArf::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
                       gammalib::str(size()));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
-        result.append(gammalib::str(emin) +
-                      " - " +
-                      gammalib::str(emax) +
-                      " TeV");
+        result.append("\n"+gammalib::parformat("Energy range"));
+        result.append(m_ebounds.emin().print() + " - " +
+                      m_ebounds.emax().print());
 
         // Append offset angle dependence
         if (m_sigma == 0) {
@@ -523,9 +518,12 @@ void GCTAAeffArf::init_members(void)
     m_filename.clear();
     m_logE.clear();
     m_aeff.clear();
+    m_ebounds.clear();
     m_sigma    = 0.0;
     m_thetacut = 0.0;
     m_scale    = 1.0;
+    m_logE_min = 0.0;
+    m_logE_max = 0.0;
 
     // Return
     return;
@@ -543,9 +541,12 @@ void GCTAAeffArf::copy_members(const GCTAAeffArf& aeff)
     m_filename = aeff.m_filename;
     m_logE     = aeff.m_logE;
     m_aeff     = aeff.m_aeff;
+    m_ebounds  = aeff.m_ebounds;
     m_sigma    = aeff.m_sigma;
     m_thetacut = aeff.m_thetacut;
     m_scale    = aeff.m_scale;
+    m_logE_min = aeff.m_logE_min;
+    m_logE_max = aeff.m_logE_max;
 
     // Return
     return;

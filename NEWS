@@ -23,13 +23,17 @@ The following classes have been renamed:
 - ...
 
 The following methods have been added:
-- GCTAResponseIrf::rspname()
-- GCTARoi::contains(GCTAInstDir&)
-- GCTAEdisp2D::fetch()
 - GEbounds::set(GEnergies&)
 - GEbounds::emin(int&, GEnergy&)
 - GEbounds::emax(int&, GEnergy&)
 - GEnergies::set(GEbounds&)
+- GCTAResponseIrf::rspname()
+- GCTARoi::contains(GCTAInstDir&)
+- GCTAEdisp2D::fetch()
+- GCTAAeff::ebounds()
+- GCTAAeff2D::ebounds()
+- GCTAAeffArf::ebounds()
+- GCTAAeffPerfTable::ebounds()
 
 The following methods have been removed:
 - ...
@@ -162,7 +166,7 @@ None
 -----------------
 Correct the containment radius computation in GCTAPsf2D (#1876).
 
-The GCTAResponseIrf::rspname method has been added that returns the name
+The GCTAResponseIrf::rspname() method has been added that returns the name
 of the response function (attribute m_rspname).
 
 Do no longer interpret a CTA calibration database as a file path in the
@@ -175,11 +179,15 @@ Lazy loading of the energy dispersion in GCTAEdisp2D has been implemented by
 adding a fetch() method to the class. Now the energy dispersion is only loaded
 when needed, for example for function evaluation or Monte Carlo sampling (#1940).
 
-The GCTAEdisp2D::compute_ebounds_src method now loops over the migration to
+The GCTAEdisp2D::compute_ebounds_src() method now loops over the migration to
 enhance the precision in the true energy boundaries that are returned by this
 method. In addition, the validity range of the table is now stored in members
 of the class, and a non-zero energy dispersion is only returned for valid
 elements of the response table.
+
+An GCTAAeff::ebounds() method has been added to the abstract interface for
+effective area responses to return the valid energy range of the effective
+area (#1989).
 
 
 21. COMPTEL interface

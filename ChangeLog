@@ -3,6 +3,7 @@
         * Version 1.3.0 released
         =========================
 
+        Add GCTAAeff::ebounds() method (#1989)
         Add GEbounds::emin() and GEbounds::emax() setter methods (#1989)
         Protect GEbounds::set_lin() and set_log() methods from invalid arguments (#1989)
         Copy shared Python libraries instead of creating a symbolic link (#1987)
