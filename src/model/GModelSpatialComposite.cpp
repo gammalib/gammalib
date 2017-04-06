@@ -528,14 +528,12 @@ void GModelSpatialComposite::append(const GModelSpatial& component,
         
     } // endfor: loop over model parameters
 
-    // Push back model scale
-    m_scales.push_back(scale);
 
     // Initialise i-th scale parameter
     m_scales_fit.push_back(new GModelPar());
     m_scales_fit[index]->clear();
     m_scales_fit[index]->name("scales_fit" + gammalib::str(m_components.size()));
-    m_scales_fit[index]->value(m_scales[index]);
+    m_scales_fit[index]->value(scale);
     m_scales_fit[index]->range(0.001,1000.);
     if(index==0)
     	m_scales_fit[index]->fix();
@@ -709,7 +707,6 @@ void GModelSpatialComposite::init_members(void)
     // Initialise other members
     m_components.clear();
     m_names.clear();
-    m_scales.clear();
     m_scales_fit.clear();
     m_region.clear();
 
@@ -728,7 +725,6 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
     // Copy members
     m_type       = model.m_type;
     m_names      = model.m_names;
-    m_scales     = model.m_scales;
     m_region     = model.m_region;
 
     // Initialise components
