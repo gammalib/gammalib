@@ -621,11 +621,12 @@ GMatrixSparse GObservations::likelihood::covariance(void) const
 
 
 /***********************************************************************//**
- * @brief Save likelihood fit results into FITS file.
+ * @brief Save likelihood fit results into CSV or FITS file.
  *
- * @param[in] filename FITS filename.
+ * @param[in] filename CSV/FITS filename.
+ * @param[in] csv save as CSV? (default: true)
  *
- * Saves the likelihood fit results into a FITS file. For the moment the
+ * Saves the likelihood fit results into a CSV/FITS file. For the moment the
  * method only writes the covariance matrix.
  ***************************************************************************/
 void GObservations::likelihood::save(const GFilename& filename, bool csv) const
