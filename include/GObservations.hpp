@@ -158,7 +158,7 @@ public:
         double        npred(void) const;
         GMatrixSparse hessian(const GOptimizerPars& pars);
         GMatrixSparse covariance(void) const;
-        void          save(const GFilename& filename) const;
+        void          save(const GFilename& filename, bool csv = true) const;
 
     protected:
         // Protected methods
