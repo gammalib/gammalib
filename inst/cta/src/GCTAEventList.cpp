@@ -575,6 +575,29 @@ void GCTAEventList::append(const GCTAEventAtom& event)
 }
 
 
+
+/***********************************************************************//**
+ * @brief Append a column to m_columns
+ *
+ * @param[in] col Fits table column to be appended.
+ *
+ * Appends a fits column to the end of the m_columns vector.
+ ***************************************************************************/
+//void GCTAEventList::append_column(const std::string& colname)
+void GCTAEventList::append_column(GFitsTableCol& col)
+{
+    // Make sure that the events are online
+    fetch();
+
+    // Append the column
+    m_columns.push_back(&col);
+
+    // Return
+    return;
+}
+
+
+
 /***********************************************************************//**
  * @brief Remove events from event list
  *

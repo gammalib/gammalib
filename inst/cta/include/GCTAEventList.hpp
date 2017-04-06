@@ -95,6 +95,7 @@ public:
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
     const std::string& gtiname(void) const;
+    void               append_column(GFitsTableCol& col);
 
 protected:
     // Protected methods
