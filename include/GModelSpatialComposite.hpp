@@ -100,6 +100,7 @@ protected:
     std::vector<GModelSpatial*> m_components; //!< Components
     std::vector<std::string>    m_names;      //!< Component names
     std::vector<double>         m_scales;     //!< Component scales
+    std::vector<GModelPar*>     m_scales_fit; //!< scales to be fitted
     mutable GSkyRegionCircle    m_region;     //!< Bounding circle
 };
 
