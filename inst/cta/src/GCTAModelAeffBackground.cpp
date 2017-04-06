@@ -657,7 +657,6 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
 			
 			// std::cout << "value: " << value << ", max_aeff: " << max_aeff << std::endl;
 			if(numberoftrys==1000&&value==0){
-			  std::cout << "PSF not found"<<std::endl;
 			  break;
 			}
                         // Compute acceptance fraction
