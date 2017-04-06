@@ -100,6 +100,8 @@ public:
     const bool& has_phase() const;
     const bool& has_detxy() const;
     
+    void               append_column(GFitsTableCol& col);
+
 protected:
     // Protected methods
     void         init_members(void);
