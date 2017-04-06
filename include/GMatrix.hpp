@@ -256,7 +256,7 @@ GMatrix GMatrix::operator-(const GMatrix& matrix) const
  * the value of scalar. The method makes use of the unary subtraction operator.
  ***************************************************************************/
 inline
-GMatrix GMatrix::operator+(const double& scalar) const
+GMatrix GMatrix::operator-(const double& scalar) const
 {
     GMatrix result = *this;
     result -= scalar;

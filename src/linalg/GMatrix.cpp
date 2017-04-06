@@ -420,7 +420,7 @@ GMatrix& GMatrix::operator-=(const GMatrix& matrix)
  *
  * This method subtracts a given scalar from each matrix element.
  ***************************************************************************/
-GMatrix& GMatrix::operator+=(const double& scalar)
+GMatrix& GMatrix::operator-=(const double& scalar)
 {
     // Add all matrix elements
     double* dst = m_data;

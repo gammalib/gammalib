@@ -532,7 +532,34 @@ void TestGMatrix::matrix_arithmetics(void)
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GMatrix / 3.0",
                 "Unexpected result matrix:\n"+test.print());
+   
+	// GMatrix + 3.0
+	test = m_test + 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0, 3.0), "Test GMatrix + 3.0",
+                "Unexpected result matrix:\n"+test.print());
 
+	// GMatrix += 3.0
+        test = m_test;
+        test += 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0, 3.0), "Test GMatrix + 3.0",
+                "Unexpected result matrix:\n"+test.print());
+    
+	// GMatrix - 5.0
+	test = m_test - 5.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0, -5.0), "Test GMatrix -= 5.0",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix -= 3.0
+        test = m_test;
+        test -= 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0, -3.0), "Test GMatrix -= 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
+    
     // Test invalid matrix addition
     test_try("Test invalid matrix addition");
     try {
