@@ -458,6 +458,10 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
             if (m_scales_fit[i]->value() != 1.0 || matching_model->has_attribute("scale")
                     || m_scales_fit[i]->is_free()) {
             	matching_model->attribute("scale", gammalib::str(m_scales_fit[i]->value()));
+            	if (m_scales_fit[i]->is_free()) {
+            	    matching_model->attribute("scale_error",
+            	            gammalib::str(m_scales_fit[i]->error()));
+            	}
             	matching_model->attribute("free_scale",
             	        gammalib::str(m_scales_fit[i]->is_free()));
             }
@@ -474,6 +478,10 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
             // Write scale to XML element if needed
             if (m_scales_fit[i]->value() != 1.0 || m_scales_fit[i]->is_free()) {
                 element.attribute("scale", gammalib::str(m_scales_fit[i]->value()));
+                if (m_scales_fit[i]->is_free()) {
+                                    element.attribute("scale_error",
+                                            gammalib::str(m_scales_fit[i]->error()));
+                }
                 element.attribute("free_scale",
                                         gammalib::str(m_scales_fit[i]->is_free()));
             }
