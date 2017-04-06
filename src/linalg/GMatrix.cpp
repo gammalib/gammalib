@@ -362,6 +362,26 @@ GMatrix& GMatrix::operator+=(const GMatrix& matrix)
 
 
 /***********************************************************************//**
+ * @brief Unary matrix scalar addition operator
+ *
+ * @param[in] double Scalar.
+ *
+ * This method adds a given scalar to each matrix element.
+ ***************************************************************************/
+GMatrix& GMatrix::operator+=(const double& scalar)
+{
+    // Add all matrix elements
+    double* dst = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ += scalar;
+    }
+
+    // Return result
+    return *this;
+}
+
+
+/***********************************************************************//**
  * @brief Unary matrix subtraction operator
  *
  * @param[in] matrix Matrix.
@@ -386,6 +406,26 @@ GMatrix& GMatrix::operator-=(const GMatrix& matrix)
     double*       dst = m_data;
     for (int i = 0; i < m_elements; ++i) {
         *dst++ -= *src++;
+    }
+
+    // Return result
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Unary matrix scalar subtraction operator
+ *
+ * @param[in] double Scalar.
+ *
+ * This method subtracts a given scalar from each matrix element.
+ ***************************************************************************/
+GMatrix& GMatrix::operator+=(const double& scalar)
+{
+    // Add all matrix elements
+    double* dst = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ -= scalar;
     }
 
     // Return result

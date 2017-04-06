@@ -96,11 +96,15 @@ public:
     virtual GMatrix&      operator=(const GMatrix& matrix);
     virtual GMatrix&      operator=(const double& value);
     virtual GMatrix       operator+(const GMatrix& matrix) const;
+    virtual GMatrix       operator+(const double& scalar) const;
     virtual GMatrix       operator-(const GMatrix& matrix) const;
+    virtual GMatrix       operator-(const double& scalar) const;
     virtual GMatrix       operator*(const GMatrix& matrix) const;
     virtual GMatrix       operator-(void) const;
     virtual GMatrix&      operator+=(const GMatrix& matrix);
+    virtual GMatrix&      operator+=(const double& scalar);
     virtual GMatrix&      operator-=(const GMatrix& matrix);
+    virtual GMatrix&      operator-=(const double& scalar);
     virtual GMatrix&      operator*=(const GMatrix& matrix);
     virtual GMatrix&      operator*=(const double& scalar);
     virtual GMatrix&      operator/=(const double& scalar);
@@ -207,6 +211,24 @@ GMatrix GMatrix::operator+(const GMatrix& matrix) const
 
 
 /***********************************************************************//**
+ * @brief Binary matrix scalar addition
+ *
+ * @param[in] double Scalar.
+ * @return Result of matrix addition.
+ *
+ * Returns the sum of the matrix with another matrix were all entries have 
+ * the value of scalar. The method makes use of the unary addition operator.
+ ***************************************************************************/
+inline
+GMatrix GMatrix::operator+(const double& scalar) const
+{
+    GMatrix result = *this;
+    result += scalar;
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Binary matrix subtraction
  *
  * @param[in] matrix Matrix.
@@ -220,6 +242,24 @@ GMatrix GMatrix::operator-(const GMatrix& matrix) const
 {
     GMatrix result = *this;
     result -= matrix;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary matrix scalar subtraction
+ *
+ * @param[in] double Scalar.
+ * @return Result of matrix subtraction.
+ *
+ * Returns the difference of the matrix with another matrix were all entries have 
+ * the value of scalar. The method makes use of the unary subtraction operator.
+ ***************************************************************************/
+inline
+GMatrix GMatrix::operator+(const double& scalar) const
+{
+    GMatrix result = *this;
+    result -= scalar;
     return result;
 }
 
