@@ -360,13 +360,21 @@ void GModelSpatialComposite::read(const GXmlElement& xml)
         // Initialise scale
         double scale = 1.0;
 
+        // Initialise freeScale
+        double freeScale = false;
+
         // Get scale value
         if (spec-> has_attribute("scale")) {
             scale = gammalib::todouble(spec->attribute("scale"));
+
+            // Check if scale is fixed
+            if (spec->has_attribute("free_scale")) {
+                freeScale = gammalib::toint(spec->attribute("free_scale"));
+            }
         }
 
         // Append spatial component to container
-        append(*ptr, name, scale);
+        append(*ptr, name, scale, freeScale);
         
     } // endfor: loop over components
     
@@ -416,7 +424,7 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
         // Find XML element with matching name
         GXmlElement *matching_model = NULL;
         for (int k = 0; k < xml.elements("spatialModel"); ++k) {
-            if (xml.element("spatialModel", k)->attribute("name") == m_names[i]) {
+            if (xml.element("spatialModel", k)->attribute("component") == m_names[i]) {
                 matching_model = xml.element("spatialModel", k);
                 break;
             }
@@ -447,8 +455,11 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
             spatial->write(*matching_model);
 
             // Write scale to XML element if needed
-            if (m_scales_fit[i]->value() != 1.0 || matching_model->has_attribute("scale")) {
+            if (m_scales_fit[i]->value() != 1.0 || matching_model->has_attribute("scale")
+                    || m_scales_fit[i]->is_free()) {
             	matching_model->attribute("scale", gammalib::str(m_scales_fit[i]->value()));
+            	matching_model->attribute("free_scale",
+            	        gammalib::str(m_scales_fit[i]->is_free()));
             }
         }
 
@@ -457,9 +468,14 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
             GXmlElement element("spatialModel");
             spatial->write(element);
 
+            // Write component name
+            element.attribute("component", m_names[i]);
+
             // Write scale to XML element if needed
-            if (m_scales_fit[i]->value() != 1.0) {
+            if (m_scales_fit[i]->value() != 1.0 || m_scales_fit[i]->is_free()) {
                 element.attribute("scale", gammalib::str(m_scales_fit[i]->value()));
+                element.attribute("free_scale",
+                                        gammalib::str(m_scales_fit[i]->is_free()));
             }
             xml.append(element);
         }
@@ -482,12 +498,14 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
  * @param[in] component Spatial model component to append.
  * @param[in] name Name of spatial model (can be empty).
  * @param[in] scale Optional spatial model scaling factor.
+ * @param[in] freeScale Free scale parameter (default:false).
  *
  * Appends a spatial component to the composite model
  ***************************************************************************/
 void GModelSpatialComposite::append(const GModelSpatial& component,
                                     const std::string&   name,
-                                    const double&        scale)
+                                    const double&        scale,
+                                    const bool&          freeScale)
 {
     // Append model container
     m_components.push_back(component.clone());
@@ -532,13 +550,13 @@ void GModelSpatialComposite::append(const GModelSpatial& component,
     // Initialise i-th scale parameter
     m_scales_fit.push_back(new GModelPar());
     m_scales_fit[index]->clear();
-    m_scales_fit[index]->name("scales_fit" + gammalib::str(m_components.size()));
+    m_scales_fit[index]->name(component_name + ":scale");
     m_scales_fit[index]->value(scale);
-    m_scales_fit[index]->range(0.001,1000.);
-    if(index==0)
-    	m_scales_fit[index]->fix();
-    else
+    m_scales_fit[index]->range(1e-10,1e13);
+    if(freeScale)
     	m_scales_fit[index]->free();
+    else
+    	m_scales_fit[index]->fix();
     m_scales_fit[index]->scale(1.0);
     m_scales_fit[index]->gradient(0.0);
     m_scales_fit[index]->has_grad(false);  // for the moment use numerical gradient
