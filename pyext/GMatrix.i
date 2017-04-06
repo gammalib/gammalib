@@ -53,8 +53,12 @@ public:
     virtual GMatrix       operator+(const GMatrix& matrix) const;
     virtual GMatrix       operator-(const GMatrix& matrix) const;
     virtual GMatrix       operator-(void) const;
+    virtual GMatrix       operator+(const double scalar) const;
+    virtual GMatrix       operator-(const double scalar) const;
     virtual GMatrix&      operator+=(const GMatrix& matrix);
+    virtual GMatrix&      operator+=(const double scalar);
     virtual GMatrix&      operator-=(const GMatrix& matrix);
+    virtual GMatrix&      operator-=(const double scalar);
     virtual GMatrix&      operator*=(const GMatrix& matrix);
     virtual GMatrix&      operator*=(const double& scalar);
 
