@@ -82,7 +82,9 @@ public:
     void                 append(const GModelSpatial& component,
                                 const std::string&   name = "",
                                 const double&        scale = 1.0,
-                                const bool&          freeScale = false);
+                                const bool&          freeScale = false,
+                                const double&        minScale = 1.e-10,
+                                const double&        maxScale = 1.e13);
     const GModelSpatial* component(const int& index) const;
     const GModelSpatial* component(const std::string& name) const;
     double               scale(const int& index) const;

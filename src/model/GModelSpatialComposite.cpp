@@ -360,8 +360,10 @@ void GModelSpatialComposite::read(const GXmlElement& xml)
         // Initialise scale
         double scale = 1.0;
 
-        // Initialise freeScale
+        // Initialise scale attributes
         double freeScale = false;
+        double minScale = 1.e-10;
+        double maxScale = 1.e13;
 
         // Get scale value
         if (spec-> has_attribute("scale")) {
@@ -371,10 +373,19 @@ void GModelSpatialComposite::read(const GXmlElement& xml)
             if (spec->has_attribute("free_scale")) {
                 freeScale = gammalib::toint(spec->attribute("free_scale"));
             }
+
+            // Check if scale minimum is specified
+            if (spec->has_attribute("scale_min")) {
+                minScale = gammalib::todouble(spec->attribute("scale_min"));
+            }
+            // Check if scale maximum is specified
+            if (spec->has_attribute("scale_max")) {
+                maxScale = gammalib::todouble(spec->attribute("scale_max"));
+            }
         }
 
         // Append spatial component to container
-        append(*ptr, name, scale, freeScale);
+        append(*ptr, name, scale, freeScale, minScale, maxScale);
         
     } // endfor: loop over components
     
@@ -461,6 +472,10 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
             	if (m_scales_fit[i]->is_free()) {
             	    matching_model->attribute("scale_error",
             	            gammalib::str(m_scales_fit[i]->error()));
+            	    matching_model->attribute("scale_min",
+            	            gammalib::str(m_scales_fit[i]->min()));
+            	    matching_model->attribute("scale_max",
+                            gammalib::str(m_scales_fit[i]->max()));
             	}
             	matching_model->attribute("free_scale",
             	        gammalib::str(m_scales_fit[i]->is_free()));
@@ -479,8 +494,12 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
             if (m_scales_fit[i]->value() != 1.0 || m_scales_fit[i]->is_free()) {
                 element.attribute("scale", gammalib::str(m_scales_fit[i]->value()));
                 if (m_scales_fit[i]->is_free()) {
-                                    element.attribute("scale_error",
-                                            gammalib::str(m_scales_fit[i]->error()));
+                    element.attribute("scale_error",
+                            gammalib::str(m_scales_fit[i]->error()));
+                    element.attribute("scale_min",
+                            gammalib::str(m_scales_fit[i]->min()));
+                    element.attribute("scale_max",
+                            gammalib::str(m_scales_fit[i]->max()));
                 }
                 element.attribute("free_scale",
                                         gammalib::str(m_scales_fit[i]->is_free()));
@@ -507,13 +526,17 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
  * @param[in] name Name of spatial model (can be empty).
  * @param[in] scale Optional spatial model scaling factor.
  * @param[in] freeScale Free scale parameter (default:false).
+ * @param[in] minScale Minimum for scale parameter (default:1.e-10).
+ * @param[in] maxScale Maximum for scale parameter (default:1.e13).
  *
  * Appends a spatial component to the composite model
  ***************************************************************************/
 void GModelSpatialComposite::append(const GModelSpatial& component,
                                     const std::string&   name,
                                     const double&        scale,
-                                    const bool&          freeScale)
+                                    const bool&          freeScale,
+                                    const double&        minScale,
+                                    const double&        maxScale)
 {
     // Append model container
     m_components.push_back(component.clone());
@@ -560,7 +583,7 @@ void GModelSpatialComposite::append(const GModelSpatial& component,
     m_scales_fit[index]->clear();
     m_scales_fit[index]->name(component_name + ":scale");
     m_scales_fit[index]->value(scale);
-    m_scales_fit[index]->range(1e-10,1e13);
+    m_scales_fit[index]->range(minScale,maxScale);
     if(freeScale)
     	m_scales_fit[index]->free();
     else
