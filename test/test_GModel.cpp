@@ -1261,7 +1261,7 @@ void TestGModel::test_spatial_composite(void)
 
     // Test append method
     model1.append(GModelSpatialPointSource(dir1));
-    model1.append(GModelSpatialRadialGauss(dir1, 0.2), "", 1.5);
+    model1.append(GModelSpatialRadialGauss(dir1, 0.2), "", GModelPar("", 1.5));
     test_value(model1.components(), 2);
     test_value(model1.size(), 7);
 

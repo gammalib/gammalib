@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-5 April 2017
+7 April 2017
 
 
 1. Introduction
@@ -87,6 +87,9 @@ intensity of a node is set to a non-positive value (#990).
 
 The GModelSpectralSmoothBrokenPlaw class that implements a smoothly broken
 power law spectrum has been added (#1948).
+
+The scale of the composite spatial models can now be fitted by adding the
+free_scale="1" attribute to the XML file (#1992).
 
 
 9. Numerics module

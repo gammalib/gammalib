@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialComposite.i - Spatial point source model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Domenico Tiziani                                 *
+ *  copyright (C) 2016-2017 by Domenico Tiziani                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,7 +65,7 @@ public:
     int                  components(void) const;
     void                 append(const GModelSpatial& component,
                                 const std::string&   name = "",
-                                const double&        scale = 1.0);
+                                const GModelPar&     par = GModelPar("", 1.0));
     const GModelSpatial* component(const int& index) const;
     const GModelSpatial* component(const std::string& name) const;
     double               scale(const int& index) const;

@@ -1,8 +1,9 @@
-2017-04-05
+2017-04-07
 
         * Version 1.3.0 released
         =========================
 
+        Allow fitting of scale parameter in composite models (#1992)
         Copy shared Python libraries instead of creating a symbolic link (#1987)
         Added FITS image conversion operators (#1986)
         If code originates from Git, always compile the Python bindings (#1985)
