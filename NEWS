@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.3.0.dev1
 
 Author(s) : Juergen Knoedlseder
 
-5 April 2017
+7 April 2017
 
 
 1. Introduction
@@ -197,19 +197,17 @@ explicit and homogenous:
 By default the old model names are still supported. Support of the old model
 names can be turned off by specifying the --disable-legacy-model-names option
 to the ./configure script (#1821).
-=======
+
 The GModelTemporalFunc class has been added to implement a temporal file
 function for the simulation of transient sources. A unit test has been
 added and the mc() and eval() methods have been validated using a dedicated
 test script (#1914).
->>>>>>> Add GModelTemporalFunc class (#1914)
-=======
+
 The GModelTemporalLightCurve class has been added to implement a light
 curve as temporal component of a model. The light curve is defined by
 nodes in a FITS file. It can be used for the simulation of transient
 sources. A unit test has been added and the mc() and eval() methods
 have been validated using a dedicated test script (#1914).
->>>>>>> Rename GModelTemporalFunc to GModelTemporalLightCurve
 
 The GModelSpatialDiffuseMap::mc and GModelSpatialDiffuseCube::mc methods
 now throw an GException::invalid_return_value exception that is catched
@@ -220,16 +218,17 @@ The GModelTemporalPhaseCurve class has been added to impelement a phase
 curve as temporal component of a model. The phase curve can be used to
 model pulsar light curves or the temporal variation of gamma-ray binaries
 (#1916).
-=======
+
 None
->>>>>>> Add GWcsGLS and GWcsSFL classes to support GLS and SFL WCS (#1851)
-=======
+
 The GModelSpectralNodes class now throws an exception if the energy or
 intensity of a node is set to a non-positive value (#990).
->>>>>>> GModelSpectralNodes throws exception for non-positive energy or intensity (#990)
 
 The GModelSpectralSmoothBrokenPlaw class that implements a smoothly broken
 power law spectrum has been added (#1948).
+
+The scale of the composite spatial models can now be fitted by adding the
+free_scale="1" attribute to the XML file (#1992).
 
 
 9. Numerics module
