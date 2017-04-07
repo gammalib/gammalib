@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-27 March 2017
+7 April 2017
 
 
 1. Introduction
@@ -159,6 +159,11 @@ enhance the precision in the true energy boundaries that are returned by this
 method. In addition, the validity range of the table is now stored in members
 of the class, and a non-zero energy dispersion is only returned for valid
 elements of the response table.
+
+The GCTAModelAeffBackground::mc() could get stuck in the rejection loop if the
+effective area returned is always zero. A counter has been added that leads to
+the exit of the loop in case that 1000 subsequent zero values are returned
+(#1988).
 
 
 21. COMPTEL interface
