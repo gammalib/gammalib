@@ -325,6 +325,11 @@ An GCTAAeff::ebounds() method has been added to the abstract interface for
 effective area responses to return the valid energy range of the effective
 area (#1989).
 
+The GCTAModelAeffBackground::mc() could get stuck in the rejection loop if the
+effective area returned is always zero. A counter has been added that leads to
+the exit of the loop in case that 1000 subsequent zero values are returned
+(#1988).
+
 
 21. COMPTEL interface
 ---------------------

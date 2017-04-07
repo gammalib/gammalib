@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.cpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -551,13 +551,14 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
         // Retrieve CTA observation
         const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
         if (cta == NULL) {
-            std::string msg = "Specified observation is not a CTA observation.\n" +
-                              obs.print();
+            std::string msg = "Specified observation is not a CTA "
+                              "observation.\n" + obs.print();
             throw GException::invalid_argument(G_MC, msg);
         }
 
         // Get pointer on CTA IRF response
-        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+        const GCTAResponseIrf* rsp =
+              dynamic_cast<const GCTAResponseIrf*>(cta->response());
         if (rsp == NULL) {
             std::string msg = "Specified observation does not contain"
                               " an IRF response.\n" + obs.print();
@@ -576,7 +577,8 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
         }
 
         // Retrieve event list to access the ROI, energy boundaries and GTIs
-        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+        const GCTAEventList* events =
+              dynamic_cast<const GCTAEventList*>(obs.events());
         if (events == NULL) {
             std::string msg = "No CTA event list found in observation.\n" +
                               obs.print();
@@ -617,6 +619,11 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
             std::cout << "GCTAModelIrfBackground::mc(\"" << name() << "\": ";
             std::cout << "rate=" << rate << " cts/s)" << std::endl;
             #endif
+
+            // If the rate is not positive then skip this energy bins
+            if (rate <= 0.0) {
+                continue;
+            }
 
             // Loop over all good time intervals
             for (int itime = 0; itime < gti.size(); ++itime) {

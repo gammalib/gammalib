@@ -11,6 +11,7 @@
         Added FITS image conversion operators (#1986)
         If code originates from Git, always compile the Python bindings (#1985)
         Raise exception instead of exiting with return code in Python tests (#1983)
+        Avoid hang-up of GCTAModelAeffBackground::mc() method (#1988)
         Enhance precision of GCTAEdisp2D::compute_ebounds_src
         Add conversion methods between GEbounds and GEnergies (#1977)
         Add GModelSpectralSmoothBrokenPlaw class (#1948)
