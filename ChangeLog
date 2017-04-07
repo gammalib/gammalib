@@ -1,8 +1,9 @@
-2017-04-05
+2017-04-07
 
         * Version 1.3.0 released
         =========================
 
+        Allow fitting of scale parameter in composite models (#1992)
         Add GCTAAeff::ebounds() method (#1989)
         Add GEbounds::emin() and GEbounds::emax() setter methods (#1989)
         Protect GEbounds::set_lin() and set_log() methods from invalid arguments (#1989)

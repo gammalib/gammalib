@@ -37,6 +37,7 @@
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialElliptical.hpp"
+#include "GModelSpatialComposite.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
@@ -1209,6 +1210,11 @@ void GModelSky::set_type(void)
         // ... otherwise, is spatial model an elliptical source?
         else if (dynamic_cast<const GModelSpatialElliptical*>(m_spatial) != NULL) {
             m_type = "ExtendedSource";
+        }
+
+        // ... otherwise, is spatial model a composite source?
+        else if (dynamic_cast<const GModelSpatialComposite*>(m_spatial) != NULL) {
+            m_type = "CompositeSource";
         }
 
         // ... otherwise we have a diffuse model

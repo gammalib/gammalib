@@ -1261,15 +1261,15 @@ void TestGModel::test_spatial_composite(void)
 
     // Test append method
     model1.append(GModelSpatialPointSource(dir1));
-    model1.append(GModelSpatialRadialGauss(dir1, 0.2), "", 1.5);
+    model1.append(GModelSpatialRadialGauss(dir1, 0.2), "", GModelPar("", 1.5));
     test_value(model1.components(), 2);
-    test_value(model1.size(), 5);
+    test_value(model1.size(), 7);
 
     // Test XML constructor
     GXml         xml(m_xml_model_spatial_composite);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
     GModelSpatialComposite model2(*element);
-    test_value(model2.size(), 5);
+    test_value(model2.size(), 7);
     test_value(model2.type(), "Composite", "Check model type");
     test_value(model2.scale(0), 1.0);
     test_value(model2.scale(1), 3.0);
