@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelAeffBackground.cpp - CTA Aeff background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Michael Mayer                               *
+ *  copyright (C) 2015-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -509,13 +509,14 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
         // Retrieve CTA observation
         const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
         if (cta == NULL) {
-            std::string msg = "Specified observation is not a CTA observation.\n" +
-                              obs.print();
+            std::string msg = "Specified observation is not a CTA "
+                              "observation.\n" + obs.print();
             throw GException::invalid_argument(G_MC, msg);
         }
 
         // Get pointer on CTA IRF response
-        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+        const GCTAResponseIrf* rsp =
+              dynamic_cast<const GCTAResponseIrf*>(cta->response());
         if (rsp == NULL) {
             std::string msg = "Specified observation does not contain"
                               " an IRF response.\n" + obs.print();
@@ -534,7 +535,8 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
         }
 
         // Retrieve event list to access the ROI, energy boundaries and GTIs
-        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+        const GCTAEventList* events =
+              dynamic_cast<const GCTAEventList*>(obs.events());
         if (events == NULL) {
             std::string msg = "No CTA event list found in observation.\n" +
                               obs.print();
@@ -559,16 +561,21 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
         // Set up spectral model to draw random energies from. Here we use
         // a fixed energy sampling for an instance of GModelSpectralNodes.
         // This is analogous to to the GCTAModelIrfBackground::mc method.
-        GEbounds spectral_ebounds = GEbounds(m_n_mc_energies, ebounds.emin(), ebounds.emax(), true);
+        // We make sure that only non-negative nodes get appended.
+        GEbounds spectral_ebounds =
+            GEbounds(m_n_mc_energies, ebounds.emin(), ebounds.emax(), true);
         GModelSpectralNodes spectral;
         for (int i = 0; i < spectral_ebounds.size(); ++i) {
-            GEnergy energy   = spectral_ebounds.elogmean(i);
-            double intensity = aeff_integral(obs, energy.log10TeV());
-            double  norm     = m_spectral->eval(energy, events->tstart());
-            spectral.append(energy, norm * intensity);
+            GEnergy energy    = spectral_ebounds.elogmean(i);
+            double  intensity = aeff_integral(obs, energy.log10TeV());
+            double  norm      = m_spectral->eval(energy, events->tstart());
+            double  arg       = norm * intensity;
+            if (arg > 0.0) {
+                spectral.append(energy, arg);
+            }
         }
 
-        // Loop over all energy boundaries
+        // Loop over all energy bins
         for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
 
             // Compute the background rate in model within the energy
@@ -582,6 +589,11 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
             std::cout << "GCTAModelAeffBackground::mc(\"" << name() << "\": ";
             std::cout << "rate=" << rate << " cts/s)" << std::endl;
             #endif
+
+            // If the rate is not positive then skip this energy bins
+            if (rate <= 0.0) {
+                continue;
+            }
 
             // Loop over all good time intervals
             for (int itime = 0; itime < gti.size(); ++itime) {
@@ -630,14 +642,22 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
                                                  ran);
 
                     // Get maximum effective area for rejection method
-                    double max_aeff = aeff->max(energy.log10TeV(), pnt.zenith(), pnt.azimuth(), false);
+                    double max_aeff = aeff->max(energy.log10TeV(), pnt.zenith(),
+                                                pnt.azimuth(), false);
+
+                    // Skip event if the maximum effective area is not positive
+                    if (max_aeff <= 0.0) {
+                        continue;
+                    }
 
                     // Initialise randomised coordinates
                     double offset = 0.0;
                     double phi    = 0.0;
 
-                    // Initialise acceptance fraction for rejection method
+                    // Initialise acceptance fraction and counter of zeros for
+                    // rejection method
                     double acceptance_fraction = 0.0;
+                    int    zeros               = 0;
 
                     // Start rejection method loop
                     do {
@@ -649,18 +669,39 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
                         phi    = ran.uniform() * gammalib::twopi;
 
                         // Compute function value at this offset angle
-                        double value = (*aeff)(energy.log10TeV(), offset, phi, pnt.zenith(), pnt.azimuth(), false);
+                        double value = (*aeff)(energy.log10TeV(), offset, phi,
+                                               pnt.zenith(), pnt.azimuth(),
+                                               false);
+
+                        // If the value is not positive then increment the
+                        // zeros counter and fall through. The counter assures
+                        // that this loop does not lock up.
+                        if (value <= 0.0) {
+                            zeros++;
+                            continue;
+                        }
+
+                        // Value is non-zero so reset the zeros counter
+                        zeros = 0;
 
                         // Compute acceptance fraction
                         acceptance_fraction = value / max_aeff;
+			
+                    } while ((ran.uniform() > acceptance_fraction) &&
+                             (zeros < 1000));
 
-                    } while (ran.uniform() > acceptance_fraction);
+                    // If the zeros counter is non-zero then the loop was
+                    // exited due to exhaustion and the event is skipped
+                    if (zeros > 0) {
+                        continue;
+                    }
 
                     // Convert CTA pointing direction in instrument system
                     GCTAInstDir mc_dir(pnt.dir());
 
                     // Rotate pointing direction by offset and azimuth angle
-                    mc_dir.dir().rotate_deg(phi * gammalib::rad2deg, offset * gammalib::rad2deg);
+                    mc_dir.dir().rotate_deg(phi    * gammalib::rad2deg,
+                                            offset * gammalib::rad2deg);
 
                     // Compute DETX and DETY coordinates
                     double detx(0.0);
