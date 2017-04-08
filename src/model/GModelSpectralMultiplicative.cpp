@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpectralMultiplicative.cpp - Multiplicative spectral model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                                    *
+ *  copyright (C) 2016-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -454,6 +454,9 @@ void GModelSpectralMultiplicative::read(const GXmlElement& xml)
         // Append spectral component to container
         append(*ptr, component_name);
 
+        // Free spectral model
+        delete ptr;
+
     } // endfor: loop over components
 
     // Return
@@ -541,41 +544,6 @@ void GModelSpectralMultiplicative::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print multiplicative spectral model information
- *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing model information.
- ***************************************************************************/
-std::string GModelSpectralMultiplicative::print(const GChatter& chatter) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Continue only if chatter is not silent
-    if (chatter != SILENT) {
-
-        // Append header
-        result.append("=== GModelSpectralMultiplicative ===");
-
-        // Append information
-        result.append("\n"+gammalib::parformat("Number of components"));
-        result.append(gammalib::str(components()));
-        result.append("\n"+gammalib::parformat("Number of parameters"));
-        result.append(gammalib::str(size()));
-
-        // Print parameter information
-        for (int i = 0; i < size(); ++i) {
-            result.append("\n"+m_pars[i]->print(chatter));
-        }
-
-    } // endif: chatter was not silent
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Append spectral component
  *
  * @param[in] spec Spectral model component.
@@ -645,14 +613,14 @@ void GModelSpectralMultiplicative::append(const GModelSpectral& spec,
  ***************************************************************************/
 const GModelSpectral* GModelSpectralMultiplicative::component(const int& index) const
 {
-	// Check if index is in validity range
-	if (index >= m_spectral.size() || index < 0) {
-		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
+    // Check if index is in validity range
+    if (index >= m_spectral.size() || index < 0) {
+        throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
                                        index, m_spectral.size());
-	}
+    }
 
-	// Return spectral component
-	return m_spectral[index];
+    // Return spectral component
+    return m_spectral[index];
 }
 
 
@@ -680,8 +648,43 @@ const GModelSpectral* GModelSpectralMultiplicative::component(const std::string&
         throw GException::model_not_found(G_COMPONENT_NAME, name);
     }
 
-	// Return spectral component
-	return m_spectral[index];
+    // Return spectral component
+    return m_spectral[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Print multiplicative spectral model information
+ *
+ * @param[in] chatter Chattiness.
+ * @return String containing model information.
+ ***************************************************************************/
+std::string GModelSpectralMultiplicative::print(const GChatter& chatter) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GModelSpectralMultiplicative ===");
+
+        // Append information
+        result.append("\n"+gammalib::parformat("Number of components"));
+        result.append(gammalib::str(components()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
+
+        // Print parameter information
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
+
+    // Return result
+    return result;
 }
 
 

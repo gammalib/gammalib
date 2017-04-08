@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralComposite.cpp - Spectral composite model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                                    *
+ *  copyright (C) 2016-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -386,28 +386,31 @@ GEnergy GModelSpectralComposite::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralComposite::read(const GXmlElement& xml)
 {
-	// Get number of spectral components
-	int n_spectrals = xml.elements("spectrum");
+    // Get number of spectral components
+    int n_spectrals = xml.elements("spectrum");
 
-	// Loop over spectral elements
-	for (int i = 0; i < n_spectrals; ++i) {
+    // Loop over spectral elements
+    for (int i = 0; i < n_spectrals; ++i) {
 
-		// Get spectral XML element
-		const GXmlElement* spec = xml.element("spectrum", i);
+        // Get spectral XML element
+        const GXmlElement* spec = xml.element("spectrum", i);
 
-		// Initialise a spectral registry object
-	    GModelSpectralRegistry registry;
+        // Initialise a spectral registry object
+        GModelSpectralRegistry registry;
 
-		// Read spectral model
-		GModelSpectral* ptr = registry.alloc(*spec);
+        // Read spectral model
+        GModelSpectral* ptr = registry.alloc(*spec);
 
-		// Get component attribute from XML file
-		std::string component_name = spec->attribute("component");
+        // Get component attribute from XML file
+        std::string component_name = spec->attribute("component");
 
-		// Append spectral component to container
-		append(*ptr, component_name);
+        // Append spectral component to container
+        append(*ptr, component_name);
 
-	} // endfor: loop over components
+        // Free spatial model
+        delete ptr;
+
+    } // endfor: loop over components
 
     // Return
     return;
@@ -438,52 +441,52 @@ void GModelSpectralComposite::write(GXmlElement& xml) const
     }
 
     // Loop over model components
-    for(int i = 0; i < m_spectral.size(); i++) {
+    for (int i = 0; i < m_spectral.size(); i++) {
 
-    	// Write spectral model
-		if (m_spectral[i] != NULL) {
+        // Write spectral model
+        if (m_spectral[i] != NULL) {
 
-			// Create new spectrum node
-			xml.append(GXmlElement("spectrum"));
+            // Create new spectrum node
+            xml.append(GXmlElement("spectrum"));
 
-			// Get new spectrum node
-			GXmlElement* spec = xml.element("spectrum", xml.elements("spectrum")-1);
+            // Get new spectrum node
+            GXmlElement* spec = xml.element("spectrum", xml.elements("spectrum")-1);
 
-			// Create temporary copy of the spectral model
-			// This is a kluge to write out the original parameters.
-			GModelSpectral* cpy = m_spectral[i]->clone();
+            // Create temporary copy of the spectral model
+            // This is a kluge to write out the original parameters.
+            GModelSpectral* cpy = m_spectral[i]->clone();
 
-			// Loop over parameters of model
-			for (int j = 0; j < cpy->size(); ++j) {
+            // Loop over parameters of model
+            for (int j = 0; j < cpy->size(); ++j) {
 
-				// Get model parameter and name
-				GModelPar& par = (*cpy)[j];
-				std::string parname = par.name();
+                // Get model parameter and name
+                GModelPar& par = (*cpy)[j];
+                std::string parname = par.name();
 
-				// Check if name contains colon
-				if (gammalib::contains(parname, ":")) {
+                // Check if name contains colon
+                if (gammalib::contains(parname, ":")) {
 
-					// Split at the colon
-					std::vector<std::string> splits = gammalib::split(parname, ":");
+                    // Split at the colon
+                    std::vector<std::string> splits = gammalib::split(parname, ":");
 
-					// Use second part of the string to recover original parameter name
-					par.name(splits[1]);
-				}
+                    // Use second part of the string to recover original parameter name
+                    par.name(splits[1]);
+                }
 
-			} // endfor: loop over parameters
+            } // endfor: loop over parameters
 
-			// Write spectral component
-			cpy->write(*spec);
+            // Write spectral component
+            cpy->write(*spec);
 
-			// Add component name if previously available
-			if (m_components[i] != gammalib::str(i+1)) {
-				spec->attribute("component", m_components[i]);
-			}
+            // Add component name if previously available
+            if (m_components[i] != gammalib::str(i+1)) {
+                spec->attribute("component", m_components[i]);
+            }
 
-			// Remove temporary copy
-			delete cpy;
+            // Remove temporary copy
+            delete cpy;
 
-		} // endif: spectral model was not NULL
+        } // endif: spectral model was not NULL
 
     } // endfor: loop over model components
 
@@ -522,25 +525,25 @@ void GModelSpectralComposite::append(const GModelSpectral& spec,
 		throw GException::invalid_value(G_APPEND, msg);
     }
 
-	// Add component name (for now simple number)
-	m_components.push_back(component_name);
+    // Add component name (for now simple number)
+    m_components.push_back(component_name);
 
-	// Get number of spectral parameters from model
-	int npars = m_spectral[index]->size();
+    // Get number of spectral parameters from model
+    int npars = m_spectral[index]->size();
 
-	// Loop over model parameters
-	for (int ipar = 0; ipar < npars; ++ipar) {
+    // Loop over model parameters
+    for (int ipar = 0; ipar < npars; ++ipar) {
 
-		// Get model parameter
-		GModelPar* par = &(m_spectral[index]->operator[](ipar));
+        // Get model parameter
+        GModelPar* par = &(m_spectral[index]->operator[](ipar));
 
-		// Modify parameter name
-		par->name(component_name+":"+par->name());
+        // Modify parameter name
+        par->name(component_name+":"+par->name());
 
-		// Append model parameter with new name to internal container
-		m_pars.push_back(par);
+        // Append model parameter with new name to internal container
+        m_pars.push_back(par);
 
-	} // endfor: loop over model parameters
+    } // endfor: loop over model parameters
 
     // Return
     return;
@@ -560,14 +563,14 @@ void GModelSpectralComposite::append(const GModelSpectral& spec,
  ***************************************************************************/
 const GModelSpectral* GModelSpectralComposite::component(const int& index) const
 {
-	// Check if index is in validity range
-	if (index >= m_spectral.size() || index < 0) {
-		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
+    // Check if index is in validity range
+    if (index >= m_spectral.size() || index < 0) {
+        throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
                                        index, m_spectral.size());
-	}
+    }
 
-	// Return spectral component
-	return m_spectral[index];
+    // Return spectral component
+    return m_spectral[index];
 }
 
 
@@ -584,24 +587,24 @@ const GModelSpectral* GModelSpectralComposite::component(const int& index) const
  ***************************************************************************/
 const GModelSpectral* GModelSpectralComposite::component(const std::string& name) const
 {
-	// Check if model name is found
-	int index = -1;
-	for(int i = 0; i < m_components.size(); ++i) {
-		if (m_components[i] == name) {
-			index = i;
-			break;
-		}
-	}
+    // Check if model name is found
+    int index = -1;
+    for (int i = 0; i < m_components.size(); ++i) {
+        if (m_components[i] == name) {
+            index = i;
+            break;
+        }
+    }
 
-	// Check if component name was found
-	if (index == -1) {
+    // Check if component name was found
+    if (index == -1) {
         std::string msg = "Model component \""+name+"\" not found in composite "
                           "spectral model.";
-		throw GException::invalid_argument(G_COMPONENT_NAME, msg);
-	}
+        throw GException::invalid_argument(G_COMPONENT_NAME, msg);
+    }
 
-	// Return spectral component
-	return m_spectral[index];
+    // Return spectral component
+    return m_spectral[index];
 
 }
 
@@ -624,15 +627,15 @@ std::string GModelSpectralComposite::print(const GChatter& chatter) const
         result.append("=== GModelSpectralComposite ===");
 
         // Append information
-		result.append("\n"+gammalib::parformat("Number of components"));
-		result.append(gammalib::str(components()));
-		result.append("\n"+gammalib::parformat("Number of parameters"));
-		result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of components"));
+        result.append(gammalib::str(components()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
 
-		// Print parameter information
-		for (int i = 0; i < size(); ++i) {
-			result.append("\n"+m_pars[i]->print(chatter));
-		}
+        // Print parameter information
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
 
     } // endif: chatter was not silent
 
@@ -705,13 +708,13 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
     	// Loop over parameters and store pointers
 		for (int ipar = 0; ipar < spec->size(); ++ipar) {
 
-			// Get model parameter reference
-			GModelPar& par = spec->operator[](ipar);
+            // Get model parameter reference
+            GModelPar& par = spec->operator[](ipar);
 
-			// Append model parameter pointer to internal container
-			m_pars.push_back(&par);
+            // Append model parameter pointer to internal container
+            m_pars.push_back(&par);
 
-		} // endfor: loop over parameters
+        } // endfor: loop over parameters
 
     } // endfor: loop over spectral models
 
@@ -726,13 +729,15 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
 void GModelSpectralComposite::free_members(void)
 {
     // Free memory
-	for (int i = 0; i < m_spectral.size(); ++i) {
+    for (int i = 0; i < m_spectral.size(); ++i) {
 
-		// Delete component i
-		if (m_spectral[i] != NULL) delete m_spectral[i];
+        // Delete component i
+        if (m_spectral[i] != NULL) {
+            delete m_spectral[i];
+        }
 
-		// Signal free pointer
-		m_spectral[i] = NULL;
+        // Signal free pointer
+        m_spectral[i] = NULL;
 	}
 
     // Return
@@ -770,8 +775,8 @@ void GModelSpectralComposite::update_mc_cache(const GEnergy& emin,
     if (par_changed || emin != m_mc_emin || emax != m_mc_emax) {
 
         // Store energy range
-		m_mc_emin = emin;
-		m_mc_emax = emax;
+        m_mc_emin = emin;
+        m_mc_emax = emax;
 
         // If parameters have changed then store the current parameter
         // values for a comparison check for the next method call
@@ -783,9 +788,9 @@ void GModelSpectralComposite::update_mc_cache(const GEnergy& emin,
         }
 
         // Compute MC flux
-		m_mc_flux = flux(m_mc_emin, m_mc_emax);
+        m_mc_flux = flux(m_mc_emin, m_mc_emax);
 
-		// Initialise sum and probabilites
+        // Initialise sum and probabilites
 	    double sum = 0.0;
 	    m_mc_probs.clear();
 

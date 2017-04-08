@@ -104,7 +104,7 @@ GModelSpatial::~GModelSpatial(void)
  * @param[in] model Spatial model.
  * @return Spatial model.
  ***************************************************************************/
-GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
+GModelSpatial& GModelSpatial::operator=(const GModelSpatial& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
