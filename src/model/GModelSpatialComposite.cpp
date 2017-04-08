@@ -769,6 +769,10 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
     m_scales = model.m_scales;
     m_region = model.m_region;
 
+    // Initialise components
+    m_components.clear();
+    m_pars.clear();
+
     // Copy components
     for (int i = 0; i < model.m_components.size(); ++i) {
 
