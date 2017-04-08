@@ -99,7 +99,7 @@ protected:
     std::string                 m_type;       //!< Model type
     std::vector<GModelSpatial*> m_components; //!< Components
     std::vector<std::string>    m_names;      //!< Component names
-    std::vector<GModelPar>      m_scales;     //!< Component scales
+    std::vector<GModelPar*>     m_scales;     //!< Component scales
     mutable GSkyRegionCircle    m_region;     //!< Bounding circle
 };
 

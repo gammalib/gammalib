@@ -246,7 +246,7 @@ double GModelSpatialComposite::eval(const GPhoton& photon,
     // Sum over all components
     for (int i = 0; i < m_components.size(); ++i) {
         value += m_components[i]->eval(photon, gradients) *
-                 m_scales[i].value();
+                 m_scales[i]->value();
     }
 
     // Normalise sum by sum of scales
@@ -283,7 +283,7 @@ GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
     double sum   = 0.0;
     int    index = 0;
     for (int i = 0; i < m_scales.size(); ++i) {
-        sum += m_scales[i].value();
+        sum += m_scales[i]->value();
         if (random <= sum) {
             index = i;
             break;
@@ -321,7 +321,7 @@ bool GModelSpatialComposite::contains(const GSkyDir& dir,
     // Loop over all components
     for (int i = 0; i < m_components.size(); ++i) {
         if (m_components[i]->contains(dir, margin) &&
-            m_scales[i].value() != 0.0) {
+            m_scales[i]->value() != 0.0) {
             containment = true;
             break;
         }
@@ -395,7 +395,10 @@ void GModelSpatialComposite::read(const GXmlElement& xml)
 
         // Append spatial component to container
         append(*ptr, name, scale);
-        
+
+        // Free spatial model
+        delete ptr;
+
     } // endfor: loop over components
     
     // Return
@@ -494,21 +497,21 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
         spatial->write(*matching_model);
 
         // Write scale to XML element if needed
-        if (m_scales[i].value() != 1.0 ||
-            m_scales[i].is_free()      ||
+        if (m_scales[i]->value() != 1.0 ||
+            m_scales[i]->is_free()      ||
             matching_model->has_attribute("scale")) {
             matching_model->attribute("scale",
-                                      gammalib::str(m_scales[i].value()));
-            if (m_scales[i].is_free()) {
+                                      gammalib::str(m_scales[i]->value()));
+            if (m_scales[i]->is_free()) {
                 matching_model->attribute("scale_error",
-            	                          gammalib::str(m_scales[i].error()));
+            	                          gammalib::str(m_scales[i]->error()));
                 matching_model->attribute("scale_min",
-            	                          gammalib::str(m_scales[i].min()));
+            	                          gammalib::str(m_scales[i]->min()));
                 matching_model->attribute("scale_max",
-                                          gammalib::str(m_scales[i].max()));
+                                          gammalib::str(m_scales[i]->max()));
             }
             matching_model->attribute("free_scale",
-                                      gammalib::str(m_scales[i].is_free()));
+                                      gammalib::str(m_scales[i]->is_free()));
         }
 
         // Delete clone
@@ -565,26 +568,28 @@ void GModelSpatialComposite::append(const GModelSpatial& component,
     for (int ipar = 0; ipar < npars; ++ipar) {
         
         // Get model parameter
-        GModelPar* par = &(m_components[index]->operator[](ipar));
+        GModelPar* p = &(m_components[index]->operator[](ipar));
         
         // Modify parameter name
-        par->name(component_name+":"+par->name());
+        p->name(component_name+":"+p->name());
         
         // Append model parameter with new name to internal container
-        m_pars.push_back(par);
+        m_pars.push_back(p);
         
     } // endfor: loop over model parameters
 
     // Set scaling parameter
-    GModelPar scale(par);
-    scale.name(component_name + ":scale");
-    scale.scale(1.0);
-    scale.gradient(0.0);
-    scale.has_grad(false); // for the moment use numerical gradient
+    GModelPar* scale = new GModelPar(par);
+    scale->name(component_name + ":scale");
+    scale->scale(1.0);
+    scale->gradient(0.0);
+    scale->has_grad(false); // for the moment use numerical gradient
 
-    // Put scale parameters in stack
+    // Push scale parameter in vector
     m_scales.push_back(scale);
-    m_pars.push_back(&scale);
+
+    // Push scale parameter in parameter stack
+    m_pars.push_back(scale);
 
     // Return
     return;
@@ -604,14 +609,14 @@ void GModelSpatialComposite::append(const GModelSpatial& component,
  ***************************************************************************/
 const GModelSpatial* GModelSpatialComposite::component(const int& index) const
 {
-	// Check if index is in validity range
-	if (index < 0 || index >= m_components.size()) {
-		throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
+    // Check if index is in validity range
+    if (index < 0 || index >= m_components.size()) {
+        throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
                                        index, m_components.size());
-	}
+    }
 
-	// Return spatial component
-	return m_components[index];
+    // Return spatial component
+    return m_components[index];
 }
 
 
@@ -628,24 +633,24 @@ const GModelSpatial* GModelSpatialComposite::component(const int& index) const
  ***************************************************************************/
 const GModelSpatial* GModelSpatialComposite::component(const std::string& name) const
 {
-	// Check if model name is found
-	int index = -1;
-	for (int i = 0; i < m_names.size(); ++i) {
+    // Check if model name is found
+    int index = -1;
+    for (int i = 0; i < m_names.size(); ++i) {
         if (m_names[i] == name) {
-			index = i;
-			break;
-		}
-	}
+            index = i;
+            break;
+        }
+    }
 
-	// Check if component name was found
-	if (index == -1) {
+    // Check if component name was found
+    if (index == -1) {
         std::string msg = "Model component \""+name+"\" not found in composite "
                           "spatial model.";
-		throw GException::invalid_argument(G_COMPONENT_NAME, msg);
-	}
+        throw GException::invalid_argument(G_COMPONENT_NAME, msg);
+    }
 
-	// Return spatial component
-	return m_components[index];
+    // Return spatial component
+    return m_components[index];
 }
 
 
@@ -663,13 +668,13 @@ const GModelSpatial* GModelSpatialComposite::component(const std::string& name) 
 double GModelSpatialComposite::scale(const int& index) const
 {
     // Check if index is in validity range
-    if (index < 0 || index >= m_components.size()) {
+    if (index < 0 || index >= m_scales.size()) {
         throw GException::out_of_range(G_COMPONENT_INDEX, "Component Index",
-                index, m_components.size());
+                index, m_scales.size());
     }
 
     // Return spatial component scale
-    return m_scales[index].value();
+    return m_scales[index]->value();
 }
 
 
@@ -687,7 +692,7 @@ double GModelSpatialComposite::sum_of_scales(void) const
     for (int i = 0; i < m_scales.size(); ++i) {
 
         // Add scale to sum
-        sum += m_scales[i].value();
+        sum += m_scales[i]->value();
     }
 
     // Return sum
@@ -713,15 +718,15 @@ std::string GModelSpatialComposite::print(const GChatter& chatter) const
         result.append("=== GModelSpatialComposite ===");
 
         // Append information
-		result.append("\n"+gammalib::parformat("Number of components"));
-		result.append(gammalib::str(components()));
-		result.append("\n"+gammalib::parformat("Number of parameters"));
-		result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of components"));
+        result.append(gammalib::str(components()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
 
-		// Print parameter information
-		for (int i = 0; i < size(); ++i) {
-			result.append("\n"+m_pars[i]->print(chatter));
-		}
+        // Print parameter information
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
 
     } // endif: chatter was not silent
 
@@ -747,9 +752,9 @@ void GModelSpatialComposite::init_members(void)
     // Initialise other members
     m_components.clear();
     m_names.clear();
-    m_scales.clear();
     m_region.clear();
     m_pars.clear();
+    m_scales.clear();
 
     // Return
     return;
@@ -766,7 +771,6 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
     // Copy members
     m_type   = model.m_type;
     m_names  = model.m_names;
-    m_scales = model.m_scales;
     m_region = model.m_region;
 
     // Initialise components
@@ -789,11 +793,20 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
         }
 
     } // endfor: looped over all components
-    
-    // Push back any scales parameters
+
+    // Copy scales
     for (int i = 0; i < m_scales.size(); ++i) {
-        m_pars.push_back(&m_scales[i]);
-    }
+
+        // Clone scale
+        GModelPar* scale = model.m_scales[i]->clone();
+
+        // Push scale parameter in vector
+        m_scales.push_back(scale);
+
+        // Push scale parameter in parameter stack
+        m_pars.push_back(scale);
+
+    } // endfor: looped over scales
 
     // Return
     return;
@@ -809,10 +822,25 @@ void GModelSpatialComposite::free_members(void)
     for (int i = 0; i < m_components.size(); ++i) {
         
         // Delete component i
-        if (m_components[i] != NULL) delete m_components[i];
+        if (m_components[i] != NULL) {
+            delete m_components[i];
+        }
 
         // Signal free pointer
         m_components[i] = NULL;
+
+    }
+
+    // Free scaling parameters
+    for (int i = 0; i < m_scales.size(); ++i) {
+        
+        // Delete component i
+        if (m_scales[i] != NULL) {
+            delete m_scales[i];
+        }
+
+        // Signal free pointer
+        m_scales[i] = NULL;
 
     }
 
