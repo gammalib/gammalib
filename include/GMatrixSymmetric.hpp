@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GMatrixSymmetric.hpp - Symmetric matrix class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -88,11 +88,15 @@ public:
     virtual GMatrixSymmetric& operator=(const GMatrixSymmetric& matrix);
     virtual GMatrixSymmetric& operator=(const double& value);
     virtual GMatrixSymmetric  operator+(const GMatrixSymmetric& matrix) const;
+    virtual GMatrixSymmetric  operator+(const double& scalar) const;
     virtual GMatrixSymmetric  operator-(const GMatrixSymmetric& matrix) const;
+    virtual GMatrixSymmetric  operator-(const double& scalar) const;
     virtual GMatrix           operator*(const GMatrixSymmetric& matrix) const;
     virtual GMatrixSymmetric  operator-(void) const;
     virtual GMatrixSymmetric& operator+=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator+=(const double& scalar);
     virtual GMatrixSymmetric& operator-=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator-=(const double& scalar);
     virtual GMatrixSymmetric& operator*=(const double& scaler);
     virtual GMatrixSymmetric& operator/=(const double& scalar);
 
@@ -214,6 +218,23 @@ GMatrixSymmetric GMatrixSymmetric::operator+(const GMatrixSymmetric& matrix) con
 
 
 /***********************************************************************//**
+ * @brief Binary matrix scalar addition
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with @p scalar added.
+ *
+ * Returns a matrix where a @p scalar has been added to each matrix element.
+ ***************************************************************************/
+inline
+GMatrixSymmetric GMatrixSymmetric::operator+(const double& scalar) const
+{
+    GMatrixSymmetric result = *this;
+    result += scalar;
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Binary matrix subtraction
  *
  * @param[in] matrix Matrix.
@@ -227,6 +248,24 @@ GMatrixSymmetric GMatrixSymmetric::operator-(const GMatrixSymmetric& matrix) con
 {
     GMatrixSymmetric result = *this;
     result -= matrix;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary matrix scalar subtraction
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with @p scalar subtracted.
+ *
+ * Returns a matrix where a @p scalar has been subtracted from each matrix
+ * element.
+ ***************************************************************************/
+inline
+GMatrixSymmetric GMatrixSymmetric::operator-(const double& scalar) const
+{
+    GMatrixSymmetric result = *this;
+    result -= scalar;
     return result;
 }
 
