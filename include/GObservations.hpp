@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.hpp - Observation container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -162,9 +162,12 @@ public:
 
     protected:
         // Protected methods
-        void           init_members(void);
-        void           copy_members(const likelihood& fct);
-        void           free_members(void);
+        void                     init_members(void);
+        void                     copy_members(const likelihood& fct);
+        void                     free_members(void);
+        void                     save_csv(const GFilename& filename) const;
+        void                     save_fits(const GFilename& filename) const;
+        std::vector<std::string> covariance_names(void) const;
 
         // Protected data members
         double         m_value;     //!< Function value

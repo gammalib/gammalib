@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GFilename.hpp - Filename class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,8 +62,10 @@
 class GFilename : public GBase {
 
     // Friend functions
-    friend std::string operator+(const GFilename& filename, const std::string& string);
-    friend std::string operator+(const std::string& string, const GFilename& filename);
+    friend std::string operator+(const GFilename&   filename,
+                                 const std::string& string);
+    friend std::string operator+(const std::string& string,
+                                 const GFilename&   filename);
     friend bool        operator==(const GFilename &a, const GFilename &b);
     friend bool        operator!=(const GFilename &a, const GFilename &b);
     
@@ -89,6 +91,7 @@ public:
     std::string        protocol(void) const;
     std::string        path(void) const;
     std::string        file(void) const;
+    std::string        type(void) const;
     bool               exists(void) const;
     bool               is_fits(void) const;
     void               remove(void) const;

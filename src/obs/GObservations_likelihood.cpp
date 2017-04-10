@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GObservations_likelihood.cpp - Likelihood function class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@
 #include "GFitsBinTable.hpp"
 #include "GFitsTableStringCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
+#include "GCsv.hpp"
 
 /* __ OpenMP section _____________________________________________________ */
 #ifdef _OPENMP
@@ -620,67 +621,28 @@ GMatrixSparse GObservations::likelihood::covariance(void) const
 
 
 /***********************************************************************//**
- * @brief Save likelihood fit results into FITS file.
+ * @brief Save likelihood fit results into a CSV or FITS file.
  *
- * @param[in] filename FITS filename.
+ * @param[in] filename CSV or FITS filename.
  *
- * Saves the likelihood fit results into a FITS file. For the moment the
- * method only writes the covariance matrix.
+ * Saves the likelihood fit results into a CSV or FITS file. The result
+ * format depends on the filename extension. If the extension is `.fits` or
+ * `.fit` the file is written into a FITS file, otherwise it is written into
+ * a CSV file.
  ***************************************************************************/
 void GObservations::likelihood::save(const GFilename& filename) const
 {
-    // Get covariance matrix
-    GMatrixSparse covmat = covariance();
+    // Get file type
+    std::string filetype = filename.type();
 
-    // Create covariance matrix entry names
-    std::vector<std::string> covmat_entries;
-    for (int i = 0 ; i < m_this->m_models.size(); ++i) {
-	    for (int j = 0; j < m_this->m_models[i]->size(); ++j) {
-            covmat_entries.push_back(m_this->m_models[i]->at(j).name() + "(" +
-                                     m_this->m_models[i]->name() + ")");
-        }
+    // If file type is a FITS file then write save covariance matrix into a
+    // FITS file, otherwise save the covariance matrix into a CSV file
+    if (filetype == "fits") {
+        save_fits(filename);
     }
-
-    // Create binary table and columns
-    int size = covmat_entries.size();
-    GFitsBinTable       covmat_table;
-    GFitsTableStringCol par("Parameters", 1, 50, size);
-    GFitsTableDoubleCol cov("Covariance", 1, size*size);
-
-    // Fill tables
-    int counter = 0;
-    for (int i = 0; i < size; ++i) {
-        par(0, i) = covmat_entries[i];
-        for (int j = 0; j < size; ++j) {
-            cov(0, counter) = covmat(i,j);
-            ++counter;
-        }
+    else {
+        save_csv(filename);
     }
-
-    // Set dimension for covariance matrix column
-    std::vector<int> dim;
-    dim.push_back(size);
-    dim.push_back(size);
-    cov.dim(dim);
-
-    // Append columns to table
-    covmat_table.append(par);
-    covmat_table.append(cov);
-
-    // Set extension name
-    covmat_table.extname("Covariance Matrix");
-
-    // Allocate FITS object
-    GFits fits;
-
-    // Append covariance matrix table to FITS object
-    fits.append(covmat_table);
-
-    // Save FITS file to disk
-    fits.saveto(filename, true);
-
-    // Close FITS object
-    fits.close();
 
     // Return
     return;
@@ -752,4 +714,135 @@ void GObservations::likelihood::free_members(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save likelihood fit results into CSV file.
+ *
+ * @param[in] filename CSV filename.
+ *
+ * Saves the likelihood fit results into a CSV file. For the moment the
+ * method only writes the covariance matrix.
+ ***************************************************************************/
+void GObservations::likelihood::save_csv(const GFilename& filename) const
+{
+    // Get covariance matrix
+    GMatrixSparse covmat = covariance();
+
+    // Get covariance matrix row and column names
+    std::vector<std::string> names = covariance_names();
+
+    // Create binary table and columns
+    int size = names.size();
+
+    // Create binary table and columns
+    GCsv table(size + 1, size);
+
+    // Fill CSV header
+    for (int i = 0; i < size; ++i) {
+        table.string(0, i, names[i]);
+    }
+
+    // Fill CSV table
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; j ++) {
+            table.real(i+1, j, covmat(i,j));
+        }
+    }
+
+    // Save CSV table
+    table.save(filename, " ", true);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save likelihood fit results into FITS file.
+ *
+ * @param[in] filename FITS filename.
+ *
+ * Saves the likelihood fit results into a FITS file. For the moment the
+ * method only writes the covariance matrix.
+ ***************************************************************************/
+void GObservations::likelihood::save_fits(const GFilename& filename) const
+{
+    // Get covariance matrix
+    GMatrixSparse covmat = covariance();
+
+    // Get covariance matrix row and column names
+    std::vector<std::string> names = covariance_names();
+
+    // Create binary table and columns
+    int size = names.size();
+
+    // Create binary table and columns
+    GFitsBinTable       covmat_table;
+    GFitsTableStringCol par("Parameters", 1, 50, size);
+    GFitsTableDoubleCol cov("Covariance", 1, size*size);
+
+    // Fill tables
+    int counter = 0;
+    for (int i = 0; i < size; ++i) {
+        par(0, i) = names[i];
+        for (int j = 0; j < size; ++j) {
+            cov(0, counter) = covmat(i,j);
+            ++counter;
+        }
+    }
+
+    // Set dimension for covariance matrix column
+    std::vector<int> dim;
+    dim.push_back(size);
+    dim.push_back(size);
+    cov.dim(dim);
+
+    // Append columns to table
+    covmat_table.append(par);
+    covmat_table.append(cov);
+
+    // Set extension name
+    covmat_table.extname("Covariance Matrix");
+
+    // Allocate FITS object
+    GFits fits;
+
+    // Append covariance matrix table to FITS object
+    fits.append(covmat_table);
+
+    // Save FITS file to disk
+    fits.saveto(filename, true);
+
+    // Close FITS object
+    fits.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return covariance matrix row and column names
+ *
+ * @return Covariance matrix row and column names.
+ *
+ * Returns the row and column names of the covariance matrix.
+ ***************************************************************************/
+std::vector<std::string> GObservations::likelihood::covariance_names(void) const
+{
+    // Initialise covariance matrix row and column names
+    std::vector<std::string> names;
+
+    // Create covariance matrix row and column names
+    for (int i = 0 ; i < m_this->m_models.size(); ++i) {
+	    for (int j = 0; j < m_this->m_models[i]->size(); ++j) {
+            names.push_back(m_this->m_models[i]->at(j).name() + "(" +
+                            m_this->m_models[i]->name() + ")");
+        }
+    }
+
+    // Return covariance matrix row and column names
+    return names;
 }
