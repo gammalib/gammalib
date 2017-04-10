@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrix.i - General Matrix class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,8 +53,12 @@ public:
     virtual GMatrix       operator+(const GMatrix& matrix) const;
     virtual GMatrix       operator-(const GMatrix& matrix) const;
     virtual GMatrix       operator-(void) const;
+    virtual GMatrix       operator+(const double& scalar) const;
+    virtual GMatrix       operator-(const double& scalar) const;
     virtual GMatrix&      operator+=(const GMatrix& matrix);
+    virtual GMatrix&      operator+=(const double& scalar);
     virtual GMatrix&      operator-=(const GMatrix& matrix);
+    virtual GMatrix&      operator-=(const double& scalar);
     virtual GMatrix&      operator*=(const GMatrix& matrix);
     virtual GMatrix&      operator*=(const double& scalar);
 

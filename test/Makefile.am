@@ -205,6 +205,7 @@ all-local:
 # Files to be removed in build directory
 clean-local:
 	rm -rf $(top_builddir)/test/*.fits
+	rm -rf $(top_builddir)/test/*.csv
 	rm -rf $(top_builddir)/test/*.log
 	rm -rf $(top_builddir)/test/*.html
 	rm -rf $(top_builddir)/test/*.xml

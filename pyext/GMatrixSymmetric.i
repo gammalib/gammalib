@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GMatrixSymmetric.i - Symmetric matrix class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,10 +50,14 @@ public:
 
     // Other operators
     virtual GMatrixSymmetric  operator+(const GMatrixSymmetric& matrix) const;
+    virtual GMatrixSymmetric  operator+(const double& scalar) const;
     virtual GMatrixSymmetric  operator-(const GMatrixSymmetric& matrix) const;
+    virtual GMatrixSymmetric  operator-(const double& scalar) const;
     virtual GMatrixSymmetric  operator-(void) const;
     virtual GMatrixSymmetric& operator+=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator+=(const double& scalar);
     virtual GMatrixSymmetric& operator-=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator-=(const double& scalar);
     virtual GMatrixSymmetric& operator*=(const double& scaler);
 
     // Implemented pure virtual base class methods

@@ -28,6 +28,18 @@ The following methods have been added:
 - GEbounds::emax(int&, GEnergy&)
 - GEnergies::set(GEbounds&)
 - GFilename::type()
+- GMatrix::operator+(double&)
+- GMatrix::operator-(double&)
+- GMatrix::operator+=(double&)
+- GMatrix::operator-=(double&)
+- GMatrixSymmetric::operator+(double&)
+- GMatrixSymmetric::operator-(double&)
+- GMatrixSymmetric::operator+=(double&)
+- GMatrixSymmetric::operator-=(double&)
+- GMatrixSparse::operator+(double&)
+- GMatrixSparse::operator-(double&)
+- GMatrixSparse::operator+=(double&)
+- GMatrixSparse::operator-=(double&)
 - GCTAResponseIrf::rspname()
 - GCTARoi::contains(GCTAInstDir&)
 - GCTAEdisp2D::fetch()
@@ -84,7 +96,8 @@ image of any type into a specific storage class (#1986).
 
 7. Linear algebra module
 ------------------------
-None
+Add operators for addition and subtraction of scalars to all matrix classes
+(#1990).
 
 
 8. Model module

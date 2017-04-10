@@ -1,7 +1,7 @@
 /***************************************************************************
  *             test_GMatrix.cpp - Test generic matrix class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -531,6 +531,32 @@ void TestGMatrix::matrix_arithmetics(void)
 	test = m_test / 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GMatrix / 3.0",
+                "Unexpected result matrix:\n"+test.print());
+   
+	// GMatrix + 3.0
+	test = m_test + 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0, 3.0), "Test GMatrix + 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix += 3.0
+    test = m_test;
+    test += 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0, 3.0), "Test GMatrix + 3.0",
+                "Unexpected result matrix:\n"+test.print());
+    
+	// GMatrix - 5.0
+	test = m_test - 5.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0, -5.0), "Test GMatrix -= 5.0",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix -= 3.0
+    test = m_test;
+    test -= 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0, -3.0), "Test GMatrix -= 3.0",
                 "Unexpected result matrix:\n"+test.print());
 
     // Test invalid matrix addition

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GMatrix.hpp - General matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -96,11 +96,15 @@ public:
     virtual GMatrix&      operator=(const GMatrix& matrix);
     virtual GMatrix&      operator=(const double& value);
     virtual GMatrix       operator+(const GMatrix& matrix) const;
+    virtual GMatrix       operator+(const double& scalar) const;
     virtual GMatrix       operator-(const GMatrix& matrix) const;
+    virtual GMatrix       operator-(const double& scalar) const;
     virtual GMatrix       operator*(const GMatrix& matrix) const;
     virtual GMatrix       operator-(void) const;
     virtual GMatrix&      operator+=(const GMatrix& matrix);
+    virtual GMatrix&      operator+=(const double& scalar);
     virtual GMatrix&      operator-=(const GMatrix& matrix);
+    virtual GMatrix&      operator-=(const double& scalar);
     virtual GMatrix&      operator*=(const GMatrix& matrix);
     virtual GMatrix&      operator*=(const double& scalar);
     virtual GMatrix&      operator/=(const double& scalar);
@@ -207,6 +211,23 @@ GMatrix GMatrix::operator+(const GMatrix& matrix) const
 
 
 /***********************************************************************//**
+ * @brief Binary matrix scalar addition
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with @p scalar added.
+ *
+ * Returns a matrix where a @p scalar has been added to each matrix element.
+ ***************************************************************************/
+inline
+GMatrix GMatrix::operator+(const double& scalar) const
+{
+    GMatrix result = *this;
+    result += scalar;
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Binary matrix subtraction
  *
  * @param[in] matrix Matrix.
@@ -220,6 +241,24 @@ GMatrix GMatrix::operator-(const GMatrix& matrix) const
 {
     GMatrix result = *this;
     result -= matrix;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary matrix scalar subtraction
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with @p scalar subtracted.
+ *
+ * Returns a matrix where a @p scalar has been subtracted from each matrix
+ * element.
+ ***************************************************************************/
+inline
+GMatrix GMatrix::operator-(const double& scalar) const
+{
+    GMatrix result = *this;
+    result -= scalar;
     return result;
 }
 
