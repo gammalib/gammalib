@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GMatrix.cpp - General matrix class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -364,9 +364,9 @@ GMatrix& GMatrix::operator+=(const GMatrix& matrix)
 /***********************************************************************//**
  * @brief Unary matrix scalar addition operator
  *
- * @param[in] double Scalar.
+ * @param[in] scaler Scalar.
  *
- * This method adds a given scalar to each matrix element.
+ * Adds a @p scalar to each matrix element.
  ***************************************************************************/
 GMatrix& GMatrix::operator+=(const double& scalar)
 {
@@ -416,9 +416,9 @@ GMatrix& GMatrix::operator-=(const GMatrix& matrix)
 /***********************************************************************//**
  * @brief Unary matrix scalar subtraction operator
  *
- * @param[in] double Scalar.
+ * @param[in] scalar Scalar.
  *
- * This method subtracts a given scalar from each matrix element.
+ * Subtracts a @p scalar from each matrix element.
  ***************************************************************************/
 GMatrix& GMatrix::operator-=(const double& scalar)
 {

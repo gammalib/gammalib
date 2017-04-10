@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GMatrix.hpp - General matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -213,11 +213,10 @@ GMatrix GMatrix::operator+(const GMatrix& matrix) const
 /***********************************************************************//**
  * @brief Binary matrix scalar addition
  *
- * @param[in] double Scalar.
- * @return Result of matrix addition.
+ * @param[in] scalar Scalar.
+ * @return Matrix with @p scalar added.
  *
- * Returns the sum of the matrix with another matrix were all entries have 
- * the value of scalar. The method makes use of the unary addition operator.
+ * Returns a matrix where a @p scalar has been added to each matrix element.
  ***************************************************************************/
 inline
 GMatrix GMatrix::operator+(const double& scalar) const
@@ -249,11 +248,11 @@ GMatrix GMatrix::operator-(const GMatrix& matrix) const
 /***********************************************************************//**
  * @brief Binary matrix scalar subtraction
  *
- * @param[in] double Scalar.
- * @return Result of matrix subtraction.
+ * @param[in] scalar Scalar.
+ * @return Matrix with @p scalar subtracted.
  *
- * Returns the difference of the matrix with another matrix were all entries have 
- * the value of scalar. The method makes use of the unary subtraction operator.
+ * Returns a matrix where a @p scalar has been subtracted from each matrix
+ * element.
  ***************************************************************************/
 inline
 GMatrix GMatrix::operator-(const double& scalar) const

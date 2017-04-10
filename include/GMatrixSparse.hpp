@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GMatrixSparse.hpp - Sparse matrix class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -221,11 +221,15 @@ public:
     virtual GMatrixSparse& operator=(const GMatrixSparse& matrix);
     virtual GMatrixSparse& operator=(const double& value);
     virtual GMatrixSparse  operator+(const GMatrixSparse& matrix) const;
+    virtual GMatrixSparse  operator+(const double& scalar) const;
     virtual GMatrixSparse  operator-(const GMatrixSparse& matrix) const;
+    virtual GMatrixSparse  operator-(const double& scalar) const;
     virtual GMatrixSparse  operator*(const GMatrixSparse& matrix) const;
     virtual GMatrixSparse  operator-(void) const;
     virtual GMatrixSparse& operator+=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse& operator+=(const double& scalar);
     virtual GMatrixSparse& operator-=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse& operator-=(const double& scalar);
     virtual GMatrixSparse& operator*=(const GMatrixSparse& matrix);
     virtual GMatrixSparse& operator*=(const double& scalar);
     virtual GMatrixSparse& operator/=(const double& scalar);
@@ -359,6 +363,23 @@ GMatrixSparse GMatrixSparse::operator+(const GMatrixSparse& matrix) const
 
 
 /***********************************************************************//**
+ * @brief Binary matrix scalar addition
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with @p scalar added.
+ *
+ * Returns a matrix where a @p scalar has been added to each matrix element.
+ ***************************************************************************/
+inline
+GMatrixSparse GMatrixSparse::operator+(const double& scalar) const
+{
+    GMatrixSparse result = *this;
+    result += scalar;
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Binary matrix subtraction
  *
  * @param[in] matrix Matrix.
@@ -372,6 +393,24 @@ GMatrixSparse GMatrixSparse::operator-(const GMatrixSparse& matrix) const
 {
     GMatrixSparse result = *this;
     result -= matrix;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary matrix scalar subtraction
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with @p scalar subtracted.
+ *
+ * Returns a matrix where a @p scalar has been subtracted from each matrix
+ * element.
+ ***************************************************************************/
+inline
+GMatrixSparse GMatrixSparse::operator-(const double& scalar) const
+{
+    GMatrixSparse result = *this;
+    result -= scalar;
     return result;
 }
 

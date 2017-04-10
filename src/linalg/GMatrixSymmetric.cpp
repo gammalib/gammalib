@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GMatrixSymmetric.cpp - Symmetric matrix class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -412,6 +412,26 @@ GMatrixSymmetric& GMatrixSymmetric::operator+=(const GMatrixSymmetric& matrix)
 
 
 /***********************************************************************//**
+ * @brief Unary matrix scalar addition operator
+ *
+ * @param[in] scaler Scalar.
+ *
+ * Adds a @p scalar to each matrix element.
+ ***************************************************************************/
+GMatrixSymmetric& GMatrixSymmetric::operator+=(const double& scalar)
+{
+    // Add all matrix elements
+    double* dst = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ += scalar;
+    }
+
+    // Return result
+    return *this;
+}
+
+
+/***********************************************************************//**
  * @brief Unary matrix subtraction operator
  *
  * @param[in] matrix Matrix.
@@ -436,6 +456,26 @@ GMatrixSymmetric& GMatrixSymmetric::operator-=(const GMatrixSymmetric& matrix)
     double*       dst = m_data;
     for (int i = 0; i < m_elements; ++i) {
         *dst++ -= *src++;
+    }
+
+    // Return result
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Unary matrix scalar subtraction operator
+ *
+ * @param[in] scalar Scalar.
+ *
+ * Subtracts a @p scalar from each matrix element.
+ ***************************************************************************/
+GMatrixSymmetric& GMatrixSymmetric::operator-=(const double& scalar)
+{
+    // Add all matrix elements
+    double* dst = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ -= scalar;
     }
 
     // Return result

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrixSparse.i - Sparse matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,10 +55,14 @@ public:
 
     // Other operators
     virtual GMatrixSparse  operator+(const GMatrixSparse& matrix) const;
+    virtual GMatrixSparse  operator+(const double& scalar) const;
     virtual GMatrixSparse  operator-(const GMatrixSparse& matrix) const;
+    virtual GMatrixSparse  operator-(const double& scalar) const;
     virtual GMatrixSparse  operator-(void) const;
     virtual GMatrixSparse& operator+=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse& operator+=(const double& scalar);
     virtual GMatrixSparse& operator-=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse& operator-=(const double& scalar);
     virtual GMatrixSparse& operator*=(const GMatrixSparse& matrix);
     virtual GMatrixSparse& operator*=(const double& scalar);
 
