@@ -55,14 +55,24 @@ void TestGObservation::set(void)
     name("Observation module");
 
     // Append tests
-    append(static_cast<pfunction>(&TestGObservation::test_time_reference), "Test GTimeReference class");
-    append(static_cast<pfunction>(&TestGObservation::test_time), "Test GTime class");
-    append(static_cast<pfunction>(&TestGObservation::test_times), "Test GTimes class");
-    append(static_cast<pfunction>(&TestGObservation::test_gti), "Test GGti class");
-    append(static_cast<pfunction>(&TestGObservation::test_energy), "Test GEnergy class");
-    append(static_cast<pfunction>(&TestGObservation::test_energies), "Test GEnergies class");
-    append(static_cast<pfunction>(&TestGObservation::test_ebounds), "Test GEbounds class");
-    append(static_cast<pfunction>(&TestGObservation::test_photons), "Test GPhotons class");
+    append(static_cast<pfunction>(&TestGObservation::test_time_reference),
+           "Test GTimeReference class");
+    append(static_cast<pfunction>(&TestGObservation::test_time),
+           "Test GTime class");
+    append(static_cast<pfunction>(&TestGObservation::test_times),
+           "Test GTimes class");
+    append(static_cast<pfunction>(&TestGObservation::test_gti),
+           "Test GGti class");
+    append(static_cast<pfunction>(&TestGObservation::test_energy),
+           "Test GEnergy class");
+    append(static_cast<pfunction>(&TestGObservation::test_energies),
+           "Test GEnergies class");
+    append(static_cast<pfunction>(&TestGObservation::test_ebounds),
+           "Test GEbounds class");
+    append(static_cast<pfunction>(&TestGObservation::test_photons),
+           "Test GPhotons class");
+    append(static_cast<pfunction>(&TestGObservation::test_observations_optimizer),
+           "Test GObservations::likelihood class");
 
     // Return
     return;
@@ -1332,6 +1342,112 @@ void TestGObservation::test_photons(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Test GObservations::likelihood
+ ***************************************************************************/
+void TestGObservation::test_observations_optimizer(void)
+{
+    // Create Test Model
+    GTestModelData model;
+
+    // Create Models conteners
+    GModels models;
+    models.append(model);
+
+    // Time iterval
+    GTime tmin(0.0);
+    GTime tmax(1800.0);
+
+    // Rate : events/sec
+    double rate = RATE;
+
+    // Create observations
+    GObservations obs;
+
+    // Add observations to container
+    for (int i = 0; i < 6; ++i) {
+
+        // Set random Generator
+        GRan ran(i);
+
+        // Create an event list
+        GEvents *events = model.generateList(rate, tmin, tmax, ran);
+
+        // Create a observation
+        GTestObservation observation;
+        observation.id(gammalib::str(i));
+
+        // Add events to the observation
+        observation.events(*events);
+        observation.ontime(tmax.secs()-tmin.secs());
+
+        // Append observation to container
+        obs.append(observation);
+
+        // Free the event list
+        delete events;
+        
+    } // endfor: added observations to container
+
+    // Add the model to the observation
+    obs.models(models);
+
+    // Create a GLog for show the interations of optimizer.
+    GLog log;
+
+    // Create an optimizer.
+    GOptimizerLM opt(&log);
+
+    // Set number of stalls
+    opt.max_stalls(50);
+
+    // Optimize
+    obs.optimize(opt);
+
+    // Compute errors
+    obs.errors(opt);
+
+    // Get the result
+    GModelPar result = (*(obs.models()[0]))[0];
+
+    // Check if converged
+    test_value(opt.status(), 0, "Check if converged",
+                                "Optimizer did not converge");
+
+    // Check if value is correct
+    test_value(result.factor_value(), RATE, result.factor_error()*3.0);
+
+    // Save covariance matrix as FITS file
+    obs.function().save("test_observations_optimizer.fits");
+
+    // Try loading covariance matrix as FITS file
+    test_try("Load covariance matrix as FITS file");
+    try {
+        GFits file("test_observations_optimizer.fits");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Save covariance matrix as CSV file
+    obs.function().save("test_observations_optimizer.csv");
+
+    // Try loading covariance matrix as CSV file
+    test_try("Load covariance matrix as CSV file");
+    try {
+        GCsv file("test_observations_optimizer.csv");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
+}
+
+
 #ifdef _OPENMP
 /***********************************************************************//**
 * @brief Set tests
@@ -1433,6 +1549,7 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
     // Create an optimizer.
     GOptimizerLM opt(&log);
 
+    // Set number of stalls
     opt.max_stalls(50);
 
     // Optimize

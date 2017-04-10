@@ -1,4 +1,4 @@
-2017-04-07
+2017-04-10
 
         * Version 1.3.0 released
         =========================
@@ -7,6 +7,7 @@
         Add GEbounds::emin() and GEbounds::emax() setter methods (#1989)
         Protect GEbounds::set_lin() and set_log() methods from invalid arguments (#1989)
         Allow fitting of scale parameter in composite models (#1992)
+        Add GFilename::type() method (#1863)
         Copy shared Python libraries instead of creating a symbolic link (#1987)
         Added FITS image conversion operators (#1986)
         If code originates from Git, always compile the Python bindings (#1985)
