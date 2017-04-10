@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.hpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2017 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,7 @@ public:
     void                      test_times(void);
     void                      test_energy(void);
     void                      test_energies(void);
+    void                      test_observations_optimizer(void);
 };
 
 

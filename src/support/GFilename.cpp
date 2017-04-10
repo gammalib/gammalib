@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GFilename.cpp - Filename class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -244,6 +244,61 @@ bool GFilename::exists(void) const
 
     // Return result
     return (exists);
+}
+
+
+/***********************************************************************//**
+ * @brief Return file type
+ *
+ * @return File type.
+ *
+ * Returns the file type based on the file extension name. Possible file
+ * types are
+ *
+ *        Type   Extension names
+ *        fits   .fits / .fit
+ *
+ * For any other file types an empty string will be returned. Any compression
+ * extensions such as `.gz`, `.Z`, `.z` or `.zip` will be stripped.
+ ***************************************************************************/
+std::string GFilename::type(void) const
+{
+    // Initialise empty file type
+    std::string type = "";
+
+    // Initialise type with the name of the file
+    std::string file = m_file;
+
+    // Strip compression extensions
+    size_t start = file.rfind(".gz");
+    if (start != std::string::npos) {
+        file = file.substr(0, start);
+    }
+    start = file.rfind(".Z");
+    if (start != std::string::npos) {
+        file = file.substr(0, start);
+    }
+    start = file.rfind(".z");
+    if (start != std::string::npos) {
+        file = file.substr(0, start);
+    }
+    start = file.rfind(".zip");
+    if (start != std::string::npos) {
+        file = file.substr(0, start);
+    }
+
+    // Extract file type
+    start = file.rfind(".fits");
+    if (start != std::string::npos) {
+        type = "fits";
+    }
+    start = file.rfind(".fit");
+    if (start != std::string::npos) {
+        type = "fits";
+    }
+
+    // Return file type
+    return type;
 }
 
 

@@ -113,6 +113,7 @@ test/*.fits
 test/*.xml
 test/*.trs
 test/*.html
+test/*.csv
 test/test_csv*.dat
 test/test_url.dat
 test/reports/*.xml

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-5 April 2017
+10 April 2017
 
 
 1. Introduction
@@ -28,6 +28,7 @@ The following methods have been added:
 - GCTAEdisp2D::fetch
 - GEbounds::set
 - GEnergies::set
+- GFilename::type()
 
 The following methods have been removed:
 - ...
@@ -117,7 +118,8 @@ The GWcs base class now also supports CD keywords instead of CDELT keywords
 
 13. Support module
 ------------------
-None
+A GFilename::type() method has been added that returns the type of the file
+based on the file type extension (e.g. ".fits") (#1863).
 
 
 14. XML module

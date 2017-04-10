@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GFilename.i - Filename class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,7 @@ public:
     std::string        protocol(void) const;
     std::string        path(void) const;
     std::string        file(void) const;
+    std::string        type(void) const;
     bool               exists(void) const;
     bool               is_fits(void) const;
     void               remove(void) const;
