@@ -2307,9 +2307,20 @@ void TestGModel::test_temp_phasecurve(void)
     test_value(model1.type(), "PhaseCurve", "Check void model type");
 
     // Test value constructor
-    GModelTemporalPhaseCurve model2(m_temp_phasecurve, 2.0);
+    GModelTemporalPhaseCurve model2(m_temp_phasecurve,
+                                    GTime(3.0, "secs"),
+                                    0.0,
+                                    1.0,
+                                    0.1,
+                                    0.01,
+                                    2.0);
     test_value(model2.filename().url(), m_temp_phasecurve,
                "Check phase curve file name");
+    test_value(model2.mjd().secs(), 3.0);
+    test_value(model2.phase(), 0.0);
+    test_value(model2.f0(), 1.0);
+    test_value(model2.f1(), 0.1);
+    test_value(model2.f2(), 0.01);
     test_value(model2.norm(), 2.0);
    
     // Test XML constructor

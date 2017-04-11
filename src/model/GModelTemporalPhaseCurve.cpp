@@ -78,24 +78,40 @@ GModelTemporalPhaseCurve::GModelTemporalPhaseCurve(void) : GModelTemporal()
  * @brief File constructor
  *
  * @param[in] filename File name of phase curve nodes.
+ * @param[in] mjd Reference time.
+ * @param[in] phase Phase at reference time.
+ * @param[in] f0 Frequency at reference time (Hz).
+ * @param[in] f1 First frequency derivative at reference time.
+ * @param[in] f2 Second frequency derivative at reference time.
  * @param[in] norm Normalization factor.
  *
  * Constructs phase curve from a list of nodes that is found in the specified
- * FITS file. See the load_nodes() method for more information about the
- * expected structure of the file.
+ * FITS file, a reference time and phase information at the reference time.
+ * See the load_nodes() method for more information about the expected
+ * structure of the file.
  ***************************************************************************/
 GModelTemporalPhaseCurve::GModelTemporalPhaseCurve(const GFilename& filename,
+                                                   const GTime&     mjd,
+                                                   const double&    phase,
+                                                   const double&    f0,
+                                                   const double&    f1,
+                                                   const double&    f2,
                                                    const double&    norm) :
                           GModelTemporal()
 {
     // Initialise members
     init_members();
 
+    // Set parameters
+    this->mjd(mjd);
+    this->phase(phase);
+    this->f0(f0);
+    this->f1(f1);
+    this->f2(f2);
+    this->norm(norm);
+
     // Load nodes
     load_nodes(filename);
-
-    // Set normalization
-    m_norm.value(norm);
 
     // Return
     return;

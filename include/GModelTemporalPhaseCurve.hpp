@@ -80,6 +80,11 @@ public:
     GModelTemporalPhaseCurve(void);
     explicit GModelTemporalPhaseCurve(const GXmlElement& xml);
     GModelTemporalPhaseCurve(const GFilename& filename,
+                             const GTime&     mjd,
+                             const double&    phase,
+                             const double&    f0,
+                             const double&    f1,
+                             const double&    f2,
                              const double&    norm = 1.0);
     GModelTemporalPhaseCurve(const GModelTemporalPhaseCurve& model);
     virtual ~GModelTemporalPhaseCurve(void);
