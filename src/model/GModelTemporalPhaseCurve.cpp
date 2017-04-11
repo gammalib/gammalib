@@ -597,7 +597,7 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_f1.unit("s^-2");
     m_f1.scale(1.0);
     m_f1.value(0.1);
-    m_f1.range(0.0,1000.0);
+    m_f1.range(-1000.0,1000.0);
     m_f1.free();
     m_f1.gradient(0.0);
     m_f1.has_grad(false);
@@ -608,7 +608,7 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_f2.unit("s^-3");
     m_f2.scale(1.0);
     m_f2.value(0.01);
-    m_f2.range(0.0,1000.0);
+    m_f2.range(-1000.0,1000.0);
     m_f2.free();
     m_f2.gradient(0.0);
     m_f2.has_grad(false);
