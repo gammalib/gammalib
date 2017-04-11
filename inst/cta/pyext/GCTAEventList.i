@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventList.i - CTA event list class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,10 @@ public:
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
     const std::string& gtiname(void) const;
+    void               has_phase(const bool& has_phase);
+    void               has_detxy(const bool& has_detxy);
+    const bool&        has_phase() const;
+    const bool&        has_detxy() const;
 };
 
 
