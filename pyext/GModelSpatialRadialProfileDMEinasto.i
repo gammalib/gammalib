@@ -59,8 +59,14 @@ public:
     // Other methods
     double scale_radius(void) const;
     void   scale_radius(const double& scale_radius);
-    //double prof_val(const double& theta);
-    double j_factor( const double& minangle, const double& maxangle, const int& npoints) const;
+    double scale_density(void) const;
+    void   scale_density(const double& scale_density);
+    double halo_distance(void) const;
+    void   halo_distance(const double& halo_distance);
+    double alpha(void) const;
+    void   alpha(const double& alpha);
+    double mass_density( const double& radius ) const ;
+    double jfactor( const double& angle ) const ;
 };
 
 
