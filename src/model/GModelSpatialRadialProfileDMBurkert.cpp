@@ -302,17 +302,20 @@ void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
     const GXmlElement* par1 = gammalib::xml_get_par(G_READ, xml, "Scale Radius");
     m_scale_radius.read(*par1);
     
-    const GXmlElement* par2 = gammalib::xml_get_par(G_READ, xml, "Halo Distance");
-    m_halo_distance.read(*par2);
+    const GXmlElement* par2 = gammalib::xml_get_par(G_READ, xml, "Scale Density");
+    m_scale_density.read(*par2);
     
-    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Theta Min");
-    m_theta_min.read(*par3);
+    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Halo Distance");
+    m_halo_distance.read(*par3);
+    
+    const GXmlElement* par4 = gammalib::xml_get_par(G_READ, xml, "Theta Min");
+    m_theta_min.read(*par4);
 
-    const GXmlElement* par4 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
-    m_theta_max.read(*par4);
+    const GXmlElement* par5 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_theta_max.read(*par5);
 
-    const GXmlElement* par5 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
-    m_core_radius.read(*par5);
+    const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
+    m_core_radius.read(*par6);
 
     // Return
     return;
@@ -344,22 +347,26 @@ void GModelSpatialRadialProfileDMBurkert::write(GXmlElement& xml) const
     // Write Scale Radius parameter
     GXmlElement* par1 = gammalib::xml_need_par(G_WRITE, xml, "Scale Radius");
     m_scale_radius.write(*par1);
+    
+    // Write Scale Radius parameter
+    GXmlElement* par2 = gammalib::xml_need_par(G_WRITE, xml, "Scale Density");
+    m_scale_density.write(*par2);
 
     // Write Halo Distance parameter
-    GXmlElement* par2 = gammalib::xml_need_par(G_WRITE, xml, "Halo Distance");
-    m_halo_distance.write(*par2);
+    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Halo Distance");
+    m_halo_distance.write(*par3);
     
     // Write Halo Distance parameter
-    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Theta Min");
-    m_theta_min.write(*par3);
+    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Theta Min");
+    m_theta_min.write(*par4);
 
     // Write Halo Distance parameter
-    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
-    m_theta_max.write(*par4);
+    GXmlElement* par5 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_theta_max.write(*par5);
     
     // Write Core Radius parameter
-    GXmlElement* par5 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
-    m_core_radius.write(*par5);
+    GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
+    m_core_radius.write(*par6);
 
     // Return
     return;
