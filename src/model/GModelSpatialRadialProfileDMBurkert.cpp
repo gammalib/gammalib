@@ -329,8 +329,6 @@ void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
 
     const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
     m_halo_distance.read(*par3);
-    
-    // extra core parameter
 
     // Return
     return;
@@ -382,10 +380,6 @@ void GModelSpatialRadialProfileDMBurkert::write(GXmlElement& xml) const
     // Write Core Radius parameter
     GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
     m_core_radius.write(*par6);
-
-    // Write Halo Distance parameter
-    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
-    m_halo_distance.write(*par3);
 
     // Return
     return;
