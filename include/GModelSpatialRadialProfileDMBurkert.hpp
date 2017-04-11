@@ -72,6 +72,12 @@ public:
     // Other methods
     double scale_radius(void) const;
     void   scale_radius(const double& scale_radius);
+    double scale_density(void) const;
+    void   scale_density(const double& scale_density);
+    double halo_distance(void) const ;
+    void   halo_distance(const double& halo_distance);
+    double mass_density( const double& radius ) const;
+    double jfactor( const double& angle ) const;
 
 protected:
     // Protected methods
@@ -86,26 +92,33 @@ protected:
     public :
         halo_kernel_los(const double& scale_radius ,
                         const double& halo_distance,
-                        const double& theta) :
+                        const double& theta,
+                        const double& core_radius) :
                         m_scale_radius(scale_radius),
                         m_halo_distance(halo_distance),
-                        m_theta(theta) {}
+                        m_theta(theta),
+                        m_core_radius(core_radius) {}
         double eval(const double& los);
     protected :
         double m_scale_radius;
         double m_halo_distance;
         double m_theta;
+        double m_core_radius;
     };
 
     // Protected members
     GModelPar m_theta_min;     //!< Minimum theta angle
     GModelPar m_theta_max;     //!< Maximum theta angle
     GModelPar m_scale_radius;  //!< Scale radius of halo profile
+    GModelPar m_scale_density; //!< Scale density of halo profile
     GModelPar m_halo_distance; //!< Distance from Earth to halo center
+    GModelPar m_core_radius;   //!< Core radius
     
     // Cached members used for precomputation
     mutable double m_last_scale_radius;
+    mutable double m_last_scale_density;
     mutable double m_mass_radius;
+    mutable double m_scale_density_squared;
 };
 
 
@@ -158,6 +171,62 @@ inline
 void GModelSpatialRadialProfileDMBurkert::scale_radius(const double& scale_radius)
 {   
     m_scale_radius.value(scale_radius);
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Return scale density
+ *                      
+ *@return scale density (GeV/cm^3).
+ *                      
+ * Returns the scale density (mass/volume density at the scale radius) of 
+ * the halo profile in GeV/cm^3.
+ ***************************************************************************/
+inline  
+double GModelSpatialRadialProfileDMBurkert::scale_density(void) const
+{       
+    return (m_scale_density.value());
+}       
+        
+/***********************************************************************//**
+ * @brief Set scale density
+ *  
+ * @param[in] scale density (GeV/cm^3).
+ *  
+ * Sets the scale density ( mass/volume density at the scale radius) of the 
+ * halo profile in GeV/cm^3.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialProfileDMBurkert::scale_density(const double& scale_density)
+{   
+    m_scale_density.value(scale_density);
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Return halo distance
+ *
+ * @return halo distance (kpc).
+ *
+ * Returns the distance to the halo center in kpc.
+ ***************************************************************************/
+inline
+double GModelSpatialRadialProfileDMBurkert::halo_distance(void) const
+{
+    return (m_halo_distance.value());
+}
+
+/***********************************************************************//**
+ * @brief Set halo distance
+ *  
+ * @param[in] halo distance (kpc).
+ *
+ * Sets the distance between the observer and the halo center in kpc.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialProfileDMBurkert::halo_distance(const double& halo_distance)
+{
+    m_halo_distance.value(halo_distance);
     return;
 }
 
