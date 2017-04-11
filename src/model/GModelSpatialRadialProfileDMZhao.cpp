@@ -336,14 +336,6 @@ void GModelSpatialRadialProfileDMZhao::read(const GXmlElement& xml)
     const GXmlElement* par9 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
     m_core_radius.read(*par9);
 
-    // Read Theta Min parameter
-    const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Theta Min");
-    m_gamma.read(*par6);
-
-    // Read Theta Max parameter
-    const GXmlElement* par7 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
-    m_gamma.read(*par7);
-
     // Return
     return;
 }
@@ -403,22 +395,6 @@ void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
     // Write Core Radius parameter
     GXmlElement* par9 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
     m_core_radius.write(*par9);
-
-    // Write Beta parameter
-    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Beta");
-    m_beta.write(*par4);
-
-    // Write Gamma parameter
-    GXmlElement* par5 = gammalib::xml_need_par(G_WRITE, xml, "Gamma");
-    m_gamma.write(*par5);
-
-    // Write Theta Max parameter
-    GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Theta Min");
-    m_gamma.write(*par6);
-
-    // Write Theta Max parameter
-    GXmlElement* par7 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
-    m_gamma.write(*par7);
 
     // Return
     return;
@@ -851,23 +827,6 @@ double GModelSpatialRadialProfileDMZhao::jfactor( const double& angle ) const
   double jfactor = 0.0 ;
   double dr      = (angle - minradian) / npoints ;
   double r       = 0.0;
-  double g = 0.0 ;
-  g  = los * los ;
-  g += m_halo_distance * m_halo_distance ;
-  g -= 2.0 * los * m_halo_distance * std::cos(m_theta) ;
-  g  = sqrt(g) ;
-  g /= m_scale_radius ;
-  
-  double f = 0.0 ;
-  f  = pow( g , m_alpha ) ;
-  f += 1 ;
-  f  = pow( f, (m_beta-m_gamma)/m_alpha ) ;
-  f *= pow( g, m_gamma ) ;
-  f = 1 / f ;
-
-  // squared, for annihilating dm
-  // would just be f if it was decaying dm
-  f = f * f ;
   
   // loop over different radii in the profile
   for (int i = 0; i < npoints; ++i) {
@@ -882,41 +841,4 @@ double GModelSpatialRadialProfileDMZhao::jfactor( const double& angle ) const
   jfactor *= gammalib::twopi;
   
   return jfactor ;
-}
-
-
-/***********************************************************************//**
- * @brief Update precomputation cache
- *
- * Computes the m_mass_radius calculation, determining the radius around
- * the halo that contains 99.99% of the mass. For a Zhao halo profile,
- * this is just 10.0 * scale_radius .
- ***************************************************************************/
-void GModelSpatialRadialProfileDMZhao::update() const
-{
-  
-    // Update if scale radius has changed
-    if (m_last_scale_radius != scale_radius()) {
-    
-        // Store last values
-        m_last_scale_radius = scale_radius();
-    
-        // perform precomputations
-        m_mass_radius = 10.0 * scale_radius();
-
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Compute profile value
- *
- * @return Profile value
- ***************************************************************************/
-double GModelSpatialRadialProfileDMZhao::prof_val(const double& theta)
-{
-    return this->profile_value(theta);
 }
