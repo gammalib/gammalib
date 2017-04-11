@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventList.i - CTA event list class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,7 @@ public:
 
     // Implement other methods
     void               append(const GCTAEventAtom& event);
+    void               append_column(const GFitsTableCol& column);
     void               reserve(const int& number);
     void               remove(const int& index, const int& number = 1);
     void               write(GFits& fits, const std::string& evtname,

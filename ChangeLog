@@ -1,8 +1,9 @@
-2017-04-10
+2017-04-11
 
         * Version 1.3.0 released
         =========================
 
+        Add GEventList::append_column() method (#1991)
         Add scalar addition and subtraction operators to matrix classes (#1990)
         Allow fitting of scale parameter in composite models (#1992)
         Add GCTAAeff::ebounds() method (#1989)
