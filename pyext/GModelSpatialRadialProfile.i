@@ -85,7 +85,9 @@ public:
     double eval(const GPhoton& photon) const {
         return self->GModelSpatialRadial::eval(photon);
     }
+    /*
     double eval_gradients(const GPhoton& photon) const {
         return self->GModelSpatialRadial::eval_gradients(photon);
     }
+    */
 };
