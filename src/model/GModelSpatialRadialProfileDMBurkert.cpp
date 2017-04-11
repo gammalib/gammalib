@@ -327,9 +327,6 @@ void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
     const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
     m_core_radius.read(*par6);
 
-    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
-    m_halo_distance.read(*par3);
-
     // Return
     return;
 }
