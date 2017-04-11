@@ -342,7 +342,7 @@ GTimes GModelTemporalPhaseCurve::mc(const double& rate, const GTime&  tmin,
  * Reads the temporal information from an XML element. The XML element should
  * have the format
  *
- *     <temporalModel type="PhaseCurve" file="..">
+ *     <temporalModel type="PhaseCurve" file="phase.fits">
  *       <parameter name="Normalization" scale="1" value="1"       min="0.1" max="10"   free="0"/>
  *       <parameter name="MJD"           scale="1" value="51544.5" min="0.0" max="1e10" free="0"/>
  *       <parameter name="Phase"         scale="1" value="0.0"     min="0.0" max="1e10" free="1"/>
@@ -388,7 +388,7 @@ void GModelTemporalPhaseCurve::read(const GXmlElement& xml)
  * Writes the temporal information into an XML element. The XML element will
  * have the format
  *
- *     <temporalModel type="PhaseCurve" file="..">
+ *     <temporalModel type="PhaseCurve" file="phase.fits">
  *       <parameter name="Normalization" scale="1" value="1"       min="0.1" max="10"   free="0"/>
  *       <parameter name="MJD"           scale="1" value="51544.5" min="0.0" max="1e10" free="0"/>
  *       <parameter name="Phase"         scale="1" value="0.0"     min="0.0" max="1e10" free="1"/>

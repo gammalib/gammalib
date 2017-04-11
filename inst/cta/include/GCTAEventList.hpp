@@ -97,7 +97,11 @@ public:
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
     const std::string& gtiname(void) const;
-
+    void               has_phase(const bool& has_phase);
+    void               has_detxy(const bool& has_detxy);
+    const bool&        has_phase() const;
+    const bool&        has_detxy() const;
+    
 protected:
     // Protected methods
     void         init_members(void);
@@ -202,6 +206,60 @@ inline
 const std::string& GCTAEventList::gtiname(void) const
 {
     return (m_gti_extname);
+}
+
+
+/***********************************************************************//**
+ * @brief Set phase information flag
+ *
+ * @param[in] has_phase Phase information flag.
+ *
+ * Sets the phase information flag of the event list.
+ ***************************************************************************/
+inline
+void GCTAEventList::has_phase(const bool& has_phase)
+{
+    m_has_phase = has_phase;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set the DETX/DETY information flag
+ *
+ * @param[in] has_detxy DETX/DETY information flag.
+ *
+ * Set the DETX/DETY information flag.
+ ***************************************************************************/
+inline
+void GCTAEventList::has_detxy(const bool& has_detxy)
+{
+    m_has_detxy = has_detxy;
+    return;
+}
+
+
+/*************************************************************************
+ * @brief Return phase information flag
+ *
+ * @return True if phase information is available, false otherwise.
+ ***************************************************************************/
+inline
+const bool& GCTAEventList::has_phase() const
+{
+    return m_has_phase;
+}
+
+
+/*************************************************************************
+ * @brief Return DETX/DETY information flag
+ *
+ * @return True if DETX/DETY information is available, false otherwise.
+ ***************************************************************************/
+inline
+const bool& GCTAEventList::has_detxy() const
+{
+    return m_has_detxy;
 }
 
 #endif /* GCTAEVENTLIST_HPP */

@@ -48,6 +48,10 @@ The following methods have been added:
 - GCTAAeffArf::ebounds()
 - GCTAAeffPerfTable::ebounds()
 - GCTAEventList::append_column(GFitsTableCol&)
+- GCTAEventList::has_phase(bool&)
+- GCTAEventList::has_phase()
+- GCTAEventList::has_detxy(bool&)
+- GCTAEventList::has_detxy()
 
 The following methods have been removed:
 - ...
@@ -217,6 +221,9 @@ A GCTAEventList::append_column() method has been added to allow appending of
 FITS columns to an event list. The method checks whether the length of the
 FITS column is compatible with the number of events that are present in the
 event list (#1991).
+
+Add GCTAEventList::has_phase() and GCTAEventList::has_detxy() getter and setter
+methods to manipulate the event list information flags (#1982).
 
 
 21. COMPTEL interface
