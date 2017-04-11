@@ -324,9 +324,6 @@ void GModelSpatialRadialProfileDMEinasto::read(const GXmlElement& xml)
     const GXmlElement* par7 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
     m_core_radius.read(*par7);
 
-    const GXmlElement* par4 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
-    m_alpha.read(*par4);
-
     // Return
     return;
 }
@@ -378,10 +375,6 @@ void GModelSpatialRadialProfileDMEinasto::write(GXmlElement& xml) const
     // Write Core Radius parameter
     GXmlElement* par7 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
     m_core_radius.write(*par7);
-
-    // Write Alpha parameter
-    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
-    m_alpha.write(*par4);
 
     // Return
     return;
@@ -737,7 +730,6 @@ void GModelSpatialRadialProfileDMEinasto::update() const
  * Calculates the halo's mass density at a given radial distance from the halo
  * center.
  *
- * @todo This should be done using a proper numerical integration
  ***************************************************************************/
 double GModelSpatialRadialProfileDMEinasto::mass_density( const double& radius ) const
 {
@@ -787,10 +779,12 @@ double GModelSpatialRadialProfileDMEinasto::jfactor( const double& angle ) const
       r      = minradian + (i * dr);
       jfactor += profile_value(r) * r * dr;
 
-    }
+  }
   
   // J-Factor = 2 * pi * Int[ profile(r) * r * dr , {r,minradian,angle} ]
   jfactor *= gammalib::twopi;
   
   return jfactor ;
 }
+
+
