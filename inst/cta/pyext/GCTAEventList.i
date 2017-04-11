@@ -70,6 +70,10 @@ public:
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
     const std::string& gtiname(void) const;
+    void               has_phase(const bool& has_phase);
+    void               has_detxy(const bool& has_detxy);
+    const bool&        has_phase() const;
+    const bool&        has_detxy() const;
 };
 
 

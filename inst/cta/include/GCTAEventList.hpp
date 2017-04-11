@@ -97,10 +97,10 @@ public:
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
     const std::string& gtiname(void) const;
-    void  has_phase(const bool& is_set);
-    void  has_detxy(const bool& is_set);
-    const bool& has_phase() const;
-    const bool& has_detxy() const;
+    void               has_phase(const bool& has_phase);
+    void               has_detxy(const bool& has_detxy);
+    const bool&        has_phase() const;
+    const bool&        has_detxy() const;
     
     void               append_column(GFitsTableCol& col);
 
@@ -212,29 +212,39 @@ const std::string& GCTAEventList::gtiname(void) const
 
 
 /***********************************************************************//**
- * @brief Set the 'm_has_phase' parameter forcing phase information to be saved
+ * @brief Set phase information flag
+ *
+ * @param[in] has_phase Phase information flag.
+ *
+ * Sets the phase information flag of the event list.
  ***************************************************************************/
 inline
-void GCTAEventList::has_phase(const bool& is_set)
+void GCTAEventList::has_phase(const bool& has_phase)
 {
-    m_has_phase = is_set;
+    m_has_phase = has_phase;
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Set the 'm_has_detxy' parameter forcing detector coordinates to be saved
+ * @brief Set the DETX/DETY information flag
+ *
+ * @param[in] has_detxy DETX/DETY information flag.
+ *
+ * Set the DETX/DETY information flag.
  ***************************************************************************/
 inline
-void GCTAEventList::has_detxy(const bool& is_set)
+void GCTAEventList::has_detxy(const bool& has_detxy)
 {
-    m_has_detxy = is_set;
+    m_has_detxy = has_detxy;
+    return;
 }
 
 
 /*************************************************************************
- * @brief Return whether or not phase information is saved
+ * @brief Return phase information flag
  *
- * @return Whether or not 'm_has_phase' was set.
+ * @return True if phase information is available, false otherwise.
  ***************************************************************************/
 inline
 const bool& GCTAEventList::has_phase() const
@@ -244,9 +254,9 @@ const bool& GCTAEventList::has_phase() const
 
 
 /*************************************************************************
- * @brief Return whether or not detector coordinates are saved
+ * @brief Return DETX/DETY information flag
  *
- * @return Current value of 'm_has_detxy'.
+ * @return True if DETX/DETY information is available, false otherwise.
  ***************************************************************************/
 inline
 const bool& GCTAEventList::has_detxy() const
