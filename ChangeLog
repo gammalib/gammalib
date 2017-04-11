@@ -32,7 +32,6 @@
 
         * Version 1.2.0 released
         =========================
-
         Reduce length of LAT response filenames by unzipping a number of energy dispersion files (#1931)
         Skip zero livetime observations in stacked cubes for CTA (#1920)
         Correct handling of time references in GGti::extend() method (#1922)
@@ -42,6 +41,8 @@
         Add GModelTemporalLightCurve class (#1914)
         Add GSkyMap FITS HDU constructor
         Add leap second for 1-1-2017 (#1887)
+        Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
+        Make GFilename::is_fits thread safe (#1717).
         Add region() method to GModelSpatial (#1764)
         Correct containment radius computation in GCTAPsf2D::containment_radius (#1876)
         Add composite spatial and spectral models (#1706)
