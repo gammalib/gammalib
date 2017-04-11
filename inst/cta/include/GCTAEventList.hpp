@@ -40,6 +40,7 @@ class GFilename;
 class GFitsHDU;
 class GFitsTable;
 class GFitsBinTable;
+class GFitsTableCol;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -85,6 +86,7 @@ public:
 
     // Implement other methods
     void               append(const GCTAEventAtom& event);
+    void               append_column(const GFitsTableCol& column);
     void               reserve(const int& number);
     void               remove(const int& index, const int& number = 1);
     void               write(GFits& fits, const std::string& evtname,
@@ -95,7 +97,6 @@ public:
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
     const std::string& gtiname(void) const;
-    void               append_column(GFitsTableCol& col);
 
 protected:
     // Protected methods

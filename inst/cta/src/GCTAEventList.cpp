@@ -35,6 +35,7 @@
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
+#include "GFitsTableCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
 #include "GFitsTableULongCol.hpp"
@@ -46,6 +47,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR                          "GCTAEventList::operator[](int&)"
 #define G_ROI                                     "GCTAEventList::roi(GRoi&)"
+#define G_APPEND_COLUMN        "GCTAEventList::append_column(GFitsTableCol&)"
 #define G_FETCH                                      "GCTAEventList::fetch()"
 
 /* __ Macros _____________________________________________________________ */
@@ -577,25 +579,40 @@ void GCTAEventList::append(const GCTAEventAtom& event)
 
 
 /***********************************************************************//**
- * @brief Append a column to m_columns
+ * @brief Append FITS table column to event list
  *
- * @param[in] col Fits table column to be appended.
+ * @param[in] column FITS table column to be appended.
  *
- * Appends a fits column to the end of the m_columns vector.
+ * @exception GException::invalid_argument
+ *            FITS column has incompatible length.
+ *
+ * Appends a FITS table column to the event list. The length of the FITS
+ * column must be identical to the number of events in the event list.
  ***************************************************************************/
-//void GCTAEventList::append_column(const std::string& colname)
-void GCTAEventList::append_column(GFitsTableCol& col)
+void GCTAEventList::append_column(const GFitsTableCol& column)
 {
+    // Throw an exception if the column has an incompatible length
+    if (size() != column.length()) {
+        std::string msg = "Incompatible column length. Attempt to append a "
+                          "column of length "+gammalib::str(column.length())+
+                          " to an event list with "+gammalib::str(size())+
+                          " events. Please specify a column of length "+
+                          gammalib::str(size())+".";
+        throw GException::invalid_argument(G_APPEND_COLUMN, msg);
+    }
+
     // Make sure that the events are online
     fetch();
 
+    // Clone the FITS column. De-allocation is done when the object is free'd
+    GFitsTableCol* ptr = column.clone();
+
     // Append the column
-    m_columns.push_back(&col);
+    m_columns.push_back(ptr);
 
     // Return
     return;
 }
-
 
 
 /***********************************************************************//**
