@@ -279,8 +279,10 @@ double GModelSpatialRadialProfileDMEinasto::theta_max(void) const
  *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
  *       <parameter name="Scale Radius"  scale="1.0" value="21.5" min="1.0e-6" free="1"/>
+ *       <parameter name="Scale Density" scale="1.0" value="0.2" free="1"/>
  *       <parameter name="Halo Distance" scale="1.0" value="7.94" min="1.0e-6" free="1"/>
  *       <parameter name="Alpha"         scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
+ *       <parameter name='Core Radius"   scale="1.0" value="10.0" min="1.0e-6" free="1"/>
  *     </spatialModel>
  *
  * or
@@ -290,8 +292,10 @@ double GModelSpatialRadialProfileDMEinasto::theta_max(void) const
  *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
  *       <parameter name="Scale Radius"  scale="1.0" value="21.5" min="1.0e-6" free="1"/>
+ *       <parameter name="Scale Density" scale="1.0" value="0.2" free="1"/>
  *       <parameter name="Halo Distance" scale="1.0" value="7.94" min="1.0e-6" free="1"/>
  *       <parameter name="Alpha"         scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
+ *       <parameter name='Core Radius"   scale="1.0" value="10.0" min="1.0e-6" free="1"/>
  *     </spatialModel>
  ***************************************************************************/
 void GModelSpatialRadialProfileDMEinasto::read(const GXmlElement& xml)
@@ -302,14 +306,23 @@ void GModelSpatialRadialProfileDMEinasto::read(const GXmlElement& xml)
     const GXmlElement* par1 = gammalib::xml_get_par(G_READ, xml, "Scale Radius");
     m_scale_radius.read(*par1);
     
-    const GXmlElement* par2 = gammalib::xml_get_par(G_READ, xml, "Halo Distance");
-    m_halo_distance.read(*par2);
+    const GXmlElement* par2 = gammalib::xml_get_par(G_READ, xml, "Scale Density");
+    m_scale_density.read(*par2);
+    
+    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Halo Distance");
+    m_halo_distance.read(*par3);
 
-    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Alpha");
-    m_alpha.read(*par3);
-
-    const GXmlElement* par4 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    const GXmlElement* par4 = gammalib::xml_get_par(G_READ, xml, "Alpha");
     m_alpha.read(*par4);
+
+    const GXmlElement* par5 = gammalib::xml_get_par(G_READ, xml, "Theta Min");
+    m_theta_min.read(*par5);
+    
+    const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_theta_max.read(*par6);
+    
+    const GXmlElement* par7 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
+    m_core_radius.read(*par7);
 
     // Return
     return;
@@ -338,18 +351,30 @@ void GModelSpatialRadialProfileDMEinasto::write(GXmlElement& xml) const
     // Write Scale Radius parameter
     GXmlElement* par1 = gammalib::xml_need_par(G_WRITE, xml, "Scale Radius");
     m_scale_radius.write(*par1);
+    
+    // Write Scale Density parameter
+    GXmlElement* par2 = gammalib::xml_need_par(G_WRITE, xml, "Scale Density");
+    m_scale_density.write(*par2);
 
     // Write Halo Distance parameter
-    GXmlElement* par2 = gammalib::xml_need_par(G_WRITE, xml, "Halo Distance");
-    m_halo_distance.write(*par2);
+    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Halo Distance");
+    m_halo_distance.write(*par3);
 
     // Write Alpha parameter
-    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Alpha");
-    m_alpha.write(*par3);
-
-    // Write Alpha parameter
-    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Alpha");
     m_alpha.write(*par4);
+
+    // Write Theta Min parameter
+    GXmlElement* par5 = gammalib::xml_need_par(G_WRITE, xml, "Theta Min");
+    m_theta_min.write(*par5);
+    
+    // Write Theta Max parameter
+    GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_theta_max.write(*par6);
+    
+    // Write Core Radius parameter
+    GXmlElement* par7 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
+    m_core_radius.write(*par7);
 
     // Return
     return;
@@ -409,6 +434,17 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_scale_radius.scale(1.0);
     m_scale_radius.gradient(0.0);
     m_scale_radius.has_grad(false);  // Radial components never have gradients
+    
+    // Initialise scale density
+    m_scale_density.clear();
+    m_scale_density.name("Scale Density");
+    m_scale_density.unit("GeV/cm^3");
+    m_scale_density.value(0.2); // GeV/cm3, default to GC scale density
+    m_scale_density.min(1.0e-6);
+    m_scale_density.fix();
+    m_scale_density.scale(1.0);
+    m_scale_density.gradient(0.0);
+    m_scale_density.has_grad(false);  // Radial components never have gradients
 
     // Initialise halo distance
     m_halo_distance.clear();
@@ -454,18 +490,33 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_theta_max.scale(1.0);
     m_theta_max.gradient(0.0);
     m_theta_max.has_grad(false);  // Radial components never have gradients
+    
+    // Initialise core radius
+    m_core_radius.clear();
+    m_core_radius.name("Core Radius");
+    m_core_radius.unit("kpc");
+    m_core_radius.value(0.5); // example: galactic center core
+    m_core_radius.min(0.0);
+    m_core_radius.fix();
+    m_core_radius.scale(1.0);
+    m_core_radius.gradient(0.0);
+    m_core_radius.has_grad(false);
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_scale_radius);
+    m_pars.push_back(&m_scale_density);
     m_pars.push_back(&m_halo_distance);
     m_pars.push_back(&m_alpha);
     m_pars.push_back(&m_theta_min);
     m_pars.push_back(&m_theta_max);
+    m_pars.push_back(&m_core_radius);
     
     // Initialize precomputation cache. Note that zero values flag
     // uninitialised, as a zero radius is not meaningful
-    m_last_scale_radius = 0.0;
-    m_mass_radius       = 0.0;
+    m_last_scale_radius     = 0.0 ;
+    m_last_scale_density    = 0.0 ;
+    m_mass_radius           = 0.0 ;
+    m_scale_density_squared = 0.0 ;
 
     // Return
     return;
@@ -485,14 +536,18 @@ void GModelSpatialRadialProfileDMEinasto::copy_members(const GModelSpatialRadial
     // stack as this should have been done by init_members() that was called
     // before. Otherwise we would have sigma twice on the stack.
     m_scale_radius  = model.m_scale_radius;
+    m_scale_density = model.m_scale_density;
     m_halo_distance = model.m_halo_distance;
     m_alpha         = model.m_alpha;
     m_theta_min     = model.m_theta_min;
     m_theta_max     = model.m_theta_max;
+    m_core_radius   = model.m_core_radius;
 
     // copy cache values
-    m_last_scale_radius = model.m_last_scale_radius;
-    m_mass_radius       = model.m_mass_radius;
+    m_last_scale_radius     = model.m_last_scale_radius;
+    m_last_scale_density    = model.m_last_scale_density;
+    m_mass_radius           = model.m_mass_radius;
+    m_scale_density_squared = model.m_scale_density_squared;
     
     // Return
     return;
@@ -537,7 +592,8 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
     halo_kernel_los integrand(m_scale_radius.value(),
                               m_halo_distance.value(),
                               m_alpha.value(),
-                              theta);
+                              theta,
+                              m_core_radius.value());
     GIntegral integral(&integrand);
     integral.max_iter(30);
     
@@ -554,7 +610,10 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
     // Compute value
     value = integral.romberg(bounds);
     
-    std::cout << "profile_value=" << value << std::endl;
+    //std::cout << "profile_value=" << value << std::endl;
+
+    // multiply in the density^2
+    value *= m_scale_density_squared ;
 
     // Return value
     return value;
@@ -595,14 +654,29 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
  ***************************************************************************/
 double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval( const double &los )
 {
-    // PLEASE ADD COMMENTS
+    // calculate the scale distance g, the ( distance from integration point 
+    // to the halo center ) divided by ( the halo scale radius )
+    
+    // first calculate the distance of the integration point from the halo 
+    // center via the law of cosines
     double g = 0.0;
     g  = los * los;
     g += m_halo_distance * m_halo_distance;
     g -= 2.0 * los * m_halo_distance * std::cos(m_theta);
     g  = std::sqrt(g);
+    
+    // if we have a core radius specified, all halo values inside this core 
+    // radius should be the same as at the core radius itself.
+    if ( g < m_core_radius ) 
+    {
+      //std::cout << "los=" << los << " is inside core radius " << m_core_radius << std::endl;
+      g = m_core_radius ;
+    }
+    
+    // finish scaling the integration point by the halo's scale radius
     g /= m_scale_radius;
   
+    // calculate the halo density f at the scale distance g
     double f = 0.0;
     f  = std::pow(g, m_alpha);
     f -= 1.0;
@@ -631,13 +705,15 @@ void GModelSpatialRadialProfileDMEinasto::update() const
 {
   
     // Update if scale radius has changed
-    if (m_last_scale_radius != scale_radius()) {
+    if (m_last_scale_radius != scale_radius() || m_last_scale_density != scale_density()) {
     
         // Store last values
         m_last_scale_radius = scale_radius();
+        m_last_scale_density = scale_density();
     
         // perform precomputations
         m_mass_radius = 10.0 * scale_radius();
+        m_scale_density_squared = scale_density() * scale_density();
 
     }
 
@@ -647,39 +723,68 @@ void GModelSpatialRadialProfileDMEinasto::update() const
 
 
 /***********************************************************************//**
- * @brief Calculate Halo J Factor
+ * @brief Calculate Halo Mass Density
  *
- * @param[in] minangle minimum integration angle (degrees).
- * @param[in] maxangle maximum integration angle (degrees).
+ * @param[in] radius from halo center (kpc)
  *
- * Calculates the halo's j-factor of the halo by integrating across the 
- * profile between two angles.
+ * Calculates the halo's mass density at a given radial distance from the halo
+ * center.
  *
- * @todo This should be done using a proper numerical integration
  ***************************************************************************/
-double GModelSpatialRadialProfileDMEinasto::j_factor(const double& minangle,
-                                                     const double& maxangle,
-                                                     const int&    npoints) const
+double GModelSpatialRadialProfileDMEinasto::mass_density( const double& radius ) const
 {
-    // init variables
-    double minradian = minangle * gammalib::deg2rad;
-    double maxradian = maxangle * gammalib::deg2rad;
-    double dr        = (maxradian - minradian) / npoints;
-    double r         = 0.0;
-    double total     = 0.0;
+  double density = 0.0 ;
   
-    // loop over different radii in the profile
-    for (int i = 0; i < npoints; ++i) {
-
-        // integration:  Int[ profile(r) * r * dr ]
-        r      = minradian + (i * dr);
-        total += profile_value(r) * r * dr;
-
-    }
+  //m_halo_distance ;
+  halo_kernel_los halo_shape( m_scale_radius.value(),
+                              m_halo_distance.value(),
+                              m_alpha.value(),
+                              0.0,
+                              m_core_radius.value() ) ;
   
-    // 2 * pi * Int[ profile(r) * r * dr
-    total *= gammalib::twopi;
+  
+  // eval produces a unitless density^2, so we must take its square root
+  density  = std::sqrt( halo_shape.eval( m_halo_distance.value() + radius ) ) ;
+  
+  // multiply in the missing scale density
+  density *= m_scale_density.value() ;
 
-    // Return J factor
-    return total;
+  return density ;
 }
+
+/***********************************************************************//**
+ * @brief Calculate J Factor
+ *
+ * @param[in] angle from halo center (radians)
+ *
+ * Calculates the halo's J-Factor at an angle from the halo center.
+ *
+ ***************************************************************************/
+double GModelSpatialRadialProfileDMEinasto::jfactor( const double& angle ) const
+{
+
+  // Integration settings
+  double minradian = 0.0 ;
+  int    npoints   = 200 ;
+
+  // initialize other variables
+  double jfactor   = 0.0 ;
+  double dr        = (angle - minradian) / npoints ;
+  double r         = 0.0;
+
+  // loop over different radii in the profile
+  for (int i = 0; i < npoints; ++i) {
+
+      // integration:  Int[ profile(r) * r * dr ]
+      r      = minradian + (i * dr);
+      jfactor += profile_value(r) * r * dr;
+
+  }
+  
+  // J-Factor = 2 * pi * Int[ profile(r) * r * dr , {r,minradian,angle} ]
+  jfactor *= gammalib::twopi;
+  
+  return jfactor ;
+}
+
+
