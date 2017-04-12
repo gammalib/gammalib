@@ -72,6 +72,7 @@ class Test(gammalib.GPythonTestSuite):
 
         # Append tests
         self.append(self.test_methods, "Test sky map methods")
+        self.append(self.test_friend_methods, "Test sky map friend methods")
         self.append(self.test_operators, "Test sky map operators")
         self.append(self.test_skymap_healpix, "Test HEALPix map")
         self.append(self.test_skymap_ait, "Test AIT projection map")
@@ -123,7 +124,35 @@ class Test(gammalib.GPythonTestSuite):
 
         # Return
         return
-    
+
+    # Test sky map friend methods
+    def test_friend_methods(self):
+        """
+        Test the sky map methods.
+        """
+        # Setup sky maps
+        m = gammalib.GSkyMap("CAR", "CEL", 83.63, 22.01, -3.7, 2.6, 10, 8, 12)
+
+        # Fill all values of skymaps with numbers > 0
+        values = range(1,m.npix()+1)
+        for j in range(m.nmaps()):
+            for i in range(m.npix()):
+                m[i,j] = values[i]
+
+        # Test map values after calling friend methods on one pixel
+        ipix = 18
+        self.test_value(m.sqrt()[ipix,0], values[ipix]**0.5, "Check sqrt method")
+        self.test_value(m.log()[ipix,0], math.log(values[ipix]), "Check log method")
+        self.test_value(m.log10()[ipix,0], math.log10(values[ipix]), "Check log10 method")
+
+        # Set the interesting value to a negative value
+        m[ipix,0] = -values[ipix]
+        self.test_value(m.abs()[ipix,0], values[ipix], "Check abs method")
+        self.test_value(m.sign()[ipix,0], -1, "Check sign method")
+        
+        # Return
+        return
+
     # Test sky map operators
     def test_operators(self):
         """

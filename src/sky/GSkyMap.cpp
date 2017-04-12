@@ -3040,13 +3040,166 @@ GSkyMap sqrt(const GSkyMap& map)
 
             // Check if content is not negative
             if (content < 0.0) {
-                std::string msg = "Negative value envountered."
+                std::string msg = "Negative value encountered."
                                   " Cannot take the sqrt from a negative value";
                 throw GException::invalid_value(G_OP_UNARY_DIV, msg);
             }
 
             // Set content of the result map
             result(j,i) = std::sqrt(content);
+
+        } // endfor: Loop over all bins
+
+    } // endfor: Loop over all maps
+
+    // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes the natural logarithm of skymap elements
+ *
+ * @param[in] map Skymap.
+ * @return Skymap containing the natural logarithm of every element.
+ ***************************************************************************/
+GSkyMap log(const GSkyMap& map)
+{
+    // Initialise result vector
+    GSkyMap result(map);
+
+    // Loop over all maps
+    for (int i = 0; i < map.nmaps(); ++i) {
+
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
+
+            // Get the content from the bin
+            double content = map(j,i);
+
+            // Check if content is not negative
+            if (content <= 0.0) {
+                std::string msg = "Negative or zero value encountered."
+                                  " Cannot calculate the logarithm of a negative or zero value";
+                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+            }
+
+            // Set content of the result map
+            result(j,i) = std::log(content);
+
+        } // endfor: Loop over all bins
+
+    } // endfor: Loop over all maps
+
+    // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes the base 10 logarithm of skymap elements
+ *
+ * @param[in] map Skymap.
+ * @return Skymap containing the base 10 logarithm of every element.
+ ***************************************************************************/
+GSkyMap log10(const GSkyMap& map)
+{
+    // Initialise result vector
+    GSkyMap result(map);
+
+    // Loop over all maps
+    for (int i = 0; i < map.nmaps(); ++i) {
+
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
+
+            // Get the content from the bin
+            double content = map(j,i);
+
+            // Check if content is not negative
+            if (content <= 0.0) {
+                std::string msg = "Negative or zero value encountered."
+                                  " Cannot calculate the logarithm of a negative or zero value";
+                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+            }
+
+            // Set content of the result map
+            result(j,i) = std::log10(content);
+
+        } // endfor: Loop over all bins
+
+    } // endfor: Loop over all maps
+
+    // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes the absolute value of skymap elements
+ *
+ * @param[in] map Skymap.
+ * @return Skymap containing the absolute value of every element.
+ ***************************************************************************/
+GSkyMap abs(const GSkyMap& map)
+{
+    // Initialise result vector
+    GSkyMap result(map);
+
+    // Loop over all maps
+    for (int i = 0; i < map.nmaps(); ++i) {
+
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
+
+            // Get the content from the bin
+            double content = map(j,i);
+
+            // Set content of the result map
+            result(j,i) = std::abs(content);
+
+        } // endfor: Loop over all bins
+
+    } // endfor: Loop over all maps
+
+    // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes the sign value of skymap elements
+ *
+ * @param[in] map Skymap.
+ * @return Skymap containing the sign value of every element.
+ *
+ * This method returns a Skymap filled with a value of 1 if the element
+ * is positive, a value of -1 if the element is negative and a value of 0  
+ * if the element is 0.
+ *
+ ***************************************************************************/
+GSkyMap sign(const GSkyMap& map)
+{
+    // Initialise result vector
+    GSkyMap result(map);
+
+    // Loop over all maps
+    for (int i = 0; i < map.nmaps(); ++i) {
+
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
+
+            // Get the content from the bin
+            double content = map(j,i);
+
+	    if (content == 0.0) {
+	       // Set content of the result map to 0.
+	       result(j,i) = 0.;
+	    }
+	    else {
+	       // Set content of the result map to the correct value
+	       result(j,i) = std::abs(content) / content;
+	    }
 
         } // endfor: Loop over all bins
 

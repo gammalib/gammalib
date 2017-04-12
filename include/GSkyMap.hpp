@@ -85,6 +85,10 @@ class GVector;
 class GSkyMap : public GBase {
 
 	friend GSkyMap sqrt(const GSkyMap& map);
+	friend GSkyMap log(const GSkyMap& map);
+	friend GSkyMap log10(const GSkyMap& map);
+	friend GSkyMap abs(const GSkyMap& map);
+	friend GSkyMap sign(const GSkyMap& map);
 
 public:
     // Constructors and destructors

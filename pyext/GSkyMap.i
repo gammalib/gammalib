@@ -245,6 +245,18 @@ public:
     GSkyMap sqrt() {
         return sqrt(*self);
     }
+    GSkyMap log() {
+        return log(*self);
+    }
+    GSkyMap log10() {
+        return log10(*self);
+    }
+    GSkyMap abs() {
+        return abs(*self);
+    }
+    GSkyMap sign() {
+        return sign(*self);
+    }
     // Python 2.x operator/=
     GSkyMap __idiv__(const GSkyMap& map) {
         self->operator/=(map);
