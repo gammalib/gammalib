@@ -7,7 +7,6 @@ Author(s) : Juergen Knoedlseder
 Author(s) : Juergen Knoedlseder
 
 
-
 1. Introduction
 ---------------
 This document briefly summarizes module by module the most important changes
@@ -115,6 +114,28 @@ Add operators for addition and subtraction of scalars to all matrix classes
 The GModelSpectralNodes class now throws an exception if the energy or
 intensity of a node is set to a non-positive value (#990).
 
+Sky directions drawn by GModelSpatialDiffuseConst::mc() are now restricted
+to the simulation cone that has previously been defined using the mc_norm()
+method. This speeds up considerbly the Monte Carlo simulations for an
+isotropic diffuse model (#1674). 
+
+The GModelSpectral eval() and eval_gradients() methods use an empty GTim()
+object as default time argument since all spectral models are so far time-
+independent. This avoids that a user needs to specify a dummy time argument
+(#1672).
+
+The set_mc_cone() methods of the GModelSpatialDiffuseCube class and the
+GModelSpatialDiffuseMap class now recompute only the Monte Carlo acceptance
+cone in case that the cone centre or radius have changed since the last
+computation. This speeds up the computations (#1673).
+
+The GModelSpectralPlaw2 class has been renamed to GModelSpectralPlawPhotonFlux
+and the integral() methods were renamed to flux(). A new class
+GModelSpectralPlawEnergyFlux has been added that handles integral energy
+fluxes as opposed to GModelSpectralPlawPhotonFlux that handles integral
+photon fluxes. Unit tests have been added for the new class (#1790).
+>>>>>>> 6e813568eca04bb423229fc9599407fa3780fa8d
+
 The GModelSpectralSmoothBrokenPlaw class that implements a smoothly broken
 power law spectrum has been added (#1948).
 
@@ -128,6 +149,76 @@ GModelSpatialRadialProfileGauss has been added to show how to implement
 radial profile for the case of a Gaussian, and also to cross-check the
 results with the GModelSpatialRadialGauss class that should return basically
 the same results (#1520).
+
+Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
+The method deals with pre-computation and normalization of the profiles,
+and implements the eval(), eval_grandients() and mc() method. The class
+GModelSpatialRadialProfileGauss has been added to show how to implement
+radial profile for the case of a Gaussian, and also to cross-check the
+results with the GModelSpatialRadialGauss class that should return basically
+the same results (#1520).
+
+The GModelSpatialDiffuseCube::mc() method now uses a rejection method for
+simulating sky directions, which makes the MC method identical to the model
+evaluation method, using in both cases a log-log interpolation. The simulation
+cone is now used for Monte Carlo simulations (#1722).
+
+Also the GModelSpatialDiffuseMap::mc() method now uses a rejection method for
+simulating sky directions (#1725).
+
+The methods spatial(), spectral() and temporal() have been added to GModelSky
+to allow setting of model components.
+
+Private methods GModel::read_attributes() and GModel::write_attributes() have
+been added to centralize the reading and writing of model attributes. These
+methods are now called at all relevant places, reducing code duplication and
+assuring that all attributes are correctly read by all classes and constructors
+(#1765).
+
+The GModelSpatialDiffuseMap, GModelSpatialDiffuseCube and GModelSpectralFunc
+class now support the specifications of file names that are relative to the
+XML file (#1808).
+
+The spatial model components have been renamed to enhance the readability and
+to make them more homogenous. The Fermi/LAT Science Tools should also evolve
+to support the new names:
+* "PointSource" (alias: "SkyDirFunction")
+* "RadialDisk" (alias: "DiskFunction")
+* "RadialGaussian" (alias: "GaussFunction")
+* "RadialShell" (alias: "ShellFunction")
+* "EllipticalDisk"
+* "EllipticalGaussian" (alias: "EllipticalGauss")
+* "DiffuseIsotropic" (alias: "ConstantValue")
+* "DiffuseMap" (alias: "SpatialMap")
+* "DiffuseMapCube" (alias: "MapCubeFunction")
+By default the old model names are still supported. Support of the old model
+names can be turned off by specifying the --disable-legacy-model-names option
+to the ./configure script (#1818).
+
+The model classes now write the same XML element names than those that were read
+in. In that way a maximum legacy for the Fermi/LAT data format is assured (#1820).
+
+The spectral registry class now also checks for model parameter names which allows
+to have models of the same type but with different parameters in the registry
+(#1824). The interface for the GModelSpectralRegistry::alloc() method has been
+changed so that it no longer takes a name string but an XML element. The same has
+been done for the GModelSpatialRegistry and GModelTemporalRegistry classes so that
+more general model definition XML file handling can be implemented.
+
+The names of some spectral model components have been modified to be more
+explicit and homogenous:
+* "Constant" (was "ConstantValue")
+* "PowerLaw" (combines "PowerLaw" and "PowerLaw2")
+* "BrokenPowerLaw"
+* "ExponentialCutoffPowerLaw" (was "ExpCutoff")
+* "SuperExponentialCutoffPowerLaw" (was "PLSuperExpCutoff")
+* "Gaussian"
+* "LogParabola"
+* "FileFunction"
+* "NodeFunction"
+By default the old model names are still supported. Support of the old model
+names can be turned off by specifying the --disable-legacy-model-names option
+to the ./configure script (#1821).
 
 
 9. Numerics module
