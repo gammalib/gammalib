@@ -99,8 +99,10 @@ public:
     const std::string& gtiname(void) const;
     void               has_phase(const bool& has_phase);
     void               has_detxy(const bool& has_detxy);
+    void               has_mc_id(const bool& has_mc_id);
     const bool&        has_phase() const;
     const bool&        has_detxy() const;
+    const bool&        has_mc_id() const;
     
 protected:
     // Protected methods
@@ -122,6 +124,7 @@ protected:
     std::string m_gti_extname; //!< GTI extension name
     bool        m_has_phase;   //!< Signal presence of phase
     bool        m_has_detxy;   //!< Signal presence of detector coordinates
+    bool        m_has_mc_id;   //!< Signal presence of MC identifier
 
     // Event list data
     mutable std::vector<GCTAEventAtom>  m_events;   //!< Events
@@ -239,6 +242,21 @@ void GCTAEventList::has_detxy(const bool& has_detxy)
 }
 
 
+/***********************************************************************//**
+ * @brief Set the Monte Carlo identifier flag
+ *
+ * @param[in] has_mc_id Monte Carlo identifier flag.
+ *
+ * Set the Monte Carlo identifier flag.
+ ***************************************************************************/
+inline
+void GCTAEventList::has_mc_id(const bool& has_mc_id)
+{
+    m_has_mc_id = has_mc_id;
+    return;
+}
+
+
 /*************************************************************************
  * @brief Return phase information flag
  *
@@ -260,6 +278,18 @@ inline
 const bool& GCTAEventList::has_detxy() const
 {
     return m_has_detxy;
+}
+
+
+/*************************************************************************
+ * @brief Return Monte Carlo identifier flag
+ *
+ * @return True if a Monte Carlo identifier is available, false otherwise.
+ ***************************************************************************/
+inline
+const bool& GCTAEventList::has_mc_id() const
+{
+    return m_has_mc_id;
 }
 
 #endif /* GCTAEVENTLIST_HPP */

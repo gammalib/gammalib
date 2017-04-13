@@ -38,6 +38,7 @@
 #include "GFitsTableCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
+#include "GFitsTableLongCol.hpp"
 #include "GFitsTableULongCol.hpp"
 #include "GTime.hpp"
 #include "GTimeReference.hpp"
@@ -380,6 +381,14 @@ void GCTAEventList::read(const GFits& fits)
     }
     else {
         m_has_phase = false;
+    }
+
+    // Signal presence of "MC_ID" column
+    if (events.contains("MC_ID")) {
+        m_has_mc_id = true;
+    }
+    else {
+        m_has_mc_id = false;
     }
 
     // Read GTI extension name from data sub-space keyword
@@ -913,6 +922,7 @@ void GCTAEventList::init_members(void)
     m_gti_extname = gammalib::extname_gti; //!< Default GTI extension name
     m_has_phase   = false;
     m_has_detxy   = true;
+    m_has_mc_id   = false;
 
     // Initialise cache
     m_irf_names.clear();
@@ -938,6 +948,7 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
     m_gti_extname = list.m_gti_extname;
     m_has_phase   = list.m_has_phase;
     m_has_detxy   = list.m_has_detxy;
+    m_has_mc_id   = list.m_has_mc_id;
 
     // Copy cache
     m_irf_names  = list.m_irf_names;
@@ -1022,6 +1033,9 @@ void GCTAEventList::read_events(const GFitsTable& table) const
         // Optionally get pointer to PHASE column
         const GFitsTableCol* ptr_phase = (m_has_phase) ? table["PHASE"] : NULL;
 
+        // Optionally get pointer to MC_ID column
+        const GFitsTableCol* ptr_mc_id = (m_has_mc_id) ? table["MC_ID"] : NULL;
+
         // Copy data from columns into GCTAEventAtom objects
         for (int i = 0; i < num; ++i) {
 
@@ -1046,6 +1060,11 @@ void GCTAEventList::read_events(const GFitsTable& table) const
                 event.m_phase = ptr_phase->real(i);
             }
 
+            // If available, set Monte Carlo identifier
+            if (m_has_mc_id) {
+                event.m_mc_id = ptr_mc_id->integer(i);
+            }
+
             // Append event
             m_events.push_back(event);
 
@@ -1068,7 +1087,8 @@ void GCTAEventList::read_events(const GFitsTable& table) const
                 name == "ENERGY"   ||
                 name == "DETX"     ||
                 name == "DETY"     ||
-                name == "PHASE") {
+                name == "PHASE"    ||
+                name == "MC_ID") {
                 continue;
             }
 
@@ -1122,11 +1142,11 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
     if (size() > 0) {
 
         // Allocate mandatory columns
-        GFitsTableULongCol  col_eid    = GFitsTableULongCol("EVENT_ID", size());
-        GFitsTableDoubleCol col_time   = GFitsTableDoubleCol("TIME", size());
-        GFitsTableFloatCol  col_ra     = GFitsTableFloatCol("RA", size());
-        GFitsTableFloatCol  col_dec    = GFitsTableFloatCol("DEC", size());
-        GFitsTableFloatCol  col_energy = GFitsTableFloatCol("ENERGY", size());
+        GFitsTableULongCol  col_eid("EVENT_ID", size());
+        GFitsTableDoubleCol col_time("TIME", size());
+        GFitsTableFloatCol  col_ra("RA", size());
+        GFitsTableFloatCol  col_dec("DEC", size());
+        GFitsTableFloatCol  col_energy("ENERGY", size());
 
         // Set units of columns
         // (see http://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf)
@@ -1155,8 +1175,8 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
         if (m_has_detxy) {
 
             // Allocate columns
-            GFitsTableFloatCol col_detx = GFitsTableFloatCol("DETX", size());
-            GFitsTableFloatCol col_dety = GFitsTableFloatCol("DETY", size());
+            GFitsTableFloatCol col_detx("DETX", size());
+            GFitsTableFloatCol col_dety("DETY", size());
 
             // Set units of columns
             // (see http://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf)
@@ -1179,15 +1199,31 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
         if (m_has_phase) {
 
             // Allocate columns
-            GFitsTableFloatCol col_phase = GFitsTableFloatCol("PHASE", size());
+            GFitsTableFloatCol col_phase("PHASE", size());
 
             // Fill columns
             for (int i = 0; i < size(); ++i) {
                 col_phase(i) = m_events[i].m_phase;
             }
 
-            // Append columns to table
+            // Append column to table
             hdu.append(col_phase);
+
+        }
+
+        // If available, add Monte Carlo identifier
+        if (m_has_mc_id) {
+
+            // Allocate columns
+            GFitsTableLongCol col_mc_id("MC_ID", size());
+
+            // Fill columns
+            for (int i = 0; i < size(); ++i) {
+                col_mc_id(i) = m_events[i].m_mc_id;
+            }
+
+            // Append column to table
+            hdu.append(col_mc_id);
 
         }
 
