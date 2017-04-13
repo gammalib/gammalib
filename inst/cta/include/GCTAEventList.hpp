@@ -82,6 +82,10 @@ public:
     virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
     virtual const GCTARoi& roi(void) const;
+    std::vector<double>    phasemin(void) const;
+    void                   phasemin(const std::vector<double> phmin);
+    std::vector<double>    phasemax(void) const;
+    void                   phasemax(const std::vector<double> phmax);
     std::string            print(const GChatter& chatter = NORMAL) const;
 
     // Implement other methods
@@ -117,11 +121,13 @@ protected:
     int          irf_cache_index(const std::string& name) const;
 
     // Event list meta data
-    GCTARoi     m_roi;         //!< Region of interest
-    int         m_num_events;  //!< Number of events
-    std::string m_gti_extname; //!< GTI extension name
-    bool        m_has_phase;   //!< Signal presence of phase
-    bool        m_has_detxy;   //!< Signal presence of detector coordinates
+    GCTARoi             m_roi;         //!< Region of interest
+    std::vector<double> m_phasemin;    //!< Lower bounds of phase intervals
+    std::vector<double> m_phasemax;    //!< Upper bounds of phase intervals
+    int                 m_num_events;  //!< Number of events
+    std::string         m_gti_extname; //!< GTI extension name
+    bool                m_has_phase;   //!< Signal presence of phase
+    bool                m_has_detxy;   //!< Signal presence of detector coordinates
 
     // Event list data
     mutable std::vector<GCTAEventAtom>  m_events;   //!< Events
@@ -179,6 +185,56 @@ inline
 const GCTARoi& GCTAEventList::roi(void) const
 {
     return (m_roi);
+}
+
+
+/***********************************************************************//**
+ * @brief Return phasemin vector
+ *
+ * @return phasemin vector.
+ ***************************************************************************/
+inline
+std::vector<double> GCTAEventList::phasemin(void) const
+{
+    return (m_phasemin);
+}
+
+
+/***********************************************************************//**
+ * @brief Set phasemin vector
+ *
+ * @param[in] phmin Lower bounds of phase intervals.
+ ***************************************************************************/
+inline
+void GCTAEventList::phasemin(const std::vector<double> phmin)
+{
+    m_phasemin = phmin;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return phasemax vector
+ *
+ * @return phasemax vector.
+ ***************************************************************************/
+inline
+std::vector<double> GCTAEventList::phasemax(void) const
+{
+    return (m_phasemax);
+}
+
+
+/***********************************************************************//**
+ * @brief Set phasemax vector
+ *
+ * @param[in] phmax Upper bounds of phase intervals.
+ ***************************************************************************/
+inline
+void GCTAEventList::phasemax(const std::vector<double> phmax)
+{
+    m_phasemax = phmax;
+    return;
 }
 
 

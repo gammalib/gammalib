@@ -42,6 +42,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_DS_ROI                      "gammalib::read_ds_roi(GFitsHDU&)"
 #define G_READ_DS_EBOUNDS              "gammalib::read_ds_ebounds(GFitsHDU&)"
+#define G_READ_DS_PHASE                  "gammalib::read_ds_phase(GFitsHDU&)"
 #define G_READ_DS_GTI         "GGti gammalib::read_ds_gti_extname(GFitsHDU&)"
 
 /* __ Coding definitions _________________________________________________ */
@@ -256,6 +257,75 @@ GEbounds gammalib::read_ds_ebounds(const GFitsHDU& hdu)
     // Return
     return ebounds;
 }
+
+
+/***********************************************************************//**
+ * @brief Read phase boundary data sub-space keywords
+ *
+ * @param[in] hdu FITS HDU
+ *
+ * @exception GException::invalid_value
+ *            Invalid phase data sub-space encountered
+ *
+ * Reads the phase boundary data sub-space keywords by searching for a 
+ * DSTYPx keyword named "PHASE". The data sub-space information is expected
+ * to be in the format "0.1:0.3,0.5:0.7", where each subset of numbers 
+ * represents the minimum and maximum phase. No detailed syntax
+ * checking is performed.
+ ***************************************************************************/
+std::vector< std::vector<double> > gammalib::read_ds_phase(const GFitsHDU& hdu)
+{
+    // Initialise phase boundaries
+    std::vector< std::vector<double> > phase_bounds;
+    std::vector<double> phasemin;
+    std::vector<double> phasemax;
+
+    // Get number of data sub-space keywords (default to 0 if keyword is
+    // not found)
+    int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
+
+    // Loop over all data sub-space keys
+    for (int i = 1; i <= ndskeys; ++i) {
+
+        // Set data sub-space key strings
+        std::string type_key  = "DSTYP"+gammalib::str(i);
+        std::string unit_key  = "DSUNI"+gammalib::str(i);
+        std::string value_key = "DSVAL"+gammalib::str(i);
+
+        // Continue only if type_key is found and if this key is PHASE
+        if (hdu.has_card(type_key) && hdu.string(type_key) == "PHASE") {
+
+            // Extract phase boundaries
+            std::string value               = hdu.string(value_key);
+	    //std::string unit                = hdu.string(unit_key);
+	    std::vector<std::string> intervals = gammalib::split(value, ",");
+	    for (int j=0; j < intervals.size(); j++) {
+	        std::vector<std::string> values = gammalib::split(intervals[j], ":");
+	        if (values.size() == 2) {
+		    double  phmin = gammalib::todouble(values[0]);
+		    double  phmax = gammalib::todouble(values[1]);
+		    phasemin.push_back(phmin);
+		    phasemax.push_back(phmax);
+		}
+		else {
+		    std::string msg = "Invalid phase value \""+value+
+		                      "\" encountered in data selection key \""+
+		                      value_key+"\"";
+		    throw GException::invalid_value(G_READ_DS_PHASE, msg);
+		}
+	    } //endfor: looped over phase intervals
+
+        } // endif: PHASE type_key found
+
+    } // endfor: looped over data selection keys
+
+    // Store phasemin and phasemax vectors in the output vector
+    phase_bounds.push_back(phasemin);
+    phase_bounds.push_back(phasemax);
+
+    // Return
+    return phase_bounds;
+} 
 
 
 /***********************************************************************//**

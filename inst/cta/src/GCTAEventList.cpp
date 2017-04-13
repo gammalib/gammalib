@@ -49,6 +49,8 @@
 #define G_ROI                                     "GCTAEventList::roi(GRoi&)"
 #define G_APPEND_COLUMN        "GCTAEventList::append_column(GFitsTableCol&)"
 #define G_FETCH                                      "GCTAEventList::fetch()"
+#define G_WRITE_DS_KEYS            "GCTAEventList::write_ds_keys(GFitsHDU&, "\
+                                                  "const std::string&) const"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -426,6 +428,12 @@ void GCTAEventList::read(const GFits& fits)
 
     // Read energy boundaries from data sub-space keyword
     m_ebounds = gammalib::read_ds_ebounds(events);
+
+    // Read phase boundaries from data sub-space keyword
+    std::vector< std::vector<double> > phase_bounds;
+    phase_bounds = gammalib::read_ds_phase(events);
+    m_phasemin = phase_bounds[0];
+    m_phasemax = phase_bounds[1];
 
     // If the file name contains an expression then load the events now.
     // We do this at the end to make sure that the GTI has been set before.
@@ -906,6 +914,8 @@ void GCTAEventList::init_members(void)
 {
     // Initialise members
     m_roi.clear();
+    m_phasemin.clear();
+    m_phasemax.clear();
     m_events.clear();
     m_columns.clear();
     m_filename.clear();
@@ -1209,6 +1219,9 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
  * @param[in] hdu FITS HDU.
  * @param[in] gtiname Good Time Interval FITS extension.
  *
+ * @exception GException::vector_mismatch
+ *            Lower and upper phase boundaries have different size.
+ *
  * Writes the data sub-space keywords for an event list into the FITS HDU.
  * The following keywords will be written:
  *
@@ -1280,6 +1293,31 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) con
         ndskeys++;
         
     } // endif: RoI was valid
+
+    // Check if there are phase interval cuts
+    if (m_phasemin.size()>0) {
+        // Check if m_phasemin and m_phasemax have the same length.
+        if (m_phasemin.size() == m_phasemax.size()) {
+
+	    std::string dsval4 = "";
+	    // Loop over m_phasemin values
+	    for (int i=0; i < m_phasemin.size(); i++) {
+	        dsval4 += gammalib::str(m_phasemin[i]) + ":" +
+		  gammalib::str(m_phasemax[i]) + ",";
+	    } // End for loop
+	    dsval4 = dsval4.substr(0,dsval4.length()-1);
+
+	    // Write DS keywords
+	    ndskeys++;
+	    hdu.card("DSTYP"+gammalib::str(ndskeys), "PHASE",         "Data sub-space type");
+	    hdu.card("DSUNI"+gammalib::str(ndskeys), "DIMENSIONLESS", "Data sub-space unit");
+	    hdu.card("DSVAL"+gammalib::str(ndskeys), dsval4,          "Data sub-space value");
+	}
+	else {
+  	    throw GException::vector_mismatch(G_WRITE_DS_KEYS, m_phasemin.size(), 
+					      m_phasemax.size());
+	}
+    } // End if phase interval cuts
 
     // Set number of data selection keys
     hdu.card("NDSKEYS", ndskeys,  "Number of data sub-space keys");

@@ -56,6 +56,10 @@ public:
     virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
     virtual const GCTARoi& roi(void) const;
+    std::vector<double>    phasemin(void) const;
+    void                   phasemin(const std::vector<double> phmin);
+    std::vector<double>    phasemax(void) const;
+    void                   phasemax(const std::vector<double> phmax);
 
     // Implement other methods
     void               append(const GCTAEventAtom& event);
