@@ -78,24 +78,40 @@ GModelTemporalPhaseCurve::GModelTemporalPhaseCurve(void) : GModelTemporal()
  * @brief File constructor
  *
  * @param[in] filename File name of phase curve nodes.
+ * @param[in] mjd Reference time.
+ * @param[in] phase Phase at reference time.
+ * @param[in] f0 Frequency at reference time (Hz).
+ * @param[in] f1 First frequency derivative at reference time.
+ * @param[in] f2 Second frequency derivative at reference time.
  * @param[in] norm Normalization factor.
  *
  * Constructs phase curve from a list of nodes that is found in the specified
- * FITS file. See the load_nodes() method for more information about the
- * expected structure of the file.
+ * FITS file, a reference time and phase information at the reference time.
+ * See the load_nodes() method for more information about the expected
+ * structure of the file.
  ***************************************************************************/
 GModelTemporalPhaseCurve::GModelTemporalPhaseCurve(const GFilename& filename,
+                                                   const GTime&     mjd,
+                                                   const double&    phase,
+                                                   const double&    f0,
+                                                   const double&    f1,
+                                                   const double&    f2,
                                                    const double&    norm) :
                           GModelTemporal()
 {
     // Initialise members
     init_members();
 
+    // Set parameters
+    this->mjd(mjd);
+    this->phase(phase);
+    this->f0(f0);
+    this->f1(f1);
+    this->f2(f2);
+    this->norm(norm);
+
     // Load nodes
     load_nodes(filename);
-
-    // Set normalization
-    m_norm.value(norm);
 
     // Return
     return;
@@ -342,7 +358,7 @@ GTimes GModelTemporalPhaseCurve::mc(const double& rate, const GTime&  tmin,
  * Reads the temporal information from an XML element. The XML element should
  * have the format
  *
- *     <temporalModel type="PhaseCurve" file="..">
+ *     <temporalModel type="PhaseCurve" file="phase.fits">
  *       <parameter name="Normalization" scale="1" value="1"       min="0.1" max="10"   free="0"/>
  *       <parameter name="MJD"           scale="1" value="51544.5" min="0.0" max="1e10" free="0"/>
  *       <parameter name="Phase"         scale="1" value="0.0"     min="0.0" max="1e10" free="1"/>
@@ -388,7 +404,7 @@ void GModelTemporalPhaseCurve::read(const GXmlElement& xml)
  * Writes the temporal information into an XML element. The XML element will
  * have the format
  *
- *     <temporalModel type="PhaseCurve" file="..">
+ *     <temporalModel type="PhaseCurve" file="phase.fits">
  *       <parameter name="Normalization" scale="1" value="1"       min="0.1" max="10"   free="0"/>
  *       <parameter name="MJD"           scale="1" value="51544.5" min="0.0" max="1e10" free="0"/>
  *       <parameter name="Phase"         scale="1" value="0.0"     min="0.0" max="1e10" free="1"/>
@@ -581,7 +597,7 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_f1.unit("s^-2");
     m_f1.scale(1.0);
     m_f1.value(0.1);
-    m_f1.range(0.0,1000.0);
+    m_f1.range(-1000.0,1000.0);
     m_f1.free();
     m_f1.gradient(0.0);
     m_f1.has_grad(false);
@@ -592,7 +608,7 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_f2.unit("s^-3");
     m_f2.scale(1.0);
     m_f2.value(0.01);
-    m_f2.range(0.0,1000.0);
+    m_f2.range(-1000.0,1000.0);
     m_f2.free();
     m_f2.gradient(0.0);
     m_f2.has_grad(false);
