@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventAtom.i - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,8 +55,10 @@ public:
     // Other methods
     const int&           index(void) const;
     const unsigned long& event_id(void) const;
+    const int&           mc_id(void) const;
     const float&         phase(void) const;
     void                 event_id(const unsigned long& id);
+    void                 mc_id(const int& id);
     void                 phase(const float& phase);
 };
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventAtom.hpp - CTA event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,8 +72,10 @@ public:
     // Other methods
     const int&           index(void) const;
     const unsigned long& event_id(void) const;
+    const int&           mc_id(void) const;
     const float&         phase(void) const;
     void                 event_id(const unsigned long& id);
+    void                 mc_id(const int& id);
     void                 phase(const float& phase);
 
 protected:
@@ -88,6 +90,7 @@ protected:
     GEnergy       m_energy;         //!< Event energy
     GTime         m_time;           //!< Event time
     unsigned long m_event_id;       //!< Event identifier
+    int           m_mc_id;          //!< Monte Carlo identifier
     float         m_phase;          //!< Optional phase
 };
 
@@ -206,6 +209,18 @@ const unsigned long& GCTAEventAtom::event_id(void) const
 
 
 /***********************************************************************//**
+ * @brief Return Monte Carlo identifier
+ *
+ * @return Monte Carlo identifier.
+ ***************************************************************************/
+inline
+const int& GCTAEventAtom::mc_id(void) const
+{
+    return (m_mc_id);
+}
+
+
+/***********************************************************************//**
  * @brief Return event phase
  *
  * @return Event phase.
@@ -226,6 +241,19 @@ inline
 void GCTAEventAtom::event_id(const unsigned long& id)
 {
     m_event_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set Monte Carlo identifier
+ *
+ * @param[in] id Monte Carlo identifier.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::mc_id(const int& id)
+{
+    m_mc_id = id;
     return;
 }
 
