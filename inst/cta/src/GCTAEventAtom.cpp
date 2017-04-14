@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventAtom.cpp - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2017 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -209,6 +209,7 @@ void GCTAEventAtom::init_members(void)
     m_energy.clear();
     m_index    = 0;
     m_event_id = 0;
+    m_mc_id    = 0;
     m_phase    = 0.0;
 
     // Return
@@ -229,6 +230,7 @@ void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
     m_energy   = atom.m_energy;
     m_index    = atom.m_index;
     m_event_id = atom.m_event_id;
+    m_mc_id    = atom.m_mc_id;
     m_phase    = atom.m_phase;
 
     // Return
