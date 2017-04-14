@@ -76,6 +76,8 @@ public:
     const bool&        has_phase() const;
     const bool&        has_detxy() const;
     const bool&        has_mc_id() const;
+    void               set_mc_id_names(const std::vector<int>&         ids,
+                                       const std::vector<std::string>& names);
 };
 
 

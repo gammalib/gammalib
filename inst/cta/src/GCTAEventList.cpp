@@ -49,6 +49,8 @@
 #define G_OPERATOR                          "GCTAEventList::operator[](int&)"
 #define G_ROI                                     "GCTAEventList::roi(GRoi&)"
 #define G_APPEND_COLUMN        "GCTAEventList::append_column(GFitsTableCol&)"
+#define G_SET_MC_ID_NAMES "GCTAEventList::set_mc_id_names(std::vector<int>&,"\
+                                                " std::vector<std::string>&)"
 #define G_FETCH                                      "GCTAEventList::fetch()"
 
 /* __ Macros _____________________________________________________________ */
@@ -442,6 +444,9 @@ void GCTAEventList::read(const GFits& fits)
         read_events(events);
     }
 
+    // Read Monte Carlo identifier keywords
+    read_mc_ids(events);
+
     // Return
     return;
 }
@@ -507,6 +512,9 @@ void GCTAEventList::write(GFits& fits, const std::string& evtname,
 
     // Write data selection keywords
     write_ds_keys(table, gtiname);
+
+    // Write Monte Carlo identifier keywords
+    write_mc_ids(table);
 
     // Append event table to FITS file
     fits.append(table);
@@ -792,9 +800,42 @@ void GCTAEventList::dispose(void) const
 
 
 /***********************************************************************//**
+ * @brief Set Monte Carlo identifiers and model names
+ *
+ * @param[in] ids Monte Carlo identifiers.
+ * @param[in] names Model name for each Monte Carlo identifier.
+ *
+ * Sets the Monte Carlo identifiers and their corresponding model names.
+ * The information will then be written into the header file.
+ ***************************************************************************/
+void GCTAEventList::set_mc_id_names(const std::vector<int>&         ids,
+                                    const std::vector<std::string>& names)
+{
+    // Throw an exception if the vectors have an incompatible size
+    if (ids.size() != names.size()) {
+        std::string msg = "The number of Monte Carlo identifiers ("+
+                          gammalib::str(ids.size())+") does not correspond to "
+                          "the number of model names ("+
+                          gammalib::str(names.size())+"). Please provide the "
+                          "same number of model names and Monte Carlo "
+                          "identifiers.";
+        throw GException::invalid_argument(G_SET_MC_ID_NAMES, msg);
+    }
+
+    // Set vectors
+    m_mc_ids      = ids;
+    m_mc_id_names = names;
+
+    // Return
+    return;
+}
+
+
+
+/***********************************************************************//**
  * @brief Print event list information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing event list information.
  ***************************************************************************/
 std::string GCTAEventList::print(const GChatter& chatter) const
@@ -923,6 +964,8 @@ void GCTAEventList::init_members(void)
     m_has_phase   = false;
     m_has_detxy   = true;
     m_has_mc_id   = false;
+    m_mc_ids.clear();
+    m_mc_id_names.clear();
 
     // Initialise cache
     m_irf_names.clear();
@@ -949,6 +992,8 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
     m_has_phase   = list.m_has_phase;
     m_has_detxy   = list.m_has_detxy;
     m_has_mc_id   = list.m_has_mc_id;
+    m_mc_ids      = list.m_mc_ids;
+    m_mc_id_names = list.m_mc_id_names;
 
     // Copy cache
     m_irf_names  = list.m_irf_names;
@@ -1107,6 +1152,52 @@ void GCTAEventList::read_events(const GFitsTable& table) const
 
 
 /***********************************************************************//**
+ * @brief Read Monte Carlo identifier keywords from FITS HDU
+ *
+ * @param[in] table FITS table HDU.
+ *
+ * Reads the Monte Carlo identifier keywords for an event list from the FITS
+ * table HDU.
+ ***************************************************************************/
+void GCTAEventList::read_mc_ids(const GFitsTable& table)
+{
+    // Clear Monte Carlo identifiers and names
+    m_mc_ids.clear();
+    m_mc_id_names.clear();
+
+    // Continue only if the header contains a "MCIDS" keyword
+    if (table.has_card("NMCIDS")) {
+
+        // Get number of Monte Carlo identifiers
+        int nids = table.integer("NMCIDS");
+
+        // Loop over Monte Carlo identifiers
+        for (int i = 0; i < nids; ++i) {
+
+            // Set keyword names
+            char keyword_id[10];
+            char keyword_name[10];
+            sprintf(keyword_id,   "MID%5.5d", i+1);
+            sprintf(keyword_name, "MMN%5.5d", i+1);
+ 
+            // Get header keywords
+            int         id   = table.integer("keyword_id");
+            std::string name = table.string("keyword_name");
+
+            // Put identifier and name in list
+            m_mc_ids.push_back(id);
+            m_mc_id_names.push_back(name);
+
+        } // endfor: looped over Monte Carlo identifiers
+
+    } // endif: there were Monte Carlo identifiers
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Write CTA events into FITS table
  *
  * @param[in] hdu FITS binary table.
@@ -1248,16 +1339,17 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
  * Writes the data sub-space keywords for an event list into the FITS HDU.
  * The following keywords will be written:
  *
- *      DSTYP1 = "TIME"                     / Data sub-space type
- *      DSUNI1 = "s"                        / Data sub-space unit
- *      DSVAL1 = "TABLE"                    / Data sub-space value
- *      DSREF1 = ":[extname]"               / Data sub-space reference
- *      DSTYP2 = "ENERGY"                   / Data sub-space type
- *      DSUNI2 = "TeV"                      / Data sub-space unit
- *      DSVAL2 = "[emin]:[emax]"            / Data sub-space value
- *      DSTYP3 = "POS(RA,DEC)"              / Data sub-space type
- *      DSUNI3 = "deg"                      / Data sub-space unit
- *      DSVAL3 = "CIRCLE([ra],[dec],[rad])" / Data sub-space value
+ *      DSTYP1  = "TIME"                     / Data sub-space type
+ *      DSUNI1  = "s"                        / Data sub-space unit
+ *      DSVAL1  = "TABLE"                    / Data sub-space value
+ *      DSREF1  = ":[extname]"               / Data sub-space reference
+ *      DSTYP2  = "ENERGY"                   / Data sub-space type
+ *      DSUNI2  = "TeV"                      / Data sub-space unit
+ *      DSVAL2  = "[emin]:[emax]"            / Data sub-space value
+ *      DSTYP3  = "POS(RA,DEC)"              / Data sub-space type
+ *      DSUNI3  = "deg"                      / Data sub-space unit
+ *      DSVAL3  = "CIRCLE([ra],[dec],[rad])" / Data sub-space value
+ *      NDSKEYS = 3                          / Number of data sub-space keys
  *
  * where
  *
@@ -1319,6 +1411,59 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) con
 
     // Set number of data selection keys
     hdu.card("NDSKEYS", ndskeys,  "Number of data sub-space keys");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write Monte Carlo identifier keywords into FITS HDU
+ *
+ * @param[in] hdu FITS HDU.
+ *
+ * Writes the Monte Carlo identifier keywords for an event list into the FITS
+ * HDU. The following keywords will be written:
+ *
+ *      NMCIDS      Number of Monte Carlo identifiers
+ *      MID00001    First Monte Carlo identifier
+ *      MMN00001    Model name for first Monte Carlo identifier
+ *      MID00002    Second Monte Carlo identifier
+ *      MMN00002    Model name for second Monte Carlo identifier
+ *      ...
+ ***************************************************************************/
+void GCTAEventList::write_mc_ids(GFitsHDU& hdu) const
+{
+    // Set number of Monte Carlo identifiers
+    int nids = m_mc_ids.size();
+
+    // Continue only if there are Monte Carlo identifiers
+    if (nids > 0) {
+
+        // Set number of Monte Carlo identifiers
+        hdu.card("NMCIDS", nids,  "Number of Monte Carlo identifiers");
+
+        // Loop over Monte Carlo identifiers
+        for (int i = 0; i < nids; ++i) {
+
+            // Set keyword names
+            char keyword_id[10];
+            char keyword_name[10];
+            sprintf(keyword_id,   "MID%5.5d", i+1);
+            sprintf(keyword_name, "MMN%5.5d", i+1);
+            
+            // Set comments
+            std::string comment_id   = "Monte Carlo identifier for model " +
+                                       gammalib::str(i+1);
+            std::string comment_name = "Name of model " + gammalib::str(i+1);
+
+            // Write header keywords
+            hdu.card(std::string(keyword_id),   m_mc_ids[i],      comment_id);
+            hdu.card(std::string(keyword_name), m_mc_id_names[i], comment_name);
+
+        } // endfor: looped over Monte Carlo identifiers
+
+    } // endif: there were Monte Carlo identifiers
 
     // Return
     return;

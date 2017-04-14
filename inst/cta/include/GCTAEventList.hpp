@@ -103,6 +103,8 @@ public:
     const bool&        has_phase() const;
     const bool&        has_detxy() const;
     const bool&        has_mc_id() const;
+    void               set_mc_id_names(const std::vector<int>&         ids,
+                                       const std::vector<std::string>& names);
     
 protected:
     // Protected methods
@@ -112,19 +114,23 @@ protected:
     virtual void set_energies(void) { return; }
     virtual void set_times(void) { return; }
     void         read_events(const GFitsTable& table) const;
+    void         read_mc_ids(const GFitsTable& table);
     void         write_events(GFitsBinTable& table) const;
     void         write_ds_keys(GFitsHDU& hdu,
                                const std::string& gtiname = gammalib::extname_gti) const;
+    void         write_mc_ids(GFitsHDU& hdu) const;
     int          irf_cache_init(const std::string& name) const;
     int          irf_cache_index(const std::string& name) const;
 
     // Event list meta data
-    GCTARoi     m_roi;         //!< Region of interest
-    int         m_num_events;  //!< Number of events
-    std::string m_gti_extname; //!< GTI extension name
-    bool        m_has_phase;   //!< Signal presence of phase
-    bool        m_has_detxy;   //!< Signal presence of detector coordinates
-    bool        m_has_mc_id;   //!< Signal presence of MC identifier
+    GCTARoi                  m_roi;         //!< Region of interest
+    int                      m_num_events;  //!< Number of events
+    std::string              m_gti_extname; //!< GTI extension name
+    bool                     m_has_phase;   //!< Signal presence of phase
+    bool                     m_has_detxy;   //!< Signal presence of detector coordinates
+    bool                     m_has_mc_id;   //!< Signal presence of MC identifier
+    std::vector<int>         m_mc_ids;      //!< List of Monte Carlo IDs
+    std::vector<std::string> m_mc_id_names; //!< List of model names
 
     // Event list data
     mutable std::vector<GCTAEventAtom>  m_events;   //!< Events

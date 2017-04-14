@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-13 April 2017
+14 April 2017
 
 
 1. Introduction
@@ -54,6 +54,7 @@ The following methods have been added:
 - GCTAEventList::has_detxy()
 - GCTAEventList::has_mc_id(bool&)
 - GCTAEventList::has_mc_id()
+- GCTAEventList::set_mc_id_names(std::vector<int>&, std::vector<std::string>&)
 - GCTAEventAtom::mc_id(int&)
 - GCTAEventAtom::mc_id()
 
@@ -232,6 +233,10 @@ methods to manipulate the event list information flags (#1982).
 Add GCTAEventList::has_mc_id() and GCTAEventAtom::mc_id() getter and setter methods
 to set the Monte Carlo identifier of a given event. This allows to attribute a
 Monte Carlo simulated event to a specific model (#1483).
+
+Add GCTAEventList::set_mc_id_names() method to store Monte Carlo metadata into an
+event list and to write this information into the FITS header. Furthermore, the
+information is read back when loading an event list (#1483).
 
 
 21. COMPTEL interface
