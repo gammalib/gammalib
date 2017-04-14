@@ -183,6 +183,7 @@
 #include "GGti.hpp"
 #include "GRoi.hpp"
 #include "GEbounds.hpp"
+#include "GPhases.hpp"
 #include "GInstDir.hpp"
 #include "GResponse.hpp"
 #include "GPhotons.hpp"

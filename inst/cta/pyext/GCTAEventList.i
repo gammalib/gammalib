@@ -62,17 +62,21 @@ public:
     void               append_column(const GFitsTableCol& column);
     void               reserve(const int& number);
     void               remove(const int& index, const int& number = 1);
-    void               write(GFits& fits, const std::string& evtname,
-                                          const std::string& gtiname) const;
-    void               fetch(void);
-    void               dispose(void);
-    double             irf_cache(const std::string& name, const int& index) const;
-    void               irf_cache(const std::string& name, const int& index,
+    void               write(GFits& fits,
+                             const std::string& evtname,
+                             const std::string& gtiname) const;
+    void               fetch(void) const;
+    void               dispose(void) const;
+    double             irf_cache(const std::string& name,
+                                 const int& index) const;
+    void               irf_cache(const std::string& name,
+                                 const int& index,
                                  const double& irf) const;
+    const GPhases&     phases(void) const;
+    void               phases(const GPhases& phases);
     const std::string& gtiname(void) const;
     void               has_phase(const bool& has_phase);
     void               has_detxy(const bool& has_detxy);
-    void               has_mc_id(const bool& has_mc_id);
     const bool&        has_phase() const;
     const bool&        has_detxy() const;
     const bool&        has_mc_id() const;

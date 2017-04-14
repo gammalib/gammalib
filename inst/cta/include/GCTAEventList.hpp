@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include "GEventList.hpp"
+#include "GPhases.hpp"
 #include "GFilename.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTARoi.hpp"
@@ -96,6 +97,8 @@ public:
     double             irf_cache(const std::string& name, const int& index) const;
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
+    const GPhases&     phases(void) const;
+    void               phases(const GPhases& phases);
     const std::string& gtiname(void) const;
     void               has_phase(const bool& has_phase);
     void               has_detxy(const bool& has_detxy);
@@ -124,6 +127,7 @@ protected:
 
     // Event list meta data
     GCTARoi                  m_roi;         //!< Region of interest
+    GPhases                  m_phases;      //!< Phase intervals
     int                      m_num_events;  //!< Number of events
     std::string              m_gti_extname; //!< GTI extension name
     bool                     m_has_phase;   //!< Signal presence of phase
@@ -188,6 +192,31 @@ inline
 const GCTARoi& GCTAEventList::roi(void) const
 {
     return (m_roi);
+}
+
+
+/***********************************************************************//**
+ * @brief Return phase intervals
+ *
+ * @return Phase intervals.
+ ***************************************************************************/
+inline
+const GPhases& GCTAEventList::phases(void) const
+{
+    return (m_phases);
+}
+
+
+/***********************************************************************//**
+ * @brief Set phase intervals
+ *
+ * @param[in] phases Phase intervals.
+ ***************************************************************************/
+inline
+void GCTAEventList::phases(const GPhases& phases)
+{
+    m_phases = phases;
+    return;
 }
 
 
