@@ -49,6 +49,7 @@ public:
     virtual std::string       classname(void) const { return "TestGObservation"; }
     void                      test_ebounds(void);
     void                      test_gti(void);
+    void                      test_phases(void);
     void                      test_photons(void);
     void                      test_time_reference(void);
     void                      test_time(void);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       obs.i - Observation module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -171,6 +171,7 @@
 %include "GEventBin.i"
 %include "GInstDir.i"
 %include "GRoi.i"
+%include "GPhases.i"
 %include "GResponse.i"
 %include "GPhoton.i"
 %include "GPhotons.i"

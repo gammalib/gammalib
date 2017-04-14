@@ -100,7 +100,7 @@ GGti::GGti(const GFilename& filename)
  *
  * @param[in] gti Good Time Intervals.
  *
- * Constructs Good Time Intervals by coping other Good Time Intervals.
+ * Constructs Good Time Intervals by copying other Good Time Intervals.
  ***************************************************************************/
 GGti::GGti(const GGti& gti)
 {

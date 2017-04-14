@@ -35,7 +35,7 @@
  *
  * @brief Good Time Interval class
  ***************************************************************************/
-class GGti : public GBase {
+class GGti : public GContainer {
 
 public:
     // Constructors and destructors

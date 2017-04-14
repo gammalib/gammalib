@@ -143,6 +143,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GGti.hpp \
                      GRoi.hpp \
                      GEbounds.hpp \
+                     GPhases.hpp \
                      GInstDir.hpp \
                      GResponse.hpp \
                      GPhotons.hpp \

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-11 April 2017
+14 April 2017
 
 
 1. Introduction
@@ -12,6 +12,7 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
+- GPhases
 - GWcsGLS
 - GWcsSFL
 - GModelSpectralSmoothBrokenPlaw
@@ -133,6 +134,8 @@ if the minimum energy is larger than the maximum energy. In addition, the
 GEbounds::set_log() method throws an exception if either the minimum or
 maximum energy are zero. Furthermore, the methods clear the energy boundaries
 if the requested number of intervals is non-zero (#1989). 
+
+The GPhases class has been added to handle phase selections of events (#1996).
 
 
 11. Optimization module

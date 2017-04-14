@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for obs module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -44,6 +44,7 @@ sources = GEnergies.cpp \
           GGti.cpp \
           GRoi.cpp \
           GEbounds.cpp \
+          GPhases.cpp \
           GResponse.cpp \
           GInstDir.cpp \
           GPhotons.cpp \

@@ -69,6 +69,8 @@ void TestGObservation::set(void)
            "Test GEnergies class");
     append(static_cast<pfunction>(&TestGObservation::test_ebounds),
            "Test GEbounds class");
+    append(static_cast<pfunction>(&TestGObservation::test_phases),
+           "Test GPhases class");
     append(static_cast<pfunction>(&TestGObservation::test_photons),
            "Test GPhotons class");
     append(static_cast<pfunction>(&TestGObservation::test_observations_optimizer),
@@ -1336,6 +1338,74 @@ void TestGObservation::test_photons(void)
     photons.extend(photons);
     test_value(photons.size(), 4, "GPhotons should have 4 photons.");
     test_assert(!photons.is_empty(), "GPhotons should not be empty.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GPhases
+ ***************************************************************************/
+void TestGObservation::test_phases(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GPhases phases;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Manipulate GPhases starting from an empty object
+    GPhases phases;
+    test_value(phases.size(), 0);
+    test_assert(phases.is_empty(), "Test for empty GPhases object");
+
+    // Add one phase interval
+    phases.append(0.3, 0.5);
+    test_value(phases.size(), 1);
+    test_value(phases.pmin(0), 0.3);
+    test_value(phases.pmax(0), 0.5);
+    test_assert(!phases.is_empty(), "Test for non-empty GPhases object");
+
+    // Remove phase interval
+    phases.remove(0);
+    test_value(phases.size(), 0);
+    test_assert(phases.is_empty(), "Test for empty GPhases object");
+
+    // Append two phase intervals
+    phases.append(0.3, 0.5);
+    phases.append(0.4, 0.7);
+    test_value(phases.pmin(0), 0.3);
+    test_value(phases.pmax(0), 0.5);
+    test_value(phases.pmin(1), 0.4);
+    test_value(phases.pmax(1), 0.7);
+    test_value(phases.size(), 2);
+    test_assert(!phases.is_empty(), "Test for non-empty GPhases object");
+
+    // Copy phase intervals
+    GPhases phases2(phases);
+    test_value(phases2.pmin(0), 0.3);
+    test_value(phases2.pmax(0), 0.5);
+    test_value(phases2.pmin(1), 0.4);
+    test_value(phases2.pmax(1), 0.7);
+    test_value(phases2.size(), 2);
+    test_assert(!phases2.is_empty(), "Test for non-empty GPhases object");
+
+    // Clear object
+    phases.clear();
+    test_value(phases.size(), 0);
+    test_assert(phases.is_empty(), "Test for empty GPhases object");
+
+    // Extend photons
+    phases.append(0.3, 0.5);
+    phases.append(0.4, 0.7);
+    phases.extend(phases);
+    test_value(phases.size(), 4);
+    test_assert(!phases.is_empty(), "Test for non-empty GPhases object");
 
     // Return
     return;
