@@ -432,8 +432,8 @@ void GCTAEventList::read(const GFits& fits)
     // Read phase boundaries from data sub-space keyword
     std::vector< std::vector<double> > phase_bounds;
     phase_bounds = gammalib::read_ds_phase(events);
-    m_phasemin = phase_bounds[0];
-    m_phasemax = phase_bounds[1];
+    m_phasemin   = phase_bounds[0];
+    m_phasemax   = phase_bounds[1];
 
     // If the file name contains an expression then load the events now.
     // We do this at the end to make sure that the GTI has been set before.
@@ -942,6 +942,8 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
 {
     // Copy members
     m_roi         = list.m_roi;
+    m_phasemin    = list.m_phasemin;
+    m_phasemax    = list.m_phasemax;
     m_events      = list.m_events;
     m_filename    = list.m_filename;
     m_num_events  = list.m_num_events;
@@ -1295,29 +1297,40 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) con
     } // endif: RoI was valid
 
     // Check if there are phase interval cuts
-    if (m_phasemin.size()>0) {
-        // Check if m_phasemin and m_phasemax have the same length.
-        if (m_phasemin.size() == m_phasemax.size()) {
+    if (m_phasemin.size() > 0) {
 
+        // Throw an exception if phase minima and maximum have different
+        // lengths
+        if (m_phasemin.size() != m_phasemax.size()) {
+            std::string msg = "Number of phase interval lower boundaries ("+
+                              gammalib::str(m_phasemin.size())+") differs from "
+                              "number of phase interval upper boundaries ("+
+                              gammalib::str(m_phasemax.size())+"). Please "
+                              "specify a consistent set of lower and upper "
+                              "phase interval boundaries.";
+            throw GException::invalid_value(G_WRITE_DS_KEYS, msg);
+        }
+
+        // Set phase interval string
 	    std::string dsval4 = "";
-	    // Loop over m_phasemin values
-	    for (int i=0; i < m_phasemin.size(); i++) {
-	        dsval4 += gammalib::str(m_phasemin[i]) + ":" +
-		  gammalib::str(m_phasemax[i]) + ",";
-	    } // End for loop
-	    dsval4 = dsval4.substr(0,dsval4.length()-1);
+	    for (int i = 0; i < m_phasemin.size(); ++i) {
+            if (i != 0) {
+                dsval4 += ",";
+            }
+            dsval4 += gammalib::str(m_phasemin[i]) + ":" +
+                      gammalib::str(m_phasemax[i]);
+	    }
 
 	    // Write DS keywords
+	    hdu.card("DSTYP"+gammalib::str(ndskeys), "PHASE",
+                 "Data sub-space type");
+	    hdu.card("DSUNI"+gammalib::str(ndskeys), "DIMENSIONLESS",
+                 "Data sub-space unit");
+	    hdu.card("DSVAL"+gammalib::str(ndskeys), dsval4,
+                 "Data sub-space value");
 	    ndskeys++;
-	    hdu.card("DSTYP"+gammalib::str(ndskeys), "PHASE",         "Data sub-space type");
-	    hdu.card("DSUNI"+gammalib::str(ndskeys), "DIMENSIONLESS", "Data sub-space unit");
-	    hdu.card("DSVAL"+gammalib::str(ndskeys), dsval4,          "Data sub-space value");
-	}
-	else {
-  	    throw GException::vector_mismatch(G_WRITE_DS_KEYS, m_phasemin.size(), 
-					      m_phasemax.size());
-	}
-    } // End if phase interval cuts
+
+	} // endif: there were phase interval cuts
 
     // Set number of data selection keys
     hdu.card("NDSKEYS", ndskeys,  "Number of data sub-space keys");

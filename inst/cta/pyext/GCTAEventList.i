@@ -56,28 +56,31 @@ public:
     virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
     virtual const GCTARoi& roi(void) const;
-    std::vector<double>    phasemin(void) const;
-    void                   phasemin(const std::vector<double> phmin);
-    std::vector<double>    phasemax(void) const;
-    void                   phasemax(const std::vector<double> phmax);
 
     // Implement other methods
-    void               append(const GCTAEventAtom& event);
-    void               append_column(const GFitsTableCol& column);
-    void               reserve(const int& number);
-    void               remove(const int& index, const int& number = 1);
-    void               write(GFits& fits, const std::string& evtname,
-                                          const std::string& gtiname) const;
-    void               fetch(void);
-    void               dispose(void);
-    double             irf_cache(const std::string& name, const int& index) const;
-    void               irf_cache(const std::string& name, const int& index,
-                                 const double& irf) const;
-    const std::string& gtiname(void) const;
-    void               has_phase(const bool& has_phase);
-    void               has_detxy(const bool& has_detxy);
-    const bool&        has_phase() const;
-    const bool&        has_detxy() const;
+    void                       append(const GCTAEventAtom& event);
+    void                       append_column(const GFitsTableCol& column);
+    void                       reserve(const int& number);
+    void                       remove(const int& index, const int& number = 1);
+    void                       write(GFits& fits,
+                                     const std::string& evtname,
+                                     const std::string& gtiname) const;
+    void                       fetch(void) const;
+    void                       dispose(void) const;
+    double                     irf_cache(const std::string& name,
+                                         const int& index) const;
+    void                       irf_cache(const std::string& name,
+                                         const int& index,
+                                         const double& irf) const;
+    const std::vector<double>& phasemin(void) const;
+    void                       phasemin(const std::vector<double>& phmin);
+    const std::vector<double>& phasemax(void) const;
+    void                       phasemax(const std::vector<double>& phmax);
+    const std::string&         gtiname(void) const;
+    void                       has_phase(const bool& has_phase);
+    void                       has_detxy(const bool& has_detxy);
+    const bool&                has_phase() const;
+    const bool&                has_detxy() const;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.cpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,7 +43,7 @@
 #define G_READ_DS_ROI                      "gammalib::read_ds_roi(GFitsHDU&)"
 #define G_READ_DS_EBOUNDS              "gammalib::read_ds_ebounds(GFitsHDU&)"
 #define G_READ_DS_PHASE                  "gammalib::read_ds_phase(GFitsHDU&)"
-#define G_READ_DS_GTI         "GGti gammalib::read_ds_gti_extname(GFitsHDU&)"
+#define G_READ_DS_GTI              "gammalib::read_ds_gti_extname(GFitsHDU&)"
 
 /* __ Coding definitions _________________________________________________ */
 
@@ -296,24 +296,24 @@ std::vector< std::vector<double> > gammalib::read_ds_phase(const GFitsHDU& hdu)
         if (hdu.has_card(type_key) && hdu.string(type_key) == "PHASE") {
 
             // Extract phase boundaries
-            std::string value               = hdu.string(value_key);
-	    //std::string unit                = hdu.string(unit_key);
-	    std::vector<std::string> intervals = gammalib::split(value, ",");
-	    for (int j=0; j < intervals.size(); j++) {
-	        std::vector<std::string> values = gammalib::split(intervals[j], ":");
-	        if (values.size() == 2) {
-		    double  phmin = gammalib::todouble(values[0]);
-		    double  phmax = gammalib::todouble(values[1]);
-		    phasemin.push_back(phmin);
-		    phasemax.push_back(phmax);
-		}
-		else {
-		    std::string msg = "Invalid phase value \""+value+
-		                      "\" encountered in data selection key \""+
-		                      value_key+"\"";
-		    throw GException::invalid_value(G_READ_DS_PHASE, msg);
-		}
-	    } //endfor: looped over phase intervals
+            std::string value                  = hdu.string(value_key);
+            std::vector<std::string> intervals = gammalib::split(value, ",");
+            for (int j = 0; j < intervals.size(); ++j) {
+                std::vector<std::string> values = gammalib::split(intervals[j], ":");
+                if (values.size() == 2) {
+                    double phmin = gammalib::todouble(values[0]);
+                    double phmax = gammalib::todouble(values[1]);
+                    phasemin.push_back(phmin);
+                    phasemax.push_back(phmax);
+                }
+                else {
+                    std::string msg = "Invalid phase value \""+value+
+                                      "\" encountered in data selection key \""+
+                                      value_key+"\"";
+                    throw GException::invalid_value(G_READ_DS_PHASE, msg);
+                }
+
+            } //endfor: looped over phase intervals
 
         } // endif: PHASE type_key found
 
