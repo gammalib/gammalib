@@ -29,6 +29,19 @@ The following methods have been added:
 - GEbounds::emin(int&, GEnergy&)
 - GEbounds::emax(int&, GEnergy&)
 - GEnergies::set(GEbounds&)
+- GFilename::type()
+- GMatrix::operator+(double&)
+- GMatrix::operator-(double&)
+- GMatrix::operator+=(double&)
+- GMatrix::operator-=(double&)
+- GMatrixSymmetric::operator+(double&)
+- GMatrixSymmetric::operator-(double&)
+- GMatrixSymmetric::operator+=(double&)
+- GMatrixSymmetric::operator-=(double&)
+- GMatrixSparse::operator+(double&)
+- GMatrixSparse::operator-(double&)
+- GMatrixSparse::operator+=(double&)
+- GMatrixSparse::operator-=(double&)
 - GCTAResponseIrf::rspname()
 - GCTARoi::contains(GCTAInstDir&)
 - GCTAEdisp2D::fetch()
@@ -101,11 +114,15 @@ image of any type into a specific storage class (#1986).
 
 7. Linear algebra module
 ------------------------
-None
+Add operators for addition and subtraction of scalars to all matrix classes
+(#1990).
 
 
 8. Model module
 ---------------
+The GModelSpectralNodes class now throws an exception if the energy or
+intensity of a node is set to a non-positive value (#990).
+
 Sky directions drawn by GModelSpatialDiffuseConst::mc() are now restricted
 to the simulation cone that has previously been defined using the mc_norm()
 method. This speeds up considerbly the Monte Carlo simulations for an
@@ -126,23 +143,21 @@ and the integral() methods were renamed to flux(). A new class
 GModelSpectralPlawEnergyFlux has been added that handles integral energy
 fluxes as opposed to GModelSpectralPlawPhotonFlux that handles integral
 photon fluxes. Unit tests have been added for the new class (#1790).
+>>>>>>> 6e813568eca04bb423229fc9599407fa3780fa8d
 
-The GModelSpectralExpInvPlaw class has been added that uses a cut-off
-parameter instead of a cut-off energy for the exponentially cut-off
-power law. The cut-off parameter is the inverse of the cut-off energy
-(#1800).
+The GModelSpectralSmoothBrokenPlaw class that implements a smoothly broken
+power law spectrum has been added (#1948).
 
-The GModelSpectralMultiplicative class has been added that implements the
-product of spectral model components as a new spectral model (#1861).
+The scale of the composite spatial models can now be fitted by adding the
+free_scale="1" attribute to the XML file (#1992).
 
-The GModelSpectralComposite and GModelSpatialComposite classes have been
-added that implement composite spectral and spatial models, which are sums
-of models as a new model component (#1706).
-
-A region() method has been added to the GModelSpatial base class and all
-derived classes that returns a pointer to a sky region that bounds the
-spatial model. For the moment, only circular sky regions have been
-implemented (#1764).
+Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
+The method deals with pre-computation and normalization of the profiles,
+and implements the eval(), eval_grandients() and mc() method. The class
+GModelSpatialRadialProfileGauss has been added to show how to implement
+radial profile for the case of a Gaussian, and also to cross-check the
+results with the GModelSpatialRadialGauss class that should return basically
+the same results (#1520).
 
 Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
 The method deals with pre-computation and normalization of the profiles,
