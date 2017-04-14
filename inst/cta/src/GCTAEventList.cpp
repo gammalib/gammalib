@@ -1434,13 +1434,13 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) con
 	    }
 
 	    // Write DS keywords
+	    ndskeys++;
 	    hdu.card("DSTYP"+gammalib::str(ndskeys), "PHASE",
                  "Data sub-space type");
 	    hdu.card("DSUNI"+gammalib::str(ndskeys), "DIMENSIONLESS",
                  "Data sub-space unit");
 	    hdu.card("DSVAL"+gammalib::str(ndskeys), dsval4,
                  "Data sub-space value");
-	    ndskeys++;
 
 	} // endif: there were phase interval cuts
 
