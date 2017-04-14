@@ -1182,8 +1182,8 @@ void GCTAEventList::read_mc_ids(const GFitsTable& table)
             sprintf(keyword_name, "MMN%5.5d", i+1);
  
             // Get header keywords
-            int         id   = table.integer("keyword_id");
-            std::string name = table.string("keyword_name");
+            int         id   = table.integer(std::string(keyword_id));
+            std::string name = table.string(std::string(keyword_name));
 
             // Put identifier and name in list
             m_mc_ids.push_back(id);
