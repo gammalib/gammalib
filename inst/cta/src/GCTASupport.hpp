@@ -39,16 +39,17 @@
 class GFitsHDU;
 class GCTARoi;
 class GEbounds;
+class GPhases;
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
     double      cta_roi_arclength(const double& rad,     const double& dist,
                                   const double& cosdist, const double& sindist,
                                   const double& roi,     const double& cosroi);
-    GCTARoi                            read_ds_roi(const GFitsHDU& hdu);
-    GEbounds                           read_ds_ebounds(const GFitsHDU& hdu);
-    std::vector< std::vector<double> > read_ds_phase(const GFitsHDU& hdu);
-    std::string                        read_ds_gti_extname(const GFitsHDU& hdu);
+    GCTARoi     read_ds_roi(const GFitsHDU& hdu);
+    GEbounds    read_ds_ebounds(const GFitsHDU& hdu);
+    GPhases     read_ds_phase(const GFitsHDU& hdu);
+    std::string read_ds_gti_extname(const GFitsHDU& hdu);
 }
 
 #endif /* GCTASUPPORT_HPP */

@@ -429,11 +429,8 @@ void GCTAEventList::read(const GFits& fits)
     // Read energy boundaries from data sub-space keyword
     m_ebounds = gammalib::read_ds_ebounds(events);
 
-    // Read phase boundaries from data sub-space keyword
-    std::vector< std::vector<double> > phase_bounds;
-    phase_bounds = gammalib::read_ds_phase(events);
-    m_phasemin   = phase_bounds[0];
-    m_phasemax   = phase_bounds[1];
+    // Read phase intervals from data sub-space keyword
+    m_phases = gammalib::read_ds_phase(events);
 
     // If the file name contains an expression then load the events now.
     // We do this at the end to make sure that the GTI has been set before.
@@ -914,8 +911,7 @@ void GCTAEventList::init_members(void)
 {
     // Initialise members
     m_roi.clear();
-    m_phasemin.clear();
-    m_phasemax.clear();
+    m_phases.clear();
     m_events.clear();
     m_columns.clear();
     m_filename.clear();
@@ -942,8 +938,7 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
 {
     // Copy members
     m_roi         = list.m_roi;
-    m_phasemin    = list.m_phasemin;
-    m_phasemax    = list.m_phasemax;
+    m_phases      = list.m_phases;
     m_events      = list.m_events;
     m_filename    = list.m_filename;
     m_num_events  = list.m_num_events;
@@ -1297,28 +1292,16 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) con
     } // endif: RoI was valid
 
     // Check if there are phase interval cuts
-    if (m_phasemin.size() > 0) {
-
-        // Throw an exception if phase minima and maximum have different
-        // lengths
-        if (m_phasemin.size() != m_phasemax.size()) {
-            std::string msg = "Number of phase interval lower boundaries ("+
-                              gammalib::str(m_phasemin.size())+") differs from "
-                              "number of phase interval upper boundaries ("+
-                              gammalib::str(m_phasemax.size())+"). Please "
-                              "specify a consistent set of lower and upper "
-                              "phase interval boundaries.";
-            throw GException::invalid_value(G_WRITE_DS_KEYS, msg);
-        }
+    if (m_phases.size() > 0) {
 
         // Set phase interval string
 	    std::string dsval4 = "";
-	    for (int i = 0; i < m_phasemin.size(); ++i) {
+	    for (int i = 0; i < m_phases.size(); ++i) {
             if (i != 0) {
                 dsval4 += ",";
             }
-            dsval4 += gammalib::str(m_phasemin[i]) + ":" +
-                      gammalib::str(m_phasemax[i]);
+            dsval4 += gammalib::str(m_phases.pmin(i)) + ":" +
+                      gammalib::str(m_phases.pmax(i));
 	    }
 
 	    // Write DS keywords

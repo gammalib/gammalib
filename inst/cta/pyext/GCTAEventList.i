@@ -72,10 +72,8 @@ public:
     void                       irf_cache(const std::string& name,
                                          const int& index,
                                          const double& irf) const;
-    const std::vector<double>& phasemin(void) const;
-    void                       phasemin(const std::vector<double>& phmin);
-    const std::vector<double>& phasemax(void) const;
-    void                       phasemax(const std::vector<double>& phmax);
+    const GPhases&             phases(void) const;
+    void                       phases(const GPhases& phases);
     const std::string&         gtiname(void) const;
     void                       has_phase(const bool& has_phase);
     void                       has_detxy(const bool& has_detxy);

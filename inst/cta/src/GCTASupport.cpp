@@ -36,6 +36,7 @@
 #include "GMath.hpp"
 #include "GFitsHDU.hpp"
 #include "GEbounds.hpp"
+#include "GPhases.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAInstDir.hpp"
 
@@ -263,6 +264,7 @@ GEbounds gammalib::read_ds_ebounds(const GFitsHDU& hdu)
  * @brief Read phase boundary data sub-space keywords
  *
  * @param[in] hdu FITS HDU
+ * @return Phase intervals
  *
  * @exception GException::invalid_value
  *            Invalid phase data sub-space encountered
@@ -273,12 +275,10 @@ GEbounds gammalib::read_ds_ebounds(const GFitsHDU& hdu)
  * represents the minimum and maximum phase. No detailed syntax
  * checking is performed.
  ***************************************************************************/
-std::vector< std::vector<double> > gammalib::read_ds_phase(const GFitsHDU& hdu)
+GPhases gammalib::read_ds_phase(const GFitsHDU& hdu)
 {
-    // Initialise phase boundaries
-    std::vector< std::vector<double> > phase_bounds;
-    std::vector<double> phasemin;
-    std::vector<double> phasemax;
+    // Initialise phase intervals
+    GPhases phases;
 
     // Get number of data sub-space keywords (default to 0 if keyword is
     // not found)
@@ -303,8 +303,7 @@ std::vector< std::vector<double> > gammalib::read_ds_phase(const GFitsHDU& hdu)
                 if (values.size() == 2) {
                     double phmin = gammalib::todouble(values[0]);
                     double phmax = gammalib::todouble(values[1]);
-                    phasemin.push_back(phmin);
-                    phasemax.push_back(phmax);
+                    phases.append(phmin, phmax);
                 }
                 else {
                     std::string msg = "Invalid phase value \""+value+
@@ -319,12 +318,8 @@ std::vector< std::vector<double> > gammalib::read_ds_phase(const GFitsHDU& hdu)
 
     } // endfor: looped over data selection keys
 
-    // Store phasemin and phasemax vectors in the output vector
-    phase_bounds.push_back(phasemin);
-    phase_bounds.push_back(phasemax);
-
     // Return
-    return phase_bounds;
+    return phases;
 } 
 
 

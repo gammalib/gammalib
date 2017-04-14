@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include "GEventList.hpp"
+#include "GPhases.hpp"
 #include "GFilename.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTARoi.hpp"
@@ -99,10 +100,8 @@ public:
     void                       irf_cache(const std::string& name,
                                          const int& index,
                                          const double& irf) const;
-    const std::vector<double>& phasemin(void) const;
-    void                       phasemin(const std::vector<double>& phmin);
-    const std::vector<double>& phasemax(void) const;
-    void                       phasemax(const std::vector<double>& phmax);
+    const GPhases&             phases(void) const;
+    void                       phases(const GPhases& phases);
     const std::string&         gtiname(void) const;
     void                       has_phase(const bool& has_phase);
     void                       has_detxy(const bool& has_detxy);
@@ -125,8 +124,7 @@ protected:
 
     // Event list meta data
     GCTARoi             m_roi;         //!< Region of interest
-    std::vector<double> m_phasemin;    //!< Lower bounds of phase intervals
-    std::vector<double> m_phasemax;    //!< Upper bounds of phase intervals
+    GPhases             m_phases;      //!< Phase intervals
     int                 m_num_events;  //!< Number of events
     std::string         m_gti_extname; //!< GTI extension name
     bool                m_has_phase;   //!< Signal presence of phase
@@ -192,51 +190,26 @@ const GCTARoi& GCTAEventList::roi(void) const
 
 
 /***********************************************************************//**
- * @brief Return lower bounds of phase intervals
+ * @brief Return phase intervals
  *
- * @return Lower bounds of phase intervals.
+ * @return Phase intervals.
  ***************************************************************************/
 inline
-const std::vector<double>& GCTAEventList::phasemin(void) const
+const GPhases& GCTAEventList::phases(void) const
 {
-    return (m_phasemin);
+    return (m_phases);
 }
 
 
 /***********************************************************************//**
- * @brief Set lower bounds of phase intervals.
+ * @brief Set phase intervals
  *
- * @param[in] phmin Lower bounds of phase intervals.
+ * @param[in] phases Phase intervals.
  ***************************************************************************/
 inline
-void GCTAEventList::phasemin(const std::vector<double>& phmin)
+void GCTAEventList::phases(const GPhases& phases)
 {
-    m_phasemin = phmin;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return upper bounds of phase intervals
- *
- * @return Upper bounds of phase intervals.
- ***************************************************************************/
-inline
-const std::vector<double>& GCTAEventList::phasemax(void) const
-{
-    return (m_phasemax);
-}
-
-
-/***********************************************************************//**
- * @brief Set upper bounds of phase intervals
- *
- * @param[in] phmax Upper bounds of phase intervals.
- ***************************************************************************/
-inline
-void GCTAEventList::phasemax(const std::vector<double>& phmax)
-{
-    m_phasemax = phmax;
+    m_phases = phases;
     return;
 }
 
