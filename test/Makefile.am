@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for unit test module                                          #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -76,9 +76,9 @@ check_PROGRAMS = test_GSupport \
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
                     $(TEST_PYTHON_ENV) \
-                    TEST_SRCDIR=$(abs_top_srcdir) \
-                    TEST_BUILDDIR=$(abs_top_builddir) \
-                    TEST_DATA=$(abs_top_srcdir)/test/data \
+                    TEST_SRCDIR=$(top_srcdir) \
+                    TEST_BUILDDIR=$(top_builddir) \
+                    TEST_DATA=$(top_srcdir)/test/data \
                     $(TEST_MWL_ENV) \
                     $(TEST_CTA_ENV) \
                     $(TEST_LAT_ENV) \
