@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp - FITS file access class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -308,7 +308,7 @@ GFitsHDU* GFits::at(const std::string& extname)
     if (extno == -1) {
         throw GException::fits_hdu_not_found(G_AT2, extname);
     }
-    
+
     // Get HDU pointer
     GFitsHDU* ptr = m_hdu[extno];
 
@@ -336,7 +336,7 @@ const GFitsHDU* GFits::at(const std::string& extname) const
     if (extno == -1) {
         throw GException::fits_hdu_not_found(G_AT2, extname);
     }
-    
+
     // Get HDU pointer
     GFitsHDU* ptr = m_hdu[extno];
 
@@ -736,7 +736,7 @@ GFitsHDU* GFits::append(const GFitsHDU& hdu)
         #if defined(G_DEBUG)
         std::cout << "<-- GFits::append" << std::endl;
         #endif
-        
+
     } // endif: HDU was valid
 
     // Return
@@ -948,7 +948,7 @@ void GFits::extend(const GFits& fits)
         } // endfor: looped over all HDUs
 
     } // endif: FITS file was not empty
-    
+
     // Return
     return;
 }
@@ -1219,7 +1219,7 @@ void GFits::save(const bool& clobber)
 
     // Signal that file needs not to be created anymore
     m_created = false;
-    
+
     // Debug trailer
     #if defined(G_DEBUG)
     std::cout << "<-- GFits::save" << std::endl;
@@ -1291,7 +1291,7 @@ void GFits::saveto(const GFilename& filename, const bool& clobber)
  ***************************************************************************/
 void GFits::close(void)
 {
-    // Close file and free all members 
+    // Close file and free all members
     free_members();
 
     // Initialise members
@@ -1390,7 +1390,7 @@ void GFits::publish(const std::string& extname, const std::string& name) const
 
     // Publish FITS HDU
     publish(extno, name);
- 
+
     // Return
     return;
 }
@@ -1549,6 +1549,9 @@ void GFits::free_members(void)
             }
 
         } // endelse: there was an open FITS file
+
+        // Set FITS file pointer to NULL
+        m_fitsfile = NULL;
 
     } // endif: FITS file had been opened
 

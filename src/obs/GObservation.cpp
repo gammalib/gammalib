@@ -267,7 +267,7 @@ double GObservation::model(const GModels& models,
     double model     = 0.0;    // Reset model value
     int    igrad     = 0;      // Reset gradient counter
     int    grad_size = 0;      // Reset gradient size
-    
+
     // If gradient is available then reset gradient vector elements to 0
     // and determine vector size
     if (gradient != NULL) {
@@ -612,13 +612,13 @@ double GObservation::model_grad(const GModel&    model,
             if (par.has_min() && ((x-par.factor_min()) < h)) {
                 grad = derivative.right_difference(x, h);
             }
-            
+
             // ... otherwise if we are too close to the maximum boundary use
             // a left sided difference ...
             else if (par.has_max() && ((par.factor_max()-x) < h)) {
                 grad = derivative.left_difference(x, h);
             }
-            
+
             // ... otherwise use a symmetric difference
             else {
                 grad = derivative.difference(x, h);
@@ -732,13 +732,13 @@ double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
             if (par.has_min() && ((x-par.factor_min()) < h)) {
                 grad = derivative.right_difference(x, h);
             }
-            
+
             // ... otherwise if we are too close to the maximum boundary use
             // a left sided difference ...
             else if (par.has_max() && ((par.factor_max()-x) < h)) {
                 grad = derivative.left_difference(x, h);
             }
-            
+
             // ... otherwise use a symmetric difference
             else {
                 grad = derivative.difference(x, h);

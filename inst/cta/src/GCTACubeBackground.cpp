@@ -563,6 +563,10 @@ void GCTACubeBackground::write(GFits& fits) const
  ***************************************************************************/
 void GCTACubeBackground::load(const GFilename& filename)
 {
+    // Put into OpenMP criticial zone
+    #pragma omp critical
+    {
+
     // Open FITS file
     GFits fits(filename);
 
@@ -571,6 +575,8 @@ void GCTACubeBackground::load(const GFilename& filename)
 
     // Close FITS file
     fits.close();
+
+    } // end of OpenMP critical zone
 
     // Store filename
     m_filename = filename;
@@ -585,13 +591,17 @@ void GCTACubeBackground::load(const GFilename& filename)
  * @brief Save background cube into FITS file
  *
  * @param[in] filename background cube FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Save the background cube into a FITS file.
  ***************************************************************************/
 void GCTACubeBackground::save(const GFilename& filename,
                               const bool&      clobber) const
 {
+    // Put into OpenMP criticial zone
+    #pragma omp critical
+    {
+
     // Open or create FITS file
     GFits fits;
 
@@ -600,6 +610,11 @@ void GCTACubeBackground::save(const GFilename& filename,
 
     // Save FITS file
     fits.saveto(filename, clobber);
+
+    // Close Edisp file
+    fits.close();
+
+    } // end of OpenMP critical zone
 
     // Store filename
     m_filename = filename;
@@ -612,7 +627,7 @@ void GCTACubeBackground::save(const GFilename& filename,
 /***********************************************************************//**
  * @brief Print background information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing background information.
  ***************************************************************************/
 std::string GCTACubeBackground::print(const GChatter& chatter) const

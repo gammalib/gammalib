@@ -575,6 +575,10 @@ void GCTACubeEdisp::write(GFits& fits) const
  ***************************************************************************/
 void GCTACubeEdisp::load(const GFilename& filename)
 {
+    // Put into OpenMP criticial zone
+    #pragma omp critical
+    {
+
     // Open FITS file
     GFits fits(filename);
 
@@ -583,6 +587,8 @@ void GCTACubeEdisp::load(const GFilename& filename)
 
     // Close Edisp file
     fits.close();
+
+    } // end of OpenMP critical zone
 
     // Store filename
     m_filename = filename;
@@ -602,6 +608,10 @@ void GCTACubeEdisp::load(const GFilename& filename)
  ***************************************************************************/
 void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
 {
+    // Put into OpenMP criticial zone
+    #pragma omp critical
+    {
+
     // Create FITS file
     GFits fits;
 
@@ -610,6 +620,11 @@ void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
 
     // Save FITS file
     fits.saveto(filename, clobber);
+
+    // Close Edisp file
+    fits.close();
+
+    } // end of OpenMP critical zone
 
     // Store filename
     m_filename = filename;

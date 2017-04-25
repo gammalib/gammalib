@@ -541,6 +541,10 @@ void GCTACubePsf::write(GFits& fits) const
  ***************************************************************************/
 void GCTACubePsf::load(const GFilename& filename)
 {
+    // Put into OpenMP criticial zone
+    #pragma omp critical
+    {
+
     // Open FITS file
     GFits fits(filename);
 
@@ -553,6 +557,8 @@ void GCTACubePsf::load(const GFilename& filename)
     // Store filename
     m_filename = filename;
 
+    } // end of OpenMP critical zone
+
     // Return
     return;
 }
@@ -562,12 +568,16 @@ void GCTACubePsf::load(const GFilename& filename)
  * @brief Save PSF cube into FITS file
  *
  * @param[in] filename PSF cube FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Save the PSF cube into a FITS file.
  ***************************************************************************/
 void GCTACubePsf::save(const GFilename& filename, const bool& clobber) const
 {
+    // Put into OpenMP criticial zone
+    #pragma omp critical
+    {
+
     // Create FITS file
     GFits fits;
 
@@ -576,6 +586,11 @@ void GCTACubePsf::save(const GFilename& filename, const bool& clobber) const
 
     // Save FITS file
     fits.saveto(filename, clobber);
+
+    // Close Edisp file
+    fits.close();
+
+    } // end of OpenMP critical zone
 
     // Store filename
     m_filename = filename;
@@ -588,7 +603,7 @@ void GCTACubePsf::save(const GFilename& filename, const bool& clobber) const
 /***********************************************************************//**
  * @brief Print PSF cube information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing PSF cube information.
  ***************************************************************************/
 std::string GCTACubePsf::print(const GChatter& chatter) const

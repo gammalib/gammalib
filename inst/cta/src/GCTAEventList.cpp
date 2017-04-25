@@ -737,7 +737,6 @@ void GCTAEventList::fetch(void) const
                 // Close FITS file
                 fits.close();
 
-
             }
             catch (...) {
                 has_exception = true;
@@ -761,7 +760,6 @@ void GCTAEventList::fetch(void) const
                 throw GException::invalid_value(G_FETCH, msg);
             }
 
-        
         } // endif: filename was not empty
 
         // Throw an exception if the FITS file name is not known
@@ -1417,32 +1415,32 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) con
         hdu.card("DSUNI3", "deg",         "Data sub-space unit");
         hdu.card("DSVAL3", dsval3,        "Data sub-space value");
         ndskeys++;
-        
+
     } // endif: RoI was valid
 
     // Check if there are phase interval cuts
     if (m_phases.size() > 0) {
 
         // Set phase interval string
-	    std::string dsval4 = "";
-	    for (int i = 0; i < m_phases.size(); ++i) {
+        std::string dsval4 = "";
+        for (int i = 0; i < m_phases.size(); ++i) {
             if (i != 0) {
                 dsval4 += ",";
             }
             dsval4 += gammalib::str(m_phases.pmin(i)) + ":" +
                       gammalib::str(m_phases.pmax(i));
-	    }
+        }
 
-	    // Write DS keywords
-	    ndskeys++;
-	    hdu.card("DSTYP"+gammalib::str(ndskeys), "PHASE",
+        // Write DS keywords
+        ndskeys++;
+        hdu.card("DSTYP"+gammalib::str(ndskeys), "PHASE",
                  "Data sub-space type");
-	    hdu.card("DSUNI"+gammalib::str(ndskeys), "DIMENSIONLESS",
+        hdu.card("DSUNI"+gammalib::str(ndskeys), "DIMENSIONLESS",
                  "Data sub-space unit");
-	    hdu.card("DSVAL"+gammalib::str(ndskeys), dsval4,
+        hdu.card("DSVAL"+gammalib::str(ndskeys), dsval4,
                  "Data sub-space value");
 
-	} // endif: there were phase interval cuts
+    } // endif: there were phase interval cuts
 
     // Set number of data selection keys
     hdu.card("NDSKEYS", ndskeys,  "Number of data sub-space keys");
@@ -1486,7 +1484,7 @@ void GCTAEventList::write_mc_ids(GFitsHDU& hdu) const
             char keyword_name[10];
             sprintf(keyword_id,   "MID%5.5d", i+1);
             sprintf(keyword_name, "MMN%5.5d", i+1);
-            
+
             // Set comments
             std::string comment_id   = "Monte Carlo identifier for model " +
                                        gammalib::str(i+1);

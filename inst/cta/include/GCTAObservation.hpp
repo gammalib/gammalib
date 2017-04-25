@@ -122,7 +122,7 @@ public:
                                  const GCTACubeBackground& bkgcube);
     void                response(const GCTACubeExposure&   expcube,
                                  const GCTACubePsf&        psfcube,
-								 const GCTACubeEdisp&      edispcube,
+                                 const GCTACubeEdisp&      edispcube,
                                  const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;

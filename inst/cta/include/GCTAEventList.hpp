@@ -108,7 +108,7 @@ public:
     const bool&        has_mc_id() const;
     void               set_mc_id_names(const std::vector<int>&         ids,
                                        const std::vector<std::string>& names);
-    
+
 protected:
     // Protected methods
     void         init_members(void);

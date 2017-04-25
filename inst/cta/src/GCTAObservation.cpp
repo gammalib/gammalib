@@ -456,7 +456,7 @@ void GCTAObservation::response(const GCTACubeExposure&   expcube,
  ***************************************************************************/
 void GCTAObservation::response(const GCTACubeExposure&   expcube,
                                const GCTACubePsf&        psfcube,
-							   const GCTACubeEdisp&      edispcube,
+                               const GCTACubeEdisp&      edispcube,
                                const GCTACubeBackground& bkgcube)
 {
     // Free response
