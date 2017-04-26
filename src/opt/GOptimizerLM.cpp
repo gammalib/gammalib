@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -276,7 +276,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
         for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
 
             // Perform one iteration
-            iteration(fct, pars);
+            double step = iteration(fct, pars);
 
             // Determine maximum (scaled) gradient
             double grad_max  = 0.0;
@@ -315,9 +315,9 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                               gammalib::str(grad_imax) + "]";
                 }
                 (*m_logger)("%sIteration %3d: -logL=%.3f, Lambda=%.1e,"
-                            " delta=%.3f, max(|grad|)=%f%s%s",
+                            " delta=%.3f, step=%.1e, max(|grad|)=%f%s%s",
                             status.c_str(), m_iter, m_value, lambda_old,
-                            m_delta, grad_max,
+                            m_delta, step, grad_max,
                             parname.c_str(), stalled.c_str());   
             }
             #if defined(G_DEBUG_OPT)
@@ -342,7 +342,9 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             // free them now and continue. We do this only once, i.e.
             // the next time a parameter is frozen and convergence is
             // reached we really stop.
-            if ((m_lambda <= lambda_old) && (m_delta >= 0.0) && (m_delta < m_eps)) {
+            if ((m_lambda <= lambda_old) &&
+                (m_delta >= 0.0) &&
+                (m_delta < step*m_eps)) {
 
                 // Check for frozen parameters, and if some exist, free
                 // them and start over
@@ -707,6 +709,7 @@ void GOptimizerLM::free_members(void)
  *
  * @param[in] fct Optimizer function.
  * @param[in] pars Function parameters.
+ * @return Step size for iteration.
  *
  * This method performs one LM iteration. Note that the method only acts on
  * the parameter value, i.e. it does not worry about the true scale of the
@@ -714,12 +717,15 @@ void GOptimizerLM::free_members(void)
  * is assumed to return the gradient and curvature matrix with respect to the
  * parameter values (and not the scaled true values).
  ***************************************************************************/
-void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
+double GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 {
     // Debug option: dump header
     #if defined(G_DEBUG_ITER)
     std::cout << "GOptimizerLM::iteration: enter" << std::endl;
     #endif
+
+    // Initialise step size
+    double step = 0.0;
 
     // Single loop for common exit point
     do {
@@ -788,7 +794,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         }
 
         // Get LM step size
-        double step = step_size(*grad, pars);
+        step = step_size(*grad, pars);
 
         // Debug option: dump step size
         #if defined(G_DEBUG_ITER)
@@ -976,8 +982,8 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
     std::cout << "GOptimizerLM::iteration: exit" << std::endl;
     #endif
 
-    // Return
-    return;
+    // Return step size
+    return step;
 
 }
 

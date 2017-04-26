@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.hpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,7 +97,7 @@ protected:
     void   init_members(void);
     void   copy_members(const GOptimizerLM& opt);
     void   free_members(void);
-    void   iteration(GOptimizerFunction& fct, GOptimizerPars& pars);
+    double iteration(GOptimizerFunction& fct, GOptimizerPars& pars);
     double step_size(const GVector& grad, const GOptimizerPars& pars);
 
     // Protected members
