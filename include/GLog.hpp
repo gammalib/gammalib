@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.hpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -121,7 +121,7 @@ protected:
     void        header(const std::string& arg, int level);
     std::string strdate(void) const;
     std::string prefix(void) const;
-    void        append(std::string arg);
+    void        append(const std::string& string);
 
     // Protected data members
     int         m_max_length;   //!< Maximum buffer length

@@ -802,13 +802,16 @@ std::string GLog::prefix(void) const
 /***********************************************************************//**
  * @brief Append string to the buffer
  *
- * @param[in] arg String to append
+ * @param[in] string String to append
  *
  * This method appends a string to the buffer and prepends, if required, the
  * current date and name at the beginning of each line.
  ***************************************************************************/
-void GLog::append(std::string arg)
+void GLog::append(const std::string& string)
 {
+    // Copy string to append
+    std::string arg = string;
+
     // If the buffer is empty and at the beginning of a line or if the last
     // character is a \n then prepend a prefix at the beginning of the string
     // to be inserted.
