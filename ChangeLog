@@ -1,8 +1,9 @@
-2017-04-25
+2017-04-27
 
         * Version 1.3.0 released
         =========================
 
+        Scale optimizer convergence criterion with step size (#2022)
         Put response cube loading and saving in OpenMP critical zone (#2021)
         Add GPhases class (#1996)
         Add support for Monte Carlo identifier metadata (#1483)
