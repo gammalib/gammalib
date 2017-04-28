@@ -16,6 +16,11 @@ The following classes have been added:
 - GWcsGLS
 - GWcsSFL
 - GModelSpectralSmoothBrokenPlaw
+- GModelSpatialRadialProfile
+- GModelSpatialRadialProfileGauss
+- GModelSpatialRadialProfileDMBurkert
+- GModelSpatialRadialProfileDMEinasto
+- GModelSpatialRadialProfileDMZhao
 
 The following classes have been removed:
 - ...
