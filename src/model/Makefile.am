@@ -38,6 +38,11 @@ sources = GModelPar.cpp \
           GModelSpatialRadialDisk.cpp \
           GModelSpatialRadialGauss.cpp \
           GModelSpatialRadialShell.cpp \
+          GModelSpatialRadialProfile.cpp \
+          GModelSpatialRadialProfileGauss.cpp \
+          GModelSpatialRadialProfileDMZhao.cpp \
+          GModelSpatialRadialProfileDMBurkert.cpp \
+          GModelSpatialRadialProfileDMEinasto.cpp \
           GModelSpatialElliptical.cpp \
           GModelSpatialEllipticalDisk.cpp \
           GModelSpatialEllipticalGauss.cpp \

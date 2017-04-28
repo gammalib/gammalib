@@ -32,6 +32,11 @@
         Correct GCTAPsf2D containment radius computation (#1876)
         Add GFilename::type() method (#1863)
         Add GLS and SFL WCS projections (#1851)
+        Add GModelSpatialRadialProfile class (#1520)
+        Add GModelSpatialRadialProfileGauss class (#1520)
+        Add GModelSpatialRadialProfileDMBurkert class (#1520)
+        Add GModelSpatialRadialProfileDMEinasto class (#1520)
+        Add GModelSpatialRadialProfileDMZhao class (#1520)
         GModelSpectralNodes throws exception for non-positive energy or intensity (#990)
 
 

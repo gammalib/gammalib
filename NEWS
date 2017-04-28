@@ -122,6 +122,17 @@ power law spectrum has been added (#1948).
 The scale of the composite spatial models can now be fitted by adding the
 free_scale="1" attribute to the XML file (#1992).
 
+Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
+The method deals with pre-computation and normalization of the profiles,
+and implements the eval() and mc() methods. The following derived classes
+have been implemented:
+- GModelSpatialRadialProfileGauss: radial Gaussian profile
+- GModelSpatialRadialProfileDMBurkert: Burkert Dark Matter profile
+- GModelSpatialRadialProfileDMEinasto: Einasto Dark Matter profile
+- GModelSpatialRadialProfileDMZhao: Zhao Dark matter profile
+Please note that these models are not deeply tested so far and the code
+and interface is still subject to change (#1520).
+
 
 9. Numerics module
 ------------------

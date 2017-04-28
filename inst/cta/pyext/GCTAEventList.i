@@ -77,6 +77,7 @@ public:
     const std::string& gtiname(void) const;
     void               has_phase(const bool& has_phase);
     void               has_detxy(const bool& has_detxy);
+    void               has_mc_id(const bool& has_mc_id);
     const bool&        has_phase() const;
     const bool&        has_detxy() const;
     const bool&        has_mc_id() const;
