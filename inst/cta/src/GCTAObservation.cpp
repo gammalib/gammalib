@@ -1286,6 +1286,10 @@ void GCTAObservation::save(const GFilename& filename,
         }
     }
 
+    // Put into OpenMP criticial zone
+    #pragma omp critical
+    {
+
     // Open or create FITS file. Since we accept here a special structure
     // for the extension that cfitsio does not understand we only pass
     // the URL without extension name to the GFits constructor.
@@ -1296,6 +1300,11 @@ void GCTAObservation::save(const GFilename& filename,
 
     // Save FITS file
     fits.save(clobber);
+
+    // Close FITS file
+    fits.close();
+
+    } // end of OpenMP critical zone
 
     // Return
     return;
@@ -1371,7 +1380,7 @@ void GCTAObservation::dispose_events(void)
 /***********************************************************************//**
  * @brief Print CTA observation information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing observation information.
  ***************************************************************************/
 std::string GCTAObservation::print(const GChatter& chatter) const
