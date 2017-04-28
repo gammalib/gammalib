@@ -1,9 +1,12 @@
-<<<<<<< HEAD
-2017-04-14
+2017-04-28
 
         * Version 1.3.0 released
         =========================
 
+        Support "BKG" as name of CTA background template
+        Scale optimizer convergence criterion with step size (#2022)
+        Put response cube loading and saving in OpenMP critical zone (#2021)
+        Add GPhases class (#1996)
         Add support for Monte Carlo identifier metadata (#1483)
         Add GEventList::has_mc_id() and GEventAtom::mc_id() methods (#1483)
         Add GEventList::has_phase() and GEventList::has_detxy() methods (#1982)
@@ -13,42 +16,6 @@
         Add GCTAAeff::ebounds() method (#1989)
         Add GEbounds::emin() and GEbounds::emax() setter methods (#1989)
         Protect GEbounds::set_lin() and set_log() methods from invalid arguments (#1989)
-        Allow fitting of scale parameter in composite models (#1992)
-        Add GFilename::type() method (#1863)
-        Copy shared Python libraries instead of creating a symbolic link (#1987)
-        Added FITS image conversion operators (#1986)
-        If code originates from Git, always compile the Python bindings (#1985)
-        Raise exception instead of exiting with return code in Python tests (#1983)
-        Avoid hang-up of GCTAModelAeffBackground::mc() method (#1988)
-        Enhance precision of GCTAEdisp2D::compute_ebounds_src
-        Add conversion methods between GEbounds and GEnergies (#1977)
-        Add GModelSpectralSmoothBrokenPlaw class (#1948)
-        Implement lazy loading of energy dispersion in GCTAEdisp2D (#1940)
-        Add GCTARoi::contains method
-        Do no longer interpret a CTA calibration database as file path (#1969)
-        Add GCTAResponseIrf::rspname() method
-        Do no longer interpret a CTA calibration database as file path (#1969)
-        GWcs now supports CD keywords instead of CDELT (#1951)
-        Correct GCTAPsf2D containment radius computation (#1876)
-        Add GLS and SFL WCS projections (#1851)
-        GModelSpectralNodes throws exception for non-positive energy or intensity (#990)
-
-
-2017-02-24
-=======
-2017-04-11 Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
->>>>>>> 3bd3ad61e38d873f77ed7fd186e09b7852484a6e
-
-        * Version 1.3.0 released
-        =========================
-
-        Add GEventList::has_phase() and GEventList::has_detxy() methods (#1982)
-        Add GEventList::append_column() method (#1991)
-        Add scalar addition and subtraction operators to matrix classes (#1990)
-        Allow fitting of scale parameter in composite models (#1992)
-        Add GCTAAeff::ebounds() method (#1989)
-        Add GEbounds::emin() and GEbounds::emax() setter methods (#1989)
-        Protect GEbounds::set_lin() and set_log() methods from invalid arguments (#1989)
         Avoid hang-up of GCTAModelAeffBackground::mc() method (#1988)
         Copy shared Python libraries instead of creating a symbolic link (#1987)
         Added FITS image conversion operators (#1986)
@@ -65,6 +32,11 @@
         Correct GCTAPsf2D containment radius computation (#1876)
         Add GFilename::type() method (#1863)
         Add GLS and SFL WCS projections (#1851)
+        Add GModelSpatialRadialProfile class (#1520)
+        Add GModelSpatialRadialProfileGauss class (#1520)
+        Add GModelSpatialRadialProfileDMBurkert class (#1520)
+        Add GModelSpatialRadialProfileDMEinasto class (#1520)
+        Add GModelSpatialRadialProfileDMZhao class (#1520)
         GModelSpectralNodes throws exception for non-positive energy or intensity (#990)
 
 
@@ -72,19 +44,7 @@
 
         * Version 1.2.0 released
         =========================
-        Reduce length of LAT response filenames by unzipping a number of energy dispersion files (#1931)
-        Skip zero livetime observations in stacked cubes for CTA (#1920)
-        Correct handling of time references in GGti::extend() method (#1922)
-        Check that MC energy is comprised in validity range for CTA 3D background template (#1918)
-        Add GModelTemporalPhaseCurve class (#1916)
-        Monte Carlo for empty maps or map cubes no longer throws an exception (#1915)
-        Add GModelTemporalLightCurve class (#1914)
-        Add GSkyMap FITS HDU constructor
-        Add leap second for 1-1-2017 (#1887)
-        Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
-        Make GFilename::is_fits thread safe (#1717).
-        Improve exception message in GModelSpatialDiffuseCube::mc (#1915)
-        Use $GAMMALIB instead of prefix in setup script (#1929)
+
         Reduce length of LAT response filenames by unzipping a number of energy dispersion files (#1931)
         Skip zero livetime observations in stacked cubes for CTA (#1920)
         Correct handling of time references in GGti::extend() method (#1922)
@@ -166,8 +126,6 @@
         Use rejection method in GModelSpatialDiffuseCube::mc() (#1722)
         Add energy dispersion cube for stacked analysis (#1721, #1801)
         Make GFilename::is_fits thread safe (#1717)
-        Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
-        Make GFilename::is_fits thread safe (#1717).
         Revise GTime operators (#1714)
         Add GSkyMap::publish() method to publish map on VO Hub (#1710)
         Add GVOClient::publish() method to publish a FITS HDU (#1710)
