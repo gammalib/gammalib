@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-27 April 2017
+28 April 2017
 
 
 1. Introduction
@@ -245,6 +245,9 @@ information is read back when loading an event list (#1483).
 
 The loading and saving of CTA response cubes was put into an OpenMP critial zone to
 avoid FITS file pointer exceptions (#2021).
+
+The CTA background template HDUCLAS2 was changed from "BGD" to "BKG". Both strings
+are supported by GammaLib.
 
 
 21. COMPTEL interface

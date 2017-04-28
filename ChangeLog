@@ -1,8 +1,9 @@
-2017-04-27
+2017-04-28
 
         * Version 1.3.0 released
         =========================
 
+        Support "BKG" as name of CTA background template
         Scale optimizer convergence criterion with step size (#2022)
         Put response cube loading and saving in OpenMP critical zone (#2021)
         Add GPhases class (#1996)

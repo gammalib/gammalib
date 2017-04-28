@@ -1033,7 +1033,14 @@ void GCTAResponseIrf::load(const std::string& rspname)
     GFilename   aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
     GFilename   psfname   = m_caldb.filename("","","RPSF","","",expr);
     GFilename   edispname = m_caldb.filename("","","EDISP","","",expr);
-    GFilename   bgdname   = m_caldb.filename("","","BGD","","",expr);
+    GFilename   bgdname   = m_caldb.filename("","","BKG","","",expr);
+
+    // Kluge: if the background filename is empty it may be because we have
+    // and old response file that used "BGD" as the name of the background
+    // extension. So we try to get here the old name
+    if (bgdname.is_empty()) {
+        bgdname = m_caldb.filename("","","BGD","","",expr);
+    }
 
     // If filenames are empty then build filenames from CALDB root path and
     // response name
