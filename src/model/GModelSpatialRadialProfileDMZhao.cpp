@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <iomanip>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
@@ -43,8 +42,8 @@ const GModelSpatialRadialProfileDMZhao g_radial_disk_seed;
 const GModelSpatialRegistry            g_radial_disk_registry(&g_radial_disk_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ   "GModelSpatialRadialProfileDMZhao::read(GXmlElement&)"
-#define G_WRITE  "GModelSpatialRadialProfileDMZhao::write(GXmlElement&)"
+#define G_READ         "GModelSpatialRadialProfileDMZhao::read(GXmlElement&)"
+#define G_WRITE       "GModelSpatialRadialProfileDMZhao::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -238,18 +237,18 @@ double GModelSpatialRadialProfileDMZhao::theta_min(void) const
  ***************************************************************************/
 double GModelSpatialRadialProfileDMZhao::theta_max(void) const
 {
-    
-    // update precomputation cache
+    // Update precomputation cache
     update();
-    
+
+    // Initialize maximum theta angle
     double theta = 0.0;
-    
+
     // If Earth is within the significant radius, then theta_max must
     // contain the entire profile (180deg) ...
     if (m_halo_distance.value() < m_mass_radius) {
         theta = gammalib::pi;
     }
-    
+
     // ... otherwise, if the halo is far enough away (further than the
     // significant radius) then we just need to deal with the angles within
     // the sphere of the significant radius.
@@ -258,10 +257,11 @@ double GModelSpatialRadialProfileDMZhao::theta_max(void) const
     }
 
     // Always chose the lesser of ( mass_radius theta, theta_max )
-    if (m_theta_max.value() * gammalib::deg2rad < theta) {
-        theta = m_theta_max.value() * gammalib::deg2rad;
+    double theta_max = m_theta_max.value() * gammalib::deg2rad;
+    if (theta_max < theta) {
+        theta = theta_max;
     }
-    
+
     // Return value
     return theta;
 }
@@ -273,26 +273,20 @@ double GModelSpatialRadialProfileDMZhao::theta_max(void) const
  * @param[in] xml XML element.
  *
  * Reads the DMZhao radial profile model information from an XML element.
- * The XML element shall have either the format 
+ * The XML element shall have the format
  *
  *     <spatialModel type="DMZhaoProfile">
- *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
- *       <parameter name="Scale Radius"  scale="1.0" value="21.5" min="1.0e-6" free="1"/>
- *       <parameter name="Halo Distance" scale="1.0" value="7.94" min="1.0e-6" free="1"/>
- *       <parameter name="Alpha"         scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
- *     </spatialModel>
- *
- * or
- *
- *     <spatialModel type="DMZhaoProfile">
- *       <parameter name="GLON"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
- *       <parameter name="Scale Radius"  scale="1.0" value="21.5" min="1.0e-6" free="1"/>
- *       <parameter name="Halo Distance" scale="1.0" value="7.94" min="1.0e-6" free="1"/>
- *       <parameter name="Alpha"         scale="1.0" value="0.17" min="0.01"   max="10" free="1"/>
+ *       <parameter name="RA"           scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="DEC"          scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="ScaleRadius"  scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="ScaleDensity" scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="HaloDistance" scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="Alpha"        scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="Beta"         scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="Gamma"        scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="ThetaMin"     scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="ThetaMax"     scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="CoreRadius"   scale=.. value=.. min=.. max=.. free=../>
  *     </spatialModel>
  ***************************************************************************/
 void GModelSpatialRadialProfileDMZhao::read(const GXmlElement& xml)
@@ -300,16 +294,16 @@ void GModelSpatialRadialProfileDMZhao::read(const GXmlElement& xml)
     // Read halo sky coordinate
     GModelSpatialRadial::read(xml);
 
-    // Read Scale Radius parameter
-    const GXmlElement* par1 = gammalib::xml_get_par(G_READ, xml, "Scale Radius");
+    // Read ScaleRadius parameter
+    const GXmlElement* par1 = gammalib::xml_get_par(G_READ, xml, "ScaleRadius");
     m_scale_radius.read(*par1);
     
-    // Read Scale Density parameter
-    const GXmlElement* par2 = gammalib::xml_get_par(G_READ, xml, "Scale Density");
+    // Read ScaleDensity parameter
+    const GXmlElement* par2 = gammalib::xml_get_par(G_READ, xml, "ScaleDensity");
     m_scale_density.read(*par2);
     
-    // Read Halo Distance parameter
-    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Halo Distance");
+    // Read HaloDistance parameter
+    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "HaloDistance");
     m_halo_distance.read(*par3);
 
     // Read Alpha parameter
@@ -324,16 +318,16 @@ void GModelSpatialRadialProfileDMZhao::read(const GXmlElement& xml)
     const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Gamma");
     m_gamma.read(*par6);
 
-    // Read Theta Min parameter
-    const GXmlElement* par7 = gammalib::xml_get_par(G_READ, xml, "Theta Min");
+    // Read ThetaMin parameter
+    const GXmlElement* par7 = gammalib::xml_get_par(G_READ, xml, "ThetaMin");
     m_theta_min.read(*par7);
 
-    // Read Theta Max parameter
-    const GXmlElement* par8 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    // Read ThetaMax parameter
+    const GXmlElement* par8 = gammalib::xml_get_par(G_READ, xml, "ThetaMax");
     m_theta_max.read(*par8);
     
-    // Read Core Radius parameter
-    const GXmlElement* par9 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
+    // Read CoreRadius parameter
+    const GXmlElement* par9 = gammalib::xml_get_par(G_READ, xml, "CoreRadius");
     m_core_radius.read(*par9);
 
     // Return
@@ -350,9 +344,17 @@ void GModelSpatialRadialProfileDMZhao::read(const GXmlElement& xml)
  * The XML element will have the format 
  *
  *     <spatialModel type="DMZhaoProfile">
- *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="RA"           scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="DEC"          scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="ScaleRadius"  scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="ScaleDensity" scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="HaloDistance" scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="Alpha"        scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="Beta"         scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="Gamma"        scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="ThetaMin"     scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="ThetaMax"     scale=.. value=.. min=.. max=.. free=../>
+ *       <parameter name="CoreRadius"   scale=.. value=.. min=.. max=.. free=../>
  *     </spatialModel>
  ***************************************************************************/
 void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
@@ -360,16 +362,16 @@ void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
     // Write DMZhao location
     GModelSpatialRadial::write(xml);
 
-    // Write Scale Radius parameter
-    GXmlElement* par1 = gammalib::xml_need_par(G_WRITE, xml, "Scale Radius");
+    // Write ScaleRadius parameter
+    GXmlElement* par1 = gammalib::xml_need_par(G_WRITE, xml, "ScaleRadius");
     m_scale_radius.write(*par1);
     
-    // Write Scale Density parameter
-    GXmlElement* par2 = gammalib::xml_need_par(G_WRITE, xml, "Scale Density");
+    // Write ScaleDensity parameter
+    GXmlElement* par2 = gammalib::xml_need_par(G_WRITE, xml, "ScaleDensity");
     m_scale_density.write(*par2);
 
-    // Write Halo Distance parameter
-    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Halo Distance");
+    // Write HaloDistance parameter
+    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "HaloDistance");
     m_halo_distance.write(*par3);
 
     // Write Alpha parameter
@@ -384,16 +386,16 @@ void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
     GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Gamma");
     m_gamma.write(*par6);
 
-    // Write Theta Max parameter
-    GXmlElement* par7 = gammalib::xml_need_par(G_WRITE, xml, "Theta Min");
+    // Write ThetaMax parameter
+    GXmlElement* par7 = gammalib::xml_need_par(G_WRITE, xml, "ThetaMin");
     m_theta_min.write(*par7);
 
-    // Write Theta Max parameter
-    GXmlElement* par8 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    // Write ThetaMax parameter
+    GXmlElement* par8 = gammalib::xml_need_par(G_WRITE, xml, "ThetaMax");
     m_theta_max.write(*par8);
     
-    // Write Core Radius parameter
-    GXmlElement* par9 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
+    // Write CoreRadius parameter
+    GXmlElement* par9 = gammalib::xml_need_par(G_WRITE, xml, "CoreRadius");
     m_core_radius.write(*par9);
 
     // Return
@@ -404,7 +406,7 @@ void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialRadialProfileDMZhao::print(const GChatter& chatter) const
@@ -446,20 +448,20 @@ void GModelSpatialRadialProfileDMZhao::init_members(void)
 
     // Initialise scale radius
     m_scale_radius.clear();
-    m_scale_radius.name("Scale Radius");
+    m_scale_radius.name("ScaleRadius");
     m_scale_radius.unit("kpc");
-    m_scale_radius.value(21.5); // default to GC scale radius
-    m_scale_radius.min(1.0e-6);   // arbitrarily chosen :/
+    m_scale_radius.value(21.5);       // default to GC scale radius
+    m_scale_radius.min(1.0e-6);       // arbitrarily chosen :/
     m_scale_radius.free();
     m_scale_radius.scale(1.0);
     m_scale_radius.gradient(0.0);
-    m_scale_radius.has_grad(false);  // Radial components never have gradients
+    m_scale_radius.has_grad(false);   // Radial components never have gradients
     
     // Initialise scale density
     m_scale_density.clear();
-    m_scale_density.name("Scale Density");
+    m_scale_density.name("ScaleDensity");
     m_scale_density.unit("GeV/cm^3");
-    m_scale_density.value(0.2); // GeV/cm^3 default to GC scale density
+    m_scale_density.value(0.2);       // GeV/cm^3 default to GC scale density
     m_scale_density.free();
     m_scale_density.scale(1.0);
     m_scale_density.gradient(0.0);
@@ -467,76 +469,76 @@ void GModelSpatialRadialProfileDMZhao::init_members(void)
 
     // Initialise halo distance
     m_halo_distance.clear();
-    m_halo_distance.name("Halo Distance");
+    m_halo_distance.name("HaloDistance");
     m_halo_distance.unit("kpc");
-    m_halo_distance.value(7.94); // default to GC halo distance
-    m_halo_distance.min(1.0e-6); // arbitrarily chosen
+    m_halo_distance.value(7.94);     // default to GC halo distance
+    m_halo_distance.min(1.0e-6);     // arbitrarily chosen
     m_halo_distance.free();
     m_halo_distance.scale(1.0);
     m_halo_distance.gradient(0.0);
-    m_halo_distance.has_grad(false);  // Radial components never have gradients
+    m_halo_distance.has_grad(false); // Radial components never have gradients
 
     // Initialise alpha
     m_alpha.clear();
     m_alpha.name("Alpha");
     m_alpha.unit("unitless");
-    m_alpha.value(1.0);  // default to NFW alpha
-    m_alpha.min(0.01);   // arbitrarily chosen
-    m_alpha.max(10.0);   // arbitrarily chosen
+    m_alpha.value(1.0);              // default to NFW alpha
+    m_alpha.min(0.01);               // arbitrarily chosen
+    m_alpha.max(10.0);               // arbitrarily chosen
     m_alpha.free();
     m_alpha.scale(1.0);
     m_alpha.gradient(0.0);
-    m_alpha.has_grad(false);  // Radial components never have gradients
+    m_alpha.has_grad(false);         // Radial components never have gradients
 
     // Initialise 
     m_beta.clear();
     m_beta.name("Beta");
     m_beta.unit("unitless");
-    m_beta.value(3.0);  // default to NFW beta
-    m_beta.min(0.01);   // arbitrarily chosen
-    m_beta.max(10.0);   // arbitrarily chosen
+    m_beta.value(3.0);               // default to NFW beta
+    m_beta.min(0.01);                // arbitrarily chosen
+    m_beta.max(10.0);                // arbitrarily chosen
     m_beta.free();
     m_beta.scale(1.0);
     m_beta.gradient(0.0);
-    m_beta.has_grad(false);  // Radial components never have gradients
+    m_beta.has_grad(false);          // Radial components never have gradients
 
     // Initialise 
     m_gamma.clear();
     m_gamma.name("Gamma");
     m_gamma.unit("unitless");
-    m_gamma.value(1.0);  // default to NFW gamma
-    m_gamma.min(0.01);   // arbitrarily chosen
-    m_gamma.max(10.0);   // arbitrarily chosen
+    m_gamma.value(1.0);              // default to NFW gamma
+    m_gamma.min(0.01);               // arbitrarily chosen
+    m_gamma.max(10.0);               // arbitrarily chosen
     m_gamma.free();
     m_gamma.scale(1.0);
     m_gamma.gradient(0.0);
-    m_gamma.has_grad(false);  // Radial components never have gradients
+    m_gamma.has_grad(false);         // Radial components never have gradients
 
     // Initialise theta max 
     m_theta_min.clear();
-    m_theta_min.name("Theta Min");
+    m_theta_min.name("ThetaMin");
     m_theta_min.unit("degrees");
-    m_theta_min.value( 1.0e-6 ); // can only go from halo center to opposite halo center
-    m_theta_min.min(1.0e-10);    // arbitrarily chosen, some halos don't converge at theta=0.0
-    m_theta_min.fix();           // should always be fixed!
+    m_theta_min.value(1.0e-6);      // can only go from halo center to opposite halo center
+    m_theta_min.min(1.0e-10);       // arbitrarily chosen, some halos don't converge at theta=0.0
+    m_theta_min.fix();              // should always be fixed!
     m_theta_min.scale(1.0);
     m_theta_min.gradient(0.0);
-    m_theta_min.has_grad(false);  // Radial components never have gradients
+    m_theta_min.has_grad(false);    // Radial components never have gradients
 
     // Initialise theta max 
     m_theta_max.clear();
-    m_theta_max.name("Theta Max");
+    m_theta_max.name("ThetaMax");
     m_theta_max.unit("degrees");
-    m_theta_max.value( 180.0 ); // can only go from halo center to opposite halo center
-    m_theta_max.min(1.0e-6); // arbitrarily chosen
-    m_theta_max.fix(); // should always be fixed!
+    m_theta_max.value(180.0);       // can only go from halo center to opposite halo center
+    m_theta_max.min(1.0e-6);        // arbitrarily chosen
+    m_theta_max.fix();              // should always be fixed!
     m_theta_max.scale(1.0);
     m_theta_max.gradient(0.0);
-    m_theta_max.has_grad(false);  // Radial components never have gradients
+    m_theta_max.has_grad(false);   // Radial components never have gradients
     
     // Initialise core radius
     m_core_radius.clear();
-    m_core_radius.name("Core Radius");
+    m_core_radius.name("CoreRadius");
     m_core_radius.unit("kpc");
     m_core_radius.value(10.0);
     m_core_radius.min(0.0);
@@ -558,10 +560,10 @@ void GModelSpatialRadialProfileDMZhao::init_members(void)
     
     // Initialize precomputation cache. Note that zero values flag
     // uninitialised, as a zero radius is not meaningful
-    m_last_scale_radius     = 0.0 ;
-    m_last_scale_density    = 0.0 ;
-    m_mass_radius           = 0.0 ;
-    m_scale_density_squared = 0.0 ;
+    m_last_scale_radius     = 0.0;
+    m_last_scale_density    = 0.0;
+    m_mass_radius           = 0.0;
+    m_scale_density_squared = 0.0;
 
     // Return
     return;
@@ -579,7 +581,7 @@ void GModelSpatialRadialProfileDMZhao::copy_members(const GModelSpatialRadialPro
 {
     // Copy members. We do not have to push back the members on the parameter
     // stack as this should have been done by init_members() that was called
-    // before. Otherwise we would have sigma twice on the stack.
+    // before.
     m_scale_radius  = model.m_scale_radius;
     m_scale_density = model.m_scale_density;
     m_halo_distance = model.m_halo_distance;
@@ -619,17 +621,16 @@ void GModelSpatialRadialProfileDMZhao::free_members(void)
  ***************************************************************************/
 double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) const
 {
-    
-    // update precomputation cache
+    // Update precomputation cache
     update();
-    
-    // initialize integral value
+
+    // Initialize integral value
     double value = 0.0;
-    
+
     // Set up integration limits
     double los_min = m_halo_distance.value() - m_mass_radius;
     double los_max = m_halo_distance.value() + m_mass_radius;
-    
+
     // Set up integral
     halo_kernel_los integrand(m_scale_radius.value(),
                               m_halo_distance.value(),
@@ -640,7 +641,7 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
                               m_core_radius.value());
     GIntegral integral(&integrand);
     integral.max_iter(25);
-    
+
     // Set up integration boundaries
     // As there is usually an infinity at the halo center, this splits
     // the integral at the m_halo_distance.
@@ -651,10 +652,10 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
 
     // Compute value
     value = integral.romberg(bounds);
-    
+
     // apply scale density squared
     // TODO: must be multiplied by the particle physics factor
-    value *= m_scale_density_squared ;
+    value *= m_scale_density_squared;
 
     // Return value
     return value;
@@ -665,6 +666,7 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
  * @brief Kernel for zhao halo density profile squared
  *
  * @param[in] distance from observer to point in space (meters)
+ * @return Jalo density.
  *
  * Computes the value of a zhao halo density profile squared, 
  * at distance l from observer, at angle \f[\theta\f] from the halo center,
@@ -691,46 +693,38 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
  *   Monthly Notices of the Royal Astronomical Society, 278, 488-49
  *   http://mnras.oxfordjournals.org/content/278/2/488.short
  *
- * @return unit
  *
  ***************************************************************************/
-double GModelSpatialRadialProfileDMZhao::halo_kernel_los::eval( const double &los )
+double GModelSpatialRadialProfileDMZhao::halo_kernel_los::eval(const double &los)
 {
-    // calculate the scale distance g, the ( distance from integration point 
+    // Calculate the scale distance g, the ( distance from integration point
     // to the halo center ) divided by ( the halo scale radius )
     
-    // first calculate the distance of the integration point from the halo 
+    // First calculate the distance of the integration point from the halo
     // center via the law of cosines
-    double g = 0.0;
-    g  = los * los;
-    g += m_halo_distance * m_halo_distance;
-    g -= 2.0 * los * m_halo_distance * std::cos(m_theta);
-    g  = std::sqrt(g) ;
+    double g  = los * los;
+    g        += m_halo_distance * m_halo_distance;
+    g        -= 2.0 * los * m_halo_distance * std::cos(m_theta);
+    g         = std::sqrt(g);
     
-    // if we have a core radius specified, all halo values inside this core 
+    // If we have a core radius specified, all halo values inside this core
     // radius should be the same as at the core radius itself.
-    if ( g < m_core_radius ) 
-    {
-      //std::cout << "los=" << los << " is inside core radius " << m_core_radius << std::endl;
-      g = m_core_radius ;
+    if (g < m_core_radius) {
+        g = m_core_radius;
     }
     
-    // finish scaling the integration point by the halo's scale radius
+    // Finish scaling the integration point by the halo's scale radius
     g /= m_scale_radius ;
   
     // apply the zhao profile from the scaled distance to the halo center
-    double f = 0.0 ;
-    f  = std::pow(g, m_alpha);
-    f += 1 ;
-    f  = std::pow(f, (m_beta-m_gamma)/m_alpha);
-    f *= std::pow(g, m_gamma);
-    f = 1 / f ;
+    double f  = std::pow(g, m_alpha);
+    f        += 1.0;
+    f         = std::pow(f, (m_beta-m_gamma)/m_alpha);
+    f        *= std::pow(g, m_gamma);
+    f         = 1.0 / f;
 
-    // squared, for annihilating dm
-    // would just be f if it was decaying dm
+    // Squared, for annihilating DM, would just be f if it was decaying DM
     f = f * f;
-  
-    //std::cout << std::setprecision(10) << "kern_los::eval  los=" << los << "  hd=" << m_halo_distance << "  theta=" << m_theta << "  alpha=" << m_alpha << "  beta=" << m_beta << "  gamma=" << m_gamma << "  g=" << g << "  f=" << f << std::endl ;
 
     // Return function value
     return f;
@@ -746,14 +740,14 @@ double GModelSpatialRadialProfileDMZhao::halo_kernel_los::eval( const double &lo
  ***************************************************************************/
 void GModelSpatialRadialProfileDMZhao::update() const
 {
-  
     // Update if scale radius has changed
-    if (m_last_scale_radius != scale_radius() || m_last_scale_density != scale_density() ) {
-    
+    if (m_last_scale_radius  != scale_radius() ||
+        m_last_scale_density != scale_density() ) {
+
         // Store last values
         m_last_scale_radius = scale_radius();
         m_last_scale_density = scale_density();
-    
+
         // perform precomputations
         m_mass_radius = 10.0 * scale_radius();
         m_scale_density_squared = scale_density() * scale_density() ;
@@ -766,18 +760,6 @@ void GModelSpatialRadialProfileDMZhao::update() const
 
 
 /***********************************************************************//**
- * @brief Compute profile value
- *
- * @return Profile value
- ***************************************************************************/
-/*
-double GModelSpatialRadialProfileDMZhao::prof_val(const double& theta)
-{
-    return this->profile_value(theta);
-}
-*/
-
-/***********************************************************************//**
  * @brief Calculate Halo Mass Density
  *
  * @param[in] distance from halo center (kpc)
@@ -788,57 +770,54 @@ double GModelSpatialRadialProfileDMZhao::prof_val(const double& theta)
  ***************************************************************************/
 double GModelSpatialRadialProfileDMZhao::mass_density(const double& radius) const
 {
-    double density = 0.0 ;
-
-    // initialize halo kernel with stored values
-    // we use theta=0 to effectivly sample the halo radially
-    halo_kernel_los halo_shape( m_scale_radius.value(),
-                                m_halo_distance.value(),
-                                m_alpha.value(),
-                                m_beta.value(),
-                                m_gamma.value(),
-                                0.0,
-                                m_core_radius.value());
+    // Initialize halo kernel with stored values. We use theta=0 to effectivly
+    // sample the halo radially
+    halo_kernel_los halo_shape(m_scale_radius.value(),
+                               m_halo_distance.value(),
+                               m_alpha.value(),
+                               m_beta.value(),
+                               m_gamma.value(),
+                               0.0,
+                               m_core_radius.value());
   
     // eval produces a unitless density^2, so we must take its square root
-    density  = std::sqrt( halo_shape.eval( m_halo_distance.value() + radius ) ) ;
+    double density = std::sqrt(halo_shape.eval(m_halo_distance.value() + radius));
     
-    // multiply in the missing scale density
-    density *= m_scale_density.value() ;
+    // Multiply in the missing scale density
+    density *= m_scale_density.value();
     
     return density ;
 }
 
+
 /***********************************************************************//**
- * @brief Calculate J Factor
+ * @brief Calculate J-factor
  *
  * @param[in] angle from halo center (radians)
+ * @return J-factor
  *
- * Calculates the halo's J-Factor at an angle from the halo center.
- *
+ * Calculates the halo's J-factor at an angle from the halo center.
  ***************************************************************************/
-double GModelSpatialRadialProfileDMZhao::jfactor( const double& angle ) const
+double GModelSpatialRadialProfileDMZhao::jfactor(const double& angle) const
 {
-  // Integration settings
-  double minradian = 0.0 ;
-  int    npoints   = 200 ;
+    // Integration settings
+    double minradian = 0.0;
+    int    npoints   = 200;
   
-  // initialize other variables
-  double jfactor = 0.0 ;
-  double dr      = (angle - minradian) / npoints ;
-  double r       = 0.0;
+    // Initialize other variables
+    double jfactor = 0.0;
+    double dr      = (angle - minradian) / npoints;
+    double r       = 0.0;
   
-  // loop over different radii in the profile
-  for (int i = 0; i < npoints; ++i) {
+    // Loop over different radii in the profile
+    for (int i = 0; i < npoints; ++i) {
+        r        = minradian + (i * dr);
+        jfactor += profile_value(r) * r * dr;
+    }
+  
+    // J-factor = 2 * pi * Int[ profile(r) * r * dr , {r,minradian,angle} ]
+    jfactor *= gammalib::twopi;
 
-      // integration:  Int[ profile(r) * r * dr ]
-      r        = minradian + (i * dr);
-      jfactor += profile_value(r) * r * dr;
-
-  }
-  
-  // J-Factor = 2 * pi * Int[ profile(r) * r * dr , {r,minradian,angle} ]
-  jfactor *= gammalib::twopi;
-  
-  return jfactor ;
+    // Return J-factor
+    return jfactor;
 }

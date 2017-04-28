@@ -78,8 +78,8 @@ public:
     void   halo_distance(const double& halo_distance);
     double alpha(void) const;
     void   alpha(const double& alpha);
-    double mass_density( const double& radius ) const ;
-    double jfactor( const double& angle ) const ;
+    double mass_density(const double& radius) const;
+    double jfactor(const double& angle) const;
 
 protected:
     // Protected methods
@@ -263,4 +263,3 @@ void GModelSpatialRadialProfileDMEinasto::alpha(const double& alpha)
 }
 
 #endif /* GMODELSPATIALRADIALPROFILEDMEINASTO_HPP */
-

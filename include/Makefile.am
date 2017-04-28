@@ -163,6 +163,9 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialRadialShell.hpp \
                      GModelSpatialRadialProfile.hpp \
                      GModelSpatialRadialProfileGauss.hpp \
+                     GModelSpatialRadialProfileDMBurkert.hpp \
+                     GModelSpatialRadialProfileDMEinasto.hpp \
+                     GModelSpatialRadialProfileDMZhao.hpp \
                      GModelSpatialElliptical.hpp \
                      GModelSpatialEllipticalDisk.hpp \
                      GModelSpatialEllipticalGauss.hpp \

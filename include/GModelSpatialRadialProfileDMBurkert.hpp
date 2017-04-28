@@ -74,10 +74,10 @@ public:
     void   scale_radius(const double& scale_radius);
     double scale_density(void) const;
     void   scale_density(const double& scale_density);
-    double halo_distance(void) const ;
+    double halo_distance(void) const;
     void   halo_distance(const double& halo_distance);
-    double mass_density( const double& radius ) const;
-    double jfactor( const double& angle ) const;
+    double mass_density(const double& radius ) const;
+    double jfactor(const double& angle) const;
 
 protected:
     // Protected methods
@@ -85,12 +85,12 @@ protected:
     void           copy_members(const GModelSpatialRadialProfileDMBurkert& model);
     void           free_members(void);
     virtual double profile_value(const double& theta) const;
-    void           update(void) const ;
+    void           update(void) const;
 
     // Integration kernel for line-of-sight integral
     class halo_kernel_los : public GFunction {
     public :
-        halo_kernel_los(const double& scale_radius ,
+        halo_kernel_los(const double& scale_radius,
                         const double& halo_distance,
                         const double& theta,
                         const double& core_radius) :
