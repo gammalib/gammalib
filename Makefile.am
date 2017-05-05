@@ -101,6 +101,11 @@ pkg:
                         dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
                         dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
 						;; \
+					Ubuntu*) \
+						echo "Ubuntu supported"; \
+                        dev/pkgbuild-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) amd64 NA ; \
+                        dev/pkgbuild-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
+						;; \
 					*) \
 						echo "Linux OS not supported"; \
 						;; \
@@ -126,6 +131,11 @@ pkgcheck:
 						echo "CentOS supported"; \
                         dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
                         dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
+						;; \
+					Ubuntu*) \
+						echo "Ubuntu supported"; \
+                        dev/pkgcheck-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) amd64 NA ; \
+                        dev/pkgcheck-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
 						;; \
 					*) \
 						echo "Linux OS not supported"; \
