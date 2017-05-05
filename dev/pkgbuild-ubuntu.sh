@@ -272,4 +272,14 @@ for package in $(find $PRODDIR -iname *.rpm ); do
 	# Temporary solution, to be fixed
      cp $package $RPMREPO
 done
+for package in $(find $PRODDIR -iname *.deb ); do 
+     echo " deb file : $package"
+     echo " ===================================================="
+     echo "  "     
+	# ==================================================== #
+	#  TODO : Move package in a secure RPM repository
+	# ==================================================== #
+	# Temporary solution, to be fixed
+     cp $package $RPMREPO
+done
 exit
