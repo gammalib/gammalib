@@ -49,7 +49,6 @@ CFITSIO=cfitsio
 NCURSES=ncurses
 READLINE=readline
 #
-PACKAGE=$PACKNAME-$VERSION
 # TODO : next step to fix RELEASE is not updated for now
 RELEASE=1
 
@@ -74,19 +73,18 @@ RPMREPO=$HOME/RPM-REPO
 #
 #
 # SBN : Liste à fixer.
-TMPDIR=$HOME/usr
-WRKDIR=$HOME/pkg_check
-SRCDIR=$WRKDIR/SOURCES
-PKGDIR=$WRKDIR/RPMS
+CHECKDIR=$HOME/usr
+WRKDIR=$CHECKDIR/pkg_check
+#SRCDIR=$WRKDIR/SOURCES
+#PKGDIR=$WRKDIR/RPMS
 
 # ========================================================================= #
 # Fix packages directory                                                    #
 # ========================================================================= #
 # If 'make pkg' produce multi-platform rpm, rpm files will be archived in $RPMREPO directory
-#PRODDIR=$WRKDIR/RPMS/$PLATFORM
-PRODIR=$RPMREPO
+PRODDIR=$RPMREPO
 #
-RPMFILE=$PRODIR/$PACKAGE-$RELEASE.*$PLATFORM.rpm
+
 #
 # ========================================================================= #
 # Install package in local directory                                        #
@@ -103,16 +101,13 @@ LOCALINSTALL=$HOME/$INSTALLDIR
 #
 LOGFILE=$WRKDIR/pkg_check.log
 LOGRPMFILE=$WRKDIR/pkg_check_rpm.log
-
-# ========================= #
-# Clean temporary directory #
-# ========================= #
-rm -rf $TMPDIR
+LOGDEBFILE=$WRKDIR/pkg_check_deb.log
 
 # ============================= #
 # Secure installation directory #
 # ============================= #
 if [ -d "$LOCALINSTALL/$PACKNAME" ]; then
+echo "Secure installation directory : $LOCALINSTALL/$PACKNAME"
     mv $LOCALINSTALL/$PACKNAME $LOCALINSTALL/$PACKNAME.backup
 fi
 
@@ -228,19 +223,41 @@ v=$(dpkg-query -W -f='${Version}\n' $p)
 echo "Package $p (version : $v) checked"
 
 
+# ======================================================================= #
+# Finally install package $HOME/$RPMREPO/$DEBPKG-$RELEASE_$PLATFORM.deb  #
+# ======================================================================= #
+debformat=true # Check with Debian package
 
-# ======================================================================= #
-# Finally install package $HOME/$RPMREPO/$PACKAGE-$RELEASE-*$PLATFORM.rpm #
-# ======================================================================= #
-#if ! sudo rpm -U --prefix=/$LOCALINSTALL $RPMFILE &>  $LOGRPMFILE ; then
-if ! alien -iv $RPMFILE &>  $LOGRPMFILE ; then
-   echo "================================================================================================="
-   echo "ERROR : Cannot install $PACKAGE package"
-   echo "================================================================================================="
-   cat  $LOGRPMFILE
-   echo "   "
-   echo "================================================================================================="
-   exit
+
+if $debformat ; then
+   DEBPKG=$PACKNAME\_$VERSION
+   DEBFILE=$PRODDIR/$DEBPKG-$RELEASE\_$PLATFORM.deb
+
+   echo "Install and Check DEB Package : $DEBFILE"
+   if ! dpkg-deb -x $DEBFILE $CHECKDIR &>  $LOGDEBFILE ; then
+      echo "================================================================================================="
+      echo "ERROR : Cannot install $DEBFILE package"
+      echo "================================================================================================="
+      cat  $LOGDEBFILE
+      echo "   "
+      echo "================================================================================================="
+   fi
+else
+   # ======================================================================= #
+   # Or install package $HOME/$RPMREPO/$RPMPKG-$RELEASE.$PLATFORM.rpm #
+   # ======================================================================= #
+   #if ! sudo rpm -U --prefix=/$LOCALINSTALL $RPMFILE &>  $LOGRPMFILE ; then
+   RPMPKG=$PACKNAME-$VERSION
+   RPMFILE=$PRODDIR/$RPMPKG-$RELEASE.$PLATFORM.rpm
+   echo "Install and Check RPM Package : $RPMFILE"
+   if ! alien -iv $RPMFILE &>  $LOGRPMFILE ; then
+      echo "================================================================================================="
+      echo "ERROR : Cannot install $RPMFILE package"
+      echo "================================================================================================="
+      cat  $LOGRPMFILE
+      echo "   "
+      echo "================================================================================================="
+   fi
 fi
 
 # ================= #
@@ -248,7 +265,6 @@ fi
 # ================= #
 export GAMMALIB=$LOCALINSTALL/$PACKNAME
 source $GAMMALIB/bin/$PACKNAME-init.sh
-ARCH=`lsb_release -irs`
 
 # ============ #
 # Test package #
@@ -256,15 +272,11 @@ ARCH=`lsb_release -irs`
 # TODO : update following section with consistent set of tests
 python -c 'import gammalib; gammalib.test()' | tee -a $LOGFILE
 
+
 # ======================= #
 # Uninstall package       #
 # ======================= #
-sudo yum remove $PACKNAME
-
-# ======================= #
-# Clean package directory #
-# ======================= #
-sudo rm -rf $TMPDIR
+sudo rm -rf $LOCALINSTALL/$PACKNAME
 
 # ============================== #
 # Recover installation directory #
