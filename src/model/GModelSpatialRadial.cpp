@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadial.cpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -263,6 +263,8 @@ void GModelSpatialRadial::read(const GXmlElement& xml)
         dir.lb_deg(ra(), dec()),
         m_ra.value(dir.ra_deg());
         m_dec.value(dir.dec_deg());
+        m_ra.name("RA");
+        m_dec.name("DEC");
     }
     else if (has_glon || has_glat) {
         throw GException::model_invalid_parnames(G_READ, xml,

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-28 April 2017
+14 May 2017
 
 
 1. Introduction
@@ -137,6 +137,9 @@ have been implemented:
 - GModelSpatialRadialProfileDMZhao: Zhao Dark matter profile
 Please note that these models are not deeply tested so far and the code
 and interface is still subject to change (#1520).
+
+The names of spatial model parameters are now always set to RA/DEC even if
+the input parameters were GLON/GLAT (#2113).
 
 
 9. Numerics module
