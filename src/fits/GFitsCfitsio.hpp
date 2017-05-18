@@ -136,6 +136,7 @@ typedef fitsfile __fitsfile;
 #define __ffdelt(A, B) __dummy()
 #define __ffdhdu(A, B, C) __dummy()
 #define __ffdrow(A, B, C, D) __dummy()
+#define __ffflus(A, B) __dummy()
 #define __ffgabc(A, B, C, D, E, F) __dummy()
 #define __ffgcv(A, B, C, D, E, F, G, H, I, J) __dummy()
 #define __ffgcvb(A, B, C, D, E, F, G, H, I) __dummy()
