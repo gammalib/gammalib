@@ -218,7 +218,11 @@ if WITH_PYTHON
 installcheck-local:
 	@export GAMMALIB=$(DESTDIR)$(prefix); \
 	. $(DESTDIR)$(prefix)/bin/gammalib-init.sh; \
-	python -c 'import gammalib; gammalib.test()'
+	python -c 'import gammalib; gammalib.test()'; \
+	if test "x$$?" != "x0"; then \
+		echo "*** gammalib unit test failure!"; \
+		exit 1; \
+	fi
 endif
 
 # Add Valgrind rule
