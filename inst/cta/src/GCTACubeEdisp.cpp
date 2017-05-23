@@ -576,7 +576,7 @@ void GCTACubeEdisp::write(GFits& fits) const
 void GCTACubeEdisp::load(const GFilename& filename)
 {
     // Put into OpenMP criticial zone
-    #pragma omp critical
+    #pragma omp critical(GCTACubeEdisp_load)
     {
 
     // Open FITS file
@@ -609,7 +609,7 @@ void GCTACubeEdisp::load(const GFilename& filename)
 void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
 {
     // Put into OpenMP criticial zone
-    #pragma omp critical
+    #pragma omp critical(GCTACubeEdisp_save)
     {
 
     // Create FITS file

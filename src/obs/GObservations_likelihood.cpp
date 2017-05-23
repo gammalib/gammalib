@@ -255,7 +255,7 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
 
             // Push variable copies into vector. This is a critical zone to
             // avoid multiple thread pushing simultaneously.
-            #pragma omp critical
+            #pragma omp critical(GObservations_likelihood_eval)
             {
                 vect_cpy_grad.push_back(cpy_gradient);
                 vect_cpy_curvature.push_back(cpy_curvature); 

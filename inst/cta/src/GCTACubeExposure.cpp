@@ -447,7 +447,7 @@ void GCTACubeExposure::write(GFits& fits) const
 void GCTACubeExposure::load(const GFilename& filename)
 {
     // Put into OpenMP criticial zone
-    #pragma omp critical
+    #pragma omp critical(GCTACubeExposure_load)
     {
 
     // Open FITS file
@@ -480,7 +480,7 @@ void GCTACubeExposure::load(const GFilename& filename)
 void GCTACubeExposure::save(const GFilename& filename, const bool& clobber) const
 {
     // Put into OpenMP criticial zone
-    #pragma omp critical
+    #pragma omp critical(GCTACubeExposure_save)
     {
 
     // Create FITS file

@@ -747,7 +747,7 @@ void GCTAEdisp2D::fetch(void) const
             // Load energy dispersion. Catch any exception. Put the code into
             // a critical zone as it might be called from within a parallelized
             // thread.
-            #pragma omp critical
+            #pragma omp critical(GCTAEdisp2D_fetch)
             {
             try {
 

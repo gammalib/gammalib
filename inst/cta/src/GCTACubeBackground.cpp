@@ -564,7 +564,7 @@ void GCTACubeBackground::write(GFits& fits) const
 void GCTACubeBackground::load(const GFilename& filename)
 {
     // Put into OpenMP criticial zone
-    #pragma omp critical
+    #pragma omp critical(GCTACubeBackground_load)
     {
 
     // Open FITS file
@@ -599,7 +599,7 @@ void GCTACubeBackground::save(const GFilename& filename,
                               const bool&      clobber) const
 {
     // Put into OpenMP criticial zone
-    #pragma omp critical
+    #pragma omp critical(GCTACubeBackground_save)
     {
 
     // Open or create FITS file
