@@ -1177,24 +1177,33 @@ void GCTAEventList::read_mc_ids(const GFitsTable& table)
         // Get number of Monte Carlo identifiers
         int nids = table.integer("NMCIDS");
 
-        // Loop over Monte Carlo identifiers
-        for (int i = 0; i < nids; ++i) {
+        // Continue only if there are identifiers
+        if (nids > 0) {
 
-            // Set keyword names
-            char keyword_id[10];
-            char keyword_name[10];
-            sprintf(keyword_id,   "MID%5.5d", i+1);
-            sprintf(keyword_name, "MMN%5.5d", i+1);
+            // Reserve space for elements
+            m_mc_ids.reserve(nids);
+            m_mc_id_names.reserve(nids);
+
+            // Loop over Monte Carlo identifiers
+            for (int i = 0; i < nids; ++i) {
+
+                // Set keyword names
+                char keyword_id[10];
+                char keyword_name[10];
+                sprintf(keyword_id,   "MID%5.5d", i+1);
+                sprintf(keyword_name, "MMN%5.5d", i+1);
  
-            // Get header keywords
-            int         id   = table.integer(std::string(keyword_id));
-            std::string name = table.string(std::string(keyword_name));
+                // Get header keywords
+                int         id   = table.integer(std::string(keyword_id));
+                std::string name = table.string(std::string(keyword_name));
 
-            // Put identifier and name in list
-            m_mc_ids.push_back(id);
-            m_mc_id_names.push_back(name);
+                // Put identifier and name in list
+                m_mc_ids.push_back(id);
+                m_mc_id_names.push_back(name);
 
-        } // endfor: looped over Monte Carlo identifiers
+            } // endfor: looped over Monte Carlo identifiers
+
+        } // endif: there were identifiers
 
     } // endif: there were Monte Carlo identifiers
 
