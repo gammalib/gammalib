@@ -187,7 +187,8 @@ GCTAPsfKing& GCTAPsfKing::operator=(const GCTAPsfKing& psf)
  * @param[in] etrue Use true energy (true/false). Not used.
  *
  * Returns the point spread function for a given angular separation in units
- * of sr^-1 for a given energy.
+ * of sr^-1 for a given energy. If the King profile parameters are invalid
+ * the method returns zero.
  ***************************************************************************/
 double GCTAPsfKing::operator()(const double& delta,
                                const double& logE, 
@@ -464,7 +465,8 @@ void GCTAPsfKing::save(const GFilename& filename, const bool& clobber) const
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  * @param[in] etrue Use true energy (true/false). Not used.
  *
- * Draws a random offset for the King Profile
+ * Draws a random offset angle for the King Profile. If the King profile
+ * parameters are invalid the method returns a zero offset angle.
  ***************************************************************************/
 double GCTAPsfKing::mc(GRan&         ran,
                        const double& logE, 
@@ -480,25 +482,30 @@ double GCTAPsfKing::mc(GRan&         ran,
     // Update the parameter cache
     update(logE, theta);
 
-    // Compute exponent
-    double exponent = 1.0 / (1.0-m_par_gamma);
+    // Continue only if normalization is positive
+    if (m_par_norm > 0.0) {
 
-    // Compile option: sample until delta <= r_max
-    #if defined(G_FIX_DELTA_MAX)
-    do {
-    #endif
+        // Compute exponent
+        double exponent = 1.0 / (1.0-m_par_gamma);
 
-    // Get uniform random number
-    double u = ran.uniform();
+        // Compile option: sample until delta <= r_max
+        #if defined(G_FIX_DELTA_MAX)
+        do {
+        #endif
 
-    // Draw random offset using inversion sampling
-    double u_max = (std::pow((1.0 - u), exponent) - 1.0) * m_par_gamma;
-    delta = m_par_sigma * std::sqrt(2.0 * u_max);
+        // Get uniform random number
+        double u = ran.uniform();
 
-    // Compile option: sample until delta <= r_max
-    #if defined(G_FIX_DELTA_MAX)
-    } while (delta > r_max);
-    #endif
+        // Draw random offset using inversion sampling
+        double u_max = (std::pow((1.0 - u), exponent) - 1.0) * m_par_gamma;
+        delta = m_par_sigma * std::sqrt(2.0 * u_max);
+
+        // Compile option: sample until delta <= r_max
+        #if defined(G_FIX_DELTA_MAX)
+        } while (delta > r_max);
+        #endif
+
+    } // endif: normalization was positive
 
     // Return PSF offset
     return delta;
@@ -517,7 +524,8 @@ double GCTAPsfKing::mc(GRan&         ran,
  *
  * Determine the radius beyond which the PSF becomes negligible. This radius
  * is set by this method to where the containment fraction become 99.995% 
- * which equals \f$5 \times \sigma\f$ of a Gaussian width.
+ * which equals \f$5 \times \sigma\f$ of a Gaussian width. If the King
+ * profile parameters are invalid the method returns zero.
  ***************************************************************************/
 double GCTAPsfKing::delta_max(const double& logE,
                               const double& theta, 
@@ -526,21 +534,29 @@ double GCTAPsfKing::delta_max(const double& logE,
                               const double& azimuth,
                               const bool&   etrue) const
 {
+    // Initialise PSF radius
+    double radius = 0.0;
+
     // Compile option: use fixed maximum delta
     #if defined(G_FIX_DELTA_MAX)
-    double radius = r_max;
+    radius = r_max;
     #else
 
     // Update the parameter cache
     update(logE, theta);
 
-    // Compute maximum PSF radius (99.995% containment)
-    double F      = 0.99995;
-    double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) * 
-                    m_par_gamma;
-    double radius = m_par_sigma * std::sqrt(2.0 * u_max);
-    #endif
+    // Continue only if normalization is positive
+    if (m_par_norm > 0.0) {
 
+        // Compute maximum PSF radius (99.995% containment)
+        double F      = 0.99995;
+        double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) *
+                        m_par_gamma;
+        radius = m_par_sigma * std::sqrt(2.0 * u_max);
+
+    } // endif: King profile parameters were valid
+    #endif
+    
     // Return maximum PSF radius
     return radius;
 }
@@ -562,7 +578,8 @@ double GCTAPsfKing::delta_max(const double& logE,
  *            Invalid fraction specified.
  *
  * Calculate the radius from the center that contains 'fraction' percent
- * of the events.  fraction * 100. = Containment %.
+ * of the events.  fraction * 100. = Containment %. If the King profile
+ * parameters are invalid the method returns zero.
  ***************************************************************************/
 double GCTAPsfKing::containment_radius(const double& fraction, 
                                        const double& logE, 
@@ -572,6 +589,9 @@ double GCTAPsfKing::containment_radius(const double& fraction,
                                        const double& azimuth,
                                        const bool&   etrue) const
 {
+    // Initialise containment radius
+    double radius = 0.0;
+
     // Check input argument
     if (fraction <= 0.0 || fraction >= 1.0) {
         std::string message = "Containment fraction "+
@@ -583,10 +603,15 @@ double GCTAPsfKing::containment_radius(const double& fraction,
     // Update the parameter cache
     update(logE, theta);
 
-    // Use analytic calculation
-    double arg1   = std::pow(1.0 - fraction, 1.0/(1.0-m_par_gamma));
-    double arg2   = 2.0 * m_par_gamma * (arg1 - 1.0);
-    double radius = (arg2 > 0) ? m_par_sigma * std::sqrt(arg2) : 0.0;
+    // Continue only if normalization is positive
+    if (m_par_norm > 0.0) {
+
+        // Use analytic calculation
+        double arg1 = std::pow(1.0 - fraction, 1.0/(1.0-m_par_gamma));
+        double arg2 = 2.0 * m_par_gamma * (arg1 - 1.0);
+        radius      = (arg2 > 0) ? m_par_sigma * std::sqrt(arg2) : 0.0;
+
+    } // endif: King profile parameters are valid
 
     // Return radius containing fraction of events
     return radius;
@@ -712,7 +737,8 @@ void GCTAPsfKing::free_members(void)
  *
  * This method updates the PSF parameter cache. As the performance table PSF
  * only depends on energy, the only parameter on which the cache values
- * depend is the energy.
+ * depend is the energy. If the PSF parameters are invalid the m_par_norm
+ * member will be set to zero.
  ***************************************************************************/
 void GCTAPsfKing::update(const double& logE, const double& theta) const
 {
@@ -735,6 +761,7 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
         // Check for parameter sanity
         if (m_par_gamma <= 0.0 || m_par_sigma <= 0.0) {
             m_par_norm = 0.0;
+            /*
             std::string msg = "King function parameters gamma="+
                               gammalib::str(m_par_gamma)+" or sigma="+
                               gammalib::str(m_par_sigma)+" are not positive "
@@ -742,21 +769,24 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
                               gammalib::str(theta)+". Setting normalization "
                               "to zero.";
             gammalib::warning(G_UPDATE, msg);
+            */
         }
         else {   
+
             // Determine normalisation for given parameters
             m_par_norm = 1.0 / gammalib::twopi * (1.0 - 1.0 / m_par_gamma) /
                          m_par_sigma2;
-        }
 
-        // Optionally correct for fixed delta_max
-        #if defined(G_FIX_DELTA_MAX)
-        double u_max = (r_max*r_max) / (2.0 * m_par_sigma2);
-        double norm  = 1.0 - std::pow((1.0 + u_max/m_par_gamma), 1.0-m_par_gamma);
-        m_par_norm /= norm;
-        #endif
+            // Optionally correct for fixed delta_max
+            #if defined(G_FIX_DELTA_MAX)
+            double u_max = (r_max*r_max) / (2.0 * m_par_sigma2);
+            double norm  = 1.0 - std::pow((1.0 + u_max/m_par_gamma), 1.0-m_par_gamma);
+            m_par_norm /= norm;
+            #endif
 
-    }
+        } // endif: King profile parameters were valid
+
+    } // endif: PSF parameters have changed
 
     // Return
     return;
