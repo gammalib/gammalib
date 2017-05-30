@@ -28,6 +28,7 @@
 #define GFITSHEADER_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <map>
 #include <string>
 #include <vector>
 #include "GContainer.hpp"
@@ -98,6 +99,7 @@ private:
 
     // Private data area
     std::vector<GFitsHeaderCard> m_cards; //!< Header cards
+    std::map<std::string, GFitsHeaderCard> m_cards2;
 };
 
 
