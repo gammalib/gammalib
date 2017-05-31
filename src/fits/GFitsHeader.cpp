@@ -433,12 +433,14 @@ GFitsHeaderCard& GFitsHeader::append(const GFitsHeaderCard& card)
         cardno = get_index(card.keyname());
         if (cardno != -1) {
             m_cards[cardno] = card;
+            m_keyname_map[card.keyname()] = &m_cards[cardno];
         }
     }
 
     // If card has not yet been updated then append card to header
     if (cardno == -1) {
         m_cards.push_back(card);
+        update_keyname_map();
         cardno = size()-1;
     }
 
@@ -481,6 +483,7 @@ GFitsHeaderCard& GFitsHeader::insert(const int&             cardno,
 
     // Inserts card
     m_cards.insert(m_cards.begin()+cardno, card);
+    update_keyname_map();
     
     // Return reference
     return m_cards[cardno];
@@ -514,6 +517,7 @@ GFitsHeaderCard& GFitsHeader::insert(const std::string&     keyname,
 
     // Inserts card
     m_cards.insert(m_cards.begin()+cardno, card);
+    update_keyname_map();
     
     // Return reference
     return m_cards[cardno];
@@ -541,6 +545,7 @@ void GFitsHeader::remove(const int& cardno)
 
     // Erase card from header
     m_cards.erase(m_cards.begin() + cardno);
+    update_keyname_map();
     
     // Return
     return;
@@ -570,6 +575,7 @@ void GFitsHeader::remove(const std::string& keyname)
 
     // Erase card from header
     m_cards.erase(m_cards.begin() + cardno);
+    update_keyname_map();
     
     // Return
     return;
@@ -600,6 +606,7 @@ void GFitsHeader::extend(const GFitsHeader& header)
         for (int i = 0; i < num; ++i) {
             m_cards.push_back(header[i]);
         }
+        update_keyname_map();
 
     } // endif: header was not empty
     
@@ -643,6 +650,9 @@ void GFitsHeader::load(void* vptr)
         m_cards.push_back(card);
     }
 
+    // Setup the pointers in m_cards2
+    update_keyname_map();
+    
     // Return
     return;
 }
@@ -730,7 +740,8 @@ void GFitsHeader::init_members(void)
 {
     // Initialise members
     m_cards.clear();
-
+    m_keyname_map.clear();
+    
     // Return
     return;
 }
@@ -745,6 +756,7 @@ void GFitsHeader::copy_members(const GFitsHeader& header)
 {
     // Copy members
     m_cards = header.m_cards;
+    update_keyname_map();
 
     // Return
     return;
@@ -774,15 +786,35 @@ int GFitsHeader::get_index(const std::string& keyname) const
 {
     // Initialise index
     int index = -1;
-
-    // Search keyname in list
-    for (int i = 0; i < size(); ++i) {
-        if (m_cards[i].keyname() == keyname) {
-            index = i;
-            break;
-        }
+    
+    std::map<std::string, GFitsHeaderCard*>::const_iterator iter =
+                                                m_keyname_map.find(keyname);
+    if (iter != m_keyname_map.end()){
+        // Taking the difference between the addresses allows us to derive the
+        // index of the entry, since std::vector guarantess its entries are
+        // stored contiguously in memory
+        index = iter->second - &m_cards[0];
     }
-
+    
     // Return index
     return index;
+}
+
+
+/***********************************************************************//**
+* @brief Reset the pointers in m_cards2
+*
+* This becomes necessary as erasing/appending elements from/to m_cards results
+* in re-allocating the entries in m_cards and thus the pointers in m_cards2
+* are no longer valid.
+***************************************************************************/
+void GFitsHeader::update_keyname_map(void)
+{
+    // Reset the entries in m_cards2. This becomes necessary as erasing the
+    // elements from m_cards results in re-allocating the entries in m_cards
+    // and thus the pointers in m_cards2 are no longer valid
+    m_keyname_map.clear();
+    for (int i=0; i<m_cards.size(); i++) {
+        m_keyname_map.insert(std::make_pair(m_cards[i].keyname(),&m_cards[i]));
+    }
 }

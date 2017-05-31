@@ -96,10 +96,11 @@ private:
     void copy_members(const GFitsHeader& header);
     void free_members(void);
     int  get_index(const std::string& keyname) const;
-
+    void update_keyname_map(void);
+    
     // Private data area
-    std::vector<GFitsHeaderCard> m_cards; //!< Header cards
-    std::map<std::string, GFitsHeaderCard> m_cards2;
+    std::vector<GFitsHeaderCard> m_cards;               //!< Header cards
+    std::map<std::string, GFitsHeaderCard*> m_keyname_map;   //!< Header pointers
 };
 
 
