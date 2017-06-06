@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFitsImage.i - Abstract FITS image base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -120,7 +120,7 @@ public:
     HDUType exttype(void) const;
 
     // Base class methods
-    const int&  size(void) const;
+    const int&  npix(void) const;
     const int&  bitpix(void) const;
     const int&  naxis(void) const;
     int         naxes(const int& axis) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_LAT.cpp - test Fermi/LAT classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -642,8 +642,8 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir,
     GFits       cntmap(lat_cntmap);
     GFitsImage* image   = cntmap.image(0);
     double      nevents = 0.0;
-    int         nsize   = image->size();
-    for (int i = 0; i < nsize; ++i) {
+    int         npix    = image->npix();
+    for (int i = 0; i < npix; ++i) {
         nevents += image->pixel(i);
     }
     cntmap.close();
@@ -694,7 +694,7 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir,
         sum += (int)((*events)[i]->counts());
     }
     test_value(sum, nevents, 1.0e-20, "Test event iterator (counts)");
-    test_value(num, nsize, 1.0e-20, "Test event iterator (bins)");
+    test_value(num, npix, 1.0e-20, "Test event iterator (bins)");
 
     // Test mean PSF
     test_try("Test mean PSF");

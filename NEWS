@@ -68,7 +68,7 @@ The following methods have been removed:
 - ...
 
 The following methods have been renamed:
-- ...
+- GFitsImage::size() => GFitsImage::npix()
 
 The arguments for the following methods have been changed:
 - ...
@@ -111,6 +111,9 @@ image of any type into a specific storage class (#1986).
 
 A map between header card keywords and header card pointers was added to
 GFitsHeader to speed up the access of FITS header cards (#2120).
+
+The GFitsImage::size() method has been renamed to GFitsImage::npix() since
+the size() method overloaded the GFitsHDU::size() method (#1858).
 
 
 7. Linear algebra module
