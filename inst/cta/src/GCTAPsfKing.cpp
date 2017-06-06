@@ -498,9 +498,8 @@ double GCTAPsfKing::mc(GRan&         ran,
  * @param[in] etrue Use true energy (true/false). Not used.
  *
  * Determine the radius beyond which the PSF becomes negligible. This radius
- * is set by this method to where the containment fraction become 99.995% 
- * which equals \f$5 \times \sigma\f$ of a Gaussian width. If the King
- * profile parameters are invalid the method returns zero.
+ * is set by this method to where the containment fraction become 99.9%. If
+ * the King profile parameters are invalid the method returns zero.
  ***************************************************************************/
 double GCTAPsfKing::delta_max(const double& logE,
                               const double& theta, 
