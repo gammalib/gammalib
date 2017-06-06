@@ -195,17 +195,17 @@ double GCTAPsfKing::operator()(const double& delta,
                                const double& azimuth,
                                const bool&   etrue) const
 {
-    #if defined(G_SMOOTH_PSF)
-    // Set ramp down radius
-    static const double ramp_down = 0.95 * m_par_rmax;
-    static const double norm_down = 1.0 / (m_par_rmax - ramp_down);
-    #endif
-
     // Initialise PSF value
     double psf = 0.0;
 
     // Update the parameter cache
     update(logE, theta);
+
+    #if defined(G_SMOOTH_PSF)
+    // Set ramp down radius
+    double ramp_down = 0.95 * m_par_rmax;
+    double norm_down = 1.0 / (m_par_rmax - ramp_down);
+    #endif
 
     // Continue only if delta is smaller than PSF radius
     if (delta <= m_par_rmax) {
