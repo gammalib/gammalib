@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsHeader.hpp - FITS header cards container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #define GFITSHEADER_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <map>
 #include <string>
 #include <vector>
 #include "GContainer.hpp"
@@ -95,9 +96,11 @@ private:
     void copy_members(const GFitsHeader& header);
     void free_members(void);
     int  get_index(const std::string& keyname) const;
-
+    void update_keyname_map(void);
+    
     // Private data area
-    std::vector<GFitsHeaderCard> m_cards; //!< Header cards
+    std::vector<GFitsHeaderCard>            m_cards;       //!< Header cards
+    std::map<std::string, GFitsHeaderCard*> m_keyname_map; //!< Header pointers
 };
 
 

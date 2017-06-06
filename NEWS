@@ -109,6 +109,9 @@ None
 FITS image type conversion constructors have been added to convert a FITS
 image of any type into a specific storage class (#1986).
 
+A map between header card keywords and header card pointers was added to
+GFitsHeader to speed up the access of FITS header cards (#2120).
+
 
 7. Linear algebra module
 ------------------------
