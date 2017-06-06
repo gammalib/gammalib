@@ -414,7 +414,7 @@ GMatrixSymmetric& GMatrixSymmetric::operator+=(const GMatrixSymmetric& matrix)
 /***********************************************************************//**
  * @brief Unary matrix scalar addition operator
  *
- * @param[in] scaler Scalar.
+ * @param[in] scalar Scalar.
  *
  * Adds a @p scalar to each matrix element.
  ***************************************************************************/

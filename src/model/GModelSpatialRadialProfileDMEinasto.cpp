@@ -1,7 +1,7 @@
 /***************************************************************************
  * GModelSpatialRadialProfileDMEinasto.cpp - Einasto radial profile class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
+ *  copyright (C) 2016-2017 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -622,7 +622,8 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
 /***********************************************************************//**
  * @brief Kernel for halo density profile squared
  *
- * @param[in] distance from observer to point in space (meters)
+ * @param[in] los Distance from observer to point in space (meters)
+ * @return Halo density.
  *
  * Computes the value of an einasto halo density profile squared, 
  * at distance l from observer, at angle \f[\theta\f] from the halo center:
@@ -647,11 +648,8 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
  *   J. Einasto, 1965
  *   "Kinematics and dynamics of stellar systems"
  *   Trudy Inst. Astrofiz. Alma-Ata 5, 87
- *
- * @return unit
- *
  ***************************************************************************/
-double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval( const double &los )
+double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval(const double &los)
 {
     // Calculate the scale distance g, the ( distance from integration point
     // to the halo center ) divided by ( the halo scale radius )
@@ -717,13 +715,13 @@ void GModelSpatialRadialProfileDMEinasto::update() const
 /***********************************************************************//**
  * @brief Calculate halo mass density
  *
- * @param[in] radius from halo center (kpc)
+ * @param[in] radius Distance from halo center (kpc).
  * @return Halo mass density.
  *
  * Calculates the halo's mass density at a given radial distance from the
  * halo center.
  ***************************************************************************/
-double GModelSpatialRadialProfileDMEinasto::mass_density( const double& radius ) const
+double GModelSpatialRadialProfileDMEinasto::mass_density(const double& radius) const
 {
     // Set-up kernel
     halo_kernel_los halo_shape(m_scale_radius.value(),

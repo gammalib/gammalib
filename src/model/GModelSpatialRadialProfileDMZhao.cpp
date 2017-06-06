@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialProfileDMZhao.cpp - Zhao radial profile class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
+ *  copyright (C) 2016-2017 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -665,8 +665,8 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
 /***********************************************************************//**
  * @brief Kernel for zhao halo density profile squared
  *
- * @param[in] distance from observer to point in space (meters)
- * @return Jalo density.
+ * @param[in] los Distance from observer to point in space (meters)
+ * @return Halo density.
  *
  * Computes the value of a zhao halo density profile squared, 
  * at distance l from observer, at angle \f[\theta\f] from the halo center,
@@ -692,8 +692,6 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
  *   "Analytical models for galactic nuclei"
  *   Monthly Notices of the Royal Astronomical Society, 278, 488-49
  *   http://mnras.oxfordjournals.org/content/278/2/488.short
- *
- *
  ***************************************************************************/
 double GModelSpatialRadialProfileDMZhao::halo_kernel_los::eval(const double &los)
 {
@@ -762,11 +760,11 @@ void GModelSpatialRadialProfileDMZhao::update() const
 /***********************************************************************//**
  * @brief Calculate Halo Mass Density
  *
- * @param[in] distance from halo center (kpc)
+ * @param[in] radius Distance from halo center (kpc).
+ * @return Halo mass density.
  *
  * Calculates the halo's mass density at a given radial distance from the halo
  * center.
- *
  ***************************************************************************/
 double GModelSpatialRadialProfileDMZhao::mass_density(const double& radius) const
 {
