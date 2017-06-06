@@ -201,36 +201,28 @@ double GCTAPsfKing::operator()(const double& delta,
     // Update the parameter cache
     update(logE, theta);
 
-    #if defined(G_SMOOTH_PSF)
-    // Set ramp down radius
-    double ramp_down = 0.95 * m_par_rmax;
-    double norm_down = 1.0 / (m_par_rmax - ramp_down);
-    #endif
+    // Continue only if delta is smaller than PSF radius and normalization is
+    // positive
+    if ((delta <= m_par_rmax) && (m_par_norm > 0.0)) {
 
-    // Continue only if delta is smaller than PSF radius
-    if (delta <= m_par_rmax) {
+        // Compute PSF value
+        double arg  = delta / m_par_sigma;
+        double arg2 = arg * arg;
+        psf = m_par_norm *
+              std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
 
-        // Continue only if normalization is positive
-        if (m_par_norm > 0.0) {
+        // If we are at large offset angles, add a smooth ramp down to
+        // avoid steps in the log-likelihood computation
+        #if defined(G_SMOOTH_PSF)
+        double ramp_down = 0.95 * m_par_rmax;
+        double norm_down = 1.0 / (m_par_rmax - ramp_down);
+        if (delta > ramp_down) {
+            double x = norm_down * (delta - ramp_down);
+            psf     *= 1.0 - x * x;
+        }
+        #endif
 
-            // Compute PSF value
-            double arg  = delta / m_par_sigma;
-            double arg2 = arg * arg;
-            psf = m_par_norm *
-                  std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
-
-            // If we are at large offset angles, add a smooth ramp down to
-            // avoid steps in the log-likelihood computation
-            #if defined(G_SMOOTH_PSF)
-            if (delta > ramp_down) {
-                double x = norm_down * (delta - ramp_down);
-                psf     *= 1.0 - x * x;
-            }
-            #endif
-
-        } // endif: normalization was positive
-
-    } // endif: PSF radius was smaller than PSF radius
+    } // endif: PSF radius was smaller than PSF radius and normalization was > 0
 
     // Return PSF
     return psf;
