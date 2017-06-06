@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.0.dev1
 
-14 May 2017
+6 June 2017
 
 
 1. Introduction
@@ -267,6 +267,11 @@ avoid FITS file pointer exceptions (#2021).
 
 The CTA background template HDUCLAS2 was changed from "BGD" to "BKG". Both strings
 are supported by GammaLib.
+
+The maximum radius of the King PSF has been increased from 0.7 to 2 degrees to cope
+with some extreme cases. Now also the maximum PSF radius is computed for a given
+energy so that if the PSF is smaller than the maximum radius of 2 degrees a smaller
+region of interest will be used for the computation (#2112).
 
 
 21. COMPTEL interface

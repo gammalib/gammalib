@@ -111,10 +111,11 @@ public:
 
 private:
     // Methods
-    void init_members(void);
-    void copy_members(const GCTAPsfKing& psf);
-    void free_members(void);
-    void update(const double& logE, const double& theta) const;
+    void   init_members(void);
+    void   copy_members(const GCTAPsfKing& psf);
+    void   free_members(void);
+    void   update(const double& logE, const double& theta) const;
+    double r_max(const double& logE, const double& theta) const;
 
     // Members
     GFilename         m_filename;   //!< Name of Aeff response file
@@ -131,6 +132,7 @@ private:
     mutable double m_par_sigma;  //!< King profile sigma (radians)
     mutable double m_par_sigma2; //!< King profile sigma squared
     mutable double m_par_gamma;  //!< King profile gamma parameter
+    mutable double m_par_rmax;   //!< Maximum PSF radius
 };
 
 

@@ -49,14 +49,11 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_FIX_DELTA_MAX
 #define G_SMOOTH_PSF
 
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const double r_max = 0.7 * gammalib::deg2rad;  // Maximum delta for fixed 
-                                               // delta_max computation
 
 
 /*==========================================================================
@@ -198,51 +195,42 @@ double GCTAPsfKing::operator()(const double& delta,
                                const double& azimuth,
                                const bool&   etrue) const
 {
-    #if defined(G_FIX_DELTA_MAX)
     #if defined(G_SMOOTH_PSF)
     // Set ramp down radius
-    static const double ramp_down = 0.95 * r_max;
-    static const double norm_down = 1.0 / (r_max - ramp_down);
-    #endif
+    static const double ramp_down = 0.95 * m_par_rmax;
+    static const double norm_down = 1.0 / (m_par_rmax - ramp_down);
     #endif
 
     // Initialise PSF value
     double psf = 0.0;
 
-    // Compile option: set PSF to zero outside delta_max
-    #if defined(G_FIX_DELTA_MAX)
-    if (delta <= r_max) {
-    #endif
-
     // Update the parameter cache
     update(logE, theta);
 
-    // Continue only if normalization is positive
-    if (m_par_norm > 0.0) {
+    // Continue only if delta is smaller than PSF radius
+    if (delta <= m_par_rmax) {
 
-        // Compute PSF value
-        double arg  = delta / m_par_sigma;
-        double arg2 = arg * arg;
-        psf = m_par_norm * 
-        std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
+        // Continue only if normalization is positive
+        if (m_par_norm > 0.0) {
 
-        // If we are at large offset angles, add a smooth ramp down to
-        // avoid steps in the log-likelihood computation
-        #if defined(G_FIX_DELTA_MAX)
-        #if defined(G_SMOOTH_PSF)
-        if (delta > ramp_down) {
-            double x = norm_down * (delta - ramp_down);
-            psf     *= 1.0 - x * x;
-        }
-        #endif
-        #endif
+            // Compute PSF value
+            double arg  = delta / m_par_sigma;
+            double arg2 = arg * arg;
+            psf = m_par_norm *
+                  std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
 
-    } // endif: normalization was positive
+            // If we are at large offset angles, add a smooth ramp down to
+            // avoid steps in the log-likelihood computation
+            #if defined(G_SMOOTH_PSF)
+            if (delta > ramp_down) {
+                double x = norm_down * (delta - ramp_down);
+                psf     *= 1.0 - x * x;
+            }
+            #endif
 
-    // Compile option: set PSF to zero outside delta_max
-    #if defined(G_FIX_DELTA_MAX)
-    }
-    #endif
+        } // endif: normalization was positive
+
+    } // endif: PSF radius was smaller than PSF radius
 
     // Return PSF
     return psf;
@@ -488,22 +476,17 @@ double GCTAPsfKing::mc(GRan&         ran,
         // Compute exponent
         double exponent = 1.0 / (1.0-m_par_gamma);
 
-        // Compile option: sample until delta <= r_max
-        #if defined(G_FIX_DELTA_MAX)
+        // Sample until delta <= m_par_rmax
         do {
-        #endif
 
-        // Get uniform random number
-        double u = ran.uniform();
+            // Get uniform random number
+            double u = ran.uniform();
 
-        // Draw random offset using inversion sampling
-        double u_max = (std::pow((1.0 - u), exponent) - 1.0) * m_par_gamma;
-        delta = m_par_sigma * std::sqrt(2.0 * u_max);
+            // Draw random offset using inversion sampling
+            double u_max = (std::pow((1.0 - u), exponent) - 1.0) * m_par_gamma;
+            delta = m_par_sigma * std::sqrt(2.0 * u_max);
 
-        // Compile option: sample until delta <= r_max
-        #if defined(G_FIX_DELTA_MAX)
-        } while (delta > r_max);
-        #endif
+        } while (delta > m_par_rmax);
 
     } // endif: normalization was positive
 
@@ -537,25 +520,13 @@ double GCTAPsfKing::delta_max(const double& logE,
     // Initialise PSF radius
     double radius = 0.0;
 
-    // Compile option: use fixed maximum delta
-    #if defined(G_FIX_DELTA_MAX)
-    radius = r_max;
-    #else
-
     // Update the parameter cache
     update(logE, theta);
 
-    // Continue only if normalization is positive
+    // Compute radius if normalization is positive
     if (m_par_norm > 0.0) {
-
-        // Compute maximum PSF radius (99.995% containment)
-        double F      = 0.99995;
-        double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) *
-                        m_par_gamma;
-        radius = m_par_sigma * std::sqrt(2.0 * u_max);
-
-    } // endif: King profile parameters were valid
-    #endif
+        radius = r_max(logE, theta);
+    }
     
     // Return maximum PSF radius
     return radius;
@@ -687,6 +658,7 @@ void GCTAPsfKing::init_members(void)
     m_par_gamma  = 0.0;
     m_par_sigma  = 0.0;
     m_par_sigma2 = 0.0;
+    m_par_rmax   = 0.0;
 
     // Return
     return;
@@ -713,6 +685,7 @@ void GCTAPsfKing::copy_members(const GCTAPsfKing& psf)
     m_par_gamma  = psf.m_par_gamma;
     m_par_sigma  = psf.m_par_sigma;
     m_par_sigma2 = psf.m_par_sigma2;
+    m_par_rmax   = psf.m_par_rmax;
 
     // Return
     return;
@@ -738,10 +711,15 @@ void GCTAPsfKing::free_members(void)
  * This method updates the PSF parameter cache. As the performance table PSF
  * only depends on energy, the only parameter on which the cache values
  * depend is the energy. If the PSF parameters are invalid the m_par_norm
- * member will be set to zero.
+ * member will be set to zero. Valid PSF parameters are \f$\gamma > 1\f$ and
+ * \f$\simga > 0\f$.
  ***************************************************************************/
 void GCTAPsfKing::update(const double& logE, const double& theta) const
 {
+    // Maximum PSF radius in radians. We set the maximum radius to 2 degrees
+    // since it's hard to imaging that a PSF will ever be larger.
+    const double r_max = 2.0 * gammalib::deg2rad;
+    
     // Only compute PSF parameters if arguments have changed
     if (logE != m_par_logE || theta != m_par_theta) {
 
@@ -758,31 +736,38 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
         m_par_sigma  = pars[m_inx_sigma];
         m_par_sigma2 = m_par_sigma * m_par_sigma;
 
-        // Check for parameter sanity
-        if (m_par_gamma <= 0.0 || m_par_sigma <= 0.0) {
+        // Check for parameter sanity. The King function is not defined for
+        // gamma values equal or smaller than one and non-positive sigma
+        // values. If this is the case we set the normalization and the
+        // maximum radius to zero ...
+        if (m_par_gamma <= 1.0 || m_par_sigma <= 0.0) {
             m_par_norm = 0.0;
-            /*
-            std::string msg = "King function parameters gamma="+
-                              gammalib::str(m_par_gamma)+" or sigma="+
-                              gammalib::str(m_par_sigma)+" are not positive "
-                              "for logE="+gammalib::str(logE)+" and theta="+
-                              gammalib::str(theta)+". Setting normalization "
-                              "to zero.";
-            gammalib::warning(G_UPDATE, msg);
-            */
+            m_par_rmax = 0.0;
         }
+
+        // ... otherwise we compute the normalization
         else {   
 
             // Determine normalisation for given parameters
             m_par_norm = 1.0 / gammalib::twopi * (1.0 - 1.0 / m_par_gamma) /
                          m_par_sigma2;
 
-            // Optionally correct for fixed delta_max
-            #if defined(G_FIX_DELTA_MAX)
-            double u_max = (r_max*r_max) / (2.0 * m_par_sigma2);
-            double norm  = 1.0 - std::pow((1.0 + u_max/m_par_gamma), 1.0-m_par_gamma);
-            m_par_norm /= norm;
-            #endif
+            // Determine maximum PSF radius
+            m_par_rmax = this->r_max(logE, theta);
+ 
+            // Make sure that radius is smaller than 2 degrees
+            if (m_par_rmax > r_max) {
+
+                // Restrict PSF radius to 2 degrees
+                m_par_rmax = r_max;
+
+                // Correct PSF normalization for restriction
+                double u_max = (m_par_rmax*m_par_rmax) / (2.0 * m_par_sigma2);
+                double norm  = 1.0 - std::pow((1.0 + u_max/m_par_gamma),
+                                              (1.0-m_par_gamma));
+                m_par_norm  /= norm;
+
+            } // endif: restricted PSF radius
 
         } // endif: King profile parameters were valid
 
@@ -790,4 +775,33 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum size of PSF (radians)
+ *
+ * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] theta Offset angle in camera system (rad).
+ *
+ * Determine the radius beyond which the PSF becomes negligible. This radius
+ * is set by this method to where the containment fraction become 99.995% 
+ * which equals \f$5 \times \sigma\f$ of a Gaussian width.
+ *
+ * This method requires the m_par_gamma and m_par_sigma to be set to valid
+ * values.
+ ***************************************************************************/
+double GCTAPsfKing::r_max(const double& logE,
+                          const double& theta) const
+{
+    // Set 99.995% containment fraction
+    const double F = 0.99995;
+
+    // Compute maximum PSF radius for containment fraction
+    double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) *
+                     m_par_gamma;
+    double radius = m_par_sigma * std::sqrt(2.0 * u_max);
+    
+    // Return maximum PSF radius
+    return radius;
 }

@@ -1,8 +1,9 @@
-2017-05-14
+2017-06-06
 
         * Version 1.3.0 released
         =========================
 
+        Increase maximum CTA King PSF radius to 2 degrees (#2112)
         Correct set names of spatial GLON/GLAT model parameters (#2113)
         Support "BKG" as name of CTA background template
         Scale optimizer convergence criterion with step size (#2022)
