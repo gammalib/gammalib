@@ -774,11 +774,11 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
  * @brief Return maximum size of PSF (radians)
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @return Maximum size of point spread function (radians).
  *
  * Determine the radius beyond which the PSF becomes negligible. This radius
- * is set by this method to where the containment fraction become 99.995% 
- * which equals \f$5 \times \sigma\f$ of a Gaussian width.
+ * is set by this method to where the containment fraction become 99.9%.
  *
  * This method requires the m_par_gamma and m_par_sigma to be set to valid
  * values.
@@ -786,8 +786,8 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
 double GCTAPsfKing::r_max(const double& logE,
                           const double& theta) const
 {
-    // Set 99.995% containment fraction
-    const double F = 0.99995;
+    // Set 99.9% containment fraction
+    const double F = 0.999;
 
     // Compute maximum PSF radius for containment fraction
     double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) *

@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib CTA module.
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -140,12 +140,12 @@ class Test(gammalib.GPythonTestSuite):
         psf      = gammalib.GCTAPsfKing(filename)
 
         # Test PSF values
-        self.test_value(psf(0.0, 0.0, 0.0), 213666.253408, 1.0e-6)
-        self.test_value(psf(0.001, 0.0, 0.0), 90939.5585827, 1.0e-6)
-        self.test_value(psf(0.0, 1.0, 0.0), 1127688.29309, 1.0e-5)
-        self.test_value(psf(0.001, 1.0, 0.0), 54916.6796886, 1.0e-6)
-        self.test_value(psf(0.0, 1.0, 0.01745), 660973.856068, 1.0e-6)
-        self.test_value(psf(0.001, 1.0, 0.01745), 80272.5530008, 1.0e-6)
+        self.test_value(psf(0.0, 0.0, 0.0), 213616.312600672, 1.0e-6)
+        self.test_value(psf(0.001, 0.0, 0.0), 90918.3030269623, 1.0e-6)
+        self.test_value(psf(0.0, 1.0, 0.0), 1126804.99931516, 1.0e-5)
+        self.test_value(psf(0.001, 1.0, 0.0), 54873.6646449112, 1.0e-6)
+        self.test_value(psf(0.0, 1.0, 0.01745), 660972.636049452, 1.0e-6)
+        self.test_value(psf(0.001, 1.0, 0.01745), 80272.4048345619, 1.0e-6)
 
         # Test GCTAPsfPerfTable file constructor
         filename = self._caldb + '/cta_dummy_irf.dat'

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -508,7 +508,7 @@ void TestGCTAResponse::test_response_psf_king(void)
                 test_value(rcont, r*gammalib::deg2rad, 0.1, msg);
             }
         }
-        test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
+        test_value(sum, 1.0, 0.005, "PSF integration for "+eng.print());
         
     }
 
