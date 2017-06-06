@@ -3,6 +3,7 @@
         * Version 1.3.0 released
         =========================
 
+        Remove GFitsTable::size() method (#1857)
         Add header card keyword map to GFitsHeader for fast access (#2120)
         Increase maximum CTA King PSF radius to 2 degrees (#2112)
         Correct set names of spatial GLON/GLAT model parameters (#2113)

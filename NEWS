@@ -65,7 +65,7 @@ The following methods have been added:
 - GCTAEventAtom::mc_id()
 
 The following methods have been removed:
-- ...
+- GFitsTable::size()
 
 The following methods have been renamed:
 - ...
@@ -111,6 +111,11 @@ image of any type into a specific storage class (#1986).
 
 A map between header card keywords and header card pointers was added to
 GFitsHeader to speed up the access of FITS header cards (#2120).
+
+The GFitsTable::size() method has been remove since the meaning of the
+method is ambiguous. It returned the number of table columns, but the 
+GFitsTable::ncols() does exactly the same thing, hence the method was
+redundant (#1857).
 
 
 7. Linear algebra module

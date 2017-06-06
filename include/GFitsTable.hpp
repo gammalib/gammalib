@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsTable.hpp - FITS table abstract base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,7 +66,6 @@ public:
     virtual HDUType     exttype(void) const = 0;
 
     // Implemented Methods
-    const int&     size(void) const;
     GFitsTableCol* set(const int& colnum, const GFitsTableCol& column);
     GFitsTableCol* set(const std::string& colname, const GFitsTableCol& column);
     GFitsTableCol* append(const GFitsTableCol& column);
@@ -105,21 +104,6 @@ private:
     GFitsTableCol*  ptr_column(const std::string& colname) const;
     int             colnum(const std::string& colname) const;
 };
-
-
-/***********************************************************************//**
- * @brief Return number of columns in table
- *
- * @return Number of columns in table
- *
- * Returns the number of columns in table. This method is equivalent to the
- * ncols() method.
- ***************************************************************************/
-inline
-const int& GFitsTable::size(void) const
-{
-    return m_cols;
-}
 
 
 /***********************************************************************//**
