@@ -168,6 +168,11 @@ clean-wrappers:
 	rm -rf $(top_builddir)/pyext/gammalib/*.py
 	rm -rf $(top_builddir)/pyext/gammalib/*_wrap.cpp
 
+# Files to be removed in build directory
+clean-local:
+	rm -rf $(top_builddir)/doc/html
+	rm -rf $(top_builddir)/doc/man
+
 # Add documentation rule:
 doc: doxygen sphinx
     
