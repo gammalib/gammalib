@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsImage.cpp - Abstract FITS image base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -385,7 +385,7 @@ void GFitsImage::nulval(const void* value)
 /***********************************************************************//**
  * @brief Print column information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing column information.
  *
  * @todo Format and cfitsio information is mainly for debugging. This could
@@ -412,7 +412,7 @@ std::string GFitsImage::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Number of dimensions"));
         result.append(gammalib::str(naxis()));
         result.append("\n"+gammalib::parformat("Number of image pixels"));
-        result.append(gammalib::str(size()));
+        result.append(gammalib::str(npix()));
         for (int i = 0; i < naxis(); ++i) {
             result.append("\n"+gammalib::parformat("Number of bins in "+gammalib::str(i)));
             result.append(gammalib::str(naxes(i)));

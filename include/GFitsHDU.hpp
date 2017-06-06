@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsHDU.hpp - Abstract FITS extension base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,7 +77,7 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented methods
-    int                    size(void) const;
+    int                    cards(void) const;
     const std::string&     extname(void) const;
     void                   extname(const std::string& extname);
     const int&             extno(void) const;
@@ -139,7 +139,7 @@ protected:
  * Returns the number of cards in the header of the FITS extension.
  ***************************************************************************/
 inline
-int GFitsHDU::size(void) const
+int GFitsHDU::cards(void) const
 {
     return (m_header.size());
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GFitsHDU.i - FITS HDU handling class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,7 @@ public:
     virtual HDUType     exttype(void) const = 0;
 
     // Implemented methods
-    int                size(void) const;
+    int                cards(void) const;
     const std::string& extname(void) const;
     void               extname(const std::string& extname);
     const int&         extno(void) const;
