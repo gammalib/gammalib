@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsTableCDoubleCol.hpp - FITS table double precision complex column  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,7 +45,7 @@ class GFitsTableCDoubleCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableCDoubleCol(void);
-    GFitsTableCDoubleCol(const std::string& name, const int& length,
+    GFitsTableCDoubleCol(const std::string& name, const int& nrows,
                          const int& size = 1);
     GFitsTableCDoubleCol(const GFitsTableCDoubleCol& column);
     virtual ~GFitsTableCDoubleCol(void);

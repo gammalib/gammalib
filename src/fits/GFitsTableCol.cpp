@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.cpp - FITS table column abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,18 +75,18 @@ GFitsTableCol::GFitsTableCol(void)
  * @brief Column constructor
  *
  * @param[in] name Name of column.
- * @param[in] length Length of column (number of rows).
+ * @param[in] nrows Number of rows in column.
  * @param[in] number Number of elements in column (negative for variable-length).
  * @param[in] width Width of one column element.
  *
- * Construct column instance from @p name, @p length, @p number of elements
+ * Construct column instance from @p name, @p nrows, @p number of elements
  * and @p width (or size) of one element. If @p number is negative, a
  * variable-length column will be allocated. The repeat value, which is
  * required for binary tables, is computed internally by multiplying the
  * @p number by the @p width.
  ***************************************************************************/
 GFitsTableCol::GFitsTableCol(const std::string& name,
-                             const int&         length,
+                             const int&         nrows,
                              const int&         number,
                              const int&         width)
 {
@@ -96,18 +96,18 @@ GFitsTableCol::GFitsTableCol(const std::string& name,
     // Store attributes
     if (number >= 0) { // fixed-length column
         m_name     = name;
-        m_length   = length;
+        m_length   = nrows;
         m_number   = number;
         m_width    = width;
         m_variable = false;
     }
     else {             // variable-length column
         m_name     = name;
-        m_length   = length;
+        m_length   = nrows;
         m_number   = 1;
         m_width    = width;
         m_variable = true;
-        m_rowstart.assign(length+1, 0);
+        m_rowstart.assign(nrows+1, 0);
     }
 
     // Calculate repeat value (only used for binary table!)
@@ -204,8 +204,8 @@ GFitsTableCol& GFitsTableCol::operator=(const GFitsTableCol& column)
 void GFitsTableCol::elements(const int& row, const int& elements)
 {
     // Check row value
-    if (row < 0 || row >= length()) {
-        throw GException::out_of_range(G_ELEMENTS1, "Row index", row, length());
+    if (row < 0 || row >= nrows()) {
+        throw GException::out_of_range(G_ELEMENTS1, "Row index", row, nrows());
     }
 
     // Check that elements is non-negative
@@ -238,13 +238,13 @@ void GFitsTableCol::elements(const int& row, const int& elements)
         }
 
         // Update row start indices
-        for (int i = row + 1; i <= length(); ++i) {
+        for (int i = row + 1; i <= nrows(); ++i) {
             m_rowstart[i] += difference;
         }
 
         // Update maximum column length
         m_varlen = 0;
-        for (int i = 0; i < length(); ++i) {
+        for (int i = 0; i < nrows(); ++i) {
             int len = m_rowstart[row+1] - m_rowstart[row];
             if (len > m_varlen) {
                 m_varlen = len;
@@ -275,8 +275,8 @@ void GFitsTableCol::elements(const int& row, const int& elements)
 int GFitsTableCol::elements(const int& row) const
 {
     // Check row value
-    if (row < 0 || row >= length()) {
-        throw GException::out_of_range(G_ELEMENTS2, "Row index", row, length());
+    if (row < 0 || row >= nrows()) {
+        throw GException::out_of_range(G_ELEMENTS2, "Row index", row, nrows());
     }
 
     // Get number of elements
@@ -433,7 +433,7 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
             result.append(" repeat=" + gammalib::str(repeat()));
             result.append(" width="  + gammalib::str(width()));
             result.append(" number=" + gammalib::str(number()));
-            result.append(" length=" + gammalib::str(length()));
+            result.append(" rows="   + gammalib::str(nrows()));
             result.append(" size="   + gammalib::str(m_size));
             result.append(" varlen=");
             if (m_varlen > 0) {
@@ -447,7 +447,7 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
             result.append(" repeat=" + gammalib::str(repeat()));
             result.append(" width="  + gammalib::str(width()));
             result.append(" number=" + gammalib::str(number()));
-            result.append(" length=" + gammalib::str(length()));
+            result.append(" rows="   + gammalib::str(nrows()));
             result.append(" size="   + gammalib::str(m_size));
         }
 
@@ -461,7 +461,7 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         if (!is_loaded()) fetch_data();
 
         // Loop over all rows
-        for (int row = 0; row < length(); ++row) {
+        for (int row = 0; row < nrows(); ++row) {
             result.append("\n");
             if (is_variable()) {
                 result.append("start=");
@@ -474,7 +474,7 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         }
         if (is_variable()) {
             result.append("\nend=");
-            result.append(gammalib::str(m_rowstart[length()]));
+            result.append(gammalib::str(m_rowstart[nrows()]));
         }
     }
     #endif

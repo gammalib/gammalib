@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableStringCol.i - FITS table string column class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GFitsTableStringCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableStringCol(void);
-    GFitsTableStringCol(const std::string& name, const int& length,
+    GFitsTableStringCol(const std::string& name, const int& nrows,
                         const int& width, const int& size = 1);
     GFitsTableStringCol(const GFitsTableStringCol& column);
     virtual ~GFitsTableStringCol(void);
@@ -72,9 +72,9 @@ public:
  ***************************************************************************/
 %extend GFitsTableStringCol {
     std::string __getitem__(int GFitsTableColInx[]) {
-        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->length()) {
+        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->nrows()) {
             throw GException::out_of_range("__getitem__()", "Row index",
-                                           GFitsTableColInx[1], self->length());
+                                           GFitsTableColInx[1], self->nrows());
         }
         if (GFitsTableColInx[0] == 1) {
             return (*self)(GFitsTableColInx[1]);
@@ -92,9 +92,9 @@ public:
         }
     }
     void __setitem__(int GFitsTableColInx[], std::string value) {
-        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->length()) {
+        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->nrows()) {
             throw GException::out_of_range("__setitem__()", "Row index",
-                                           GFitsTableColInx[1], self->length());
+                                           GFitsTableColInx[1], self->nrows());
         }
         if (GFitsTableColInx[0] == 1) {
             (*self)(GFitsTableColInx[1]) = value;
@@ -112,9 +112,9 @@ public:
         }
     }
     void __setitem__(int GFitsTableColInx[], GFilename value) {
-        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->length()) {
+        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->nrows()) {
             throw GException::out_of_range("__setitem__()", "Row index",
-                                           GFitsTableColInx[1], self->length());
+                                           GFitsTableColInx[1], self->nrows());
         }
         if (GFitsTableColInx[0] == 1) {
             (*self)(GFitsTableColInx[1]) = std::string(value);

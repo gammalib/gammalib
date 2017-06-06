@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableStringCol.hpp - FITS table string column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@ class GFitsTableStringCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableStringCol(void);
-    GFitsTableStringCol(const std::string& name, const int& length,
+    GFitsTableStringCol(const std::string& name, const int& nrows,
                         const int& width, const int& size = 1);
     GFitsTableStringCol(const GFitsTableStringCol& column);
     virtual ~GFitsTableStringCol(void);

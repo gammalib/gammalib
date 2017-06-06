@@ -319,7 +319,7 @@ void GCTAAeffArf::read(const GFitsTable& table)
     }
 
     // Extract number of energy bins
-    int num = energy_lo->length();
+    int num = energy_lo->nrows();
 
     // Set nodes
     for (int i = 0; i < num; ++i) {

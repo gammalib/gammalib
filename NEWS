@@ -70,6 +70,7 @@ The following methods have been removed:
 The following methods have been renamed:
 - GFitsImage::size() => GFitsImage::npix()
 - GFitsHDU::size() => GFitsHDU::cards()
+- GFitsTableCol::length() => GFitsTableCol::nrows()
 
 The arguments for the following methods have been changed:
 - ...
@@ -123,6 +124,9 @@ redundant (#1857).
 
 The GFitsHDU::size() method has been renamed to GFitsHDU::cards() since the
 meaning of the size() method was not clear (#1859).
+
+The GFitsTableCol::length() method was renamed to GFitsTableCol::nrows()
+to clarify the meaning of thie method (#1860).
 
 
 7. Linear algebra module

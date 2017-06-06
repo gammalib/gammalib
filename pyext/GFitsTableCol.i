@@ -75,7 +75,7 @@ public:
     // Constructors and destructors
     GFitsTableCol(void);
     GFitsTableCol(const std::string& name,
-                  const int&         length,
+                  const int&         nrows,
                   const int&         number,
                   const int&         width);
     GFitsTableCol(const GFitsTableCol& column);
@@ -111,8 +111,8 @@ public:
     const int&              number(void) const;
     void                    elements(const int& row, const int& elements);
     int                     elements(const int& row) const;
-    void                    length(const int& length);
-    const int&              length(void) const;
+    void                    nrows(const int& nrows);
+    const int&              nrows(void) const;
     void                    is_variable(const bool& variable);
     const bool&             is_variable(void) const;
     void                    anynul(const int& anynul);

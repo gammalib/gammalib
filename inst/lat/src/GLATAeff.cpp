@@ -642,7 +642,7 @@ void GLATAeff::read_efficiency(const GFitsTable& hdu)
 
     // If we have 2 rows in the table we have a Pass 8 response and hence
     // the table only applies to the specific event type
-    if (ptr->length() == 2) {
+    if (ptr->nrows() == 2) {
         for (int i = 0; i < 6; ++i) {
             par1.push_back(ptr->real(0,i));
             par2.push_back(ptr->real(1,i));

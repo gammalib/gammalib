@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsTableBitCol.hpp - FITS table bit column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,7 +46,7 @@ class GFitsTableBitCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableBitCol(void);
-    GFitsTableBitCol(const std::string& name, const int& length,
+    GFitsTableBitCol(const std::string& name, const int& nrows,
                      const int& size = 1);
     GFitsTableBitCol(const GFitsTableBitCol& column);
     virtual ~GFitsTableBitCol(void);

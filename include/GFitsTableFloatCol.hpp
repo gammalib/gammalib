@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsTableFloatCol.hpp - FITS table float column class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableFloatCol.hpp
  * @brief FITS table float column class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSTABLEFLOATCOL_HPP
@@ -44,7 +44,7 @@ class GFitsTableFloatCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableFloatCol(void);
-    GFitsTableFloatCol(const std::string& name, const int& length,
+    GFitsTableFloatCol(const std::string& name, const int& nrows,
                        const int& size = 1);
     GFitsTableFloatCol(const GFitsTableFloatCol& column);
     virtual ~GFitsTableFloatCol(void);

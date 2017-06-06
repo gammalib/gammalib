@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAPsfVector.cpp - CTA point spread function vector class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -347,7 +347,7 @@ void GCTAPsfVector::read(const GFitsTable& table)
     }
 
     // Extract number of energy bins
-    int num = energy_lo->length();
+    int num = energy_lo->nrows();
 
     // Set nodes
     for (int i = 0; i < num; ++i) {

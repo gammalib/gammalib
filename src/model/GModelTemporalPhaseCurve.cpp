@@ -706,26 +706,26 @@ void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
     GFitsTableCol* norm_col  = (*table)["NORM"];
 
     // Check that there are at least two nodes in table
-    if (phase_col->length() < 2) {
+    if (phase_col->nrows() < 2) {
         std::string msg = "\"PHASE\" column contains "+
-                          gammalib::str(phase_col->length())+" rows but at "
+                          gammalib::str(phase_col->nrows())+" rows but at "
                           "least two rows are required. Please specify a valid "
                           "phase curve file.";
         throw GException::invalid_value(G_LOAD_NODES, msg);
     }
 
     // Check that both columns are consistent
-    if (phase_col->length() != norm_col->length()) {
+    if (phase_col->nrows() != norm_col->nrows()) {
         std::string msg = "\"PHASE\" and \"NORM\" columns have inconsistent "
                           "number of rows ("+
-                          gammalib::str(phase_col->length())+", "+
-                          gammalib::str(norm_col->length())+"). Please "
+                          gammalib::str(phase_col->nrows())+", "+
+                          gammalib::str(norm_col->nrows())+"). Please "
                           "specify a valid phase curve file.";
         throw GException::invalid_value(G_LOAD_NODES, msg);
     }
 
     // Set number of nodes
-    int nodes = phase_col->length();
+    int nodes = phase_col->nrows();
 
     // Check that phase values are in ascending order and comprised between
     // 0 and 1, and that no node is larger than one

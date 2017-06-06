@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GFitsTableCFloatCol.hpp - FITS table single precision complex column  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,7 +45,7 @@ class GFitsTableCFloatCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableCFloatCol(void);
-    GFitsTableCFloatCol(const std::string& name, const int& length,
+    GFitsTableCFloatCol(const std::string& name, const int& nrows,
                          const int& size = 1);
     GFitsTableCFloatCol(const GFitsTableCFloatCol& column);
     virtual ~GFitsTableCFloatCol(void);

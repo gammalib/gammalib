@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsTableShortCol.hpp - FITS table short column class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@ class GFitsTableShortCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableShortCol(void);
-    GFitsTableShortCol(const std::string& name, const int& length,
+    GFitsTableShortCol(const std::string& name, const int& nrows,
                        const int& size = 1);
     GFitsTableShortCol(const GFitsTableShortCol& column);
     virtual ~GFitsTableShortCol(void);
