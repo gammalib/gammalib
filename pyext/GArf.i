@@ -45,8 +45,7 @@ public:
     virtual ~GArf(void);
 
     // Operators
-    double&       operator()(const int& index, const int& col);
-    const double& operator()(const int& index, const int& col) const;
+    double& operator()(const int& index, const int& col);
 
     // Methods
     void             clear(void);

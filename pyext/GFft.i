@@ -48,7 +48,6 @@ public:
     GFft& operator+=(const GFft& fft);
     GFft& operator-=(const GFft& fft);
     GFft& operator*=(const GFft& fft);
-    GFft& operator/=(const GFft& fft);
     GFft  operator-(void) const;
 
     // Methods

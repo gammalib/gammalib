@@ -43,9 +43,6 @@ public:
     GVOTable(const GVOTable& votable);
     virtual ~GVOTable(void);
 
-    // Operators
-    GVOTable& operator=(const GVOTable& votable);
-
     // Methods
     void               clear(void);
     GVOTable*          clone(void) const;

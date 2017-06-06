@@ -43,11 +43,11 @@ public:
                              const std::string& prefactor,
                              const std::string& index,
                              const std::string& pivot,
-                             const std::string& lambda);
+                             const std::string& inverse_cutoff);
     GModelSpectralExpInvPlaw(const double&  prefactor,
                              const double&  index,
                              const GEnergy& pivot,
-                             const double&  lambda);
+                             const double&  inverse_cutoff);
     GModelSpectralExpInvPlaw(const double&  prefactor,
                              const double&  index,
                              const GEnergy& pivot,
