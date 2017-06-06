@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableCol.i - FITS abstract table column base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,7 +41,27 @@
 #include "GException.hpp"
 %}
 %include "std_vector.i"
-%template(vectori) std::vector<int>;
+
+// This typecheck verifies that all arguments are integers. The typecheck
+// is needed for using "int GFitsTableColInx" in overloaded methods.
+%typemap(typecheck, precedence=SWIG_TYPECHECK_INTEGER) int GFitsTableColInx[ANY] {
+    $1 = 1;
+    if (PySequence_Check($input)) {
+        int size = PyObject_Length($input);
+        for (int i = 0; i < size; i++) {
+            PyObject *o = PySequence_GetItem($input,i);
+            if (!PyInt_Check(o)) {
+                $1 = 0;
+                break;
+            }
+        }
+    }
+    else {
+        if (!PyInt_Check($input)) {
+            $1 = 0;
+        }
+    }
+}
 
 
 /***********************************************************************//**
