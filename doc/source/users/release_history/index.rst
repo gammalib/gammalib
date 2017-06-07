@@ -8,6 +8,8 @@ Major releases:
 .. toctree::
    :maxdepth: 1
 
+   GammaLib 1.3 <1.3>
+   GammaLib 1.2 <1.2>
    GammaLib 1.1 <1.1>
    GammaLib 1.0 <1.0>
 

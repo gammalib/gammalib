@@ -1,4 +1,4 @@
-New Features and Important Changes in GammaLib 1.3.0.dev1
+New Features and Important Changes in GammaLib 1.3.0
 
 6 June 2017
 
@@ -23,10 +23,10 @@ The following classes have been added:
 - GModelSpatialRadialProfileDMZhao
 
 The following classes have been removed:
-- ...
+- n.a.
 
 The following classes have been renamed:
-- ...
+- n.a.
 
 The following methods have been added:
 - GEbounds::set(GEnergies&)
@@ -73,10 +73,10 @@ The following methods have been renamed:
 - GFitsTableCol::length() => GFitsTableCol::nrows()
 
 The arguments for the following methods have been changed:
-- ...
+- n.a.
 
 The return value of the following methods has been changed:
-- ...
+- n.a.
 
 
 3. Configuration

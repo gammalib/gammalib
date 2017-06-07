@@ -1,0 +1,105 @@
+.. _1.2:
+
+GammaLib 1.2 release (24 February 2017)
+=======================================
+
+Overview
+--------
+
+GammaLib 1.2 is a major release that adds significant functionality.
+
+In particular, this release provides:
+
+* temporal models for pulsar, binaries and variable sources
+* composite spectral and spatial models
+* a multplicative spectral model
+* fast fourier transformations
+* n-dimensional floating point arrays
+* VO table support
+
+
+Bug fixes
+---------
+
+* [`1931 <https://cta-redmine.irap.omp.eu/issues/1931>`_] -
+  Reduce length of LAT response filenames by unzipping a number of energy dispersion files
+* [`1922 <https://cta-redmine.irap.omp.eu/issues/1922>`_] -
+  Correct handling of time references in ``GGti::extend()`` method
+* [`1920 <https://cta-redmine.irap.omp.eu/issues/1920>`_] -
+  Skip zero livetime observations in stacked cubes for CTA
+* [`1918 <https://cta-redmine.irap.omp.eu/issues/1918>`_] -
+  Check that MC energy is comprised in validity range for CTA 3D background template
+* [`1915 <https://cta-redmine.irap.omp.eu/issues/1915>`_] -
+  Monte Carlo for empty maps or map cubes no longer throws an exception
+* [`1876 <https://cta-redmine.irap.omp.eu/issues/1876>`_] -
+  Correct containment radius computation in ``GCTAPsf2D::containment_radius()``
+* [`1848 <https://cta-redmine.irap.omp.eu/issues/1848>`_] -
+  Check CTA response table dimension for consistency
+* [`1823 <https://cta-redmine.irap.omp.eu/issues/1823>`_] -
+  Fix invalid pointer problem in GLog copies
+* [`1835 <https://cta-redmine.irap.omp.eu/issues/1835>`_] -
+  Fix ``GSkyMap::publish()`` bug for empty sky maps
+* [`1835 <https://cta-redmine.irap.omp.eu/issues/1835>`_] -
+  Fix loss of application name and version
+* [`1826 <https://cta-redmine.irap.omp.eu/issues/1826>`_] -
+  Fix removal of Python wrappers after make clean
+
+
+Improvements
+------------
+
+* Add ``GSkyMap`` FITS HDU constructor
+* [`1887 <https://cta-redmine.irap.omp.eu/issues/1887>`_] -
+  Add leap second for 1-1-2017
+* [`1863 <https://cta-redmine.irap.omp.eu/issues/1863>`_] -
+  Add ``GObservations::save_covmat()`` method
+* [`1764 <https://cta-redmine.irap.omp.eu/issues/1764>`_] -
+  Add ``GModelSpatial::region()`` method
+* Increase precision of ``gammalib::str()`` floating point functions
+* [`1231 <https://cta-redmine.irap.omp.eu/issues/1231>`_] -
+  Add ``GFits::publish()`` methods
+* [`1856 <https://cta-redmine.irap.omp.eu/issues/1856>`_] -
+  Add additional time setting and getting methods
+* [`1847 <https://cta-redmine.irap.omp.eu/issues/1847>`_] -
+  Remove ``eval_gradients()`` methods and remplace by ``eval()`` method with
+  optional ``gradients`` argument
+* [`1838 <https://cta-redmine.irap.omp.eu/issues/1838>`_] -
+  Add ``GApplication`` access by index operator
+* [`1838 <https://cta-redmine.irap.omp.eu/issues/1838>`_] -
+  Add ``GApplication::pars() and ``GApplicationPar::current_value()`` methods
+* [`1837 <https://cta-redmine.irap.omp.eu/issues/1837>`_] -
+  Add ``GLog`` ``is_open()``, ``is_empty()`` and ``written_size()`` methods
+* Add ``GTestSuite::test_value()`` method with automatic precision computation
+* [`1828 <https://cta-redmine.irap.omp.eu/issues/1828>`_] -
+  Add ``GSkyMap::is_empty()`` method
+* [`1828 <https://cta-redmine.irap.omp.eu/issues/1828>`_] -
+  Add methods for logging in applications
+
+
+New features
+------------
+
+* [`1916 <https://cta-redmine.irap.omp.eu/issues/1916>`_] -
+  Add ``GModelTemporalPhaseCurve`` class
+* [`1914 <https://cta-redmine.irap.omp.eu/issues/1914>`_] -
+  Add ``GModelTemporalLightCurve`` class
+* [`1861 <https://cta-redmine.irap.omp.eu/issues/1861>`_] -
+  Add multiplicative spectral model
+* [`1800 <https://cta-redmine.irap.omp.eu/issues/1800>`_] -
+  Add ``GModelSpectralExpInvPlaw`` class
+* [`1790 <https://cta-redmine.irap.omp.eu/issues/1790>`_] -
+  Add ``GModelSpectralPlawEnergyFlux`` class
+* [`1768 <https://cta-redmine.irap.omp.eu/issues/1768>`_] -
+  Add ``GNdarray`` class
+* [`1731 <https://cta-redmine.irap.omp.eu/issues/1731>`_] -
+  Add ``GFft`` and ``GFftWavetable`` classes
+* [`1706 <https://cta-redmine.irap.omp.eu/issues/1706>`_] -
+  Add composite spatial and spectral models
+* [`1231 <https://cta-redmine.irap.omp.eu/issues/1231>`_] -
+  Add ``GVOTable`` class
+
+Clean up
+--------
+
+* [`1790 <https://cta-redmine.irap.omp.eu/issues/1790>`_] -
+  Rename ``GModelSpectralPlaw2`` to ``GModelSpectralPlawPhotonFlux``

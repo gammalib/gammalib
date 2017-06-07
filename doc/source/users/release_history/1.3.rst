@@ -1,0 +1,115 @@
+.. _1.3:
+
+GammaLib 1.3 release (7 June 2017)
+==================================
+
+Overview
+--------
+
+GammaLib 1.3 is a major release that adds significant functionality.
+
+In particular, this release provides:
+
+* phase information for CTA event files
+* bookkeeping of Monte Carlo information for CTA event list simulations
+* a smoothed broken power law spectral model
+* radial profile spatial models, including Dark Matter halo models
+
+
+Bug fixes
+---------
+
+* [`2113 <https://cta-redmine.irap.omp.eu/issues/2113>`_] -
+  Correct set names of spatial GLON/GLAT model parameters
+* [`2112 <https://cta-redmine.irap.omp.eu/issues/2112>`_] -
+  Increase maximum CTA King PSF radius to 2 degrees
+* [`2022 <https://cta-redmine.irap.omp.eu/issues/2022>`_] -
+  Scale optimizer convergence criterion with step size
+* [`2021 <https://cta-redmine.irap.omp.eu/issues/2021>`_] -
+  Put response cube loading and saving in OpenMP critical zone
+* [`1989 <https://cta-redmine.irap.omp.eu/issues/1989>`_] -
+  Protect ``GEbounds::set_lin()`` and ``set_log()`` methods from invalid arguments
+* [`1988 <https://cta-redmine.irap.omp.eu/issues/1988>`_] -
+  Avoid hang-up of ``GCTAModelAeffBackground::mc()`` method
+* [`1987 <https://cta-redmine.irap.omp.eu/issues/1987>`_] -
+  Copy shared Python libraries instead of creating a symbolic link
+* [`1983 <https://cta-redmine.irap.omp.eu/issues/1983>`_] -
+  Raise exception instead of exiting with return code in Python tests
+* [`1876 <https://cta-redmine.irap.omp.eu/issues/1876>`_] -
+  Correct ``GCTAPsf2D`` containment radius computation
+* [`990 <https://cta-redmine.irap.omp.eu/issues/990>`_] -
+  ``GModelSpectralNodes`` throws exception for non-positive energy or intensity
+
+Improvements
+------------
+
+* [`2120 <https://cta-redmine.irap.omp.eu/issues/2120>`_] -
+  Add header card keyword map to ``GFitsHeader`` for fast access
+* Support ``BKG`` as name of CTA background template
+* [`1992 <https://cta-redmine.irap.omp.eu/issues/1992>`_] -
+  Allow fitting of scale parameter in composite models
+* [`1991 <https://cta-redmine.irap.omp.eu/issues/1991>`_] -
+  Add ``GEventList::append_column()`` method
+* [`1990 <https://cta-redmine.irap.omp.eu/issues/1990>`_] -
+  Add scalar addition and subtraction operators to matrix classes
+* [`1989 <https://cta-redmine.irap.omp.eu/issues/1989>`_] -
+  Add ``GCTAAeff::ebounds()`` method
+* [`1989 <https://cta-redmine.irap.omp.eu/issues/1989>`_] -
+  Add ``GEbounds::emin()`` and ``GEbounds::emax()`` setter methods
+* [`1986 <https://cta-redmine.irap.omp.eu/issues/1986>`_] -
+  Added FITS image conversion operators
+* [`1985 <https://cta-redmine.irap.omp.eu/issues/1985>`_] -
+  If code originates from Git, always compile the Python bindings
+* [`1982 <https://cta-redmine.irap.omp.eu/issues/1982>`_] -
+  Add ``GEventList::has_phase()`` and ``GEventList::has_detxy()`` methods
+* Enhance precision of ``GCTAEdisp2D::compute_ebounds_src()``
+* [`1977 <https://cta-redmine.irap.omp.eu/issues/1977>`_] -
+  Add conversion methods between ``GEbounds`` and ``GEnergies``
+* [`1951 <https://cta-redmine.irap.omp.eu/issues/1951>`_] -
+  ``GWcs`` now supports ``CD`` keywords instead of ``CDELT``
+* [`1940 <https://cta-redmine.irap.omp.eu/issues/1940>`_] -
+  Implement lazy loading of energy dispersion in ``GCTAEdisp2D``
+* Add ``GCTARoi::contains()`` method
+* Add ``GCTAResponseIrf::rspname()`` method
+* [`1863 <https://cta-redmine.irap.omp.eu/issues/1863>`_] -
+  Add ``GFilename::type()`` method
+* [`1851 <https://cta-redmine.irap.omp.eu/issues/1851>`_] -
+  Add GLS and SFL WCS projections
+* [`1483 <https://cta-redmine.irap.omp.eu/issues/1483>`_] -
+  Add ``GEventList::has_mc_id()`` and ``GEventAtom::mc_id()`` methods
+
+
+New features
+------------
+
+* [`1996 <https://cta-redmine.irap.omp.eu/issues/1996>`_] -
+  Add ``GPhases`` class
+* [`1948 <https://cta-redmine.irap.omp.eu/issues/1948>`_] -
+  Add ``GModelSpectralSmoothBrokenPlaw`` class
+* [`1520 <https://cta-redmine.irap.omp.eu/issues/1520>`_] -
+  Add ``GModelSpatialRadialProfile`` class
+* [`1520 <https://cta-redmine.irap.omp.eu/issues/1520>`_] -
+  Add ``GModelSpatialRadialProfileGauss`` class
+* [`1520 <https://cta-redmine.irap.omp.eu/issues/1520>`_] -
+  Add ``GModelSpatialRadialProfileDMBurkert`` class
+* [`1520 <https://cta-redmine.irap.omp.eu/issues/1520>`_] -
+  Add ``GModelSpatialRadialProfileDMEinasto`` class
+* [`1520 <https://cta-redmine.irap.omp.eu/issues/1520>`_] -
+  Add ``GModelSpatialRadialProfileDMZhao`` class
+* [`1483 <https://cta-redmine.irap.omp.eu/issues/1483>`_] -
+  Add support for Monte Carlo identifier metadata
+
+
+Clean up
+--------
+
+* [`1969 <https://cta-redmine.irap.omp.eu/issues/1969>`_] -
+  Do no longer interpret a CTA calibration database as file path
+* [`1860 <https://cta-redmine.irap.omp.eu/issues/1860>`_] -
+  Rename ``GFitsTableCol::length()`` to ``GFitsTableCol::nrows()``
+* [`1859 <https://cta-redmine.irap.omp.eu/issues/1859>`_] -
+  Rename ``GFitsHDU::size()`` to ``GFitsHDU::cards()``
+* [`1858 <https://cta-redmine.irap.omp.eu/issues/1858>`_] -
+  Rename ``GFitsImage::size()`` to ``GFitsImage::npix()``
+* [`1857 <https://cta-redmine.irap.omp.eu/issues/1857>`_] -
+  Remove ``GFitsTable::size()`` method
