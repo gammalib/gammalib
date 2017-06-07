@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableStringCol.cpp - FITS table string column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,15 +69,15 @@ GFitsTableStringCol::GFitsTableStringCol(void) : GFitsTableCol()
  * @brief Constructor
  *
  * @param[in] name Name of column.
- * @param[in] length Length of column.
+ * @param[in] nrows Number of rows in column.
  * @param[in] width Length of individual string.
  * @param[in] size Number of strings in each column.
  ***************************************************************************/
 GFitsTableStringCol::GFitsTableStringCol(const std::string& name,
-                                         const int&         length,
+                                         const int&         nrows,
                                          const int&         width,
                                          const int&         size) :
-                     GFitsTableCol(name, length, size, width)
+                     GFitsTableCol(name, nrows, size, width)
 {
     // Initialise class members for clean destruction
     init_members();

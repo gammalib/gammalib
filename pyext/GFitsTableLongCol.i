@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GFitsTableLongCol.i - FITS table long integer column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,7 +38,7 @@ class GFitsTableLongCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableLongCol(void);
-    GFitsTableLongCol(const std::string& name, const int& length,
+    GFitsTableLongCol(const std::string& name, const int& nrows,
                       const int& size = 1);
     GFitsTableLongCol(const GFitsTableLongCol& column);
     virtual ~GFitsTableLongCol(void);
@@ -71,9 +71,9 @@ public:
  ***************************************************************************/
 %extend GFitsTableLongCol {
     long __getitem__(int GFitsTableColInx[]) {
-        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->length()) {
+        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->nrows()) {
             throw GException::out_of_range("__getitem__()", "Row index",
-                                           GFitsTableColInx[1], self->length());
+                                           GFitsTableColInx[1], self->nrows());
         }
         if (GFitsTableColInx[0] == 1) {
             return (*self)(GFitsTableColInx[1]);
@@ -91,9 +91,9 @@ public:
         }
     }
     void __setitem__(int GFitsTableColInx[], long value) {
-        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->length()) {
+        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->nrows()) {
             throw GException::out_of_range("__setitem__()", "Row index",
-                                           GFitsTableColInx[1], self->length());
+                                           GFitsTableColInx[1], self->nrows());
         }
         if (GFitsTableColInx[0] == 1) {
             (*self)(GFitsTableColInx[1]) = value;

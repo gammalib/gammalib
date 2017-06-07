@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsTableBitCol.cpp  - FITS table Bit column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,13 +72,13 @@ GFitsTableBitCol::GFitsTableBitCol(void) : GFitsTableCol()
  * @brief Constructor
  *
  * @param[in] name Name of column.
- * @param[in] length Length of column.
+ * @param[in] nrows Number of rows in column.
  * @param[in] size Vector size of column.
  ***************************************************************************/
 GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
-                                   const int&         length,
+                                   const int&         nrows,
                                    const int&         size) :
-                  GFitsTableCol(name, length, size, 1)
+                  GFitsTableCol(name, nrows, size, 1)
 {
     // Initialise class members for clean destruction
     init_members();

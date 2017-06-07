@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableDoubleCol.hpp - FITS table double column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@ class GFitsTableDoubleCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableDoubleCol(void);
-    GFitsTableDoubleCol(const std::string& name, const int& length,
+    GFitsTableDoubleCol(const std::string& name, const int& nrows,
                         const int& size = 1);
     GFitsTableDoubleCol(const GFitsTableDoubleCol& column);
     virtual ~GFitsTableDoubleCol(void);

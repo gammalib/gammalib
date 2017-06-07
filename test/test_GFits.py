@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib FITS module.
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -335,17 +335,17 @@ class Test(gammalib.GPythonTestSuite):
         col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
 
         # Test number of rows
-        self.test_value(col1.length(),  nrows, "Check number of rows in Bit column")
-        self.test_value(col2.length(),  nrows, "Check number of rows in Boolean column")
-        self.test_value(col3.length(),  nrows, "Check number of rows in Byte column")
-        self.test_value(col4.length(),  nrows, "Check number of rows in Double column")
-        self.test_value(col5.length(),  nrows, "Check number of rows in Float column")
-        self.test_value(col6.length(),  nrows, "Check number of rows in Long column")
-        self.test_value(col7.length(),  nrows, "Check number of rows in LongLong column")
-        self.test_value(col8.length(),  nrows, "Check number of rows in Short column")
-        self.test_value(col9.length(),  nrows, "Check number of rows in String column")
-        self.test_value(col10.length(), nrows, "Check number of rows in ULong column")
-        self.test_value(col11.length(), nrows, "Check number of rows in UShort column")
+        self.test_value(col1.nrows(),  nrows, "Check number of rows in Bit column")
+        self.test_value(col2.nrows(),  nrows, "Check number of rows in Boolean column")
+        self.test_value(col3.nrows(),  nrows, "Check number of rows in Byte column")
+        self.test_value(col4.nrows(),  nrows, "Check number of rows in Double column")
+        self.test_value(col5.nrows(),  nrows, "Check number of rows in Float column")
+        self.test_value(col6.nrows(),  nrows, "Check number of rows in Long column")
+        self.test_value(col7.nrows(),  nrows, "Check number of rows in LongLong column")
+        self.test_value(col8.nrows(),  nrows, "Check number of rows in Short column")
+        self.test_value(col9.nrows(),  nrows, "Check number of rows in String column")
+        self.test_value(col10.nrows(), nrows, "Check number of rows in ULong column")
+        self.test_value(col11.nrows(), nrows, "Check number of rows in UShort column")
 
         # Test iterators
         for row in col1:

@@ -585,7 +585,7 @@ void GCTAEventList::append(const GCTAEventAtom& event)
 
     // Append an element to all additional columns
     for (int i = 0; i < m_columns.size(); ++i) {
-        m_columns[i]->insert(m_columns[i]->length(),1);
+        m_columns[i]->insert(m_columns[i]->nrows(),1);
     }
 
     // Set number of events
@@ -607,17 +607,17 @@ void GCTAEventList::append(const GCTAEventAtom& event)
  * @param[in] column FITS table column to be appended.
  *
  * @exception GException::invalid_argument
- *            FITS column has incompatible length.
+ *            FITS column has incompatible number of rows.
  *
  * Appends a FITS table column to the event list. The length of the FITS
  * column must be identical to the number of events in the event list.
  ***************************************************************************/
 void GCTAEventList::append_column(const GFitsTableCol& column)
 {
-    // Throw an exception if the column has an incompatible length
-    if (size() != column.length()) {
+    // Throw an exception if the column has an incompatible number of rows
+    if (size() != column.nrows()) {
         std::string msg = "Incompatible column length. Attempt to append a "
-                          "column of length "+gammalib::str(column.length())+
+                          "column of length "+gammalib::str(column.nrows())+
                           " to an event list with "+gammalib::str(size())+
                           " events. Please specify a column of length "+
                           gammalib::str(size())+".";

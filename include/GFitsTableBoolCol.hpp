@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableBoolCol.hpp - FITS table boolean column class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,7 +47,7 @@ class GFitsTableBoolCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableBoolCol(void);
-    GFitsTableBoolCol(const std::string& name, const int& length,
+    GFitsTableBoolCol(const std::string& name, const int& nrows,
                       const int& size = 1);
     GFitsTableBoolCol(const GFitsTableBoolCol& column);
     virtual ~GFitsTableBoolCol(void);

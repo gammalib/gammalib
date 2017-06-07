@@ -68,13 +68,13 @@ GFitsTableShortCol::GFitsTableShortCol(void) : GFitsTableCol()
  * @brief Constructor
  *
  * @param[in] name Name of column.
- * @param[in] length Length of column (number of rows).
+ * @param[in] nrows Number of rows in column.
  * @param[in] size Number of elements in column (negative for variable-length).
  ***************************************************************************/
 GFitsTableShortCol::GFitsTableShortCol(const std::string& name,
-                                       const int&         length,
+                                       const int&         nrows,
                                        const int&         size) :
-                    GFitsTableCol(name, length, size, 2)
+                    GFitsTableCol(name, nrows, size, 2)
 {
     // Initialise class members for clean destruction
     init_members();

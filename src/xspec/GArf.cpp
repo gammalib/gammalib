@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.cpp - XSPEC Auxiliary Response File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -487,7 +487,7 @@ void GArf::read(const GFitsTable& table)
     }
 
     // Extract number of energy bins
-    int num = energy_lo->length();
+    int num = energy_lo->nrows();
 
     // Set energy bins
     for (int i = 0; i < num; ++i) {

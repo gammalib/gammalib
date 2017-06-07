@@ -32,6 +32,7 @@
         Add GCTAResponseIrf::rspname() method
         Correct GCTAPsf2D containment radius computation (#1876)
         Add GFilename::type() method (#1863)
+        Rename GFitsTableCol::length() to GFitsTableCol::nrows() (#1860)
         Rename GFitsHDU::size() to GFitsHDU::cards() (#1859)
         Rename GFitsImage::size() to GFitsImage::npix() (#1858)
         Remove GFitsTable::size() method (#1857)

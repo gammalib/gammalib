@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GFitsTableULongCol.hpp - FITS table unsigned long column class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@ class GFitsTableULongCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableULongCol(void);
-    GFitsTableULongCol(const std::string& name, const int& length,
+    GFitsTableULongCol(const std::string& name, const int& nrows,
                        const int& size = 1);
     GFitsTableULongCol(const GFitsTableULongCol& column);
     virtual ~GFitsTableULongCol(void);

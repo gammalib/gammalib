@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileDMZhao.hpp - DM Zhao profile class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
+ *  copyright (C) 2016-2017 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -168,7 +168,7 @@ std::string GModelSpatialRadialProfileDMZhao::type(void) const
 /***********************************************************************//**
  * @brief Return scale radius
  *
- * @return scale radius (kpc).
+ * @return Scale radius (kpc).
  *
  * Returns the scale radius of the halo profile in kpc.
  ***************************************************************************/
@@ -181,21 +181,21 @@ double GModelSpatialRadialProfileDMZhao::scale_radius(void) const
 /***********************************************************************//**
  * @brief Set scale radius
  *  
- * @param[in] radius scale radius (kpc).
+ * @param[in] radius Scale radius (kpc).
  *
  * Sets the scale radius of the halo profile in kpc.
  ***************************************************************************/
 inline
-void GModelSpatialRadialProfileDMZhao::scale_radius(const double& scale_radius)
+void GModelSpatialRadialProfileDMZhao::scale_radius(const double& radius)
 {
-    m_scale_radius.value(scale_radius);
+    m_scale_radius.value(radius);
     return;
 }
 
 /***********************************************************************//**
  * @brief Return scale density
  *
- * @return scale density (GeV/cm^3).
+ * @return Scale density (GeV/cm^3).
  *
  * Returns the scale density (mass/volume density at the scale radius) of 
  * the halo profile in GeV/cm^3.
@@ -209,22 +209,22 @@ double GModelSpatialRadialProfileDMZhao::scale_density(void) const
 /***********************************************************************//**
  * @brief Set scale density
  *  
- * @param[in] radius scale density (GeV/cm^3).
+ * @param[in] density Scale density (GeV/cm^3).
  *
  * Sets the scale density (mass/volume density at the scale radius) of the 
  * halo profile in GeV/cm^3.
  ***************************************************************************/
 inline
-void GModelSpatialRadialProfileDMZhao::scale_density(const double& scale_density)
+void GModelSpatialRadialProfileDMZhao::scale_density(const double& density)
 {
-    m_scale_density.value(scale_density);
+    m_scale_density.value(density);
     return;
 }
 
 /***********************************************************************//**
  * @brief Return halo distance
  *
- * @return halo distance (kpc).
+ * @return Halo distance (kpc).
  *
  * Returns the distance to the halo center in kpc.
  ***************************************************************************/
@@ -237,14 +237,14 @@ double GModelSpatialRadialProfileDMZhao::halo_distance(void) const
 /***********************************************************************//**
  * @brief Set halo distance
  *  
- * @param[in] halo distance (kpc).
+ * @param[in] distance Halo distance (kpc).
  *
  * Sets the distance between the observer and the halo center in kpc.
  ***************************************************************************/
 inline
-void GModelSpatialRadialProfileDMZhao::halo_distance(const double& halo_distance)
+void GModelSpatialRadialProfileDMZhao::halo_distance(const double& distance)
 {
-    m_halo_distance.value(halo_distance);
+    m_halo_distance.value(distance);
     return;
 }
 

@@ -474,7 +474,7 @@ void GRmf::read(const GFitsTable& table)
     const GFitsTableCol* matrix    = table["MATRIX"];
 
     // Set matrix rows and columns
-    int rows    = energy_lo->length();
+    int rows    = energy_lo->nrows();
     int columns = m_ebds_measured.size();
 
     // Initialize matrix

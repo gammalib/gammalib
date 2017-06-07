@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2517,7 +2517,7 @@ void GSkyMap::read_healpix(const GFitsTable& table)
 
                 // Load map
                 double *ptr = m_pixels + m_num_pixels*imap;
-                for (int row = 0; row < col->length(); ++row) {
+                for (int row = 0; row < col->nrows(); ++row) {
                     for (int inx = inx_start; inx < inx_end; ++inx) {
                         *ptr++ = col->real(row,inx);
                     }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileDMEinasto.hpp - DM Einasto profile class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
+ *  copyright (C) 2016-2017 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -169,21 +169,21 @@ double GModelSpatialRadialProfileDMEinasto::scale_radius(void) const
 /***********************************************************************//**
  * @brief Set scale radius
  *  
- * @param[in] radius scale radius (kpc).
+ * @param[in] radius Scale radius (kpc).
  *
  * Sets the scale radius of the halo profile in kpc.
  ***************************************************************************/
 inline
-void GModelSpatialRadialProfileDMEinasto::scale_radius(const double& scale_radius)
+void GModelSpatialRadialProfileDMEinasto::scale_radius(const double& radius)
 {
-    m_scale_radius.value(scale_radius);
+    m_scale_radius.value(radius);
     return;
 }
 
 /***********************************************************************//**
  * @brief Return scale density
  *
- * @return scale radius (GeV/cm^3).
+ * @return Scale density (GeV/cm^3).
  *
  * Returns the scale radius of the halo profile in kpc.
  ***************************************************************************/
@@ -196,22 +196,22 @@ double GModelSpatialRadialProfileDMEinasto::scale_density(void) const
 /***********************************************************************//**
  * @brief Set scale density 
  *  
- * @param[in] radius scale density (GeV/cm^3).
+ * @param[in] density Scale density (GeV/cm^3).
  *
  * Sets the scale density (mass/volume density at the scale radius) of 
  * the halo profile in GeV/cm^3.
  ***************************************************************************/
 inline
-void GModelSpatialRadialProfileDMEinasto::scale_density(const double& scale_density)
+void GModelSpatialRadialProfileDMEinasto::scale_density(const double& density)
 {
-    m_scale_density.value(scale_density);
+    m_scale_density.value(density);
     return;
 }
 
 /***********************************************************************//**
  * @brief Return halo distance
  *
- * @return halo distance (kpc).
+ * @return Halo distance (kpc).
  *
  * Returns the distance to the halo center in kpc.
  ***************************************************************************/
@@ -224,21 +224,21 @@ double GModelSpatialRadialProfileDMEinasto::halo_distance(void) const
 /***********************************************************************//**
  * @brief Set halo distance
  *  
- * @param[in] halo distance (kpc).
+ * @param[in] distance Halo distance (kpc).
  *
  * Sets the distance between the observer and the halo center in kpc.
  ***************************************************************************/
 inline
-void GModelSpatialRadialProfileDMEinasto::halo_distance(const double& halo_distance)
+void GModelSpatialRadialProfileDMEinasto::halo_distance(const double& distance)
 {
-    m_halo_distance.value(halo_distance);
+    m_halo_distance.value(distance);
     return;
 }
 
 /***********************************************************************//**
  * @brief Return Einasto alpha power index
  *
- * @return alpha (unitless).
+ * @return Einasto profile power index alpha (unitless).
  *
  * Returns the alpha power index in the Einasto halo density function.
  ***************************************************************************/
@@ -249,9 +249,9 @@ double GModelSpatialRadialProfileDMEinasto::alpha(void) const
 }
 
 /***********************************************************************//**
- * @brief Set Einasto alpha power index
+ * @brief Set Einasto profile power index
  *  
- * @param[in] alpha (unitless).
+ * @param[in] alpha Einasto profile power index (unitless).
  *
  * Sets the Einasto profile power index, should be positive.
  ***************************************************************************/

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsTable.cpp - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -412,14 +412,14 @@ GFitsTableCol* GFitsTable::insert(int colnum, const GFitsTableCol& column)
     // If the table is empty and has 0 rows then set the number of rows in
     // the table to the length of the column
     if (m_columns == NULL && m_rows == 0) {
-        m_rows = column.length();
+        m_rows = column.nrows();
     }
 
     // Throw exception if the column length is incompatible with number of
     // rows in the table
-    if (m_rows != column.length()) {
+    if (m_rows != column.nrows()) {
         throw GException::fits_bad_col_length(G_INSERT1,
-                                              column.length(), m_rows);
+                                              column.nrows(), m_rows);
     }
 
     // If no column data exist then allocate them now
@@ -860,7 +860,7 @@ void GFitsTable::data_open(void* vptr)
         m_columns[i]->type(typecode);
         m_columns[i]->repeat(repeat);
         m_columns[i]->width(width);
-        m_columns[i]->length(m_rows);
+        m_columns[i]->nrows(m_rows);
         m_columns[i]->is_variable(typecode < 0);
         m_columns[i]->connect(FPTR(m_fitsfile));
 
@@ -943,10 +943,10 @@ void GFitsTable::data_save(void)
     // Make sure that column lengths are consistent with table length.
     // Columns with zero length will not be considered (why?)
     for (int i = 0; i < m_cols; ++i) {
-        if (m_columns[i] != NULL && m_columns[i]->length() > 0) {
-            if (m_columns[i]->length() != m_rows) {
+        if (m_columns[i] != NULL && m_columns[i]->nrows() > 0) {
+            if (m_columns[i]->nrows() != m_rows) {
                 throw GException::fits_bad_col_length(G_DATA_SAVE,
-                                                      m_columns[i]->length(),
+                                                      m_columns[i]->nrows(),
                                                       m_rows);
             }
         }
@@ -1179,7 +1179,7 @@ void GFitsTable::data_save(void)
                 } // endif: column appended to FITS file
 
                 // Now write column into FITS file (only if length is positive)
-                if (m_columns[i]->length() > 0) {
+                if (m_columns[i]->nrows() > 0) {
                     // Debug option: Show which column we're going to write
                     #if defined(G_DEBUG_SAVE)
                     std::cout << "GFitsTable::save: Write column " << i;
@@ -1216,9 +1216,9 @@ void GFitsTable::data_save(void)
             // Check if this column is actually in our list of columns
             bool used = false;
             for (int i = 0; i < m_cols; ++i) {
-                if (m_columns[i]           != NULL &&
-                    m_columns[i]->length() > 0 &&
-                    m_columns[i]->name()   == colname) {
+                if (m_columns[i]          != NULL &&
+                    m_columns[i]->nrows() > 0 &&
+                    m_columns[i]->name()  == colname) {
                     used = true;
                     break;
                 }

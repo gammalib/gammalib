@@ -432,7 +432,7 @@ void GPha::read(const GFitsTable& table)
     const GFitsTableCol* col_data = table["COUNTS"];
 
     // Extract number of channels in FITS file
-    int length = col_data->length();
+    int length = col_data->nrows();
 
     // Check whether column length is consistent with energy boundaries
     if (m_ebounds.size() > 0) {

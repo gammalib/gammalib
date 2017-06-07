@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.hpp - FITS table column abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,7 +50,7 @@ public:
     // Constructors and destructors
     GFitsTableCol(void);
     GFitsTableCol(const std::string& name,
-                  const int&         length,
+                  const int&         nrows,
                   const int&         number,
                   const int&         width);
     GFitsTableCol(const GFitsTableCol& column);
@@ -89,8 +89,8 @@ public:
     const int&              number(void) const;
     void                    elements(const int& row, const int& elements);
     int                     elements(const int& row) const;
-    void                    length(const int& length);
-    const int&              length(void) const;
+    void                    nrows(const int& nrows);
+    const int&              nrows(void) const;
     void                    is_variable(const bool& variable);
     const bool&             is_variable(void) const;
     void                    anynul(const int& anynul);
@@ -402,17 +402,17 @@ const int& GFitsTableCol::number(void) const
 
 
 /***********************************************************************//**
- * @brief Set column length (number of rows)
+ * @brief Set number of rows in column
  *
- * @param[in] length Column length.
+ * @param[in] nrows Number of rows in column.
  *
- * Sets the number of rows in one column.
+ * Sets the number of rows in column.
  ***************************************************************************/
 inline
-void GFitsTableCol::length(const int& length)
+void GFitsTableCol::nrows(const int& nrows)
 {
     // Set length
-    m_length = length;
+    m_length = nrows;
 
     // Return
     return;
@@ -425,7 +425,7 @@ void GFitsTableCol::length(const int& length)
  * @return Number of rows in column.
  ***************************************************************************/
 inline
-const int& GFitsTableCol::length(void) const
+const int& GFitsTableCol::nrows(void) const
 {
     // Return column length
     return m_length;

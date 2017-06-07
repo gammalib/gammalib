@@ -604,30 +604,30 @@ void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
     m_timeref.read(*table);
 
     // Extract columns
-    GFitsTableCol* time_col  = (*table)["TIME"];
+    GFitsTableCol* time_col = (*table)["TIME"];
     GFitsTableCol* norm_col = (*table)["NORM"];
 
     // Check that there are at least two nodes in table
-    if (time_col->length() < 2) {
+    if (time_col->nrows() < 2) {
         std::string msg = "\"TIME\" column contains "+
-                          gammalib::str(time_col->length())+" rows but at "
+                          gammalib::str(time_col->nrows())+" rows but at "
                           "least two rows are required. Please specify a valid "
                           "temporal file function.";
         throw GException::invalid_value(G_LOAD_NODES, msg);
     }
 
     // Check that both columns are consistent
-    if (time_col->length() != norm_col->length()) {
+    if (time_col->nrows() != norm_col->nrows()) {
         std::string msg = "\"TIME\" and \"NORM\" columns have inconsistent "
                           "number of rows ("+
-                          gammalib::str(time_col->length())+", "+
-                          gammalib::str(norm_col->length())+"). Please "
+                          gammalib::str(time_col->nrows())+", "+
+                          gammalib::str(norm_col->nrows())+"). Please "
                           "specify a valid temporal file function.";
         throw GException::invalid_value(G_LOAD_NODES, msg);
     }
 
     // Set number of nodes
-    int nodes = time_col->length();
+    int nodes = time_col->nrows();
 
     // Check that time values are in ascending order and that no node is
     // larger than one
@@ -663,7 +663,7 @@ void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
 
     // Set minimum and maximum times (assumes that times are ordered)
     m_tmin.set(time_col->real(0), m_timeref);
-    m_tmax.set(time_col->real(time_col->length()-1), m_timeref);
+    m_tmax.set(time_col->real(time_col->nrows()-1), m_timeref);
 
     // Close FITS file
     fits.close();
