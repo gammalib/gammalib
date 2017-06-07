@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -85,6 +85,10 @@ class GVector;
 class GSkyMap : public GBase {
 
 	friend GSkyMap sqrt(const GSkyMap& map);
+	friend GSkyMap log(const GSkyMap& map);
+	friend GSkyMap log10(const GSkyMap& map);
+	friend GSkyMap abs(const GSkyMap& map);
+	friend GSkyMap sign(const GSkyMap& map);
 
 public:
     // Constructors and destructors
