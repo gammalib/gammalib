@@ -34,6 +34,8 @@ Below a few links to learn how to contribute to GammaLib:
 
    git/index
    coding/index
+   profiling/index
+   releasing/index
 
 And here some status shields:
 
