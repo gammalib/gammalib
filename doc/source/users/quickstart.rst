@@ -45,33 +45,33 @@ Now let's append a model to this container. For this, type:
 
 .. code-block:: python
 
-    >>> pos = gammalib.GSkyDir()
-    >>> pos.radec_deg(83.6331, 22.0145)
-    >>> spatial = gammalib.GModelSpatialPointSource(pos)
-    >>> spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100, 'MeV'))
-    >>> model = gammalib.GModelSky(spatial, spectral)
-    >>> models.append(model)
-    >>> print(models)
-    === GModels ===
-     Number of models ..........: 1
-     Number of parameters ......: 6
-    === GModelSky ===
-     Name ......................: 
-     Instruments ...............: all
-     Instrument scale factors ..: unity
-     Observation identifiers ...: all
-     Model type ................: PointSource
-     Model components ..........: "SkyDirFunction" * "PowerLaw" * "Constant"
-     Number of parameters ......: 6
-     Number of spatial par's ...: 2
-      RA .......................: 83.6331 deg (fixed,scale=1)
-      DEC ......................: 22.0145 deg (fixed,scale=1)
-     Number of spectral par's ..: 3
-      Prefactor ................: 1 +/- 0 [0,infty[ ph/cm2/s/MeV (free,scale=1,gradient)
-      Index ....................: -2 +/- 0 [10,-10]  (free,scale=-2,gradient)
-      PivotEnergy ..............: 100 MeV (fixed,scale=100,gradient)
-     Number of temporal par's ..: 1
-      Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+   >>> pos = gammalib.GSkyDir()
+   >>> pos.radec_deg(83.6331, 22.0145)
+   >>> spatial = gammalib.GModelSpatialPointSource(pos)
+   >>> spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100, 'MeV'))
+   >>> model = gammalib.GModelSky(spatial, spectral)
+   >>> models.append(model)
+   >>> print(models)
+   === GModels ===
+    Number of models ..........: 1
+    Number of parameters ......: 6
+   === GModelSky ===
+    Name ......................:
+    Instruments ...............: all
+    Instrument scale factors ..: unity
+    Observation identifiers ...: all
+    Model type ................: PointSource
+    Model components ..........: "PointSource" * "PowerLaw" * "Constant"
+    Number of parameters ......: 6
+    Number of spatial par's ...: 2
+     RA .......................: 83.6331 deg (fixed,scale=1)
+     DEC ......................: 22.0145 deg (fixed,scale=1)
+    Number of spectral par's ..: 3
+     Prefactor ................: 1 +/- 0 [0,infty[ ph/cm2/s/MeV (free,scale=1,gradient)
+     Index ....................: -2 +/- 0 [10,-10]  (free,scale=-2,gradient)
+     PivotEnergy ..............: 100 MeV (fixed,scale=100,gradient)
+    Number of temporal par's ..: 1
+     Normalization ............: 1 (relative value) (fixed,scale=1,gradient)
 
 With this sequence of commands you first defined a sky direction in
 celestial coordinates using ``GSkyDir``. You may recognise that this
@@ -88,7 +88,8 @@ Among them, you find the specified source position (parameters ``RA`` and
 ``DEC``), the power law normalisation (parameter ``Prefactor``) and the spectral
 index (parameter ``Index``). In addition, the reference energy for the
 normalisation has been set to 100 MeV (parameter ``PivotEnergy``)
-and the temporal component has been set by default to a constant (parameter ``Constant``).
+and the temporal component has been set by default to a constant
+(parameter ``Constant``).
 
 Suppose you want to change one of these parameters, such as the
 ``PivotEnergy`` that you want to set to 1 TeV. This can be done using:
