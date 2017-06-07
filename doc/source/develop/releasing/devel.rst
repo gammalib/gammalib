@@ -1,7 +1,7 @@
 .. _dev_releasing_merge:
 
 Incrementing the development version
-=======================================
+====================================
 
 As last step you have to increment the version number to the next
 development release number. Before doing that you should make sure that you
@@ -60,7 +60,7 @@ Now commit the changes by chosing ``4``:
     M sonar-project.properties
    Commit all changes? (y/n): y
    Please enter a commit message: Update to release version 1.3.0.dev1
-   [test-release d44a7d6] Update to release version 1.3.0.dev1
+   [devel d44a7d6] Update to release version 1.3.0.dev1
     6 files changed, 7 insertions(+), 7 deletions(-)
 
    [1] Make a new release
