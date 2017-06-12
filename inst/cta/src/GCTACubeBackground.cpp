@@ -412,7 +412,7 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
         // Extract region of interest from CTA observation
         GCTARoi roi = cta->roi();
-        
+
         // Extract energy boundaries from CTA observation
         GEbounds obs_ebounds = cta->ebounds();
 

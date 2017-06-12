@@ -1721,6 +1721,23 @@ void GSkyMap::projection(const GSkyProjection& proj)
  *
  * @param[in] reg Circular region
  * @return True or False
+ *
+ * The check is done by first testing whether the central pointing
+ * position of the observation falls into the sky map. If this is false, 
+ * then pixel position that borders the sky map is tested for whether or
+ * not it falls into the observation region. The positions tested can be
+ * visualized as follows, where '*' marks the positions tested.
+ *
+ *     *   *   *   *   *   *
+ *       +---+---+---+---+
+ *     * |1,3|2,3|3,3|4,3| *
+ *       +---+---+---+---+
+ *     * |1,2|2,2|3,2|4,2| *
+ *       +---+---+---+---+
+ *     * |1,1|2,1|3,1|4,1| *
+ *       +---+---+---+---+
+ *     *   *   *   *   *   *
+ 
  ***************************************************************************/
 bool GSkyMap::overlaps(const GSkyRegionCircle& reg) const
 {
