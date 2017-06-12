@@ -84,6 +84,7 @@ public:
     void              extend(const GSkyRegions& regions);
     bool              contains(const GSkyDir& dir) const;
     bool              overlaps(const GSkyRegion& reg) const;
+    bool              overlaps(const GSkyRegions& regions) const;
     void              load(const GFilename& filename);
     void              save(const GFilename& filename) const;
     const GFilename&  filename(void) const;

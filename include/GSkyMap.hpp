@@ -35,6 +35,7 @@
 #include "GSkyPixel.hpp"
 #include "GSkyProjection.hpp"
 #include "GBilinear.hpp"
+#include "GSkyRegionCircle.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
@@ -158,6 +159,7 @@ public:
     double                  flux(const GSkyPixel& pixel, const int& map = 0) const;
     double                  solidangle(const int& index) const;
     double                  solidangle(const GSkyPixel& pixel) const;
+    bool                    overlaps(const GSkyRegionCircle& reg) const;
     bool                    contains(const GSkyDir& dir) const;
     bool                    contains(const GSkyPixel& pixel) const;
     const GSkyProjection*   projection(void) const;

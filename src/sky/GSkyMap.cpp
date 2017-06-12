@@ -1716,6 +1716,51 @@ void GSkyMap::projection(const GSkyProjection& proj)
 }
 
 
+/***********************************************************************
+ * @brief Checks whether or not a circular region overlaps with this map
+ *
+ * @param[in] reg Circular region
+ * @return True or False
+ ***************************************************************************/
+bool GSkyMap::overlaps(const GSkyRegionCircle& reg) const
+{
+    // Check if the center of the region is inside the map
+    if (contains(reg.centre())) {
+        return true;
+    } else {
+        // Loop through each of the outer bins and check if the map
+        // overlaps with them (within some delta)
+        GSkyPixel pix1(0.0,0.0);
+        GSkyPixel pix2(0.0,0.0);
+        
+        // Check the bottom and top bins
+        pix1.y(0.0);
+        pix2.y(ny()+1);
+        for (int x=0; x <= nx()+1; x++) {
+            pix1.x(double(x));
+            pix2.x(double(x));
+            if ((reg.contains(pix2dir(pix1)))||(reg.contains(pix2dir(pix2)))) {
+                return true;
+            }
+        } // Loop x bins
+        
+        // Check the left and right bins
+        // Check the bottom and top bins
+        pix1.x(0.0);
+        pix2.x(nx()+1);
+        for (int y=1; y <= ny(); y++) {
+            pix1.y(double(y));
+            pix2.y(double(y));
+            if ((reg.contains(pix2dir(pix1)))||(reg.contains(pix2dir(pix2)))) {
+                return true;
+            }
+        } // Loop y bins
+
+    }
+    return false;
+}
+
+
 /***********************************************************************//**
  * @brief Verifies if sky direction falls in map
  *

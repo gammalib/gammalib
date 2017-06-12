@@ -609,21 +609,46 @@ std::string GSkyRegions::print(const GChatter& chatter) const
  *
  * Tells if region overlaps one of the regions
  ***************************************************************************/
-  bool GSkyRegions::overlaps(const GSkyRegion& reg) const
-  {
-	  // Initialise return value
-	  bool reg_is_in = false;
-	  
-	  // Loop over regions
-	  for (int i = 0; i < size(); ++i) {
-		  reg_is_in=m_regions[i]->overlaps(reg);
-		  if (reg_is_in) break;
-	  }
-	  
-	  // Return result
-	  return reg_is_in;
-  }
-  
+bool GSkyRegions::overlaps(const GSkyRegion& reg) const
+{
+    // Initialise return value
+    bool reg_is_in = false;
+    
+    // Loop over regions
+    for (int i = 0; i < size(); ++i) {
+        reg_is_in=m_regions[i]->overlaps(reg);
+        if (reg_is_in) break;
+    }
+    
+    // Return result
+    return reg_is_in;
+}
+
+
+/***********************************************************************
+ * @brief Tells if any of the regions in two containers overlap
+ *
+ * @param[in] regions GSkyRegions object containing a list of sky regions
+ * @return True or False
+ *
+ * Tells if all regions in  overlaps one of the regions. Note, this method
+ * returns true if ANY of the regions in the two containers overlap with 
+ * each other
+ ***************************************************************************/
+bool GSkyRegions::overlaps(const GSkyRegions& regions) const
+{
+    // Initialize return value
+    bool reg_is_in = false;
+    
+    // Loop over each region in the container
+    for (int i=0; i < size(); i++) {
+        reg_is_in = regions.overlaps( *m_regions[i] );
+        if (reg_is_in) break;
+    }
+    
+    // Return result
+    return reg_is_in;
+}
 
 /*==========================================================================
  =                                                                         =
