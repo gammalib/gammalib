@@ -347,20 +347,6 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
         const GCTAObservation* cta =
               dynamic_cast<const GCTAObservation*>(obs[i]);
 
-        // Make sure the observation overlaps with the cube
-        GSkyRegionCircle obs_reg(cta->roi().centre().dir(), cta->roi().radius());
-        if (!m_cube.overlaps(obs_reg)) {
-            if (log != NULL) {
-                *log << "Skipping ";
-                *log << cta->instrument();
-                *log << " observation ";
-                *log << "\"" << cta->name() << "\"";
-                *log << " (id=" << cta->id() << ") as it lies outside the cube";
-                *log << std::endl;
-            }
-            continue;
-        } // endif: m_cube overlaps observation
-        
         // Skip observation if it's not CTA
         if (cta == NULL) {
             if (log != NULL) {
@@ -401,15 +387,6 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Announce observation usage
-        if (log != NULL) {
-            *log << "Including ";
-            *log << cta->instrument();
-            *log << " observation \"" << cta->name();
-            *log << "\" (id=" << cta->id() << ")";
-            *log << " in background cube computation." << std::endl;
-        }
-
         // Extract region of interest from CTA observation
         GCTARoi roi = cta->roi();
 
@@ -424,6 +401,29 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             throw GException::invalid_value(G_FILL, msg);
         }
 
+        // Make sure the observation overlaps with the cube
+        GSkyRegionCircle obs_reg(roi.centre().dir(), roi.radius());
+        if (!m_cube.overlaps(obs_reg)) {
+            if (log != NULL) {
+                *log << "Skipping ";
+                *log << cta->instrument();
+                *log << " observation ";
+                *log << "\"" << cta->name() << "\"";
+                *log << " (id=" << cta->id() << ") as it lies outside the cube";
+                *log << std::endl;
+            }
+            continue;
+        } // endif: m_cube overlaps observation
+        
+        // Announce observation usage
+        if (log != NULL) {
+            *log << "Including ";
+            *log << cta->instrument();
+            *log << " observation \"" << cta->name();
+            *log << "\" (id=" << cta->id() << ")";
+            *log << " in background cube computation." << std::endl;
+        }
+        
         // Set GTI of actual observations as the GTI of the event cube
         eventcube.gti(cta->gti());
 

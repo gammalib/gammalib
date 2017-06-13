@@ -797,7 +797,11 @@ void GCTAEventList::dispose(void) const
     // Clear events and additional columns
     m_events.clear();
     m_columns.clear();
-
+    
+    // Now actually remove the memory reserved for these objects
+    std::vector<GCTAEventAtom>(m_events).swap(m_events);
+    std::vector<GFitsTableCol*>(m_columns).swap(m_columns);
+    
     // Return
     return;
 }
