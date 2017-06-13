@@ -655,6 +655,20 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
                               "to specify an RoI for this observation.";
             throw GException::invalid_value(G_FILL_CUBE, msg);
         }
+        
+        // Check that the observation overlaps with the cube
+        GSkyRegionCircle obs_reg(roi.centre().dir(), roi.radius());
+        if (!m_cube.overlaps(obs_reg)) {
+            if (log != NULL) {
+                *log << "Skipping unbinned ";
+                *log << obs.instrument();
+                *log << " observation ";
+                *log << "\"" << obs.name() << "\"";
+                *log << " (id=" << obs.id() << ") ";
+                *log << "which lies outside exposure cube";
+                *log << std::endl;
+            }
+        }
 
         // Extract response from observation
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>
