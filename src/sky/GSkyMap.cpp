@@ -1724,20 +1724,20 @@ void GSkyMap::projection(const GSkyProjection& proj)
  *
  * The check is done by first testing whether the central pointing
  * position of the observation falls into the sky map. If this is false, 
- * then pixel position that borders the sky map is tested for whether or
- * not it falls into the observation region. The positions tested can be
+ * then pixel positions that border the sky map are tested for whether or
+ * not they fall into the observation region. The positions tested can be
  * visualized as follows, where '*' marks the positions tested.
  *
  *     *   *   *   *   *   *
  *       +---+---+---+---+
- *     * |1,3|2,3|3,3|4,3| *
+ *     * |0,2|1,2|2,2|3,2| *
  *       +---+---+---+---+
- *     * |1,2|2,2|3,2|4,2| *
+ *     * |0,1|1,1|2,1|3,1| *
  *       +---+---+---+---+
- *     * |1,1|2,1|3,1|4,1| *
+ *     * |0,0|1,0|2,0|3,0| *
  *       +---+---+---+---+
  *     *   *   *   *   *   *
- 
+ *
  ***************************************************************************/
 bool GSkyMap::overlaps(const GSkyRegionCircle& reg) const
 {
@@ -1751,27 +1751,27 @@ bool GSkyMap::overlaps(const GSkyRegionCircle& reg) const
         GSkyPixel pix2(0.0,0.0);
         
         // Check the bottom and top bins
-        pix1.y(0.0);
-        pix2.y(ny()+1);
-        for (int x=0; x <= nx()+1; x++) {
-            pix1.x(double(x));
-            pix2.x(double(x));
-            if ((reg.contains(pix2dir(pix1)))||(reg.contains(pix2dir(pix2)))) {
+        pix1.y(-1);
+        pix2.y(ny());
+        for (int xbin=-1; xbin <= nx(); xbin+=1.0) {
+            pix1.x(xbin);
+            pix2.x(xbin);
+            if ((reg.contains(pix2dir(pix1))) || (reg.contains(pix2dir(pix2)))) {
                 return true;
             }
-        } // Loop x bins
+        } // endfor: loop on xbin
         
         // Check the left and right bins
         // Check the bottom and top bins
-        pix1.x(0.0);
-        pix2.x(nx()+1);
-        for (int y=1; y <= ny(); y++) {
-            pix1.y(double(y));
-            pix2.y(double(y));
-            if ((reg.contains(pix2dir(pix1)))||(reg.contains(pix2dir(pix2)))) {
+        pix1.x(-1);
+        pix2.x(nx());
+        for (double ybin=0; ybin < ny(); ybin+=1.0) {
+            pix1.y(ybin);
+            pix2.y(ybin);
+            if ((reg.contains(pix2dir(pix1))) || (reg.contains(pix2dir(pix2)))) {
                 return true;
             }
-        } // Loop y bins
+        } // endfor: loop on ybin
 
     }
     return false;
