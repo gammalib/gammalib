@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.3.0
+New Features and Important Changes in GammaLib 1.4.0
 
-6 June 2017
+22 June 2017
 
 
 1. Introduction
@@ -12,15 +12,7 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- GPhases
-- GWcsGLS
-- GWcsSFL
-- GModelSpectralSmoothBrokenPlaw
-- GModelSpatialRadialProfile
-- GModelSpatialRadialProfileGauss
-- GModelSpatialRadialProfileDMBurkert
-- GModelSpatialRadialProfileDMEinasto
-- GModelSpatialRadialProfileDMZhao
+- n.a.
 
 The following classes have been removed:
 - n.a.
@@ -29,48 +21,13 @@ The following classes have been renamed:
 - n.a.
 
 The following methods have been added:
-- GEbounds::set(GEnergies&)
-- GEbounds::emin(int&, GEnergy&)
-- GEbounds::emax(int&, GEnergy&)
-- GEnergies::set(GEbounds&)
-- GFilename::type()
-- GMatrix::operator+(double&)
-- GMatrix::operator-(double&)
-- GMatrix::operator+=(double&)
-- GMatrix::operator-=(double&)
-- GMatrixSymmetric::operator+(double&)
-- GMatrixSymmetric::operator-(double&)
-- GMatrixSymmetric::operator+=(double&)
-- GMatrixSymmetric::operator-=(double&)
-- GMatrixSparse::operator+(double&)
-- GMatrixSparse::operator-(double&)
-- GMatrixSparse::operator+=(double&)
-- GMatrixSparse::operator-=(double&)
-- GCTAResponseIrf::rspname()
-- GCTARoi::contains(GCTAInstDir&)
-- GCTAEdisp2D::fetch()
-- GCTAAeff::ebounds()
-- GCTAAeff2D::ebounds()
-- GCTAAeffArf::ebounds()
-- GCTAAeffPerfTable::ebounds()
-- GCTAEventList::append_column(GFitsTableCol&)
-- GCTAEventList::has_phase(bool&)
-- GCTAEventList::has_phase()
-- GCTAEventList::has_detxy(bool&)
-- GCTAEventList::has_detxy()
-- GCTAEventList::has_mc_id(bool&)
-- GCTAEventList::has_mc_id()
-- GCTAEventList::set_mc_id_names(std::vector<int>&, std::vector<std::string>&)
-- GCTAEventAtom::mc_id(int&)
-- GCTAEventAtom::mc_id()
+- n.a.
 
 The following methods have been removed:
-- GFitsTable::size()
+- n.a.
 
 The following methods have been renamed:
-- GFitsImage::size() => GFitsImage::npix()
-- GFitsHDU::size() => GFitsHDU::cards()
-- GFitsTableCol::length() => GFitsTableCol::nrows()
+- n.a.
 
 The arguments for the following methods have been changed:
 - n.a.
@@ -81,19 +38,7 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-The Python unit tests now raise exceptions instead of exiting with a non-
-zero return code so that the user is not thrown out of Python after calling
-gammalib.test() (#1983).
-
-If the code originates from the Git repository the configuration now switches
-to developer mode which implies that the Python bindings are always built.
-This solves the problem that occured for developers that could not get rid
-of existing Python wrappers, even if they modified the Python interface
-(#1985).
-
-The shared libraries needed by the Python wrappers are now copied into a
-build/gammalib directory for unit testing instead of creating a symbolic
-link since on shared VM file systems symbolic links may not work (#1987).
+None
 
 
 4. Application module
@@ -108,57 +53,17 @@ None
 
 6. FITS I/O Interface
 ---------------------
-FITS image type conversion constructors have been added to convert a FITS
-image of any type into a specific storage class (#1986).
-
-A map between header card keywords and header card pointers was added to
-GFitsHeader to speed up the access of FITS header cards (#2120).
-
-The GFitsImage::size() method has been renamed to GFitsImage::npix() since
-the size() method overloaded the GFitsHDU::size() method (#1858).
-
-The GFitsTable::size() method has been removed since the meaning of the
-method was ambiguous. It returned the number of table columns, but the 
-GFitsTable::ncols() does exactly the same thing, hence the method was
-redundant (#1857).
-
-The GFitsHDU::size() method has been renamed to GFitsHDU::cards() since the
-meaning of the size() method was not clear (#1859).
-
-The GFitsTableCol::length() method was renamed to GFitsTableCol::nrows()
-to clarify the meaning of thie method (#1860).
+None
 
 
 7. Linear algebra module
 ------------------------
-Add operators for addition and subtraction of scalars to all matrix classes
-(#1990).
+None
 
 
 8. Model module
 ---------------
-The GModelSpectralNodes class now throws an exception if the energy or
-intensity of a node is set to a non-positive value (#990).
-
-The GModelSpectralSmoothBrokenPlaw class that implements a smoothly broken
-power law spectrum has been added (#1948).
-
-The scale of the composite spatial models can now be fitted by adding the
-free_scale="1" attribute to the XML file (#1992).
-
-Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
-The method deals with pre-computation and normalization of the profiles,
-and implements the eval() and mc() methods. The following derived classes
-have been implemented:
-- GModelSpatialRadialProfileGauss: radial Gaussian profile
-- GModelSpatialRadialProfileDMBurkert: Burkert Dark Matter profile
-- GModelSpatialRadialProfileDMEinasto: Einasto Dark Matter profile
-- GModelSpatialRadialProfileDMZhao: Zhao Dark matter profile
-Please note that these models are not deeply tested so far and the code
-and interface is still subject to change (#1520).
-
-The names of spatial model parameters are now always set to RA/DEC even if
-the input parameters were GLON/GLAT (#2113).
+None
 
 
 9. Numerics module
@@ -168,39 +73,22 @@ None
 
 10. Observation module
 ----------------------
-A set() method has been added to GEbounds and GEnergies to allow converting
-energy boundaries into an energy container and vice versa. In addition,
-conversion constructors have been added (#1977).
-
-The GEbounds::set_lin() and GEbounds::set_log() method now throw exceptions
-if the minimum energy is larger than the maximum energy. In addition, the
-GEbounds::set_log() method throws an exception if either the minimum or
-maximum energy are zero. Furthermore, the methods clear the energy boundaries
-if the requested number of intervals is non-zero (#1989). 
-
-The GPhases class has been added to handle phase selections of events (#1996).
+None
 
 
 11. Optimization module
 -----------------------
-The Levenberg-Marquardt optimiser convergence criterion is now scaled with the
-step size so that a small step size does no longer lead to a stop of the
-iterative process (#2022).
+None
 
 
 12. Sky module
 --------------
-The GWcsGLS and GWcsSFL classes have been added to support the GLS and SFL
-World Coordinate System projections (#1851).
-
-The GWcs base class now also supports CD keywords instead of CDELT keywords
-(#1951).
+None
 
 
 13. Support module
 ------------------
-A GFilename::type() method has been added that returns the type of the file
-based on the file type extension (e.g. ".fits") (#1863).
+None
 
 
 14. XML module
@@ -235,62 +123,7 @@ None
 
 20. CTA interface
 -----------------
-Correct the containment radius computation in GCTAPsf2D (#1876).
-
-The GCTAResponseIrf::rspname() method has been added that returns the name
-of the response function (attribute m_rspname).
-
-Do no longer interpret a CTA calibration database as a file path in the
-GCTAResponseIrf::read() method (#1969).
-
-Add GCTARoi::contains() method that checks whether an instrument direction
-is contained within the region of interest.
-
-Lazy loading of the energy dispersion in GCTAEdisp2D has been implemented by
-adding a fetch() method to the class. Now the energy dispersion is only loaded
-when needed, for example for function evaluation or Monte Carlo sampling (#1940).
-
-The GCTAEdisp2D::compute_ebounds_src() method now loops over the migration to
-enhance the precision in the true energy boundaries that are returned by this
-method. In addition, the validity range of the table is now stored in members
-of the class, and a non-zero energy dispersion is only returned for valid
-elements of the response table.
-
-An GCTAAeff::ebounds() method has been added to the abstract interface for
-effective area responses to return the valid energy range of the effective
-area (#1989).
-
-The GCTAModelAeffBackground::mc() could get stuck in the rejection loop if the
-effective area returned is always zero. A counter has been added that leads to
-the exit of the loop in case that 1000 subsequent zero values are returned
-(#1988).
-
-A GCTAEventList::append_column() method has been added to allow appending of
-FITS columns to an event list. The method checks whether the length of the
-FITS column is compatible with the number of events that are present in the
-event list (#1991).
-
-Add GCTAEventList::has_phase() and GCTAEventList::has_detxy() getter and setter
-methods to manipulate the event list information flags (#1982).
-
-Add GCTAEventList::has_mc_id() and GCTAEventAtom::mc_id() getter and setter methods
-to set the Monte Carlo identifier of a given event. This allows to attribute a
-Monte Carlo simulated event to a specific model (#1483).
-
-Add GCTAEventList::set_mc_id_names() method to store Monte Carlo metadata into an
-event list and to write this information into the FITS header. Furthermore, the
-information is read back when loading an event list (#1483).
-
-The loading and saving of CTA response cubes was put into an OpenMP critial zone to
-avoid FITS file pointer exceptions (#2021).
-
-The CTA background template HDUCLAS2 was changed from "BGD" to "BKG". Both strings
-are supported by GammaLib.
-
-The maximum radius of the King PSF has been increased from 0.7 to 2 degrees to cope
-with some extreme cases. Now also the maximum PSF radius is computed for a given
-energy so that if the PSF is smaller than the maximum radius of 2 degrees a smaller
-region of interest will be used for the computation (#2112).
+None
 
 
 21. COMPTEL interface

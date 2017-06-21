@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self.test_energy, 'Test GEnergy class')
         self.append(self.test_energies, 'Test GEnergies class')
         self.append(self.test_time, 'Test GTime class')
+        self.append(self.test_observations_slicing,
+                    'Test GObservations class slicing')
 
         # Return
         return
@@ -214,3 +216,80 @@ class Test(gammalib.GPythonTestSuite):
 
         # Return
         return
+
+
+    # Test GObservations class slicing
+    def test_observations_slicing(self):
+        """
+        Test GObservations class slicing
+        """
+        # Setup observation container
+        obs = gammalib.GObservations()
+        run = gammalib.GCTAObservation()
+        for i in range(10):
+            run.id('%s' % i)
+            obs.append(run)
+
+        # Setup model container
+        models = gammalib.GModels()
+        model  = gammalib.GModelSky()
+        for i in range(10):
+            model.name('%s' % i)
+            models.append(model)
+
+        # Set observation's model container
+        obs.models(models)
+
+        # Test obs[start:end]
+        self.test_value(len(obs[3:5]), 2)
+        self.test_value(len(obs[3:5].models()), 10)
+        self.test_value(obs[3:5][0].id(), '3')
+        self.test_value(obs[3:5][1].id(), '4')
+
+        # Test obs[start:]
+        self.test_value(len(obs[7:]), 3)
+        self.test_value(len(obs[7:].models()), 10)
+        self.test_value(obs[7:][0].id(), '7')
+        self.test_value(obs[7:][1].id(), '8')
+        self.test_value(obs[7:][2].id(), '9')
+
+        # Test obs[:end]
+        self.test_value(len(obs[:2]), 2)
+        self.test_value(len(obs[:2].models()), 10)
+        self.test_value(obs[:2][0].id(), '0')
+        self.test_value(obs[:2][1].id(), '1')
+
+        # Test obs[:]
+        self.test_value(len(obs[:]), 10)
+        self.test_value(len(obs[:].models()), 10)
+        for i in range(10):
+            self.test_value(obs[:][i].id(), '%s' % i)
+
+        # Test obs[start:end:step]
+        self.test_value(len(obs[3:7:2]), 2)
+        self.test_value(len(obs[3:7:2].models()), 10)
+        self.test_value(obs[3:7:2][0].id(), '3')
+        self.test_value(obs[3:7:2][1].id(), '5')
+
+        # Test obs[start:end:step]
+        self.test_value(len(obs[6:3:-2]), 2)
+        self.test_value(len(obs[6:3:-2].models()), 10)
+        self.test_value(obs[6:3:-2][0].id(), '6')
+        self.test_value(obs[6:3:-2][1].id(), '4')
+
+        # Test obs[-start:]
+        self.test_value(len(obs[-2:]), 2)
+        self.test_value(len(obs[-2:].models()), 10)
+        self.test_value(obs[-2:][0].id(), '8')
+        self.test_value(obs[-2:][1].id(), '9')
+
+        # Test obs[:-end]
+        self.test_value(len(obs[:-7]), 3)
+        self.test_value(len(obs[:-7].models()), 10)
+        self.test_value(obs[:-7][0].id(), '0')
+        self.test_value(obs[:-7][1].id(), '1')
+        self.test_value(obs[:-7][2].id(), '2')
+
+        # Return
+        return
+
