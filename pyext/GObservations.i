@@ -142,7 +142,8 @@ typedef GObservations::likelihood likelihood;
                 return obs;
             }
             else {
-                throw GException::invalid_argument("__getitem__(PyObject)","Invalid slice indices");
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
             }
         }
         else {

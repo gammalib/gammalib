@@ -292,4 +292,3 @@ class Test(gammalib.GPythonTestSuite):
 
         # Return
         return
-
