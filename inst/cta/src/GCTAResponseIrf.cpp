@@ -2075,10 +2075,11 @@ double GCTAResponseIrf::npsf(const GSkyDir&      srcDir,
                 std::cout << "*** ERROR: GCTAResponseIrf::npsf:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;
-                std::cout << ", roi_radius=" << roi_radius;
-                std::cout << ", roi_psf_distance=" << roi_psf_distance;
-                //std::cout << ", sigma=" << sigma;
-                std::cout << ", r=[" << rmin << "," << rmax << "])";
+                std::cout << ", roi_radius=" << roi_radius * gammalib::rad2deg;
+                std::cout << ", roi_psf_distance=";
+                std::cout << roi_psf_distance * gammalib::rad2deg;
+                std::cout << ", r=[" << rmin * gammalib::rad2deg;
+                std::cout << "," << rmax * gammalib::rad2deg << "])";
                 std::cout << std::endl;
             }
             #endif

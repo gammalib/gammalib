@@ -518,7 +518,21 @@ double GCTAPsfKing::delta_max(const double& logE,
     if (m_par_norm > 0.0) {
         radius = r_max(logE, theta);
     }
-    
+if (gammalib::is_notanumber(radius) || gammalib::is_infinite(radius)) {
+    const double F = 0.999;
+    double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) *
+                     m_par_gamma;
+    radius = m_par_sigma * std::sqrt(2.0 * u_max);
+std::cout << "GCTAPsfKing::delta_max";
+std::cout << " base=" << (1.0 - F);
+std::cout << " exponent=" << (1.0/(1.0-m_par_gamma));
+std::cout << " u_max=" << u_max;
+std::cout << " radius=" << radius;
+std::cout << " m_par_norm=" << m_par_norm;
+std::cout << " m_par_gamma=" << m_par_gamma;
+std::cout << " m_par_sigma=" << m_par_sigma << std::endl;
+}
+
     // Return maximum PSF radius
     return radius;
 }
@@ -760,6 +774,12 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
 
             } // endif: restricted PSF radius
 
+            // If maximum PSF radius is zero then also set the normalization
+            // to zero
+            else if (m_par_rmax == 0.0) {
+                m_par_norm = 0.0;
+            }
+
         } // endif: King profile parameters were valid
 
     } // endif: PSF parameters have changed
@@ -780,7 +800,8 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
  * is set by this method to where the containment fraction become 99.9%.
  *
  * This method requires the m_par_gamma and m_par_sigma to be set to valid
- * values.
+ * values. In case that the parameters lead to an infinite result the method
+ * will return a maximum size of zero.
  ***************************************************************************/
 double GCTAPsfKing::r_max(const double& logE,
                           const double& theta) const
@@ -791,7 +812,8 @@ double GCTAPsfKing::r_max(const double& logE,
     // Compute maximum PSF radius for containment fraction
     double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) *
                      m_par_gamma;
-    double radius = m_par_sigma * std::sqrt(2.0 * u_max);
+    double radius = (gammalib::is_infinite(u_max)) ? 0.0 :
+                     m_par_sigma * std::sqrt(2.0 * u_max);
     
     // Return maximum PSF radius
     return radius;
