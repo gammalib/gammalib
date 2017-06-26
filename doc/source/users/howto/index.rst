@@ -3,8 +3,8 @@ How To
 ======
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   sky
+   sky/index
 
 

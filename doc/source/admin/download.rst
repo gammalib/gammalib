@@ -1,4 +1,4 @@
-.. _download:
+.. _sec_download:
 
 Download
 ========
@@ -92,7 +92,7 @@ the following command sequence (the code will be installed into the
    $ export GAMMALIB=/usr/local/gamma
    $ source $GAMMALIB/bin/gammalib-init.sh
 
-Please read the :ref:`installation` section if you need more information on
+Please read the :ref:`sec_installation` section if you need more information on
 how to install GammaLib.
 
 .. note::

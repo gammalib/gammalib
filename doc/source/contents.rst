@@ -1,10 +1,13 @@
+.. _sec_contents:
+
 Documentation
 =============
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    about
-   download
+   admin/index
    users/index
    develop/index
+   help/index

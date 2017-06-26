@@ -1,9 +1,11 @@
+.. _sec_user_manual:
+
 ===========
 User Manual
 ===========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    introduction
    getting
