@@ -1,4 +1,4 @@
-.. _help:
+.. _sec_help:
 
 Getting Help
 ============
