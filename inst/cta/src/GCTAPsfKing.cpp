@@ -518,20 +518,6 @@ double GCTAPsfKing::delta_max(const double& logE,
     if (m_par_norm > 0.0) {
         radius = r_max(logE, theta);
     }
-if (gammalib::is_notanumber(radius) || gammalib::is_infinite(radius)) {
-    const double F = 0.999;
-    double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) *
-                     m_par_gamma;
-    radius = m_par_sigma * std::sqrt(2.0 * u_max);
-std::cout << "GCTAPsfKing::delta_max";
-std::cout << " base=" << (1.0 - F);
-std::cout << " exponent=" << (1.0/(1.0-m_par_gamma));
-std::cout << " u_max=" << u_max;
-std::cout << " radius=" << radius;
-std::cout << " m_par_norm=" << m_par_norm;
-std::cout << " m_par_gamma=" << m_par_gamma;
-std::cout << " m_par_sigma=" << m_par_sigma << std::endl;
-}
 
     // Return maximum PSF radius
     return radius;
