@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.hpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -101,12 +101,12 @@ private:
                double* xout, double *yout) const;
 
     // Private members
-    bool   m_has_lb;     //!< Has galactic coordinates
-    bool   m_has_radec;  //!< Has equatorial coordinates
-    double m_l;          //!< Galactic longitude in radians
-    double m_b;          //!< Galactic latitude in radians
-    double m_ra;         //!< Right Ascension in radians
-    double m_dec;        //!< Declination in radians
+    mutable bool   m_has_lb;     //!< Has galactic coordinates
+    mutable bool   m_has_radec;  //!< Has equatorial coordinates
+    double         m_l;          //!< Galactic longitude in radians
+    double         m_b;          //!< Galactic latitude in radians
+    double         m_ra;         //!< Right Ascension in radians
+    double         m_dec;        //!< Declination in radians
 
     // Sincos cache
     #if defined(G_SINCOS_CACHE)
