@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.cpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -811,6 +811,9 @@ void GSkyDir::equ2gal(void) const
     // Convert from equatorial to galactic
     euler(0, m_ra, m_dec, l, b);
 
+    // Signal that galactic coordinates are available
+    m_has_lb = true;
+
     // Return
     return;
 }
@@ -829,6 +832,9 @@ void GSkyDir::gal2equ(void) const
 
     // Convert from galactic to equatorial
     euler(1, m_l, m_b, ra, dec);
+
+    // Signal that equatorial coordinates are available
+    m_has_radec = true;
 
     // Return
     return;
