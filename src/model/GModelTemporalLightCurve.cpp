@@ -587,6 +587,9 @@ void GModelTemporalLightCurve::free_members(void)
  ***************************************************************************/
 void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
 {
+    // Set maximum light curve normalization value, including a small margin
+    const double max_norm = 1.0 + 1.0e-8;
+
     // Clear nodes and values
     m_nodes.clear();
     m_values.clear();
@@ -630,7 +633,7 @@ void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
     int nodes = time_col->nrows();
 
     // Check that time values are in ascending order and that no node is
-    // larger than one
+    // larger than 1
     double last_time = -1.0;
     for (int i = 0; i < nodes; ++i) {
 
@@ -644,12 +647,12 @@ void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
             throw GException::invalid_value(G_LOAD_NODES, msg);
         }
 
-        // Check if value is <= 1
-        if (norm_col->real(i) > 1.0) {
+        // Check if value is smaller than maximum allowed normalisation
+        if (norm_col->real(i) > max_norm) {
             std::string msg = "Value "+gammalib::str(norm_col->real(i))+" at "
                               "time "+gammalib::str(time_col->real(i))+" is "
-                              "above 1. Please provide a light curve file with "
-                              "normalizations not exceeding 1.";
+                              "larger than 1. Please provide a light curve file "
+                              "with normalizations not exceeding 1.";
             throw GException::invalid_value(G_LOAD_NODES, msg);
         }
         
@@ -659,6 +662,13 @@ void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
     for (int i = 0; i < nodes; ++i) {
         m_nodes.append(time_col->real(i));
         m_values.push_back(norm_col->real(i));
+    }
+
+    // Make sure that no node exceeds 1
+    for (int i = 0; i < m_values.size(); ++i) {
+        if (m_values[i] > 1.0) {
+            m_values[i] = 1.0;
+        }
     }
 
     // Set minimum and maximum times (assumes that times are ordered)

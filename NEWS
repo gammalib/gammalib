@@ -63,7 +63,11 @@ None
 
 8. Model module
 ---------------
-None
+The normalisation values of light and phase curves shall not exceed values of 1
+but due to rounding problems when reading the FITS file it can happen that
+slightly larger value occur. To circumvent the issue a small margin of 1e-8 has
+been added to the maximum value of 1, well below the required precision for
+flux normalisations (#2149).
 
 
 9. Numerics module
