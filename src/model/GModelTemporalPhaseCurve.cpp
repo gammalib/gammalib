@@ -688,6 +688,9 @@ void GModelTemporalPhaseCurve::free_members(void)
  ***************************************************************************/
 void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
 {
+    // Set maximum phase curve normalization value, including a small margin
+    const double max_norm = 1.0 + 1.0e-8;
+
     // Clear nodes and values
     m_nodes.clear();
     m_values.clear();
@@ -728,7 +731,7 @@ void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
     int nodes = phase_col->nrows();
 
     // Check that phase values are in ascending order and comprised between
-    // 0 and 1, and that no node is larger than one
+    // 0 and 1, and that no node is larger than 1
     double last_phase = -1.0;
     for (int i = 0; i < nodes; ++i) {
 
@@ -751,12 +754,12 @@ void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
             throw GException::invalid_value(G_LOAD_NODES, msg);
         }
 
-        // Check if value is <= 1
-        if (norm_col->real(i) > 1.0) {
+        // Check if value is smaller than maximum allowed normalisation
+        if (norm_col->real(i) > max_norm) {
             std::string msg = "Value "+gammalib::str(norm_col->real(i))+" at "
                               "phase "+gammalib::str(phase_col->real(i))+" is "
-                              "above 1. Please provide a phase curve file with "
-                              "normalizations not exceeding 1.";
+                              "larger than 1. Please provide a phase curve file "
+                              "with normalizations not exceeding 1.";
             throw GException::invalid_value(G_LOAD_NODES, msg);
         }
         
@@ -782,6 +785,13 @@ void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
     if (phase_col->real(nodes-1) < 1.0) {
         m_nodes.append(phase_col->real(0)+1.0);
         m_values.push_back(norm_col->real(0));
+    }
+
+    // Make sure that no node exceeds 1
+    for (int i = 0; i < m_values.size(); ++i) {
+        if (m_values[i] > 1.0) {
+            m_values[i] = 1.0;
+        }
     }
 
     // Close FITS file

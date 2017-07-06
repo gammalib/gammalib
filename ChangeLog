@@ -11,6 +11,7 @@
         * Bug fix version 1.3.1 released
         ================================
 
+        Add margin to maximum light and phase curve values (#2149)
         Improve caching in GSkyDir (#2148)
         Make GCTAPsfKing save against invalid values (#2133)
 
