@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.3.1
 
-26 June 2017
+6 July 2017
 
 
 1. Introduction
@@ -83,7 +83,9 @@ None
 
 12. Sky module
 --------------
-None
+The GSkyDir class now signals that ra/dec or l/b are cached when they were
+computed in the gal2equ() and equ2gal() methods, improving hence the speed
+of the clients (#2148).
 
 
 13. Support module
