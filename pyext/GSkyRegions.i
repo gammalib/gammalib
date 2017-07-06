@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegions.i - Sky region container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Pierrick Martin                             *
+ *  copyright (C) 2013-2017 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,7 +56,8 @@ public:
     void              reserve(const int& num);
     void              extend(const GSkyRegions& regions);
     bool              contains(const GSkyDir& dir) const;
-    bool              overlaps(const GSkyRegion& reg) const;
+    bool              overlaps(const GSkyRegion& region) const;
+    bool              overlaps(const GSkyRegions& regions) const;
     void              load(const GFilename& filename);
     void              save(const GFilename& filename) const;
     const GFilename&  filename(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSkyMap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -171,6 +171,7 @@ public:
     double                  solidangle(const GSkyPixel& pixel) const;
     bool                    contains(const GSkyDir& dir) const;
     bool                    contains(const GSkyPixel& pixel) const;
+    bool                    overlaps(const GSkyRegion& region) const;
     const GSkyProjection*   projection(void) const;
     void                    projection(const GSkyProjection& proj);
     const double*           pixels(void) const;

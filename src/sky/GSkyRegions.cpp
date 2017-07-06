@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSkyRegions.cpp - Sky region container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Pierrick Martin                             *
+ *  copyright (C) 2013-2017 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -408,6 +408,90 @@ void GSkyRegions::extend(const GSkyRegions& regions)
 
 
 /***********************************************************************//**
+ * @brief Check if direction is contained in one of the regions
+ *
+ * @param[in] dir Sky direction.
+ * @return True if the sky direction is container in one of the regions,
+ *         falls otherwise.
+ *
+ * Checks if a sky direction is contained in one of the regions of the
+ * container.
+ ***************************************************************************/
+bool GSkyRegions::contains(const GSkyDir& dir) const
+{
+	 // Initialise return value
+	 bool overlap = false;
+	 
+	 // Loop over regions
+	 for (int i = 0; i < size(); ++i) {
+		 overlap = m_regions[i]->contains(dir);
+		 if (overlap) {
+            break;
+        }
+	 }
+	 
+	 // Return result
+	 return overlap;
+}
+
+ 
+/***********************************************************************//**
+ * @brief Check if region overlaps one of the regions
+ *
+ * @param[in] region Sky region.
+ * @return True if @p region overlaps with one of the regions in the region
+ *         container, false otherwise
+ *
+ * Tells if region overlaps one of the regions
+ ***************************************************************************/
+bool GSkyRegions::overlaps(const GSkyRegion& region) const
+{
+    // Initialise return value
+    bool overlap = false;
+    
+    // Loop over regions
+    for (int i = 0; i < size(); ++i) {
+        overlap = m_regions[i]->overlaps(region);
+        if (overlap) {
+            break;
+        }
+    }
+    
+    // Return result
+    return overlap;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if any of the regions in two containers overlap
+ *
+ * @param[in] regions Sky region container.
+ * @return True if one of the regions in the @p regions container overlaps
+ *         with one of the regions in the container, false otherwise
+ *
+ * Tells if all regions in  overlaps one of the regions. Note, this method
+ * returns true if ANY of the regions in the two containers overlap with 
+ * each other
+ ***************************************************************************/
+bool GSkyRegions::overlaps(const GSkyRegions& regions) const
+{
+    // Initialize return value
+    bool overlap = false;
+    
+    // Loop over each region in the container
+    for (int i = 0; i < size(); ++i) {
+        overlap = regions.overlaps(*m_regions[i]);
+        if (overlap) {
+            break;
+        }
+    }
+    
+    // Return result
+    return overlap;
+}
+
+
+/***********************************************************************//**
  * @brief Load regions from DS9 region file
  *
  * @param[in] filename DS9 region filename.
@@ -545,7 +629,7 @@ void GSkyRegions::save(const GFilename& filename) const
 /***********************************************************************//**
  * @brief Print regions
  *
- * @param[in] chatter Chattiness
+ * @param[in] chatter Chattiness.
  * @return String containing region container information.
  *
  * Prints all regions into a string.
@@ -576,79 +660,6 @@ std::string GSkyRegions::print(const GChatter& chatter) const
     return result;
 }
 
-
-/***********************************************************************//**
- * @brief Tells if direction is contained in one of the regions
- *
- * @param[in] dir A sky direction
- * @return True or False
- *
- * Tells if direction is contained in one of the regions
- ***************************************************************************/
- bool GSkyRegions::contains(const GSkyDir& dir) const
- {
-	 // Initialise return value
-	 bool dir_is_in = false;
-	 
-	 // Loop over regions
-	 for (int i = 0; i < size(); ++i) {
-		 dir_is_in=m_regions[i]->contains(dir);
-		 if (dir_is_in) break;
-	 }
-	 
-	 // Return result
-	 return dir_is_in;
- }
-
- 
-/***********************************************************************//**
- * @brief Tells if region overlaps one of the regions
- *
- * @param[in] reg A sky region
- * @return True or False
- *
- * Tells if region overlaps one of the regions
- ***************************************************************************/
-bool GSkyRegions::overlaps(const GSkyRegion& reg) const
-{
-    // Initialise return value
-    bool reg_is_in = false;
-    
-    // Loop over regions
-    for (int i = 0; i < size(); ++i) {
-        reg_is_in=m_regions[i]->overlaps(reg);
-        if (reg_is_in) break;
-    }
-    
-    // Return result
-    return reg_is_in;
-}
-
-
-/***********************************************************************
- * @brief Tells if any of the regions in two containers overlap
- *
- * @param[in] regions GSkyRegions object containing a list of sky regions
- * @return True or False
- *
- * Tells if all regions in  overlaps one of the regions. Note, this method
- * returns true if ANY of the regions in the two containers overlap with 
- * each other
- ***************************************************************************/
-bool GSkyRegions::overlaps(const GSkyRegions& regions) const
-{
-    // Initialize return value
-    bool reg_is_in = false;
-    
-    // Loop over each region in the container
-    for (int i=0; i < size(); i++) {
-        reg_is_in = regions.overlaps( *m_regions[i] );
-        if (reg_is_in) break;
-    }
-    
-    // Return result
-    return reg_is_in;
-}
 
 /*==========================================================================
  =                                                                         =
@@ -712,4 +723,3 @@ void GSkyRegions::free_members(void)
     // Return
     return;
 }
-

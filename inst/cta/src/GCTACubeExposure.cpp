@@ -32,6 +32,7 @@
 #include "GMath.hpp"
 #include "GLog.hpp"
 #include "GObservations.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
@@ -655,20 +656,9 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
                               "to specify an RoI for this observation.";
             throw GException::invalid_value(G_FILL_CUBE, msg);
         }
-        
-        // Check that the observation overlaps with the cube
-        GSkyRegionCircle obs_reg(roi.centre().dir(), roi.radius());
-        if (!m_cube.overlaps(obs_reg)) {
-            if (log != NULL) {
-                *log << "Skipping unbinned ";
-                *log << obs.instrument();
-                *log << " observation ";
-                *log << "\"" << obs.name() << "\"";
-                *log << " (id=" << obs.id() << ") ";
-                *log << "which lies outside exposure cube";
-                *log << std::endl;
-            }
-        }
+
+        // Convert RoI into a circular region for overlap checking
+        GSkyRegionCircle roi_reg(roi.centre().dir(), roi.radius());
 
         // Extract response from observation
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>
@@ -689,6 +679,19 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
                 *log << " observation ";
                 *log << "\"" << obs.name() << "\"";
                 *log << " (id=" << obs.id() << ") due to zero livetime";
+                *log << std::endl;
+            }
+        }
+
+        // Skip observation if observation is outside the bounds of the cube
+        else if (!m_cube.overlaps(roi_reg)) {
+            if (log != NULL) {
+                *log << "Skipping unbinned ";
+                *log << obs.instrument();
+                *log << " observation ";
+                *log << "\"" << obs.name() << "\"";
+                *log << " (id=" << obs.id() << ") since it does not overlap ";
+                *log << "with the exposure cube.";
                 *log << std::endl;
             }
         }

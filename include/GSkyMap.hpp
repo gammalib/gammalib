@@ -35,7 +35,6 @@
 #include "GSkyPixel.hpp"
 #include "GSkyProjection.hpp"
 #include "GBilinear.hpp"
-#include "GSkyRegionCircle.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
@@ -47,6 +46,8 @@ class GFitsImage;
 class GFitsImageDouble;
 class GMatrix;
 class GVector;
+class GSkyRegion;
+class GSkyRegionCircle;
 
 
 /***********************************************************************//**
@@ -159,9 +160,9 @@ public:
     double                  flux(const GSkyPixel& pixel, const int& map = 0) const;
     double                  solidangle(const int& index) const;
     double                  solidangle(const GSkyPixel& pixel) const;
-    bool                    overlaps(const GSkyRegionCircle& reg) const;
     bool                    contains(const GSkyDir& dir) const;
     bool                    contains(const GSkyPixel& pixel) const;
+    bool                    overlaps(const GSkyRegion& region) const;
     const GSkyProjection*   projection(void) const;
     void                    projection(const GSkyProjection& proj);
     const double*           pixels(void) const;
@@ -196,6 +197,7 @@ private:
                                  const GSkyDir& dir3) const;
     double            solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
                                  const GSkyDir& dir3, const GSkyDir& dir4) const;
+    bool              overlaps_circle(const GSkyRegionCircle& region) const;
     bool              is_healpix(const GFitsHDU& hdu) const;
     bool              is_wcs(const GFitsHDU& hdu) const;
 

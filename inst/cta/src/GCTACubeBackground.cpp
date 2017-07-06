@@ -32,15 +32,16 @@
 #include "GException.hpp"
 #include "GMath.hpp"
 #include "GRan.hpp"
+#include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GObservations.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTACubeBackground.hpp"
-#include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                             "GCTACubeBackground::read(GFits&)"
@@ -405,16 +406,17 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
         GSkyRegionCircle obs_reg(roi.centre().dir(), roi.radius());
         if (!m_cube.overlaps(obs_reg)) {
             if (log != NULL) {
-                *log << "Skipping ";
+                *log << "Skipping unbinned ";
                 *log << cta->instrument();
                 *log << " observation ";
                 *log << "\"" << cta->name() << "\"";
-                *log << " (id=" << cta->id() << ") as it lies outside the cube";
+                *log << " (id=" << cta->id() << ") since it does not overlap ";
+                *log << "with the background cube.";
                 *log << std::endl;
             }
             continue;
         } // endif: m_cube overlaps observation
-        
+
         // Announce observation usage
         if (log != NULL) {
             *log << "Including ";
@@ -423,7 +425,7 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             *log << "\" (id=" << cta->id() << ")";
             *log << " in background cube computation." << std::endl;
         }
-        
+
         // Set GTI of actual observations as the GTI of the event cube
         eventcube.gti(cta->gti());
 

@@ -44,6 +44,8 @@
 #include "GMatrix.hpp"
 #include "GVector.hpp"
 #include "GVOClient.hpp"
+#include "GSkyRegion.hpp"
+#include "GSkyRegionCircle.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT_HPX                "GSkyMap::GSkyMap(std::string&, int&,"\
@@ -68,6 +70,7 @@
 #define G_FLUX2                                   "GSkyMap::flux(GSkyPixel&)"
 #define G_SOLIDANGLE1                             "GSkyMap::solidangle(int&)"
 #define G_SOLIDANGLE2                       "GSkyMap::solidangle(GSkyPixel&)"
+#define G_OVERLAPS                           "GSkyMap::overlaps(GSkyRegion&)"
 #define G_EXTRACT                              "GSkyMap::extract(int&, int&)"
 #define G_READ                                     "GSkyMap::read(GFitsHDU&)"
 #define G_SET_WCS     "GSkyMap::set_wcs(std::string&, std::string&, double&,"\
@@ -1716,72 +1719,11 @@ void GSkyMap::projection(const GSkyProjection& proj)
 }
 
 
-/***********************************************************************
- * @brief Checks whether or not a circular region overlaps with this map
- *
- * @param[in] reg Circular region
- * @return True or False
- *
- * The check is done by first testing whether the central pointing
- * position of the observation falls into the sky map. If this is false, 
- * then pixel positions that border the sky map are tested for whether or
- * not they fall into the observation region. The positions tested can be
- * visualized as follows, where '*' marks the positions tested.
- *
- *     *   *   *   *   *   *
- *       +---+---+---+---+
- *     * |0,2|1,2|2,2|3,2| *
- *       +---+---+---+---+
- *     * |0,1|1,1|2,1|3,1| *
- *       +---+---+---+---+
- *     * |0,0|1,0|2,0|3,0| *
- *       +---+---+---+---+
- *     *   *   *   *   *   *
- *
- ***************************************************************************/
-bool GSkyMap::overlaps(const GSkyRegionCircle& reg) const
-{
-    // Check if the center of the region is inside the map
-    if (contains(reg.centre())) {
-        return true;
-    } else {
-        // Loop through each of the outer bins and check if the map
-        // overlaps with them (within some delta)
-        GSkyPixel pix1(0.0,0.0);
-        GSkyPixel pix2(0.0,0.0);
-        
-        // Check the bottom and top bins
-        pix1.y(-1);
-        pix2.y(ny());
-        for (int xbin=-1; xbin <= nx(); xbin+=1.0) {
-            pix1.x(xbin);
-            pix2.x(xbin);
-            if ((reg.contains(pix2dir(pix1))) || (reg.contains(pix2dir(pix2)))) {
-                return true;
-            }
-        } // endfor: loop on xbin
-        
-        // Check the left and right bins
-        // Check the bottom and top bins
-        pix1.x(-1);
-        pix2.x(nx());
-        for (double ybin=0; ybin < ny(); ybin+=1.0) {
-            pix1.y(ybin);
-            pix2.y(ybin);
-            if ((reg.contains(pix2dir(pix1))) || (reg.contains(pix2dir(pix2)))) {
-                return true;
-            }
-        } // endfor: loop on ybin
-
-    }
-    return false;
-}
-
-
 /***********************************************************************//**
- * @brief Verifies if sky direction falls in map
+ * @brief Checks if sky direction falls in map
  *
  * @param[in] dir Sky direction.
+ * @return True if sky direction falls into map, false otherwise.
  *
  * This method checks if the specified sky direction falls within the pixels
  * covered by the skymap. The method uses the dir2xy method to convert the
@@ -1833,6 +1775,38 @@ bool GSkyMap::contains(const GSkyPixel& pixel) const
 
     // Return containment flag
     return inmap;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks whether a region overlaps with this map
+ *
+ * @param[in] region Region
+ * @return True if region overlaps with map, false otherwise
+ *
+ * @exception GException::feature_not_implemented
+ *            Region is not a circular sky region
+ ***************************************************************************/
+bool GSkyMap::overlaps(const GSkyRegion& region) const
+{
+    // Initialise overlap
+    bool overlap = false;
+
+    // If the region is a circular region than test on overlap
+    if (region.type() == "Circle") {
+        const GSkyRegionCircle* circle =
+              static_cast<const GSkyRegionCircle*>(&region);
+        overlap = overlaps_circle(*circle);
+    }
+
+    // ... otherwise signal that method is not implemented
+    else {
+        std::string msg = "Method not implemented for non-circular regions.";
+        throw GException::feature_not_implemented(G_OVERLAPS, msg);
+    }
+
+    // Return overlap flag
+    return overlap;
 }
 
 
@@ -3029,6 +3003,83 @@ double GSkyMap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
 
     // Return solid angle
     return solidangle;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks whether a circular region overlaps with this map
+ *
+ * @param[in] region Circular region
+ * @return True if circular region overlaps with map, false otherwise
+ *
+ * The check is done by first testing whether the central pointing
+ * position of the observation falls into the sky map. If this is false, 
+ * then pixel positions that border the sky map are tested for whether or
+ * not they fall into the observation region. The positions tested can be
+ * visualized as follows, where '*' marks the positions tested.
+ *
+ *     *   *   *   *   *   *
+ *       +---+---+---+---+
+ *     * |0,2|1,2|2,2|3,2| *
+ *       +---+---+---+---+
+ *     * |0,1|1,1|2,1|3,1| *
+ *       +---+---+---+---+
+ *     * |0,0|1,0|2,0|3,0| *
+ *       +---+---+---+---+
+ *     *   *   *   *   *   *
+ *
+ ***************************************************************************/
+bool GSkyMap::overlaps_circle(const GSkyRegionCircle& region) const
+{
+    // Initialise overlap with true
+    bool overlap = false;
+
+    // If the centre of the region is inside the map then signal overlap ...
+    if (contains(region.centre())) {
+        overlap = true;
+    }
+
+    // ... otherwise loop through each of the outer bins and check if the
+    // region overlaps with them (within some delta)
+    else {
+
+        // Initialise test pixels
+        GSkyPixel pix1(0.0,0.0);
+        GSkyPixel pix2(0.0,0.0);
+
+        // Check the bottom and top bins
+        pix1.y(-1.0);
+        pix2.y(double(ny()));
+        for (double xbin = -1.0; xbin <= nx(); xbin += 1.0) {
+            pix1.x(xbin);
+            pix2.x(xbin);
+            if ((region.contains(pix2dir(pix1))) ||
+                (region.contains(pix2dir(pix2)))) {
+                overlap = true;
+                break;
+            }
+        } // endfor: loop on xbin
+
+        // If no overlap has been found then check now the left and right
+        // bins
+        if (!overlap) {
+            pix1.x(-1.0);
+            pix2.x(double(nx()));
+            for (double ybin = 0.0; ybin < ny(); ybin += 1.0) {
+                pix1.y(ybin);
+                pix2.y(ybin);
+                if ((region.contains(pix2dir(pix1))) ||
+                    (region.contains(pix2dir(pix2)))) {
+                    overlap = true;
+                    break;
+                }
+            } // endfor: loop on ybin
+        }
+
+    } // endelse: check border bins
+
+    // Return overlap flag
+    return overlap;
 }
 
 
