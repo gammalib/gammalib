@@ -101,6 +101,11 @@ pkg:
                         dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
                         dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
 						;; \
+					Fedora*) \
+						echo "Fedora supported"; \
+                        dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
+                        dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
+						;; \
 					Ubuntu*) \
 						echo "Ubuntu supported"; \
                         dev/pkgbuild-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
@@ -131,6 +136,11 @@ pkgcheck:
 				case `lsb_release -irs` in \
 					CentOS*) \
 						echo "CentOS supported"; \
+                        dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
+                        dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
+						;; \
+					Fedora*) \
+						echo "Fedora supported"; \
                         dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
                         dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
 						;; \
