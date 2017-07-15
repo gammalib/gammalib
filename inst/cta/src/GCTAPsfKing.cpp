@@ -703,7 +703,7 @@ void GCTAPsfKing::free_members(void)
  * only depends on energy, the only parameter on which the cache values
  * depend is the energy. If the PSF parameters are invalid the m_par_norm
  * member will be set to zero. Valid PSF parameters are \f$\gamma > 1\f$ and
- * \f$\simga > 0\f$.
+ * \f$\sigma > 0\f$.
  ***************************************************************************/
 void GCTAPsfKing::update(const double& logE, const double& theta) const
 {
