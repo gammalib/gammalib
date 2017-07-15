@@ -260,9 +260,9 @@ GModelTemporalPhaseCurve* GModelTemporalPhaseCurve::clone(void) const
  *
  * where
  *
- * \f$r(\Phi(t))$\f is the phase dependent rate, defined by linear
- * interpolation between the nodes in a FITS file, \f$\Phi(t)$\f is the time
- * dependent phase, and \f${\tt m\_norm}$\f is a normalisation constant.
+ * \f$r(\Phi(t))\f$ is the phase dependent rate, defined by linear
+ * interpolation between the nodes in a FITS file, \f$\Phi(t)\f$ is the time
+ * dependent phase, and \f${\tt m\_norm}\f$ is a normalisation constant.
  ***************************************************************************/
 double GModelTemporalPhaseCurve::eval(const GTime& srcTime,
                                       const bool&  gradients) const
@@ -464,12 +464,12 @@ void GModelTemporalPhaseCurve::write(GXmlElement& xml) const
  * \f]
  *
  * where
- * \f$t_0$\f is a reference time,
- * \f$\Phi_0$\f is the phase at the reference time,
- * \f$f$\f is the variation frequency at the reference time,
- * \f$\dot{f}$\f is the first derivative of the variation frequency at the
+ * \f$t_0\f$ is a reference time,
+ * \f$\Phi_0\f$ is the phase at the reference time,
+ * \f$f\f$ is the variation frequency at the reference time,
+ * \f$\dot{f}\f$ is the first derivative of the variation frequency at the
  * reference time, and
- * \f$\dot{f}$\f is the second derivative of the variation frequency at the
+ * \f$\dot{f}\f$ is the second derivative of the variation frequency at the
  * reference time.
  *
  * The phase \f$\Phi(t)\f$ is in the interval [0,1].

@@ -141,13 +141,12 @@ GModelSpectralSmoothBrokenPlaw::GModelSpectralSmoothBrokenPlaw(
  * @param[in] beta Break smoothness parameter
  *
  * Constructs a smoothly broken power law using the model parameters
- *
- *     power law @p prefactor (ph/cm2/s/MeV)
- *     spectral @p index1
- *     Energy @p pivot energy
- *     spectral @p index2
- *     Energy @p breakenergy of spectral break
- *     spectral @p beta
+ * power law @p prefactor (ph/cm2/s/MeV),
+ * spectral @p index1,
+ * @p pivot energy,
+ * spectral @p index2,
+ * @p breakenergy of spectral break, and
+ * smoothness parameter @p beta.
  ***************************************************************************/
 GModelSpectralSmoothBrokenPlaw::GModelSpectralSmoothBrokenPlaw(
                                         const double&  prefactor,

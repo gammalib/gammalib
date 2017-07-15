@@ -37,6 +37,14 @@ Below a few links to learn how to contribute to GammaLib:
    profiling/index
    releasing/index
 
+Links:
+
+* `GitLab <https://cta-gitlab.irap.omp.eu/gammalib/gammalib>`_
+* `GitHub <https://github.com/gammalib/gammalib>`_
+* `Redmine <https://cta-redmine.irap.omp.eu/projects/gammalib>`_
+* `Open HUB <https://www.openhub.net/p/gammalib>`_
+* `Source code documentation (Doxygen) <../doxygen/index.html>`_
+
 And here some status shields:
 
 .. image:: https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os
