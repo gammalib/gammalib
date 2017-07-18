@@ -85,7 +85,8 @@ public:
                              const double&    f0,
                              const double&    f1,
                              const double&    f2,
-                             const double&    norm = 1.0);
+                             const double&    norm = 1.0,
+                             const bool&      normalize = true);
     GModelTemporalPhaseCurve(const GModelTemporalPhaseCurve& model);
     virtual ~GModelTemporalPhaseCurve(void);
 
@@ -121,6 +122,7 @@ public:
     void             f1(const double& f1);
     double           f2(void) const;
     void             f2(const double& f2);
+    bool             normalize(void) const;
 
 protected:
     // Protected methods
@@ -128,14 +130,17 @@ protected:
     void copy_members(const GModelTemporalPhaseCurve& model);
     void free_members(void);
     void load_nodes(const GFilename& filename);
+    void normalise_nodes(void);
 
     // Protected parameter members
-    GModelPar           m_norm;     //!< Normalization factor
-    GModelPar           m_mjd;      //!< Reference MJD
-    GModelPar           m_phase;    //!< Phase at reference MJD
-    GModelPar           m_f0;       //!< Frequency at reference MJD
-    GModelPar           m_f1;       //!< First freq. derivative at reference MJD
-    GModelPar           m_f2;       //!< Second freq. derivative at reference MJD
+    GModelPar           m_norm;          //!< Normalization factor
+    GModelPar           m_mjd;           //!< Reference MJD
+    GModelPar           m_phase;         //!< Phase at reference MJD
+    GModelPar           m_f0;            //!< Frequency at reference MJD
+    GModelPar           m_f1;            //!< First freq. derivative at reference MJD
+    GModelPar           m_f2;            //!< Second freq. derivative at reference MJD
+    bool                m_normalize;     //!< Normalize phase curve (default: true)
+    bool                m_has_normalize; //!< XML has normalize attribute
 
     // Protected members
     mutable GNodeArray  m_nodes;    //!< Phase values of nodes
@@ -166,7 +171,7 @@ std::string GModelTemporalPhaseCurve::classname(void) const
 inline
 std::string GModelTemporalPhaseCurve::type(void) const
 {
-    return "PhaseCurve";
+    return ("PhaseCurve");
 }
 
 
@@ -372,6 +377,20 @@ void GModelTemporalPhaseCurve::f2(const double& f2)
 {
     m_f2.value(f2);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization flag
+ *
+ * @return True if the phase curve has been normalized, false otherwise.
+ *
+ * Signals whether a phase curve has been normalized or not.
+ ***************************************************************************/
+inline
+bool GModelTemporalPhaseCurve::normalize(void) const
+{
+    return (m_normalize);
 }
 
 #endif /* GMODELTEMPORALPHASECURVE_HPP */

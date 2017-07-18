@@ -47,6 +47,7 @@ const GModelTemporalRegistry   g_temporal_phase_registry(&g_temporal_phase_seed)
 #define G_READ                 "GModelTemporalPhaseCurve::read(GXmlElement&)"
 #define G_WRITE               "GModelTemporalPhaseCurve::write(GXmlElement&)"
 #define G_LOAD_NODES       "GModelTemporalPhaseCurve::load_nodes(GFilename&)"
+#define G_NORMALISE_NODES       "GModelTemporalPhaseCurve::normalise_nodes()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -84,6 +85,7 @@ GModelTemporalPhaseCurve::GModelTemporalPhaseCurve(void) : GModelTemporal()
  * @param[in] f1 First frequency derivative at reference time.
  * @param[in] f2 Second frequency derivative at reference time.
  * @param[in] norm Normalization factor.
+ * @param[in] normalize Normalize phase curve?
  *
  * Constructs phase curve from a list of nodes that is found in the specified
  * FITS file, a reference time and phase information at the reference time.
@@ -96,7 +98,8 @@ GModelTemporalPhaseCurve::GModelTemporalPhaseCurve(const GFilename& filename,
                                                    const double&    f0,
                                                    const double&    f1,
                                                    const double&    f2,
-                                                   const double&    norm) :
+                                                   const double&    norm,
+                                                   const bool&      normalize) :
                           GModelTemporal()
 {
     // Initialise members
@@ -109,6 +112,9 @@ GModelTemporalPhaseCurve::GModelTemporalPhaseCurve(const GFilename& filename,
     this->f1(f1);
     this->f2(f2);
     this->norm(norm);
+
+    // Set normalization flag
+    m_normalize = normalize;
 
     // Load nodes
     load_nodes(filename);
@@ -385,6 +391,17 @@ void GModelTemporalPhaseCurve::read(const GXmlElement& xml)
     m_f1.read(*f1);
     m_f2.read(*f2);
 
+    // Get optional normalization attribute
+    m_normalize     = true;
+    m_has_normalize = false;
+    if (xml.has_attribute("normalize")) {
+        m_has_normalize = true;
+        std::string arg = xml.attribute("normalize");
+        if (arg == "0" || gammalib::tolower(arg) == "false") {
+            m_normalize = false;
+        }
+    }
+
     // Load nodes from file
     load_nodes(gammalib::xml_file_expand(xml, xml.attribute("file")));
 
@@ -445,6 +462,16 @@ void GModelTemporalPhaseCurve::write(GXmlElement& xml) const
 
     // Set file attribute
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
+
+    // Set optional normalization attribute
+    if (m_has_normalize || !m_normalize) {
+        if (m_normalize) {
+            xml.attribute("normalize", "1");
+        }
+        else {
+            xml.attribute("normalize", "0");
+        }
+    }
 
     // Return
     return;
@@ -514,19 +541,24 @@ std::string GModelTemporalPhaseCurve::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Function file"));
         result.append(m_filename.url());
+        if (normalize()) {
+            result.append(" [normalized]");
+        }
         result.append("\n"+gammalib::parformat("Number of parameters"));
         result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }
-
-        // Append node information
         result.append("\n"+gammalib::parformat("Number of phase nodes"));
         result.append(gammalib::str(m_nodes.size()));
-        for (int i = 0; i < m_nodes.size(); ++i) {
-            result.append("\n");
-            result.append(gammalib::parformat(" Phase "+gammalib::str(m_nodes[i])));
-            result.append(gammalib::str(m_values[i]));
+
+        // EXPLICIT: Append node values
+        if (chatter >= EXPLICIT) {
+            for (int i = 0; i < m_nodes.size(); ++i) {
+                result.append("\n");
+                result.append(gammalib::parformat(" Phase "+gammalib::str(m_nodes[i])));
+                result.append(gammalib::str(m_values[i]));
+            }
         }
 
     } // endif: chatter was not silent
@@ -626,7 +658,9 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_nodes.clear();
     m_values.clear();
     m_filename.clear();
-    
+    m_normalize     = true;
+    m_has_normalize = false;
+
     // Return
     return;
 }
@@ -640,15 +674,17 @@ void GModelTemporalPhaseCurve::init_members(void)
 void GModelTemporalPhaseCurve::copy_members(const GModelTemporalPhaseCurve& model)
 {
     // Copy members
-    m_norm     = model.m_norm;
-    m_mjd      = model.m_mjd;
-    m_phase    = model.m_phase;
-    m_f0       = model.m_f0;
-    m_f1       = model.m_f1;
-    m_f2       = model.m_f2;
-    m_nodes    = model.m_nodes;
-    m_values   = model.m_values;
-    m_filename = model.m_filename;
+    m_norm          = model.m_norm;
+    m_mjd           = model.m_mjd;
+    m_phase         = model.m_phase;
+    m_f0            = model.m_f0;
+    m_f1            = model.m_f1;
+    m_f2            = model.m_f2;
+    m_nodes         = model.m_nodes;
+    m_values        = model.m_values;
+    m_filename      = model.m_filename;
+    m_normalize     = model.m_normalize;
+    m_has_normalize = model.m_has_normalize;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -796,6 +832,59 @@ void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
 
     // Close FITS file
     fits.close();
+
+    // Optionally normalise nodes
+    if (m_normalize) {
+        normalise_nodes();
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Normalise nodes
+ *
+ * @exception GException::invalid_value
+ *            Phase curve FITS file is invalid
+ *
+ * Normalise the node values so that the integral over the phase interval
+ * [0,1] gives an average normalisation of 1.
+ ***************************************************************************/
+void GModelTemporalPhaseCurve::normalise_nodes(void)
+{
+    // Initialise node integral
+    double sum = 0.0;
+
+    // Loop over all nodes-1
+    for (int i = 0; i < m_nodes.size()-1; ++i) {
+
+        // Compute phase values
+        double a = (m_nodes[i]   < 0.0) ? 0.0 : m_nodes[i];
+        double b = (m_nodes[i+1] > 1.0) ? 1.0 : m_nodes[i+1];
+
+        // Compute normalisation at phase values
+        double fa = m_nodes.interpolate(a, m_values);
+        double fb = m_nodes.interpolate(b, m_values);
+
+        // Compute intergal for this interval using the Trapezoid rule
+        sum += 0.5 * (b - a) * (fa + fb);
+
+    }
+
+    // Throw an exception if the integral is not positive
+    if (sum <= 0.0) {
+        std::string msg = "Integral over phase curve is not positive ("+
+                          gammalib::str(sum)+"). Please provide a valid phase "
+                          "curve file.";
+        throw GException::invalid_value(G_NORMALISE_NODES, msg);
+    }
+
+    // Normalise the node values
+    for (int i = 0; i < m_values.size(); ++i) {
+        m_values[i] /= sum;
+    }
 
     // Return
     return;

@@ -46,7 +46,8 @@ public:
                              const double&    f0,
                              const double&    f1,
                              const double&    f2,
-                             const double&    norm = 1.0);
+                             const double&    norm = 1.0,
+                             const bool&      normalize = true);
     GModelTemporalPhaseCurve(const GModelTemporalPhaseCurve& model);
     virtual ~GModelTemporalPhaseCurve(void);
 
@@ -78,6 +79,7 @@ public:
     void             f1(const double& f1);
     double           f2(void) const;
     void             f2(const double& f2);
+    bool             normalize(void) const;
 };
 
 

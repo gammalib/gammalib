@@ -1,8 +1,9 @@
-2017-07-06
+2017-07-18
 
         * Version 1.4.0 released
         =========================
 
+        Normalise phase curves by default (#2154)
         Add GSkyRegions::overlaps() and GSkyMap::overlaps() classes (#1980)
 
 

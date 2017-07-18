@@ -880,7 +880,7 @@ int GObservations::nobserved(void) const
 /***********************************************************************//**
  * @brief Print observation list information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing observation list information
  ***************************************************************************/
 std::string GObservations::print(const GChatter& chatter) const
@@ -910,12 +910,12 @@ std::string GObservations::print(const GChatter& chatter) const
                 result.append("\n");
                 result.append((*this)[i]->print());
             }
-        } // endif: chatter was explicit
+        }
 
         // VERBOSE: Append models
         if (chatter == VERBOSE) {
             result.append("\n"+m_models.print());
-        } // endif: chatter was verbose
+        }
 
     } // endif: chatter was not silent
 
