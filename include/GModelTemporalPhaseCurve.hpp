@@ -116,6 +116,7 @@ public:
     double           phase(void) const;
     double           phase(const GTime& time) const;
     void             phase(const double& phase);
+    double           value(const double& phase) const;
     double           f0(void) const;
     void             f0(const double& f0);
     double           f1(void) const;
@@ -130,7 +131,7 @@ protected:
     void copy_members(const GModelTemporalPhaseCurve& model);
     void free_members(void);
     void load_nodes(const GFilename& filename);
-    void normalise_nodes(void);
+    void normalize_nodes(void);
 
     // Protected parameter members
     GModelPar           m_norm;          //!< Normalization factor

@@ -47,7 +47,7 @@ const GModelTemporalRegistry   g_temporal_phase_registry(&g_temporal_phase_seed)
 #define G_READ                 "GModelTemporalPhaseCurve::read(GXmlElement&)"
 #define G_WRITE               "GModelTemporalPhaseCurve::write(GXmlElement&)"
 #define G_LOAD_NODES       "GModelTemporalPhaseCurve::load_nodes(GFilename&)"
-#define G_NORMALISE_NODES       "GModelTemporalPhaseCurve::normalise_nodes()"
+#define G_NORMALISE_NODES       "GModelTemporalPhaseCurve::normalize_nodes()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -522,6 +522,34 @@ double GModelTemporalPhaseCurve::phase(const GTime& time) const
 
 
 /***********************************************************************//**
+ * @brief Evaluate phase curve value for a given phase
+ *
+ * @param[in] phase Phase.
+ * @return Value of phase curve.
+ *
+ * Computes
+ *
+ * \f[
+ *    S_{\rm t}(\Phi) = r(\Phi) \times {\tt m\_norm}
+ * \f]
+ *
+ * where
+ *
+ * \f$r(\Phi)\f$ is the phase dependent rate, defined by linear interpolation
+ * between the nodes in a FITS file, \f$\Phi\f$ is the phase, and
+ * \f${\tt m\_norm}\f$ is a normalisation constant.
+ ***************************************************************************/
+double GModelTemporalPhaseCurve::value(const double& phase) const
+{
+    // Compute function value
+    double value  = m_norm.value() * m_nodes.interpolate(phase, m_values);
+
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
  * @brief Print phase curve information
  *
  * @param[in] chatter Chattiness.
@@ -833,9 +861,9 @@ void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
     // Close FITS file
     fits.close();
 
-    // Optionally normalise nodes
+    // Optionally normalize nodes
     if (m_normalize) {
-        normalise_nodes();
+        normalize_nodes();
     }
 
     // Return
@@ -852,7 +880,7 @@ void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
  * Normalise the node values so that the integral over the phase interval
  * [0,1] gives an average normalisation of 1.
  ***************************************************************************/
-void GModelTemporalPhaseCurve::normalise_nodes(void)
+void GModelTemporalPhaseCurve::normalize_nodes(void)
 {
     // Initialise node integral
     double sum = 0.0;

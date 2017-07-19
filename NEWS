@@ -23,7 +23,8 @@ The following classes have been renamed:
 The following methods have been added:
 - GSkyRegion::overlaps(GSkyRegions&)
 - GSkyMap::overlaps(GSkyRegion&)
-- GModelTemporalPhaseCurve::normalise()
+- GModelTemporalPhaseCurve::normalize()
+- GModelTemporalPhaseCurve::value(double&)
 
 The following methods have been removed:
 - n.a.

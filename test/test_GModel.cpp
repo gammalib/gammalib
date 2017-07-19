@@ -2322,52 +2322,78 @@ void TestGModel::test_temp_phasecurve(void)
     test_value(model2.f1(), 0.1);
     test_value(model2.f2(), 0.01);
     test_value(model2.norm(), 2.0);
-   
-    // Test XML constructor
-    GXml         xml(m_xml_model_point_temp_phasecurve);
-    GXmlElement* element = xml.element(0)->element(0)->element("temporal", 0);
-    GModelTemporalPhaseCurve model3(*element);
-    test_value(model3.size(), 6);
-    test_value(model3.type(), "PhaseCurve", "Check model type");
+    test_value(model2.value(0.1), 0.0);
+    test_value(model2.value(0.2), 9.09090909090909);
+    test_value(model2.value(0.6), 8.18181818181818);
+    test_assert(model2.normalize(), "Check that phase curve is normalised");
+
+    // Test value constructor without phase curve normalization
+    GModelTemporalPhaseCurve model3(m_temp_phasecurve,
+                                    GTime(3.0, "secs"),
+                                    0.0,
+                                    1.0,
+                                    0.1,
+                                    0.01,
+                                    2.0,
+                                    false);
     test_value(model3.filename().url(), m_temp_phasecurve,
                "Check phase curve file name");
-    test_value(model3.norm(), 1.0);
-    test_value(model3.mjd().mjd(), 51544.5);
+    test_value(model3.mjd().secs(), 3.0);
     test_value(model3.phase(), 0.0);
     test_value(model3.f0(), 1.0);
     test_value(model3.f1(), 0.1);
     test_value(model3.f2(), 0.01);
+    test_value(model3.norm(), 2.0);
+    test_value(model3.value(0.1), 0.0);
+    test_value(model3.value(0.2), 2.0);
+    test_value(model3.value(0.6), 1.8);
+    test_assert(!model3.normalize(), "Check that phase curve is not normalised");
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_point_temp_phasecurve);
+    GXmlElement* element = xml.element(0)->element(0)->element("temporal", 0);
+    GModelTemporalPhaseCurve model4(*element);
+    test_value(model4.size(), 6);
+    test_value(model4.type(), "PhaseCurve", "Check model type");
+    test_value(model4.filename().url(), m_temp_phasecurve,
+               "Check phase curve file name");
+    test_value(model4.norm(), 1.0);
+    test_value(model4.mjd().mjd(), 51544.5);
+    test_value(model4.phase(), 0.0);
+    test_value(model4.f0(), 1.0);
+    test_value(model4.f1(), 0.1);
+    test_value(model4.f2(), 0.01);
 
     // Test filename method
-    model3.filename(m_temp_phasecurve);
-    test_value(model3.filename().url(), m_temp_phasecurve,
+    model4.filename(m_temp_phasecurve);
+    test_value(model4.filename().url(), m_temp_phasecurve,
                "Check phase curve file name");
 
     // Test parameter methods
-    model3.norm(3.0);
-    test_value(model3.norm(), 3.0);
-    model3.mjd(GTime(3.0, "s"));
-    test_value(model3.mjd().secs(), 3.0);
-    model3.phase(0.3);
-    test_value(model3.phase(), 0.3);
-    model3.f0(3.0);
-    test_value(model3.f0(), 3.0);
-    model3.f1(3.0);
-    test_value(model3.f1(), 3.0);
-    model3.f2(3.0);
-    test_value(model3.f2(), 3.0);
+    model4.norm(3.0);
+    test_value(model4.norm(), 3.0);
+    model4.mjd(GTime(3.0, "s"));
+    test_value(model4.mjd().secs(), 3.0);
+    model4.phase(0.3);
+    test_value(model4.phase(), 0.3);
+    model4.f0(3.0);
+    test_value(model4.f0(), 3.0);
+    model4.f1(3.0);
+    test_value(model4.f1(), 3.0);
+    model4.f2(3.0);
+    test_value(model4.f2(), 3.0);
 
     // Test operator access
     const char* strarray[] = {"Normalization", "MJD", "Phase", "F0", "F1", "F2"};
     for (int i = 0; i < 6; ++i) {
         std::string keyname(strarray[i]);
-        model3[keyname].remove_range(); // To allow setting of any value
-        model3[keyname].value(2.1);
-        model3[keyname].error(1.9);
-        model3[keyname].gradient(0.8);
-        test_value(model3[keyname].value(), 2.1);
-        test_value(model3[keyname].error(), 1.9);
-        test_value(model3[keyname].gradient(), 0.8);
+        model4[keyname].remove_range(); // To allow setting of any value
+        model4[keyname].value(2.1);
+        model4[keyname].error(1.9);
+        model4[keyname].gradient(0.8);
+        test_value(model4[keyname].value(), 2.1);
+        test_value(model4[keyname].error(), 1.9);
+        test_value(model4[keyname].gradient(), 0.8);
     }
 
     // Return
