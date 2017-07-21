@@ -120,7 +120,8 @@ EXTRA_DIST = data reports testinst \
              test_GXml.py \
              test_GXspec.py \
              test_examples.py \
-             test_python.py
+             test_python.py \
+             test_support.py
 
 # Standard test sources and links
 test_GSupport_SOURCES = test_GSupport.cpp test_GSupport.hpp

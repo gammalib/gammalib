@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib application module
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 # ==========================================================================
 import os
 import gammalib
+import test_support
 
 
 # ========================================== #
@@ -42,8 +43,7 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-
-    # Private methods
+    # Check log file versus a reference
     def _check_log_file(self, ref, calls):
         """
         Check log file versus a reference
@@ -74,24 +74,28 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-
-    # Public methods
-    def set(self):
+    # Setup GApplicationPars container
+    def _setup_pars(self):
         """
-        Set all test functions
+        Setup GApplicationPars container
+
+        Returns
+        -------
+        pars : `~gammalib.GApplicationPars`
+            Parameter container
         """
-        # Set test name
-        self.name('app')
+        # Setup application parameter container
+        pars = gammalib.GApplicationPars()
+        for i in range(10):
+            name = '%s' % i
+            par  = gammalib.GApplicationPar(name,'r','a','1.0','0.0','2.0','Dummy')
+            pars.append(par)
 
-        # Append tests
-        self.append(self.test_log, 'Test GLog')
-        self.append(self.test_app, 'Test GApplication')
-        self.append(self.test_pars, 'Test GApplicationPars')
+        # Return application parameter container
+        return pars
 
-        # Return
-        return
-
-    def test_log(self):
+    # Test GLog class
+    def _test_log(self):
         """
         Test GLog class
         """
@@ -192,7 +196,8 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    def test_app(self):
+    # Test GApplication class
+    def _test_app(self):
         """
         Test GApplication class
         """
@@ -224,7 +229,8 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    def test_pars(self):
+    # Test GApplicationPars class
+    def _test_pars(self):
         """
         Test GApplicationPars class
         """
@@ -237,6 +243,62 @@ class Test(gammalib.GPythonTestSuite):
             self.test_try_success()
         else:
             self.test_try_failure('This should never happen')
+
+        # Return
+        return
+
+    # Test GApplicationPars class access operators
+    def _test_pars_access(self):
+        """
+        Test GApplicationPars class model access
+        """
+        # Setup application parameter container
+        pars = self._setup_pars()
+
+        # Perform application parameter access tests
+        test_support._container_access_index(self, pars)
+
+        # Check application parameter setting by index from start
+        par     = gammalib.GApplicationPar('98','r','a','1.0','0.0','2.0','Dummy')
+        pars[3] = par
+        self.test_value(pars[3].name(),  '98')
+
+        # Check application parameter setting by index from end
+        par      = gammalib.GApplicationPar('99','r','a','1.0','0.0','2.0','Dummy')
+        pars[-2] = par
+        self.test_value(pars[-2].name(), '99')
+
+        # Return
+        return
+
+    # Test GApplicationPars class slicing
+    def _test_pars_slicing(self):
+        """
+        Test GApplicationPars class slicing
+        """
+        # Setup application parameter container
+        pars = self._setup_pars()
+
+        # Perform slicing tests
+        test_support._container_slicing(self, pars)
+
+        # Return
+        return
+
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions
+        """
+        # Set test name
+        self.name('app')
+
+        # Append tests
+        self.append(self._test_log, 'Test GLog')
+        self.append(self._test_app, 'Test GApplication')
+        self.append(self._test_pars, 'Test GApplicationPars')
+        self.append(self._test_pars_access, 'Test GApplicationPars class parameter access')
+        self.append(self._test_pars_access, 'Test GApplicationPars class slicing')
 
         # Return
         return

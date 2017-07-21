@@ -125,9 +125,13 @@ public:
         }
     }
     void __setitem__(const int& index, const GModel& val) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->size()) {
             self->set(index, val);
-            return;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            self->set(self->size()+index, val);
         }
         else {
             throw GException::out_of_range("__setitem__(int)", "Model index",

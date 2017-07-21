@@ -18,6 +18,7 @@
 #
 # ==========================================================================
 import gammalib
+import test_support
 
 
 # ========================================== #
@@ -38,26 +39,39 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    # Set test functions
-    def set(self):
+    # Setup GObservations container
+    def _setup_obs(self):
         """
-        Set all test functions
+        Setup GObservations container
+
+        Returns
+        -------
+        obs : `~gammalib.GObservations`
+            Observation container
         """
-        # Set test name
-        self.name('obs')
+        # Setup observation container
+        obs = gammalib.GObservations()
+        run = gammalib.GCTAObservation()
+        for i in range(10):
+            run.name('%s' % i)
+            run.id('%s' % i)
+            obs.append(run)
 
-        # Append tests
-        self.append(self.test_energy, 'Test GEnergy class')
-        self.append(self.test_energies, 'Test GEnergies class')
-        self.append(self.test_time, 'Test GTime class')
-        self.append(self.test_observations_slicing,
-                    'Test GObservations class slicing')
+        # Setup model container
+        models = gammalib.GModels()
+        model  = gammalib.GModelSky()
+        for i in range(10):
+            model.name('%s' % i)
+            models.append(model)
 
-        # Return
-        return
+        # Set observation's model container
+        obs.models(models)
+
+        # Return observations container
+        return obs
 
     # Test GEnergy class
-    def test_energy(self):
+    def _test_energy(self):
         """
         Test GEnergy class
         """
@@ -131,7 +145,7 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test GEnergies class
-    def test_energies(self):
+    def _test_energies(self):
         """
         Test GEnergies class
         """
@@ -149,7 +163,7 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test GTime class
-    def test_time(self):
+    def _test_time(self):
         """
         Test GTime class
         """
@@ -217,78 +231,69 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GObservations class access operators
+    def _test_observations_access(self):
+        """
+        Test GObservations class observation access
+        """
+        # Setup observation container and CTA observation
+        obs = self._setup_obs()
+        run = gammalib.GCTAObservation()
+
+        # Perform observation access tests
+        test_support._container_access_index(self, obs)
+
+        # Check observation setting by index from start
+        run.id('98')
+        obs[3] = run
+        self.test_value(obs[3].id(),  '98')
+
+        # Check observation setting by index from end
+        run.id('99')
+        obs[-2] = run
+        self.test_value(obs[-2].id(), '99')
+
+        # Return
+        return
 
     # Test GObservations class slicing
-    def test_observations_slicing(self):
+    def _test_observations_slicing(self):
         """
         Test GObservations class slicing
         """
         # Setup observation container
-        obs = gammalib.GObservations()
-        run = gammalib.GCTAObservation()
-        for i in range(10):
-            run.id('%s' % i)
-            obs.append(run)
+        obs = self._setup_obs()
 
-        # Setup model container
-        models = gammalib.GModels()
-        model  = gammalib.GModelSky()
-        for i in range(10):
-            model.name('%s' % i)
-            models.append(model)
+        # Perform slicing tests
+        test_support._container_slicing(self, obs)
 
-        # Set observation's model container
-        obs.models(models)
-
-        # Test obs[start:end]
-        self.test_value(len(obs[3:5]), 2)
+        # Perform additional slicing tests
         self.test_value(len(obs[3:5].models()), 10)
-        self.test_value(obs[3:5][0].id(), '3')
-        self.test_value(obs[3:5][1].id(), '4')
-
-        # Test obs[start:]
-        self.test_value(len(obs[7:]), 3)
         self.test_value(len(obs[7:].models()), 10)
-        self.test_value(obs[7:][0].id(), '7')
-        self.test_value(obs[7:][1].id(), '8')
-        self.test_value(obs[7:][2].id(), '9')
-
-        # Test obs[:end]
-        self.test_value(len(obs[:2]), 2)
         self.test_value(len(obs[:2].models()), 10)
-        self.test_value(obs[:2][0].id(), '0')
-        self.test_value(obs[:2][1].id(), '1')
-
-        # Test obs[:]
-        self.test_value(len(obs[:]), 10)
         self.test_value(len(obs[:].models()), 10)
-        for i in range(10):
-            self.test_value(obs[:][i].id(), '%s' % i)
-
-        # Test obs[start:end:step]
-        self.test_value(len(obs[3:7:2]), 2)
         self.test_value(len(obs[3:7:2].models()), 10)
-        self.test_value(obs[3:7:2][0].id(), '3')
-        self.test_value(obs[3:7:2][1].id(), '5')
-
-        # Test obs[start:end:step]
-        self.test_value(len(obs[6:3:-2]), 2)
         self.test_value(len(obs[6:3:-2].models()), 10)
-        self.test_value(obs[6:3:-2][0].id(), '6')
-        self.test_value(obs[6:3:-2][1].id(), '4')
-
-        # Test obs[-start:]
-        self.test_value(len(obs[-2:]), 2)
         self.test_value(len(obs[-2:].models()), 10)
-        self.test_value(obs[-2:][0].id(), '8')
-        self.test_value(obs[-2:][1].id(), '9')
-
-        # Test obs[:-end]
-        self.test_value(len(obs[:-7]), 3)
         self.test_value(len(obs[:-7].models()), 10)
-        self.test_value(obs[:-7][0].id(), '0')
-        self.test_value(obs[:-7][1].id(), '1')
-        self.test_value(obs[:-7][2].id(), '2')
+
+        # Return
+        return
+
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions
+        """
+        # Set test name
+        self.name('obs')
+
+        # Append tests
+        self.append(self._test_energy, 'Test GEnergy class')
+        self.append(self._test_energies, 'Test GEnergies class')
+        self.append(self._test_time, 'Test GTime class')
+        self.append(self._test_observations_access, 'Test GObservations class observation access')
+        self.append(self._test_observations_slicing, 'Test GObservations class slicing')
 
         # Return
         return
