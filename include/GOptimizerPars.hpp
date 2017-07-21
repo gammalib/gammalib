@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GOptimizerPars.hpp - Optimizer parameter container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,6 +75,7 @@ public:
     int                  nfree(void) const;
     GOptimizerPar*       set(const int& index, const GOptimizerPar& par);
     GOptimizerPar*       set(const std::string& name, const GOptimizerPar& par);
+    GOptimizerPar*       append(const GOptimizerPar& par);
     void                 attach(GOptimizerPar* par);
     void                 attach(const int& index, GOptimizerPar* par);
     void                 attach(const std::string& name, GOptimizerPar* par);

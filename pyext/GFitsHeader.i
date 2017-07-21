@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GFitsHeader.i - FITS header cards container class           *
+ *            GFitsHeader.i - FITS header cards container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,15 +29,13 @@
 #include "GTools.hpp"
 %}
 
-//%include stl.i
-
 
 /***********************************************************************//**
  * @class GFitsHeader
  *
  * @brief Interface for FITS header class
  ***************************************************************************/
-class GFitsHeader : public GBase {
+class GFitsHeader : public GContainer {
 public:
     // Constructors and destructors
     GFitsHeader(void);
@@ -77,8 +75,13 @@ public:
  ***************************************************************************/
 %extend GFitsHeader {
     GFitsHeaderCard& __getitem__(const int& cardno) {
+        // Counting from start, e.g. [2]
         if (cardno >= 0 && cardno < self->size()) {
             return (*self)[cardno];
+        }
+        // Counting from end, e.g. [-1]
+        else if (cardno < 0 && self->size()+cardno >= 0) {
+            return (*self)[self->size()+cardno];
         }
         else {
             throw GException::out_of_range("__getitem__(int)",
@@ -89,10 +92,43 @@ public:
     GFitsHeaderCard& __getitem__(const std::string& keyname) {
         return (*self)[keyname];
     }
+    GFitsHeader* __getitem__(PyObject *param) {
+        if (PySlice_Check(param)) {
+            Py_ssize_t start = 0;
+            Py_ssize_t stop  = 0;
+            Py_ssize_t step  = 0;
+            Py_ssize_t len   = self->size();
+            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
+                GFitsHeader* header = new GFitsHeader;
+                if (step > 0) {
+                    for (int i = (int)start; i < (int)stop; i += (int)step) {
+                        header->append((*self)[i]);
+                    }
+                }
+                else {
+                    for (int i = (int)start; i > (int)stop; i += (int)step) {
+                        header->append((*self)[i]);
+                    }
+                }
+                return header;
+            }
+            else {
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
+            }
+        }
+        else {
+            throw GException::invalid_argument("__getitem__(PyObject)","");
+        }
+    }
     void __setitem__(const int& cardno, const GFitsHeaderCard& card) {
+        // Counting from start, e.g. [2]
         if (cardno >= 0 && cardno < self->size()) {
             (*self)[cardno] = card;
-            return;
+        }
+        // Counting from end, e.g. [-1]
+        else if (cardno < 0 && self->size()+cardno >= 0) {
+            (*self)[self->size()+cardno] = card;
         }
         else {
             throw GException::out_of_range("__setitem__(int)",

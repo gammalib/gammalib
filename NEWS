@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.4.0
 
-22 June 2017
+22 July 2017
 
 
 1. Introduction
@@ -21,7 +21,13 @@ The following classes have been renamed:
 - n.a.
 
 The following methods have been added:
-- n.a.
+- GSkyRegion::type(std::string&)
+- GSkyRegion::name(std::string&)
+- GSkyRegion::solidangle(std::string&)
+- GOptimizerPars::append(GOptimizerPar&)
+- GLATEventList::append(GLATEventAtom&)
+- GLATEventList::reserve(int&)
+- GLATEventList::remove(int&,int&)
 
 The following methods have been removed:
 - n.a.
@@ -78,12 +84,13 @@ None
 
 11. Optimization module
 -----------------------
-None
+Add GOptimizerPars::append() method to allow appending of parameters to the
+container.
 
 
 12. Sky module
 --------------
-None
+Add methods to set the name, type and solid angle of a sky region.
 
 
 13. Support module
@@ -118,7 +125,7 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-None
+Add append(), remove() and reserve() methods to GLATEventList class.
 
 
 20. CTA interface

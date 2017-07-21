@@ -90,19 +90,64 @@ public:
  * @brief GCTAEventList class extension
  ***************************************************************************/
 %extend GCTAEventList {
+    GCTAEventAtom* __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
+            return (*self)[index];
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            return (*self)[self->size()+index];
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", "Event index",
+                                           index, self->size());
+        }
+    }
+    GCTAEventList* __getitem__(PyObject *param) {
+        if (PySlice_Check(param)) {
+            Py_ssize_t start = 0;
+            Py_ssize_t stop  = 0;
+            Py_ssize_t step  = 0;
+            Py_ssize_t len   = self->size();
+            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
+                GCTAEventList* list = new GCTAEventList;
+                if (step > 0) {
+                    for (int i = (int)start; i < (int)stop; i += (int)step) {
+                        list->append(*(*self)[i]);
+                    }
+                }
+                else {
+                    for (int i = (int)start; i > (int)stop; i += (int)step) {
+                        list->append(*(*self)[i]);
+                    }
+                }
+                return list;
+            }
+            else {
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
+            }
+        }
+        else {
+            throw GException::invalid_argument("__getitem__(PyObject)","");
+        }
+    }
+    void __setitem__(const int& index, const GCTAEventAtom& event) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
+            *(*self)[index] = event;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            *(*self)[self->size()+index] = event;
+        }
+        else {
+            throw GException::out_of_range("__setitem__(int)", "Event index",
+                                           index, self->size());
+        }
+    }
     GCTAEventList copy() {
         return (*self);
-    }
-    GCTAEventAtom* __getitem__(int index) {
-        if (index >= 0 && index < self->size())
-            return (*self)[index];
-        else
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
-    }
-    void __setitem__(int index, const GCTAEventAtom& val) {
-        if (index>=0 && index < self->size())
-            *((*self)[index]) = val;
-        else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
 };

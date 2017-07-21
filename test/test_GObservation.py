@@ -649,24 +649,8 @@ class Test(gammalib.GPythonTestSuite):
         # Setup photons container
         photons = self._setup_photons()
 
-        # Loop over all elements using the container iterator and count the
-        # number of iterations
-        nphotons  = 0
-        reference = 0.0
-        for photon in photons:
-            self.test_value(photon.energy().MeV(), reference)
-            nphotons  += 1
-            reference += 1.0
-
-        # Check that looping was successful
-        self.test_value(photons.size(), 10, 'Check container size')
-        self.test_value(nphotons, 10, 'Check container iterator')
-
-        # Test access from start
-        self.test_value(photons[3].energy().MeV(), 3.0)
-
-        # Check access from end
-        self.test_value(photons[-2].energy().MeV(), 8.0)
+        # Perform photons access tests
+        test_support._energy_container_access_index(self, photons)
 
         # Return
         return
@@ -679,47 +663,8 @@ class Test(gammalib.GPythonTestSuite):
         # Setup photons container
         photons = self._setup_photons()
 
-        # Test photons[start:end]
-        self.test_value(len(photons[3:5]), 2)
-        self.test_value(photons[3:5][0].energy().MeV(), 3.0)
-        self.test_value(photons[3:5][1].energy().MeV(), 4.0)
-
-        # Test photons[start:]
-        self.test_value(len(photons[7:]), 3)
-        self.test_value(photons[7:][0].energy().MeV(), 7.0)
-        self.test_value(photons[7:][1].energy().MeV(), 8.0)
-        self.test_value(photons[7:][2].energy().MeV(), 9.0)
-
-        # Test photons[:end]
-        self.test_value(len(photons[:2]), 2)
-        self.test_value(photons[:2][0].energy().MeV(), 0.0)
-        self.test_value(photons[:2][1].energy().MeV(), 1.0)
-
-        # Test photons[:]
-        self.test_value(len(photons[:]), 10)
-        for i in range(10):
-            self.test_value(photons[:][i].energy().MeV(), float(i))
-
-        # Test photons[start:end:step]
-        self.test_value(len(photons[3:7:2]), 2)
-        self.test_value(photons[3:7:2][0].energy().MeV(), 3.0)
-        self.test_value(photons[3:7:2][1].energy().MeV(), 5.0)
-
-        # Test photons[start:end:step]
-        self.test_value(len(photons[6:3:-2]), 2)
-        self.test_value(photons[6:3:-2][0].energy().MeV(), 6.0)
-        self.test_value(photons[6:3:-2][1].energy().MeV(), 4.0)
-
-        # Test photons[-start:]
-        self.test_value(len(photons[-2:]), 2)
-        self.test_value(photons[-2:][0].energy().MeV(), 8.0)
-        self.test_value(photons[-2:][1].energy().MeV(), 9.0)
-
-        # Test photons[:-end]
-        self.test_value(len(photons[:-7]), 3)
-        self.test_value(photons[:-7][0].energy().MeV(), 0.0)
-        self.test_value(photons[:-7][1].energy().MeV(), 1.0)
-        self.test_value(photons[:-7][2].energy().MeV(), 2.0)
+        # Perform slicing tests
+        test_support._energy_container_slicing(self, photons)
 
         # Return
         return
@@ -735,16 +680,6 @@ class Test(gammalib.GPythonTestSuite):
 
         # Perform observation access tests
         test_support._container_access_index(self, obs)
-
-        # Check observation setting by index from start
-        run.id('98')
-        obs[3] = run
-        self.test_value(obs[3].id(),  '98')
-
-        # Check observation setting by index from end
-        run.id('99')
-        obs[-2] = run
-        self.test_value(obs[-2].id(), '99')
 
         # Return
         return

@@ -61,7 +61,7 @@ public:
     virtual ~GLATEventList(void);
 
     // Operators
-    virtual GLATEventList&       operator= (const GLATEventList& list);
+    virtual GLATEventList&       operator=(const GLATEventList& list);
     virtual GLATEventAtom*       operator[](const int& index);
     virtual const GLATEventAtom* operator[](const int& index) const;
 
@@ -81,6 +81,9 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void append(const GLATEventAtom& event);
+    void reserve(const int& number);
+    void remove(const int& index, const int& number = 1);
 
 protected:
     // Protected methods
@@ -93,13 +96,13 @@ protected:
     void         read_ds_keys(const GFitsHDU& hdu);
 
     // Protected members
-    GLATRoi                    m_roi;            //!< Region of interest
-    std::vector<GLATEventAtom> m_events;         //!< Events
-    std::vector<std::string>   m_difrsp_label;   //!< Diffuse response model labels
-    std::vector<std::string>   m_ds_type;        //!< Data selection types
-    std::vector<std::string>   m_ds_unit;        //!< Data selection units
-    std::vector<std::string>   m_ds_value;       //!< Data selection values
-    std::vector<std::string>   m_ds_reference;   //!< Data selection references
+    GLATRoi                    m_roi;          //!< Region of interest
+    std::vector<GLATEventAtom> m_events;       //!< Events
+    std::vector<std::string>   m_difrsp_label; //!< Diffuse response model labels
+    std::vector<std::string>   m_ds_type;      //!< Data selection types
+    std::vector<std::string>   m_ds_unit;      //!< Data selection units
+    std::vector<std::string>   m_ds_value;     //!< Data selection values
+    std::vector<std::string>   m_ds_reference; //!< Data selection references
 };
 
 
@@ -148,6 +151,21 @@ inline
 const GLATRoi& GLATEventList::roi(void) const
 {
     return m_roi;
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for events
+ *
+ * @param[in] number Number of events.
+ *
+ * Reserves space for number events in the event list.
+ ***************************************************************************/
+inline
+void GLATEventList::reserve(const int& number)
+{
+    m_events.reserve(number);
+    return;
 }
 
 #endif /* GLATEVENTLIST_HPP */

@@ -50,6 +50,69 @@ def _container_access_index(testsuite, container):
     # Check access from end
     testsuite.test_value(container[-2].name(), '8')
 
+    # Clone first element
+    #element = container[0].copy()
+
+    # Check setting by index from start
+    #element.name('98')
+    #container[3] = element
+    #self.test_value(container[3].name(),  '98')
+
+    # Check setting by index from end
+    #element.name('99')
+    #container[-2] = element
+    #self.test_value(container[-2].name(), '99')
+
+    # Return
+    return
+
+
+# ===================================== #
+# Test energy container access by index #
+# ===================================== #
+def _energy_container_access_index(testsuite, container):
+    """
+    Test energy container access by index
+
+    Parameters
+    ----------
+    testsuite : `~gammalib.GPythonTestSuite`
+        Test suite class
+    container : `~gammalib.GContainer`
+        Container class
+    """
+    # Loop over all elements using the container iterator and count the number
+    # of iterations
+    niter     = 0
+    reference = 0.0
+    for element in container:
+        testsuite.test_value(element.energy().MeV(), reference)
+        niter     += 1
+        reference += 1.0
+
+    # Check that looping was successful
+    testsuite.test_value(container.size(), 10, 'Check container size')
+    testsuite.test_value(niter, 10, 'Check container iterator')
+
+    # Test access from start
+    testsuite.test_value(container[3].energy().MeV(), 3.0)
+
+    # Check access from end
+    testsuite.test_value(container[-2].energy().MeV(), 8.0)
+
+    # Clone first element
+    element = container[0].copy()
+
+    # Check setting by index from start
+    element.energy().MeV(98.0)
+    container[3] = element
+    testsuite.test_value(container[3].energy().MeV(),  98.0)
+
+    # Check setting setting by index from end
+    element.energy().MeV(99.0)
+    container[-2] = element
+    testsuite.test_value(container[-2].energy().MeV(),  99.0)
+
     # Return
     return
 
@@ -109,6 +172,66 @@ def _container_slicing(testsuite, container):
     testsuite.test_value(container[:-7][0].name(), '0')
     testsuite.test_value(container[:-7][1].name(), '1')
     testsuite.test_value(container[:-7][2].name(), '2')
+
+    # Return
+    return
+
+
+# ============================= #
+# Test energy container slicing #
+# ============================= #
+def _energy_container_slicing(testsuite, container):
+    """
+    Test energy container slicing
+
+    Parameters
+    ----------
+    testsuite : `~gammalib.GPythonTestSuite`
+        Test suite class
+    container : `~gammalib.GContainer`
+        Container class
+    """
+    # Test container[start:end]
+    testsuite.test_value(len(container[3:5]), 2)
+    testsuite.test_value(container[3:5][0].energy().MeV(), 3.0)
+    testsuite.test_value(container[3:5][1].energy().MeV(), 4.0)
+
+    # Test container[start:]
+    testsuite.test_value(len(container[7:]), 3)
+    testsuite.test_value(container[7:][0].energy().MeV(), 7.0)
+    testsuite.test_value(container[7:][1].energy().MeV(), 8.0)
+    testsuite.test_value(container[7:][2].energy().MeV(), 9.0)
+
+    # Test container[:end]
+    testsuite.test_value(len(container[:2]), 2)
+    testsuite.test_value(container[:2][0].energy().MeV(), 0.0)
+    testsuite.test_value(container[:2][1].energy().MeV(), 1.0)
+
+    # Test container[:]
+    testsuite.test_value(len(container[:]), 10)
+    for i in range(10):
+        testsuite.test_value(container[:][i].energy().MeV(), float(i))
+
+    # Test container[start:end:step]
+    testsuite.test_value(len(container[3:7:2]), 2)
+    testsuite.test_value(container[3:7:2][0].energy().MeV(), 3.0)
+    testsuite.test_value(container[3:7:2][1].energy().MeV(), 5.0)
+
+    # Test container[start:end:step]
+    testsuite.test_value(len(container[6:3:-2]), 2)
+    testsuite.test_value(container[6:3:-2][0].energy().MeV(), 6.0)
+    testsuite.test_value(container[6:3:-2][1].energy().MeV(), 4.0)
+
+    # Test container[-start:]
+    testsuite.test_value(len(container[-2:]), 2)
+    testsuite.test_value(container[-2:][0].energy().MeV(), 8.0)
+    testsuite.test_value(container[-2:][1].energy().MeV(), 9.0)
+
+    # Test container[:-end]
+    testsuite.test_value(len(container[:-7]), 3)
+    testsuite.test_value(container[:-7][0].energy().MeV(), 0.0)
+    testsuite.test_value(container[:-7][1].energy().MeV(), 1.0)
+    testsuite.test_value(container[:-7][2].energy().MeV(), 2.0)
 
     # Return
     return

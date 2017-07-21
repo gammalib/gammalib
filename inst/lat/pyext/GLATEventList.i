@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventList.i - Fermi/LAT event list class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,11 @@ public:
     virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
     virtual const GLATRoi& roi(void) const;
+
+    // Other methods
+    void append(const GLATEventAtom& event);
+    void reserve(const int& number);
+    void remove(const int& index, const int& number = 1);
 };
 
 
@@ -63,25 +68,64 @@ public:
  * @brief GLATEventList class extension
  ***************************************************************************/
 %extend GLATEventList {
-    GLATEventList copy() {
-        return (*self);
-    }
     GLATEventAtom* __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->size()) {
-            return ((*self)[index]);
+            return (*self)[index];
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            return (*self)[self->size()+index];
         }
         else {
             throw GException::out_of_range("__getitem__(int)", "Event index",
                                            index, self->size());
         }
     }
-    void __setitem__(const int& index, const GLATEventAtom& value) {
-        if (index>=0 && index < self->size()) {
-            *((*self)[index]) = value;
+    GLATEventList* __getitem__(PyObject *param) {
+        if (PySlice_Check(param)) {
+            Py_ssize_t start = 0;
+            Py_ssize_t stop  = 0;
+            Py_ssize_t step  = 0;
+            Py_ssize_t len   = self->size();
+            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
+                GLATEventList* list = new GLATEventList;
+                if (step > 0) {
+                    for (int i = (int)start; i < (int)stop; i += (int)step) {
+                        list->append(*(*self)[i]);
+                    }
+                }
+                else {
+                    for (int i = (int)start; i > (int)stop; i += (int)step) {
+                        list->append(*(*self)[i]);
+                    }
+                }
+                return list;
+            }
+            else {
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
+            }
+        }
+        else {
+            throw GException::invalid_argument("__getitem__(PyObject)","");
+        }
+    }
+    void __setitem__(const int& index, const GLATEventAtom& event) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
+            *(*self)[index] = event;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            *(*self)[self->size()+index] = event;
         }
         else {
             throw GException::out_of_range("__setitem__(int)", "Event index",
                                            index, self->size());
         }
+    }
+    GLATEventList copy() {
+        return (*self);
     }
 };

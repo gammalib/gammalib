@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.i - Test suite container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2017 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,17 +73,55 @@ public:
  ***************************************************************************/
 %extend GTestSuites {
     GTestSuite* __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            return (*self)[self->size()+index];
         }
         else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
     }
+    GTestSuites* __getitem__(PyObject *param) {
+        if (PySlice_Check(param)) {
+            Py_ssize_t start = 0;
+            Py_ssize_t stop  = 0;
+            Py_ssize_t step  = 0;
+            Py_ssize_t len   = self->size();
+            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
+                GTestSuites* tests = new GTestSuites(self->name());
+                if (step > 0) {
+                    for (int i = (int)start; i < (int)stop; i += (int)step) {
+                        tests->append(*(*self)[i]);
+                    }
+                }
+                else {
+                    for (int i = (int)start; i > (int)stop; i += (int)step) {
+                        tests->append(*(*self)[i]);
+                    }
+                }
+                return tests;
+            }
+            else {
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
+            }
+        }
+        else {
+            throw GException::invalid_argument("__getitem__(PyObject)","");
+        }
+    }
     void __setitem__(const int& index, const GTestSuite& suite) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->size()) {
             self->set(index, suite);
-            return;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            self->set(self->size()+index, suite);
         }
         else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
