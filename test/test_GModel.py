@@ -115,8 +115,8 @@ class Test(gammalib.GPythonTestSuite):
         self.name('model')
 
         # Append tests
-        self.append(self._test_models_access, 'Test GModels class model access')
-        self.append(self._test_models_slicing, 'Test GModels class slicing')
+        self.append(self._test_models_access, 'Test GModels model access')
+        self.append(self._test_models_slicing, 'Test GModels slicing')
 
         # Return
         return

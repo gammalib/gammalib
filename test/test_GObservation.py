@@ -90,6 +90,46 @@ class Test(gammalib.GPythonTestSuite):
         # Return times container
         return times
 
+    # Setup GGti container
+    def _setup_gti(self):
+        """
+        Setup GGti container
+
+        Returns
+        -------
+        gti : `~gammalib.GGti`
+            GGti container
+        """
+        # Setup GTI container
+        gti = gammalib.GGti()
+        for i in range(10):
+            tstart = gammalib.GTime(float(i),   'sec')
+            tstop  = gammalib.GTime(float(i+1), 'sec')
+            gti.append(tstart, tstop)
+
+        # Return GTI container
+        return gti
+
+    # Setup GPhases container
+    def _setup_phases(self):
+        """
+        Setup GPhases container
+
+        Returns
+        -------
+        phases : `~gammalib.GPhases`
+            GPhases container
+        """
+        # Setup phases container
+        phases = gammalib.GPhases()
+        for i in range(10):
+            pmin = float(i)
+            pmax = float(i+1)
+            phases.append(pmin, pmax)
+
+        # Return phases container
+        return phases
+
     # Setup GPhotons container
     def _setup_photons(self):
         """
@@ -289,6 +329,60 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GEbounds class slicing
+    def _test_ebounds_slicing(self):
+        """
+        Test GEbounds class slicing
+        """
+        # Setup energies container
+        ebounds = gammalib.GEbounds(10, gammalib.GEnergy(1.0,  'MeV'),
+                                        gammalib.GEnergy(11.0, 'MeV'), False)
+
+        # Test ebounds[start:end]
+        self.test_value(len(ebounds[3:5]), 2)
+        self.test_value(ebounds[3:5].emin(0).MeV(), 4.0)
+        self.test_value(ebounds[3:5].emin(1).MeV(), 5.0)
+
+        # Test ebounds[start:]
+        self.test_value(len(ebounds[7:]), 3)
+        self.test_value(ebounds[7:].emin(0).MeV(), 8.0)
+        self.test_value(ebounds[7:].emin(1).MeV(), 9.0)
+        self.test_value(ebounds[7:].emin(2).MeV(), 10.0)
+
+        # Test ebounds[:end]
+        self.test_value(len(ebounds[:2]), 2)
+        self.test_value(ebounds[:2].emin(0).MeV(), 1.0)
+        self.test_value(ebounds[:2].emin(1).MeV(), 2.0)
+
+        # Test ebounds[:]
+        self.test_value(len(ebounds[:]), 10)
+        for i in range(10):
+            self.test_value(ebounds[:].emin(i).MeV(), float(i+1))
+
+        # Test ebounds[start:end:step]
+        self.test_value(len(ebounds[3:7:2]), 2)
+        self.test_value(ebounds[3:7:2].emin(0).MeV(), 4.0)
+        self.test_value(ebounds[3:7:2].emin(1).MeV(), 6.0)
+
+        # Test ebounds[start:end:step]
+        self.test_value(len(ebounds[6:3:-2]), 2)
+        self.test_value(ebounds[6:3:-2].emin(0).MeV(), 7.0)
+        self.test_value(ebounds[6:3:-2].emin(1).MeV(), 5.0)
+
+        # Test ebounds[-start:]
+        self.test_value(len(ebounds[-2:]), 2)
+        self.test_value(ebounds[-2:].emin(0).MeV(), 9.0)
+        self.test_value(ebounds[-2:].emin(1).MeV(), 10.0)
+
+        # Test ebounds[:-end]
+        self.test_value(len(ebounds[:-7]), 3)
+        self.test_value(ebounds[:-7].emin(0).MeV(), 1.0)
+        self.test_value(ebounds[:-7].emin(1).MeV(), 2.0)
+        self.test_value(ebounds[:-7].emin(2).MeV(), 3.0)
+
+        # Return
+        return
+
     # Test GTime class
     def _test_time(self):
         """
@@ -441,6 +535,112 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GGti class slicing
+    def _test_gti_slicing(self):
+        """
+        Test GGti class slicing
+        """
+        # Setup GTI container
+        gti = self._setup_gti()
+
+        # Test gti[start:end]
+        self.test_value(len(gti[3:5]), 2)
+        self.test_value(gti[3:5].tstop(0).secs(), 4.0)
+        self.test_value(gti[3:5].tstop(1).secs(), 5.0)
+
+        # Test gti[start:]
+        self.test_value(len(gti[7:]), 3)
+        self.test_value(gti[7:].tstop(0).secs(), 8.0)
+        self.test_value(gti[7:].tstop(1).secs(), 9.0)
+        self.test_value(gti[7:].tstop(2).secs(), 10.0)
+
+        # Test gti[:end]
+        self.test_value(len(gti[:2]), 2)
+        self.test_value(gti[:2].tstop(0).secs(), 1.0)
+        self.test_value(gti[:2].tstop(1).secs(), 2.0)
+
+        # Test gti[:]
+        self.test_value(len(gti[:]), 10)
+        for i in range(10):
+            self.test_value(gti[:].tstop(i).secs(), float(i+1))
+
+        # Test gti[start:end:step]
+        self.test_value(len(gti[3:7:2]), 2)
+        self.test_value(gti[3:7:2].tstop(0).secs(), 4.0)
+        self.test_value(gti[3:7:2].tstop(1).secs(), 6.0)
+
+        # Test gti[start:end:step]
+        self.test_value(len(gti[6:3:-2]), 2)
+        self.test_value(gti[6:3:-2].tstop(0).secs(), 7.0)
+        self.test_value(gti[6:3:-2].tstop(1).secs(), 5.0)
+
+        # Test gti[-start:]
+        self.test_value(len(gti[-2:]), 2)
+        self.test_value(gti[-2:].tstop(0).secs(), 9.0)
+        self.test_value(gti[-2:].tstop(1).secs(), 10.0)
+
+        # Test gti[:-end]
+        self.test_value(len(gti[:-7]), 3)
+        self.test_value(gti[:-7].tstop(0).secs(), 1.0)
+        self.test_value(gti[:-7].tstop(1).secs(), 2.0)
+        self.test_value(gti[:-7].tstop(2).secs(), 3.0)
+
+        # Return
+        return
+
+    # Test GPhases class slicing
+    def _test_phases_slicing(self):
+        """
+        Test GPhases class slicing
+        """
+        # Setup phase container
+        phases = self._setup_phases()
+
+        # Test phases[start:end]
+        self.test_value(len(phases[3:5]), 2)
+        self.test_value(phases[3:5].pmax(0), 4.0)
+        self.test_value(phases[3:5].pmax(1), 5.0)
+
+        # Test phases[start:]
+        self.test_value(len(phases[7:]), 3)
+        self.test_value(phases[7:].pmax(0), 8.0)
+        self.test_value(phases[7:].pmax(1), 9.0)
+        self.test_value(phases[7:].pmax(2), 10.0)
+
+        # Test phases[:end]
+        self.test_value(len(phases[:2]), 2)
+        self.test_value(phases[:2].pmax(0), 1.0)
+        self.test_value(phases[:2].pmax(1), 2.0)
+
+        # Test phases[:]
+        self.test_value(len(phases[:]), 10)
+        for i in range(10):
+            self.test_value(phases[:].pmax(i), float(i+1))
+
+        # Test phases[start:end:step]
+        self.test_value(len(phases[3:7:2]), 2)
+        self.test_value(phases[3:7:2].pmax(0), 4.0)
+        self.test_value(phases[3:7:2].pmax(1), 6.0)
+
+        # Test phases[start:end:step]
+        self.test_value(len(phases[6:3:-2]), 2)
+        self.test_value(phases[6:3:-2].pmax(0), 7.0)
+        self.test_value(phases[6:3:-2].pmax(1), 5.0)
+
+        # Test phases[-start:]
+        self.test_value(len(phases[-2:]), 2)
+        self.test_value(phases[-2:].pmax(0), 9.0)
+        self.test_value(phases[-2:].pmax(1), 10.0)
+
+        # Test phases[:-end]
+        self.test_value(len(phases[:-7]), 3)
+        self.test_value(phases[:-7].pmax(0), 1.0)
+        self.test_value(phases[:-7].pmax(1), 2.0)
+        self.test_value(phases[:-7].pmax(2), 3.0)
+
+        # Return
+        return
+
     # Test GPhotons class access operators
     def _test_photons_access(self):
         """
@@ -584,14 +784,15 @@ class Test(gammalib.GPythonTestSuite):
         # Append tests
         self.append(self._test_energy, 'Test GEnergy')
         self.append(self._test_energies, 'Test GEnergies')
-        self.append(self._test_energies_access, 'Test GEnergies energy access')
-        self.append(self._test_energies_slicing, 'Test GEnergies slicing')
         self.append(self._test_time, 'Test GTime')
+        self.append(self._test_energies_access, 'Test GEnergies energy access')
         self.append(self._test_times_access, 'Test GTimes time access')
-        self.append(self._test_times_slicing, 'Test GTimes slicing')
         self.append(self._test_photons_access, 'Test GPhotons photon access')
-        self.append(self._test_photons_slicing, 'Test GPhotons slicing')
         self.append(self._test_observations_access, 'Test GObservations observation access')
+        self.append(self._test_energies_slicing, 'Test GEnergies slicing')
+        self.append(self._test_ebounds_slicing, 'Test GEbounds slicing')
+        self.append(self._test_times_slicing, 'Test GTimes slicing')
+        self.append(self._test_photons_slicing, 'Test GPhotons slicing')
         self.append(self._test_observations_slicing, 'Test GObservations slicing')
 
         # Return

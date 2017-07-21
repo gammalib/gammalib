@@ -297,8 +297,8 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_log, 'Test GLog')
         self.append(self._test_app, 'Test GApplication')
         self.append(self._test_pars, 'Test GApplicationPars')
-        self.append(self._test_pars_access, 'Test GApplicationPars class parameter access')
-        self.append(self._test_pars_access, 'Test GApplicationPars class slicing')
+        self.append(self._test_pars_access, 'Test GApplicationPars parameter access')
+        self.append(self._test_pars_access, 'Test GApplicationPars slicing')
 
         # Return
         return
