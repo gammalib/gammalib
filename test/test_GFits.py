@@ -27,11 +27,12 @@ import gammalib
 # =================================== #
 class Test(gammalib.GPythonTestSuite):
     """
-    Test class for GammaLib FITS module.
+    Test class for GammaLib FITS module
     """
+    # Constructor
     def __init__(self):
         """
-        Constructor.
+        Constructor
         """
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
@@ -39,25 +40,236 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    def set(self):
+    # Setup GFits container
+    def _setup_fits(self):
         """
-        Set all test functions.
-        """
-        # Set test name
-        self.name("fits")
+        Setup GFits container
 
-        # Append tests
-        self.append(self.test_fits, "Test GFits class")
-        self.append(self.test_fits_image, "Test GFitsImage class")
-        self.append(self.test_fits_table, "Test GFitsTable class")
-        self.append(self.test_fits_table_columns, "Test GFitsTableCol classes")
+        Returns
+        -------
+        fits : `~gammalib.GFits`
+            GFits container
+        """
+        # Setup GFits container
+        fits  = gammalib.GFits()
+        image = gammalib.GFitsImageDouble()
+        for i in range(10):
+            image.extname('%s' % i)
+            fits.append(image)
+
+        # Return GFits container
+        return fits
+
+    # Setup GFitsHeader container
+    def _setup_header(self):
+        """
+        Setup GFitsHeader container
+
+        Returns
+        -------
+        header : `~gammalib.GFitsHeader`
+            GFitsHeader container
+        """
+        # Setup GFitsHeader container
+        header = gammalib.GFitsHeader()
+        card   = gammalib.GFitsHeaderCard()
+        for i in range(10):
+            card.keyname('%s' % i)
+            header.append(card)
+
+        # Return GFitsHeader container
+        return header
+
+    # Test GFits class access operators
+    def _test_fits_access(self):
+        """
+        Test GFits class parameter access
+        """
+        # Setup GFits container and element
+        fits  = self._setup_fits()
+        image = gammalib.GFitsImageDouble()
+
+        # Loop over all elements using the container iterator and count the
+        # number of iterations
+        niter = 0
+        for hdu in fits:
+            self.test_value(hdu.extname(), '%s' % niter)
+            niter += 1
+
+        # Check that looping was successful
+        self.test_value(fits.size(), 10, 'Check container size')
+        self.test_value(niter, 10, 'Check container iterator')
+
+        # Test access from start
+        self.test_value(fits[3].extname(), '3')
+
+        # Check access from end
+        self.test_value(fits[-2].extname(), '8')
+
+        # Check parameter setting by index from start
+        image.extname('98')
+        fits[3] = image
+        self.test_value(fits[3].extname(), '98')
+
+        # Check parameter setting by index from end
+        image.extname('99')
+        fits[-2] = image
+        self.test_value(fits[-2].extname(), '99')
 
         # Return
         return
 
-    def test_fits(self):
+    # Test GFits class slicing
+    def _test_fits_slicing(self):
         """
-        Test GFile class interface.
+        Test GFits class slicing
+        """
+        # Setup XML container
+        fits = self._setup_fits()
+
+        # Test fits[start:end]
+        self.test_value(len(fits[3:5]), 2)
+        self.test_value(fits[3:5][0].extname(), '3')
+        self.test_value(fits[3:5][1].extname(), '4')
+
+        # Test fits[start:]
+        self.test_value(len(fits[7:]), 3)
+        self.test_value(fits[7:][0].extname(), '7')
+        self.test_value(fits[7:][1].extname(), '8')
+        self.test_value(fits[7:][2].extname(), '9')
+
+        # Test fits[:end]
+        self.test_value(len(fits[:2]), 2)
+        self.test_value(fits[:2][0].extname(), '0')
+        self.test_value(fits[:2][1].extname(), '1')
+
+        # Test fits[:]
+        self.test_value(len(fits[:]), 10)
+        for i in range(10):
+            self.test_value(fits[:][i].extname(), '%s' % i)
+
+        # Test fits[start:end:step]
+        self.test_value(len(fits[3:7:2]), 2)
+        self.test_value(fits[3:7:2][0].extname(), '3')
+        self.test_value(fits[3:7:2][1].extname(), '5')
+
+        # Test fits[start:end:step]
+        self.test_value(len(fits[6:3:-2]), 2)
+        self.test_value(fits[6:3:-2][0].extname(), '6')
+        self.test_value(fits[6:3:-2][1].extname(), '4')
+
+        # Test fits[-start:]
+        self.test_value(len(fits[-2:]), 2)
+        self.test_value(fits[-2:][0].extname(), '8')
+        self.test_value(fits[-2:][1].extname(), '9')
+
+        # Test fits[:-end]
+        self.test_value(len(fits[:-7]), 3)
+        self.test_value(fits[:-7][0].extname(), '0')
+        self.test_value(fits[:-7][1].extname(), '1')
+        self.test_value(fits[:-7][2].extname(), '2')
+
+        # Return
+        return
+
+    # Test GFitsHeader class access operators
+    def _test_header_access(self):
+        """
+        Test GFitsHeader class parameter access
+        """
+        # Setup FITS header
+        header = self._setup_header()
+
+        # Loop over all elements using the container iterator and count the
+        # number of iterations
+        niter = 0
+        for card in header:
+            self.test_value(card.keyname(), '%s' % niter)
+            niter += 1
+
+        # Check that looping was successful
+        self.test_value(header.size(), 10, 'Check container size')
+        self.test_value(niter, 10, 'Check container iterator')
+
+        # Test access from start
+        self.test_value(header[3].keyname(), '3')
+
+        # Check access from end
+        self.test_value(header[-2].keyname(), '8')
+
+        # Setup header card
+        card = gammalib.GFitsHeaderCard()
+
+        # Check parameter setting by index from start
+        card.keyname('98')
+        header[3] = card
+        self.test_value(header[3].keyname(), '98')
+
+        # Check parameter setting by index from end
+        card.keyname('99')
+        header[-2] = card
+        self.test_value(header[-2].keyname(), '99')
+
+        # Return
+        return
+
+    # Test GFitsHeader class slicing
+    def _test_header_slicing(self):
+        """
+        Test GFitsHeader class slicing
+        """
+        # Setup FITS header
+        header = self._setup_header()
+
+        # Test header[start:end]
+        self.test_value(len(header[3:5]), 2)
+        self.test_value(header[3:5][0].keyname(), '3')
+        self.test_value(header[3:5][1].keyname(), '4')
+
+        # Test header[start:]
+        self.test_value(len(header[7:]), 3)
+        self.test_value(header[7:][0].keyname(), '7')
+        self.test_value(header[7:][1].keyname(), '8')
+        self.test_value(header[7:][2].keyname(), '9')
+
+        # Test header[:end]
+        self.test_value(len(header[:2]), 2)
+        self.test_value(header[:2][0].keyname(), '0')
+        self.test_value(header[:2][1].keyname(), '1')
+
+        # Test header[:]
+        self.test_value(len(header[:]), 10)
+        for i in range(10):
+            self.test_value(header[:][i].keyname(), '%s' % i)
+
+        # Test header[start:end:step]
+        self.test_value(len(header[3:7:2]), 2)
+        self.test_value(header[3:7:2][0].keyname(), '3')
+        self.test_value(header[3:7:2][1].keyname(), '5')
+
+        # Test header[start:end:step]
+        self.test_value(len(header[6:3:-2]), 2)
+        self.test_value(header[6:3:-2][0].keyname(), '6')
+        self.test_value(header[6:3:-2][1].keyname(), '4')
+
+        # Test header[-start:]
+        self.test_value(len(header[-2:]), 2)
+        self.test_value(header[-2:][0].keyname(), '8')
+        self.test_value(header[-2:][1].keyname(), '9')
+
+        # Test header[:-end]
+        self.test_value(len(header[:-7]), 3)
+        self.test_value(header[:-7][0].keyname(), '0')
+        self.test_value(header[:-7][1].keyname(), '1')
+        self.test_value(header[:-7][2].keyname(), '2')
+
+        # Return
+        return
+
+    # Test GFile class interface
+    def _test_fits(self):
+        """
+        Test GFile class interface
         """
         # Get test data directory
         datadir = os.environ['TEST_DATA'] + '/'
@@ -66,33 +278,33 @@ class Test(gammalib.GPythonTestSuite):
         file = gammalib.GFilename(datadir+'file.fits')
 
         # Test loading of FITS file
-        self.test_try("Test GFits file load constructor")
+        self.test_try('Test GFits file load constructor')
         try:
             fits = gammalib.GFits(file)
             self.test_try_success()
         except:
-            self.test_try_failure("Unable to load FITS file.")
+            self.test_try_failure('Unable to load FITS file.')
 
         # Test creation of FITS file
-        self.test_try("Test GFits file creation constructor")
+        self.test_try('Test GFits file creation constructor')
         try:
-            fits = gammalib.GFits("test_file.fits", True)
+            fits = gammalib.GFits('test_file.fits', True)
             self.test_try_success()
         except:
-            self.test_try_failure("Unable to create FITS file.")
+            self.test_try_failure('Unable to create FITS file.')
 
         # Open FITS file
         fits = gammalib.GFits(file)
-        self.test_value(fits["EVENTS"].nrows(), 1231, "Check number of rows")
+        self.test_value(fits['EVENTS'].nrows(), 1231, 'Check number of rows')
 
         # Open FITS file with event selection
-        fits = gammalib.GFits(file+"[EVENTS][ENERGY>1.0]")
-        self.test_value(fits["EVENTS"].nrows(), 152, "Check number of rows")
+        fits = gammalib.GFits(file+'[EVENTS][ENERGY>1.0]')
+        self.test_value(fits['EVENTS'].nrows(), 152, 'Check number of rows')
 
         # Open FITS file with non-existing extension name
-        self.test_try("Test non-existing extension name")
+        self.test_try('Test non-existing extension name')
         try:
-            fits = gammalib.GFits(file+"[DUMMY][ENERGY>1.0]")
+            fits = gammalib.GFits(file+'[DUMMY][ENERGY>1.0]')
             self.test_try_failure()
         except:
             self.test_try_success()
@@ -100,13 +312,14 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    def test_fits_image(self):
+    # Test GFitsImage class interface
+    def _test_fits_image(self):
         """
-        Test GFitsImage class interface.
+        Test GFitsImage class interface
         """
         # Set test file names
-        file1 = gammalib.GFilename("test_python_fits_image_v1.fits")
-        file2 = gammalib.GFilename("test_python_fits_image_v2.fits")
+        file1 = gammalib.GFilename('test_python_fits_image_v1.fits')
+        file2 = gammalib.GFilename('test_python_fits_image_v2.fits')
 
         # Remove test files
         file1.remove()
@@ -138,15 +351,15 @@ class Test(gammalib.GPythonTestSuite):
                 img7[x, y] = x + y * nx
                 img8[x, y] = x + y * nx
                 img9[x, y] = x + y * nx
-        img1.extname("Byte")
-        img2.extname("Double")
-        img3.extname("Float")
-        img4.extname("Long")
-        img5.extname("LongLong")
-        img6.extname("SByte")
-        img7.extname("Short")
-        img8.extname("ULong")
-        img9.extname("UShort")
+        img1.extname('Byte')
+        img2.extname('Double')
+        img3.extname('Float')
+        img4.extname('Long')
+        img5.extname('LongLong')
+        img6.extname('SByte')
+        img7.extname('Short')
+        img8.extname('ULong')
+        img9.extname('UShort')
 
         # Test image types by checking the bitpix values
         self.test_value(img1.bitpix(), 8)
@@ -172,9 +385,9 @@ class Test(gammalib.GPythonTestSuite):
 
         # Set header keywords
         img_byte = fits.image(0)
-        img_byte.card("test", "test-value", "this is for testing")
-        img_byte.card("real", 3.1415, "a real value")
-        img_byte.card("int", 41, "an integer value")
+        img_byte.card('test', 'test-value', 'this is for testing')
+        img_byte.card('real', 3.1415, 'a real value')
+        img_byte.card('int', 41, 'an integer value')
 
         # Save FITS file
         fits.save()
@@ -198,7 +411,7 @@ class Test(gammalib.GPythonTestSuite):
 
         # Get double precision image, take square root of pixel and save in
         # another file
-        img_double = fits.image("Double")
+        img_double = fits.image('Double')
         for x in range(nx):
             for y in range(ny):
                 img_double[x, y] = math.sqrt(img_double[x, y])
@@ -232,13 +445,14 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    def test_fits_table(self):
+    # Test GFitsTable class interface
+    def _test_fits_table(self):
         """
-        Test GFitsTable class interface.
+        Test GFitsTable class interface
         """
         # Set test file names
-        file1 = gammalib.GFilename("test_python_fits_table_v1.fits")
-        file2 = gammalib.GFilename("test_python_fits_table_v2.fits")
+        file1 = gammalib.GFilename('test_python_fits_table_v1.fits')
+        file2 = gammalib.GFilename('test_python_fits_table_v2.fits')
 
         # Remove test files
         file1.remove()
@@ -249,17 +463,17 @@ class Test(gammalib.GPythonTestSuite):
 
         # Create table columns
         nrows = 10
-        col1 = gammalib.GFitsTableBitCol("BIT", nrows)
-        col2 = gammalib.GFitsTableBoolCol("BOOLEAN", nrows)
-        col3 = gammalib.GFitsTableByteCol("BYTE", nrows)
-        col4 = gammalib.GFitsTableDoubleCol("DOUBLE", nrows)
-        col5 = gammalib.GFitsTableFloatCol("FLOAT", nrows)
-        col6 = gammalib.GFitsTableLongCol("LONG", nrows)
-        col7 = gammalib.GFitsTableLongLongCol("LONGLONG", nrows)
-        col8 = gammalib.GFitsTableShortCol("SHORT", nrows)
-        col9 = gammalib.GFitsTableStringCol("STRING", nrows, 20)
-        col10 = gammalib.GFitsTableULongCol("ULONG", nrows)
-        col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
+        col1 = gammalib.GFitsTableBitCol('BIT', nrows)
+        col2 = gammalib.GFitsTableBoolCol('BOOLEAN', nrows)
+        col3 = gammalib.GFitsTableByteCol('BYTE', nrows)
+        col4 = gammalib.GFitsTableDoubleCol('DOUBLE', nrows)
+        col5 = gammalib.GFitsTableFloatCol('FLOAT', nrows)
+        col6 = gammalib.GFitsTableLongCol('LONG', nrows)
+        col7 = gammalib.GFitsTableLongLongCol('LONGLONG', nrows)
+        col8 = gammalib.GFitsTableShortCol('SHORT', nrows)
+        col9 = gammalib.GFitsTableStringCol('STRING', nrows, 20)
+        col10 = gammalib.GFitsTableULongCol('ULONG', nrows)
+        col11 = gammalib.GFitsTableUShortCol('USHORT', nrows)
         for i in range(nrows):
             #col1[i] = i % 2        # Old swig version
             #col2[i] = i % 2        # Old swig version
@@ -288,7 +502,7 @@ class Test(gammalib.GPythonTestSuite):
         tbl_ascii.append(col9)
         tbl_ascii.append(col10)
         tbl_ascii.append(col11)
-        tbl_ascii.extname("ASCII table")
+        tbl_ascii.extname('ASCII table')
         fits.append(tbl_ascii)
 
         # Set binary table
@@ -304,7 +518,7 @@ class Test(gammalib.GPythonTestSuite):
         tbl_bin.append(col9)
         tbl_bin.append(col10)
         tbl_bin.append(col11)
-        tbl_bin.extname("Binary table")
+        tbl_bin.extname('Binary table')
         fits.append(tbl_bin)
 
         # Save FITS file
@@ -316,36 +530,37 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    def test_fits_table_columns(self):
+    # Test FITS table columns
+    def _test_fits_table_columns(self):
         """
         Test FITS table columns
         """
         # Create table columns
         nrows = 10
-        col1  = gammalib.GFitsTableBitCol("BIT", nrows)
-        col2  = gammalib.GFitsTableBoolCol("BOOLEAN", nrows)
-        col3  = gammalib.GFitsTableByteCol("BYTE", nrows)
-        col4  = gammalib.GFitsTableDoubleCol("DOUBLE", nrows)
-        col5  = gammalib.GFitsTableFloatCol("FLOAT", nrows)
-        col6  = gammalib.GFitsTableLongCol("LONG", nrows)
-        col7  = gammalib.GFitsTableLongLongCol("LONGLONG", nrows)
-        col8  = gammalib.GFitsTableShortCol("SHORT", nrows)
-        col9  = gammalib.GFitsTableStringCol("STRING", nrows, 20)
-        col10 = gammalib.GFitsTableULongCol("ULONG", nrows)
-        col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
+        col1  = gammalib.GFitsTableBitCol('BIT', nrows)
+        col2  = gammalib.GFitsTableBoolCol('BOOLEAN', nrows)
+        col3  = gammalib.GFitsTableByteCol('BYTE', nrows)
+        col4  = gammalib.GFitsTableDoubleCol('DOUBLE', nrows)
+        col5  = gammalib.GFitsTableFloatCol('FLOAT', nrows)
+        col6  = gammalib.GFitsTableLongCol('LONG', nrows)
+        col7  = gammalib.GFitsTableLongLongCol('LONGLONG', nrows)
+        col8  = gammalib.GFitsTableShortCol('SHORT', nrows)
+        col9  = gammalib.GFitsTableStringCol('STRING', nrows, 20)
+        col10 = gammalib.GFitsTableULongCol('ULONG', nrows)
+        col11 = gammalib.GFitsTableUShortCol('USHORT', nrows)
 
         # Test number of rows
-        self.test_value(col1.nrows(),  nrows, "Check number of rows in Bit column")
-        self.test_value(col2.nrows(),  nrows, "Check number of rows in Boolean column")
-        self.test_value(col3.nrows(),  nrows, "Check number of rows in Byte column")
-        self.test_value(col4.nrows(),  nrows, "Check number of rows in Double column")
-        self.test_value(col5.nrows(),  nrows, "Check number of rows in Float column")
-        self.test_value(col6.nrows(),  nrows, "Check number of rows in Long column")
-        self.test_value(col7.nrows(),  nrows, "Check number of rows in LongLong column")
-        self.test_value(col8.nrows(),  nrows, "Check number of rows in Short column")
-        self.test_value(col9.nrows(),  nrows, "Check number of rows in String column")
-        self.test_value(col10.nrows(), nrows, "Check number of rows in ULong column")
-        self.test_value(col11.nrows(), nrows, "Check number of rows in UShort column")
+        self.test_value(col1.nrows(),  nrows, 'Check number of rows in Bit column')
+        self.test_value(col2.nrows(),  nrows, 'Check number of rows in Boolean column')
+        self.test_value(col3.nrows(),  nrows, 'Check number of rows in Byte column')
+        self.test_value(col4.nrows(),  nrows, 'Check number of rows in Double column')
+        self.test_value(col5.nrows(),  nrows, 'Check number of rows in Float column')
+        self.test_value(col6.nrows(),  nrows, 'Check number of rows in Long column')
+        self.test_value(col7.nrows(),  nrows, 'Check number of rows in LongLong column')
+        self.test_value(col8.nrows(),  nrows, 'Check number of rows in Short column')
+        self.test_value(col9.nrows(),  nrows, 'Check number of rows in String column')
+        self.test_value(col10.nrows(), nrows, 'Check number of rows in ULong column')
+        self.test_value(col11.nrows(), nrows, 'Check number of rows in UShort column')
 
         # Test iterators
         for row in col1:
@@ -373,28 +588,48 @@ class Test(gammalib.GPythonTestSuite):
 
         # Test setting and retrieving of values
         col1[5] = True
-        self.test_assert(col1[5], "Check Bit column setting and retrieving")
+        self.test_assert(col1[5], 'Check Bit column setting and retrieving')
         col2[5] = True
-        self.test_assert(col2[5], "Check Boolean column setting and retrieving")
+        self.test_assert(col2[5], 'Check Boolean column setting and retrieving')
         col3[5] = 5
-        self.test_value(col3[5], 5, "Check Byte column setting and retrieving")
+        self.test_value(col3[5], 5, 'Check Byte column setting and retrieving')
         col4[5] = 3.14
-        self.test_value(col4[5], 3.14, 1.0e-6, "Check Double column setting and retrieving")
+        self.test_value(col4[5], 3.14, 1.0e-6, 'Check Double column setting and retrieving')
         col5[5] = 3.14
-        self.test_value(col5[5], 3.14, 1.0e-6, "Check Float column setting and retrieving")
+        self.test_value(col5[5], 3.14, 1.0e-6, 'Check Float column setting and retrieving')
         col6[5] = 314
-        self.test_value(col6[5], 314, "Check Long column setting and retrieving")
+        self.test_value(col6[5], 314, 'Check Long column setting and retrieving')
         col7[5] = 314
-        self.test_value(col7[5], 314, "Check LongLong column setting and retrieving")
+        self.test_value(col7[5], 314, 'Check LongLong column setting and retrieving')
         col8[5] = 314
-        self.test_value(col8[5], 314, "Check Short column setting and retrieving")
-        col9[5] = "Hallo"
-        self.test_assert(col9[5] == "Hallo", "Check String column setting and retrieving")
+        self.test_value(col8[5], 314, 'Check Short column setting and retrieving')
+        col9[5] = 'Hallo'
+        self.test_assert(col9[5] == 'Hallo', 'Check String column setting and retrieving')
         col10[5] = 314
-        self.test_value(col10[5], 314, "Check ULong column setting and retrieving")
+        self.test_value(col10[5], 314, 'Check ULong column setting and retrieving')
         col11[5] = 314
-        self.test_value(col11[5], 314, "Check UShort column setting and retrieving")
+        self.test_value(col11[5], 314, 'Check UShort column setting and retrieving')
 
         # Return
         return
-        
+
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions
+        """
+        # Set test name
+        self.name('fits')
+
+        # Append tests
+        self.append(self._test_fits, 'Test GFits')
+        self.append(self._test_fits_access, 'Test GFits parameter access')
+        self.append(self._test_fits_slicing, 'Test GFits slicing')
+        self.append(self._test_header_access, 'Test GFitsHeader parameter access')
+        self.append(self._test_header_slicing, 'Test GFitsHeader slicing')
+        self.append(self._test_fits_image, 'Test GFitsImage')
+        self.append(self._test_fits_table, 'Test GFitsTable')
+        self.append(self._test_fits_table_columns, 'Test GFitsTableCol')
+
+        # Return
+        return

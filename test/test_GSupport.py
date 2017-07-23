@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib support module.
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,26 +39,26 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    # Set all test functions
-    def set(self):
+    # Setup GNodeArray container
+    def _setup_nodes(self):
         """
-        Set all test functions.
+        Setup GNodeArray
+
+        Returns
+        -------
+        nodes : `~gammalib.GNodeArray`
+            Node array
         """
-        # Set test name
-        self.name('support')
+        # Setup time container
+        nodes = gammalib.GNodeArray()
+        for i in range(10):
+            nodes.append(float(i))
 
-        # Append tests
-        self.append(self.test_node_array, 'Test GNodeArray')
-        self.append(self.test_url_file,   'Test GUrlFile')
-        self.append(self.test_url_string, 'Test GUrlString')
-        self.append(self.test_filename,   'Test GFilename')
-        self.append(self.test_csv,        'Test GCsv')
-
-        # Return
-        return
+        # Return GNodeArray
+        return nodes
 
     # Test GNodeArray class
-    def test_node_array(self):
+    def _test_node_array(self):
         """
         Test GNodeArray class.
         """
@@ -91,8 +91,91 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GNodeArray access
+    def _test_node_array_access(self):
+        """
+        Test GNodeArray access
+        """
+        # Setup nodes container
+        nodes = self._setup_nodes()
+
+        # Loop over all elements using the container iterator and count the
+        # number of iterations
+        nnodes    = 0
+        reference = 0.0
+        for node in nodes:
+            self.test_value(node, reference)
+            nnodes    += 1
+            reference += 1.0
+
+        # Check that looping was successful
+        self.test_value(nodes.size(), 10, 'Check container size')
+        self.test_value(nnodes, 10, 'Check container iterator')
+
+        # Test access from start
+        self.test_value(nodes[3], 3.0)
+
+        # Check access from end
+        self.test_value(nodes[-2], 8.0)
+
+        # Return
+        return
+
+    # Test GNodeArray slicing
+    def _test_node_array_slicing(self):
+        """
+        Test GNodeArray slicing
+        """
+        # Setup nodes container
+        nodes = self._setup_nodes()
+
+        # Test nodes[start:end]
+        self.test_value(len(nodes[3:5]), 2)
+        self.test_value(nodes[3:5][0], 3.0)
+        self.test_value(nodes[3:5][1], 4.0)
+
+        # Test nodes[start:]
+        self.test_value(len(nodes[7:]), 3)
+        self.test_value(nodes[7:][0], 7.0)
+        self.test_value(nodes[7:][1], 8.0)
+        self.test_value(nodes[7:][2], 9.0)
+
+        # Test nodes[:end]
+        self.test_value(len(nodes[:2]), 2)
+        self.test_value(nodes[:2][0], 0.0)
+        self.test_value(nodes[:2][1], 1.0)
+
+        # Test nodes[:]
+        self.test_value(len(nodes[:]), 10)
+        for i in range(10):
+            self.test_value(nodes[:][i], float(i))
+
+        # Test nodes[start:end:step]
+        self.test_value(len(nodes[3:7:2]), 2)
+        self.test_value(nodes[3:7:2][0], 3.0)
+        self.test_value(nodes[3:7:2][1], 5.0)
+
+        # Test nodes[start:end:step]
+        self.test_value(len(nodes[6:3:-2]), 2)
+        self.test_value(nodes[6:3:-2][0], 6.0)
+        self.test_value(nodes[6:3:-2][1], 4.0)
+
+        # Test nodes[-start:]
+        self.test_value(len(nodes[-2:]), 2)
+        self.test_value(nodes[-2:][0], 8.0)
+        self.test_value(nodes[-2:][1], 9.0)
+
+        # Test nodes[:-end]
+        self.test_value(len(nodes[:-7]), 3)
+        self.test_value(nodes[:-7][0], 0.0)
+        self.test_value(nodes[:-7][1], 1.0)
+        self.test_value(nodes[:-7][2], 2.0)
+
+        # Return
+        return
+
     # Test GUrlFile class
-    def test_url_file(self):
+    def _test_url_file(self):
         """
         Test GUrlFile class.
         """
@@ -113,7 +196,7 @@ class Test(gammalib.GPythonTestSuite):
         return
  
     # Test GUrlString class
-    def test_url_string(self):
+    def _test_url_string(self):
         """
         Test GUrlString class.
         """
@@ -133,7 +216,7 @@ class Test(gammalib.GPythonTestSuite):
         return
        
     # Test GFilename class
-    def test_filename(self):
+    def _test_filename(self):
         """
         Test GFilename class.
         """
@@ -158,7 +241,7 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test GCsv class
-    def test_csv(self):
+    def _test_csv(self):
         """
         Test GCsv class.
         """
@@ -195,3 +278,24 @@ class Test(gammalib.GPythonTestSuite):
 
         # Return
         return
+
+    # Set all test functions
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name('support')
+
+        # Append tests
+        self.append(self._test_node_array, 'Test GNodeArray')
+        self.append(self._test_node_array_access, 'Test GNodeArray node access')
+        self.append(self._test_node_array_slicing, 'Test GNodeArray slicing')
+        self.append(self._test_url_file,   'Test GUrlFile')
+        self.append(self._test_url_string, 'Test GUrlString')
+        self.append(self._test_filename,   'Test GFilename')
+        self.append(self._test_csv,        'Test GCsv')
+
+        # Return
+        return
+

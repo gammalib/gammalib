@@ -384,9 +384,56 @@ void GLATEventList::roi(const GRoi& roi)
 
 
 /***********************************************************************//**
+ * @brief Append event to event list
+ *
+ * @param[in] event Event.
+ *
+ * Appends an event to the end of the event list.
+ ***************************************************************************/
+void GLATEventList::append(const GLATEventAtom& event)
+{
+    // Append event
+    m_events.push_back(event);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove events from event list
+ *
+ * @param[in] index Index from which on events should be removed.
+ * @param[in] number Number of event to remove (default: 1).
+ *
+ * Removes events from the event list. This method does nothing if @p index
+ * points beyond the event list. The method does also gently accept
+ * @p number arguments where @p index + @p number reach beyond the event
+ * list. In that case, all events from event @p index on will be removed.
+ ***************************************************************************/
+void GLATEventList::remove(const int& index, const int& number)
+{
+    // Continue only if index is valid
+    if (index < size()) {
+
+        // Determine number of elements to remove
+        int n_remove = (index + number > size()) ? size() - index : number;
+
+        // Remove events
+        m_events.erase(m_events.begin() + index,
+                       m_events.begin() + index + n_remove);
+
+    } // endif: index was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print event list information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing event list information.
  ***************************************************************************/
 std::string GLATEventList::print(const GChatter& chatter) const

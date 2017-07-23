@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GSkyRegion.hpp - Abstract virtual sky region base class         *
  * ----------------------------------------------------------------------- *
- * copyright (C) 2013-2014 by Pierrick Martin                              *
+ * copyright (C) 2013-2017 by Pierrick Martin                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,6 +80,9 @@ public:
     const std::string& type(void) const;
     const std::string& name(void) const;
     const double&      solidangle(void) const;
+    void               type(const std::string& type);
+    void               name(const std::string& name);
+    void               solidangle(const double& solidangle);
 
 protected:
     // Protected methods
@@ -109,6 +112,21 @@ const std::string& GSkyRegion::name(void) const
 
 
 /***********************************************************************//**
+ * @brief Set region name
+ *
+ * @param[in] name Region name.
+ *
+ * Sets the region name.
+ ***************************************************************************/
+inline
+void GSkyRegion::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return region type
  *
  * @return Region type
@@ -123,16 +141,46 @@ const std::string& GSkyRegion::type(void) const
 
 
 /***********************************************************************//**
- * @brief Return solid angle
+ * @brief Set region type
  *
- * @return Solid angle
+ * @param[in] type Region type.
  *
- * Returns the solid angle subtended by the region (in steradian).
+ * Sets the region type.
+ ***************************************************************************/
+inline
+void GSkyRegion::type(const std::string& type)
+{
+    m_type = type;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return solid angle of region
+ *
+ * @return Solid angle of region.
+ *
+ * Returns the solid angle subtended by the region (in steradians).
  ***************************************************************************/
 inline
 const double& GSkyRegion::solidangle(void) const
 {
     return (m_solid);
 }
-  
+
+
+/***********************************************************************//**
+ * @brief Set solid angle of region
+ *
+ * @param[in] solidangle Solid angle of region (in steradians).
+ *
+ * Sets the solid angle subtended by the region (in steradians).
+ ***************************************************************************/
+inline
+void GSkyRegion::solidangle(const double& solidangle)
+{
+    m_solid = solidangle;
+    return;
+}
+
 #endif /* GSKYREGION_HPP */

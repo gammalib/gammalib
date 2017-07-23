@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlNode.i - Abstract XML node base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,7 +36,7 @@
  *
  * @brief Abstract XML node base class
  ***************************************************************************/
-class GXmlNode : public GBase {
+class GXmlNode : public GContainer {
 public:
     // Constructors and destructors
     GXmlNode(void);
@@ -89,25 +89,29 @@ public:
         return gammalib::tochar(self->print(NORMAL, 0));
     }
     GXmlNode* __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            return (*self)[self->size()+index];
+        }
         else {
-            throw GException::out_of_range("__getitem__(int)", index,
-                                           0, self->size()-1);
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
     }
     void __setitem__(const int& index, const GXmlNode& node) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->size()) {
             self->set(index, node);
-            return;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            self->set(self->size()+index, node);
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index,
-                                           0, self->size()-1);
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
-    }
-    int __len__() {
-        return (self->size());
     }
 };

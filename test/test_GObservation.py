@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012-2016 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #
 # ==========================================================================
 import gammalib
+import test_support
 
 
 # ========================================== #
@@ -38,24 +39,119 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    # Set test functions
-    def set(self):
+    # Setup GObservations container
+    def _setup_obs(self):
         """
-        Set all test functions
+        Setup GObservations container
+
+        Returns
+        -------
+        obs : `~gammalib.GObservations`
+            Observation container
         """
-        # Set test name
-        self.name('obs')
+        # Setup observation container
+        obs = gammalib.GObservations()
+        run = gammalib.GCTAObservation()
+        for i in range(10):
+            run.name('%s' % i)
+            run.id('%s' % i)
+            obs.append(run)
 
-        # Append tests
-        self.append(self.test_energy, 'Test GEnergy class')
-        self.append(self.test_energies, 'Test GEnergies class')
-        self.append(self.test_time, 'Test GTime class')
+        # Setup model container
+        models = gammalib.GModels()
+        model  = gammalib.GModelSky()
+        for i in range(10):
+            model.name('%s' % i)
+            models.append(model)
 
-        # Return
-        return
+        # Set observation's model container
+        obs.models(models)
+
+        # Return observations container
+        return obs
+
+    # Setup GTimes container
+    def _setup_times(self):
+        """
+        Setup GTimes container
+
+        Returns
+        -------
+        times : `~gammalib.GTimes`
+            GTime container
+        """
+        # Setup time container
+        times = gammalib.GTimes()
+        time  = gammalib.GTime()
+        for i in range(10):
+            time.secs(float(i))
+            times.append(time)
+
+        # Return times container
+        return times
+
+    # Setup GGti container
+    def _setup_gti(self):
+        """
+        Setup GGti container
+
+        Returns
+        -------
+        gti : `~gammalib.GGti`
+            GGti container
+        """
+        # Setup GTI container
+        gti = gammalib.GGti()
+        for i in range(10):
+            tstart = gammalib.GTime(float(i),   'sec')
+            tstop  = gammalib.GTime(float(i+1), 'sec')
+            gti.append(tstart, tstop)
+
+        # Return GTI container
+        return gti
+
+    # Setup GPhases container
+    def _setup_phases(self):
+        """
+        Setup GPhases container
+
+        Returns
+        -------
+        phases : `~gammalib.GPhases`
+            GPhases container
+        """
+        # Setup phases container
+        phases = gammalib.GPhases()
+        for i in range(10):
+            pmin = float(i)
+            pmax = float(i+1)
+            phases.append(pmin, pmax)
+
+        # Return phases container
+        return phases
+
+    # Setup GPhotons container
+    def _setup_photons(self):
+        """
+        Setup GPhotons container
+
+        Returns
+        -------
+        photons : `~gammalib.GPhotons`
+            GPhoton container
+        """
+        # Setup photon container
+        photons = gammalib.GPhotons()
+        photon  = gammalib.GPhoton()
+        for i in range(10):
+            photon.energy().MeV(float(i))
+            photons.append(photon)
+
+        # Return photons container
+        return photons
 
     # Test GEnergy class
-    def test_energy(self):
+    def _test_energy(self):
         """
         Test GEnergy class
         """
@@ -129,13 +225,15 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test GEnergies class
-    def test_energies(self):
+    def _test_energies(self):
         """
         Test GEnergies class
         """
-        # Setup 3 logarithmic energies
+        # Setup energies container
         energies = gammalib.GEnergies(3, gammalib.GEnergy(1.0,   'MeV'),
                                          gammalib.GEnergy(100.0, 'MeV'))
+
+        # Check energies container
         self.test_value(energies[0].MeV(), 1.0, 1.0e-7,
              'Check energy value access')
         self.test_value(energies[1].MeV(), 10.0, 1.0e-7,
@@ -146,8 +244,147 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GEnergies class access operators
+    def _test_energies_access(self):
+        """
+        Test GEnergies class observation access
+        """
+        # Setup energies container
+        energies = gammalib.GEnergies(10, gammalib.GEnergy(1.0,  'MeV'),
+                                          gammalib.GEnergy(10.0, 'MeV'), False)
+
+        # Loop over all elements using the container iterator and count the
+        # number of iterations
+        nenergies = 0
+        reference = 1.0
+        for energy in energies:
+            self.test_value(energy.MeV(), reference)
+            nenergies += 1
+            reference += 1.0
+
+        # Check that looping was successful
+        self.test_value(energies.size(), 10, 'Check container size')
+        self.test_value(nenergies, 10, 'Check container iterator')
+
+        # Test access from start
+        self.test_value(energies[3].MeV(), 4.0)
+
+        # Check access from end
+        self.test_value(energies[-2].MeV(), 9.0)
+
+        # Return
+        return
+
+    # Test GEnergies class slicing
+    def _test_energies_slicing(self):
+        """
+        Test GEnergies class slicing
+        """
+        # Setup energies container
+        energies = gammalib.GEnergies(10, gammalib.GEnergy(1.0,  'MeV'),
+                                          gammalib.GEnergy(10.0, 'MeV'), False)
+
+        # Test energies[start:end]
+        self.test_value(len(energies[3:5]), 2)
+        self.test_value(energies[3:5][0].MeV(), 4.0)
+        self.test_value(energies[3:5][1].MeV(), 5.0)
+
+        # Test energies[start:]
+        self.test_value(len(energies[7:]), 3)
+        self.test_value(energies[7:][0].MeV(), 8.0)
+        self.test_value(energies[7:][1].MeV(), 9.0)
+        self.test_value(energies[7:][2].MeV(), 10.0)
+
+        # Test energies[:end]
+        self.test_value(len(energies[:2]), 2)
+        self.test_value(energies[:2][0].MeV(), 1.0)
+        self.test_value(energies[:2][1].MeV(), 2.0)
+
+        # Test energies[:]
+        self.test_value(len(energies[:]), 10)
+        for i in range(10):
+            self.test_value(energies[:][i].MeV(), float(i+1))
+
+        # Test energies[start:end:step]
+        self.test_value(len(energies[3:7:2]), 2)
+        self.test_value(energies[3:7:2][0].MeV(), 4.0)
+        self.test_value(energies[3:7:2][1].MeV(), 6.0)
+
+        # Test energies[start:end:step]
+        self.test_value(len(energies[6:3:-2]), 2)
+        self.test_value(energies[6:3:-2][0].MeV(), 7.0)
+        self.test_value(energies[6:3:-2][1].MeV(), 5.0)
+
+        # Test energies[-start:]
+        self.test_value(len(energies[-2:]), 2)
+        self.test_value(energies[-2:][0].MeV(), 9.0)
+        self.test_value(energies[-2:][1].MeV(), 10.0)
+
+        # Test energies[:-end]
+        self.test_value(len(energies[:-7]), 3)
+        self.test_value(energies[:-7][0].MeV(), 1.0)
+        self.test_value(energies[:-7][1].MeV(), 2.0)
+        self.test_value(energies[:-7][2].MeV(), 3.0)
+
+        # Return
+        return
+
+    # Test GEbounds class slicing
+    def _test_ebounds_slicing(self):
+        """
+        Test GEbounds class slicing
+        """
+        # Setup energies container
+        ebounds = gammalib.GEbounds(10, gammalib.GEnergy(1.0,  'MeV'),
+                                        gammalib.GEnergy(11.0, 'MeV'), False)
+
+        # Test ebounds[start:end]
+        self.test_value(len(ebounds[3:5]), 2)
+        self.test_value(ebounds[3:5].emin(0).MeV(), 4.0)
+        self.test_value(ebounds[3:5].emin(1).MeV(), 5.0)
+
+        # Test ebounds[start:]
+        self.test_value(len(ebounds[7:]), 3)
+        self.test_value(ebounds[7:].emin(0).MeV(), 8.0)
+        self.test_value(ebounds[7:].emin(1).MeV(), 9.0)
+        self.test_value(ebounds[7:].emin(2).MeV(), 10.0)
+
+        # Test ebounds[:end]
+        self.test_value(len(ebounds[:2]), 2)
+        self.test_value(ebounds[:2].emin(0).MeV(), 1.0)
+        self.test_value(ebounds[:2].emin(1).MeV(), 2.0)
+
+        # Test ebounds[:]
+        self.test_value(len(ebounds[:]), 10)
+        for i in range(10):
+            self.test_value(ebounds[:].emin(i).MeV(), float(i+1))
+
+        # Test ebounds[start:end:step]
+        self.test_value(len(ebounds[3:7:2]), 2)
+        self.test_value(ebounds[3:7:2].emin(0).MeV(), 4.0)
+        self.test_value(ebounds[3:7:2].emin(1).MeV(), 6.0)
+
+        # Test ebounds[start:end:step]
+        self.test_value(len(ebounds[6:3:-2]), 2)
+        self.test_value(ebounds[6:3:-2].emin(0).MeV(), 7.0)
+        self.test_value(ebounds[6:3:-2].emin(1).MeV(), 5.0)
+
+        # Test ebounds[-start:]
+        self.test_value(len(ebounds[-2:]), 2)
+        self.test_value(ebounds[-2:].emin(0).MeV(), 9.0)
+        self.test_value(ebounds[-2:].emin(1).MeV(), 10.0)
+
+        # Test ebounds[:-end]
+        self.test_value(len(ebounds[:-7]), 3)
+        self.test_value(ebounds[:-7].emin(0).MeV(), 1.0)
+        self.test_value(ebounds[:-7].emin(1).MeV(), 2.0)
+        self.test_value(ebounds[:-7].emin(2).MeV(), 3.0)
+
+        # Return
+        return
+
     # Test GTime class
-    def test_time(self):
+    def _test_time(self):
         """
         Test GTime class
         """
@@ -211,6 +448,287 @@ class Test(gammalib.GPythonTestSuite):
              'Check larger or equal than operator')
         self.test_assert(time_a >= time_b,
              'Check larger or equal than operator')
+
+        # Return
+        return
+
+    # Test GTimes class access operators
+    def _test_times_access(self):
+        """
+        Test GTimes class observation access
+        """
+        # Setup times container
+        times = self._setup_times()
+
+        # Loop over all elements using the container iterator and count the
+        # number of iterations
+        ntimes    = 0
+        reference = 0.0
+        for time in times:
+            self.test_value(time.secs(), reference)
+            ntimes    += 1
+            reference += 1.0
+
+        # Check that looping was successful
+        self.test_value(times.size(), 10, 'Check container size')
+        self.test_value(ntimes, 10, 'Check container iterator')
+
+        # Test access from start
+        self.test_value(times[3].secs(), 3.0)
+
+        # Check access from end
+        self.test_value(times[-2].secs(), 8.0)
+
+        # Return
+        return
+
+    # Test GTimes class slicing
+    def _test_times_slicing(self):
+        """
+        Test GTimes class slicing
+        """
+        # Setup times container
+        times = self._setup_times()
+
+        # Test times[start:end]
+        self.test_value(len(times[3:5]), 2)
+        self.test_value(times[3:5][0].secs(), 3.0)
+        self.test_value(times[3:5][1].secs(), 4.0)
+
+        # Test times[start:]
+        self.test_value(len(times[7:]), 3)
+        self.test_value(times[7:][0].secs(), 7.0)
+        self.test_value(times[7:][1].secs(), 8.0)
+        self.test_value(times[7:][2].secs(), 9.0)
+
+        # Test times[:end]
+        self.test_value(len(times[:2]), 2)
+        self.test_value(times[:2][0].secs(), 0.0)
+        self.test_value(times[:2][1].secs(), 1.0)
+
+        # Test times[:]
+        self.test_value(len(times[:]), 10)
+        for i in range(10):
+            self.test_value(times[:][i].secs(), float(i))
+
+        # Test times[start:end:step]
+        self.test_value(len(times[3:7:2]), 2)
+        self.test_value(times[3:7:2][0].secs(), 3.0)
+        self.test_value(times[3:7:2][1].secs(), 5.0)
+
+        # Test times[start:end:step]
+        self.test_value(len(times[6:3:-2]), 2)
+        self.test_value(times[6:3:-2][0].secs(), 6.0)
+        self.test_value(times[6:3:-2][1].secs(), 4.0)
+
+        # Test times[-start:]
+        self.test_value(len(times[-2:]), 2)
+        self.test_value(times[-2:][0].secs(), 8.0)
+        self.test_value(times[-2:][1].secs(), 9.0)
+
+        # Test times[:-end]
+        self.test_value(len(times[:-7]), 3)
+        self.test_value(times[:-7][0].secs(), 0.0)
+        self.test_value(times[:-7][1].secs(), 1.0)
+        self.test_value(times[:-7][2].secs(), 2.0)
+
+        # Return
+        return
+
+    # Test GGti class slicing
+    def _test_gti_slicing(self):
+        """
+        Test GGti class slicing
+        """
+        # Setup GTI container
+        gti = self._setup_gti()
+
+        # Test gti[start:end]
+        self.test_value(len(gti[3:5]), 2)
+        self.test_value(gti[3:5].tstop(0).secs(), 4.0)
+        self.test_value(gti[3:5].tstop(1).secs(), 5.0)
+
+        # Test gti[start:]
+        self.test_value(len(gti[7:]), 3)
+        self.test_value(gti[7:].tstop(0).secs(), 8.0)
+        self.test_value(gti[7:].tstop(1).secs(), 9.0)
+        self.test_value(gti[7:].tstop(2).secs(), 10.0)
+
+        # Test gti[:end]
+        self.test_value(len(gti[:2]), 2)
+        self.test_value(gti[:2].tstop(0).secs(), 1.0)
+        self.test_value(gti[:2].tstop(1).secs(), 2.0)
+
+        # Test gti[:]
+        self.test_value(len(gti[:]), 10)
+        for i in range(10):
+            self.test_value(gti[:].tstop(i).secs(), float(i+1))
+
+        # Test gti[start:end:step]
+        self.test_value(len(gti[3:7:2]), 2)
+        self.test_value(gti[3:7:2].tstop(0).secs(), 4.0)
+        self.test_value(gti[3:7:2].tstop(1).secs(), 6.0)
+
+        # Test gti[start:end:step]
+        self.test_value(len(gti[6:3:-2]), 2)
+        self.test_value(gti[6:3:-2].tstop(0).secs(), 7.0)
+        self.test_value(gti[6:3:-2].tstop(1).secs(), 5.0)
+
+        # Test gti[-start:]
+        self.test_value(len(gti[-2:]), 2)
+        self.test_value(gti[-2:].tstop(0).secs(), 9.0)
+        self.test_value(gti[-2:].tstop(1).secs(), 10.0)
+
+        # Test gti[:-end]
+        self.test_value(len(gti[:-7]), 3)
+        self.test_value(gti[:-7].tstop(0).secs(), 1.0)
+        self.test_value(gti[:-7].tstop(1).secs(), 2.0)
+        self.test_value(gti[:-7].tstop(2).secs(), 3.0)
+
+        # Return
+        return
+
+    # Test GPhases class slicing
+    def _test_phases_slicing(self):
+        """
+        Test GPhases class slicing
+        """
+        # Setup phase container
+        phases = self._setup_phases()
+
+        # Test phases[start:end]
+        self.test_value(len(phases[3:5]), 2)
+        self.test_value(phases[3:5].pmax(0), 4.0)
+        self.test_value(phases[3:5].pmax(1), 5.0)
+
+        # Test phases[start:]
+        self.test_value(len(phases[7:]), 3)
+        self.test_value(phases[7:].pmax(0), 8.0)
+        self.test_value(phases[7:].pmax(1), 9.0)
+        self.test_value(phases[7:].pmax(2), 10.0)
+
+        # Test phases[:end]
+        self.test_value(len(phases[:2]), 2)
+        self.test_value(phases[:2].pmax(0), 1.0)
+        self.test_value(phases[:2].pmax(1), 2.0)
+
+        # Test phases[:]
+        self.test_value(len(phases[:]), 10)
+        for i in range(10):
+            self.test_value(phases[:].pmax(i), float(i+1))
+
+        # Test phases[start:end:step]
+        self.test_value(len(phases[3:7:2]), 2)
+        self.test_value(phases[3:7:2].pmax(0), 4.0)
+        self.test_value(phases[3:7:2].pmax(1), 6.0)
+
+        # Test phases[start:end:step]
+        self.test_value(len(phases[6:3:-2]), 2)
+        self.test_value(phases[6:3:-2].pmax(0), 7.0)
+        self.test_value(phases[6:3:-2].pmax(1), 5.0)
+
+        # Test phases[-start:]
+        self.test_value(len(phases[-2:]), 2)
+        self.test_value(phases[-2:].pmax(0), 9.0)
+        self.test_value(phases[-2:].pmax(1), 10.0)
+
+        # Test phases[:-end]
+        self.test_value(len(phases[:-7]), 3)
+        self.test_value(phases[:-7].pmax(0), 1.0)
+        self.test_value(phases[:-7].pmax(1), 2.0)
+        self.test_value(phases[:-7].pmax(2), 3.0)
+
+        # Return
+        return
+
+    # Test GPhotons class access operators
+    def _test_photons_access(self):
+        """
+        Test GPhotons class observation access
+        """
+        # Setup photons container
+        photons = self._setup_photons()
+
+        # Perform photons access tests
+        test_support._energy_container_access_index(self, photons)
+
+        # Return
+        return
+
+    # Test GPhotons class slicing
+    def _test_photons_slicing(self):
+        """
+        Test GPhotons class slicing
+        """
+        # Setup photons container
+        photons = self._setup_photons()
+
+        # Perform slicing tests
+        test_support._energy_container_slicing(self, photons)
+
+        # Return
+        return
+
+    # Test GObservations class access operators
+    def _test_observations_access(self):
+        """
+        Test GObservations class observation access
+        """
+        # Setup observation container and CTA observation
+        obs = self._setup_obs()
+        run = gammalib.GCTAObservation()
+
+        # Perform observation access tests
+        test_support._container_access_index(self, obs)
+
+        # Return
+        return
+
+    # Test GObservations class slicing
+    def _test_observations_slicing(self):
+        """
+        Test GObservations class slicing
+        """
+        # Setup observation container
+        obs = self._setup_obs()
+
+        # Perform slicing tests
+        test_support._container_slicing(self, obs)
+
+        # Perform additional slicing tests
+        self.test_value(len(obs[3:5].models()), 10)
+        self.test_value(len(obs[7:].models()), 10)
+        self.test_value(len(obs[:2].models()), 10)
+        self.test_value(len(obs[:].models()), 10)
+        self.test_value(len(obs[3:7:2].models()), 10)
+        self.test_value(len(obs[6:3:-2].models()), 10)
+        self.test_value(len(obs[-2:].models()), 10)
+        self.test_value(len(obs[:-7].models()), 10)
+
+        # Return
+        return
+
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions
+        """
+        # Set test name
+        self.name('obs')
+
+        # Append tests
+        self.append(self._test_energy, 'Test GEnergy')
+        self.append(self._test_energies, 'Test GEnergies')
+        self.append(self._test_time, 'Test GTime')
+        self.append(self._test_energies_access, 'Test GEnergies energy access')
+        self.append(self._test_times_access, 'Test GTimes time access')
+        self.append(self._test_photons_access, 'Test GPhotons photon access')
+        self.append(self._test_observations_access, 'Test GObservations observation access')
+        self.append(self._test_energies_slicing, 'Test GEnergies slicing')
+        self.append(self._test_ebounds_slicing, 'Test GEbounds slicing')
+        self.append(self._test_times_slicing, 'Test GTimes slicing')
+        self.append(self._test_photons_slicing, 'Test GPhotons slicing')
+        self.append(self._test_observations_slicing, 'Test GObservations slicing')
 
         # Return
         return

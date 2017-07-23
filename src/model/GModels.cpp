@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.cpp - Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -324,11 +324,11 @@ GModel* GModels::set(const int& index, const GModel& model)
     int inx = get_index(model.name());
     if (inx != -1 && inx != index) {
         std::string msg =
-            "Attempt to set model with name \""+model.name()+"\" in model"
-            " container at index "+gammalib::str(index)+", but a model with"
-            " the same name exists already at index "+gammalib::str(inx)+
-            " in the container.\n"
-            "Every model in the model container needs a unique name.";
+            "Attempt to set model with name \""+model.name()+"\" in model "
+            "container at index "+gammalib::str(index)+", but a model with "
+            "the same name exists already at index "+gammalib::str(inx)+
+            " in the container. Every model in the model container needs a "
+            "unique name.";
         throw GException::invalid_value(G_SET1, msg);
     }
 

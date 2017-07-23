@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GSkyRegion.i - Sky region class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,9 @@ public:
     const std::string& type(void) const;
     const std::string& name(void) const;
     const double&      solidangle(void) const;
+    void               type(const std::string& type);
+    void               name(const std::string& name);
+    void               solidangle(const double& solidangle);
 };
 
 

@@ -17,8 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-import os
 import gammalib
+import test_support
 
 
 # ==================================== #
@@ -36,8 +36,72 @@ class Test(gammalib.GPythonTestSuite):
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
 
-        # Set test data directory
-        self._datadir = os.environ['TEST_DATA']
+        # Return
+        return
+
+    # Setup GModels container
+    def _setup_models(self):
+        """
+        Setup GModels container
+
+        Returns
+        -------
+        models : `~gammalib.GModels`
+            Models container
+        """
+        # Setup model container
+        models = gammalib.GModels()
+        model  = gammalib.GModelSky()
+        for i in range(10):
+            model.name('%s' % i)
+            models.append(model)
+
+        # Return model container
+        return models
+
+    # Test GModels class access operators
+    def _test_models_access(self):
+        """
+        Test GModels class model access
+        """
+        # Setup model container and sky model
+        models = self._setup_models()
+        model  = gammalib.GModelSky()
+
+        # Perform model access tests
+        test_support._container_access_index(self, models)
+
+        # Check model getting by name
+        self.test_value(models['7'].name(), '7')
+
+        # Check model setting by name
+        model.name('Test name')
+        models['3'] = model
+        self.test_value(models['Test name'].name(), 'Test name')
+
+        # Check model setting by index from start
+        model.name('Test index from start')
+        models[1] = model
+        self.test_value(models[1].name(), 'Test index from start')
+
+        # Check model setting by index from end
+        model.name('Test index from end')
+        models[-2] = model
+        self.test_value(models[-2].name(), 'Test index from end')
+
+        # Return
+        return
+
+    # Test GModels class slicing
+    def _test_models_slicing(self):
+        """
+        Test GModels class slicing
+        """
+        # Setup models container
+        models = self._setup_models()
+
+        # Perform slicing tests
+        test_support._container_slicing(self, models)
 
         # Return
         return
@@ -51,43 +115,8 @@ class Test(gammalib.GPythonTestSuite):
         self.name('model')
 
         # Append tests
-        self.append(self.test_models, 'Test GModels')
+        self.append(self._test_models_access, 'Test GModels model access')
+        self.append(self._test_models_slicing, 'Test GModels slicing')
 
-        # Return
-        return
-
-    # Test function
-    def test_models(self):
-        """
-        Test GModels class
-        """
-        # Set model filename
-        filename = self._datadir + '/model_point_plaw.xml'
-
-        # Read model container and create a copy of its first model (the
-        # copy is needed since the model container will go out of scope
-        # later)
-        models = gammalib.GModels(filename)
-        model  = models[0].copy()
-        name   = model.name()
-
-        # Create an empty model container
-        models = gammalib.GModels()
-
-        # Append 10 identical models to model container
-        for i in range(10):
-            model.name(name+'_'+str(i))
-            models.append(model)
-        
-        # Loop over all models using the container iterator and count the
-        # number of iterations
-        nmodels = 0
-        for model in models:
-            nmodels += 1
-
-        # Check that looping was successful
-        self.test_value(models.size(), 10, 'Check model container size')
-        self.test_value(nmodels, 10, 'Check model iterator')
-        
         # Return
         return

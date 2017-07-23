@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GApplicationPars.i - Application parameter container          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,7 +36,7 @@
  *
  * @brief Application parameter container class
  ***************************************************************************/
-class GApplicationPars : public GBase {
+class GApplicationPars : public GContainer {
 
 public:
     // Constructors and destructors
@@ -76,8 +76,13 @@ public:
  ***************************************************************************/
 %extend GApplicationPars {
     GApplicationPar& __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            return (*self)[self->size()+index];
         }
         else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
@@ -86,10 +91,44 @@ public:
     GApplicationPar& __getitem__(const std::string& name) {
         return (*self)[name];
     }
+    GApplicationPars* __getitem__(PyObject *param) {
+        if (PySlice_Check(param)) {
+            Py_ssize_t start = 0;
+            Py_ssize_t stop  = 0;
+            Py_ssize_t step  = 0;
+            Py_ssize_t len   = self->size();
+            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
+                GApplicationPars* pars = new GApplicationPars;
+                if (step > 0) {
+                    for (int i = (int)start; i < (int)stop; i += (int)step) {
+                        pars->append((*self)[i]);
+                    }
+                }
+                else {
+                    for (int i = (int)start; i > (int)stop; i += (int)step) {
+                        pars->append((*self)[i]);
+                    }
+                }
+                return pars;
+            }
+            else {
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
+            }
+        }
+        else {
+            throw GException::invalid_argument("__getitem__(PyObject)","");
+        }
+    }
     void __setitem__(const int& index, const GApplicationPar& par) {
-        if (index>=0 && index < self->size()) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
             (*self)[index] = par;
             return;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            (*self)[self->size()+index] = par;
         }
         else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());

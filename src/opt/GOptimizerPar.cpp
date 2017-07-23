@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GOptimizerPar.cpp - Optimizer parameter class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -700,8 +700,8 @@ std::string GOptimizerPar::print(const GChatter& chatter) const
 void GOptimizerPar::init_members(void)
 {
     // Initialise members
-    m_name            = "";
-    m_unit            = "";
+    m_name.clear();
+    m_unit.clear();
     m_factor_value    = 0.0;
     m_factor_error    = 0.0;
     m_factor_gradient = 0.0;

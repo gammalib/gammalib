@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GFits.i - FITS file class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -100,8 +100,13 @@ public:
  ***************************************************************************/
 %extend GFits {
     GFitsHDU* __getitem__(const int& extno) {
+        // Counting from start, e.g. [2]
         if (extno >= 0 && extno < self->size()) {
             return (*self)[extno];
+        }
+        // Counting from end, e.g. [-1]
+        else if (extno < 0 && self->size()+extno >= 0) {
+            return (*self)[self->size()+extno];
         }
         else {
             throw GException::out_of_range("__getitem__(int)",
@@ -112,10 +117,43 @@ public:
     GFitsHDU* __getitem__(const std::string& extname) {
         return (*self)[extname];
     }
+    GFits* __getitem__(PyObject *param) {
+        if (PySlice_Check(param)) {
+            Py_ssize_t start = 0;
+            Py_ssize_t stop  = 0;
+            Py_ssize_t step  = 0;
+            Py_ssize_t len   = self->size();
+            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
+                GFits* fits = new GFits;
+                if (step > 0) {
+                    for (int i = (int)start; i < (int)stop; i += (int)step) {
+                        fits->append(*(*self)[i]);
+                    }
+                }
+                else {
+                    for (int i = (int)start; i > (int)stop; i += (int)step) {
+                        fits->append(*(*self)[i]);
+                    }
+                }
+                return fits;
+            }
+            else {
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
+            }
+        }
+        else {
+            throw GException::invalid_argument("__getitem__(PyObject)","");
+        }
+    }
     void __setitem__(const int& extno, const GFitsHDU& hdu) {
+        // Counting from start, e.g. [2]
         if (extno >= 0 && extno < self->size()) {
             self->set(extno, hdu);
-            return;
+        }
+        // Counting from end, e.g. [-1]
+        else if (extno < 0 && self->size()+extno >= 0) {
+            self->set(self->size()+extno, hdu);
         }
         else {
             throw GException::out_of_range("__setitem__(int)",

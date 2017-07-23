@@ -20,12 +20,13 @@
 import os
 import math
 import gammalib
+import test_support
 
 
 # =========== #
 # Text parser #
 # =========== #
-def loadtxt(filename):
+def _loadtxt(filename):
     """
     Parse text file with columns of floats.
 
@@ -63,40 +64,33 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    def set(self):
+    # Setup GSkyRegions container
+    def _setup_regions(self):
         """
-        Set all test functions.
+        Setup GSkyRegions container
+
+        Returns
+        -------
+        regions : `~gammalib.GSkyRegions`
+            Sky regions container
         """
-        # Set test name
-        self.name("sky")
+        # Setup regions container
+        regions = gammalib.GSkyRegions()
+        circle  = gammalib.GSkyRegionCircle()
+        for i in range(10):
+            circle.name('%s' % i)
+            regions.append(circle)
 
-        # Append tests
-        self.append(self.test_methods, "Test sky map methods")
-        self.append(self.test_friend_methods, "Test sky map friend methods")
-        self.append(self.test_operators, "Test sky map operators")
-        self.append(self.test_skymap_healpix, "Test HEALPix map")
-        self.append(self.test_skymap_ait, "Test AIT projection map")
-        self.append(self.test_skymap_azp, "Test AZP projection map")
-        self.append(self.test_skymap_car, "Test CAR projection map")
-        self.append(self.test_skymap_gls, "Test GLS projection map")
-        self.append(self.test_skymap_mer, "Test MER projection map")
-        self.append(self.test_skymap_mol, "Test MOL projection map")
-        self.append(self.test_skymap_sfl, "Test SFL projection map")
-        self.append(self.test_skymap_sin, "Test SIN projection map")
-        self.append(self.test_skymap_stg, "Test STG projection map")
-        self.append(self.test_skymap_tan, "Test TAN projection map")
-        self.append(self.test_fk5_to_galactic, "Test FK5 to Galactic coordinate conversion")
-
-        # Return
-        return
+        # Return regions container
+        return regions
 
     # Test sky map methods
-    def test_methods(self):
+    def _test_methods(self):
         """
         Test the sky map methods.
         """
         # Setup sky maps
-        map = gammalib.GSkyMap("CAR", "CEL", 83.63, 22.01, -3.7, 2.6, 10, 8, 12)
+        map = gammalib.GSkyMap('CAR', 'CEL', 83.63, 22.01, -3.7, 2.6, 10, 8, 12)
 
         # Set sky map shape
         map.shape(3,4)
@@ -126,7 +120,7 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test sky map friend methods
-    def test_friend_methods(self):
+    def _test_friend_methods(self):
         """
         Test the sky map friend methods
         """
@@ -154,12 +148,12 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test sky map operators
-    def test_operators(self):
+    def _test_operators(self):
         """
         Test the sky map operators.
         """
         # Setup sky maps
-        map    = gammalib.GSkyMap("CAR", "CEL", 83.6331, 22.0145, -3.7, 2.6, 2, 2)
+        map    = gammalib.GSkyMap('CAR', 'CEL', 83.6331, 22.0145, -3.7, 2.6, 2, 2)
         map[0] = 1.0
         map[1] = 2.0
         map[2] = 3.0
@@ -218,7 +212,7 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Generic skymap pixel transformation test
-    def test_skymap_pixels(self, pixels, map):
+    def _test_skymap_pixels(self, pixels, map):
         """
         Control coordinate and pixel transformation methods.
         """
@@ -226,9 +220,9 @@ class Test(gammalib.GPythonTestSuite):
         for i in range(pixels.npix()):
             dir = pixels.inx2dir(i)
             inx = pixels.dir2inx(dir)
-            msg = map + " inx2dir/dir2inx check for pixel " + str(i)
-            err = map + " GSkyMap trouble with pixel " + str(i) + " (" + str(inx) + \
-                "), RA=" + str(dir.ra() * 180 / math.pi) + ", Dec=" + str(dir.dec() * 180 / math.pi)
+            msg = map + ' inx2dir/dir2inx check for pixel ' + str(i)
+            err = map + ' GSkyMap trouble with pixel ' + str(i) + ' (' + str(inx) + \
+                '), RA=' + str(dir.ra() * 180 / math.pi) + ', Dec=' + str(dir.dec() * 180 / math.pi)
             self.test_assert(i == inx, msg, err)
 
         # Control SkyDir coordinate transformation for all pixels
@@ -240,21 +234,21 @@ class Test(gammalib.GPythonTestSuite):
             if (dra >= 5.0):
                 dra -= 2.0 * math.pi
             ddec = abs(dir.dec() - dir_new.dec())
-            msg = map + " dir check for pixel " + str(i)
-            err = map + " GSkyMap trouble with pixel " + str(i) + " (" + str(dra) + \
-                "," + str(ddec) + ")"
+            msg = map + ' dir check for pixel ' + str(i)
+            err = map + ' GSkyMap trouble with pixel ' + str(i) + ' (' + str(dra) + \
+                ',' + str(ddec) + ')'
             self.test_assert(not (dra > 1.0e-9 or ddec > 1.0e-9), msg, err)
 
         # Return
         return
 
     # Generic skymap projection test
-    def test_skymap_proj(self, proj):
+    def _test_skymap_proj(self, proj):
         """
         Test skymap projection.
         """
         # Set filename
-        file = "test_python_skymap_" + proj + ".fits"
+        file = 'test_python_skymap_' + proj + '.fits'
 
         # Remove test files
         try:
@@ -263,26 +257,26 @@ class Test(gammalib.GPythonTestSuite):
             pass
 
         # Create skymap
-        pixels = gammalib.GSkyMap(proj, "CEL", 83.6331, 22.0145, -3.7, 2.6, 5, 5, 20)
+        pixels = gammalib.GSkyMap(proj, 'CEL', 83.6331, 22.0145, -3.7, 2.6, 5, 5, 20)
         for map in range(pixels.nmaps()):
             for i in range(pixels.npix()):
                 pixels[i, map] = i + map * pixels.npix()
         pixels.save(file)
 
         # Test coordinate and pixel transformations
-        self.test_skymap_pixels(pixels, proj)
+        self._test_skymap_pixels(pixels, proj)
 
         # Return
         return
 
     # Test HEALPix projection
-    def test_skymap_healpix(self):
+    def _test_skymap_healpix(self):
         """
         Test HEALPix interface.
         """
         # Set filenames
-        file1 = "test_python_skymap_hpx_v1.fits"
-        file2 = "test_python_skymap_hpx_v2.fits"
+        file1 = 'test_python_skymap_hpx_v1.fits'
+        file2 = 'test_python_skymap_hpx_v2.fits'
 
         # Remove test files
         try:
@@ -292,7 +286,7 @@ class Test(gammalib.GPythonTestSuite):
             pass
 
         # Create HEALPix skymap
-        pixels = gammalib.GSkyMap("GAL", 2, "RING", 2)
+        pixels = gammalib.GSkyMap('GAL', 2, 'RING', 2)
         for i in range(pixels.npix()):
             pixels[i] = i + 1.0
             pixels[i, 1] = i + 1.0 + 1000.0
@@ -302,7 +296,7 @@ class Test(gammalib.GPythonTestSuite):
         pixels = gammalib.GSkyMap(file1)
 
         # Control coordinate and pixel transformations
-        self.test_skymap_pixels(pixels, "HEALPix")
+        self._test_skymap_pixels(pixels, 'HEALPix')
 
         # Save HEALPix skymap twice. The second saving should fail.
         try:
@@ -311,7 +305,7 @@ class Test(gammalib.GPythonTestSuite):
         except RuntimeError:
             pass
         else:
-            raise RuntimeError("*** TEST ERROR: FITS file overwritten!")
+            raise RuntimeError('*** TEST ERROR: FITS file overwritten!')
         pixels.save(file2, True)
 
         # Load again HEALPix skymap
@@ -321,117 +315,117 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test AIT projection
-    def test_skymap_ait(self):
+    def _test_skymap_ait(self):
         """
         Test AIT projection.
         """
         # Execute generic test
-        self.test_skymap_proj("AIT")
+        self._test_skymap_proj('AIT')
 
         # Return
         return
 
     # Test AZP projection
-    def test_skymap_azp(self):
+    def _test_skymap_azp(self):
         """
         Test AZP projection.
         """
         # Execute generic test
-        self.test_skymap_proj("AZP")
+        self._test_skymap_proj('AZP')
 
         # Return
         return
 
     # Test CAR projection
-    def test_skymap_car(self):
+    def _test_skymap_car(self):
         """
         Test CAR projection.
         """
         # Execute generic test
-        self.test_skymap_proj("CAR")
+        self._test_skymap_proj('CAR')
 
         # Return
         return
 
     # Test GLS projection
-    def test_skymap_gls(self):
+    def _test_skymap_gls(self):
         """
         Test GLS projection.
         """
         # Execute generic test
-        self.test_skymap_proj("GLS")
+        self._test_skymap_proj('GLS')
 
         # Return
         return
 
     # Test MER projection
-    def test_skymap_mer(self):
+    def _test_skymap_mer(self):
         """
         Test MER projection.
         """
         # Execute generic test
-        self.test_skymap_proj("MER")
+        self._test_skymap_proj('MER')
 
         # Return
         return
 
     # Test MOL projection
-    def test_skymap_mol(self):
+    def _test_skymap_mol(self):
         """
         Test MOL projection.
         """
         # Execute generic test
-        self.test_skymap_proj("MOL")
+        self._test_skymap_proj('MOL')
 
         # Return
         return
 
     # Test SIN projection
-    def test_skymap_sin(self):
+    def _test_skymap_sin(self):
         """
         Test SIN projection.
         """
         # Execute generic test
-        self.test_skymap_proj("SIN")
+        self._test_skymap_proj('SIN')
 
         # Return
         return
 
     # Test SFL projection
-    def test_skymap_sfl(self):
+    def _test_skymap_sfl(self):
         """
         Test SFL projection.
         """
         # Execute generic test
-        self.test_skymap_proj("SFL")
+        self._test_skymap_proj('SFL')
 
         # Return
         return
 
     # Test STG projection
-    def test_skymap_stg(self):
+    def _test_skymap_stg(self):
         """
         Test STG projection.
         """
         # Execute generic test
-        self.test_skymap_proj("STG")
+        self._test_skymap_proj('STG')
 
         # Return
         return
 
     # Test TAN projection
-    def test_skymap_tan(self):
+    def _test_skymap_tan(self):
         """
         Test TAN projection.
         """
         # Execute generic test
-        self.test_skymap_proj("TAN")
+        self._test_skymap_proj('TAN')
 
         # Return
         return
 
     # FK5 J2000 to Galactic coordinate tranformations
-    def test_fk5_to_galactic(self):
+    def _test_fk5_to_galactic(self):
         """
         Test precision of FK5 J2000 to Galactic coordinate tranformations
         against pyast (http://dsberry.github.com/starlink/pyast.html)
@@ -446,8 +440,8 @@ class Test(gammalib.GPythonTestSuite):
         # Set parameters
         fk5_filename         = datadir + 'initial_coords.txt'
         galactic_filename    = datadir + 'fk5_to_galactic.txt'
-        fk5_coordinates      = loadtxt(fk5_filename)
-        galactic_coordinates = loadtxt(galactic_filename)
+        fk5_coordinates      = _loadtxt(fk5_filename)
+        galactic_coordinates = _loadtxt(galactic_filename)
         coordinates          = zip(fk5_coordinates, galactic_coordinates)
         max_dist             = 0
 
@@ -480,6 +474,73 @@ class Test(gammalib.GPythonTestSuite):
         msg = ''
         err = ''
         self.test_assert(max_dist < 20, msg, err)
+
+        # Return
+        return
+
+    # Test GSkyRegions class access operators
+    def _test_regions_access(self):
+        """
+        Test GSkyRegions class observation access
+        """
+        # Setup regions container
+        regions = self._setup_regions()
+        circle  = gammalib.GSkyRegionCircle()
+
+        # Perform regions access tests
+        test_support._container_access_index(self, regions)
+
+        # Check regions setting by index from start
+        circle.name('98')
+        regions[3] = circle
+        self.test_value(regions[3].name(), '98')
+
+        # Check observation setting by index from end
+        circle.name('99')
+        regions[-2] = circle
+        self.test_value(regions[-2].name(), '99')
+
+        # Return
+        return
+
+    # Test GSkyRegions class slicing
+    def _test_regions_slicing(self):
+        """
+        Test GSkyRegions class slicing
+        """
+        # Setup regions container
+        regions = self._setup_regions()
+
+        # Perform slicing tests
+        test_support._container_slicing(self, regions)
+
+        # Return
+        return
+
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name("sky")
+
+        # Append tests
+        self.append(self._test_methods, "Test sky map methods")
+        self.append(self._test_friend_methods, "Test sky map friend methods")
+        self.append(self._test_operators, "Test sky map operators")
+        self.append(self._test_skymap_healpix, "Test HEALPix map")
+        self.append(self._test_skymap_ait, "Test AIT projection map")
+        self.append(self._test_skymap_azp, "Test AZP projection map")
+        self.append(self._test_skymap_car, "Test CAR projection map")
+        self.append(self._test_skymap_gls, "Test GLS projection map")
+        self.append(self._test_skymap_mer, "Test MER projection map")
+        self.append(self._test_skymap_mol, "Test MOL projection map")
+        self.append(self._test_skymap_sfl, "Test SFL projection map")
+        self.append(self._test_skymap_sin, "Test SIN projection map")
+        self.append(self._test_skymap_stg, "Test STG projection map")
+        self.append(self._test_skymap_tan, "Test TAN projection map")
+        self.append(self._test_regions_access, "Test GSkyRegions region access")
+        self.append(self._test_regions_slicing, "Test GSkyRegions slicing")
 
         # Return
         return

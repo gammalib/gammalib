@@ -20,6 +20,7 @@
 import os
 import gammalib
 import math
+import test_support
 
 
 # ================================== #
@@ -27,12 +28,12 @@ import math
 # ================================== #
 class Test(gammalib.GPythonTestSuite):
     """
-    Test class for GammaLib CTA module.
+    Test class for GammaLib CTA module
     """
     # Constructor
     def __init__(self):
         """
-        Constructor.
+        Constructor
         """
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
@@ -44,28 +45,58 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    # Set test functions
-    def set(self):
+    # Setup GCTAEventList container
+    def _setup_eventlist(self):
         """
-        Set all test functions.
-        """
-        # Set test name
-        self.name('CTA')
+        Setup GCTAEventList container
 
-        # Append tests
-        self.append(self.test_aeff, 'Test CTA effective area classes')
-        self.append(self.test_psf, 'Test CTA PSF classes')
-        self.append(self.test_edisp, 'Test CTA energy dispersion classes')
-        self.append(self.test_response, 'Test CTA response classes')
-        self.append(self.test_onoff, 'Test CTA On/Off analysis')
+        Returns
+        -------
+        list : `~gammalib.GCTAEventList`
+            GCTAEventList container
+        """
+        # Setup event list container
+        list = gammalib.GCTAEventList()
+        atom = gammalib.GCTAEventAtom()
+        for i in range(10):
+            atom.energy().MeV(float(i))
+            list.append(atom)
+
+        # Return event list container
+        return list
+
+    # Test GCTAEventList class access operators
+    def _test_eventlist_access(self):
+        """
+        Test GCTAEventList class observation access
+        """
+        # Setup event list container
+        list = self._setup_eventlist()
+
+        # Perform event list access tests
+        test_support._energy_container_access_index(self, list)
+
+        # Return
+        return
+
+    # Test GCTAEventList class slicing
+    def _test_eventlist_slicing(self):
+        """
+        Test GCTAEventList class slicing
+        """
+        # Setup event list container
+        list = self._setup_eventlist()
+
+        # Perform slicing tests
+        test_support._energy_container_slicing(self, list)
 
         # Return
         return
 
     # Test effective area response
-    def test_aeff(self):
+    def _test_aeff(self):
         """
-        Test GCTAAeff classes.
+        Test GCTAAeff classes
         """
         # Test GCTAAeff2D file constructor
         filename = self._caldb + '/prod1_gauss.fits'
@@ -119,9 +150,9 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test point spread function response
-    def test_psf(self):
+    def _test_psf(self):
         """
-        Test GCTAPsf classes.
+        Test GCTAPsf classes
         """
         # Test GCTAPsf2D file constructor
         filename = self._caldb + '/prod1_gauss.fits'
@@ -175,9 +206,9 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test energy dispersion
-    def test_edisp(self):
+    def _test_edisp(self):
         """
-        Test GCTAEdisp classes.
+        Test GCTAEdisp classes
         """
         # Test GCTAEdispRmf file constructor
         filename = self._caldb + '/dc1/rmf.fits'
@@ -222,7 +253,7 @@ class Test(gammalib.GPythonTestSuite):
         #                0.5, 0.005)
 
     # Test response
-    def test_response(self):
+    def _test_response(self):
         """
         Test response classes
         """
@@ -234,9 +265,9 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test On/Off analysis
-    def test_onoff(self):
+    def _test_onoff(self):
         """
-        Test On/Off analysis.
+        Test On/Off analysis
         """
         # Create On region
         crab = gammalib.GSkyDir()
@@ -271,9 +302,6 @@ class Test(gammalib.GPythonTestSuite):
         lm = gammalib.GOptimizerLM()
         outobs.optimize(lm)
         outobs.errors(lm)
-        #print(lm)
-        #print(outobs)
-        #print(outobs.models())
 
         # Test On/Off model fitting results
         sky = outobs.models()['Crab']
@@ -305,5 +333,25 @@ class Test(gammalib.GPythonTestSuite):
         # Save On/Off observations
         outobs.save('test_cta_onoff.xml')
         
+        # Return
+        return
+
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name('CTA')
+
+        # Append tests
+        self.append(self._test_eventlist_access, 'Test GCTAEventList event access')
+        self.append(self._test_eventlist_slicing, 'Test GCTAEventList slicing')
+        self.append(self._test_aeff, 'Test CTA effective area classes')
+        self.append(self._test_psf, 'Test CTA PSF classes')
+        self.append(self._test_edisp, 'Test CTA energy dispersion classes')
+        self.append(self._test_response, 'Test CTA response classes')
+        self.append(self._test_onoff, 'Test CTA On/Off analysis')
+
         # Return
         return

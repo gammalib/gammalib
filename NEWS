@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.4.0
 
-18 July 2017
+22 July 2017
 
 
 1. Introduction
@@ -22,9 +22,16 @@ The following classes have been renamed:
 
 The following methods have been added:
 - GSkyRegion::overlaps(GSkyRegions&)
+- GSkyRegion::type(std::string&)
+- GSkyRegion::name(std::string&)
+- GSkyRegion::solidangle(std::string&)
 - GSkyMap::overlaps(GSkyRegion&)
 - GModelTemporalPhaseCurve::normalize()
 - GModelTemporalPhaseCurve::value(double&)
+- GOptimizerPars::append(GOptimizerPar&)
+- GLATEventList::append(GLATEventAtom&)
+- GLATEventList::reserve(int&)
+- GLATEventList::remove(int&,int&)
 
 The following methods have been removed:
 - n.a.
@@ -84,7 +91,8 @@ None
 
 11. Optimization module
 -----------------------
-None
+Add GOptimizerPars::append() method to allow appending of parameters to the
+container.
 
 
 12. Sky module
@@ -95,6 +103,8 @@ container (#1980).
 
 A GSkyMap::overlaps(GSkyRegions&) method has been added to check the overlap
 of a sky region with a sky map (#1980).
+
+Add methods to set the name, type and solid angle of a sky region.
 
 
 13. Support module
@@ -129,7 +139,7 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-None
+Add append(), remove() and reserve() methods to GLATEventList class.
 
 
 20. CTA interface

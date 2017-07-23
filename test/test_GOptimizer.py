@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib optimizer module.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2017 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #
 # ==========================================================================
 import gammalib
+import test_support
 
 
 # ======================================== #
@@ -38,24 +39,76 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Setup GOptimizerPars container
+    def _setup_pars(self):
+        """
+        Setup GOptimizerPars container
+
+        Returns
+        -------
+        pars : `~gammalib.GOptimizerPars`
+            GOptimizerPars container
+        """
+        # Setup GOptimizerPars container
+        pars = gammalib.GOptimizerPars()
+        par  = gammalib.GOptimizerPar()
+        for i in range(10):
+            par.name('%s' % i)
+            pars.append(par)
+
+        # Return GOptimizerPars container
+        return pars
+
+    # Test GOptimizerPars class access operators
+    def _test_pars_access(self):
+        """
+        Test GOptimizerPars class parameter access
+        """
+        # Setup GOptimizerPars container and parameter
+        pars = self._setup_pars()
+        par  = gammalib.GOptimizerPar()
+
+        # Perform GOptimizerPars access tests
+        test_support._container_access_index(self, pars)
+
+        # Check parameter setting by index from start
+        par.name('98')
+        pars[3] = par
+        self.test_value(pars[3].name(), '98')
+
+        # Check parameter setting by index from end
+        par.name('99')
+        pars[-2] = par
+        self.test_value(pars[-2].name(), '99')
+
+        # Return
+        return
+
+    # Test GOptimizerPars class slicing
+    def _test_pars_slicing(self):
+        """
+        Test GOptimizerPars class slicing
+        """
+        # Setup GOptimizerPars container
+        pars = self._setup_pars()
+
+        # Perform slicing tests
+        test_support._container_slicing(self, pars)
+
+        # Return
+        return
+
     # Set test functions
     def set(self):
         """
         Set all test functions.
         """
         # Set test name
-        self.name("opt")
+        self.name('opt')
 
         # Append tests
-        self.append(self.test, "Optimizer module dummy test")
+        self.append(self._test_pars_access, "Test GOptimizerPars parameter access")
+        self.append(self._test_pars_slicing, "Test GOptimizerPars slicing")
 
-        # Return
-        return
-
-    # Test function
-    def test(self):
-        """
-        Test function.
-        """
         # Return
         return

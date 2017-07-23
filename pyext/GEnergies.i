@@ -79,17 +79,55 @@ public:
  ***************************************************************************/
 %extend GEnergies {
     GEnergy& __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            return (*self)[self->size()+index];
         }
         else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
     }
+    GEnergies* __getitem__(PyObject *param) {
+        if (PySlice_Check(param)) {
+            Py_ssize_t start = 0;
+            Py_ssize_t stop  = 0;
+            Py_ssize_t step  = 0;
+            Py_ssize_t len   = self->size();
+            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
+                GEnergies* energies = new GEnergies;
+                if (step > 0) {
+                    for (int i = (int)start; i < (int)stop; i += (int)step) {
+                        energies->append((*self)[i]);
+                    }
+                }
+                else {
+                    for (int i = (int)start; i > (int)stop; i += (int)step) {
+                        energies->append((*self)[i]);
+                    }
+                }
+                return energies;
+            }
+            else {
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
+            }
+        }
+        else {
+            throw GException::invalid_argument("__getitem__(PyObject)","");
+        }
+    }
     void __setitem__(const int& index, const GEnergy& val) {
-        if (index>=0 && index < self->size()) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
             (*self)[index] = val;
-            return;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            (*self)[self->size()+index] = val;
         }
         else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());

@@ -85,8 +85,34 @@ public:
  * @brief GGti class extension
  ***************************************************************************/
 %extend GGti {
-    int __len__() {
-        return (self->size());
+    GGti* __getitem__(PyObject *param) {
+        if (PySlice_Check(param)) {
+            Py_ssize_t start = 0;
+            Py_ssize_t stop  = 0;
+            Py_ssize_t step  = 0;
+            Py_ssize_t len   = self->size();
+            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
+                GGti* gti = new GGti;
+                if (step > 0) {
+                    for (int i = (int)start; i < (int)stop; i += (int)step) {
+                        gti->append(self->tstart(i), self->tstop(i));
+                    }
+                }
+                else {
+                    for (int i = (int)start; i > (int)stop; i += (int)step) {
+                        gti->append(self->tstart(i), self->tstop(i));
+                    }
+                }
+                return gti;
+            }
+            else {
+                throw GException::invalid_argument("__getitem__(PyObject)",
+                                                   "Invalid slice indices");
+            }
+        }
+        else {
+            throw GException::invalid_argument("__getitem__(PyObject)","");
+        }
     }
     GGti copy() {
         return (*self);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GOptimizerPars.cpp - Optimizer parameter container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -392,6 +392,30 @@ GOptimizerPar* GOptimizerPars::set(const std::string& name, const GOptimizerPar&
 
 
 /***********************************************************************//**
+ * @brief Append parameter to container
+ *
+ * @param[in] par Parameter reference.
+ * @return Pointer to appended parameter.
+ *
+ * Appends a parameter to the container. The method stores a copy of the
+ * parameter in the container, hence the client may delete the parameter
+ * after the method is called.
+ ***************************************************************************/
+GOptimizerPar* GOptimizerPars::append(const GOptimizerPar& par)
+{
+    // Clone parameter
+    GOptimizerPar* ptr = par.clone();
+
+    // Inserts deep copy of parameter
+    m_alloc.push_back(true);
+    m_pars.push_back(ptr);
+
+    // Return parameter pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
  * @brief Attach parameter to container
  *
  * @param[in] par Parameter pointer.
@@ -680,6 +704,7 @@ std::string GOptimizerPars::print(const GChatter& chatter) const
 
         // Append parameters
         for (int i = 0; i < size(); ++i) {
+std::cout << i << " " << m_pars[i] << std::endl;
             result.append("\n"+m_pars[i]->print(chatter));
         }
 
