@@ -98,6 +98,7 @@ PYTHON_WRAPPERS = $(wrapperdir)/gammalib/app_wrap.cpp \
 # Test scripts to be distributed in $(pyexecdir)/gammalib/tests
 testscripts = gammalib/tests/__init__.py \
               $(top_srcdir)/test/test_python.py \
+              $(top_srcdir)/test/test_support.py \
               $(top_srcdir)/test/test_GApplication.py \
               $(top_srcdir)/test/test_GFits.py \
               $(top_srcdir)/test/test_GLinalg.py \
