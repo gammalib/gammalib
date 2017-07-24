@@ -28,6 +28,7 @@
 #include "GApplicationPars.hpp"
 #include "GException.hpp"
 #include "GFilename.hpp"
+#include "Python.h"
 %}
 
 
