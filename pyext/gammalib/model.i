@@ -41,6 +41,7 @@
 
 /* __ Include GammaLib typemaps __________________________________________ */
 %include typemap_GFilename.i
+%include typemap_slices.i
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";

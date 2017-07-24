@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         test.i - Test module                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2017 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,7 @@
 
 /* __ Include GammaLib typemaps __________________________________________ */
 %include typemap_GFilename.i
+%include typemap_slices.i
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";

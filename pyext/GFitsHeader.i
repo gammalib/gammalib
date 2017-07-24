@@ -98,11 +98,7 @@ public:
             Py_ssize_t stop  = 0;
             Py_ssize_t step  = 0;
             Py_ssize_t len   = self->size();
-            #if PY_VERSION_HEX >= 0x03020000
-            if (PySlice_GetIndices(param, len, &start, &stop, &step) == 0) {
-            #else
-            if (PySlice_GetIndices((PySliceObject*)param, len, &start, &stop, &step) == 0) {
-            #endif
+            if (PythonSlice_GetIndices(param, len, &start, &stop, &step) == 0) {
                 GFitsHeader* header = new GFitsHeader;
                 if (step > 0) {
                     for (int i = (int)start; i < (int)stop; i += (int)step) {
