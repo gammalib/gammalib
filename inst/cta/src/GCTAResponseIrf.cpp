@@ -756,11 +756,11 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
 
         } // endif: sigma attribute specified
 
-        // Store database and response names (we do this now since the
-        // load() method results the object, except of the calibration
-        // database)
-        m_xml_caldb   = xml_caldb;
-        m_xml_rspname = xml_rspname;
+        // Store database and response names for later writing into the XML
+        // file (we do this now since the load() method clears all
+        // GCTAResponseIrf data members)
+        //m_xml_caldb   = xml_caldb;
+        //m_xml_rspname = xml_rspname;
 
     } // endif: "Calibration" parameter found
 
@@ -1020,6 +1020,9 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
  * appropriate response is found, the method takes the database root path
  * and response name to build the full path to the response file, and tries
  * to load the response from these paths.
+ *
+ * The method sets the calibration database and response names for writing
+ * of the response information into the XML file.
  ***************************************************************************/
 void GCTAResponseIrf::load(const std::string& rspname)
 {
@@ -1042,19 +1045,26 @@ void GCTAResponseIrf::load(const std::string& rspname)
         bgdname = m_caldb.filename("","","BGD","","",expr);
     }
 
+    // Signal usage of calibration database
+    bool use_caldb = true;
+
     // If filenames are empty then build filenames from CALDB root path and
     // response name
     if (aeffname.is_empty()) {
-        aeffname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+        aeffname  = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+        use_caldb = false;
     }
     if (psfname.is_empty()) {
-        psfname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+        psfname   = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+        use_caldb = false;
     }
     if (edispname.is_empty()) {
         edispname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+        use_caldb = false;
     }
     if (bgdname.is_empty()) {
-        bgdname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+        bgdname   = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+        use_caldb = false;
     }
 
     // Load effective area
@@ -1077,6 +1087,13 @@ void GCTAResponseIrf::load(const std::string& rspname)
 
     // Store response name
     m_rspname = rspname;
+
+    // If the calibration database has been used then store database and
+    // response names for later writing into the XML file
+    if (use_caldb) {
+        m_xml_caldb   = caldb.instrument();
+        m_xml_rspname = rspname;
+    }
 
     // Return
     return;

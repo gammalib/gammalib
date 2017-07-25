@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.4.0
 
-22 July 2017
+25 July 2017
 
 
 1. Introduction
@@ -148,6 +148,10 @@ The GCTACubeExposure::fill_cube(), GCTACubePsf::fill_cube(),
 GCTACubeEdisp::fill_cube(), and GCTACubeBackground::fill() methods now
 exclude any observations from the filling for which the RoI does not
 overlap with the cube definition (#1980).
+
+The response information is now always written in the observation definition
+XML file if it is available, and not only if it has been read in previously
+from another XML file (#2170).
 
 
 21. COMPTEL interface

@@ -10,8 +10,7 @@ GammaLib 1.4 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* TBD
-* TBD
+* Support for Python list slicing for all container classes
 
 
 Bug fixes
@@ -21,12 +20,19 @@ Bug fixes
 Improvements
 ------------
 
+* [`2170 <https://cta-redmine.irap.omp.eu/issues/2170>`_] -
+  Write response information into simulated observation definition file
+* [`2154 <https://cta-redmine.irap.omp.eu/issues/2154>`_] -
+  Normalise phase curves by default
 * [`1980 <https://cta-redmine.irap.omp.eu/issues/1980>`_] -
   Add ``GSkyRegions::overlaps()`` and ``GSkyMap::overlaps()`` classes
 
 
 New features
 ------------
+
+* [`2128 <https://cta-redmine.irap.omp.eu/issues/2128>`_] -
+  Support Python list slicing for container classes
 
 
 
