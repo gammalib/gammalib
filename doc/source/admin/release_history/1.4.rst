@@ -20,6 +20,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2171 <https://cta-redmine.irap.omp.eu/issues/2171>`_] -
+  Add ``GCTAEventList::ipix()`` and ``GCTAEventList::ieng()`` setter methods
 * [`2170 <https://cta-redmine.irap.omp.eu/issues/2170>`_] -
   Write response information into simulated observation definition file
 * [`2154 <https://cta-redmine.irap.omp.eu/issues/2154>`_] -

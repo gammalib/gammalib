@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.4.0
 
-25 July 2017
+27 July 2017
 
 
 1. Introduction
@@ -29,6 +29,8 @@ The following methods have been added:
 - GModelTemporalPhaseCurve::normalize()
 - GModelTemporalPhaseCurve::value(double&)
 - GOptimizerPars::append(GOptimizerPar&)
+- GCTAEventList::ipix(int&)
+- GCTAEventList::ieng(int&)
 - GLATEventList::append(GLATEventAtom&)
 - GLATEventList::reserve(int&)
 - GLATEventList::remove(int&,int&)
@@ -152,6 +154,9 @@ overlap with the cube definition (#1980).
 The response information is now always written in the observation definition
 XML file if it is available, and not only if it has been read in previously
 from another XML file (#2170).
+
+Add GCTAEventList::ipix() and GCTAEventList::ieng() setter methods (#2171).
+
 
 
 21. COMPTEL interface

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAEventBin.i - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,6 +67,8 @@ public:
     void           dir(const GCTAInstDir& dir);
     void           energy(const GEnergy& energy);
     void           time(const GTime& time);
+    void           ipix(const int& ipix);
+    void           ieng(const int& ieng);
     void           solidangle(const double& solidangle);
     void           ewidth(const GEnergy& ewidth);
     void           ontime(const double& ontime);

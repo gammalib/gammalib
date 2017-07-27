@@ -1479,6 +1479,8 @@ void TestGCTAObservation::test_event_bin(void)
     bin.energy(GEnergy(2.0, "TeV"));
     bin.time(GTime(87.3));
     bin.counts(4.0);
+    bin.ipix(5);
+    bin.ieng(7);
     bin.solidangle(3.14);
     bin.ewidth(GEnergy(7.0, "GeV"));
     bin.ontime(101.0);
@@ -1502,8 +1504,8 @@ void TestGCTAObservation::test_event_bin(void)
     test_value(bin.time().secs(), 87.3, 1.0e-10, "Check time() for filled bin");
     test_value(bin.counts(), 4.0, 1.0e-10, "Check counts() for filled bin");
     test_value(bin.error(),  2.0, 1.0e-10, "Check error() for filled bin");
-    test_value(bin.ipix(), -1, "Check ipix() for filled bin");
-    test_value(bin.ieng(), -1, "Check ieng() for filled bin");
+    test_value(bin.ipix(), 5, "Check ipix() for filled bin");
+    test_value(bin.ieng(), 7, "Check ieng() for filled bin");
     test_value(bin.solidangle(), 3.14, 1.0e-10,
                "Check solidangle() for filled bin");
     test_value(bin.ewidth().GeV(), 7.0, 1.0e-10,
@@ -1528,8 +1530,8 @@ void TestGCTAObservation::test_event_bin(void)
     test_value(bin2.time().secs(), 87.3, 1.0e-10, "Check time() for copied bin");
     test_value(bin2.counts(), 4.0, 1.0e-10, "Check counts() for copied bin");
     test_value(bin2.error(),  2.0, 1.0e-10, "Check error() for copied bin");
-    test_value(bin2.ipix(), -1, "Check ipix() for copied bin");
-    test_value(bin2.ieng(), -1, "Check ieng() for copied bin");
+    test_value(bin2.ipix(), 5, "Check ipix() for copied bin");
+    test_value(bin2.ieng(), 7, "Check ieng() for copied bin");
     test_value(bin2.solidangle(), 3.14, 1.0e-10,
                "Check solidangle() for copied bin");
     test_value(bin2.ewidth().GeV(), 7.0, 1.0e-10,
@@ -1555,8 +1557,8 @@ void TestGCTAObservation::test_event_bin(void)
                "Check time() for assigned bin");
     test_value(bin3.counts(), 4.0, 1.0e-10, "Check counts() for assigned bin");
     test_value(bin3.error(),  2.0, 1.0e-10, "Check error() for assigned bin");
-    test_value(bin3.ipix(), -1, "Check ipix() for assigned bin");
-    test_value(bin3.ieng(), -1, "Check ieng() for assigned bin");
+    test_value(bin3.ipix(), 5, "Check ipix() for assigned bin");
+    test_value(bin3.ieng(), 7, "Check ieng() for assigned bin");
     test_value(bin3.solidangle(), 3.14, 1.0e-10,
                "Check solidangle() for assigned bin");
     test_value(bin3.ewidth().GeV(), 7.0, 1.0e-10,
@@ -1582,8 +1584,8 @@ void TestGCTAObservation::test_event_bin(void)
                "Check time() for cloned bin");
     test_value(bin4->counts(), 4.0, 1.0e-10, "Check counts() for cloned bin");
     test_value(bin4->error(),  2.0, 1.0e-10, "Check error() for cloned bin");
-    test_value(bin4->ipix(), -1, "Check ipix() for cloned bin");
-    test_value(bin4->ieng(), -1, "Check ieng() for cloned bin");
+    test_value(bin4->ipix(), 5, "Check ipix() for cloned bin");
+    test_value(bin4->ieng(), 7, "Check ieng() for cloned bin");
     test_value(bin4->solidangle(), 3.14, 1.0e-10,
                "Check solidangle() for cloned bin");
     test_value(bin4->ewidth().GeV(), 7.0, 1.0e-10,

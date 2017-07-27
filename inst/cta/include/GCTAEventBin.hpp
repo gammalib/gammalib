@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventBin.hpp - CTA event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -86,6 +86,8 @@ public:
     void           dir(const GCTAInstDir& dir);
     void           energy(const GEnergy& energy);
     void           time(const GTime& time);
+    void           ipix(const int& ipix);
+    void           ieng(const int& ieng);
     void           solidangle(const double& solidangle);
     void           ewidth(const GEnergy& ewidth);
     void           ontime(const double& ontime);
@@ -140,6 +142,21 @@ const int& GCTAEventBin::ipix(void) const
 
 
 /***********************************************************************//**
+ * @brief Set the spatial pixel index
+ *
+ * @param[in] ipix Spatial pixel index.
+ *
+ * Sets the spatial index of the event bin in the event cube.
+ ***************************************************************************/
+inline
+void GCTAEventBin::ipix(const int& ipix)
+{
+    m_ipix = ipix;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return the energy layer index
  *
  * @return Energy layer index.
@@ -151,6 +168,21 @@ inline
 const int& GCTAEventBin::ieng(void) const
 {
     return (m_ieng);
+}
+
+
+/***********************************************************************//**
+ * @brief Set the energy layer index
+ *
+ * @param[in] ieng Energy layer index.
+ *
+ * Sets the energy layer of the event bin in the event cube.
+ ***************************************************************************/
+inline
+void GCTAEventBin::ieng(const int& ieng)
+{
+    m_ieng = ieng;
+    return;
 }
 
 #endif /* GCTAEVENTBIN_HPP */
