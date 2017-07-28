@@ -7,6 +7,7 @@
         Write response information into simulated observation definition file (#2170)
         Normalise phase curves by default (#2154, #2172)
         Support Python list slicing for container classes (#2128)
+        Add Python typemaps for GObservation::likelihood() output argument (#2126)
         Add GSkyRegions::overlaps() and GSkyMap::overlaps() classes (#1980)
 
 

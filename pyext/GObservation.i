@@ -32,6 +32,19 @@
 #include "GTools.hpp"
 %}
 
+/* __ Typemaps ___________________________________________________________ */
+/*
+ * Convert double output argument from and into a Python float object. This
+ * typemap is needed for the likelihood() method.
+ */
+%typemap(in) double *npred (double temp) {
+    temp = PyFloat_AsDouble($input);
+    $1   = &temp;
+}
+%typemap(argout) double *npred {
+    $result = PyFloat_FromDouble(*$1);
+}
+
 
 /***********************************************************************//**
  * @class GObservation

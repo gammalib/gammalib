@@ -16,6 +16,9 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`2126 <https://cta-redmine.irap.omp.eu/issues/2126>`_] -
+  Add Python typemaps for ``GObservation::likelihood()`` output argument
+
 
 Improvements
 ------------
@@ -35,7 +38,6 @@ New features
 
 * [`2128 <https://cta-redmine.irap.omp.eu/issues/2128>`_] -
   Support Python list slicing for container classes
-
 
 
 Clean up
