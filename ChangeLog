@@ -1,11 +1,11 @@
-2017-07-27
+2017-07-28
 
         * Version 1.4.0 released
         =========================
 
         Add GCTAEventBin::ipix() and ieng() setter methods (#2171)
         Write response information into simulated observation definition file (#2170)
-        Normalise phase curves by default (#2154)
+        Normalise phase curves by default (#2154, #2172)
         Support Python list slicing for container classes (#2128)
         Add GSkyRegions::overlaps() and GSkyMap::overlaps() classes (#1980)
 

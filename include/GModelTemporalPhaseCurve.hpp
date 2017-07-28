@@ -144,9 +144,10 @@ protected:
     bool                m_has_normalize; //!< XML has normalize attribute
 
     // Protected members
-    mutable GNodeArray  m_nodes;    //!< Phase values of nodes
-    std::vector<double> m_values;   //!< Function values at nodes
-    GFilename           m_filename; //!< Name of phase file function
+    mutable GNodeArray  m_nodes;     //!< Phase values of nodes
+    std::vector<double> m_values;    //!< Function values at nodes
+    double              m_scale;     //!< Scale factor due to normalization
+    GFilename           m_filename;  //!< Name of phase file function
 };
 
 

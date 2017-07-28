@@ -316,7 +316,7 @@ GTimes GModelTemporalPhaseCurve::mc(const double& rate, const GTime&  tmin,
     GTimes times;
 
     // Compute event rate (in events per seconds)
-    double lambda = rate * norm();
+    double lambda = rate * norm() * m_scale;
 
     // Initialise start and stop times in seconds
     double time  = tmin.secs();
@@ -341,7 +341,7 @@ GTimes GModelTemporalPhaseCurve::mc(const double& rate, const GTime&  tmin,
         double value = eval(srcTime);
 
         // Get uniform random number
-        double uniform = ran.uniform();
+        double uniform = ran.uniform() * m_scale;
 
         // If the random number is not larger than the phase curve value
         // then accept the time
@@ -686,6 +686,7 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_nodes.clear();
     m_values.clear();
     m_filename.clear();
+    m_scale         = 1.0;
     m_normalize     = true;
     m_has_normalize = false;
 
@@ -711,6 +712,7 @@ void GModelTemporalPhaseCurve::copy_members(const GModelTemporalPhaseCurve& mode
     m_nodes         = model.m_nodes;
     m_values        = model.m_values;
     m_filename      = model.m_filename;
+    m_scale         = model.m_scale;
     m_normalize     = model.m_normalize;
     m_has_normalize = model.m_has_normalize;
 
@@ -909,9 +911,12 @@ void GModelTemporalPhaseCurve::normalize_nodes(void)
         throw GException::invalid_value(G_NORMALISE_NODES, msg);
     }
 
+    // Set scale factor
+    m_scale = 1.0 / sum;
+
     // Normalise the node values
     for (int i = 0; i < m_values.size(); ++i) {
-        m_values[i] /= sum;
+        m_values[i] *= m_scale;
     }
 
     // Return
