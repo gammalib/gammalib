@@ -47,11 +47,10 @@ To download an older release, click on the corresponding release number:
 Development release
 -------------------
 
-The current GammaLib development release is ``gammalib-1.5.0.dev1``.
+The current GammaLib development release is
+`gammalib-1.5.0.dev1 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.5.0.dev1.tar.gz>`_.
 This release reflects the status of the current ``devel`` branch of
 the GammaLib git repository.
-
-* `GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.5.0.dev1.tar.gz>`_ source code tarball
 
 
 Git repository
