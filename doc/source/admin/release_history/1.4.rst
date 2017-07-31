@@ -1,7 +1,7 @@
 .. _1.4:
 
-GammaLib 1.4 release
-====================
+GammaLib 1.4 release (1 August)
+===============================
 
 Overview
 --------
@@ -42,3 +42,5 @@ New features
 
 Clean up
 --------
+
+* None

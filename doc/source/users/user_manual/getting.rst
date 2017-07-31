@@ -36,7 +36,7 @@ required to compile :
 -  readline, including the readline developer package that provides the
    ``readline.h`` header file. If readline is present, the packages are used
    to enhance the user interface when entering parameters for ftools
-   applications (see section [sec:app]).
+   applications (see :ref:`this section <sec_app>`).
 
 If you plan to modify or to extend the GammaLib source code, the following
 software is also required on your system:
@@ -48,7 +48,7 @@ software is also required on your system:
 
 -  `swig <http://www.swig.org/>`_ is needed to rebuild the Python wrappers
    following Python interface modifications. Make sure to install the
-   latest swig version () to guarantee the largest possible
+   latest swig version to guarantee the largest possible
    compatibility of the Python wrappers.
 
 -  `Doxygen <http://www.doxygen.org/>`_ is needed to rebuild the software
@@ -133,7 +133,7 @@ readline (version 6.2) in the GammaLib default install directory
     $ make
     $ sudo make install
 
-Note that sudo is only needed if you are not the owner of the install
+Note that ``sudo`` is only needed if you are not the owner of the install
 directory.
 
 Installing
@@ -142,33 +142,7 @@ Installing
 Downloading
 ~~~~~~~~~~~
 
-To get the latest version of GammaLib, please visit the site
-http://cta.irap.omp.eu/ctools/download.html. The code can be downloaded
-from this site by selection the gammalib package from the table.
-Alternatively, the code can be downloaded and unpacked from the UNIX prompt
-using::
-
-    $ wget --no-check-certificate http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.0.0.tar.gz
-    $ tar xfz gammalib-1.0.0.tar.gz
-
-The GammaLib source code can also be cloned using git. This method is
-recommended if you plan to contribute to the development of the GammaLib
-library. Assuming that git is installed on your system, you may clone
-GammaLib using::
-
-    $ git clone https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git
-
-In case that you get:
-
-.. code-block:: bash
-
-    error: SSL certificate problem, verify that the CA cert is OK.
-
-you should add::
-
-    $ export GIT_SSL_NO_VERIFY=true
-
-before retrieving the code.
+You get the latest version of GammaLib :ref:`here <sec_download>`.
 
 .. _sec_configure:
 
@@ -202,27 +176,29 @@ case that you encounter installation problems, and may help you to
 diagnose the problems. The typical output that you may see is as
 follows::
 
-      GammaLib configuration summary
-      ==============================
-      * FITS I/O support             (yes)   /usr/local/gamma/lib /usr/local/gamma/include
-      * Readline support             (yes)    
-      * Ncurses support              (yes)   
-      * Make Python binding          (yes)   use swig for updates
-      * Python                       (yes)
-      * Python.h                     (yes)
-      * Python wrappers              (yes)
-      * swig                         (yes)
-      * Multiwavelength interface    (yes)
-      * Fermi-LAT interface          (yes)
-      * CTA interface                (yes)
-      * COMPTEL interface            (yes)
-      * Doxygen                      (yes)   /opt/local/bin/doxygen
-      * Perform NaN/Inf checks       (yes)   (default)
-      * Perform range checking       (yes)   (default)
-      * Optimize memory usage        (yes)   (default)
-      * Enable OpenMP                (yes)   (default)
-      - Compile in debug code        (no)    (default)
-      - Enable code for profiling    (no)    (default)
+  GammaLib configuration summary
+  ==============================
+  * FITS I/O support             (yes)    
+  * Readline support             (yes)    
+  * Ncurses support              (yes)   
+  * Developer configuration      (yes)
+  * Make Python binding          (yes)   use swig for updates
+  * Python                       (yes)
+  * Python.h                     (yes)
+  * Python wrappers              (yes)
+  * swig                         (yes)
+  * Multiwavelength interface    (yes)
+  * Fermi-LAT interface          (yes)
+  * CTA interface                (yes)
+  * COMPTEL interface            (yes)
+  * Doxygen                      (yes)   /usr/local/bin/doxygen
+  * Perform NaN/Inf checks       (yes)   (default)
+  * Perform range checking       (yes)   (default)
+  * Optimize memory usage        (yes)   (default)
+  * Support legacy XML format    (yes)   (default)
+  - Enable OpenMP                (no)
+  - Compile in debug code        (no)    (default)
+  - Enable code for profiling    (no)    (default)
 
 The script informs whether cfitsio has been found (and eventually also
 gives the directories in which the cfitsio library and the header file

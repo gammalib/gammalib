@@ -9,7 +9,7 @@ arithmetics. However, we do not provide a detailed description of the
 interface and the inner workings of each C++ class. This information is
 provided in the reference documentation, which can be found online at
 http://cta.irap.omp.eu/gammalib/doxygen/, or which can be installed
-locally on your machine (see section :ref:`sec_doxygen`).
+locally on your machine (see :ref:`sec_doxygen`).
 
 Each GammaLib module is presented in a dedicated section, following the overview
 shown in :ref:`fig_structure` from the top-left to the bottom right.
@@ -18,7 +18,7 @@ Instrument specific modules are described in a dedicated chapter (see
 illustrated using a UML diagram.
 
 To explain how to read such a diagram, we show an example for five
-fictive classes in :ref:`fig_uml_template`. Our example shows a container
+fictive classes in the figure below. Our example shows a container
 class that contains an arbitrary number of elements which are realized
 by an abstract base class. Names of abstract base classes are indicated
 in *italic* to highlight the fact that such classes can not be
@@ -34,6 +34,7 @@ dotted boundary.
 .. _fig_uml_template:
 
 .. figure:: uml_template.png
-   :width: 100%
+   :width: 60%
+   :align: center
 
-   UML usage
+   *UML usage*

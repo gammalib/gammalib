@@ -1084,8 +1084,8 @@ between 0 and 1.
 
    *Structure of phase curve FITS file*
 
-By default, the ``NORM`` values are recomputed internally so that the phase
-averaged normalisation is one. In that case, the spectral component corresponds
+By default, the ``NORM`` values are recomputed internally so that the
+phase-averaged normalisation is one. In that case, the spectral component corresponds
 to the phase-averaged spectrum. If the internal normalisation should be disabled
 the ``normalize="0"`` attribute needs to be added to the temporal tag, i.e.
 
