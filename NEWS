@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.4.0
+New Features and Important Changes in GammaLib 1.5.0
 
-28 July 2017
+1 August 2017
 
 
 1. Introduction
@@ -21,19 +21,7 @@ The following classes have been renamed:
 - n.a.
 
 The following methods have been added:
-- GSkyRegion::overlaps(GSkyRegions&)
-- GSkyRegion::type(std::string&)
-- GSkyRegion::name(std::string&)
-- GSkyRegion::solidangle(std::string&)
-- GSkyMap::overlaps(GSkyRegion&)
-- GModelTemporalPhaseCurve::normalize()
-- GModelTemporalPhaseCurve::value(double&)
-- GOptimizerPars::append(GOptimizerPar&)
-- GCTAEventList::ipix(int&)
-- GCTAEventList::ieng(int&)
-- GLATEventList::append(GLATEventAtom&)
-- GLATEventList::reserve(int&)
-- GLATEventList::remove(int&,int&)
+- n.a.
 
 The following methods have been removed:
 - n.a.
@@ -75,10 +63,7 @@ None
 
 8. Model module
 ---------------
-The GModelTemporalPhaseCurve models are now normalised by default unless a
-normalize="0" attribute is explicitly added into the XML file. Thus the spectral
-component of a sky model with a GModelTemporalPhaseCurve temporal component now
-gives the phase-averaged flux (#2154).
+None
 
 
 9. Numerics module
@@ -93,20 +78,12 @@ None
 
 11. Optimization module
 -----------------------
-Add GOptimizerPars::append() method to allow appending of parameters to the
-container.
+None
 
 
 12. Sky module
 --------------
-A GSkyRegions::overlaps(GSkyRegions&) method has been added to check the
-overlap of any region in a given container with any region in another
-container (#1980).
-
-A GSkyMap::overlaps(GSkyRegions&) method has been added to check the overlap
-of a sky region with a sky map (#1980).
-
-Add methods to set the name, type and solid angle of a sky region.
+None
 
 
 13. Support module
@@ -141,21 +118,12 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-Add append(), remove() and reserve() methods to GLATEventList class.
+None
 
 
 20. CTA interface
 -----------------
-The GCTACubeExposure::fill_cube(), GCTACubePsf::fill_cube(),
-GCTACubeEdisp::fill_cube(), and GCTACubeBackground::fill() methods now
-exclude any observations from the filling for which the RoI does not
-overlap with the cube definition (#1980).
-
-The response information is now always written in the observation definition
-XML file if it is available, and not only if it has been read in previously
-from another XML file (#2170).
-
-Add GCTAEventList::ipix() and GCTAEventList::ieng() setter methods (#2171).
+None
 
 
 
