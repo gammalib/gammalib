@@ -113,6 +113,13 @@ pkg:
                         dev/pkgbuild-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) amd64 NA ; \
                         dev/pkgbuild-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
 						;; \
+					openSUSE*) \
+						echo "openSUSE supported"; \
+                        dev/pkgbuild-openSuse.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
+                        dev/pkgbuild-openSuse.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) all NA ; \
+                        dev/pkgbuild-openSuse.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) amd64 NA ; \
+                        dev/pkgbuild-openSuse.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
+						;; \
 					*) \
 						echo "Linux OS not supported"; \
 						;; \
@@ -150,6 +157,13 @@ pkgcheck:
                         dev/pkgcheck-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) all NA ; \
                         dev/pkgcheck-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) amd64 NA ; \
                         dev/pkgcheck-ubuntu.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
+						;; \
+					openSUSE*) \
+						echo "openSUSE supported"; \
+                        dev/pkgcheck-openSuse.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
+                        dev/pkgcheck-openSuse.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) all NA ; \
+                        dev/pkgcheck-openSuse.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) amd64 NA ; \
+                        dev/pkgcheck-openSuse.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
 						;; \
 					*) \
 						echo "Linux OS not supported"; \
