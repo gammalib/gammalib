@@ -1,0 +1,40 @@
+.. _1.5:
+
+GammaLib 1.5 release
+====================
+
+Overview
+--------
+
+GammaLib 1.5 is a major release that adds significant functionality.
+
+In particular, this release provides:
+
+* TBW
+
+
+Bug fixes
+---------
+
+* TBW
+
+
+Improvements
+------------
+
+* [`1864 <https://cta-redmine.irap.omp.eu/issues/1864>`_] -
+  Add time parameter to ``GApplicationPar`` class
+* [`1864 <https://cta-redmine.irap.omp.eu/issues/1864>`_] -
+  Add time string constructor and set method to ``GTime`` class
+
+
+New features
+------------
+
+* None
+
+
+Clean up
+--------
+
+* None

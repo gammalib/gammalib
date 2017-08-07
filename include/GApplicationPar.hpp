@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplicationPar.hpp - Application parameter class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,7 +30,10 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GFilename.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GTime;
 
 
 /***********************************************************************//**
@@ -66,6 +69,7 @@ public:
     void               value(const std::string& value);
     void               string(const std::string& value);
     void               filename(const GFilename& value);
+    void               time(const GTime& value);
     void               boolean(const bool& value);
     void               integer(const int& value);
     void               real(const double& value);
@@ -75,6 +79,7 @@ public:
     std::string        value(void);
     std::string        string(void);
     GFilename          filename(void);
+    GTime              time(void);
     bool               boolean(void);
     int                integer(void);
     double             real(void);
@@ -112,6 +117,7 @@ protected:
     void        check_value_real(const std::string& value) const;
     void        check_value_string(const std::string& value) const;
     void        check_value_filename(const std::string& value) const;
+    void        check_value_time(const std::string& value) const;
     bool        check_options(const std::string& value) const;
     std::string set_status(const std::string& value);
     void        set_value(const std::string& value);

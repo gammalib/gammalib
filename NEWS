@@ -23,6 +23,8 @@ The following classes have been renamed:
 The following methods have been added:
 - GTime(std::string&)
 - GTime::set(const std::string& time)
+- GApplicationPar::time()
+- GApplicationPar::time(GTime&)
 
 The following methods have been removed:
 - n.a.
@@ -44,7 +46,8 @@ None
 
 4. Application module
 ---------------------
-None
+A time parameter with type "t" has been added to allow specifying time values in
+various formats to time systems to an application (#1864).
 
 
 5. Base module

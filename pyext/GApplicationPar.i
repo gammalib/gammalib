@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GApplicationPar.i - Application parameter class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,7 @@ public:
     void               value(const std::string& value);
     void               string(const std::string& value);
     void               filename(const GFilename& value);
+    void               time(const GTime& value);
     void               boolean(const bool& value);
     void               integer(const int& value);
     void               real(const double& value);
@@ -63,6 +64,7 @@ public:
     std::string        value(void);
     std::string        string(void);
     GFilename          filename(void);
+    GTime              time(void);
     bool               boolean(void);
     int                integer(void);
     double             real(void);

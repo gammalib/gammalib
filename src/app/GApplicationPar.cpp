@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPar.cpp - Application parameter               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,15 +36,19 @@
 #include "GApplicationPar.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
+#include "GTime.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_STRING_SET                  "GApplicationPar::string(std::string&)"
 #define G_FILENAME_SET                "GApplicationPar::filename(GFilename&)"
+#define G_TIME_SET                            "GApplicationPar::time(GTime&)"
 #define G_BOOLEAN_SET                       "GApplicationPar::boolean(bool&)"
 #define G_INTEGER_SET                        "GApplicationPar::integer(int&)"
 #define G_REAL_SET                           "GApplicationPar::real(double&)"
 #define G_STRING_GET                              "GApplicationPar::string()"
 #define G_FILENAME_GET                          "GApplicationPar::filename()"
+#define G_TIME_GET                                  "GApplicationPar::time()"
 #define G_BOOLEAN_GET                            "GApplicationPar::boolean()"
 #define G_INTEGER_GET                            "GApplicationPar::integer()"
 #define G_REAL_GET                                  "GApplicationPar::real()"
@@ -221,7 +225,8 @@ GApplicationPar* GApplicationPar::clone(void) const
  *
  * @param[in] type Parameter type.
  *
- * Sets the parameter type. Valid parameter types are: b,i,r,s,f,fr,fw,fe,fn.
+ * Sets the parameter type. Valid parameter types are:
+ * b,i,r,s,f,fr,fw,fe,fn,t.
  ***************************************************************************/
 void GApplicationPar::type(const std::string& type)
 {
@@ -326,6 +331,35 @@ void GApplicationPar::filename(const GFilename& value)
 
     // Set value
     set_value(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time parameter value
+ *
+ * @param[in] value Parameter value.
+ *
+ * @exception GException::invalid_value
+ *            Parameter is not of time type.
+ *
+ * This method sets a time parameter with a UTC string. The method only
+ * applies to time parameters. Other parameter types will produce an
+ * exception.
+ ***************************************************************************/
+void GApplicationPar::time(const GTime& value)
+{
+    // Check if parameter is a filename parameter
+    if (m_type != "t") {
+        std::string msg = "Attempt to set "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" with filename value.";
+        throw GException::invalid_value(G_TIME_SET, msg);
+    }
+
+    // Set value
+    set_value(value.utc());
 
     // Return
     return;
@@ -509,6 +543,40 @@ GFilename GApplicationPar::filename(void)
 
     // Return value
     return (GFilename(m_value));
+}
+
+
+/***********************************************************************//**
+ * @brief Returns time parameter value
+ *
+ * @exception GException::invalid_value
+ *            Parameter is not of time type.
+ *
+ * This method queries and returns a time parameter. The method only applies
+ * to time parameters. Other parameter types will produce an exception.
+ ***************************************************************************/
+GTime GApplicationPar::time(void)
+{
+    // Check if parameter is a time parameter
+    if (m_type != "t") {
+        std::string msg = "Attempt to read "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" as a filename value.";
+        throw GException::invalid_value(G_TIME_GET, msg);
+    }
+
+    // Query parameter
+    query();
+    
+    // Check if parameter is valid
+    if (m_status != ST_VALID) {
+        std::string msg = "Parameter \""+m_name+"\" is "+
+                          par_status_string()+". Please specify a valid"
+                          " parameter value.";
+        throw GException::invalid_value(G_TIME_GET, msg);
+    }
+
+    // Return value
+    return (GTime(m_value));
 }
 
 
@@ -841,7 +909,7 @@ void GApplicationPar::free_members(void)
  * @exception GException::invalid_value
  *            Invalid parameter type.
  *
- * The parameter type has to be one of b,i,r,s,f,fr,fw,fe,fn. 
+ * The parameter type has to be one of b,i,r,s,f,fr,fw,fe,fn,t.
  * The fr,fw,fe,fn types test for read access, write access, file existence,
  * and file absence, respectively.
  ***************************************************************************/
@@ -850,7 +918,7 @@ void GApplicationPar::check_type(const std::string& type) const
     // Check if type is valid
     if (type != "b"  && type != "i"  && type != "r"  && type != "s" &&
         type != "f"  && type != "fr" && type != "fw" && type != "fe" &&
-        type != "fn") {
+        type != "fn" && type != "t") {
         std::string msg = "Invalid parameter type \""+type+"\" encountered"
                           " for parameter \""+m_name+"\".";
         throw GException::invalid_value(G_CHECK_TYPE, msg);
@@ -908,6 +976,9 @@ void GApplicationPar::check_value(const std::string& value) const
     }
     else if (m_type == "s") {
         check_value_string(value);
+    }
+    else if (m_type == "t") {
+        check_value_time(value);
     }
     else if (is_filename()) {
         check_value_filename(value);
@@ -1105,6 +1176,27 @@ void GApplicationPar::check_value_filename(const std::string& value) const
 
 
 /***********************************************************************//**
+ * @brief Test validity of time parameter value
+ *
+ * @param[in] value Parameter value.
+ *
+ * If options have been specified, check if the time parameter value
+ * satisfies the options.
+ *
+ * Requires that m_type, m_min and m_max are set. The method does not verify
+ * if m_type is valid.
+ ***************************************************************************/
+void GApplicationPar::check_value_time(const std::string& value) const
+{
+    // Check for options
+    check_options(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test if parameter value satisfies possible options
  *
  * @param[in] value Parameter value.
@@ -1241,6 +1333,21 @@ std::string GApplicationPar::set_status(const std::string& value)
         }
     }
 
+    // Set time status. Catch the special values that signal that
+    // a parameter is undefined.
+    else if (m_type == "t") {
+        std::string lvalue = gammalib::tolower(value);
+        if (lvalue == "indef" ||
+            lvalue == "none"  ||
+            lvalue == "undef" ||
+            lvalue == "undefined") {
+            m_status = ST_UNDEFINED;
+        }
+        else {
+            m_status = ST_VALID;
+        }
+    }
+
     // Set other status
     else {
         m_status = ST_VALID;
@@ -1359,7 +1466,7 @@ void GApplicationPar::stop_query(void)
  * @param[in] type Parameter type.
  *
  * Translates parameter type character(s) into a human readable type string.
- * Valid parameter types are: b,i,r,s,f,fr,fw,fe,fn. If the parameter type
+ * Valid parameter types are: b,i,r,s,f,fr,fw,fe,fn,t. If the parameter type
  * is not valid, the method returns "unknown".
  ***************************************************************************/
 std::string GApplicationPar::par_type_string(const std::string& type) const
@@ -1383,6 +1490,9 @@ std::string GApplicationPar::par_type_string(const std::string& type) const
     else if (type == "f"  || type == "fr" || type == "fw" ||
              type == "fe" || type == "fn") {
         type_string.append("filename");
+    }
+    else if (type == "t") {
+        type_string.append("time");
     }
     else {
         type_string.append("unknown");

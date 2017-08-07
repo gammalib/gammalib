@@ -254,7 +254,8 @@ void TestGApplication::test_GApplicationPar(void)
     // Test parameter constructor
     test_try("Parameter constructor");
     try {
-        GApplicationPar par("name", "r", "a", "1.0", "0.0", "2.0", "Parameter name");
+        GApplicationPar par("name", "r", "a", "1.0", "0.0", "2.0",
+                            "Parameter name");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -266,6 +267,12 @@ void TestGApplication::test_GApplicationPar(void)
     try {
         GApplicationPar par("name", "i", "a", "1", "0", "2", "Parameter name");
         test_try_success();
+        test_value(par.name(), "name");
+        test_value(par.type(), "i");
+        test_value(par.mode(), "a");
+        test_value(par.integer(), 1);
+        test_value(par.min(), "0");
+        test_value(par.max(), "2");
     }
     catch (std::exception &e) {
         test_try_failure(e);
@@ -284,7 +291,8 @@ void TestGApplication::test_GApplicationPar(void)
     }
     test_try("Integer parameter with valid option");
     try {
-        GApplicationPar par("name", "i", "a", "1", "0|1|2", "", "Parameter name");
+        GApplicationPar par("name", "i", "a", "1", "0|1|2", "",
+                            "Parameter name");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -292,7 +300,8 @@ void TestGApplication::test_GApplicationPar(void)
     }
     test_try("Integer parameter with invalid option");
     try {
-        GApplicationPar par("name", "i", "a", "3", "0|1|2", "", "Parameter name");
+        GApplicationPar par("name", "i", "a", "3", "0|1|2", "",
+                            "Parameter name");
         test_try_failure("Integer parameter outside validity range shall throw"
                          " an exception.");
     }
@@ -306,15 +315,23 @@ void TestGApplication::test_GApplicationPar(void)
     // Test real parameter validity
     test_try("Real parameter in valid range");
     try {
-        GApplicationPar par("name", "r", "a", "1.0", "0.0", "2.0", "Parameter name");
+        GApplicationPar par("name", "r", "a", "1.0", "0.0", "2.0",
+                            "Parameter name");
         test_try_success();
+        test_value(par.name(), "name");
+        test_value(par.type(), "r");
+        test_value(par.mode(), "a");
+        test_value(par.real(), 1.0);
+        test_value(par.min(), "0.0");
+        test_value(par.max(), "2.0");
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
     test_try("Real parameter outside valid range");
     try {
-        GApplicationPar par("name", "r", "a", "3.0", "0.0", "2.0", "Parameter name");
+        GApplicationPar par("name", "r", "a", "3.0", "0.0", "2.0",
+                            "Parameter name");
         test_try_failure("Real parameter outside validity range shall throw"
                          " an exception.");
     }
@@ -326,7 +343,8 @@ void TestGApplication::test_GApplicationPar(void)
     }
     test_try("Real parameter with valid option");
     try {
-        GApplicationPar par("name", "r", "a", "1.0", "0.0|1.0|2.0", "", "Parameter name");
+        GApplicationPar par("name", "r", "a", "1.0", "0.0|1.0|2.0", "",
+                            "Parameter name");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -334,7 +352,8 @@ void TestGApplication::test_GApplicationPar(void)
     }
     test_try("Real parameter with invalid option");
     try {
-        GApplicationPar par("name", "r", "a", "3.0", "0.0|1.0|2.0", "", "Parameter name");
+        GApplicationPar par("name", "r", "a", "3.0", "0.0|1.0|2.0", "",
+                            "Parameter name");
         test_try_failure("Real parameter outside validity range shall throw"
                          " an exception.");
     }
@@ -348,15 +367,23 @@ void TestGApplication::test_GApplicationPar(void)
     // Test string parameter validity
     test_try("String parameter with valid option");
     try {
-        GApplicationPar par("name", "s", "a", "WaN", "Obi|Wan|Joda", "", "Parameter name");
+        GApplicationPar par("name", "s", "a", "WaN", "Obi|Wan|Joda", "",
+                            "Parameter name");
         test_try_success();
+        test_value(par.name(), "name");
+        test_value(par.type(), "s");
+        test_value(par.mode(), "a");
+        test_value(par.string(), "WaN");
+        test_value(par.min(), "Obi|Wan|Joda");
+        test_value(par.max(), "");
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
     test_try("String parameter with invalid option");
     try {
-        GApplicationPar par("name", "s", "a", "Kenobi", "Obi|Wan|Joda", "", "Parameter name");
+        GApplicationPar par("name", "s", "a", "Kenobi", "Obi|Wan|Joda", "",
+                            "Parameter name");
         test_try_failure("String parameter outside validity range shall throw"
                          " an exception.");
     }
@@ -368,18 +395,26 @@ void TestGApplication::test_GApplicationPar(void)
     }
 
     // Test filename parameter validity
-    test_try("String parameter with valid option");
+    test_try("Filename parameter with valid option");
     try {
-        GApplicationPar par("name", "f", "a", "Wan", "Obi|Wan|Joda", "", "Parameter name");
+        GApplicationPar par("name", "f", "a", "Wan", "Obi|Wan|Joda", "",
+                            "Parameter name");
         test_try_success();
+        test_value(par.name(), "name");
+        test_value(par.type(), "f");
+        test_value(par.mode(), "a");
+        test_value(par.filename(), "Wan");
+        test_value(par.min(), "Obi|Wan|Joda");
+        test_value(par.max(), "");
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-    test_try("String parameter with invalid option");
+    test_try("Filename parameter with invalid option");
     try {
-        GApplicationPar par("name", "f", "a", "WaN", "Obi|Wan|Joda", "", "Parameter name");
-        test_try_failure("String parameter outside validity range shall throw"
+        GApplicationPar par("name", "f", "a", "WaN", "Obi|Wan|Joda", "",
+                            "Parameter name");
+        test_try_failure("Filename parameter outside validity range shall throw"
                          " an exception.");
     }
     catch (GException::invalid_value &e) {
@@ -388,14 +423,32 @@ void TestGApplication::test_GApplicationPar(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-    test_try("String parameter with invalid option");
+    test_try("Filename parameter with invalid option");
     try {
-        GApplicationPar par("name", "f", "a", "Kenobi", "Obi|Wan|Joda", "", "Parameter name");
-        test_try_failure("String parameter outside validity range shall throw"
+        GApplicationPar par("name", "f", "a", "Kenobi", "Obi|Wan|Joda", "",
+                            "Parameter name");
+        test_try_failure("Filename parameter outside validity range shall throw"
                          " an exception.");
     }
     catch (GException::invalid_value &e) {
         test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test time parameter validity
+    test_try("Time parameter with valid option");
+    try {
+        GApplicationPar par("name", "t", "a", "2005-10-08T14:30:25", "", "",
+                            "Parameter name");
+        test_try_success();
+        test_value(par.name(), "name");
+        test_value(par.type(), "t");
+        test_value(par.mode(), "a");
+        test_value(par.time().utc(), "2005-10-08T14:30:25");
+        test_value(par.min(), "");
+        test_value(par.max(), "");
     }
     catch (std::exception &e) {
         test_try_failure(e);
