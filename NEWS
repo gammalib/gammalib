@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-1 August 2017
+7 August 2017
 
 
 1. Introduction
@@ -21,7 +21,8 @@ The following classes have been renamed:
 - n.a.
 
 The following methods have been added:
-- n.a.
+- GTime(std::string&)
+- GTime::set(const std::string& time)
 
 The following methods have been removed:
 - n.a.
@@ -73,7 +74,8 @@ None
 
 10. Observation module
 ----------------------
-None
+A time string constructor and set method has been added to GTime to allow
+setting various time formats from a string (#1864).
 
 
 11. Optimization module

@@ -772,6 +772,18 @@ void TestGObservation::test_time(void)
         test_try_failure(e);
     }
 
+    // Test time constructor (string)
+    test_try("Time constructor (string)");
+    try {
+        GTime time("1800.01");
+        test_try_success();
+        test_value(time.secs(), 1800.01);
+        test_value(time.days(), 1800.01/86400.0);
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Test time access methods
     // Reference times are from
     // - http://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xTime/xTime.pl
@@ -877,6 +889,34 @@ void TestGObservation::test_time(void)
     test_value(time.days(), 1.4288979);
     time.set(12.3, GTimeReference(0.0, "secs", "TT", "LOCAL"));
     test_value(time.secs(), 12.3 - mjd_ref*86400.0);
+
+    // Test time string set method
+    time.set("2005-10-08T14:30:25");
+    test_value(time.utc(), "2005-10-08T14:30:25");
+    time.set("123456.789");
+    test_value(time.secs(), 123456.789);
+    time.set("123456.789 (TT)");
+    test_value(time.secs(), 123456.789);
+    time.set("123424.605(TAI)");
+    test_value(time.secs(), 123456.789);
+    time.set("123390.60487(UTC)");
+    test_value(time.secs(), 123456.789);
+    time.set("MJD55198.42966648");
+    test_value(time.mjd(), 55198.42966648);
+    time.set("MJD 55198.42966648(TT)");
+    test_value(time.mjd(), 55198.42966648);
+    time.set("MJD 55198.42929398 (TAI)");
+    test_value(time.mjd(), 55198.42966648);
+    time.set("MJD 55198.42890046 (UTC)");
+    test_value(time.mjd(), 55198.42966648);
+    time.set("JD 2455198.92966648");
+    test_value(time.jd(), 2455198.92966648);
+    time.set("JD2455198.92966648(TT)");
+    test_value(time.jd(), 2455198.92966648);
+    time.set("JD 2455198.92929398 (TAI)");
+    test_value(time.jd(), 2455198.92966648);
+    time.set("JD  2455198.92890046 (UTC)");
+    test_value(time.jd(), 2455198.92966648);
 
     // Test conversion to different time systems
     time.utc("2005-10-08T14:30:25");

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -143,6 +143,27 @@ GTime::GTime(const double& time, const GTimeReference& ref)
 
     // Set time
     set(time, ref);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Time constructor
+ *
+ * @param[in] time Time string.
+ *
+ * Constructs a GTime object by setting the time to a string value. See the
+ * set(const std::string& time) method for valid time strings.
+ ***************************************************************************/
+GTime::GTime(const std::string& time)
+{
+    // Initialise private members
+    init_members();
+
+    // Set time
+    set(time);
 
     // Return
     return;
@@ -910,6 +931,74 @@ void GTime::set(const double& time, const GTimeReference& ref)
 
 
 /***********************************************************************//**
+ * @brief Set time from string
+ *
+ * @param[in] time Time string.
+ *
+ * Set the time from a string. The following strings are valid:
+ *
+ *     "2016-10-05T15:08:56" (UTC string)
+ *     "1800.0" (MET seconds in native reference, TT system)
+ *     "1800.0 (TT)" (MET seconds in native reference, TT system)
+ *     "1800.0 (UTC)" (MET seconds in native reference, UTC time system)
+ *     "1800.0 (TAI)" (MET seconds in native reference, TAI time system)
+ *     "MJD 54609" (Modified Julian Days, TT system)
+ *     "MJD 54609 (TT)" (Modified Julian Days, TT system)
+ *     "MJD 54609 (UTC)" (Modified Julian Days, UTC system)
+ *     "MJD 54609 (TAI)" (Modified Julian Days, TAI system)
+ *     "JD 54609" (Julian Days, TT system)
+ *     "JD 54609 (TT)" (Julian Days, TT system)
+ *     "JD 54609 (UTC)" (Julian Days, UTC system)
+ *     "JD 54609 (TAI)" (Julian Days, TAI system)
+ *
+ * If any other string is encountered, the numerical value is interpreted as
+ * time is seconds using the TT system.
+ ***************************************************************************/
+void GTime::set(const std::string& time)
+{
+    // Strip any whitespace from string and convert it to upper case
+    std::string str = gammalib::toupper(gammalib::strip_whitespace(time));
+
+    // First check if the string is a UTC string
+    long   year   = 0;
+    int    month  = 0;
+    long   day    = 0;
+    long   hour   = 0;
+    long   minute = 0;
+    double second = 0.0;
+    int    n      = sscanf(str.c_str(), "%ld-%d-%ldT%ld:%ld:%lg",
+		                   &year, &month, &day, &hour, &minute, &second);
+    if (n == 3 || n == 6) {
+        utc(str);
+    }
+
+    // ... otherwise check for Modified Julian Days
+    else if (str.find("MJD") == 0) {
+        double      timeval = extract_timeval(str);
+        std::string timesys = extract_timesys(str);
+        mjd(timeval, timesys);
+    }
+
+    // ... otherwise check for Julian Days
+    else if (str.find("JD") == 0) {
+        double      timeval = extract_timeval(str);
+        std::string timesys = extract_timesys(str);
+        jd(timeval, timesys);
+    }
+
+    // ... otherwise take time as seconds
+    else {
+        double      timeval = extract_timeval(str);
+        std::string timesys = extract_timesys(str);
+        secs(timeval, timesys);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set time to current time
  *
  * Sets time to current time.
@@ -1104,4 +1193,78 @@ double GTime::leap_seconds(const double& mjd) const
 
     // Return leap seconds
     return (leapsecs[i]);
+}
+
+
+/***********************************************************************//**
+ * @brief Extract time value from time string
+ *
+ * @param[in] time Time string.
+ * @return Time value.
+ *
+ * Extracts the time value from a time string.
+ ***************************************************************************/
+double GTime::extract_timeval(const std::string& time) const
+{
+    // Find time
+    size_t length = time.length();
+    size_t start  = time.find_first_of("0123456789+-.");
+    size_t stop   = time.find("(");
+
+    // If there is a stop position then set length to stop
+    if (stop != std::string::npos) {
+        length = stop;
+    }
+
+    // Reduce length by start
+    if (start != std::string::npos) {
+        length -= start;
+    }
+
+    // Get substring containing the time value
+    std::string value = time.substr(start, length);
+
+    // Convert value into double precision
+    double result = gammalib::todouble(value);
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract time system from time string
+ *
+ * @param[in] time Time string.
+ * @return Time system.
+ *
+ * Extracts the time system from a time string. Valid time systems are:
+ *
+ *     "(TT)" (TT system)
+ *     "(UTC)" (UTC system)
+ *     "(TAI)" (TAI system)
+ *
+ * If no time system is found TT is returned.
+ ***************************************************************************/
+std::string GTime::extract_timesys(const std::string& time) const
+{
+    // Initialise time system with TT string
+    std::string timesys = "TT";
+
+    // Strip any whitespace from string and convert it to upper case
+    std::string str = gammalib::toupper(gammalib::strip_whitespace(time));
+
+    // Check for UTC
+    if (str.find("(UTC)") != std::string::npos) {
+        timesys = "UTC";
+    }
+    else if (str.find("(TAI)") != std::string::npos) {
+        timesys = "TAI";
+    }
+    else if (str.find("(TT)") != std::string::npos) {
+        timesys = "TT";
+    }
+
+    // Return time system
+    return timesys;
 }

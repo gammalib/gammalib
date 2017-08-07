@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GTime.i - Time class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,6 +42,7 @@ public:
     GTime(const GTime& time);
     GTime(const double& time, const std::string& unit = "sec");
     GTime(const double& time, const GTimeReference& ref);
+    explicit GTime(const std::string& time);
     virtual ~GTime(void);
 
     // Operators
@@ -76,6 +77,7 @@ public:
     void           days(const double& days, const std::string& timesys);
     void           utc(const std::string& time);
     void           set(const double& time, const GTimeReference& ref);
+    void           set(const std::string& time);
     void           now(void);
     GTimeReference reference(void) const;
 };

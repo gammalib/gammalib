@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.hpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,6 +71,7 @@ public:
     GTime(const GTime& time);
     GTime(const double& time, const std::string& unit = "sec");
     GTime(const double& time, const GTimeReference& ref);
+    explicit GTime(const std::string& time);
     virtual ~GTime(void);
  
     // Operators
@@ -106,18 +107,21 @@ public:
     void           days(const double& days, const std::string& timesys);
     void           utc(const std::string& time);
     void           set(const double& time, const GTimeReference& ref);
+    void           set(const std::string& time);
     void           now(void);
     GTimeReference reference(void) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GTime& time);
-    void   free_members(void);
-    double leap_seconds(const double& mjd) const;
-    bool   is_leap_year(const int& year) const;
-    int    days_in_year(const int& year) const;
+    void        init_members(void);
+    void        copy_members(const GTime& time);
+    void        free_members(void);
+    double      leap_seconds(const double& mjd) const;
+    bool        is_leap_year(const int& year) const;
+    int         days_in_year(const int& year) const;
+    double      extract_timeval(const std::string& time) const;
+    std::string extract_timesys(const std::string& time) const;
 
     // Protected data members
     double m_time; //!< Time in seconds in native reference (TT)

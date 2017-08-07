@@ -1,7 +1,9 @@
-2017-08-01
+2017-08-07
 
         * Version 1.5.0 released
         =========================
+
+        Add time string constructor a set method to GTime (#1864)
 
 
 2017-07-28
