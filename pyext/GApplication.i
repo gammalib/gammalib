@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GApplication.i - GammaLib application base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,23 +60,23 @@ public:
 
     // Ignore base class methods and make methods private in Python by
     // prepending an underscore
-    %ignore                  clear;
-    %ignore                  clone;
-    %ignore                  classname;
-    %rename(_name)           name;
-    %rename(_version)        version;
-    %rename(_logTerse)       logTerse;
-    %rename(_logNormal)      logNormal;
-    %rename(_logExplicit)    logExplicit;
-    %rename(_logVerbose)     logVerbose;
-    %rename(_logDebug)       logDebug;
-    %rename(_clobber)        clobber;
-    %rename(_par_filename)   par_filename;
-    %rename(_log_filename)   log_filename;
-    %rename(_log_header)     log_header;
-    %rename(_log_trailer)    log_trailer;
-    %rename(_need_help)      need_help;
-    %rename(_log)            log;
+    %ignore                 clear;
+    %ignore                 clone;
+    %ignore                 classname;
+    %rename(_name)          name;
+    %rename(_version)       version;
+    %rename(_logTerse)      logTerse;
+    %rename(_logNormal)     logNormal;
+    %rename(_logExplicit)   logExplicit;
+    %rename(_logVerbose)    logVerbose;
+    %rename(_logDebug)      logDebug;
+    %rename(_clobber)       clobber;
+    %rename(_par_filename)  par_filename;
+    %rename(_log_filename)  log_filename;
+    %rename(_log_header)    log_header;
+    %rename(_log_trailer)   log_trailer;
+    %rename(_need_help)     need_help;
+    %rename(_log)           log;
 
     // Methods
     void                    clear(void);
@@ -208,6 +208,22 @@ GApplication._log_value = _log_value
                                                    msg);
             }
         } 
+        else if (par.type() == "t") {
+            std::string lval = gammalib::tolower(val);
+            if (lval == "indef" ||
+                lval == "none"  ||
+                lval == "undef" ||
+                lval == "undefined") {
+                par.value(val);
+            }
+            else {
+                std::string msg = "Attempt to set \""+par.type()+
+                                  "\" parameter \""+name+"\" with string "
+                                  "value \""+val+"\".";
+                throw GException::invalid_argument("__setitem__(std::string, std::string)",
+                                                   msg);
+            }
+        } 
         else {
             std::string msg = "Attempt to set \""+par.type()+
                               "\" parameter \""+name+"\" with string "
@@ -217,9 +233,28 @@ GApplication._log_value = _log_value
         } 
         return;
     }
+    void __setitem__(const std::string& name, const GTime& val) {
+        GApplicationPar& par = (*self)[name];
+        if (par.type() == "t") {
+            par.time(val);
+        }
+        else {
+            std::string msg = "Attempt to set \""+par.type()+
+                              "\" parameter \""+name+"\" with time "
+                              "value \""+val.print()+"\".";
+            throw GException::invalid_argument("__setitem__(std::string, GTime)",
+                                               msg);
+        }
+        return;
+    }
     GApplicationPar& __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->pars().size()) {
             return (*self)[index];
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->pars().size()+index >= 0) {
+            return (*self)[self->pars().size()+index];
         }
         else {
             throw GException::out_of_range("__getitem__(int)", "Application "
@@ -228,9 +263,13 @@ GApplication._log_value = _log_value
         }
     }
     void __setitem__(const int& index, const GApplicationPar& val) {
+        // Counting from start, e.g. [2]
         if (index >= 0 && index < self->pars().size()) {
             (*self)[index] = val;
-            return;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->pars().size()+index >= 0) {
+            (*self)[self->pars().size()+index] = val;
         }
         else {
             throw GException::out_of_range("__setitem__(int)", "Application "

@@ -1,6 +1,14 @@
 #
+# Test parameters
+# ===============
+real,     r, h, 83.63,,, "Real parameter"
+integer,  i, h, 1,,, "Integer parameter"
+string,   s, h, CEL,CEL|GAL,, "String parameter"
+filename, f, h, file.fits,,, "Filename parameter"
+time,     t, h, 2005-10-08T14:30:25,,, "Time parameter"
+#
 # Standard parameters
-#====================
+# ===================
 chatter, i, h, 2,0,4, "Chattiness of output"
 clobber, b, h, yes,,, "Overwrite existing output files with new output files?"
 debug,   b, h, no,,, "Debugging mode activated"

@@ -203,15 +203,15 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Set PFILES environment variable
         os.environ['PFILES'] = os.environ['TEST_DATA']
-        
+
         # Allocate test application
         app = gammalib.GApplication('test_GApplication', '1.1.0')
-        
+
         # Check proper allocation of test application
         self.test_value(app._name(), 'test_GApplication', 'Check application name')
         self.test_value(app._version(), '1.1.0', 'Check application version')
-        self.test_value(app.pars().size(), 5, 'Check number of parameters')
-        
+        self.test_value(app.pars().size(), 10, 'Check number of parameters')
+
         # Check that we properly can loop over all parameters. The npars
         # variable counts the number of iterations. If the parameter "chatter"
         # is encounter then set the chattiness to 4
@@ -220,11 +220,133 @@ class Test(gammalib.GPythonTestSuite):
             npars += 1
             if par.name() == 'chatter':
                 par.integer(4)
-        
+
         # Check outcome of loop
-        self.test_value(npars, 5, 'Check number of parameters in loop')
+        self.test_value(npars, 10, 'Check number of parameters in loop')
         self.test_value(app['chatter'].integer(), 4, 'Check that "chatter" '
                         'parameter could be stored correctly')
+
+        # Check access by index
+        self.test_value(app[1].integer(), 1)
+        self.test_value(app[-5].integer(), 4)
+
+        # Check setting by index
+        par = app[1]
+        par.integer(5)
+        app[1] = par
+        par = app[-5]
+        par.integer(4)
+        app[-5] = par
+        self.test_value(app[1].integer(), 5)
+        self.test_value(app[-5].integer(), 4)
+
+        # Check setting and getting of parameters
+        app['real']     = 100.0
+        app['integer']  = 10
+        app['string']   = 'GAL'
+        app['filename'] = 'newfile.fits'
+        app['time']     = gammalib.GTime('2000-01-01T12:00:00')
+        self.test_value(app['real'].real(), 100.0)
+        self.test_value(app['integer'].integer(), 10)
+        self.test_value(app['string'].string(), 'GAL')
+        self.test_value(app['filename'].filename().url(), 'newfile.fits')
+        self.test_value(app['time'].time().utc(), '2000-01-01T12:00:00')
+
+        # Check boolean exception
+        self.test_try('Test GApplication boolean parameter exception')
+        try:
+            app['real'] = False
+            self.test_try_failure('Exception not thrown')
+        except:
+            self.test_try_success()
+        else:
+            self.test_try_failure('This should never happen')
+
+        # Check integer exception
+        self.test_try('Test GApplication integer parameter exception')
+        try:
+            app['string'] = 1
+            self.test_try_failure('Exception not thrown')
+        except:
+            self.test_try_success()
+        else:
+            self.test_try_failure('This should never happen')
+
+        # Check string exception
+        self.test_try('Test GApplication string parameter exception')
+        try:
+            app['real'] = 'Unknown'
+            self.test_try_failure('Exception not thrown')
+        except:
+            self.test_try_success()
+        else:
+            self.test_try_failure('This should never happen')
+        self.test_try('Test GApplication string parameter exception')
+        try:
+            app['time'] = 'Unknown'
+            self.test_try_failure('Exception not thrown')
+        except:
+            self.test_try_success()
+        else:
+            self.test_try_failure('This should never happen')
+        self.test_try('Test GApplication string parameter exception')
+        try:
+            app['clobber'] = 'Unknown'
+            self.test_try_failure('Exception not thrown')
+        except:
+            self.test_try_success()
+        else:
+            self.test_try_failure('This should never happen')
+
+        # Check time exception
+        self.test_try('Test GApplication time parameter exception')
+        try:
+            app['real'] = gammalib.GTime()
+            self.test_try_failure('Exception not thrown')
+        except:
+            self.test_try_success()
+        else:
+            self.test_try_failure('This should never happen')
+
+        # Check handling of undefined parameters
+        app['real']    = 'INDEF'
+        app['integer'] = 'INDEF'
+        app['time']    = 'INDEF'
+        self.test_assert(app['real'].is_undefined(), 'INDEF real parameter')
+        self.test_assert(app['integer'].is_undefined(), 'INDEF integer parameter')
+        self.test_assert(app['time'].is_undefined(), 'INDEF time parameter')
+        app['real']    = 'NONE'
+        app['integer'] = 'NONE'
+        app['time']    = 'NONE'
+        self.test_assert(app['real'].is_undefined(), 'NONE real parameter')
+        self.test_assert(app['integer'].is_undefined(), 'NONE integer parameter')
+        self.test_assert(app['time'].is_undefined(), 'NONE time parameter')
+        app['real']    = 'UNDEF'
+        app['integer'] = 'UNDEF'
+        app['time']    = 'UNDEF'
+        self.test_assert(app['real'].is_undefined(), 'UNDEF real parameter')
+        self.test_assert(app['integer'].is_undefined(), 'UNDEF integer parameter')
+        self.test_assert(app['time'].is_undefined(), 'UNDEF time parameter')
+        app['real']    = 'UNDEFINED'
+        app['integer'] = 'UNDEFINED'
+        app['time']    = 'UNDEFINED'
+        self.test_assert(app['real'].is_undefined(), 'UNDEFINED real parameter')
+        self.test_assert(app['integer'].is_undefined(), 'UNDEFINED integer parameter')
+        self.test_assert(app['time'].is_undefined(), 'UNDEFINED time parameter')
+
+        # Check handling of NaN parameters
+        app['real']    = 'INF'
+        app['integer'] = 'INF'
+        self.test_assert(app['real'].is_notanumber(), 'INF real parameter')
+        self.test_assert(app['integer'].is_valid(), 'INF integer parameter')
+        app['real']    = 'INFINITY'
+        app['integer'] = 'INFINITY'
+        self.test_assert(app['real'].is_notanumber(), 'INFINITY real parameter')
+        self.test_assert(app['integer'].is_valid(), 'INFINITY integer parameter')
+        app['real']    = 'NAN'
+        app['integer'] = 'NAN'
+        self.test_assert(app['real'].is_notanumber(), 'NAN real parameter')
+        self.test_assert(app['integer'].is_valid(), 'NAN integer parameter')
 
         # Return
         return

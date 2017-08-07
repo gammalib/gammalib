@@ -626,32 +626,47 @@ void TestGApplication::test_GApplication(void)
         fgets(line, 100, fp);
         test_value(line, "+============+\n", "Check log file line 20");
         fgets(line, 100, fp);
-        test_value(line, " chatter ...................: 2\n",
+        test_value(line, " real ......................: 83.63\n",
                          "Check log file line 21");
         fgets(line, 100, fp);
-        test_value(line, " clobber ...................: yes\n",
+        test_value(line, " integer ...................: 1\n",
                          "Check log file line 22");
         fgets(line, 100, fp);
-        test_value(line, " debug .....................: no\n",
+        test_value(line, " string ....................: CEL\n",
                          "Check log file line 23");
         fgets(line, 100, fp);
-        test_value(line, " mode ......................: ql\n",
+        test_value(line, " filename ..................: file.fits\n",
                          "Check log file line 24");
         fgets(line, 100, fp);
-        test_value(line, " logfile ...................: test_application.log\n",
+        test_value(line, " time ......................: 2005-10-08T14:30:25\n",
                          "Check log file line 25");
+        fgets(line, 100, fp);
+        test_value(line, " chatter ...................: 2\n",
+                         "Check log file line 26");
+        fgets(line, 100, fp);
+        test_value(line, " clobber ...................: yes\n",
+                         "Check log file line 27");
+        fgets(line, 100, fp);
+        test_value(line, " debug .....................: no\n",
+                         "Check log file line 28");
+        fgets(line, 100, fp);
+        test_value(line, " mode ......................: ql\n",
+                         "Check log file line 29");
+        fgets(line, 100, fp);
+        test_value(line, " logfile ...................: test_application.log\n",
+                         "Check log file line 30");
         fgets(line, 32, fp);
         test_value(line, "Application \"test_GApplication\"",
-                         "Check log file line 26");
+                         "Check log file line 31");
 
         // Empty remaining characters (not checked since they are machine
         // dependent)
         fgets(line, 200, fp);
         fgets(line, 100, fp);
-        test_value(line, "\n", "Check log file line 27");
+        test_value(line, "\n", "Check log file line 32");
         fgets(line, 32, fp);
         test_value(line, "Application \"test_GApplication\"",
-                         "Check log file line 28");
+                         "Check log file line 33");
 
         // Close log file
         fclose(fp);
