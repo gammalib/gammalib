@@ -65,6 +65,7 @@ public:
     std::string        string(void);
     GFilename          filename(void);
     GTime              time(void);
+    GTime              time(const GTimeReference& ref);
     bool               boolean(void);
     int                integer(void);
     double             real(void);

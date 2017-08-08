@@ -25,7 +25,7 @@ The following methods have been added:
 - GTime(std::string&, GTimeReference&)
 - GTime::set(std::string&)
 - GTime::set(std::string&, GTimeReference&)
-- GApplicationPar::time()
+- GApplicationPar::time(GTimeReference&)
 - GApplicationPar::time(GTime&)
 
 The following methods have been removed:
@@ -49,7 +49,8 @@ None
 4. Application module
 ---------------------
 A time parameter with type "t" has been added to allow specifying time values in
-various formats to time systems to an application (#1864).
+various formats to time systems to an application. Methods have been added to set
+and retrieve the time value (#1864).
 
 
 5. Base module

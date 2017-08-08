@@ -30,10 +30,11 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GTime.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
-class GTime;
+class GTimeReference;
 
 
 /***********************************************************************//**
@@ -80,6 +81,7 @@ public:
     std::string        string(void);
     GFilename          filename(void);
     GTime              time(void);
+    GTime              time(const GTimeReference& ref);
     bool               boolean(void);
     int                integer(void);
     double             real(void);
@@ -232,6 +234,18 @@ inline
 const std::string& GApplicationPar::prompt(void) const
 {
     return m_prompt;
+}
+
+/***********************************************************************//**
+ * @brief Return time in native reference system
+ *
+ * @return Time.
+ ***************************************************************************/
+inline
+GTime GApplicationPar::time(void)
+{
+    GTime native;
+    return (time(native.reference()));
 }
 
 #endif /* GPAR_HPP */

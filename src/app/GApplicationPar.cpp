@@ -549,13 +549,18 @@ GFilename GApplicationPar::filename(void)
 /***********************************************************************//**
  * @brief Returns time parameter value
  *
+ * @param[in] ref Time reference system.
+ * @return Time.
+ *
  * @exception GException::invalid_value
  *            Parameter is not of time type.
  *
  * This method queries and returns a time parameter. The method only applies
- * to time parameters. Other parameter types will produce an exception.
+ * to time parameters. Other parameter types will produce an exception. If
+ * the time is specified as "Mission Elapsed Time" (MET) the specified
+ * time reference system will be used for conversion.
  ***************************************************************************/
-GTime GApplicationPar::time(void)
+GTime GApplicationPar::time(const GTimeReference& ref)
 {
     // Check if parameter is a time parameter
     if (m_type != "t") {
@@ -576,7 +581,7 @@ GTime GApplicationPar::time(void)
     }
 
     // Return value
-    return (GTime(m_value));
+    return (GTime(m_value, ref));
 }
 
 
