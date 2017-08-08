@@ -16,7 +16,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
-* TBW
+* [`2177 <https://cta-redmine.irap.omp.eu/issues/2177>`_] -
+  Fix UTC rounding error in ``GTime::utc()`` method
 
 
 Improvements

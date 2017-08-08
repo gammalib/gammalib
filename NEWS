@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-7 August 2017
+8 August 2017
 
 
 1. Introduction
@@ -83,6 +83,9 @@ None
 A time string constructor and set method has been added to GTime to allow
 setting various time formats from a string. Variants exist to set the time in
 the native time reference or in a specific time reference (#1864).
+
+A rounding error has been fixed in GTime::utc() so that times such as
+"2019-12-31T23:59:60" are now "2020-01-01T00:00:00" as they should be (#2177).
 
 
 11. Optimization module

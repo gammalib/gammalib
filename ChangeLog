@@ -1,8 +1,9 @@
-2017-08-07
+2017-08-08
 
         * Version 1.5.0 released
         =========================
 
+        Fix UTC rounding error in GTime::utc() method (#2177)
         Add time parameter to GApplicationPar class (#1864)
         Add time string constructor and set method to GTime class (#1864)
 
