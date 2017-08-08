@@ -178,7 +178,13 @@ GApplication._log_value = _log_value
         return;
     }
     void __setitem__(const std::string& name, const double& val) {
-        (*self)[name].real(val);
+        GApplicationPar& par = (*self)[name];
+        if (par.type() == "t") {
+            par.value(gammalib::str(val));
+        }
+        else {
+            par.real(val);
+        }
         return;
     }
     void __setitem__(const std::string& name, const std::string& val) {
@@ -209,20 +215,7 @@ GApplication._log_value = _log_value
             }
         } 
         else if (par.type() == "t") {
-            std::string lval = gammalib::tolower(val);
-            if (lval == "indef" ||
-                lval == "none"  ||
-                lval == "undef" ||
-                lval == "undefined") {
-                par.value(val);
-            }
-            else {
-                std::string msg = "Attempt to set \""+par.type()+
-                                  "\" parameter \""+name+"\" with string "
-                                  "value \""+val+"\".";
-                throw GException::invalid_argument("__setitem__(std::string, std::string)",
-                                                   msg);
-            }
+            par.value(val);
         } 
         else {
             std::string msg = "Attempt to set \""+par.type()+
