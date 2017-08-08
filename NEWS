@@ -22,7 +22,9 @@ The following classes have been renamed:
 
 The following methods have been added:
 - GTime(std::string&)
-- GTime::set(const std::string& time)
+- GTime(std::string&, GTimeReference&)
+- GTime::set(std::string&)
+- GTime::set(std::string&, GTimeReference&)
 - GApplicationPar::time()
 - GApplicationPar::time(GTime&)
 
@@ -78,7 +80,8 @@ None
 10. Observation module
 ----------------------
 A time string constructor and set method has been added to GTime to allow
-setting various time formats from a string (#1864).
+setting various time formats from a string. Variants exist to set the time in
+the native time reference or in a specific time reference (#1864).
 
 
 11. Optimization module

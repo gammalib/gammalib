@@ -918,6 +918,18 @@ void TestGObservation::test_time(void)
     time.set("JD  2455198.92890046 (UTC)");
     test_value(time.jd(), 2455198.92966648);
 
+    // Test time string set method using reference system
+    time.set("123456.789", GTimeReference(mjd_ref, "secs", "TT", "LOCAL"));
+    test_value(time.days(), 1.4288979);
+    time.set("1.4288979", GTimeReference(mjd_ref, "days", "TT", "LOCAL"));
+    test_value(time.days(), 1.4288979);
+    time.set("1.4288979 (TT)", GTimeReference(mjd_ref, "days", "UTC", "LOCAL"));
+    test_value(time.days(), 1.4288979);
+    time.set("1.4285254 (TAI)", GTimeReference(mjd_ref, "days", "TT", "LOCAL"));
+    test_value(time.days(), 1.4288979);
+    time.set("1.42813188 (UTC)", GTimeReference(mjd_ref, "days", "TT", "LOCAL"));
+    test_value(time.days(), 1.4288979);
+
     // Test conversion to different time systems
     time.utc("2005-10-08T14:30:25");
     test_value(time.convert(GTimeReference(0.0, "days", "TT", "LOCAL")),

@@ -30,9 +30,9 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GTimeReference.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GTimeReference;
 
 
 /***********************************************************************//**
@@ -71,6 +71,7 @@ public:
     GTime(const GTime& time);
     GTime(const double& time, const std::string& unit = "sec");
     GTime(const double& time, const GTimeReference& ref);
+    GTime(const std::string& time, const GTimeReference& ref);
     explicit GTime(const std::string& time);
     virtual ~GTime(void);
  
@@ -107,11 +108,12 @@ public:
     void           days(const double& days, const std::string& timesys);
     void           utc(const std::string& time);
     void           set(const double& time, const GTimeReference& ref);
+    void           set(const std::string& time, const GTimeReference& ref);
     void           set(const std::string& time);
     void           now(void);
     GTimeReference reference(void) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
-  
+
 protected:
     // Protected methods
     void        init_members(void);
@@ -377,6 +379,19 @@ inline
 bool operator>=(const GTime &a, const GTime &b)
 {
     return (a.m_time >= b.m_time);
+}
+
+
+/***********************************************************************//**
+ * @brief Set time for string for native time reference system
+ *
+ * @param[in] time Time string.
+ ***************************************************************************/
+inline
+void GTime::set(const std::string& time)
+{
+    set(time, this->reference());
+    return;
 }
 
 #endif /* GTIME_HPP */

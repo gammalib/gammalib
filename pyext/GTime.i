@@ -42,6 +42,7 @@ public:
     GTime(const GTime& time);
     GTime(const double& time, const std::string& unit = "sec");
     GTime(const double& time, const GTimeReference& ref);
+    GTime(const std::string& time, const GTimeReference& ref);
     explicit GTime(const std::string& time);
     virtual ~GTime(void);
 
@@ -77,6 +78,7 @@ public:
     void           days(const double& days, const std::string& timesys);
     void           utc(const std::string& time);
     void           set(const double& time, const GTimeReference& ref);
+    void           set(const std::string& time, const GTimeReference& ref);
     void           set(const std::string& time);
     void           now(void);
     GTimeReference reference(void) const;

@@ -152,6 +152,28 @@ GTime::GTime(const double& time, const GTimeReference& ref)
 /***********************************************************************//**
  * @brief Time constructor
  *
+ * @param[in] time Time string in given reference system.
+ * @param[in] ref Reference system.
+ *
+ * Constructs a GTime object by setting the time to a string value. See the
+ * set(std::string&, GTimeReference&) method for valid time strings.
+ ***************************************************************************/
+GTime::GTime(const std::string& time, const GTimeReference& ref)
+{
+    // Initialise private members
+    init_members();
+
+    // Set time
+    set(time, ref);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Time constructor
+ *
  * @param[in] time Time string.
  *
  * Constructs a GTime object by setting the time to a string value. See the
@@ -934,14 +956,16 @@ void GTime::set(const double& time, const GTimeReference& ref)
  * @brief Set time from string
  *
  * @param[in] time Time string.
+ * @param[in] ref Reference system.
  *
- * Set the time from a string. The following strings are valid:
+ * Sets the time from a string for a given reference system. The following
+ * strings are valid:
  *
  *     "2016-10-05T15:08:56" (UTC string)
- *     "1800.0" (MET seconds in native reference, TT system)
- *     "1800.0 (TT)" (MET seconds in native reference, TT system)
- *     "1800.0 (UTC)" (MET seconds in native reference, UTC time system)
- *     "1800.0 (TAI)" (MET seconds in native reference, TAI time system)
+ *     "1800.0" (MET seconds in specified reference system)
+ *     "1800.0 (TT)" (MET seconds in specified reference, TT system)
+ *     "1800.0 (UTC)" (MET seconds in specified reference, UTC time system)
+ *     "1800.0 (TAI)" (MET seconds in specified reference, TAI time system)
  *     "MJD 54609" (Modified Julian Days, TT system)
  *     "MJD 54609 (TT)" (Modified Julian Days, TT system)
  *     "MJD 54609 (UTC)" (Modified Julian Days, UTC system)
@@ -953,8 +977,12 @@ void GTime::set(const double& time, const GTimeReference& ref)
  *
  * If any other string is encountered, the numerical value is interpreted as
  * time is seconds using the TT system.
+ *
+ * Note that the TT, UTC or TAI attributes overwrite the values contained in
+ * the specified reference system. The reference system is only used to
+ * convert MET times in seconds.
  ***************************************************************************/
-void GTime::set(const std::string& time)
+void GTime::set(const std::string& time, const GTimeReference& ref)
 {
     // Strip any whitespace from string and convert it to upper case
     std::string str = gammalib::toupper(gammalib::strip_whitespace(time));
@@ -976,6 +1004,9 @@ void GTime::set(const std::string& time)
     else if (str.find("MJD") == 0) {
         double      timeval = extract_timeval(str);
         std::string timesys = extract_timesys(str);
+        if (timesys.empty()) {
+            timesys = "TT";
+        }
         mjd(timeval, timesys);
     }
 
@@ -983,14 +1014,23 @@ void GTime::set(const std::string& time)
     else if (str.find("JD") == 0) {
         double      timeval = extract_timeval(str);
         std::string timesys = extract_timesys(str);
+        if (timesys.empty()) {
+            timesys = "TT";
+        }
         jd(timeval, timesys);
     }
 
-    // ... otherwise take time as seconds
+    // ... otherwise take time as seconds and use the specified reference
+    // system. If no TT, UTC or TAI arrtibutes are specified use the value
+    // specified by the reference system.
     else {
         double      timeval = extract_timeval(str);
         std::string timesys = extract_timesys(str);
-        secs(timeval, timesys);
+        if (timesys.empty()) {
+            timesys = ref.timesys();
+        }
+        GTimeReference timeref(ref.mjdref(), ref.timeunit(), timesys, ref.timeref());
+        set(timeval, timeref);
     }
 
     // Return
@@ -1202,7 +1242,9 @@ double GTime::leap_seconds(const double& mjd) const
  * @param[in] time Time string.
  * @return Time value.
  *
- * Extracts the time value from a time string.
+ * Extracts the time value from a time string. The method strips any prefix
+ * such as "MJD" or "JD" and any suffix starting with a left parentheses "("
+ * and converts the remainder into a double precision value.
  ***************************************************************************/
 double GTime::extract_timeval(const std::string& time) const
 {
@@ -1244,12 +1286,12 @@ double GTime::extract_timeval(const std::string& time) const
  *     "(UTC)" (UTC system)
  *     "(TAI)" (TAI system)
  *
- * If no time system is found TT is returned.
+ * If no time system is found a blank string is returned.
  ***************************************************************************/
 std::string GTime::extract_timesys(const std::string& time) const
 {
-    // Initialise time system with TT string
-    std::string timesys = "TT";
+    // Initialise time system with blank string
+    std::string timesys = "";
 
     // Strip any whitespace from string and convert it to upper case
     std::string str = gammalib::toupper(gammalib::strip_whitespace(time));
