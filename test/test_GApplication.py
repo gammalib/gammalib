@@ -259,6 +259,8 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(app['time'].time().secs(), 1800.0)
         app['time']     = 1800.0
         self.test_value(app['time'].time().secs(), 1800.0)
+        app['time']     = 1800
+        self.test_value(app['time'].time().secs(), 1800.0)
 
         # Check boolean exception (does not work on older Linux systems)
         #self.test_try('Test GApplication boolean parameter exception')
