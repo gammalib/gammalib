@@ -565,7 +565,7 @@ GTime GApplicationPar::time(const GTimeReference& ref)
     // Check if parameter is a time parameter
     if (m_type != "t") {
         std::string msg = "Attempt to read "+par_type_string(m_type)+
-                          " parameter \""+m_name+"\" as a filename value.";
+                          " parameter \""+m_name+"\" as a time value.";
         throw GException::invalid_value(G_TIME_GET, msg);
     }
 
