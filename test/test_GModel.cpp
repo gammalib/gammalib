@@ -2071,7 +2071,7 @@ void TestGModel::test_nodes(void)
     test_value(model2.intensity(1), 0.1);
     test_value(model2.intensity(2), 1.0);
     test_value(model2.intensity(3), 0.1);
-   
+
     // Test XML constructor
     GXml                      xml(m_xml_model_point_nodes);
     GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -2104,6 +2104,19 @@ void TestGModel::test_nodes(void)
         test_value(model3[keyname].error(), 1.9);
         test_value(model3[keyname].gradient(), 0.8);
     }
+
+    // Test spectral model constructor
+    GModelSpectralPlaw  plaw(5.7e-16, -2.48, GEnergy(0.3, "TeV"));
+    GEnergies           energies(3, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GModelSpectralNodes model4(plaw, energies);
+    test_value(model4.size(), 6);
+    test_value(model4.nodes(), 3);
+    test_value(model4.energy(0).TeV(), 0.1);
+    test_value(model4.intensity(0), 8.69231722336369e-15);
+    test_value(model4.energy(1).TeV(), 3.16227766016838);
+    test_value(model4.intensity(1), 1.65628690171949e-18);
+    test_value(model4.energy(2).TeV(), 100.0);
+    test_value(model4.intensity(2), 3.15598962890354e-22);
 
     // Exit test
     return;

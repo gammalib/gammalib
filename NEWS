@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-8 August 2017
+10 August 2017
 
 
 1. Introduction
@@ -27,6 +27,7 @@ The following methods have been added:
 - GTime::set(std::string&, GTimeReference&)
 - GApplicationPar::time(GTimeReference&)
 - GApplicationPar::time(GTime&)
+- GModelSpectralNodes(GModelSpectral&, GEnergies&)
 
 The following methods have been removed:
 - n.a.
@@ -70,7 +71,8 @@ None
 
 8. Model module
 ---------------
-None
+A spectral model constructor was added to GModelSpectralNodes to allow
+conversion of any spectral model into a spectral node model (#2178).
 
 
 9. Numerics module

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralNodes.hpp - Spectral nodes model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,11 +34,11 @@
 #include "GModelPar.hpp"
 #include "GNodeArray.hpp"
 #include "GEnergy.hpp"
-//#include "GXmlElement.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
 class GTime;
+class GEnergies;
 class GXmlElement;
 
 
@@ -86,6 +86,7 @@ class GModelSpectralNodes : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralNodes(void);
+    GModelSpectralNodes(const GModelSpectral& model, const GEnergies& energies);
     explicit GModelSpectralNodes(const GXmlElement& xml);
     GModelSpectralNodes(const GModelSpectralNodes& model);
     virtual ~GModelSpectralNodes(void);

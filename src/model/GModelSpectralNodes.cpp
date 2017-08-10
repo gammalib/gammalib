@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GRan.hpp"
+#include "GEnergies.hpp"
 #include "GModelSpectralNodes.hpp"
 #include "GModelSpectralRegistry.hpp"
 
@@ -70,11 +71,38 @@ const GModelSpectralRegistry g_spectral_nodes_registry(&g_spectral_nodes_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs an empty spectral node model.
  ***************************************************************************/
 GModelSpectralNodes::GModelSpectralNodes(void) : GModelSpectral()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Spectral model constructor
+ *
+ * @param[in] model Spectral model.
+ * @param[in] energies Node energies.
+ *
+ * Constructs a spectral node model from any spectral model.
+ ***************************************************************************/
+GModelSpectralNodes::GModelSpectralNodes(const GModelSpectral& model,
+                                         const GEnergies&      energies) :
+                     GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Append nodes for all energies
+    for (int i = 0; i < energies.size(); ++i) {
+        append(energies[i], model.eval(energies[i]));
+    }
 
     // Return
     return;
@@ -793,7 +821,8 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
  * @exception GException::invalid_argument
  *            Non-positive energy or intensity specified.
  *
- * Appends one node to the node function.
+ * Appends one node to the node function. By default the energy of the node
+ * is fixed while the intensity of the node is free.
  ***************************************************************************/
 void GModelSpectralNodes::append(const GEnergy& energy,
                                  const double&  intensity)
@@ -821,12 +850,14 @@ void GModelSpectralNodes::append(const GEnergy& energy,
     e_par.value(energy.MeV());
     e_par.unit("MeV");
     e_par.has_grad(false);
+    e_par.fix();
 
     // Set intensity attributes
     i_par.name("Intensity");
     i_par.value(intensity);
     i_par.unit("ph/cm2/s/MeV");
     i_par.has_grad(true);
+    i_par.free();
 
     // Append to nodes
     m_energies.push_back(e_par);
@@ -856,7 +887,8 @@ void GModelSpectralNodes::append(const GEnergy& energy,
  *            Non-positive energy or intensity specified.
  *
  * Inserts a node into the node function before the node with the specified
- * @p index.
+ * @p index. By default the energy of the node is fixed while the intensity
+ * of the node is free.
  ***************************************************************************/
 void GModelSpectralNodes::insert(const int&     index,
                                  const GEnergy& energy,
@@ -899,12 +931,14 @@ void GModelSpectralNodes::insert(const int&     index,
     e_par.value(energy.MeV());
     e_par.unit("MeV");
     e_par.has_grad(false);
+    e_par.fix();
 
     // Set intensity attributes
     i_par.name("Intensity");
     i_par.value(intensity);
     i_par.unit("ph/cm2/s/MeV");
     i_par.has_grad(true);
+    i_par.free();
 
     // Insert node
     m_energies.insert(m_energies.begin()+index, e_par);
@@ -1174,14 +1208,16 @@ std::string GModelSpectralNodes::print(const GChatter& chatter) const
             result.append("\n"+m_pars[i]->print(chatter));
         }
 
-        // Append node information
-        for (int i = 0; i < m_prefactor.size(); ++i) {
-            result.append("\n"+gammalib::parformat("Node "+gammalib::str(i+1)));
-            result.append("Epivot="+gammalib::str(m_epivot[i]));
-            result.append(" Prefactor="+gammalib::str(m_prefactor[i]));
-            result.append(" Gamma="+gammalib::str(m_gamma[i]));
-            result.append(" Flux="+gammalib::str(m_flux[i]));
-            result.append(" EFlux="+gammalib::str(m_eflux[i]));
+        // VERBOSE: Append information about power laws between node
+        if (chatter == VERBOSE) {
+            for (int i = 0; i < m_prefactor.size(); ++i) {
+                result.append("\n"+gammalib::parformat("Interval "+gammalib::str(i+1)));
+                result.append("Epivot="+gammalib::str(m_epivot[i]));
+                result.append(" Prefactor="+gammalib::str(m_prefactor[i]));
+                result.append(" Gamma="+gammalib::str(m_gamma[i]));
+                result.append(" Flux="+gammalib::str(m_flux[i]));
+                result.append(" EFlux="+gammalib::str(m_eflux[i]));
+            }
         }
 
     } // endif: chatter was not silent
