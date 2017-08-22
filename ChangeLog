@@ -9,6 +9,14 @@
         Add time string constructor and set method to GTime class (#1864)
 
 
+2017-08-22
+
+        * Bug fix version 1.4.1 released
+        ================================
+
+        Correct GModelSpectralNodes::mc() regression for energies outside the node energy range (#2179)
+
+
 2017-07-28
 
         * Version 1.4.0 released

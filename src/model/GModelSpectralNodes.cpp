@@ -557,7 +557,7 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
             }
         }
     }
-    else {
+    else if (m_mc_cum.size() == 0) {
         std::string msg = "No valid nodes found for energy interval ["+
                           emin.print()+","+emax.print()+"]. Either restrict "
                           "the energy range to the one covered by the "
