@@ -184,7 +184,7 @@ If everything works successfully you should see
 or
 
     ============================================================================
-    Testsuite summary for gammalib 1.4.0
+    Testsuite summary for gammalib 1.4.1
     ============================================================================
     # TOTAL: 21
     # PASS:  21
