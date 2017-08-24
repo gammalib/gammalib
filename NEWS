@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.4.1
+New Features and Important Changes in GammaLib 1.4.2
 
-22 August 2017
+24 August 2017
 
 
 1. Introduction
@@ -63,10 +63,9 @@ None
 
 8. Model module
 ---------------
-A regression has been introduced in GModelSpectralNodes::mc() that led to a
-GException::invalid_return_value exception in case that the energy range was
-lying outside the energy range covered by the node function. This regression
-was corrected (#2179).
+Fixed bug where the light curve normalization was taken into account twice in
+GModelTemporalLightCurve::mc() so that the number of events scaled with the
+squared of the normalization instead of a linear scaling (#2181).
 
 
 9. Numerics module

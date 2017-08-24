@@ -1,0 +1,14 @@
+.. _1.4.2:
+
+GammaLib 1.4.2 release (24 August 2017)
+=======================================
+
+Overview
+--------
+
+GammaLib 1.4.2 is a bug fix for GammaLib release 1.4.
+
+The following bugs have been fixed:
+
+* [`2181 <https://cta-redmine.irap.omp.eu/issues/2181>`_] -
+  Correct  rate computation in ``GModelTemporalLightCurve::mc()``
