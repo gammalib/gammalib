@@ -3,7 +3,7 @@
         * Bug fix version 1.4.2 released
         ================================
 
-        Correct  rate computation in GModelTemporalLightCurve::mc() (#2181)
+        Correct rate computation in GModelTemporalLightCurve::mc() (#2181)
 
 
 2017-08-22
