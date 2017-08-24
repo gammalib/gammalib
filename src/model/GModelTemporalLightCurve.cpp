@@ -313,8 +313,10 @@ GTimes GModelTemporalLightCurve::mc(const double& rate, const GTime&  tmin,
     if (m_mc_eff_duration > 0.0 && m_mc_cum.size() > 0) {
 
         // Compute mean number of times by multiplying the rate with the
-        // effective duration and the normalization factor
-        double lambda = rate * norm() * m_mc_eff_duration;
+        // effective duration. Note that the light curve normalization factor
+        // is already included in the effective rate, hence we should not
+        // multiply it here again (see #2181).
+        double lambda = rate * m_mc_eff_duration;
 
         // Compute number of times to be sampled
         int ntimes = int(ran.poisson(lambda)+0.5);
