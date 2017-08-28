@@ -518,6 +518,7 @@ void GModelTemporalLightCurve::init_members(void)
     // Initialise cache
     m_mc_tmin.clear();
     m_mc_tmax.clear();
+    m_mc_norm         = 0.0;
     m_mc_eff_duration = 0.0;
     m_mc_cum.clear();
     m_mc_slope.clear();
@@ -549,6 +550,7 @@ void GModelTemporalLightCurve::copy_members(const GModelTemporalLightCurve& mode
     // Copy cache
     m_mc_tmin         = model.m_mc_tmin;
     m_mc_tmax         = model.m_mc_tmax;
+    m_mc_norm         = model.m_mc_norm;
     m_mc_eff_duration = model.m_mc_eff_duration;
     m_mc_cum          = model.m_mc_cum;
     m_mc_slope        = model.m_mc_slope;
@@ -697,12 +699,16 @@ void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
 void GModelTemporalLightCurve::mc_update(const GTime& tmin,
                                    const GTime& tmax) const
 {
-    // Update the cache only if the time interval has changed
-    if (tmin != m_mc_tmin || tmax != m_mc_tmax) {
+    // Get light curve normalisation value to see whether it has changed
+    double norm = m_norm.value();
+
+    // Update the cache only if the time interval or normalisation has changed
+    if (tmin != m_mc_tmin || tmax != m_mc_tmax || norm != m_mc_norm) {
     
-        // Store new time interval
+        // Store new time interval and normalisation value
         m_mc_tmin = tmin;
         m_mc_tmax = tmax;
+        m_mc_norm = norm;
         
         // Initialise cache
         m_mc_eff_duration = 0.0;

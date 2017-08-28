@@ -112,6 +112,7 @@ protected:
     // Cached members for MC
     mutable GTime               m_mc_tmin;         //!< Minimum time
     mutable GTime               m_mc_tmax;         //!< Maximum time
+    mutable double              m_mc_norm;         //!< Light curve normalisation
     mutable double              m_mc_eff_duration; //!< Effective duration
     mutable std::vector<double> m_mc_cum;          //!< Cumulative distribution
     mutable std::vector<double> m_mc_slope;        //!< Slope of interval
