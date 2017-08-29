@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-10 August 2017
+29 August 2017
 
 
 1. Introduction
@@ -140,7 +140,8 @@ None
 None
 
 
-
 21. COMPTEL interface
 ---------------------
-None
+COMPTEL SDA, SDB and ICT response files were added so that the information to
+compute the instrument response for any arbitrary energy band is available
+(#2186).
