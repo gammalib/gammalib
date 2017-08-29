@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for com module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -39,6 +39,8 @@ sources = src/GCOMSupport.cpp \
           src/GCOMEventBin.cpp \
           src/GCOMInstDir.cpp \
           src/GCOMResponse.cpp \
+          src/GCOMD1Response.cpp \
+          src/GCOMD2Response.cpp \
           src/GCOMObservation.cpp \
           src/GCOMModelDRBFitting.cpp
 
@@ -47,6 +49,8 @@ pkginclude_HEADERS = include/GCOMEventCube.hpp \
                      include/GCOMEventBin.hpp \
                      include/GCOMInstDir.hpp \
                      include/GCOMResponse.hpp \
+                     include/GCOMD1Response.hpp \
+                     include/GCOMD2Response.hpp \
                      include/GCOMObservation.hpp \
                      include/GCOMModelDRBFitting.hpp \
                      include/GCOMLib.hpp

@@ -94,7 +94,7 @@ private:
     void free_members(void);
 
     // Private data members
-    GCaldb              m_caldb;             //!< Name of or path to the calibration database
+    GCaldb              m_caldb;             //!< Calibration database
     std::string         m_rspname;           //!< Response name
     std::vector<double> m_iaq;               //!< IAQ array
     int                 m_phigeo_bins;       //!< Number of Phigeo bins
@@ -159,7 +159,7 @@ const GCaldb& GCOMResponse::caldb(void) const
 
 
 /***********************************************************************//**
- * @brief Set path to the calibration database
+ * @brief Set calibration database
  *
  * @param[in] caldb Calibration database.
  *

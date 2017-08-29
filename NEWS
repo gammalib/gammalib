@@ -12,7 +12,8 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- n.a.
+- GCOMD1Response
+- GCOMD2Response
 
 The following classes have been removed:
 - n.a.
@@ -49,8 +50,8 @@ None
 
 4. Application module
 ---------------------
-A time parameter with type "t" has been added to allow specifying time values in
-various formats to time systems to an application. Methods have been added to set
+A time parameter with type "t" has was to allow specifying time values in
+various formats to time systems to an application. Methods were added to set
 and retrieve the time value (#1864).
 
 
@@ -82,11 +83,11 @@ None
 
 10. Observation module
 ----------------------
-A time string constructor and set method has been added to GTime to allow
+A time string constructor and set method was added to GTime to allow
 setting various time formats from a string. Variants exist to set the time in
 the native time reference or in a specific time reference (#1864).
 
-A rounding error has been fixed in GTime::utc() so that times such as
+A rounding error was fixed in GTime::utc() so that times such as
 "2019-12-31T23:59:60" are now "2020-01-01T00:00:00" as they should be (#2177).
 
 
@@ -145,3 +146,7 @@ None
 COMPTEL SDA, SDB and ICT response files were added so that the information to
 compute the instrument response for any arbitrary energy band is available
 (#2186).
+
+The classes GCOMD1Response and GCOMD2Response were added to handle the energy
+response of the D1 and D2 modules, respectively. These classes handle reading
+of the SDA and SDB response files (#2186).

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCOMLib.hpp - COMPTEL Support Header files              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,8 @@
 #include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
 #include "GCOMResponse.hpp"
+#include "GCOMD1Response.hpp"
+#include "GCOMD2Response.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMModelDRBFitting.hpp"
 

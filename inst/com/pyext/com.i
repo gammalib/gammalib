@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        com.i - COMPTEL module                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,4 +67,5 @@
 %include "GCOMModelDRBFitting.i"
 %include "GCOMObservation.i"
 %include "GCOMResponse.i"
-
+%include "GCOMD1Response.i"
+%include "GCOMD2Response.i"

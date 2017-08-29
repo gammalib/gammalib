@@ -488,7 +488,7 @@ void GCOMResponse::load(const std::string& rspname)
     // Read IAQ
     read(iaq);
 
-    // Close ARF FITS file
+    // Close IAQ FITS file
     fits.close();
 
     // Return
@@ -556,7 +556,7 @@ void GCOMResponse::read(const GFitsImage& image)
 /***********************************************************************//**
  * @brief Print COMPTEL response information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing COMPTEL response information.
  ***************************************************************************/
 std::string GCOMResponse::print(const GChatter& chatter) const

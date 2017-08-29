@@ -49,8 +49,9 @@ namespace gammalib {
     const double twothird     =  2.0/3.0;
     const double fourthird    =  4.0/3.0;
     const double sqrt_onehalf = std::sqrt(1.0/2.0);
-    const double sqrt_pihalf  = std::sqrt(pihalf);
     const double sqrt_two     = std::sqrt(2.0);
+    const double sqrt_pihalf  = std::sqrt(pihalf);
+    const double sqrt_twopi   = std::sqrt(twopi);
     const double inv_ln10     =  1.0/ln10;
 }
 
