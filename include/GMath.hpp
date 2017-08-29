@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GMath.hpp - Mathematical functions                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,6 +53,7 @@ namespace gammalib {
     const double sqrt_pihalf  = std::sqrt(pihalf);
     const double sqrt_twopi   = std::sqrt(twopi);
     const double inv_ln10     =  1.0/ln10;
+    const double inv_loge     =  1.0/std::log10(std::exp(1.0));
 }
 
 /* __ Prototypes _________________________________________________________ */

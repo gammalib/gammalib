@@ -14,6 +14,7 @@ made since the last release of GammaLib.
 The following classes have been added:
 - GCOMD1Response
 - GCOMD2Response
+- GCOMInstChars
 
 The following classes have been removed:
 - n.a.
@@ -150,3 +151,7 @@ compute the instrument response for any arbitrary energy band is available
 The classes GCOMD1Response and GCOMD2Response were added to handle the energy
 response of the D1 and D2 modules, respectively. These classes handle reading
 of the SDA and SDB response files (#2186).
+
+The class GCOMInstChar was added to handle the instrument characteristics that
+are necessary to perform the response computation. The class handles reading
+of the ICT file (#2186).

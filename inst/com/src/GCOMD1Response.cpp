@@ -87,7 +87,7 @@ GCOMD1Response::GCOMD1Response(const GCOMD1Response& rsp)
  * @param[in] sdaname SDA response name.
  * @param[in] caldb Calibration database.
  *
- * Create COMPTEL D1 module response response by loading an SDA file from a
+ * Create COMPTEL D1 module response by loading an SDA file from a
  * calibration database.
  ***************************************************************************/
 GCOMD1Response::GCOMD1Response(const std::string& sdaname, const GCaldb& caldb)

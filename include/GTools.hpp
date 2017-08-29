@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@ namespace gammalib {
     const double sec_in_day   = 86400.0;          // seconds per day
     const double sec2day      = 1.0 / sec_in_day; // seconds => days
     const double tai2tt       = 32.184;           // TAI => TT time system
+    const double mec2         = 0.5109989461;     // Electron rest mass (MeV)
 }
 
 /* __ Prototypes ________________________________________________________ */

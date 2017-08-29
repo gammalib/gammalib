@@ -37,6 +37,7 @@
 #include "GCOMResponse.hpp"
 #include "GCOMD1Response.hpp"
 #include "GCOMD2Response.hpp"
+#include "GCOMInstChars.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMModelDRBFitting.hpp"
 

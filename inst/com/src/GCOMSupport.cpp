@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMSupport.cpp - COMPTEL support functions              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,9 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GCOMSupport.hpp"
+#include "GTools.hpp"
+#include "GMath.hpp"
 #include "GWcs.hpp"
 #include "GWcsCAR.hpp"
+#include "GCOMSupport.hpp"
 
 /* __ Coding definitions _________________________________________________ */
 
@@ -91,4 +93,41 @@ void com_wcs_mer2car(GSkyMap& map)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return D1 energy deposit
+ *
+ * @param[in] energy Input photon energy (MeV).
+ * @param[in] phigeo Geometrical scatter angle (deg).
+ * @return D1 energy deposit in MeV.
+ ***************************************************************************/
+double com_energy1(const double& energy, const double& phigeo)
+{
+    // Compute D2 energy deposit
+    double e2 = com_energy2(energy, phigeo);
+
+    // Return D1 energy deposit
+    return (energy - e2);
+}
+
+
+/***********************************************************************//**
+ * @brief Return D2 energy deposit
+ *
+ * @param[in] energy Input photon energy (MeV).
+ * @param[in] phigeo Geometrical scatter angle (deg).
+ * @return D2 energy deposit in MeV.
+ ***************************************************************************/
+double com_energy2(const double& energy, const double& phigeo)
+{
+    // Compute 1-cos(phigeo)
+    double one_minus_cos  = 1.0 - std::cos(phigeo * gammalib::deg2rad);
+
+    // Compute D2 energy deposit
+    double e2 = energy / (one_minus_cos * energy / gammalib::mec2 + 1.0);
+
+    // Return D2 energy deposit
+    return e2;
 }

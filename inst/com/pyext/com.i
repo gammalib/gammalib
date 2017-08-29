@@ -69,3 +69,4 @@
 %include "GCOMResponse.i"
 %include "GCOMD1Response.i"
 %include "GCOMD2Response.i"
+%include "GCOMInstChar.i"
