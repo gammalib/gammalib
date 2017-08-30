@@ -44,7 +44,7 @@ public:
     ~GCOMD2Response(void);
 
     // Operators
-    double operator()(const GEnergy& etrue, const GEnergy& ereco) const;
+    double operator()(const double& etrue, const double& ereco) const;
 
     // Methods
     void            clear(void);

@@ -157,11 +157,11 @@ GCOMD1Response& GCOMD1Response::operator=(const GCOMD1Response& rsp)
 /***********************************************************************//**
  * @brief D1 module response evaluation operator
  *
- * @param[in] etrue True energy.
- * @param[in] ereco Reconstructed energy.
+ * @param[in] etrue True energy (MeV).
+ * @param[in] ereco Reconstructed energy (MeV).
  * @return COMPTEL D1 module response.
  ***************************************************************************/
-double GCOMD1Response::operator()(const GEnergy& etrue, const GEnergy& ereco) const
+double GCOMD1Response::operator()(const double& etrue, const double& ereco) const
 {
     // Initialise response with zero
     double response = 0.0;
@@ -177,7 +177,7 @@ double GCOMD1Response::operator()(const GEnergy& etrue, const GEnergy& ereco) co
 
             // Compute D1 module response (here is where the real magic
             // happens)
-            double arg = (m_energy.MeV()-ereco.MeV()) / m_sigma;
+            double arg = (m_energy-ereco) / m_sigma;
             response   = m_amplitude * std::exp(-0.5 * arg * arg);
 
         }
@@ -390,7 +390,7 @@ void GCOMD1Response::init_members(void)
     m_emaxs.clear();
 
     // Initialise pre-computation cache
-    m_energy    = GEnergy(-1.0e30, "MeV");  // To assure initialisation
+    m_energy    = 0.0;
     m_position  = 0.0;
     m_sigma     = 0.0;
     m_amplitude = 0.0;
@@ -447,11 +447,11 @@ void GCOMD1Response::free_members(void)
 /***********************************************************************//**
  * @brief Update computation cache
  *
- * @param[in] etrue True energy.
+ * @param[in] etrue True energy (MeV).
  *
  * The method assumes that there is a valid D1 module response.
  ***************************************************************************/
-void GCOMD1Response::update_cache(const GEnergy& etrue) const
+void GCOMD1Response::update_cache(const double& etrue) const
 {
     // Update only if the true energy has changed
     if (etrue != m_energy) {
@@ -459,13 +459,10 @@ void GCOMD1Response::update_cache(const GEnergy& etrue) const
         // Set true energy
         m_energy = etrue;
 
-        // Get true energy in MeV
-        double etrue_MeV = etrue.MeV();
-
         // If true energy is below lowest energy or above largest energy
         // then set response to zero
-        if ((etrue_MeV < m_energies[0]) ||
-            (etrue_MeV > m_energies[m_energies.size()-1])) {
+        if ((etrue < m_energies[0]) ||
+            (etrue > m_energies[m_energies.size()-1])) {
             m_position  = 0.0;
             m_sigma     = 0.0;
             m_amplitude = 0.0;
@@ -478,12 +475,12 @@ void GCOMD1Response::update_cache(const GEnergy& etrue) const
         else {
 
             // Interpolate response parameters
-            m_position  = m_energies.interpolate(etrue_MeV, m_positions);
-            m_sigma     = m_energies.interpolate(etrue_MeV, m_sigmas);
-            m_amplitude = m_energies.interpolate(etrue_MeV, m_amplitudes);
-            m_emin      = m_energies.interpolate(etrue_MeV, m_emins);
-            m_ewidth    = m_energies.interpolate(etrue_MeV, m_ewidths);
-            m_emax      = m_energies.interpolate(etrue_MeV, m_emaxs);
+            m_position  = m_energies.interpolate(etrue, m_positions);
+            m_sigma     = m_energies.interpolate(etrue, m_sigmas);
+            m_amplitude = m_energies.interpolate(etrue, m_amplitudes);
+            m_emin      = m_energies.interpolate(etrue, m_emins);
+            m_ewidth    = m_energies.interpolate(etrue, m_ewidths);
+            m_emax      = m_energies.interpolate(etrue, m_emaxs);
 
             // Re-compute Gaussian amplitude to assure normalization
             m_amplitude = 1.0 / (m_sigma * gammalib::sqrt_twopi);

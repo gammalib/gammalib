@@ -503,7 +503,7 @@ double GCOMInstChars::multi_scatter(const GEnergy& energy, const double& phigeo)
  * deposit in MeV. Coefficients are taken from Boron calibration data
  * (ZA=1.14) to remain consistent with Rob van Dijk's SIMPSF corrections.
  *
- * The code was implemented from the COMPASS RESPSIT2 function PSDACP.F
+ * The code implemented is based on the COMPASS RESPSIT2 function PSDACP.F
  * (release 1.0, 11-DEC-92).
  ***************************************************************************/
 double GCOMInstChars::psd_correction(const GEnergy& energy, const double& phigeo) const

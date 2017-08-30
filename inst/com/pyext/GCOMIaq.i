@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GCOMD1Response.i - COMPTEL D1 module response class           *
+ *          GCOMIaq.i - COMPTEL instrument response representation         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,55 +19,46 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMD1Response.i
- * @brief COMPTEL D1 module response class interface definition
+ * @file GCOMIaq.i
+ * @brief COMPTEL instrument response representation class interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCOMD1Response.hpp"
+#include "GCOMIaq.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCOMD1Response
+ * @class GCOMIaq
  *
- * @brief Interface for the COMPTEL D1 module response class
+ * @brief Interface for the COMPTEL instrument response representation class
  ***************************************************************************/
-class GCOMD1Response : public GBase {
+class GCOMIaq : public GBase {
 
 public:
     // Constructors and destructors
-    GCOMD1Response(void);
-    GCOMD1Response(const GCOMD1Response& rsp);
-    GCOMD1Response(const GCaldb& caldb, const std::string& sdaname);
-    ~GCOMD1Response(void);
-
-    // Operators
-    double operator()(const double& etrue, const double& ereco) const;
+    GCOMIaq(void);
+    GCOMIaq(const GCOMIaq& iaq);
+    GCOMIaq(const double&   phigeo_max, const double& phigeo_bin_size,
+            const double&   phibar_max, const double& phibar_bin_size,
+            const GEbounds& ebounds);
+    ~GCOMIaq(void);
 
     // Methods
-    void            clear(void);
-    GCOMD1Response* clone(void) const;
-    std::string     classname(void) const;
-    void            caldb(const GCaldb& caldb);
-    const GCaldb&   caldb(void) const;
-    void            load(const std::string& sdaname);
-    void            read(const GFitsTable& hdu);
-    double          position(const double& etrue) const;
-    double          sigma(const double& etrue) const;
-    double          amplitude(const double& etrue) const;
-    double          emin(const double& etrue) const;
-    double          ewidth(const double& etrue) const;
-    double          emax(const double& etrue) const;
+    void        clear(void);
+    GCOMIaq*    clone(void) const;
+    std::string classname(void) const;
+    void        save(const GFilename& filename, const bool& clobber) const;
+    void        iaqwei(const GEnergy& energy, const double& weight);
 };
 
 
 /***********************************************************************//**
- * @brief GCOMD1Response class extension
+ * @brief GCOMIaq class extension
  ***************************************************************************/
-%extend GCOMD1Response {
-    GCOMD1Response copy() {
+%extend GCOMIaq {
+    GCOMIaq copy() {
         return (*self);
     }
 };

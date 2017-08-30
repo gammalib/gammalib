@@ -56,9 +56,6 @@ public:
     GCOMResponse(void);
     GCOMResponse(const GCOMResponse& rsp);
     GCOMResponse(const GCaldb& caldb, const std::string& rspname);
-    //GCOMResponse(const int&    phigeo_num, const int&    phibar_num,
-    //             const double& phigeo_max, const double& phibar_max,
-    //             const double& phigeo_bin, const double& phibar_bin);
     virtual ~GCOMResponse(void);
 
     // Operators

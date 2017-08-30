@@ -31,7 +31,6 @@
 #include <vector>
 #include <string>
 #include "GCaldb.hpp"
-#include "GEnergy.hpp"
 #include "GNodeArray.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -55,8 +54,8 @@ public:
     ~GCOMD2Response(void);
 
     // Operators
-    GCOMD2Response& operator=(const GCOMD2Response & rsp);
-    double          operator()(const GEnergy& etrue, const GEnergy& ereco) const;
+    GCOMD2Response& operator=(const GCOMD2Response& rsp);
+    double          operator()(const double& etrue, const double& ereco) const;
 
     // Methods
     void            clear(void);
@@ -73,7 +72,7 @@ private:
     void init_members(void);
     void copy_members(const GCOMD2Response& rsp);
     void free_members(void);
-    void update_cache(const GEnergy& etrue) const;
+    void update_cache(const double& etrue) const;
 
     // Private data members
     GCaldb              m_caldb;       //!< Calibration database
@@ -90,17 +89,17 @@ private:
     std::vector<double> m_emaxs;       //!< Upper energy limit of D2
 
     // Pre-computation cache
-    mutable GEnergy m_energy;
-    mutable double  m_position;
-    mutable double  m_sigma;
-    mutable double  m_amplitude;
-    mutable double  m_escape1;
-    mutable double  m_escape2;
-    mutable double  m_tail;
-    mutable double  m_background;
-    mutable double  m_emin;
-    mutable double  m_ewidth;
-    mutable double  m_emax;
+    mutable double m_energy;
+    mutable double m_position;
+    mutable double m_sigma;
+    mutable double m_amplitude;
+    mutable double m_escape1;
+    mutable double m_escape2;
+    mutable double m_tail;
+    mutable double m_background;
+    mutable double m_emin;
+    mutable double m_ewidth;
+    mutable double m_emax;
 };
 
 

@@ -31,7 +31,6 @@
 #include <vector>
 #include <string>
 #include "GCaldb.hpp"
-#include "GEnergy.hpp"
 #include "GNodeArray.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -55,8 +54,8 @@ public:
     ~GCOMD1Response(void);
 
     // Operators
-    GCOMD1Response& operator=(const GCOMD1Response & rsp);
-    double          operator()(const GEnergy& etrue, const GEnergy& ereco) const;
+    GCOMD1Response& operator=(const GCOMD1Response& rsp);
+    double          operator()(const double& etrue, const double& ereco) const;
 
     // Methods
     void            clear(void);
@@ -66,6 +65,12 @@ public:
     const GCaldb&   caldb(void) const;
     void            load(const std::string& sdaname);
     void            read(const GFitsTable& table);
+    double          position(const double& etrue) const;
+    double          sigma(const double& etrue) const;
+    double          amplitude(const double& etrue) const;
+    double          emin(const double& etrue) const;
+    double          ewidth(const double& etrue) const;
+    double          emax(const double& etrue) const;
     std::string     print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -73,7 +78,7 @@ private:
     void init_members(void);
     void copy_members(const GCOMD1Response& rsp);
     void free_members(void);
-    void update_cache(const GEnergy& etrue) const;
+    void update_cache(const double& etrue) const;
 
     // Private data members
     GCaldb              m_caldb;      //!< Calibration database
@@ -86,13 +91,13 @@ private:
     std::vector<double> m_emaxs;      //!< Upper energy limit of D1
 
     // Pre-computation cache
-    mutable GEnergy m_energy;
-    mutable double  m_position;
-    mutable double  m_sigma;
-    mutable double  m_amplitude;
-    mutable double  m_emin;
-    mutable double  m_ewidth;
-    mutable double  m_emax;
+    mutable double m_energy;
+    mutable double m_position;
+    mutable double m_sigma;
+    mutable double m_amplitude;
+    mutable double m_emin;
+    mutable double m_ewidth;
+    mutable double m_emax;
 };
 
 
@@ -116,7 +121,7 @@ std::string GCOMD1Response::classname(void) const
 inline
 const GCaldb& GCOMD1Response::caldb(void) const
 {
-    return m_caldb;
+    return (m_caldb);
 }
 
 
@@ -132,6 +137,90 @@ void GCOMD1Response::caldb(const GCaldb& caldb)
 {
     m_caldb = caldb;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return photo peak position
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Photo peak position (MeV).
+ ***************************************************************************/
+inline
+double GCOMD1Response::position(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_position);
+}
+
+
+/***********************************************************************//**
+ * @brief Return photo peak standard deviation
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Photo peak standard deviation (MeV).
+ ***************************************************************************/
+inline
+double GCOMD1Response::sigma(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_sigma);
+}
+
+
+/***********************************************************************//**
+ * @brief Return photo peak amplitude
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Photo peak amplitude.
+ ***************************************************************************/
+inline
+double GCOMD1Response::amplitude(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_amplitude);
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum energy
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Minimum energy (MeV).
+ ***************************************************************************/
+inline
+double GCOMD1Response::emin(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_emin);
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy threshold width
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Energy threshold width (MeV).
+ ***************************************************************************/
+inline
+double GCOMD1Response::ewidth(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_ewidth);
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum energy
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Maximum energy (MeV).
+ ***************************************************************************/
+inline
+double GCOMD1Response::emax(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_emax);
 }
 
 #endif /* GCOMD1RESPONSE_HPP */
