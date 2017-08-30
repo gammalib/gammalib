@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.i - COMPTEL observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,7 +63,7 @@ public:
                         const GFilename& drbname,
                         const GFilename& drgname,
                         const GFilename& drxname);
-    void           response(const std::string& rspname, const GCaldb& caldb);
+    void           response(const GCaldb& caldb, const std::string& rspname);
     void           obs_id(const double& id);
     void           ontime(const double& ontime);
     void           livetime(const double& livetime);

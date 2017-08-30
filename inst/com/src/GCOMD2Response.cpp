@@ -84,13 +84,13 @@ GCOMD2Response::GCOMD2Response(const GCOMD2Response& rsp)
 /***********************************************************************//**
  * @brief Response constructor
  *
- * @param[in] sdbname SDA response name.
  * @param[in] caldb Calibration database.
+ * @param[in] sdbname SDA response name.
  *
  * Create COMPTEL D2 module response by loading an SDB file from a
  * calibration database.
  ***************************************************************************/
-GCOMD2Response::GCOMD2Response(const std::string& sdbname, const GCaldb& caldb)
+GCOMD2Response::GCOMD2Response(const GCaldb& caldb, const std::string& sdbname)
 {
     // Initialise members
     init_members();

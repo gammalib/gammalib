@@ -88,13 +88,13 @@ GCOMInstChars::GCOMInstChars(const GCOMInstChars& ict)
 /***********************************************************************//**
  * @brief Response constructor
  *
- * @param[in] ictname ICT response name.
  * @param[in] caldb Calibration database.
+ * @param[in] ictname ICT response name.
  *
  * Create COMPTEL instrument characteristics by loading an SDA file from a
  * calibration database.
  ***************************************************************************/
-GCOMInstChars::GCOMInstChars(const std::string& ictname, const GCaldb& caldb)
+GCOMInstChars::GCOMInstChars(const GCaldb& caldb, const std::string& ictname)
 {
     // Initialise members
     init_members();

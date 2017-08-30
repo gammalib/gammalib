@@ -40,7 +40,7 @@ public:
     // Constructors and destructors
     GCOMInstChars(void);
     GCOMInstChars(const GCOMInstChars& ict);
-    GCOMInstChars(const std::string& ictname, const GCaldb& caldb);
+    GCOMInstChars(const GCaldb& caldb, const std::string& ictname);
     ~GCOMInstChars(void);
 
     // Methods
@@ -50,7 +50,7 @@ public:
     void           caldb(const GCaldb& caldb);
     const GCaldb&  caldb(void) const;
     void           load(const std::string& ictname);
-    double         prob_D1inter(const GEnergy& energy, const double& zenith) const;
+    double         prob_D1inter(const GEnergy& energy) const;
     double         prob_D2inter(const GEnergy& energy, const double& phigeo) const;
     double         prob_multihit(const GEnergy& energy) const;
     double         atten_D1(const GEnergy& energy) const;

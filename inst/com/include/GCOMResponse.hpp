@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCOMResponse.hpp - COMPTEL Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,7 +55,10 @@ public:
     // Constructors and destructors
     GCOMResponse(void);
     GCOMResponse(const GCOMResponse& rsp);
-    GCOMResponse(const std::string& rspname, const GCaldb& caldb);
+    GCOMResponse(const GCaldb& caldb, const std::string& rspname);
+    //GCOMResponse(const int&    phigeo_num, const int&    phibar_num,
+    //             const double& phigeo_max, const double& phibar_max,
+    //             const double& phigeo_bin, const double& phibar_bin);
     virtual ~GCOMResponse(void);
 
     // Operators

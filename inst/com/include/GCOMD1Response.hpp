@@ -51,7 +51,7 @@ public:
     // Constructors and destructors
     GCOMD1Response(void);
     GCOMD1Response(const GCOMD1Response& rsp);
-    GCOMD1Response(const std::string& sdaname, const GCaldb& caldb);
+    GCOMD1Response(const GCaldb& caldb, const std::string& sdaname);
     ~GCOMD1Response(void);
 
     // Operators

@@ -38,7 +38,8 @@ The following methods have been renamed:
 - n.a.
 
 The arguments for the following methods have been changed:
-- n.a.
+- GCOMResponse(GCaldb&, std::string&)
+- GCOMObservation::response(GCaldb&, std::string&)
 
 The return value of the following methods has been changed:
 - n.a.

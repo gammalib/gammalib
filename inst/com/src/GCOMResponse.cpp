@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,14 +105,14 @@ GCOMResponse::GCOMResponse(const GCOMResponse& rsp) : GResponse(rsp)
 /***********************************************************************//**
  * @brief Response constructor
  *
- * @param[in] iaqname IAQ file name.
  * @param[in] caldb Calibration database.
+ * @param[in] iaqname IAQ file name.
  *
  * Create COMPTEL response by loading an IAQ file from a calibration
  * database.
  ***************************************************************************/
-GCOMResponse::GCOMResponse(const std::string& iaqname,
-                           const GCaldb&      caldb) : GResponse()
+GCOMResponse::GCOMResponse(const GCaldb&      caldb,
+                           const std::string& iaqname) : GResponse()
 {
     // Initialise members
     init_members();

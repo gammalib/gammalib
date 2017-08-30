@@ -51,7 +51,7 @@ public:
     // Constructors and destructors
     GCOMInstChars(void);
     GCOMInstChars(const GCOMInstChars& ict);
-    GCOMInstChars(const std::string& ictname, const GCaldb& caldb);
+    GCOMInstChars(const GCaldb& caldb, const std::string& ictname);
     ~GCOMInstChars(void);
 
     // Operators

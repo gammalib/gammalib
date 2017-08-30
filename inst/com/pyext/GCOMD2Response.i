@@ -40,7 +40,7 @@ public:
     // Constructors and destructors
     GCOMD2Response(void);
     GCOMD2Response(const GCOMD2Response& rsp);
-    GCOMD2Response(const std::string& sdaname, const GCaldb& caldb);
+    GCOMD2Response(const GCaldb& caldb, const std::string& sdbname);
     ~GCOMD2Response(void);
 
     // Operators

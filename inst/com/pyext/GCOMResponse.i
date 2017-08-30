@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMResponse.i - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GCOMResponse(void);
     GCOMResponse(const GCOMResponse& rsp);
-    GCOMResponse(const std::string& rspname, const GCaldb& caldb);
+    GCOMResponse(const GCaldb& caldb, const std::string& rspname);
     virtual ~GCOMResponse(void);
 
     // Implement pure virtual base class methods
