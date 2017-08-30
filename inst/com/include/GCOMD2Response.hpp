@@ -65,6 +65,8 @@ public:
     const GCaldb&   caldb(void) const;
     void            load(const std::string& sdbname);
     void            read(const GFitsTable& table);
+    double          emin(void) const;
+    double          emax(void) const;
     std::string     print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -139,6 +141,38 @@ void GCOMD2Response::caldb(const GCaldb& caldb)
 {
     m_caldb = caldb;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum D2 input energy (MeV)
+ *
+ * @return Minimum energy D2 input energy (MeV).
+ *
+ * Returns the minimum D2 input energy (MeV). In case that no information
+ * has been read from a SDB file so far, the method returns 0.
+ ***************************************************************************/
+inline
+double GCOMD2Response::emin(void) const
+{
+    double emin = (m_energies.size() > 0) ? m_energies[0] : 0.0;
+    return (emin);
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum D2 input energy (MeV)
+ *
+ * @return Maximum energy D2 input energy (MeV).
+ *
+ * Returns the maximum D2 input energy (MeV). In case that no information
+ * has been read from a SDB file so far, the method returns 0.
+ ***************************************************************************/
+inline
+double GCOMD2Response::emax(void) const
+{
+    double emax = (m_energies.size() > 0) ? m_energies[m_energies.size()-1] : 0.0;
+    return (emax);
 }
 
 #endif /* GCOMD2RESPONSE_HPP */

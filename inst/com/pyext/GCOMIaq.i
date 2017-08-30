@@ -49,8 +49,9 @@ public:
     void        clear(void);
     GCOMIaq*    clone(void) const;
     std::string classname(void) const;
-    void        save(const GFilename& filename, const bool& clobber) const;
-    void        iaqwei(const GEnergy& energy, const double& weight);
+    void        save(const GFilename& filename, const bool& clobber = false) const;
+    void        set(const GEnergy& energy);
+    void        set(const GModelSpectral& spectrum);
 };
 
 

@@ -71,6 +71,8 @@ public:
     double          emin(const double& etrue) const;
     double          ewidth(const double& etrue) const;
     double          emax(const double& etrue) const;
+    double          emin(void) const;
+    double          emax(void) const;
     std::string     print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -221,6 +223,38 @@ double GCOMD1Response::emax(const double& etrue) const
 {
     update_cache(etrue);
     return (m_emax);
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum D1 input energy (MeV)
+ *
+ * @return Minimum energy D1 input energy (MeV).
+ *
+ * Returns the minimum D1 input energy (MeV). In case that no information
+ * has been read from a SDA file so far, the method returns 0.
+ ***************************************************************************/
+inline
+double GCOMD1Response::emin(void) const
+{
+    double emin = (m_energies.size() > 0) ? m_energies[0] : 0.0;
+    return (emin);
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum D1 input energy (MeV)
+ *
+ * @return Maximum energy D1 input energy (MeV).
+ *
+ * Returns the maximum D1 input energy (MeV). In case that no information
+ * has been read from a SDA file so far, the method returns 0.
+ ***************************************************************************/
+inline
+double GCOMD1Response::emax(void) const
+{
+    double emax = (m_energies.size() > 0) ? m_energies[m_energies.size()-1] : 0.0;
+    return (emax);
 }
 
 #endif /* GCOMD1RESPONSE_HPP */

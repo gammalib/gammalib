@@ -41,6 +41,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
+class GModelSpectral;
 
 
 /***********************************************************************//**
@@ -66,19 +67,27 @@ public:
     void        clear(void);
     GCOMIaq*    clone(void) const;
     std::string classname(void) const;
-    void        save(const GFilename& filename, const bool& clobber) const;
+    void        set(const GEnergy& energy);
+    void        set(const GModelSpectral& spectrum);
+    void        save(const GFilename& filename, const bool& clobber = false) const;
     std::string print(const GChatter& chatter = NORMAL) const;
-    void        iaqwei(const GEnergy& energy, const double& weight);
 
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GCOMIaq& iaq);
     void free_members(void);
+    void init_response(void);
+    void remove_cards(void);
 
     // RESPSI methods
-    //void   iaqwei(const GEnergy& energy, const double& weight);
-    double respsc(const double& etrue1, const double& etrue2, const double& phibar);
+    void   compton_kinematics(const double& energy);
+    double compute_iaq_bin(const double& etrue1, const double& etrue2,
+                           const double& phibar);
+    void   klein_nishina(const double& energy);
+    double klein_nishina_bin(const double& energy, const double& phigeo);
+    double klein_nishina_integral(const double& v, const double& a);
+    void   weight_iaq(const double& energy);
 
     // Reponse integration kernel
     class response_kernel : public GFunction {
@@ -123,19 +132,22 @@ private:
     };
 
     // Private data members
-    GFitsImageFloat m_iaq;             //!< Response
-    GEbounds        m_ebounds;         //!< Energy boundaries
-    GCOMD1Response  m_response_d1;     //!< D1 module response
-    GCOMD2Response  m_response_d2;     //!< D2 module response
-    GCOMInstChars   m_ict;             //!< Instrument characteristics
-    double          m_phigeo_max;      //!< Maximum geometrical scatter angle (deg)
-    double          m_phibar_max;      //!< Maximum Compton scatter angle (deg)
-    double          m_phigeo_bin_size; //!< Bin size in geometrical scatter angle (deg)
-    double          m_phibar_bin_size; //!< Bin size in Compton scatter angle (deg)
-    double          m_e1min;           //!< Minimum D1 energy (MeV)
-    double          m_e1max;           //!< Maximum D1 energy (MeV)
-    double          m_e2min;           //!< Minimum D2 energy (MeV)
-    double          m_e2max;           //!< Maximum D2 energy (MeV)
+    GFitsImageFloat m_iaq;               //!< Response
+    GEbounds        m_ebounds;           //!< Energy boundaries
+    GCOMD1Response  m_response_d1;       //!< D1 module response
+    GCOMD2Response  m_response_d2;       //!< D2 module response
+    GCOMInstChars   m_ict;               //!< Instrument characteristics
+    double          m_phigeo_max;        //!< Maximum geometrical scatter angle (deg)
+    double          m_phibar_max;        //!< Maximum Compton scatter angle (deg)
+    double          m_phigeo_bin_size;   //!< Bin size in geometrical scatter angle (deg)
+    double          m_phibar_bin_size;   //!< Bin size in Compton scatter angle (deg)
+    double          m_phibar_resolution; //!< Bin size for oversampling (deg)
+    double          m_e1min;             //!< Minimum D1 energy (MeV)
+    double          m_e1max;             //!< Maximum D1 energy (MeV)
+    double          m_e2min;             //!< Minimum D2 energy (MeV)
+    double          m_e2max;             //!< Maximum D2 energy (MeV)
+    int             m_num_energies;      //!< Number of energies for continuum IAQ
+    bool            m_psd_correct;       //!< PSD correction usage flag
 };
 
 

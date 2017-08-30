@@ -32,6 +32,11 @@
 #include "GFits.hpp"
 #include "GFilename.hpp"
 #include "GIntegral.hpp"
+#include "GEbounds.hpp"
+#include "GModelSpectral.hpp"
+#include "GModelSpectralPlaw.hpp"
+#include "GModelSpectralPlawPhotonFlux.hpp"
+#include "GModelSpectralPlawEnergyFlux.hpp"
 #include "GCOMIaq.hpp"
 #include "GCOMSupport.hpp"
 
@@ -41,12 +46,15 @@
 
 /* __ Coding definitions _________________________________________________ */
 //#define G_RESPONSE_KERNEL_LIMITS
-//#define G_RESPSC_NO_WARNINGS
+#define G_RESPSC_NO_WARNINGS
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_IAQWEI
-//#define G_DEBUG_RESPSC
+//#define G_DEBUG_COMPTON_KINEMATICS
+//#define G_DEBUG_COMPUTE_IAQ_BIN
+//#define G_DEBUG_KLEIN_NISHINA
 //#define G_DEBUG_RESPONSE_KERNEL
+//#define G_DEBUG_WEIGHT_IAQ
+//#define G_DEBUG_SET_CONTINUUM
 
 /* __ Constants __________________________________________________________ */
 
@@ -126,17 +134,15 @@ GCOMIaq::GCOMIaq(const double&   phigeo_max, const double& phigeo_bin_size,
     m_iaq = GFitsImageFloat(nphigeo, nphibar);
 
     // Set FITS image keywords
-    m_iaq.card("CTYPE1", "nphig", "Number of geometrical scatter angle pixels");
+    m_iaq.card("CTYPE1", "Phigeo", "Geometrical scatter angle");
     m_iaq.card("CRVAL1", 0.5*m_phigeo_bin_size, "[deg] Geometrical scatter angle for reference bin");
-    m_iaq.card("CRPIX1", 1.0, "Reference bin of geometrical scatter angle");
     m_iaq.card("CDELT1", m_phigeo_bin_size, "[deg] Geometrical scatter angle bin size");
-    m_iaq.card("CTYPE2", "nphib", "Number of Compton scatter angle bins");
+    m_iaq.card("CRPIX1", 1.0, "Reference bin of geometrical scatter angle");
+    m_iaq.card("CTYPE2", "Phibar", "Compton scatter angle");
     m_iaq.card("CRVAL2", 0.5*m_phibar_bin_size, "[deg] Compton scatter angle for reference bin");
-    m_iaq.card("CRPIX2", 1.0, "Reference bin of Compton scatter angle");
     m_iaq.card("CDELT2", m_phibar_bin_size, "[deg] Compton scatter angle bin size");
-    m_iaq.card("ENERGIE", 0.0, "[MeV] Source photon energy");
-    m_iaq.card("EMIN", m_ebounds.emin().MeV(), "[MeV] Minimum measured photon energy");
-    m_iaq.card("EMAX", m_ebounds.emax().MeV(), "[MeV] Maximum measured photon energy");
+    m_iaq.card("CRPIX2", 1.0, "Reference bin of Compton scatter angle");
+    m_iaq.card("BUNIT", "Probability per bin", "Unit of bins");
     m_iaq.card("TELESCOP", "GRO", "Name of telescope");
     m_iaq.card("INSTRUME", "COMPTEL", "Name of instrument");
     m_iaq.card("ORIGIN", "GammaLib", "Origin of FITS file");
@@ -234,6 +240,157 @@ GCOMIaq* GCOMIaq::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Set mono-energetic IAQ
+ *
+ * @param[in] energy Input photon energy.
+ *
+ * The code implemented is based on the COMPASS RESPSIT2 function SPCIAQ.F
+ * (release 1.0, 18-DEC-92).
+ *
+ * @todo Implement geometrical smearing.
+ ***************************************************************************/
+void GCOMIaq::set(const GEnergy& energy)
+{
+    // Initialise COMPTEL response information and instrument characteristics
+    init_response();
+
+    // Remove any extra header cards
+    remove_cards();
+
+    // Generate IAQ using Compton kinematics
+    compton_kinematics(energy.MeV());
+
+    // Multiply IAQ with Klein-Nishina factors
+    klein_nishina(energy.MeV());
+
+    // Weight IAQ
+    weight_iaq(energy.MeV());
+
+    // Set source photon energy
+    m_iaq.card("ENERGY", energy.MeV(), "[MeV] Source photon energy");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set continuum IAQ
+ *
+ * @param[in] spectrum Input spectrum.
+ *
+ * Computes the continuum IAQ based on an input @p spectrum. The method
+ * computes the line IAQ for a m_num_energies logarithmically spaced energies
+ * within an energy range that conceivably covers the observed energy band.
+ *
+ * The code implementation is loosly based on the COMPASS RESPSIT2 functions
+ * SPCIAQ.F, GENWEI.F and DERFAN.F (release 1.0, 18-DEC-92). The code was
+ * much simplified.
+ *
+ * @todo Implement geometrical smearing.
+ ***************************************************************************/
+void GCOMIaq::set(const GModelSpectral& spectrum)
+{
+    // Initialise COMPTEL response information and instrument characteristics
+    init_response();
+
+    // Remove any extra header cards
+    remove_cards();
+
+    // Get minimum and maximum input energy for continuum IAQ
+    double energy_min = 0.7 * m_ebounds.emin().MeV();
+    double energy_max = (m_response_d1.emax() < m_response_d2.emax()) ?
+                         m_response_d1.emax() : m_response_d2.emax();
+
+    // Debug
+    #if defined(G_DEBUG_SET_CONTINUUM)
+    std::cout << "Minimum energy=" << energy_min << std::endl;
+    std::cout << "Maximum energy=" << energy_max << std::endl;
+    #endif
+
+    // Setup array of energy boundaries
+    GEbounds ebounds(m_num_energies, GEnergy(energy_min, "MeV"),
+                                     GEnergy(energy_max, "MeV"));
+
+    // Compute flux over total energy interval
+    double flux_total = spectrum.flux(ebounds.emin(), ebounds.emax());
+
+    // Store empty copy of IAQ
+    GFitsImageFloat iaq = m_iaq;
+    for (int k = 0; k < iaq.npix(); ++k) {
+        iaq(k) = 0.0;
+    }
+
+    // Loop over energy bins
+    for (int i = 0; i < ebounds.size(); ++i) {
+
+        // Get log mean energy for bin
+        GEnergy energy = ebounds.elogmean(i);
+
+        // Get weight for this bin
+        double weight = spectrum.flux(ebounds.emin(i), ebounds.emax(i)) /
+                        flux_total;
+
+        // Initialise sum
+        double sum = 0.0;
+
+        // Continue only if we have weight
+        if (weight > 0.0) {
+
+            // Generate IAQ using Compton kinematics
+            compton_kinematics(energy.MeV());
+
+            // Multiply IAQ with Klein-Nishina factors
+            klein_nishina(energy.MeV());
+
+            // Weight IAQ
+            weight_iaq(energy.MeV());
+
+            // Copy weigthed IAQ values
+            for (int k = 0; k < iaq.npix(); ++k) {
+                double value = m_iaq(k) * weight;
+                iaq(k)      += value;
+                sum         += value;
+            }
+
+        } // endif: we has weight
+
+        // Debug
+        #if defined(G_DEBUG_SET_CONTINUUM)
+        std::cout << "Energy=" << energy;
+        std::cout << " weight=" << weight;
+        std::cout << " sum=" << sum << std::endl;
+        #endif
+
+    } // endfor: looped over energy bins
+
+    // Store IAQ matrix
+    m_iaq = iaq;
+
+    // Set parameters
+    m_iaq.card("SPECTRUM", spectrum.classname(), "Source spectrum");
+    const GModelSpectralPlaw*           plaw  = dynamic_cast<const GModelSpectralPlaw*>(&spectrum);
+    const GModelSpectralPlawPhotonFlux* pplaw = dynamic_cast<const GModelSpectralPlawPhotonFlux*>(&spectrum);
+    const GModelSpectralPlawEnergyFlux* eplaw = dynamic_cast<const GModelSpectralPlawEnergyFlux*>(&spectrum);
+    if (plaw != NULL) {
+        m_iaq.card("PLAWINX", plaw->index(), "Power law spectral index");
+    }
+    else if (pplaw != NULL) {
+        m_iaq.card("PLAWINX", pplaw->index(), "Power law spectral index");
+    }
+    else if (eplaw != NULL) {
+        m_iaq.card("PLAWINX", eplaw->index(), "Power law spectral index");
+    }
+    m_iaq.card("NENG", m_num_energies, "Number of incident energies");
+    m_iaq.card("EIMIN", energy_min, "[MeV] Minimum incident energy");
+    m_iaq.card("EIMAX", energy_max, "[MeV] Maximum incident energy");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Save COMPTEL instrument response representation into FITS file
  *
  * @param[in] filename FITS file name.
@@ -253,6 +410,15 @@ void GCOMIaq::save(const GFilename& filename, const bool& clobber) const
     if (filename.has_extname()) {
         iaq.extname(filename.extname());
     }
+
+    // Set FITS image keywords
+    iaq.card("EMIN", m_ebounds.emin().MeV(), "[MeV] Minimum measured photon energy");
+    iaq.card("EMAX", m_ebounds.emax().MeV(), "[MeV] Maximum measured photon energy");
+    iaq.card("E1MIN", m_e1min, "[MeV] Minimum D1 energy deposit");
+    iaq.card("E1MAX", m_e1max, "[MeV] Maximum D1 energy deposit");
+    iaq.card("E2MIN", m_e1min, "[MeV] Minimum D2 energy deposit");
+    iaq.card("E2MAX", m_e1max, "[MeV] Maximum D2 energy deposit");
+    iaq.card("PSDCORR", m_psd_correct, "PSD correction for 0-110");
 
     // Initialise empty FITS file
     GFits fits;
@@ -338,14 +504,17 @@ void GCOMIaq::init_members(void)
     m_response_d1.clear();
     m_response_d2.clear();
     m_ict.clear();
-    m_phigeo_max      =  0.0;
-    m_phibar_max      =  0.0;
-    m_phigeo_bin_size =  0.0;
-    m_phibar_bin_size =  0.0;
-    m_e1min           =  0.070; //!< Default: 70 keV
-    m_e1max           = 20.0;   //!< Default: 20 MeV
-    m_e2min           =  0.650; //!< Default: 650 keV
-    m_e2max           = 30.0;   //!< Default: 30 MeV
+    m_phigeo_max        =  0.0;
+    m_phibar_max        =  0.0;
+    m_phigeo_bin_size   =  0.0;
+    m_phibar_bin_size   =  0.0;
+    m_phibar_resolution =  0.25;  //!< Default: 0.25 deg
+    m_e1min             =  0.070; //!< Default: 70 keV
+    m_e1max             = 20.0;   //!< Default: 20 MeV
+    m_e2min             =  0.650; //!< Default: 650 keV
+    m_e2max             = 30.0;   //!< Default: 30 MeV
+    m_psd_correct       = true;   //!< Default: use PSD correction
+    m_num_energies      = 100;    //!< Default: 100 input energies
 
     // Return
     return;
@@ -360,19 +529,22 @@ void GCOMIaq::init_members(void)
 void GCOMIaq::copy_members(const GCOMIaq& iaq)
 {
     // Copy attributes
-    m_iaq             = iaq.m_iaq;
-    m_ebounds         = iaq.m_ebounds;
-    m_response_d1     = iaq.m_response_d1;
-    m_response_d2     = iaq.m_response_d2;
-    m_ict             = iaq.m_ict;
-    m_phigeo_max      = iaq.m_phigeo_max;
-    m_phibar_max      = iaq.m_phibar_max;
-    m_phigeo_bin_size = iaq.m_phigeo_bin_size;
-    m_phibar_bin_size = iaq.m_phibar_bin_size;
-    m_e1min           = iaq.m_e1min;
-    m_e1max           = iaq.m_e1max;
-    m_e2min           = iaq.m_e2min;
-    m_e2max           = iaq.m_e2max;
+    m_iaq               = iaq.m_iaq;
+    m_ebounds           = iaq.m_ebounds;
+    m_response_d1       = iaq.m_response_d1;
+    m_response_d2       = iaq.m_response_d2;
+    m_ict               = iaq.m_ict;
+    m_phigeo_max        = iaq.m_phigeo_max;
+    m_phibar_max        = iaq.m_phibar_max;
+    m_phigeo_bin_size   = iaq.m_phigeo_bin_size;
+    m_phibar_bin_size   = iaq.m_phibar_bin_size;
+    m_phibar_resolution = iaq.m_phibar_resolution;
+    m_e1min             = iaq.m_e1min;
+    m_e1max             = iaq.m_e1max;
+    m_e2min             = iaq.m_e2min;
+    m_e2max             = iaq.m_e2max;
+    m_psd_correct       = iaq.m_psd_correct;
+    m_num_energies      = iaq.m_num_energies;
 
     // Return
     return;
@@ -390,30 +562,83 @@ void GCOMIaq::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Add IAQ for a given photon energy
- *
- * @param[in] energy Input photon energy.
- * @param[in] weight Spectral weight.
- *
- * The code implemented is based on the COMPASS RESPSIT2 function IAQWEI.F
- * (release 1.0, 24-FEB-93).
+ * @brief Initialise COMPTEL response function and instrument characteristics
  ***************************************************************************/
-void GCOMIaq::iaqwei(const GEnergy& energy, const double& weight)
+void GCOMIaq::init_response(void)
 {
-    // Get response information
+    // Initialise COMPTEL response function  and instrument characteristics
     GCaldb caldb("cgro","comptel");
     m_response_d1 = GCOMD1Response(caldb, "DEFAULT");
     m_response_d2 = GCOMD2Response(caldb, "DEFAULT");
     m_ict         = GCOMInstChars(caldb, "DEFAULT");
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove any extra header cards
+ *
+ * Remove all header cards that may have been attached by the set() methods.
+ ***************************************************************************/
+void GCOMIaq::remove_cards(void)
+{
+    // Remove extra header cards
+    if (m_iaq.has_card("ENERGY")) {
+        m_iaq.header().remove("ENERGY");
+    }
+    if (m_iaq.has_card("SPECTRUM")) {
+        m_iaq.header().remove("SPECTRUM");
+    }
+    if (m_iaq.has_card("PLAWINX")) {
+        m_iaq.header().remove("PLAWINX");
+    }
+    if (m_iaq.has_card("NENG")) {
+        m_iaq.header().remove("NENG");
+    }
+    if (m_iaq.has_card("EIMIN")) {
+        m_iaq.header().remove("EIMIN");
+    }
+    if (m_iaq.has_card("EIMAX")) {
+        m_iaq.header().remove("EIMAX");
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Generate IAQ matrix based on Compton kinematics
+ *
+ * @param[in] energy Input photon energy (MeV).
+ *
+ * Generates an IAQ matrix based on Compton kinematics only. See the
+ * compute_iaq_bin() method for the formula used to compute each bin of the
+ * IAQ matrix.
+ *
+ * The Phibar dimension of the IAQ is sampled at a resolution that is set
+ * by the m_phibar_resolution member.
+ *
+ * The code implemented is based on the COMPASS RESPSIT2 function IAQWEI.F
+ * (release 1.0, 24-FEB-93).
+ ***************************************************************************/
+void GCOMIaq::compton_kinematics(const double& energy)
+{
     // Get IAQ dimensions
     int n_phigeo = m_iaq.naxes(0);
     int n_phibar = m_iaq.naxes(1);
 
-    // Set fine phibar step size to improve the accuracy
-    double finstp = 0.25;
-    int    nfin   = int(m_phibar_bin_size / finstp + 0.5);
-    finstp        = m_phibar_bin_size / double(nfin);
+    // Set the phibar step size for the internal computation. The phibar
+    // step size is set by the m_phibar_resolution member. This ensures that
+    // the computation is done with a sufficient resolution in phibar.
+    int n_fine = int(m_phibar_bin_size / m_phibar_resolution + 0.5);
+    if (n_fine < 1) {
+        n_fine = 1;
+    }
+    double dphibar     = m_phibar_bin_size / double(n_fine);
+    double dphibar_rad = dphibar * gammalib::deg2rad;
 
     // Loop over phigeo
     for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
@@ -423,51 +648,50 @@ void GCOMIaq::iaqwei(const GEnergy& energy, const double& weight)
 
         // Compute the true D1 and D2 energy deposits based on the
         // geometrical scatter angle
-        double etrue2 = com_energy2(energy.MeV(), phigeo);
-        double etrue1 = energy.MeV() - etrue2;
+        double etrue2 = com_energy2(energy, phigeo);
+        double etrue1 = energy - etrue2;
 
         // Debug
-        #if defined(G_DEBUG_IAQWEI)
+        #if defined(G_DEBUG_COMPTON_KINEMATICS)
         std::cout << "phigeo=" << phigeo;
         std::cout << " etrue1=" << etrue1;
-        std::cout << " etrue2=" << etrue2 << std::endl;
-        double sum = 0.0;
+        std::cout << " etrue2=" << etrue2;
         #endif
+
+        // Initialise sum
+        double sum = 0.0;
 
         // Loop over phibar
         for (int i_phibar = 0; i_phibar < n_phibar; ++i_phibar) {
 
             // Initialise start of phibar for this layer
-            double phibar = double(i_phibar) * m_phibar_bin_size + 0.5 * finstp;
+            double phibar = double(i_phibar) * m_phibar_bin_size + 0.5 * dphibar;
 
             // Initialise response for this phibar layer
             double response = 0.0;
 
             // Loop fine phibar layers
-            for (int i = 0; i < nfin; ++i, phibar += finstp) {
+            for (int i = 0; i < n_fine; ++i, phibar += dphibar) {
 
-                // Compute response
-                response += respsc(etrue1, etrue2, phibar);
-//std::cout << " phibar=" << phibar << " response=" << response << std::endl;
+                // Compute IAQ bin
+                response += compute_iaq_bin(etrue1, etrue2, phibar);
 
             } // endfor: looper over fine phibar layers
 
-            // Multiply response by size of fine phibar layers
-            response *= finstp;
+            // Multiply response by size of fine phibar layers in radians
+            response *= dphibar_rad;
 
             // Store result
             m_iaq(i_phigeo, i_phibar) = response;
 
-            // Debug
-            #if defined(G_DEBUG_IAQWEI)
+            // Add response to sum
             sum += response;
-            #endif
 
         } // endfor: looped over phibar
 
         // Debug
-        #if defined(G_DEBUG_IAQWEI)
-        std::cout << " Sum=" << sum << std::endl;
+        #if defined(G_DEBUG_COMPTON_KINEMATICS)
+        std::cout << " Prob=" << sum << std::endl;
         #endif
 
     } // endfor: looped over phigeo
@@ -478,13 +702,12 @@ void GCOMIaq::iaqwei(const GEnergy& energy, const double& weight)
 
 
 /***********************************************************************//**
- * @brief Integrates response over energy interval
+ * @brief Computes the IAQ for one bin
  *
  * @param[in] etrue1 True D1 energy deposit (MeV).
  * @param[in] etrue2 True D2 energy deposit (MeV).
  * @param[in] phibar Compton scatter angle (deg).
- * @param[in] e1min Minimum measured D1 energy deposit for integration (MeV).
- * @param[in] e1max Maximum measured D1 energy deposit for integration (MeV).
+ * @return Response for one IAQ bin
  *
  * Compute the integral
  *
@@ -508,10 +731,12 @@ void GCOMIaq::iaqwei(const GEnergy& energy, const double& weight)
  * RESPSC.F (release 2.0, 14-Mar-91) and RESINT.F (release 3.0, 21-Oct-91).
  * Since RESPSC.F only defines the threshold while RESINT.F does the real
  * job, both functions were merged.
+ *
+ * @todo Study impact of integration precision.
  ***************************************************************************/
-double GCOMIaq::respsc(const double& etrue1,
-                       const double& etrue2,
-                       const double& phibar)
+double GCOMIaq::compute_iaq_bin(const double& etrue1,
+                                const double& etrue2,
+                                const double& phibar)
 {
     // Initialise response
     double response = 0.0;
@@ -548,6 +773,9 @@ double GCOMIaq::respsc(const double& etrue1,
         // Setup integral
         GIntegral integral(&integrand);
 
+        // Set precision
+        integral.eps(1.0e-4);
+
         // No warnings
         #if defined(G_RESPSC_NO_WARNINGS)
         integral.silent(true);
@@ -559,7 +787,7 @@ double GCOMIaq::respsc(const double& etrue1,
     } // endif: integration interval was positive
 
     // Debug
-    #if defined(G_DEBUG_RESPSC)
+    #if defined(G_DEBUG_COMPUTE_IAQ_BIN)
     std::cout << " phibar=" << phibar;
     std::cout << " e1min=" << e1min;
     std::cout << " e1max=" << e1max;
@@ -570,6 +798,255 @@ double GCOMIaq::respsc(const double& etrue1,
 
     // Return response
     return response;
+}
+
+
+/***********************************************************************//**
+ * @brief Multiply IAQ matrix by the Klein-Nishina formula
+ *
+ * @param[in] energy Input photon energy (MeV).
+ *
+ * The code implemented is based on the COMPASS RESPSIT2 function IAQWEI.F
+ * (release 1.0, 24-FEB-93).
+ ***************************************************************************/
+void GCOMIaq::klein_nishina(const double& energy)
+{
+    // Get IAQ dimensions
+    int n_phigeo = m_iaq.naxes(0);
+    int n_phibar = m_iaq.naxes(1);
+
+    // Loop over phigeo
+    for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+
+        // Get geometrical scatter angle (deg)
+        double phigeo = (double(i_phigeo) + 0.5) * m_phigeo_bin_size;
+
+        // Get Klein-Nishina value for Phigeo
+        double prob_kn = klein_nishina_bin(energy, phigeo);
+
+        // Debug
+        #if defined(G_DEBUG_KLEIN_NISHINA)
+        std::cout << "phigeo=" << phigeo << " prob_kn=" << prob_kn << std::endl;
+        #endif
+
+        // Loop over phibar
+        for (int i_phibar = 0; i_phibar < n_phibar; ++i_phibar) {
+
+            // Store result
+            m_iaq(i_phigeo, i_phibar) *= prob_kn;
+
+        } // endfor: looped over phibar
+
+    } // endfor: looped over phigeo
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes Klein-Nishina probability for one bin
+ *
+ * @param[in] energy Input photon energy (MeV).
+ * @param[in] phigeo Geometric scatter angle (deg).
+ * @return Klein-Nishina probability.
+ *
+ * Compute the probability that a photon of @p energy is Compton scattered
+ * in a given \f$\varphi_{\rm geo}\f$ bin using
+ *
+ * \f[
+ *    P = \frac{\int_{\varphi_{\rm geo,min}}^{\varphi_{\rm geo,max}}
+ *              \sigma_{\rm KN}(E, \varphi_{\rm geo}) d\varphi_{\rm geo}}
+ *             {\int_{0}^{\pi}
+ *              \sigma_{\rm KN}(E, \varphi_{\rm geo}) d\varphi_{\rm geo}}
+ * \f]
+ *
+ * where \f$\sigma_{\rm KN}(E, \varphi_{\rm geo})\f$ is the Klein-Nishina
+ * cross section.
+ *
+ * The code implementation is based on the COMPASS RESPSIT2 function
+ * RESPSG.F (release 2.0, 26-Apr-90).
+ ***************************************************************************/
+double GCOMIaq::klein_nishina_bin(const double& energy, const double& phigeo)
+{
+    // Compute phigeo boundaries in radians. Make sure that they remain in
+    // the range [0,pi].
+    double phigeo_lo = phigeo - 0.5 * m_phigeo_bin_size;
+    double phigeo_hi = phigeo + 0.5 * m_phigeo_bin_size;
+    if (phigeo_lo < 0.0) {
+        phigeo_lo = 0.0;
+    }
+    if (phigeo_hi < 0.0) {
+        phigeo_hi = 0.0;
+    }
+    if (phigeo_lo > 180.0) {
+        phigeo_lo = 180.0;
+    }
+    if (phigeo_hi > 180.0) {
+        phigeo_hi = 180.0;
+    }
+    phigeo_lo *= gammalib::deg2rad;
+    phigeo_hi *= gammalib::deg2rad;
+
+    // Express input photon energy in units of electron rest mass
+    double alpha = energy / gammalib::mec2;
+
+    // Calculate the probability of phigeo bin
+    double v_low    = 1.0 - 1.0 / (1.0 + (1.0 - std::cos(phigeo_lo)) * alpha);
+    double v_high   = 1.0 - 1.0 / (1.0 + (1.0 - std::cos(phigeo_hi)) * alpha);
+    double r_low    = klein_nishina_integral(v_low,  alpha);
+    double r_high   = klein_nishina_integral(v_high, alpha);
+    double prob_bin = (r_high - r_low);
+
+    // Calculate the probability of [0,pi] range
+    double v_zero   = 0.0;
+    double v_pi     = 1.0 - 1.0 / (1.0 + 2.0 * alpha);
+    double r_zero   = klein_nishina_integral(v_zero, alpha);
+    double r_pi     = klein_nishina_integral(v_pi, alpha);
+    double prob_tot = (r_pi - r_zero);
+
+    // Calculate the probability of phigeo bin
+    double prob_phigeo = prob_bin / prob_tot;
+
+    // Return probability of phigeo bin
+    return prob_phigeo;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes Klein-Nishina integral
+ *
+ * @param[in] v Integration limit.
+ * @param[in] a Normalized energy.
+ * @return Integrated Klein-Nishina cross section.
+ *
+ * Computes the indefinite integral of the Klein-Nishina cross section
+ * evaluated at the integration limit @p v.
+ *
+ * The code implementation is based on the COMPASS RESPSIT2 function
+ * RESSLV.F (release 1.0, 23-Nov-88). The formula used in that code is
+ * the following:
+ *
+ * W = V*( 1.D0/A  +  1.D0 )**2
+ * W = W + ( 2.D0/(A**2) + 2.D0/A - 1.D0 )* DLOG(1.D0 - V)
+ * W = W - (V**2)/2.D0
+ * W = W + 1.D0/(A**2) * 1.D0/(1.D0 - V)
+ *
+ * @todo Check this formula !!!
+ ***************************************************************************/
+double GCOMIaq::klein_nishina_integral(const double& v, const double& a)
+{
+    // Compute integral (hope this is okay :o)
+    double w = v * (1.0/a + 1.0) * (1.0/a + 1.0) +
+               (2.0/(a*a) + 2.0/a - 1.0) * std::log(1.0 - v) -
+               v*v/2.0 +
+               1.0/(a*a) * 1.0/(1.0 - v);
+
+    // Return integral
+    return w;
+}
+
+
+/***********************************************************************//**
+ * @brief Weight IAQ matrix
+ *
+ * @param[in] energy Input photon energy (MeV).
+ *
+ * The code implemented is based on the COMPASS RESPSIT2 function IAQWEI.F
+ * (release 1.0, 24-FEB-93).
+ ***************************************************************************/
+void GCOMIaq::weight_iaq(const double& energy)
+{
+    // Compute the total D1 interaction coefficient for source on axis
+    double d1prob = m_ict.prob_D1inter(energy);
+
+    // Compute the fraction of Compton interactions within the total D1
+    // interaction probability (COM-RP-ROL-DRG-41)
+    double cfract = 1.0;
+    if (energy >= 2.0) {
+        cfract = 1.067 - 0.0295 * energy + 3.4e-4 * energy * energy;
+    }
+    if (cfract > 1.0) {
+        cfract = 1.0;
+    }
+    else if (cfract < 0.0) {
+        cfract = 0.0;
+    }
+
+    // Compute the attenuation coefficient above D1
+    double v1att = m_ict.atten_D1(energy);
+
+    // Compute the selfveto attenuation coefficient for source on axis
+    double sveto = m_ict.atten_selfveto(energy, 0.0);
+
+    // Compute the multi-hit probability
+    double mlhit = m_ict.prob_multihit(energy);
+
+    // Compute the overall (shape independent) transmission coefficients
+    double oalltr = v1att * d1prob * cfract * mlhit * sveto;
+
+    // Debug
+    #if defined(G_DEBUG_WEIGHT_IAQ)
+    std::cout << "Transmission coefficients:" << std::endl;
+    std::cout << "==========================" << std::endl;
+    std::cout << " Above D1 transmission ..........: " << v1att << std::endl;
+    std::cout << " D1 interaction probability .....: " << d1prob << std::endl;
+    std::cout << " Compton scatter fraction .......: " << cfract << std::endl;
+    std::cout << " Compton interaction probability : " << d1prob*cfract << std::endl;
+    std::cout << " Multi-hit transmission .........: " << mlhit << std::endl;
+    std::cout << " Self-vetoing ...................: " << sveto << std::endl;
+    std::cout << " Overall shape-independent trans.: " << oalltr << std::endl;
+    #endif
+
+    // Get IAQ dimensions
+    int n_phigeo = m_iaq.naxes(0);
+    int n_phibar = m_iaq.naxes(1);
+
+    // Loop over phigeo
+    for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+
+        // Get geometrical scatter angle (deg)
+        double phigeo = (double(i_phigeo) + 0.5) * m_phigeo_bin_size;
+
+        // Compute the attenuation coefficient between D1 and D2
+        double v2att = m_ict.atten_D2(energy, phigeo);
+
+        // Compute the D2 interaction coefficient
+        double d2prob = m_ict.prob_D2inter(energy, phigeo);
+
+        // Compute multi-scatter transmission inside D1 module
+        double mscatt = m_ict.multi_scatter(energy, phigeo);
+
+        // Optionally compute PSD correction for the default corrected PSD
+        // channel selection 0-110
+        double psdtrn = (m_psd_correct) ? m_ict.psd_correction(energy, phigeo) : 1.0;
+
+        // Compute the overall phigeo dependent correction
+        double oallpg = v2att * d2prob * mscatt * psdtrn;
+
+        // Compute the overall correction
+        double weight = oalltr * oallpg;
+
+        // Debug
+        #if defined(G_DEBUG_WEIGHT_IAQ)
+        std::cout << " Phigeo .........................: " << phigeo << std::endl;
+        std::cout << "  Between D1 & D2 transmission ..: " << v2att << std::endl;
+        std::cout << "  D2 interaction probability ....: " << d2prob << std::endl;
+        std::cout << "  D1 multi-scatter transmission .: " << mscatt << std::endl;
+        std::cout << "  PSD correction ................: " << psdtrn << std::endl;
+        std::cout << "  Overall shape-dependent trans. : " << oallpg << std::endl;
+        std::cout << "  Overall transmission ..........: " << weight << std::endl;
+        #endif
+
+        // Apply weight to all phibar layers
+        for (int i_phibar = 0; i_phibar < n_phibar; ++i_phibar) {
+            m_iaq(i_phigeo, i_phibar) *= weight;
+        }
+
+    } // endfor: looped over phigeo
+
+    // Return
+    return;
 }
 
 

@@ -160,6 +160,8 @@ GCOMD2Response& GCOMD2Response::operator=(const GCOMD2Response& rsp)
  * @param[in] etrue True energy (MeV).
  * @param[in] ereco Reconstructed energy (MeV).
  * @return COMPTEL D2 module response.
+ *
+ * @todo Add non photo peak response components
  ***************************************************************************/
 double GCOMD2Response::operator()(const double& etrue, const double& ereco) const
 {
@@ -520,6 +522,7 @@ void GCOMD2Response::update_cache(const double& etrue) const
             m_emax       = m_energies.interpolate(etrue, m_emaxs);
 
             //TODO: Assure normalization
+            //m_amplitude = 1.0 / (m_sigma * gammalib::sqrt_twopi); // FOR TESTING ONLY
 
         }
 

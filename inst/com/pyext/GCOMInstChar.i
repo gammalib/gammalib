@@ -50,14 +50,14 @@ public:
     void           caldb(const GCaldb& caldb);
     const GCaldb&  caldb(void) const;
     void           load(const std::string& ictname);
-    double         prob_D1inter(const GEnergy& energy) const;
-    double         prob_D2inter(const GEnergy& energy, const double& phigeo) const;
-    double         prob_multihit(const GEnergy& energy) const;
-    double         atten_D1(const GEnergy& energy) const;
-    double         atten_D2(const GEnergy& energy, const double& phigeo) const;
-    double         atten_selfveto(const GEnergy& energy, const double& zenith) const;
-    double         multi_scatter(const GEnergy& energy, const double& phigeo) const;
-    double         psd_correction(const GEnergy& energy, const double& phigeo) const;
+    double         prob_D1inter(const double& energy) const;
+    double         prob_D2inter(const double& energy, const double& phigeo) const;
+    double         prob_multihit(const double& energy) const;
+    double         atten_D1(const double& energy) const;
+    double         atten_D2(const double& energy, const double& phigeo) const;
+    double         atten_selfveto(const double& energy, const double& zenith) const;
+    double         multi_scatter(const double& energy, const double& phigeo) const;
+    double         psd_correction(const double& energy, const double& phigeo) const;
 };
 
 

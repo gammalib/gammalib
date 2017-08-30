@@ -298,7 +298,7 @@ void GCOMInstChars::load(const std::string& ictname)
 /***********************************************************************//**
  * @brief Return D1 interaction probability
  *
- * @param[in] energy Input photon energy.
+ * @param[in] energy Input photon energy (MeV).
  * @return D1 interaction probability.
  *
  * Returns D1 interaction probability as function of energy for a source that
@@ -306,7 +306,7 @@ void GCOMInstChars::load(const std::string& ictname)
  *
  * The computation uses a log-log interpolation of the ICT table values.
  ***************************************************************************/
-double GCOMInstChars::prob_D1inter(const GEnergy& energy) const
+double GCOMInstChars::prob_D1inter(const double& energy) const
 {
     // Initialise probability
     double prob = 0.0;
@@ -315,7 +315,7 @@ double GCOMInstChars::prob_D1inter(const GEnergy& energy) const
     if (m_d1inter_energies.size() > 0) {
 
         // Get log of energy
-        double logE = energy.log10MeV() * gammalib::inv_loge;
+        double logE = std::log(energy);
 
         // Get interaction coefficient
         double logc   = m_d1inter_energies.interpolate(logE, m_d1inter_coeffs);
@@ -334,7 +334,7 @@ double GCOMInstChars::prob_D1inter(const GEnergy& energy) const
 /***********************************************************************//**
  * @brief Return D2 interaction probability
  *
- * @param[in] energy Input photon energy.
+ * @param[in] energy Input photon energy (MeV).
  * @param[in] phigeo Geometrical scatter angle (deg).
  * @return D2 interaction probability.
  *
@@ -343,7 +343,7 @@ double GCOMInstChars::prob_D1inter(const GEnergy& energy) const
  *
  * @todo Verify formula.
  ***************************************************************************/
-double GCOMInstChars::prob_D2inter(const GEnergy& energy, const double& phigeo) const
+double GCOMInstChars::prob_D2inter(const double& energy, const double& phigeo) const
 {
     // Initialise probability
     double prob = 0.0;
@@ -352,7 +352,7 @@ double GCOMInstChars::prob_D2inter(const GEnergy& energy, const double& phigeo) 
     if (m_d2inter_energies.size() > 0) {
 
         // Compute log of D2 energy deposit
-        double logE2 = std::log(com_energy2(energy.MeV(), phigeo));
+        double logE2 = std::log(com_energy2(energy, phigeo));
 
         // Get interaction coefficient
         double logc   = m_d2inter_energies.interpolate(logE2, m_d2inter_coeffs);
@@ -372,12 +372,12 @@ double GCOMInstChars::prob_D2inter(const GEnergy& energy, const double& phigeo) 
 /***********************************************************************//**
  * @brief Return multihit probability
  *
- * @param[in] energy Input photon energy.
+ * @param[in] energy Input photon energy (MeV).
  * @return Multihit probability.
  *
  * @todo Implement method. Need to find out what exactly is computed.
  ***************************************************************************/
-double GCOMInstChars::prob_multihit(const GEnergy& energy) const
+double GCOMInstChars::prob_multihit(const double& energy) const
 {
     // Initialise probability
     double prob = 1.0;
@@ -390,12 +390,12 @@ double GCOMInstChars::prob_multihit(const GEnergy& energy) const
 /***********************************************************************//**
  * @brief Return attenuation above D1
  *
- * @param[in] energy Input photon energy.
+ * @param[in] energy Input photon energy (MeV).
  * @return Attenuation above D1.
  *
  * @todo Implement method
  ***************************************************************************/
-double GCOMInstChars::atten_D1(const GEnergy& energy) const
+double GCOMInstChars::atten_D1(const double& energy) const
 {
     // Initialise attenuation
     double attenuation = 1.0;
@@ -408,13 +408,13 @@ double GCOMInstChars::atten_D1(const GEnergy& energy) const
 /***********************************************************************//**
  * @brief Return attenuation between D1 and D2
  *
- * @param[in] energy Input photon energy.
+ * @param[in] energy Input photon energy (MeV).
  * @param[in] phigeo Geometrical scatter angle (deg).
  * @return Attenuation between D1 and D2.
  *
  * @todo Implement method
  ***************************************************************************/
-double GCOMInstChars::atten_D2(const GEnergy& energy, const double& phigeo) const
+double GCOMInstChars::atten_D2(const double& energy, const double& phigeo) const
 {
     // Initialise attenuation
     double attenuation = 1.0;
@@ -427,13 +427,13 @@ double GCOMInstChars::atten_D2(const GEnergy& energy, const double& phigeo) cons
 /***********************************************************************//**
  * @brief Return attenuation due to selfveto
  *
- * @param[in] energy Input photon energy.
+ * @param[in] energy Input photon energy (MeV).
  * @param[in] zenith Zenith angle (deg).
  * @return Attenuation due to selfveto.
  *
  * @todo Implement method
  ***************************************************************************/
-double GCOMInstChars::atten_selfveto(const GEnergy& energy, const double& zenith) const
+double GCOMInstChars::atten_selfveto(const double& energy, const double& zenith) const
 {
     // Initialise attenuation
     double attenuation = 1.0;
@@ -446,7 +446,7 @@ double GCOMInstChars::atten_selfveto(const GEnergy& energy, const double& zenith
 /***********************************************************************//**
  * @brief Return multi-scatter correction
  *
- * @param[in] energy Input photon energy.
+ * @param[in] energy Input photon energy (MeV).
  * @param[in] phigeo Geometrical scatter angle (deg).
  * @return Correction factor due to multi-scatter.
  *
@@ -472,7 +472,7 @@ double GCOMInstChars::atten_selfveto(const GEnergy& energy, const double& zenith
  * @todo Implement method from the COMPASS RESPSIT2 function MULTIS.F
  * (27-NOV-92).
  ***************************************************************************/
-double GCOMInstChars::multi_scatter(const GEnergy& energy, const double& phigeo) const
+double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) const
 {
     // Initialise fraction
     double fraction = 1.0;
@@ -485,7 +485,7 @@ double GCOMInstChars::multi_scatter(const GEnergy& energy, const double& phigeo)
 /***********************************************************************//**
  * @brief Return PSD correction
  *
- * @param[in] energy Input photon energy.
+ * @param[in] energy Input photon energy (MeV).
  * @param[in] phigeo Geometrical scatter angle (deg).
  * @return Correction factor due to PSD selection.
  *
@@ -506,14 +506,14 @@ double GCOMInstChars::multi_scatter(const GEnergy& energy, const double& phigeo)
  * The code implemented is based on the COMPASS RESPSIT2 function PSDACP.F
  * (release 1.0, 11-DEC-92).
  ***************************************************************************/
-double GCOMInstChars::psd_correction(const GEnergy& energy, const double& phigeo) const
+double GCOMInstChars::psd_correction(const double& energy, const double& phigeo) const
 {
     // Set constants
     const double a1 = 1727.9;
     const double a2 = 2.530;
 
     // Compute D1 energy deposit
-    double e1 = com_energy1(energy.MeV(), phigeo);
+    double e1 = com_energy1(energy, phigeo);
 
     // Original COMPASS code
     double psdacp = 1.0 - (1.0 / (a1 * std::pow(e1, a2) + 1.0));

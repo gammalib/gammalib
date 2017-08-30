@@ -60,6 +60,8 @@ public:
     double          emin(const double& etrue) const;
     double          ewidth(const double& etrue) const;
     double          emax(const double& etrue) const;
+    double          emin(void) const;
+    double          emax(void) const;
 };
 
 

@@ -32,7 +32,6 @@
 #include "GModelSpectral.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
-//#include "GXmlElement.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
