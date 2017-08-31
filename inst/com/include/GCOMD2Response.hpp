@@ -65,6 +65,16 @@ public:
     const GCaldb&   caldb(void) const;
     void            load(const std::string& sdbname);
     void            read(const GFitsTable& table);
+    double          position(const double& etrue) const;
+    double          sigma(const double& etrue) const;
+    double          amplitude(const double& etrue) const;
+    double          escape1(const double& etrue) const;
+    double          escape2(const double& etrue) const;
+    double          comptontail(const double& etrue) const;
+    double          background(const double& etrue) const;
+    double          emin(const double& etrue) const;
+    double          ewidth(const double& etrue) const;
+    double          emax(const double& etrue) const;
     double          emin(void) const;
     double          emax(void) const;
     std::string     print(const GChatter& chatter = NORMAL) const;
@@ -104,6 +114,7 @@ private:
     mutable double m_emax;         //!< Upper energy limit of D2 (MeV)
     mutable double m_pos_escape1;  //!< Position of first escape peak (MeV)
     mutable double m_pos_escape2;  //!< Position of second escape peak (MeV)
+    mutable double m_compton_edge; //!< Position of Compton edge (MeV)
 };
 
 
@@ -143,6 +154,146 @@ void GCOMD2Response::caldb(const GCaldb& caldb)
 {
     m_caldb = caldb;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return photo peak position
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Photo peak position (MeV).
+ ***************************************************************************/
+inline
+double GCOMD2Response::position(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_position);
+}
+
+
+/***********************************************************************//**
+ * @brief Return photo peak standard deviation
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Photo peak standard deviation (MeV).
+ ***************************************************************************/
+inline
+double GCOMD2Response::sigma(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_sigma);
+}
+
+
+/***********************************************************************//**
+ * @brief Return photo peak amplitude
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Photo peak amplitude.
+ ***************************************************************************/
+inline
+double GCOMD2Response::amplitude(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_amplitude);
+}
+
+
+/***********************************************************************//**
+ * @brief Return first escape peak amplitude
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return First escape peak amplitude.
+ ***************************************************************************/
+inline
+double GCOMD2Response::escape1(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_escape1);
+}
+
+
+/***********************************************************************//**
+ * @brief Return second escape peak amplitude
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Second escape peak amplitude.
+ ***************************************************************************/
+inline
+double GCOMD2Response::escape2(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_escape2);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Compton tail amplitude
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Compton tail amplitude.
+ ***************************************************************************/
+inline
+double GCOMD2Response::comptontail(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_tail);
+}
+
+
+/***********************************************************************//**
+ * @brief Return background amplitude
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Background amplitude.
+ ***************************************************************************/
+inline
+double GCOMD2Response::background(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_background);
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum energy
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Minimum energy (MeV).
+ ***************************************************************************/
+inline
+double GCOMD2Response::emin(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_emin);
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy threshold width
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Energy threshold width (MeV).
+ ***************************************************************************/
+inline
+double GCOMD2Response::ewidth(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_ewidth);
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum energy
+ *
+ * @param[in] etrue True energy (MeV).
+ * @return Maximum energy (MeV).
+ ***************************************************************************/
+inline
+double GCOMD2Response::emax(const double& etrue) const
+{
+    update_cache(etrue);
+    return (m_emax);
 }
 
 

@@ -52,6 +52,7 @@
 //#define G_DEBUG_COMPTON_KINEMATICS
 //#define G_DEBUG_COMPUTE_IAQ_BIN
 //#define G_DEBUG_KLEIN_NISHINA
+//#define G_DEBUG_KLEIN_NISHINA_INTEGRAL
 //#define G_DEBUG_RESPONSE_KERNEL
 //#define G_DEBUG_WEIGHT_IAQ
 //#define G_DEBUG_SET_CONTINUUM
@@ -823,6 +824,11 @@ void GCOMIaq::klein_nishina(const double& energy)
     int n_phigeo = m_iaq.naxes(0);
     int n_phibar = m_iaq.naxes(1);
 
+    // Debug
+    #if defined(G_DEBUG_KLEIN_NISHINA)
+    double sum = 0.0;
+    #endif
+
     // Loop over phigeo
     for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
 
@@ -835,6 +841,7 @@ void GCOMIaq::klein_nishina(const double& energy)
         // Debug
         #if defined(G_DEBUG_KLEIN_NISHINA)
         std::cout << "phigeo=" << phigeo << " prob_kn=" << prob_kn << std::endl;
+        sum += prob_kn;
         #endif
 
         // Loop over phibar
@@ -846,6 +853,11 @@ void GCOMIaq::klein_nishina(const double& energy)
         } // endfor: looped over phibar
 
     } // endfor: looped over phigeo
+
+    // Debug
+    #if defined(G_DEBUG_KLEIN_NISHINA)
+    std::cout << "Sum of probabilities = " << sum << std::endl;
+    #endif
 
     // Return
     return;
@@ -940,7 +952,8 @@ double GCOMIaq::klein_nishina_bin(const double& energy, const double& phigeo)
  * W = W - (V**2)/2.D0
  * W = W + 1.D0/(A**2) * 1.D0/(1.D0 - V)
  *
- * @todo Check this formula !!!
+ * It has been check that the original formula gives the same results as the
+ * version that was implemented.
  ***************************************************************************/
 double GCOMIaq::klein_nishina_integral(const double& v, const double& a)
 {
@@ -949,6 +962,18 @@ double GCOMIaq::klein_nishina_integral(const double& v, const double& a)
                (2.0/(a*a) + 2.0/a - 1.0) * std::log(1.0 - v) -
                v*v/2.0 +
                1.0/(a*a) * 1.0/(1.0 - v);
+
+    // Debug
+    #if defined(G_DEBUG_KLEIN_NISHINA_INTEGRAL)
+    double w_test;
+    w_test = v*( 1.0/a  +  1.0 )*( 1.0/a  +  1.0 );
+    w_test = w_test + ( 2.0/(a*a) + 2.0/a - 1.0 )* std::log(1.0 - v);
+    w_test = w_test - (v*v)/2.0;
+    w_test = w_test + 1.0/(a*a) * 1.0/(1.0 - v);
+    if (w != w_test) {
+        std::cout << "w=" << w << " w_test=" << w_test << std::endl;
+    }
+    #endif
 
     // Return integral
     return w;

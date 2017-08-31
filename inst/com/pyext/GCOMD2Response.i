@@ -54,6 +54,16 @@ public:
     const GCaldb&   caldb(void) const;
     void            load(const std::string& sdaname);
     void            read(const GFitsTable& hdu);
+    double          position(const double& etrue) const;
+    double          sigma(const double& etrue) const;
+    double          amplitude(const double& etrue) const;
+    double          escape1(const double& etrue) const;
+    double          escape2(const double& etrue) const;
+    double          comptontail(const double& etrue) const;
+    double          background(const double& etrue) const;
+    double          emin(const double& etrue) const;
+    double          ewidth(const double& etrue) const;
+    double          emax(const double& etrue) const;
     double          emin(void) const;
     double          emax(void) const;
 };
