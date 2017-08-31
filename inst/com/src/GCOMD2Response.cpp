@@ -161,7 +161,7 @@ GCOMD2Response& GCOMD2Response::operator=(const GCOMD2Response& rsp)
  * @param[in] ereco Reconstructed energy (MeV).
  * @return COMPTEL D2 module response.
  *
- * @todo Add non photo peak response components
+ * @todo Add Compton components to response
  ***************************************************************************/
 double GCOMD2Response::operator()(const double& etrue, const double& ereco) const
 {
@@ -174,15 +174,31 @@ double GCOMD2Response::operator()(const double& etrue, const double& ereco) cons
         // Update response evaluation cache
         update_cache(etrue);
 
-        // Continue only if amplitude is positive
+        // Add photo peak if amplitude is positive and reconstructed energy
+        // is within 5 sigma of the Gaussian position
         if (m_amplitude > 0.0) {
+            double arg  = (m_position-ereco) / m_sigma;
+            if (std::abs(arg) < 5.0) {
+                response += m_amplitude * std::exp(-0.5 * arg * arg);
+            }
+        }
 
-            // Compute D2 module response (here is where the real magic
-            // happens)
-            //TODO: Implement the correct formula
-            double arg = (m_energy-ereco) / m_sigma;
-            response   = m_amplitude * std::exp(-0.5 * arg * arg);
+        // Add first escape peak if amplitude is positive and reconstructed
+        // energy is within 5 sigma of the Gaussian position
+        if (m_escape1 > 0.0) {
+            double arg  = (m_pos_escape1-ereco) / m_sigma;
+            if (std::abs(arg) < 5.0) {
+                response += m_escape1 * std::exp(-0.5 * arg * arg);
+            }
+        }
 
+        // Add second escape peak if amplitude is positive and reconstructed
+        // energy is within 5 sigma of the Gaussian position
+        if (m_escape2 > 0.0) {
+            double arg  = (m_pos_escape2-ereco) / m_sigma;
+            if (std::abs(arg) < 5.0) {
+                response += m_escape2 * std::exp(-0.5 * arg * arg);
+            }
         }
 
     } // endif: response was loaded
@@ -409,17 +425,19 @@ void GCOMD2Response::init_members(void)
     m_emaxs.clear();
 
     // Initialise pre-computation cache
-    m_energy     = 0.0;
-    m_position   = 0.0;
-    m_sigma      = 0.0;
-    m_amplitude  = 0.0;
-    m_escape1    = 0.0;
-    m_escape2    = 0.0;
-    m_tail       = 0.0;
-    m_background = 0.0;
-    m_emin       = 0.0;
-    m_ewidth     = 0.0;
-    m_emax       = 0.0;
+    m_energy      = 0.0;
+    m_position    = 0.0;
+    m_sigma       = 0.0;
+    m_amplitude   = 0.0;
+    m_escape1     = 0.0;
+    m_escape2     = 0.0;
+    m_tail        = 0.0;
+    m_background  = 0.0;
+    m_emin        = 0.0;
+    m_ewidth      = 0.0;
+    m_emax        = 0.0;
+    m_pos_escape1 = 0.0;
+    m_pos_escape2 = 0.0;
 
     // Return
     return;
@@ -448,17 +466,19 @@ void GCOMD2Response::copy_members(const GCOMD2Response& rsp)
     m_emaxs       = rsp.m_emaxs;
 
     // Copy pre-computation cache
-    m_energy     = rsp.m_energy;
-    m_position   = rsp.m_position;
-    m_sigma      = rsp.m_sigma;
-    m_amplitude  = rsp.m_amplitude;
-    m_escape1    = rsp.m_escape1;
-    m_escape2    = rsp.m_escape2;
-    m_tail       = rsp.m_tail;
-    m_background = rsp.m_background;
-    m_emin       = rsp.m_emin;
-    m_ewidth     = rsp.m_ewidth;
-    m_emax       = rsp.m_emax;
+    m_energy      = rsp.m_energy;
+    m_position    = rsp.m_position;
+    m_sigma       = rsp.m_sigma;
+    m_amplitude   = rsp.m_amplitude;
+    m_escape1     = rsp.m_escape1;
+    m_escape2     = rsp.m_escape2;
+    m_tail        = rsp.m_tail;
+    m_background  = rsp.m_background;
+    m_emin        = rsp.m_emin;
+    m_ewidth      = rsp.m_ewidth;
+    m_emax        = rsp.m_emax;
+    m_pos_escape1 = rsp.m_pos_escape1;
+    m_pos_escape2 = rsp.m_pos_escape2;
 
     // Return
     return;
@@ -494,16 +514,18 @@ void GCOMD2Response::update_cache(const double& etrue) const
         // then set response to zero
         if ((etrue < m_energies[0]) ||
             (etrue > m_energies[m_energies.size()-1])) {
-            m_position   = 0.0;
-            m_sigma      = 0.0;
-            m_amplitude  = 0.0;
-            m_escape1    = 0.0;
-            m_escape2    = 0.0;
-            m_tail       = 0.0;
-            m_background = 0.0;
-            m_emin       = 0.0;
-            m_ewidth     = 0.0;
-            m_emax       = 0.0;
+            m_position    = 0.0;
+            m_sigma       = 0.0;
+            m_amplitude   = 0.0;
+            m_escape1     = 0.0;
+            m_escape2     = 0.0;
+            m_tail        = 0.0;
+            m_background  = 0.0;
+            m_emin        = 0.0;
+            m_ewidth      = 0.0;
+            m_emax        = 0.0;
+            m_pos_escape1 = 0.0;
+            m_pos_escape2 = 0.0;
         }
 
         // ... otherwise interpolate response parameters
@@ -520,6 +542,10 @@ void GCOMD2Response::update_cache(const double& etrue) const
             m_emin       = m_energies.interpolate(etrue, m_emins);
             m_ewidth     = m_energies.interpolate(etrue, m_ewidths);
             m_emax       = m_energies.interpolate(etrue, m_emaxs);
+
+            // Derive some respose parameters
+            m_pos_escape1 = m_position - gammalib::mec2;
+            m_pos_escape2 = m_position - 2.0 * gammalib::mec2;
 
             //TODO: Assure normalization
             //m_amplitude = 1.0 / (m_sigma * gammalib::sqrt_twopi); // FOR TESTING ONLY

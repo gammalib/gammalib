@@ -312,8 +312,8 @@ void GCOMIaq::set(const GModelSpectral& spectrum)
     GEbounds ebounds(m_num_energies, GEnergy(energy_min, "MeV"),
                                      GEnergy(energy_max, "MeV"));
 
-    // Compute flux over total energy interval
-    double flux_total = spectrum.flux(ebounds.emin(), ebounds.emax());
+    // Compute flux over measured total energy interval
+    double flux_total = spectrum.flux(m_ebounds.emin(), m_ebounds.emax());
 
     // Store empty copy of IAQ
     GFitsImageFloat iaq = m_iaq;
@@ -479,6 +479,14 @@ std::string GCOMIaq::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Energy range"));
         result.append(m_ebounds.emin().print()+" - ");
         result.append(m_ebounds.emax().print());
+
+        // Append IAQ integral
+        double sum = 0.0;
+        for (int i = 0; i < m_iaq.npix(); ++i) {
+            sum += m_iaq(i);
+        }
+        result.append("\n"+gammalib::parformat("Response integral"));
+        result.append(gammalib::str(sum));
 
     } // endif: chatter was not silent
 
@@ -973,28 +981,33 @@ void GCOMIaq::weight_iaq(const double& energy)
         cfract = 0.0;
     }
 
-    // Compute the attenuation coefficient above D1
-    double v1att = m_ict.atten_D1(energy);
+    // Compute the transmission of material above D1
+    double ad1trans = m_ict.trans_D1(energy);
 
-    // Compute the selfveto attenuation coefficient for source on axis
-    double sveto = m_ict.atten_selfveto(energy, 0.0);
+    // Compute the transmission of V1 veto dome
+    double v1trans = m_ict.trans_V1(energy);
 
-    // Compute the multi-hit probability
-    double mlhit = m_ict.prob_multihit(energy);
+    // Compute the probability that a photon was not self vetoed assuming
+    // a source on axis
+    double sveto = m_ict.prob_no_selfveto(energy, 0.0);
+
+    // Compute the probability that an event is not a multihit
+    double mlhit = m_ict.prob_no_multihit(energy);
 
     // Compute the overall (shape independent) transmission coefficients
-    double oalltr = v1att * d1prob * cfract * mlhit * sveto;
+    double oalltr = ad1trans * v1trans * d1prob * cfract * mlhit * sveto;
 
     // Debug
     #if defined(G_DEBUG_WEIGHT_IAQ)
     std::cout << "Transmission coefficients:" << std::endl;
     std::cout << "==========================" << std::endl;
-    std::cout << " Above D1 transmission ..........: " << v1att << std::endl;
+    std::cout << " Above D1 transmission ..........: " << ad1trans << std::endl;
+    std::cout << " V1 veto dome transmission ......: " << v1trans << std::endl;
     std::cout << " D1 interaction probability .....: " << d1prob << std::endl;
     std::cout << " Compton scatter fraction .......: " << cfract << std::endl;
     std::cout << " Compton interaction probability : " << d1prob*cfract << std::endl;
-    std::cout << " Multi-hit transmission .........: " << mlhit << std::endl;
-    std::cout << " Self-vetoing ...................: " << sveto << std::endl;
+    std::cout << " Multihit transmission ..........: " << mlhit << std::endl;
+    std::cout << " Self-vetoing transmission ......: " << sveto << std::endl;
     std::cout << " Overall shape-independent trans.: " << oalltr << std::endl;
     #endif
 
@@ -1008,8 +1021,11 @@ void GCOMIaq::weight_iaq(const double& energy)
         // Get geometrical scatter angle (deg)
         double phigeo = (double(i_phigeo) + 0.5) * m_phigeo_bin_size;
 
-        // Compute the attenuation coefficient between D1 and D2
-        double v2att = m_ict.atten_D2(energy, phigeo);
+        // Compute the transmission between D1 and D2
+        double ad2trans = m_ict.trans_D2(energy, phigeo);
+
+        // Compute the transmission of V2+V3 veto domes
+        double v23trans = m_ict.trans_V23(energy, phigeo);
 
         // Compute the D2 interaction coefficient
         double d2prob = m_ict.prob_D2inter(energy, phigeo);
@@ -1022,7 +1038,7 @@ void GCOMIaq::weight_iaq(const double& energy)
         double psdtrn = (m_psd_correct) ? m_ict.psd_correction(energy, phigeo) : 1.0;
 
         // Compute the overall phigeo dependent correction
-        double oallpg = v2att * d2prob * mscatt * psdtrn;
+        double oallpg = ad2trans * v23trans * d2prob * mscatt * psdtrn;
 
         // Compute the overall correction
         double weight = oalltr * oallpg;
@@ -1030,7 +1046,8 @@ void GCOMIaq::weight_iaq(const double& energy)
         // Debug
         #if defined(G_DEBUG_WEIGHT_IAQ)
         std::cout << " Phigeo .........................: " << phigeo << std::endl;
-        std::cout << "  Between D1 & D2 transmission ..: " << v2att << std::endl;
+        std::cout << "  Between D1 & D2 transmission ..: " << ad2trans << std::endl;
+        std::cout << "  V2+V3 veto dome transmission ..: " << v23trans << std::endl;
         std::cout << "  D2 interaction probability ....: " << d2prob << std::endl;
         std::cout << "  D1 multi-scatter transmission .: " << mscatt << std::endl;
         std::cout << "  PSD correction ................: " << psdtrn << std::endl;

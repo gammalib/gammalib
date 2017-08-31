@@ -175,10 +175,12 @@ double GCOMD1Response::operator()(const double& etrue, const double& ereco) cons
         // Continue only if amplitude is positive
         if (m_amplitude > 0.0) {
 
-            // Compute D1 module response (here is where the real magic
-            // happens)
-            double arg = (m_energy-ereco) / m_sigma;
-            response   = m_amplitude * std::exp(-0.5 * arg * arg);
+            // Compute D1 module response. Here is where the real magic
+            // happens. Only consider the response within 5 sigma.
+            double arg = (m_position-ereco) / m_sigma;
+            if (std::abs(arg) < 5.0) {
+                response = m_amplitude * std::exp(-0.5 * arg * arg);
+            }
 
         }
 

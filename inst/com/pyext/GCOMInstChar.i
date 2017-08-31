@@ -52,10 +52,12 @@ public:
     void           load(const std::string& ictname);
     double         prob_D1inter(const double& energy) const;
     double         prob_D2inter(const double& energy, const double& phigeo) const;
-    double         prob_multihit(const double& energy) const;
-    double         atten_D1(const double& energy) const;
-    double         atten_D2(const double& energy, const double& phigeo) const;
-    double         atten_selfveto(const double& energy, const double& zenith) const;
+    double         prob_no_multihit(const double& energy) const;
+    double         trans_D1(const double& energy) const;
+    double         trans_V1(const double& energy) const;
+    double         trans_D2(const double& energy, const double& phigeo) const;
+    double         trans_V23(const double& energy, const double& phigeo) const;
+    double         prob_no_selfveto(const double& energy, const double& zenith) const;
     double         multi_scatter(const double& energy, const double& phigeo) const;
     double         psd_correction(const double& energy, const double& phigeo) const;
 };

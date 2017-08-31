@@ -91,17 +91,19 @@ private:
     std::vector<double> m_emaxs;       //!< Upper energy limit of D2
 
     // Pre-computation cache
-    mutable double m_energy;
-    mutable double m_position;
-    mutable double m_sigma;
-    mutable double m_amplitude;
-    mutable double m_escape1;
-    mutable double m_escape2;
-    mutable double m_tail;
-    mutable double m_background;
-    mutable double m_emin;
-    mutable double m_ewidth;
-    mutable double m_emax;
+    mutable double m_energy;       //!< Incident total energy (MeV)
+    mutable double m_position;     //!< Position of photo peak (MeV)
+    mutable double m_sigma;        //!< Width of photo peak (MeV)
+    mutable double m_amplitude;    //!< Amplitude of photo peak
+    mutable double m_escape1;      //!< Amplitude of first escape peak
+    mutable double m_escape2;      //!< Amplitude of second escape peak
+    mutable double m_tail;         //!< Amplitude of Compton tail
+    mutable double m_background;   //!> Amplitude of Compton background
+    mutable double m_emin;         //!< Lower energy threshold of D2 (MeV)
+    mutable double m_ewidth;       //!< Lower energy threshold width of D2 (MeV)
+    mutable double m_emax;         //!< Upper energy limit of D2 (MeV)
+    mutable double m_pos_escape1;  //!< Position of first escape peak (MeV)
+    mutable double m_pos_escape2;  //!< Position of second escape peak (MeV)
 };
 
 
