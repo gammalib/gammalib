@@ -46,7 +46,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 //#define G_RESPONSE_KERNEL_LIMITS
-#define G_RESPSC_NO_WARNINGS
+#define G_COMPUTE_IAQ_BIN_NO_WARNINGS
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_COMPTON_KINEMATICS
@@ -513,17 +513,19 @@ void GCOMIaq::init_members(void)
     m_response_d1.clear();
     m_response_d2.clear();
     m_ict.clear();
-    m_phigeo_max        =  0.0;
-    m_phibar_max        =  0.0;
-    m_phigeo_bin_size   =  0.0;
-    m_phibar_bin_size   =  0.0;
+    m_phigeo_max      =  0.0;
+    m_phibar_max      =  0.0;
+    m_phigeo_bin_size =  0.0;
+    m_phibar_bin_size =  0.0;
+
+    // Initialise parameters
     m_phibar_resolution =  0.25;  //!< Default: 0.25 deg
     m_e1min             =  0.070; //!< Default: 70 keV
     m_e1max             = 20.0;   //!< Default: 20 MeV
     m_e2min             =  0.650; //!< Default: 650 keV
     m_e2max             = 30.0;   //!< Default: 30 MeV
     m_psd_correct       = true;   //!< Default: use PSD correction
-    m_num_energies      = 100;    //!< Default: 100 input energies
+    m_num_energies      = 50;     //!< Default: 50 input energies
 
     // Return
     return;
@@ -538,15 +540,17 @@ void GCOMIaq::init_members(void)
 void GCOMIaq::copy_members(const GCOMIaq& iaq)
 {
     // Copy attributes
-    m_iaq               = iaq.m_iaq;
-    m_ebounds           = iaq.m_ebounds;
-    m_response_d1       = iaq.m_response_d1;
-    m_response_d2       = iaq.m_response_d2;
-    m_ict               = iaq.m_ict;
-    m_phigeo_max        = iaq.m_phigeo_max;
-    m_phibar_max        = iaq.m_phibar_max;
-    m_phigeo_bin_size   = iaq.m_phigeo_bin_size;
-    m_phibar_bin_size   = iaq.m_phibar_bin_size;
+    m_iaq             = iaq.m_iaq;
+    m_ebounds         = iaq.m_ebounds;
+    m_response_d1     = iaq.m_response_d1;
+    m_response_d2     = iaq.m_response_d2;
+    m_ict             = iaq.m_ict;
+    m_phigeo_max      = iaq.m_phigeo_max;
+    m_phibar_max      = iaq.m_phibar_max;
+    m_phigeo_bin_size = iaq.m_phigeo_bin_size;
+    m_phibar_bin_size = iaq.m_phibar_bin_size;
+
+    // Copy parameters
     m_phibar_resolution = iaq.m_phibar_resolution;
     m_e1min             = iaq.m_e1min;
     m_e1max             = iaq.m_e1max;
@@ -786,7 +790,7 @@ double GCOMIaq::compute_iaq_bin(const double& etrue1,
         integral.eps(1.0e-4);
 
         // No warnings
-        #if defined(G_RESPSC_NO_WARNINGS)
+        #if defined(G_COMPUTE_IAQ_BIN_NO_WARNINGS)
         integral.silent(true);
         #endif
 
@@ -1101,7 +1105,7 @@ void GCOMIaq::weight_iaq(const double& energy)
  *
  * \f[
  *    R(E_1,E_2|\hat{E_1},\hat{E_2}) =
-      R_1(E_1|\hat{E_1}) \times R_2(E_2|\hat{E_2}) \times J
+ *    R_1(E_1|\hat{E_1}) \times R_2(E_2|\hat{E_2}) \times J
  * \f]
  *
  * where

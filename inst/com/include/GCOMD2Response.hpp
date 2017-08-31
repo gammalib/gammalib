@@ -32,6 +32,7 @@
 #include <string>
 #include "GCaldb.hpp"
 #include "GNodeArray.hpp"
+#include "GFunction.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -85,6 +86,42 @@ private:
     void copy_members(const GCOMD2Response& rsp);
     void free_members(void);
     void update_cache(const double& etrue) const;
+    void update_response_vector(const double& etrue) const;
+
+    // Klein-Nishina Gaussian integration kernel
+    class kn_gauss_kernel : public GFunction {
+    public:
+        kn_gauss_kernel(const double& ereco,
+                        const double& e0,
+                        const double& ec,
+                        const double& sigma) :
+                        m_ereco(ereco),
+                        m_e0(e0),
+                        m_ec(ec),
+                        m_wgt(1.0/sigma) {}
+        double eval(const double& e);
+    protected:
+        double m_ereco; //< Reconstructed energy (MeV)
+        double m_e0;    //!< Incident energy (MeV)
+        double m_ec;    //!< Compton edge energy (MeV)
+        double m_wgt;   //!< Inverse of Gaussian standard deviation (1/MeV)
+    };
+
+    // Background Gaussian integration kernel
+    class bkg_gauss_kernel : public GFunction {
+    public:
+        bkg_gauss_kernel(const double& ereco,
+                         const double& e0,
+                         const double& sigma) :
+                         m_ereco(ereco),
+                         m_e0(e0),
+                         m_wgt(1.0/sigma) {}
+        double eval(const double& e);
+    protected:
+        double m_ereco; //< Reconstructed energy (MeV)
+        double m_e0;    //!< Incident energy (MeV)
+        double m_wgt;   //!< Inverse of Gaussian standard deviation (1/MeV)
+    };
 
     // Private data members
     GCaldb              m_caldb;       //!< Calibration database
@@ -114,7 +151,16 @@ private:
     mutable double m_emax;         //!< Upper energy limit of D2 (MeV)
     mutable double m_pos_escape1;  //!< Position of first escape peak (MeV)
     mutable double m_pos_escape2;  //!< Position of second escape peak (MeV)
+    mutable double m_wgt_photo;    //!< Inverse of width of photo peak (1/MeV)
+    mutable double m_wgt_escape1;  //!< Inverse of width of first escape peak (1/MeV)
+    mutable double m_wgt_escape2;  //!< Inverse of width of first escape peak (1/MeV)
     mutable double m_compton_edge; //!< Position of Compton edge (MeV)
+
+    // Pre-computed response vector
+    mutable double              m_rsp_etrue;    //!< True energy of response vector
+    mutable GNodeArray          m_rsp_energies; //!< Response vector energies
+    mutable std::vector<double> m_rsp_values;   //!< Response vector values
+
 };
 
 

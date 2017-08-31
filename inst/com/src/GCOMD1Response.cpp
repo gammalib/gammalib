@@ -160,6 +160,24 @@ GCOMD1Response& GCOMD1Response::operator=(const GCOMD1Response& rsp)
  * @param[in] etrue True energy (MeV).
  * @param[in] ereco Reconstructed energy (MeV).
  * @return COMPTEL D1 module response.
+ *
+ * Computes
+ *
+ * \f[
+ *    R_{\rm D1}(E|E_0) = n \times \left[
+ *    A_1 \exp \left( -\frac{1}{2} \frac{(E_0-E)^2}{\sigma^2(E_0)} \right)
+ *    \right]
+ * \f]
+ *
+ * where
+ * \f$B1\f$ is the amplitude of the photo peak,
+ * \f$\sigma(E_0)\f$ is width of the photo peak, and
+ * \f$E_0\f$ is the position of the photo peak.
+ * The constant \f$n\f$ is chosen so that
+ *
+ * \f[
+ *    \int_{E} R_{\rm D1}(E|E_0) dE = 1
+ * \f]
  ***************************************************************************/
 double GCOMD1Response::operator()(const double& etrue, const double& ereco) const
 {
