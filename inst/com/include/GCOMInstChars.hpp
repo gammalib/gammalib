@@ -86,7 +86,7 @@ private:
                     std::vector<double>& y);
     void   read_selfveto(const GFitsTable& table);
     double ne213a_mfpath(const double& energy) const;
-    double kn_cross_section(const double& x, const double& alpha) const;
+    double kn_cross_section(const double& k) const;
     double min_coeff(const std::vector<double>& coeffs) const;
     double max_coeff(const std::vector<double>& coeffs) const;
 

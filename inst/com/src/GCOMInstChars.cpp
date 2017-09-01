@@ -39,6 +39,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define TEST_KN
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_READ_SELFVETO
@@ -692,12 +693,13 @@ double GCOMInstChars::prob_no_selfveto(const double& energy, const double& zenit
  * However, in order to calculate that correction, an integral over the
  * module must be performed, which properly takes into account the radiative
  * transfer inside the module at all R and z. We again use the assumption
- * of vertical photon incidence, which simplifies the calculation.
+ * of vertical photon incidence, which simplifies the calculation. The
+ * integral is done over the location of the first interaction.
  *
  * Note that the transmission calculated is conservative : in reality it will
  * be a bit higher because of a fraction of the photons which undergo a
  * second scatter have a final scatter angle after escaping the module within
- * the phigeo-range of the PSF. These events will,  however, mainly be located
+ * the phigeo-range of the PSF. These events will, however, mainly be located
  * at large phibar (large D1E deposit).
  *
  * The code implementation is based on the COMPASS RESPSIT2 function
@@ -718,14 +720,14 @@ double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) 
     double mu = 1.0 / ne213a_mfpath(energy);
 
     // Compute the energy after scattering and the corresponding attenuation
-    double epsnew = energy / (1.0 + alpha * (1.0 - cth));
-    double muscat = 1.0 / ne213a_mfpath(epsnew);
+    double e_scattered  = energy / (1.0 + alpha * (1.0 - cth));
+    double mu_scattered = 1.0 / ne213a_mfpath(e_scattered);
 
     // Compute the full vertical optical depth of the module
     double tau0 = mu * m_d1thick;
 
-    // Compute the total number of interactions
-    double totint = 1.0 - std::exp(-tau0);
+    // Compute the fraction of photons that are interacting
+    double total_interactions = 1.0 - std::exp(-tau0);
 
     // Perform integration per rho-value (symmetry!) over
     // (1) z (the geometrical depth in the module)
@@ -737,21 +739,19 @@ double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) 
 
     // Initialise integration loop. The binning in radius is based on
     // constant surface per cylinder
-    double rho    = 1.0;
-    double delrho = 2.0 * rho;
-    double rholow = rho - 0.5 * delrho;
-    double rhoupp = rho + 0.5 * delrho;
-    double surstp = 2.0 * delrho * rho;
+    double rho     = 1.0;
+    double delrho  = 2.0 * rho;
+    double rholow  = rho - 0.5 * delrho; // Should be 0
+    double rhoupp  = rho + 0.5 * delrho; // Should be 2
+    double surface = 2.0 * delrho * rho; // Should be 4
 
-    // Initialise weights
-    std::vector<double> w(100, 0.0);
-    w[0] = surstp;
-
-    int    klast = 0;
-    double kappa = deltau / double(nphi); // Integration normalisation value
+    // Compute the integration normalisation value
+    double kappa = deltau / double(nphi);
     
-    // Start integration loop
-    double conrho = 0.0;
+    // Integration loop over the module radius
+    double contribution_rho = 0.0;
+    double total_surface    = surface;
+    int    klast            = 0;   // Will be >0 if the loop should be exited
     for (int krho = 0; krho < 100; ++krho) {
 
         // If we have reached the end then exit the loop now
@@ -759,93 +759,90 @@ double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) 
             break;
         }
 
-        // Determine radius limits. Do not go beyond D1 module radius
+        // Determine radius limits. If D1 module radius is reached or
+        // exceeded, limit the upper rho value to the D1 module radius,
+        // re-compute the surface, and signal to exit the loop in the
+        // next round.
         if (krho > 0) {
-            rholow  = rhoupp;
-            rhoupp  = std::sqrt(surstp + rholow*rholow);
-            rho     = 0.5 * (rhoupp + rholow);
-            w[krho] = surstp;
+            rholow = rhoupp;
+            rhoupp = std::sqrt(surface + rholow*rholow);
+            rho    = 0.5 * (rhoupp + rholow);
             if (rhoupp > m_d1rad) {
                 rhoupp  = m_d1rad;
                 rho     = 0.5 * (rhoupp + rholow);
-                w[krho] = (rhoupp*rhoupp - rholow*rholow);
+                surface = (rhoupp*rhoupp - rholow*rholow);
                 klast   = krho;
             }
+            total_surface += surface;
         }
 
         // Initialise azimuthal results
         std::vector<double> r(nphi, 0.0);
 
-        // Compute stuff for all azimuth angles
+        // Compute remaining radius as function of azimuth angle if the
+        // first interaction was at radius rho.
         for (int lphi = 0; lphi < nphi; ++lphi) {
             double phi  = dltphi * (lphi + 0.5);
             double term = rho * std::sin(phi);
-            r[lphi] = -rho * std::cos(phi) +
-                             std::sqrt(m_d1rad*m_d1rad - term*term);
+            r[lphi]     = -rho * std::cos(phi) +
+                                 std::sqrt(m_d1rad*m_d1rad - term*term);
         }
 
         // Perform integration over depth
-        double conz = 0.0;
+        double contribution_z = 0.0;
         for (int kz = 0; kz < nz; ++kz) {
 
             // Calculate depth
             double z   = (kz + 0.5) * deltaz;
             double tau = z * mu;
 
+            // Compute the remaining length in the module after the first
+            // interaction. Test for foward/backward scattering although
+            // this should not be relevant for any reasonable phigeo values.
+            double length0 = 1000.0;
+            if (sth < 0.99) {                   // True for all reasonable phigeo's
+                if (cth < 0.0) {                // False for all reasonable phigeo's
+                    length0 = z/std::abs(cth);
+                }
+                else {
+                    length0 = (m_d1thick-z)/cth; // All reasonable phigeo's
+                }
+            }
+
             // Perform integration over azimuth
-            double conphi = 0.0;
+            double contribution_phi = 0.0;
             for (int kphi = 0; kphi < nphi; ++kphi) {
 
-                // Test background/forward scattering
-                double length = 1000.0;
-                if (sth < 0.99) {
-                    if (cth < 0.0) {
-                        length = z/std::abs(cth);
-                    }
-                    else {
-                        length = (m_d1thick-z)/cth;
-                    }
-                }
-
-                //
+                // Compute the actual remaining length for a given azimuth
+                // angle phi. Limit the length to the remaining radius.
+                double length = length0;
                 if (length * sth > r[kphi]) {
                     length = r[kphi] / sth;
                 }
 
-                // Update the  contribution to 1 pixel (rho,phi,z)
-                // from scatter phigeo
-                double tauran = length * muscat;
-
-                // conphi determines contribution over phi-rings (KN
-                // independent of phi) => Contribution to a (rho,z)
-                // pixel
-                conphi += std::exp(-tauran);
+                // Now compute the probability that the photon is not
+                // absorbed during the remaining path through the detector.
+                contribution_phi += std::exp(-length * mu_scattered);
 
             } // endfor: looped over azimuth
 
-            // Average contribution must later be divided by NPHI for
-            // phi-pixels and multiplied by DELTAU. Do this at end, to
-            // save computation
-            conz += conphi * std::exp(-tau);
+            // Average contribution must later be divided by nphi for
+            // phi-pixels and multiplied by deltau; this is done by
+            // multiplying with kappa. Do this at end, to save computation
+            contribution_z += contribution_phi * std::exp(-tau);
 
         } // endfor: looped over depth
 
-        // Update ...
-        conrho += conz * kappa * w[krho];
+        // Add the average contribution of radius rho
+        contribution_rho += contribution_z * kappa * surface;
 
     } // endfor: looped over radius
 
-    // Determine sum of weight factors for rho-average
-    double sumw = 0.0;
-    for (int krho = 0; krho < klast; ++krho) {
-        sumw += w[krho];
-    }
-
     // Compute average
-    double trsing = conrho / (sumw * totint);
+    double transmission = contribution_rho / (total_surface * total_interactions);
 
-    // Return
-    return trsing;
+    // Return transmission
+    return transmission;
 }
 
 
@@ -1522,19 +1519,16 @@ double GCOMInstChars::ne213a_mfpath(const double& energy) const
                              64.62, 65.80, 66.94, 68.04, 69.09,
                              69.86, 70.61, 71.33, 72.03, 72.70,
                              73.33, 73.93, 74.50, 75.03, 75.51};
-    const double alpat1 = 1.95695;
+
+    // Normalisation constant for low-energy extrapolation
+    const double norm = mfpath[1] * kn_cross_section(2.0 / gammalib::mec2);
 
     // Initialise mfpath
     double result = 0.0;
 
-    // Do a Klein-Nishina extrapolation for small energies
+    // Do a Klein-Nishina extrapolation for low energies
     if (energy < 2.0) {
-        double alpate = energy / gammalib::mec2;
-        double sigat1 = kn_cross_section(1.0,  alpat1) -
-                        kn_cross_section(-1.0, alpat1);
-        double sigate = kn_cross_section(1.0,  alpate) -
-                        kn_cross_section(-1.0, alpate);
-        result        = mfpath[0] * sigat1 / sigate;
+        result   = norm / kn_cross_section(energy / gammalib::mec2);
     }
 
     // ... otherwise do a linear interpolation
@@ -1555,18 +1549,29 @@ double GCOMInstChars::ne213a_mfpath(const double& energy) const
 /***********************************************************************//**
  * @brief Return integrated Klein-Nishina cross section
  *
- * @param[in] x cos(theta)
- * @param[in] alpha E/mc^2
+ * @param[in] k \f$E/ m_e c^2\f$
  * @return Integrated Klein-Nishina cross section
+ *
+ * Computes
+ *
+ * \f[
+ *    \sigma_{\rm KN}(k) = \frac{1+k}{k^2}
+ *                         \left[
+ *                               \frac{2(1+k)}{1+2k} - \frac{\ln(1+2k)}{k}
+ *                         \right] + \frac{\ln(1+2k)}{2k} -
+ *                                   \frac{1+3k}{(1+2k)^2}
+ * \f]
+ *
+ * where \f$k = E/ m_e c^2\f$.
  ***************************************************************************/
-double GCOMInstChars::kn_cross_section(const double& x, const double& alpha) const
+double GCOMInstChars::kn_cross_section(const double& k) const
 {
     // Compute integrated Klein-Nishina cross section
-    double y  = 1.0 + alpha * (1.0 - x);
-    double kn = 1.0 / (2.0 * alpha * y*y) -
-                std::log(y)/alpha +
-                (x*x - 1)/(alpha*y) +
-                2.0 * (x + ((1.0 + alpha)/alpha) * std::log(y)) / (alpha*alpha);
+    double k1      = k + 1.0;
+    double k2p1    = 1.0 + 2.0*k;
+    double logk2p1 = std::log(k2p1);
+    double kn      = k1/(k*k) * (2.0*k1/k2p1 - logk2p1/k) +
+                     logk2p1/(2.0*k) - (1.0+3.0*k)/(k2p1*k2p1);
 
     // Return
     return kn;
