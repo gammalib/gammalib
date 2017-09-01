@@ -1055,7 +1055,7 @@ void GCOMIaq::weight_iaq(const double& energy)
     double ad1trans = m_ict.trans_D1(energy);
 
     // Compute the transmission of V1 veto dome
-    double v1trans = m_ict.trans_V1(energy);
+    //double v1trans = m_ict.trans_V1(energy);
 
     // Compute the probability that a photon was not self vetoed assuming
     // a source on axis
@@ -1065,7 +1065,8 @@ void GCOMIaq::weight_iaq(const double& energy)
     double mlhit = m_ict.prob_no_multihit(energy);
 
     // Compute the overall (shape independent) transmission coefficients
-    double oalltr = ad1trans * v1trans * d1prob * cfract * mlhit * sveto;
+    //double oalltr = ad1trans * v1trans * d1prob * cfract * mlhit * sveto;
+    double oalltr = ad1trans * d1prob * cfract * mlhit * sveto;
 
     // Debug
     #if defined(G_DEBUG_WEIGHT_IAQ)
@@ -1095,7 +1096,7 @@ void GCOMIaq::weight_iaq(const double& energy)
         double ad2trans = m_ict.trans_D2(energy, phigeo);
 
         // Compute the transmission of V2+V3 veto domes
-        double v23trans = m_ict.trans_V23(energy, phigeo);
+        //double v23trans = m_ict.trans_V23(energy, phigeo);
 
         // Compute the D2 interaction coefficient
         double d2prob = m_ict.prob_D2inter(energy, phigeo);
@@ -1112,7 +1113,8 @@ void GCOMIaq::weight_iaq(const double& energy)
         #endif
 
         // Compute the overall phigeo dependent correction
-        double oallpg = ad2trans * v23trans * d2prob * mscatt * psdtrn;
+        //double oallpg = ad2trans * v23trans * d2prob * mscatt * psdtrn;
+        double oallpg = ad2trans * d2prob * mscatt * psdtrn;
 
         // Compute the overall correction
         double weight = oalltr * oallpg;
