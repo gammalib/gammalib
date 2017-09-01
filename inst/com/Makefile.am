@@ -67,7 +67,11 @@ caldb_irfs = caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
              caldb/data/cgro/comptel/bcf/u47512_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/u47569_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/u47741_iaq.fits.gz \
-             caldb/data/cgro/comptel/bcf/u48091_iaq.fits.gz
+             caldb/data/cgro/comptel/bcf/u48091_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/plaw2_0.75-1MeV_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/plaw2_1-3MeV_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/plaw2_10-30MeV_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/plaw2_3-10MeV_iaq.fits.gz
 
 # Build libtool library
 noinst_LTLIBRARIES = libcom.la

@@ -700,8 +700,8 @@ double GCOMInstChars::prob_no_selfveto(const double& energy, const double& zenit
  * the phigeo-range of the PSF. These events will,  however, mainly be located
  * at large phibar (large D1E deposit).
  *
- * @todo Implement method from the COMPASS RESPSIT2 function MULTIS.F
- * (27-NOV-92).
+ * The code implementation is based on the COMPASS RESPSIT2 function
+ * MULTIS.F (release ?, 27-NOV-92).
  ***************************************************************************/
 double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) const
 {
@@ -745,7 +745,6 @@ double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) 
 
     // Initialise weights
     std::vector<double> w(100, 0.0);
-    std::vector<double> r(100*nphi, 0.0);
     w[0] = surstp;
 
     int    klast = 0;
@@ -774,12 +773,15 @@ double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) 
             }
         }
 
+        // Initialise azimuthal results
+        std::vector<double> r(nphi, 0.0);
+
         // Compute stuff for all azimuth angles
         for (int lphi = 0; lphi < nphi; ++lphi) {
             double phi  = dltphi * (lphi + 0.5);
             double term = rho * std::sin(phi);
-            r[krho+lphi*100] = -rho * std::cos(phi) +
-                                std::sqrt(m_d1rad*m_d1rad - term*term);
+            r[lphi] = -rho * std::cos(phi) +
+                             std::sqrt(m_d1rad*m_d1rad - term*term);
         }
 
         // Perform integration over depth
@@ -806,8 +808,8 @@ double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) 
                 }
 
                 //
-                if (length * sth > r[krho+kphi*100]) {
-                    length = r[krho+kphi*100] / sth;
+                if (length * sth > r[kphi]) {
+                    length = r[kphi] / sth;
                 }
 
                 // Update the  contribution to 1 pixel (rho,phi,z)
