@@ -85,6 +85,8 @@ private:
     void   read_pos(const GFitsTable& table, std::vector<double>& x,
                     std::vector<double>& y);
     void   read_selfveto(const GFitsTable& table);
+    double ne213a_mfpath(const double& energy) const;
+    double kn_cross_section(const double& x, const double& alpha) const;
     double min_coeff(const std::vector<double>& coeffs) const;
     double max_coeff(const std::vector<double>& coeffs) const;
 
@@ -111,6 +113,8 @@ private:
     std::vector<double> m_d1pos_y;           //!< D1 y-position (cm)
     std::vector<double> m_d2pos_x;           //!< D2 x-position (cm)
     std::vector<double> m_d2pos_y;           //!< D2 y-position (cm)
+    GNodeArray          m_mfpath_energies;   //!< NE213A mean free path energies (MeV)
+    std::vector<double> m_mfpath_coeffs;     //!< NE213A mean free path values
     double              m_d1dens;            //!< D1 density (g/cm^-3)
     double              m_d1rad;             //!< D1 radius (cm)
     double              m_d1thick;           //!< D1 thickness (cm)
