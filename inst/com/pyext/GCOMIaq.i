@@ -41,8 +41,7 @@ public:
     GCOMIaq(void);
     GCOMIaq(const GCOMIaq& iaq);
     GCOMIaq(const double&   phigeo_max, const double& phigeo_bin_size,
-            const double&   phibar_max, const double& phibar_bin_size,
-            const GEbounds& ebounds);
+            const double&   phibar_max, const double& phibar_bin_size);
     ~GCOMIaq(void);
 
     // Methods
@@ -50,8 +49,8 @@ public:
     GCOMIaq*    clone(void) const;
     std::string classname(void) const;
     void        save(const GFilename& filename, const bool& clobber = false) const;
-    void        set(const GEnergy& energy);
-    void        set(const GModelSpectral& spectrum);
+    void        set(const GEnergy& energy, const GEbounds& ebounds);
+    void        set(const GModelSpectral& spectrum, const GEbounds& ebounds);
 };
 
 

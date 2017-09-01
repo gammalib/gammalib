@@ -47,6 +47,7 @@
 /* __ Coding definitions _________________________________________________ */
 //#define G_RESPONSE_KERNEL_LIMITS
 #define G_COMPUTE_IAQ_BIN_NO_WARNINGS
+#define G_LOCATION_SMEARING_NO_WARNINGS
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_COMPTON_KINEMATICS
@@ -56,6 +57,8 @@
 //#define G_DEBUG_RESPONSE_KERNEL
 //#define G_DEBUG_WEIGHT_IAQ
 //#define G_DEBUG_SET_CONTINUUM
+//#define G_DEBUG_LOCATION_SMEARING
+//#define G_DEBUG_LOCATION_SPREAD
 
 /* __ Constants __________________________________________________________ */
 
@@ -106,13 +109,11 @@ GCOMIaq::GCOMIaq(const GCOMIaq& iaq)
  * @param[in] phigeo_bin_size Bin size in geometrical scatter angle (deg).
  * @param[in] phibar_max Maximum Compton scatter angle (deg).
  * @param[in] phibar_bin_size Bin size in Compton scatter angle (deg).
- * @param[in] ebounds Boundaries of observed energy.
  *
  * @todo Test input argument validity.
  **************************************************************************/
 GCOMIaq::GCOMIaq(const double&   phigeo_max, const double& phigeo_bin_size,
-                 const double&   phibar_max, const double& phibar_bin_size,
-                 const GEbounds& ebounds)
+                 const double&   phibar_max, const double& phibar_bin_size)
 {
     // Initialise members
     init_members();
@@ -127,9 +128,6 @@ GCOMIaq::GCOMIaq(const double&   phigeo_max, const double& phigeo_bin_size,
     m_phibar_bin_size = phibar_bin_size;
     m_phigeo_max      = phigeo_bin_size * double(nphigeo);
     m_phibar_max      = phibar_bin_size * double(nphibar);
-
-    // Store the energy boundaries
-    m_ebounds = ebounds;
 
     // Allocate FITS image
     m_iaq = GFitsImageFloat(nphigeo, nphibar);
@@ -244,14 +242,18 @@ GCOMIaq* GCOMIaq::clone(void) const
  * @brief Set mono-energetic IAQ
  *
  * @param[in] energy Input photon energy.
+ * @param[in] ebounds Boundaries of observed energy.
  *
  * The code implemented is based on the COMPASS RESPSIT2 function SPCIAQ.F
  * (release 1.0, 18-DEC-92).
  *
  * @todo Implement geometrical smearing.
  ***************************************************************************/
-void GCOMIaq::set(const GEnergy& energy)
+void GCOMIaq::set(const GEnergy& energy, const GEbounds& ebounds)
 {
+    // Store the energy boundaries
+    m_ebounds = ebounds;
+
     // Initialise COMPTEL response information and instrument characteristics
     init_response();
 
@@ -267,6 +269,9 @@ void GCOMIaq::set(const GEnergy& energy)
     // Weight IAQ
     weight_iaq(energy.MeV());
 
+    // Apply location smearing
+    location_smearing(m_zenith);
+
     // Set source photon energy
     m_iaq.card("ENERGY", energy.MeV(), "[MeV] Source photon energy");
 
@@ -279,6 +284,7 @@ void GCOMIaq::set(const GEnergy& energy)
  * @brief Set continuum IAQ
  *
  * @param[in] spectrum Input spectrum.
+ * @param[in] ebounds Boundaries of observed energy.
  *
  * Computes the continuum IAQ based on an input @p spectrum. The method
  * computes the line IAQ for a m_num_energies logarithmically spaced energies
@@ -290,8 +296,11 @@ void GCOMIaq::set(const GEnergy& energy)
  *
  * @todo Implement geometrical smearing.
  ***************************************************************************/
-void GCOMIaq::set(const GModelSpectral& spectrum)
+void GCOMIaq::set(const GModelSpectral& spectrum, const GEbounds& ebounds)
 {
+    // Store the energy boundaries
+    m_ebounds = ebounds;
+
     // Initialise COMPTEL response information and instrument characteristics
     init_response();
 
@@ -310,8 +319,8 @@ void GCOMIaq::set(const GModelSpectral& spectrum)
     #endif
 
     // Setup array of energy boundaries
-    GEbounds ebounds(m_num_energies, GEnergy(energy_min, "MeV"),
-                                     GEnergy(energy_max, "MeV"));
+    GEbounds ebds(m_num_energies, GEnergy(energy_min, "MeV"),
+                                  GEnergy(energy_max, "MeV"));
 
     // Compute flux over measured total energy interval
     double flux_total = spectrum.flux(m_ebounds.emin(), m_ebounds.emax());
@@ -323,13 +332,13 @@ void GCOMIaq::set(const GModelSpectral& spectrum)
     }
 
     // Loop over energy bins
-    for (int i = 0; i < ebounds.size(); ++i) {
+    for (int i = 0; i < ebds.size(); ++i) {
 
         // Get log mean energy for bin
-        GEnergy energy = ebounds.elogmean(i);
+        GEnergy energy = ebds.elogmean(i);
 
         // Get weight for this bin
-        double weight = spectrum.flux(ebounds.emin(i), ebounds.emax(i)) /
+        double weight = spectrum.flux(ebds.emin(i), ebds.emax(i)) /
                         flux_total;
 
         // Initialise sum
@@ -368,11 +377,17 @@ void GCOMIaq::set(const GModelSpectral& spectrum)
     // Store IAQ matrix
     m_iaq = iaq;
 
+    // Apply location smearing
+    location_smearing(m_zenith);
+
     // Set parameters
     m_iaq.card("SPECTRUM", spectrum.classname(), "Source spectrum");
-    const GModelSpectralPlaw*           plaw  = dynamic_cast<const GModelSpectralPlaw*>(&spectrum);
-    const GModelSpectralPlawPhotonFlux* pplaw = dynamic_cast<const GModelSpectralPlawPhotonFlux*>(&spectrum);
-    const GModelSpectralPlawEnergyFlux* eplaw = dynamic_cast<const GModelSpectralPlawEnergyFlux*>(&spectrum);
+    const GModelSpectralPlaw*           plaw  =
+          dynamic_cast<const GModelSpectralPlaw*>(&spectrum);
+    const GModelSpectralPlawPhotonFlux* pplaw =
+          dynamic_cast<const GModelSpectralPlawPhotonFlux*>(&spectrum);
+    const GModelSpectralPlawEnergyFlux* eplaw =
+          dynamic_cast<const GModelSpectralPlawEnergyFlux*>(&spectrum);
     if (plaw != NULL) {
         m_iaq.card("PLAWINX", plaw->index(), "Power law spectral index");
     }
@@ -419,7 +434,9 @@ void GCOMIaq::save(const GFilename& filename, const bool& clobber) const
     iaq.card("E1MAX", m_e1max, "[MeV] Maximum D1 energy deposit");
     iaq.card("E2MIN", m_e1min, "[MeV] Minimum D2 energy deposit");
     iaq.card("E2MAX", m_e1max, "[MeV] Maximum D2 energy deposit");
+    iaq.card("ZENITH", m_zenith, "[deg] Zenith angle for location smearing");
     iaq.card("PSDCORR", m_psd_correct, "PSD correction for 0-110");
+    iaq.card("PHIRES", m_phibar_resolution, "[deg] Phibar resolution in computation");
 
     // Initialise empty FITS file
     GFits fits;
@@ -481,6 +498,27 @@ std::string GCOMIaq::print(const GChatter& chatter) const
         result.append(m_ebounds.emin().print()+" - ");
         result.append(m_ebounds.emax().print());
 
+        // Append parameters
+        result.append("\n"+gammalib::parformat("D1 energy range"));
+        result.append(gammalib::str(m_e1min)+" MeV - ");
+        result.append(gammalib::str(m_e1max)+" MeV");
+        result.append("\n"+gammalib::parformat("D2 energy range"));
+        result.append(gammalib::str(m_e2min)+" MeV - ");
+        result.append(gammalib::str(m_e2max)+" MeV");
+        result.append("\n"+gammalib::parformat("Zenith angle"));
+        result.append(gammalib::str(m_zenith)+" deg");
+        result.append("\n"+gammalib::parformat("Phibar resolution"));
+        result.append(gammalib::str(m_phibar_resolution)+" deg");
+        result.append("\n"+gammalib::parformat("PSD correction"));
+        if (m_psd_correct) {
+            result.append("yes");
+        }
+        else {
+            result.append("no");
+        }
+        result.append("\n"+gammalib::parformat("Number of input energies"));
+        result.append(gammalib::str(m_num_energies));
+
         // Append IAQ integral
         double sum = 0.0;
         for (int i = 0; i < m_iaq.npix(); ++i) {
@@ -524,8 +562,9 @@ void GCOMIaq::init_members(void)
     m_e1max             = 20.0;   //!< Default: 20 MeV
     m_e2min             =  0.650; //!< Default: 650 keV
     m_e2max             = 30.0;   //!< Default: 30 MeV
-    m_psd_correct       = true;   //!< Default: use PSD correction
     m_num_energies      = 50;     //!< Default: 50 input energies
+    m_psd_correct       = true;   //!< Default: use PSD correction
+    m_zenith            = 30.0;   //!< Default: 30 deg
 
     // Return
     return;
@@ -556,8 +595,9 @@ void GCOMIaq::copy_members(const GCOMIaq& iaq)
     m_e1max             = iaq.m_e1max;
     m_e2min             = iaq.m_e2min;
     m_e2max             = iaq.m_e2max;
-    m_psd_correct       = iaq.m_psd_correct;
     m_num_energies      = iaq.m_num_energies;
+    m_psd_correct       = iaq.m_psd_correct;
+    m_zenith            = iaq.m_zenith;
 
     // Return
     return;
@@ -1097,6 +1137,183 @@ void GCOMIaq::weight_iaq(const double& energy)
 
 
 /***********************************************************************//**
+ * @brief Perform location smearing
+ *
+ * @param[in] zenith Zenith angle of source (deg).
+ *
+ * The code implementation is based on the COMPASS RESPSIT2 function LOCSPR.F
+ * (release 1.0, 05-JAN-93).
+ ***************************************************************************/
+void GCOMIaq::location_smearing(const double& zenith)
+{
+    // Compute location spread for all phigeo angles
+    std::vector<double> sigmas = location_spread(zenith);
+
+    // Get IAQ dimensions
+    int n_phigeo = m_iaq.naxes(0);
+    int n_phibar = m_iaq.naxes(1);
+
+    // Setup phigeo node array for interpolated
+    GNodeArray phigeos;
+    for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+        phigeos.append((double(i_phigeo) + 0.5) * m_phigeo_bin_size);
+    }
+
+    // Loop over phibar
+    for (int i_phibar = 0; i_phibar < n_phibar; ++i_phibar) {
+
+        // Copy phigeo vector
+        std::vector<double> values;
+        double              sum_before = 0.0;
+        for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+            values.push_back(m_iaq(i_phigeo, i_phibar));
+            sum_before += m_iaq(i_phigeo, i_phibar);
+        }
+
+        // Compute convolution integral for each phigeo pixel
+        std::vector<double> convolved_values;
+        for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+
+            // Setup integration kernel
+            smearing_kernel integrand(phigeos[i_phigeo],
+                                      sigmas[i_phigeo],
+                                      phigeos,
+                                      values);
+
+            // Setup integral
+            GIntegral integral(&integrand);
+
+            // Set precision
+            integral.eps(1.0e-4);
+
+            // No warnings
+            #if defined(G_LOCATION_SMEARING_NO_WARNINGS)
+            integral.silent(true);
+            #endif
+
+            // Get integration boundaries
+            double phigeo_min = phigeos[i_phigeo] - 3.0 * sigmas[i_phigeo];
+            double phigeo_max = phigeos[i_phigeo] + 3.0 * sigmas[i_phigeo];
+
+            // Perform integration
+            double value = integral.romberg(phigeo_min, phigeo_max);
+
+            // Store result
+            convolved_values.push_back(value);
+
+        } // endfor: convolution integral
+
+        // Restore phigeo vector
+        double sum_after = 0.0;
+        for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+            m_iaq(i_phigeo, i_phibar) = convolved_values[i_phigeo];
+            sum_after += convolved_values[i_phigeo];
+        }
+
+        // Debug
+        #if defined(G_DEBUG_LOCATION_SMEARING)
+        std::cout << "phibar=" << (double(i_phibar) + 0.5) * m_phibar_bin_size;
+        std::cout << " before=" << sum_before;
+        std::cout << " after=" << sum_after;
+        if (sum_before > 0.0) {
+            std::cout << " (" << sum_after/sum_before << ")";
+        }
+        std::cout << std::endl;
+        #endif
+
+    } // endfor: looped over phibar
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute location spread vector
+ *
+ * @param[in] zenith Zenith angle of source (deg).
+ * @return Vector of location spreads in Gaussian sigma
+ *
+ * The code implementation is based on the COMPASS RESPSIT2 function LOCSPR.F
+ * (release 1.0, 05-JAN-93).
+ ***************************************************************************/
+std::vector<double> GCOMIaq::location_spread(const double& zenith) const
+{
+    // Set distance between the detector midplanes of D1 and D2 (cm)
+    const double zdist = 158.0;
+
+    // Set horizontal (x,y) location spread in D1 resp. D2 (cm)
+    const double sighd1 = 2.30;
+    const double sighd2 = 1.96;
+
+    // Set vertical (z) location spread in D1 resp. D2 based on homogeneous
+    // event distributions in z-direction (cm)
+    const double sigvd1 = 2.45;
+    const double sigvd2 = 2.17;
+
+    // Derive constants
+    const double zdist2 = zdist * zdist;
+    const double sight2 = sighd1*sighd1 + sighd2*sighd2;
+    const double sigvt2 = sigvd1*sigvd1 + sigvd2*sigvd2;
+
+    // Initialise result
+    std::vector<double> sigmas;
+
+    // Compute terms
+    double a1     = std::sin(zenith * gammalib::deg2rad);
+    double a1sq   = a1 * a1;
+    double a2     = std::cos(zenith * gammalib::deg2rad);
+    double a2sq   = a2 * a2;
+
+    // Get IAQ dimensions
+    int n_phigeo = m_iaq.naxes(0);
+    //int n_phibar = m_iaq.naxes(1);
+
+    // Loop over phigeo
+    for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+
+        // Get geometrical scatter angle (deg)
+        double phigeo = (double(i_phigeo) + 0.5) * m_phigeo_bin_size;
+
+        // Compute spread due to (x,y) uncertainty
+        double cphig  = std::cos(phigeo * gammalib::deg2rad);
+        double sphig  = std::sin(phigeo * gammalib::deg2rad);
+        double cphig2 = cphig*cphig;
+        double sphig2 = sphig*sphig;
+        double sigxy2 = (a2sq * cphig2 *
+                         (4.0 * a1sq * sphig2 + cphig2 - a1sq) +
+                          0.5 * a1sq *
+                         (a2sq * cphig2 + a1sq * sphig2 * (1.0 - 0.75 * cphig2))) *
+                        sight2 / zdist2;
+
+        // Compute spread due to (z) uncertainty
+        double sigz2 = (a2sq * a2sq * sphig2 * cphig2 +
+                        a2sq * a2sq * (0.5 - 3.0 * cphig2 * sphig2) +
+                        3.0 * a1sq * a1sq * sphig2 * cphig2 / 8.0) *
+                       sigvt2 / zdist2;
+    
+        // Calculate sigma in degrees
+        double siggeo = std::sqrt(sigxy2 + sigz2) * gammalib::rad2deg;
+
+        // Append sigma
+        sigmas.push_back(siggeo);
+
+        // Debug
+        #if defined(G_DEBUG_LOCATION_SPREAD)
+        std::cout << "phigeo=" << phigeo << " sigma=" << siggeo << std::endl;
+        #endif
+
+        // We should now create a warning if siggeo+zenith is larger than
+        // 90.0 deg, at least the original code does that
+
+    } // endfor: looped over phigeo
+
+    // Return sigmas
+    return sigmas;
+}
+
+
+/***********************************************************************//**
  * @brief Computes product of D1 and D2 responses at energy E1 and phibar
  *
  * @param[in] energy1 D1 energy deposit (MeV).
@@ -1216,6 +1433,31 @@ double GCOMIaq::response_kernel::eval(const double& energy1)
         value = jc * d1 * d2;
 
     } while(false);
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes product of D1 and D2 responses at energy E1 and phibar
+ *
+ * @param[in] phigeo Geometrical scatter angle.
+ * @return Bla ...
+ *
+ ***************************************************************************/
+double GCOMIaq::smearing_kernel::eval(const double& phigeo)
+{
+    // Get interpolated IAQ value for geometrical scatter angle. Make sure
+    // that the value is positive
+    double value = m_phigeos.interpolate(phigeo, m_values);
+    if (value < 0.0) {
+        value = 0.0;
+    }
+
+    // Multiply with Gaussian
+    double arg  = (m_phigeo - phigeo) * m_wgt;
+    value      *= m_norm * std::exp(-0.5 * arg * arg);
 
     // Return value
     return value;

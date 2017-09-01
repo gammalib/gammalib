@@ -183,6 +183,17 @@ double GCOMD2Response::operator()(const double& etrue, const double& ereco) cons
             response = 0.0;
         }
 
+        // Apply threshold. We use a width of 0.1 MeV for the high-energy
+        // threshold width to assure a smooth transition to zero.
+        if (ereco < m_emin) {
+            double arg  = (m_emin-ereco) / m_ewidth;
+            response   *= std::exp(-0.5 * arg * arg);
+        }
+        else if (ereco > m_emax) {
+            double arg  = (m_emax-ereco) / 0.1;
+            response   *= std::exp(-0.5 * arg * arg);
+        }
+
     } // endif: response was loaded
 
     // Return response

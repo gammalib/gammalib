@@ -56,8 +56,7 @@ public:
     GCOMIaq(void);
     GCOMIaq(const GCOMIaq& iaq);
     GCOMIaq(const double&   phigeo_max, const double& phigeo_bin_size,
-            const double&   phibar_max, const double& phibar_bin_size,
-            const GEbounds& ebounds);
+            const double&   phibar_max, const double& phibar_bin_size);
     ~GCOMIaq(void);
 
     // Operators
@@ -67,8 +66,8 @@ public:
     void        clear(void);
     GCOMIaq*    clone(void) const;
     std::string classname(void) const;
-    void        set(const GEnergy& energy);
-    void        set(const GModelSpectral& spectrum);
+    void        set(const GEnergy& energy, const GEbounds& ebounds);
+    void        set(const GModelSpectral& spectrum, const GEbounds& ebounds);
     void        save(const GFilename& filename, const bool& clobber = false) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
@@ -81,13 +80,18 @@ private:
     void remove_cards(void);
 
     // RESPSI methods
-    void   compton_kinematics(const double& energy);
-    double compute_iaq_bin(const double& etrue1, const double& etrue2,
-                           const double& phibar);
-    void   klein_nishina(const double& energy);
-    double klein_nishina_bin(const double& energy, const double& phigeo);
-    double klein_nishina_integral(const double& v, const double& a);
-    void   weight_iaq(const double& energy);
+    void                compton_kinematics(const double& energy);
+    double              compute_iaq_bin(const double& etrue1,
+                                        const double& etrue2,
+                                        const double& phibar);
+    void                klein_nishina(const double& energy);
+    double              klein_nishina_bin(const double& energy,
+                                          const double& phigeo);
+    double              klein_nishina_integral(const double& v,
+                                               const double& a);
+    void                weight_iaq(const double& energy);
+    void                location_smearing(const double& zenith);
+    std::vector<double> location_spread(const double& zenith) const;
 
     // Reponse integration kernel
     class response_kernel : public GFunction {
@@ -131,6 +135,27 @@ private:
         double                m_e2max;       //!< Maximum D2 energy (MeV)
     };
 
+    // Smearing integration kernel
+    class smearing_kernel : public GFunction {
+    public:
+        smearing_kernel(const double&              phigeo,
+                        const double&              sigma,
+                        const GNodeArray&          phigeos,
+                        const std::vector<double>& values) :
+                        m_phigeos(phigeos),
+                        m_values(values),
+                        m_phigeo(phigeo),
+                        m_wgt(1.0/sigma),
+                        m_norm(1.0/(sigma*gammalib::sqrt_twopi)) {}
+        double eval(const double& phigeo);
+    protected:
+        const GNodeArray&          m_phigeos; //!< Geometrical scatter angles
+        const std::vector<double>& m_values;  //!< IAQ values
+        double                     m_phigeo;  //!< Current phigeo value
+        double                     m_wgt;     //!< Inverse of Gaussian std (1/deg)
+        double                     m_norm;    //!< Gaussian normalisation
+    };
+
     // Private data members
     GFitsImageFloat m_iaq;               //!< Response
     GEbounds        m_ebounds;           //!< Energy boundaries
@@ -148,6 +173,7 @@ private:
     double          m_e2max;             //!< Maximum D2 energy (MeV)
     int             m_num_energies;      //!< Number of energies for continuum IAQ
     bool            m_psd_correct;       //!< PSD correction usage flag
+    double          m_zenith;            //!< Zenith angle for location smearing (deg)
 };
 
 
