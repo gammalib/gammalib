@@ -68,6 +68,8 @@ caldb_irfs = caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
              caldb/data/cgro/comptel/bcf/u47569_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/u47741_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/u48091_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u09517_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/m16845_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/plaw2_0.75-1MeV_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/plaw2_1-3MeV_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/plaw2_10-30MeV_iaq.fits.gz \

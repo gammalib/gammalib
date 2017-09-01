@@ -305,15 +305,14 @@ void GCOMInstChars::load(const std::string& ictname)
  * Computes the D1 interaction probability as function of energy using
  *
  * \f[
- *    P(E) = 1 - \exp \left(-\mu_m(E) \, \rho \, l \right)
+ *    P(E) = 1 - \exp \left(-\mu_m(E) \, l \right)
  * \f]
  *
  * where
- * \f$-\mu_m(E)\f$ is the energy-dependent D1 mass attenuation coefficient
- * in units of \f$cm^2/g\f$ that is interpolated using a log-log
- * interpolation of the ICT table values,
- * \f$\rho\f$ is the density of the D1 module in units of \f$g/cm^3\f$, and
- * \f$l\f$ is the thickness of the D1 module in \f$cm\f$.
+ * \f$-\mu(E)\f$ is the energy-dependent D1 attenuation coefficient in units
+ * of \f$1/cm\f$ that is interpolated using a log-log interpolation of the
+ * ICT table values, and \f$l\f$ is the thickness of the D1 module in
+ * \f$cm\f$.
  ***************************************************************************/
 double GCOMInstChars::prob_D1inter(const double& energy) const
 {
@@ -328,7 +327,7 @@ double GCOMInstChars::prob_D1inter(const double& energy) const
 
         // Get interaction coefficient
         double logc  = m_d1inter_energies.interpolate(logE, m_d1inter_coeffs);
-        double coeff = std::exp(logc) * m_d1dens * m_d1thick;
+        double coeff = std::exp(logc) * m_d1thick;
 
         // Compute interaction probability
         prob = 1.0 - std::exp(-coeff);
@@ -474,17 +473,15 @@ double GCOMInstChars::trans_V1(const double& energy) const
  * Computes the D2 interaction probability as function of energy using
  *
  * \f[
- *    P(E) = 1 - \exp \left(\frac{-\mu_m(E) \, \rho \, l}
+ *    P(E) = 1 - \exp \left(\frac{-\mu_m(E) \, l}
  *                               {\cos \varphi_{\rm geo}} \right)
  * \f]
  *
  * where
- * \f$-\mu_m(E)\f$ is the energy-dependent D2 mass attenuation coefficient
- * in units of \f$cm^2/g\f$ that is interpolated using a log-log
- * interpolation of the ICT table values,
- * \f$\rho\f$ is the density of the D2 module in units of \f$g/cm^3\f$,
- * \f$l\f$ is the thickness of the D2 module in \f$cm\f$, and
- * \f$\varphi_{\rm geo}\f$ is the geometrical scatter angle.
+ * \f$-\mu(E)\f$ is the energy-dependent D2 attenuation coefficient in units
+ * of \f$1/cm\f$ that is interpolated using a log-log interpolation of the
+ * ICT table values, \f$l\f$ is the thickness of the D2 module in \f$cm\f$,
+ * and \f$\varphi_{\rm geo}\f$ is the geometrical scatter angle.
  ***************************************************************************/
 double GCOMInstChars::prob_D2inter(const double& energy, const double& phigeo) const
 {
@@ -500,7 +497,7 @@ double GCOMInstChars::prob_D2inter(const double& energy, const double& phigeo) c
         // Get interaction coefficient
         double logc   = m_d2inter_energies.interpolate(logE2, m_d2inter_coeffs);
         double length = m_d2thick / std::cos(phigeo * gammalib::deg2rad);
-        double coeff  = std::exp(logc) * m_d2dens * length;
+        double coeff  = std::exp(logc) * length;
 
         // Compute interaction probability
         prob = 1.0 - std::exp(-coeff);

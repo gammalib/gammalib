@@ -46,6 +46,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 //#define G_RESPONSE_KERNEL_LIMITS
+//#define G_APPLY_PSD_CORRECTION_IN_RESPONSE_KERNEL
 #define G_COMPUTE_IAQ_BIN_NO_WARNINGS
 #define G_LOCATION_SMEARING_NO_WARNINGS
 
@@ -564,7 +565,7 @@ void GCOMIaq::init_members(void)
     m_e2max             = 30.0;   //!< Default: 30 MeV
     m_num_energies      = 50;     //!< Default: 50 input energies
     m_psd_correct       = true;   //!< Default: use PSD correction
-    m_zenith            = 30.0;   //!< Default: 30 deg
+    m_zenith            = 25.0;   //!< Default: 25 deg
 
     // Return
     return;
@@ -963,11 +964,11 @@ double GCOMIaq::klein_nishina_bin(const double& energy, const double& phigeo)
     double prob_bin = (r_high - r_low);
 
     // Calculate the probability of [0,pi] range
-    double v_zero   = 0.0;
-    double v_pi     = 1.0 - 1.0 / (1.0 + 2.0 * alpha);
-    double r_zero   = klein_nishina_integral(v_zero, alpha);
-    double r_pi     = klein_nishina_integral(v_pi, alpha);
-    double prob_tot = (r_pi - r_zero);
+    const double v_zero   = 0.0;
+    const double v_pi     = 1.0 - 1.0 / (1.0 + 2.0 * alpha);
+    const double r_zero   = klein_nishina_integral(v_zero, alpha);
+    const double r_pi     = klein_nishina_integral(v_pi, alpha);
+    const double prob_tot = (r_pi - r_zero);
 
     // Calculate the probability of phigeo bin
     double prob_phigeo = prob_bin / prob_tot;
@@ -1104,7 +1105,11 @@ void GCOMIaq::weight_iaq(const double& energy)
 
         // Optionally compute PSD correction for the default corrected PSD
         // channel selection 0-110
+        #if defined(G_APPLY_PSD_CORRECTION_IN_RESPONSE_KERNEL)
+        double psdtrn = 1.0;
+        #else
         double psdtrn = (m_psd_correct) ? m_ict.psd_correction(energy, phigeo) : 1.0;
+        #endif
 
         // Compute the overall phigeo dependent correction
         double oallpg = ad2trans * v23trans * d2prob * mscatt * psdtrn;
@@ -1419,6 +1424,13 @@ double GCOMIaq::response_kernel::eval(const double& energy1)
         if (d1 < 1.0e-20) {
             break;
         }
+        #endif
+
+        // Optionally apply PSD correction
+        #if defined(G_APPLY_PSD_CORRECTION_IN_RESPONSE_KERNEL)
+        const double a1 = 1727.9;
+        const double a2 = 2.530;
+        d1             *= 1.0 - (1.0 / (a1 * std::pow(e1, a2) + 1.0));
         #endif
 
         // Get D2 response. Break if it is too small.
