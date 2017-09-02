@@ -5,6 +5,6 @@
     <parameter name="DRB" file="m34997_drg.fits"/>
     <parameter name="DRG" file="m34997_drg.fits"/>
     <parameter name="DRX" file="m32171_drx.fits"/>
-    <parameter name="IAQ" value="ENERG(1.0-3.0)MeV"/>
+    <parameter name="IAQ" value="UNH(1.0-3.0)MeV"/>
   </observation>
 </observation_list>
