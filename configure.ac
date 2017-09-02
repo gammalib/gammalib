@@ -1418,20 +1418,21 @@ DX_INIT_DOXYGEN([GammaLib], [doc/Doxyfile], [doc/doxygen])
 #############################################################################
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 src/app/Makefile
                  src/base/Makefile
-                 src/support/Makefile
-                 src/linalg/Makefile
-                 src/numerics/Makefile
                  src/fits/Makefile
-                 src/xml/Makefile
-                 src/vo/Makefile
-                 src/xspec/Makefile
-                 src/sky/Makefile
+                 src/linalg/Makefile
+                 src/model/Makefile
+                 src/numerics/Makefile
                  src/opt/Makefile
                  src/obs/Makefile
-                 src/model/Makefile
-                 src/app/Makefile
+                 src/sky/Makefile
+                 src/support/Makefile
+                 src/template/Makefile
                  src/test/Makefile
+                 src/vo/Makefile
+                 src/xml/Makefile
+                 src/xspec/Makefile
                  src/gammalib-setup
                  include/Makefile
                  test/Makefile

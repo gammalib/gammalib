@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for source module                                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -37,6 +37,7 @@ SUBDIRS = base \
           obs \
           model \
           app \
+          template \
           test
 
 # Define sources for this directory
