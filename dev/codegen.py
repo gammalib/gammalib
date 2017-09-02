@@ -141,7 +141,7 @@ def add_file(infile, outfile, tokens):
 
         # If we have a header line than format the line
         if is_header:
-            text = gammalib.strip_whitespace(line[2:69])
+            text = line.strip(' *\n')
             if n_header == 2:
                 line = ' *'+gammalib.centre(text,73)+'*\n'
             elif n_header == 4:
@@ -202,7 +202,8 @@ def set_tokens(name, instrument, author):
     year = str(date.today().year)
 
     # Set tokens
-    tokens = [{'pattern': 'XXX', 'string': name.upper()},
+    tokens = [{'pattern': 'xxx', 'string': name.lower()},
+              {'pattern': 'XXX', 'string': name.upper()},
               {'pattern': '[INSTRUMENT]', 'string': instrument},
               {'pattern': '[AUTHOR]', 'string': author},
               {'pattern': '[YEAR]', 'string': year}]
@@ -247,9 +248,9 @@ def module_menu():
 
         # Ask to confirm module summary
         print('All right. Have now:')
-        print(' Module name ....: "%s"' % name)
-        print(' Instrument name : "%s"' % instrument)
-        print(' Your name ......: "%s"' % author)
+        print('Module name .....: "%s"' % name)
+        print('Instrument name .: "%s"' % instrument)
+        print('Your name .......: "%s"' % author)
         if confirm('Is this correct?'):
             break
 
@@ -257,12 +258,12 @@ def module_menu():
     tokens = set_tokens(name, instrument, author)
 
     # If the module exists already then determine all base classes that are
-    # not yet implemented
+    # not yet implemented and propose to add them one by one ...
     if os.path.isdir('inst/%s' % name):
 
         # Determine which of the baseclasses are not yet implemented
         baseclasses = ['GObservation', 'GResponse',
-                       'GEventAtom', 'GEventBin', 'GEventCube', 'GEventList',
+                       'GEventList', 'GEventAtom', 'GEventCube', 'GEventBin',
                        'GInstDir', 'GRoi']
         files = glob.glob('inst/%s/include/*.hpp' % name)
         for file in files:
@@ -276,13 +277,263 @@ def module_menu():
                   'are already implemented. Return now to main menu.')
             return
         else:
-            print("All right. Now let's add some classes:")
+            print('All right. Now let\'s add some classes:')
 
         # Loop over all missing baseclasses
         for baseclass in baseclasses:
             classname = 'G'+name.upper()+baseclass[1:]
             if confirm('Add "%s" class?' % classname):
                 add_instrument_class(name, tokens, classname)
+
+    # ... otherwise add a new module
+    else:
+
+        # Setup base classes
+        baseclasses = ['GObservation', 'GResponse']
+
+        # Ask further questions
+        print('All right. You want a new "%s" instrument module.' % name)
+        while True:
+            add_list = confirm('Do you want event list support?')
+            add_bin  = confirm('Do you want binned event data support?')
+            if not add_list and not add_bin:
+                print('*** Warning: You need no support for event lists and '
+                      'binned event data. This means that you have no data :o')
+                if confirm('Is this true? You want a module that cannot handle data?'):
+                    break
+            else:
+                break
+
+        # Add base classes according to choice
+        if add_list or add_bin:
+            baseclasses.append('GInstDir')
+        if add_list:
+            baseclasses.extend(['GEventList', 'GEventAtom', 'GRoi'])
+        if add_bin:
+            baseclasses.extend(['GEventCube', 'GEventBin'])
+
+        # Create directory structure
+        os.mkdir('inst/%s' % name)
+        os.mkdir('inst/%s/caldb' % name)
+        os.mkdir('inst/%s/include' % name)
+        os.mkdir('inst/%s/pyext' % name)
+        os.mkdir('inst/%s/src' % name)
+        os.mkdir('inst/%s/test' % name)
+        os.mkdir('inst/%s/test/data' % name)
+
+        # Add some files
+        add_file('src/template/inst_Makefile.am',
+                 'inst/%s/Makefile.am' % name, tokens)
+        add_file('src/template/inst_README.md',
+                 'inst/%s/README.md' % name, tokens)
+        add_file('src/template/GXXXLib.hpp',
+                 'inst/%s/include/G%sLib.hpp' % (name, name.upper()), tokens)
+        add_file('src/template/xxx.i',
+                 'inst/%s/pyext/%s.i' % (name, name), tokens)
+        add_file('src/template/inst_test_Makefile.am',
+                 'inst/%s/test/Makefile.am' % name, tokens)
+        add_file('src/template/inst_test_XXX.hpp',
+                 'inst/%s/test/test_%s.hpp' % (name, name.upper()), tokens)
+        add_file('src/template/inst_test_XXX.cpp',
+                 'inst/%s/test/test_%s.cpp' % (name, name.upper()), tokens)
+        add_file('src/template/inst_test_XXX.py',
+                 'inst/%s/test/test_%s.py' % (name, name.upper()), tokens)
+
+        # Adjust configuration
+        adjust_config(name)
+
+        # Adjust Python configuration
+        adjust_python_config(name, instrument)
+
+        # Adjust test configuration
+        adjust_test_config(name, instrument)
+
+
+        # Loop over all baseclasses
+        #for baseclass in baseclasses:
+        #    classname = 'G'+name.upper()+baseclass[1:]
+        #    if confirm('Add "%s" class?' % classname):
+        #        add_instrument_class(name, tokens, classname)
+
+    # Return
+    return
+
+
+# ============================================== #
+# Adjust configuration for new instrument module #
+# ============================================== #
+def adjust_config(name):
+    """
+    Parameters
+    ----------
+    name : str
+        Module name
+    """
+    # Adjust inst/Makefile.am
+    config = 'if WITH_INST_%s\nINST_%s = %s\nendif\n' % (name.upper(), name.upper(), name)
+    for line in fileinput.FileInput('inst/Makefile.am',inplace=1):
+        if 'Detect configuration' in line:
+            line = line.replace(line, line+config)
+        elif 'SUBDIRS=' in line.replace(' ', ''):
+            line = line.replace(line, line[:-1]+' $(INST_%s)\n' % name.upper())
+        print line,
+
+    # Adjust configure.ac
+    checks = '# Checks for %s interface\n' \
+             'AC_ARG_WITH([%s],\n' \
+             '            [AS_HELP_STRING([--with-%s],\n' \
+             '                            [compile in %s specific interface [default=yes]])],\n' \
+             '            [],\n' \
+             '            [with_%s=yes])\n' \
+             'if test "x$with_%s" = "xyes"; then\n' \
+             '  AC_CHECK_FILE([$srcdir/inst/%s/README.md],\n' \
+             '                [with_%s=yes],\n' \
+             '                [with_%s=no])\n' \
+             'fi\n' \
+             'AM_CONDITIONAL(WITH_INST_%s, test "x$with_%s" = "xyes")\n' % \
+             (name.upper(), name, name, name.upper(), name, name, name,
+              name, name, name.upper(), name)
+    wrap   = '  if test "x$with_%s" = "xyes"; then\n' \
+             '    AC_CHECK_FILES([$srcdir/pyext/gammalib/%s_wrap.cpp\n' \
+             '                    $srcdir/pyext/gammalib/%s.py],,\n' \
+             '                   [has_wrappers="no"])\n' \
+             '  fi' % (name, name, name)
+    files  = 'if test "x$with_%s" = "xyes"; then\n' \
+             '  AC_CONFIG_FILES([inst/%s/Makefile])\n' \
+             '  AC_CONFIG_FILES([inst/%s/test/Makefile])\n' \
+             'fi' % (name, name, name)
+    info   = 'if test "x$with_%s" = "xyes"; then\n' \
+             '  echo "  * %s interface                (yes)"\n' \
+             'else\n' \
+             '  echo "  - %s interface                (no)"\n' \
+             'fi' % (name, name.upper(), name.upper())
+    for line in fileinput.FileInput('configure.ac',inplace=1):
+        if '# Insert new checks here' in line:
+            print(checks)
+        elif '# Insert new wrappers here' in line:
+            print(wrap)
+        elif '# Inset new Makefiles here' in line:
+            print(files)
+        elif '# Insert new interface informations here' in line:
+            print(info)
+        print line,
+
+    # Return
+    return
+
+
+# ===================================================== #
+# Adjust Python configuration for new instrument module #
+# ===================================================== #
+def adjust_python_config(name, instrument):
+    """
+    Parameters
+    ----------
+    name : str
+        Module name
+    instrument : str
+        Instrument
+    """
+    # Adjust pyext/setup.py.in
+    module = 'if \'@WITH_INST_%s_TRUE@\' != \'#\':\n' \
+             '    print(\'Include %s instrument interface in gammalib Python module.\')\n' \
+             '    inst_modules.append(\'%s\')' % \
+             (name.upper(), instrument, name)
+    for line in fileinput.FileInput('pyext/setup.py.in',inplace=1):
+        if '# Insert new module here' in line:
+            print(module)
+        print line,
+
+    # Adjust pyext/Makefile.am
+    target  = 'if WITH_INST_%s\n' \
+              '  %s_SWIG_TARGETS = $(wrapperdir)/gammalib/%s_wrap.cpp \\\n' \
+              '                     $(wrapperdir)/gammalib/%s.py\n' \
+              '  %s_TESTS        = $(top_srcdir)/inst/%s/test/test_%s.py\n' \
+              'endif' % (name.upper(), name.upper(), name, name,
+                         name.upper(), name, name.upper())
+    targets = '                    $(%s_SWIG_TARGETS) ' % name.upper()
+    rule    = '# Rule for %s module\n' \
+              'if WITH_INST_%s\n' \
+              '$(wrapperdir)/gammalib/%s.py: $(wrapperdir)/gammalib/%s_wrap.cpp\n' \
+              '$(wrapperdir)/gammalib/%s_wrap.cpp: $(top_srcdir)/inst/%s/pyext/%s.i\n' \
+              '	if $(SWIGCOMPILE) -MMD -MF "gammalib/%s.Tpi" -I$(top_srcdir)/pyext -o gammalib/%s_wrap.cpp -outdir gammalib $<; \\\n' \
+              '	then mv -f "gammalib/%s.Tpi" "gammalib/%s.Pi"; else rm -f "gammalib/%s.Tpi"; exit 1; fi\n' \
+              'endif\n' % (name.upper(), name.upper(), name, name, name,
+                           name, name, name, name, name, name, name)
+    for line in fileinput.FileInput('pyext/Makefile.am',inplace=1):
+        if '# Insert new target here' in line:
+            print(target)
+        elif 'INST_SWIG_TARGETS=' in line.replace(' ', ''):
+            last = line[-2]
+            line = line.replace(line, line+targets+last+'\n')
+        elif '$(MWL_TESTS)' in line:
+            line = line.replace(line, line[:-1]+' $(%s_TESTS)\n' % name.upper())
+        if '# Insert new rule here' in line:
+            print(rule)
+        print line,
+
+    # Return
+    return
+
+
+# =================================================== #
+# Adjust test configuration for new instrument module #
+# =================================================== #
+def adjust_test_config(name, instrument):
+    """
+    Parameters
+    ----------
+    name : str
+        Module name
+    instrument : str
+        Instrument
+    """
+    # Adjust test/Makefile.am
+    test    = 'if WITH_INST_%s\n' \
+              '  INST_%s     = $(top_builddir)/inst/%s/test/test_%s\n' \
+              '  TEST_%s     = :$(top_srcdir)/inst/%s/test\n' \
+              '  TEST_%s_ENV = TEST_%s_DATA=$(top_srcdir)/inst/%s/test/data\n' \
+              'endif' % (name.upper(), name.upper(), name, name.upper(),
+                         name.upper(), name, name.upper(), name.upper(),
+                         name)
+    testenv = '                    $(TEST_%s_ENV) ' % name.upper()
+    tests   = '        $(INST_%s) \\\n' % name.upper()
+    for line in fileinput.FileInput('test/Makefile.am',inplace=1):
+        if '# Insert new test here' in line:
+            print(test)
+        elif 'TEST_PYTHON_ENV=' in line.replace(' ', ''):
+            line = line.replace(line, line[:-1]+'$(TEST_%s)\n' % name.upper())
+        elif 'TEST_DATA=$(top_srcdir)/test/data' in line:
+            last = line[-2]
+            line = line.replace(line, line+testenv+last+'\n')
+        elif '$(TEST_PYTHON_SCRIPT)' in line:
+            line = line.replace(line, tests+line)
+        print line,
+
+    # Adjust test/test_python.py
+    test  = '# Try importing %s tests\n' \
+            'try:\n' \
+            '    import test_%s\n' \
+            '    has_%s = True\n' \
+            'except:\n' \
+            '    has_%s = False\n' % \
+            (instrument, name.upper(), name, name)
+    data  = '        os.environ[\'TEST_%s_DATA\'] = \'%s/data\'' % \
+             (name.upper(), name)
+    suite = '    # Optionally handle %s suite\n' \
+            '    if has_%s:\n' \
+            '        suite_%s = test_%s.Test()\n' \
+            '        suite_%s.set()\n' \
+            '        suites.append(suite_%s)\n' % \
+            (instrument, name, name, name.upper(), name, name)
+    for line in fileinput.FileInput('test/test_python.py',inplace=1):
+        if '# Insert new test here' in line:
+            print(test)
+        if '# Insert new environment here' in line:
+            print(data)
+        if '# Insert new suite here' in line:
+            print(suite)
+        print line,
 
     # Return
     return
