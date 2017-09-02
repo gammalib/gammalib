@@ -31,7 +31,7 @@
 #include "GammaLib.hpp"
 
 /* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMObservation.hpp"
-#include "GCOMResponse.hpp"
+#include "GXXXObservation.hpp"
+#include "GXXXResponse.hpp"
 
 #endif /* GXXXLIB_HPP */

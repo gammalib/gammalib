@@ -212,148 +212,61 @@ def set_tokens(name, instrument, author):
     return tokens
 
 
-# ======================== #
-# Manage instrument module #
-# ======================== #
-def module_menu():
+# ======================= #
+# Add an instrument class #
+# ======================= #
+def add_instrument_class(name, tokens, classname):
     """
-    Manage instrument module
+    Add an instrument class
+
+    Parameters
+    ----------
+    name : str
+        Module name
+    tokens : str
+        Tokens for replacement
+    classname : str
+        Class name
     """
-    # Annonce actions
-    print("")
-    print("Add instrument module")
-    print("---------------------")
+    # Set template classname
+    tmpname = classname.replace(name.upper(), 'XXX')
 
-    # Stay in loop until there is a final confirmation
-    while True:
+    # Set destination file names
+    incfile = 'inst/%s/include/%s.hpp' % (name, classname)
+    srcfile = 'inst/%s/src/%s.cpp'     % (name, classname)
+    pyfile  = 'inst/%s/pyext/%s.i'     % (name, classname)
+    
+    # Add files
+    add_file('src/template/%s.hpp' % tmpname, incfile, tokens)
+    add_file('src/template/%s.cpp' % tmpname, srcfile, tokens)
+    add_file('src/template/%s.i'   % tmpname, pyfile, tokens)
 
-        # Enter a module name
-        while True:
-            name = response('Please enter a 3 digit-name for the module').lower()
-            if len(name) == 3:
-                break
-            else:
-                print('*** Error: Module name "%s" has not 3 digits.' % name)
+    # Update module header
+    filename   = 'inst/%s/include/G%sLib.hpp' % (name, name.upper())
+    afterline  = '#include "G%sObservation.hpp"' % (name.upper())
+    insertline = '#include "%s.hpp"\n' % (classname)
+    for line in fileinput.FileInput(filename,inplace=1):
+        if afterline in line:
+            line = line.replace(line, line+insertline)
+        print line,
 
-        # If module exists already then ask if classes should be added, and
-        # quit if this is not the case
-        if os.path.isdir('inst/%s' % name):
-            if not confirm('Module "%s" exists already. Do you want to add '
-                           'classes to this module?' % name):
-                return
+    # Update module Makefile.am
+    filename    = 'inst/%s/Makefile.am' % (name)
+    insertline1 = '          src/%s.cpp ' % (classname)
+    insertline2 = '                     include/%s.hpp ' % (classname)
+    for line in fileinput.FileInput(filename,inplace=1):
+        if 'sources=' in line.replace(' ', ''):
+            last = line[-2]
+            line = line.replace(line, line+insertline1+last+'\n')
+        if 'pkginclude_HEADERS=' in line.replace(' ', ''):
+            last = line[-2]
+            line = line.replace(line, line+insertline2+last+'\n')
+        print line,
 
-        # Enter other information
-        instrument = response('Please enter the instrument name (e.g. "Fermi/LAT")')
-        author     = response('Please enter your name (e.g. "Joe Public")')
-
-        # Ask to confirm module summary
-        print('All right. Have now:')
-        print('Module name .....: "%s"' % name)
-        print('Instrument name .: "%s"' % instrument)
-        print('Your name .......: "%s"' % author)
-        if confirm('Is this correct?'):
-            break
-
-    # Set tokens
-    tokens = set_tokens(name, instrument, author)
-
-    # If the module exists already then determine all base classes that are
-    # not yet implemented and propose to add them one by one ...
-    if os.path.isdir('inst/%s' % name):
-
-        # Determine which of the baseclasses are not yet implemented
-        baseclasses = ['GObservation', 'GResponse',
-                       'GEventList', 'GEventAtom', 'GEventCube', 'GEventBin',
-                       'GInstDir', 'GRoi']
-        files = glob.glob('inst/%s/include/*.hpp' % name)
-        for file in files:
-            baseclass = get_base_class(file)
-            if baseclass in baseclasses:
-                baseclasses.remove(baseclass)
-
-        # If all baseclasses are already there then exist now
-        if len(baseclasses) == 0:
-            print('All right. The module exists already and all base classes '
-                  'are already implemented. Return now to main menu.')
-            return
-        else:
-            print('All right. Now let\'s add some classes:')
-
-        # Loop over all missing baseclasses
-        for baseclass in baseclasses:
-            classname = 'G'+name.upper()+baseclass[1:]
-            if confirm('Add "%s" class?' % classname):
-                add_instrument_class(name, tokens, classname)
-
-    # ... otherwise add a new module
-    else:
-
-        # Setup base classes
-        baseclasses = ['GObservation', 'GResponse']
-
-        # Ask further questions
-        print('All right. You want a new "%s" instrument module.' % name)
-        while True:
-            add_list = confirm('Do you want event list support?')
-            add_bin  = confirm('Do you want binned event data support?')
-            if not add_list and not add_bin:
-                print('*** Warning: You need no support for event lists and '
-                      'binned event data. This means that you have no data :o')
-                if confirm('Is this true? You want a module that cannot handle data?'):
-                    break
-            else:
-                break
-
-        # Add base classes according to choice
-        if add_list or add_bin:
-            baseclasses.append('GInstDir')
-        if add_list:
-            baseclasses.extend(['GEventList', 'GEventAtom', 'GRoi'])
-        if add_bin:
-            baseclasses.extend(['GEventCube', 'GEventBin'])
-
-        # Create directory structure
-        os.mkdir('inst/%s' % name)
-        os.mkdir('inst/%s/caldb' % name)
-        os.mkdir('inst/%s/include' % name)
-        os.mkdir('inst/%s/pyext' % name)
-        os.mkdir('inst/%s/src' % name)
-        os.mkdir('inst/%s/test' % name)
-        os.mkdir('inst/%s/test/data' % name)
-
-        # Add some files
-        add_file('src/template/inst_Makefile.am',
-                 'inst/%s/Makefile.am' % name, tokens)
-        add_file('src/template/inst_README.md',
-                 'inst/%s/README.md' % name, tokens)
-        add_file('src/template/GXXXLib.hpp',
-                 'inst/%s/include/G%sLib.hpp' % (name, name.upper()), tokens)
-        add_file('src/template/xxx.i',
-                 'inst/%s/pyext/%s.i' % (name, name), tokens)
-        add_file('src/template/inst_test_Makefile.am',
-                 'inst/%s/test/Makefile.am' % name, tokens)
-        add_file('src/template/inst_test_XXX.hpp',
-                 'inst/%s/test/test_%s.hpp' % (name, name.upper()), tokens)
-        add_file('src/template/inst_test_XXX.cpp',
-                 'inst/%s/test/test_%s.cpp' % (name, name.upper()), tokens)
-        add_file('src/template/inst_test_XXX.py',
-                 'inst/%s/test/test_%s.py' % (name, name.upper()), tokens)
-
-        # Adjust configuration
-        adjust_config(name)
-
-        # Adjust Python configuration
-        adjust_python_config(name, instrument)
-
-        # Adjust test configuration
-        adjust_test_config(name, instrument)
-
-
-        # Loop over all baseclasses
-        #for baseclass in baseclasses:
-        #    classname = 'G'+name.upper()+baseclass[1:]
-        #    if confirm('Add "%s" class?' % classname):
-        #        add_instrument_class(name, tokens, classname)
+    # Update Python module
+    filename = 'inst/%s/pyext/%s.i' % (name, name)
+    with open(filename, 'a') as f:
+        f.write('%%include "%s.i"\n' % classname)
 
     # Return
     return
@@ -539,58 +452,146 @@ def adjust_test_config(name, instrument):
     return
 
 
-# ======================= #
-# Add an instrument class #
-# ======================= #
-def add_instrument_class(name, tokens, classname):
+# ======================== #
+# Manage instrument module #
+# ======================== #
+def module_menu():
     """
-    Add an instrument class
-
-    Parameters
-    ----------
-    name : str
-        Module name
-    tokens : str
-        Tokens for replacement
-    classname : str
-        Class name
+    Manage instrument module
     """
-    # Set destination file names
-    incfile = 'inst/%s/include/%s.hpp' % (name, classname)
-    srcfile = 'inst/%s/src/%s.cpp' % (name, classname)
-    pyfile  = 'inst/%s/pyext/%s.i' % (name, classname)
-    
-    # Add files
-    add_file('src/template/GXXXRoi.hpp', incfile, tokens)
-    add_file('src/template/GXXXRoi.cpp', srcfile, tokens)
-    add_file('src/template/GXXXRoi.i',   pyfile, tokens)
+    # Annonce actions
+    print("")
+    print("Add instrument module")
+    print("---------------------")
 
-    # Update module header
-    filename   = 'inst/%s/include/G%sLib.hpp' % (name, name.upper())
-    afterline  = '#include "G%sObservation.hpp"' % (name.upper())
-    insertline = '#include "%s.hpp"\n' % (classname)
-    for line in fileinput.FileInput(filename,inplace=1):
-        if afterline in line:
-            line = line.replace(line, line+insertline)
-        print line,
+    # Stay in loop until there is a final confirmation
+    while True:
 
-    # Update module Makefile.am
-    filename    = 'inst/%s/Makefile.am' % (name)
-    insertline1 = '          src/%s.cpp ' % (classname)
-    insertline2 = '                     include/%s.hpp ' % (classname)
-    for line in fileinput.FileInput(filename,inplace=1):
-        if 'sources=' in line.replace(' ', ''):
-            last = line[-2]
-            line = line.replace(line, line+insertline1+last+'\n')
-        if 'pkginclude_HEADERS=' in line.replace(' ', ''):
-            last = line[-2]
-            line = line.replace(line, line+insertline2+last+'\n')
-        print line,
+        # Enter a module name
+        while True:
+            name = response('Please enter a 3 digit-name for the module').lower()
+            if len(name) == 3:
+                break
+            else:
+                print('*** Error: Module name "%s" has not 3 digits.' % name)
 
-    # Update Python module
-    filename = 'inst/%s/pyext/%s.i' % (name, name)
-    with open(filename, 'a') as f:
-        f.write('%%include "%s.i"' % classname)
+        # If module exists already then ask if classes should be added, and
+        # quit if this is not the case
+        if os.path.isdir('inst/%s' % name):
+            if not confirm('Module "%s" exists already. Do you want to add '
+                           'classes to this module?' % name):
+                return
+
+        # Enter other information
+        instrument = response('Please enter the instrument name (e.g. "Fermi/LAT")')
+        author     = response('Please enter your name (e.g. "Joe Public")')
+
+        # Ask to confirm module summary
+        print('All right. Have now:')
+        print('Module name .....: "%s"' % name)
+        print('Instrument name .: "%s"' % instrument)
+        print('Your name .......: "%s"' % author)
+        if confirm('Is this correct?'):
+            break
+
+    # Set tokens
+    tokens = set_tokens(name, instrument, author)
+
+    # If the module exists already then determine all base classes that are
+    # not yet implemented and propose to add them one by one ...
+    if os.path.isdir('inst/%s' % name):
+
+        # Determine which of the baseclasses are not yet implemented
+        baseclasses = ['GObservation', 'GResponse',
+                       'GEventList', 'GEventAtom', 'GEventCube', 'GEventBin',
+                       'GInstDir', 'GRoi']
+        files = glob.glob('inst/%s/include/*.hpp' % name)
+        for file in files:
+            baseclass = get_base_class(file)
+            if baseclass in baseclasses:
+                baseclasses.remove(baseclass)
+
+        # If all baseclasses are already there then exist now
+        if len(baseclasses) == 0:
+            print('All right. The module exists already and all base classes '
+                  'are already implemented. Return now to main menu.')
+            return
+        else:
+            print('All right. Now let\'s add some classes:')
+
+        # Loop over all missing baseclasses
+        for baseclass in baseclasses:
+            classname = 'G'+name.upper()+baseclass[1:]
+            if confirm('Add "%s" class?' % classname):
+                add_instrument_class(name, tokens, classname)
+
+    # ... otherwise add a new module
+    else:
+
+        # Setup base classes
+        baseclasses = ['GObservation', 'GResponse']
+
+        # Ask further questions
+        print('All right. You want a new "%s" instrument module.' % name)
+        while True:
+            add_list = confirm('Do you want event list support?')
+            add_bin  = confirm('Do you want binned event data support?')
+            if not add_list and not add_bin:
+                print('*** Warning: You need no support for event lists and '
+                      'binned event data. This means that you have no data :o')
+                if confirm('Is this true? You want a module that cannot handle data?'):
+                    break
+            else:
+                break
+
+        # Add base classes according to choice
+        if add_list or add_bin:
+            baseclasses.append('GInstDir')
+        if add_list:
+            baseclasses.extend(['GEventList', 'GEventAtom', 'GRoi'])
+        if add_bin:
+            baseclasses.extend(['GEventCube', 'GEventBin'])
+
+        # Create directory structure
+        os.mkdir('inst/%s' % name)
+        os.mkdir('inst/%s/caldb' % name)
+        os.mkdir('inst/%s/include' % name)
+        os.mkdir('inst/%s/pyext' % name)
+        os.mkdir('inst/%s/src' % name)
+        os.mkdir('inst/%s/test' % name)
+        os.mkdir('inst/%s/test/data' % name)
+
+        # Add some files
+        add_file('src/template/inst_Makefile.am',
+                 'inst/%s/Makefile.am' % name, tokens)
+        add_file('src/template/inst_README.md',
+                 'inst/%s/README.md' % name, tokens)
+        add_file('src/template/GXXXLib.hpp',
+                 'inst/%s/include/G%sLib.hpp' % (name, name.upper()), tokens)
+        add_file('src/template/xxx.i',
+                 'inst/%s/pyext/%s.i' % (name, name), tokens)
+        add_file('src/template/inst_test_Makefile.am',
+                 'inst/%s/test/Makefile.am' % name, tokens)
+        add_file('src/template/inst_test_XXX.hpp',
+                 'inst/%s/test/test_%s.hpp' % (name, name.upper()), tokens)
+        add_file('src/template/inst_test_XXX.cpp',
+                 'inst/%s/test/test_%s.cpp' % (name, name.upper()), tokens)
+        add_file('src/template/inst_test_XXX.py',
+                 'inst/%s/test/test_%s.py' % (name, name.upper()), tokens)
+
+        # Adjust configuration
+        adjust_config(name)
+
+        # Adjust Python configuration
+        adjust_python_config(name, instrument)
+
+        # Adjust test configuration
+        adjust_test_config(name, instrument)
+
+        # Loop over all baseclasses
+        for baseclass in baseclasses:
+            classname = 'G'+name.upper()+baseclass[1:]
+            add_instrument_class(name, tokens, classname)
 
     # Return
     return

@@ -34,6 +34,11 @@
 #include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GEventBin.hpp"
+#include "GEventAtom.hpp"
+#include "GEventCube.hpp"
+#include "GEventList.hpp"
+#include "GModelData.hpp"
 %}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
@@ -54,12 +59,12 @@
 %import(module="gammalib.obs") "GResponse.i";
 %import(module="gammalib.obs") "GEvent.i";
 %import(module="gammalib.obs") "GEventBin.i";
+%import(module="gammalib.obs") "GEventAtom.i";
 %import(module="gammalib.obs") "GEvents.i";
 %import(module="gammalib.obs") "GEventCube.i";
+%import(module="gammalib.obs") "GEventList.i";
 %import(module="gammalib.obs") "GInstDir.i";
 %import(module="gammalib.model") "GModel.i";
 %import(module="gammalib.model") "GModelData.i";
 
-/* __ COMPTEL _____________________________________________________________ */
-%include "GCOMObservation.i"
-%include "GCOMResponse.i"
+/* __ [INSTRUMENT] _______________________________________________________ */
