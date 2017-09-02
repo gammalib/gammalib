@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-29 August 2017
+2 September 2017
 
 
 1. Introduction
@@ -15,6 +15,7 @@ The following classes have been added:
 - GCOMD1Response
 - GCOMD2Response
 - GCOMInstChars
+- GCOMIaq
 
 The following classes have been removed:
 - n.a.
@@ -156,3 +157,9 @@ of the SDA and SDB response files (#2186).
 The class GCOMInstChar was added to handle the instrument characteristics that
 are necessary to perform the response computation. The class handles reading
 of the ICT file (#2186).
+
+The class GCOMIaq was added to perform the computation of an IAQ response. This
+allows now to generate an own IAQ within GammaLib. Below 10 MeV the resulting
+IAQs are very close to simulated ones from UNH, above there are some deviations.
+Definitely more cross-checking is needed, but for now the functionality is
+there (#2186).

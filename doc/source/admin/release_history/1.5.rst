@@ -10,7 +10,7 @@ GammaLib 1.5 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* TBW
+* IAQ response computation for COMPTEL
 
 
 Bug fixes
@@ -34,7 +34,8 @@ Improvements
 New features
 ------------
 
-* None
+* [`2186 <https://cta-redmine.irap.omp.eu/issues/2186>`_] -
+  Implement COMPTEL response computation
 
 
 Clean up
