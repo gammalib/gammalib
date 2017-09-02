@@ -25,7 +25,9 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Define sources for this directory
-sources = GXXXRoi.cpp
+sources = GXXXObservation.cpp \
+          GXXXResponse.cpp \
+          GXXXRoi.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libtemplate.la
