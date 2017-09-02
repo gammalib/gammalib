@@ -44,6 +44,7 @@ if WITH_INST_COM
   TEST_COM     = :$(top_srcdir)/inst/com/test
   TEST_COM_ENV = TEST_COM_DATA=$(top_srcdir)/inst/com/test/data
 endif
+# Insert new test here
 
 # Optional python bindings
 if WITH_PYTHON

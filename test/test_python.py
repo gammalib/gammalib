@@ -66,6 +66,7 @@ try:
 except:
     has_com = False
 
+# Insert new test here
 
 # ================== #
 # Perform unit tests #
@@ -81,6 +82,7 @@ def test(installed=False):
         os.environ['TEST_CTA_DATA'] = 'cta/data'
         os.environ['TEST_LAT_DATA'] = 'lat/data'
         os.environ['TEST_MWL_DATA'] = 'mwl/data'
+        # Insert new environment here
 
     # Allocate test suites
     suites = gammalib.GTestSuites('Python interface testing')
@@ -140,8 +142,6 @@ def test(installed=False):
     if has_cta:
         suite_cta = test_CTA.Test()
         suite_cta.set()
-        #if installed:
-        #    suite_cta.testdir('cta') # Test data for installed test
         suites.append(suite_cta)
 
     # Optionally handle LAT suite
@@ -155,6 +155,8 @@ def test(installed=False):
         suite_com = test_COM.Test()
         suite_com.set()
         suites.append(suite_com)
+
+    # Insert new suite here
 
     # If we have an installed version then create a temporary
     # directory and copy over all information that is needed

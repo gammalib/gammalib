@@ -59,6 +59,7 @@ if WITH_INST_COM
                      $(wrapperdir)/gammalib/com.py
   COM_TESTS        = $(top_srcdir)/inst/com/test/test_COM.py
 endif
+# Insert new target here
 INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
                     $(CTA_SWIG_TARGETS) \
                     $(LAT_SWIG_TARGETS) \
@@ -205,6 +206,8 @@ $(wrapperdir)/gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -I$(top_srcdir)/pyext -o gammalib/com_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/com.Tpi" "gammalib/com.Pi"; else rm -f "gammalib/com.Tpi"; exit 1; fi
 endif
+
+# Insert new rule here
 
 # ... otherwise, if building of Python wrappers has not been required then
 # they are located in the source directory and we don't have to build them

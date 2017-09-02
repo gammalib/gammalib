@@ -612,6 +612,8 @@ if test "x$with_com" = "xyes"; then
 fi
 AM_CONDITIONAL(WITH_INST_COM, test "x$with_com" = "xyes")
 
+# Insert new checks here
+
 
 #############################################################################
 # Checks for header files                                                   #
@@ -1007,6 +1009,7 @@ else
                     $srcdir/pyext/gammalib/com.py],,
                    [has_wrappers="no"])
   fi
+  # Insert new wrappers here
   if test "x$has_wrappers" = "xno"; then
     AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
   fi
@@ -1468,6 +1471,7 @@ if test "x$with_com" = "xyes"; then
   AC_CONFIG_FILES([inst/com/Makefile])
   AC_CONFIG_FILES([inst/com/test/Makefile])
 fi
+# Inset new Makefiles here
 AC_OUTPUT
 
 
@@ -1576,6 +1580,7 @@ if test "x$with_com" = "xyes"; then
 else
   echo "  - COMPTEL interface            (no)"
 fi
+# Insert new interface informations here
 
 # Dump Doxygen information
 if test "$DX_DOXYGEN" != ""; then
