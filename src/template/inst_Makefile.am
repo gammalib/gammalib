@@ -1,0 +1,66 @@
+#############################################################################
+# Makefile.am for xxx module                                                #
+# ------------------------------------------------------------------------- #
+# Copyright (C) [YEAR] by [AUTHOR]                                          #
+# ------------------------------------------------------------------------- #
+#                                                                           #
+#  This program is free software: you can redistribute it and/or modify     #
+#  it under the terms of the GNU General Public License as published by     #
+#  the Free Software Foundation, either version 3 of the License, or        #
+#  (at your option) any later version.                                      #
+#                                                                           #
+#  This program is distributed in the hope that it will be useful,          #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+#  GNU General Public License for more details.                             #
+#                                                                           #
+#  You should have received a copy of the GNU General Public License        #
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
+#                                                                           #
+#############################################################################
+
+# Set sub directories
+SUBDIRS = test
+
+# Darwin support
+MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
+@EXPORT_MACOSX_DEPLOYMENT_TARGET@export MACOSX_DEPLOYMENT_TARGET
+
+# Set include directories
+INCLUDES = -I$(top_srcdir)/include \
+           -I$(top_srcdir)/src \
+           -I$(top_srcdir)/src/support \
+           -I$(top_srcdir)/inst/xxx/include \
+           -I$(top_srcdir)/inst/xxx/src
+
+# Define sources for this directory
+sources = src/GXXXObservation.cpp \
+          src/GXXXResponse.cpp
+
+# Define headers to be installed
+pkginclude_HEADERS = include/GXXXObservation.hpp \
+                     include/GXXXResponse.hpp
+
+# Build libtool library
+noinst_LTLIBRARIES = libxxx.la
+libxxx_la_SOURCES = $(sources)
+libxxx_la_LDFLAGS =
+
+# Extra files to be distributed in the tar file
+#EXTRA_DIST = README.md caldb pyext \
+#             include/GXXXLib.hpp \
+#             test/test_XXX.hpp test/test_XXX.py test/data
+EXTRA_DIST = README.md caldb pyext \
+             include/GXXXLib.hpp
+
+# Calibration files to distribute
+# TODO: Follow the example below to distribution your calibration data
+#caldb_indx = caldb/data/cgro/comptel/caldb.indx
+#caldb_irfs = caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
+#             caldb/data/cgro/comptel/bcf/m10564_sdb.fits.gz
+#
+# Distribute calibration database files
+#caldbindxdir   = $(datadir)/caldb/data/cgro/comptel
+#caldbindx_DATA = $(caldb_indx)
+#caldbirfsdir   = $(datadir)/caldb/data/cgro/comptel/bcf
+#caldbirfs_DATA = $(caldb_irfs)
