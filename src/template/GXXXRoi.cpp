@@ -29,8 +29,6 @@
 #include <config.h>
 #endif
 #include "GXXXRoi.hpp"
-//#include "GEvent.hpp"
-//#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 

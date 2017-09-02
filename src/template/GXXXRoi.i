@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GXXXRoi.hpp - [INSTRUMENT] region of interest class         *
+ *             GXXXRoi.i - [INSTRUMENT] region of interest class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) [YEAR] by [AUTHOR]                                       *
  * ----------------------------------------------------------------------- *
@@ -19,28 +19,20 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GXXXRoi.hpp
+ * @file GXXXRoi.i
  * @brief [INSTRUMENT] region of interest class definition
  * @author [AUTHOR]
  */
-
-#ifndef GXXXROI_HPP
-#define GXXXROI_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include <string>
-#include "GRoi.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GXXXRoi.hpp"
+%}
 
 
 /***********************************************************************//**
  * @class GXXXRoi
  *
  * @brief [INSTRUMENT] region of interest class
- *
- * The [INSTRUMENT] region of interest class defines the event direction
- * region that is used for unbinned data analysis.
- *
- * @todo Complete the class description.
  ***************************************************************************/
 class GXXXRoi : public GRoi {
 
@@ -50,41 +42,22 @@ public:
     GXXXRoi(const GXXXRoi& roi);
     virtual ~GXXXRoi(void);
 
-    // Operators
-    GXXXRoi& operator=(const GXXXRoi& roi);
-
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GXXXRoi*    clone(void) const;
     virtual std::string classname(void) const;
     virtual bool        contains(const GEvent& event) const;
-    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    // TODO: Add any further methods that are needed
-
-protected:
-    // Protected methods
-    void init_members(void);
-    void copy_members(const GXXXRoi& roi);
-    void free_members(void);
-    
-    // Protected members
-    // TODO: Add any data members that are necessary
-    // Example:
-    double m_radius; //!< Region of interest radius
+    // TODO: Copy methods from GXXXRoi.hpp file
 };
 
 
 /***********************************************************************//**
- * @brief Return class name
- *
- * @return String containing the class name ("GXXXRoi").
+ * @brief GXXXRoi class extension
  ***************************************************************************/
-inline
-std::string GXXXRoi::classname(void) const
-{
-    return ("GXXXRoi");
-}
-
-#endif /* GXXXROI_HPP */
+%extend GXXXRoi {
+    GXXXRoi copy() {
+        return (*self);
+    }
+};
