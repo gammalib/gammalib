@@ -606,18 +606,19 @@ def main_menu():
     """
     # Print main menu
     print('[1] Add instrument module')
-    print('[2] Add spectral model')
-    print('[3] Add spatial model')
-    print('[4] Add temporal model')
-    print('[4] Add generic class')
+    #print('[2] Add spectral model')
+    #print('[3] Add spatial model')
+    #print('[4] Add temporal model')
+    #print('[4] Add generic class')
     print('[q] Quit')
 
     # Wait for the input
     waiting = True
     while waiting:
         choice = str(raw_input('Enter your choice: '))
-        if choice == '1' or choice == '2' or choice == '3' or choice == '4' or \
-           choice == 'q':
+        #if choice == '1' or choice == '2' or choice == '3' or choice == '4' or \
+        #   choice == 'q':
+        if choice == '1' or choice == 'q':
             waiting = False
 
     # Return choice
