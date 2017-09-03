@@ -34,7 +34,35 @@ sources = GXXXObservation.cpp \
           GXXXInstDir.cpp \
           GXXXRoi.cpp
 
-# Build libtool library
+# Build libtool library (note that this library is not linked included into
+# GammaLib, but we make sure that the library building step works correctly
+# for the code)
 noinst_LTLIBRARIES = libtemplate.la
 libtemplate_la_SOURCES = $(sources)
 libtemplate_la_LDFLAGS =
+
+# Additional files to distribute
+EXTRA_DIST = GXXXLib.hpp \
+             GXXXObservation.hpp \
+             GXXXObservation.i \
+             GXXXResponse.hpp \
+             GXXXResponse.i \
+             GXXXEventList.hpp \
+             GXXXEventList.i \
+             GXXXEventAtom.hpp \
+             GXXXEventAtom.i \
+             GXXXEventCube.hpp \
+             GXXXEventCube.i \
+             GXXXEventBin.hpp \
+             GXXXEventBin.i \
+             GXXXInstDir.hpp \
+             GXXXInstDir.i \
+             GXXXRoi.hpp \
+             GXXXRoi.i \
+             inst_Makefile.am \
+             inst_README.md \
+             inst_test_Makefile.am \
+             inst_test_XXX.cpp \
+             inst_test_XXX.hpp \
+             inst_test_XXX.py \
+             xxx.i
