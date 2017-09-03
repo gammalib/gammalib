@@ -10,6 +10,7 @@ GammaLib 1.5 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
+* A code generator for GammaLib extensions
 * IAQ response computation for COMPTEL
 
 
@@ -36,6 +37,8 @@ New features
 
 * [`2186 <https://cta-redmine.irap.omp.eu/issues/2186>`_] -
   Implement COMPTEL response computation
+* [`2190 <https://cta-redmine.irap.omp.eu/issues/2186>`_] -
+  Implement GammaLib code generator
 
 
 Clean up
