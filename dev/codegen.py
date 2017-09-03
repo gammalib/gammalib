@@ -487,7 +487,7 @@ def module_menu():
         author     = response('Please enter your name (e.g. "Joe Public")')
 
         # Ask to confirm module summary
-        print('All right. Have now:')
+        print('\nAll right. Have now:')
         print('Module name .....: "%s"' % name)
         print('Instrument name .: "%s"' % instrument)
         print('Your name .......: "%s"' % author)
@@ -513,11 +513,11 @@ def module_menu():
 
         # If all baseclasses are already there then exist now
         if len(baseclasses) == 0:
-            print('All right. The module exists already and all base classes '
+            print('\nAll right. The module exists already and all base classes '
                   'are already implemented. Return now to main menu.')
             return
         else:
-            print('All right. Now let\'s add some classes:')
+            print('\nAll right. Now let\'s add some classes:')
 
         # Loop over all missing baseclasses
         for baseclass in baseclasses:
@@ -532,7 +532,7 @@ def module_menu():
         baseclasses = ['GObservation', 'GResponse']
 
         # Ask further questions
-        print('All right. You want a new "%s" instrument module.' % name)
+        print('\nAll right. You want a new "%s" instrument module.' % name)
         while True:
             add_list = confirm('Do you want event list support?')
             add_bin  = confirm('Do you want binned event data support?')
