@@ -27,6 +27,9 @@ INCLUDES = -I$(top_srcdir)/include \
 # Define sources for this directory
 sources = GXXXObservation.cpp \
           GXXXResponse.cpp \
+          GXXXEventList.cpp \
+          GXXXEventAtom.cpp \
+          GXXXInstDir.cpp \
           GXXXRoi.cpp
 
 # Build libtool library

@@ -73,7 +73,7 @@ GLATEventList::GLATEventList(void) : GEventList()
 /***********************************************************************//**
  * @brief File name constructor
  *
- * @param[in] filename Counts cube filename.
+ * @param[in] filename Event list filename.
  *
  * Construct event list object by loading the events from a FITS file.
  ***************************************************************************/

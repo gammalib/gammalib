@@ -88,8 +88,9 @@ protected:
     double       m_ontime;   //!< Ontime (sec)
     double       m_livetime; //!< Livetime (sec)
     double       m_deadc;    //!< Deadtime correction
-    // TODO: Add any data members that are necessary. Note that the events
-    // are stored in the GObservation base class
+    // TODO: Add any data members that are necessary. Note that the event
+    // list or cubes (type GEvents) are stored in the GObservation base
+    // class
 };
 
 
