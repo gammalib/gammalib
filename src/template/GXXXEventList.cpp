@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <typeinfo>
 #include "GFits.hpp"
 #include "GException.hpp"
 #include "GXXXEventList.hpp"

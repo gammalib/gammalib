@@ -30,7 +30,6 @@
 #endif
 #include <string>
 #include "GXXXEventAtom.hpp"
-//#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
