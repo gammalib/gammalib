@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCOMLib.hpp - COMPTEL Support Header files              *
+ *               GCOMRoi.i - COMPTEL region of interest class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,29 +19,45 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMLib.hpp
- * @brief Collection of COMPTEL support header files
- * @author Juergen Knoedlseder    
+ * @file GCOMRoi.i
+ * @brief COMPTEL region of interest class definition
+ * @author Juergen Knoedlseder
  */
-
-#ifndef GCOMLIB_HPP
-#define GCOMLIB_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-
-/* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMEventCube.hpp"
-#include "GCOMEventBin.hpp"
-#include "GCOMInstDir.hpp"
-#include "GCOMResponse.hpp"
-#include "GCOMD1Response.hpp"
-#include "GCOMD2Response.hpp"
-#include "GCOMInstChars.hpp"
-#include "GCOMObservation.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
 #include "GCOMRoi.hpp"
-#include "GCOMEventAtom.hpp"
-#include "GCOMEventList.hpp"
-#include "GCOMModelDRBFitting.hpp"
+%}
 
-#endif /* GCOMLIB_HPP */
+
+/***********************************************************************//**
+ * @class GCOMRoi
+ *
+ * @brief COMPTEL region of interest class
+ ***************************************************************************/
+class GCOMRoi : public GRoi {
+
+public:
+    // Constructors and destructors
+    GCOMRoi(void);
+    GCOMRoi(const GCOMRoi& roi);
+    virtual ~GCOMRoi(void);
+
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual GCOMRoi*    clone(void) const;
+    virtual std::string classname(void) const;
+    virtual bool        contains(const GEvent& event) const;
+
+    // Other methods
+    // TODO: Copy methods from GCOMRoi.hpp file
+};
+
+
+/***********************************************************************//**
+ * @brief GCOMRoi class extension
+ ***************************************************************************/
+%extend GCOMRoi {
+    GCOMRoi copy() {
+        return (*self);
+    }
+};

@@ -71,3 +71,6 @@
 %include "GCOMD2Response.i"
 %include "GCOMInstChar.i"
 %include "GCOMIaq.i"
+%include "GCOMEventList.i"
+%include "GCOMEventAtom.i"
+%include "GCOMRoi.i"
