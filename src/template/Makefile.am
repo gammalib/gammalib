@@ -29,6 +29,8 @@ sources = GXXXObservation.cpp \
           GXXXResponse.cpp \
           GXXXEventList.cpp \
           GXXXEventAtom.cpp \
+          GXXXEventCube.cpp \
+          GXXXEventBin.cpp \
           GXXXInstDir.cpp \
           GXXXRoi.cpp
 

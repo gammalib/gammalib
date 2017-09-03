@@ -44,9 +44,6 @@
  ***************************************************************************/
 class GXXXEventAtom : public GEventAtom {
 
-    // Friend classes
-    //friend class GXXXEventList;
-
 public:
     // Constructors and destructors
     GXXXEventAtom(void);

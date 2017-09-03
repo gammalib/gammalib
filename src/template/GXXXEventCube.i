@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GCOMEventCube.i  -  COMPTEL event bin container class          *
+ *         GXXXEventCube.i - [INSTRUMENT] event bin container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) [YEAR] by [AUTHOR]                                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,35 +19,33 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMEventCube.hpp
- * @brief COMPTEL event bin container class definition
- * @author Juergen Knoedlseder
+ * @file GXXXEventCube.i
+ * @brief [INSTRUMENT] event bin container class definition
+ * @author [AUTHOR]
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCOMEventCube.hpp"
+#include "GXXXEventCube.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCOMEventCube
+ * @class GXXXEventCube
  *
- * @brief COMPTEL event bin container class
+ * @brief [INSTRUMENT] event bin container class
  ***************************************************************************/
-class GCOMEventCube : public GEventCube {
+class GXXXEventCube : public GEventCube {
+
 public:
     // Constructors and destructors
-    GCOMEventCube(void);
-    explicit GCOMEventCube(const GFilename& filename);
-    explicit GCOMEventCube(const GSkyMap& map, const GEbounds& ebds,
-                           const GGti& gti, const double& phimin,
-                           const double& dphi);
-    GCOMEventCube(const GCOMEventCube& cube);
-    virtual ~GCOMEventCube(void);
+    GXXXEventCube(void);
+    explicit GXXXEventCube(const GFilename& filename);
+    GXXXEventCube(const GXXXEventCube& cube);
+    virtual ~GXXXEventCube(void);
 
     // Implemented pure virtual base class methods
     virtual void           clear(void);
-    virtual GCOMEventCube* clone(void) const;
+    virtual GXXXEventCube* clone(void) const;
     virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual int            dim(void) const;
@@ -60,24 +58,18 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    void                   map(const GSkyMap& map, const double& phimin,
-                               const double& dphi);
-    const GSkyMap&         map(void) const;
-    int                    nchi(void) const;
-    int                    npsi(void) const;
-    int                    nphi(void) const;
-    int                    npix(void) const;
+    // TODO: Copy methods from GXXXEventCube.hpp file
 };
 
 
 /***********************************************************************//**
- * @brief GCOMEventCube class extension
+ * @brief GXXXEventCube class extension
  ***************************************************************************/
-%extend GCOMEventCube {
-    GCOMEventCube copy() {
+%extend GXXXEventCube {
+    GXXXEventCube copy() {
         return (*self);
     }
-    GCOMEventBin* __getitem__(int index) {
+    GXXXEventBin* __getitem__(int index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
@@ -85,7 +77,7 @@ public:
             throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
     }
-    void __setitem__(int index, const GCOMEventBin& val) {
+    void __setitem__(int index, const GXXXEventBin& val) {
         if (index>=0 && index < self->size()) {
             *((*self)[index]) = val;
         }
