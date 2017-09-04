@@ -212,7 +212,7 @@ bool GLATRoi::contains(const GEvent& event) const
 /***********************************************************************//**
  * @brief Print region of interest information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing region of interest information.
  ***************************************************************************/
 std::string GLATRoi::print(const GChatter& chatter) const
@@ -227,9 +227,9 @@ std::string GLATRoi::print(const GChatter& chatter) const
         result.append("=== GLATRoi ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("ROI centre"));
+        result.append("\n"+gammalib::parformat("RoI centre"));
         result.append(m_centre.print());
-        result.append("\n"+gammalib::parformat("ROI radius"));
+        result.append("\n"+gammalib::parformat("RoI radius"));
         result.append(gammalib::str(m_radius)+" deg");
 
     } // endif: chatter was not silent
