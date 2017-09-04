@@ -43,8 +43,9 @@ public:
     virtual ~GTPLBase(void);
 
     // Implemented pure virtual base class methods
-    virtual void       clear(void);
-    virtual GTPLBase* clone(void) const;
+    virtual void        clear(void);
+    virtual GTPLBase*   clone(void) const;
+    virtual std::string classname(void) const;
 
     // Other methods
     // TODO: Copy methods from GTPLBase.hpp file

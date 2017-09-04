@@ -192,11 +192,11 @@ def get_base_class(filename):
 
 
 # ===================== #
-# Set instrument tokens #
+# Set base class tokens #
 # ===================== #
-def set_class_tokens(classname, author, what, object):
+def set_base_tokens(classname, author, what, object):
     """
-    Set replacement tokens for a generic class
+    Set replacement tokens for a generic base class
     """
     # Get current year
     year = str(date.today().year)
@@ -207,6 +207,28 @@ def set_class_tokens(classname, author, what, object):
               {'pattern': '[WHAT]', 'string': what},
               {'pattern': '[AUTHOR]', 'string': author},
               {'pattern': 'TPL_OBJECT', 'string': object.lower()},
+              {'pattern': '[YEAR]', 'string': year}]
+
+    # Return tokens
+    return tokens
+
+
+# ========================== #
+# Set container class tokens #
+# ========================== #
+def set_container_tokens(classname, author, what, object):
+    """
+    Set replacement tokens for a generic container class
+    """
+    # Get current year
+    year = str(date.today().year)
+
+    # Set tokens
+    tokens = [{'pattern': 'GTPLContainer', 'string': classname},
+              {'pattern': 'GTPLContainer', 'string': classname.upper()},
+              {'pattern': '[WHAT]', 'string': what},
+              {'pattern': '[AUTHOR]', 'string': author},
+              {'pattern': 'TPL_CONTAINER', 'string': object.lower()},
               {'pattern': '[YEAR]', 'string': year}]
 
     # Return tokens
@@ -627,7 +649,7 @@ def module_menu():
 # ==================== #
 def generic_class_menu():
     """
-    Manage class
+    Manage generic class
     """
     # Annonce actions
     print("")
@@ -662,12 +684,79 @@ def generic_class_menu():
             break
 
     # Set tokens
-    tokens = set_class_tokens(classname, author, what, object)
+    tokens = set_base_tokens(classname, author, what, object)
 
     # If we have an instrument model then add a class to the instrument
     if 'inst/' in dir:
         name = dir[5:8]
         add_instrument_class(name, tokens, classname, 'GTPLBase')
+
+    # Otherwise we have a core module
+    else:
+        print('Core modules not supported yet, sorry ;)')
+
+    # Return
+    return
+
+
+# ====================== #
+# Manage container class #
+# ====================== #
+def container_class_menu():
+    """
+    Manage container class
+    """
+    # Annonce actions
+    print("")
+    print("Add container class")
+    print("-------------------")
+
+    # Stay in loop until there is a final confirmation
+    while True:
+
+        # Get class directory
+        while True:
+            dir = response('Please enter directory where class should reside '
+                           '(e.g. "inst/cta", "src/obs")').lower()
+            if os.path.isdir(dir):
+                break
+            else:
+                print('*** Error: Directory not found.')
+
+        # Enter other information
+        basename  = response('Please enter class name for the objects in the '
+                             'container (e.g. "GEnergy")')
+        baseinst  = response('Please specify how an instance of the class '
+                             'objects should be named (e.g. "energy")')
+        classname = response('Please enter class name for the container '
+                             '(e.g. "GEnergies")')
+        classinst = response('Please specify how an instance of the container '
+                             'class should be named (e.g. "energies")')
+        what      = response('Please say what the class contains (e.g. "Energy")')
+        author    = response('Please enter your name (e.g. "Joe Public")')
+
+        # Ask to confirm module summary
+        print('\nAll right. Have now:')
+        print('Container class name .........: "%s"' % classname)
+        print('Container class instance .....: "%s"' % classinst)
+        print('Object class in container ....: "%s"' % basename)
+        print('Object instance in container .: "%s"' % baseinst)
+        print('Object descriptor ............: "%s"' % what)
+        print('Your name ....................: "%s"' % author)
+        if confirm('Is this correct?'):
+            break
+
+    # Set tokens
+    base_tokens      = set_base_tokens(basename, author, what, baseinst)
+    container_tokens = set_container_tokens(classname, author, what, classinst)
+    container_tokens.extend(base_tokens)
+
+    # If we have an instrument model then add a class to the instrument
+    if 'inst/' in dir:
+        name = dir[5:8]
+        if confirm('Do you want to add the base class "%s"?' % basename):
+            add_instrument_class(name, base_tokens, basename, 'GTPLBase')
+        add_instrument_class(name, container_tokens, classname, 'GTPLContainer')
 
     # Otherwise we have a core module
     else:
@@ -685,20 +774,16 @@ def main_menu():
     Manage main menu
     """
     # Print main menu
-    print('[1] Add instrument module')
-    #print('[2] Add spectral model')
-    #print('[3] Add spatial model')
-    #print('[4] Add temporal model')
-    print('[4] Add generic class')
+    print('[1] Add generic class')
+    print('[2] Add container class')
+    print('[3] Add instrument module')
     print('[q] Quit')
 
     # Wait for the input
     waiting = True
     while waiting:
         choice = str(raw_input('Enter your choice: '))
-        #if choice == '1' or choice == '2' or choice == '3' or choice == '4' or \
-        #   choice == 'q':
-        if choice == '1' or choice == '4' or choice == 'q':
+        if choice == '1' or choice == '2' or choice == '3' or choice == 'q':
             waiting = False
 
     # Return choice
@@ -732,16 +817,13 @@ if __name__ == '__main__':
 
         # Dispatch according to choice
         if choice == '1':
-            module_menu()
+            generic_class_menu()
             print('')
         elif choice == '2':
-            #package_version_menu()
+            container_class_menu()
             print('')
         elif choice == '3':
-            #libtool_version_menu()
-            print('')
-        elif choice == '4':
-            generic_class_menu()
+            module_menu()
             print('')
         elif choice == 'q':
             break
