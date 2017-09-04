@@ -211,7 +211,7 @@ void GTPLClass::init_members(void)
  ***************************************************************************/
 void GTPLClass::copy_members(const GTPLClass& TPL_OBJECT)
 {
-    // Copy attributes
+    // Copy members
     // TODO: Copy all data members
 
     // Return

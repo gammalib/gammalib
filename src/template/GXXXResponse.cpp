@@ -398,7 +398,7 @@ void GXXXResponse::init_members(void)
  ***************************************************************************/
 void GXXXResponse::copy_members(const GXXXResponse& rsp)
 {
-    // Copy attributes
+    // Copy members
     // TODO: Copy all data members
 
     // Return

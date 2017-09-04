@@ -203,6 +203,9 @@ std::string GXXXInstDir::print(const GChatter& chatter) const
  ***************************************************************************/
 void GXXXInstDir::init_members(void)
 {
+    // Initialise members
+    // TODO: Initialise all data members
+
     // Return
     return;
 }
@@ -215,6 +218,9 @@ void GXXXInstDir::init_members(void)
  ***************************************************************************/
 void GXXXInstDir::copy_members(const GXXXInstDir& dir)
 {
+    // Copy members
+    // TODO: Copy all data members
+
     // Return
     return;
 }

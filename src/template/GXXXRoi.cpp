@@ -251,7 +251,7 @@ void GXXXRoi::init_members(void)
  ***************************************************************************/
 void GXXXRoi::copy_members(const GXXXRoi& roi)
 {
-    // Copy attributes
+    // Copy members
     // TODO: Copy all data members
     // Example:
     m_radius = roi.m_radius;
