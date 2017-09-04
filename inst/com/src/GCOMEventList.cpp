@@ -29,8 +29,10 @@
 #include <config.h>
 #endif
 #include <typeinfo>
+#include "GMath.hpp"
 #include "GFits.hpp"
 #include "GException.hpp"
+#include "GCOMSupport.hpp"
 #include "GCOMEventList.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -308,8 +310,18 @@ void GCOMEventList::read(const GFits& file)
     // Clear object
     clear();
 
-    // TODO: You need to implement an interface to the FITS file that stores
-    // your events. Make sure that you read all relevant information.
+    // Get HDU (pointer is always valid)
+    const GFitsTable& hdu = *file.table(1);
+
+    // Read event data
+    read_events(hdu);
+
+    // Read start and stop time
+    GTime start(com_time(hdu.integer("VISDAY"), hdu.integer("VISTIM")));
+    GTime stop(com_time(hdu.integer("VIEDAY"), hdu.integer("VIETIM")));
+    
+    // Append start and stop time as single time interval to GTI
+    m_gti.append(start, stop);
 
     // Return
     return;
@@ -433,9 +445,25 @@ std::string GCOMEventList::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Number of events") +
                       gammalib::str(number()));
 
-        // Append additional information
-        // TODO: Add code to append any additional information that might
-        // be relevant.
+        // Append time information
+        result.append("\n"+gammalib::parformat("MJD interval"));
+        if (gti().size() > 0) {
+            result.append(gammalib::str(tstart().mjd()));
+            result.append(" - ");
+            result.append(gammalib::str(tstop().mjd())+" days");
+        }
+        else {
+            result.append("not defined");
+        }
+        result.append("\n"+gammalib::parformat("UTC interval"));
+        if (gti().size() > 0) {
+            result.append(tstart().utc());
+            result.append(" - ");
+            result.append(tstop().utc());
+        }
+        else {
+            result.append("not defined");
+        }
 
     } // endif: chatter was not silent
 
@@ -485,6 +513,154 @@ void GCOMEventList::copy_members(const GCOMEventList& list)
  ***************************************************************************/
 void GCOMEventList::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read COMPTEL events from FITS table
+ *
+ * @param[in] table FITS table.
+ *
+ * Reads COMPTEL events from a FITS table. The method expects the data in the
+ * format that is provided by the HEASARC archive.
+ *
+ * The method also sets the energy boundaries and Region of Interest of the
+ * data set as this information is not provided in the FITS table header.
+ * For that purpose it scans all data and determines the range that is
+ * covered by the data.
+ *
+ * The method assumes that no events exist so far.
+ ***************************************************************************/
+void GCOMEventList::read_events(const GFitsTable& table)
+{
+    // Extract number of events in FITS file
+    int num = table.nrows();
+
+    // If there are events then load them
+    if (num > 0) {
+
+        // Use pointing direction as roi centre
+        GSkyDir centre;
+        centre.lb_deg(table.real("GLON_SCZ"), table.real("GLAT_SCZ"));
+
+        // Initialise boundaries
+        double radius_max = 0.0;
+        double phibar_min = 0.0;
+        double phibar_max = 0.0;
+
+        // Reserve data
+        m_events.reserve(num);
+
+        // Get column pointers
+        const GFitsTableCol* ptr_tjd        = table["TJD"];           // days
+        const GFitsTableCol* ptr_tics       = table["TICS"];          // ticks
+        const GFitsTableCol* ptr_glon_scat  = table["GLON_SCAT"];     // rad
+        const GFitsTableCol* ptr_glat_scat  = table["GLAT_SCAT"];     // rad
+        const GFitsTableCol* ptr_phi_scat   = table["AZIMUTH_SCAT"];  // rad
+        const GFitsTableCol* ptr_theta_scat = table["ZENITH_SCAT"];   // rad
+        const GFitsTableCol* ptr_phibar     = table["PHIBAR"];        // rad
+        const GFitsTableCol* ptr_eha        = table["EARTH_HORIZON"]; // rad
+        const GFitsTableCol* ptr_e1         = table["E_D1"];          // keV
+        const GFitsTableCol* ptr_e2         = table["E_D2"];          // keV
+        const GFitsTableCol* ptr_psd        = table["PSD"];           // channel
+        const GFitsTableCol* ptr_tof        = table["TOF"];           // channel
+        const GFitsTableCol* ptr_modcom     = table["MODCOM"];        // id
+        const GFitsTableCol* ptr_reflag     = table["RC_REFLAG"];     //
+        const GFitsTableCol* ptr_veto       = table["RC_VETO"];       //
+
+        // Disable scaling of TOF and PSD values so that the original
+        // channel values are recovered
+        ptr_psd->scale(1.0, 0.0);
+        ptr_tof->scale(1.0, 0.0);
+
+        // Initialise boundaries
+        GEnergy emin;
+        GEnergy emax;
+
+        // Copy data from columns into GCOMEventAtom objects
+        for (int i = 0; i < num; ++i) {
+
+            // Allocate event
+            GCOMEventAtom event;
+
+            // Set instrument direction. Note that contrary to what is
+            // specified in the FITS file, angles are provided in radians.
+            // Also, GLON and GLAT are inverted.
+            GCOMInstDir inst_dir;
+            GSkyDir     sky_dir;
+            sky_dir.lb(ptr_glat_scat->real(i), ptr_glon_scat->real(i));
+            inst_dir.dir(sky_dir);
+            inst_dir.phibar(ptr_phibar->real(i) * gammalib::rad2deg);
+
+            // Set total energy
+            GEnergy etot;
+            etot.keV(ptr_e1->real(i) + ptr_e2->real(i));
+
+            // Set phibar value (deg)
+            double phibar = ptr_phibar->real(i) * gammalib::rad2deg;
+
+            // Set event information
+            event.time(ptr_tjd->integer(i), ptr_tics->integer(i));
+            event.energy(etot);
+            event.dir(inst_dir);
+            event.phi(ptr_phi_scat->real(i) * gammalib::rad2deg);     // rad -> deg
+            event.theta(ptr_theta_scat->real(i) * gammalib::rad2deg); // rad -> deg
+            event.phibar(phibar);                                     // rad -> deg
+            event.eha(ptr_eha->real(i) * gammalib::rad2deg);          // rad -> deg
+            event.e1(ptr_e1->real(i) * 1.0e-3);                       // keV -> MeV
+            event.e2(ptr_e2->real(i) * 1.0e-3);                       // keV -> MeV
+            event.psd(ptr_psd->integer(i));
+            event.tof(ptr_tof->integer(i));
+            event.modcom(ptr_modcom->integer(i));
+            event.reflag(ptr_reflag->integer(i));
+            event.veto(ptr_veto->integer(i));
+
+            // Append event
+            m_events.push_back(event);
+
+            // Compute distance from pointing direction
+            double radius = centre.dist_deg(sky_dir);
+
+            // Update boundaries
+            if (i == 0) {
+                emin       = etot;
+                emax       = etot;
+                phibar_min = phibar;
+                phibar_max = phibar;
+                radius_max = radius;
+            }
+            else {
+                if (etot < emin) {
+                    emin = etot;
+                }
+                if (etot > emax) {
+                    emax = etot;
+                }
+                if (phibar < phibar_min) {
+                    phibar_min = phibar;
+                }
+                if (phibar > phibar_max) {
+                    phibar_max = phibar;
+                }
+                if (radius > radius_max) {
+                    radius_max = radius;
+                }
+            }
+
+        } // endfor: looped over all events
+
+        // Set region of interest
+        double phibar = 0.5 * (phibar_min + phibar_max);
+        m_roi         = GCOMRoi(GCOMInstDir(centre, phibar), radius_max,
+                                phibar_min, phibar_max);
+
+        // Set energy boundaries
+        m_ebounds = GEbounds(emin, emax);
+
+    } // endif: there were events
+
     // Return
     return;
 }

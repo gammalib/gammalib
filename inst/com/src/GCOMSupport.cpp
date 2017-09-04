@@ -32,6 +32,8 @@
 #include "GMath.hpp"
 #include "GWcs.hpp"
 #include "GWcsCAR.hpp"
+#include "GTime.hpp"
+#include "GSkyMap.hpp"
 #include "GCOMSupport.hpp"
 
 /* __ Coding definitions _________________________________________________ */
@@ -130,4 +132,36 @@ double com_energy2(const double& energy, const double& phigeo)
 
     // Return D2 energy deposit
     return e2;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert TJD and COMPTEL ticks in GTime object
+ *
+ * @param[in] tjd Truncated Julian Days (days).
+ * @param[in] tics COMPTEL ticks (1/8 ms).
+ * @return Time.
+ *
+ * Converts TJD and COMPTEL ticks into a GTime object. COMPTEL times are
+ * given in UTC, i.e. 8393:0 converts into 1991-05-17T00:00:00 UT
+ * (see COM-RP-UNH-DRG-037).
+ ***************************************************************************/
+GTime com_time(const int& tjd, const int& tics)
+{
+    // Compute MJD
+    double mjd = double(tjd) + 40000.0;
+
+    // Set time and retrieve result in native seconds
+    GTime time;
+    time.mjd(mjd, "UTC");
+    double secs = time.secs();
+
+    // Add ticks and set time in native seconds
+    secs += double(tics) * 0.000125;
+
+    // Set time
+    time.secs(secs);
+
+    // Return time
+    return time;
 }

@@ -28,7 +28,11 @@
 #define GCOMSUPPORT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GSkyMap.hpp"
+//#include "GSkyMap.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GSkyMap;
+class GTime;
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -38,6 +42,6 @@
 void   com_wcs_mer2car(GSkyMap& map);
 double com_energy1(const double& energy, const double& phigeo);
 double com_energy2(const double& energy, const double& phigeo);
-
+GTime  com_time(const int& tjd, const int& tics);
 
 #endif /* GCOMSUPPORT_HPP */

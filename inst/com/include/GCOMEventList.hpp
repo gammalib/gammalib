@@ -38,6 +38,7 @@
 class GRoi;
 class GFits;
 class GFilename;
+class GFitsTable;
 
 /* __ Constants __________________________________________________________ */
 
@@ -88,10 +89,11 @@ protected:
     void         free_members(void);
     virtual void set_energies(void);
     virtual void set_times(void);
+    void         read_events(const GFitsTable& table);
 
     // Protected members
-    GCOMRoi                    m_roi;          //!< Region of interest
-    std::vector<GCOMEventAtom> m_events;       //!< Events
+    GCOMRoi                    m_roi;    //!< Region of interest
+    std::vector<GCOMEventAtom> m_events; //!< Events
 };
 
 

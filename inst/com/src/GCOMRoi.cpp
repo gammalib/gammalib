@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GEvent.hpp"
 #include "GCOMRoi.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -71,6 +72,32 @@ GCOMRoi::GCOMRoi(const GCOMRoi& roi) : GRoi(roi)
 
     // Copy members
     copy_members(roi);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Region of interest constructor
+ *
+ * @param[in] centre Instrument direction centre.
+ * @param[in] radius Instrument direction radius.
+ * @param[in] phibar_min Phibar minimum (deg).
+ * @param[in] phibar_max Phibar maximum (deg).
+ ***************************************************************************/
+GCOMRoi::GCOMRoi(const GCOMInstDir& centre, const double& radius,
+                 const double& phibar_min, const double& phibar_max) : GRoi()
+
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    this->centre(centre);
+    this->radius(radius);
+    this->phibar_min(phibar_min);
+    this->phibar_max(phibar_max);
 
     // Return
     return;
@@ -165,15 +192,24 @@ GCOMRoi* GCOMRoi::clone(void) const
  * @brief Check if region of interest contains an event
  *
  * @return True if region of interest contains event, false otherwise.
- *
- * @todo Implement method.
  ***************************************************************************/
 bool GCOMRoi::contains(const GEvent& event) const
 {
     // Initialise flag to non-containment
     bool contains = false;
 
-    // TODO: Implement containment test
+    // Get pointer to COMPTEL instrument direction
+    const GCOMInstDir* dir = dynamic_cast<const GCOMInstDir*>(&event.dir());
+
+    // If instrument direction is a COMPTEL instrument direction then check
+    // on containment
+    if (dir != NULL) {
+        if ((m_centre.dir().dist_deg(dir->dir()) <= m_radius) &&
+            (m_phibar_min                        <= dir->phibar()) &&
+            (m_phibar_max                        >= dir->phibar())) {
+            contains = true;
+        }
+    }
 
     // Return containment flag
     return contains;
@@ -200,7 +236,13 @@ std::string GCOMRoi::print(const GChatter& chatter) const
         result.append("=== GCOMRoi ===");
 
         // Append information
-        // TODO: Add any relevant information
+        result.append("\n"+gammalib::parformat("RoI centre"));
+        result.append(m_centre.print());
+        result.append("\n"+gammalib::parformat("RoI radius"));
+        result.append(gammalib::str(m_radius)+" deg");
+        result.append("\n"+gammalib::parformat("Phibar range"));
+        result.append(gammalib::str(m_phibar_min)+" - ");
+        result.append(gammalib::str(m_phibar_max)+" deg");
 
     } // endif: chatter was not silent
 
@@ -221,9 +263,10 @@ std::string GCOMRoi::print(const GChatter& chatter) const
 void GCOMRoi::init_members(void)
 {
     // Initialise members
-    // TODO: Initialise all data members
-    // Example:
-    double m_radius = 0.0;
+    m_centre.clear();
+    m_radius     = 0.0;
+    m_phibar_min = 0.0;
+    m_phibar_max = 0.0;
     
     // Return
     return;
@@ -238,9 +281,10 @@ void GCOMRoi::init_members(void)
 void GCOMRoi::copy_members(const GCOMRoi& roi)
 {
     // Copy attributes
-    // TODO: Copy all data members
-    // Example:
-    m_radius = roi.m_radius;
+    m_centre     = roi.m_centre;
+    m_radius     = roi.m_radius;
+    m_phibar_min = roi.m_phibar_min;
+    m_phibar_max = roi.m_phibar_max;
 
     // Return
     return;

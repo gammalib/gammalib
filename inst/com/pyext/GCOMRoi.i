@@ -40,6 +40,8 @@ public:
     // Constructors and destructors
     GCOMRoi(void);
     GCOMRoi(const GCOMRoi& roi);
+    GCOMRoi(const GCOMInstDir& centre, const double& radius,
+            const double& phibar_min, const double& phibar_max);
     virtual ~GCOMRoi(void);
 
     // Implemented pure virtual base class methods
@@ -49,7 +51,14 @@ public:
     virtual bool        contains(const GEvent& event) const;
 
     // Other methods
-    // TODO: Copy methods from GCOMRoi.hpp file
+    const GCOMInstDir& centre(void) const;
+    const double&      radius(void) const;
+    const double&      phibar_min(void) const;
+    const double&      phibar_max(void) const;
+    void               centre(const GCOMInstDir& centre);
+    void               radius(const double& radius);
+    void               phibar_min(const double& phibar_min);
+    void               phibar_max(const double& phibar_max);
 };
 
 

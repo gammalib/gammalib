@@ -11,6 +11,7 @@ GammaLib 1.5 is a major release that adds significant functionality.
 In particular, this release provides:
 
 * IAQ response computation for COMPTEL
+* Event list support for COMPTEL
 
 
 Bug fixes
@@ -38,7 +39,8 @@ New features
 
 * [`2186 <https://cta-redmine.irap.omp.eu/issues/2186>`_] -
   Implement COMPTEL response computation
-
+* [`2187 <https://cta-redmine.irap.omp.eu/issues/2187>`_] -
+  Implement COMPTEL event list support
 
 Clean up
 --------

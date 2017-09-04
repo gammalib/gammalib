@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GRoi.hpp"
+#include "GCOMInstDir.hpp"
 
 
 /***********************************************************************//**
@@ -39,8 +40,6 @@
  *
  * The COMPTEL region of interest class defines the event direction
  * region that is used for unbinned data analysis.
- *
- * @todo Complete the class description.
  ***************************************************************************/
 class GCOMRoi : public GRoi {
 
@@ -48,6 +47,8 @@ public:
     // Constructors and destructors
     GCOMRoi(void);
     GCOMRoi(const GCOMRoi& roi);
+    GCOMRoi(const GCOMInstDir& centre, const double& radius,
+            const double& phibar_min, const double& phibar_max);
     virtual ~GCOMRoi(void);
 
     // Operators
@@ -61,7 +62,14 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    // TODO: Add any further methods that are needed
+    const GCOMInstDir& centre(void) const;
+    void               centre(const GCOMInstDir& centre);
+    const double&      radius(void) const;
+    void               radius(const double& radius);
+    const double&      phibar_min(void) const;
+    void               phibar_min(const double& phibar_min);
+    const double&      phibar_max(void) const;
+    void               phibar_max(const double& phibar_max);
 
 protected:
     // Protected methods
@@ -70,9 +78,10 @@ protected:
     void free_members(void);
     
     // Protected members
-    // TODO: Add any data members that are necessary
-    // Example:
-    double m_radius; //!< Region of interest radius
+    GCOMInstDir m_centre;     //!< Centre of RoI in instrument coordinates
+    double      m_radius;     //!< Radius of region of interest
+    double      m_phibar_min; //!< Minimum Phibar of region of interest
+    double      m_phibar_max; //!< Minimum Phibar of region of interest
 };
 
 
@@ -85,6 +94,122 @@ inline
 std::string GCOMRoi::classname(void) const
 {
     return ("GCOMRoi");
+}
+
+
+/***********************************************************************//**
+ * @brief Return centre of region of interest
+ *
+ * @return Centre of region of interest centre.
+ *
+ * Returns the instrument direction of the centre of the region of interest.
+ ***************************************************************************/
+inline
+const GCOMInstDir& GCOMRoi::centre(void) const
+{
+    return (m_centre);
+}
+
+
+/***********************************************************************//**
+ * @brief Set centre of region of interest
+ *
+ * @param[in] centre Instrument direction.
+ *
+ * Set the instrument direction of the centre of the region of interest.
+ ***************************************************************************/
+inline
+void GCOMRoi::centre(const GCOMInstDir& centre)
+{
+    m_centre = centre;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return radius of region of interest
+ *
+ * @return Radius of region of interest (deg).
+ *
+ * Returns the radius of the region of interest.
+ ***************************************************************************/
+inline
+const double& GCOMRoi::radius(void) const
+{
+    return (m_radius);
+}
+
+
+/***********************************************************************//**
+ * @brief Set radius of region of interest
+ *
+ * @param[in] radius Radius of region of interest (deg).
+ *
+ * Set the radius of the region of interest.
+ ***************************************************************************/
+inline
+void GCOMRoi::radius(const double& radius)
+{
+    m_radius = radius;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum Phibar of region of interest
+ *
+ * @return Minimum Phibar of region of interest (deg).
+ *
+ * Returns the minimum Phibar of region of interest.
+ ***************************************************************************/
+inline
+const double& GCOMRoi::phibar_min(void) const
+{
+    return (m_phibar_min);
+}
+
+
+/***********************************************************************//**
+ * @brief Set minimum Phibar of region of interest
+ *
+ * @param[in] phibar_min Minimum Phibar of region of interest (deg).
+ *
+ * Set the minimum Phibar of region of interest.
+ ***************************************************************************/
+inline
+void GCOMRoi::phibar_min(const double& phibar_min)
+{
+    m_phibar_min = phibar_min;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum Phibar of region of interest
+ *
+ * @return Maximum Phibar of region of interest (deg).
+ *
+ * Returns the maximum Phibar of region of interest.
+ ***************************************************************************/
+inline
+const double& GCOMRoi::phibar_max(void) const
+{
+    return (m_phibar_max);
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum Phibar of region of interest
+ *
+ * @param[in] phibar_min Maximum Phibar of region of interest (deg).
+ *
+ * Set the maximum Phibar of region of interest.
+ ***************************************************************************/
+inline
+void GCOMRoi::phibar_max(const double& phibar_max)
+{
+    m_phibar_max = phibar_max;
+    return;
 }
 
 #endif /* GCOMROI_HPP */

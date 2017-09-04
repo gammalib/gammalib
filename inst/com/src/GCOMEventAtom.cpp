@@ -30,6 +30,7 @@
 #endif
 #include <string>
 #include "GCOMEventAtom.hpp"
+#include "GCOMSupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -169,6 +170,24 @@ GCOMEventAtom* GCOMEventAtom::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Set event time
+ *
+ * @param[in] tjd Truncated Julian Days (days).
+ * @param[in] ticks COMPTEL ticks (1/8 ms).
+ *
+ * Sets the event time from the native COMPTEL time format.
+ ***************************************************************************/
+void GCOMEventAtom::time(const int& tjd, const int& tics)
+{
+    // Set event time by converting from the native COMPTEL time format
+    m_time = com_time(tjd, tics);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print event information
  *
  * @param[in] chatter Chattiness.
@@ -183,7 +202,9 @@ std::string GCOMEventAtom::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append event attributes
-        result.append("Dir="+m_dir.print(chatter));
+        result.append("Chi="+gammalib::str(m_dir.dir().l_deg()));
+        result.append(" Psi="+gammalib::str(m_dir.dir().b_deg()));
+        result.append(" Phibar="+gammalib::str(m_dir.phibar()));
         result.append(" Energy="+m_energy.print(chatter));
         result.append(" Time="+m_time.print(chatter));
 
@@ -207,8 +228,19 @@ void GCOMEventAtom::init_members(void)
 {
     // Initialise members
     m_dir.clear();
-    m_time.clear();
     m_energy.clear();
+    m_time.clear();
+    m_e1     = 0.0;
+    m_e2     = 0.0;
+    m_phibar = 0.0;
+    m_theta  = 0.0;
+    m_phi    = 0.0;
+    m_eha    = 0.0;
+    m_psd    = 0;
+    m_tof    = 0;
+    m_modcom = 0;
+    m_reflag = 0;
+    m_veto   = 0;
 
     // Return
     return;
@@ -224,8 +256,19 @@ void GCOMEventAtom::copy_members(const GCOMEventAtom& atom)
 {
     // Copy members
     m_dir    = atom.m_dir;
-    m_time   = atom.m_time;
     m_energy = atom.m_energy;
+    m_time   = atom.m_time;
+    m_e1     = atom.m_e1;
+    m_e2     = atom.m_e2;
+    m_phibar = atom.m_phibar;
+    m_theta  = atom.m_theta;
+    m_phi    = atom.m_phi;
+    m_eha    = atom.m_eha;
+    m_psd    = atom.m_psd;
+    m_tof    = atom.m_tof;
+    m_modcom = atom.m_modcom;
+    m_reflag = atom.m_reflag;
+    m_veto   = atom.m_veto;
 
     // Return
     return;

@@ -3,6 +3,7 @@
         * Version 1.5.0 released
         =========================
 
+        Implement COMPTEL event list support (#2187)
         Add GFitsTableCol::scale() method (#2191)
         Implement COMPTEL response computation (#2186)
         Add COMPTEL SDA, SDB and ICT response files (#2186)

@@ -16,6 +16,9 @@ The following classes have been added:
 - GCOMD2Response
 - GCOMInstChars
 - GCOMIaq
+- GCOMRoi
+- GCOMEventAtom
+- GCOMEventList
 
 The following classes have been removed:
 - n.a.
@@ -32,6 +35,7 @@ The following methods have been added:
 - GApplicationPar::time(GTime&)
 - GModelSpectralNodes(GModelSpectral&, GEnergies&)
 - GFitsTableCol::scale(double&, double&)
+- GCOMInstDir(GSkyDir&, double&)
 
 The following methods have been removed:
 - n.a.
@@ -166,3 +170,6 @@ allows now to generate an own IAQ within GammaLib. Below 10 MeV the resulting
 IAQs are very close to simulated ones from UNH, above there are some deviations.
 Definitely more cross-checking is needed, but for now the functionality is
 there (#2186).
+
+The classes GCOMRoi, GCOMEventAtom and GCOMEventList were added to support
+handling of COMPTEL event lists in EVP FITS format (#2182).

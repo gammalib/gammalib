@@ -49,6 +49,34 @@ public:
     const GCOMInstDir& dir(void) const;
     const GEnergy&     energy(void) const;
     const GTime&       time(void) const;
+
+    // Other methods
+    void         dir(const GCOMInstDir& dir);
+    void         energy(const GEnergy& energy);
+    void         time(const GTime& time);
+    void         time(const int& tjd, const int& tics);
+    void         phibar(const float& phibar);
+    const float& phibar(void) const;
+    void         phi(const float& phi);
+    const float& phi(void) const;
+    void         theta(const float& theta);
+    const float& theta(void) const;
+    void         eha(const float& eha);
+    const float& eha(void) const;
+    void         e1(const float& e1);
+    const float& e1(void) const;
+    void         e2(const float& e2);
+    const float& e2(void) const;
+    void         psd(const int& psd);
+    const int&   psd(void) const;
+    void         tof(const int& tof);
+    const int&   tof(void) const;
+    void         modcom(const int& modcom);
+    const int&   modcom(void) const;
+    void         reflag(const int& reflag);
+    const int&   reflag(void) const;
+    void         veto(const int& veto);
+    const int&   veto(void) const;
 };
 
 

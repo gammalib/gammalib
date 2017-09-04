@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMInstDir.cpp - COMPTEL instrument direction class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,6 +72,29 @@ GCOMInstDir::GCOMInstDir(const GCOMInstDir& dir) : GInstDir(dir)
 
     // Copy members
     copy_members(dir);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Instrument direction constructor
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] phibar Phibar.
+ *
+ * Constructs a COMPTEL instrument direction from a sky direction and a
+ * phibar value.
+ ***************************************************************************/
+GCOMInstDir::GCOMInstDir(const GSkyDir& dir, const double& phibar) : GInstDir()
+{
+    // Initialise class members
+    init_members();
+
+    // Set class members
+    this->dir(dir);
+    this->phibar(phibar);
 
     // Return
     return;
