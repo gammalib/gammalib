@@ -50,10 +50,11 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
-    void        read(const GFitsTable& table, const std::string& usage = "",
-                                              const std::string& mode  = "");
+    bool        contains(const GTime& time) const;
     const GGti& gti(void) const;
     void        gti(const GGti& gti);
+    void        read(const GFitsTable& table, const std::string& usage = "",
+                                              const std::string& mode  = "");
 };
 
 

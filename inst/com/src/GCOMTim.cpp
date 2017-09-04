@@ -305,7 +305,7 @@ void GCOMTim::init_members(void)
 {
     // Initialise members
     m_gti.clear();
-    
+
     // Return
     return;
 }
@@ -318,7 +318,7 @@ void GCOMTim::init_members(void)
  ***************************************************************************/
 void GCOMTim::copy_members(const GCOMTim& tim)
 {
-    // Copy attributes
+    // Copy members
     m_gti = tim.m_gti;
 
     // Return

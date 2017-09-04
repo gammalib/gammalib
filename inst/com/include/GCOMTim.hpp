@@ -66,10 +66,11 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void        read(const GFitsTable& table, const std::string& usage = "",
-                                              const std::string& mode  = "");
+    bool        contains(const GTime& time) const;
     const GGti& gti(void) const;
     void        gti(const GGti& gti);
+    void        read(const GFitsTable& table, const std::string& usage = "",
+                                              const std::string& mode  = "");
 
 protected:
     // Protected methods
@@ -78,7 +79,7 @@ protected:
     void free_members(void);
     
     // Protected members
-    GGti m_gti; //!< Good Time intervals
+    GGti m_gti;     //!< Good Time intervals
 };
 
 
@@ -91,6 +92,21 @@ inline
 std::string GCOMTim::classname(void) const
 {
     return ("GCOMTim");
+}
+
+
+/***********************************************************************//**
+ * @brief Check if time is comprised in the Good Time Intervals
+ *
+ * @param[in] time Time.
+ * @return True if time is within Good Time Intervals, false otherwise.
+ *
+ * Checks if a time is comprised in the Good Time Intervals.
+ ***************************************************************************/
+inline
+bool GCOMTim::contains(const GTime& time) const
+{
+    return (m_gti.contains(time));
 }
 
 
