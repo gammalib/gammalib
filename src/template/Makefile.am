@@ -44,7 +44,7 @@ libtemplate_la_LDFLAGS =
 
 # Additional files to distribute
 EXTRA_DIST = GTPLClass.hpp \
-             GTPLClass..i \
+             GTPLClass.i \
              GXXXLib.hpp \
              GXXXObservation.hpp \
              GXXXObservation.i \

@@ -60,6 +60,7 @@
 %import(module="gammalib.obs") "GEventList.i";
 %import(module="gammalib.obs") "GResponse.i";
 %import(module="gammalib.obs") "GInstDir.i";
+%import(module="gammalib.obs") "GRoi.i";
 %import(module="gammalib.model") "GModel.i";
 %import(module="gammalib.model") "GModelData.i";
 
@@ -111,3 +112,4 @@
 %include "GCOMInstChar.i"
 %include "GCOMIaq.i"
 %include "GCOMModelDRBFitting.i"
+%include "GCOMTim.i"

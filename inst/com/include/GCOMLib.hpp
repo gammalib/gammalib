@@ -39,6 +39,7 @@
 #include "GCOMD2Response.hpp"
 #include "GCOMInstChars.hpp"
 #include "GCOMObservation.hpp"
+#include "GCOMTim.hpp"
 #include "GCOMRoi.hpp"
 #include "GCOMEventAtom.hpp"
 #include "GCOMEventList.hpp"

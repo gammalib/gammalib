@@ -1,7 +1,7 @@
 /***************************************************************************
- *                       GTPLClass.cpp - [WHAT] class                      *
+ *             GCOMTim.cpp - COMPTEL Good Time Intervals class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) [YEAR] by [AUTHOR]                                       *
+ *  copyright (C) 2017 by Juergen Knodlseder                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,16 +19,19 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GTPLClass.cpp
- * @brief [WHAT] class implementation
- * @author [AUTHOR]
+ * @file GCOMTim.cpp
+ * @brief COMPTEL Good Time Intervals class implementation
+ * @author Juergen Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GTPLClass.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
+#include "GCOMTim.hpp"
+#include "GCOMSupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -49,7 +52,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GTPLClass::GTPLClass(void)
+GCOMTim::GCOMTim(void)
 {
     // Initialise class members
     init_members();
@@ -62,15 +65,46 @@ GTPLClass::GTPLClass(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] TPL_OBJECT [WHAT].
+ * @param[in] tim COMPTEL Good Time Intervals.
  ***************************************************************************/
-GTPLClass::GTPLClass(const GTPLClass& TPL_OBJECT)
+GCOMTim::GCOMTim(const GCOMTim& tim)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(TPL_OBJECT);
+    copy_members(tim);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief File name constructor
+ *
+ * @param[in] filename TIM file name.
+ * @param[in] usage Usage selection (blank: accept all usage strings).
+ * @param[in] mode Mode selection (blank: accept all mode strings).
+ *
+ * Constructs COMPTEL Good Time Intervals from the information in a TIM
+ * FITS file.
+ ***************************************************************************/
+GCOMTim::GCOMTim(const GFilename&   filename,
+                 const std::string& usage,
+                 const std::string& mode)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Get HDU (pointer is always valid)
+    const GFitsTable& hdu = *fits.table(1);
+
+    // Read TIM file
+    read(hdu, usage, mode);
+
+    // Close FITS file
+    fits.close();
 
     // Return
     return;
@@ -80,7 +114,7 @@ GTPLClass::GTPLClass(const GTPLClass& TPL_OBJECT)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GTPLClass::~GTPLClass(void)
+GCOMTim::~GCOMTim(void)
 {
     // Free members
     free_members();
@@ -99,13 +133,13 @@ GTPLClass::~GTPLClass(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] TPL_OBJECT [WHAT].
- * @return [WHAT].
+ * @param[in] tim COMPTEL Good Time Intervals.
+ * @return COMPTEL Good Time Intervals.
  ***************************************************************************/
-GTPLClass& GTPLClass::operator=(const GTPLClass& TPL_OBJECT)
+GCOMTim& GCOMTim::operator=(const GCOMTim& tim)
 {
     // Execute only if object is not identical
-    if (this != &TPL_OBJECT) {
+    if (this != &tim) {
 
         // Free members
         free_members();
@@ -114,7 +148,7 @@ GTPLClass& GTPLClass::operator=(const GTPLClass& TPL_OBJECT)
         init_members();
 
         // Copy members
-        copy_members(TPL_OBJECT);
+        copy_members(tim);
 
     } // endif: object was not identical
 
@@ -130,9 +164,9 @@ GTPLClass& GTPLClass::operator=(const GTPLClass& TPL_OBJECT)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear [WHAT]
+ * @brief Clear COMPTEL good time intervals
  ***************************************************************************/
-void GTPLClass::clear(void)
+void GCOMTim::clear(void)
 {
     // Free members
     free_members();
@@ -146,25 +180,85 @@ void GTPLClass::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone [WHAT]
+ * @brief Clone COMPTEL good time intervals
  *
- * @return Pointer to deep copy of [WHAT].
+ * @return Pointer to deep copy of COMPTEL Good Time Intervals.
  ***************************************************************************/
-GTPLClass* GTPLClass::clone(void) const
+GCOMTim* GCOMTim::clone(void) const
 {
-    return new GTPLClass(*this);
+    return new GCOMTim(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Print [WHAT]
+ * @brief Read COMPTEL Good Time Intervals from FITS table
+ *
+ * @param[in] table TIM FITS table.
+ * @param[in] usage Usage selection (blank: accept all usage strings).
+ * @param[in] mode Mode selection (blank: accept all mode strings).
+ *
+ * Reads COMPTEL Good Time Intervals from the information in a TIM FITS
+ * table.
+ ***************************************************************************/
+void GCOMTim::read(const GFitsTable&  table,
+                   const std::string& usage,
+                   const std::string& mode)
+{
+    // Clear object
+    clear();
+
+    // Extract number of TIM rows
+    int num = table.nrows();
+
+    // If there is TIM information then load it
+    if (num > 0) {
+
+        // Get column pointers
+        const GFitsTableCol* ptr_tjd_start = table["START_TJD"];
+        const GFitsTableCol* ptr_tic_start = table["START_TIC"];
+        const GFitsTableCol* ptr_tjd_end   = table["END_TJD"];
+        const GFitsTableCol* ptr_tic_end   = table["END_TIC"];
+        const GFitsTableCol* ptr_usage     = table["USAGE"];
+        const GFitsTableCol* ptr_mode      = table["MODE"];
+ 
+        // Convert data into GTI
+        for (int i = 0; i < num; ++i) {
+
+            // Skip if usage string does not match
+            if (!usage.empty() && ptr_usage->string(i) != usage) {
+                continue;
+            }
+
+            // Skip if mode string does not match
+            if (!mode.empty() && ptr_mode->string(i) != mode) {
+                continue;
+            }
+
+            // Convert times
+            GTime tstart = com_time(ptr_tjd_start->integer(i),
+                                    ptr_tic_start->integer(i));
+            GTime tstop  = com_time(ptr_tjd_end->integer(i),
+                                    ptr_tic_end->integer(i));
+
+            // Append GTI
+            m_gti.append(tstart, tstop);
+
+        } // endfor: Looped over GTIs
+
+    } // endif: there was TIM information
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print COMPTEL Good Time Intervals
  *
  * @param[in] chatter Chattiness.
- * @return String containing [WHAT] information.
- *
- * @todo Implement method.
+ * @return String containing COMPTEL Good Time Intervals information.
  ***************************************************************************/
-std::string GTPLClass::print(const GChatter& chatter) const
+std::string GCOMTim::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -173,10 +267,23 @@ std::string GTPLClass::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GTPLClass ===");
+        result.append("=== GCOMTim ===");
 
-        // Append information
-        // TODO: Add any relevant information
+        // Append GTI information
+        result.append("\n"+gammalib::parformat("Number of intervals"));
+        result.append(gammalib::str(m_gti.size()));
+        result.append("\n"+gammalib::parformat("Ontime"));
+        result.append(gammalib::str(m_gti.ontime())+" sec");
+        result.append("\n"+gammalib::parformat("Elapsed time"));
+        result.append(gammalib::str(m_gti.telapse())+" sec");
+        result.append("\n"+gammalib::parformat("MJD range"));
+        result.append(gammalib::str(m_gti.tstart().mjd()));
+        result.append(" - ");
+        result.append(gammalib::str(m_gti.tstop().mjd()));
+        result.append("\n"+gammalib::parformat("UTC range"));
+        result.append(m_gti.tstart().utc());
+        result.append(" - ");
+        result.append(m_gti.tstop().utc());
 
     } // endif: chatter was not silent
 
@@ -194,10 +301,10 @@ std::string GTPLClass::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GTPLClass::init_members(void)
+void GCOMTim::init_members(void)
 {
     // Initialise members
-    // TODO: Initialise all data members
+    m_gti.clear();
     
     // Return
     return;
@@ -207,12 +314,12 @@ void GTPLClass::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] TPL_OBJECT [WHAT].
+ * @param[in] tim COMPTEL Good Time Intervals.
  ***************************************************************************/
-void GTPLClass::copy_members(const GTPLClass& TPL_OBJECT)
+void GCOMTim::copy_members(const GCOMTim& tim)
 {
     // Copy attributes
-    // TODO: Copy all data members
+    m_gti = tim.m_gti;
 
     // Return
     return;
@@ -222,7 +329,7 @@ void GTPLClass::copy_members(const GTPLClass& TPL_OBJECT)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GTPLClass::free_members(void)
+void GCOMTim::free_members(void)
 {
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                        GTPLClass.i - [WHAT] class                       *
+ *              GCOMTim.i - COMPTEL Good Time Intervals class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) [YEAR] by [AUTHOR]                                       *
+ *  copyright (C) 2017 by Juergen Knodlseder                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,43 +19,49 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GTPLClass.i
- * @brief [WHAT] class definition
- * @author [AUTHOR]
+ * @file GCOMTim.i
+ * @brief COMPTEL Good Time Intervals class definition
+ * @author Juergen Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GTPLClass.hpp"
+#include "GCOMTim.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GTPLClass
+ * @class GCOMTim
  *
- * @brief [WHAT] class
+ * @brief COMPTEL Good Time Intervals class
  ***************************************************************************/
-class GTPLClass : public GBase {
+class GCOMTim : public GBase {
 
 public:
     // Constructors and destructors
-    GTPLClass(void);
-    GTPLClass(const GTPLClass& TPL_OBJECT);
-    virtual ~GTPLClass(void);
+    GCOMTim(void);
+    GCOMTim(const GCOMTim& tim);
+    GCOMTim(const GFilename& filename, const std::string& usage = "",
+                                       const std::string& mode  = "");
+    virtual ~GCOMTim(void);
 
     // Implemented pure virtual base class methods
-    virtual void       clear(void);
-    virtual GTPLClass* clone(void) const;
+    virtual void        clear(void);
+    virtual GCOMTim*    clone(void) const;
+    virtual std::string classname(void) const;
 
     // Other methods
-    // TODO: Copy methods from GTPLClass.hpp file
+    void        read(const GFitsTable& table, const std::string& usage = "",
+                                              const std::string& mode  = "");
+    const GGti& gti(void) const;
+    void        gti(const GGti& gti);
 };
 
 
 /***********************************************************************//**
- * @brief GTPLClass class extension
+ * @brief GCOMTim class extension
  ***************************************************************************/
-%extend GTPLClass {
-    GTPLClass copy() {
+%extend GCOMTim {
+    GCOMTim copy() {
         return (*self);
     }
 };

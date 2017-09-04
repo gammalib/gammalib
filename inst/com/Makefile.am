@@ -35,6 +35,7 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = src/GCOMSupport.cpp \
+          src/GCOMTim.cpp \
           src/GCOMRoi.cpp \
           src/GCOMEventAtom.cpp \
           src/GCOMEventList.cpp \
@@ -51,6 +52,7 @@ sources = src/GCOMSupport.cpp \
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCOMEventCube.hpp \
+                     include/GCOMTim.hpp \
                      include/GCOMRoi.hpp \
                      include/GCOMEventAtom.hpp \
                      include/GCOMEventList.hpp \

@@ -19,6 +19,7 @@ The following classes have been added:
 - GCOMRoi
 - GCOMEventAtom
 - GCOMEventList
+- GCOMTim
 
 The following classes have been removed:
 - n.a.
@@ -173,4 +174,5 @@ Definitely more cross-checking is needed, but for now the functionality is
 there (#2186).
 
 The classes GCOMRoi, GCOMEventAtom and GCOMEventList were added to support
-handling of COMPTEL event lists in EVP FITS format (#2182).
+handling of COMPTEL event lists in EVP FITS format. In addition, the class
+GCOMTim was added to support reading of TIM FITS files (#2182).
