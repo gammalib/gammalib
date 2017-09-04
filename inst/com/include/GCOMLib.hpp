@@ -39,6 +39,9 @@
 #include "GCOMD2Response.hpp"
 #include "GCOMInstChars.hpp"
 #include "GCOMObservation.hpp"
+#include "GCOMRoi.hpp"
+#include "GCOMEventAtom.hpp"
+#include "GCOMEventList.hpp"
 #include "GCOMModelDRBFitting.hpp"
 
 #endif /* GCOMLIB_HPP */

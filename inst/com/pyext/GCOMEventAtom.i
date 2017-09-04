@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GCOMInstDir.i - COMPTEL instrument direction class            *
+ *                GCOMEventAtom.i - COMPTEL event atom class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,47 +19,72 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMInstDir.hpp
- * @brief COMPTEL instrument direction class definition
+ * @file GCOMEventAtom.i
+ * @brief COMPTEL event atom class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCOMInstDir.hpp"
+#include "GCOMEventAtom.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCOMInstDir
+ * @class GCOMEventAtom
  *
- * @brief Interface for the COMPTEL instrument direction class
+ * @brief COMPTEL event atom class
  ***************************************************************************/
-class GCOMInstDir : public GInstDir {
+class GCOMEventAtom : public GEventAtom {
+
 public:
     // Constructors and destructors
-    GCOMInstDir(void);
-    GCOMInstDir(const GCOMInstDir& dir);
-    GCOMInstDir(const GSkyDir& dir, const double& phibar);
-    virtual ~GCOMInstDir(void);
+    GCOMEventAtom(void);
+    GCOMEventAtom(const GCOMEventAtom& atom);
+    virtual ~GCOMEventAtom(void);
 
-    // Methods
-    virtual void         clear(void);
-    virtual GCOMInstDir* clone(void) const;
-    virtual std::string  classname(void) const;
+    // Implemented pure virtual base class methods
+    void               clear(void);
+    GCOMEventAtom*     clone(void) const;
+    std::string        classname(void) const;
+    const GCOMInstDir& dir(void) const;
+    const GEnergy&     energy(void) const;
+    const GTime&       time(void) const;
 
     // Other methods
-    void           dir(const GSkyDir& dir);
-    const GSkyDir& dir(void) const;
-    void           phibar(const double& phibar);
-    const double&  phibar(void) const;
+    void         dir(const GCOMInstDir& dir);
+    void         energy(const GEnergy& energy);
+    void         time(const GTime& time);
+    void         time(const int& tjd, const int& tics);
+    void         phibar(const float& phibar);
+    const float& phibar(void) const;
+    void         phi(const float& phi);
+    const float& phi(void) const;
+    void         theta(const float& theta);
+    const float& theta(void) const;
+    void         eha(const float& eha);
+    const float& eha(void) const;
+    void         e1(const float& e1);
+    const float& e1(void) const;
+    void         e2(const float& e2);
+    const float& e2(void) const;
+    void         psd(const int& psd);
+    const int&   psd(void) const;
+    void         tof(const int& tof);
+    const int&   tof(void) const;
+    void         modcom(const int& modcom);
+    const int&   modcom(void) const;
+    void         reflag(const int& reflag);
+    const int&   reflag(void) const;
+    void         veto(const int& veto);
+    const int&   veto(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GCOMInstDir class extension
+ * @brief GCOMEventAtom class extension
  ***************************************************************************/
-%extend GCOMInstDir {
-    GCOMInstDir copy() {
+%extend GCOMEventAtom {
+    GCOMEventAtom copy() {
         return (*self);
     }
 };

@@ -94,7 +94,7 @@ std::string GXXXEventAtom::classname(void) const
  *
  * Returns the direction of the event.
  *
- * @todo Specify what actually an event direction is. You instrument may
+ * @todo Specify what actually an event direction is. Your instrument may
  * not be an imaging instrument.
  ***************************************************************************/
 inline

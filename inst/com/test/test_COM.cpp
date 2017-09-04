@@ -51,6 +51,35 @@ const std::string com_model = datadir+"/crab.xml";
 
 
 /***********************************************************************//**
+ * @brief Set COMPTEL support test methods
+ ***************************************************************************/
+void TestGCOMSupport::set(void)
+{
+    // Set test name
+    name("GCOMSupport");
+
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCOMSupport::test_com_time),
+           "Test conversion of COMPTEL time into GTime");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCOMSupport* TestGCOMSupport::clone(void) const
+{
+    // Clone test suite
+    return new TestGCOMSupport(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set COMPTEL response test methods
  ***************************************************************************/
 void TestGCOMResponse::set(void)
@@ -140,6 +169,22 @@ TestGCOMOptimize* TestGCOMOptimize::clone(void) const
 {
     // Clone test suite
     return new TestGCOMOptimize(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Test com_time function
+ ***************************************************************************/
+void TestGCOMSupport::test_com_time(void)
+{
+    // Verify time conversion given in COM-RP-UNH-DRG-037
+    GTime time1(com_time(8393, 0));
+    test_value(time1.utc(), "1991-05-17T00:00:00", "Test 8393:0");
+    GTime time2(com_time(8406, 691199999));
+    test_value(time2.utc(), "1991-05-31T00:00:00", "Test 8406:691199999");
+
+    // Return
+    return;
 }
 
 
@@ -696,11 +741,13 @@ int main(void)
     bool success = true;
 
     // Create test suites and append them to the container
-    TestGCOMResponse    rsp;
+    TestGCOMSupport     support;
     TestGCOMObservation obs;
+    TestGCOMResponse    rsp;
     TestGCOMOptimize    opt;
-    testsuites.append(rsp);
+    testsuites.append(support);
     testsuites.append(obs);
+    testsuites.append(rsp);
     testsuites.append(opt);
 
     // Run the testsuites

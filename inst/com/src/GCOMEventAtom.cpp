@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GXXXRoi.cpp - [INSTRUMENT] region of interest class         *
+ *               GCOMEventAtom.cpp - COMPTEL event atom class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) [YEAR] by [AUTHOR]                                       *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,18 +19,18 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GXXXRoi.cpp
- * @brief [INSTRUMENT] region of interest class implementation
- * @author [AUTHOR]
+ * @file GCOMEventAtom.cpp
+ * @brief COMPTEL event atom class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GEvent.hpp"
-#include "GXXXRoi.hpp"
-#include "GXXXInstDir.hpp"
+#include <string>
+#include "GCOMEventAtom.hpp"
+#include "GCOMSupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -41,19 +41,20 @@
 /* __ Debug definitions __________________________________________________ */
 
 
-
 /*==========================================================================
  =                                                                         =
- =                         Constructors/destructors                        =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Creates an empty COMPTEL event atom.
  ***************************************************************************/
-GXXXRoi::GXXXRoi(void) : GRoi()
+GCOMEventAtom::GCOMEventAtom(void) : GEventAtom()
 {
-    // Initialise class members
+    // Initialise class members for clean destruction
     init_members();
 
     // Return
@@ -64,15 +65,15 @@ GXXXRoi::GXXXRoi(void) : GRoi()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] roi [INSTRUMENT] region of interest.
+ * @param[in] atom COMPTEL event atom.
  ***************************************************************************/
-GXXXRoi::GXXXRoi(const GXXXRoi& roi) : GRoi(roi)
+GCOMEventAtom::GCOMEventAtom(const GCOMEventAtom& atom) : GEventAtom(atom)
 {
-    // Initialise class members
+    // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(roi);
+    copy_members(atom);
 
     // Return
     return;
@@ -82,7 +83,7 @@ GXXXRoi::GXXXRoi(const GXXXRoi& roi) : GRoi(roi)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GXXXRoi::~GXXXRoi(void)
+GCOMEventAtom::~GCOMEventAtom(void)
 {
     // Free members
     free_members();
@@ -94,32 +95,32 @@ GXXXRoi::~GXXXRoi(void)
 
 /*==========================================================================
  =                                                                         =
- =                               Operators                                 =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] roi [INSTRUMENT] region of interest.
- * @return [INSTRUMENT] region of interest.
+ * @param[in] atom COMPTEL event atom.
+ * @return COMPTEL event atom.
  ***************************************************************************/
-GXXXRoi& GXXXRoi::operator=(const GXXXRoi& roi)
+GCOMEventAtom& GCOMEventAtom::operator=(const GCOMEventAtom& atom)
 {
     // Execute only if object is not identical
-    if (this != &roi) {
+    if (this != &atom) {
 
         // Copy base class members
-        this->GRoi::operator=(roi);
+        this->GEventAtom::operator=(atom);
 
         // Free members
         free_members();
 
-        // Initialise private members
+        // Initialise private members for clean destruction
         init_members();
 
         // Copy members
-        copy_members(roi);
+        copy_members(atom);
 
     } // endif: object was not identical
 
@@ -130,21 +131,26 @@ GXXXRoi& GXXXRoi::operator=(const GXXXRoi& roi)
 
 /*==========================================================================
  =                                                                         =
- =                             Public methods                              =
+ =                            Public methods                               =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear region of interest
+ * @brief Clear event atom
+ *
+ * Clears COMPTEL event atom by resetting all class members to an
+ * initial state. Any information that was present before will be lost.
  ***************************************************************************/
-void GXXXRoi::clear(void)
+void GCOMEventAtom::clear(void)
 {
-    // Free members
+    // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GRoi::free_members();
+    this->GEventAtom::free_members();
+    this->GEvent::free_members();
 
-    // Initialise private members
-    this->GRoi::init_members();
+    // Initialise members
+    this->GEvent::init_members();
+    this->GEventAtom::init_members();
     init_members();
 
     // Return
@@ -153,56 +159,41 @@ void GXXXRoi::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone region of interest
+ * @brief Clone event atom
  *
- * @return Pointer to deep copy of [INSTRUMENT] region of interest.
+ * @return Pointer to deep copy of COMPTEL event atom.
  ***************************************************************************/
-GXXXRoi* GXXXRoi::clone(void) const
+GCOMEventAtom* GCOMEventAtom::clone(void) const
 {
-    return new GXXXRoi(*this);
+    return new GCOMEventAtom(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Check if region of interest contains an event
+ * @brief Set event time
  *
- * @return True if region of interest contains event, false otherwise.
+ * @param[in] tjd Truncated Julian Days (days).
+ * @param[in] ticks COMPTEL ticks (1/8 ms).
  *
- * @todo Implement method.
- *
- * If the event does not contain an instrument direction of type GXXXInstDir
- * the method returns false.
+ * Sets the event time from the native COMPTEL time format.
  ***************************************************************************/
-bool GXXXRoi::contains(const GEvent& event) const
+void GCOMEventAtom::time(const int& tjd, const int& tics)
 {
-    // Initialise flag to non-containment
-    bool contains = false;
+    // Set event time by converting from the native COMPTEL time format
+    m_time = com_time(tjd, tics);
 
-    // Get pointer to [INSTRUMENT] instrument direction
-    const GXXXInstDir* dir = dynamic_cast<const GXXXInstDir*>(&event.dir());
-
-    // If instrument direction is a [INSTRUMENT] instrument direction then
-    // check on containment
-    if (dir != NULL) {
-
-        // TODO: Implement containment test
-
-    } // endif: pointer was a [INSTRUMENT] instrument direction
-
-    // Return containment flag
-    return contains;
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Print region of interest information
+ * @brief Print event information
  *
  * @param[in] chatter Chattiness.
- * @return String containing region of interest information.
- *
- * @todo Implement method.
+ * @return String containing event information.
  ***************************************************************************/
-std::string GXXXRoi::print(const GChatter& chatter) const
+std::string GCOMEventAtom::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -210,11 +201,12 @@ std::string GXXXRoi::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Append header
-        result.append("=== GXXXRoi ===");
-
-        // Append information
-        // TODO: Add any relevant information
+        // Append event attributes
+        result.append("Chi="+gammalib::str(m_dir.dir().l_deg()));
+        result.append(" Psi="+gammalib::str(m_dir.dir().b_deg()));
+        result.append(" Phibar="+gammalib::str(m_dir.phibar()));
+        result.append(" Energy="+m_energy.print(chatter));
+        result.append(" Time="+m_time.print(chatter));
 
     } // endif: chatter was not silent
 
@@ -225,20 +217,31 @@ std::string GXXXRoi::print(const GChatter& chatter) const
 
 /*==========================================================================
  =                                                                         =
- =                             Private methods                             =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GXXXRoi::init_members(void)
+void GCOMEventAtom::init_members(void)
 {
     // Initialise members
-    // TODO: Initialise all data members
-    // Example:
-    m_radius = 0.0;
-    
+    m_dir.clear();
+    m_energy.clear();
+    m_time.clear();
+    m_e1     = 0.0;
+    m_e2     = 0.0;
+    m_phibar = 0.0;
+    m_theta  = 0.0;
+    m_phi    = 0.0;
+    m_eha    = 0.0;
+    m_psd    = 0;
+    m_tof    = 0;
+    m_modcom = 0;
+    m_reflag = 0;
+    m_veto   = 0;
+
     // Return
     return;
 }
@@ -247,14 +250,25 @@ void GXXXRoi::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] roi [INSTRUMENT] region of interest.
+ * @param[in] atom COMPTEL event atom.
  ***************************************************************************/
-void GXXXRoi::copy_members(const GXXXRoi& roi)
+void GCOMEventAtom::copy_members(const GCOMEventAtom& atom)
 {
-    // Copy attributes
-    // TODO: Copy all data members
-    // Example:
-    m_radius = roi.m_radius;
+    // Copy members
+    m_dir    = atom.m_dir;
+    m_energy = atom.m_energy;
+    m_time   = atom.m_time;
+    m_e1     = atom.m_e1;
+    m_e2     = atom.m_e2;
+    m_phibar = atom.m_phibar;
+    m_theta  = atom.m_theta;
+    m_phi    = atom.m_phi;
+    m_eha    = atom.m_eha;
+    m_psd    = atom.m_psd;
+    m_tof    = atom.m_tof;
+    m_modcom = atom.m_modcom;
+    m_reflag = atom.m_reflag;
+    m_veto   = atom.m_veto;
 
     // Return
     return;
@@ -264,7 +278,7 @@ void GXXXRoi::copy_members(const GXXXRoi& roi)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GXXXRoi::free_members(void)
+void GCOMEventAtom::free_members(void)
 {
     // Return
     return;

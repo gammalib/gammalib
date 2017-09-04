@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GXXXRoi.cpp - [INSTRUMENT] region of interest class         *
+ *              GCOMRoi.cpp - COMPTEL region of interest class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) [YEAR] by [AUTHOR]                                       *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,9 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GXXXRoi.cpp
- * @brief [INSTRUMENT] region of interest class implementation
- * @author [AUTHOR]
+ * @file GCOMRoi.cpp
+ * @brief COMPTEL region of interest class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -29,8 +29,7 @@
 #include <config.h>
 #endif
 #include "GEvent.hpp"
-#include "GXXXRoi.hpp"
-#include "GXXXInstDir.hpp"
+#include "GCOMRoi.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -51,7 +50,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GXXXRoi::GXXXRoi(void) : GRoi()
+GCOMRoi::GCOMRoi(void) : GRoi()
 {
     // Initialise class members
     init_members();
@@ -64,9 +63,9 @@ GXXXRoi::GXXXRoi(void) : GRoi()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] roi [INSTRUMENT] region of interest.
+ * @param[in] roi COMPTEL region of interest.
  ***************************************************************************/
-GXXXRoi::GXXXRoi(const GXXXRoi& roi) : GRoi(roi)
+GCOMRoi::GCOMRoi(const GCOMRoi& roi) : GRoi(roi)
 {
     // Initialise class members
     init_members();
@@ -80,9 +79,35 @@ GXXXRoi::GXXXRoi(const GXXXRoi& roi) : GRoi(roi)
 
 
 /***********************************************************************//**
+ * @brief Region of interest constructor
+ *
+ * @param[in] centre Instrument direction centre.
+ * @param[in] radius Instrument direction radius.
+ * @param[in] phibar_min Phibar minimum (deg).
+ * @param[in] phibar_max Phibar maximum (deg).
+ ***************************************************************************/
+GCOMRoi::GCOMRoi(const GCOMInstDir& centre, const double& radius,
+                 const double& phibar_min, const double& phibar_max) : GRoi()
+
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    this->centre(centre);
+    this->radius(radius);
+    this->phibar_min(phibar_min);
+    this->phibar_max(phibar_max);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GXXXRoi::~GXXXRoi(void)
+GCOMRoi::~GCOMRoi(void)
 {
     // Free members
     free_members();
@@ -101,10 +126,10 @@ GXXXRoi::~GXXXRoi(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] roi [INSTRUMENT] region of interest.
- * @return [INSTRUMENT] region of interest.
+ * @param[in] roi COMPTEL region of interest.
+ * @return COMPTEL region of interest.
  ***************************************************************************/
-GXXXRoi& GXXXRoi::operator=(const GXXXRoi& roi)
+GCOMRoi& GCOMRoi::operator=(const GCOMRoi& roi)
 {
     // Execute only if object is not identical
     if (this != &roi) {
@@ -137,7 +162,7 @@ GXXXRoi& GXXXRoi::operator=(const GXXXRoi& roi)
 /***********************************************************************//**
  * @brief Clear region of interest
  ***************************************************************************/
-void GXXXRoi::clear(void)
+void GCOMRoi::clear(void)
 {
     // Free members
     free_members();
@@ -155,11 +180,11 @@ void GXXXRoi::clear(void)
 /***********************************************************************//**
  * @brief Clone region of interest
  *
- * @return Pointer to deep copy of [INSTRUMENT] region of interest.
+ * @return Pointer to deep copy of COMPTEL region of interest.
  ***************************************************************************/
-GXXXRoi* GXXXRoi::clone(void) const
+GCOMRoi* GCOMRoi::clone(void) const
 {
-    return new GXXXRoi(*this);
+    return new GCOMRoi(*this);
 }
 
 
@@ -167,27 +192,24 @@ GXXXRoi* GXXXRoi::clone(void) const
  * @brief Check if region of interest contains an event
  *
  * @return True if region of interest contains event, false otherwise.
- *
- * @todo Implement method.
- *
- * If the event does not contain an instrument direction of type GXXXInstDir
- * the method returns false.
  ***************************************************************************/
-bool GXXXRoi::contains(const GEvent& event) const
+bool GCOMRoi::contains(const GEvent& event) const
 {
     // Initialise flag to non-containment
     bool contains = false;
 
-    // Get pointer to [INSTRUMENT] instrument direction
-    const GXXXInstDir* dir = dynamic_cast<const GXXXInstDir*>(&event.dir());
+    // Get pointer to COMPTEL instrument direction
+    const GCOMInstDir* dir = dynamic_cast<const GCOMInstDir*>(&event.dir());
 
-    // If instrument direction is a [INSTRUMENT] instrument direction then
-    // check on containment
+    // If instrument direction is a COMPTEL instrument direction then check
+    // on containment
     if (dir != NULL) {
-
-        // TODO: Implement containment test
-
-    } // endif: pointer was a [INSTRUMENT] instrument direction
+        if ((m_centre.dir().dist_deg(dir->dir()) <= m_radius) &&
+            (m_phibar_min                        <= dir->phibar()) &&
+            (m_phibar_max                        >= dir->phibar())) {
+            contains = true;
+        }
+    }
 
     // Return containment flag
     return contains;
@@ -202,7 +224,7 @@ bool GXXXRoi::contains(const GEvent& event) const
  *
  * @todo Implement method.
  ***************************************************************************/
-std::string GXXXRoi::print(const GChatter& chatter) const
+std::string GCOMRoi::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -211,10 +233,16 @@ std::string GXXXRoi::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GXXXRoi ===");
+        result.append("=== GCOMRoi ===");
 
         // Append information
-        // TODO: Add any relevant information
+        result.append("\n"+gammalib::parformat("RoI centre"));
+        result.append(m_centre.print());
+        result.append("\n"+gammalib::parformat("RoI radius"));
+        result.append(gammalib::str(m_radius)+" deg");
+        result.append("\n"+gammalib::parformat("Phibar range"));
+        result.append(gammalib::str(m_phibar_min)+" - ");
+        result.append(gammalib::str(m_phibar_max)+" deg");
 
     } // endif: chatter was not silent
 
@@ -232,12 +260,13 @@ std::string GXXXRoi::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GXXXRoi::init_members(void)
+void GCOMRoi::init_members(void)
 {
     // Initialise members
-    // TODO: Initialise all data members
-    // Example:
-    m_radius = 0.0;
+    m_centre.clear();
+    m_radius     = 0.0;
+    m_phibar_min = 0.0;
+    m_phibar_max = 0.0;
     
     // Return
     return;
@@ -247,14 +276,15 @@ void GXXXRoi::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] roi [INSTRUMENT] region of interest.
+ * @param[in] roi COMPTEL region of interest.
  ***************************************************************************/
-void GXXXRoi::copy_members(const GXXXRoi& roi)
+void GCOMRoi::copy_members(const GCOMRoi& roi)
 {
     // Copy attributes
-    // TODO: Copy all data members
-    // Example:
-    m_radius = roi.m_radius;
+    m_centre     = roi.m_centre;
+    m_radius     = roi.m_radius;
+    m_phibar_min = roi.m_phibar_min;
+    m_phibar_max = roi.m_phibar_max;
 
     // Return
     return;
@@ -264,7 +294,7 @@ void GXXXRoi::copy_members(const GXXXRoi& roi)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GXXXRoi::free_members(void)
+void GCOMRoi::free_members(void)
 {
     // Return
     return;

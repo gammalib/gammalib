@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_COM.hpp  -  Test COMPTEL classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,28 @@
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 #include "GCOMLib.hpp"
+#include "GCOMSupport.hpp"
+
+
+/***********************************************************************//**
+ * @class TestGCOMSupport
+ *
+ * @brief Test suite for COMPTEL support functions
+ *
+ * This class defines a unit test suite for the COMPTEL support function.
+ ***************************************************************************/
+class TestGCOMSupport : public GTestSuite {
+public:
+    // Constructors and destructors
+    TestGCOMSupport(void) : GTestSuite() {}
+    virtual ~TestGCOMSupport(void) {}
+
+    // Methods
+    virtual void             set(void);
+    virtual TestGCOMSupport* clone(void) const;
+    virtual std::string      classname(void) const { return "TestGCOMSupport"; }
+    void                     test_com_time(void);
+};
 
 
 /***********************************************************************//**

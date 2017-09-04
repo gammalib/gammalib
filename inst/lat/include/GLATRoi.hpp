@@ -94,9 +94,9 @@ std::string GLATRoi::classname(void) const
 /***********************************************************************//**
  * @brief Returns region of interest centre
  *
- * @return Region of interest centre sky direction.
+ * @return Region of interest centre instrument direction.
  *
- * Returns the sky direction of the region of interest centre.
+ * Returns the instrument direction of the region of interest centre.
  ***************************************************************************/
 inline
 const GLATInstDir& GLATRoi::centre(void) const
@@ -122,9 +122,9 @@ const double& GLATRoi::radius(void) const
 /***********************************************************************//**
  * @brief Set region of interest centre
  *
- * @param[in] centre Region of interest centre sky direction.
+ * @param[in] centre Region of interest centre instrument direction.
  *
- * Set the sky direction of the region of interest centre.
+ * Set the instrument direction of the region of interest centre.
  ***************************************************************************/
 inline
 void GLATRoi::centre(const GLATInstDir& centre)

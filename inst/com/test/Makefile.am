@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for com/test module                                           #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -22,7 +22,7 @@
 # Test sources
 test_COM_SOURCES = test_COM.cpp test_COM.hpp
 test_COM_LDFLAGS = @LDFLAGS@
-test_COM_CPPFLAGS = @CPPFLAGS@ -I$(srcdir)/../include -I$(top_srcdir)/include
+test_COM_CPPFLAGS = @CPPFLAGS@ -I$(srcdir)/../include -I$(top_srcdir)/include -I$(srcdir)/../src -I$(top_srcdir)/src
 test_COM_LDADD = $(top_builddir)/src/libgamma.la
 
 # Test programs (list of executables that will be compiled)

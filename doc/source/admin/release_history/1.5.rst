@@ -12,6 +12,7 @@ In particular, this release provides:
 
 * A code generator for GammaLib extensions
 * IAQ response computation for COMPTEL
+* Event list support for COMPTEL
 
 
 Bug fixes
@@ -24,6 +25,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2191 <https://cta-redmine.irap.omp.eu/issues/2191>`_] -
+  Add ``GFitsTableCol::scale()`` method
 * [`2178 <https://cta-redmine.irap.omp.eu/issues/2178>`_] -
   Add spectral model constructor to ``GModelSpectralNodes`` class
 * [`1864 <https://cta-redmine.irap.omp.eu/issues/1864>`_] -
@@ -35,11 +38,12 @@ Improvements
 New features
 ------------
 
-* [`2186 <https://cta-redmine.irap.omp.eu/issues/2186>`_] -
-  Implement COMPTEL response computation
 * [`2190 <https://cta-redmine.irap.omp.eu/issues/2186>`_] -
   Implement GammaLib code generator
-
+* [`2187 <https://cta-redmine.irap.omp.eu/issues/2187>`_] -
+  Implement COMPTEL event list support
+* [`2186 <https://cta-redmine.irap.omp.eu/issues/2186>`_] -
+  Implement COMPTEL response computation
 
 Clean up
 --------

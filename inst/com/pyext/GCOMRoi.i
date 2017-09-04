@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GCOMInstDir.i - COMPTEL instrument direction class            *
+ *               GCOMRoi.i - COMPTEL region of interest class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,47 +19,54 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMInstDir.hpp
- * @brief COMPTEL instrument direction class definition
+ * @file GCOMRoi.i
+ * @brief COMPTEL region of interest class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCOMInstDir.hpp"
+#include "GCOMRoi.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCOMInstDir
+ * @class GCOMRoi
  *
- * @brief Interface for the COMPTEL instrument direction class
+ * @brief COMPTEL region of interest class
  ***************************************************************************/
-class GCOMInstDir : public GInstDir {
+class GCOMRoi : public GRoi {
+
 public:
     // Constructors and destructors
-    GCOMInstDir(void);
-    GCOMInstDir(const GCOMInstDir& dir);
-    GCOMInstDir(const GSkyDir& dir, const double& phibar);
-    virtual ~GCOMInstDir(void);
+    GCOMRoi(void);
+    GCOMRoi(const GCOMRoi& roi);
+    GCOMRoi(const GCOMInstDir& centre, const double& radius,
+            const double& phibar_min, const double& phibar_max);
+    virtual ~GCOMRoi(void);
 
-    // Methods
-    virtual void         clear(void);
-    virtual GCOMInstDir* clone(void) const;
-    virtual std::string  classname(void) const;
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual GCOMRoi*    clone(void) const;
+    virtual std::string classname(void) const;
+    virtual bool        contains(const GEvent& event) const;
 
     // Other methods
-    void           dir(const GSkyDir& dir);
-    const GSkyDir& dir(void) const;
-    void           phibar(const double& phibar);
-    const double&  phibar(void) const;
+    const GCOMInstDir& centre(void) const;
+    const double&      radius(void) const;
+    const double&      phibar_min(void) const;
+    const double&      phibar_max(void) const;
+    void               centre(const GCOMInstDir& centre);
+    void               radius(const double& radius);
+    void               phibar_min(const double& phibar_min);
+    void               phibar_max(const double& phibar_max);
 };
 
 
 /***********************************************************************//**
- * @brief GCOMInstDir class extension
+ * @brief GCOMRoi class extension
  ***************************************************************************/
-%extend GCOMInstDir {
-    GCOMInstDir copy() {
+%extend GCOMRoi {
+    GCOMRoi copy() {
         return (*self);
     }
 };

@@ -1,9 +1,11 @@
-2017-09-03
+2017-09-04
 
         * Version 1.5.0 released
         =========================
 
+        Add GFitsTableCol::scale() method (#2191)
         Implement code generator for GammaLib extensions (#2190)
+        Implement COMPTEL event list support (#2187)
         Implement COMPTEL response computation (#2186)
         Add COMPTEL SDA, SDB and ICT response files (#2186)
         Add GModelSpectralNodes spectral model constructor (#2178)

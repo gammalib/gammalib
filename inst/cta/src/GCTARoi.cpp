@@ -331,7 +331,7 @@ void GCTARoi::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print ROI information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing ROI information.
  ***************************************************************************/
 std::string GCTARoi::print(const GChatter& chatter) const
@@ -346,9 +346,9 @@ std::string GCTARoi::print(const GChatter& chatter) const
         result.append("=== GCTARoi ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("ROI centre"));
+        result.append("\n"+gammalib::parformat("RoI centre"));
         result.append(m_centre.print());
-        result.append("\n"+gammalib::parformat("ROI radius"));
+        result.append("\n"+gammalib::parformat("RoI radius"));
         result.append(gammalib::str(m_radius)+" deg");
 
     } // endif: chatter was not silent

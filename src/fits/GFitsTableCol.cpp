@@ -368,9 +368,38 @@ std::string GFitsTableCol::tform_binary(void) const
 
 
 /***********************************************************************//**
+ * @brief Set table column scale value
+ *
+ * @param[in] tscale Table column scale value.
+ * @param[in] tzero Table column scale value.
+ *
+ * Sets the table column scale values @p tscale and @p tzero. When reading
+ * FITS table column values, the true value is computed using
+ *
+ * \f[
+ *    {\rm true value} = {\rm FITS value} \times {\tm tscale} +  {\tm tzero}
+ * \f]
+ *
+ * Setting of the @p tscale and @p tzero values will only be effective if
+ * this is done before the first reading of a table column value. Also, the
+ * setting will not affect the TSCALE and TZERO keywords that may exist in
+ * the FITS header.
+ ***************************************************************************/
+void GFitsTableCol::scale(const double& tscale, const double& tzero) const
+{
+    // Set tscale and tzero values
+    int status = 0;
+    status = __fftscl(FPTR(m_fitsfile), m_colnum, tscale, tzero, &status);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print column information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing column information.
  *
  * @todo Format and cfitsio information is mainly for debugging. This could
