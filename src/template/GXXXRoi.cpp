@@ -28,7 +28,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GEvent.hpp"
 #include "GXXXRoi.hpp"
+#include "GXXXInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -167,13 +169,25 @@ GXXXRoi* GXXXRoi::clone(void) const
  * @return True if region of interest contains event, false otherwise.
  *
  * @todo Implement method.
+ *
+ * If the event does not contain an instrument direction of type GXXXInstDir
+ * the method returns false.
  ***************************************************************************/
 bool GXXXRoi::contains(const GEvent& event) const
 {
     // Initialise flag to non-containment
     bool contains = false;
 
-    // TODO: Implement containment test
+    // Get pointer to [INSTRUMENT] instrument direction
+    const GXXXInstDir* dir = dynamic_cast<const GXXXInstDir*>(&event.dir());
+
+    // If instrument direction is a [INSTRUMENT] instrument direction then
+    // check on containment
+    if (dir != NULL) {
+
+        // TODO: Implement containment test
+
+    } // endif: pointer was a [INSTRUMENT] instrument direction
 
     // Return containment flag
     return contains;
@@ -223,7 +237,7 @@ void GXXXRoi::init_members(void)
     // Initialise members
     // TODO: Initialise all data members
     // Example:
-    double m_radius = 0.0;
+    m_radius = 0.0;
     
     // Return
     return;
