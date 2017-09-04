@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-2 September 2017
+4 September 2017
 
 
 1. Introduction
@@ -31,6 +31,7 @@ The following methods have been added:
 - GApplicationPar::time(GTimeReference&)
 - GApplicationPar::time(GTime&)
 - GModelSpectralNodes(GModelSpectral&, GEnergies&)
+- GFitsTableCol::scale(double&, double&)
 
 The following methods have been removed:
 - n.a.
@@ -65,7 +66,9 @@ None
 
 6. FITS I/O Interface
 ---------------------
-None
+The GFitsTableCol::scale() method has been added to allow setting the
+TSCALE and TZERO values before reading the column data. The keywords
+that may exist in the FITS file are not affected by the setting (#2191).
 
 
 7. Linear algebra module

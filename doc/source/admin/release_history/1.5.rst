@@ -23,6 +23,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2191 <https://cta-redmine.irap.omp.eu/issues/2191>`_] -
+  Add ``GFitsTableCol::scale()`` method
 * [`2178 <https://cta-redmine.irap.omp.eu/issues/2178>`_] -
   Add spectral model constructor to ``GModelSpectralNodes`` class
 * [`1864 <https://cta-redmine.irap.omp.eu/issues/1864>`_] -

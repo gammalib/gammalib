@@ -117,6 +117,7 @@ public:
     const bool&             is_variable(void) const;
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
+    void                    scale(const double& tscale, const double& tzero) const;
     std::string             tform_binary(void) const;
 };
 
