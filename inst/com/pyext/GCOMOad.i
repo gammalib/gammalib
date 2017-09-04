@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCOMLib.hpp - COMPTEL Support Header files              *
+ *               GCOMOad.i - COMPTEL Orbit Aspect Data class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017 by Juergen Knodlseder                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,32 +19,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMLib.hpp
- * @brief Collection of COMPTEL support header files
- * @author Juergen Knoedlseder    
+ * @file GCOMOad.i
+ * @brief COMPTEL Orbit Aspect Data class definition
+ * @author Juergen Knodlseder
  */
-
-#ifndef GCOMLIB_HPP
-#define GCOMLIB_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-
-/* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMEventCube.hpp"
-#include "GCOMEventBin.hpp"
-#include "GCOMInstDir.hpp"
-#include "GCOMResponse.hpp"
-#include "GCOMD1Response.hpp"
-#include "GCOMD2Response.hpp"
-#include "GCOMInstChars.hpp"
-#include "GCOMObservation.hpp"
-#include "GCOMOads.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
 #include "GCOMOad.hpp"
-#include "GCOMTim.hpp"
-#include "GCOMRoi.hpp"
-#include "GCOMEventAtom.hpp"
-#include "GCOMEventList.hpp"
-#include "GCOMModelDRBFitting.hpp"
+%}
 
-#endif /* GCOMLIB_HPP */
+
+/***********************************************************************//**
+ * @class GCOMOad
+ *
+ * @brief COMPTEL Orbit Aspect Data class
+ ***************************************************************************/
+class GCOMOad : public GBase {
+
+public:
+    // Constructors and destructors
+    GCOMOad(void);
+    GCOMOad(const GCOMOad& oad);
+    virtual ~GCOMOad(void);
+
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual GCOMOad*    clone(void) const;
+    virtual std::string classname(void) const;
+
+    // Other methods
+    // TODO: Copy methods from GCOMOad.hpp file
+};
+
+
+/***********************************************************************//**
+ * @brief GCOMOad class extension
+ ***************************************************************************/
+%extend GCOMOad {
+    GCOMOad copy() {
+        return (*self);
+    }
+};
