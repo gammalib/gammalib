@@ -102,6 +102,10 @@ the native time reference or in a specific time reference (#1864).
 A rounding error was fixed in GTime::utc() so that times such as
 "2019-12-31T23:59:60" are now "2020-01-01T00:00:00" as they should be (#2177).
 
+The efficiency of the GGti::contains() method has been improved for subsequent
+checking of sorted times. Now a new time search always starts at the last
+successful index so that the number of search loops is minimized.
+
 
 11. Optimization module
 -----------------------

@@ -25,6 +25,7 @@ Bug fixes
 Improvements
 ------------
 
+* Improve efficiency of ``GGti::contains()`` method
 * [`2191 <https://cta-redmine.irap.omp.eu/issues/2191>`_] -
   Add ``GFitsTableCol::scale()`` method
 * [`2178 <https://cta-redmine.irap.omp.eu/issues/2178>`_] -

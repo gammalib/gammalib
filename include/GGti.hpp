@@ -119,12 +119,15 @@ protected:
     int             m_num;          //!< Number of Good Time Intervals
     GTime           m_tstart;       //!< Start time of Good Time Intervals
     GTime           m_tstop;        //!< Stop time of Good Time Intervals
-    double          m_ontime;       //!< Sum of Good Time Interval durations (in seconds)
+    double          m_ontime;       //!< Sum of GTIs durations (in seconds)
     double          m_telapse;      //!< Time between start of first GTI and stop of last GTI (in seconds)
     GTime          *m_start;        //!< Array of start times
     GTime          *m_stop;         //!< Array of stop times
     GTimeReference  m_reference;    //!< Time reference
     GFilename       m_xml_filename; //!< XML filename
+
+    // Computation cache
+    mutable int     m_last_index;   //!< Last index for containment test
 };
 
 

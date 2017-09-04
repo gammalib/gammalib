@@ -1006,17 +1006,33 @@ const GTimeReference& GGti::reference(void) const
  * Checks if a given @p time falls in at least one of the Good Time
  * Intervals. The method exits when the first matching interval has been
  * found.
+ *
+ * Since this method may be called repeadetly while scanning an ordered list
+ * of time it is most efficient to start the search always at the index where
+ * the last search was successful.
  ***************************************************************************/
 bool GGti::contains(const GTime& time) const
 {
     // Initialise test
     bool found = false;
 
-    // Test all GTIs
-    for (int i = 0; i < m_num; ++i) {
+    // Start GTIs search from the last successful index
+    for (int i = m_last_index; i < m_num; ++i) {
         if (time >= m_start[i] && time <= m_stop[i]) {
-            found = true;
+            found        = true;
+            m_last_index = i;
             break;
+        }
+    }
+
+    // If no GTI has been found then search now from the start of the list
+    if (!found) {
+        for (int i = 0; i < m_last_index; ++i) {
+            if (time >= m_start[i] && time <= m_stop[i]) {
+                found        = true;
+                m_last_index = i;
+                break;
+            }
         }
     }
 
@@ -1099,6 +1115,9 @@ void GGti::init_members(void)
     m_start   = NULL;
     m_stop    = NULL;
 
+    // Initialise computation cache
+    m_last_index = 0;
+
     // Initialise time reference with native reference
     GTime time;
     m_reference = time.reference();
@@ -1133,6 +1152,9 @@ void GGti::copy_members(const GGti& gti)
             m_stop[i]  = gti.m_stop[i];
         }
     }
+
+    // Copy computation cache
+    m_last_index = gti.m_last_index;
 
     // Return
     return;

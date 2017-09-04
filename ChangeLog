@@ -3,6 +3,7 @@
         * Version 1.5.0 released
         =========================
 
+        Improve efficiency of GGti::contains() method.
         Add GCOMTim class to support TIM files (#2187)
         Add GFitsTableCol::scale() method (#2191)
         Implement code generator for GammaLib extensions (#2190)
