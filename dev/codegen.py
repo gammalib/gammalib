@@ -191,12 +191,35 @@ def get_base_class(filename):
     return baseclass
 
 
-# ========== #
-# Set tokens #
-# ========== #
-def set_tokens(name, instrument, author):
+# ===================== #
+# Set instrument tokens #
+# ===================== #
+def set_class_tokens(classname, author, what, object):
     """
-    Set replacement tokens
+    Set replacement tokens for a generic class
+    """
+    # Get current year
+    year = str(date.today().year)
+
+    # Set tokens
+    tokens = [{'pattern': 'GTPLClass', 'string': classname},
+              {'pattern': 'GTPLCLASS', 'string': classname.upper()},
+              {'pattern': '[WHAT]', 'string': what},
+              {'pattern': '[what]', 'string': what.lower()},
+              {'pattern': '[AUTHOR]', 'string': author},
+              {'pattern': 'TPL_OBJECT', 'string': object.lower()},
+              {'pattern': '[YEAR]', 'string': year}]
+
+    # Return tokens
+    return tokens
+
+
+# ===================== #
+# Set instrument tokens #
+# ===================== #
+def set_inst_tokens(name, instrument, author):
+    """
+    Set replacement tokens for an instrument
     """
     # Get current year
     year = str(date.today().year)
@@ -215,7 +238,7 @@ def set_tokens(name, instrument, author):
 # ======================= #
 # Add an instrument class #
 # ======================= #
-def add_instrument_class(name, tokens, classname):
+def add_instrument_class(name, tokens, classname, tmpname=None):
     """
     Add an instrument class
 
@@ -227,9 +250,12 @@ def add_instrument_class(name, tokens, classname):
         Tokens for replacement
     classname : str
         Class name
+    tmpname : str, optional
+        Template name
     """
     # Set template classname
-    tmpname = classname.replace(name.upper(), 'XXX')
+    if tmpname == None:
+        tmpname = classname.replace(name.upper(), 'XXX')
 
     # Set destination file names
     incfile = 'inst/%s/include/%s.hpp' % (name, classname)
@@ -495,7 +521,7 @@ def module_menu():
             break
 
     # Set tokens
-    tokens = set_tokens(name, instrument, author)
+    tokens = set_inst_tokens(name, instrument, author)
 
     # If the module exists already then determine all base classes that are
     # not yet implemented and propose to add them one by one ...
@@ -597,6 +623,61 @@ def module_menu():
     return
 
 
+# ==================== #
+# Manage generic class #
+# ==================== #
+def generic_class_menu():
+    """
+    Manage class
+    """
+    # Annonce actions
+    print("")
+    print("Add generic class")
+    print("-----------------")
+
+    # Stay in loop until there is a final confirmation
+    while True:
+
+        # Get class directory
+        while True:
+            dir = response('Please enter directory where class should reside '
+                           '(e.g. "inst/cta", "src/obs")').lower()
+            if os.path.isdir(dir):
+                break
+            else:
+                print('*** Error: Directory not found.')
+
+        # Enter other information
+        classname = response('Please enter a class name (e.g. "GEnergy")')
+        what      = response('Please say what the class is for (e.g. "Energy")')
+        object    = response('Please say how an instance of the class should be named (e.g. "energy")')
+        author    = response('Please enter your name (e.g. "Joe Public")')
+
+        # Ask to confirm module summary
+        print('\nAll right. Have now:')
+        print('Class name ......: "%s"' % classname)
+        print('Class descriptor : "%s"' % what)
+        print('Class instance ..: "%s"' % object)
+        print('Your name .......: "%s"' % author)
+        if confirm('Is this correct?'):
+            break
+
+    # Set tokens
+    tokens = set_class_tokens(classname, author, what, object)
+
+    # If we have an instrument model then add a class to the instrument
+    if 'inst/' in dir:
+        name = dir[5:8]
+        add_instrument_class(name, tokens, classname, 'GTPLClass')
+
+    # Otherwise we have a core module
+    else:
+        print('Core modules not supported yet, sorry ;)')
+
+    # Return
+    return
+
+
 # ================ #
 # Manage main menu #
 # ================ #
@@ -609,7 +690,7 @@ def main_menu():
     #print('[2] Add spectral model')
     #print('[3] Add spatial model')
     #print('[4] Add temporal model')
-    #print('[4] Add generic class')
+    print('[4] Add generic class')
     print('[q] Quit')
 
     # Wait for the input
@@ -618,7 +699,7 @@ def main_menu():
         choice = str(raw_input('Enter your choice: '))
         #if choice == '1' or choice == '2' or choice == '3' or choice == '4' or \
         #   choice == 'q':
-        if choice == '1' or choice == 'q':
+        if choice == '1' or choice == '4' or choice == 'q':
             waiting = False
 
     # Return choice
@@ -661,7 +742,7 @@ if __name__ == '__main__':
             #libtool_version_menu()
             print('')
         elif choice == '4':
-            #commit('')
+            generic_class_menu()
             print('')
         elif choice == 'q':
             break

@@ -25,7 +25,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Define sources for this directory
-sources = GXXXObservation.cpp \
+sources = GTPLClass.cpp \
+          GXXXObservation.cpp \
           GXXXResponse.cpp \
           GXXXEventList.cpp \
           GXXXEventAtom.cpp \
@@ -42,7 +43,9 @@ libtemplate_la_SOURCES = $(sources)
 libtemplate_la_LDFLAGS =
 
 # Additional files to distribute
-EXTRA_DIST = GXXXLib.hpp \
+EXTRA_DIST = GTPLClass.hpp \
+             GTPLClass..i \
+             GXXXLib.hpp \
              GXXXObservation.hpp \
              GXXXObservation.i \
              GXXXResponse.hpp \
