@@ -1,5 +1,5 @@
 /***************************************************************************
- *                        GTPLClass.i - [WHAT] class                       *
+ *                         GTPLBase.i - [WHAT] class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) [YEAR] by [AUTHOR]                                       *
  * ----------------------------------------------------------------------- *
@@ -19,43 +19,43 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GTPLClass.i
+ * @file GTPLBase.i
  * @brief [WHAT] class definition
  * @author [AUTHOR]
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GTPLClass.hpp"
+#include "GTPLBase.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GTPLClass
+ * @class GTPLBase
  *
  * @brief [WHAT] class
  ***************************************************************************/
-class GTPLClass : public GBase {
+class GTPLBase : public GBase {
 
 public:
     // Constructors and destructors
-    GTPLClass(void);
-    GTPLClass(const GTPLClass& TPL_OBJECT);
-    virtual ~GTPLClass(void);
+    GTPLBase(void);
+    GTPLBase(const GTPLBase& TPL_OBJECT);
+    virtual ~GTPLBase(void);
 
     // Implemented pure virtual base class methods
     virtual void       clear(void);
-    virtual GTPLClass* clone(void) const;
+    virtual GTPLBase* clone(void) const;
 
     // Other methods
-    // TODO: Copy methods from GTPLClass.hpp file
+    // TODO: Copy methods from GTPLBase.hpp file
 };
 
 
 /***********************************************************************//**
- * @brief GTPLClass class extension
+ * @brief GTPLBase class extension
  ***************************************************************************/
-%extend GTPLClass {
-    GTPLClass copy() {
+%extend GTPLBase {
+    GTPLBase copy() {
         return (*self);
     }
 };

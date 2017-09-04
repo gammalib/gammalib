@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       GTPLClass.hpp - [WHAT] class                      *
+ *                       GTPLBase.hpp - [WHAT] class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) [YEAR] by [AUTHOR]                                       *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GTPLClass.hpp
+ * @file GTPLBase.hpp
  * @brief [WHAT] class definition
  * @author [AUTHOR]
  */
 
-#ifndef GTPLCLASS_HPP
-#define GTPLCLASS_HPP
+#ifndef GTPLBASE_HPP
+#define GTPLBASE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -37,26 +37,26 @@
 
 
 /***********************************************************************//**
- * @class GTPLClass
+ * @class GTPLBase
  *
  * @brief [WHAT] class
  *
  * @todo Add class description.
  ***************************************************************************/
-class GTPLClass : public GBase {
+class GTPLBase : public GBase {
 
 public:
     // Constructors and destructors
-    GTPLClass(void);
-    GTPLClass(const GTPLClass& TPL_OBJECT);
-    virtual ~GTPLClass(void);
+    GTPLBase(void);
+    GTPLBase(const GTPLBase& TPL_OBJECT);
+    virtual ~GTPLBase(void);
 
     // Operators
-    GTPLClass& operator=(const GTPLClass& TPL_OBJECT);
+    GTPLBase& operator=(const GTPLBase& TPL_OBJECT);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
-    virtual GTPLClass*  clone(void) const;
+    virtual GTPLBase*   clone(void) const;
     virtual std::string classname(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
@@ -66,7 +66,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GTPLClass& TPL_OBJECT);
+    void copy_members(const GTPLBase& TPL_OBJECT);
     void free_members(void);
     
     // Protected members
@@ -77,12 +77,12 @@ protected:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GTPLClass").
+ * @return String containing the class name ("GTPLBase").
  ***************************************************************************/
 inline
-std::string GTPLClass::classname(void) const
+std::string GTPLBase::classname(void) const
 {
-    return ("GTPLClass");
+    return ("GTPLBase");
 }
 
-#endif /* GTPLCLASS_HPP */
+#endif /* GTPLBASE_HPP */

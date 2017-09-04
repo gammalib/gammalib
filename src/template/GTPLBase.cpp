@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       GTPLClass.cpp - [WHAT] class                      *
+ *                        GTPLBase.cpp - [WHAT] class                      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) [YEAR] by [AUTHOR]                                       *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GTPLClass.cpp
+ * @file GTPLBase.cpp
  * @brief [WHAT] class implementation
  * @author [AUTHOR]
  */
@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GTPLClass.hpp"
+#include "GTPLBase.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -49,7 +49,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GTPLClass::GTPLClass(void)
+GTPLBase::GTPLBase(void)
 {
     // Initialise class members
     init_members();
@@ -64,7 +64,7 @@ GTPLClass::GTPLClass(void)
  *
  * @param[in] TPL_OBJECT [WHAT].
  ***************************************************************************/
-GTPLClass::GTPLClass(const GTPLClass& TPL_OBJECT)
+GTPLBase::GTPLBase(const GTPLBase& TPL_OBJECT)
 {
     // Initialise class members
     init_members();
@@ -80,7 +80,7 @@ GTPLClass::GTPLClass(const GTPLClass& TPL_OBJECT)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GTPLClass::~GTPLClass(void)
+GTPLBase::~GTPLBase(void)
 {
     // Free members
     free_members();
@@ -102,7 +102,7 @@ GTPLClass::~GTPLClass(void)
  * @param[in] TPL_OBJECT [WHAT].
  * @return [WHAT].
  ***************************************************************************/
-GTPLClass& GTPLClass::operator=(const GTPLClass& TPL_OBJECT)
+GTPLBase& GTPLBase::operator=(const GTPLBase& TPL_OBJECT)
 {
     // Execute only if object is not identical
     if (this != &TPL_OBJECT) {
@@ -132,7 +132,7 @@ GTPLClass& GTPLClass::operator=(const GTPLClass& TPL_OBJECT)
 /***********************************************************************//**
  * @brief Clear [WHAT]
  ***************************************************************************/
-void GTPLClass::clear(void)
+void GTPLBase::clear(void)
 {
     // Free members
     free_members();
@@ -150,9 +150,9 @@ void GTPLClass::clear(void)
  *
  * @return Pointer to deep copy of [WHAT].
  ***************************************************************************/
-GTPLClass* GTPLClass::clone(void) const
+GTPLBase* GTPLBase::clone(void) const
 {
-    return new GTPLClass(*this);
+    return new GTPLBase(*this);
 }
 
 
@@ -164,7 +164,7 @@ GTPLClass* GTPLClass::clone(void) const
  *
  * @todo Implement method.
  ***************************************************************************/
-std::string GTPLClass::print(const GChatter& chatter) const
+std::string GTPLBase::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -173,7 +173,7 @@ std::string GTPLClass::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GTPLClass ===");
+        result.append("=== GTPLBase ===");
 
         // Append information
         // TODO: Add any relevant information
@@ -194,7 +194,7 @@ std::string GTPLClass::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GTPLClass::init_members(void)
+void GTPLBase::init_members(void)
 {
     // Initialise members
     // TODO: Initialise all data members
@@ -209,7 +209,7 @@ void GTPLClass::init_members(void)
  *
  * @param[in] TPL_OBJECT [WHAT].
  ***************************************************************************/
-void GTPLClass::copy_members(const GTPLClass& TPL_OBJECT)
+void GTPLBase::copy_members(const GTPLBase& TPL_OBJECT)
 {
     // Copy members
     // TODO: Copy all data members
@@ -222,7 +222,7 @@ void GTPLClass::copy_members(const GTPLClass& TPL_OBJECT)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GTPLClass::free_members(void)
+void GTPLBase::free_members(void)
 {
     // Return
     return;

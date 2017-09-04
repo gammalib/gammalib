@@ -202,10 +202,9 @@ def set_class_tokens(classname, author, what, object):
     year = str(date.today().year)
 
     # Set tokens
-    tokens = [{'pattern': 'GTPLClass', 'string': classname},
-              {'pattern': 'GTPLCLASS', 'string': classname.upper()},
+    tokens = [{'pattern': 'GTPLBase', 'string': classname},
+              {'pattern': 'GTPLBASE', 'string': classname.upper()},
               {'pattern': '[WHAT]', 'string': what},
-              {'pattern': '[what]', 'string': what.lower()},
               {'pattern': '[AUTHOR]', 'string': author},
               {'pattern': 'TPL_OBJECT', 'string': object.lower()},
               {'pattern': '[YEAR]', 'string': year}]
@@ -668,7 +667,7 @@ def generic_class_menu():
     # If we have an instrument model then add a class to the instrument
     if 'inst/' in dir:
         name = dir[5:8]
-        add_instrument_class(name, tokens, classname, 'GTPLClass')
+        add_instrument_class(name, tokens, classname, 'GTPLBase')
 
     # Otherwise we have a core module
     else:
