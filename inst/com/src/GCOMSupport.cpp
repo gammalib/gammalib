@@ -165,3 +165,42 @@ GTime com_time(const int& tjd, const int& tics)
     // Return time
     return time;
 }
+
+
+/***********************************************************************//**
+ * @brief Convert GTime in COMPTEL TJD
+ *
+ * @param[in] time Time.
+ * @return Truncated Julian Days (days).
+ *
+ * Converts GTime object in TJD.
+ ***************************************************************************/
+int com_tjd(const GTime& time)
+{
+    // Compute TJD
+    int tjd = int(time.mjd("UTC") - 40000.0);
+
+    // Return TJD
+    return tjd;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert GTime in COMPTEL tics
+ *
+ * @param[in] time Time.
+ * @return COMPTEL ticks (1/8 ms).
+ *
+ * Converts GTime object in COMPTEL ticks (1/8 ms).
+ ***************************************************************************/
+int com_tics(const GTime& time)
+{
+    // Compute COMPTEL time at 0 tics
+    GTime tjd = com_time(com_tjd(time), 0);
+
+    // Compute time difference in seconds
+    int tics = int((time - tjd) * 8000.0 + 0.5); // rounding to nearest int
+
+    // Return tics
+    return tics;
+}

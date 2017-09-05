@@ -1065,15 +1065,21 @@ std::string GGti::print(const GChatter& chatter) const
         result.append(gammalib::str(ontime())+" sec");
         result.append("\n"+gammalib::parformat("Elapsed time"));
         result.append(gammalib::str(telapse())+" sec");
-        result.append("\n"+gammalib::parformat("Time range"));
-        result.append(gammalib::str(tstart().convert(m_reference)));
+        result.append("\n"+gammalib::parformat("MJD range"));
+        result.append(gammalib::str(tstart().mjd()));
         result.append(" - ");
-        result.append(gammalib::str(tstop().convert(m_reference)));
+        result.append(gammalib::str(tstop().mjd()));
+        result.append(" "+reference().timeunit());
+        result.append(" ("+reference().timesys()+")");
+        result.append("\n"+gammalib::parformat("UTC range"));
+        result.append(tstart().utc());
+        result.append(" - ");
+        result.append(tstop().utc());
         result.append(" "+reference().timeunit());
         result.append(" ("+reference().timesys()+")");
 
         // Append reference MJD
-        result.append("\n"+gammalib::parformat("Reference MDJ"));
+        result.append("\n"+gammalib::parformat("Reference MJD"));
         result.append(gammalib::str(reference().mjdref()));
 
         // EXPLICIT: Append time reference information

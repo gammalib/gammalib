@@ -30,24 +30,32 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GSkyMap.hpp"
+#include "GEbounds.hpp"
+#include "GGti.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GFits;
+class GFitsImage;
 
 /* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_dri = "DRI";
+}
 
 
 /***********************************************************************//**
  * @class GCOMDri
  *
  * @brief COMPTEL Data Space class
- *
- * @todo Add class description.
  ***************************************************************************/
 class GCOMDri : public GBase {
 
 public:
     // Constructors and destructors
     GCOMDri(void);
+    explicit GCOMDri(const GFilename& filename);
     GCOMDri(const GCOMDri& dri);
     virtual ~GCOMDri(void);
 
@@ -56,21 +64,30 @@ public:
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
-    virtual GCOMDri*   clone(void) const;
+    virtual GCOMDri*    clone(void) const;
     virtual std::string classname(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    // TODO: Add any further methods that are needed
+    void load(const GFilename& filename);
+    void save(const GFilename& filename, const bool& clobber = false) const;
+    void read(const GFitsImage& image);
+    void write(GFits& fits, const std::string& extname = "") const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCOMDri& dri);
     void free_members(void);
+    void read_attributes(const GFitsHDU* hdu);
+    void write_attributes(GFitsHDU* hdu) const;
     
     // Protected members
-    // TODO: Add any data members that are necessary
+    GSkyMap  m_dri;      //!< Data cube
+    GEbounds m_ebounds;  //!< Energy boundaries of data cube
+    GGti     m_gti;      //!< Good Time Intervals of data cube
+    double   m_phimin;   //!< Phibar minimum (deg)
+    double   m_phibin;   //!< Phibar binsize (deg)
 };
 
 

@@ -173,7 +173,7 @@ TestGCOMOptimize* TestGCOMOptimize::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Test com_time function
+ * @brief Test com_time, com_tjd and com_tics functions
  ***************************************************************************/
 void TestGCOMSupport::test_com_time(void)
 {
@@ -182,6 +182,16 @@ void TestGCOMSupport::test_com_time(void)
     test_value(time1.utc(), "1991-05-17T00:00:00", "Test 8393:0");
     GTime time2(com_time(8406, 691199999));
     test_value(time2.utc(), "1991-05-31T00:00:00", "Test 8406:691199999");
+
+    // Verify back conversion
+    int tjd1  = com_tjd(time1);
+    int tics1 = com_tics(time1);
+    test_value(tjd1, 8393, "Test TJD 8393");
+    test_value(tics1, 0, "Test tics 0");
+    int tjd2  = com_tjd(time2);
+    int tics2 = com_tics(time2);
+    test_value(tjd2, 8406, "Test TJD 8406");
+    test_value(tics2, 691199999, "Test tics 691199999");
 
     // Return
     return;

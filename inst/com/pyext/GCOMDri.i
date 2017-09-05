@@ -39,16 +39,20 @@ class GCOMDri : public GBase {
 public:
     // Constructors and destructors
     GCOMDri(void);
+    explicit GCOMDri(const GFilename& filename);
     GCOMDri(const GCOMDri& dri);
     virtual ~GCOMDri(void);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
-    virtual GCOMDri*   clone(void) const;
+    virtual GCOMDri*    clone(void) const;
     virtual std::string classname(void) const;
 
     // Other methods
-    // TODO: Copy methods from GCOMDri.hpp file
+    void load(const GFilename& filename);
+    void save(const GFilename& filename, const bool& clobber = false) const;
+    void read(const GFitsImage& image);
+    void write(GFits& fits, const std::string& extname = "") const;
 };
 
 
