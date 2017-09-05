@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCOMLib.hpp - COMPTEL Support Header files              *
+ *                   GCOMDri.i - COMPTEL Data Space class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,33 +19,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMLib.hpp
- * @brief Collection of COMPTEL support header files
- * @author Juergen Knoedlseder    
+ * @file GCOMDri.i
+ * @brief COMPTEL Data Space class definition
+ * @author Juergen Knoedlseder
  */
-
-#ifndef GCOMLIB_HPP
-#define GCOMLIB_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-
-/* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMEventCube.hpp"
-#include "GCOMEventBin.hpp"
-#include "GCOMInstDir.hpp"
-#include "GCOMResponse.hpp"
-#include "GCOMD1Response.hpp"
-#include "GCOMD2Response.hpp"
-#include "GCOMInstChars.hpp"
-#include "GCOMObservation.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
 #include "GCOMDri.hpp"
-#include "GCOMOads.hpp"
-#include "GCOMOad.hpp"
-#include "GCOMTim.hpp"
-#include "GCOMRoi.hpp"
-#include "GCOMEventAtom.hpp"
-#include "GCOMEventList.hpp"
-#include "GCOMModelDRBFitting.hpp"
+%}
 
-#endif /* GCOMLIB_HPP */
+
+/***********************************************************************//**
+ * @class GCOMDri
+ *
+ * @brief COMPTEL Data Space class
+ ***************************************************************************/
+class GCOMDri : public GBase {
+
+public:
+    // Constructors and destructors
+    GCOMDri(void);
+    GCOMDri(const GCOMDri& dri);
+    virtual ~GCOMDri(void);
+
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual GCOMDri*   clone(void) const;
+    virtual std::string classname(void) const;
+
+    // Other methods
+    // TODO: Copy methods from GCOMDri.hpp file
+};
+
+
+/***********************************************************************//**
+ * @brief GCOMDri class extension
+ ***************************************************************************/
+%extend GCOMDri {
+    GCOMDri copy() {
+        return (*self);
+    }
+};

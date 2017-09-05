@@ -20,6 +20,9 @@ The following classes have been added:
 - GCOMEventAtom
 - GCOMEventList
 - GCOMTim
+- GCOMOad
+- GCOMOads
+- GCOMDri
 
 The following classes have been removed:
 - n.a.
@@ -179,4 +182,6 @@ there (#2186).
 
 The classes GCOMRoi, GCOMEventAtom and GCOMEventList were added to support
 handling of COMPTEL event lists in EVP FITS format. In addition, the class
-GCOMTim was added to support reading of TIM FITS files (#2182).
+GCOMTim was added to support reading of TIM FITS files. Furthermore the classes
+GCOMOad and GCOMOads were added to handle the COMPTEL Orbit Aspect Data. And
+finally the class GCOMDri now handles all COMPTEL data cubes (#2182).
