@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GCOMOad.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -161,8 +162,6 @@ GCOMOad* GCOMOad::clone(void) const
  *
  * @param[in] chatter Chattiness.
  * @return String containing COMPTEL Orbit Aspect Data information.
- *
- * @todo Implement method.
  ***************************************************************************/
 std::string GCOMOad::print(const GChatter& chatter) const
 {
@@ -176,7 +175,19 @@ std::string GCOMOad::print(const GChatter& chatter) const
         result.append("=== GCOMOad ===");
 
         // Append information
-        // TODO: Add any relevant information
+        result.append("\n"+gammalib::parformat("COMPTEL time"));
+        result.append(gammalib::str(m_tjd));
+        result.append(":");
+        result.append(gammalib::str(m_tics));
+        result.append("\n"+gammalib::parformat("Superpacket MJD range"));
+        result.append(gammalib::str(m_tstart.mjd()));
+        result.append(" - ");
+        result.append(gammalib::str(m_tstop.mjd()));
+        result.append(" days");
+        result.append("\n"+gammalib::parformat("Superpacket UTC range"));
+        result.append(m_tstart.utc());
+        result.append(" - ");
+        result.append(m_tstop.utc());
 
     } // endif: chatter was not silent
 
@@ -197,7 +208,10 @@ std::string GCOMOad::print(const GChatter& chatter) const
 void GCOMOad::init_members(void)
 {
     // Initialise members
-    // TODO: Initialise all data members
+    m_tstart.clear();
+    m_tstop.clear();
+    m_tjd  = 0;
+    m_tics = 0;
     
     // Return
     return;
@@ -212,7 +226,10 @@ void GCOMOad::init_members(void)
 void GCOMOad::copy_members(const GCOMOad& oad)
 {
     // Copy members
-    // TODO: Copy all data members
+    m_tstart = oad.m_tstart;
+    m_tstop  = oad.m_tstop;
+    m_tjd    = oad.m_tjd;
+    m_tics   = oad.m_tics;
 
     // Return
     return;

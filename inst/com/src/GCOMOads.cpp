@@ -29,7 +29,10 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GCOMOads.hpp"
+#include "GCOMSupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                                             "GCOMOads::at(int&)"
@@ -52,11 +55,33 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs an empty Orbit Aspect Data container
  ***************************************************************************/
 GCOMOads::GCOMOads(void)
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Filename constructor
+ *
+ * @param[in] filename Orbit Aspect Data FITS file
+ *
+ * Constructs an Orbit Aspect Data container from an OAD FITS file.
+ ***************************************************************************/
+GCOMOads::GCOMOads(const GFilename& filename)
+{
+    // Initialise class members
+    init_members();
+
+    // Load data
+    load(filename);
 
     // Return
     return;
@@ -285,7 +310,7 @@ void GCOMOads::remove(const int& index)
 
     // Erase Orbit Aspect Data from container
     m_oads.erase(m_oads.begin() + index);
-    
+
     // Return
     return;
 }
@@ -317,7 +342,88 @@ void GCOMOads::extend(const GCOMOads& oads)
         }
 
     } // endif: COMPTEL Orbit Aspect Data container was not empty
-    
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load COMPTEL Orbit Aspect Data FITS file
+ *
+ * @param[in] filename COMPTEL OAD FITS file name.
+ *
+ * Loads an COMPTEL Orbit Aspect Data FITS file in the container.
+ ***************************************************************************/
+void GCOMOads::load(const GFilename& filename)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Get HDU (pointer is always valid)
+    const GFitsTable& hdu = *fits.table(1);
+
+    // Read Orbit Aspect Data FITS table
+    read(hdu);
+
+    // Close FITS file
+    fits.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read COMPTEL Orbit Aspect Data FITS table
+ *
+ * @param[in] table COMPTEL OAD FITS table.
+ *
+ * Reads COMPTEL Orbit Aspect Data FITS table into the container.
+ ***************************************************************************/
+void GCOMOads::read(const GFitsTable& table)
+{
+    // Clear
+    clear();
+
+    // Extract number of records in FITS file
+    int num = table.nrows();
+
+    // If there are records then load them
+    if (num > 0) {
+
+        // Reserve data
+        m_oads.reserve(num);
+
+        // Get column pointers
+        const GFitsTableCol* ptr_tjd  = table["TJD"];  // days
+        const GFitsTableCol* ptr_tics = table["TICS"]; // ticks
+
+        // Copy data from columns into records
+        for (int i = 0; i < num; ++i) {
+
+            // Allocate OAD record
+            GCOMOad oad;
+
+            // Get time of record
+            int tjd  = ptr_tjd->integer(i);
+            int tics = ptr_tics->integer(i);
+
+            // Store time information. The stop time is defined as the start
+            // time plus 131071 tics, since the length of one superpacket is
+            //  16.384 secs, i.e. 16.384 * 8000 = 131072 ticks
+            oad.tjd(tjd);
+            oad.tics(tics);
+            oad.tstart(com_time(tjd, tics));
+            oad.tstop(com_time(tjd, tics + 131071));
+
+            // Append record
+            m_oads.push_back(oad);
+
+        } // endfor: looped over OAD records
+
+    } // endif: there were records to load
+
     // Return
     return;
 }
@@ -328,8 +434,6 @@ void GCOMOads::extend(const GCOMOads& oads)
  *
  * @param[in] chatter Chattiness.
  * @return String containing COMPTEL Orbit Aspect Data container information.
- *
- * @todo Implement method.
  ***************************************************************************/
 std::string GCOMOads::print(const GChatter& chatter) const
 {
@@ -343,11 +447,19 @@ std::string GCOMOads::print(const GChatter& chatter) const
         result.append("=== GCOMOads ===");
 
         // Append container information
-        result.append("\n"+gammalib::parformat("Number of oad"));
+        result.append("\n"+gammalib::parformat("Number of records"));
         result.append(gammalib::str(size()));
-
-        // Append other information
-        // TODO: Add any relevant information
+        if (size() > 0) {
+            result.append("\n"+gammalib::parformat("MJD range"));
+            result.append(gammalib::str(m_oads[0].tstart().mjd()));
+            result.append(" - ");
+            result.append(gammalib::str(m_oads[size()-1].tstop().mjd()));
+            result.append(" days");
+            result.append("\n"+gammalib::parformat("UTC range"));
+            result.append(m_oads[0].tstart().utc());
+            result.append(" - ");
+            result.append(m_oads[size()-1].tstop().utc());
+        }
 
     } // endif: chatter was not silent
 
@@ -369,7 +481,7 @@ void GCOMOads::init_members(void)
 {
     // Initialise members
     m_oads.clear();
-    
+
     // Return
     return;
 }

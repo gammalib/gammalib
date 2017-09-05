@@ -39,6 +39,7 @@ class GCOMOads : public GContainer {
 public:
     // Constructors and destructors
     GCOMOads(void);
+    explicit GCOMOads(const GFilename& filename);
     GCOMOads(const GCOMOads& oads);
     virtual ~GCOMOads(void);
 
@@ -54,6 +55,8 @@ public:
     void        remove(const int& index);
     void        reserve(const int& num);
     void        extend(const GCOMOads& oads);
+    void        load(const GFilename& filename);
+    void        read(const GFitsTable& table);
 };
 
 

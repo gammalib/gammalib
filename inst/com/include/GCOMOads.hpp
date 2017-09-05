@@ -34,6 +34,8 @@
 #include "GContainer.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GFitsTable;
 
 /* __ Constants __________________________________________________________ */
 
@@ -43,13 +45,15 @@
  *
  * @brief COMPTEL Orbit Aspect Data container class
  *
- * @todo Add class description.
+ * The COMPTEL Orbit Aspect Data container class holds record of Orbit
+ * Aspect data that were extracted from one COMPTEL OAD FITS file.
  ***************************************************************************/
 class GCOMOads : public GContainer {
 
 public:
     // Constructors and destructors
     GCOMOads(void);
+    explicit GCOMOads(const GFilename& filename);
     GCOMOads(const GCOMOads& oads);
     virtual ~GCOMOads(void);
 
@@ -71,19 +75,18 @@ public:
     void           remove(const int& index);
     void           reserve(const int& num);
     void           extend(const GCOMOads& oads);
+    void           load(const GFilename& filename);
+    void           read(const GFitsTable& table);
     std::string    print(const GChatter& chatter = NORMAL) const;
-
-    // Other methods
-    // TODO: Add any further methods that are needed
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCOMOads& oads);
     void free_members(void);
-    
+
     // Protected data members
-    std::vector<GCOMOad> m_oads;
+    std::vector<GCOMOad> m_oads; //!< Orbit Aspect Data records
 };
 
 

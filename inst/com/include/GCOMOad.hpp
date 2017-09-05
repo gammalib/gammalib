@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GTime.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -41,7 +42,7 @@
  *
  * @brief COMPTEL Orbit Aspect Data class
  *
- * @todo Add class description.
+ * The class holds one record of a COMPTEL Orbit Aspect Data file.
  ***************************************************************************/
 class GCOMOad : public GBase {
 
@@ -61,7 +62,14 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    // TODO: Add any further methods that are needed
+    const GTime& tstart(void) const;
+    void         tstart(const GTime& tstart);
+    const GTime& tstop(void) const;
+    void         tstop(const GTime& tstop);
+    const int&   tjd(void) const;
+    void         tjd(const int& tjd);
+    const int&   tics(void) const;
+    void         tics(const int& tics);
 
 protected:
     // Protected methods
@@ -70,7 +78,10 @@ protected:
     void free_members(void);
     
     // Protected members
-    // TODO: Add any data members that are necessary
+    GTime m_tstart; //!< Start time of superpacket
+    GTime m_tstop;  //!< Stop time of superpacket
+    int   m_tjd;    //!< TJD of OAD record
+    int   m_tics;   //!< Tics of OAD record
 };
 
 
@@ -83,6 +94,124 @@ inline
 std::string GCOMOad::classname(void) const
 {
     return ("GCOMOad");
+}
+
+
+/***********************************************************************//**
+ * @brief Return start time of superpacket
+ *
+ * @return Start time of superpacket.
+ *
+ * Returns the start time of the superpacket.
+ ***************************************************************************/
+inline
+const GTime& GCOMOad::tstart(void) const
+{
+    return (m_tstart);
+}
+
+
+/***********************************************************************//**
+ * @brief Set start time of superpacket
+ *
+ * @param[in] tstart Start time of superpacket.
+ *
+ * Set the start time of the superpacket.
+ ***************************************************************************/
+inline
+void GCOMOad::tstart(const GTime& tstart)
+{
+    m_tstart = tstart;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return stop time of superpacket
+ *
+ * @return Stop time of superpacket.
+ *
+ * Returns the stop time of the superpacket. The stop time is defined as the
+ * start time plus 131071 tics, since the length of one superpacket is
+ * 16.384 secs, i.e. 16.384 * 8000 = 131072 ticks.
+ ***************************************************************************/
+inline
+const GTime& GCOMOad::tstop(void) const
+{
+    return (m_tstop);
+}
+
+
+/***********************************************************************//**
+ * @brief Set stop time of superpacket
+ *
+ * @param[in] tstop Stop time of superpacket.
+ *
+ * Set the stop time of the superpacket.
+ ***************************************************************************/
+inline
+void GCOMOad::tstop(const GTime& tstop)
+{
+    m_tstop = tstop;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Truncated Julian Days of Orbit Aspect Record
+ *
+ * @return Truncated Julian Days of Orbit Aspect Record.
+ *
+ * Returns the Truncated Julian Days of the Orbit Aspect Record.
+ ***************************************************************************/
+inline
+const int& GCOMOad::tjd(void) const
+{
+    return (m_tjd);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Truncated Julian Days of Orbit Aspect Record
+ *
+ * @param[in] tjd Truncated Julian Days of Orbit Aspect Record.
+ *
+ * Set the Truncated Julian Days of the Orbit Aspect Record.
+ ***************************************************************************/
+inline
+void GCOMOad::tjd(const int& tjd)
+{
+    m_tjd = tjd;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return tics of Orbit Aspect Record
+ *
+ * @return Tics of Orbit Aspect Record.
+ *
+ * Returns the tics of the Orbit Aspect Record.
+ ***************************************************************************/
+inline
+const int& GCOMOad::tics(void) const
+{
+    return (m_tics);
+}
+
+
+/***********************************************************************//**
+ * @brief Set tics of Orbit Aspect Record
+ *
+ * @param[in] tics Tics of Orbit Aspect Record.
+ *
+ * Set the tics of the Orbit Aspect Record.
+ ***************************************************************************/
+inline
+void GCOMOad::tics(const int& tics)
+{
+    m_tics = tics;
+    return;
 }
 
 #endif /* GCOMOAD_HPP */

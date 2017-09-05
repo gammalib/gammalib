@@ -48,7 +48,14 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
-    // TODO: Copy methods from GCOMOad.hpp file
+    const GTime& tstart(void) const;
+    void         tstart(const GTime& tstart);
+    const GTime& tstop(void) const;
+    void         tstop(const GTime& tstop);
+    const int&   tjd(void) const;
+    void         tjd(const int& tjd);
+    const int&   tics(void) const;
+    void         tics(const int& tics);
 };
 
 
