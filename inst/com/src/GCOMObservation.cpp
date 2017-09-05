@@ -1074,7 +1074,7 @@ void GCOMObservation::load_drx(const GFilename& drxname)
 bool GCOMObservation::check_map(const GSkyMap& map) const
 {
     // Get reference to event cube map
-    const GSkyMap& ref = dynamic_cast<GCOMEventCube*>(m_events)->dri().map();
+    const GSkyMap& ref = dynamic_cast<GCOMEventCube*>(m_events)->dre().map();
 
     // Compare dimensions
     bool same_dimension = ((map.nx()    == ref.nx()) &&

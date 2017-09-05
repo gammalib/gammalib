@@ -76,7 +76,7 @@ GCOMEventCube::GCOMEventCube(void) : GEventCube()
  *
  * @param[in] filename DRE FITS filename.
  *
- * Construct an event cube from a DRE FITS file.
+ * Constructs an event cube from a DRE FITS file.
  ***************************************************************************/
 GCOMEventCube::GCOMEventCube(const GFilename& filename) : GEventCube()
 {
@@ -96,31 +96,18 @@ GCOMEventCube::GCOMEventCube(const GFilename& filename) : GEventCube()
  *
  * @param[in] dri DRI event cube.
  *
- * Construct an event cube from a DRI event cube.
+ * Constructs an event cube from a DRE event cube.
  ***************************************************************************/
-GCOMEventCube::GCOMEventCube(const GCOMDri& dri) : GEventCube()
+GCOMEventCube::GCOMEventCube(const GCOMDri& dre) : GEventCube()
 {
     // Initialise members
     init_members();
 
-    // Set DRI event cube
-    m_dri = dri;
+    // Set DRE event cube
+    m_dri = dre;
 
-    // Copy over the energy boundaries and GTI from DRI cube
-    this->ebounds(m_dri.ebounds());
-    this->gti(m_dri.gti());
-
-    // Set scatter directions
-    set_scatter_directions();
-
-    // Set scatter angles
-    set_scatter_angles();
-
-    // Set energies
-    set_energies();
-
-    // Set times
-    set_times();
+    // Initialise event cube
+    init_cube();
 
     // Return
     return;
@@ -335,8 +322,7 @@ int GCOMEventCube::naxis(const int& axis) const
  *
  * @param[in] filename FITS filename.
  *
- * The method clears the object before loading, thus any events residing in
- * the object before loading will be lost.
+ * Loads the event cube from a DRE FITS file.
  ***************************************************************************/
 void GCOMEventCube::load(const GFilename& filename)
 {
@@ -360,7 +346,7 @@ void GCOMEventCube::load(const GFilename& filename)
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite existing FITS file? (default: false).
  *
- * Save the COMPTEL event cube into FITS file.
+ * Saves the COMPTEL event cube into a DRE FITS file.
  ***************************************************************************/
 void GCOMEventCube::save(const GFilename& filename, const bool& clobber) const
 {
@@ -383,9 +369,7 @@ void GCOMEventCube::save(const GFilename& filename, const bool& clobber) const
  *
  * @param[in] fits FITS file.
  *
- * Reads an COMPTEL event cube from a DRE FITS file. The event cube is loaded
- * into a skymap and the header keywords are analyzed to determine the
- * scatter angle axis, the energy range and the time range.
+ * Reads an COMPTEL event cube from a DRE FITS file.
  ***************************************************************************/
 void GCOMEventCube::read(const GFits& fits)
 {
@@ -398,21 +382,8 @@ void GCOMEventCube::read(const GFits& fits)
     // Read DRI
     m_dri.read(image);
 
-    // Copy over the energy boundaries and GTI from DRI cube
-    this->ebounds(m_dri.ebounds());
-    this->gti(m_dri.gti());
-
-    // Set scatter directions
-    set_scatter_directions();
-
-    // Set scatter angles
-    set_scatter_angles();
-
-    // Set energies
-    set_energies();
-
-    // Set times
-    set_times();
+    // Initialise event cube
+    init_cube();
 
     // Return
     return;
@@ -423,6 +394,8 @@ void GCOMEventCube::read(const GFits& fits)
  * @brief Write COMPTEL event cube into FITS file.
  *
  * @param[in] file FITS file.
+ *
+ * Writes the COMPTEL event cube into a DRE FITS file.
  ***************************************************************************/
 void GCOMEventCube::write(GFits& file) const
 {
@@ -535,10 +508,10 @@ void GCOMEventCube::init_members(void)
     m_ontime = 0.0;
     m_energy.clear();
     m_ewidth.clear();
+    m_npix = 0;
     m_dirs.clear();
     m_solidangle.clear();
-    m_phi.clear();
-    m_dphi.clear();
+    m_phibar.clear();
 
     // Prepare event bin
     init_bin();
@@ -569,10 +542,10 @@ void GCOMEventCube::copy_members(const GCOMEventCube& cube)
     m_ontime     = cube.m_ontime;
     m_energy     = cube.m_energy;
     m_ewidth     = cube.m_ewidth;
+    m_npix       = cube.m_npix;
     m_dirs       = cube.m_dirs;
     m_solidangle = cube.m_solidangle;
-    m_phi        = cube.m_phi;
-    m_dphi       = cube.m_dphi;
+    m_phibar     = cube.m_phibar;
 
     // Prepare event bin
     init_bin();
@@ -593,6 +566,42 @@ void GCOMEventCube::free_members(void)
 
 
 /***********************************************************************//**
+ * @brief Initialise event cube
+ *
+ * This method needs to be called once a new DRI dataset has been read.
+ *
+ * The method copies the energy boundaries and the Good Time Intervals from
+ * the DRI cube into the event cube and sets up arrays that will be used
+ * for event bin access. In particular, the set_scatter_directions(),
+ * set_scatter_angles(), set_energies() and set_times() methods will be
+ * called by this method.
+ ***************************************************************************/
+void GCOMEventCube::init_cube(void)
+{
+    // Copy energy boundaries from DRI
+    ebounds(m_dri.ebounds());
+
+    // Copy Good Time Intervals from DRI
+    gti(m_dri.gti());
+
+    // Set scatter directions
+    set_scatter_directions();
+
+    // Set scatter angles
+    set_scatter_angles();
+
+    // Set energies
+    set_energies();
+
+    // Set times
+    set_times();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set sky directions and solid angles of events cube
  *
  * @exception GException::invalid_value
@@ -606,10 +615,10 @@ void GCOMEventCube::free_members(void)
 void GCOMEventCube::set_scatter_directions(void)
 {
     // Compute number of sky pixels
-    int npix = m_dri.nchi() * m_dri.npsi();
+    m_npix = m_dri.nchi() * m_dri.npsi();
 
     // Throw an error if we have no sky pixels
-    if (npix < 1) {
+    if (m_npix < 1) {
         std::string msg = "No sky pixels have been found in event cube. "
                           "Every COMPTEL event cube needs a definition of "
                           "sky pixels.";
@@ -621,8 +630,8 @@ void GCOMEventCube::set_scatter_directions(void)
     m_solidangle.clear();
 
     // Reserve space for pixel directions and solid angles
-    m_dirs.reserve(npix);
-    m_solidangle.reserve(npix);
+    m_dirs.reserve(m_npix);
+    m_solidangle.reserve(m_npix);
 
     // Set pixel directions and solid angles
     for (int iy = 0; iy < m_dri.npsi(); ++iy) {
@@ -641,23 +650,20 @@ void GCOMEventCube::set_scatter_directions(void)
 /***********************************************************************//**
  * @brief Set Compton scatter angles of event cube
  *
- * Sets a vector of the Compton scatter angless.
+ * Sets a vector of the Compton scatter angles.
  ***************************************************************************/
 void GCOMEventCube::set_scatter_angles(void)
 {
-    // Clear vectors
-    m_phi.clear();
-    m_dphi.clear();
+    // Clear vector
+    m_phibar.clear();
 
     // Reserve space for pixel directions and solid angles
-    m_phi.reserve(m_dri.nphibar());
-    m_dphi.reserve(m_dri.nphibar());
+    m_phibar.reserve(m_dri.nphibar());
 
     // Set scatter angles
     for (int iz = 0; iz < m_dri.nphibar(); ++iz) {
-        double phi = m_dri.phimin() + (iz+0.5)*m_dri.phibin();
-        m_phi.push_back(phi);
-        m_dphi.push_back(m_dri.phibin());
+        double phibar = m_dri.phimin() + (iz+0.5)*m_dri.phibin();
+        m_phibar.push_back(phibar);
     }
 
     // Return
@@ -670,6 +676,8 @@ void GCOMEventCube::set_scatter_angles(void)
  *
  * @exception GException::invalid_value
  *            No energy boundaries found.
+ *
+ * Computes the mean energy and energy bin width of the event cube.
  ***************************************************************************/
 void GCOMEventCube::set_energies(void)
 {
@@ -773,12 +781,8 @@ void GCOMEventCube::set_bin(const int& index)
     }
     #endif
 
-    // Compute number of sky pixels
-    //int npix = m_dri.nchi() * m_dri.npsi();
-    int npix = m_dri.map().npix();
-
     // Check for the existence of sky directions and solid angles
-    if (m_dirs.size() != npix || m_solidangle.size() != npix) {
+    if (m_dirs.size() != m_npix || m_solidangle.size() != m_npix) {
         std::string msg = "Sky direction vector has not been setup for "
                           "event cube. Every COMPTEL event cube needs an "
                           "internal vector of sky directions.";
@@ -786,15 +790,15 @@ void GCOMEventCube::set_bin(const int& index)
     }
 
     // Get pixel and energy bin indices.
-    int ipix = index % npix;
-    int iphi = index / npix;
+    int ipix = index % m_npix;
+    int iphi = index / m_npix;
 
     // Set indices
     m_bin.m_index = index;
 
     // Set instrument direction
     m_dir.dir(m_dirs[ipix]);
-    m_dir.phibar(m_phi[iphi]);
+    m_dir.phibar(m_phibar[iphi]);
 
     // Set pointers
     m_bin.m_counts     = &(m_dri[index]);

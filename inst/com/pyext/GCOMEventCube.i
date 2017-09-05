@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GCOMEventCube(void);
     explicit GCOMEventCube(const GFilename& filename);
-    explicit GCOMEventCube(const GCOMDri& dri);
+    explicit GCOMEventCube(const GCOMDri& dre);
     GCOMEventCube(const GCOMEventCube& cube);
     virtual ~GCOMEventCube(void);
 
@@ -58,7 +58,7 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    const GCOMDri& dri(void) const;
+    const GCOMDri& dre(void) const;
 };
 
 

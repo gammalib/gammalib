@@ -57,7 +57,7 @@ public:
     // Constructors and destructors
     GCOMEventCube(void);
     explicit GCOMEventCube(const GFilename& filename);
-    explicit GCOMEventCube(const GCOMDri& dri);
+    explicit GCOMEventCube(const GCOMDri& dre);
     GCOMEventCube(const GCOMEventCube& cube);
     virtual ~GCOMEventCube(void);
 
@@ -82,13 +82,14 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const GCOMDri& dri(void) const;
+    const GCOMDri& dre(void) const;
 
 protected:
     // Protected methods
     void         init_members(void);
     void         copy_members(const GCOMEventCube& cube);
     void         free_members(void);
+    void         init_cube(void);
     void         set_scatter_directions(void);
     void         set_scatter_angles(void);
     virtual void set_energies(void);
@@ -104,10 +105,10 @@ protected:
     double               m_ontime;     //!< Event cube ontime (sec)
     GEnergy              m_energy;     //!< Event cube mean energy
     GEnergy              m_ewidth;     //!< Event cube energy bin width
+    int                  m_npix;       //!< Number of DRI pixels
     std::vector<GSkyDir> m_dirs;       //!< Array of event scatter directions
     std::vector<double>  m_solidangle; //!< Array of solid angles (sr)
-    std::vector<double>  m_phi;        //!< Array of event scatter angles
-    std::vector<double>  m_dphi;       //!< Array of event scatter angles widths
+    std::vector<double>  m_phibar;     //!< Array of event scatter angles
 };
 
 
@@ -136,12 +137,12 @@ int GCOMEventCube::size(void) const
 
 
 /***********************************************************************//**
- * @brief Return reference to DRI data
+ * @brief Return reference to DRE data
  *
- * @return Reference to DRI data.
+ * @return Reference to DRE data.
  ***************************************************************************/
 inline
-const GCOMDri& GCOMEventCube::dri(void) const
+const GCOMDri& GCOMEventCube::dre(void) const
 {
     return (m_dri);
 }
