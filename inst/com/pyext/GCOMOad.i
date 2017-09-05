@@ -56,6 +56,12 @@ public:
     void         tjd(const int& tjd);
     const int&   tics(void) const;
     void         tics(const int& tics);
+    const float& gcaz(void) const;
+    void         gcaz(const float& gcaz);
+    const float& gcel(void) const;
+    void         gcel(const float& gcel);
+    const float& georad(void) const;
+    void         georad(const float& georad);
 };
 
 

@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GMath.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GCOMOads.hpp"
@@ -38,13 +39,14 @@
 #define G_AT                                             "GCOMOads::at(int&)"
 #define G_INSERT                           "GCOMOads::insert(int&, GCOMOad&)"
 #define G_REMOVE                                     "GCOMOads::remove(int&)"
+#define G_READ                                  "GCOMOads::read(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_GEORAD_WARNING
 
 /* __ Debug definitions __________________________________________________ */
-
 
 
 /*==========================================================================
@@ -383,6 +385,14 @@ void GCOMOads::load(const GFilename& filename)
  ***************************************************************************/
 void GCOMOads::read(const GFitsTable& table)
 {
+    // Earth radius in km including atmosphere (see EVP routine EVSCDJ Rev.7)
+    const double era = 6451.03;
+
+    // Set Earth radius in km excluding atmosphere
+    const double erd     = 6378.5;
+    const double erd_min = erd + 300.0; // Lower limit on orbit
+    const double erd_max = erd + 530.0; // Upper limit on orbit
+
     // Clear
     clear();
 
@@ -398,6 +408,14 @@ void GCOMOads::read(const GFitsTable& table)
         // Get column pointers
         const GFitsTableCol* ptr_tjd  = table["TJD"];  // days
         const GFitsTableCol* ptr_tics = table["TICS"]; // ticks
+        const GFitsTableCol* ptr_gcaz = table["GCAZ"]; // rad
+        const GFitsTableCol* ptr_gcel = table["GCEL"]; // rad
+        const GFitsTableCol* ptr_posx = table["POSX"]; // km
+        const GFitsTableCol* ptr_posy = table["POSY"]; // km
+        const GFitsTableCol* ptr_posz = table["POSZ"]; // km
+
+        // Initialise Earth radius angle
+        double georad = 73.5;
 
         // Copy data from columns into records
         for (int i = 0; i < num; ++i) {
@@ -411,11 +429,35 @@ void GCOMOads::read(const GFitsTable& table)
 
             // Store time information. The stop time is defined as the start
             // time plus 131071 tics, since the length of one superpacket is
-            //  16.384 secs, i.e. 16.384 * 8000 = 131072 ticks
+            // 16.384 secs, i.e. 16.384 * 8000 = 131072 ticks
             oad.tjd(tjd);
             oad.tics(tics);
             oad.tstart(com_time(tjd, tics));
             oad.tstop(com_time(tjd, tics + 131071));
+
+            // Set geocentre azimuth and zenith angle in deg
+            oad.gcaz(ptr_gcaz->real(i) * gammalib::rad2deg);
+            oad.gcel(ptr_gcel->real(i) * gammalib::rad2deg);
+
+            // Compute apparent radius of Earth
+            double radius = std::sqrt(ptr_posx->real(i) * ptr_posx->real(i) +
+                                      ptr_posy->real(i) * ptr_posy->real(i) +
+                                      ptr_posz->real(i) * ptr_posz->real(i));
+            if ((radius > erd_min) && (radius < erd_max)) {
+                georad = std::asin(era/radius) * gammalib::rad2deg;
+            }
+            #if defined(G_GEORAD_WARNING)
+            else {
+                std::string msg = "Error in CGRO position. Distance from "
+                                  "geocentre is "+gammalib::str(radius)+ "km "
+                                  "while it should be in the interval ["+
+                                  gammalib::str(erd_min)+","+
+                                  gammalib::str(erd_max)+"] km. Use previous "
+                                  "spacecraft altitude.";
+                gammalib::warning(G_READ, msg);
+            }
+            #endif
+            oad.georad(georad);
 
             // Append record
             m_oads.push_back(oad);

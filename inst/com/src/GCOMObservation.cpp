@@ -54,6 +54,7 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_CHECK_EHA_COMPUTATION
 
 /* __ Debug definitions __________________________________________________ */
 #define G_DEBUG_COMPUTE_DRE
@@ -581,13 +582,18 @@ void GCOMObservation::load(const GFilename&              evpname,
         // Find index of where to insert OAD file
         int index = 0;
         for (; index < m_oads.size(); ++index) {
-            if (oads[0].tstart() >= m_oads[index][m_oads[index].size()-1].tstop()) {
+            if (oads[0].tstop() < m_oads[index][m_oads[index].size()-1].tstart()) {
                 break;
             }
         }
 
         // Inserts Orbit Aspect Data
-        m_oads.insert(m_oads.begin()+index, oads);
+        if (index < m_oads.size()) {
+            m_oads.insert(m_oads.begin()+index, oads);
+        }
+        else {
+            m_oads.push_back(oads);
+        }
 
     }
 
@@ -605,6 +611,10 @@ void GCOMObservation::load(const GFilename&              evpname,
  * @brief Compute event cube
  *
  * @param[in] dre COMPTEL event cube.
+ *
+ * @exception GException::invalid_argument
+ *            Observation does not hold an event list.
+ *            DRE cube has a non-positive Phibar bin size.
  *
  * Compute DRE event cube from event list (EVP), Good Time Intervals (TIM)
  * and Orbit Aspect Data (OAD).
@@ -627,6 +637,13 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
         throw GException::invalid_argument(G_COMPUTE_DRE, msg);
     }
 
+    // Check for positive Phibar bin size
+    if (dre.phibin() <= 0.0) {
+        std::string msg = "DRE cube has a non-positive Phibar bin size. Please "
+                          "specify a DRE cube with a positive Phibar bin size.";
+        throw GException::invalid_argument(G_COMPUTE_DRE, msg);
+    }
+
     // Initialise variables for book keeping
     int last_tjd = 0;
     int i_evt    = 0;
@@ -635,6 +652,27 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
     int num_used_superpackets    = 0;
     int num_skipped_superpackets = 0;
     int num_used_events          = 0;
+    int num_event_outside_sp     = 0;
+    int num_energy_too_low       = 0;
+    int num_energy_too_high      = 0;
+    int num_no_scatter_angle     = 0;
+    int num_bad_modcom           = 0;
+    int num_eha_too_small        = 0;
+    int num_phibar_too_low       = 0;
+    int num_phibar_too_high      = 0;
+    int num_outside_dre          = 0;
+    int num_outside_e1           = 0;
+    int num_outside_e2           = 0;
+    int num_outside_tof          = 0;
+    int num_outside_psd          = 0;
+    int num_bad_reflag           = 0;
+    int num_event_before_dre     = 0;
+    int num_event_after_dre      = 0;
+
+    // Set all DRE bins to zero
+    for (int i = 0; i < dre.size(); ++i) {
+        dre[i] = 0.0;
+    }
 
     // Loop over Orbit Aspect Data vector
     for (int i_oads = 0; i_oads < m_oads.size(); ++i_oads) {
@@ -654,8 +692,11 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
             // Update superpackets statistics
             num_used_superpackets++;
 
-            // Compute angle subtended by Earth
-            double georad = 0.0; // TODO
+            // Prepare Earth horizon angle comparison
+            GSkyDir sky_geocentre;
+            double  theta_geocentre = double(oad.gcel());
+            double  phi_geocentre   = double(oad.gcaz());
+            sky_geocentre.radec_deg(phi_geocentre, 90.0-theta_geocentre);
 
             // If TJD changed then update the module status table
             if (oad.tjd() != last_tjd) {
@@ -663,50 +704,101 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                 // TODO: Update module status table
             }
 
-            // Update validity interval
+            // Update validity interval so that DRE will have the correct
+            // interval
             //TODO
 
             // Collect all events within superpacket. Break if the end
             // of the event list was reached.
             for (; i_evt < evp->size(); ++i_evt) {
 
+                // Get pointer to event
+                const GCOMEventAtom* event = (*evp)[i_evt];
+
+                // Skip event if it lies before the DRE start
+                if (event->time() < dre.gti().tstart()) {
+                    num_event_before_dre++;
+                    continue;
+                }
+
+                // Skip event if it lies before the superpacket start
+                if (event->time() < oad.tstart()) {
+                    num_event_outside_sp++;
+                    continue;
+                }
+
                 // Break loop if the end of the superpacket was reached
-                if ((*evp)[i_evt]->time() > oad.tstop()) {
+                if (event->time() > oad.tstop()) {
                     break;
                 }
 
-                // Apply event selection
-                // TODO: PSSEVP
+                // Break if event lies after the DRE stop
+                if (event->time() > dre.gti().tstop()) {
+                    num_event_after_dre++;
+                    continue;
+                }
 
-                // Test whether event lies within energy boundaries
+                // Skip event if it lies outside energy range
+                if (event->energy() < dre.ebounds().emin()) {
+                    num_energy_too_low++;
+                    continue;
+                }
+                else if (event->energy() > dre.ebounds().emax()) {
+                    num_energy_too_high++;
+                    continue;
+                }
 
-                // Check whether the event has a scatter angle
-                // determined
-                // TODO: IF(EVSCT(4).GT.-1.0E3) THEN
+                // Apply event selection, see PSSEVP.F
+                // TODO: Hard coded for the moment, seems like EVP files
+                //       contain already these thresholds !!!
+                if (event->e1() < 0.070 || event->e1() > 20.0) {
+                    num_outside_e1++;
+                    continue;
+                }
+                if (event->e2() < 0.650 || event->e2() > 30.0) {
+                    num_outside_e2++;
+                    continue;
+                }
+                if (event->tof() < 110 || event->tof() > 150) {
+                    num_outside_tof++;
+                    continue;
+                }
+                if (event->psd() < 0 || event->psd() > 110) {
+                    num_outside_psd++;
+                    continue;
+                }
+                if (event->reflag() < 1) {
+                    num_bad_reflag++;
+                    continue;
+                }
+
+                // Check whether the event has a scatter angle determined.
+                // This is signalled by a scatter angle -10e20 in radians.
+                if (event->theta() < -1.0e3) {
+                    num_no_scatter_angle++;
+                    continue;
+                }
 
                 // Check for valid module IDs from MODCOM
-                // TODO: IF ( MODCOM.GE.1.AND.MODCOM.LE.98) THEN
+                if (event->modcom() < 1 && event->modcom() > 98) {
+                    num_bad_modcom++;
+                    continue;
+                }
 
                 // Extract module IDs from MODCOM
-                // TODO: ID2 = (MODCOM-1)/7 + 1
-                // TODO: ID1 =  MODCOM - (ID2-1) * 7
+                int id2 = (event->modcom()-1)/7 + 1;      // [1-14]
+                int id1 =  event->modcom() - (id2-1) * 7; // [1-7]
+                /*
+                if (id2 == 11 || id2 == 13 || id2 == 14) {
+                    continue;
+                }
+                */
 
                 // Check minitelescope against that specified in DRI
                 // definition and module status from database
                 // TODO: IF ( BETAPQ(ID1,ID2)    .EQ. 1
                 //           .AND.D1STAT(ID1) .NE. 0
                 //           .AND.D2STAT(ID2) .NE. 0 ) THEN
-
-                // Compute angle from geocentre
-                // TODO: GCANGL = GTCIR1(THETGD,PHIGD,THET1D,PHI1D)
-                // TODO: EHA = GCANGL  - GEORAD
-
-                // Check EHA calculation against value stored in EVP
-                // TODO: This means that we do not need GEORAD but we
-                //       can use directly the EHA value in the EVP
-
-                // Check Earth horizon angle OK
-                // TODO: IF(EHA   .GE.EHAMIN(KP)       ) THEN
 
                 // Check tha event is not falling in excluded region
                 // of failed PMT
@@ -717,17 +809,59 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                 // TODO (EXD2X(ID2)-MPAR(10)*.1)**2+(EXD2Y(ID2)-MPAR(11)*.1)**2
                 // TODO .GT.      EXD2R(ID2)**2           )
 
-                // Increment DRE event array
-                /*
-                if (dre.phibin() > 0.0) {
-                    int iphibar = ((*evp)[i_evt]->phibar() - dre.phimin()) / dre.phibin();
-                    if (iphibar)
+                // Compute Compton scatter angle index. Skip if it's invalid.
+                int iphibar = (event->phibar() - dre.phimin()) / dre.phibin();
+                if (iphibar < 0) {
+                    num_phibar_too_low++;
+                    continue;
+                }
+                else if (iphibar >= dre.nphibar()) {
+                    num_phibar_too_high++;
+                    continue;
+                }
 
-                GSkyPixel pixel = dre.map().dir2pix((*evp)[i_evt]->dir().dir());
-                */
+                // Compute Earth horizon angle (do not trust the EVP value)
+                GSkyDir sky_event;
+                double  theta_event = double(event->theta());
+                double  phi_event   = double(event->phi());
+                sky_event.radec_deg(-phi_event, 90.0-theta_event);
+                double eha = sky_event.dist_deg(sky_geocentre) - oad.georad();
 
-                // TODO: E(INDXE(ICHI,IPSI,KP)) = E(INDXE(ICHI,IPSI,KP)) + 1
-                num_used_events++;
+                // Option: Earth horizon angle comparison
+                #if defined(G_CHECK_EHA_COMPUTATION)
+                if (std::abs(eha - event->eha()) > 1.5) {
+                    std::string msg = "Earth horizon angle from EVP dataset ("+
+                                      gammalib::str(event->eha())+" deg) "
+                                      "differs from Earth horizon angle "
+                                      "computed from Orbit Aspect Data ("+
+                                      gammalib::str(eha)+" deg). Use the EVP "
+                                      "value.";
+                    gammalib::warning(G_COMPUTE_DRE, msg);
+                }
+                #endif
+
+                // Check for Earth horizon angle. The limit is fixed here to
+                // the values of 5, 7, ..., 53 deg for 25 Phibar layers that
+                // was usually used for COMPTEL.
+                double ehamin = double(iphibar) * dre.phibin() + 5.0;
+                if (event->eha() < ehamin) {
+                    num_eha_too_small++;
+                    continue;
+                }
+
+                // Now fill the DRE event array
+                GSkyPixel pixel = dre.map().dir2pix(event->dir().dir());
+                int       ichi  = int(pixel.x());
+                int       ipsi  = int(pixel.y());
+                if ((ichi >= 0) && (ipsi < dre.nchi()) &&
+                    (ipsi >= 0) && (ipsi < dre.npsi())) {
+                    int inx   = ichi + (ipsi + iphibar * dre.npsi()) * dre.nchi();
+                    dre[inx] += 1;
+                    num_used_events++;
+                }
+                else {
+                    num_outside_dre++;
+                }
 
             } // endfor: collected events
 
@@ -747,9 +881,25 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
 
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRE)
-    std::cout << "Used superpackets ....: " << num_used_superpackets << std::endl;
-    std::cout << "Skipped superpackets .: " << num_skipped_superpackets << std::endl;
-    std::cout << "Used events ..........: " << num_used_events << std::endl;
+    std::cout << "Used superpackets ............: " << num_used_superpackets << std::endl;
+    std::cout << "Skipped superpackets .........: " << num_skipped_superpackets << std::endl;
+    std::cout << "Used events ..................: " << num_used_events << std::endl;
+    std::cout << "Events outside superpacket ...: " << num_event_outside_sp << std::endl;
+    std::cout << "Events before DRE GTI ........: " << num_event_before_dre << std::endl;
+    std::cout << "Events after DRE GTI .........: " << num_event_after_dre << std::endl;
+    std::cout << "Energy too low ...............: " << num_energy_too_low << std::endl;
+    std::cout << "Energy too high ..............: " << num_energy_too_high << std::endl;
+    std::cout << "Phibar too low ...............: " << num_phibar_too_low << std::endl;
+    std::cout << "Phibar too high ..............: " << num_phibar_too_high << std::endl;
+    std::cout << "Outside D1 selection .........: " << num_outside_e1 << std::endl;
+    std::cout << "Outside D2 selection .........: " << num_outside_e2 << std::endl;
+    std::cout << "Outside TOF selection ........: " << num_outside_tof << std::endl;
+    std::cout << "Outside PSD selection ........: " << num_outside_psd << std::endl;
+    std::cout << "Outside rejection flag sel. ..: " << num_bad_reflag << std::endl;
+    std::cout << "Outside DRE cube .............: " << num_outside_dre << std::endl;
+    std::cout << "No scatter angle .............: " << num_no_scatter_angle << std::endl;
+    std::cout << "Bad module combination .......: " << num_bad_modcom << std::endl;
+    std::cout << "Earth horizon angle too small : " << num_eha_too_small << std::endl;
     #endif
 
     // Return

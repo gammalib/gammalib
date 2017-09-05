@@ -446,22 +446,21 @@ std::string GCOMEventList::print(const GChatter& chatter) const
                       gammalib::str(number()));
 
         // Append time information
-        result.append("\n"+gammalib::parformat("MJD interval"));
         if (gti().size() > 0) {
-            result.append(gammalib::str(tstart().mjd()));
-            result.append(" - ");
+            result.append("\n"+gammalib::parformat("MJD interval"));
+            result.append(gammalib::str(tstart().mjd())+" - ");
             result.append(gammalib::str(tstop().mjd())+" days");
-        }
-        else {
-            result.append("not defined");
-        }
-        result.append("\n"+gammalib::parformat("UTC interval"));
-        if (gti().size() > 0) {
-            result.append(tstart().utc());
-            result.append(" - ");
+            result.append("\n"+gammalib::parformat("UTC interval"));
+            result.append(tstart().utc()+" - ");
             result.append(tstop().utc());
+            result.append("\n"+gammalib::parformat("TJD interval"));
+            result.append(gammalib::str(com_tjd(tstart()))+":");
+            result.append(gammalib::str(com_tics(tstart()))+" - ");
+            result.append(gammalib::str(com_tjd(tstop()))+":");
+            result.append(gammalib::str(com_tics(tstop())));
         }
         else {
+            result.append("\n"+gammalib::parformat("MJD interval"));
             result.append("not defined");
         }
 
@@ -583,8 +582,8 @@ void GCOMEventList::read_events(const GFitsTable& table)
 
         // Disable scaling of TOF and PSD values so that the original
         // channel values are recovered
-        ptr_psd->scale(1.0, 0.0);
-        ptr_tof->scale(1.0, 0.0);
+        //ptr_psd->scale(1.0, 0.0);
+        //ptr_tof->scale(1.0, 0.0);
 
         // Initialise boundaries
         GEnergy emin;

@@ -70,18 +70,27 @@ public:
     void         tjd(const int& tjd);
     const int&   tics(void) const;
     void         tics(const int& tics);
+    const float& gcaz(void) const;
+    void         gcaz(const float& gcaz);
+    const float& gcel(void) const;
+    void         gcel(const float& gcel);
+    const float& georad(void) const;
+    void         georad(const float& georad);
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCOMOad& oad);
     void free_members(void);
-    
+
     // Protected members
     GTime m_tstart; //!< Start time of superpacket
     GTime m_tstop;  //!< Stop time of superpacket
     int   m_tjd;    //!< TJD of OAD record
     int   m_tics;   //!< Tics of OAD record
+    float m_gcaz;   //!< Geocentre azimuth angle (deg)
+    float m_gcel;   //!< Geocentre zenith angle (deg)
+    float m_georad; //!< Apparent radius of Earth (deg)
 };
 
 
@@ -211,6 +220,93 @@ inline
 void GCOMOad::tics(const int& tics)
 {
     m_tics = tics;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Geocentre azimuth angle
+ *
+ * @return Geocentre azimuth angle (deg).
+ *
+ * Returns the Geocentre azimuth angle in degrees.
+ ***************************************************************************/
+inline
+const float& GCOMOad::gcaz(void) const
+{
+    return (m_gcaz);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Geocentre azimuth angle
+ *
+ * @param[in] gcaz Geocentre azimuth angle (deg).
+ *
+ * Set the Geocentre azimuth angle.
+ ***************************************************************************/
+inline
+void GCOMOad::gcaz(const float& gcaz)
+{
+    m_gcaz = gcaz;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Geocentre zenith angle
+ *
+ * @return Geocentre zenith angle (deg).
+ *
+ * Returns the Geocentre zenith angle in degrees.
+ ***************************************************************************/
+inline
+const float& GCOMOad::gcel(void) const
+{
+    return (m_gcel);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Geocentre zenith angle
+ *
+ * @param[in] gcaz Geocentre zenith angle (deg).
+ *
+ * Set the Geocentre zenith angle.
+ ***************************************************************************/
+inline
+void GCOMOad::gcel(const float& gcel)
+{
+    m_gcel = gcel;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return apparent radius of Earth
+ *
+ * @return Apparent radius of Earth (deg).
+ *
+ * Returns the apparent radius of Earth in degrees.
+ ***************************************************************************/
+inline
+const float& GCOMOad::georad(void) const
+{
+    return (m_georad);
+}
+
+
+/***********************************************************************//**
+ * @brief Set apparent radius of Earth
+ *
+ * @param[in] georad Apparent radius of Earth (deg).
+ *
+ * Set the apparent radius of Earth.
+ ***************************************************************************/
+inline
+void GCOMOad::georad(const float& georad)
+{
+    m_georad = georad;
     return;
 }
 

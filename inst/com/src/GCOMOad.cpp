@@ -210,9 +210,12 @@ void GCOMOad::init_members(void)
     // Initialise members
     m_tstart.clear();
     m_tstop.clear();
-    m_tjd  = 0;
-    m_tics = 0;
-    
+    m_tjd    = 0;
+    m_tics   = 0;
+    m_gcaz   = 0.0;
+    m_gcel   = 0.0;
+    m_georad = 0.0;
+
     // Return
     return;
 }
@@ -230,6 +233,9 @@ void GCOMOad::copy_members(const GCOMOad& oad)
     m_tstop  = oad.m_tstop;
     m_tjd    = oad.m_tjd;
     m_tics   = oad.m_tics;
+    m_gcaz   = oad.m_gcaz;
+    m_gcel   = oad.m_gcel;
+    m_georad = oad.m_georad;
 
     // Return
     return;
