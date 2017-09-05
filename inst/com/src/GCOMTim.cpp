@@ -94,17 +94,11 @@ GCOMTim::GCOMTim(const GFilename&   filename,
                  const std::string& usage,
                  const std::string& mode)
 {
-    // Open FITS file
-    GFits fits(filename);
+    // Initialise class members
+    init_members();
 
-    // Get HDU (pointer is always valid)
-    const GFitsTable& hdu = *fits.table(1);
-
-    // Read TIM file
-    read(hdu, usage, mode);
-
-    // Close FITS file
-    fits.close();
+    // Load TIM file
+    load(filename, usage, mode);
 
     // Return
     return;
@@ -187,6 +181,36 @@ void GCOMTim::clear(void)
 GCOMTim* GCOMTim::clone(void) const
 {
     return new GCOMTim(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Load COMPTEL Good Time Intervals from FITS file
+ *
+ * @param[in] filename TIM file name.
+ * @param[in] usage Usage selection (blank: accept all usage strings).
+ * @param[in] mode Mode selection (blank: accept all mode strings).
+ *
+ * Load COMPTEL Good Time Intervals from the information in a TIM FITS file.
+ ***************************************************************************/
+void GCOMTim::load(const GFilename&   filename,
+                   const std::string& usage,
+                   const std::string& mode)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Get HDU (pointer is always valid)
+    const GFitsTable& hdu = *fits.table(1);
+
+    // Read TIM file
+    read(hdu, usage, mode);
+
+    // Close FITS file
+    fits.close();
+
+    // Return
+    return;
 }
 
 

@@ -53,6 +53,8 @@ public:
     bool        contains(const GTime& time) const;
     const GGti& gti(void) const;
     void        gti(const GGti& gti);
+    void        load(const GFilename& filename, const std::string& usage = "",
+                                                const std::string& mode  = "");
     void        read(const GFitsTable& table, const std::string& usage = "",
                                               const std::string& mode  = "");
 };
