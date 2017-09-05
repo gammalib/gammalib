@@ -76,7 +76,7 @@ public:
     const GSkyMap& drb(void) const;
     const GSkyMap& drg(void) const;
     const GSkyMap& drx(void) const;
-    void           compute_dre(const GEbounds& ebounds);
+    void           compute_dre(GCOMDri& dre);
 };
 
 

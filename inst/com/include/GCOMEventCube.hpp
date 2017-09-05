@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.hpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,13 +30,13 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GSkyDir.hpp"
 #include "GEventCube.hpp"
 #include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyMap.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+#include "GCOMDri.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
@@ -57,9 +57,7 @@ public:
     // Constructors and destructors
     GCOMEventCube(void);
     explicit GCOMEventCube(const GFilename& filename);
-    explicit GCOMEventCube(const GSkyMap& map, const GEbounds& ebds,
-                           const GGti& gti, const double& phimin,
-                           const double& dphi);
+    explicit GCOMEventCube(const GCOMDri& dri);
     GCOMEventCube(const GCOMEventCube& cube);
     virtual ~GCOMEventCube(void);
 
@@ -84,13 +82,7 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                   map(const GSkyMap& map, const double& phimin,
-                               const double& dphi);
-    const GSkyMap&         map(void) const;
-    int                    nchi(void) const;
-    int                    npsi(void) const;
-    int                    nphi(void) const;
-    int                    npix(void) const;
+    const GCOMDri& dri(void) const;
 
 protected:
     // Protected methods
@@ -98,7 +90,7 @@ protected:
     void         copy_members(const GCOMEventCube& cube);
     void         free_members(void);
     void         set_scatter_directions(void);
-    void         set_scatter_angles(const double& phimin, const double& dphi);
+    void         set_scatter_angles(void);
     virtual void set_energies(void);
     virtual void set_times(void);
     void         init_bin(void);
@@ -107,7 +99,7 @@ protected:
     // Protected members
     GCOMEventBin         m_bin;        //!< Actual event bin
     GCOMInstDir          m_dir;        //!< Actual event direction
-    GSkyMap              m_map;        //!< Counts map stored as sky map
+    GCOMDri              m_dri;        //!< DRI cube
     GTime                m_time;       //!< Event cube mean time
     double               m_ontime;     //!< Event cube ontime (sec)
     GEnergy              m_energy;     //!< Event cube mean energy
@@ -132,62 +124,26 @@ std::string GCOMEventCube::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return event cube sky map
+ * @brief Return number of bins in event cube
  *
- * @return Sky map containing event cube.
+ * @return Number of bins in event cube.
  ***************************************************************************/
 inline
-const GSkyMap& GCOMEventCube::map(void) const
+int GCOMEventCube::size(void) const
 {
-    return (m_map);
+    return (m_dri.size());
 }
 
 
 /***********************************************************************//**
- * @brief Return number of Chi bins
+ * @brief Return reference to DRI data
  *
- * @return Number of Chi bins.
+ * @return Reference to DRI data.
  ***************************************************************************/
 inline
-int GCOMEventCube::nchi(void) const
+const GCOMDri& GCOMEventCube::dri(void) const
 {
-    return (m_map.nx());
-}
-
-
-/***********************************************************************//**
- * @brief Return number of Psi bins
- *
- * @return Number of Psi bins.
- ***************************************************************************/
-inline
-int GCOMEventCube::npsi(void) const
-{
-    return (m_map.ny());
-}
-
-
-/***********************************************************************//**
- * @brief Return number of Phibar bins
- *
- * @return Number of Phibar bins.
- ***************************************************************************/
-inline
-int GCOMEventCube::nphi(void) const
-{
-    return (m_map.nmaps());
-}
-
-
-/***********************************************************************//**
- * @brief Return number of pixels
- *
- * @return Number of pixels.
- ***************************************************************************/
-inline
-int GCOMEventCube::npix(void) const
-{
-    return (m_map.npix());
+    return (m_dri);
 }
 
 #endif /* GCOMEVENTCUBE_HPP */

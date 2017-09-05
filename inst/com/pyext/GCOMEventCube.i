@@ -39,9 +39,7 @@ public:
     // Constructors and destructors
     GCOMEventCube(void);
     explicit GCOMEventCube(const GFilename& filename);
-    explicit GCOMEventCube(const GSkyMap& map, const GEbounds& ebds,
-                           const GGti& gti, const double& phimin,
-                           const double& dphi);
+    explicit GCOMEventCube(const GCOMDri& dri);
     GCOMEventCube(const GCOMEventCube& cube);
     virtual ~GCOMEventCube(void);
 
@@ -60,13 +58,7 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    void                   map(const GSkyMap& map, const double& phimin,
-                               const double& dphi);
-    const GSkyMap&         map(void) const;
-    int                    nchi(void) const;
-    int                    npsi(void) const;
-    int                    nphi(void) const;
-    int                    npix(void) const;
+    const GCOMDri& dri(void) const;
 };
 
 

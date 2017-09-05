@@ -604,19 +604,19 @@ void GCOMObservation::load(const GFilename&              evpname,
 /***********************************************************************//**
  * @brief Compute event cube
  *
- * @param[in] ebounds Energy boundaries for event cube.
+ * @param[in] dre COMPTEL event cube.
  *
  * Compute DRE event cube from event list (EVP), Good Time Intervals (TIM)
  * and Orbit Aspect Data (OAD).
  ***************************************************************************/
-void GCOMObservation::compute_dre(const GEbounds& ebounds)
+void GCOMObservation::compute_dre(GCOMDri& dre)
 {
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRE)
     std::cout << "GCOMObservation::compute_dre" << std::endl;
     std::cout << "============================" << std::endl;
     #endif
-    
+
     // Get pointer to event list. Throw an exception if the observation
     // does not hold an event list
     const GCOMEventList* evp = dynamic_cast<const GCOMEventList*>(m_events);
@@ -669,7 +669,7 @@ void GCOMObservation::compute_dre(const GEbounds& ebounds)
             // Collect all events within superpacket. Break if the end
             // of the event list was reached.
             for (; i_evt < evp->size(); ++i_evt) {
-                
+
                 // Break loop if the end of the superpacket was reached
                 if ((*evp)[i_evt]->time() > oad.tstop()) {
                     break;
@@ -718,16 +718,24 @@ void GCOMObservation::compute_dre(const GEbounds& ebounds)
                 // TODO .GT.      EXD2R(ID2)**2           )
 
                 // Increment DRE event array
+                /*
+                if (dre.phibin() > 0.0) {
+                    int iphibar = ((*evp)[i_evt]->phibar() - dre.phimin()) / dre.phibin();
+                    if (iphibar)
+
+                GSkyPixel pixel = dre.map().dir2pix((*evp)[i_evt]->dir().dir());
+                */
+
                 // TODO: E(INDXE(ICHI,IPSI,KP)) = E(INDXE(ICHI,IPSI,KP)) + 1
                 num_used_events++;
-                
+
             } // endfor: collected events
 
             // Break if there are no more events
             if (i_evt >= evp->size()) {
                 break;
             }
-            
+
         } // endfor: looped over Orbit Aspect Data
 
         // Break if there are no more events
@@ -1066,7 +1074,7 @@ void GCOMObservation::load_drx(const GFilename& drxname)
 bool GCOMObservation::check_map(const GSkyMap& map) const
 {
     // Get reference to event cube map
-    const GSkyMap& ref = dynamic_cast<GCOMEventCube*>(m_events)->map();
+    const GSkyMap& ref = dynamic_cast<GCOMEventCube*>(m_events)->dri().map();
 
     // Compare dimensions
     bool same_dimension = ((map.nx()    == ref.nx()) &&

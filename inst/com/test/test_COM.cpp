@@ -590,23 +590,6 @@ void TestGCOMObservation::test_event_cube(void)
                "Expected Chi axis dimension 25, found "+
                gammalib::str(cube2.naxis(2))+".");
 
-    // nchi, npsi, nphi methods
-    test_value(cube2.nchi(), 76, "Test nchi() method.",
-               "Expected Chi axis dimension 76, found "+
-               gammalib::str(cube2.nchi())+".");
-    test_value(cube2.npsi(), 74, "Test npsi() method.",
-               "Expected Chi axis dimension 74, found "+
-               gammalib::str(cube2.npsi())+".");
-    test_value(cube2.nphi(), 25, "Test nphi() method.",
-               "Expected Chi axis dimension 25, found "+
-               gammalib::str(cube2.nphi())+".");
-
-    // npix method
-    int npix = cube2.nchi() * cube2.npsi();
-    test_value(cube2.npix(), npix, "Test npix() method.",
-               "Expected "+gammalib::str(npix)+" pixels in (Chi,Psi) plane, found "+
-               gammalib::str(cube2.npix())+".");
-
     // number method
     test_value(cube2.number(), 316141, "Test number() method.",
                "Expected 316141 events in cube, found "+

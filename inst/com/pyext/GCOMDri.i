@@ -49,6 +49,10 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
+    int  size(void) const;
+    int  nchi(void) const;
+    int  npsi(void) const;
+    int  nphibar(void) const;
     void load(const GFilename& filename);
     void save(const GFilename& filename, const bool& clobber = false) const;
     void read(const GFitsImage& image);
