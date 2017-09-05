@@ -35,7 +35,10 @@
 #include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
 #include "GCOMResponse.hpp"
-//#include "GCaldb.hpp"
+#include "GCOMTim.hpp"
+#include "GCOMOads.hpp"
+#include "GCOMEventCube.hpp"
+#include "GCOMEventList.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GCaldb;
@@ -64,6 +67,9 @@ public:
                     const GFilename& drbname,
                     const GFilename& drgname,
                     const GFilename& drxname);
+    GCOMObservation(const GFilename&              evpname,
+                    const GFilename&              timname,
+                    const std::vector<GFilename>& oadnames);
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
 
@@ -85,10 +91,15 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    bool           is_unbinned(void) const;
+    bool           is_binned(void) const;
     void           load(const GFilename& drename,
                         const GFilename& drbname,
                         const GFilename& drgname,
                         const GFilename& drxname);
+    void           load(const GFilename&              evpname,
+                        const GFilename&              timname,
+                        const std::vector<GFilename>& oadnames);
     void           response(const GCaldb& caldb, const std::string& rspname);
     void           obs_id(const double& id);
     void           ontime(const double& ontime);
@@ -100,6 +111,7 @@ public:
     const GSkyMap& drb(void) const;
     const GSkyMap& drg(void) const;
     const GSkyMap& drx(void) const;
+    void           compute_dre(const GEbounds& ebounds);
 
 protected:
     // Protected methods
@@ -115,21 +127,30 @@ protected:
     void write_attributes(GFitsHDU* hdu) const;
 
     // Protected members
-    std::string  m_instrument;  //!< Instrument name
-    GFilename    m_drename;     //!< DRE filename
-    GFilename    m_drbname;     //!< DRB filename
-    GFilename    m_drgname;     //!< DRG filename
-    GFilename    m_drxname;     //!< DRX filename
-    GSkyMap      m_drb;         //!< Background model
-    GSkyMap      m_drg;         //!< Geometry factors
-    GSkyMap      m_drx;         //!< Exposure map
-    GSkyDir      m_pointing;    //!< Pointing direction
-    GCOMResponse m_response;    //!< Response functions
-    double       m_obs_id;      //!< Observation ID
-    double       m_ontime;      //!< Ontime (sec)
-    double       m_livetime;    //!< Livetime (sec)
-    double       m_deadc;       //!< Deadtime correction
-    double       m_ewidth;      //!< Energy width (MeV)
+    std::string            m_instrument; //!< Instrument name
+    GSkyDir                m_pointing;   //!< Pointing direction
+    GCOMResponse           m_response;   //!< Response functions
+    double                 m_obs_id;     //!< Observation ID
+    double                 m_ontime;     //!< Ontime (sec)
+    double                 m_livetime;   //!< Livetime (sec)
+    double                 m_deadc;      //!< Deadtime correction
+
+    // Protected members for binned observation
+    GFilename              m_drename;    //!< DRE filename
+    GFilename              m_drbname;    //!< DRB filename
+    GFilename              m_drgname;    //!< DRG filename
+    GFilename              m_drxname;    //!< DRX filename
+    GSkyMap                m_drb;        //!< Background model
+    GSkyMap                m_drg;        //!< Geometry factors
+    GSkyMap                m_drx;        //!< Exposure map
+    double                 m_ewidth;     //!< Energy width (MeV)
+
+    // Protected members for unbinned observation
+    GFilename              m_evpname;    //!< EVP filename
+    GFilename              m_timname;    //!< TIM filename
+    std::vector<GFilename> m_oadnames;   //!< OAD filenames
+    GCOMTim                m_tim;        //!< COMPTEL Good Time Intervals
+    std::vector<GCOMOads>  m_oads;       //!< Orbit Aspect Data
 };
 
 
@@ -339,6 +360,30 @@ const GSkyMap& GCOMObservation::drx(void) const
 {
     // Return exposure
     return (m_drx);
+}
+
+
+/***********************************************************************//**
+ * @brief Check whether observation is unbinned
+ *
+ * @return True if observation is unbinned.
+ ***************************************************************************/
+inline
+bool GCOMObservation::is_unbinned(void) const
+{
+    return (dynamic_cast<const GCOMEventList*>(m_events) != NULL);
+}
+
+
+/***********************************************************************//**
+ * @brief Check whether observation is binned
+ *
+ * @return True if observation is unbinned.
+ ***************************************************************************/
+inline
+bool GCOMObservation::is_binned(void) const
+{
+    return (dynamic_cast<const GCOMEventCube*>(m_events) != NULL);
 }
 
 #endif /* GCOMOBSERVATION_HPP */

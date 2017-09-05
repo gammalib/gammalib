@@ -465,6 +465,17 @@ std::string GCOMEventList::print(const GChatter& chatter) const
             result.append("not defined");
         }
 
+        // Append energy information
+        result.append("\n"+gammalib::parformat("Energy interval"));
+        if (ebounds().size() > 0) {
+            result.append(gammalib::str(ebounds().emin().MeV()));
+            result.append(" - ");
+            result.append(gammalib::str(ebounds().emax().MeV())+" MeV");
+        }
+        else {
+            result.append("not defined");
+        }
+
     } // endif: chatter was not silent
 
     // Return result

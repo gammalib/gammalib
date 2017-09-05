@@ -59,6 +59,8 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    bool           is_unbinned(void) const;
+    bool           is_binned(void) const;
     void           load(const GFilename& drename,
                         const GFilename& drbname,
                         const GFilename& drgname,
@@ -74,6 +76,7 @@ public:
     const GSkyMap& drb(void) const;
     const GSkyMap& drg(void) const;
     const GSkyMap& drx(void) const;
+    void           compute_dre(const GEbounds& ebounds);
 };
 
 
