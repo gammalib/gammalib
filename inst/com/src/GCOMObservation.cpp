@@ -561,11 +561,6 @@ void GCOMObservation::load(const GFilename&              evpname,
     m_deadc       = 0.85;
     m_livetime    = m_deadc * m_ontime;
 
-    // Extract pointing from event list
-    double ra_scz  = evp->roi().centre().dir().ra_deg();
-    double dec_scz = evp->roi().centre().dir().dec_deg();
-    m_pointing.radec_deg(ra_scz, dec_scz);
-
     // Load TIM data
     m_tim.load(timname);
 
@@ -977,11 +972,6 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Deadtime correction"));
         result.append(gammalib::str(m_deadc));
 
-        // Append pointing
-        result.append("\n"+gammalib::parformat("Pointing (RA,Dec)"));
-        result.append("("+gammalib::str(m_pointing.ra_deg())+", ");
-        result.append(gammalib::str(m_pointing.dec_deg())+") deg");
-
         // Append response (if available)
         if (response()->rspname().length() > 0) {
             result.append("\n"+response()->print(gammalib::reduce(chatter)));
@@ -1020,7 +1010,6 @@ void GCOMObservation::init_members(void)
 {
     // Initialise members
     m_instrument = "COM";
-    m_pointing.clear();
     m_response.clear();
     m_obs_id   = 0;
     m_ontime   = 0.0;
@@ -1059,7 +1048,6 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     // Copy members
     m_instrument = obs.m_instrument;
     m_response   = obs.m_response;
-    m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;
     m_ontime     = obs.m_ontime;
     m_livetime   = obs.m_livetime;
@@ -1287,8 +1275,6 @@ bool GCOMObservation::check_map(const GSkyMap& map) const
  *
  * Reads COM observation attributes from HDU. Mandatory attributes are
  *
- *     RA_SCZ   - Right Ascension of pointing
- *     DEC_SCZ  - Declination of pointing
  *     TSTART   - Start time (days)
  *     TSTOP    - Stop time (days)
  *     E_MIN    - Minimum energy (MeV)
@@ -1326,11 +1312,6 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
         double emin = hdu->real("E_MIN");
         double emax = hdu->real("E_MAX");
         m_ewidth = emax - emin;
-
-        // Set pointing information
-        double ra_scz  = hdu->real("RA_SCZ");
-        double dec_scz = hdu->real("DEC_SCZ");
-        m_pointing.radec_deg(ra_scz, dec_scz);
 
     } // endif: HDU was valid
 

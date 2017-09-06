@@ -128,7 +128,6 @@ protected:
 
     // Protected members
     std::string            m_instrument; //!< Instrument name
-    GSkyDir                m_pointing;   //!< Pointing direction
     GCOMResponse           m_response;   //!< Response functions
     double                 m_obs_id;     //!< Observation ID
     double                 m_ontime;     //!< Ontime (sec)
