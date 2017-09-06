@@ -49,14 +49,21 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
-    int  size(void) const;
-    int  nchi(void) const;
-    int  npsi(void) const;
-    int  nphibar(void) const;
-    void load(const GFilename& filename);
-    void save(const GFilename& filename, const bool& clobber = false) const;
-    void read(const GFitsImage& image);
-    void write(GFits& fits, const std::string& extname = "") const;
+    int             size(void) const;
+    int             nchi(void) const;
+    int             npsi(void) const;
+    int             nphibar(void) const;
+    void            load(const GFilename& filename);
+    void            save(const GFilename& filename, const bool& clobber = false) const;
+    void            read(const GFitsImage& image);
+    void            write(GFits& fits, const std::string& extname = "") const;
+    const GSkyMap&  map(void) const;
+    const GEbounds& ebounds(void) const;
+    void            ebounds(const GEbounds&);
+    const GGti&     gti(void) const;
+    void            gti(const GGti& gti);
+    const double&   phimin(void) const;
+    const double&   phibin(void) const;
 };
 
 
@@ -64,6 +71,32 @@ public:
  * @brief GCOMDri class extension
  ***************************************************************************/
 %extend GCOMDri {
+    double __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
+            return (*self)[index];
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            return (*self)[self->size()+index];
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
+    }
+    void __setitem__(const int& index, const double& val) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
+            (*self)[index] = val;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            (*self)[self->size()+index] = val;
+        }
+        else {
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
+    }
     GCOMDri copy() {
         return (*self);
     }

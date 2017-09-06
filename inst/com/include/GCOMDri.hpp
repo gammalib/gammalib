@@ -81,7 +81,9 @@ public:
     void            write(GFits& fits, const std::string& extname = "") const;
     const GSkyMap&  map(void) const;
     const GEbounds& ebounds(void) const;
+    void            ebounds(const GEbounds&);
     const GGti&     gti(void) const;
+    void            gti(const GGti& gti);
     const double&   phimin(void) const;
     const double&   phibin(void) const;
 
@@ -201,9 +203,9 @@ const GSkyMap& GCOMDri::map(void) const
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries of DRI data
+ * @brief Return energy boundaries of DRI cube
  *
- * @return Energy boundaries of DRI data.
+ * @return Energy boundaries of DRI cube.
  ***************************************************************************/
 inline
 const GEbounds& GCOMDri::ebounds(void) const
@@ -213,9 +215,24 @@ const GEbounds& GCOMDri::ebounds(void) const
 
 
 /***********************************************************************//**
- * @brief Return Good Time Intervals of DRI data
+ * @brief Set energy boundaries of DRI cube
  *
- * @return Good Time Intervals of DRI data.
+ * @param[in] ebounds Energy boundaries of DRI cube.
+ *
+ * Sets energy boundaries of DRI cube
+ ***************************************************************************/
+inline
+void GCOMDri::ebounds(const GEbounds& ebounds)
+{
+    m_ebounds = ebounds;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Good Time Intervals of DRI cube
+ *
+ * @return Good Time Intervals of DRI cube.
  ***************************************************************************/
 inline
 const GGti& GCOMDri::gti(void) const
@@ -225,9 +242,24 @@ const GGti& GCOMDri::gti(void) const
 
 
 /***********************************************************************//**
- * @brief Return minimum Compton scatter angle of DRI data
+ * @brief Set Good Time Intervals of DRI cube
  *
- * @return Minimum Compton scatter angle of DRI data.
+ * @param[in] git Good Time Intervals of DRI data.
+ *
+ * Sets the Good Time Intervals of DRI cube.
+ ***************************************************************************/
+inline
+void GCOMDri::gti(const GGti& gti)
+{
+    m_gti = gti;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum Compton scatter angle of DRI cube
+ *
+ * @return Minimum Compton scatter angle of DRI cube.
  ***************************************************************************/
 inline
 const double& GCOMDri::phimin(void) const
@@ -237,9 +269,9 @@ const double& GCOMDri::phimin(void) const
 
 
 /***********************************************************************//**
- * @brief Return Compton scatter angle bin of DRI data
+ * @brief Return Compton scatter angle bin of DRI cube
  *
- * @return Compton scatter angle bin of DRI data.
+ * @return Compton scatter angle bin of DRI cube.
  ***************************************************************************/
 inline
 const double& GCOMDri::phibin(void) const

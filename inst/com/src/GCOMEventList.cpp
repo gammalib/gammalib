@@ -580,11 +580,6 @@ void GCOMEventList::read_events(const GFitsTable& table)
         const GFitsTableCol* ptr_reflag     = table["RC_REFLAG"];     //
         const GFitsTableCol* ptr_veto       = table["RC_VETO"];       //
 
-        // Disable scaling of TOF and PSD values so that the original
-        // channel values are recovered
-        //ptr_psd->scale(1.0, 0.0);
-        //ptr_tof->scale(1.0, 0.0);
-
         // Initialise boundaries
         GEnergy emin;
         GEnergy emax;

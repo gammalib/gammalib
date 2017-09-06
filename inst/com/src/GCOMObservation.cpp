@@ -644,9 +644,11 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
         throw GException::invalid_argument(G_COMPUTE_DRE, msg);
     }
 
-    // Initialise variables for book keeping
-    int last_tjd = 0;
-    int i_evt    = 0;
+    // Initialise variables
+    int   last_tjd = 0;
+    int   i_evt    = 0;
+    GTime tstart;
+    GTime tstop;
 
     // Initialise statistics
     int num_used_superpackets    = 0;
@@ -668,11 +670,17 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
     int num_bad_reflag           = 0;
     int num_event_before_dre     = 0;
     int num_event_after_dre      = 0;
+    int num_module_off           = 0;
+    int num_processed            = 0;
+    int num_superpackets         = 0;
 
     // Set all DRE bins to zero
     for (int i = 0; i < dre.size(); ++i) {
         dre[i] = 0.0;
     }
+
+    // Signal that loop should be terminated
+    bool terminate = false;
 
     // Loop over Orbit Aspect Data vector
     for (int i_oads = 0; i_oads < m_oads.size(); ++i_oads) {
@@ -683,8 +691,13 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
             // Get reference to Orbit Aspect Data of superpacket
             const GCOMOad &oad = m_oads[i_oads][i_oad];
 
+            // Increment superpacket counter
+            num_superpackets++;
+
             // Skip superpacket if it is not within Good Time Intervals
-            if (!m_tim.contains(oad.tstart())) {
+            //if (!m_tim.contains(oad.tstart())) {
+            //if (!m_tim.contains(oad.tstart()) && !m_tim.contains(oad.tstop())) {
+            if (!(m_tim.contains(oad.tstart()) && m_tim.contains(oad.tstop()))) {
                 num_skipped_superpackets++;
                 continue;
             }
@@ -706,7 +719,13 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
 
             // Update validity interval so that DRE will have the correct
             // interval
-            //TODO
+            if (num_used_superpackets == 1) {
+                tstart = oad.tstart();
+                tstop  = oad.tstop();
+            }
+            else {
+                tstop  = oad.tstop();
+            }
 
             // Collect all events within superpacket. Break if the end
             // of the event list was reached.
@@ -715,26 +734,30 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                 // Get pointer to event
                 const GCOMEventAtom* event = (*evp)[i_evt];
 
+                // Break loop if the end of the superpacket was reached
+                if (event->time() > oad.tstop()) {
+                    break;
+                }
+
+                // Increase number of processed events
+                num_processed++;
+
                 // Skip event if it lies before the DRE start
                 if (event->time() < dre.gti().tstart()) {
                     num_event_before_dre++;
                     continue;
                 }
 
-                // Skip event if it lies before the superpacket start
-                if (event->time() < oad.tstart()) {
-                    num_event_outside_sp++;
-                    continue;
-                }
-
-                // Break loop if the end of the superpacket was reached
-                if (event->time() > oad.tstop()) {
-                    break;
-                }
-
                 // Break if event lies after the DRE stop
                 if (event->time() > dre.gti().tstop()) {
                     num_event_after_dre++;
+                    terminate = true;
+                    break;
+                }
+
+                // Skip event if it lies before the superpacket start
+                if (event->time() < oad.tstart()) {
+                    num_event_outside_sp++;
                     continue;
                 }
 
@@ -759,7 +782,7 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                     num_outside_e2++;
                     continue;
                 }
-                if (event->tof() < 110 || event->tof() > 150) {
+                if (event->tof() < 115 || event->tof() > 130) {
                     num_outside_tof++;
                     continue;
                 }
@@ -773,7 +796,7 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                 }
 
                 // Check whether the event has a scatter angle determined.
-                // This is signalled by a scatter angle -10e20 in radians.
+                // This is signaled by a scatter angle -10e20 in radians.
                 if (event->theta() < -1.0e3) {
                     num_no_scatter_angle++;
                     continue;
@@ -786,14 +809,36 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                 }
 
                 // Extract module IDs from MODCOM
+                // 8392,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
+                // 8393,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
+                // 8394,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
+                // 8395,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
+                // 8396,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
+                // 8397,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
+                // 8398,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,0
+                // 8399,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,0
+                // 8400,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
+                // 8401,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
+                // 8402,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
+                // 8403,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
+                // 8404,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
+                // 8405,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
+                // 8406,1,1,1,1,1,1,1, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
                 int id2 = (event->modcom()-1)/7 + 1;      // [1-14]
                 int id1 =  event->modcom() - (id2-1) * 7; // [1-7]
-                /*
-                if (id2 == 11 || id2 == 13 || id2 == 14) {
+                if (id1 == 7 || id2 == 2 || id2 == 5) {
+                    num_module_off++;
                     continue;
                 }
-                */
-
+                if ((oad.tjd() < 8400) && (id2 == 1)) {
+                    num_module_off++;
+                    continue;
+                }
+                if ((oad.tjd() > 8397) && (id2 == 14)) {
+                    num_module_off++;
+                    continue;
+                }
+                
                 // Check minitelescope against that specified in DRI
                 // definition and module status from database
                 // TODO: IF ( BETAPQ(ID1,ID2)    .EQ. 1
@@ -843,6 +888,7 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                 // Check for Earth horizon angle. The limit is fixed here to
                 // the values of 5, 7, ..., 53 deg for 25 Phibar layers that
                 // was usually used for COMPTEL.
+                // zeta = 5.0
                 double ehamin = double(iphibar) * dre.phibin() + 5.0;
                 if (event->eha() < ehamin) {
                     num_eha_too_small++;
@@ -853,10 +899,10 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                 GSkyPixel pixel = dre.map().dir2pix(event->dir().dir());
                 int       ichi  = int(pixel.x());
                 int       ipsi  = int(pixel.y());
-                if ((ichi >= 0) && (ipsi < dre.nchi()) &&
+                if ((ichi >= 0) && (ichi < dre.nchi()) &&
                     (ipsi >= 0) && (ipsi < dre.npsi())) {
                     int inx   = ichi + (ipsi + iphibar * dre.npsi()) * dre.nchi();
-                    dre[inx] += 1;
+                    dre[inx] += 1.0;
                     num_used_events++;
                 }
                 else {
@@ -865,28 +911,35 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
 
             } // endfor: collected events
 
-            // Break if there are no more events
-            if (i_evt >= evp->size()) {
+            // Break if termination was signalled or if there are no more events
+            if (terminate || i_evt >= evp->size()) {
                 break;
             }
 
         } // endfor: looped over Orbit Aspect Data
 
-        // Break if there are no more events
-        if (i_evt >= evp->size()) {
+        // Break if termination was signalled or if there are no more events
+        if (terminate || i_evt >= evp->size()) {
             break;
         }
 
     } // endfor: looped over Orbit Aspect Data vector
 
+    // Set Good Time interval for DRE
+    dre.gti(GGti(tstart, tstop));
+
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRE)
+    std::cout << "Total number of superpackets .: " << num_superpackets << std::endl;
     std::cout << "Used superpackets ............: " << num_used_superpackets << std::endl;
     std::cout << "Skipped superpackets .........: " << num_skipped_superpackets << std::endl;
+    std::cout << "Total number of events .......: " << evp->size() << std::endl;
+    std::cout << "Processed events .............: " << num_processed << std::endl;
     std::cout << "Used events ..................: " << num_used_events << std::endl;
     std::cout << "Events outside superpacket ...: " << num_event_outside_sp << std::endl;
     std::cout << "Events before DRE GTI ........: " << num_event_before_dre << std::endl;
     std::cout << "Events after DRE GTI .........: " << num_event_after_dre << std::endl;
+    std::cout << "Events when module off .......: " << num_module_off << std::endl;
     std::cout << "Energy too low ...............: " << num_energy_too_low << std::endl;
     std::cout << "Energy too high ..............: " << num_energy_too_high << std::endl;
     std::cout << "Phibar too low ...............: " << num_phibar_too_low << std::endl;
