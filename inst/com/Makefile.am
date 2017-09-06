@@ -35,6 +35,7 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = src/GCOMSupport.cpp \
+          src/GCOMStatus.cpp \
           src/GCOMDri.cpp \
           src/GCOMOads.cpp \
           src/GCOMOad.cpp \
@@ -55,6 +56,7 @@ sources = src/GCOMSupport.cpp \
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCOMEventCube.hpp \
+                     include/GCOMStatus.hpp \
                      include/GCOMDri.hpp \
                      include/GCOMOads.hpp \
                      include/GCOMOad.hpp \

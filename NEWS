@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-4 September 2017
+6 September 2017
 
 
 1. Introduction
@@ -23,6 +23,7 @@ The following classes have been added:
 - GCOMOad
 - GCOMOads
 - GCOMDri
+- GCOMStatus
 
 The following classes have been removed:
 - n.a.
@@ -184,4 +185,7 @@ The classes GCOMRoi, GCOMEventAtom and GCOMEventList were added to support
 handling of COMPTEL event lists in EVP FITS format. In addition, the class
 GCOMTim was added to support reading of TIM FITS files. Furthermore the classes
 GCOMOad and GCOMOads were added to handle the COMPTEL Orbit Aspect Data. And
-finally the class GCOMDri now handles all COMPTEL data cubes (#2182).
+finally the class GCOMDri now handles all COMPTEL data cubes (#2187).
+
+The class GCOMStatus was added to handle a mission wide database of D1 and D2
+module status that forms now part of the COMPTEL calibration database (#2187).

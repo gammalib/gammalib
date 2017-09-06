@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCOMLib.hpp - COMPTEL Support Header files              *
+ *              GCOMStatus.i - COMPTEL instrument status class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,34 +19,46 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMLib.hpp
- * @brief Collection of COMPTEL support header files
- * @author Juergen Knoedlseder    
+ * @file GCOMStatus.i
+ * @brief COMPTEL instrument status class definition
+ * @author Juergen Knoedlseder
  */
-
-#ifndef GCOMLIB_HPP
-#define GCOMLIB_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-
-/* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMEventCube.hpp"
-#include "GCOMEventBin.hpp"
-#include "GCOMInstDir.hpp"
-#include "GCOMResponse.hpp"
-#include "GCOMD1Response.hpp"
-#include "GCOMD2Response.hpp"
-#include "GCOMInstChars.hpp"
-#include "GCOMObservation.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
 #include "GCOMStatus.hpp"
-#include "GCOMDri.hpp"
-#include "GCOMOads.hpp"
-#include "GCOMOad.hpp"
-#include "GCOMTim.hpp"
-#include "GCOMRoi.hpp"
-#include "GCOMEventAtom.hpp"
-#include "GCOMEventList.hpp"
-#include "GCOMModelDRBFitting.hpp"
+%}
 
-#endif /* GCOMLIB_HPP */
+
+/***********************************************************************//**
+ * @class GCOMStatus
+ *
+ * @brief COMPTEL instrument status class
+ ***************************************************************************/
+class GCOMStatus : public GBase {
+
+public:
+    // Constructors and destructors
+    GCOMStatus(void);
+    GCOMStatus(const GCOMStatus& status);
+    virtual ~GCOMStatus(void);
+
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual GCOMStatus* clone(void) const;
+    virtual std::string classname(void) const;
+
+    // Other methods
+    void load(void) const;
+    int  d1status(const int& tjd, const int& module) const;
+    int  d2status(const int& tjd, const int& module) const;
+};
+
+
+/***********************************************************************//**
+ * @brief GCOMStatus class extension
+ ***************************************************************************/
+%extend GCOMStatus {
+    GCOMStatus copy() {
+        return (*self);
+    }
+};
