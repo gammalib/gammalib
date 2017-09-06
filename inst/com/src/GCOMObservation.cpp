@@ -37,6 +37,7 @@
 #include "GCOMObservation.hpp"
 #include "GCOMEventCube.hpp"
 #include "GCOMEventList.hpp"
+#include "GCOMStatus.hpp"
 #include "GCOMSupport.hpp"
 
 /* __ Globals ____________________________________________________________ */
@@ -645,10 +646,11 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
     }
 
     // Initialise variables
-    int   last_tjd = 0;
-    int   i_evt    = 0;
-    GTime tstart;
-    GTime tstop;
+    int        last_tjd = 0;
+    int        i_evt    = 0;
+    GTime      tstart;
+    GTime      tstop;
+    GCOMStatus status;
 
     // Initialise statistics
     int num_used_superpackets    = 0;
@@ -670,7 +672,8 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
     int num_bad_reflag           = 0;
     int num_event_before_dre     = 0;
     int num_event_after_dre      = 0;
-    int num_module_off           = 0;
+    int num_d1module_off         = 0;
+    int num_d2module_off         = 0;
     int num_processed            = 0;
     int num_superpackets         = 0;
 
@@ -694,10 +697,10 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
             // Increment superpacket counter
             num_superpackets++;
 
-            // Skip superpacket if it is not within Good Time Intervals
-            //if (!m_tim.contains(oad.tstart())) {
-            //if (!m_tim.contains(oad.tstart()) && !m_tim.contains(oad.tstop())) {
-            if (!(m_tim.contains(oad.tstart()) && m_tim.contains(oad.tstop()))) {
+            // Skip superpacket if it is not within Good Time Intervals.
+            // According to the original routine dalsel17.p7time.f only the
+            // superpacket start time is checked.
+            if (!m_tim.contains(oad.tstart())) {
                 num_skipped_superpackets++;
                 continue;
             }
@@ -809,43 +812,27 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                 }
 
                 // Extract module IDs from MODCOM
-                // 8392,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
-                // 8393,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
-                // 8394,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
-                // 8395,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
-                // 8396,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
-                // 8397,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,1
-                // 8398,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,0
-                // 8399,1,1,1,1,1,1,0, 0,0,1,1,0,1,1,1,1,1,1,1,1,0
-                // 8400,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
-                // 8401,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
-                // 8402,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
-                // 8403,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
-                // 8404,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
-                // 8405,1,1,1,1,1,1,0, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
-                // 8406,1,1,1,1,1,1,1, 1,0,1,1,0,1,1,1,1,1,1,1,1,0
                 int id2 = (event->modcom()-1)/7 + 1;      // [1-14]
                 int id1 =  event->modcom() - (id2-1) * 7; // [1-7]
-                if (id1 == 7 || id2 == 2 || id2 == 5) {
-                    num_module_off++;
+
+                // Check module status. Skip all events where module is
+                // signalled as not on.
+                if (status.d1status(oad.tjd(), id1) != 1) {
+                    num_d1module_off++;
                     continue;
                 }
-                if ((oad.tjd() < 8400) && (id2 == 1)) {
-                    num_module_off++;
+                if (status.d2status(oad.tjd(), id2) != 1) {
+                    num_d2module_off++;
                     continue;
                 }
-                if ((oad.tjd() > 8397) && (id2 == 14)) {
-                    num_module_off++;
-                    continue;
-                }
-                
+
                 // Check minitelescope against that specified in DRI
                 // definition and module status from database
                 // TODO: IF ( BETAPQ(ID1,ID2)    .EQ. 1
                 //           .AND.D1STAT(ID1) .NE. 0
                 //           .AND.D2STAT(ID2) .NE. 0 ) THEN
 
-                // Check tha event is not falling in excluded region
+                // Check the event is not falling in excluded region
                 // of failed PMT
                 // MPAR(10,11) = D2(x,y) of event in mm
                 //
@@ -939,7 +926,8 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
     std::cout << "Events outside superpacket ...: " << num_event_outside_sp << std::endl;
     std::cout << "Events before DRE GTI ........: " << num_event_before_dre << std::endl;
     std::cout << "Events after DRE GTI .........: " << num_event_after_dre << std::endl;
-    std::cout << "Events when module off .......: " << num_module_off << std::endl;
+    std::cout << "Events with D1 module off ....: " << num_d1module_off << std::endl;
+    std::cout << "Events with D2 module off ....: " << num_d2module_off << std::endl;
     std::cout << "Energy too low ...............: " << num_energy_too_low << std::endl;
     std::cout << "Energy too high ..............: " << num_energy_too_high << std::endl;
     std::cout << "Phibar too low ...............: " << num_phibar_too_low << std::endl;
