@@ -75,7 +75,8 @@ pkginclude_HEADERS = include/GCOMEventCube.hpp \
 
 # Calibration files to distribute
 caldb_indx = caldb/data/cgro/comptel/caldb.indx
-caldb_irfs = caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
+caldb_irfs = caldb/data/cgro/comptel/bcf/module_status.fits.gz \
+             caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
              caldb/data/cgro/comptel/bcf/m10564_sdb.fits.gz \
              caldb/data/cgro/comptel/bcf/r00004_ict.fits.gz \
              caldb/data/cgro/comptel/bcf/u47512_iaq.fits.gz \
