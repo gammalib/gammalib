@@ -1,14 +1,14 @@
-2017-09-04
+2017-09-07
 
         * Version 1.5.0 released
         =========================
 
         Improve efficiency of GGti::contains() method.
-        Add GCOMTim class to support TIM files (#2187)
         Add GFitsTableCol::scale() method (#2191)
         Implement code generator for GammaLib extensions (#2190)
         Implement COMPTEL event list support (#2187)
         Implement COMPTEL response computation (#2186)
+        Correct output of COMPTEL DRB fitting XML model (#2184)
         Add COMPTEL SDA, SDB and ICT response files (#2186)
         Add GModelSpectralNodes spectral model constructor (#2178)
         Fix UTC rounding error in GTime::utc() method (#2177)

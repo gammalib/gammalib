@@ -608,18 +608,25 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
         GXmlElement* node = src->element("node", i);
 
         // Write Phibar parameter
-        GXmlElement* par = gammalib::xml_need_par(G_WRITE, *node, "Phibar");
-        m_phibars[i].write(*par);
+        GXmlElement* par  = gammalib::xml_need_par(G_WRITE, *node, "Phibar");
+        GModelPar    mpar = m_phibars[i];
+        mpar.name("Phibar");
+        mpar.write(*par);
 
         // Write Normalization parameter
-        par = gammalib::xml_need_par(G_WRITE, *node, "Normalization");
-        m_values[i].write(*par);
+        par  = gammalib::xml_need_par(G_WRITE, *node, "Normalization");
+        mpar = m_values[i];
+        mpar.name("Normalization");
+        mpar.write(*par);
 
     } // endfor: looped over nodes
 
     // Return
     return;
 }
+        // Allocate node parameters
+        GModelPar phibar;
+        GModelPar normalization;
 
 
 /***********************************************************************//**
