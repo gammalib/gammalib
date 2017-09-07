@@ -406,13 +406,17 @@ void GCOMOads::read(const GFitsTable& table)
         m_oads.reserve(num);
 
         // Get column pointers
-        const GFitsTableCol* ptr_tjd  = table["TJD"];  // days
-        const GFitsTableCol* ptr_tics = table["TICS"]; // ticks
-        const GFitsTableCol* ptr_gcaz = table["GCAZ"]; // rad
-        const GFitsTableCol* ptr_gcel = table["GCEL"]; // rad
-        const GFitsTableCol* ptr_posx = table["POSX"]; // km
-        const GFitsTableCol* ptr_posy = table["POSY"]; // km
-        const GFitsTableCol* ptr_posz = table["POSZ"]; // km
+        const GFitsTableCol* ptr_tjd   = table["TJD"];  // days
+        const GFitsTableCol* ptr_tics  = table["TICS"]; // ticks
+        const GFitsTableCol* ptr_gcaz  = table["GCAZ"]; // rad
+        const GFitsTableCol* ptr_gcel  = table["GCEL"]; // rad
+        const GFitsTableCol* ptr_posx  = table["POSX"]; // km
+        const GFitsTableCol* ptr_posy  = table["POSY"]; // km
+        const GFitsTableCol* ptr_posz  = table["POSZ"]; // km
+        const GFitsTableCol* ptr_zrasc = table["ZRASC"]; // rad
+        const GFitsTableCol* ptr_zdecl = table["ZDECL"]; // rad
+        const GFitsTableCol* ptr_xrasc = table["XRASC"]; // rad
+        const GFitsTableCol* ptr_xdecl = table["XDECL"]; // rad
 
         // Initialise Earth radius angle
         double georad = 73.5;
@@ -438,6 +442,14 @@ void GCOMOads::read(const GFitsTable& table)
             // Set geocentre azimuth and zenith angle in deg
             oad.gcaz(ptr_gcaz->real(i) * gammalib::rad2deg);
             oad.gcel(ptr_gcel->real(i) * gammalib::rad2deg);
+
+            // Set telescope z- and x-axes
+            GSkyDir zaxis;
+            GSkyDir xaxis;
+            zaxis.radec(ptr_zrasc->real(i), ptr_zdecl->real(i));
+            xaxis.radec(ptr_xrasc->real(i), ptr_xdecl->real(i));
+            oad.zaxis(zaxis);
+            oad.xaxis(xaxis);
 
             // Compute apparent radius of Earth
             double radius = std::sqrt(ptr_posx->real(i) * ptr_posx->real(i) +

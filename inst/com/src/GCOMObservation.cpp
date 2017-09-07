@@ -31,6 +31,7 @@
 #include <typeinfo> 
 #include "GObservationRegistry.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
 #include "GCaldb.hpp"
@@ -59,6 +60,7 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 
 /* __ Debug definitions __________________________________________________ */
 #define G_DEBUG_COMPUTE_DRE
+#define G_DEBUG_COMPUTE_DRG
 
 
 /*==========================================================================
@@ -842,12 +844,13 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                     continue;
                 }
 
-                // Compute Earth horizon angle (do not trust the EVP value)
+                // Compute Earth horizon angle for comparison with EVP value
                 GSkyDir sky_event;
                 double  theta_event = double(event->theta());
                 double  phi_event   = double(event->phi());
                 sky_event.radec_deg(-phi_event, 90.0-theta_event);
-                double eha = sky_event.dist_deg(sky_geocentre) - oad.georad();
+                //double eha = sky_event.dist_deg(sky_geocentre) - oad.georad();
+                double eha = sky_geocentre.dist_deg(sky_event) - oad.georad();
 
                 // Option: Earth horizon angle comparison
                 #if defined(G_CHECK_EHA_COMPUTATION)
@@ -945,6 +948,159 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
     std::cout << "No scatter angle .............: " << num_no_scatter_angle << std::endl;
     std::cout << "Bad module combination .......: " << num_bad_modcom << std::endl;
     std::cout << "Earth horizon angle too small : " << num_eha_too_small << std::endl;
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute geometry cube
+ *
+ * @param[in] drg COMPTEL geometry cube.
+ *
+ * @exception GException::invalid_argument
+ *            Observation does not hold an event list.
+ *            DRE cube has a non-positive Phibar bin size.
+ *
+ * Compute DRE event cube from event list (EVP), Good Time Intervals (TIM)
+ * and Orbit Aspect Data (OAD).
+ ***************************************************************************/
+void GCOMObservation::compute_drg(GCOMDri& drg)
+{
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRG)
+    std::cout << "GCOMObservation::compute_drg" << std::endl;
+    std::cout << "============================" << std::endl;
+    #endif
+
+    // Initialise variables
+    int        npix = drg.nchi() * drg.npsi();
+    GTime      tstart;
+    GTime      tstop;
+    GCOMStatus status;
+
+    // Initialise statistics
+    int num_superpackets          = 0;
+    int num_used_superpackets     = 0;
+    int num_skipped_superpackets  = 0;
+    int last_superpackets         = 0;
+    int last_skipped_superpackets = 0;
+
+    // Set all DRG bins to zero
+    for (int i = 0; i < drg.size(); ++i) {
+        drg[i] = 0.0;
+    }
+
+    // Loop over Orbit Aspect Data vector
+    for (int i_oads = 0; i_oads < m_oads.size(); ++i_oads) {
+
+        // Loop over Orbit Aspect Data
+        for (int i_oad = 0; i_oad < m_oads[i_oads].size(); ++i_oad) {
+
+            // Get reference to Orbit Aspect Data of superpacket
+            const GCOMOad &oad = m_oads[i_oads][i_oad];
+
+            // Increment superpacket counter
+            num_superpackets++;
+
+            // Skip superpacket if it is not within Good Time Intervals.
+            // According to the original routine dalsel17.p7time.f only the
+            // superpacket start time is checked.
+            if (!m_tim.contains(oad.tstart())) {
+                num_skipped_superpackets++;
+                continue;
+            }
+
+            // Update superpackets statistics
+            num_used_superpackets++;
+
+            // Prepare Earth horizon angle comparison
+            GSkyDir sky_geocentre;
+            double  theta_geocentre = double(oad.gcel());
+            double  phi_geocentre   = double(oad.gcaz());
+            sky_geocentre.radec_deg(phi_geocentre, 90.0-theta_geocentre);
+
+            // Update validity interval so that DRG will have the correct
+            // interval
+            if (num_used_superpackets == 1) {
+                tstart = oad.tstart();
+                tstop  = oad.tstop();
+            }
+            else {
+                tstop  = oad.tstop();
+            }
+
+            // Compute geometrical factors for all (Chi, Psi)
+            for (int index = 0; index < npix; ++index) {
+
+                // Get sky direction for (Chi, Psi)
+                GSkyDir sky = drg.map().inx2dir(index);
+
+                // Convert to COMPTEL coordinates
+                double theta = oad.theta(sky);
+                double phi   = oad.phi(sky);
+
+                // Compute geometric factor summed over all D1, D2
+                double geometry = compute_geometry(oad.tjd(), theta, phi, status);
+
+                // Compute Earth horizon angle
+                GSkyDir sky_event;
+                sky_event.radec_deg(-phi, 90.0-theta);
+                double eha = sky_geocentre.dist_deg(sky_event) - oad.georad();
+
+                // Loop over Phibar
+                for (int iphibar = 0; iphibar < drg.nphibar(); ++iphibar) {
+
+                    // Compute minimum Earth horizon angle (zeta = 5 deg)
+                    double ehamin = double(iphibar) * drg.phibin() + 5.0;
+
+                    // Continue of Earth horizon angle is equal or larger
+                    // than the minimum
+                    if (eha >= ehamin) {
+                        int inx   = index + iphibar * npix;
+                        drg[inx] += geometry;
+                    }
+
+                } // endfor: looped over Phibar
+
+            } // endfor: looped over (Chi, Psi)
+
+        } // endfor: looped over Orbit Aspect Data
+
+        // Debug
+        #if defined(G_DEBUG_COMPUTE_DRG)
+        int sp_total    = num_superpackets - last_superpackets;
+        int sp_skipped  = num_skipped_superpackets - last_skipped_superpackets;
+        int sp_fraction = int(double(sp_skipped) / double(sp_total)*100.0);
+        std::cout << "Orbit Aspect Data TJD ";
+        std::cout << m_oads[i_oads][0].tjd();
+        std::cout << " ...: " << sp_total << " superpackets,";
+        std::cout << " skipped " << sp_skipped << " (" << sp_fraction << "%)";
+        std::cout << std::endl;
+        last_superpackets         = num_superpackets;
+        last_skipped_superpackets = num_skipped_superpackets;
+        #endif
+
+    } // endfor: looped over Orbit Aspect Data vector
+
+    // Divide DRG by total number of superpackets
+    if (num_superpackets > 0) {
+        double norm = 1.0 / double(num_superpackets);
+        for (int i = 0; i < drg.size(); ++i) {
+            drg[i] *= norm;
+        }
+    }
+
+    // Set Good Time interval for DRG
+    drg.gti(GGti(tstart, tstop));
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRG)
+    std::cout << "Total number of superpackets .: " << num_superpackets << std::endl;
+    std::cout << "Used superpackets ............: " << num_used_superpackets << std::endl;
+    std::cout << "Skipped superpackets .........: " << num_skipped_superpackets << std::endl;
     #endif
 
     // Return
@@ -1100,6 +1256,11 @@ void GCOMObservation::free_members(void)
  * @param[in] drename DRE filename.
  *
  * Loads the event cube from a DRE file.
+ *
+ * The ontime is extracted from the Good Time Intervals. The deadtime
+ * fraction is fixed to 15%, hence DEADC=0.85. The livetime is then computed
+ * by multiplying the deadtime correction by the ontime, i.e.
+ * LIVETIME = ONTIME * DEADC.
  ***************************************************************************/
 void GCOMObservation::load_dre(const GFilename& drename)
 {
@@ -1117,9 +1278,20 @@ void GCOMObservation::load_dre(const GFilename& drename)
     // Read event cube
     m_events->read(fits);
 
-    // Read observation attributes from primary extension
-    GFitsHDU* hdu = fits[0];
-    read_attributes(hdu);
+    // Extract ontime
+    m_ontime = m_events->gti().ontime();
+
+    // Set fixed deadtime fraction
+    m_deadc = 0.85;
+
+    // Compute livetime
+    m_livetime = m_deadc * m_ontime;
+
+    // Compute energy width
+    m_ewidth = m_events->emax().MeV() - m_events->emin().MeV();
+
+    // Read additional observation attributes from primary extension
+    read_attributes(fits[0]);
 
     // Close FITS file
     fits.close();
@@ -1282,22 +1454,10 @@ bool GCOMObservation::check_map(const GSkyMap& map) const
  *
  * @param[in] hdu FITS HDU pointer
  *
- * Reads COM observation attributes from HDU. Mandatory attributes are
- *
- *     TSTART   - Start time (days)
- *     TSTOP    - Stop time (days)
- *     E_MIN    - Minimum energy (MeV)
- *     E_MAX    - Maximum energy (MeV)
- *
- * and optional attributes are
+ * Reads optional attributes are
  *
  *     OBS_ID   - Observation identifier
  *     OBJECT   - Object
- *
- * Based on TSTART and TSTOP the ontime is computed. The deadtime fraction
- * is fixed to 15%, hence DEADC=0.85. The livetime is then computed by
- * multiplying the deadtime correction by the ontime, i.e.
- * LIVETIME = ONTIME * DEADC.
  *
  * Nothing is done if the HDU pointer is NULL.
  ***************************************************************************/
@@ -1310,17 +1470,6 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
         m_obs_id = (hdu->has_card("OBS_ID")) ? hdu->real("OBS_ID") : 0;
         m_name   = (hdu->has_card("OBJECT")) ? hdu->string("OBJECT") : "unknown";
 
-        // Compute ontime
-        double tstart = hdu->real("TSTART");
-        double tstop  = hdu->real("TSTOP");
-        m_ontime   = (tstop - tstart) * 86400.0;
-        m_deadc    = 0.85;
-        m_livetime = m_deadc * m_ontime;
-
-        // Compute energy width
-        double emin = hdu->real("E_MIN");
-        double emax = hdu->real("E_MAX");
-        m_ewidth = emax - emin;
 
     } // endif: HDU was valid
 
@@ -1347,4 +1496,129 @@ void GCOMObservation::write_attributes(GFitsHDU* hdu) const
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute DRG geometry
+ *
+ * @param[in] tjd TJD for module status
+ * @param[in] theta Zenith angle in COMPTEL coordinates (deg).
+ * @param[in] phi Azimuth angle in COMPTEL coordinates (deg).
+ * @param[in] status D1 and D2 module status
+ * @return Geometry factor.
+ ***************************************************************************/
+double GCOMObservation::compute_geometry(const int&        tjd,
+                                         const double&     theta,
+                                         const double&     phi,
+                                         const GCOMStatus& status) const
+{
+    // Set D1 module positions (from COM-RP-MPE-M10-123, Issue 1, Page 3-3)
+    const double xd1[] = {0.0,-42.3,-26.0,26.0, 42.3,26.0,-26.0};
+    const double yd1[] = {0.0,  0.0, 39.1,39.1, 0.0,-39.1,-39.1};
+
+    // Set D2 module positions (from COM-RP-MPE-M10-123, Issue 1, Page 4-4)
+    const double xd2[] = { 30.2,    0.0,  -30.2,   45.3,  15.1, -15.1, -45.3,
+                           45.3,   15.1,  -15.1,  -45.3,  30.2,   0.0, -30.2};
+    const double yd2[] = {-41.254,-41.254,-41.254,-15.1, -15.1, -15.1, -15.1,
+                           15.1,   15.1,   15.1 ,  15.1,  41.254,41.254,41.254};
+
+    // Set distance between D1 and D2 levels in cm (from COM-SP-MPE-M10-123,
+    // Issue 1, page 8-5
+    const double delz = 158.0;
+
+    // Set D1 module radius in cm (from COM-TN-UNH-F70-051)
+    const double r1 = 13.8;
+
+    // Set D2 module radius in cm (from SIM-AL-005)
+    const double r2 = 14.085;
+
+    // Derive some constants
+    const double r1sq     = r1 * r1;
+    const double r2sq     = r2 * r2;
+    const double drsq     = r1sq - r2sq;
+    const double norm_geo = 1.0 / (gammalib::pi * r1sq);
+
+    // Initialise geometry factor
+    double geometry = 0.0;
+
+    // Precompute results
+    double theta_rad = theta * gammalib::deg2rad;
+    double phi_rad   = phi   * gammalib::deg2rad;
+    double cosphi    = std::cos(phi_rad);
+    double sinphi    = std::sin(phi_rad);
+    double tantheta  = std::tan(theta_rad);
+
+    // Loop over all D1 modules
+    for (int id1 = 0; id1 < 7; ++id1) {
+    
+        // Skip D1 module if it's off
+        if (status.d1status(tjd, id1+1) != 1) {
+            continue;
+        }
+
+        // Compute coordinates of D1 projected on D2 plane
+        double xd1_prj = xd1[id1] - delz * tantheta * cosphi;
+        double yd1_prj = yd1[id1] - delz * tantheta * sinphi;
+
+        // Loop over all D2 modules
+        for (int id2 = 0; id2 < 14; ++id2) {
+
+            // Skip D2 module if it's off
+            if (status.d2status(tjd, id2+1) != 1) {
+                continue;
+            }
+
+            // Compute distance between center of D2 and projected centre
+            // of D1
+            double dx  = xd2[id2] - xd1_prj;
+            double dy  = yd2[id2] - yd1_prj;
+            double dsq = dx * dx + dy * dy;
+            double d   = std::sqrt(dsq);
+
+            // If there is no overlap then skip the module
+            if (d >= r1 + r2) {
+                continue;
+            }
+
+            // If there is total overlap (within 0.1 cm) then add 1 to the
+            // geometry factor
+            else if (d <= r2 - r1 + 0.1) {
+                geometry += 1.0;
+            }
+
+            // ... otherwise if there is a partial overlap then compute the
+            // semiangle subtended by overlap sector of D2 and projected
+            // D1 module
+            else {
+
+                // Cosine beta
+                double d2     = 2.0 * d;
+                double cbeta1 = (dsq + drsq) / (d2 * r1);
+                double cbeta2 = (dsq - drsq) / (d2 * r2);
+
+                // Sin beta
+                double sbeta1 = std::sqrt(1.0 - cbeta1 * cbeta1);
+                double sbeta2 = std::sqrt(1.0 - cbeta2 * cbeta2);
+
+                // Beta
+                double beta1 = std::acos(cbeta1);
+                double beta2 = std::acos(cbeta2);
+
+                // Projection
+                geometry += (r1sq * (beta1 - sbeta1 * cbeta1) +
+                             r2sq * (beta2 - sbeta2 * cbeta2)) * norm_geo;
+
+            } // endelse: there was partial overlap
+
+        } // endfor: looped over D2 modules
+
+    } // endfor: looped over D1 modules
+
+    // Now divide by 7 since we want the probability of hitting a given
+    // D1 module
+    geometry /= 7.0;
+
+    // Return geometry factor
+    return geometry;
 }

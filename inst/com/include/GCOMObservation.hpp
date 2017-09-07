@@ -45,6 +45,7 @@ class GCaldb;
 class GResponse;
 class GXmlElement;
 class GFitsHDU;
+class GCOMStatus;
 
 
 /***********************************************************************//**
@@ -112,19 +113,23 @@ public:
     const GSkyMap& drg(void) const;
     const GSkyMap& drx(void) const;
     void           compute_dre(GCOMDri& dre);
+    void           compute_drg(GCOMDri& drg);
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCOMObservation& obs);
-    void free_members(void);
-    void load_dre(const GFilename& drename);
-    void load_drb(const GFilename& drbname);
-    void load_drg(const GFilename& drgname);
-    void load_drx(const GFilename& drxname);
-    bool check_map(const GSkyMap& map) const;
-    void read_attributes(const GFitsHDU* hdu);
-    void write_attributes(GFitsHDU* hdu) const;
+    void   init_members(void);
+    void   copy_members(const GCOMObservation& obs);
+    void   free_members(void);
+    void   load_dre(const GFilename& drename);
+    void   load_drb(const GFilename& drbname);
+    void   load_drg(const GFilename& drgname);
+    void   load_drx(const GFilename& drxname);
+    bool   check_map(const GSkyMap& map) const;
+    void   read_attributes(const GFitsHDU* hdu);
+    void   write_attributes(GFitsHDU* hdu) const;
+    double compute_geometry(const int& tjd, const double&     theta,
+                                            const double&     phi,
+                                            const GCOMStatus& status) const;
 
     // Protected members
     std::string            m_instrument; //!< Instrument name

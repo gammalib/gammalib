@@ -48,20 +48,26 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
-    const GTime& tstart(void) const;
-    void         tstart(const GTime& tstart);
-    const GTime& tstop(void) const;
-    void         tstop(const GTime& tstop);
-    const int&   tjd(void) const;
-    void         tjd(const int& tjd);
-    const int&   tics(void) const;
-    void         tics(const int& tics);
-    const float& gcaz(void) const;
-    void         gcaz(const float& gcaz);
-    const float& gcel(void) const;
-    void         gcel(const float& gcel);
-    const float& georad(void) const;
-    void         georad(const float& georad);
+    const GTime&   tstart(void) const;
+    void           tstart(const GTime& tstart);
+    const GTime&   tstop(void) const;
+    void           tstop(const GTime& tstop);
+    const int&     tjd(void) const;
+    void           tjd(const int& tjd);
+    const int&     tics(void) const;
+    void           tics(const int& tics);
+    const float&   gcaz(void) const;
+    void           gcaz(const float& gcaz);
+    const float&   gcel(void) const;
+    void           gcel(const float& gcel);
+    const float&   georad(void) const;
+    void           georad(const float& georad);
+    const GSkyDir& zaxis(void) const;
+    void           zaxis(const GSkyDir& zaxis);
+    const GSkyDir& xaxis(void) const;
+    void           xaxis(const GSkyDir& xaxis);
+    double         theta(const GSkyDir& sky) const;
+    double         phi(const GSkyDir& sky) const;
 };
 
 

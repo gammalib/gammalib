@@ -31,6 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GTime.hpp"
+#include "GSkyDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -62,20 +63,26 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const GTime& tstart(void) const;
-    void         tstart(const GTime& tstart);
-    const GTime& tstop(void) const;
-    void         tstop(const GTime& tstop);
-    const int&   tjd(void) const;
-    void         tjd(const int& tjd);
-    const int&   tics(void) const;
-    void         tics(const int& tics);
-    const float& gcaz(void) const;
-    void         gcaz(const float& gcaz);
-    const float& gcel(void) const;
-    void         gcel(const float& gcel);
-    const float& georad(void) const;
-    void         georad(const float& georad);
+    const GTime&   tstart(void) const;
+    void           tstart(const GTime& tstart);
+    const GTime&   tstop(void) const;
+    void           tstop(const GTime& tstop);
+    const int&     tjd(void) const;
+    void           tjd(const int& tjd);
+    const int&     tics(void) const;
+    void           tics(const int& tics);
+    const float&   gcaz(void) const;
+    void           gcaz(const float& gcaz);
+    const float&   gcel(void) const;
+    void           gcel(const float& gcel);
+    const float&   georad(void) const;
+    void           georad(const float& georad);
+    const GSkyDir& zaxis(void) const;
+    void           zaxis(const GSkyDir& zaxis);
+    const GSkyDir& xaxis(void) const;
+    void           xaxis(const GSkyDir& xaxis);
+    double         theta(const GSkyDir& sky) const;
+    double         phi(const GSkyDir& sky) const;
 
 protected:
     // Protected methods
@@ -84,13 +91,15 @@ protected:
     void free_members(void);
 
     // Protected members
-    GTime m_tstart; //!< Start time of superpacket
-    GTime m_tstop;  //!< Stop time of superpacket
-    int   m_tjd;    //!< TJD of OAD record
-    int   m_tics;   //!< Tics of OAD record
-    float m_gcaz;   //!< Geocentre azimuth angle (deg)
-    float m_gcel;   //!< Geocentre zenith angle (deg)
-    float m_georad; //!< Apparent radius of Earth (deg)
+    GTime   m_tstart;  //!< Start time of superpacket
+    GTime   m_tstop;   //!< Stop time of superpacket
+    GSkyDir m_zaxis;   //!< Telescope z-axis
+    GSkyDir m_xaxis;   //!< Telescope x-axis
+    int     m_tjd;     //!< TJD of OAD record
+    int     m_tics;    //!< Tics of OAD record
+    float   m_gcaz;    //!< Geocentre azimuth angle (deg)
+    float   m_gcel;    //!< Geocentre zenith angle (deg)
+    float   m_georad;  //!< Apparent radius of Earth (deg)
 };
 
 
@@ -308,6 +317,94 @@ void GCOMOad::georad(const float& georad)
 {
     m_georad = georad;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return telescope Z-axis
+ *
+ * @return Telescope Z-axis.
+ *
+ * Returns the telescope Z-axis.
+ ***************************************************************************/
+inline
+const GSkyDir& GCOMOad::zaxis(void) const
+{
+    return (m_zaxis);
+}
+
+
+/***********************************************************************//**
+ * @brief Set telescope Z-axis
+ *
+ * @param[in] zaxis Telescope Z-axis.
+ *
+ * Set the telescope Z-axis.
+ ***************************************************************************/
+inline
+void GCOMOad::zaxis(const GSkyDir& zaxis)
+{
+    m_zaxis = zaxis;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return telescope X-axis
+ *
+ * @return Telescope X-axis.
+ *
+ * Returns the telescope X-axis.
+ ***************************************************************************/
+inline
+const GSkyDir& GCOMOad::xaxis(void) const
+{
+    return (m_xaxis);
+}
+
+
+/***********************************************************************//**
+ * @brief Set telescope X-axis
+ *
+ * @param[in] xaxis Telescope X-axis.
+ *
+ * Set the telescope X-axis.
+ ***************************************************************************/
+inline
+void GCOMOad::xaxis(const GSkyDir& xaxis)
+{
+    m_xaxis = xaxis;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return zenith angle of sky direction in COMPTEL coordinates
+ *
+ * @param[in] sky Sky direction.
+ * @return Zenith angle of sky direction in COMPTEL coordinates (deg).
+ *
+ * Returns the zenith angle of a sky direction in COMPTEL coordinates.
+ ***************************************************************************/
+inline
+double GCOMOad::theta(const GSkyDir& sky) const
+{
+    return (m_zaxis.dist_deg(sky));
+}
+
+
+/***********************************************************************//**
+ * @brief Return azimuth angle of sky direction in COMPTEL coordinates
+ *
+ * @param[in] sky Sky direction.
+ * @return Azimuth angle of sky direction in COMPTEL coordinates (deg).
+ *
+ * Returns the azimuth angle of a sky direction in COMPTEL coordinates.
+ ***************************************************************************/
+inline
+double GCOMOad::phi(const GSkyDir& sky) const
+{
+    return (m_zaxis.posang_deg(m_xaxis) - m_zaxis.posang_deg(sky));
 }
 
 #endif /* GCOMOAD_HPP */
