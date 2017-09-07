@@ -38,6 +38,10 @@
 class GFilename;
 class GFits;
 class GFitsImage;
+class GCOMOads;
+class GCOMTim;
+class GCOMStatus;
+class GCOMEventList;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -75,10 +79,6 @@ public:
     int             nchi(void) const;
     int             npsi(void) const;
     int             nphibar(void) const;
-    void            load(const GFilename& filename);
-    void            save(const GFilename& filename, const bool& clobber = false) const;
-    void            read(const GFitsImage& image);
-    void            write(GFits& fits, const std::string& extname = "") const;
     const GSkyMap&  map(void) const;
     const GEbounds& ebounds(void) const;
     void            ebounds(const GEbounds&);
@@ -86,14 +86,28 @@ public:
     void            gti(const GGti& gti);
     const double&   phimin(void) const;
     const double&   phibin(void) const;
+    void            dre(const GCOMEventList& events,
+                        const GCOMOads&      oads,
+                        const GCOMTim&       tim,
+                        const double&        zeta = 5.0);
+    void            drg(const GCOMOads& oads,
+                        const GCOMTim&  tim,
+                        const double&   zeta = 5.0);
+    void            load(const GFilename& filename);
+    void            save(const GFilename& filename, const bool& clobber = false) const;
+    void            read(const GFitsImage& image);
+    void            write(GFits& fits, const std::string& extname = "") const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCOMDri& dri);
-    void free_members(void);
-    void read_attributes(const GFitsHDU* hdu);
-    void write_attributes(GFitsHDU* hdu) const;
+    void   init_members(void);
+    void   copy_members(const GCOMDri& dri);
+    void   free_members(void);
+    void   read_attributes(const GFitsHDU* hdu);
+    void   write_attributes(GFitsHDU* hdu) const;
+    double compute_geometry(const int& tjd, const double&     theta,
+                                            const double&     phi,
+                                            const GCOMStatus& status) const;
 
     // Protected members
     GSkyMap  m_dri;      //!< Data cube

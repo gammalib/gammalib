@@ -59,25 +59,28 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    bool           is_unbinned(void) const;
-    bool           is_binned(void) const;
-    void           load(const GFilename& drename,
-                        const GFilename& drbname,
-                        const GFilename& drgname,
-                        const GFilename& drxname);
-    void           response(const GCaldb& caldb, const std::string& rspname);
-    void           obs_id(const double& id);
-    void           ontime(const double& ontime);
-    void           livetime(const double& livetime);
-    void           deadc(const double& deadc);
-    void           ewidth(const double& ewidth);
-    const double&  obs_id(void) const;
-    const double&  ewidth(void) const;
-    const GSkyMap& drb(void) const;
-    const GSkyMap& drg(void) const;
-    const GSkyMap& drx(void) const;
-    void           compute_dre(GCOMDri& dre);
-    void           compute_drg(GCOMDri& drg);
+    bool            is_unbinned(void) const;
+    bool            is_binned(void) const;
+    void            load(const GFilename& drename,
+                         const GFilename& drbname,
+                         const GFilename& drgname,
+                         const GFilename& drxname);
+    void            load(const GFilename&              evpname,
+                         const GFilename&              timname,
+                         const std::vector<GFilename>& oadnames);
+    void            response(const GCaldb& caldb, const std::string& rspname);
+    void            obs_id(const double& id);
+    void            ontime(const double& ontime);
+    void            livetime(const double& livetime);
+    void            deadc(const double& deadc);
+    void            ewidth(const double& ewidth);
+    const double&   obs_id(void) const;
+    const double&   ewidth(void) const;
+    const GSkyMap&  drb(void) const;
+    const GSkyMap&  drg(void) const;
+    const GSkyMap&  drx(void) const;
+    const GCOMTim&  tim(void) const;
+    const GCOMOads& oads(void) const;
 };
 
 

@@ -92,44 +92,41 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    bool           is_unbinned(void) const;
-    bool           is_binned(void) const;
-    void           load(const GFilename& drename,
-                        const GFilename& drbname,
-                        const GFilename& drgname,
-                        const GFilename& drxname);
-    void           load(const GFilename&              evpname,
-                        const GFilename&              timname,
-                        const std::vector<GFilename>& oadnames);
-    void           response(const GCaldb& caldb, const std::string& rspname);
-    void           obs_id(const double& id);
-    void           ontime(const double& ontime);
-    void           livetime(const double& livetime);
-    void           deadc(const double& deadc);
-    void           ewidth(const double& ewidth);
-    const double&  obs_id(void) const;
-    const double&  ewidth(void) const;
-    const GSkyMap& drb(void) const;
-    const GSkyMap& drg(void) const;
-    const GSkyMap& drx(void) const;
-    void           compute_dre(GCOMDri& dre);
-    void           compute_drg(GCOMDri& drg);
+    bool            is_unbinned(void) const;
+    bool            is_binned(void) const;
+    void            load(const GFilename& drename,
+                         const GFilename& drbname,
+                         const GFilename& drgname,
+                         const GFilename& drxname);
+    void            load(const GFilename&              evpname,
+                         const GFilename&              timname,
+                         const std::vector<GFilename>& oadnames);
+    void            response(const GCaldb& caldb, const std::string& rspname);
+    void            obs_id(const double& id);
+    void            ontime(const double& ontime);
+    void            livetime(const double& livetime);
+    void            deadc(const double& deadc);
+    void            ewidth(const double& ewidth);
+    const double&   obs_id(void) const;
+    const double&   ewidth(void) const;
+    const GSkyMap&  drb(void) const;
+    const GSkyMap&  drg(void) const;
+    const GSkyMap&  drx(void) const;
+    const GCOMTim&  tim(void) const;
+    const GCOMOads& oads(void) const;
 
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GCOMObservation& obs);
-    void   free_members(void);
-    void   load_dre(const GFilename& drename);
-    void   load_drb(const GFilename& drbname);
-    void   load_drg(const GFilename& drgname);
-    void   load_drx(const GFilename& drxname);
-    bool   check_map(const GSkyMap& map) const;
-    void   read_attributes(const GFitsHDU* hdu);
-    void   write_attributes(GFitsHDU* hdu) const;
-    double compute_geometry(const int& tjd, const double&     theta,
-                                            const double&     phi,
-                                            const GCOMStatus& status) const;
+    void init_members(void);
+    void copy_members(const GCOMObservation& obs);
+    void free_members(void);
+    void load_dre(const GFilename& drename);
+    void load_drb(const GFilename& drbname);
+    void load_drg(const GFilename& drgname);
+    void load_drx(const GFilename& drxname);
+    bool check_map(const GSkyMap& map) const;
+    void read_attributes(const GFitsHDU* hdu);
+    void write_attributes(GFitsHDU* hdu) const;
 
     // Protected members
     std::string            m_instrument; //!< Instrument name
@@ -154,7 +151,7 @@ protected:
     GFilename              m_timname;    //!< TIM filename
     std::vector<GFilename> m_oadnames;   //!< OAD filenames
     GCOMTim                m_tim;        //!< COMPTEL Good Time Intervals
-    std::vector<GCOMOads>  m_oads;       //!< Orbit Aspect Data
+    GCOMOads               m_oads;       //!< Orbit Aspect Data
 };
 
 
@@ -364,6 +361,32 @@ const GSkyMap& GCOMObservation::drx(void) const
 {
     // Return exposure
     return (m_drx);
+}
+
+
+/***********************************************************************//**
+ * @brief Return COMPTEL Good Time Intervals
+ *
+ * @return COMPTEL Good Time Intervals.
+ ***************************************************************************/
+inline
+const GCOMTim& GCOMObservation::tim(void) const
+{
+    // Return COMPTEL Good Time Intervals
+    return (m_tim);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Orbit Aspect Data
+ *
+ * @return Orbit Aspect Data
+ ***************************************************************************/
+inline
+const GCOMOads& GCOMObservation::oads(void) const
+{
+    // Return Orbit Aspect Data
+    return (m_oads);
 }
 
 
