@@ -449,7 +449,7 @@ void GCOMOads::read(const GFitsTable& table)
             #if defined(G_GEORAD_WARNING)
             else {
                 std::string msg = "Error in CGRO position. Distance from "
-                                  "geocentre is "+gammalib::str(radius)+ "km "
+                                  "geocentre is "+gammalib::str(radius)+ " km "
                                   "while it should be in the interval ["+
                                   gammalib::str(erd_min)+","+
                                   gammalib::str(erd_max)+"] km. Use previous "

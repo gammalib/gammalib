@@ -641,36 +641,37 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
     }
 
     // Initialise variables
-    int        last_tjd = 0;
-    int        i_evt    = 0;
+    int        i_evt = 0;
     GTime      tstart;
     GTime      tstop;
     GCOMStatus status;
 
     // Initialise statistics
-    int num_used_superpackets    = 0;
-    int num_skipped_superpackets = 0;
-    int num_used_events          = 0;
-    int num_event_outside_sp     = 0;
-    int num_energy_too_low       = 0;
-    int num_energy_too_high      = 0;
-    int num_no_scatter_angle     = 0;
-    int num_bad_modcom           = 0;
-    int num_eha_too_small        = 0;
-    int num_phibar_too_low       = 0;
-    int num_phibar_too_high      = 0;
-    int num_outside_dre          = 0;
-    int num_outside_e1           = 0;
-    int num_outside_e2           = 0;
-    int num_outside_tof          = 0;
-    int num_outside_psd          = 0;
-    int num_bad_reflag           = 0;
-    int num_event_before_dre     = 0;
-    int num_event_after_dre      = 0;
-    int num_d1module_off         = 0;
-    int num_d2module_off         = 0;
-    int num_processed            = 0;
-    int num_superpackets         = 0;
+    int num_used_superpackets     = 0;
+    int num_skipped_superpackets  = 0;
+    int num_used_events           = 0;
+    int num_event_outside_sp      = 0;
+    int num_energy_too_low        = 0;
+    int num_energy_too_high       = 0;
+    int num_no_scatter_angle      = 0;
+    int num_bad_modcom            = 0;
+    int num_eha_too_small         = 0;
+    int num_phibar_too_low        = 0;
+    int num_phibar_too_high       = 0;
+    int num_outside_dre           = 0;
+    int num_outside_e1            = 0;
+    int num_outside_e2            = 0;
+    int num_outside_tof           = 0;
+    int num_outside_psd           = 0;
+    int num_bad_reflag            = 0;
+    int num_event_before_dre      = 0;
+    int num_event_after_dre       = 0;
+    int num_d1module_off          = 0;
+    int num_d2module_off          = 0;
+    int num_processed             = 0;
+    int num_superpackets          = 0;
+    int last_superpackets         = 0;
+    int last_skipped_superpackets = 0;
 
     // Set all DRE bins to zero
     for (int i = 0; i < dre.size(); ++i) {
@@ -708,12 +709,6 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
             double  theta_geocentre = double(oad.gcel());
             double  phi_geocentre   = double(oad.gcaz());
             sky_geocentre.radec_deg(phi_geocentre, 90.0-theta_geocentre);
-
-            // If TJD changed then update the module status table
-            if (oad.tjd() != last_tjd) {
-                last_tjd = oad.tjd();
-                // TODO: Update module status table
-            }
 
             // Update validity interval so that DRE will have the correct
             // interval
@@ -780,11 +775,11 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
                     num_outside_e2++;
                     continue;
                 }
-                if (event->tof() < 115 || event->tof() > 130) {
+                if (event->tof() < 115.0 || event->tof() > 130.0) {
                     num_outside_tof++;
                     continue;
                 }
-                if (event->psd() < 0 || event->psd() > 110) {
+                if (event->psd() < 0.0 || event->psd() > 110.0) {
                     num_outside_psd++;
                     continue;
                 }
@@ -899,6 +894,20 @@ void GCOMObservation::compute_dre(GCOMDri& dre)
             }
 
         } // endfor: looped over Orbit Aspect Data
+
+        // Debug
+        #if defined(G_DEBUG_COMPUTE_DRE)
+        int sp_total    = num_superpackets - last_superpackets;
+        int sp_skipped  = num_skipped_superpackets - last_skipped_superpackets;
+        int sp_fraction = int(double(sp_skipped) / double(sp_total)*100.0);
+        std::cout << "Orbit Aspect Data TJD ";
+        std::cout << m_oads[i_oads][0].tjd();
+        std::cout << " ...: " << sp_total << " superpackets,";
+        std::cout << " skipped " << sp_skipped << " (" << sp_fraction << "%)";
+        std::cout << std::endl;
+        last_superpackets         = num_superpackets;
+        last_skipped_superpackets = num_skipped_superpackets;
+        #endif
 
         // Break if termination was signalled or if there are no more events
         if (terminate || i_evt >= evp->size()) {

@@ -79,10 +79,10 @@ public:
     const float& e1(void) const;
     void         e2(const float& e2);
     const float& e2(void) const;
-    void         psd(const int& psd);
-    const int&   psd(void) const;
-    void         tof(const int& tof);
-    const int&   tof(void) const;
+    void         psd(const float& psd);
+    const float& psd(void) const;
+    void         tof(const float& tof);
+    const float& tof(void) const;
     void         modcom(const int& modcom);
     const int&   modcom(void) const;
     void         reflag(const int& reflag);
@@ -106,8 +106,12 @@ protected:
     float       m_theta;  //!< Zenith angle of scatter direction (deg)
     float       m_phi;    //!< Azimuth angle of scatter direction (deg)
     float       m_eha;    //!< Earth horizon angle (deg)
+    /*
     int         m_psd;    //!< PSD value (channel)
     int         m_tof;    //!< Time of flight value (channel)
+    */
+    float       m_psd;    //!< PSD value (channel)
+    float       m_tof;    //!< Time of flight value (channel)
     int         m_modcom; //!< Mini telescope number
     int         m_reflag; //!< Rejection flag
     int         m_veto;   //!< Veto flag
@@ -394,13 +398,20 @@ const float& GCOMEventAtom::e2(void) const
  *
  * Sets PSD value.
  ***************************************************************************/
+/*
 inline
 void GCOMEventAtom::psd(const int& psd)
 {
     m_psd = psd;
     return;
 }
-
+*/
+inline
+void GCOMEventAtom::psd(const float& psd)
+{
+    m_psd = psd;
+    return;
+}
 
 /***********************************************************************//**
  * @brief Return PSD value
@@ -410,12 +421,18 @@ void GCOMEventAtom::psd(const int& psd)
  * Returns the Pulse Shape Discriminator (PSD) channel value of the event.
  * The PSD value is used for the distinction between gammas and neutrons.
  ***************************************************************************/
+/*
 inline
 const int& GCOMEventAtom::psd(void) const
 {
     return m_psd;
 }
-
+*/
+inline
+const float& GCOMEventAtom::psd(void) const
+{
+    return m_psd;
+}
 
 /***********************************************************************//**
  * @brief Set TOF value
@@ -424,8 +441,16 @@ const int& GCOMEventAtom::psd(void) const
  *
  * Sets TOF value.
  ***************************************************************************/
+/*
 inline
 void GCOMEventAtom::tof(const int& tof)
+{
+    m_tof = tof;
+    return;
+}
+*/
+inline
+void GCOMEventAtom::tof(const float& tof)
 {
     m_tof = tof;
     return;
@@ -441,8 +466,15 @@ void GCOMEventAtom::tof(const int& tof)
  * value is used for the distinction between forward and backward scattering
  * events.
  ***************************************************************************/
+/*
 inline
 const int& GCOMEventAtom::tof(void) const
+{
+    return m_tof;
+}
+*/
+inline
+const float& GCOMEventAtom::tof(void) const
 {
     return m_tof;
 }

@@ -67,10 +67,10 @@ public:
     const float& e1(void) const;
     void         e2(const float& e2);
     const float& e2(void) const;
-    void         psd(const int& psd);
-    const int&   psd(void) const;
-    void         tof(const int& tof);
-    const int&   tof(void) const;
+    void         psd(const float& psd);
+    const float& psd(void) const;
+    void         tof(const float& tof);
+    const float& tof(void) const;
     void         modcom(const int& modcom);
     const int&   modcom(void) const;
     void         reflag(const int& reflag);

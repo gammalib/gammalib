@@ -580,6 +580,12 @@ void GCOMEventList::read_events(const GFitsTable& table)
         const GFitsTableCol* ptr_reflag     = table["RC_REFLAG"];     //
         const GFitsTableCol* ptr_veto       = table["RC_VETO"];       //
 
+        // Disable scaling of TOF and PSD values so that the original channel
+        // values are recovered. The values are divided by 128.0 below. This
+        // emulates the behaviour of the evpdal13.pevpsr.f function.
+        ptr_psd->scale(1.0, 0.0);
+        ptr_tof->scale(1.0, 0.0);
+
         // Initialise boundaries
         GEnergy emin;
         GEnergy emax;
@@ -616,8 +622,8 @@ void GCOMEventList::read_events(const GFitsTable& table)
             event.eha(ptr_eha->real(i) * gammalib::rad2deg);          // rad -> deg
             event.e1(ptr_e1->real(i) * 1.0e-3);                       // keV -> MeV
             event.e2(ptr_e2->real(i) * 1.0e-3);                       // keV -> MeV
-            event.psd(ptr_psd->integer(i));
-            event.tof(ptr_tof->integer(i));
+            event.psd(ptr_psd->integer(i)/128.0);
+            event.tof(ptr_tof->integer(i)/128.0);
             event.modcom(ptr_modcom->integer(i));
             event.reflag(ptr_reflag->integer(i));
             event.veto(ptr_veto->integer(i));
