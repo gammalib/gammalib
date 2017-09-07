@@ -46,21 +46,41 @@ const std::string com_dre   = datadir+"/m50439_dre.fits"; // 1-3 MeV
 const std::string com_drb   = datadir+"/m34997_drg.fits";
 const std::string com_drg   = datadir+"/m34997_drg.fits";
 const std::string com_drx   = datadir+"/m32171_drx.fits";
+const std::string com_tim   = datadir+"/m10695_tim.fits";
+const std::string com_oad   = datadir+"/m20039_oad.fits";
 const std::string com_obs   = datadir+"/obs.xml";
 const std::string com_model = datadir+"/crab.xml";
 
 
 /***********************************************************************//**
- * @brief Set COMPTEL support test methods
+ * @brief Set COMPTEL test methods
  ***************************************************************************/
-void TestGCOMSupport::set(void)
+void TestGCOM::set(void)
 {
     // Set test name
-    name("GCOMSupport");
+    name("COMPTEL instrument module");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCOMSupport::test_com_time),
-           "Test conversion of COMPTEL time into GTime");
+    append(static_cast<pfunction>(&TestGCOM::test_com_time),
+           "GCOMSupport: Test conversion of COMPTEL time into GTime");
+    append(static_cast<pfunction>(&TestGCOM::test_tim_class),
+           "GCOMTim: Test COMPTEL Good Time Intervals");
+    append(static_cast<pfunction>(&TestGCOM::test_oad_class),
+           "GCOMOad: Test COMPTEL Orbit Aspect Data");
+    append(static_cast<pfunction>(&TestGCOM::test_oads_class),
+           "GCOMOads: Test COMPTEL Orbit Aspect Data container");
+    append(static_cast<pfunction>(&TestGCOM::test_inst_dir),
+           "GCOMInstDir: Test instrument direction");
+    append(static_cast<pfunction>(&TestGCOM::test_event_bin),
+           "GCOMEventBin: Test event bin");
+    append(static_cast<pfunction>(&TestGCOM::test_event_cube),
+           "GCOMEventCube: Test event cube");
+    append(static_cast<pfunction>(&TestGCOM::test_response),
+           "GCOMResponse: Test response");
+    append(static_cast<pfunction>(&TestGCOM::test_binned_obs),
+           "GCOMObservation: Test binned observation");
+    append(static_cast<pfunction>(&TestGCOM::test_binned_optimizer),
+           "GCOMObservation: Test binned optimizer");
 
     // Return
     return;
@@ -72,110 +92,17 @@ void TestGCOMSupport::set(void)
  *
  * @return Pointer to deep copy of test suite.
  ***************************************************************************/
-TestGCOMSupport* TestGCOMSupport::clone(void) const
+TestGCOM* TestGCOM::clone(void) const
 {
     // Clone test suite
-    return new TestGCOMSupport(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Set COMPTEL response test methods
- ***************************************************************************/
-void TestGCOMResponse::set(void)
-{
-    // Set test name
-    name("GCOMResponse");
-
-    // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCOMResponse::test_inst_dir),
-           "Test instrument direction");
-    append(static_cast<pfunction>(&TestGCOMResponse::test_response),
-           "Test response");
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone test suite
- *
- * @return Pointer to deep copy of test suite.
- ***************************************************************************/
-TestGCOMResponse* TestGCOMResponse::clone(void) const
-{
-    // Clone test suite
-    return new TestGCOMResponse(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Set COMPTEL observation test methods
- ***************************************************************************/
-void TestGCOMObservation::set(void)
-{
-    // Set test name
-    name("GCOMObservation");
-
-    // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCOMObservation::test_binned_obs),
-           "Test binned observation");
-    append(static_cast<pfunction>(&TestGCOMObservation::test_event_bin),
-           "Test event bin");
-    append(static_cast<pfunction>(&TestGCOMObservation::test_event_cube),
-           "Test event cube");
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone test suite
- *
- * @return Pointer to deep copy of test suite.
- ***************************************************************************/
-TestGCOMObservation* TestGCOMObservation::clone(void) const
-{
-    // Clone test suite
-    return new TestGCOMObservation(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Set COMPTEL optimizer test methods
- ***************************************************************************/
-void TestGCOMOptimize::set(void)
-{
-    // Set test name
-    name("COMPTEL optimizers");
-
-    // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCOMOptimize::test_binned_optimizer),
-           "Test binned optimizer");
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone test suite
- *
- * @return Pointer to deep copy of test suite.
- ***************************************************************************/
-TestGCOMOptimize* TestGCOMOptimize::clone(void) const
-{
-    // Clone test suite
-    return new TestGCOMOptimize(*this);
+    return new TestGCOM(*this);
 }
 
 
 /***********************************************************************//**
  * @brief Test com_time, com_tjd and com_tics functions
  ***************************************************************************/
-void TestGCOMSupport::test_com_time(void)
+void TestGCOM::test_com_time(void)
 {
     // Verify time conversion given in COM-RP-UNH-DRG-037
     GTime time1(com_time(8393, 0));
@@ -199,9 +126,116 @@ void TestGCOMSupport::test_com_time(void)
 
 
 /***********************************************************************//**
+ * @brief Test GCOMTim class
+ ***************************************************************************/
+void TestGCOM::test_tim_class(void)
+{
+    // Read Good Time intervals
+    GCOMTim tim(com_tim);
+
+    // Check Good Time interval content
+    test_value(tim.gti().size(), 194, "Check that TIM contains 194 rows");
+    test_value(tim.gti().tstart().secs(), com_time(8392, 624010000).secs(),
+               "Check TIM start time");
+    test_value(tim.gti().tstop().secs(), com_time(8406, 542890000).secs(),
+               "Check TIM stop time");
+    test_value(tim.gti().tstart(14).secs(), com_time(8393, 684868096).secs(),
+               "Check TIM row 15 start time");
+    test_value(tim.gti().tstop(129).secs(), com_time(8402, 451392320).secs(),
+               "Check TIM row 130 stop time");
+
+    // Check Good Time interval contains() method
+    test_assert(tim.contains(com_time(8392, 624010000)),
+                "Check that TIM contains start time");
+    test_assert(tim.contains(com_time(8406, 542890000)),
+                "Check that TIM contains stop time");
+    test_assert(tim.contains(com_time(8403, 3637760)),
+                "Check that TIM contains 8403:3637760");
+    test_assert(!tim.contains(com_time(8403, 3637759)),
+                "Check that TIM does not contain 8403:3637759");
+    test_assert(tim.contains(com_time(8399, 388780672)),
+                "Check that TIM contains 8399:388780672");
+    test_assert(!tim.contains(com_time(8399, 388780673)),
+                "Check that TIM does not contain 8399:388780673");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMOad class
+ ***************************************************************************/
+void TestGCOM::test_oad_class(void)
+{
+    // Allocate GCOMOad class
+    GCOMOad oad;
+
+    // Setup object
+    oad.tstart(com_time(8392, 624010000));
+    oad.tstop(com_time(8406, 542890000));
+    oad.tjd(8403);
+    oad.tics(3637760);
+    oad.gcaz(123.45);
+    oad.gcel(67.89);
+    oad.georad(76.54);
+
+    // Check object
+    test_value(oad.tstart().secs(), com_time(8392, 624010000).secs(),
+               "Check start time");
+    test_value(oad.tstop().secs(), com_time(8406, 542890000).secs(),
+               "Check stop time");
+    test_value(oad.tjd(), 8403, "Check TJD");
+    test_value(oad.tics(), 3637760, "Check tics");
+    test_value(oad.gcaz(), 123.45, "Check gcaz");
+    test_value(oad.gcel(), 67.89, "Check gcel");
+    test_value(oad.georad(), 76.54, "Check georad");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMOads class
+ ***************************************************************************/
+void TestGCOM::test_oads_class(void)
+{
+    // Read Orbit Aspect Data
+    GCOMOads oads(com_oad);
+
+    // Check Orbit Aspect Data content
+    test_value(oads.size(), 5273, "Check that OAD contains 5273 rows");
+    test_value(oads[0].tstart().secs(), com_time(8393, 96000).secs(),
+               "Check OAD start time of row 1");
+    test_value(oads[0].tstop().secs(), com_time(8393, 227071).secs(),
+               "Check OAD stop time of row 1");
+    test_value(oads[0].tjd(), 8393, "Check OAD TJD of row 1");
+    test_value(oads[0].tics(), 96000, "Check OAD tics of row 1");
+    test_value(oads[0].gcaz(), 0.5229999*gammalib::rad2deg, 1.0e-4,
+               "Check OAD gcaz of row 1");
+    test_value(oads[0].gcel(), 1.743999*gammalib::rad2deg, 1.0e-4,
+               "Check OAD gecl of row 1");
+    test_value(oads[2919].tstart().secs(), com_time(8393, 382702208).secs(),
+               "Check OAD start time of row 2920");
+    test_value(oads[2919].tstop().secs(), com_time(8393, 382833279).secs(),
+               "Check OAD stop time of row 2920");
+    test_value(oads[2919].tjd(), 8393, "Check OAD TJD of row 2920");
+    test_value(oads[2919].tics(), 382702208, "Check OAD tics of row 2920");
+    test_value(oads[2919].gcaz(), 3.631*gammalib::rad2deg, 1.0e-4,
+               "Check OAD gcaz of row 2920");
+    test_value(oads[2919].gcel(), 1.584999*gammalib::rad2deg, 1.0e-4,
+               "Check OAD gecl of row 2920");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test GCOMInstDir class
  ***************************************************************************/
-void TestGCOMResponse::test_inst_dir(void)
+void TestGCOM::test_inst_dir(void)
 {
     // Test constructors
     test_try("Test constructors");
@@ -271,7 +305,7 @@ void TestGCOMResponse::test_inst_dir(void)
  * files are 2D images that show the instrument response as function of
  * geometrical (Phi_geo) and measured (Phi_bar) Compton scatter angle.
  ***************************************************************************/
-void TestGCOMResponse::test_response(void)
+void TestGCOM::test_response(void)
 {
     // Test constructors
     test_try("Test constructors");
@@ -321,7 +355,7 @@ void TestGCOMResponse::test_response(void)
  * Note that in first approximation we can use the DRG file as background
  * model.
  ***************************************************************************/
-void TestGCOMObservation::test_binned_obs(void)
+void TestGCOM::test_binned_obs(void)
 {
     // Test constructors
     test_try("Test constructors");
@@ -373,7 +407,7 @@ void TestGCOMObservation::test_binned_obs(void)
 /***********************************************************************//**
  * @brief Checks handling of COMPTEL event bin
  ***************************************************************************/
-void TestGCOMObservation::test_event_bin(void)
+void TestGCOM::test_event_bin(void)
 {
     // Test event bin void constructor
     GCOMEventBin bin;
@@ -518,7 +552,7 @@ void TestGCOMObservation::test_event_bin(void)
 /***********************************************************************//**
  * @brief Checks handling of COMPTEL event cube
  ***************************************************************************/
-void TestGCOMObservation::test_event_cube(void)
+void TestGCOM::test_event_cube(void)
 {
     // Event cube void constructor
     GCOMEventCube cube;
@@ -613,7 +647,7 @@ void TestGCOMObservation::test_event_cube(void)
 /***********************************************************************//**
  * @brief Test binned optimizer
  ***************************************************************************/
-void TestGCOMOptimize::test_binned_optimizer(void)
+void TestGCOM::test_binned_optimizer(void)
 {
     // Declare observations
     GObservations   obs;
@@ -733,15 +767,9 @@ int main(void)
     // Initially assume that we pass all tests
     bool success = true;
 
-    // Create test suites and append them to the container
-    TestGCOMSupport     support;
-    TestGCOMObservation obs;
-    TestGCOMResponse    rsp;
-    TestGCOMOptimize    opt;
-    testsuites.append(support);
-    testsuites.append(obs);
-    testsuites.append(rsp);
-    testsuites.append(opt);
+    // Create test suite and append it to the container
+    TestGCOM test;
+    testsuites.append(test);
 
     // Run the testsuites
     success = testsuites.run();

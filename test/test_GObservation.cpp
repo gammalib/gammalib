@@ -620,12 +620,29 @@ void TestGObservation::test_gti(void)
     test_value(load1.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(load1.tstop().secs(), 10000.0, 1.0e-7, "Stop time should be 10000.");
 
-    // Check saving in a different extnsion
+    // Check saving in a different extension
     test3.save("test_gti.fits[GOOD TIME INTERVALS]", true);
     GGti load2("test_gti.fits[GOOD TIME INTERVALS]");
     test_value(load2.size(), 1, "GGti should have 1 interval.");
     test_value(load2.tstart().convert(GTimeReference(51544.5, "s")), 0.0, 1.0e-7, "Start time should be 0.");
     test_value(load2.tstop().convert(GTimeReference(51544.5, "s")), 100.0, 1.0e-7, "Stop time should be 100.");
+
+    // Check contains() method
+    GGti test6;
+    test6.append(GTime(2.0), GTime(3.0));
+    test6.append(GTime(5.0), GTime(7.0));
+    test6.append(GTime(10.0), GTime(20.0));
+    test_value(test6.size(), 3, "Check GGti::contains(): size=3");
+    test_value(test6.tstart().secs(), 2.0, 1.0e-7, "Check GGti::contains(): start=2");
+    test_value(test6.tstop().secs(), 20.0, 1.0e-7, "Check GGti::contains(): stop=20");
+    test_assert(!test6.contains(GTime(1.0)), "Check GGti::contains(): 1 is not contained");
+    test_assert(test6.contains(GTime(15.0)), "Check GGti::contains(): 15 is contained");
+    test_assert(test6.contains(GTime(20.0)), "Check GGti::contains(): 20 is contained");
+    test_assert(test6.contains(GTime(2.5)), "Check GGti::contains(): 2.5 is contained");
+    test_assert(test6.contains(GTime(20.0)), "Check GGti::contains(): 20 is still contained");
+    test_assert(test6.contains(GTime(6.0)), "Check GGti::contains(): 6 is contained");
+    test_assert(!test6.contains(GTime(8.0)), "Check GGti::contains(): 8 is not contained");
+    test_assert(!test6.contains(GTime(4.0)), "Check GGti::contains(): 4 is not contained");
 
     // Return
     return;

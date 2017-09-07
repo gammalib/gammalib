@@ -36,87 +36,31 @@
 /***********************************************************************//**
  * @class TestGCOMSupport
  *
- * @brief Test suite for COMPTEL support functions
+ * @brief Test suite for COMPTEL classes
  *
- * This class defines a unit test suite for the COMPTEL support function.
+ * This class defines a unit test suite for the classes in the COMPTEL
+ * instrument module.
  ***************************************************************************/
-class TestGCOMSupport : public GTestSuite {
+class TestGCOM : public GTestSuite {
 public:
     // Constructors and destructors
-    TestGCOMSupport(void) : GTestSuite() {}
-    virtual ~TestGCOMSupport(void) {}
+    TestGCOM(void) : GTestSuite() {}
+    virtual ~TestGCOM(void) {}
 
     // Methods
-    virtual void             set(void);
-    virtual TestGCOMSupport* clone(void) const;
-    virtual std::string      classname(void) const { return "TestGCOMSupport"; }
-    void                     test_com_time(void);
-};
-
-
-/***********************************************************************//**
- * @class TestGCOMResponse
- *
- * @brief Test suite for COMPTEL response class testing
- *
- * This class defines a unit test suite for the COM response class.
- ***************************************************************************/
-class TestGCOMResponse : public GTestSuite {
-public:
-    // Constructors and destructors
-    TestGCOMResponse(void) : GTestSuite() {}
-    virtual ~TestGCOMResponse(void) {}
-
-    // Methods
-    virtual void              set(void);
-    virtual TestGCOMResponse* clone(void) const;
-    virtual std::string       classname(void) const { return "TestGCOMResponse"; }
-    void                      test_inst_dir(void);
-    void                      test_response(void);
-};
-
-
-/***********************************************************************//**
- * @class TestGCOMObservation
- *
- * @brief Test suite for COMPTEL observation testing
- *
- * This class defines a unit test suite for testing of GCOMObservation.
- ***************************************************************************/
-class TestGCOMObservation : public GTestSuite {
-public:
-    // Constructors and destructors
-    TestGCOMObservation(void) : GTestSuite() {}
-    virtual ~TestGCOMObservation(void) {}
-
-    // Methods
-    virtual void                 set(void);
-    virtual TestGCOMObservation* clone(void) const;
-    virtual std::string          classname(void) const { return "TestGCOMObservation"; }
-    void                         test_binned_obs(void);
-    void                         test_event_bin(void);
-    void                         test_event_cube(void);
-};
-
-
-/***********************************************************************//**
- * @class TestGCOMOptimize
- *
- * @brief Test suite for COMPTEL optimizer testing
- *
- * This class defines a unit test suite for testing of COMPTEL optimizers.
- ***************************************************************************/
-class TestGCOMOptimize : public GTestSuite {
-public:
-    // Constructors and destructors
-    TestGCOMOptimize(void) : GTestSuite() {}
-    virtual ~TestGCOMOptimize(void) {}
-
-    // Methods
-    virtual void              set(void);
-    virtual TestGCOMOptimize* clone(void) const;
-    virtual std::string       classname(void) const { return "TestGCOMOptimize"; }
-    void                      test_binned_optimizer(void);
+    virtual void        set(void);
+    virtual TestGCOM*   clone(void) const;
+    virtual std::string classname(void) const { return "TestGCOM"; }
+    void                test_com_time(void);
+    void                test_tim_class(void);
+    void                test_oad_class(void);
+    void                test_oads_class(void);
+    void                test_inst_dir(void);
+    void                test_response(void);
+    void                test_binned_obs(void);
+    void                test_event_bin(void);
+    void                test_event_cube(void);
+    void                test_binned_optimizer(void);
 };
 
 #endif /* TEST_COM_HPP */
