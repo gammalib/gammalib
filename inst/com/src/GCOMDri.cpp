@@ -435,8 +435,8 @@ void GCOMDri::dre(const GCOMEventList& events,
 
             // Now fill the DRE event array
             GSkyPixel pixel = m_dri.dir2pix(event->dir().dir());
-            int       ichi  = int(pixel.x());
-            int       ipsi  = int(pixel.y());
+            int       ichi  = int(pixel.x()+0.5);
+            int       ipsi  = int(pixel.y()+0.5);
             if ((ichi >= 0) && (ichi < nchi()) &&
                 (ipsi >= 0) && (ipsi < npsi())) {
                 int inx       = ichi + (ipsi + iphibar * npsi()) * nchi();
