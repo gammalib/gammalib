@@ -48,12 +48,12 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_CHECK_EHA_COMPUTATION
+//#define G_CHECK_EHA_COMPUTATION
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_COMPUTE_DRE
-#define G_DEBUG_COMPUTE_DRG
-#define G_DEBUG_COMPUTE_DRX
+//#define G_DEBUG_COMPUTE_DRE
+//#define G_DEBUG_COMPUTE_DRG
+//#define G_DEBUG_COMPUTE_DRX
 
 /* __ Constants __________________________________________________________ */
 const double superpacket_duration = 16.384; // Duration of superpacket (s)
