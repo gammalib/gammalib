@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCOMLib.hpp - COMPTEL Support Header files              *
+ *              GCOMSelection.i - COMPTEL selection set class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,35 +19,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMLib.hpp
- * @brief Collection of COMPTEL support header files
- * @author Juergen Knoedlseder    
+ * @file GCOMSelection.i
+ * @brief COMPTEL selection set class definition
+ * @author Juergen Knoedlseder
  */
-
-#ifndef GCOMLIB_HPP
-#define GCOMLIB_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-
-/* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMEventCube.hpp"
-#include "GCOMEventBin.hpp"
-#include "GCOMInstDir.hpp"
-#include "GCOMResponse.hpp"
-#include "GCOMD1Response.hpp"
-#include "GCOMD2Response.hpp"
-#include "GCOMInstChars.hpp"
-#include "GCOMObservation.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
 #include "GCOMSelection.hpp"
-#include "GCOMStatus.hpp"
-#include "GCOMDri.hpp"
-#include "GCOMOads.hpp"
-#include "GCOMOad.hpp"
-#include "GCOMTim.hpp"
-#include "GCOMRoi.hpp"
-#include "GCOMEventAtom.hpp"
-#include "GCOMEventList.hpp"
-#include "GCOMModelDRBFitting.hpp"
+%}
 
-#endif /* GCOMLIB_HPP */
+
+/***********************************************************************//**
+ * @class GCOMSelection
+ *
+ * @brief COMPTEL selection set class
+ ***************************************************************************/
+class GCOMSelection : public GBase {
+
+public:
+    // Constructors and destructors
+    GCOMSelection(void);
+    GCOMSelection(const GCOMSelection& select);
+    virtual ~GCOMSelection(void);
+
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual GCOMSelection*   clone(void) const;
+    virtual std::string classname(void) const;
+
+    // Other methods
+    // TODO: Copy methods from GCOMSelection.hpp file
+};
+
+
+/***********************************************************************//**
+ * @brief GCOMSelection class extension
+ ***************************************************************************/
+%extend GCOMSelection {
+    GCOMSelection copy() {
+        return (*self);
+    }
+};

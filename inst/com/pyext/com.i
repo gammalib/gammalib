@@ -118,3 +118,4 @@
 %include "GCOMOads.i"
 %include "GCOMDri.i"
 %include "GCOMStatus.i"
+%include "GCOMSelection.i"
