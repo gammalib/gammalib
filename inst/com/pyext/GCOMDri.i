@@ -60,13 +60,13 @@ public:
     void            gti(const GGti& gti);
     const double&   phimin(void) const;
     const double&   phibin(void) const;
-    void            dre(const GCOMEventList& events,
-                        const GCOMOads&      oads,
-                        const GCOMTim&       tim,
-                        const double&        zeta = 5.0);
-    void            drg(const GCOMOads& oads,
-                        const GCOMTim&  tim,
-                        const double&   zeta = 5.0);
+    void            compute_dre(const GCOMEventList& events,
+                                const GCOMOads&      oads,
+                                const GCOMTim&       tim,
+                                const double&        zeta = 5.0);
+    void            compute_drg(const GCOMOads& oads,
+                                const GCOMTim&  tim,
+                                const double&   zeta = 5.0);
     void            compute_drx(const GCOMOads& oads,
                                 const GCOMTim&  tim);
     void            load(const GFilename& filename);

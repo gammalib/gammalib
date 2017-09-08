@@ -34,6 +34,7 @@
 #include "GFits.hpp"
 #include "GFitsImage.hpp"
 #include "GCOMDri.hpp"
+#include "GCOMOad.hpp"
 #include "GCOMOads.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMStatus.hpp"
@@ -49,8 +50,8 @@
 #define G_CHECK_EHA_COMPUTATION
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_DRE
-#define G_DEBUG_DRG
+#define G_DEBUG_COMPUTE_DRE
+#define G_DEBUG_COMPUTE_DRG
 #define G_DEBUG_COMPUTE_DRX
 
 /* __ Constants __________________________________________________________ */
@@ -210,15 +211,15 @@ GCOMDri* GCOMDri::clone(void) const
  * Compute DRE event cube from event list (EVP), Good Time Intervals (TIM)
  * and Orbit Aspect Data (OAD).
  ***************************************************************************/
-void GCOMDri::dre(const GCOMEventList& events,
-                  const GCOMOads&      oads,
-                  const GCOMTim&       tim,
-                  const double&        zeta)
+void GCOMDri::compute_dre(const GCOMEventList& events,
+                          const GCOMOads&      oads,
+                          const GCOMTim&       tim,
+                          const double&        zeta)
 {
     // Debug
-    #if defined(G_DEBUG_DRE)
-    std::cout << "GCOMDri::dre" << std::endl;
-    std::cout << "============" << std::endl;
+    #if defined(G_DEBUG_COMPUTE_DRE)
+    std::cout << "GCOMDri::compute_dre" << std::endl;
+    std::cout << "====================" << std::endl;
     #endif
 
     // Check for positive Phibar bin size
@@ -228,15 +229,16 @@ void GCOMDri::dre(const GCOMEventList& events,
         throw GException::invalid_argument(G_DRE, msg);
     }
 
-    // Initialise variables
-    int        i_evt = 0;
-    GTime      tstart;
-    GTime      tstop;
+    // Initialise event counter
+    int i_evt = 0;
+
+    // Initialise D1 & D2 module status
     GCOMStatus status;
 
+    // Initialise superpacket statistics
+    init_statistics();
+
     // Initialise statistics
-    int num_used_superpackets     = 0;
-    int num_skipped_superpackets  = 0;
     int num_used_events           = 0;
     int num_event_outside_sp      = 0;
     int num_energy_too_low        = 0;
@@ -257,9 +259,6 @@ void GCOMDri::dre(const GCOMEventList& events,
     int num_d1module_off          = 0;
     int num_d2module_off          = 0;
     int num_processed             = 0;
-    int num_superpackets          = 0;
-    int last_superpackets         = 0;
-    int last_skipped_superpackets = 0;
 
     // Set all DRE bins to zero
     for (int i = 0; i < size(); ++i) {
@@ -275,35 +274,16 @@ void GCOMDri::dre(const GCOMEventList& events,
         // Get reference to Orbit Aspect Data of superpacket
         const GCOMOad &oad = oads[i_oad];
 
-        // Increment superpacket counter
-        num_superpackets++;
-
-        // Skip superpacket if it is not within Good Time Intervals.
-        // According to the original routine dalsel17.p7time.f only the
-        // superpacket start time is checked.
-        if (!tim.contains(oad.tstart())) {
-            num_skipped_superpackets++;
+        // Check superpacket usage
+        if (!use_superpacket(oad, tim)) {
             continue;
         }
-
-        // Update superpackets statistics
-        num_used_superpackets++;
 
         // Prepare Earth horizon angle comparison
         GSkyDir sky_geocentre;
         double  theta_geocentre = double(oad.gcel());
         double  phi_geocentre   = double(oad.gcaz());
         sky_geocentre.radec_deg(phi_geocentre, 90.0-theta_geocentre);
-
-        // Update validity interval so that DRE will have the correct
-        // interval
-        if (num_used_superpackets == 1) {
-            tstart = oad.tstart();
-            tstop  = oad.tstop();
-        }
-        else {
-            tstop  = oad.tstop();
-        }
 
         // Collect all events within superpacket. Break if the end
         // of the event list was reached.
@@ -442,8 +422,17 @@ void GCOMDri::dre(const GCOMEventList& events,
                 continue;
             }
 
-            // Now fill the DRE event array
+            // Now fill the event into the DRE
             GSkyPixel pixel = m_dri.dir2pix(event->dir().dir());
+            if (m_dri.contains(pixel)) {
+                int inx        = m_dri.pix2inx(pixel) + iphibar * m_dri.npix();
+                 (*this)[inx] += 1.0;
+                num_used_events++;
+            }
+            else {
+                num_outside_dre++;
+            }
+            /*
             int       ichi  = int(pixel.x()+0.5);
             int       ipsi  = int(pixel.y()+0.5);
             if ((ichi >= 0) && (ichi < nchi()) &&
@@ -455,6 +444,7 @@ void GCOMDri::dre(const GCOMEventList& events,
             else {
                 num_outside_dre++;
             }
+            */
 
         } // endfor: collected events
 
@@ -466,13 +456,15 @@ void GCOMDri::dre(const GCOMEventList& events,
     } // endfor: looped over Orbit Aspect Data
 
     // Set Good Time interval for DRE
-    m_gti = GGti(tstart, tstop);
+    if (m_num_used_superpackets > 0) {
+        m_gti = GGti(m_tstart, m_tstop);
+    }
 
     // Debug
-    #if defined(G_DEBUG_DRE)
-    std::cout << "Total number of superpackets .: " << num_superpackets << std::endl;
-    std::cout << "Used superpackets ............: " << num_used_superpackets << std::endl;
-    std::cout << "Skipped superpackets .........: " << num_skipped_superpackets << std::endl;
+    #if defined(G_DEBUG_COMPUTE_DRE)
+    std::cout << "Total number of superpackets .: " << m_num_superpackets << std::endl;
+    std::cout << "Used superpackets ............: " << m_num_used_superpackets << std::endl;
+    std::cout << "Skipped superpackets .........: " << m_num_skipped_superpackets << std::endl;
     std::cout << "Total number of events .......: " << events.size() << std::endl;
     std::cout << "Processed events .............: " << num_processed << std::endl;
     std::cout << "Used events ..................: " << num_used_events << std::endl;
@@ -511,24 +503,19 @@ void GCOMDri::dre(const GCOMEventList& events,
  * Compute DRG cube from Orbit Aspect Data (OAD) and Good Time Intervals
  * (TIM).
  ***************************************************************************/
-void GCOMDri::drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
+void GCOMDri::compute_drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
 {
     // Debug
-    #if defined(G_DEBUG_DRG)
-    std::cout << "GCOMDri::drg" << std::endl;
-    std::cout << "============" << std::endl;
+    #if defined(G_DEBUG_COMPUTE_DRG)
+    std::cout << "GCOMDri::compute_drg" << std::endl;
+    std::cout << "====================" << std::endl;
     #endif
 
-    // Initialise variables
-    int        npix = nchi() * npsi(); // Number of pixels in (Chi, Psi)
-    GTime      tstart;                 // Start time
-    GTime      tstop;                  // Stop time
-    GCOMStatus status;                 // D1 & D2 module status
+    // Initialise D1 & D2 module status
+    GCOMStatus status;
 
     // Initialise superpacket statistics
-    int num_sp         = 0;
-    int num_sp_used    = 0;
-    int num_sp_skipped = 0;
+    init_statistics();
 
     // Set all DRG bins to zero
     for (int i = 0; i < size(); ++i) {
@@ -541,21 +528,10 @@ void GCOMDri::drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
         // Get reference to Orbit Aspect Data of superpacket
         const GCOMOad &oad = oads[i_oad];
 
-        // Increment superpacket counter
-        num_sp++;
-
-        // Skip superpacket if it is not within Good Time Intervals.
-        // According to the original routine dalsel17.p7time.f only the
-        // superpacket start time is checked.
-        if (!tim.contains(oad.tstart())) {
-            num_sp_skipped++;
+        // Check superpacket usage
+        if (!use_superpacket(oad, tim)) {
             continue;
         }
-
-        //TODO: Add GTI check to be compliant with DRE
-
-        // Update superpackets statistics
-        num_sp_used++;
 
         // Prepare Earth horizon angle computation. The celestial system
         // is reinterpreted as the COMPTEL coordinate system, where the
@@ -568,18 +544,8 @@ void GCOMDri::drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
         GSkyDir geocentre_comptel;
         geocentre_comptel.radec_deg(phi_geocentre, 90.0-theta_geocentre);
 
-        // Update validity interval so that DRG will have the correct time
-        // interval
-        if (num_sp_used == 1) {
-            tstart = oad.tstart();
-            tstop  = oad.tstop();
-        }
-        else {
-            tstop  = oad.tstop();
-        }
-
         // Compute geometrical factors for all (Chi, Psi)
-        for (int index = 0; index < npix; ++index) {
+        for (int index = 0; index < m_dri.npix(); ++index) {
 
             // Get sky direction for (Chi, Psi)
             GSkyDir sky = m_dri.inx2dir(index);
@@ -607,7 +573,7 @@ void GCOMDri::drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
                 // Add up geometry if the Earth horizon angle is equal or
                 // larger than the minimum
                 if (eha >= ehamin) {
-                    int inx       = index + iphibar * npix;
+                    int inx       = index + iphibar * m_dri.npix();
                     (*this)[inx] += geometry;
                 }
 
@@ -617,9 +583,9 @@ void GCOMDri::drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
 
     } // endfor: looped over Orbit Aspect Data
 
-    // Divide DRG by total number of superpackets
-    if (num_sp > 0) {
-        double norm = 1.0 / double(num_sp);
+    // Divide DRG by number of used superpackets
+    if (m_num_used_superpackets > 0) {
+        double norm = 1.0 / double(m_num_used_superpackets);
         for (int i = 0; i < size(); ++i) {
             (*this)[i] *= norm;
         }
@@ -629,13 +595,15 @@ void GCOMDri::drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
     m_ebounds.clear();
 
     // Set the Good Time interval for DRG
-    m_gti = GGti(tstart, tstop);
+    if (m_num_used_superpackets > 0) {
+        m_gti = GGti(m_tstart, m_tstop);
+    }
 
     // Debug
-    #if defined(G_DEBUG_DRG)
-    std::cout << "Total number of superpackets .: " << num_sp << std::endl;
-    std::cout << "Used superpackets ............: " << num_sp_used << std::endl;
-    std::cout << "Skipped superpackets .........: " << num_sp_skipped << std::endl;
+    #if defined(G_DEBUG_COMPUTE_DRG)
+    std::cout << "Total number of superpackets .: " << m_num_superpackets << std::endl;
+    std::cout << "Used superpackets ............: " << m_num_used_superpackets << std::endl;
+    std::cout << "Skipped superpackets .........: " << m_num_skipped_superpackets << std::endl;
     #endif
 
     // Return
@@ -677,11 +645,6 @@ void GCOMDri::compute_drx(const GCOMOads& oads, const GCOMTim& tim)
     // Initialise constants
     const double tau = 0.2; // Thickness in radiation lenghts
 
-    // Initialise variables
-    int        npix = nchi() * npsi(); // Number of pixels in (Chi, Psi)
-    GTime      tstart;                 // Start time
-    GTime      tstop;                  // Stop time
-
     // Initialise superpacket statistics
     init_statistics();
 
@@ -696,29 +659,18 @@ void GCOMDri::compute_drx(const GCOMOads& oads, const GCOMTim& tim)
         // Get reference to Orbit Aspect Data of superpacket
         const GCOMOad &oad = oads[i_oad];
 
-        // Increment superpacket counter
-        m_num_superpackets++;
-
-        // Skip superpacket if it is not within Good Time Intervals.
-        // According to the original routine dalsel17.p7time.f only the
-        // superpacket start time is checked.
-        if (!tim.contains(oad.tstart())) {
-            m_num_skipped_superpackets++;
+        // Check superpacket usage
+        if (!use_superpacket(oad, tim)) {
             continue;
         }
 
-        //TODO: Add GTI check to be compliant with DRE
-
-        // Update superpackets statistics
-        m_num_used_superpackets++;
-
         // Loop over all DRX pixels
-        for (int index = 0; index < npix; ++index) {
+        for (int index = 0; index < m_dri.npix(); ++index) {
 
-            // Get sky direction for (Chi, Psi)
+            // Get sky direction for DRX pixel
             GSkyDir sky = m_dri.inx2dir(index);
 
-            // Compute zenith angle in COMPTEL coordinates from sky direction
+            // Compute zenith angle of pixel in COMPTEL coordinates
             double theta = oad.theta(sky);
 
             // Initialise exposure
@@ -758,7 +710,9 @@ void GCOMDri::compute_drx(const GCOMOads& oads, const GCOMTim& tim)
     m_ebounds.clear();
 
     // Set the Good Time interval for DRX
-    m_gti = GGti(tstart, tstop);
+    if (m_num_used_superpackets > 0) {
+        m_gti = GGti(m_tstart, m_tstop);
+    }
 
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRX)
@@ -985,6 +939,8 @@ void GCOMDri::copy_members(const GCOMDri& dri)
     m_phibin  = dri.m_phibin;
 
     // Copy statistics
+    m_tstart                   = dri.m_tstart;
+    m_tstop                    = dri.m_tstop;
     m_num_superpackets         = dri.m_num_superpackets;
     m_num_used_superpackets    = dri.m_num_used_superpackets;
     m_num_skipped_superpackets = dri.m_num_skipped_superpackets;
@@ -1010,12 +966,67 @@ void GCOMDri::free_members(void)
 void GCOMDri::init_statistics(void)
 {
     // Initialise statistics
+    m_tstart.clear();
+    m_tstop.clear();
     m_num_superpackets         = 0;
     m_num_used_superpackets    = 0;
     m_num_skipped_superpackets = 0;
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if superpacket should be used
+ *
+ * @param[in] oad Orbit Aspect Data record (i.e. superpacket).
+ * @param[in] tim Good Time Intervals.
+ * @return True if superpacket should be used, false otherwise.
+ *
+ * Checks if a superpacket should be used and updated the superpacket
+ * statistics and selected time interval. A superpacket will be used if
+ * it is fully enclosed within the COMPTEL Good Time Intervals and the
+ * Good Time Intervals of the DRI dataset.
+ ***************************************************************************/
+bool GCOMDri::use_superpacket(const GCOMOad &oad, const GCOMTim& tim)
+{
+    // Initialise usage flag
+    bool use = true;
+
+    // Increment superpacket counter
+    m_num_superpackets++;
+
+    // Skip superpacket if it is not fully enclosed within the COMPTEL
+    // Good Time Intervals
+    if (!(tim.contains(oad.tstart()) && tim.contains(oad.tstop()))) {
+        m_num_skipped_superpackets++;
+        use = false;
+    }
+
+    // Skip superpacket if it is not fully enclosed within the DRI Good
+    // Time Intervals
+    else if (!(m_gti.contains(oad.tstart()) && m_gti.contains(oad.tstop()))) {
+        m_num_skipped_superpackets++;
+        use = false;
+    }
+
+    // ... otherwise use superpacket
+    else {
+        m_num_used_superpackets++;
+    }
+
+    // Update selection validity interval
+    if (m_num_used_superpackets == 1) {
+        m_tstart = oad.tstart();
+        m_tstop  = oad.tstop();
+    }
+    else {
+        m_tstop  = oad.tstop();
+    }
+
+    // Return usage
+    return use;
 }
 
 

@@ -38,6 +38,7 @@
 class GFilename;
 class GFits;
 class GFitsImage;
+class GCOMOad;
 class GCOMOads;
 class GCOMTim;
 class GCOMStatus;
@@ -86,13 +87,13 @@ public:
     void            gti(const GGti& gti);
     const double&   phimin(void) const;
     const double&   phibin(void) const;
-    void            dre(const GCOMEventList& events,
-                        const GCOMOads&      oads,
-                        const GCOMTim&       tim,
-                        const double&        zeta = 5.0);
-    void            drg(const GCOMOads& oads,
-                        const GCOMTim&  tim,
-                        const double&   zeta = 5.0);
+    void            compute_dre(const GCOMEventList& events,
+                                const GCOMOads&      oads,
+                                const GCOMTim&       tim,
+                                const double&        zeta = 5.0);
+    void            compute_drg(const GCOMOads& oads,
+                                const GCOMTim&  tim,
+                                const double&   zeta = 5.0);
     void            compute_drx(const GCOMOads& oads,
                                 const GCOMTim&  tim);
     void            load(const GFilename& filename);
@@ -106,6 +107,7 @@ protected:
     void   copy_members(const GCOMDri& dri);
     void   free_members(void);
     void   init_statistics(void);
+    bool   use_superpacket(const GCOMOad &oad, const GCOMTim& tim);
     void   read_attributes(const GFitsHDU* hdu);
     void   write_attributes(GFitsHDU* hdu) const;
     double compute_geometry(const int& tjd, const double&     theta,
@@ -120,9 +122,11 @@ protected:
     double   m_phibin;   //!< Phibar binsize (deg)
 
     // Computation statistics
-    int m_num_superpackets;         //!< Number of superpackets
-    int m_num_used_superpackets;    //!< Number of used superpackets
-    int m_num_skipped_superpackets; //!< Number of skipped superpackets
+    GTime m_tstart;                   //!< Selection start time
+    GTime m_tstop;                    //!< Selection stop time
+    int   m_num_superpackets;         //!< Number of superpackets
+    int   m_num_used_superpackets;    //!< Number of used superpackets
+    int   m_num_skipped_superpackets; //!< Number of skipped superpackets
 };
 
 
