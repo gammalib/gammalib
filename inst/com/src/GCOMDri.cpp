@@ -102,6 +102,44 @@ GCOMDri::GCOMDri(const GFilename& filename)
 
 
 /***********************************************************************//**
+ * @brief Sky map constructor
+ *
+ * @param[in] map Sky map defining the DRI cube.
+ * @param[in] phimin Minimum Phibar angle (deg).
+ * @param[in] phibin Bin size of Phibar angle (deg).
+ * @param[in] nphibin Number of Phibar bins.
+ *
+ * Constructs a DRI cube from a sky map and a Phibar binning definition.
+ ***************************************************************************/
+GCOMDri::GCOMDri(const GSkyMap& map,
+                 const double&  phimin,
+                 const double&  phibin,
+                 const int&     nphibin)
+{
+    // Initialise class members
+    init_members();
+
+    // Set sky map
+    m_dri = map;
+
+    // Make sure that sky map can hold the required number of maps
+    if (nphibin > 0) {
+        m_dri.nmaps(nphibin);
+    }
+
+    // Set all sky map pixels to zero
+    m_dri = 0;
+
+    // Store minimum Phibar and bin size
+    m_phimin = phimin;
+    m_phibin = phibin;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] dri COMPTEL Data Space.
@@ -299,17 +337,21 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
             // Increase number of processed events
             num_processed++;
 
-            // Skip event if it lies before the DRE start
-            if (event->time() < m_gti.tstart()) {
-                num_event_before_dre++;
-                continue;
-            }
+            // Check GTIs if the DRE has GTIs
+            if (m_gti.size() > 0) {
 
-            // Break if event lies after the DRE stop
-            if (event->time() > m_gti.tstop()) {
-                num_event_after_dre++;
-                terminate = true;
-                break;
+                // Skip event if it lies before the DRE start.
+                if (event->time() < m_gti.tstart()) {
+                    num_event_before_dre++;
+                    continue;
+                }
+
+                // Break if event lies after the DRE stop
+                else if (event->time() > m_gti.tstop()) {
+                    num_event_after_dre++;
+                    terminate = true;
+                    break;
+                }
             }
 
             // Skip event if it lies before the superpacket start
@@ -385,14 +427,20 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
                 continue;
             }
 
-            // Now fill the event into the DRE
-            GSkyPixel pixel = m_dri.dir2pix(event->dir().dir());
-            if (m_dri.contains(pixel)) {
-                int inx        = m_dri.pix2inx(pixel) + iphibar * m_dri.npix();
-                 (*this)[inx] += 1.0;
-                num_used_events++;
+            // Now fill the event into the DRE. Put this in a try-catch
+            // block so that any invalid transformations are catched.
+            try {
+                GSkyPixel pixel = m_dri.dir2pix(event->dir().dir());
+                if (m_dri.contains(pixel)) {
+                    int inx        = m_dri.pix2inx(pixel) + iphibar * m_dri.npix();
+                    (*this)[inx] += 1.0;
+                    num_used_events++;
+                }
+                else {
+                    num_outside_dre++;
+                }
             }
-            else {
+            catch (GException::wcs_invalid_phi_theta) {
                 num_outside_dre++;
             }
 
@@ -512,7 +560,7 @@ void GCOMDri::compute_drg(const GCOMOads&      oads,
             // centre in COMPTEL coordinates and the (Chi, Psi) pixel in
             // COMPTEL coordinates minus the radius of the Earth.
             GSkyDir chipsi_comptel;
-            chipsi_comptel.radec_deg(-phi, 90.0-theta);
+            chipsi_comptel.radec_deg(phi, 90.0-theta);
             double eha = geocentre_comptel.dist_deg(chipsi_comptel) - oad.georad();
 
             // Loop over Phibar
@@ -956,8 +1004,10 @@ bool GCOMDri::use_superpacket(const GCOMOad &oad, const GCOMTim& tim)
     }
 
     // Skip superpacket if it is not fully enclosed within the DRI Good
-    // Time Intervals
-    else if (!(m_gti.contains(oad.tstart()) && m_gti.contains(oad.tstop()))) {
+    // Time Intervals. Only check if there are Good Time Intervals in the
+    // DRI.
+    else if ((m_gti.size() > 0) &&
+             !(m_gti.contains(oad.tstart()) && m_gti.contains(oad.tstop()))) {
         m_num_skipped_superpackets++;
         use = false;
     }

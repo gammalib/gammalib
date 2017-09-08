@@ -448,11 +448,18 @@ GEbounds GCOMResponse::ebounds(const GEnergy& obsEnergy) const
  *
  * @param[in] rspname COMPTEL response name.
  *
- * Loads the COMPTEL response with specified name @p rspname. The method first
- * searchs for an appropriate response in the calibration database. If no
- * appropriate response is found, the method takes the database root path
- * and response name to build the full path to the response file, and tries
- * to load the response from these paths.
+ * Loads the COMPTEL response with specified name @p rspname.
+ *
+ * The method first attempts to interpret @p rspname as a file name and to
+ * load the corresponding response.
+ *
+ * If @p rspname is not a FITS file the method searches for an appropriate
+ * response in the calibration database. If no appropriate response is found,
+ * the method takes the CALDB root path and response name to build the full
+ * path to the response file, and tries to load the response from these
+ * paths.
+ *
+ * If also this fails an exception is thrown.
  ***************************************************************************/
 void GCOMResponse::load(const std::string& rspname)
 {
@@ -464,20 +471,29 @@ void GCOMResponse::load(const std::string& rspname)
     // Save response name
     m_rspname = rspname;
 
-    // First attempt reading the response using the GCaldb interface
-    GFilename filename = m_caldb.filename("","","IAQ","","",rspname);
+    // Interpret response name as a FITS file name
+    GFilename filename(rspname);
 
-    // If filename is empty then build filename from CALDB root path and
-    // response name
-    if (filename.is_empty()) {
-        filename = gammalib::filepath(m_caldb.rootdir(), rspname);
-        if (!filename.exists()) {
-            GFilename testname = filename + ".fits";
-            if (testname.exists()) {
-                filename = testname;
+    // If the filename does not exist the try getting the response from the
+    // calibration database
+    if (!filename.is_fits()) {
+
+        // Get GCaldb response
+        filename = m_caldb.filename("","","IAQ","","",rspname);
+
+        // If filename is empty then build filename from CALDB root path
+        // and response name
+        if (filename.is_empty()) {
+            filename = gammalib::filepath(m_caldb.rootdir(), rspname);
+            if (!filename.exists()) {
+                GFilename testname = filename + ".fits";
+                if (testname.exists()) {
+                    filename = testname;
+                }
             }
         }
-    }
+
+    } // endif: response name is not a FITS file
 
     // Open FITS file
     GFits fits(filename);

@@ -62,6 +62,9 @@ public:
     // Constructors and destructors
     GCOMDri(void);
     explicit GCOMDri(const GFilename& filename);
+    GCOMDri(const GSkyMap& map, const double& phimin = 0.0,
+                                const double& phibin = 0.0,
+                                const int&    nphibin = 0);
     GCOMDri(const GCOMDri& dri);
     virtual ~GCOMDri(void);
 

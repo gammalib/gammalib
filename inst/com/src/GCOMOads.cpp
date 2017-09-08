@@ -504,6 +504,16 @@ std::string GCOMOads::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Number of records"));
         result.append(gammalib::str(size()));
         if (size() > 0) {
+
+            // Append time range
+            result.append("\n"+gammalib::parformat("TJD range"));
+            result.append(gammalib::str(m_oads[0].tjd()));
+            result.append(":");
+            result.append(gammalib::str(m_oads[0].tics()));
+            result.append(" - ");
+            result.append(gammalib::str(m_oads[size()-1].tjd()));
+            result.append(":");
+            result.append(gammalib::str(m_oads[size()-1].tics()));
             result.append("\n"+gammalib::parformat("MJD range"));
             result.append(gammalib::str(m_oads[0].tstart().mjd()));
             result.append(" - ");
@@ -513,7 +523,29 @@ std::string GCOMOads::print(const GChatter& chatter) const
             result.append(m_oads[0].tstart().utc());
             result.append(" - ");
             result.append(m_oads[size()-1].tstop().utc());
-        }
+
+            // Append TJDs
+            int tjd = 0;
+            int num = 0;
+            for (int i = 0; i < size(); ++i) {
+                if (m_oads[i].tjd() != tjd) {
+                    if (num > 0) {
+                        std::string key = "TJD "+gammalib::str(tjd);
+                        result.append("\n"+gammalib::parformat(key));
+                        result.append(gammalib::str(num)+" superpackets");
+                    }
+                    tjd = m_oads[i].tjd();
+                    num = 1;
+                }
+                else {
+                    num++;
+                }
+            }
+            std::string key = "TJD "+gammalib::str(tjd);
+            result.append("\n"+gammalib::parformat(key));
+            result.append(gammalib::str(num)+" superpackets");
+
+        } // endif: there were records
 
     } // endif: chatter was not silent
 

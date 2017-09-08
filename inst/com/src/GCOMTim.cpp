@@ -300,6 +300,16 @@ std::string GCOMTim::print(const GChatter& chatter) const
         result.append(gammalib::str(m_gti.ontime())+" sec");
         result.append("\n"+gammalib::parformat("Elapsed time"));
         result.append(gammalib::str(m_gti.telapse())+" sec");
+
+        // Append time range
+        result.append("\n"+gammalib::parformat("TJD range"));
+        result.append(gammalib::str(com_tjd(m_gti.tstart())));
+        result.append(":");
+        result.append(gammalib::str(com_tics(m_gti.tstart())));
+        result.append(" - ");
+        result.append(gammalib::str(com_tjd(m_gti.tstop())));
+        result.append(":");
+        result.append(gammalib::str(com_tics(m_gti.tstop())));
         result.append("\n"+gammalib::parformat("MJD range"));
         result.append(gammalib::str(m_gti.tstart().mjd()));
         result.append(" - ");
