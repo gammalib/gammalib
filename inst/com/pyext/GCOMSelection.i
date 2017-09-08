@@ -43,12 +43,13 @@ public:
     virtual ~GCOMSelection(void);
 
     // Implemented pure virtual base class methods
-    virtual void        clear(void);
-    virtual GCOMSelection*   clone(void) const;
-    virtual std::string classname(void) const;
+    virtual void           clear(void);
+    virtual GCOMSelection* clone(void) const;
+    virtual std::string    classname(void) const;
 
     // Other methods
-    // TODO: Copy methods from GCOMSelection.hpp file
+    void init_statistics(void) const;
+    bool use_event(const GCOMEventAtom& event) const;
 };
 
 

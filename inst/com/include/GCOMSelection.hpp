@@ -32,6 +32,7 @@
 #include "GBase.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GCOMEventAtom;
 
 /* __ Constants __________________________________________________________ */
 
@@ -41,7 +42,7 @@
  *
  * @brief COMPTEL selection set class
  *
- * @todo Add class description.
+ * This class implements a COMPTEL selection set.
  ***************************************************************************/
 class GCOMSelection : public GBase {
 
@@ -55,13 +56,14 @@ public:
     GCOMSelection& operator=(const GCOMSelection& select);
 
     // Implemented pure virtual base class methods
-    virtual void        clear(void);
-    virtual GCOMSelection*   clone(void) const;
-    virtual std::string classname(void) const;
-    virtual std::string print(const GChatter& chatter = NORMAL) const;
+    virtual void           clear(void);
+    virtual GCOMSelection* clone(void) const;
+    virtual std::string    classname(void) const;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    // TODO: Add any further methods that are needed
+    void init_statistics(void) const;
+    bool use_event(const GCOMEventAtom& event) const;
 
 protected:
     // Protected methods
@@ -70,7 +72,41 @@ protected:
     void free_members(void);
     
     // Protected members
-    // TODO: Add any data members that are necessary
+    double m_e1_min;       //!< Minimum D1 energy deposit (MeV)
+    double m_e1_max;       //!< Maximum D1 energy deposit (MeV)
+    double m_e2_min;       //!< Minimum D2 energy deposit (MeV)
+    double m_e2_max;       //!< Maximum D2 energy deposit (MeV)
+    double m_tof_min;      //!< Minimum TOF window
+    double m_tof_max;      //!< Maximum TOF window
+    double m_psd_min;      //!< Minimum PSD window
+    double m_psd_max;      //!< Maximum PSD window
+    double m_zeta_min;     //!< Minimum Earth horizon angle - Phibar window
+    double m_zeta_max;     //!< Maximum Earth horizon angle - Phibar window
+    int    m_reflag_min;   //!< Minimum rejection flag
+    int    m_reflag_max;   //!< Maximum rejection flag
+    int    m_vetoflag_min; //!< Minimum veto flag
+    int    m_vetoflag_max; //!< Maximum veto flag
+
+    // Selection statistics
+    mutable int m_num_events_checked;  //!< Number of checked events
+    mutable int m_num_events_used;     //!< Number of used events
+    mutable int m_num_events_rejected; //!< Number of rejected events
+    mutable int m_num_e1_min;          //!< Number of events below E1 threshold
+    mutable int m_num_e1_max;          //!< Number of events above E1 threshold
+    mutable int m_num_e2_min;          //!< Number of events below E2 threshold
+    mutable int m_num_e2_max;          //!< Number of events above E2 threshold
+    mutable int m_num_tof_min;         //!< Number of events below TOF threshold
+    mutable int m_num_tof_max;         //!< Number of events above TOF threshold
+    mutable int m_num_psd_min;         //!< Number of events below PSD threshold
+    mutable int m_num_psd_max;         //!< Number of events above PSD threshold
+    mutable int m_num_zeta_min;        //!< Number of events below Zeta threshold
+    mutable int m_num_zeta_max;        //!< Number of events above Zeta threshold
+    mutable int m_num_reflag_min;      //!< Number of events below rejection flag threshold
+    mutable int m_num_reflag_max;      //!< Number of events above rejection flag threshold
+    mutable int m_num_vetoflag_min;    //!< Number of events below rejection flag threshold
+    mutable int m_num_vetoflag_max;    //!< Number of events above rejection flag threshold
+    mutable int m_num_no_scatter;      //!< Number of events without scatter angle
+    mutable int m_num_invalid_modcom;  //!< Number of events with invalid minitelescopes
 };
 
 

@@ -106,10 +106,6 @@ protected:
     float       m_theta;  //!< Zenith angle of scatter direction (deg)
     float       m_phi;    //!< Azimuth angle of scatter direction (deg)
     float       m_eha;    //!< Earth horizon angle (deg)
-    /*
-    int         m_psd;    //!< PSD value (channel)
-    int         m_tof;    //!< Time of flight value (channel)
-    */
     float       m_psd;    //!< PSD value (channel)
     float       m_tof;    //!< Time of flight value (channel)
     int         m_modcom; //!< Mini telescope number

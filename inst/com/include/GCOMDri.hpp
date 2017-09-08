@@ -33,6 +33,7 @@
 #include "GSkyMap.hpp"
 #include "GEbounds.hpp"
 #include "GGti.hpp"
+#include "GCOMSelection.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
@@ -90,10 +91,12 @@ public:
     void            compute_dre(const GCOMEventList& events,
                                 const GCOMOads&      oads,
                                 const GCOMTim&       tim,
+                                const GCOMSelection& select = GCOMSelection(),
                                 const double&        zeta = 5.0);
-    void            compute_drg(const GCOMOads& oads,
-                                const GCOMTim&  tim,
-                                const double&   zeta = 5.0);
+    void            compute_drg(const GCOMOads&      oads,
+                                const GCOMTim&       tim,
+                                const GCOMSelection& select = GCOMSelection(),
+                                const double&        zeta = 5.0);
     void            compute_drx(const GCOMOads& oads,
                                 const GCOMTim&  tim);
     void            load(const GFilename& filename);

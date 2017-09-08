@@ -38,8 +38,9 @@
 #include "GCOMOads.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMStatus.hpp"
-#include "GCOMSupport.hpp"
 #include "GCOMEventList.hpp"
+#include "GCOMSelection.hpp"
+#include "GCOMSupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_DRE    "GCOMDri::dre(GCOMEventList&, GCOMOads&, GCOMTim&, double&)"
@@ -203,6 +204,7 @@ GCOMDri* GCOMDri::clone(void) const
  * @param[in] events Events list.
  * @param[in] oads Orbit Aspect Data.
  * @param[in] tim Good Time Intervals.
+ * @param[in] select Selection set.
  * @param[in] zeta Minimum Earth horizon - Phibar cut (deg).
  *
  * @exception GException::invalid_argument
@@ -214,6 +216,7 @@ GCOMDri* GCOMDri::clone(void) const
 void GCOMDri::compute_dre(const GCOMEventList& events,
                           const GCOMOads&      oads,
                           const GCOMTim&       tim,
+                          const GCOMSelection& select,
                           const double&        zeta)
 {
     // Debug
@@ -238,22 +241,18 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
     // Initialise superpacket statistics
     init_statistics();
 
+    // Initialise selection statistics
+    select.init_statistics();
+
     // Initialise statistics
     int num_used_events           = 0;
     int num_event_outside_sp      = 0;
     int num_energy_too_low        = 0;
     int num_energy_too_high       = 0;
-    int num_no_scatter_angle      = 0;
-    int num_bad_modcom            = 0;
     int num_eha_too_small         = 0;
     int num_phibar_too_low        = 0;
     int num_phibar_too_high       = 0;
     int num_outside_dre           = 0;
-    int num_outside_e1            = 0;
-    int num_outside_e2            = 0;
-    int num_outside_tof           = 0;
-    int num_outside_psd           = 0;
-    int num_bad_reflag            = 0;
     int num_event_before_dre      = 0;
     int num_event_after_dre       = 0;
     int num_d1module_off          = 0;
@@ -329,40 +328,8 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
                 continue;
             }
 
-            // Apply event selection, see PSSEVP.F
-            // TODO: Hard coded for the moment, seems like EVP files
-            //       contain already these thresholds !!!
-            if (event->e1() < 0.070 || event->e1() > 20.0) {
-                num_outside_e1++;
-                continue;
-            }
-            if (event->e2() < 0.650 || event->e2() > 30.0) {
-                num_outside_e2++;
-                continue;
-            }
-            if (event->tof() < 115.0 || event->tof() > 130.0) {
-                num_outside_tof++;
-                continue;
-            }
-            if (event->psd() < 0.0 || event->psd() > 110.0) {
-                num_outside_psd++;
-                continue;
-            }
-            if (event->reflag() < 1) {
-                num_bad_reflag++;
-                continue;
-            }
-
-            // Check whether the event has a scatter angle determined.
-            // This is signaled by a scatter angle -10e20 in radians.
-            if (event->theta() < -1.0e3) {
-                num_no_scatter_angle++;
-                continue;
-            }
-
-            // Check for valid module IDs from MODCOM
-            if (event->modcom() < 1 && event->modcom() > 98) {
-                num_bad_modcom++;
+            // Apply event selectio
+            if (!select.use_event(*event)) {
                 continue;
             }
 
@@ -392,15 +359,13 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
                 continue;
             }
 
-            // Compute Earth horizon angle for comparison with EVP value
+            // Option: Earth horizon angle comparison
+            #if defined(G_CHECK_EHA_COMPUTATION)
             GSkyDir sky_event;
             double  theta_event = double(event->theta());
             double  phi_event   = double(event->phi());
             sky_event.radec_deg(-phi_event, 90.0-theta_event);
             double eha = sky_geocentre.dist_deg(sky_event) - oad.georad();
-
-            // Option: Earth horizon angle comparison
-            #if defined(G_CHECK_EHA_COMPUTATION)
             if (std::abs(eha - event->eha()) > 1.5) {
                 std::string msg = "Earth horizon angle from EVP dataset ("+
                                   gammalib::str(event->eha())+" deg) "
@@ -412,10 +377,8 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
             }
             #endif
 
-            // Check for Earth horizon angle. The limit is fixed here to
-            // the values of 5, 7, ..., 53 deg for 25 Phibar layers that
-            // was usually used for COMPTEL.
-            // zeta = 5.0
+            // Check for Earth horizon angle. There is a constant EHA limit
+            // over a Phibar layer to be compliant with the DRG.
             double ehamin = double(iphibar) * m_phibin + zeta;
             if (event->eha() < ehamin) {
                 num_eha_too_small++;
@@ -432,19 +395,6 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
             else {
                 num_outside_dre++;
             }
-            /*
-            int       ichi  = int(pixel.x()+0.5);
-            int       ipsi  = int(pixel.y()+0.5);
-            if ((ichi >= 0) && (ichi < nchi()) &&
-                (ipsi >= 0) && (ipsi < npsi())) {
-                int inx       = ichi + (ipsi + iphibar * npsi()) * nchi();
-                (*this)[inx] += 1.0;
-                num_used_events++;
-            }
-            else {
-                num_outside_dre++;
-            }
-            */
 
         } // endfor: collected events
 
@@ -477,15 +427,9 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
     std::cout << "Energy too high ..............: " << num_energy_too_high << std::endl;
     std::cout << "Phibar too low ...............: " << num_phibar_too_low << std::endl;
     std::cout << "Phibar too high ..............: " << num_phibar_too_high << std::endl;
-    std::cout << "Outside D1 selection .........: " << num_outside_e1 << std::endl;
-    std::cout << "Outside D2 selection .........: " << num_outside_e2 << std::endl;
-    std::cout << "Outside TOF selection ........: " << num_outside_tof << std::endl;
-    std::cout << "Outside PSD selection ........: " << num_outside_psd << std::endl;
-    std::cout << "Outside rejection flag sel. ..: " << num_bad_reflag << std::endl;
     std::cout << "Outside DRE cube .............: " << num_outside_dre << std::endl;
-    std::cout << "No scatter angle .............: " << num_no_scatter_angle << std::endl;
-    std::cout << "Bad module combination .......: " << num_bad_modcom << std::endl;
     std::cout << "Earth horizon angle too small : " << num_eha_too_small << std::endl;
+    std::cout << select << std::endl;
     #endif
 
     // Return
@@ -498,12 +442,16 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
  *
  * @param[in] oads Orbit Aspect Data.
  * @param[in] tim Good Time Intervals.
+ * @param[in] select Selection set (not used so gar).
  * @param[in] zeta Minimum Earth horizon - Phibar cut (deg).
  *
  * Compute DRG cube from Orbit Aspect Data (OAD) and Good Time Intervals
  * (TIM).
  ***************************************************************************/
-void GCOMDri::compute_drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
+void GCOMDri::compute_drg(const GCOMOads&      oads,
+                          const GCOMTim&       tim,
+                          const GCOMSelection& select,
+                          const double&        zeta)
 {
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRG)
@@ -516,6 +464,9 @@ void GCOMDri::compute_drg(const GCOMOads& oads, const GCOMTim& tim, const double
 
     // Initialise superpacket statistics
     init_statistics();
+
+    // Initialise selection statistics
+    select.init_statistics();
 
     // Set all DRG bins to zero
     for (int i = 0; i < size(); ++i) {
