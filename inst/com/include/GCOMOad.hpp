@@ -100,6 +100,9 @@ protected:
     float   m_gcaz;    //!< Geocentre azimuth angle (deg)
     float   m_gcel;    //!< Geocentre zenith angle (deg)
     float   m_georad;  //!< Apparent radius of Earth (deg)
+
+    // Precomputation cache
+    mutable double m_posang; //!< X-axis position angle in COMPTEL system
 };
 
 
@@ -279,7 +282,7 @@ const float& GCOMOad::gcel(void) const
 /***********************************************************************//**
  * @brief Set Geocentre zenith angle
  *
- * @param[in] gcaz Geocentre zenith angle (deg).
+ * @param[in] gcel Geocentre zenith angle (deg).
  *
  * Set the Geocentre zenith angle.
  ***************************************************************************/
@@ -344,7 +347,8 @@ const GSkyDir& GCOMOad::zaxis(void) const
 inline
 void GCOMOad::zaxis(const GSkyDir& zaxis)
 {
-    m_zaxis = zaxis;
+    m_posang = 1.0e30; // To assure initialisation of position angle
+    m_zaxis  = zaxis;
     return;
 }
 
@@ -373,7 +377,8 @@ const GSkyDir& GCOMOad::xaxis(void) const
 inline
 void GCOMOad::xaxis(const GSkyDir& xaxis)
 {
-    m_xaxis = xaxis;
+    m_posang = 1.0e30; // To assure initialisation of position angle
+    m_xaxis  = xaxis;
     return;
 }
 
@@ -404,7 +409,12 @@ double GCOMOad::theta(const GSkyDir& sky) const
 inline
 double GCOMOad::phi(const GSkyDir& sky) const
 {
-    return (m_zaxis.posang_deg(m_xaxis) - m_zaxis.posang_deg(sky));
+    // If position angle has not be initialised the do it now
+    if (m_posang > 1.0e20) {
+        m_posang = m_zaxis.posang_deg(m_xaxis);
+    }
+    //return (m_zaxis.posang_deg(m_xaxis) - m_zaxis.posang_deg(sky));
+    return (m_posang - m_zaxis.posang_deg(sky));
 }
 
 #endif /* GCOMOAD_HPP */

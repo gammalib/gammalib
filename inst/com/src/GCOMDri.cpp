@@ -51,6 +51,15 @@
 /* __ Debug definitions __________________________________________________ */
 #define G_DEBUG_DRE
 #define G_DEBUG_DRG
+#define G_DEBUG_COMPUTE_DRX
+
+/* __ Constants __________________________________________________________ */
+const double superpacket_duration = 16.384; // Duration of superpacket (s)
+const double r1                   = 13.8;   // D1 module radius (cm)
+
+/* __ Derived constants __________________________________________________ */
+const double r1sq    = r1 * r1;
+const double d1_area = 7.0 * gammalib::pi * r1sq;
 
 
 /*==========================================================================
@@ -635,6 +644,135 @@ void GCOMDri::drg(const GCOMOads& oads, const GCOMTim& tim, const double& zeta)
 
 
 /***********************************************************************//**
+ * @brief Compute DRX exposure map
+ *
+ * @param[in] oads Orbit Aspect Data.
+ * @param[in] tim Good Time Intervals.
+ *
+ * Compute DRX exposure map from Orbit Aspect Data (OAD) and Good Time
+ * Intervals (TIM).
+ *
+ * For a given superpacket, the exposure is computed using
+ *
+ * \f[
+ *    X_i(\theta_c) = 7 \pi r_1^2 \cos \theta_c
+ *    \frac{1 - \exp \left( -\tau \ \cos \theta_c \right)}
+ *         {1 - \exp \left( -\tau \right)}
+ * \f]
+ *
+ * where
+ * \f$\tau=0.2\f$ is the typical thickness of a D1 module in radiation
+ * lengths,
+ * \f$r_1=13.8\f$ cm is the radius of a D1 module, and
+ * \f$\theta_c\f$ is the zenith angle in COMPTEL coordinates.
+ ***************************************************************************/
+void GCOMDri::compute_drx(const GCOMOads& oads, const GCOMTim& tim)
+{
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRX)
+    std::cout << "GCOMDri::compute_drx" << std::endl;
+    std::cout << "====================" << std::endl;
+    #endif
+
+    // Initialise constants
+    const double tau = 0.2; // Thickness in radiation lenghts
+
+    // Initialise variables
+    int        npix = nchi() * npsi(); // Number of pixels in (Chi, Psi)
+    GTime      tstart;                 // Start time
+    GTime      tstop;                  // Stop time
+
+    // Initialise superpacket statistics
+    init_statistics();
+
+    // Set all DRX bins to zero
+    for (int i = 0; i < size(); ++i) {
+        (*this)[i] = 0.0;
+    }
+
+    // Loop over Orbit Aspect Data
+    for (int i_oad = 0; i_oad < oads.size(); ++i_oad) {
+
+        // Get reference to Orbit Aspect Data of superpacket
+        const GCOMOad &oad = oads[i_oad];
+
+        // Increment superpacket counter
+        m_num_superpackets++;
+
+        // Skip superpacket if it is not within Good Time Intervals.
+        // According to the original routine dalsel17.p7time.f only the
+        // superpacket start time is checked.
+        if (!tim.contains(oad.tstart())) {
+            m_num_skipped_superpackets++;
+            continue;
+        }
+
+        //TODO: Add GTI check to be compliant with DRE
+
+        // Update superpackets statistics
+        m_num_used_superpackets++;
+
+        // Loop over all DRX pixels
+        for (int index = 0; index < npix; ++index) {
+
+            // Get sky direction for (Chi, Psi)
+            GSkyDir sky = m_dri.inx2dir(index);
+
+            // Compute zenith angle in COMPTEL coordinates from sky direction
+            double theta = oad.theta(sky);
+
+            // Initialise exposure
+            double exposure = 0.0;
+
+            // Skip pixel if zenith angle is beyond 90 degrees
+            if (theta >= 90.0) {
+                continue;
+            }
+
+            // ... otherwise compute the exposure
+            else {
+                double costheta = std::cos(theta * gammalib::deg2rad);
+                if (theta < 89.0) {
+                    exposure = d1_area * costheta *
+                               (1.0 - std::exp(-tau / costheta)) /
+                               (1.0 - std::exp(-tau));
+                }
+                else {
+                    exposure = d1_area * costheta / (1.0 - std::exp(-tau));
+                }
+            }
+
+            // Accumulate exposure
+            (*this)[index] += exposure;
+
+        } // endfor: looped over all DRX pixels
+
+    } // endfor: looped over Orbit Aspect Data
+
+    // Multiply by time per superpacket to give the result in cm^2 s
+    for (int i = 0; i < size(); ++i) {
+        (*this)[i] *= superpacket_duration;
+    }
+
+    // Clear energy boundaries for DRX since DRX does not depend on energy)
+    m_ebounds.clear();
+
+    // Set the Good Time interval for DRX
+    m_gti = GGti(tstart, tstop);
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRX)
+    std::cout << "Total number of superpackets .: " << m_num_superpackets << std::endl;
+    std::cout << "Used superpackets ............: " << m_num_used_superpackets << std::endl;
+    std::cout << "Skipped superpackets .........: " << m_num_skipped_superpackets << std::endl;
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load COMPTEL Data Space from DRI FITS file
  *
  * @param[in] filename DRI FITS file name.
@@ -662,6 +800,7 @@ void GCOMDri::load(const GFilename& filename)
  * @brief Save COMPTEL Data Space into DRI FITS file
  *
  * @param[in] filename DRI FITS file name.
+ * @param[in] clobber Overwrite existing file?
  ***************************************************************************/
 void GCOMDri::save(const GFilename& filename, const bool& clobber) const
 {
@@ -790,6 +929,14 @@ std::string GCOMDri::print(const GChatter& chatter) const
             result.append("\n"+m_dri.print(gammalib::reduce(chatter)));
         }
 
+        // Append computation statistics
+        result.append("\n"+gammalib::parformat("Input superpackets"));
+        result.append(gammalib::str(m_num_superpackets));
+        result.append("\n"+gammalib::parformat("Used superpackets"));
+        result.append(gammalib::str(m_num_used_superpackets));
+        result.append("\n"+gammalib::parformat("Skipped superpackets"));
+        result.append(gammalib::str(m_num_skipped_superpackets));
+
     } // endif: chatter was not silent
 
     // Return result
@@ -814,7 +961,10 @@ void GCOMDri::init_members(void)
     m_gti.clear();
     m_phimin = 0.0;
     m_phibin = 0.0;
-    
+
+    // Initialise statistics
+    init_statistics();
+
     // Return
     return;
 }
@@ -834,6 +984,11 @@ void GCOMDri::copy_members(const GCOMDri& dri)
     m_phimin  = dri.m_phimin;
     m_phibin  = dri.m_phibin;
 
+    // Copy statistics
+    m_num_superpackets         = dri.m_num_superpackets;
+    m_num_used_superpackets    = dri.m_num_used_superpackets;
+    m_num_skipped_superpackets = dri.m_num_skipped_superpackets;
+
     // Return
     return;
 }
@@ -850,22 +1005,53 @@ void GCOMDri::free_members(void)
 
 
 /***********************************************************************//**
+ * @brief Initialise computation statistics
+ ***************************************************************************/
+void GCOMDri::init_statistics(void)
+{
+    // Initialise statistics
+    m_num_superpackets         = 0;
+    m_num_used_superpackets    = 0;
+    m_num_skipped_superpackets = 0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Read DRI attributes from FITS HDU
  *
  * @param[in] hdu FITS HDU pointer.
+ *
+ * Reads the time interval from the FITS header and sets the Phibar definiton
+ * and energy boundaries from the header keywords if they are provided.
  ***************************************************************************/
 void GCOMDri::read_attributes(const GFitsHDU* hdu)
 {
-    // Get phibar attributes
-    m_phibin = hdu->real("CDELT3");
-    m_phimin = hdu->real("CRVAL3") - (hdu->real("CRPIX3")-0.5) * m_phibin;
-    
     // Get time attributes
     GTime tstart = com_time(hdu->integer("VISDAY"), hdu->integer("VISTIM"));
     GTime tstop  = com_time(hdu->integer("VIEDAY"), hdu->integer("VIETIM"));
 
     // Set Good Time Intervals
     m_gti = GGti(tstart, tstop);
+
+    // Optionally read Phibar attributes
+    if (hdu->has_card("CDELT3") &&
+        hdu->has_card("CRVAL3") &&
+        hdu->has_card("CRPIX3")) {
+
+        // Get phibar attributes
+        m_phibin = hdu->real("CDELT3");
+        m_phimin = hdu->real("CRVAL3") - (hdu->real("CRPIX3")-0.5) * m_phibin;
+
+    }
+
+    // ... otherwise set Phibar attributes to zero
+    else {
+        m_phimin = 0.0;
+        m_phibin = 0.0;
+    }
 
     // Optionally read energy attributes
     if (hdu->has_card("E_MIN") && hdu->has_card("E_MAX")) {
@@ -877,6 +1063,11 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
         // Set energy boundaries
         m_ebounds = GEbounds(emin, emax);
 
+    }
+
+    // ... otherwise clear energy boundaries
+    else {
+        m_ebounds.clear();
     }
 
     // Return
@@ -925,6 +1116,11 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
         hdu->card("E_MAX", m_ebounds.emax().MeV(), "[MeV] Upper bound of energy range");
     }
 
+    // Write superpacket statistics
+    hdu->card("NSPINP", m_num_superpackets, "Number of input superpackets");
+    hdu->card("NSPUSE", m_num_used_superpackets, "Number of used superpackets");
+    hdu->card("NSPSKP", m_num_skipped_superpackets, "Number of skipped superpackets");
+
     // Return
     return;
 }
@@ -962,13 +1158,13 @@ double GCOMDri::compute_geometry(const int&        tjd,
     const double delz = 158.0;
 
     // Set D1 module radius in cm (from COM-TN-UNH-F70-051)
-    const double r1 = 13.8;
+    //const double r1 = 13.8; // Defined globally
 
     // Set D2 module radius in cm (from SIM-AL-005)
     const double r2 = 14.085;
 
     // Derive some constants
-    const double r1sq     = r1 * r1;
+    //const double r1sq     = r1 * r1;  // Defined globally
     const double r2sq     = r2 * r2;
     const double drsq     = r1sq - r2sq;
     const double norm_geo = 1.0 / (gammalib::pi * r1sq);

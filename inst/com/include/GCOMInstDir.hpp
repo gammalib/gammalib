@@ -116,11 +116,11 @@ void GCOMInstDir::dir(const GSkyDir& dir)
 
 
 /***********************************************************************//**
- * @brief Return event scatter angle
+ * @brief Return event Compton scatter angle
  *
- * @return Event scatter angle.
+ * @return Event Compton scatter angle.
  *
- * Returns the event scatter angle.
+ * Returns the event Compton scatter angle.
  ***************************************************************************/
 inline
 const double& GCOMInstDir::phibar(void) const
@@ -130,11 +130,11 @@ const double& GCOMInstDir::phibar(void) const
 
 
 /***********************************************************************//**
- * @brief Set event scatter angle
+ * @brief Set event Compton scatter angle
  *
- * @param[in] dir Event scatter angle.
+ * @param[in] phibar Event Compton scatter angle.
  *
- * Set the event scatter angle.
+ * Set the event Compton scatter angle.
  ***************************************************************************/
 inline
 void GCOMInstDir::phibar(const double& phibar)

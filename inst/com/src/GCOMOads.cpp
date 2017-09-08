@@ -443,7 +443,7 @@ void GCOMOads::read(const GFitsTable& table)
             oad.gcaz(ptr_gcaz->real(i) * gammalib::rad2deg);
             oad.gcel(ptr_gcel->real(i) * gammalib::rad2deg);
 
-            // Set telescope z- and x-axes
+            // Set telescope Z- and X-axes
             GSkyDir zaxis;
             GSkyDir xaxis;
             zaxis.radec(ptr_zrasc->real(i), ptr_zdecl->real(i));
@@ -544,7 +544,7 @@ void GCOMOads::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] oad COMPTEL Orbit Aspect Data container.
+ * @param[in] oads COMPTEL Orbit Aspect Data container.
  ***************************************************************************/
 void GCOMOads::copy_members(const GCOMOads& oads)
 {

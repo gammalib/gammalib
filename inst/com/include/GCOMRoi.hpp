@@ -201,7 +201,7 @@ const double& GCOMRoi::phibar_max(void) const
 /***********************************************************************//**
  * @brief Set maximum Phibar of region of interest
  *
- * @param[in] phibar_min Maximum Phibar of region of interest (deg).
+ * @param[in] phibar_max Maximum Phibar of region of interest (deg).
  *
  * Set the maximum Phibar of region of interest.
  ***************************************************************************/

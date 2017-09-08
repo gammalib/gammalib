@@ -67,6 +67,8 @@ public:
     void            drg(const GCOMOads& oads,
                         const GCOMTim&  tim,
                         const double&   zeta = 5.0);
+    void            compute_drx(const GCOMOads& oads,
+                                const GCOMTim&  tim);
     void            load(const GFilename& filename);
     void            save(const GFilename& filename, const bool& clobber = false) const;
     void            read(const GFitsImage& image);

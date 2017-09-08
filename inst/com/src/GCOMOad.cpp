@@ -217,6 +217,7 @@ void GCOMOad::init_members(void)
     m_gcaz   = 0.0;
     m_gcel   = 0.0;
     m_georad = 0.0;
+    m_posang = 1.0e30;
 
     // Return
     return;
@@ -240,6 +241,7 @@ void GCOMOad::copy_members(const GCOMOad& oad)
     m_gcaz   = oad.m_gcaz;
     m_gcel   = oad.m_gcel;
     m_georad = oad.m_georad;
+    m_posang = oad.m_posang;
 
     // Return
     return;

@@ -93,6 +93,8 @@ public:
     void            drg(const GCOMOads& oads,
                         const GCOMTim&  tim,
                         const double&   zeta = 5.0);
+    void            compute_drx(const GCOMOads& oads,
+                                const GCOMTim&  tim);
     void            load(const GFilename& filename);
     void            save(const GFilename& filename, const bool& clobber = false) const;
     void            read(const GFitsImage& image);
@@ -103,6 +105,7 @@ protected:
     void   init_members(void);
     void   copy_members(const GCOMDri& dri);
     void   free_members(void);
+    void   init_statistics(void);
     void   read_attributes(const GFitsHDU* hdu);
     void   write_attributes(GFitsHDU* hdu) const;
     double compute_geometry(const int& tjd, const double&     theta,
@@ -115,6 +118,11 @@ protected:
     GGti     m_gti;      //!< Good Time Intervals of data cube
     double   m_phimin;   //!< Phibar minimum (deg)
     double   m_phibin;   //!< Phibar binsize (deg)
+
+    // Computation statistics
+    int m_num_superpackets;         //!< Number of superpackets
+    int m_num_used_superpackets;    //!< Number of used superpackets
+    int m_num_skipped_superpackets; //!< Number of skipped superpackets
 };
 
 
@@ -258,7 +266,7 @@ const GGti& GCOMDri::gti(void) const
 /***********************************************************************//**
  * @brief Set Good Time Intervals of DRI cube
  *
- * @param[in] git Good Time Intervals of DRI data.
+ * @param[in] gti Good Time Intervals of DRI data.
  *
  * Sets the Good Time Intervals of DRI cube.
  ***************************************************************************/

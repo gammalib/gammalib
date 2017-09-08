@@ -173,7 +173,7 @@ GCOMEventAtom* GCOMEventAtom::clone(void) const
  * @brief Set event time
  *
  * @param[in] tjd Truncated Julian Days (days).
- * @param[in] ticks COMPTEL ticks (1/8 ms).
+ * @param[in] tics COMPTEL ticks (1/8 ms).
  *
  * Sets the event time from the native COMPTEL time format.
  ***************************************************************************/

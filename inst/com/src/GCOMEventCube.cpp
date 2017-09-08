@@ -92,9 +92,9 @@ GCOMEventCube::GCOMEventCube(const GFilename& filename) : GEventCube()
 
 
 /***********************************************************************//**
- * @brief DRI constructor
+ * @brief DRE constructor
  *
- * @param[in] dri DRI event cube.
+ * @param[in] dre DRE event cube.
  *
  * Constructs an event cube from a DRE event cube.
  ***************************************************************************/
