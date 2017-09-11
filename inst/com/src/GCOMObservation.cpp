@@ -35,6 +35,9 @@
 #include "GException.hpp"
 #include "GFits.hpp"
 #include "GCaldb.hpp"
+#include "GSource.hpp"
+#include "GModelSky.hpp"
+#include "GModelSpectralConst.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventCube.hpp"
 #include "GCOMEventList.hpp"
@@ -51,6 +54,7 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 #define G_WRITE                        "GCOMObservation::write(GXmlElement&)"
 #define G_LOAD_DRB                    "GCOMObservation::load_drb(GFilename&)"
 #define G_LOAD_DRG                    "GCOMObservation::load_drg(GFilename&)"
+#define G_ADD_DRM                        "GCOMObservation::add_drm(GSource&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -438,7 +442,7 @@ void GCOMObservation::write(GXmlElement& xml) const
 
     // Handle unbinned observation
     if (is_unbinned()) {
-    
+
         // Set EVP parameter
         par = gammalib::xml_need_par(G_WRITE, xml, "EVP");
         par->attribute("file", gammalib::xml_file_reduce(xml, m_evpname));
@@ -610,6 +614,68 @@ void GCOMObservation::load(const GFilename&              evpname,
 
 
 /***********************************************************************//**
+ * @brief Return source model DRM cube
+ *
+ * @param[in] source Source.
+ *
+ * @return Source model DRM cube.
+ ***************************************************************************/
+const GCOMDri& GCOMObservation::drm(const GSource& source) const
+{
+    // Search source in DRM cache
+    int index = 0;
+    for (; index < m_drms.size(); ++index) {
+        if (source.name() == m_drms[index].name()) {
+            break;
+        }
+    }
+
+    // If no source was found then add a cube to the DRM cache
+    if (index >= m_drms.size()) {
+        const_cast<GCOMObservation*>(this)->add_drm(source);
+        index = m_drms.size() - 1;
+    }
+
+    // ... otherwise, if the spatial source model has changed then update
+    // the DRM cache
+    else {
+
+        // Check if one of the source parameters has changed
+        bool changed = (m_pars[index].size() != source.model()->size());
+        if (!changed) {
+            for (int i = 0; i < source.model()->size(); ++i) {
+                if (m_pars[index][i] != (*(source.model()))[i].value()) {
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
+        // If model has changed then recompute it
+        if (changed) {
+
+            // Setup sky model for DRM computation
+            GModelSky model(*(source.model()), GModelSpectralConst());
+
+            // Compute DRM
+            const_cast<GCOMObservation*>(this)->m_drms[index].compute_drm((*this), model);
+
+            // Store new model parameters in cache
+            for (int i = 0; i < source.model()->size(); ++i) {
+                const_cast<GCOMObservation*>(this)->m_pars[index][i] =
+                    (*(source.model()))[i].value();
+            }
+
+        } // endif: source parameter(s) changed
+
+    } // endelse: spatial source model has changed
+
+    // Return reference to DRM cube
+    return (m_drms[index]);
+}
+
+
+/***********************************************************************//**
  * @brief Print observation information
  *
  * @param[in] chatter Chattiness.
@@ -699,6 +765,10 @@ void GCOMObservation::init_members(void)
     m_tim.clear();
     m_oads.clear();
 
+    // Initialise members for response cache
+    m_pars.clear();
+    m_drms.clear();
+
     // Return
     return;
 }
@@ -735,6 +805,10 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_oadnames = obs.m_oadnames;
     m_tim      = obs.m_tim;
     m_oads     = obs.m_oads;
+
+    // Copy members for response cache
+    m_pars = obs.m_pars;
+    m_drms = obs.m_drms;
 
     // Return
     return;
@@ -917,6 +991,56 @@ void GCOMObservation::load_drx(const GFilename& drxname)
 
     // Store DRX filename
     m_drxname = drxname;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Add DRM cube to observation response cache
+ *
+ * @param[in] source Source.
+ *
+ * @exception GCOMObservation::add_drm
+ *            No event cube specified.
+ *
+ * Adds a DRM cube based on the given source to the observation response
+ * cache.
+ ***************************************************************************/
+void GCOMObservation::add_drm(const GSource& source)
+{
+    // Get pointer on COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(m_events);
+    if (cube == NULL) {
+        std::string cls = std::string(typeid(m_events).name());
+        std::string msg = "Events of type \""+cls+"\" is not a COMPTEL event "
+                          "cube. Please specify a COMPTEL event cube when "
+                          "using this method.";
+        throw GException::invalid_argument(G_ADD_DRM, msg);
+    }
+
+    // Initialise DRM cube based on DRE cube
+    GCOMDri drm = cube->dre();
+
+    // Setup sky model for DRM computation
+    GModelSky model(*(source.model()), GModelSpectralConst());
+
+    // Compute DRM
+    drm.compute_drm((*this), model);
+
+    // Set model name
+    drm.name(source.name());
+
+    // Push model on stack
+    m_drms.push_back(drm);
+
+    // Push model parameters on stack
+    std::vector<double> pars;
+    for (int i = 0; i < source.model()->size(); ++i) {
+        pars.push_back((*(source.model()))[i].value());
+    }
+    m_pars.push_back(pars);
 
     // Return
     return;

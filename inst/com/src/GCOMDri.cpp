@@ -33,17 +33,25 @@
 #include "GWcs.hpp"
 #include "GFits.hpp"
 #include "GFitsImage.hpp"
+#include "GModelSky.hpp"
+#include "GModelSpatial.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GCOMDri.hpp"
 #include "GCOMOad.hpp"
 #include "GCOMOads.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMStatus.hpp"
+#include "GCOMObservation.hpp"
 #include "GCOMEventList.hpp"
 #include "GCOMSelection.hpp"
 #include "GCOMSupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_DRE    "GCOMDri::dre(GCOMEventList&, GCOMOads&, GCOMTim&, double&)"
+#define G_COMPUTE_DRE               "GCOMDri::compute_dre(GCOMObservation&, "\
+                                                   "GCOMSelection&, double&)"
+#define G_COMPUTE_DRM       "GCOMDri::compute_drm(GCOMObservation&, GModel&)"
+#define G_COMPUTE_DRE_PTSRC   "GCOMDri::compute_drm_ptsrc(GCOMObservation&, "\
+                                                                "GModelSky&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -239,23 +247,18 @@ GCOMDri* GCOMDri::clone(void) const
 /***********************************************************************//**
  * @brief Compute event cube
  *
- * @param[in] events Events list.
- * @param[in] oads Orbit Aspect Data.
- * @param[in] tim Good Time Intervals.
+ * @param[in] obs COMPTEL observation.
  * @param[in] select Selection set.
- * @param[in] zeta Minimum Earth horizon - Phibar cut (deg).
+ * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  *
  * @exception GException::invalid_argument
  *            DRE cube has a non-positive Phibar bin size.
  *
- * Compute DRE event cube from event list (EVP), Good Time Intervals (TIM)
- * and Orbit Aspect Data (OAD).
+ * Compute DRE event cube for a COMPTEL observation.
  ***************************************************************************/
-void GCOMDri::compute_dre(const GCOMEventList& events,
-                          const GCOMOads&      oads,
-                          const GCOMTim&       tim,
-                          const GCOMSelection& select,
-                          const double&        zeta)
+void GCOMDri::compute_dre(const GCOMObservation& obs,
+                          const GCOMSelection&   select,
+                          const double&          zetamin)
 {
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRE)
@@ -263,11 +266,19 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
     std::cout << "====================" << std::endl;
     #endif
 
+    // Check if observation contains a COMPTEL event list
+    const GCOMEventList* events = dynamic_cast<const GCOMEventList*>(obs.events());
+    if (events == NULL) {
+        std::string msg = "No event list found in COMPTEL observation. Please "
+                          "specify an observation that contains an event list.";
+        throw GException::invalid_argument(G_COMPUTE_DRE, msg);
+    }
+
     // Check for positive Phibar bin size
     if (m_phibin <= 0.0) {
         std::string msg = "DRE cube has a non-positive Phibar bin size. Please "
                           "specify a DRE cube with a positive Phibar bin size.";
-        throw GException::invalid_argument(G_DRE, msg);
+        throw GException::invalid_argument(G_COMPUTE_DRE, msg);
     }
 
     // Initialise event counter
@@ -298,21 +309,19 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
     int num_processed             = 0;
 
     // Set all DRE bins to zero
-    for (int i = 0; i < size(); ++i) {
-        (*this)[i] = 0.0;
-    }
+    init_cube();
 
     // Signal that loop should be terminated
     bool terminate = false;
 
     // Loop over Orbit Aspect Data
-    for (int i_oad = 0; i_oad < oads.size(); ++i_oad) {
+    for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
         // Get reference to Orbit Aspect Data of superpacket
-        const GCOMOad &oad = oads[i_oad];
+        const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, tim)) {
+        if (!use_superpacket(oad, obs.tim())) {
             continue;
         }
 
@@ -324,10 +333,10 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
 
         // Collect all events within superpacket. Break if the end
         // of the event list was reached.
-        for (; i_evt < events.size(); ++i_evt) {
+        for (; i_evt < events->size(); ++i_evt) {
 
             // Get pointer to event
-            const GCOMEventAtom* event = events[i_evt];
+            const GCOMEventAtom* event = (*events)[i_evt];
 
             // Break loop if the end of the superpacket was reached
             if (event->time() > oad.tstop()) {
@@ -415,13 +424,13 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
                                   "computed from Orbit Aspect Data ("+
                                   gammalib::str(eha)+" deg). Use the EVP "
                                   "value.";
-                gammalib::warning(G_DRE, msg);
+                gammalib::warning(G_COMPUTE_DRE, msg);
             }
             #endif
 
             // Check for Earth horizon angle. There is a constant EHA limit
             // over a Phibar layer to be compliant with the DRG.
-            double ehamin = double(iphibar) * m_phibin + zeta;
+            double ehamin = double(iphibar) * m_phibin + zetamin;
             if (event->eha() < ehamin) {
                 num_eha_too_small++;
                 continue;
@@ -447,7 +456,7 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
         } // endfor: collected events
 
         // Break if termination was signalled or if there are no more events
-        if (terminate || i_evt >= events.size()) {
+        if (terminate || i_evt >= events->size()) {
             break;
         }
 
@@ -488,18 +497,15 @@ void GCOMDri::compute_dre(const GCOMEventList& events,
 /***********************************************************************//**
  * @brief Compute geometry cube
  *
- * @param[in] oads Orbit Aspect Data.
- * @param[in] tim Good Time Intervals.
- * @param[in] select Selection set (not used so gar).
- * @param[in] zeta Minimum Earth horizon - Phibar cut (deg).
+ * @param[in] obs COMPTEL observation.
+ * @param[in] select Selection set (not used so far).
+ * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  *
- * Compute DRG cube from Orbit Aspect Data (OAD) and Good Time Intervals
- * (TIM).
+ * Compute DRG cube for a COMPTEL observation.
  ***************************************************************************/
-void GCOMDri::compute_drg(const GCOMOads&      oads,
-                          const GCOMTim&       tim,
-                          const GCOMSelection& select,
-                          const double&        zeta)
+void GCOMDri::compute_drg(const GCOMObservation& obs,
+                          const GCOMSelection&   select,
+                          const double&          zetamin)
 {
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRG)
@@ -517,18 +523,16 @@ void GCOMDri::compute_drg(const GCOMOads&      oads,
     select.init_statistics();
 
     // Set all DRG bins to zero
-    for (int i = 0; i < size(); ++i) {
-        (*this)[i] = 0.0;
-    }
+    init_cube();
 
     // Loop over Orbit Aspect Data
-    for (int i_oad = 0; i_oad < oads.size(); ++i_oad) {
+    for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
         // Get reference to Orbit Aspect Data of superpacket
-        const GCOMOad &oad = oads[i_oad];
+        const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, tim)) {
+        if (!use_superpacket(oad, obs.tim())) {
             continue;
         }
 
@@ -567,7 +571,7 @@ void GCOMDri::compute_drg(const GCOMOads&      oads,
             for (int iphibar = 0; iphibar < nphibar(); ++iphibar) {
 
                 // Compute minimum Earth horizon angle for Phibar layer
-                double ehamin = double(iphibar) * m_phibin + zeta;
+                double ehamin = double(iphibar) * m_phibin + zetamin;
 
                 // Add up geometry if the Earth horizon angle is equal or
                 // larger than the minimum
@@ -613,11 +617,11 @@ void GCOMDri::compute_drg(const GCOMOads&      oads,
 /***********************************************************************//**
  * @brief Compute DRX exposure map
  *
- * @param[in] oads Orbit Aspect Data.
- * @param[in] tim Good Time Intervals.
+ * @param[in] obs COMPTEL observation.
  *
- * Compute DRX exposure map from Orbit Aspect Data (OAD) and Good Time
- * Intervals (TIM).
+ * Compute DRG cube for a COMPTEL observation.
+ *
+ * Compute DRX exposure map for a COMPTEL observation.
  *
  * For a given superpacket, the exposure is computed using
  *
@@ -633,7 +637,7 @@ void GCOMDri::compute_drg(const GCOMOads&      oads,
  * \f$r_1=13.8\f$ cm is the radius of a D1 module, and
  * \f$\theta_c\f$ is the zenith angle in COMPTEL coordinates.
  ***************************************************************************/
-void GCOMDri::compute_drx(const GCOMOads& oads, const GCOMTim& tim)
+void GCOMDri::compute_drx(const GCOMObservation& obs)
 {
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRX)
@@ -648,18 +652,16 @@ void GCOMDri::compute_drx(const GCOMOads& oads, const GCOMTim& tim)
     init_statistics();
 
     // Set all DRX bins to zero
-    for (int i = 0; i < size(); ++i) {
-        (*this)[i] = 0.0;
-    }
+    init_cube();
 
     // Loop over Orbit Aspect Data
-    for (int i_oad = 0; i_oad < oads.size(); ++i_oad) {
+    for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
         // Get reference to Orbit Aspect Data of superpacket
-        const GCOMOad &oad = oads[i_oad];
+        const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, tim)) {
+        if (!use_superpacket(oad, obs.tim())) {
             continue;
         }
 
@@ -726,6 +728,55 @@ void GCOMDri::compute_drx(const GCOMOads& oads, const GCOMTim& tim)
 
 
 /***********************************************************************//**
+ * @brief Compute DRM model
+ *
+ * @param[in] obs COMPTEL observation.
+ * @param[in] model Model.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is only implemented for a point source sky model.
+ *
+ * Compute DRM model cube for a COMPTEL observation.
+ ***************************************************************************/
+void GCOMDri::compute_drm(const GCOMObservation& obs,
+                          const GModel&          model)
+{
+    // Check if model is a sky model
+    const GModelSky* skymodel = dynamic_cast<const GModelSky*>(&model);
+    if (skymodel == NULL) {
+        std::string msg = "Method is only implement for sky models.";
+        throw GException::feature_not_implemented(G_COMPUTE_DRM, msg);
+    }
+
+    // Extract spatial model component
+    const GModelSpatial* spatial = skymodel->spatial();
+
+    // Select computation depending on the spatial model type
+    switch (spatial->code()) {
+        case GMODEL_SPATIAL_POINT_SOURCE:
+            {
+            compute_drm_ptsrc(obs, *skymodel);
+            }
+            break;
+        case GMODEL_SPATIAL_RADIAL:
+        case GMODEL_SPATIAL_ELLIPTICAL:
+        case GMODEL_SPATIAL_DIFFUSE:
+            {
+            std::string msg = "Method is not yet implemented for spatial model "
+                              "type \""+spatial->type()+"\".";
+            throw GException::feature_not_implemented(G_COMPUTE_DRM, msg);
+            }
+            break;
+        default:
+            break;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load COMPTEL Data Space from DRI FITS file
  *
  * @param[in] filename DRI FITS file name.
@@ -743,7 +794,7 @@ void GCOMDri::load(const GFilename& filename)
 
     // Close FITS file
     fits.close();
-    
+
     // Return
     return;
 }
@@ -768,7 +819,7 @@ void GCOMDri::save(const GFilename& filename, const bool& clobber) const
 
     // Close FITS file
     fits.close();
-    
+
     // Return
     return;
 }
@@ -909,6 +960,7 @@ std::string GCOMDri::print(const GChatter& chatter) const
 void GCOMDri::init_members(void)
 {
     // Initialise members
+    m_name.clear();
     m_dri.clear();
     m_ebounds.clear();
     m_gti.clear();
@@ -917,6 +969,10 @@ void GCOMDri::init_members(void)
 
     // Initialise statistics
     init_statistics();
+
+    // Initialise selection parameters
+    m_selection.clear();
+    m_zetamin = -90.0;   // Signals no selection
 
     // Return
     return;
@@ -931,6 +987,7 @@ void GCOMDri::init_members(void)
 void GCOMDri::copy_members(const GCOMDri& dri)
 {
     // Copy members
+    m_name    = dri.m_name;
     m_dri     = dri.m_dri;
     m_ebounds = dri.m_ebounds;
     m_gti     = dri.m_gti;
@@ -944,6 +1001,10 @@ void GCOMDri::copy_members(const GCOMDri& dri)
     m_num_used_superpackets    = dri.m_num_used_superpackets;
     m_num_skipped_superpackets = dri.m_num_skipped_superpackets;
 
+    // Copy selection parameters
+    m_selection = dri.m_selection;
+    m_zetamin   = dri.m_zetamin;
+
     // Return
     return;
 }
@@ -954,6 +1015,23 @@ void GCOMDri::copy_members(const GCOMDri& dri)
  ***************************************************************************/
 void GCOMDri::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise DRI cube
+ *
+ * Sets all DRI cube bins to zero.
+ ***************************************************************************/
+void GCOMDri::init_cube(void)
+{
+    // Set all cube bins to zero
+    for (int i = 0; i < size(); ++i) {
+        (*this)[i] = 0.0;
+    }
+
     // Return
     return;
 }
@@ -1082,6 +1160,17 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
         m_ebounds.clear();
     }
 
+    // Optionally read superpacket statistics
+    if (hdu->has_card("NSPINP")) {
+        m_num_superpackets = hdu->integer("NSPINP");
+    }
+    if (hdu->has_card("NSPUSE")) {
+        m_num_used_superpackets = hdu->integer("NSPUSE");
+    }
+    if (hdu->has_card("NSPSKP")) {
+        m_num_skipped_superpackets = hdu->integer("NSPSKP");
+    }
+
     // Return
     return;
 }
@@ -1193,7 +1282,7 @@ double GCOMDri::compute_geometry(const int&        tjd,
 
     // Loop over all D1 modules
     for (int id1 = 0; id1 < 7; ++id1) {
-    
+
         // Skip D1 module if it's off
         if (status.d1status(tjd, id1+1) != 1) {
             continue;
@@ -1263,4 +1352,122 @@ double GCOMDri::compute_geometry(const int&        tjd,
 
     // Return geometry factor
     return geometry;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute DRM model for a point source
+ *
+ * @param[in] obs COMPTEL observation.
+ * @param[in] model Sky model.
+ *
+ * @exception GException::invalid_argument
+ *            Model is not a point source model.
+ *
+ * Compute point source DRM model cube for a COMPTEL observation.
+ ***************************************************************************/
+void GCOMDri::compute_drm_ptsrc(const GCOMObservation& obs,
+                                const GModelSky&       model)
+{
+    // Extract source direction from spatial model component
+    const GModelSpatialPointSource* source =
+        dynamic_cast<const GModelSpatialPointSource*>(model.spatial());
+    if (source == NULL) {
+        std::string msg = "Spatial component of model \""+model.name()+"\" "
+                          "is not a point source.";
+        throw GException::invalid_argument(G_COMPUTE_DRE_PTSRC, msg);
+    }
+    const GSkyDir& srcDir = source->dir();
+
+    // Extract response
+    const GCOMResponse* rsp = obs.response();
+
+    // Set all DRM cube bins to zero
+    init_cube();
+
+    // Get DRX value (units: cm^2 sec)
+    double drx = obs.drx()(srcDir);
+
+    // Get ontime
+    double ontime = obs.ontime(); // sec
+
+    // Get deadtime correction
+    double deadc = obs.deadc(GTime());
+
+    // Compute multiplicate IAQ normalisation
+    double norm = drx * deadc / ontime;
+
+    // Loop over all scatter angle pixels
+    for (int index = 0; index < m_dri.npix(); ++index) {
+
+        // Get sky direction of pixel
+        GSkyDir obsDir = m_dri.inx2dir(index);
+
+        // Compute angle between true photon arrival direction and scatter
+        // direction (Chi,Psi)
+        double phigeo = srcDir.dist_deg(obsDir);
+
+        // Get Phigeo interpolation factor
+        double phirat  = phigeo / rsp->m_phigeo_bin_size; // 0.5 at bin centre
+        int    iphigeo = int(phirat);                     // index into which Phigeo falls
+        double eps     = phirat - iphigeo - 0.5;          // 0.0 at bin centre
+
+        // Continue only if Phigeo is inside IAQ
+        if (iphigeo < rsp->m_phigeo_bins) {
+
+            // Initialise IAQ pixel index
+            int i = iphigeo;
+
+            // Interpolate towards left
+            if (eps < 0.0) {
+
+                // Not the first bin
+                if (iphigeo > 0) {
+                    for (int iphibar = 0; iphibar < nphibar(); ++iphibar,
+                         i += rsp->m_phigeo_bins) {
+                        double iaq = obs.drg()(index, iphibar);
+                        iaq       *= (1.0 + eps) * rsp->m_iaq[i] - eps * rsp->m_iaq[i-1];
+                        m_dri(index, iphibar) = iaq * norm;
+                    }
+                }
+                else {
+                    for (int iphibar = 0; iphibar < nphibar(); ++iphibar,
+                         i += rsp->m_phigeo_bins) {
+                        double iaq = obs.drg()(index, iphibar);
+                        iaq       *= (1.0 - eps) * rsp->m_iaq[i] + eps * rsp->m_iaq[i+1];
+                        m_dri(index, iphibar) = iaq * norm;
+                    }
+                }
+
+            }
+
+            // Interpolate towards right
+            else {
+
+                // Not the last IAQ bin
+                if (iphigeo < rsp->m_phigeo_bins-1) {
+                    for (int iphibar = 0; iphibar < nphibar(); ++iphibar,
+                         i += rsp->m_phigeo_bins) {
+                        double iaq = obs.drg()(index, iphibar);
+                        iaq       *= (1.0 - eps) * rsp->m_iaq[i] + eps * rsp->m_iaq[i+1];
+                        m_dri(index, iphibar) = iaq * norm;
+                    }
+                }
+                else {
+                    for (int iphibar = 0; iphibar < nphibar(); ++iphibar,
+                         i += rsp->m_phigeo_bins) {
+                        double iaq = obs.drg()(index, iphibar);
+                        iaq       *= (1.0 + eps) * rsp->m_iaq[i] - eps * rsp->m_iaq[i-1];
+                        m_dri(index, iphibar) = iaq * norm;
+                    }
+                }
+
+            } // endfor: looped over all Compton scatter angles
+
+        } // endif: Phigeo was inside IAQ
+
+    } // endfor: looped over all scatter angle pixels
+
+    // Return
+    return;
 }

@@ -39,11 +39,12 @@
 class GFilename;
 class GFits;
 class GFitsImage;
+class GModel;
+class GModelSky;
 class GCOMOad;
-class GCOMOads;
 class GCOMTim;
 class GCOMStatus;
-class GCOMEventList;
+class GCOMObservation;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -80,38 +81,41 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int             size(void) const;
-    int             nchi(void) const;
-    int             npsi(void) const;
-    int             nphibar(void) const;
-    const GSkyMap&  map(void) const;
-    const GEbounds& ebounds(void) const;
-    void            ebounds(const GEbounds&);
-    const GGti&     gti(void) const;
-    void            gti(const GGti& gti);
-    const double&   phimin(void) const;
-    const double&   phibin(void) const;
-    void            compute_dre(const GCOMEventList& events,
-                                const GCOMOads&      oads,
-                                const GCOMTim&       tim,
-                                const GCOMSelection& select = GCOMSelection(),
-                                const double&        zeta = 5.0);
-    void            compute_drg(const GCOMOads&      oads,
-                                const GCOMTim&       tim,
-                                const GCOMSelection& select = GCOMSelection(),
-                                const double&        zeta = 5.0);
-    void            compute_drx(const GCOMOads& oads,
-                                const GCOMTim&  tim);
-    void            load(const GFilename& filename);
-    void            save(const GFilename& filename, const bool& clobber = false) const;
-    void            read(const GFitsImage& image);
-    void            write(GFits& fits, const std::string& extname = "") const;
+    int                size(void) const;
+    int                nchi(void) const;
+    int                npsi(void) const;
+    int                nphibar(void) const;
+    const GSkyMap&     map(void) const;
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    const GEbounds&    ebounds(void) const;
+    void               ebounds(const GEbounds&);
+    const GGti&        gti(void) const;
+    void               gti(const GGti& gti);
+    const double&      phimin(void) const;
+    const double&      phibin(void) const;
+    void               compute_dre(const GCOMObservation& obs,
+                                   const GCOMSelection&   select = GCOMSelection(),
+                                   const double&          zetamin = 5.0);
+    void               compute_drg(const GCOMObservation& obs,
+                                   const GCOMSelection&   select = GCOMSelection(),
+                                   const double&          zetamin = 5.0);
+    void               compute_drx(const GCOMObservation& obs);
+    void               compute_drm(const GCOMObservation& obs,
+                                   const GModel&          model);
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    void               read(const GFitsImage& image);
+    void               write(GFits&             fits,
+                             const std::string& extname = "") const;
 
 protected:
     // Protected methods
     void   init_members(void);
     void   copy_members(const GCOMDri& dri);
     void   free_members(void);
+    void   init_cube(void);
     void   init_statistics(void);
     bool   use_superpacket(const GCOMOad &oad, const GCOMTim& tim);
     void   read_attributes(const GFitsHDU* hdu);
@@ -119,13 +123,16 @@ protected:
     double compute_geometry(const int& tjd, const double&     theta,
                                             const double&     phi,
                                             const GCOMStatus& status) const;
+    void   compute_drm_ptsrc(const GCOMObservation& obs,
+                             const GModelSky&       model);
 
     // Protected members
-    GSkyMap  m_dri;      //!< Data cube
-    GEbounds m_ebounds;  //!< Energy boundaries of data cube
-    GGti     m_gti;      //!< Good Time Intervals of data cube
-    double   m_phimin;   //!< Phibar minimum (deg)
-    double   m_phibin;   //!< Phibar binsize (deg)
+    std::string m_name;     //!< Data cube name
+    GSkyMap     m_dri;      //!< Data cube
+    GEbounds    m_ebounds;  //!< Energy boundaries of data cube
+    GGti        m_gti;      //!< Good Time Intervals of data cube
+    double      m_phimin;   //!< Phibar minimum (deg)
+    double      m_phibin;   //!< Phibar binsize (deg)
 
     // Computation statistics
     GTime m_tstart;                   //!< Selection start time
@@ -133,6 +140,10 @@ protected:
     int   m_num_superpackets;         //!< Number of superpackets
     int   m_num_used_superpackets;    //!< Number of used superpackets
     int   m_num_skipped_superpackets; //!< Number of skipped superpackets
+
+    // Selection parameters
+    GCOMSelection m_selection;        //!< Selection parameters
+    double        m_zetamin;          //!< Minimum zeta angle
 };
 
 
@@ -231,6 +242,33 @@ inline
 const GSkyMap& GCOMDri::map(void) const
 {
     return (m_dri);
+}
+
+
+/***********************************************************************//**
+ * @brief Return DRI cube name
+ *
+ * @return DRI cube name.
+ ***************************************************************************/
+inline
+const std::string& GCOMDri::name(void) const
+{
+    return (m_name);
+}
+
+
+/***********************************************************************//**
+ * @brief Set DRI cube name
+ *
+ * @param[in] name DRI cube name.
+ *
+ * Sets the name of the DRI cube.
+ ***************************************************************************/
+inline
+void GCOMDri::name(const std::string& name)
+{
+    m_name = name;
+    return;
 }
 
 

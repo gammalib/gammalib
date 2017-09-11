@@ -52,32 +52,34 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
-    int             size(void) const;
-    int             nchi(void) const;
-    int             npsi(void) const;
-    int             nphibar(void) const;
-    const GSkyMap&  map(void) const;
-    const GEbounds& ebounds(void) const;
-    void            ebounds(const GEbounds&);
-    const GGti&     gti(void) const;
-    void            gti(const GGti& gti);
-    const double&   phimin(void) const;
-    const double&   phibin(void) const;
-    void            compute_dre(const GCOMEventList& events,
-                                const GCOMOads&      oads,
-                                const GCOMTim&       tim,
-                                const GCOMSelection& select = GCOMSelection(),
-                                const double&        zeta = 5.0);
-    void            compute_drg(const GCOMOads&      oads,
-                                const GCOMTim&       tim,
-                                const GCOMSelection& select = GCOMSelection(),
-                                const double&        zeta = 5.0);
-    void            compute_drx(const GCOMOads& oads,
-                                const GCOMTim&  tim);
-    void            load(const GFilename& filename);
-    void            save(const GFilename& filename, const bool& clobber = false) const;
-    void            read(const GFitsImage& image);
-    void            write(GFits& fits, const std::string& extname = "") const;
+    int                size(void) const;
+    int                nchi(void) const;
+    int                npsi(void) const;
+    int                nphibar(void) const;
+    const GSkyMap&     map(void) const;
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    const GEbounds&    ebounds(void) const;
+    void               ebounds(const GEbounds&);
+    const GGti&        gti(void) const;
+    void               gti(const GGti& gti);
+    const double&      phimin(void) const;
+    const double&      phibin(void) const;
+    void               compute_dre(const GCOMObservation& obs,
+                                   const GCOMSelection&   select = GCOMSelection(),
+                                   const double&          zetamin = 5.0);
+    void               compute_drg(const GCOMObservation& obs,
+                                   const GCOMSelection&   select = GCOMSelection(),
+                                   const double&          zetamin = 5.0);
+    void               compute_drx(const GCOMObservation& obs);
+    void               compute_drm(const GCOMObservation& obs,
+                                   const GModel&          model);
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    void               read(const GFitsImage& image);
+    void               write(GFits&             fits,
+                             const std::string& extname = "") const;
 };
 
 

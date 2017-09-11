@@ -32,11 +32,13 @@
 #include "GObservation.hpp"
 #include "GTime.hpp"
 #include "GFilename.hpp"
+#include "GSource.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
 #include "GCOMResponse.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMOads.hpp"
+#include "GCOMDri.hpp"
 #include "GCOMEventCube.hpp"
 #include "GCOMEventList.hpp"
 
@@ -112,6 +114,7 @@ public:
     const GSkyMap&  drb(void) const;
     const GSkyMap&  drg(void) const;
     const GSkyMap&  drx(void) const;
+    const GCOMDri&  drm(const GSource& source) const;
     const GCOMTim&  tim(void) const;
     const GCOMOads& oads(void) const;
 
@@ -124,6 +127,7 @@ protected:
     void load_drb(const GFilename& drbname);
     void load_drg(const GFilename& drgname);
     void load_drx(const GFilename& drxname);
+    void add_drm(const GSource& source);
     bool check_map(const GSkyMap& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
@@ -152,6 +156,10 @@ protected:
     std::vector<GFilename> m_oadnames;   //!< OAD filenames
     GCOMTim                m_tim;        //!< COMPTEL Good Time Intervals
     GCOMOads               m_oads;       //!< Orbit Aspect Data
+
+    // Protected members for response cache
+    std::vector<std::vector<double> > m_pars; //!< Parameters for model cubes
+    std::vector<GCOMDri>              m_drms; //!< Convolved model cubes
 };
 
 

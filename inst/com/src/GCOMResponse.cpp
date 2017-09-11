@@ -57,6 +57,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_USE_DRM_CUBE
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -228,7 +229,7 @@ GCOMResponse* GCOMResponse::clone(void) const
  * @param[in] event Observed event.
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
- * @return Instrument response function (cm2 sr-1)
+ * @return Instrument response function (cm^2 sr^-1)
  *
  * @exception GException::invalid_argument
  *            Observation is not a COMPTEL observation.
@@ -314,10 +315,10 @@ double GCOMResponse::irf(const GEvent&       event,
         }
     }
 
-    // Get DRG value (units: cm2)
+    // Get DRG value (units: probability)
     double drg = observation->drg()(obsDir.dir(), iphibar);
 
-    // Get DRX value (units: sec)
+    // Get DRX value (units: cm^2 sec)
     double drx = observation->drx()(srcDir);
 
     // Get ontime
@@ -356,7 +357,16 @@ double GCOMResponse::irf(const GEvent&       event,
  * @param[in] obs Observation.
  * @return Instrument response.
  *
+ * @exception GException::invalid_argument
+ *            Invalid observation or event type specified.
+ * @exception GException::feature_not_implemented
+ *            Computation for specified spatial model not implemented.
+ *
  * Returns the instrument response for a given event, source and observation.
+ * If all spatial model parameters are fixed a DRM cube stored in the COMPTEL
+ * observation is used. The computation of this cube is handled by the
+ * GCOMObservation::drm() method that also will update the cube in case that
+ * any of the parameters changes.
  ***************************************************************************/
 double GCOMResponse::irf(const GEvent&       event,
                          const GSource&      source,
@@ -365,28 +375,75 @@ double GCOMResponse::irf(const GEvent&       event,
     // Initialise IRF value
     double irf = 0.0;
 
-    // Select IRF depending on the spatial model type
-    switch (source.model()->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            {
-            const GModelSpatialPointSource* src =
-                  static_cast<const GModelSpatialPointSource*>(source.model());
-            GPhoton photon(src->dir(), source.energy(), source.time());
-            irf = this->irf(event, photon, obs);
-            }
+    // Determine if all spatial parameters are fixed
+    #if defined(G_USE_DRM_CUBE)
+    bool fixed = true;
+    for (int i = 0; i < source.model()->size(); ++i) {
+        if ((*(source.model()))[i].is_free()) {
+            fixed = false;
             break;
-        case GMODEL_SPATIAL_RADIAL:
-        case GMODEL_SPATIAL_ELLIPTICAL:
-        case GMODEL_SPATIAL_DIFFUSE:
-            {
-            std::string msg = "Response computation not yet implemented for "
-                              "spatial model type \""+source.model()->type()+"\".";
-            throw GException::feature_not_implemented(G_IRF, msg);
-            }
-            break;
-        default:
-            break;
+        }
     }
+
+    // If all parameters are fixed then use the DRM cache
+    if (fixed) {
+
+        // Get pointer to COMPTEL observation
+        const GCOMObservation* comobs = dynamic_cast<const GCOMObservation*>(&obs);
+        if (comobs == NULL) {
+            std::string cls = std::string(typeid(&obs).name());
+            std::string msg = "Observation of type \""+cls+"\" is not a "
+                              "COMPTEL observation. Please specify a COMPTEL "
+                              "observation as argument.";
+            throw GException::invalid_argument(G_IRF, msg);
+        }
+
+        // Get pointer to COMPTEL event bin
+        if (!event.is_bin()) {
+            std::string msg = "The current event is not a COMPTEL event bin. "
+                              "This method only works on binned COMPTEL data. "
+                              "Please make sure that a COMPTEL observation "
+                              "containing binned data is provided.";
+            throw GException::invalid_argument(G_IRF, msg);
+        }
+        const GCOMEventBin* bin = static_cast<const GCOMEventBin*>(&event);
+
+        // Get IRF value
+        irf = comobs->drm(source)[bin->index()];
+
+    } // endif: all spatial parameters were fixed
+
+    // ... otherwise compute IRF directly
+    else {
+    #endif
+
+        // Select IRF depending on the spatial model type
+        switch (source.model()->code()) {
+            case GMODEL_SPATIAL_POINT_SOURCE:
+                {
+                const GModelSpatialPointSource* src =
+                    static_cast<const GModelSpatialPointSource*>(source.model());
+                GPhoton photon(src->dir(), source.energy(), source.time());
+                irf = this->irf(event, photon, obs);
+                }
+                break;
+            case GMODEL_SPATIAL_RADIAL:
+            case GMODEL_SPATIAL_ELLIPTICAL:
+            case GMODEL_SPATIAL_DIFFUSE:
+                {
+                std::string msg = "Response computation not yet implemented "
+                                  "for spatial model type \""+
+                                  source.model()->type()+"\".";
+                throw GException::feature_not_implemented(G_IRF, msg);
+                }
+                break;
+            default:
+                break;
+        }
+
+    #if defined(G_USE_DRM_CUBE)
+    } // endelse: used IRF computation directly
+    #endif
 
     // Return IRF value
     return irf;

@@ -79,6 +79,7 @@ public:
     const GSkyMap&  drb(void) const;
     const GSkyMap&  drg(void) const;
     const GSkyMap&  drx(void) const;
+    const GCOMDri&  drm(const GSource& source) const;
     const GCOMTim&  tim(void) const;
     const GCOMOads& oads(void) const;
 };

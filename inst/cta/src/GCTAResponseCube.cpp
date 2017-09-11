@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.cpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1160,7 +1160,7 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
         throw GException::invalid_value(G_IRF_PTSRC, msg);
     }
     const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-    
+
     // Determine angular separation between true and measured photon
     // direction in radians
     double delta = bin->dir().dir().dist(srcDir);
@@ -1296,7 +1296,7 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
             irf *= exposure().deadc();
 
         } // endif: exposure was positive
-        
+
     } // endif: we were sufficiently close and livetime >0
 
     // Compile option: Check for NaN/Inf
@@ -1438,7 +1438,7 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
                           "This method only works on binned CTA data. Please "
                           "make sure that a CTA observation containing binned "
                           "CTA data is provided.";
-        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+        throw GException::invalid_argument(G_IRF_DIFFUSE, msg);
     }
     const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
 
@@ -1449,7 +1449,7 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     GCTACubeSourceDiffuse* cache(NULL);
     int index = cache_index(source.name());
     if (index == -1) {
-    
+
         // No cache entry was found, thus allocate and initialise a new one
         cache = new GCTACubeSourceDiffuse;
         cache->set(source.name(), *source.model(), obs);
@@ -1457,7 +1457,7 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
 
     } // endif: no cache entry was found
     else {
-    
+
         // Check that the cache entry is of the expected type
         if (m_cache[index]->code() != GCTA_CUBE_SOURCE_DIFFUSE) {
             std::string msg = "Cached model \""+source.name()+"\" is not "

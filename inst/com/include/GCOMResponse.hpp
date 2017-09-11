@@ -51,6 +51,9 @@ class GFitsImage;
  ***************************************************************************/
 class GCOMResponse : public GResponse {
 
+    // Friend classes
+    friend class GCOMDri;
+
 public:
     // Constructors and destructors
     GCOMResponse(void);

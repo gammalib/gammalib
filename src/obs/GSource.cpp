@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GSource.cpp - Source class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,7 +55,7 @@ GSource::GSource(void)
 {
     // Initialise private members
     init_members();
-  
+
     // Return
     return;
 }
@@ -73,7 +73,7 @@ GSource::GSource(const std::string& name,
                  GModelSpatial*     model,
                  const GEnergy&     energy,
                  const GTime&       time)
-{ 
+{
     // Initialise private members
     init_members();
 
@@ -94,7 +94,7 @@ GSource::GSource(const std::string& name,
  * @param[in] src Source.
  ***************************************************************************/
 GSource::GSource(const GSource& src)
-{ 
+{
     // Initialise private members
     init_members();
 
@@ -132,7 +132,7 @@ GSource::~GSource(void)
  * @return Source.
  ***************************************************************************/
 GSource& GSource::operator= (const GSource& src)
-{ 
+{
     // Execute only if object is not identical
     if (this != &src) {
 
@@ -146,7 +146,7 @@ GSource& GSource::operator= (const GSource& src)
         copy_members(src);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -168,7 +168,7 @@ void GSource::clear(void)
 
     // Initialise private members
     init_members();
-    
+
     // Return
     return; 
 }
@@ -189,7 +189,7 @@ GSource* GSource::clone(void) const
 /***********************************************************************//**
  * @brief Print source
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing source information
  ***************************************************************************/
 std::string GSource::print(const GChatter& chatter) const
@@ -231,7 +231,7 @@ void GSource::init_members(void)
     m_model = NULL;
     m_energy.clear();
     m_time.clear();
-  
+
     // Return
     return;
 }
@@ -249,7 +249,7 @@ void GSource::copy_members(const GSource& src)
     m_name   = src.m_name;
     m_energy = src.m_energy;
     m_time   = src.m_time;
-    
+
     // Return
     return;
 }
