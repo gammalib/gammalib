@@ -105,7 +105,7 @@ echo "===================================================="
 echo "Packaging DONE"
 echo " "
 echo "New binary packages are located in $PRODDIR"
-for package in $(find $PRODDIR -iname *.rpm ); do 
+for package in $(find $PRODDIR -iname '*.rpm' ); do 
      echo "rpm file : $package"
      echo "===================================================="
      rpm -qip $package
@@ -114,7 +114,7 @@ done
 echo "===================================================="
 echo " "
 echo "New source packages are located in $SPKGDIR"
-for package in $(find $SPKGDIR -iname *.rpm ); do
+for package in $(find $SPKGDIR -iname '*.rpm' ); do
      echo "rpm file : $package"
      echo "===================================================="
      rpm -qip $package
