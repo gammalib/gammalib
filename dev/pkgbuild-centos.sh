@@ -30,12 +30,12 @@
 # ====================================== #
 # Get GammaLib version from command line #
 # ====================================== #
-if [ $# -ne 2 ] ;  then
-    echo "Please specify GammaLib in the form 'x.y.z x86_64/i386'"
+if [ $# -ne 1 ] ;  then
+    echo "Please specify GammaLib in the form 'x.y.z'"
     exit 1
 fi
 VERSION=$1
-PLATFORM=$2
+PLATFORM=`uname -m`
 
 
 # ====== #
@@ -97,9 +97,9 @@ mv gammalib-*.tar.gz $SRCDIR/
 rpmbuild --target $PLATFORM -ba --define "_topdir $WRKDIR" $PACKNAME.spec -v
 
 
-# ======= #
-# Trailer #
-# ======= #
+# ============================== #
+# Copy package to root directory #
+# ============================== #
 echo " ===================================================="
 echo " Packaging DONE :"
 echo " New package is located at $PRODDIR"
@@ -107,6 +107,7 @@ for package in $(find $PRODDIR -iname *.rpm ); do
      echo " rpm file : $package"
      echo " ===================================================="
      echo "  "     
-     rpm -qip $package; 
+     rpm -qip $package
+     cp $package $PWD/
 done
 exit
