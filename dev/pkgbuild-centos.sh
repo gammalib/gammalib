@@ -172,8 +172,9 @@ mv gammalib-*.tar.gz $SRCDIR/
 # ==================== #
 # Build CentOS package #
 # ==================== #
-rpmbuild --target $PLATFORM -ba $WRKDIR/SPECS/$PACKNAME.spec -v
-
+#rpmbuild --target $PLATFORM -ba $WRKDIR/SPECS/$PACKNAME.spec -v
+#rpmbuild --target $PLATFORM -ba --buildroot $WRKDIR $PACKNAME.spec -v
+rpmbuild --target $PLATFORM -ba --define "_topdir $WRKDIR" $PACKNAME.spec -v
 
 # ==================================================== #
 # Sign package with an environment variable is set by the pass phrase during login
