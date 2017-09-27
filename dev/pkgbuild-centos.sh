@@ -51,20 +51,20 @@ RELEASE=1
 # ============== #
 # Set parameters #
 # ============== #
-WRKDIR=centos/rpmbuild
+WRKDIR=$PWD/rpm/rpmbuild
 SRCDIR=$WRKDIR/SOURCES
 PKGDIR=$WRKDIR/RPMS
 PRODDIR=$WRKDIR/RPMS/$PLATFORM
 #RPMFILE=$PRODDIR/$PACKAGE-$RELEASE-*$PLATFORM.rpm
-#LOGFILE=centos/pkg_build/pkg_build.log
-#LOGDEPILE=centos/pkg_build/pkg_dependencies_rpm.log
+#LOGFILE=rpm/pkg_build/pkg_build.log
+#LOGDEPILE=rpm/pkg_build/pkg_dependencies_rpm.log
 
 
 # ==================================================== #
 #  TODO : Create a secure RPM repository
 # ==================================================== #
 # Temporary solution, to be fixed
-YUMREPO=centos/YUM-REPO
+YUMREPO=$PWD/rpm/YUM-REPO
 
 # ======================= #
 # Clean package directory #
