@@ -49,9 +49,9 @@ echo " ================================================================= "
 #CFITSIO=cfitsio3410
 #NCURSES=ncurses-5.9
 #READLINE=readline-6.3
-CFITSIO=cfitsio
-NCURSES=ncurses
-READLINE=readline
+#CFITSIO=cfitsio
+#NCURSES=ncurses
+#READLINE=readline
 #
 PACKAGE=$PACKNAME-$VERSION
 RELEASE=1
@@ -70,21 +70,21 @@ RELEASE=1
 #
 #
 # SBN : Liste à fixer.
-TMPDIR=$HOME/usr
-WRKDIR=$HOME/rpmbuild
+#TMPDIR=$HOME/usr
+WRKDIR=centos/rpmbuild
 SRCDIR=$WRKDIR/SOURCES
 PKGDIR=$WRKDIR/RPMS
 PRODDIR=$WRKDIR/RPMS/$PLATFORM
 RPMFILE=$PRODDIR/$PACKAGE-$RELEASE-*$PLATFORM.rpm
 #
-LOGFILE=$HOME/pkg_build/pkg_build.log
-LOGDEPILE=$HOME/pkg_build/pkg_dependencies_rpm.log
+LOGFILE=centos/pkg_build/pkg_build.log
+LOGDEPILE=centos/pkg_build/pkg_dependencies_rpm.log
 
 # ==================================================== #
 #  TODO : Create a secure RPM repository
 # ==================================================== #
 # Temporary solution, to be fixed
-YUMREPO=$HOME/YUM-REPO
+YUMREPO=centos/YUM-REPO
 
 # ======================= #
 # Clean package directory #
@@ -94,33 +94,33 @@ rm -rf $WRKDIR
 # ========================= #
 # Clean temporary directory #
 # ========================= #
-rm -rf $TMPDIR
+#rm -rf $TMPDIR
 
 # ============================= #
 # Create package directory tree #
 # ============================= #
-mkdir -p $HOME/rpmbuild/{RPMS,SRPMS,BUILD,SOURCES,SPECS,tmp}
+mkdir -p $WRKDIR/{RPMS,SRPMS,BUILD,SOURCES,SPECS,tmp}
 
 # =============== #
 # Install ncurses #
 # =============== #
 # TODO : eventuellement fixer le numero de version du paquet
 # rpm -qa | grep ncurses || sudo yum install ncurses
-
-if ! rpm -qa | grep -q ncurses; then
-    echo "ncurses need to be installed"
-    sudo yum install ncurses
-    if ! rpm -qa | grep -q ncurses; then
-        echo "================================================================================================="
-        echo "ERROR : ncurses need to be installed manually"
-        echo "   "
-        echo "================================================================================================="
-        exit
-    fi
-fi
+#
+#if ! rpm -qa | grep -q ncurses; then
+#    echo "ncurses need to be installed"
+#    sudo yum install ncurses
+#    if ! rpm -qa | grep -q ncurses; then
+#        echo "================================================================================================="
+#        echo "ERROR : ncurses need to be installed manually"
+#        echo "   "
+#        echo "================================================================================================="
+#        exit
+#    fi
+#fi
 # Check ncurses version
-v=$(rpm --qf '%{VERSION}\n' -q ncurses)
-echo "ncurses $v checked"
+#v=$(rpm --qf '%{VERSION}\n' -q ncurses)
+#echo "ncurses $v checked"
 
 # ================ #
 # Install readline #
@@ -128,20 +128,20 @@ echo "ncurses $v checked"
 # TODO : eventuellement fixer le numero de version du paquet
 # rpm -qa | grep readline || sudo yum install readline
 
-if ! rpm -qa | grep -q readline; then
-    echo "readline need to be installed"
-    sudo yum install readline
-    if ! rpm -qa | grep -q readline; then
-        echo "================================================================================================="
-        echo "ERROR : readline need to be installed manually"
-        echo "   "
-        echo "================================================================================================="
-        exit
-    fi
-fi
+#if ! rpm -qa | grep -q readline; then
+#    echo "readline need to be installed"
+#    sudo yum install readline
+#    if ! rpm -qa | grep -q readline; then
+#        echo "================================================================================================="
+#        echo "ERROR : readline need to be installed manually"
+#        echo "   "
+#        echo "================================================================================================="
+#        exit
+#    fi
+#fi
 # Check readline version
-v=$(rpm --qf '%{VERSION}\n' -q readline)
-echo "readline $v checked"
+#v=$(rpm --qf '%{VERSION}\n' -q readline)
+#echo "readline $v checked"
 
 # =============== #
 # Install cfitsio #
@@ -149,26 +149,26 @@ echo "readline $v checked"
 # TODO : eventuellement fixer le numero de version du paquet
 # rpm -qa | grep cfitsio || sudo yum install cfitsio
 
-if ! rpm -qa | grep -q cfitsio; then
-    echo "cfitsio need to be installed"
-    sudo yum install cfitsio-devel
-    if ! rpm -qa | grep -q cfitsio; then
-        echo "================================================================================================="
-        echo " ERROR : cfitsio need to be installed"
-        echo "================================================================================================="
-        echo "You can download the latest version of CFITSIO on http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html"
-        echo "   "
-        echo "or "
-        echo "   "
-        echo "cfitsio rpm can be found in the epel-release repository ; Try : sudo yum install cfitsio-devel"
-        echo "   "
-        echo "================================================================================================="
-        exit
-    fi
-fi
+#if ! rpm -qa | grep -q cfitsio; then
+#    echo "cfitsio need to be installed"
+#    sudo yum install cfitsio-devel
+#    if ! rpm -qa | grep -q cfitsio; then
+#        echo "================================================================================================="
+#        echo " ERROR : cfitsio need to be installed"
+#        echo "================================================================================================="
+#        echo "You can download the latest version of CFITSIO on http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html"
+#        echo "   "
+#        echo "or "
+#        echo "   "
+#        echo "cfitsio rpm can be found in the epel-release repository ; Try : sudo yum install cfitsio-devel"
+#        echo "   "
+#        echo "================================================================================================="
+#        exit
+#    fi
+#fi
 # Check cfitsio version
-v=$(rpm --qf '%{VERSION}\n' -q cfitsio)
-echo "cfitsio $v checked"
+#v=$(rpm --qf '%{VERSION}\n' -q cfitsio)
+#echo "cfitsio $v checked"
 
 # ======================================== #
 # Copy package configuration file (*.spec) #
