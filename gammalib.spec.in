@@ -98,7 +98,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 # Clean #
 # ===== #
 %clean
-#rm -rf $RPM_BUILD_ROOT
+rm -rf $RPM_BUILD_ROOT
 
 
 # ============================================ #
@@ -125,17 +125,18 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %postun
 
 
-# ========== #
-# Change Log #
-# ========== #
-%changelog
-* Wed Mar 1 2017 Sylvie Brau-Nogue (sylvie.brau-nogue@irap.omp.eu)
-- Packaging scripts included in the Makefile
-
-
 # =========================== #
 # Files being part of package #
 # =========================== #
 %files
 %defattr(-,root,root,-)
 %doc COPYING ChangeLog
+%dir /usr/local/gamma
+
+
+# ========== #
+# Change Log #
+# ========== #
+%changelog
+* Wed Mar 1 2017 Sylvie Brau-Nogue (sylvie.brau-nogue@irap.omp.eu)
+- Packaging scripts included in the Makefile

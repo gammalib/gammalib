@@ -59,6 +59,7 @@ RELEASE=1
 WRKDIR=$PWD/rpm/rpmbuild
 SRCDIR=$WRKDIR/SOURCES
 PKGDIR=$WRKDIR/RPMS
+SPKGDIR=$WRKDIR/SRPMS
 PRODDIR=$WRKDIR/RPMS/$PLATFORM
 
 
@@ -100,14 +101,22 @@ rpmbuild --target $PLATFORM -ba --define "_topdir $WRKDIR" $PACKNAME.spec -v
 # ============================== #
 # Copy package to root directory #
 # ============================== #
-echo " ===================================================="
-echo " Packaging DONE :"
-echo " New package is located at $PRODDIR"
+echo "===================================================="
+echo "Packaging DONE"
+echo " "
+echo "New binary packages are located in $PRODDIR"
 for package in $(find $PRODDIR -iname *.rpm ); do 
-     echo " rpm file : $package"
-     echo " ===================================================="
-     echo "  "     
+     echo "rpm file : $package"
+     echo "===================================================="
      rpm -qip $package
      cp $package $PWD/
 done
-exit
+echo "===================================================="
+echo " "
+echo "New source packages are located in $SPKGDIR"
+for package in $(find $SPKGDIR -iname *.rpm ); do
+     echo "rpm file : $package"
+     echo "===================================================="
+     rpm -qip $package
+     cp $package $PWD/
+done
