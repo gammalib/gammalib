@@ -11,8 +11,8 @@ Version: %{VERSION}
 Release: %{RELEASE}
 License: GPLv3
 Group: Development/Libraries
-#Source0: %{PKGNAME}-%VERSION.tar.gz
-Source0: http://cta.irap.omp.eu/ctools/releases/gammalib/%{PKGNAME}-%VERSION.tar.gz
+Source0: centos/rpmbuild/SOURCES/%{PKGNAME}-%VERSION.tar.gz
+#Source0: http://cta.irap.omp.eu/ctools/releases/gammalib/%{PKGNAME}-%VERSION.tar.gz
 #BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 #BuildRequires: ncurses
@@ -56,10 +56,10 @@ and Cherenkov telescopes (CTA, H.E.S.S., MAGIC, VERITAS).
 %setup -q
 
 # Nettoyer le dossier temporaire (eventuellement precedents rpmbuild)
-rm -rf $HOME%{prefix}
+rm -rf centos%{prefix}
 
 # Compilation du logiciel (execute ./configure et make)
-./configure -prefix=$HOME%{prefix}/%{PKGNAME}
+./configure -prefix=centos%{prefix}/%{PKGNAME}
 
 make
 
@@ -83,7 +83,7 @@ make install
 #      option 1:
 #         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /ctools.dist
 #         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /Licence.txt
-#      option 2: result in $HOME/usr/local/gamma/ctools
+#      option 2: result in centos/usr/local/gamma/ctools
 #         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /usr/local/gamma/ctools/ctools.dist
 #         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /usr/local/gamma/ctools/Licence.txt
 
@@ -91,7 +91,7 @@ make install
 
 # Option 1 : cat <<EOF > $RPM_BUILD_ROOT/%{PKGNAME}.dist
 # Option 2 selected
-#cat <<EOF > $HOME/%{prefix}/%{PKGNAME}/%{PKGNAME}.dist
+#cat <<EOF > centos/%{prefix}/%{PKGNAME}/%{PKGNAME}.dist
 #<license file="COPYING"/>
 #<title>'%{PKGNAME}'</title>
 #<organization>irap.omp.eu</organization>
@@ -102,10 +102,10 @@ make install
 # Add additional files to production folder
 # Option 1 : cp COPYING $RPM_BUILD_ROOT/License.txt
 # Option 2 selected
-#cp COPYING $HOME/%{prefix}/%{PKGNAME}/License.txt
+#cp COPYING centos/%{prefix}/%{PKGNAME}/License.txt
 
-# copie des fichiers de $HOME/usr dans cp -R $HOME/usr $HOME/rpm/BUILDROOT/%{PKGNAME}-1.platform/
-cp -R $HOME/usr $RPM_BUILD_ROOT/
+# copie des fichiers de centos/usr dans cp -R centos/usr centos/rpm/BUILDROOT/%{PKGNAME}-1.platform/
+cp -R centos/usr $RPM_BUILD_ROOT/
 
 echo "============ Installation ==============="
 install -m 0755 -d /%{prefix}
