@@ -1,3 +1,22 @@
+# ==========================================================================
+# gammalib rpm package specification
+#
+# Copyright (C) 2017 Sylvie Brau-Nogué
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ==========================================================================
 %global _enable_debug_package 0
 %global debug_package %{nil}
 %global __os_install_post /usr/lib/rpm/brp-compress %{nil}
@@ -5,38 +24,28 @@
 %define VERSION @PACKAGE_VERSION@
 %define RELEASE 1%{?dist}
 
-Name: %{PKGNAME}
+
+# ======== #
+# Preamble #
+# ======== #
 Summary: Versatile toolbox for scientific analysis of astronomical gamma-ray data
+Name: %{PKGNAME}
 Version: %{VERSION}
 Release: %{RELEASE}
 License: GPLv3
 Group: Development/Libraries
-Source0: rpm/rpmbuild/SOURCES/%{PKGNAME}-%VERSION.tar.gz
-#BuildArch: noarch
+Source: %{_topdir}/SOURCES/%{PKGNAME}-%VERSION.tar.gz
+URL: http://cta.irap.omp.eu/gammalib/
+Distribution: Linux
+Vendor: Institut de Recherche en Astrophysique et Planetologie
+Packager: Sylvie Brau-Nogue <sylvie.brau-nogue@irap.omp.eu>
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
-#BuildRequires: ncurses
-#BuildRequires: readline
-#BuildRequires: libstdc++-devel
-#BuildRequires: gcc-c++
-#BuildRequires: automake 
-#BuildRequires: autoconf 
-#BuildRequires: libtool
-#BuildRequires: swig
-#BuildRequires: doxygen
-#BuildRequires: python-devel
-#BuildRequires: ncurses
-#BuildRequires: readline
-#BuildRequires: cfitsio
-# Requires: liste des packages requis pour l'installation
 Requires: ncurses
 Requires: readline
 Requires: cfitsio
-#
 Prefix: /usr/local/gamma
-#
-URL: http://gammalib.sourceforge.net/
 
-#Description (max 79 caractères par ligne)
+# Description (max 79 chars par line)
 %description
 GammaLib is a versatile toolbox for the high-level analysis of astronomical
 gamma-ray data. It consists of a C++ library and a Python module that exposes
@@ -50,97 +59,83 @@ consistent broad-band spectral fitting or imaging.
 So far, GammaLib supports analysis of data obtained with COMPTEL, Fermi/LAT,
 and Cherenkov telescopes (CTA, H.E.S.S., MAGIC, VERITAS).
 
-# Préparation du package
+
+# ====================== #
+# Preparation of package #
+# ====================== #
 %prep
 %setup -q
 
-# Nettoyer le dossier temporaire (eventuellement precedents rpmbuild)
-rm -rf rpm%{prefix}
+# Clean build directory
+rm -rf $RPM_BUILD_ROOT%{prefix}
 
-# Compilation du logiciel (execute ./configure et make)
-./configure -prefix=rpm%{prefix}/%{PKGNAME}
+# Configure GammaLib
+./configure --prefix=%{prefix}
 
+
+# ===== #
+# Build #
+# ===== #
+%build
 make
 
+# ===== #
+# Check #
+# ===== #
 %check
 make check
 
-# Installation de l'application (execute make install)
+
+# ======= #
+# Install #
+# ======= #
 %install
 export DONT_STRIP=1
-make install
-
-#=================================================#
-# TODO : Add Information to RPM File             #
-#=================================================#
-
-# TODO : fix folder and option
-#      option 1 : this file is at the root of the package, and will not be installed
-#      option 2 : this file is saved in %{prefix}/%{PKGNAME} folder
-#
-# --> How to extract files,
-#      option 1:
-#         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /ctools.dist
-#         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /Licence.txt
-#      option 2: result in rpm/usr/local/gamma/ctools
-#         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /usr/local/gamma/ctools/ctools.dist
-#         rpm2cpio ctools-1.1.0-1.noarch.rpm | cpio -ivd /usr/local/gamma/ctools/Licence.txt
-
-# Add information to rpm file
-
-# Option 1 : cat <<EOF > $RPM_BUILD_ROOT/%{PKGNAME}.dist
-# Option 2 selected
-#cat <<EOF > rpm/%{prefix}/%{PKGNAME}/%{PKGNAME}.dist
-#<license file="COPYING"/>
-#<title>'%{PKGNAME}'</title>
-#<organization>irap.omp.eu</organization>
-#<description>CTA Science Analysis Tools</description>
-#EOF
+make DESTDIR=$RPM_BUILD_ROOT install
 
 
-# Add additional files to production folder
-# Option 1 : cp COPYING $RPM_BUILD_ROOT/License.txt
-# Option 2 selected
-#cp COPYING rpm/%{prefix}/%{PKGNAME}/License.txt
-
-# copie des fichiers de rpm/usr dans cp -R rpm/usr rpm/rpm/BUILDROOT/%{PKGNAME}-1.platform/
-cp -R rpm/usr $RPM_BUILD_ROOT/
-
-echo "============ Installation ==============="
-install -m 0755 -d /%{prefix}
-
-# Nettoyage du package
+# ===== #
+# Clean #
+# ===== #
 %clean
-rm -rf $RPM_BUILD_ROOT
+#rm -rf $RPM_BUILD_ROOT
 
-# Pre installation
+
+# ============================================ #
+# Pre installation (create users, group, etc.) #
+# ============================================ #
 %pre
-# TODO : Création des utilisateurs, des groupes etc...
 
-# Post installation
+
+# =========================================== #
+# Post installation (test, add crontab, etc.) #
+# =========================================== #
 %post
-# TODO : Test installation ?
-# TODO : Ajout des scripts en crontab
 
-# Pré désinstallation
+
+# =============================================================== #
+# Pre deinstallation (backup database, configuration files, etc.) #
+# =============================================================== #
 %preun
-# TODO : Backup database, configuration files etc...
 
-# Post désinstallation
+
+# ================================================ #
+# Post deinstallation (remove users, groups, etc.) #
+# ================================================ #
 %postun
-# TODO : Suppression utilisateur etc...
 
+
+# ========== #
+# Change Log #
+# ========== #
 %changelog
-* Wed Mar 1 2017 SYLVIE BRAU-NOGUE (sylvie.brau-nogue@irap.omp.eu)
+* Wed Mar 1 2017 Sylvie Brau-Nogue (sylvie.brau-nogue@irap.omp.eu)
 - Packaging scripts included in the Makefile
 
-# Fichier embarqués
+
+# =========================== #
+# Files being part of package #
+# =========================== #
 %files
 %defattr(-,root,root,-)
-/*
-# Add the list of documentation files that are included in this package to the %doc directive
 %doc COPYING ChangeLog
-# TODO : Affiner le placement des fichiers
-
-
-
