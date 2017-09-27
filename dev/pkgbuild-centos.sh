@@ -2,7 +2,7 @@
 # ==========================================================================
 # gammalib CentOS package creation
 #
-# Copyright (C) 2017 Sylvie Brau-Nogué
+# Copyright (C) 2017 Sylvie Brau-Nogue
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,14 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# -------------------------------------------------------------------------
-#
-# This script installs the ctools and GammaLib packages in the location
-# /usr/local/gamma and then builds a CentOS rpm package.
-# Any existing content in /usr/local/gamma will be
-# destroyed. The script needs the priviledges to create a folder in
-# /usr/local.
-#
 # ==========================================================================
 
 # ====================================== #
@@ -38,6 +30,14 @@ VERSION=$1
 PLATFORM=`uname -m`
 
 
+# =============================== #
+# Set software component versions #
+# =============================== #
+PACKNAME=gammalib
+PACKAGE=$PACKNAME-$VERSION
+RELEASE=1
+
+
 # ====== #
 # Header #
 # ====== #
@@ -45,13 +45,6 @@ echo "================================================================="
 echo "Build $PACKNAME rpm package, Version $VERSION, Platform $PLATFORM"
 echo "================================================================="
 
-
-# =============================== #
-# Set software component versions #
-# =============================== #
-PACKNAME=gammalib
-PACKAGE=$PACKNAME-$VERSION
-RELEASE=1
 
 # ============== #
 # Set parameters #
@@ -105,7 +98,7 @@ echo "===================================================="
 echo "Packaging DONE"
 echo " "
 echo "New binary packages are located in $PRODDIR"
-for package in $(find $PRODDIR -iname '*.rpm' ); do 
+for package in $(find $PRODDIR -iname '*.rpm' ); do
      echo "rpm file : $package"
      echo "===================================================="
      rpm -qip $package

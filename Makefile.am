@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for GammaLib package                                          #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -149,8 +149,7 @@ pkgcheck:
 				case `lsb_release -irs` in \
 					CentOS*) \
 						echo "CentOS supported"; \
-                        dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
-                        dev/pkgcheck-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
+                        dev/pkgcheck-centos.sh $(PACKAGE_VERSION); \
 						;; \
 					Fedora*) \
 						echo "Fedora supported"; \
