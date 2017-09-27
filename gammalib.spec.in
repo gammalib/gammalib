@@ -131,7 +131,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc COPYING ChangeLog
-%dir /usr/local/gamma
+/usr/local/gamma
 
 
 # ========== #
