@@ -27,58 +27,38 @@
 #
 # ==========================================================================
 
-# ============================================= #
-# Get ctools/GammaLib version from command line #
-# ============================================= #
-if [ $# -ne 4 ] ;  then
-echo "Please specify package name version platform in the form 'package x.y.z platform '"
-exit 1
+# ====================================== #
+# Get GammaLib version from command line #
+# ====================================== #
+if [ $# -ne 2 ] ;  then
+    echo "Please specify GammaLib in the form 'x.y.z x86_64/i386'"
+    exit 1
 fi
-PACKNAME=$1
-VERSION=$2
-PLATFORM=$3
-GVERSION=$4
+VERSION=$1
+PLATFORM=$2
 
-echo " ================================================================= "
-echo " Build $PACKNAME rpm package, Version $VERSION, Platform $PLATFORM "
-echo " ================================================================= "
+echo "================================================================="
+echo "Build $PACKNAME rpm package, Version $VERSION, Platform $PLATFORM"
+echo "================================================================="
 
 # =============================== #
 # Set software component versions #
 # =============================== #
-#CFITSIO=cfitsio3410
-#NCURSES=ncurses-5.9
-#READLINE=readline-6.3
-#CFITSIO=cfitsio
-#NCURSES=ncurses
-#READLINE=readline
-#
+PACKNAME=gammalib
 PACKAGE=$PACKNAME-$VERSION
 RELEASE=1
 
 # ============== #
 # Set parameters #
 # ============== #
-#
-# System Configuration Hypothesis with file ~/.rpmmacros.
-# This file must contain at least the follwing lines :
-# %packager KNODLSEDER
-# %_topdir %(echo $HOME)/rpmbuild
-# %_tmppath %(echo $HOME)/rpmbuild/tmp
-# %_smp_mflags  -j3
-# %__arch_install_post   /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot
-#
-#
-# SBN : Liste à fixer.
-#TMPDIR=$HOME/usr
 WRKDIR=centos/rpmbuild
 SRCDIR=$WRKDIR/SOURCES
 PKGDIR=$WRKDIR/RPMS
 PRODDIR=$WRKDIR/RPMS/$PLATFORM
-RPMFILE=$PRODDIR/$PACKAGE-$RELEASE-*$PLATFORM.rpm
-#
-LOGFILE=centos/pkg_build/pkg_build.log
-LOGDEPILE=centos/pkg_build/pkg_dependencies_rpm.log
+#RPMFILE=$PRODDIR/$PACKAGE-$RELEASE-*$PLATFORM.rpm
+#LOGFILE=centos/pkg_build/pkg_build.log
+#LOGDEPILE=centos/pkg_build/pkg_dependencies_rpm.log
+
 
 # ==================================================== #
 #  TODO : Create a secure RPM repository
@@ -175,10 +155,13 @@ mkdir -p $WRKDIR/{RPMS,SRPMS,BUILD,SOURCES,SPECS,tmp}
 # ======================================== #
 cp $PACKNAME.spec $WRKDIR/SPECS/
 
-# ================================================================== #
-# Just copy dist in SOURCES dir                                      #
-# ================================================================== #
-cp $PACKAGE.tar.gz $SRCDIR/
+
+# ===================================== #
+# Create tarball and move it in $SRCDIR #
+# ===================================== #
+make dist
+mv gammalib-*.tar.gz $SRCDIR/
+#cp $PACKAGE.tar.gz $SRCDIR/
 
 
 # ================= #
@@ -186,11 +169,11 @@ cp $PACKAGE.tar.gz $SRCDIR/
 # ================= #
 
 
-# ====================== #
-# Build centOS package #
-# ====================== #
-
+# ==================== #
+# Build CentOS package #
+# ==================== #
 rpmbuild --target $PLATFORM -ba $WRKDIR/SPECS/$PACKNAME.spec -v
+
 
 # ==================================================== #
 # Sign package with an environment variable is set by the pass phrase during login

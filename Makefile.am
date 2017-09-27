@@ -98,8 +98,8 @@ pkg:
 				case `lsb_release -irs` in \
 					CentOS*) \
 						echo "CentOS supported"; \
-                        dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) x86_64 NA ; \
-                        dev/pkgbuild-centos.sh $(PACKAGE_NAME) $(PACKAGE_VERSION) i386 NA ; \
+                        dev/pkgbuild-centos.sh $(PACKAGE_VERSION) x86_64 ; \
+                        dev/pkgbuild-centos.sh $(PACKAGE_VERSION) i386 ; \
 						;; \
 					Fedora*) \
 						echo "Fedora supported"; \
