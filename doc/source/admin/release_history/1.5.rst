@@ -18,6 +18,7 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* Correct bug in ``GModelSpatialComposite::copy_members()``
 * [`2184 <https://cta-redmine.irap.omp.eu/issues/2184>`_] -
   Correct output of COMPTEL DRB fitting XML model
 * [`2177 <https://cta-redmine.irap.omp.eu/issues/2177>`_] -
@@ -47,6 +48,7 @@ New features
   Implement COMPTEL event list support
 * [`2186 <https://cta-redmine.irap.omp.eu/issues/2186>`_] -
   Implement COMPTEL response computation
+
 
 Clean up
 --------

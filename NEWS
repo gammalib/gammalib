@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-7 September 2017
+10 October 2017
 
 
 1. Introduction
@@ -90,6 +90,9 @@ None
 ---------------
 A spectral model constructor was added to GModelSpectralNodes to allow
 conversion of any spectral model into a spectral node model (#2178).
+
+A bug was corrected in GModelSpatialComposite::copy_members() that led to a
+segmentation fault when writing a composite spatial model into an XML file.
 
 
 9. Numerics module
