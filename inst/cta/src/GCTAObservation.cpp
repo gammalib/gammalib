@@ -1132,18 +1132,20 @@ void GCTAObservation::write(GFits& fits, const std::string& evtname,
  ***************************************************************************/
 void GCTAObservation::load(const GFilename& filename)
 {
-    // Store event filename
-    m_eventfile = filename;
-
-    // Open FITS file
-    GFits fits(filename);
-
-    // Read data
-    read(fits);
-
-    // Close FITS file
-    fits.close();
-
+    #pragma omp critical(GCTAObservation_load)
+    {
+        // Store event filename
+        m_eventfile = filename;
+        
+        // Open FITS file
+        GFits fits(filename);
+        
+        // Read data
+        read(fits);
+        
+        // Close FITS file
+        fits.close();
+    }
     // Return
     return;
 }
