@@ -114,7 +114,7 @@ GModelSpatialComposite::GModelSpatialComposite(const GXmlElement& xml) :
 {
     // Initialise members
     init_members();
-    
+
     // Read information from XML element
     read(xml);
 
@@ -296,7 +296,7 @@ GSkyDir GModelSpatialComposite::mc(const GEnergy& energy,
 
     // Draw random sky direction from the selected component
     GSkyDir sky_dir = m_components[index]->mc(energy, time, ran);
-    
+
     // Return sky direction
     return (sky_dir);
 }
@@ -400,7 +400,7 @@ void GModelSpatialComposite::read(const GXmlElement& xml)
         delete ptr;
 
     } // endfor: loop over components
-    
+
     // Return
     return;
 }
@@ -438,7 +438,7 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
 
         // Get spatial component
         GModelSpatial* component = m_components[i];
-        
+
         // Fall through if component is empty
         if (component == NULL) {
             continue;
@@ -449,7 +449,7 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
 
         // Loop over all parameters of component and strip prefix
         for (int k = 0; k < spatial->size(); ++k) {
-            
+
             // Get model parameter
             GModelPar& par = (*spatial)[k];
 
@@ -544,11 +544,11 @@ void GModelSpatialComposite::append(const GModelSpatial& component,
 
     // Get index of latest model
     int index = m_components.size()-1;
-    
+
     // Use model index if component name is empty
     std::string component_name = !name.empty() ? name
                                                : gammalib::str(m_components.size());
-    
+
     // Check if component name is unique, throw exception if not
     if (gammalib::contains(m_names, component_name)) {
     	std::string msg = "Attempt to append component \""+component_name+"\" "
@@ -560,22 +560,22 @@ void GModelSpatialComposite::append(const GModelSpatial& component,
 
     // Add component name
     m_names.push_back(component_name);
-    
+
     // Get number of spectral parameters from model
     int npars = m_components[index]->size();
-    
+
     // Loop over model parameters
     for (int ipar = 0; ipar < npars; ++ipar) {
-        
+
         // Get model parameter
         GModelPar* p = &(m_components[index]->operator[](ipar));
-        
+
         // Modify parameter name
         p->name(component_name+":"+p->name());
-        
+
         // Append model parameter with new name to internal container
         m_pars.push_back(p);
-        
+
     } // endfor: loop over model parameters
 
     // Set scaling parameter
@@ -773,8 +773,9 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
     m_names  = model.m_names;
     m_region = model.m_region;
 
-    // Initialise components
+    // Initialise components and scales
     m_components.clear();
+    m_scales.clear();
     m_pars.clear();
 
     // Copy components
@@ -785,7 +786,7 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
 
         // Get number of parameters to append
         int npars = m_components[i]->size();
-    
+
         // Append parameter references
         for (int ipar = 0; ipar < npars; ++ipar) {
             GModelPar& par = (*m_components[i])[ipar];
@@ -795,7 +796,7 @@ void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
     } // endfor: looped over all components
 
     // Copy scales
-    for (int i = 0; i < m_scales.size(); ++i) {
+    for (int i = 0; i < model.m_scales.size(); ++i) {
 
         // Clone scale
         GModelPar* scale = model.m_scales[i]->clone();
@@ -820,7 +821,7 @@ void GModelSpatialComposite::free_members(void)
 {
     // Free model components
     for (int i = 0; i < m_components.size(); ++i) {
-        
+
         // Delete component i
         if (m_components[i] != NULL) {
             delete m_components[i];
@@ -833,7 +834,7 @@ void GModelSpatialComposite::free_members(void)
 
     // Free scaling parameters
     for (int i = 0; i < m_scales.size(); ++i) {
-        
+
         // Delete component i
         if (m_scales[i] != NULL) {
             delete m_scales[i];
