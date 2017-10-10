@@ -21,7 +21,7 @@
 /**
  * @file GCTAOnOffObservation.hpp
  * @brief CTA On/Off observation class definition
- * @author Chia-Chun Lu & Christoph Deil
+ * @author Chia-Chun Lu & Christoph Deil & Pierrick Martin
  */
 
 #ifndef GCTAONOFFOBSERVATION_HPP
@@ -34,7 +34,7 @@
 #include "GPha.hpp"
 #include "GArf.hpp"
 #include "GRmf.hpp"
-#include "GSkyRegions.hpp"
+#include "GSkyRegionMap.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GModels;
@@ -55,7 +55,9 @@ class GBounds;
  * (ARF) and the Redistribution Matrix File (RMF).
  *
  * The class uses GPha objects to store the On and Off spectra, and GArf and
- * GRmf objects to store the response information.
+ * GRmf objects to store the response information. On and Off regions are 
+ * defined via GSkyRegionMap objects which are essentially finely-pixellized 
+ * skymaps that allow handling arbitrarily complex shapes
  ***************************************************************************/
 class GCTAOnOffObservation : public GObservation {
 
@@ -65,8 +67,9 @@ public:
     GCTAOnOffObservation(const GCTAObservation& obs,
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
-                         const GSkyRegions&     on,
-                         const GSkyRegions&     off);
+                         const GSkyRegionMap&     on,
+                         const GSkyRegionMap&     off,
+                         const GSkyDir            src_dir);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
  
@@ -96,14 +99,16 @@ public:
 
     // Other methods
     void               instrument(const std::string& instrument);
-    void               on_regions(const GSkyRegions& regions);
-    void               off_regions(const GSkyRegions& regions);
-    const GSkyRegions& on_regions(void) const;
-    const GSkyRegions& off_regions(void) const;
+    void               on_regions(const GSkyRegionMap& regionmap);
+    void               off_regions(const GSkyRegionMap& regionmap);
+    const GSkyRegionMap& on_regions(void) const;
+    const GSkyRegionMap& off_regions(void) const;
     const GPha&        on_spec(void) const;
     const GPha&        off_spec(void) const;
     const GArf&        arf(void) const;
     const GRmf&        rmf(void) const;
+    void               src_dir(const GSkyDir& src_dir);
+    const GSkyDir&     src_dir(void) const;
 
 protected:
     // Protected methods
@@ -128,9 +133,10 @@ protected:
     GPha 		        m_off_spec;    //!< Off counts spectrum
     GArf                m_arf;         //!< Auxiliary Response Function vector
     GRmf                m_rmf;         //!< Redistribution matrix
-    GSkyRegions         m_on_regions;  //!< Container of On region
-    GSkyRegions         m_off_regions; //!< Container of Off regions
-};
+    GSkyRegionMap       m_on_regions;  //!< Container of On region
+    GSkyRegionMap       m_off_regions; //!< Container of Off regions
+    GSkyDir             m_src_dir;     //!< Direction to source in On region
+ };
 
 
 /***********************************************************************//**
@@ -144,7 +150,6 @@ std::string GCTAOnOffObservation::classname(void) const
     return ("GCTAOnOffObservation");
 }
 
-
 /***********************************************************************//**
  * @brief Return instrument
  *
@@ -155,7 +160,6 @@ std::string GCTAOnOffObservation::instrument(void) const
 {
     return (m_instrument);
 }
-
 
 /***********************************************************************//**
  * @brief Return ontime
@@ -168,7 +172,6 @@ double GCTAOnOffObservation::ontime(void) const
     return (m_ontime);
 }
 
-
 /***********************************************************************//**
  * @brief Return livetime
  *
@@ -179,7 +182,6 @@ double GCTAOnOffObservation::livetime(void) const
 {
     return (m_livetime);
 }
-
 
 /***********************************************************************//**
  * @brief Return deadtime correction factor
@@ -200,7 +202,6 @@ double GCTAOnOffObservation::deadc(const GTime& time) const
     return (m_deadc);
 }
 
-
 /***********************************************************************//**
  * @brief Set instrument
  *
@@ -213,56 +214,51 @@ void GCTAOnOffObservation::instrument(const std::string& instrument)
     return;
 }
 
-
 /***********************************************************************//**
- * @brief Set On regions
+ * @brief Set On regions map
  *
- * @param[in] regions On regions.
+ * @param[in] regions On regions map.
  ***************************************************************************/
 inline
-void GCTAOnOffObservation::on_regions(const GSkyRegions& regions)
+void GCTAOnOffObservation::on_regions(const GSkyRegionMap& regionmap)
 {
-    m_on_regions = regions;
+    m_on_regions = regionmap;
     return;
 }
 
-
 /***********************************************************************//**
- * @brief Set Off regions
+ * @brief Set Off regions map
  *
- * @param[in] regions Off regions.
+ * @param[in] regions Off regions map.
  ***************************************************************************/
 inline
-void GCTAOnOffObservation::off_regions(const GSkyRegions& regions)
+void GCTAOnOffObservation::off_regions(const GSkyRegionMap& regionmap)
 {
-    m_off_regions = regions;
+    m_off_regions = regionmap;
     return;
 }
 
-
 /***********************************************************************//**
- * @brief Return On regions
+ * @brief Return On regions map
  *
- * @return On regions.
+ * @return On regions map.
  ***************************************************************************/
 inline
-const GSkyRegions& GCTAOnOffObservation::on_regions(void) const
+const GSkyRegionMap& GCTAOnOffObservation::on_regions(void) const
 {
     return (m_on_regions);
 }
 
-
 /***********************************************************************//**
- * @brief Return Off regions
+ * @brief Return Off regions map
  *
- * @return Off regions.
+ * @return Off regions map.
  ***************************************************************************/
 inline
-const GSkyRegions& GCTAOnOffObservation::off_regions(void) const
+const GSkyRegionMap& GCTAOnOffObservation::off_regions(void) const
 {
     return (m_off_regions);
 }
-
 
 /***********************************************************************//**
  * @brief Return On spectrum
@@ -275,7 +271,6 @@ const GPha& GCTAOnOffObservation::on_spec(void) const
     return (m_on_spec);
 }
 
-
 /***********************************************************************//**
  * @brief Return Off spectrum
  *
@@ -286,7 +281,6 @@ const GPha& GCTAOnOffObservation::off_spec(void) const
 {
     return (m_off_spec);
 }
-
 
 /***********************************************************************//**
  * @brief Return Auxiliary Response File
@@ -299,7 +293,6 @@ const GArf& GCTAOnOffObservation::arf(void) const
     return (m_arf);
 }
 
-
 /***********************************************************************//**
  * @brief Return Redistribution Matrix File
  *
@@ -311,7 +304,6 @@ const GRmf& GCTAOnOffObservation::rmf(void) const
     return (m_rmf);
 }
 
-
 /***********************************************************************//**
  * @brief Return number of observed events
  *
@@ -320,7 +312,30 @@ const GRmf& GCTAOnOffObservation::rmf(void) const
 inline
 int GCTAOnOffObservation::nobserved(void) const
 {
-    return ((int)(m_on_spec.counts()+0.5));
+    return (m_on_spec.counts());
+}
+
+/***********************************************************************//**
+ * @brief Set direction to source
+ *
+ * @param[in] direction to source.
+ ***************************************************************************/
+inline
+void GCTAOnOffObservation::src_dir(const GSkyDir& src_dir)
+{
+    m_src_dir = src_dir;
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Return direction to source
+ *
+ * @return direction to source
+ ***************************************************************************/
+inline
+const GSkyDir& GCTAOnOffObservation::src_dir(void) const
+{
+    return (m_src_dir);
 }
 
 #endif /* GCTAONOFFOBSERVATION_HPP */

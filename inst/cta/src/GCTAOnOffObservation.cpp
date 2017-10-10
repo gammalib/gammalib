@@ -21,7 +21,7 @@
 /**
  * @file GCTAOnOffObservation.cpp
  * @brief CTA On/Off observation class implementation
- * @author Chia-Chun Lu & Christoph Deil
+ * @author Chia-Chun Lu & Christoph Deil & Pierrick Martin
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -36,7 +36,7 @@
 #include "GModelSpatial.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
-#include "GSkyRegionCircle.hpp"
+#include "GSkyRegionMap.hpp"
 #include "GOptimizerPars.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventAtom.hpp"
@@ -140,9 +140,9 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs) :
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
                                            const GEbounds&        etrue,
                                            const GEbounds&        ereco,
-                                           const GSkyRegions&     on,
-                                           const GSkyRegions&     off) : 
-                      GObservation()
+                                           const GSkyRegionMap&   on,
+                                           const GSkyRegionMap&   off,
+                                           const GSkyDir          src_dir)
 {
     // Initialise private
     init_members();
@@ -158,6 +158,9 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     // Store regions
     m_on_regions  = on;
     m_off_regions = off;
+    
+    // Set direction to source
+    m_src_dir=src_dir;
 
     // Set On/Off observation from CTA observation
     set(obs);
@@ -165,7 +168,6 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     // Return
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Destructor
@@ -338,11 +340,11 @@ const GCTAResponse* GCTAOnOffObservation::response(void) const
  ***************************************************************************/
 void GCTAOnOffObservation::read(const GXmlElement& xml)
 {
-	// clean object
-	clear();
+    // clean object
+    clear();
 
-	// Extract instrument name
-	m_instrument = xml.attribute("instrument");
+    // Extract instrument name
+    m_instrument = xml.attribute("instrument");
 
     // Get file names
     std::string pha_on  = gammalib::xml_get_attr(G_READ, xml, "Pha_on",      "file");
@@ -362,7 +364,7 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 
     // Load files
     m_on_spec.load(pha_on);
-	m_off_spec.load(pha_off);
+    m_off_spec.load(pha_off);
     m_on_regions.load(reg_on);
     m_off_regions.load(reg_off);
     m_arf.load(arf);
@@ -543,47 +545,47 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 	
     // Initialise statistics
     #if defined(G_LIKELIHOOD_DEBUG)
-	int    n_bins        = m_on_spec.size();
+    int    n_bins        = m_on_spec.size();
     int    n_used        = 0;
     int    n_small_model = 0;
     int    n_zero_data   = 0;
     double sum_data      = 0.0;
     double sum_model     = 0.0;
-	double init_npred    = *npred;
+    double init_npred    = *npred;
     #endif
 	
-	// Initialise log-likelihood value
+    // Initialise log-likelihood value
     double value = 0.0;
-	
-	// Get number of model parameters in model container
-    int npars = models.npars();
-	
-	// Create model gradient vectors for sky and background parameters
-	GVector sky_grad(npars);
-	GVector bgd_grad(npars);
 
-	// Allocate working array
-	GVector colvar(npars);
+    // Get number of model parameters in model container
+    int npars = models.npars();
+    
+    // Create model gradient vectors for sky and background parameters
+    GVector sky_grad(npars);
+    GVector bgd_grad(npars);
+
+    // Allocate working array
+    GVector colvar(npars);
 
     // Get reference to alpha parameters
     const std::vector<double>& alpha = m_arf["ALPHA"];
-	
-	// Check that there is at least one parameter
-	if (npars > 0) {
-		
+
+    // Check that there is at least one parameter
+    if (npars > 0) {
+
         // Loop over all energy bins
         for (int i = 0; i < m_on_spec.size(); ++i) {
-				
+
             // Reinitialize working arrays
             for (int j = 0; j < npars; ++j) {
                 sky_grad[j] = 0.0;
                 bgd_grad[j] = 0.0;
             }
-		  
+
             // Get number of On and Off counts
             double non  = m_on_spec[i];
             double noff = m_off_spec[i];
-			
+
             // Get number of gamma and background events (and corresponding
             // spectral model gradients)
             double ngam = N_gamma(models, i, &sky_grad);
@@ -597,20 +599,20 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                 #endif
                 continue;
             }
-		  
+
             // Now we have all predicted gamma and background events for
             // current energy bin. Update the log(likelihood) and predicted
             // number of events
             value  += -non * log(nonpred) + nonpred - noff * log(nbgd) + nbgd;
             *npred += nonpred;
-		  
+
             // Update statistics
             #if defined(G_LIKELIHOOD_DEBUG)
             n_used++;
             sum_data  += non;
             sum_model += nonpred;
             #endif
-		  
+
             // Fill derivatives
             double fa         = non/nonpred;
             double fb         = fa/nonpred;
@@ -621,18 +623,18 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 
             // Loop over all parameters
             for (int j = 0; j < npars; ++j) {
-			
+
                 // If spectral model for sky component is non-zero and
                 // non-infinite then handle sky component gradients and
                 // second derivatives including at least a sky component ...
                 if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
-				
+
                     // Gradient
                     (*gradient)[j] += sky_factor * sky_grad[j];
-				
+
                     // Hessian (from first-order derivatives only)
                     for (int k = 0; k < npars; ++k) {
-				
+
                         // If spectral model for sky component is non-zero and
                         // non-infinite then we have the curvature element
                         // of a sky component
@@ -640,7 +642,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                             !gammalib::is_infinite(sky_grad[k])) {
                             colvar[k] = sky_grad[j] * sky_grad[k] * fb;
                         }
-					
+
                         // ... else if spectral model for background component
                         // is non-zero and non-infinite then we have the mixed
                         // curvature element between a sky and a background
@@ -649,32 +651,32 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                                  !gammalib::is_infinite(bgd_grad[k])) {
                             colvar[k] = sky_grad[j] * bgd_grad[k] * fc;
                         }
-						
+
                         // ...else neither sky nor background
                         else {
                             colvar[k] = 0.0;
                         }
-					
+
                     } // endfor: Hessian computation
-				
+
                     // Update matrix
                     curvature->add_to_column(j, colvar);
 
                 } // endif: spectral model is non-zero and non-infinite
-			
+
                 // ... otherwise if spectral model for background component is
                 // non-zero and non-infinite then handle background component
                 // gradients and second derivatives including at least a
                 // background component
                 else if (bgd_grad[j] != 0.0  &&
                          !gammalib::is_infinite(bgd_grad[j])) {
-				
+
                     // Gradient
                     (*gradient)[j] += bgd_factor * bgd_grad[j];
-				
+
                     // Hessian (from first-order derivatives only)
                     for (int k = 0; k < npars; ++k) {
-					
+
                         // If spectral model for sky component is non-zero and
                         // non-infinite then we have the mixed curvature element
                         // between a sky and a background component
@@ -682,29 +684,29 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                             !gammalib::is_infinite(sky_grad[k])) {
                             colvar[k] = bgd_grad[j] * sky_grad[k] * fc;
                         }
-						
-						// ... else if spectral model for background component
+
+                        // ... else if spectral model for background component
                         // is non-zero and non-infinite then we have the
                         // curvature element of a background component
                         else if (bgd_grad[k] != 0.0  &&
                                  !gammalib::is_infinite(bgd_grad[k])) {
                             colvar[k] = bgd_grad[j] * bgd_grad[k] * fd;
                         }
-						
-						// ... else neither sky nor background
+
+                        // ... else neither sky nor background
                         else {
                             colvar[k] = 0.0;
                         }
 
                     } // endfor: Hessian computation
-				
+
                     // Update matrix
                     curvature->add_to_column(j, colvar);
-			
+
                 } // endif: spectral model for background component valid
 
             } // endfor: looped over all parameters for derivatives computation
-			
+
         } // endfor: looped over energy bins
 
     } // endif: number of parameters was positive
@@ -811,6 +813,7 @@ void GCTAOnOffObservation::init_members(void)
     m_rmf.clear();
     m_on_regions.clear();
     m_off_regions.clear();
+    m_src_dir.clear();
 
     // Return
     return;
@@ -835,6 +838,7 @@ void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
     m_rmf         = obs.m_rmf;
     m_on_regions  = obs.m_on_regions;
     m_off_regions = obs.m_off_regions;
+    m_src_dir     = obs.m_src_dir;
 
     // Clone members
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
@@ -870,30 +874,30 @@ void GCTAOnOffObservation::free_members(void)
 void GCTAOnOffObservation::set(const GCTAObservation& obs)
 {
     // Get CTA event list pointer
-	const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-	if (events == NULL) {
+    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+    if (events == NULL) {
         std::string msg = "No event list found in CTA observation \""+
                           obs.name()+"\" (ID="+obs.id()+"). ON/OFF observation "
                           "can only be filled from event list.";
         throw GException::invalid_value(G_SET, msg);
-	}
+    }
 
     // Loop over all events
-	for (int i = 0; i < events->size(); ++i) {
+    for (int i = 0; i < events->size(); ++i) {
 
         // Get measured event direction
-		const GCTAEventAtom* atom = (*events)[i];
-		GSkyDir              dir  = atom->dir().dir();
+        const GCTAEventAtom* atom = (*events)[i];
+        GSkyDir              dir  = atom->dir().dir();
 
         // Fill in spectrum according to region containment
-		if (m_on_regions.contains(dir)) {
-			m_on_spec.fill(atom->energy());
-		}
-		if (m_off_regions.contains(dir)) {
-			m_off_spec.fill(atom->energy());
-		}
+        if (m_on_regions.contains(dir)) {
+            m_on_spec.fill(atom->energy());
+        }
+        if (m_off_regions.contains(dir)) {
+            m_off_spec.fill(atom->energy());
+        }
         
-	} // endfor: looped over all events
+    } // endfor: looped over all events
 
     // Store the livetime as exposures of the spectra
     m_on_spec.exposure(obs.livetime());
@@ -904,14 +908,14 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs)
     m_livetime = obs.livetime();
     m_deadc    = obs.deadc();
 
-	// Compute response components
-	compute_arf(obs);
-	compute_bgd(obs);
-	compute_alpha(obs);
-	compute_rmf(obs);
-	
-	// Return
-	return;
+    // Compute response components
+    compute_arf(obs);
+    compute_bgd(obs);
+    compute_alpha(obs);
+    compute_rmf(obs);
+
+    // Return
+    return;
 }
 
 
@@ -925,12 +929,11 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs)
  *
  * @todo Implement GCTAResponse::npred usage instead of computing Aeff
  *       (required the integration of PSF over On region).
- * @todo Allow general region, not only circles.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
 {
     // Get reconstructed energy boundaries from on ARF
-	GEbounds ereco = m_arf.ebounds();
+    GEbounds ereco = m_arf.ebounds();
     int      nreco = ereco.size();
 
     // Continue only if there are ARF bins
@@ -939,53 +942,78 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
         // Get CTA response pointer. Throw an exception if no response is found
         const GCTAResponseIrf* response =
               dynamic_cast<const GCTAResponseIrf*>(obs.response());
-		if (response == NULL) {
-	        std::string msg = "Response in CTA observation \""+obs.name()+"\" "
-	                          "(ID="+obs.id()+") is not of the GCTAResponseIrf "
+        if (response == NULL) {
+            std::string msg = "Response in CTA observation \""+obs.name()+"\" "
+                              "(ID="+obs.id()+") is not of the GCTAResponseIrf "
                               "type.";
-	        throw GException::invalid_value(G_COMPUTE_ARF, msg);
-		}
-		
-		// Get CTA observation pointing direction, zenith, and azimuth
-		GCTAPointing obspnt  = obs.pointing();
-		GSkyDir      obsdir  = obspnt.dir();
-		double       zenith  = obspnt.zenith();
-		double       azimuth = obspnt.azimuth();
+            throw GException::invalid_value(G_COMPUTE_ARF, msg);
+        }
 
+        // Get CTA observation pointing direction, zenith, and azimuth
+        GCTAPointing obspnt  = obs.pointing();
+        GSkyDir      obsdir  = obspnt.dir();
+        double       zenith  = obspnt.zenith();
+        double       azimuth = obspnt.azimuth();
+
+        // Retrieve ON map pixel indices and declare working variables
+        std::vector<int> pixidx = m_on_regions.nonzeroindices();
+        int pixnum = pixidx.size();
+        
         // Loop over reconstructed energies
         for (int i = 0; i < nreco; ++i) {
         
             // Get mean energy of bin
             double logEreco = ereco.elogmean(i).log10TeV();
-			
-			// Initialize effective area for this bin
-			m_arf[i] = 0.0;
-			
-			// Loop over On sky regions
-            for (int m = 0; m < m_on_regions.size(); ++m)  {
-				
-				// If region is of type GSkyRegionCircle
-				const GSkyRegionCircle* skyreg =
-                      dynamic_cast<const GSkyRegionCircle*>(m_on_regions[m]);
-				if (skyreg != NULL) {
-					
-					// Get centre of circular region
-					GSkyDir centre(skyreg->centre());
-					
-					// Compute position of region centre in instrument coordinates
-				    double theta = obsdir.dist(centre);
-				    double phi   = obsdir.posang(centre);
-					
-		            // Add up effective area
-		            m_arf[i] += response->aeff(theta,
-                                               phi,
-                                               zenith,
-                                               azimuth,
-                                               logEreco);
-									
-				} // endif: sky region is of type GSkyRegionCircle
-				
-			} // endfor: looped over On regions
+
+            // Initialize effective area for this bin
+            m_arf[i] = 0.0;
+
+            // Initialize totals
+            double totsolid = 0.0;
+            double totpsf = 0.0;
+
+            // Loop over pixels in ON region map and integrate effective area 
+            for (int j = 0; j < pixnum; j++ ) {
+                
+                // Get direction to pixel center
+                GSkyDir pixdir=m_on_regions.map().inx2dir(pixidx[j]);
+                // Get solid angle subtended by this pixel
+                double pixsolid=m_on_regions.map().solidangle(pixidx[j]);
+                
+                // Compute position of pixel centre in instrument coordinates
+                double theta = obsdir.dist(pixdir);
+                double phi   = obsdir.posang(pixdir);
+                
+                // Add up effective area
+                m_arf[i] += response->aeff(theta,
+                                           phi,
+                                           zenith,
+                                           azimuth,
+                                           logEreco)*pixsolid;
+                                           
+                // Add pixel solid angle to total for averaging later
+                totsolid += pixsolid;
+                
+                // Integrate PSF
+                double delta = m_src_dir.dist_deg(pixdir);
+                totpsf += response->psf(delta,
+                                        theta,
+                                        phi,
+                                        zenith,
+                                        azimuth,
+                                        logEreco)*pixsolid;
+
+            } // Looped over all pixels in map
+            
+            // Average effective area over solid angle
+            if (totsolid > 0.0) {
+                m_arf[i] /= totsolid;
+            }
+            
+            // Correct effective area by containment fraction
+            if (totpsf >= 0.0) {
+                m_arf[i] *= totpsf;
+            }
        
         } // endfor: looped over reconstructed energies
         
@@ -1009,8 +1037,6 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
  * and stores the background rate as additional column with name
  * `BACKGROUND` in the Auxiliary Response File (ARF).
  *
- * @todo Should implement integration of background model over region.
- * @todo Allow general region, not only circles.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
 {	
@@ -1043,24 +1069,19 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
                               "background information.\n" + obs.print();
             throw GException::invalid_argument(G_COMPUTE_BGD, msg);
         }
-					
-        // Loop over Off regions
-        for (int m = 0; m < m_off_regions.size(); ++m)  {
-						
-            // Get region centre direction, fall through if region is not
-            // of type GSkyRegionCircle
-            const GSkyRegionCircle* skyreg =
-                  dynamic_cast<const GSkyRegionCircle*>(m_off_regions[m]);
-            if (skyreg == NULL) {
-                continue;
-            }
-								
-            // Get centre of circular region
-            GSkyDir centre = skyreg->centre();
-								
-            // Get instrument direction of region centre
-            GCTAInstDir offdir = obspnt.instdir(centre);
-							
+        
+        // Loop over pixels in OFF region map and integrate background rate 
+        std::vector<int> pixidx= m_off_regions.nonzeroindices();
+        int pixnum=pixidx.size();
+        for (int j = 0; j < pixnum; j++ ) {
+            
+            // Get direction to pixel center
+            GSkyDir pixdir=m_off_regions.map().inx2dir(pixidx[j]);
+            // Translate sky direction into instrument direction
+            GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+            // Get solid angle subtended by this pixel
+            double pixsolid = m_off_regions.map().solidangle(pixidx[j]);
+            
             // Loop over energy bins
             for (int i = 0; i < nreco; ++i) {
 
@@ -1069,20 +1090,19 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
 
                 // Get background rate in events/s/MeV
                 background[i] += (*bgd)(logEreco,
-                                        offdir.detx(),
-                                        offdir.dety()) * skyreg->solidangle();
-
-            } // endfor: looped over energy bins
-
-        } // endfor: looped over sky regions
-
+                                        pixinstdir.detx(),
+                                        pixinstdir.dety()) * pixsolid;
+            } // Looped over energy bins
+        
+        } // Looped over all pixels in map
+        
         // Append background vector to ARF
         m_arf.append("BACKGROUND", background);
-		
-	} // endif: there were spectral bins
 
-	// Return
-	return;
+    } // endif: there were spectral bins
+
+    // Return
+    return;
 }
 
 
@@ -1098,108 +1118,97 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
  * gives the ratio between the On and Off region background acceptance
  * multiplied by the ratio between On and Off region solid angles.
  *
- * @todo Implement for general sky regions, not only circles
- * @todo Integrate over the sky region instead of taking the values at the
- *       sky region centre
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 {
     // Get reconstructed energy boundaries from on ARF
-	GEbounds ereco = m_arf.ebounds();
+    GEbounds ereco = m_arf.ebounds();
     int      nreco = ereco.size();
     
     // Continue only if there are ARF bins
     if (nreco > 0) {
 
-		// Initialise On/Off exposure ratios
+        // Initialise On/Off exposure ratios
         std::vector<double> alpha(nreco, 0.0);
     
         // Get CTA response pointer. Throw an exception if no response is found
         const GCTAResponseIrf* response =
               dynamic_cast<const GCTAResponseIrf*>(obs.response());
-		if (response == NULL) {
-	        std::string msg = "Response in CTA observation \""+obs.name()+"\" "
-	                          "(ID="+obs.id()+") is not of the GCTAResponseIrf "
+        if (response == NULL) {
+            std::string msg = "Response in CTA observation \""+obs.name()+"\" "
+                              "(ID="+obs.id()+") is not of the GCTAResponseIrf "
                               "type.";
-	        throw GException::invalid_value(G_COMPUTE_ALPHA, msg);
-		}
-		
-		// Get CTA observation pointing direction, zenith, and azimuth
-		GCTAPointing obspnt  = obs.pointing();
-		GSkyDir      obsdir  = obspnt.dir();
+            throw GException::invalid_value(G_COMPUTE_ALPHA, msg);
+        }
+
+        // Get CTA observation pointing direction, zenith, and azimuth
+        GCTAPointing obspnt  = obs.pointing();
+        GSkyDir      obsdir  = obspnt.dir();
+
+        // Declare variables for map handling
+        std::vector<int> pixidx;
+        int pixnum = 0;
 
         // Loop over reconstructed energies 
         for (int i = 0; i < nreco; ++i) {
         
             // Get mean log10 energy in TeV of bin
             double logEreco = ereco.elogmean(i).log10TeV();
-			
-			// Initialise effective area totals
-			double aon(0.0);
-			double aoff(0.0);
-			
-			// Loop over ON sky regions
-            for (int m = 0; m < m_on_regions.size(); ++m)  {
-				
-				// If region is of type GSkyRegionCircle
-				const GSkyRegionCircle* skyreg =
-                      dynamic_cast<const GSkyRegionCircle*>(m_on_regions[m]);
-				if (skyreg != NULL) {
-					
-					// Get centre of circular region
-					GSkyDir centreg = skyreg->centre();
-					
-                    // Compute instrument direction from region centre
-                    GCTAInstDir instdir(obspnt.instdir(centreg));
 
-                    // Add up acceptance
-                    aon += (*response->background())(logEreco,
-                                                     instdir.detx(),
-                                                     instdir.dety()) *
-                           skyreg->solidangle();
-					
-				} // endif: sky region is of type GSkyRegionCircle
-				
-			} // Looped over ON regions
-						
-			// Loop over OFF sky regions
-            for (int m = 0; m < m_off_regions.size(); ++m)  {
-				
-				// If region is of type GSkyRegionCircle
-				const GSkyRegionCircle* skyreg =
-                      dynamic_cast<const GSkyRegionCircle*>(m_off_regions[m]);
-				if (skyreg != NULL) {
-					
-					// Get centre of circular region
-					GSkyDir centreg = skyreg->centre();
-					
-                    // Compute instrument direction from region centre
-                    GCTAInstDir instdir(obspnt.instdir(centreg));
+            // Initialise effective area totals
+            double aon(0.0);
+            double aoff(0.0);
+            
+            // Loop over pixels in ON region map and integrate acceptance 
+            pixidx = m_on_regions.nonzeroindices();
+            pixnum = pixidx.size();
+            for (int j = 0; j < pixnum; j++ ) {
+                
+                // Get direction to pixel center
+                GSkyDir pixdir = m_on_regions.map().inx2dir(pixidx[j]);
+                // Translate sky direction into instrument direction
+                GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+                // Get solid angle subtended by this pixel
+                double pixsolid = m_on_regions.map().solidangle(pixidx[j]);
+             
+                // Add up acceptance
+                aon += (*response->background())(logEreco,
+                                                 pixinstdir.detx(),
+                                                 pixinstdir.dety()) * pixsolid;
+            } // Looped over all pixels in map
 
-                    // Add up acceptance
-                    aoff += (*response->background())(logEreco,
-                                                     instdir.detx(),
-                                                     instdir.dety()) *
-                            skyreg->solidangle();
-					
-                } // endif: sky region is of type GSkyRegionCircle
-				
-            } // endfor: looped over OFF regions
-			
-			// Compute alpha for this energy bin
-			if (aoff > 0.0) {
-				alpha[i] = aon/aoff;
-			}
-												 
+            // Loop over pixels in OFF region map and integrate acceptance 
+            pixidx = m_off_regions.nonzeroindices();
+            pixnum = pixidx.size();
+            for (int j = 0; j < pixnum; j++ ) {
+            
+                // Get direction to pixel center
+                GSkyDir pixdir = m_off_regions.map().inx2dir(pixidx[j]);
+                // Translate sky direction into instrument direction
+                GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+                // Get solid angle subtended by this pixel
+                double pixsolid = m_off_regions.map().solidangle(pixidx[j]);
+            
+                // Add up acceptance
+                aoff += (*response->background())(logEreco,
+                                                 pixinstdir.detx(),
+                                                 pixinstdir.dety()) * pixsolid;
+            } // Looped over all pixels in map
+            
+            // Compute alpha for this energy bin
+            if (aoff > 0.0) {
+                alpha[i] = aon/aoff;
+            }
+
         } // endfor: looped over reconstructed energies
 
         // Append alpha vector to ARF
         m_arf.append("ALPHA", alpha);
-	
+
     } // endif: there were energy bins
 
- 	// Return
- 	return;
+    // Return
+    return;
 }
 
 
@@ -1213,16 +1222,12 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
  *
  * Compute the energy redistribution matrix for an On/Off observation. The
  * method requires that the RMF energy axes have been defined before.
- *
- * @todo Check if we really should use reconstructed energy in the Aeff
- *       access.
- * @todo Generalise to any kind of sky region
  ***************************************************************************/
 void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
 {
     // Get true and reconstructed energy boundaries from RMF
-	GEbounds etrue = m_rmf.etrue();
-	GEbounds ereco = m_rmf.emeasured();
+    GEbounds etrue = m_rmf.etrue();
+    GEbounds ereco = m_rmf.emeasured();
     int      ntrue = etrue.size();
     int      nreco = ereco.size();
 
@@ -1232,19 +1237,23 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
         // Get CTA response pointer
         const GCTAResponseIrf* response =
               dynamic_cast<const GCTAResponseIrf*>(obs.response());
-		if (response == NULL) {
-	        std::string msg = "Response in CTA observation \""+obs.name()+"\" "
-	                          "(ID="+obs.id()+") is not of the GCTAResponseIrf "
+        if (response == NULL) {
+            std::string msg = "Response in CTA observation \""+obs.name()+"\" "
+                              "(ID="+obs.id()+") is not of the GCTAResponseIrf "
                               "type.";
-	        throw GException::invalid_value(G_COMPUTE_RMF, msg);
-		}
-		
-		// Get CTA observation pointing direction, zenith, and azimuth
-		GCTAPointing obspnt  = obs.pointing();
-		GSkyDir      obsdir  = obspnt.dir();
-		double       zenith  = obspnt.zenith();
-		double       azimuth = obspnt.azimuth();
-		
+            throw GException::invalid_value(G_COMPUTE_RMF, msg);
+        }
+
+        // Get CTA observation pointing direction, zenith, and azimuth
+        GCTAPointing obspnt  = obs.pointing();
+        GSkyDir      obsdir  = obspnt.dir();
+        double       zenith  = obspnt.zenith();
+        double       azimuth = obspnt.azimuth();
+
+        // Retrieve map information
+        std::vector<int> pixidx= m_on_regions.nonzeroindices();
+        int pixnum=pixidx.size();
+        
         // Loop over reconstructed energy
         for (int ireco = 0; ireco < nreco; ++ireco) {
 
@@ -1259,24 +1268,21 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
                 
                 // Compute true energy and initialise weight for this bin
                 double logEtrue = etrue.elogmean(itrue).log10TeV();
-				double weight   = 0.0;
-				
-				// Loop over ON sky regions
-	            for (int m = 0; m < m_on_regions.size(); ++m)  {
-				
-					// Fall through if region is not of type GSkyRegionCircle
-					const GSkyRegionCircle* skyreg =
-                          dynamic_cast<const GSkyRegionCircle*>(m_on_regions[m]);
-					if (skyreg == NULL) {
-                        continue;
-                    }
-					
-                    // Get centre of circular region
-                    GSkyDir centreg(skyreg->centre());
-					
-                    // Compute position of region centre in instrument coordinates
-                    double theta = obsdir.dist(centreg);
-                    double phi   = obsdir.posang(centreg);
+                double weight   = 0.0;
+
+                // Loop over pixels in ON region map and integrate acceptance
+                for (int j = 0; j < pixnum; j++ ) {
+                
+                    // Get direction to pixel center
+                    GSkyDir pixdir = m_on_regions.map().inx2dir(pixidx[j]);
+                    // Translate sky direction into instrument direction
+                    GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+                    // Get solid angle subtended by this pixel
+                    double pixsolid=m_on_regions.map().solidangle(pixidx[j]);
+             
+                    // Compute position of pixel centre in instrument coordinates
+                    double theta = obsdir.dist(pixdir);
+                    double phi   = obsdir.posang(pixdir);
 
                     // Get effective area
                     double aeff = response->aeff(theta,
@@ -1284,31 +1290,30 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
                                                  zenith,
                                                  azimuth,
                                                  logEreco);
-					
+
                     // Add up energy dispersion weighted by effective area
                     weight              += aeff;
                     m_rmf(itrue, ireco) += response->edisp(ereco.elogmean(ireco),
                                                            theta,
                                                            phi,
-		                                                   zenith,
-		                                                   azimuth,
-		                                                   logEtrue) * aeff;
-									
-				} // endfor: looped over ON regions
-				
-				// Complete weighing by dividing by total effective area
-				if (weight > 0.0) {
+                                                           zenith,
+                                                           azimuth,
+                                                           logEtrue) * aeff;
+                } // Looped over all pixels in map
+                
+                // Complete weighing by dividing by total effective area
+                if (weight > 0.0) {
                     m_rmf(itrue, ireco) /= weight;
-				}	
+                }	
 
             } // endfor: looped over true energy
-			
+
         } // endfor: looped over reconstructed energy
-		
+
     } // endif: there were energy bins
 
-	// Return
-	return;
+    // Return
+    return;
 }
 
 
@@ -1339,21 +1344,21 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                                      const int&     ibin,
                                      GVector*       grad) const
 {
-	// Get total number of model parameters
-	int npars = models.npars();
+    // Get total number of model parameters
+    int npars = models.npars();
 
-	// Initialize results
-	double value = 0.0;
+    // Initialize results
+    double value = 0.0;
     for (int i = 0; i < npars; ++i) {
         (*grad)[i] = 0.0;
     }
-	
-	// Continue only if bin number is in range and there are model parameters
-	if ((ibin >= 0) && (ibin < m_on_spec.size()) && (npars > 0)) {
+    
+    // Continue only if bin number is in range and there are model parameters
+    if ((ibin >= 0) && (ibin < m_on_spec.size()) && (npars > 0)) {
 
         // Initialise parameter index
         int ipar = 0;
-		
+
         // Get energy bin bounds
         const GEnergy emin   = m_on_spec.ebounds().emin(ibin);
         const GEnergy emax   = m_on_spec.ebounds().emax(ibin);
@@ -1364,46 +1369,46 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
         double exposure  = m_on_spec.exposure();
         double norm_flux = m_arf[ibin] * exposure; // cm2 s
         double norm_grad = norm_flux   * ewidth;   // cm2 s MeV
-				
+
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
-			
+
             // Get model pointer. Fall through if pointer is not valid
             const GModel* mptr = models[j];
             if (mptr == NULL) {
                 continue;
             }
-				
+
             // Fall through if model does not apply to specific instrument
             // and observation identifier
             if (!mptr->is_valid(instrument(), id())) {
                 ipar += mptr->size();
                 continue;
             }
-					
+
             // Fall through if this model component is a not sky component
             const GModelSky* sky = dynamic_cast<const GModelSky*>(mptr);
             if (sky == NULL) {
                 ipar += mptr->size();
                 continue;
             }
-					
+
             // Increase parameter counter for spatial parameter
             GModelSpatial* spatial = sky->spatial();
             if (spatial != NULL)  {
                 ipar += spatial->size();
             }
-						
+
             // Spectral component (the useful one)
             GModelSpectral* spectral = sky->spectral();
             if (spectral != NULL)  {
-								
+
                 // Determine the number of gamma-ray events in model by
                 // computing the flux over the energy bin in ph/cm2/s
                 // and multiplying this flux by the effective area (cm2)
                 // and the livetime (s)
                 value += spectral->flux(emin, emax) * norm_flux;
-								
+
                 // Determine the model gradients at the current energy. The
                 // eval() method needs a time in case that the spectral model
                 // has a time dependence. We simply use a dummy time here.
@@ -1416,21 +1421,21 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                         (*grad)[ipar] = par.factor_gradient() * norm_grad;
                     }
                 }
-								
+
             } // endif: spectral component
-							
+
             // Increase parameter counter for temporal parameter
             GModelTemporal* temporal = sky->temporal();
             if (temporal != NULL)  {
                 ipar += temporal->size();
             }
-			
+
         } // endfor: looped over model components
-		
-	} // endif: bin number is in the range and model container is not empty
-	
-	// Return number of gamma-ray events
-	return value;
+
+    } // endif: bin number is in the range and model container is not empty
+
+    // Return number of gamma-ray events
+    return value;
 }
 
 
@@ -1464,24 +1469,24 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                                    const int&     ibin,
                                    GVector*       grad) const
 {
-	// Get total number of model parameters
-	int npars = models.npars();
-	
-	// Initialize results
-	double value = 0.0;
+    // Get total number of model parameters
+    int npars = models.npars();
+    
+    // Initialize results
+    double value = 0.0;
     for (int i = 0; i < npars; ++i) {
         (*grad)[i] = 0.0;
     }
 
-	// Continue only if bin number is valid and if there are model parameters
-	if ((ibin >= 0) && (ibin < m_off_spec.size()) && (npars > 0))  {
+    // Continue only if bin number is valid and if there are model parameters
+    if ((ibin >= 0) && (ibin < m_off_spec.size()) && (npars > 0))  {
 
         // Initialise parameter index
         int ipar = 0;
-	
+
         // Get reference to background rates (events/MeV/s)
         const std::vector<double>& background = m_arf["BACKGROUND"];
-				
+
         // Get energy bin mean and width
         const GEnergy emean  = m_off_spec.ebounds().elogmean(ibin);
         const double  ewidth = m_off_spec.ebounds().ewidth(ibin).MeV();
@@ -1489,23 +1494,23 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
         // Compute normalisation factor (events)
         double exposure = m_off_spec.exposure();
         double norm     = background[ibin] * exposure * ewidth;
-			
+
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
-				
+
             // Get model pointer. Fall through if pointer is not valid
             const GModel* mptr = models[j];
             if (mptr == NULL) {
                 continue;
             }
-					
+
             // Fall through if model does not apply to specific instrument
             // and observation identifier.
             if (!mptr->is_valid(this->instrument(), this->id())) {
                 ipar += mptr->size();
                 continue;
             }
-						
+
             // Fall through if model is not an IRF background component
             const GCTAModelIrfBackground* bgd =
                   dynamic_cast<const GCTAModelIrfBackground*>(mptr);
@@ -1513,7 +1518,7 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                 ipar += mptr->size();
                 continue;
             }
-							
+
             // Get spectral component
             GModelSpectral* spectral = bgd->spectral();
             if (spectral != NULL)  {
@@ -1534,19 +1539,19 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                         (*grad)[ipar] += par.factor_gradient() * norm;
                     }
                 }
-								
+
             } // endif: pointer to spectral component was not NULL
-							
+
             // Increase parameter counter for temporal parameter
             GModelTemporal* temporal = bgd->temporal();
             if (temporal != NULL)  {
                 ipar += temporal->size();
             }
-												
+
         } // endfor: looped over model components
-			
-	} // endif: bin number is in the range and model container is not empty
-	
-	// Return
-	return value;
+
+    } // endif: bin number is in the range and model container is not empty
+
+    // Return
+    return value;
 }
