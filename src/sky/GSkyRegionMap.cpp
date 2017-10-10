@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GSkyRegionMap.cpp -  Sky region map class              *
+ *               GSkyRegionMap.cpp -  Sky region map class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Pierrick Martin                             *
+ *  copyright (C) 2017 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSkyRegionMap.hpp
+ * @file GSkyRegionMap.cpp
  * @brief Sky region map implementation
  * @author Pierrick Martin
  */
@@ -37,9 +37,7 @@
 #include "GSkyRegionMap.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                         "GSkyRegionMap::read(std::string&)"
-#define G_CONTAINS                  "GSkyRegionMap::contains(GSkyRegion&)"
-#define G_OVERLAPS                  "GSkyRegionMap::overlaps(GSkyRegion&)"
+#define G_CONTAINS                     "GSkyRegionMap::contains(GSkyRegion&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -72,7 +70,7 @@ GSkyRegionMap::GSkyRegionMap(void) : GSkyRegion()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] Map sky region
+ * @param[in] region Sky region map.
  ***************************************************************************/
 GSkyRegionMap::GSkyRegionMap(const GSkyRegionMap& region) : GSkyRegion(region)
 {
@@ -105,10 +103,11 @@ GSkyRegionMap::GSkyRegionMap(const GFilename& filename) : GSkyRegion()
     return;
 }
 
+
 /***********************************************************************//**
- * @brief Skymap constructor
+ * @brief Sky map constructor
  *
- * @param[in] map sky map object.
+ * @param[in] map Sky map.
  ***************************************************************************/
 GSkyRegionMap::GSkyRegionMap(const GSkyMap& map) : GSkyRegion()
 {
@@ -118,8 +117,8 @@ GSkyRegionMap::GSkyRegionMap(const GSkyMap& map) : GSkyRegion()
     // Attach map
     m_map = map;
     
-    // Get non-zero pixel indices
-    get_nonzero_pixels();
+    // Set non-zero pixel indices
+    set_nonzero_indices();
     
     // Compute solid angle
     compute_solid_angle();
@@ -127,6 +126,7 @@ GSkyRegionMap::GSkyRegionMap(const GSkyMap& map) : GSkyRegion()
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Destructor
@@ -150,8 +150,8 @@ GSkyRegionMap::~GSkyRegionMap(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] sky map region.
- * @return sky map region.
+ * @param[in] region Sky region map.
+ * @return Sky region map.
  ***************************************************************************/
 GSkyRegionMap& GSkyRegionMap::operator=(const GSkyRegionMap& region)
 {
@@ -197,10 +197,11 @@ void GSkyRegionMap::clear(void)
     return;
 }
 
+
 /***********************************************************************//**
- * @brief Clone sky map region
+ * @brief Clone sky region map
  *
- * @return Deep copy to sky map region.
+ * @return Deep copy to sky region map.
  ***************************************************************************/
 GSkyRegionMap* GSkyRegionMap::clone(void) const
 {
@@ -208,10 +209,11 @@ GSkyRegionMap* GSkyRegionMap::clone(void) const
     return new GSkyRegionMap(*this);
 }
 
+
 /***********************************************************************//**
- * @brief Load region from FITS file name
+ * @brief Load region map from FITS file name
  *
- * @param[in] filename FITS file name
+ * @param[in] filename FITS file name.
  ***************************************************************************/
 void GSkyRegionMap::load(const GFilename& filename)
 {
@@ -227,8 +229,8 @@ void GSkyRegionMap::load(const GFilename& filename)
     // Store filename
     m_filename = filename;
     
-    // Get non-zero indices
-    get_nonzero_pixels();
+    // Set non-zero indices
+    set_nonzero_indices();
     
     // Compute solid angle
     compute_solid_angle();
@@ -237,13 +239,16 @@ void GSkyRegionMap::load(const GFilename& filename)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Create region from a string in DS9 format
  *
  * @param[in] line String describing region in DS9 region format.
  *
- * Empty implementation of a virtual function because.
- * map is not supported as DS9 region
+ * Empty implementation of a virtual function because map is not supported
+ * as DS9 region.
+ *
+ * @todo Translate any DS9 region into a map.
  ***************************************************************************/
 void GSkyRegionMap::read(const std::string& line)
 {
@@ -251,28 +256,30 @@ void GSkyRegionMap::read(const std::string& line)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Write string describing region in DS9 region format
  *
- * @return string
+ * @return DS9 region string
+ *
+ * Returns an empty string.
+ *
+ * @todo Translate region map into a DS9 polygon.
  ***************************************************************************/
 std::string GSkyRegionMap::write(void) const
 {
     // Allocate string
     std::string result;
 
-    // Set string
-    result.append("Warning: This function cannot be implemented for GSkyRegionMap.");
-
     // Return string
     return result;
 }
 
+
 /***********************************************************************//**
  * @brief Print region description
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- *
+ * @param[in] chatter Chattiness.
  * @return String containing region information.
  ***************************************************************************/
 std::string GSkyRegionMap::print(const GChatter& chatter) const
@@ -295,119 +302,112 @@ std::string GSkyRegionMap::print(const GChatter& chatter) const
     return result;
 }
 
+
 /***********************************************************************//**
  * @brief Check if a given direction is contained in this region
  *
- * @param[in] dir A Sky direction.
+ * @param[in] dir Sky direction.
+ * @return True if sky direction is in region, false otherwise.
  *
- * @return True or False
- *
- * Checks if direction is contained in this region
+ * Checks if sky direction is contained in the region map.
  ***************************************************************************/
 bool GSkyRegionMap::contains(const GSkyDir& dir) const
 {
     // Initialize
     bool contain = false;
-    
+
     // If direction is within map boundaries
     if (m_map.contains(dir)) {
         
         // Convert sky direction into pixel index
-        int i_dir = m_map.dir2inx(dir);
-    
-        for (int i = 0; i < m_nzarray.size(); i++ ) {
-            if (i_dir == m_nzarray[i]) { 
-                contain = true;
-                break;
-            }
-            
-        } // Looped over all non-zero map pixels
+        int i = m_map.dir2inx(dir);
+
+        // Set containment flag
+        contain = (m_map(i,0) != 0.0);
         
-    } // Map contains direction
-    
+    } // endif: map contains direction
+
     // Return value
     return contain;
 }
+
 
 /***********************************************************************//**
  * @brief Checks if a given region is fully contained within this region
  *
  * @param[in] reg Sky region.
- *
- * @return True or False
+ * @return True if the region is contained within this region, false
+ *         otherwise.
  *
  * @exception GException::feature_not_implemented
- *            Regions differ in type.
+ *            Specified sky region type not supported by method.
  ***************************************************************************/
 bool GSkyRegionMap::contains(const GSkyRegion& reg) const
 {
     // Initialise return value
     bool inside = true;
     
-    // Case of a map region
+    // Case of a region map
     if (reg.type() == "Map") {
         
 		// Cast to map type
-		const GSkyRegionMap* inreg =
-              dynamic_cast<const GSkyRegionMap*>(&reg);
+		const GSkyRegionMap* inreg = dynamic_cast<const GSkyRegionMap*>(&reg);
         
         // Retrieve map data
-        const GSkyMap& regmap=inreg->map();
-        std::vector<int> regnzvec=inreg->nonzeroindices();
-        int regnznum=regnzvec.size();
-        int reginnum=0;
+        const GSkyMap&          regmap   = inreg->map();
+        const std::vector<int>& regnzvec = inreg->nonzero_indices();
         
         // Loop over input map non-zero pixels and check if they are all in
-        for (int i = 0; i < regnznum; i++ ) {
-            if (contains(regmap.inx2dir(regnzvec[i]))) {
-                reginnum += 1;
+        for (int i = 0; i < regnzvec.size(); ++i) {
+            if (!contains(regmap.inx2dir(regnzvec[i]))) {
+                inside = false;
+                break;
             }
         }
-        
-        // If all non-zero pixels of map are in, region is fully contained
-        if (reginnum != regnznum) {
-            inside = false;
-        }
-    
-    // Case of a circle region
-    } else if (reg.type() == "Circle") {
+
+    } // endcase: region map
+
+    // Case of a circular region
+    else if (reg.type() == "Circle") {
         
 		// Create circular region from reg
-		const GSkyRegionCircle* inreg =
-              dynamic_cast<const GSkyRegionCircle*>(&reg);
+		const GSkyRegionCircle* inreg = dynamic_cast<const GSkyRegionCircle*>(&reg);
+
         // Retrieve circle data
-        const GSkyDir& cendir=inreg->centre();
-        double rad=inreg->radius();
+        const GSkyDir& centre = inreg->centre();
+        double         rad    = inreg->radius();
         
         // Test a number of points along the circle
-        int numtest=100;
-        double rotangle=180./numtest;
-        GSkyDir testdir;
-        for (int i = 0; i < numtest; i++ ) {
-            testdir=cendir;
+        const int numtest  = 360;
+        double    rotangle = 360.0 / numtest;
+        GSkyDir   testdir;
+        for (int i = 0; i < numtest; ++i) {
+            testdir = centre;
             testdir.rotate_deg(i*rotangle, rad);
             if (!contains(testdir)) {
                 inside = false;
                 break;
             }
         }
-    
+
+    } // endcase: circular region
+
     // Other cases not implemented
-    } else {
-            throw GException::feature_not_implemented(G_CONTAINS,
-              "Only implemented for GSkyRegionMap and GSkyRegionCircle.");
+    else {
+        throw GException::feature_not_implemented(G_CONTAINS,
+              "Method only implemented for cicular and map regions.");
     }
     
-    // Return value
+    // Return result
     return inside;
 }
+
 
 /***********************************************************************//**
  * @brief Checks if a given region is overlapping with this region
  *
  * @param[in] reg Sky region.
- *
- * @return True or False
+ * @return True if the region is overlapping, false otherwise.
  ***************************************************************************/
 bool GSkyRegionMap::overlaps(const GSkyRegion& reg) const
 {
@@ -415,13 +415,13 @@ bool GSkyRegionMap::overlaps(const GSkyRegion& reg) const
     bool overlap = false;
     
     // Loop over non-zero pixels until direction is contained into region 
-    for (int i = 0; i < m_nzarray.size(); i++ ) {
-        GSkyDir dir = m_map.inx2dir(m_nzarray[i]);
+    for (int i = 0; i < m_nonzero_indices.size(); ++i) {
+        GSkyDir dir = m_map.inx2dir(m_nonzero_indices[i]);
         if (reg.contains(dir)) {
             overlap = true;
             break;
         }
-    } // Looped over non-zero map pixels
+    }
 
     // Return
     return overlap;
@@ -439,30 +439,30 @@ bool GSkyRegionMap::overlaps(const GSkyRegion& reg) const
  ***************************************************************************/
 void GSkyRegionMap::init_members(void)
 {
-    // Initialise members
-    m_map  = GSkyMap();
+    // Initialie base class members
     m_type = "Map";
-    m_solid = 0.0;
-    m_nznum = 0;
+
+    // Initialise members
+    m_map.clear();
+    m_nonzero_indices.clear();
     m_filename.clear();
 
     //Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] region sky map region.
+ * @param[in] region Sky region map.
  ***************************************************************************/
 void GSkyRegionMap::copy_members(const GSkyRegionMap& map)
 {
-    // Copy attributes
-    m_map = map.m_map;
-    m_filename = map.m_filename;
-    
-    // Get non-zero pixel indices
-    get_nonzero_pixels();
+    // Copy members
+    m_map              = map.m_map;
+    m_nonzero_indices  = map.m_nonzero_indices;
+    m_filename         = map.m_filename;
     
     // Compute solid angle
     compute_solid_angle();
@@ -470,6 +470,7 @@ void GSkyRegionMap::copy_members(const GSkyRegionMap& map)
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Delete class members
@@ -480,42 +481,39 @@ void GSkyRegionMap::free_members(void)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Compute solid angle
  ***************************************************************************/
 void GSkyRegionMap::compute_solid_angle(void)
 {
+    // Initialise solid angle
+    m_solid = 0.0;
+
     // Loop over all non-zero pixels of map and add up solid angles
-    double value=0.0;
-    for (int i =0; i < m_nzarray.size(); ++i) {
-        value += m_map.solidangle(m_nzarray[i]);
-    }
-    
-    // Update member value
-    m_solid=0.0;
-    if (!gammalib::is_infinite(value))  {
-        m_solid = value;
+    for (int i = 0; i < m_nonzero_indices.size(); ++i) {
+        m_solid += m_map.solidangle(m_nonzero_indices[i]);
     }
     
     // Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Create an array of non-zero pixel indices
  ***************************************************************************/
-void GSkyRegionMap::get_nonzero_pixels(void)
+void GSkyRegionMap::set_nonzero_indices(void)
 {
+    // Clear zero pixel array
+    m_nonzero_indices.clear();
+
     // Loop over map pixels and find non-zero pixels
-    for (int i = 0; i < m_map.npix(); i++) 
-    {
-        if (m_map(i,0) > 0) {
-            m_nzarray.push_back(i);
+    for (int i = 0; i < m_map.npix(); ++i) {
+        if (m_map(i,0) != 0.0) {
+            m_nonzero_indices.push_back(i);
         }
-    } // Looped over all map pixels
-    
-    // Number of non-zero pixels
-    m_nznum=m_nzarray.size();
+    }
     
     // Return
     return;

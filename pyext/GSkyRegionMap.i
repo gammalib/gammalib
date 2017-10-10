@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GSkyRegionMap.i - Sky region class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Pierrick Martin                             *
+ *  copyright (C) 2017 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,10 +54,11 @@ public:
     bool              overlaps(const GSkyRegion& reg) const;
     
     // Other methods
-    void              load(const GFilename& filename);  
-    void              map(const GSkyMap& map); 
-    const GSkyMap&    map(void) const;
-    const std::vector<int> nonzeroindices(void) const;
+    void                    load(const GFilename& filename);
+    void                    map(const GSkyMap& map);
+    const GSkyMap&          map(void) const;
+    const GFilename&        filename(void) const;
+    const std::vector<int>& nonzero_indices(void) const;
 };
 
 

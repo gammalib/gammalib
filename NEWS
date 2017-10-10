@@ -24,6 +24,7 @@ The following classes have been added:
 - GCOMOads
 - GCOMDri
 - GCOMStatus
+- GSkyRegionMap
 
 The following classes have been removed:
 - n.a.
@@ -121,7 +122,8 @@ None
 
 12. Sky module
 --------------
-None
+The GSkyRegionMap class was added to handle arbitrary sky regions defined using
+a FITS file map. All positive pixels will define the region (#1121).
 
 
 13. Support module

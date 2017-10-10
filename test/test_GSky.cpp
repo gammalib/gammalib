@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1441,10 +1441,9 @@ void TestGSky::test_GSkyRegionMap_construct(void)
  ***************************************************************************/
 void TestGSky::test_GSkyRegionMap_logic(void)
 {
-
     // Load reference region map (a mask centred on (RA,Dec)=(0,0) with radius 0.3deg)
     GSkyRegionMap regmap(sky_region_map);
-    
+
     // Set reference directions and regions
     GSkyDir refdir_radeczerozero = GSkyDir();
     refdir_radeczerozero.radec_deg(0.0,0.0);
@@ -1455,19 +1454,19 @@ void TestGSky::test_GSkyRegionMap_logic(void)
     GSkyRegionCircle inregion(refdir_radeczerozero,0.2);
     GSkyRegionCircle outregion(refdir_radeclargeshift,0.2);
     GSkyRegionCircle overregion(refdir_radecsmallshift,0.3);
-    
+
     // Test contains dirs
     test_assert(regmap.contains(refdir_radeczerozero),"test for direction containment");
     test_assert(!regmap.contains(refdir_radeclargeshift),"test2 for direction containment");
-    
+
     // Test contains regions
     test_assert(regmap.contains(inregion),"test for region containment");
     test_assert(!regmap.contains(outregion),"test2 for region containment");
-    
+
     // Test overlaps regions
     test_assert(regmap.overlaps(inregion),"test for region overlap");
     test_assert(regmap.overlaps(overregion),"test2 for region overlap");
-    
+
     // Exit test
     return;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.hpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2017 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
