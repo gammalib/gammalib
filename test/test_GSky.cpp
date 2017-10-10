@@ -46,6 +46,7 @@
 /* __ Constants __________________________________________________________ */
 const std::string datadir    = std::getenv("TEST_DATA");
 const std::string sky_region = datadir + "/test_circle_region.reg";
+const std::string sky_region_map = datadir + "/test_map_region.fits";
 
 
 /***********************************************************************//**
@@ -79,6 +80,10 @@ void TestGSky::set(void){
            "Test GSkyRegionCircle constructors");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),
            "Test GSkyRegionCircle logic");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionMap_construct),
+           "Test GSkyRegionMap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionMap_logic),
+           "Test GSkyRegionMap logic");
     append(static_cast<pfunction>(&TestGSky::test_GHorizDir),
            "Test GHorizDir");
 
@@ -1378,7 +1383,7 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
 
     // Test contain dirs
 	test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
-    test_assert(refregion.contains(centre), "test if centre in circle");
+  test_assert(refregion.contains(centre), "test if centre in circle");
 	test_assert(!refregion.contains(refdir_outside_refregion), "test2 for containment");
 
 	// Test contain regions
@@ -1396,6 +1401,74 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
 	test_assert(!refregion.overlaps(refregion_decpole),"test4 for overlap");
 
 	// Exit test
+    return;
+}
+
+
+/***************************************************************************
+ * @brief GSkyRegionMap_construct
+ ***************************************************************************/
+void TestGSky::test_GSkyRegionMap_construct(void)
+{
+    // Test file constructor:
+    test_try("Test file constructor");
+    try {
+        GSkyRegionMap regmap(sky_region_map);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test skymap constructor
+    GSkyMap skymap("TAN", "CEL", 0.0, 0.0, 0.1, 0.1, 100, 100);
+    test_try("Test skymap constructor");
+    try {
+      GSkyRegionMap regmap(skymap);
+      test_try_success();
+    }
+    catch (std::exception &e) {
+      test_try_failure(e);
+    }
+    
+    // Exit test
+    return;
+}
+
+
+/***************************************************************************
+ * @brief GSkyRegionMap_logic
+ ***************************************************************************/
+void TestGSky::test_GSkyRegionMap_logic(void)
+{
+
+    // Load reference region map (a mask centred on (RA,Dec)=(0,0) with radius 0.3deg)
+    GSkyRegionMap regmap(sky_region_map);
+    
+    // Set reference directions and regions
+    GSkyDir refdir_radeczerozero = GSkyDir();
+    refdir_radeczerozero.radec_deg(0.0,0.0);
+    GSkyDir refdir_radeclargeshift = GSkyDir();
+    refdir_radeclargeshift.radec_deg(2.0,0.0);
+    GSkyDir refdir_radecsmallshift = GSkyDir();
+    refdir_radecsmallshift.radec_deg(0.3,0.0);
+    GSkyRegionCircle inregion(refdir_radeczerozero,0.2);
+    GSkyRegionCircle outregion(refdir_radeclargeshift,0.2);
+    GSkyRegionCircle overregion(refdir_radecsmallshift,0.3);
+    
+    // Test contains dirs
+    test_assert(regmap.contains(refdir_radeczerozero),"test for direction containment");
+    test_assert(!regmap.contains(refdir_radeclargeshift),"test2 for direction containment");
+    
+    // Test contains regions
+    test_assert(regmap.contains(inregion),"test for region containment");
+    test_assert(!regmap.contains(outregion),"test2 for region containment");
+    
+    // Test overlaps regions
+    test_assert(regmap.overlaps(inregion),"test for region overlap");
+    test_assert(regmap.overlaps(overregion),"test2 for region overlap");
+    
+    // Exit test
     return;
 }
 

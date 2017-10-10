@@ -52,6 +52,8 @@ public:
     void                test_GSkyRegions_io(void);
     void                test_GSkyRegionCircle_construct(void);
     void                test_GSkyRegionCircle_logic(void);
+    void                test_GSkyRegionMap_construct(void);
+    void                test_GSkyRegionMap_logic(void);
     void                test_GHorizDir(void);
 
 // Private methods
