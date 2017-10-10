@@ -306,17 +306,24 @@ std::string GSkyRegionMap::print(const GChatter& chatter) const
  ***************************************************************************/
 bool GSkyRegionMap::contains(const GSkyDir& dir) const
 {
+    // Initialize
     bool contain = false;
     
-    // Convert sky direction into pixel index
-    int i_dir = m_map.dir2inx(dir);
+    // If direction is within map boundaries
+    if (m_map.contains(dir)) {
+        
+        // Convert sky direction into pixel index
+        int i_dir = m_map.dir2inx(dir);
     
-    for (int i = 0; i < m_nzarray.size(); i++ ) {
-        if (i_dir == m_nzarray[i]) { 
-            contain = true;
-            break;
-        }
-    } // Looped over all non-zero map pixels
+        for (int i = 0; i < m_nzarray.size(); i++ ) {
+            if (i_dir == m_nzarray[i]) { 
+                contain = true;
+                break;
+            }
+            
+        } // Looped over all non-zero map pixels
+        
+    } // Map contains direction
     
     // Return value
     return contain;
