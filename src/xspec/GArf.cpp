@@ -459,9 +459,9 @@ void GArf::save(const GFilename& filename, const bool& clobber) const
  * response information is expected in the `SPECRESP` column.
  *
  * The method will analyze the unit of the `SPECRESP` column, and if either
- * `m^2` or `m2` are encountered, multiply the values of the column by 
- * \f$10^4\f$ to convert the response into units of \f$cm^2\f$. Units of the
- * `ENERG_LO` and `ENERG_HI` columns are also interpreted for conversion.
+ * `m**2`, `m^2` or `m2` are encountered, multiply the values of the column
+ * by \f$10^4\f$ to convert the response into units of \f$cm^2\f$. Units of
+ * the `ENERG_LO` and `ENERG_HI` columns are also interpreted for conversion.
  *
  * See
  * http://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc4
@@ -480,9 +480,9 @@ void GArf::read(const GFitsTable& table)
     // Determine effective area conversion factor. Internal
     // units are cm^2
     std::string u_specresp =
-                gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
+         gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
     double      c_specresp = 1.0;
-    if (u_specresp == "m^2" || u_specresp == "m2") {
+    if (u_specresp == "m**2" || u_specresp == "m^2" || u_specresp == "m2") {
         c_specresp = 10000.0;
     }
 
@@ -491,7 +491,7 @@ void GArf::read(const GFitsTable& table)
 
     // Set energy bins
     for (int i = 0; i < num; ++i) {
-    
+
         // Append energy bin
         GEnergy emin(energy_lo->real(i), energy_lo->unit());
         GEnergy emax(energy_hi->real(i), energy_hi->unit());
@@ -582,7 +582,7 @@ void GArf::write(GFits& fits) const
         // Set column units
         energy_lo.unit("keV");
         energy_hi.unit("keV");
-        specresp.unit("cm^2");
+        specresp.unit("cm**2");
 
         // Set table attributes
         hdu.extname(gammalib::extname_arf);

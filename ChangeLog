@@ -1,8 +1,9 @@
-2017-10-10
+2017-10-11
 
         * Version 1.5.0 released
         =========================
 
+        Fix OpenMP segfault issue when fetching CTA events (#2192) 
         Correct GModelSpatialComposite::copy_members() bug.
         Improve efficiency of GGti::contains() method.
         Add GFitsTableCol::scale() method (#2191)

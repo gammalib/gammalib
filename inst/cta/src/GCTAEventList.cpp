@@ -705,14 +705,6 @@ void GCTAEventList::fetch(void) const
         // Continue only if the file name is not empty
         if (!m_filename.is_empty()) {
 
-            // Throw an exception if the file does not exist
-            if (!m_filename.exists()) {
-                std::string msg = "File \""+m_filename+"\" not found. "
-                                  "Cannot fetch events. Maybe the file has "
-                                  "been deleted in the meantime.";
-                GException::file_error(G_FETCH, msg);
-            }
-
             // Initialise exception flag
             bool has_exception = false;
 
@@ -721,12 +713,12 @@ void GCTAEventList::fetch(void) const
             #pragma omp critical(GCTAEventList_fetch)
             {
             try {
-
                 // Open FITS file
                 GFits fits(m_filename);
 
                 // Initialise events extension name
-                std::string extname = fits.filename().extname(gammalib::extname_cta_events);
+                std::string extname =
+                     fits.filename().extname(gammalib::extname_cta_events);
 
                 // Get event list HDU
                 const GFitsTable& events = *fits.table(extname);
