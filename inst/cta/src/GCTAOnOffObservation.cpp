@@ -152,7 +152,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     m_off_spec = GPha(ereco);
 
     // Initialise response information
-    m_arf = GArf(ereco);
+    m_arf = GArf(etrue);
     m_rmf = GRmf(etrue, ereco);
 
     // Store regions
@@ -933,11 +933,11 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs)
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
 {
     // Get reconstructed energy boundaries from on ARF
-    GEbounds ereco = m_arf.ebounds();
-    int      nreco = ereco.size();
+    GEbounds etrue = m_arf.ebounds();
+    int      ntrue = etrue.size();
 
     // Continue only if there are ARF bins
-    if (nreco > 0) {
+    if (ntrue > 0) {
     
         // Get CTA response pointer. Throw an exception if no response is found
         const GCTAResponseIrf* response =
@@ -959,11 +959,11 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
         std::vector<int> pixidx = m_on_regions.nonzeroindices();
         int pixnum = pixidx.size();
         
-        // Loop over reconstructed energies
-        for (int i = 0; i < nreco; ++i) {
+        // Loop over true energies
+        for (int i = 0; i < ntrue; ++i) {
         
             // Get mean energy of bin
-            double logEreco = ereco.elogmean(i).log10TeV();
+            double logEtrue = etrue.elogmean(i).log10TeV();
 
             // Initialize effective area for this bin
             m_arf[i] = 0.0;
@@ -989,7 +989,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
                                            phi,
                                            zenith,
                                            azimuth,
-                                           logEreco)*pixsolid;
+                                           logEtrue)*pixsolid;
                                            
                 // Add pixel solid angle to total for averaging later
                 totsolid += pixsolid;
@@ -1001,7 +1001,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
                                         phi,
                                         zenith,
                                         azimuth,
-                                        logEreco)*pixsolid;
+                                        logEtrue)*pixsolid;
 
             } // Looped over all pixels in map
             
@@ -1015,7 +1015,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
                 m_arf[i] *= totpsf;
             }
        
-        } // endfor: looped over reconstructed energies
+        } // endfor: looped over true energies
         
 	} // endif: there were energy bins
 
@@ -1122,7 +1122,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 {
     // Get reconstructed energy boundaries from on ARF
-    GEbounds ereco = m_arf.ebounds();
+    GEbounds ereco = m_rmf.emeasured();
     int      nreco = ereco.size();
     
     // Continue only if there are ARF bins
@@ -1155,7 +1155,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
             // Get mean log10 energy in TeV of bin
             double logEreco = ereco.elogmean(i).log10TeV();
 
-            // Initialise effective area totals
+            // Initialise background rate totals
             double aon(0.0);
             double aoff(0.0);
             
@@ -1358,17 +1358,25 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
 
         // Initialise parameter index
         int ipar = 0;
+        
+        // Get true energy binning (loop over bins further down)
+        GEbounds etrue = m_arf.ebounds();
+        int      ntrue = etrue.size();
+        
+        /* Previous version without RMF
 
-        // Get energy bin bounds
-        const GEnergy emin   = m_on_spec.ebounds().emin(ibin);
-        const GEnergy emax   = m_on_spec.ebounds().emax(ibin);
-        const GEnergy emean  = m_on_spec.ebounds().elogmean(ibin);
-        const double  ewidth = m_on_spec.ebounds().ewidth(ibin).MeV();
-
+        // Get reconstructed energy bin properties
+        const GEnergy erecomin   = m_on_spec.ebounds().emin(ibin);
+        const GEnergy erecomax   = m_on_spec.ebounds().emax(ibin);
+        const GEnergy erecomean  = m_on_spec.ebounds().elogmean(ibin);
+        const double  erecowidth = m_on_spec.ebounds().ewidth(ibin).MeV();
+        
         // Compute normalisation factors
         double exposure  = m_on_spec.exposure();
         double norm_flux = m_arf[ibin] * exposure; // cm2 s
         double norm_grad = norm_flux   * ewidth;   // cm2 s MeV
+        
+        */
 
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
@@ -1402,7 +1410,42 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
             // Spectral component (the useful one)
             GModelSpectral* spectral = sky->spectral();
             if (spectral != NULL)  {
+                  
+                    // Loop over true energy bins
+                    for (int itrue = 0; itrue < ntrue; ++itrue) {
+                        
+                        // True energy bin properties
+                        const GEnergy etruemin   = etrue.emin(itrue);
+                        const GEnergy etruemax   = etrue.emax(itrue);
+                        const GEnergy etruemean  = etrue.elogmean(itrue);
+                        const double  etruewidth = etrue.ewidth(itrue).MeV();
+                        
+                        // Determine number of gamma-ray events in model by
+                        // computing the flux over the true  energy bin 
+                        // in ph/cm2/s and multiplying this by effective area (cm2)
+                        // and livetime (s) and redistribution probability
+                        double norm_flux = m_arf[itrue] * m_on_spec.exposure() * m_rmf(itrue, ibin);
+                        value += spectral->flux(etruemin, etruemax) * norm_flux;
+                        
+                        // Determine the model gradients at the current true energy. The
+                        // eval() method needs a time in case that the spectral model
+                        // has a time dependence. We simply use a dummy time here.
+                        double norm_grad = norm_flux * etruewidth;
+                        spectral->eval(etruemean, GTime(), true);
 
+                        // Loop over spectral model parameters
+                        for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
+                            GModelPar& par = (*spectral)[k];
+                            if (par.is_free() && ipar < npars)  {
+                                (*grad)[ipar] += par.factor_gradient() * norm_grad;
+                            }
+                        } // Looped over model parameters
+                        
+                    } // Looped over true energy bins
+                
+                
+                /* Previous version without RMF
+                
                 // Determine the number of gamma-ray events in model by
                 // computing the flux over the energy bin in ph/cm2/s
                 // and multiplying this flux by the effective area (cm2)
@@ -1421,6 +1464,8 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                         (*grad)[ipar] = par.factor_gradient() * norm_grad;
                     }
                 }
+                
+                */
 
             } // endif: spectral component
 
@@ -1487,7 +1532,7 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
         // Get reference to background rates (events/MeV/s)
         const std::vector<double>& background = m_arf["BACKGROUND"];
 
-        // Get energy bin mean and width
+        // Get reconstructed energy bin mean and width
         const GEnergy emean  = m_off_spec.ebounds().elogmean(ibin);
         const double  ewidth = m_off_spec.ebounds().ewidth(ibin).MeV();
 
