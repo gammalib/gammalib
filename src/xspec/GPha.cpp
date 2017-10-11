@@ -514,6 +514,9 @@ void GPha::write(GFits& fits) const
         for (int i = 0; i < length; ++i) {
             col_chan(i) = i+1; // Channels start at 1
             col_data(i) = float(m_counts[i]);
+            col_stat(i) = float(std::sqrt(std::abs(m_counts[i])));
+            col_area(i) = 1.0;
+            col_back(i) = 1.0;
         }
 
         // Set table attributes
