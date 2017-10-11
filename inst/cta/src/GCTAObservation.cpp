@@ -1136,16 +1136,17 @@ void GCTAObservation::load(const GFilename& filename)
     {
         // Store event filename
         m_eventfile = filename;
-        
+
         // Open FITS file
         GFits fits(filename);
-        
+
         // Read data
         read(fits);
-        
+
         // Close FITS file
         fits.close();
     }
+
     // Return
     return;
 }

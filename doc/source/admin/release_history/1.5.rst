@@ -18,6 +18,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`2192 <https://cta-redmine.irap.omp.eu/issues/2192>`_] -
+  Fix OpenMP segfault issue when fetching CTA events
 * Correct bug in ``GModelSpatialComposite::copy_members()``
 * [`2184 <https://cta-redmine.irap.omp.eu/issues/2184>`_] -
   Correct output of COMPTEL DRB fitting XML model

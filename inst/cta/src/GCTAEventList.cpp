@@ -715,16 +715,17 @@ void GCTAEventList::fetch(void) const
             try {
                 // Open FITS file
                 GFits fits(m_filename);
-                
+
                 // Initialise events extension name
-                std::string extname = fits.filename().extname(gammalib::extname_cta_events);
-                
+                std::string extname =
+                     fits.filename().extname(gammalib::extname_cta_events);
+
                 // Get event list HDU
                 const GFitsTable& events = *fits.table(extname);
-                
+
                 // Load event data
                 read_events(events);
-                
+
                 // Close FITS file
                 fits.close();
 

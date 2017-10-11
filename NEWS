@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-10 October 2017
+11 October 2017
 
 
 1. Introduction
@@ -161,7 +161,8 @@ None
 
 20. CTA interface
 -----------------
-None
+Fix a segmentation fault issue when fetching CTA events from an event list
+(#2192).
 
 
 21. COMPTEL interface
