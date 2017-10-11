@@ -39,6 +39,8 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OPERATOR_PLUS                             "GPha::operator+=(GPha&)"
+#define G_OPERATOR_MINUS                            "GPha::operator-=(GPha&)"
 #define G_AT                                                 "GPha::at(int&)"
 #define G_READ                                      "GPha::read(GFitsTable*)"
 
@@ -183,6 +185,97 @@ GPha& GPha::operator=(const GPha& pha)
         copy_members(pha);
 
     } // endif: object was not identical
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Add spectrum
+ *
+ * @param[in] pha Pulse Height Analyzer spectrum.
+ * @return Sum of Pulse Height Analyzer spectra.
+ *
+ * @exception GException::invalid_value
+ *            Incompatible spectrum.
+ ***************************************************************************/
+GPha& GPha::operator+=(const GPha& pha)
+{
+    // Throw an exception if the spectra are not compatible
+    if (this->ebounds() != pha.ebounds()) {
+        std::string msg = "Incompatible energy binning of Pulse Height "
+                          "Analyzer spectrum.";
+        throw GException::invalid_value(G_OPERATOR_PLUS, msg);
+    }
+    
+    // Add spectra
+    for (int i = 0; i < this->size(); ++i) {
+        m_counts[i] += pha.m_counts[i];
+    }
+
+    // Add attributes
+    m_underflow += pha.m_underflow;
+    m_overflow  += pha.m_overflow;
+    m_outflow   += pha.m_outflow;
+    m_exposure  += pha.m_exposure;
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Subtract spectrum
+ *
+ * @param[in] pha Pulse Height Analyzer spectrum.
+ * @return Difference of Pulse Height Analyzer spectra.
+ *
+ * @exception GException::invalid_value
+ *            Incompatible spectrum.
+ ***************************************************************************/
+GPha& GPha::operator-=(const GPha& pha)
+{
+    // Throw an exception if the spectra are not compatible
+    if (this->ebounds() != pha.ebounds()) {
+        std::string msg = "Incompatible energy binning of Pulse Height "
+                          "Analyzer spectrum.";
+        throw GException::invalid_value(G_OPERATOR_PLUS, msg);
+    }
+    
+    // Subtract spectra
+    for (int i = 0; i < this->size(); ++i) {
+        m_counts[i] -= pha.m_counts[i];
+    }
+
+    // Subtract attributes
+    m_underflow -= pha.m_underflow;
+    m_overflow  -= pha.m_overflow;
+    m_outflow   -= pha.m_outflow;
+    m_exposure  -= pha.m_exposure;
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Scale spectrum
+ *
+ * @param[in] pha Pulse Height Analyzer spectrum.
+ * @return Scaled Pulse Height Analyzer spectra.
+ ***************************************************************************/
+GPha& GPha::operator*=(const double& scale)
+{
+    // Scale spectrums
+    for (int i = 0; i < this->size(); ++i) {
+        m_counts[i] *= scale;
+    }
+
+    // Scale attributes
+    m_underflow *= scale;
+    m_overflow  *= scale;
+    m_outflow   *= scale;
 
     // Return
     return *this;

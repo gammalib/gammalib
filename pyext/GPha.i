@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPha.i - XSPEC Pulse Height Analyzer class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,11 @@ public:
     explicit GPha(const int& bins);
     GPha(const GPha& pha);
     virtual ~GPha(void);
+
+    // Operators
+    GPha& operator+=(const GPha& pha);
+    GPha& operator-=(const GPha& pha);
+    GPha& operator*=(const double& scale);
 
     // Methods
     void             clear(void);
@@ -90,6 +95,15 @@ public:
     }
     int __len__() {
         return (self->size());
+    }
+    GPha __add__(const GPha& pha) const {
+        return ((*self) + pha);
+    }
+    GPha __sub__(const GPha& pha) const {
+        return ((*self) - pha);
+    }
+    GPha __mul__(const double& scale) const {
+        return ((*self) * scale);
     }
     GPha copy() {
         return (*self);

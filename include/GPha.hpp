@@ -61,6 +61,12 @@ namespace gammalib {
  ***************************************************************************/
 class GPha : public GBase {
 
+    // Operator friends
+    friend GPha operator+(const GPha& a,       const GPha& b);
+    friend GPha operator-(const GPha& a,       const GPha& b);
+    friend GPha operator*(const GPha& pha,     const double& scale);
+    friend GPha operator*(const double& scale, const GPha& pha);
+
 public:
     // Constructors and destructors
     GPha(void);
@@ -72,6 +78,9 @@ public:
 
     // Operators
     GPha&         operator=(const GPha& pha);
+    GPha&         operator+=(const GPha& pha);
+    GPha&         operator-=(const GPha& pha);
+    GPha&         operator*=(const double& scale);
     double&       operator[](const int& index);
     const double& operator[](const int& index) const;
 
@@ -270,6 +279,70 @@ inline
 const GFilename& GPha::filename(void) const
 {
     return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Spectrum addition operator friend
+ *
+ * @param[in] a First Pulse Height Analyzer spectrum.
+ * @param[in] b Second Pulse Height Analyzer spectrum.
+ * @return Sum of Pulse Height Analyzer spectra.
+ ***************************************************************************/
+inline
+GPha operator+(const GPha& a, const GPha& b)
+{
+    GPha result = a;
+    result     += b;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Spectrum subtraction operator friend
+ *
+ * @param[in] a First Pulse Height Analyzer spectrum.
+ * @param[in] b Second Pulse Height Analyzer spectrum.
+ * @return Difference of Pulse Height Analyzer spectra.
+ ***************************************************************************/
+inline
+GPha operator-(const GPha& a, const GPha& b)
+{
+    GPha result = a;
+    result     -= b;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Spectrum scale operator friend
+ *
+ * @param[in] pha Pulse Height Analyzer spectrum.
+ * @param[in] scale Scale factor.
+ * @return Scaled Pulse Height Analyzer spectrum.
+ ***************************************************************************/
+inline
+GPha operator*(const GPha& pha, const double& scale)
+{
+    GPha result = pha;
+    result     *= scale;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Spectrum scale operator friend
+ *
+ * @param[in] pha Pulse Height Analyzer spectrum.
+ * @param[in] scale Scale factor.
+ * @return Scaled Pulse Height Analyzer spectrum.
+ ***************************************************************************/
+inline
+GPha operator*(const double& scale, const GPha& pha)
+{
+    GPha result = pha;
+    result     *= scale;
+    return result;
 }
 
 #endif /* GPHA_HPP */

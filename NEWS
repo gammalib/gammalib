@@ -44,6 +44,13 @@ The following methods have been added:
 - GCOMInstDir(GSkyDir&, double&)
 - GEbounds::operator==(GEbounds&, GEbounds&)
 - GEbounds::operator!=(GEbounds&, GEbounds&)
+- GPha::operator+=(GPha&)
+- GPha::operator-=(GPha&)
+- GPha::operator*=(double&)
+- operator+(GPha&, GPha&)
+- operator-(GPha&, GPha&)
+- operator*(GPha&, double&)
+- operator*(double&, double&)
 
 The following methods have been removed:
 - n.a.
@@ -147,7 +154,7 @@ None
 
 16. Xspec module
 ----------------
-None
+Add arithmetic operators for GPha class to add, subtract and scale spectra.
 
 
 17. Test module

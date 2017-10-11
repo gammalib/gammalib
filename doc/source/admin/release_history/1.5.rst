@@ -31,6 +31,7 @@ Improvements
 ------------
 
 * Add ``GEbounds`` equality and inequality operators
+* Add ``GPha`` arithmetic operators
 * Improve efficiency of ``GGti::contains()`` method
 * [`2191 <https://cta-redmine.irap.omp.eu/issues/2191>`_] -
   Add ``GFitsTableCol::scale()`` method
