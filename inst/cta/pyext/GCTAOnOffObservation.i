@@ -79,9 +79,9 @@ public:
     GCTAOnOffObservation(const GCTAObservation& obs,
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
-                         const GSkyRegions&     on,
-                         const GSkyRegions&     off);
-    GCTAOnOffObservation(const GCTAOnOffObservation& obs);
+                         const GSkyRegionMap&     on,
+                         const GSkyRegionMap&     off,
+                         const GSkyDir            src_dir);
     virtual ~GCTAOnOffObservation(void);
  
     // Implemented pure virtual methods
@@ -106,14 +106,16 @@ public:
 
     // Other methods
     void               instrument(const std::string& instrument);
-    void               on_regions(const GSkyRegions& regions);
-    void               off_regions(const GSkyRegions& regions);
-    const GSkyRegions& on_regions(void) const;
-    const GSkyRegions& off_regions(void) const;
+    void               on_regions(const GSkyRegionMap& regionmap);
+    void               off_regions(const GSkyRegionMap& regionmap);
+    const GSkyRegionMap& on_regions(void) const;
+    const GSkyRegionMap& off_regions(void) const;
     const GPha&        on_spec(void) const;
     const GPha&        off_spec(void) const;
     const GArf&        arf(void) const;
     const GRmf&        rmf(void) const;
+    void               src_dir(const GSkyDir& src_dir);
+    const GSkyDir&     src_dir(void) const;
 };
 
 
