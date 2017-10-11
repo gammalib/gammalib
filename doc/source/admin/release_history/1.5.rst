@@ -30,6 +30,7 @@ Bug fixes
 Improvements
 ------------
 
+* Add ``GEbounds`` equality and inequality operators
 * Improve efficiency of ``GGti::contains()`` method
 * [`2191 <https://cta-redmine.irap.omp.eu/issues/2191>`_] -
   Add ``GFitsTableCol::scale()`` method

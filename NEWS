@@ -42,6 +42,8 @@ The following methods have been added:
 - GModelSpectralNodes(GModelSpectral&, GEnergies&)
 - GFitsTableCol::scale(double&, double&)
 - GCOMInstDir(GSkyDir&, double&)
+- GEbounds::operator==(GEbounds&, GEbounds&)
+- GEbounds::operator!=(GEbounds&, GEbounds&)
 
 The following methods have been removed:
 - n.a.
@@ -113,6 +115,8 @@ A rounding error was fixed in GTime::utc() so that times such as
 The efficiency of the GGti::contains() method has been improved for subsequent
 checking of sorted times. Now a new time search always starts at the last
 successful index so that the number of search loops is minimized.
+
+Add equality and inequality operators for the GEbounds class.
 
 
 11. Optimization module

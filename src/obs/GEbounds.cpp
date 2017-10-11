@@ -1456,3 +1456,41 @@ void GEbounds::insert_eng(const int&     index,
     // Return
     return;
 }
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                Friends                                  =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Energy boundaries equality operator friend
+ *
+ * @param[in] a First energy boundaries.
+ * @param[in] b Second energy boundaries.
+ * @return True if both energy boundaries are identical.
+ ***************************************************************************/
+bool operator==(const GEbounds& a, const GEbounds& b)
+{
+    // Initialise identify flag
+    bool identity = true;
+
+    // Check that both energy boundaries have the same size
+    if (a.size() != b.size()) {
+        identity = false;
+    }
+
+    // Check all energy boundaries
+    else {
+        for (int i = 0; i < a.size(); ++i) {
+            if ((a.emin(i) != b.emin(i)) || (a.emax(i) != b.emax(i))) {
+                identity = false;
+                break;
+            }
+        }
+    }
+
+    // Return identity flag
+    return identity;
+}

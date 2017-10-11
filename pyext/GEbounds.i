@@ -122,6 +122,12 @@ public:
             throw GException::invalid_argument("__getitem__(PyObject)","");
         }
     }
+    bool __eq__(const GEbounds& bounds) const {
+        return ((*self) == bounds);
+    }
+    bool __ne__(const GEbounds& bounds) const {
+        return ((*self) != bounds);
+    }
     GEbounds copy() {
         return (*self);
     }

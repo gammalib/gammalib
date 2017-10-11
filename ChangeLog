@@ -3,6 +3,7 @@
         * Version 1.5.0 released
         =========================
 
+        Add GEbounds equality and inequality operators
         Fix OpenMP segfault issue when fetching CTA events (#2192) 
         Correct GModelSpatialComposite::copy_members() bug.
         Improve efficiency of GGti::contains() method.

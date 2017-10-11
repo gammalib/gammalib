@@ -59,6 +59,10 @@ namespace gammalib {
  ***************************************************************************/
 class GEbounds : public GContainer {
 
+    // Operator friends
+    friend bool operator==(const GEbounds& a, const GEbounds& b);
+    friend bool operator!=(const GEbounds& a, const GEbounds& b);
+
 public:
     // Constructors and destructors
     GEbounds(void);
@@ -189,6 +193,20 @@ inline
 const GEnergy& GEbounds::emax(void) const
 {
     return m_emax;
+}
+
+
+/***********************************************************************//**
+ * @brief Energy boundaries inequality operator friend
+ *
+ * @param[in] a First energy boundaries.
+ * @param[in] b Second energy boundaries.
+ * @return True if both energy boundaries are different.
+ ***************************************************************************/
+inline
+bool operator!=(const GEbounds& a, const GEbounds& b)
+{
+    return (!(a == b));
 }
 
 #endif /* GEBOUNDS_HPP */

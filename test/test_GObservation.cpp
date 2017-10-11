@@ -375,6 +375,12 @@ void TestGObservation::test_ebounds(void)
     test_value(ebds2.emin().MeV(), 123.0, 1.0e-10, "Energy boundary setter");
     test_value(ebds2.emax().MeV(), 511.0, 1.0e-10, "Energy boundary setter");
 
+    // Check equality operator
+    test_assert(ebds1 == ebds1, "Equality operator");
+
+    // Check inequality operator
+    test_assert(ebds1 != ebds2, "Inequality operator");
+
     // Return
     return;
 }

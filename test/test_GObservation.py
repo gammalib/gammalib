@@ -204,8 +204,8 @@ class Test(gammalib.GPythonTestSuite):
         energy2 = gammalib.GEnergy(5.0, 'TeV')
         self.test_assert(energy1 == energy1, 'Check equality operator')
 
-        # Non-equality operator
-        self.test_assert(energy1 != energy2, 'Check non-equality operator')
+        # Inequality operator
+        self.test_assert(energy1 != energy2, 'Check inequality operator')
 
         # Smaller than operator
         self.test_assert(energy1 < energy2, 'Check smaller than operator')
@@ -325,6 +325,27 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(energies[:-7][0].MeV(), 1.0)
         self.test_value(energies[:-7][1].MeV(), 2.0)
         self.test_value(energies[:-7][2].MeV(), 3.0)
+
+        # Return
+        return
+
+    # Test GEbounds class
+    def _test_ebounds(self):
+        """
+        Test GEbounds class
+        """
+        # Equality operator
+        ebounds1 = gammalib.GEbounds(10, gammalib.GEnergy(1.0,  'MeV'),
+                                         gammalib.GEnergy(11.0, 'MeV'))
+        ebounds2 = gammalib.GEbounds(10, gammalib.GEnergy(1.1,  'MeV'),
+                                         gammalib.GEnergy(11.0, 'MeV'))
+        ebounds3 = gammalib.GEbounds(11, gammalib.GEnergy(1.0,  'MeV'),
+                                         gammalib.GEnergy(11.0, 'MeV'))
+        self.test_assert(ebounds1 == ebounds1, 'Check equality operator')
+
+        # Inequality operator
+        self.test_assert(ebounds1 != ebounds2, 'Check inequality operator')
+        self.test_assert(ebounds1 != ebounds3, 'Check inequality operator')
 
         # Return
         return
@@ -719,6 +740,7 @@ class Test(gammalib.GPythonTestSuite):
         # Append tests
         self.append(self._test_energy, 'Test GEnergy')
         self.append(self._test_energies, 'Test GEnergies')
+        self.append(self._test_ebounds, 'Test GEbounds')
         self.append(self._test_time, 'Test GTime')
         self.append(self._test_energies_access, 'Test GEnergies energy access')
         self.append(self._test_times_access, 'Test GTimes time access')
