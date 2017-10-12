@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GXspec.hpp - Test Xspec module                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -127,8 +127,8 @@ void TestGXspec::test_GPha(void)
     test_value(pha[0], 5.0, 1.0e-6);
     test_value(pha[1], 3.7, 1.0e-6);
     test_value(pha.counts(),   11.7, 1.0e-6);
-    test_value(pha.underflow(), 0.0, 1.0e-6);
-    test_value(pha.overflow(),  0.0, 1.0e-6);
+    test_value(pha.underflow(), 1.0, 1.0e-6);
+    test_value(pha.overflow(),  1.0, 1.0e-6);
     test_value(pha.outflow(),   0.0, 1.0e-6);
     for (int i = 2; i < 9; i += 2) {
         test_value(pha.at(i), 0.0);
@@ -146,8 +146,8 @@ void TestGXspec::test_GPha(void)
     test_value(pha2[0], 5.0, 1.0e-6);
     test_value(pha2[1], 3.7, 1.0e-6);
     test_value(pha2.counts(),   11.7, 1.0e-6);
-    test_value(pha2.underflow(), 0.0, 1.0e-6);
-    test_value(pha2.overflow(),  0.0, 1.0e-6);
+    test_value(pha2.underflow(), 1.0, 1.0e-6);
+    test_value(pha2.overflow(),  1.0, 1.0e-6);
     test_value(pha2.outflow(),   0.0, 1.0e-6);
     for (int i = 2; i < 9; i += 2) {
         test_value(pha2.at(i), 0.0);
@@ -157,8 +157,72 @@ void TestGXspec::test_GPha(void)
         test_value(pha2.at(i), 1.0);
         test_value(pha2[i], 1.0);
     }
-    //std::cout << pha << std::endl;
-    //std::cout << pha2 << std::endl;
+
+    // Test addition operator
+    GPha pha3 = pha2 + pha2;
+    test_value(pha3[0], 10.0, 1.0e-6);
+    test_value(pha3[1],  7.4, 1.0e-6);
+    test_value(pha3.counts(),   23.4, 1.0e-6);
+    test_value(pha3.underflow(), 2.0, 1.0e-6);
+    test_value(pha3.overflow(),  2.0, 1.0e-6);
+    test_value(pha3.outflow(),   0.0, 1.0e-6);
+
+    // Test subtraction operator
+    GPha pha4 = pha2 - pha2;
+    test_value(pha4[0], 0.0, 1.0e-6);
+    test_value(pha4[1], 0.0, 1.0e-6);
+    test_value(pha4.counts(),    0.0, 1.0e-6);
+    test_value(pha4.underflow(), 0.0, 1.0e-6);
+    test_value(pha4.overflow(),  0.0, 1.0e-6);
+    test_value(pha4.outflow(),   0.0, 1.0e-6);
+
+    // Test scale operator
+    GPha pha5 = pha2 * 2.0;
+    test_value(pha5[0], 10.0, 1.0e-6);
+    test_value(pha5[1],  7.4, 1.0e-6);
+    test_value(pha5.counts(),   23.4, 1.0e-6);
+    test_value(pha5.underflow(), 2.0, 1.0e-6);
+    test_value(pha5.overflow(),  2.0, 1.0e-6);
+    test_value(pha5.outflow(),   0.0, 1.0e-6);
+
+    // Test scale operator
+    GPha pha6 = 2.0 * pha2;
+    test_value(pha6[0], 10.0, 1.0e-6);
+    test_value(pha6[1],  7.4, 1.0e-6);
+    test_value(pha6.counts(),   23.4, 1.0e-6);
+    test_value(pha6.underflow(), 2.0, 1.0e-6);
+    test_value(pha6.overflow(),  2.0, 1.0e-6);
+    test_value(pha6.outflow(),   0.0, 1.0e-6);
+
+    // Test unary addition operator
+    GPha pha7 = pha2;
+    pha7 += pha2;
+    test_value(pha7[0], 10.0, 1.0e-6);
+    test_value(pha7[1],  7.4, 1.0e-6);
+    test_value(pha7.counts(),   23.4, 1.0e-6);
+    test_value(pha7.underflow(), 2.0, 1.0e-6);
+    test_value(pha7.overflow(),  2.0, 1.0e-6);
+    test_value(pha7.outflow(),   0.0, 1.0e-6);
+
+    // Test unary subtraction operator
+    GPha pha8 = pha2;
+    pha8 -= pha2;
+    test_value(pha8[0], 0.0, 1.0e-6);
+    test_value(pha8[1], 0.0, 1.0e-6);
+    test_value(pha8.counts(),    0.0, 1.0e-6);
+    test_value(pha8.underflow(), 0.0, 1.0e-6);
+    test_value(pha8.overflow(),  0.0, 1.0e-6);
+    test_value(pha8.outflow(),   0.0, 1.0e-6);
+
+    // Test unary scale operator
+    GPha pha9 = pha2;
+    pha9 *= 2.0;
+    test_value(pha9[0], 10.0, 1.0e-6);
+    test_value(pha9[1],  7.4, 1.0e-6);
+    test_value(pha9.counts(),   23.4, 1.0e-6);
+    test_value(pha9.underflow(), 2.0, 1.0e-6);
+    test_value(pha9.overflow(),  2.0, 1.0e-6);
+    test_value(pha9.outflow(),   0.0, 1.0e-6);
 
     // Return
     return;

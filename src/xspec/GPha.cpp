@@ -42,6 +42,10 @@
 #define G_OPERATOR_PLUS                             "GPha::operator+=(GPha&)"
 #define G_OPERATOR_MINUS                            "GPha::operator-=(GPha&)"
 #define G_AT                                                 "GPha::at(int&)"
+#define G_AREASCAL_SET                        "GPha::areascal(int&, double&)"
+#define G_AREASCAL_GET                                 "GPha::areascal(int&)"
+#define G_BACKSCAL_SET                        "GPha::backscal(int&, double&)"
+#define G_BACKSCAL_GET                                 "GPha::backscal(int&)"
 #define G_READ                                      "GPha::read(GFitsTable*)"
 
 /* __ Macros _____________________________________________________________ */
@@ -102,7 +106,7 @@ GPha::GPha(const GEbounds& ebds)
     m_ebounds = ebds;
 
     // Initialize spectrum
-    m_counts.assign(ebds.size(), 0.0);
+    alloc(ebds.size());
 
     // Return
     return;
@@ -120,7 +124,7 @@ GPha::GPha(const int& bins)
     init_members();
 
     // Initialize spectrum
-    m_counts.assign(bins, 0.0);
+    alloc(bins);
 
     // Return
     return;
@@ -199,6 +203,26 @@ GPha& GPha::operator=(const GPha& pha)
  *
  * @exception GException::invalid_value
  *            Incompatible spectrum.
+ *
+ * Adds the counts of a spectrum to the counts of the current spectrum. The
+ * operator also adds the exposure times of the spectrum to the current
+ * exposure time. The area scaling factor \f$\alpha\f$ is recomputed for
+ * each spectral bin using
+ *
+ * \f[
+ *    \alpha = \frac{N_1 + N_2}{\frac{N_1}{\alpha_1} + \frac{N_2}{\alpha_2}}
+ * \f]
+ *
+ * where
+ * \f$N_1\f$ and \f$N_2\f$ are the number of events in the bin for spectrum
+ * 1 and 2, respectively, and
+ * \f$\alpha_1\f$ and \f$\alpha_2\f$ are the corresponding area scaling
+ * factors.
+ *
+ * The background scaling factor is not altered.
+ *
+ * The operator only works if the provide specturm has the same energy
+ * binning than the current spectrum.
  ***************************************************************************/
 GPha& GPha::operator+=(const GPha& pha)
 {
@@ -211,6 +235,18 @@ GPha& GPha::operator+=(const GPha& pha)
     
     // Add spectra
     for (int i = 0; i < this->size(); ++i) {
+
+        // Update the area scaling
+        double n1     = m_counts[i];
+        double n2     = pha.m_counts[i];
+        double a1     = m_areascal[i];
+        double a2     = pha.m_areascal[i];
+        double f1     = (a1 > 0.0) ? n1/a1 : 0.0;
+        double f2     = (a2 > 0.0) ? n2/a2 : 0.0;
+        double f      = f1 + f2;
+        m_areascal[i] = (f > 0.0) ? (n1+n2)/f : 1.0;
+
+        // Add counts
         m_counts[i] += pha.m_counts[i];
     }
 
@@ -233,6 +269,26 @@ GPha& GPha::operator+=(const GPha& pha)
  *
  * @exception GException::invalid_value
  *            Incompatible spectrum.
+ *
+ * Subtracts the counts of a spectrum from the counts of the current
+ * spectrum. The operator also subtracts the exposure times of the spectrum
+ * from the current exposure time.  The area scaling factor \f$\alpha\f$ is
+ * recomputed for each spectral bin using
+ *
+ * \f[
+ *    \alpha = \frac{N_1 - N_2}{\frac{N_1}{\alpha_1} - \frac{N_2}{\alpha_2}}
+ * \f]
+ *
+ * where
+ * \f$N_1\f$ and \f$N_2\f$ are the number of events in the bin for spectrum
+ * 1 and 2, respectively, and
+ * \f$\alpha_1\f$ and \f$\alpha_2\f$ are the corresponding area scaling
+ * factors.
+ *
+ * The background scaling factor is not altered.
+ *
+ * The operator only works if the provide specturm has the same energy
+ * binning than the current spectrum.
  ***************************************************************************/
 GPha& GPha::operator-=(const GPha& pha)
 {
@@ -245,6 +301,18 @@ GPha& GPha::operator-=(const GPha& pha)
     
     // Subtract spectra
     for (int i = 0; i < this->size(); ++i) {
+
+        // Update the area scaling
+        double n1     = m_counts[i];
+        double n2     = pha.m_counts[i];
+        double a1     = m_areascal[i];
+        double a2     = pha.m_areascal[i];
+        double f1     = (a1 > 0.0) ? n1/a1 : 0.0;
+        double f2     = (a2 > 0.0) ? n2/a2 : 0.0;
+        double f      = f1 - f2;
+        m_areascal[i] = (f > 0.0) ? (n1-n2)/f : 1.0;
+
+        // Subtract counts
         m_counts[i] -= pha.m_counts[i];
     }
 
@@ -262,8 +330,11 @@ GPha& GPha::operator-=(const GPha& pha)
 /***********************************************************************//**
  * @brief Scale spectrum
  *
- * @param[in] pha Pulse Height Analyzer spectrum.
+ * @param[in] scale Scale factor.
  * @return Scaled Pulse Height Analyzer spectra.
+ *
+ * Multiplies the counts of a spectrum with a scale factor. The exposure
+ * time and scale factors are not altered.
  ***************************************************************************/
 GPha& GPha::operator*=(const double& scale)
 {
@@ -332,7 +403,7 @@ double& GPha::at(const int& index)
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Spectral bin index", index, size());
     }
 
     // Return reference
@@ -354,11 +425,113 @@ const double& GPha::at(const int& index) const
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Spectral bin index", index, size());
     }
 
     // Return reference
     return (m_counts[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Set area scaling factor
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] areascal Area scaling factor.
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin index is out of range.
+ *
+ * Set area scaling for spectral bin with specified @p index.
+ ***************************************************************************/
+void GPha::areascal(const int& index, const double& areascal)
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AREASCAL_SET, "Spectral bin index",
+                                       index, size());
+    }
+
+    // Set area scaling factor
+    m_areascal[index] = areascal;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return area scaling factor
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin index is out of range.
+ *
+ * Returns reference to area scaling for spectral bin with specified
+ * @p index.
+ ***************************************************************************/
+const double& GPha::areascal(const int& index) const
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AREASCAL_GET, "Spectral bin index",
+                                       index, size());
+    }
+
+    // Return reference
+    return (m_areascal[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Set background scaling factor
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] areascal Background scaling factor.
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin index is out of range.
+ *
+ * Set background scaling for spectral bin with specified @p index.
+ ***************************************************************************/
+void GPha::backscal(const int& index, const double& backscal)
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_BACKSCAL_SET, "Spectral bin index",
+                                       index, size());
+    }
+
+    // Set background scaling factor
+    m_backscal[index] = backscal;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return background scaling factor
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin index is out of range.
+ *
+ * Returns reference to background scaling for spectral bin with specified
+ * @p index.
+ ***************************************************************************/
+const double& GPha::backscal(const int& index) const
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_BACKSCAL_GET, "Spectral bin index",
+                                       index, size());
+    }
+
+    // Return reference
+    return (m_backscal[index]);
 }
 
 
@@ -523,6 +696,8 @@ void GPha::read(const GFitsTable& table)
 
     // Get data column
     const GFitsTableCol* col_data = table["COUNTS"];
+    const GFitsTableCol* col_area = table["AREASCAL"];
+    const GFitsTableCol* col_back = table["BACKSCAL"];
 
     // Extract number of channels in FITS file
     int length = col_data->nrows();
@@ -540,15 +715,20 @@ void GPha::read(const GFitsTable& table)
     }
 
     // Initialize spectrum
-    m_counts.assign(length, 0.0);
+    alloc(length);
 
     // Copy data
     for (int i = 0; i < length; ++i) {
-        m_counts[i] = col_data->real(i);
+        m_counts[i]   = col_data->real(i);
+        m_areascal[i] = col_area->real(i);
+        m_backscal[i] = col_back->real(i);
     }
 
     // Read keywords
-    m_exposure = (table.has_card("EXPOSURE")) ? table.real("EXPOSURE") : 0.0;
+    m_underflow = (table.has_card("UNDEFLOW")) ? table.real("UNDEFLOW") : 0.0;
+    m_overflow  = (table.has_card("OVERFLOW")) ? table.real("OVERFLOW") : 0.0;
+    m_outflow   = (table.has_card("OUTFLOW"))  ? table.real("OUTFLOW")  : 0.0;
+    m_exposure  = (table.has_card("EXPOSURE")) ? table.real("EXPOSURE") : 0.0;
 
     // Return
     return;
@@ -608,8 +788,8 @@ void GPha::write(GFits& fits) const
             col_chan(i) = i+1; // Channels start at 1
             col_data(i) = float(m_counts[i]);
             col_stat(i) = float(std::sqrt(std::abs(m_counts[i])));
-            col_area(i) = 1.0;
-            col_back(i) = 1.0;
+            col_area(i) = float(m_areascal[i]);
+            col_back(i) = float(m_backscal[i]);
         }
 
         // Set table attributes
@@ -626,7 +806,10 @@ void GPha::write(GFits& fits) const
         hdu.append(col_back);
 
         // Write keywords
-        hdu.card("EXPOSURE", m_exposure, "[s] Deadtime corrected exposure time");
+        hdu.card("UNDEFLOW", m_underflow, "Number of underflowing events");
+        hdu.card("OVERFLOW", m_overflow,  "Number of overflowing events");
+        hdu.card("OUTFLOW",  m_outflow,   "Number of outflowing events");
+        hdu.card("EXPOSURE", m_exposure,  "[s] Deadtime corrected exposure time");
 
         // Append HDU to FITS file
         fits.append(hdu);
@@ -705,6 +888,8 @@ void GPha::init_members(void)
     m_filename.clear();
     m_ebounds.clear();
     m_counts.clear();
+    m_areascal.clear();
+    m_backscal.clear();
     m_underflow = 0.0;
     m_overflow  = 0.0;
     m_outflow   = 0.0;
@@ -725,6 +910,8 @@ void GPha::copy_members(const GPha& pha)
     // Copy members
     m_filename  = pha.m_filename;
     m_counts    = pha.m_counts;
+    m_areascal  = pha.m_areascal;
+    m_backscal  = pha.m_backscal;
     m_underflow = pha.m_underflow;
     m_overflow  = pha.m_overflow;
     m_outflow   = pha.m_outflow;
@@ -741,6 +928,32 @@ void GPha::copy_members(const GPha& pha)
  ***************************************************************************/
 void GPha::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocate spectrum
+ *
+ * @param[in] size Size of spectrum.
+ *
+ * Allocates memory for a spectrum of given @p size and sets number of counts
+ * to zero and area and background scaling factors to one.
+ ***************************************************************************/
+void GPha::alloc(const int& size)
+{
+    // Initialise attributes
+    m_underflow = 0.0;
+    m_overflow  = 0.0;
+    m_outflow   = 0.0;
+    m_exposure  = 0.0;
+
+    // Initialize vectors
+    m_counts.assign(size, 0.0);
+    m_areascal.assign(size, 1.0);
+    m_backscal.assign(size, 1.0);
+
     // Return
     return;
 }

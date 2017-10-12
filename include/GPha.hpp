@@ -93,6 +93,10 @@ public:
     const double&    at(const int& index) const;
     const GEbounds&  ebounds(void) const;
     double           counts(void) const;
+    void             areascal(const int& index, const double& areascal);
+    const double&    areascal(const int& index) const;
+    void             backscal(const int& index, const double& backscal);
+    const double&    backscal(const int& index) const;
     const double&    underflow(void) const;
     const double&    overflow(void) const;
     const double&    outflow(void) const;
@@ -112,15 +116,18 @@ protected:
     void init_members(void);
     void copy_members(const GPha& pha);
     void free_members(void);
+    void alloc(const int& size);
     
     // Protected members
-    mutable GFilename   m_filename;   //!< Filename of origin
-    std::vector<double> m_counts;     //!< Counts data
-    double              m_underflow;  //!< Number of underflowing events
-    double              m_overflow;   //!< Number of overflowing events
-    double              m_outflow;    //!< Number of outflowing events
-    double              m_exposure;   //!< Exposure time (sec)
-    GEbounds            m_ebounds;    //!< Energy boundaries
+    mutable GFilename   m_filename;  //!< Filename of origin
+    std::vector<double> m_counts;    //!< Counts data
+    std::vector<double> m_areascal;  //!< Area scaling
+    std::vector<double> m_backscal;  //!< Background scaling
+    double              m_underflow; //!< Number of underflowing events
+    double              m_overflow;  //!< Number of overflowing events
+    double              m_outflow;   //!< Number of outflowing events
+    double              m_exposure;  //!< Deadtime corrected exposure time (sec)
+    GEbounds            m_ebounds;   //!< Energy boundaries
 };
 
 
