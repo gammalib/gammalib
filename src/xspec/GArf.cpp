@@ -174,6 +174,115 @@ GArf& GArf::operator=(const GArf& arf)
 
 
 /***********************************************************************//**
+ * @brief Add Auxiliary Response File
+ *
+ * @param[in] arf Auxiliary Response File.
+ * @return Sum of Auxiliary Response Files.
+ *
+ * @exception GException::invalid_value
+ *            Incompatible Auxiliary Response Files.
+ *
+ * Adds the ARF values of an Auxiliary Response File to the current values.
+ *
+ * The operator only works if the provide Auxiliary Response File has the
+ * same energy binning than the current Auxiliary Response File.
+ ***************************************************************************/
+#define G_OPERATOR_PLUS                             "GArf::operator+=(GArf&)"
+#define G_OPERATOR_MINUS                            "GArf::operator-=(GArf&)"
+GArf& GArf::operator+=(const GArf& arf)
+{
+    // Throw an exception if the spectra are not compatible
+    if (this->ebounds() != arf.ebounds()) {
+        std::string msg = "Incompatible energy binning of Auxiliary "
+                          "Response File.";
+        throw GException::invalid_value(G_OPERATOR_PLUS, msg);
+    }
+    
+    // Add ARF values
+    for (int i = 0; i < this->size(); ++i) {
+        m_specresp[i] += arf.m_specresp[i];
+    }
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Subtract Auxiliary Response File
+ *
+ * @param[in] arf Auxiliary Response File.
+ * @return Difference of Auxiliary Response File.
+ *
+ * @exception GException::invalid_value
+ *            Incompatible Auxiliary Response Files.
+ *
+ * Subtracts the ARF values of an Auxiliary Response File from the current
+ * values.
+ *
+ * The operator only works if the provide Auxiliary Response File has the
+ * same energy binning than the current Auxiliary Response File.
+ ***************************************************************************/
+GArf& GArf::operator-=(const GArf& arf)
+{
+    // Throw an exception if the spectra are not compatible
+    if (this->ebounds() != arf.ebounds()) {
+        std::string msg = "Incompatible energy binning of Auxiliary "
+                          "Response File.";
+        throw GException::invalid_value(G_OPERATOR_MINUS, msg);
+    }
+    
+    // Subtract ARF values
+    for (int i = 0; i < this->size(); ++i) {
+        m_specresp[i] -= arf.m_specresp[i];
+    }
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Scale Auxiliary Response File values
+ *
+ * @param[in] scale Scale factor.
+ * @return Scaled Auxiliary Response File.
+ *
+ * Multiplies the values of the Auxiliary Response File with a scale factor. 
+ ***************************************************************************/
+GArf& GArf::operator*=(const double& scale)
+{
+    // Scale ARF values
+    for (int i = 0; i < this->size(); ++i) {
+        m_specresp[i] *= scale;
+    }
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Divide Auxiliary Response File values
+ *
+ * @param[in] scale Division factor.
+ * @return Divided Auxiliary Response File.
+ *
+ * Divides the values of the Auxiliary Response File by a division factor.
+ ***************************************************************************/
+GArf& GArf::operator/=(const double& scale)
+{
+    // Divide ARF values
+    for (int i = 0; i < this->size(); ++i) {
+        m_specresp[i] /= scale;
+    }
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
  * @brief Return additional vector column
  *
  * @param[in] colname Vector column name.

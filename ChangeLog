@@ -1,9 +1,10 @@
-2017-10-11
+2017-10-12
 
         * Version 1.5.0 released
         =========================
 
-        Add GPha arithmetic operators
+        Add GPha arithmetic operators and scale access methods
+        Add GArf arithmetic operators
         Add GEbounds equality and inequality operators
         Fix OpenMP segfault issue when fetching CTA events (#2192) 
         Correct GModelSpatialComposite::copy_members() bug.

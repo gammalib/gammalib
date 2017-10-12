@@ -296,7 +296,7 @@ GPha& GPha::operator-=(const GPha& pha)
     if (this->ebounds() != pha.ebounds()) {
         std::string msg = "Incompatible energy binning of Pulse Height "
                           "Analyzer spectrum.";
-        throw GException::invalid_value(G_OPERATOR_PLUS, msg);
+        throw GException::invalid_value(G_OPERATOR_MINUS, msg);
     }
     
     // Subtract spectra
@@ -328,13 +328,13 @@ GPha& GPha::operator-=(const GPha& pha)
 
 
 /***********************************************************************//**
- * @brief Scale spectrum
+ * @brief Scale spectrum values
  *
  * @param[in] scale Scale factor.
- * @return Scaled Pulse Height Analyzer spectra.
+ * @return Scaled Pulse Height Analyzer spectrum.
  *
  * Multiplies the counts of a spectrum with a scale factor. The exposure
- * time and scale factors are not altered.
+ * time and area and background scale factors are not altered.
  ***************************************************************************/
 GPha& GPha::operator*=(const double& scale)
 {
@@ -347,6 +347,32 @@ GPha& GPha::operator*=(const double& scale)
     m_underflow *= scale;
     m_overflow  *= scale;
     m_outflow   *= scale;
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Divide spectrum values
+ *
+ * @param[in] scale Division factor.
+ * @return Divided Pulse Height Analyzer spectrum.
+ *
+ * Divides the counts of a spectrum by a scale factor. The exposure time
+ * and the area and background scale factors are not altered.
+ ***************************************************************************/
+GPha& GPha::operator/=(const double& scale)
+{
+    // Scale spectrums
+    for (int i = 0; i < this->size(); ++i) {
+        m_counts[i] /= scale;
+    }
+
+    // Scale attributes
+    m_underflow /= scale;
+    m_overflow  /= scale;
+    m_outflow   /= scale;
 
     // Return
     return *this;

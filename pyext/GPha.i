@@ -109,6 +109,22 @@ public:
     GPha __mul__(const double& scale) const {
         return ((*self) * scale);
     }
+    // Python 2.x
+    GPha __div__(const double& scale) const {
+        return ((*self) / scale);
+    }
+    GPha __idiv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
+    }
+    // Python 3.x
+    GPha __truediv__(const double& scale) const {
+        return ((*self) / scale);
+    }
+    GPha __itruediv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
+    }
     GPha copy() {
         return (*self);
     }

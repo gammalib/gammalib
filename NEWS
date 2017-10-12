@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-11 October 2017
+12 October 2017
 
 
 1. Introduction
@@ -47,6 +47,7 @@ The following methods have been added:
 - GPha::operator+=(GPha&)
 - GPha::operator-=(GPha&)
 - GPha::operator*=(double&)
+- GPha::operator/=(double&)
 - GPha::areascal(int&, double&)
 - GPha::areascal(int&)
 - GPha::backscal(int&, double&)
@@ -55,6 +56,16 @@ The following methods have been added:
 - operator-(GPha&, GPha&)
 - operator*(GPha&, double&)
 - operator*(double&, double&)
+- operator/(GPha&, double&)
+- GArf::operator+=(GArf&)
+- GArf::operator-=(GArf&)
+- GArf::operator*=(double&)
+- GArf::operator/=(double&)
+- operator+(GArf&, GArf&)
+- operator-(GArf&, GArf&)
+- operator*(GArf&, double&)
+- operator*(double&, double&)
+- operator/(GArf&, double&)
 
 The following methods have been removed:
 - n.a.
@@ -158,8 +169,12 @@ None
 
 16. Xspec module
 ----------------
-Add arithmetic operators for GPha class to add, subtract and scale spectra.
-Add methods to set and retrieve the area and background scaling factors.
+Added arithmetic operators for GPha class to add, subtract, scale and divide
+spectra, and methods to set and retrieve the area and background scaling
+factors.
+
+Added arithmetic operatirs for GArf class to add, subtract, scale and divide
+Auxiliary Response Files. 
 
 
 17. Test module

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GArf.hpp - XSPEC Auxiliary Response File class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,13 @@ namespace gammalib {
  ***************************************************************************/
 class GArf : public GBase {
 
+    // Operator friends
+    friend GArf operator+(const GArf& a,       const GArf& b);
+    friend GArf operator-(const GArf& a,       const GArf& b);
+    friend GArf operator*(const GArf& arf,     const double& scale);
+    friend GArf operator*(const double& scale, const GArf& arf);
+    friend GArf operator/(const GArf& arf,     const double& scale);
+
 public:
     // Constructors and destructors
     GArf(void);
@@ -61,6 +68,10 @@ public:
 
     // Operators
     GArf&         operator=(const GArf& arf);
+    GArf&         operator+=(const GArf& arf);
+    GArf&         operator-=(const GArf& arf);
+    GArf&         operator*=(const double& scale);
+    GArf&         operator/=(const double& scale);
     double&       operator[](const int& index);
     const double& operator[](const int& index) const;
     double&       operator()(const int& index, const int& col);
@@ -233,6 +244,86 @@ inline
 const GFilename& GArf::filename(void) const
 {
     return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Auxiliary Response File addition operator friend
+ *
+ * @param[in] a First Auxiliary Response File.
+ * @param[in] b Second Auxiliary Response File.
+ * @return Sum of Auxiliary Response Files.
+ ***************************************************************************/
+inline
+GArf operator+(const GArf& a, const GArf& b)
+{
+    GArf result = a;
+    result     += b;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Auxiliary Response File subtraction operator friend
+ *
+ * @param[in] a First Auxiliary Response File.
+ * @param[in] b Second Auxiliary Response File.
+ * @return Difference of Auxiliary Response Files.
+ ***************************************************************************/
+inline
+GArf operator-(const GArf& a, const GArf& b)
+{
+    GArf result = a;
+    result     -= b;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Auxiliary Response File scaling operator friend
+ *
+ * @param[in] arf Auxiliary Response File.
+ * @param[in] scale Scale factor.
+ * @return Scaled Auxiliary Response File.
+ ***************************************************************************/
+inline
+GArf operator*(const GArf& arf, const double& scale)
+{
+    GArf result = arf;
+    result     *= scale;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Auxiliary Response File scaling operator friend
+ *
+ * @param[in] scale Scale factor.
+ * @param[in] arf Auxiliary Response File.
+ * @return Scaled Auxiliary Response File.
+ ***************************************************************************/
+inline
+GArf operator*(const double& scale, const GArf& arf)
+{
+    GArf result = arf;
+    result     *= scale;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Auxiliary Response File vision operator friend
+ *
+ * @param[in] arf Auxiliary Response File.
+ * @param[in] scale Division factor.
+ * @return Divided Auxiliary Response File.
+ ***************************************************************************/
+inline
+GArf operator/(const GArf& arf, const double& scale)
+{
+    GArf result = arf;
+    result     /= scale;
+    return result;
 }
 
 #endif /* GARF_HPP */

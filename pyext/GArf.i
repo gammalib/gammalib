@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.i - XSPEC Auxiliary Response File class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,9 @@ public:
     virtual ~GArf(void);
 
     // Operators
+    GArf&   operator+=(const GArf& arf);
+    GArf&   operator-=(const GArf& arf);
+    GArf&   operator*=(const double& scale);
     double& operator()(const int& index, const int& col);
 
     // Methods
@@ -90,6 +93,31 @@ public:
     }
     int __len__() {
         return (self->size());
+    }
+    GArf __add__(const GArf& arf) const {
+        return ((*self) + arf);
+    }
+    GArf __sub__(const GArf& arf) const {
+        return ((*self) - arf);
+    }
+    GArf __mul__(const double& scale) const {
+        return ((*self) * scale);
+    }
+    // Python 2.x
+    GArf __div__(const double& scale) const {
+        return ((*self) / scale);
+    }
+    GArf __idiv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
+    }
+    // Python 3.x
+    GArf __truediv__(const double& scale) const {
+        return ((*self) / scale);
+    }
+    GArf __itruediv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
     }
     GArf copy() {
         return (*self);
