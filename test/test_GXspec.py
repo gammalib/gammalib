@@ -61,7 +61,8 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Allocate GPha object and check its size
         nmeasured = 10
-        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"), gammalib.GEnergy(10.0, "TeV"))
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"),
+                                                 gammalib.GEnergy(10.0, "TeV"))
         pha       = gammalib.GPha(emeasured)
         self.test_value(pha.size(), nmeasured)
 
@@ -80,7 +81,8 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Allocate GArf object and check its size
         nmeasured = 10
-        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"), gammalib.GEnergy(10.0, "TeV"))
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"),
+                                                 gammalib.GEnergy(10.0, "TeV"))
         arf       = gammalib.GArf(emeasured)
         self.test_value(arf.size(), nmeasured)
 
@@ -100,8 +102,10 @@ class Test(gammalib.GPythonTestSuite):
         # Allocate GRmf object and check its size
         ntrue     = 20
         nmeasured = 10
-        etrue     = gammalib.GEbounds(ntrue, gammalib.GEnergy(1.0, "TeV"), gammalib.GEnergy(10.0, "TeV"))
-        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"), gammalib.GEnergy(10.0, "TeV"))
+        etrue     = gammalib.GEbounds(ntrue, gammalib.GEnergy(1.0, "TeV"),
+                                             gammalib.GEnergy(10.0, "TeV"))
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"),
+                                                 gammalib.GEnergy(10.0, "TeV"))
         rmf       = gammalib.GRmf(etrue, emeasured)
         self.test_value(rmf.size(), ntrue*nmeasured)
         self.test_value(rmf.ntrue(), ntrue)

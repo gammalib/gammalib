@@ -30,8 +30,10 @@ Bug fixes
 Improvements
 ------------
 
+* Add ``GPha`` arithmetic operators and scale access methods
+* Add ``GArf`` arithmetic operators
+* Add ``GRmf`` arithmetic operators
 * Add ``GEbounds`` equality and inequality operators
-* Add ``GPha`` arithmetic operators
 * Improve efficiency of ``GGti::contains()`` method
 * [`2191 <https://cta-redmine.irap.omp.eu/issues/2191>`_] -
   Add ``GFitsTableCol::scale()`` method

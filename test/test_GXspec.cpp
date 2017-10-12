@@ -194,35 +194,54 @@ void TestGXspec::test_GPha(void)
     test_value(pha6.overflow(),  2.0, 1.0e-6);
     test_value(pha6.outflow(),   0.0, 1.0e-6);
 
-    // Test unary addition operator
-    GPha pha7 = pha2;
-    pha7 += pha2;
-    test_value(pha7[0], 10.0, 1.0e-6);
-    test_value(pha7[1],  7.4, 1.0e-6);
-    test_value(pha7.counts(),   23.4, 1.0e-6);
-    test_value(pha7.underflow(), 2.0, 1.0e-6);
-    test_value(pha7.overflow(),  2.0, 1.0e-6);
+    // Test division operator
+    GPha pha7 = pha2 / 2.0;
+    test_value(pha7[0],  2.5, 1.0e-6);
+    test_value(pha7[1],  1.85, 1.0e-6);
+    test_value(pha7.counts(),   5.85, 1.0e-6);
+    test_value(pha7.underflow(), 0.5, 1.0e-6);
+    test_value(pha7.overflow(),  0.5, 1.0e-6);
     test_value(pha7.outflow(),   0.0, 1.0e-6);
 
-    // Test unary subtraction operator
+    // Test unary addition operator
     GPha pha8 = pha2;
-    pha8 -= pha2;
-    test_value(pha8[0], 0.0, 1.0e-6);
-    test_value(pha8[1], 0.0, 1.0e-6);
-    test_value(pha8.counts(),    0.0, 1.0e-6);
-    test_value(pha8.underflow(), 0.0, 1.0e-6);
-    test_value(pha8.overflow(),  0.0, 1.0e-6);
+    pha8 += pha2;
+    test_value(pha8[0], 10.0, 1.0e-6);
+    test_value(pha8[1],  7.4, 1.0e-6);
+    test_value(pha8.counts(),   23.4, 1.0e-6);
+    test_value(pha8.underflow(), 2.0, 1.0e-6);
+    test_value(pha8.overflow(),  2.0, 1.0e-6);
     test_value(pha8.outflow(),   0.0, 1.0e-6);
 
-    // Test unary scale operator
+    // Test unary subtraction operator
     GPha pha9 = pha2;
-    pha9 *= 2.0;
-    test_value(pha9[0], 10.0, 1.0e-6);
-    test_value(pha9[1],  7.4, 1.0e-6);
-    test_value(pha9.counts(),   23.4, 1.0e-6);
-    test_value(pha9.underflow(), 2.0, 1.0e-6);
-    test_value(pha9.overflow(),  2.0, 1.0e-6);
+    pha9 -= pha2;
+    test_value(pha9[0], 0.0, 1.0e-6);
+    test_value(pha9[1], 0.0, 1.0e-6);
+    test_value(pha9.counts(),    0.0, 1.0e-6);
+    test_value(pha9.underflow(), 0.0, 1.0e-6);
+    test_value(pha9.overflow(),  0.0, 1.0e-6);
     test_value(pha9.outflow(),   0.0, 1.0e-6);
+
+    // Test unary scale operator
+    GPha pha10 = pha2;
+    pha10 *= 2.0;
+    test_value(pha10[0], 10.0, 1.0e-6);
+    test_value(pha10[1],  7.4, 1.0e-6);
+    test_value(pha10.counts(),   23.4, 1.0e-6);
+    test_value(pha10.underflow(), 2.0, 1.0e-6);
+    test_value(pha10.overflow(),  2.0, 1.0e-6);
+    test_value(pha10.outflow(),   0.0, 1.0e-6);
+
+    // Test unary division operator
+    GPha pha11 = pha2;
+    pha11 /= 2.0;
+    test_value(pha11[0],  2.5, 1.0e-6);
+    test_value(pha11[1],  1.85, 1.0e-6);
+    test_value(pha11.counts(),   5.85, 1.0e-6);
+    test_value(pha11.underflow(), 0.5, 1.0e-6);
+    test_value(pha11.overflow(),  0.5, 1.0e-6);
+    test_value(pha11.outflow(),   0.0, 1.0e-6);
 
     // Return
     return;
@@ -306,8 +325,55 @@ void TestGXspec::test_GArf(void)
         test_value(arf2.at(i), 0.0);
         test_value(arf2[i], 0.0);
     }
-    //std::cout << arf << std::endl;
-    //std::cout << arf2 << std::endl;
+
+    // Test addition operator
+    GArf arf3 = arf2 + arf2;
+    test_value(arf3[0], 10.0, 1.0e-6);
+    test_value(arf3[1],  7.4, 1.0e-6);
+
+    // Test subtraction operator
+    GArf arf4 = arf2 - arf2;
+    test_value(arf4[0], 0.0, 1.0e-6);
+    test_value(arf4[1], 0.0, 1.0e-6);
+
+    // Test scale operator
+    GArf arf5 = arf2 * 2.0;
+    test_value(arf5[0], 10.0, 1.0e-6);
+    test_value(arf5[1],  7.4, 1.0e-6);
+
+    // Test scale operator
+    GArf arf6 = 2.0 * arf2;
+    test_value(arf6[0], 10.0, 1.0e-6);
+    test_value(arf6[1],  7.4, 1.0e-6);
+
+    // Test division operator
+    GArf arf7 = arf2 / 2.0;
+    test_value(arf7[0], 2.5, 1.0e-6);
+    test_value(arf7[1], 1.85, 1.0e-6);
+
+    // Test unary addition operator
+    GArf arf8 = arf2;
+    arf8 += arf2;
+    test_value(arf8[0], 10.0, 1.0e-6);
+    test_value(arf8[1],  7.4, 1.0e-6);
+
+    // Test unary subtraction operator
+    GArf arf9 = arf2;
+    arf9 -= arf2;
+    test_value(arf9[0], 0.0, 1.0e-6);
+    test_value(arf9[1], 0.0, 1.0e-6);
+
+    // Test unary scale operator
+    GArf arf10 = arf2;
+    arf10 *= 2.0;
+    test_value(arf10[0], 10.0, 1.0e-6);
+    test_value(arf10[1],  7.4, 1.0e-6);
+
+    // Test unary divisison operator
+    GArf arf11 = arf2;
+    arf11 /= 2.0;
+    test_value(arf11[0], 2.5, 1.0e-6);
+    test_value(arf11[1], 1.85, 1.0e-6);
 
     // Return
     return;
@@ -381,14 +447,6 @@ void TestGXspec::test_GRmf(void)
     rmf.load("rmf.fits");
     test_assert(rmf.filename().url() == "rmf.fits",
                 "Unexpected filename \""+rmf.filename().url()+"\".");
-    /*
-    for (int i = 0; i < 9; ++i) {
-        for (int k = 0; k < 9; ++k) {
-            std::cout << rmf(i,k) << " ";
-        }
-        std::cout << std::endl;
-    }
-    */
     for (int i = 0; i < 9; ++i) {
         int k = 0;
         for (; k < i; ++k) {
@@ -424,8 +482,55 @@ void TestGXspec::test_GRmf(void)
             test_value(rmf(i,k),    0.0);
         }
     }
-    //std::cout << rmf << std::endl;
-    //std::cout << rmf2 << std::endl;
+
+    // Test addition operator
+    GRmf rmf3 = rmf2 + rmf2;
+    test_value(rmf3(0,0), 2.0, 1.0e-6);
+    test_value(rmf3(1,1), 2.0, 1.0e-6);
+
+    // Test subtraction operator
+    GRmf rmf4 = rmf2 - rmf2;
+    test_value(rmf4(0,0), 0.0, 1.0e-6);
+    test_value(rmf4(1,1), 0.0, 1.0e-6);
+
+    // Test scale operator
+    GRmf rmf5 = rmf2 * 2.0;
+    test_value(rmf5(0,0), 2.0, 1.0e-6);
+    test_value(rmf5(1,1), 2.0, 1.0e-6);
+
+    // Test scale operator
+    GRmf rmf6 = 2.0 * rmf2;
+    test_value(rmf6(0,0), 2.0, 1.0e-6);
+    test_value(rmf6(1,1), 2.0, 1.0e-6);
+
+    // Test division operator
+    GRmf rmf7 = rmf2 / 2.0;
+    test_value(rmf7(0,0), 0.5, 1.0e-6);
+    test_value(rmf7(1,1), 0.5, 1.0e-6);
+
+    // Test unary addition operator
+    GRmf rmf8 = rmf2;
+    rmf8 += rmf2;
+    test_value(rmf8(0,0), 2.0, 1.0e-6);
+    test_value(rmf8(1,1), 2.0, 1.0e-6);
+
+    // Test unary subtraction operator
+    GRmf rmf9 = rmf2;
+    rmf9 -= rmf2;
+    test_value(rmf9(0,0), 0.0, 1.0e-6);
+    test_value(rmf9(1,1), 0.0, 1.0e-6);
+
+    // Test unary scale operator
+    GRmf rmf10 = rmf2;
+    rmf10 *= 2.0;
+    test_value(rmf10(0,0), 2.0, 1.0e-6);
+    test_value(rmf10(1,1), 2.0, 1.0e-6);
+
+    // Test unary divisison operator
+    GRmf rmf11 = rmf2;
+    rmf11 /= 2.0;
+    test_value(rmf11(0,0), 0.5, 1.0e-6);
+    test_value(rmf11(1,1), 0.5, 1.0e-6);
 
     // Return
     return;

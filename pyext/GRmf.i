@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GRmf.i - XSPEC Redistribution Matrix File class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,12 @@ public:
     GRmf(const GRmf& rmf);
     virtual ~GRmf(void);
 
+    // Operators
+    GRmf& operator=(const GRmf& rmf);
+    GRmf& operator+=(const GRmf& rmf);
+    GRmf& operator-=(const GRmf& rmf);
+    GRmf& operator*=(const double& scale);
+
     // Methods
     void                 clear(void);
     GRmf*                clone(void) const;
@@ -82,6 +88,31 @@ public:
     }
     int __len__() {
         return (self->size());
+    }
+    GRmf __add__(const GRmf& rmf) const {
+        return ((*self) + rmf);
+    }
+    GRmf __sub__(const GRmf& rmf) const {
+        return ((*self) - rmf);
+    }
+    GRmf __mul__(const double& scale) const {
+        return ((*self) * scale);
+    }
+    // Python 2.x
+    GRmf __div__(const double& scale) const {
+        return ((*self) / scale);
+    }
+    GRmf __idiv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
+    }
+    // Python 3.x
+    GRmf __truediv__(const double& scale) const {
+        return ((*self) / scale);
+    }
+    GRmf __itruediv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
     }
     GRmf copy() {
         return (*self);

@@ -455,7 +455,7 @@ void GSkyRegionMap::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] region Sky region map.
+ * @param[in] map Sky region map.
  ***************************************************************************/
 void GSkyRegionMap::copy_members(const GSkyRegionMap& map)
 {

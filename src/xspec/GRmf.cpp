@@ -39,6 +39,8 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OPERATOR_PLUS                             "GRmf::operator+=(GRmf&)"
+#define G_OPERATOR_MINUS                            "GRmf::operator-=(GRmf&)"
 #define G_AT                                           "GRmf::at(int&, int&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -166,6 +168,133 @@ GRmf& GRmf::operator=(const GRmf& rmf)
         copy_members(rmf);
 
     } // endif: object was not identical
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Add Redistribution Matrix File
+ *
+ * @param[in] rmf Redistribution Matrix File.
+ * @return Sum of Redistribution Matrix File.
+ *
+ * @exception GException::invalid_value
+ *            Incompatible Redistribution Matrix Files.
+ *
+ * Adds the RMF values of an Redistribution Matrix File to the current
+ * values.
+ *
+ * The operator only works if the provide Redistribution Matrix File has the
+ * same energy binning than the current Redistribution Matrix File.
+ ***************************************************************************/
+GRmf& GRmf::operator+=(const GRmf& rmf)
+{
+    // Throw an exception if the RMF are not compatible
+    if (this->etrue() != rmf.etrue()) {
+        std::string msg = "Incompatible true energy binning of "
+                          "Redistribution Matrix File.";
+        throw GException::invalid_value(G_OPERATOR_PLUS, msg);
+    }
+    if (this->emeasured() != rmf.emeasured()) {
+        std::string msg = "Incompatible measured energy binning of "
+                          "Redistribution Matrix File.";
+        throw GException::invalid_value(G_OPERATOR_PLUS, msg);
+    }
+    
+    // Add RMF values
+    for (int itrue = 0; itrue < ntrue(); ++itrue) {
+        for (int imeasured = 0; imeasured < nmeasured(); ++imeasured) {
+            m_matrix(itrue, imeasured) += rmf.m_matrix(itrue, imeasured);
+        }
+    }
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Subtract Redistribution Matrix File
+ *
+ * @param[in] rmf Redistribution Matrix File.
+ * @return Difference of Redistribution Matrix File.
+ *
+ * @exception GException::invalid_value
+ *            Incompatible Redistribution Matrix Files.
+ *
+ * Subtracts the RMF values of an Redistribution Matrix File from the current
+ * values.
+ *
+ * The operator only works if the provide Redistribution Matrix File has the
+ * same energy binning than the current Redistribution Matrix File.
+ ***************************************************************************/
+GRmf& GRmf::operator-=(const GRmf& rmf)
+{
+    // Throw an exception if the RMF are not compatible
+    if (this->etrue() != rmf.etrue()) {
+        std::string msg = "Incompatible true energy binning of "
+                          "Redistribution Matrix File.";
+        throw GException::invalid_value(G_OPERATOR_MINUS, msg);
+    }
+    if (this->emeasured() != rmf.emeasured()) {
+        std::string msg = "Incompatible measured energy binning of "
+                          "Redistribution Matrix File.";
+        throw GException::invalid_value(G_OPERATOR_MINUS, msg);
+    }
+    
+    // Subtract RMF values
+    for (int itrue = 0; itrue < ntrue(); ++itrue) {
+        for (int imeasured = 0; imeasured < nmeasured(); ++imeasured) {
+            m_matrix(itrue, imeasured) -= rmf.m_matrix(itrue, imeasured);
+        }
+    }
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Scale Redistribution Matrix File values
+ *
+ * @param[in] scale Scale factor.
+ * @return Scaled Redistribution Matrix File.
+ *
+ * Multiplies the values of the Redistribution Matrix File with a scale
+ * factor.
+ ***************************************************************************/
+GRmf& GRmf::operator*=(const double& scale)
+{
+    // Scale RMF values
+    for (int itrue = 0; itrue < ntrue(); ++itrue) {
+        for (int imeasured = 0; imeasured < nmeasured(); ++imeasured) {
+            m_matrix(itrue, imeasured) *= scale;
+        }
+    }
+
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Divide Redistribution Matrix File values
+ *
+ * @param[in] scale Division factor.
+ * @return Divided Redistribution Matrix File.
+ *
+ * Divides the values of the Redistribution Matrix File by a division factor.
+ ***************************************************************************/
+GRmf& GRmf::operator/=(const double& scale)
+{
+    // Divide RMF values
+    for (int itrue = 0; itrue < ntrue(); ++itrue) {
+        for (int imeasured = 0; imeasured < nmeasured(); ++imeasured) {
+            m_matrix(itrue, imeasured) /= scale;
+        }
+    }
 
     // Return
     return *this;

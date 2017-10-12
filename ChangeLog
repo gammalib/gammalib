@@ -5,6 +5,7 @@
 
         Add GPha arithmetic operators and scale access methods
         Add GArf arithmetic operators
+        Add GRmf arithmetic operators
         Add GEbounds equality and inequality operators
         Fix OpenMP segfault issue when fetching CTA events (#2192) 
         Correct GModelSpatialComposite::copy_members() bug.

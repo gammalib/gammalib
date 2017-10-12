@@ -53,6 +53,13 @@ namespace gammalib {
  ***************************************************************************/
 class GRmf : public GBase {
 
+    // Operator friends
+    friend GRmf operator+(const GRmf& a,       const GRmf& b);
+    friend GRmf operator-(const GRmf& a,       const GRmf& b);
+    friend GRmf operator*(const GRmf& rmf,     const double& scale);
+    friend GRmf operator*(const double& scale, const GRmf& rmf);
+    friend GRmf operator/(const GRmf& rmf,     const double& scale);
+
 public:
     // Constructors and destructors
     GRmf(void);
@@ -63,6 +70,10 @@ public:
 
     // Operators
     GRmf&         operator=(const GRmf& rmf);
+    GRmf&         operator+=(const GRmf& rmf);
+    GRmf&         operator-=(const GRmf& rmf);
+    GRmf&         operator*=(const double& scale);
+    GRmf&         operator/=(const double& scale);
     double&       operator()(const int& itrue, const int& imeasured);
     const double& operator()(const int& itrue, const int& imeasured) const;
 
@@ -279,6 +290,86 @@ inline
 const GFilename& GRmf::filename(void) const
 {
     return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Redistribution Matrix File addition operator friend
+ *
+ * @param[in] a First Redistribution Matrix File.
+ * @param[in] b Second Redistribution Matrix File.
+ * @return Sum of Redistribution Matrix Files.
+ ***************************************************************************/
+inline
+GRmf operator+(const GRmf& a, const GRmf& b)
+{
+    GRmf result = a;
+    result     += b;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Redistribution Matrix File subtraction operator friend
+ *
+ * @param[in] a First Redistribution Matrix File.
+ * @param[in] b Second Redistribution Matrix File.
+ * @return Difference of Redistribution Matrix Files.
+ ***************************************************************************/
+inline
+GRmf operator-(const GRmf& a, const GRmf& b)
+{
+    GRmf result = a;
+    result     -= b;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Redistribution Matrix File scaling operator friend
+ *
+ * @param[in] rmf Redistribution Matrix File.
+ * @param[in] scale Scale factor.
+ * @return Scaled Redistribution Matrix File.
+ ***************************************************************************/
+inline
+GRmf operator*(const GRmf& rmf, const double& scale)
+{
+    GRmf result = rmf;
+    result     *= scale;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Redistribution Matrix File scaling operator friend
+ *
+ * @param[in] scale Scale factor.
+ * @param[in] rmf Redistribution Matrix File.
+ * @return Scaled Redistribution Matrix File.
+ ***************************************************************************/
+inline
+GRmf operator*(const double& scale, const GRmf& rmf)
+{
+    GRmf result = rmf;
+    result     *= scale;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Redistribution Matrix File vision operator friend
+ *
+ * @param[in] rmf Redistribution Matrix File.
+ * @param[in] scale Division factor.
+ * @return Divided Redistribution Matrix File.
+ ***************************************************************************/
+inline
+GRmf operator/(const GRmf& rmf, const double& scale)
+{
+    GRmf result = rmf;
+    result     /= scale;
+    return result;
 }
 
 #endif /* GRMF_HPP */

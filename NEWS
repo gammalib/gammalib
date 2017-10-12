@@ -66,6 +66,15 @@ The following methods have been added:
 - operator*(GArf&, double&)
 - operator*(double&, double&)
 - operator/(GArf&, double&)
+- GRmf::operator+=(GRmf&)
+- GRmf::operator-=(GRmf&)
+- GRmf::operator*=(double&)
+- GRmf::operator/=(double&)
+- operator+(GRmf&, GRmf&)
+- operator-(GRmf&, GRmf&)
+- operator*(GRmf&, double&)
+- operator*(double&, double&)
+- operator/(GRmf&, double&)
 
 The following methods have been removed:
 - n.a.
@@ -175,6 +184,9 @@ factors.
 
 Added arithmetic operatirs for GArf class to add, subtract, scale and divide
 Auxiliary Response Files. 
+
+Added arithmetic operatirs for GRmf class to add, subtract, scale and divide
+Redistribution Matrix Files.
 
 
 17. Test module

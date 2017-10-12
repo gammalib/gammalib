@@ -39,6 +39,8 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OPERATOR_PLUS                             "GArf::operator+=(GArf&)"
+#define G_OPERATOR_MINUS                            "GArf::operator-=(GArf&)"
 #define G_OPERATOR                           "GArf::operator[](std::string&)"
 #define G_AT1                                                "GArf::at(int&)"
 #define G_AT2                                          "GArf::at(int&, int&)"
@@ -187,11 +189,9 @@ GArf& GArf::operator=(const GArf& arf)
  * The operator only works if the provide Auxiliary Response File has the
  * same energy binning than the current Auxiliary Response File.
  ***************************************************************************/
-#define G_OPERATOR_PLUS                             "GArf::operator+=(GArf&)"
-#define G_OPERATOR_MINUS                            "GArf::operator-=(GArf&)"
 GArf& GArf::operator+=(const GArf& arf)
 {
-    // Throw an exception if the spectra are not compatible
+    // Throw an exception if the ARF are not compatible
     if (this->ebounds() != arf.ebounds()) {
         std::string msg = "Incompatible energy binning of Auxiliary "
                           "Response File.";
@@ -225,7 +225,7 @@ GArf& GArf::operator+=(const GArf& arf)
  ***************************************************************************/
 GArf& GArf::operator-=(const GArf& arf)
 {
-    // Throw an exception if the spectra are not compatible
+    // Throw an exception if the ARF are not compatible
     if (this->ebounds() != arf.ebounds()) {
         std::string msg = "Incompatible energy binning of Auxiliary "
                           "Response File.";
