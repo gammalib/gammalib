@@ -38,6 +38,7 @@
 #include "GModelTemporal.hpp"
 #include "GSkyRegionCircle.hpp"
 #include "GOptimizerPars.hpp"
+#include "GObservations.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTAEventCube.hpp"
@@ -56,6 +57,7 @@ const GCTAOnOffObservation g_onoff_obs_cta_seed;
 const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR              "GCTAOnOffObservation(GObservations& obs)"
 #define G_RESPONSE_SET           "GCTAOnOffObservation::response(GResponse&)"
 #define G_RESPONSE_GET                     "GCTAOnOffObservation::response()"
 #define G_WRITE                   "GCTAOnOffObservation::write(GXmlElement&)"
@@ -131,9 +133,9 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs) :
  * @param[in] on On regions.
  * @param[in] off Off regions.
  *
- * Constructs On/Off observation a CTA observation by filling the On and Off
- * spectra and computing the Auxiliary Response File (ARF) and Redistribution
- * Matrix File (RMF). The method requires the specification of the true and
+ * Constructs On/Off observation by filling the On and Off spectra and
+ * computing the Auxiliary Response File (ARF) and Redistribution Matrix
+ * File (RMF). The method requires the specification of the true and
  * reconstructed energy boundaries, as well as the definition of On and Off
  * regions.
  ***************************************************************************/
@@ -152,7 +154,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     m_off_spec = GPha(ereco);
 
     // Initialise response information
-    m_arf = GArf(ereco);
+    m_arf = GArf(etrue);
     m_rmf = GRmf(etrue, ereco);
 
     // Store regions
@@ -161,6 +163,200 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
 
     // Set On/Off observation from CTA observation
     set(obs);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief CTA On/Off observation stacking constructor
+ *
+ * @param[in] obs Observation container.
+ *
+ * GException::invalid_value
+ *             Incompatible On/Off observation definition.
+ *
+ * Constructs On/Off observation by stacking all On/Off observation in the
+ * observation container into a single On/Off observation.
+ *
+ * The constructor uses the following formulae:
+ *
+ * \f[
+ *    N^{\rm on}(E_{\rm reco}) = \sum_i N^{\rm on}_i(E_{\rm reco})
+ * \f]
+ *
+ * \f[
+ *    N^{\rm off}(E_{\rm reco}) = \sum_i N^{\rm off}_i(E_{\rm reco})
+ * \f]
+ *
+ * \f[
+ *    \alpha(E_{\rm reco}) = \frac{\sum_i \alpha_i(E_{\rm reco})
+ *                                        N^{\rm off}_i(E_{\rm reco})}
+ *                                {\sum_i N^{\rm off}_i(E_{\rm reco})}
+ * \f]
+ *
+ * \f[
+ *    ARF(E_{\rm true}) = \frac{\sum_i ARF_i(E_{\rm true}) \tau_i}
+ *                             {\sum_i \tau_i}
+ * \f]
+ *
+ * \f[
+ *    RMF(E_{\rm true}, E_{\rm reco}) =
+ *    \frac{\sum_i RMF_i(E_{\rm true}, E_{\rm reco}) ARF_i(E_{\rm true}) \tau_i}
+ *         {\sum_i ARF_i(E_{\rm true}) \tau_i}
+ * \f]
+ *
+ * where
+ * \f$N^{\rm on}_i(E_{\rm reco})\f$ is the On spectrum of observation \f$i\f$,
+ * \f$N^{\rm off}_i(E_{\rm reco})\f$ is the Off spectrum of observation
+ * \f$i\f$,
+ * \f$\alpha_i(E_{\rm reco})\f$ is the background scaling of observation
+ * \f$i\f$,
+ * \f$ARF_i(E_{\rm true})\f$ is the Auxiliary Response File of observation
+ * \f$i\f$,
+ * \f$RMF_i(E_{\rm true}, E_{\rm reco})\f$ is the Redistribution Matrix File
+ * of observation \f$i\f$, and
+ * \f$\tau_i\f$ is the livetime of observation \f$i\f$.
+ ***************************************************************************/
+GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
+                      GObservation()
+{
+    // Initialise private
+    init_members();
+
+    // Signal first On/Off observation
+    bool first = true;
+
+    // Initialise exposure
+    double exposure = 0.0;
+
+    // Loop over all observation in container
+    for (int i = 0; i < obs.size(); ++i) {
+
+        // Get pointer to On/Off observation
+        const GCTAOnOffObservation* onoff =
+              dynamic_cast<const GCTAOnOffObservation*>(obs[i]);
+
+        // Skip observation if it is not a On/Off observation
+        if (onoff == NULL) {
+            continue;
+        }
+
+        // Check consistency of On/Off observation
+        onoff->check_consistency(G_CONSTRUCTOR);
+
+        // If this is the first On/Off observation then store the data to
+        // initialise the data definition
+        if (first) {
+
+            // Store PHA, ARF and RMF
+            m_on_spec  = onoff->on_spec();
+            m_off_spec = onoff->off_spec();
+            m_arf      = onoff->arf() * onoff->on_spec().exposure();
+            m_rmf      = onoff->rmf();
+            m_ontime   = onoff->ontime();
+            m_livetime = onoff->livetime();
+            exposure   = onoff->on_spec().exposure();
+
+            // Compute RMF contribution
+            for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
+                double arf = m_arf[itrue];
+                for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
+                    m_rmf(itrue,imeasured) *= arf;
+                }
+            }
+
+            // Signal that the On/Off definition has been set
+            first = false;
+
+        }
+
+        // ... otherwise stack data
+        else {
+
+            // Check consistency of On spectrum
+            if (m_on_spec.ebounds() != onoff->on_spec().ebounds()) {
+                std::string msg = "Incompatible energy binning of On spectrum.";
+                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+            }
+
+            // Check consistency of Off spectrum
+            if (m_off_spec.ebounds() != onoff->off_spec().ebounds()) {
+                std::string msg = "Incompatible energy binning of Off spectrum.";
+                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+            }
+
+            // Check consistency of Arf
+            if (m_arf.ebounds() != onoff->arf().ebounds()) {
+                std::string msg = "Incompatible energy binning of ARF.";
+                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+            }
+
+            // Check consistency of Rmf
+            if (m_rmf.etrue() != onoff->rmf().etrue()) {
+                std::string msg = "Incompatible true energy binning of RMF.";
+                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+            }
+            if (m_rmf.emeasured() != onoff->rmf().emeasured()) {
+                std::string msg = "Incompatible measured energy binning of RMF.";
+                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+            }
+
+            // Compute background scaling factor
+            for (int i = 0; i < m_on_spec.size(); ++i) {
+
+                // Compute background scaling factor for spectral bin
+                double n1 = m_off_spec[i];                // Counts from Off
+                double n2 = onoff->off_spec()[i];         // Counts from Off
+                double a1 = m_on_spec.backscal(i);        // Alpha from On
+                double a2 = onoff->on_spec().backscal(i); // Alpha from On
+                double n  = n1 + n2;
+                double a  = (n > 0.0) ? (a1 * n1 + a2 * n2)/n : 1.0;
+
+                // Set background scaling factor of On Spectrum
+                m_on_spec.backscal(i,a);
+
+            } // endfor: computed background scaling factors
+
+            // Add On and Off spectrum
+            m_on_spec  += onoff->on_spec();
+            m_off_spec += onoff->off_spec();
+
+            // Add ARF
+            m_arf += onoff->arf() * onoff->on_spec().exposure();
+
+            // Add RMF
+            for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
+                double arf = onoff->arf()[itrue] * onoff->on_spec().exposure();
+                for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
+                    m_rmf(itrue,imeasured) += onoff->rmf()(itrue,imeasured) * arf;
+                }
+            }
+
+            // Add exposure
+            exposure += onoff->on_spec().exposure();
+
+            // Add ontime and livetime
+            m_ontime   += onoff->ontime();
+            m_livetime += onoff->livetime();
+
+        } // endelse: stacked data
+
+    } // endfor: looped over observations
+
+    // Compute RMF
+    for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
+        double arf = m_arf[itrue];
+        for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
+            m_rmf(itrue,imeasured) /= arf;
+        }
+    }
+
+    // Compute ARF
+    if (exposure > 0.0) {
+        m_arf /= exposure;
+    }
 
     // Return
     return;
@@ -195,7 +391,7 @@ GCTAOnOffObservation::~GCTAOnOffObservation(void)
  * Assigns one On/Off observation to another On/Off observation object.
  ***************************************************************************/
 GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation& obs)
-{ 
+{
     // Execute only if object is not identical
     if (this != &obs) {
 
@@ -212,7 +408,7 @@ GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation
         copy_members(obs);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -347,26 +543,29 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
     // Get file names
     std::string pha_on  = gammalib::xml_get_attr(G_READ, xml, "Pha_on",      "file");
     std::string pha_off = gammalib::xml_get_attr(G_READ, xml, "Pha_off",     "file");
-    std::string reg_on  = gammalib::xml_get_attr(G_READ, xml, "Regions_on",  "file");
-    std::string reg_off = gammalib::xml_get_attr(G_READ, xml, "Regions_off", "file");
+    //std::string reg_on  = gammalib::xml_get_attr(G_READ, xml, "Regions_on",  "file");
+    //std::string reg_off = gammalib::xml_get_attr(G_READ, xml, "Regions_off", "file");
     std::string arf     = gammalib::xml_get_attr(G_READ, xml, "Arf",         "file");
     std::string rmf     = gammalib::xml_get_attr(G_READ, xml, "Rmf",         "file");
 
     // Expand file names
     pha_on  = gammalib::xml_file_expand(xml, pha_on);
     pha_off = gammalib::xml_file_expand(xml, pha_off);
-    reg_on  = gammalib::xml_file_expand(xml, reg_on);
-    reg_off = gammalib::xml_file_expand(xml, reg_off);
+    //reg_on  = gammalib::xml_file_expand(xml, reg_on);
+    //reg_off = gammalib::xml_file_expand(xml, reg_off);
     arf     = gammalib::xml_file_expand(xml, arf);
     rmf     = gammalib::xml_file_expand(xml, rmf);
 
     // Load files
     m_on_spec.load(pha_on);
 	m_off_spec.load(pha_off);
-    m_on_regions.load(reg_on);
-    m_off_regions.load(reg_off);
+    //m_on_regions.load(reg_on);
+    //m_off_regions.load(reg_off);
     m_arf.load(arf);
     m_rmf.load(rmf);
+
+    // Check consistency of On/Off observation
+    check_consistency(G_READ);
 
 	// Return
 	return;
@@ -406,12 +605,12 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
     par->attribute("file", gammalib::xml_file_reduce(xml, m_off_spec.filename()));
 
     // Set Regions_on parameter
-    par = gammalib::xml_need_par(G_WRITE, xml, "Regions_on");
-    par->attribute("file", gammalib::xml_file_reduce(xml, m_on_regions.filename()));
+    //par = gammalib::xml_need_par(G_WRITE, xml, "Regions_on");
+    //par->attribute("file", gammalib::xml_file_reduce(xml, m_on_regions.filename()));
 
     // Set Regions_off parameter
-    par = gammalib::xml_need_par(G_WRITE, xml, "Regions_off");
-    par->attribute("file", gammalib::xml_file_reduce(xml, m_off_regions.filename()));
+    //par = gammalib::xml_need_par(G_WRITE, xml, "Regions_off");
+    //par->attribute("file", gammalib::xml_file_reduce(xml, m_off_regions.filename()));
 
     // Set Arf parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "Arf");
@@ -540,7 +739,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     clock_t t_start = clock();
     #endif
     #endif
-	
+
     // Initialise statistics
     #if defined(G_LIKELIHOOD_DEBUG)
 	int    n_bins        = m_on_spec.size();
@@ -551,13 +750,13 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     double sum_model     = 0.0;
 	double init_npred    = *npred;
     #endif
-	
+
 	// Initialise log-likelihood value
     double value = 0.0;
-	
+
 	// Get number of model parameters in model container
     int npars = models.npars();
-	
+
 	// Create model gradient vectors for sky and background parameters
 	GVector sky_grad(npars);
 	GVector bgd_grad(npars);
@@ -566,73 +765,80 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 	GVector colvar(npars);
 
     // Get reference to alpha parameters
-    const std::vector<double>& alpha = m_arf["ALPHA"];
-	
+    //const std::vector<double>& alpha = m_arf["ALPHA"];
+
 	// Check that there is at least one parameter
 	if (npars > 0) {
-		
+
         // Loop over all energy bins
         for (int i = 0; i < m_on_spec.size(); ++i) {
-				
+
             // Reinitialize working arrays
             for (int j = 0; j < npars; ++j) {
                 sky_grad[j] = 0.0;
                 bgd_grad[j] = 0.0;
             }
-		  
+
             // Get number of On and Off counts
             double non  = m_on_spec[i];
             double noff = m_off_spec[i];
-			
+
+            // Get background scaling
+            double alpha = m_on_spec.backscal(i);
+
             // Get number of gamma and background events (and corresponding
             // spectral model gradients)
             double ngam = N_gamma(models, i, &sky_grad);
             double nbgd = N_bgd(models, i, &bgd_grad);
 
             // Skip bin if model is too small (avoids -Inf or NaN gradients)
-            double nonpred = ngam + alpha[i] * nbgd;
+            //double nonpred = ngam + alpha[i] * nbgd;
+            double nonpred = ngam + alpha * nbgd;
             if ((nbgd <= minmod) || (nonpred <= minmod)) {
                 #if defined(G_LIKELIHOOD_DEBUG)
                 n_small_model++;
                 #endif
                 continue;
             }
-		  
+
             // Now we have all predicted gamma and background events for
             // current energy bin. Update the log(likelihood) and predicted
             // number of events
             value  += -non * log(nonpred) + nonpred - noff * log(nbgd) + nbgd;
             *npred += nonpred;
-		  
+
             // Update statistics
             #if defined(G_LIKELIHOOD_DEBUG)
             n_used++;
             sum_data  += non;
             sum_model += nonpred;
             #endif
-		  
+
             // Fill derivatives
             double fa         = non/nonpred;
             double fb         = fa/nonpred;
-            double fc         = alpha[i] * fb;
-            double fd         = fc * alpha[i] + noff/(nbgd*nbgd);
+            //double fc         = alpha[i] * fb;
+            double fc         = alpha * fb;
+            //double fd         = fc * alpha[i] + noff/(nbgd*nbgd);
+            double fd         = fc * alpha + noff/(nbgd*nbgd);
             double sky_factor = 1.0 - fa;
-            double bgd_factor = 1.0 + alpha[i] - alpha[i] * fa - noff/nbgd;
+            //double bgd_factor = 1.0 + alpha[i] - alpha[i] * fa - noff/nbgd;
+            double bgd_factor = 1.0 + alpha - alpha * fa - noff/nbgd;
 
             // Loop over all parameters
             for (int j = 0; j < npars; ++j) {
-			
+
                 // If spectral model for sky component is non-zero and
                 // non-infinite then handle sky component gradients and
                 // second derivatives including at least a sky component ...
                 if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
-				
+
                     // Gradient
                     (*gradient)[j] += sky_factor * sky_grad[j];
-				
+
                     // Hessian (from first-order derivatives only)
                     for (int k = 0; k < npars; ++k) {
-				
+
                         // If spectral model for sky component is non-zero and
                         // non-infinite then we have the curvature element
                         // of a sky component
@@ -640,7 +846,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                             !gammalib::is_infinite(sky_grad[k])) {
                             colvar[k] = sky_grad[j] * sky_grad[k] * fb;
                         }
-					
+
                         // ... else if spectral model for background component
                         // is non-zero and non-infinite then we have the mixed
                         // curvature element between a sky and a background
@@ -649,32 +855,32 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                                  !gammalib::is_infinite(bgd_grad[k])) {
                             colvar[k] = sky_grad[j] * bgd_grad[k] * fc;
                         }
-						
+
                         // ...else neither sky nor background
                         else {
                             colvar[k] = 0.0;
                         }
-					
+
                     } // endfor: Hessian computation
-				
+
                     // Update matrix
                     curvature->add_to_column(j, colvar);
 
                 } // endif: spectral model is non-zero and non-infinite
-			
+
                 // ... otherwise if spectral model for background component is
                 // non-zero and non-infinite then handle background component
                 // gradients and second derivatives including at least a
                 // background component
                 else if (bgd_grad[j] != 0.0  &&
                          !gammalib::is_infinite(bgd_grad[j])) {
-				
+
                     // Gradient
                     (*gradient)[j] += bgd_factor * bgd_grad[j];
-				
+
                     // Hessian (from first-order derivatives only)
                     for (int k = 0; k < npars; ++k) {
-					
+
                         // If spectral model for sky component is non-zero and
                         // non-infinite then we have the mixed curvature element
                         // between a sky and a background component
@@ -682,7 +888,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                             !gammalib::is_infinite(sky_grad[k])) {
                             colvar[k] = bgd_grad[j] * sky_grad[k] * fc;
                         }
-						
+
 						// ... else if spectral model for background component
                         // is non-zero and non-infinite then we have the
                         // curvature element of a background component
@@ -690,25 +896,25 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                                  !gammalib::is_infinite(bgd_grad[k])) {
                             colvar[k] = bgd_grad[j] * bgd_grad[k] * fd;
                         }
-						
+
 						// ... else neither sky nor background
                         else {
                             colvar[k] = 0.0;
                         }
 
                     } // endfor: Hessian computation
-				
+
                     // Update matrix
                     curvature->add_to_column(j, colvar);
-			
+
                 } // endif: spectral model for background component valid
 
             } // endfor: looped over all parameters for derivatives computation
-			
+
         } // endfor: looped over energy bins
 
     } // endif: number of parameters was positive
-				
+
 	// ... else there are no parameters, so throw an exception
 	else {
 		std::string msg ="No model parameter for the computation of the "
@@ -716,7 +922,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 		                 "\" (ID "+this->id()+").\n";
 		throw GException::invalid_value(G_LIKELIHOOD, msg);
 	}
-		
+
     // Dump statistics
     #if defined(G_LIKELIHOOD_DEBUG)
     std::cout << "Number of parameters: " << npars << std::endl;
@@ -729,13 +935,13 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     std::cout << "Sum of model (On): " << sum_model << std::endl;
     std::cout << "Statistics: " << value << std::endl;
     #endif
-	
+
     // Optionally dump gradient and curvature matrix
     #if defined(G_LIKELIHOOD_DEBUG)
     std::cout << *gradient << std::endl;
     std::cout << *curvature << std::endl;
     #endif
-	
+
     // Timing measurement
     #if defined(G_LIKELIHOOD_DEBUG)
     #ifdef _OPENMP
@@ -746,7 +952,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     std::cout << "GCTAOnOffObservation::optimizer::likelihood: CPU usage = "
 	          << t_elapse << " sec" << std::endl;
     #endif
-	
+
     // Return
     return value;
 }
@@ -755,6 +961,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 /***********************************************************************//**
  * @brief Print On/Off observation information
  *
+ * @param[in] chatter Chattiness.
  * @return String containing On/Off observation information.
  ***************************************************************************/
 std::string GCTAOnOffObservation::print(const GChatter& chatter) const
@@ -764,7 +971,7 @@ std::string GCTAOnOffObservation::print(const GChatter& chatter) const
 
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
-    
+
         // Append header
         result.append("=== GCTAOnOffObservation ===");
 
@@ -856,6 +1063,41 @@ void GCTAOnOffObservation::free_members(void)
 
 
 /***********************************************************************//**
+ * @brief Check consistency of data members
+ *
+ * @param[in] method Calling method.
+ *
+ * Checks the consistency of data members and throw exceptions in case that
+ * inconsistencies are found.
+ ***************************************************************************/
+void GCTAOnOffObservation::check_consistency(const std::string& method) const
+{
+    // Check that On spectrum is consistent with Off spectrum
+    if (m_on_spec.ebounds() != m_off_spec.ebounds()) {
+        std::string msg = "On and Off spectra are incompatible.";
+        throw GException::invalid_value(method, msg);
+    }
+
+    // Check that On spectrum is consistent with RMF
+    if (m_on_spec.ebounds() != m_rmf.emeasured()) {
+        std::string msg = "Redistribution Matrix File is incompatible with "
+                          "spectra.";
+        throw GException::invalid_value(method, msg);
+    }
+
+    // Check that ARF is consistent with RMF
+    if (m_arf.ebounds() != m_rmf.etrue()) {
+        std::string msg = "Redistribution Matrix File is incompatible with "
+                          "Auxiliary Response File.";
+        throw GException::invalid_value(method, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set On/Off observation from a CTA observation
  *
  * @param[in] obs CTA observation.
@@ -892,7 +1134,7 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs)
 		if (m_off_regions.contains(dir)) {
 			m_off_spec.fill(atom->energy());
 		}
-        
+
 	} // endfor: looped over all events
 
     // Store the livetime as exposures of the spectra
@@ -909,7 +1151,7 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs)
 	compute_bgd(obs);
 	compute_alpha(obs);
 	compute_rmf(obs);
-	
+
 	// Return
 	return;
 }
@@ -935,7 +1177,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
 
     // Continue only if there are ARF bins
     if (nreco > 0) {
-    
+
         // Get CTA response pointer. Throw an exception if no response is found
         const GCTAResponseIrf* response =
               dynamic_cast<const GCTAResponseIrf*>(obs.response());
@@ -945,7 +1187,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
                               "type.";
 	        throw GException::invalid_value(G_COMPUTE_ARF, msg);
 		}
-		
+
 		// Get CTA observation pointing direction, zenith, and azimuth
 		GCTAPointing obspnt  = obs.pointing();
 		GSkyDir      obsdir  = obspnt.dir();
@@ -954,41 +1196,41 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
 
         // Loop over reconstructed energies
         for (int i = 0; i < nreco; ++i) {
-        
+
             // Get mean energy of bin
             double logEreco = ereco.elogmean(i).log10TeV();
-			
+
 			// Initialize effective area for this bin
 			m_arf[i] = 0.0;
-			
+
 			// Loop over On sky regions
             for (int m = 0; m < m_on_regions.size(); ++m)  {
-				
+
 				// If region is of type GSkyRegionCircle
 				const GSkyRegionCircle* skyreg =
                       dynamic_cast<const GSkyRegionCircle*>(m_on_regions[m]);
 				if (skyreg != NULL) {
-					
+
 					// Get centre of circular region
 					GSkyDir centre(skyreg->centre());
-					
+
 					// Compute position of region centre in instrument coordinates
 				    double theta = obsdir.dist(centre);
 				    double phi   = obsdir.posang(centre);
-					
+
 		            // Add up effective area
 		            m_arf[i] += response->aeff(theta,
                                                phi,
                                                zenith,
                                                azimuth,
                                                logEreco);
-									
+
 				} // endif: sky region is of type GSkyRegionCircle
-				
+
 			} // endfor: looped over On regions
-       
+
         } // endfor: looped over reconstructed energies
-        
+
 	} // endif: there were energy bins
 
 	// Return
@@ -1013,20 +1255,20 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
  * @todo Allow general region, not only circles.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
-{	
+{
     // Get reconstructed energy boundaries from on ARF
 	GEbounds ereco = m_arf.ebounds();
     int      nreco = ereco.size();
-    
+
     // Continue only if there are ARF bins
     if (nreco > 0) {
 
 		// Initialise background rates to zero
         std::vector<double> background(nreco, 0.0);
-    		
+
 		// Get CTA observation pointing direction
 		GCTAPointing obspnt = obs.pointing();
-	
+
         // Get pointer on CTA IRF response
         const GCTAResponseIrf* rsp =
               dynamic_cast<const GCTAResponseIrf*>(obs.response());
@@ -1043,10 +1285,10 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
                               "background information.\n" + obs.print();
             throw GException::invalid_argument(G_COMPUTE_BGD, msg);
         }
-					
+
         // Loop over Off regions
         for (int m = 0; m < m_off_regions.size(); ++m)  {
-						
+
             // Get region centre direction, fall through if region is not
             // of type GSkyRegionCircle
             const GSkyRegionCircle* skyreg =
@@ -1054,18 +1296,19 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
             if (skyreg == NULL) {
                 continue;
             }
-								
+
             // Get centre of circular region
             GSkyDir centre = skyreg->centre();
-								
+
             // Get instrument direction of region centre
             GCTAInstDir offdir = obspnt.instdir(centre);
-							
+
             // Loop over energy bins
             for (int i = 0; i < nreco; ++i) {
 
                 // Get log10(E/TeV) of mean reconstructed bin energy
-                double logEreco = m_on_spec.ebounds().elogmean(i).log10TeV();
+                //double logEreco = m_on_spec.ebounds().elogmean(i).log10TeV();
+                double logEreco = ereco.elogmean(i).log10TeV();
 
                 // Get background rate in events/s/MeV
                 background[i] += (*bgd)(logEreco,
@@ -1078,7 +1321,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
 
         // Append background vector to ARF
         m_arf.append("BACKGROUND", background);
-		
+
 	} // endif: there were spectral bins
 
 	// Return
@@ -1104,15 +1347,12 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 {
-    // Get reconstructed energy boundaries from on ARF
-	GEbounds ereco = m_arf.ebounds();
+    // Get reconstructed energy boundaries from RMF
+	GEbounds ereco = m_rmf.emeasured();
     int      nreco = ereco.size();
-    
-    // Continue only if there are ARF bins
-    if (nreco > 0) {
 
-		// Initialise On/Off exposure ratios
-        std::vector<double> alpha(nreco, 0.0);
+    // Continue only if there are reconstructed energy bins
+    if (nreco > 0) {
     
         // Get CTA response pointer. Throw an exception if no response is found
         const GCTAResponseIrf* response =
@@ -1123,32 +1363,32 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
                               "type.";
 	        throw GException::invalid_value(G_COMPUTE_ALPHA, msg);
 		}
-		
+
 		// Get CTA observation pointing direction, zenith, and azimuth
 		GCTAPointing obspnt  = obs.pointing();
 		GSkyDir      obsdir  = obspnt.dir();
 
         // Loop over reconstructed energies 
         for (int i = 0; i < nreco; ++i) {
-        
+
             // Get mean log10 energy in TeV of bin
             double logEreco = ereco.elogmean(i).log10TeV();
-			
+
 			// Initialise effective area totals
 			double aon(0.0);
 			double aoff(0.0);
-			
+
 			// Loop over ON sky regions
             for (int m = 0; m < m_on_regions.size(); ++m)  {
-				
+
 				// If region is of type GSkyRegionCircle
 				const GSkyRegionCircle* skyreg =
                       dynamic_cast<const GSkyRegionCircle*>(m_on_regions[m]);
 				if (skyreg != NULL) {
-					
+
 					// Get centre of circular region
 					GSkyDir centreg = skyreg->centre();
-					
+
                     // Compute instrument direction from region centre
                     GCTAInstDir instdir(obspnt.instdir(centreg));
 
@@ -1157,22 +1397,22 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
                                                      instdir.detx(),
                                                      instdir.dety()) *
                            skyreg->solidangle();
-					
+
 				} // endif: sky region is of type GSkyRegionCircle
-				
+
 			} // Looped over ON regions
-						
+
 			// Loop over OFF sky regions
             for (int m = 0; m < m_off_regions.size(); ++m)  {
-				
+
 				// If region is of type GSkyRegionCircle
 				const GSkyRegionCircle* skyreg =
                       dynamic_cast<const GSkyRegionCircle*>(m_off_regions[m]);
 				if (skyreg != NULL) {
-					
+
 					// Get centre of circular region
 					GSkyDir centreg = skyreg->centre();
-					
+
                     // Compute instrument direction from region centre
                     GCTAInstDir instdir(obspnt.instdir(centreg));
 
@@ -1181,21 +1421,19 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
                                                      instdir.detx(),
                                                      instdir.dety()) *
                             skyreg->solidangle();
-					
+
                 } // endif: sky region is of type GSkyRegionCircle
-				
+
             } // endfor: looped over OFF regions
-			
+
 			// Compute alpha for this energy bin
-			if (aoff > 0.0) {
-				alpha[i] = aon/aoff;
-			}
-												 
+            double alpha = (aoff > 0.0) ? aon/aoff : 1.0;
+
+            // Set background scaling in On spectra
+            m_on_spec.backscal(i, alpha);
+
         } // endfor: looped over reconstructed energies
 
-        // Append alpha vector to ARF
-        m_arf.append("ALPHA", alpha);
-	
     } // endif: there were energy bins
 
  	// Return
@@ -1228,7 +1466,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
 
     // Continue only if there are RMF bins
     if (ntrue > 0 && nreco > 0) {
-    
+
         // Get CTA response pointer
         const GCTAResponseIrf* response =
               dynamic_cast<const GCTAResponseIrf*>(obs.response());
@@ -1238,13 +1476,13 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
                               "type.";
 	        throw GException::invalid_value(G_COMPUTE_RMF, msg);
 		}
-		
+
 		// Get CTA observation pointing direction, zenith, and azimuth
 		GCTAPointing obspnt  = obs.pointing();
 		GSkyDir      obsdir  = obspnt.dir();
 		double       zenith  = obspnt.zenith();
 		double       azimuth = obspnt.azimuth();
-		
+
         // Loop over reconstructed energy
         for (int ireco = 0; ireco < nreco; ++ireco) {
 
@@ -1256,24 +1494,24 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
 
                 // Initialise RMF element
                 m_rmf(itrue, ireco) = 0.0;
-                
+
                 // Compute true energy and initialise weight for this bin
                 double logEtrue = etrue.elogmean(itrue).log10TeV();
 				double weight   = 0.0;
-				
+
 				// Loop over ON sky regions
 	            for (int m = 0; m < m_on_regions.size(); ++m)  {
-				
+
 					// Fall through if region is not of type GSkyRegionCircle
 					const GSkyRegionCircle* skyreg =
                           dynamic_cast<const GSkyRegionCircle*>(m_on_regions[m]);
 					if (skyreg == NULL) {
                         continue;
                     }
-					
+
                     // Get centre of circular region
                     GSkyDir centreg(skyreg->centre());
-					
+
                     // Compute position of region centre in instrument coordinates
                     double theta = obsdir.dist(centreg);
                     double phi   = obsdir.posang(centreg);
@@ -1284,7 +1522,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
                                                  zenith,
                                                  azimuth,
                                                  logEreco);
-					
+
                     // Add up energy dispersion weighted by effective area
                     weight              += aeff;
                     m_rmf(itrue, ireco) += response->edisp(ereco.elogmean(ireco),
@@ -1293,18 +1531,18 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
 		                                                   zenith,
 		                                                   azimuth,
 		                                                   logEtrue) * aeff;
-									
+
 				} // endfor: looped over ON regions
-				
+
 				// Complete weighing by dividing by total effective area
 				if (weight > 0.0) {
                     m_rmf(itrue, ireco) /= weight;
 				}	
 
             } // endfor: looped over true energy
-			
+
         } // endfor: looped over reconstructed energy
-		
+
     } // endif: there were energy bins
 
 	// Return
@@ -1347,13 +1585,13 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
     for (int i = 0; i < npars; ++i) {
         (*grad)[i] = 0.0;
     }
-	
+
 	// Continue only if bin number is in range and there are model parameters
 	if ((ibin >= 0) && (ibin < m_on_spec.size()) && (npars > 0)) {
 
         // Initialise parameter index
         int ipar = 0;
-		
+
         // Get energy bin bounds
         const GEnergy emin   = m_on_spec.ebounds().emin(ibin);
         const GEnergy emax   = m_on_spec.ebounds().emax(ibin);
@@ -1364,46 +1602,46 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
         double exposure  = m_on_spec.exposure();
         double norm_flux = m_arf[ibin] * exposure; // cm2 s
         double norm_grad = norm_flux   * ewidth;   // cm2 s MeV
-				
+
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
-			
+
             // Get model pointer. Fall through if pointer is not valid
             const GModel* mptr = models[j];
             if (mptr == NULL) {
                 continue;
             }
-				
+
             // Fall through if model does not apply to specific instrument
             // and observation identifier
             if (!mptr->is_valid(instrument(), id())) {
                 ipar += mptr->size();
                 continue;
             }
-					
+
             // Fall through if this model component is a not sky component
             const GModelSky* sky = dynamic_cast<const GModelSky*>(mptr);
             if (sky == NULL) {
                 ipar += mptr->size();
                 continue;
             }
-					
+
             // Increase parameter counter for spatial parameter
             GModelSpatial* spatial = sky->spatial();
             if (spatial != NULL)  {
                 ipar += spatial->size();
             }
-						
+
             // Spectral component (the useful one)
             GModelSpectral* spectral = sky->spectral();
             if (spectral != NULL)  {
-								
+
                 // Determine the number of gamma-ray events in model by
                 // computing the flux over the energy bin in ph/cm2/s
                 // and multiplying this flux by the effective area (cm2)
                 // and the livetime (s)
                 value += spectral->flux(emin, emax) * norm_flux;
-								
+
                 // Determine the model gradients at the current energy. The
                 // eval() method needs a time in case that the spectral model
                 // has a time dependence. We simply use a dummy time here.
@@ -1416,19 +1654,19 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                         (*grad)[ipar] = par.factor_gradient() * norm_grad;
                     }
                 }
-								
+
             } // endif: spectral component
-							
+
             // Increase parameter counter for temporal parameter
             GModelTemporal* temporal = sky->temporal();
             if (temporal != NULL)  {
                 ipar += temporal->size();
             }
-			
+
         } // endfor: looped over model components
-		
+
 	} // endif: bin number is in the range and model container is not empty
-	
+
 	// Return number of gamma-ray events
 	return value;
 }
@@ -1466,7 +1704,7 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 {
 	// Get total number of model parameters
 	int npars = models.npars();
-	
+
 	// Initialize results
 	double value = 0.0;
     for (int i = 0; i < npars; ++i) {
@@ -1478,10 +1716,10 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 
         // Initialise parameter index
         int ipar = 0;
-	
+
         // Get reference to background rates (events/MeV/s)
         const std::vector<double>& background = m_arf["BACKGROUND"];
-				
+
         // Get energy bin mean and width
         const GEnergy emean  = m_off_spec.ebounds().elogmean(ibin);
         const double  ewidth = m_off_spec.ebounds().ewidth(ibin).MeV();
@@ -1489,23 +1727,23 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
         // Compute normalisation factor (events)
         double exposure = m_off_spec.exposure();
         double norm     = background[ibin] * exposure * ewidth;
-			
+
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
-				
+
             // Get model pointer. Fall through if pointer is not valid
             const GModel* mptr = models[j];
             if (mptr == NULL) {
                 continue;
             }
-					
+
             // Fall through if model does not apply to specific instrument
             // and observation identifier.
             if (!mptr->is_valid(this->instrument(), this->id())) {
                 ipar += mptr->size();
                 continue;
             }
-						
+
             // Fall through if model is not an IRF background component
             const GCTAModelIrfBackground* bgd =
                   dynamic_cast<const GCTAModelIrfBackground*>(mptr);
@@ -1513,7 +1751,7 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                 ipar += mptr->size();
                 continue;
             }
-							
+
             // Get spectral component
             GModelSpectral* spectral = bgd->spectral();
             if (spectral != NULL)  {
@@ -1534,19 +1772,19 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                         (*grad)[ipar] += par.factor_gradient() * norm;
                     }
                 }
-								
+
             } // endif: pointer to spectral component was not NULL
-							
+
             // Increase parameter counter for temporal parameter
             GModelTemporal* temporal = bgd->temporal();
             if (temporal != NULL)  {
                 ipar += temporal->size();
             }
-												
+
         } // endfor: looped over model components
-			
+
 	} // endif: bin number is in the range and model container is not empty
-	
+
 	// Return
 	return value;
 }

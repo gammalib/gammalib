@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.hpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2017 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GModels;
 class GOptimizerPars;
+class GObservations;
 class GCTAObservation;
 class GBounds;
 
@@ -67,6 +68,7 @@ public:
                          const GEbounds&        ereco,
                          const GSkyRegions&     on,
                          const GSkyRegions&     off);
+    GCTAOnOffObservation(const GObservations& obs);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
  
@@ -110,6 +112,7 @@ protected:
     void   init_members(void);
     void   copy_members(const GCTAOnOffObservation& obs);
     void   free_members(void);
+    void   check_consistency(const std::string& method) const;
     void   set(const GCTAObservation& obs);
     void   compute_arf(const GCTAObservation& obs);
 	void   compute_bgd(const GCTAObservation& obs);
@@ -119,17 +122,17 @@ protected:
 	double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
 
     // Protected data members
-    std::string         m_instrument;  //!< Instrument name
-    GCTAResponse*       m_response;    //!< Pointer to IRFs
-	double              m_ontime;      //!< Ontime (seconds)
-    double              m_livetime;    //!< Livetime (seconds)
-    double              m_deadc;       //!< Deadtime correction (livetime/ontime)
-    GPha 		        m_on_spec;     //!< On counts spectrum
-    GPha 		        m_off_spec;    //!< Off counts spectrum
-    GArf                m_arf;         //!< Auxiliary Response Function vector
-    GRmf                m_rmf;         //!< Redistribution matrix
-    GSkyRegions         m_on_regions;  //!< Container of On region
-    GSkyRegions         m_off_regions; //!< Container of Off regions
+    std::string   m_instrument;  //!< Instrument name
+    GCTAResponse* m_response;    //!< Pointer to IRFs
+	double        m_ontime;      //!< Ontime (seconds)
+    double        m_livetime;    //!< Livetime (seconds)
+    double        m_deadc;       //!< Deadtime correction (livetime/ontime)
+    GPha 		  m_on_spec;     //!< On counts spectrum
+    GPha 		  m_off_spec;    //!< Off counts spectrum
+    GArf          m_arf;         //!< Auxiliary Response Function vector
+    GRmf          m_rmf;         //!< Redistribution matrix
+    GSkyRegions   m_on_regions;  //!< Container of On regions
+    GSkyRegions   m_off_regions; //!< Container of Off regions
 };
 
 
