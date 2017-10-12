@@ -995,7 +995,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
                 totsolid += pixsolid;
                 
                 // Integrate PSF
-                double delta = m_src_dir.dist_deg(pixdir);
+                double delta = m_src_dir.dist(pixdir);
                 totpsf += response->psf(delta,
                                         theta,
                                         phi,
@@ -1011,7 +1011,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
             }
             
             // Correct effective area by containment fraction
-            if (totpsf >= 0.0) {
+            if (totpsf >= 0.0 && totpsf <= 1.0) {
                 m_arf[i] *= totpsf;
             }
        
