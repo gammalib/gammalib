@@ -31,6 +31,7 @@
 #include <typeinfo>
 #include "GObservationRegistry.hpp"
 #include "GTools.hpp"
+#include "GIntegral.hpp"
 #include "GModels.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
@@ -65,12 +66,16 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 #define G_LIKELIHOOD            "GCTAOnOffObservation::likelihood(GModels&, "\
                                           "GOptimizerPars&, GMatrixSparse&, "\
                                                 "GVector&, double&, double&)"
-#define G_SET                   "GCTAOnOffObservation::set(GCTAObservation&)"
-#define G_COMPUTE_ARF   "GCTAOnOffObservation::compute_arf(GCTAObservation&)"
-#define G_COMPUTE_BGD   "GCTAOnOffObservation::compute_bgd(GCTAObservation&)"
+#define G_SET        "GCTAOnOffObservation::set(GCTAObservation&, GSkyDir&, "\
+                                            "GSkyRegionMap&, GSkyRegionMap&)"
+#define G_COMPUTE_ARF  "GCTAOnOffObservation::compute_arf(GCTAObservation&, "\
+                                                  "GSkyDir&, GSkyRegionMap&)"
+#define G_COMPUTE_BGD  "GCTAOnOffObservation::compute_bgd(GCTAObservation&, "\
+                                                            "GSkyRegionMap&)"
 #define G_COMPUTE_ALPHA                "GCTAOnOffObservation::compute_alpha("\
-                                                          "GCTAObservation&)"
-#define G_COMPUTE_RMF   "GCTAOnOffObservation::compute_rmf(GCTAObservation&)"
+                          "GCTAObservation&, GSkyRegionMap&, GSkyRegionMap&)"
+#define G_COMPUTE_RMF  "GCTAOnOffObservation::compute_rmf(GCTAObservation&, "\
+                                                            "GSkyRegionMap&)"
 
 /* __ Constants __________________________________________________________ */
 const double minmod = 1.0e-100;                      //!< Minimum model value
@@ -82,6 +87,7 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_LIKELIHOOD_DEBUG                //!< Debug likelihood computation
+//#define G_N_GAMMA_DEBUG                   //!< Debug N_gamma computation
 
 
 /*==========================================================================
@@ -998,14 +1004,14 @@ void GCTAOnOffObservation::init_members(void)
 void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
 {
     // Copy attributes
-    m_instrument  = obs.m_instrument;
-    m_ontime      = obs.m_ontime;
-    m_livetime    = obs.m_livetime;
-    m_deadc       = obs.m_deadc;
-    m_on_spec     = obs.m_on_spec;
-    m_off_spec    = obs.m_off_spec;
-    m_arf         = obs.m_arf;
-    m_rmf         = obs.m_rmf;
+    m_instrument = obs.m_instrument;
+    m_ontime     = obs.m_ontime;
+    m_livetime   = obs.m_livetime;
+    m_deadc      = obs.m_deadc;
+    m_on_spec    = obs.m_on_spec;
+    m_off_spec   = obs.m_off_spec;
+    m_arf        = obs.m_arf;
+    m_rmf        = obs.m_rmf;
 
     // Clone members
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
@@ -1201,7 +1207,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                                            phi,
                                            zenith,
                                            azimuth,
-                                           logEtrue)*pixsolid;
+                                           logEtrue) * pixsolid;
 
                 // Add pixel solid angle to total for averaging later
                 totsolid += pixsolid;
@@ -1215,7 +1221,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                                         phi,
                                         zenith,
                                         azimuth,
-                                        logEtrue)*pixsolid;
+                                        logEtrue) * pixsolid;
 
             } // endfor: Looped over all pixels in map
 
@@ -1250,8 +1256,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
  *
  * Compute the background rate in units of events/s/MeV in all Off regions
  * and stores the background rate as additional column with name
- * `BACKGROUND` in the Auxiliary Response File (ARF).
- *
+ * `BACKRESP` in the Auxiliary Response File (ARF).
  ***************************************************************************/
 void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
                                        const GSkyRegionMap&   off)
@@ -1317,7 +1322,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
         } // Looped over all pixels in map
 
         // Append background vector to ARF
-        m_arf.append("BACKGROUND", background);
+        m_arf.append("BACKRESP", background);
 
     } // endif: there were spectral bins
 
@@ -1478,8 +1483,9 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
         // Loop over reconstructed energy
         for (int ireco = 0; ireco < nreco; ++ireco) {
 
-            // Get log10(E)
-            double logEreco = ereco.elogmean(ireco).log10TeV();
+            // Get log of reconstructed energy boundaries
+            double ereco_min = std::log(ereco.emin(ireco).MeV());
+            double ereco_max = std::log(ereco.emax(ireco).MeV());
 
             // Loop over true energy
             for (int itrue = 0; itrue < ntrue; ++itrue) {
@@ -1500,31 +1506,29 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                     // Get direction to pixel center
                     GSkyDir pixdir = on.map().inx2dir(pixidx);
 
-                    // Translate sky direction into instrument direction
-                    GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
-
-                    // Get solid angle subtended by this pixel
-                    double pixsolid = on.map().solidangle(pixidx);
-
                     // Compute position of pixel centre in instrument coordinates
                     double theta = obsdir.dist(pixdir);
                     double phi   = obsdir.posang(pixdir);
 
-                    // Get effective area
-                    double aeff = response->aeff(theta,
-                                                 phi,
-                                                 zenith,
-                                                 azimuth,
-                                                 logEreco);
+                    // Get effective area for weighting
+                    double aeff = response->aeff(theta, phi, zenith, azimuth,
+                                                 logEtrue);
 
-                    // Add up energy dispersion weighted by effective area
-                    weight              += aeff;
-                    m_rmf(itrue, ireco) += response->edisp(ereco.elogmean(ireco),
-                                                           theta,
-                                                           phi,
-                                                           zenith,
-                                                           azimuth,
-                                                           logEtrue) * aeff;
+                    // Add up weight
+                    weight += aeff;
+
+                    // Setup energy dispersion integral
+                    GCTAOnOffObservation::edisp_kern integrand(response,
+                                                               theta, phi,
+                                                               zenith, azimuth,
+                                                               logEtrue);
+                    GIntegral integral(&integrand);
+
+                    // Do Romberg integration
+                    double value = integral.romberg(ereco_min, ereco_max);
+
+                    // Update RMF value
+                    m_rmf(itrue, ireco) += value * aeff;
 
                 } // endfor: Looped over all pixels in map
                 
@@ -1586,10 +1590,6 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
         // Initialise parameter index
         int ipar = 0;
 
-        // Get true energy binning (loop over bins further down)
-        GEbounds etrue = m_arf.ebounds();
-        int      ntrue = etrue.size();
-
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
 
@@ -1623,37 +1623,65 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
             GModelSpectral* spectral = sky->spectral();
             if (spectral != NULL)  {
 
-                // Loop over true energy bins
-                for (int itrue = 0; itrue < ntrue; ++itrue) {
+                // Debug code
+                #if defined(G_N_GAMMA_DEBUG)
+                double rmf_sum = 0.0;
+                #endif
 
-                    // True energy bin properties
-                    const GEnergy etruemin   = etrue.emin(itrue);
-                    const GEnergy etruemax   = etrue.emax(itrue);
-                    const GEnergy etruemean  = etrue.elogmean(itrue);
-                    const double  etruewidth = etrue.ewidth(itrue).MeV();
+                // Loop over true energy bins
+                for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
+
+                    // Get RMF value. Continue only if it is positive
+                    double rmf = m_rmf(itrue, ibin);
+                    if (rmf <= 0.0) {
+                        continue;
+                    }
+
+                    // Debug code
+                    #if defined(G_N_GAMMA_DEBUG)
+                    rmf_sum += rmf;
+                    #endif
+
+                    // Get true energy bin properties
+                    GEnergy etruemin   = m_arf.ebounds().emin(itrue);
+                    GEnergy etruemax   = m_arf.ebounds().emax(itrue);
+                    GEnergy etruemean  = m_arf.ebounds().elogmean(itrue);
+                    double  etruewidth = m_arf.ebounds().ewidth(itrue).MeV();
+
+                    // Compute normalisation factors
+                    double exposure  = m_on_spec.exposure();
+                    double norm_flux = m_arf[itrue] * exposure * rmf;
+                    double norm_grad = norm_flux * etruewidth;
 
                     // Determine number of gamma-ray events in model by
-                    // computing the flux over the true  energy bin
-                    // in ph/cm2/s and multiplying this by effective area (cm2)
-                    // and livetime (s) and redistribution probability
-                    double norm_flux = m_arf[itrue] * m_on_spec.exposure() * m_rmf(itrue, ibin);
+                    // computing the flux over the true energy bin in
+                    // ph/cm2/s and multiplying this by effective area (cm2),
+                    // livetime (s) and redistribution probability
                     value += spectral->flux(etruemin, etruemax) * norm_flux;
 
-                    // Determine the model gradients at the current true energy. The
-                    // eval() method needs a time in case that the spectral model
-                    // has a time dependence. We simply use a dummy time here.
-                    double norm_grad = norm_flux * etruewidth;
+                    // Determine the model gradients at the current true
+                    // energy. The eval() method needs a time in case that the
+                    // spectral model has a time dependence. We simply use a
+                    // dummy time here.
                     spectral->eval(etruemean, GTime(), true);
 
                     // Loop over spectral model parameters
-                    for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
+                    for (int k = 0; k < spectral->size(); ++k) {
                         GModelPar& par = (*spectral)[k];
-                        if (par.is_free() && ipar < npars)  {
-                            (*grad)[ipar] += par.factor_gradient() * norm_grad;
+                        if (par.is_free() && (k+ipar) < npars)  {
+                            (*grad)[k+ipar] += par.factor_gradient() * norm_grad;
                         }
                     } // endfor: looped over model parameters
 
                 } // endfor: looped over true energy bins
+
+                // Debug code
+                #if defined(G_N_GAMMA_DEBUG)
+                std::cout << "sum(Rmf) = " << rmf_sum << std::endl;
+                #endif
+
+                // Increment parameter counter for spectral parameter
+                ipar += spectral->size();
 
             } // endif: spectral component
 
@@ -1718,7 +1746,7 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
         int ipar = 0;
 
         // Get reference to background rates (events/MeV/s)
-        const std::vector<double>& background = m_arf["BACKGROUND"];
+        const std::vector<double>& background = m_arf["BACKRESP"];
 
         // Get reconstructed energy bin mean and width
         const GEnergy emean  = m_off_spec.ebounds().elogmean(ibin);
@@ -1787,4 +1815,30 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 
 	// Return
 	return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Energy dispersion integration kernel evaluation
+ *
+ * @param[in] x Function value.
+ *
+ * This method implements the integration kernel for the energy dispersion.
+ ***************************************************************************/
+double GCTAOnOffObservation::edisp_kern::eval(const double& x)
+{
+    // Set energy
+    GEnergy ereco;
+    double expx = std::exp(x);
+    ereco.MeV(expx);
+
+    // Get function value
+    double value = m_irf->edisp(ereco, m_theta, m_phi, m_zenith, m_azimuth,
+                                m_logEtrue);
+
+    // Correct for variable substitution
+    value *= expx;
+
+    // Return value
+    return value;
 }

@@ -61,23 +61,23 @@ public:
     GSkyRegionMap& operator=(const GSkyRegionMap& region);
 
     // Implemented pure virtual  methods
-    void              clear(void);
-    GSkyRegionMap*    clone(void) const;
-    std::string       classname(void) const;
-    void              read(const std::string& line);
-    std::string       write(void) const;
-    bool              contains(const GSkyDir& dir) const;
-    bool              contains(const GSkyRegion& reg) const;
-    bool              overlaps(const GSkyRegion& reg) const;
-    std::string       print(const GChatter& chatter = NORMAL) const;
-    
+    void           clear(void);
+    GSkyRegionMap* clone(void) const;
+    std::string    classname(void) const;
+    void           read(const std::string& line);
+    std::string    write(void) const;
+    bool           contains(const GSkyDir& dir) const;
+    bool           contains(const GSkyRegion& reg) const;
+    bool           overlaps(const GSkyRegion& reg) const;
+    std::string    print(const GChatter& chatter = NORMAL) const;
+
     // Other methods
     void                    load(const GFilename& filename);
     void                    map(const GSkyMap& map);
     const GSkyMap&          map(void) const;
     const GFilename&        filename(void) const;
     const std::vector<int>& nonzero_indices(void) const;
-    
+
 protected:
     // Protected methods
     void init_members(void);
@@ -127,7 +127,7 @@ void GSkyRegionMap::map(const GSkyMap& map)
 {
     // Set map object
     m_map = map;
-    
+
     // Return
     return;
 }

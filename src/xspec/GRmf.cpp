@@ -631,6 +631,8 @@ void GRmf::read(const GFitsTable& table)
 
             // Get values
             for (int i = 0; i < nvalues; ++i, ++imeasured, ++icolumn) {
+
+                // Set matrix value
                 m_matrix(itrue, imeasured) = matrix->real(itrue, icolumn);
 
                 // Update fmax
@@ -639,12 +641,12 @@ void GRmf::read(const GFitsTable& table)
                     m_itruemax = itrue;
                     m_imeasmax = imeasured;
                 }
-            }
+
+            } // endfor: looped over measured energy bins
 
         } // endfor: looped over groups
 
     } // endfor: looped over true energy bins
-
 
     // Return
     return;

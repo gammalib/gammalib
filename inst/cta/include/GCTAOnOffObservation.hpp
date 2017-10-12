@@ -30,10 +30,11 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GObservation.hpp"
 #include "GPha.hpp"
 #include "GArf.hpp"
 #include "GRmf.hpp"
+#include "GFunction.hpp"
+#include "GObservation.hpp"
 #include "GSkyRegionMap.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -42,6 +43,7 @@ class GOptimizerPars;
 class GObservations;
 class GCTAObservation;
 class GBounds;
+class GCTAResponseIrf;
 
 
 /***********************************************************************//**
@@ -128,6 +130,31 @@ protected:
                        const GSkyRegionMap&   on);
     double N_gamma(const GModels& models, const int& ibin, GVector* grad) const;
 	double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
+
+    // Energy dispersion integration kernel
+    class edisp_kern : public GFunction {
+    public:
+        edisp_kern(const GCTAResponseIrf* irf,
+                   const double&          theta,
+                   const double&          phi,
+                   const double&          zenith,
+                   const double&          azimuth,
+                   const double&          logEtrue) :
+                   m_irf(irf),
+                   m_theta(theta),
+                   m_phi(phi),
+                   m_zenith(zenith),
+                   m_azimuth(azimuth),
+                   m_logEtrue(logEtrue) { }
+        double eval(const double& x);
+    protected:
+        const GCTAResponseIrf* m_irf;      //!< Response pointer
+        double                 m_theta;    //!< Offset angle
+        double                 m_phi;      //!< Polar angle
+        double                 m_zenith;   //!< Zenith angle
+        double                 m_azimuth;  //!< Azimuth angle
+        double                 m_logEtrue; //!< Log10 true energy in TeV
+    };
 
     // Protected data members
     std::string   m_instrument;  //!< Instrument name
