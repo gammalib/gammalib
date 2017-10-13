@@ -32,11 +32,13 @@
 #include "GObservationRegistry.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"
+#include "GMatrixSparse.hpp"
 #include "GModels.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
+#include "GSkyRegions.hpp"
 #include "GSkyRegionMap.hpp"
 #include "GOptimizerPars.hpp"
 #include "GObservations.hpp"
@@ -136,8 +138,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs) :
  * @param[in] obs CTA observation.
  * @param[in] etrue True energy boundaries.
  * @param[in] ereco Reconstructed energy boundaries.
- * @param[in] on On region map.
- * @param[in] off Off region map.
+ * @param[in] on On regions.
+ * @param[in] off Off regions.
  * @param[in] srcdir Point source location.
  *
  * Constructs On/Off observation by filling the On and Off spectra and
@@ -150,8 +152,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
                                            const GSkyDir&         srcdir,
                                            const GEbounds&        etrue,
                                            const GEbounds&        ereco,
-                                           const GSkyRegionMap&   on,
-                                           const GSkyRegionMap&   off)
+                                           const GSkyRegions&     on,
+                                           const GSkyRegions&     off)
 {
     // Initialise private
     init_members();
@@ -1110,8 +1112,8 @@ void GCTAOnOffObservation::check_consistency(const std::string& method) const
  *
  * @param[in] obs CTA observation.
  * @param[in] srcdir Point source location.
- * @param[in] on On region map.
- * @param[in] off Off region map.
+ * @param[in] on On regions.
+ * @param[in] off Off regions.
  *
  * @exception GException::invalid_value
  *            No CTA event list found in CTA observation.
@@ -1122,8 +1124,8 @@ void GCTAOnOffObservation::check_consistency(const std::string& method) const
  ***************************************************************************/
 void GCTAOnOffObservation::set(const GCTAObservation& obs,
                                const GSkyDir&         srcdir,
-                               const GSkyRegionMap&   on,
-                               const GSkyRegionMap&   off)
+                               const GSkyRegions&     on,
+                               const GSkyRegions&     off)
 {
     // Get CTA event list pointer
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
@@ -1160,11 +1162,21 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
     m_livetime = obs.livetime();
     m_deadc    = obs.deadc();
 
+    // Convert all regions into region maps
+    GSkyRegions reg_on;
+    GSkyRegions reg_off;
+    for (int i = 0; i < on.size(); ++i) {
+        reg_on.append(GSkyRegionMap(on[i]));
+    }
+    for (int i = 0; i < off.size(); ++i) {
+        reg_off.append(GSkyRegionMap(off[i]));
+    }
+
 	// Compute response components
-	compute_arf(obs, srcdir, on);
-	compute_bgd(obs, off);
-	compute_alpha(obs, on, off);
-	compute_rmf(obs, on);
+	compute_arf(obs, srcdir, reg_on);
+	compute_bgd(obs, reg_off);
+	compute_alpha(obs, reg_on, reg_off);
+	compute_rmf(obs, reg_on);
 
     // Set log true energy node array
     set_logetrue();
@@ -1179,14 +1191,14 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
  *
  * @param[in] obs CTA observation.
  * @param[in] srcdir Point source location.
- * @param[in] on On region map.
+ * @param[in] on On regions.
  *
  * @exception GException::invalid_value
  *            No CTA response found in CTA observation.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                                        const GSkyDir&         srcdir,
-                                       const GSkyRegionMap&   on)
+                                       const GSkyRegions&     on)
 {
     // Get reconstructed energy boundaries from on ARF
     GEbounds etrue = m_arf.ebounds();
@@ -1224,44 +1236,53 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
             double totsolid = 0.0;
             double totpsf   = 0.0;
 
-            // Loop over pixels in ON region map and integrate effective area 
-            for (int j = 0; j < on.nonzero_indices().size(); ++j) {
+            // Loop over regions
+            for (int k = 0; k < on.size(); ++k) {
 
-                // Get pixel index
-                int pixidx = on.nonzero_indices()[j];
+                // Get pointer on sky region map
+                const GSkyRegionMap* on_map = static_cast<const GSkyRegionMap*>(on[k]);
 
-                // Get direction to pixel center
-                GSkyDir pixdir = on.map().inx2dir(pixidx);
+                // Loop over pixels in On region map and integrate effective
+                // area
+                for (int j = 0; j < on_map->nonzero_indices().size(); ++j) {
 
-                // Get solid angle subtended by this pixel
-                double pixsolid = on.map().solidangle(pixidx);
+                    // Get pixel index
+                    int pixidx = on_map->nonzero_indices()[j];
 
-                // Compute position of pixel centre in instrument coordinates
-                double theta = obsdir.dist(pixdir);
-                double phi   = obsdir.posang(pixdir);
+                    // Get direction to pixel center
+                    GSkyDir pixdir = on_map->map().inx2dir(pixidx);
 
-                // Add up effective area
-                m_arf[i] += response->aeff(theta,
-                                           phi,
-                                           zenith,
-                                           azimuth,
-                                           logEtrue) * pixsolid;
+                    // Get solid angle subtended by this pixel
+                    double pixsolid = on_map->map().solidangle(pixidx);
 
-                // Add pixel solid angle to total for averaging later
-                totsolid += pixsolid;
+                    // Compute position of pixel centre in instrument coordinates
+                    double theta = obsdir.dist(pixdir);
+                    double phi   = obsdir.posang(pixdir);
 
-                // Compute offset angle to source
-                double delta = srcdir.dist(pixdir);
+                    // Add up effective area
+                    m_arf[i] += response->aeff(theta,
+                                               phi,
+                                               zenith,
+                                               azimuth,
+                                               logEtrue) * pixsolid;
 
-                // Integrate PSF
-                totpsf += response->psf(delta,
-                                        theta,
-                                        phi,
-                                        zenith,
-                                        azimuth,
-                                        logEtrue) * pixsolid;
+                    // Add pixel solid angle to total for averaging later
+                    totsolid += pixsolid;
 
-            } // endfor: Looped over all pixels in map
+                    // Compute offset angle to source
+                    double delta = srcdir.dist(pixdir);
+
+                    // Integrate PSF
+                    totpsf += response->psf(delta,
+                                            theta,
+                                            phi,
+                                            zenith,
+                                            azimuth,
+                                            logEtrue) * pixsolid;
+
+                } // endfor: looped over all pixels in region map
+
+            } // endfor: looped over all regions
 
             // Average effective area over solid angle
             if (totsolid > 0.0) {
@@ -1283,10 +1304,10 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
 
 
 /***********************************************************************//**
- * @brief Compute background rate in Off region
+ * @brief Compute background rate in Off regions
  *
  * @param[in] obs CTA observation.
- * @param[in] off Off region map.
+ * @param[in] off Off regions.
  *
  * @exception GException::invalid_argument
  *            Observation does not contain relevant response or background
@@ -1297,7 +1318,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
  * the Auxiliary Response File (ARF).
  ***************************************************************************/
 void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
-                                       const GSkyRegionMap&   off)
+                                       const GSkyRegions&     off)
 {
     // Get true energy boundaries from on Arf and interpret them as
     // reconstructed energies for the background rates
@@ -1330,35 +1351,44 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
             throw GException::invalid_argument(G_COMPUTE_BGD, msg);
         }
 
-        // Loop over pixels in Off region map and integrate background rate
-        for (int j = 0; j < off.nonzero_indices().size(); ++j) {
+        // Loop over regions
+        for (int k = 0; k < off.size(); ++k) {
 
-            // Get pixel index
-            int pixidx = off.nonzero_indices()[j];
+            // Get pointer on sky region map
+            const GSkyRegionMap* off_map = static_cast<const GSkyRegionMap*>(off[k]);
 
-            // Get direction to pixel center
-            GSkyDir pixdir = off.map().inx2dir(pixidx);
+            // Loop over pixels in Off region map and integrate background
+            // rate
+            for (int j = 0; j < off_map->nonzero_indices().size(); ++j) {
 
-            // Translate sky direction into instrument direction
-            GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+                // Get pixel index
+                int pixidx = off_map->nonzero_indices()[j];
 
-            // Get solid angle subtended by this pixel
-            double pixsolid = off.map().solidangle(pixidx);
+                // Get direction to pixel center
+                GSkyDir pixdir = off_map->map().inx2dir(pixidx);
 
-            // Loop over energy bins
-            for (int i = 0; i < nreco; ++i) {
+                // Translate sky direction into instrument direction
+                GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
 
-                // Get log10(E/TeV) of mean reconstructed bin energy
-                double logEreco = ereco.elogmean(i).log10TeV();
+                // Get solid angle subtended by this pixel
+                double pixsolid = off_map->map().solidangle(pixidx);
 
-                // Get background rate in events/s/MeV
-                background[i] += (*bgd)(logEreco,
-                                        pixinstdir.detx(),
-                                        pixinstdir.dety()) * pixsolid;
+                // Loop over energy bins
+                for (int i = 0; i < nreco; ++i) {
 
-            } // endfor: looped over energy bins
+                    // Get log10(E/TeV) of mean reconstructed bin energy
+                    double logEreco = ereco.elogmean(i).log10TeV();
 
-        } // endfor: looped over all pixels in map
+                    // Get background rate in events/s/MeV
+                    background[i] += (*bgd)(logEreco,
+                                            pixinstdir.detx(),
+                                            pixinstdir.dety()) * pixsolid;
+
+                } // endfor: looped over energy bins
+
+            } // endfor: looped over all pixels in map
+
+        } // endfor: looped over all regions
 
         // Append background vector to ARF
         m_arf.append("BACKRESP", background);
@@ -1374,8 +1404,8 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  * @brief Compute vector of alpha parameters
  *
  * @param[in] obs CTA observation.
- * @param[in] on On region map.
- * @param[in] off Off region map.
+ * @param[in] on On regions.
+ * @param[in] off Off regions.
  *
  * @exception GException::invalid_value
  *            No CTA response found in CTA observation.
@@ -1386,8 +1416,8 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  *
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
-                                         const GSkyRegionMap&   on,
-                                         const GSkyRegionMap&   off)
+                                         const GSkyRegions&     on,
+                                         const GSkyRegions&     off)
 {
     // Get reconstructed energy boundaries from RMF
 	GEbounds ereco = m_rmf.emeasured();
@@ -1420,49 +1450,67 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
             double aon  = 0.0;
             double aoff = 0.0;
 
-            // Loop over pixels in On region map and integrate acceptance
-            for (int j = 0; j < on.nonzero_indices().size(); ++j) {
+            // Loop over On regions
+            for (int k = 0; k < on.size(); ++k) {
 
-                // Get pixel index
-                int pixidx = on.nonzero_indices()[j];
+                // Get pointer on sky region map
+                const GSkyRegionMap* on_map = static_cast<const GSkyRegionMap*>(on[k]);
 
-                // Get direction to pixel center
-                GSkyDir pixdir = on.map().inx2dir(pixidx);
+                // Loop over pixels in On region map and integrate acceptance
+                for (int j = 0; j < on_map->nonzero_indices().size(); ++j) {
 
-                // Translate sky direction into instrument direction
-                GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+                    // Get pixel index
+                    int pixidx = on_map->nonzero_indices()[j];
 
-                // Get solid angle subtended by this pixel
-                double pixsolid = on.map().solidangle(pixidx);
+                    // Get direction to pixel center
+                    GSkyDir pixdir = on_map->map().inx2dir(pixidx);
 
-                // Add up acceptance
-                aon += (*response->background())(logEreco,
-                                                 pixinstdir.detx(),
-                                                 pixinstdir.dety()) * pixsolid;
+                    // Translate sky direction into instrument direction
+                    GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
 
-            } // endfor: looped over all pixels in map
+                    // Get solid angle subtended by this pixel
+                    double pixsolid = on_map->map().solidangle(pixidx);
 
-            // Loop over pixels in Off region map and integrate acceptance
-            for (int j = 0; j < off.nonzero_indices().size(); ++j) {
+                    // Add up acceptance
+                    aon += (*response->background())(logEreco,
+                                                     pixinstdir.detx(),
+                                                     pixinstdir.dety()) *
+                                                     pixsolid;
 
-                // Get pixel index
-                int pixidx = off.nonzero_indices()[j];
+                } // endfor: looped over all pixels in map
 
-                // Get direction to pixel center
-                GSkyDir pixdir = off.map().inx2dir(pixidx);
+            } // endfor: looped over regions
 
-                // Translate sky direction into instrument direction
-                GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+            // Loop over Off regions
+            for (int k = 0; k < off.size(); ++k) {
 
-                // Get solid angle subtended by this pixel
-                double pixsolid = off.map().solidangle(pixidx);
+                // Get pointer on sky region map
+                const GSkyRegionMap* off_map = static_cast<const GSkyRegionMap*>(off[k]);
 
-                // Add up acceptance
-                aoff += (*response->background())(logEreco,
-                                                  pixinstdir.detx(),
-                                                  pixinstdir.dety()) * pixsolid;
+                // Loop over pixels in Off region map and integrate acceptance
+                for (int j = 0; j < off_map->nonzero_indices().size(); ++j) {
 
-            } // endfor: Looped over all pixels in map
+                    // Get pixel index
+                    int pixidx = off_map->nonzero_indices()[j];
+
+                    // Get direction to pixel center
+                    GSkyDir pixdir = off_map->map().inx2dir(pixidx);
+
+                    // Translate sky direction into instrument direction
+                    GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+
+                    // Get solid angle subtended by this pixel
+                    double pixsolid = off_map->map().solidangle(pixidx);
+
+                    // Add up acceptance
+                    aoff += (*response->background())(logEreco,
+                                                      pixinstdir.detx(),
+                                                      pixinstdir.dety()) *
+                                                      pixsolid;
+
+                } // endfor: looped over all pixels in map
+
+            } // endfor: looped over all regions
 
 			// Compute alpha for this energy bin
             double alpha = (aoff > 0.0) ? aon/aoff : 1.0;
@@ -1483,7 +1531,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
  * @brief Compute RMF of On/Off observation
  *
  * @param[in] obs CTA observation.
- * @param[in] on On region map.
+ * @param[in] on On regions.
  *
  * @exception GException::invalid_value
  *            Observation does not contain IRF response
@@ -1492,7 +1540,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
  * method requires that the RMF energy axes have been defined before.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
-                                       const GSkyRegionMap&   on)
+                                       const GSkyRegions&     on)
 {
     // Get true and reconstructed energy boundaries from Rmf
     GEbounds etrue = m_rmf.etrue();
@@ -1519,66 +1567,86 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
         double       zenith  = obspnt.zenith();
         double       azimuth = obspnt.azimuth();
 
-        // Loop over reconstructed energy
-        for (int ireco = 0; ireco < nreco; ++ireco) {
-
-            // Get log of reconstructed energy boundaries
-            double ereco_min = std::log(ereco.emin(ireco).MeV());
-            double ereco_max = std::log(ereco.emax(ireco).MeV());
-
-            // Loop over true energy
-            for (int itrue = 0; itrue < ntrue; ++itrue) {
-
-                // Initialise Rmf element
+        // Initialise Rmf matrix
+        for (int itrue = 0; itrue < ntrue; ++itrue) {
+            for (int ireco = 0; ireco < nreco; ++ireco) {
                 m_rmf(itrue, ireco) = 0.0;
+            }
+        }
 
-                // Compute true energy and initialise weight for this bin
-                double logEtrue = etrue.elogmean(itrue).log10TeV();
-                double weight   = 0.0;
+        // Initialise weight matrix
+        GMatrixSparse weight(ntrue, nreco);
 
-                // Loop over pixels in ON region map and integrate acceptance
-                for (int j = 0; j < on.nonzero_indices().size(); ++j) {
+        // Loop over On regions
+        for (int k = 0; k < on.size(); ++k) {
 
-                    // Get pixel index
-                    int pixidx = on.nonzero_indices()[j];
+            // Get pointer on sky region map
+            const GSkyRegionMap* on_map = static_cast<const GSkyRegionMap*>(on[k]);
 
-                    // Get direction to pixel center
-                    GSkyDir pixdir = on.map().inx2dir(pixidx);
+            // Loop over pixels in On region map and integrate acceptance
+            for (int j = 0; j < on_map->nonzero_indices().size(); ++j) {
 
-                    // Compute position of pixel centre in instrument coordinates
-                    double theta = obsdir.dist(pixdir);
-                    double phi   = obsdir.posang(pixdir);
+                // Get pixel index
+                int pixidx = on_map->nonzero_indices()[j];
+
+                // Get direction to pixel center
+                GSkyDir pixdir = on_map->map().inx2dir(pixidx);
+
+                // Compute position of pixel centre in instrument coordinates
+                double theta = obsdir.dist(pixdir);
+                double phi   = obsdir.posang(pixdir);
+
+                // Loop over true energy
+                for (int itrue = 0; itrue < ntrue; ++itrue) {
+
+                    // Compute log10 of true energy in TeV
+                    double logEtrue = etrue.elogmean(itrue).log10TeV();
 
                     // Get effective area for weighting
-                    double aeff = response->aeff(theta, phi, zenith, azimuth,
+                    double aeff = response->aeff(theta, phi,
+                                                 zenith, azimuth,
                                                  logEtrue);
-
-                    // Add up weight
-                    weight += aeff;
 
                     // Setup energy dispersion integral
                     GCTAOnOffObservation::edisp_kern integrand(response,
-                                                               theta, phi,
-                                                               zenith, azimuth,
+                                                               theta,
+                                                               phi,
+                                                               zenith,
+                                                               azimuth,
                                                                logEtrue);
                     GIntegral integral(&integrand);
+                    integral.eps(1.0e-4);
 
-                    // Do Romberg integration
-                    double value = integral.romberg(ereco_min, ereco_max);
+                    // Loop over reconstructed energy
+                    for (int ireco = 0; ireco < nreco; ++ireco) {
 
-                    // Update Rmf value
-                    m_rmf(itrue, ireco) += value * aeff;
+                        // Get log of reconstructed energy boundaries
+                        double ereco_min = std::log(ereco.emin(ireco).MeV());
+                        double ereco_max = std::log(ereco.emax(ireco).MeV());
 
-                } // endfor: looped over all pixels in map
+                        // Do Romberg integration
+                        double value = integral.romberg(ereco_min, ereco_max);
 
-                // Complete weighing by dividing by total effective area
-                if (weight > 0.0) {
-                    m_rmf(itrue, ireco) /= weight;
-                }	
+                        // Update Rmf value and weight
+                        m_rmf(itrue, ireco)  += value * aeff;
+                        weight(itrue, ireco) += aeff;
 
-            } // endfor: looped over true energy
+                    } // endfor: looped over reconstructed energy
 
-        } // endfor: looped over reconstructed energy
+                } // endfor: looped over true energy
+
+            } // endfor: looped over all pixels in map
+
+        } // endfor: looped over all regions
+
+        // Normalise Rmf matrix
+        for (int itrue = 0; itrue < ntrue; ++itrue) {
+            for (int ireco = 0; ireco < nreco; ++ireco) {
+                if (weight(itrue, ireco) > 0.0) {
+                    m_rmf(itrue, ireco) /= weight(itrue, ireco);
+                }
+            }
+        }
 
     } // endif: there were energy bins
 

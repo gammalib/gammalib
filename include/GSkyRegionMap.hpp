@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GSkyRegionMap.hpp - sky map region class                   *
+ *               GSkyRegionMap.hpp - Sky region map class                  *
  * ----------------------------------------------------------------------- *
  * copyright (C) 2017 by Pierrick Martin                                   *
  * ----------------------------------------------------------------------- *
@@ -36,15 +36,16 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GSkyDir;
+class GSkyRegionMap;
 
 
 /***********************************************************************//**
  * @class GSkyRegionMap
  *
- * @brief Interface for a sky region in the form of a map
+ * @brief Interface for a sky region map
  *
  * This class provides an implementation for a sky region defined by a
- * skymap. The map is provided as a FITS file filled with 0 and non-zero
+ * sky map. The map is provided as a FITS file filled with 0 and non-zero
  * values.
  ***************************************************************************/
 class GSkyRegionMap : public GSkyRegion {
@@ -54,6 +55,7 @@ public:
     GSkyRegionMap(void);
     GSkyRegionMap(const GFilename& filename);
     GSkyRegionMap(const GSkyMap& map);
+    GSkyRegionMap(const GSkyRegion* region);
     GSkyRegionMap(const GSkyRegionMap& region);
     virtual ~GSkyRegionMap(void);
 
@@ -85,6 +87,7 @@ protected:
     void free_members(void);
     void compute_solid_angle(void);
     void set_nonzero_indices(void);
+    void set_region_circle(const GSkyRegionCircle* circle);
 
     // Protected members
     GSkyMap	          m_map;             //!< The region map
@@ -114,22 +117,6 @@ inline
 const GSkyMap& GSkyRegionMap::map(void) const
 {
     return (m_map);
-}
-
-
-/***********************************************************************//**
- * @brief Set sky map object
- * 
- * @param[in] map Sky map
- ***************************************************************************/
-inline
-void GSkyRegionMap::map(const GSkyMap& map)
-{
-    // Set map object
-    m_map = map;
-
-    // Return
-    return;
 }
 
 

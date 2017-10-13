@@ -273,25 +273,15 @@ class Test(gammalib.GPythonTestSuite):
         crab = gammalib.GSkyDir()
         crab.radec_deg(83.6331, 22.0145)
 
-        # Create On region map
-        onmap = gammalib.GSkyMap('TAN','CEL',83.6331,22.0145,0.01,0.01,100,100)
-        for i in range(onmap.npix()):
-            dir = onmap.inx2dir(i)
-            if dir.dist_deg(crab) <= 0.2:
-                onmap[i] = 1.0
-        on = gammalib.GSkyRegionMap(onmap)
-        onmap.save('test_on_map.fits', True)
+        # Create On region
+        on = gammalib.GSkyRegions()
+        on.append(gammalib.GSkyRegionCircle(crab, 0.2))
 
-        # Create Off region map
+        # Create Off region
         offdir = gammalib.GSkyDir()
         offdir.radec_deg(83.6331, 23.5145)
-        offmap = gammalib.GSkyMap('TAN','CEL',83.6331,23.5145,0.01,0.01,150,150)
-        for i in range(offmap.npix()):
-            dir = offmap.inx2dir(i)
-            if dir.dist_deg(offdir) <= 0.5:
-                offmap[i] = 1.0
-        off = gammalib.GSkyRegionMap(offmap)
-        offmap.save('test_off_map.fits', True)
+        off = gammalib.GSkyRegions()
+        off.append(gammalib.GSkyRegionCircle(offdir, 0.5))
 
         # Set energy binning
         etrue = gammalib.GEbounds(40, gammalib.GEnergy(0.1,  'TeV'),
@@ -322,19 +312,19 @@ class Test(gammalib.GPythonTestSuite):
         # Test On/Off model fitting results
         sky = outobs.models()['Crab']
         bgd = outobs.models()['Background']
-        self.test_value(sky['Prefactor'].value(), 6.453731e-16, 1.0e-20,
+        self.test_value(sky['Prefactor'].value(), 6.456877e-16, 1.0e-20,
                         'Check sky model prefactor value')
         self.test_value(sky['Prefactor'].error(), 2.176260e-17, 1.0e-20,
                         'Check sky model prefactor error')
-        self.test_value(sky['Index'].value(), -2.575501, 1.0e-4,
+        self.test_value(sky['Index'].value(), -2.575639, 1.0e-4,
                         'Check sky model index value')
         self.test_value(sky['Index'].error(), 0.030702, 1.0e-4,
                         'Check sky model index error')
-        self.test_value(bgd['Prefactor'].value(), 1.188457, 1.0e-4,
+        self.test_value(bgd['Prefactor'].value(), 1.182291, 1.0e-4,
                         'Check background model prefactor value')
-        self.test_value(bgd['Prefactor'].error(), 0.153416, 1.0e-4,
+        self.test_value(bgd['Prefactor'].error(), 0.152625, 1.0e-4,
                         'Check background model prefactor error')
-        self.test_value(bgd['Index'].value(), 0.521118, 1.0e-4,
+        self.test_value(bgd['Index'].value(), 0.520937, 1.0e-4,
                         'Check background model index value')
         self.test_value(bgd['Index'].error(), 0.086309, 1.0e-4,
                         'Check background model index error')

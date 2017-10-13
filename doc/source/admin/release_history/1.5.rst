@@ -30,6 +30,10 @@ Bug fixes
 Improvements
 ------------
 
+* [`2228 <https://cta-redmine.irap.omp.eu/issues/2228>`_] -
+  Implement observation stacking in ``GCTAOnOffObservation``
+* [`2210 <https://cta-redmine.irap.omp.eu/issues/2210>`_] -
+  Implement region integration in ``GCTAOnOffObservation``
 * Add ``GPha`` arithmetic operators and scale access methods
 * Add ``GArf`` arithmetic operators
 * Add ``GRmf`` arithmetic operators

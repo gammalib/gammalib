@@ -52,7 +52,6 @@ class GSkyDir;
  *
  * The object can be initialised from a DS9 region file, and has load and 
  * save methods from/to a DS9 region file.
- *
  ***************************************************************************/
 class GSkyRegions : public GContainer {
 

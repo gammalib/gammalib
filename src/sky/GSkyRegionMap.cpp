@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GSkyRegionMap.cpp -  Sky region map class                 *
+ *                GSkyRegionMap.cpp - Sky region map class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2017 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
@@ -68,23 +68,6 @@ GSkyRegionMap::GSkyRegionMap(void) : GSkyRegion()
 
 
 /***********************************************************************//**
- * @brief Copy constructor
- *
- * @param[in] region Sky region map.
- ***************************************************************************/
-GSkyRegionMap::GSkyRegionMap(const GSkyRegionMap& region) : GSkyRegion(region)
-{
-    // Initialise members
-    init_members();
-
-    // Copy members
-    copy_members(region);
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
  * @brief FITS filename constructor
  *
  * @param[in] filename FITS file.
@@ -114,14 +97,58 @@ GSkyRegionMap::GSkyRegionMap(const GSkyMap& map) : GSkyRegion()
     // Initialise members
     init_members();
 
-    // Attach map
-    m_map = map;
-    
-    // Set non-zero pixel indices
-    set_nonzero_indices();
-    
-    // Compute solid angle
-    compute_solid_angle();
+    // Set sky map
+    this->map(map);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Region conversion constructor
+ *
+ * @param[in] region Pointer to sky region.
+ *
+ * Constructs a sky region map from any region type.
+ ***************************************************************************/
+GSkyRegionMap::GSkyRegionMap(const GSkyRegion* region) : GSkyRegion(*region)
+{
+    // Initialise members
+    init_members();
+
+    // Get dynamic casts
+    const GSkyRegionMap*    map    = dynamic_cast<const GSkyRegionMap*>(region);
+    const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(region);
+
+    // If region is of type GSkyRegionMap then copy class members
+    if (map != NULL) {
+        copy_members(*map);
+    }
+
+    // ... otherwise, if region is of type GSkyRegionCircle then set region
+    // map from region circle
+    else if (circle != NULL) {
+        set_region_circle(circle);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] region Sky region map.
+ ***************************************************************************/
+GSkyRegionMap::GSkyRegionMap(const GSkyRegionMap& region) : GSkyRegion(region)
+{
+    // Initialise members
+    init_members();
+
+    // Copy members
+    copy_members(region);
 
     // Return
     return;
@@ -207,6 +234,29 @@ GSkyRegionMap* GSkyRegionMap::clone(void) const
 {
     // Clone sky map region
     return new GSkyRegionMap(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set sky map
+ * 
+ * @param[in] map Sky map
+ *
+ * Sets the sky map of a region map.
+ ***************************************************************************/
+void GSkyRegionMap::map(const GSkyMap& map)
+{
+    // Set map object
+    m_map = map;
+
+    // Set non-zero pixel indices
+    set_nonzero_indices();
+    
+    // Compute solid angle
+    compute_solid_angle();
+
+    // Return
+    return;
 }
 
 
@@ -515,6 +565,63 @@ void GSkyRegionMap::set_nonzero_indices(void)
         }
     }
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set region map from region circle
+ *
+ * @param[in] circle Region circle
+ *
+ * Sets a region map from a region circle. The method allocates a sky map
+ * with a default resolution of 1/20 of the circle radius. In any case, the
+ * sky map resolution is comprised within [0.0002, 0.1] degrees. The default
+ * size of the sky map is 2.5 times the circle radius, and in any case, at
+ * least 10 sky map pixels will be allocated. The sky map will be in
+ * celestial coordinates and TAN projection.
+ ***************************************************************************/
+void GSkyRegionMap::set_region_circle(const GSkyRegionCircle* circle)
+{
+    // Set sky map resolution from circle radius and constrain the
+    // resolution to [0.0002, 0.1] deg
+    double resolution = 0.05 * circle->radius();
+    if (resolution < 0.0002) {
+        resolution = 0.0002;
+    }
+    else if (resolution > 0.1) {
+        resolution = 0.1;
+    }
+
+    // Set number of sky map pixels
+    int nbins = int(2.5 * circle->radius() / resolution);
+    if (nbins < 10) {
+        nbins = 10;
+    }
+
+    // Set sky map
+    GSkyMap map("TAN", "CEL", circle->ra(), circle->dec(),
+                              resolution,   resolution,
+                              nbins,        nbins);
+
+    // Set sky map pixels
+    for (int i = 0; i < map.npix(); ++i) {
+
+        // Compute distance to circle centre
+        double distance = circle->centre().dist_deg(map.inx2dir(i));
+
+        // If distance is smaller or equal to radius then set map
+        // pixel to 1
+        if (distance <= circle->radius()) {
+            map(i) = 1.0;
+        }
+
+    } // endfor: looped over sky map pixels
+
+    // Set sky map as region map
+    this->map(map);
+
     // Return
     return;
 }

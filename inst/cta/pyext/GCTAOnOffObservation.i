@@ -80,8 +80,8 @@ public:
                          const GSkyDir&         srcdir,
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
-                         const GSkyRegionMap&   on,
-                         const GSkyRegionMap&   off);
+                         const GSkyRegions&     on,
+                         const GSkyRegions&     off);
     GCTAOnOffObservation(const GObservations& obs);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);

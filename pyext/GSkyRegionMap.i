@@ -1,5 +1,5 @@
 /***************************************************************************
- *                      GSkyRegionMap.i - Sky region class                 *
+ *                  GSkyRegionMap.i - Sky region map class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2017 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
@@ -40,6 +40,7 @@ public:
     GSkyRegionMap(void);
     GSkyRegionMap(const GFilename& filename);
     GSkyRegionMap(const GSkyMap& map); 
+    GSkyRegionMap(const GSkyRegion* region);
 	GSkyRegionMap(const GSkyRegionMap& region);
     virtual ~GSkyRegionMap(void);
 

@@ -35,14 +35,15 @@
 #include "GRmf.hpp"
 #include "GFunction.hpp"
 #include "GObservation.hpp"
-#include "GSkyRegionMap.hpp"
+#include "GNodeArray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GModels;
 class GOptimizerPars;
 class GObservations;
+class GSkyRegions;
 class GCTAObservation;
-class GBounds;
+class GCTAResponse;
 class GCTAResponseIrf;
 
 
@@ -71,8 +72,8 @@ public:
                          const GSkyDir&         srcdir,
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
-                         const GSkyRegionMap&   on,
-                         const GSkyRegionMap&   off);
+                         const GSkyRegions&     on,
+                         const GSkyRegions&     off);
     GCTAOnOffObservation(const GObservations& obs);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
@@ -117,18 +118,18 @@ protected:
     void   check_consistency(const std::string& method) const;
     void   set(const GCTAObservation& obs,
                const GSkyDir&         srcdir,
-               const GSkyRegionMap&   on,
-               const GSkyRegionMap&   off);
+               const GSkyRegions&     on,
+               const GSkyRegions&     off);
     void   compute_arf(const GCTAObservation& obs,
                        const GSkyDir&         srcdir,
-                       const GSkyRegionMap&   on);
+                       const GSkyRegions&     on);
 	void   compute_bgd(const GCTAObservation& obs,
-                       const GSkyRegionMap&   off);
+                       const GSkyRegions&     off);
 	void   compute_alpha(const GCTAObservation& obs,
-                         const GSkyRegionMap&   on,
-                         const GSkyRegionMap&   off);
+                         const GSkyRegions&     on,
+                         const GSkyRegions&     off);
     void   compute_rmf(const GCTAObservation& obs,
-                       const GSkyRegionMap&   on);
+                       const GSkyRegions&     on);
     double N_gamma(const GModels& models, const int& ibin, GVector* grad) const;
 	double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
 

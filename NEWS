@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-12 October 2017
+13 October 2017
 
 
 1. Introduction
@@ -75,6 +75,7 @@ The following methods have been added:
 - operator*(GRmf&, double&)
 - operator*(double&, double&)
 - operator/(GRmf&, double&)
+- GCTAOnOffObservation(GObservations&)
 
 The following methods have been removed:
 - n.a.
@@ -208,6 +209,14 @@ None
 -----------------
 Fix a segmentation fault issue when fetching CTA events from an event list
 (#2192).
+
+The GCTAOnOffObservation class now performs a proper response integration over
+the On and Off regions and takes into account the energy dispersion using the
+Redistribution Matrix File (#2210).
+
+A GCTAOnOffObservation(GObservations&) constructer has been added to the
+GCTAOnOffObservation class that creates a stacked CTA On/Off observations from
+all On/Off observations that are found in the observation container (#2228).
 
 
 21. COMPTEL interface
