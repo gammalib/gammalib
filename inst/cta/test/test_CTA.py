@@ -292,11 +292,11 @@ class Test(gammalib.GPythonTestSuite):
                 offmap[i] = 1.0
         off = gammalib.GSkyRegionMap(offmap)
         offmap.save('test_off_map.fits', True)
-        
+
         # Set energy binning
-        etrue = gammalib.GEbounds(10, gammalib.GEnergy(0.1,  'TeV'),
+        etrue = gammalib.GEbounds(40, gammalib.GEnergy(0.1,  'TeV'),
                                       gammalib.GEnergy(10.0, 'TeV'))
-        ereco = gammalib.GEbounds(10, gammalib.GEnergy(0.1,  'TeV'),
+        ereco = gammalib.GEbounds(20, gammalib.GEnergy(0.1,  'TeV'),
                                       gammalib.GEnergy(10.0, 'TeV'))
 
         # Create On/Off observations from CTA observations
@@ -322,21 +322,21 @@ class Test(gammalib.GPythonTestSuite):
         # Test On/Off model fitting results
         sky = outobs.models()['Crab']
         bgd = outobs.models()['Background']
-        self.test_value(sky['Prefactor'].value(), 6.250780e-16, 1.0e-20,
+        self.test_value(sky['Prefactor'].value(), 6.453731e-16, 1.0e-20,
                         'Check sky model prefactor value')
-        self.test_value(sky['Prefactor'].error(), 2.126319e-17, 1.0e-20,
+        self.test_value(sky['Prefactor'].error(), 2.176260e-17, 1.0e-20,
                         'Check sky model prefactor error')
-        self.test_value(sky['Index'].value(), -2.559035, 1.0e-4,
+        self.test_value(sky['Index'].value(), -2.575501, 1.0e-4,
                         'Check sky model index value')
-        self.test_value(sky['Index'].error(), 0.030862, 1.0e-4,
+        self.test_value(sky['Index'].error(), 0.030702, 1.0e-4,
                         'Check sky model index error')
-        self.test_value(bgd['Prefactor'].value(), 1.151006, 1.0e-4,
+        self.test_value(bgd['Prefactor'].value(), 1.188457, 1.0e-4,
                         'Check background model prefactor value')
-        self.test_value(bgd['Prefactor'].error(), 0.147594, 1.0e-4,
+        self.test_value(bgd['Prefactor'].error(), 0.153416, 1.0e-4,
                         'Check background model prefactor error')
-        self.test_value(bgd['Index'].value(), 0.545884, 1.0e-4,
+        self.test_value(bgd['Index'].value(), 0.521118, 1.0e-4,
                         'Check background model index value')
-        self.test_value(bgd['Index'].error(), 0.0872644, 1.0e-4,
+        self.test_value(bgd['Index'].error(), 0.086309, 1.0e-4,
                         'Check background model index error')
 
         # Save PHA, ARF and RMFs

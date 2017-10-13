@@ -113,6 +113,7 @@ protected:
     void   init_members(void);
     void   copy_members(const GCTAOnOffObservation& obs);
     void   free_members(void);
+    void   set_logetrue(void);
     void   check_consistency(const std::string& method) const;
     void   set(const GCTAObservation& obs,
                const GSkyDir&         srcdir,
@@ -157,15 +158,16 @@ protected:
     };
 
     // Protected data members
-    std::string   m_instrument;  //!< Instrument name
-    GCTAResponse* m_response;    //!< Pointer to IRFs
-	double        m_ontime;      //!< Ontime (seconds)
-    double        m_livetime;    //!< Livetime (seconds)
-    double        m_deadc;       //!< Deadtime correction (livetime/ontime)
-    GPha 		  m_on_spec;     //!< On counts spectrum
-    GPha 		  m_off_spec;    //!< Off counts spectrum
-    GArf          m_arf;         //!< Auxiliary Response Function vector
-    GRmf          m_rmf;         //!< Redistribution matrix
+    std::string   m_instrument; //!< Instrument name
+    GCTAResponse* m_response;   //!< Pointer to IRFs
+	double        m_ontime;     //!< Ontime (seconds)
+    double        m_livetime;   //!< Livetime (seconds)
+    double        m_deadc;      //!< Deadtime correction (livetime/ontime)
+    GPha 		  m_on_spec;    //!< On counts spectrum
+    GPha 		  m_off_spec;   //!< Off counts spectrum
+    GArf          m_arf;        //!< Auxiliary Response Function vector
+    GRmf          m_rmf;        //!< Redistribution matrix
+    GNodeArray    m_logetrue;   //!< Node array of log10 true energies in TeV
 };
 
 

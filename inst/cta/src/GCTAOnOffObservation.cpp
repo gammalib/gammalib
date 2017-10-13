@@ -559,6 +559,9 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
     m_arf.load(arf);
     m_rmf.load(rmf);
 
+    // Set log true energy node array
+    set_logetrue();
+
     // Check consistency of On/Off observation
     check_consistency(G_READ);
 
@@ -990,6 +993,7 @@ void GCTAOnOffObservation::init_members(void)
     m_off_spec.clear();
     m_arf.clear();
     m_rmf.clear();
+    m_logetrue.clear();
 
     // Return
     return;
@@ -1012,6 +1016,7 @@ void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
     m_off_spec   = obs.m_off_spec;
     m_arf        = obs.m_arf;
     m_rmf        = obs.m_rmf;
+    m_logetrue   = obs.m_logetrue;
 
     // Clone members
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
@@ -1027,6 +1032,39 @@ void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
  ***************************************************************************/
 void GCTAOnOffObservation::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set true energy node array
+ ***************************************************************************/
+void GCTAOnOffObservation::set_logetrue(void)
+{
+    // Clear node array
+    m_logetrue.clear();
+
+    // Continue only if there are true energies in Arf
+    int netrue = m_arf.size();
+    if (netrue > 0) {
+
+        // Reserve space in node array
+        m_logetrue.reserve(netrue);
+
+        // Append all log mean energies to node array
+        for (int i = 0; i < netrue; ++i) {
+
+            // Get log mean of true energy in TeV
+            double logE = m_arf.ebounds().elogmean(i).log10TeV();
+
+            // Append energy to node array
+            m_logetrue.append(logE);
+
+        } // endfor: appended log mean energies
+
+    } // endif: there were true energies in Arf
+
     // Return
     return;
 }
@@ -1128,6 +1166,9 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
 	compute_alpha(obs, on, off);
 	compute_rmf(obs, on);
 
+    // Set log true energy node array
+    set_logetrue();
+
 	// Return
 	return;
 }
@@ -1142,9 +1183,6 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
  *
  * @exception GException::invalid_value
  *            No CTA response found in CTA observation.
- *
- * @todo Implement GCTAResponse::npred usage instead of computing Aeff
- *       (required the integration of PSF over On region).
  ***************************************************************************/
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                                        const GSkyDir&         srcdir,
@@ -1254,18 +1292,19 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
  *            Observation does not contain relevant response or background
  *            information
  *
- * Compute the background rate in units of events/s/MeV in all Off regions
- * and stores the background rate as additional column with name
- * `BACKRESP` in the Auxiliary Response File (ARF).
+ * Compute the background rate in units of events/s/MeV in the Off region
+ * map and stores the result as additional column with name `BACKRESP` in
+ * the Auxiliary Response File (ARF).
  ***************************************************************************/
 void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
                                        const GSkyRegionMap&   off)
 {
-    // Get reconstructed energy boundaries from on ARF
+    // Get true energy boundaries from on Arf and interpret them as
+    // reconstructed energies for the background rates
 	GEbounds ereco = m_arf.ebounds();
     int      nreco = ereco.size();
 
-    // Continue only if there are ARF bins
+    // Continue only if there are Arf bins
     if (nreco > 0) {
 
 		// Initialise background rates to zero
@@ -1291,7 +1330,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
             throw GException::invalid_argument(G_COMPUTE_BGD, msg);
         }
 
-        // Loop over pixels in OFF region map and integrate background rate 
+        // Loop over pixels in Off region map and integrate background rate
         for (int j = 0; j < off.nonzero_indices().size(); ++j) {
 
             // Get pixel index
@@ -1317,9 +1356,9 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
                                         pixinstdir.detx(),
                                         pixinstdir.dety()) * pixsolid;
 
-            } // endfor: Looped over energy bins
+            } // endfor: looped over energy bins
 
-        } // Looped over all pixels in map
+        } // endfor: looped over all pixels in map
 
         // Append background vector to ARF
         m_arf.append("BACKRESP", background);
@@ -1356,7 +1395,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
 
     // Continue only if there are reconstructed energy bins
     if (nreco > 0) {
-    
+
         // Get CTA response pointer. Throw an exception if no response is found
         const GCTAResponseIrf* response =
               dynamic_cast<const GCTAResponseIrf*>(obs.response());
@@ -1380,8 +1419,8 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
             // Initialise background rate totals
             double aon  = 0.0;
             double aoff = 0.0;
-            
-            // Loop over pixels in ON region map and integrate acceptance 
+
+            // Loop over pixels in On region map and integrate acceptance
             for (int j = 0; j < on.nonzero_indices().size(); ++j) {
 
                 // Get pixel index
@@ -1403,7 +1442,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
 
             } // endfor: looped over all pixels in map
 
-            // Loop over pixels in OFF region map and integrate acceptance 
+            // Loop over pixels in Off region map and integrate acceptance
             for (int j = 0; j < off.nonzero_indices().size(); ++j) {
 
                 // Get pixel index
@@ -1417,11 +1456,11 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
 
                 // Get solid angle subtended by this pixel
                 double pixsolid = off.map().solidangle(pixidx);
-            
+
                 // Add up acceptance
                 aoff += (*response->background())(logEreco,
-                                                 pixinstdir.detx(),
-                                                 pixinstdir.dety()) * pixsolid;
+                                                  pixinstdir.detx(),
+                                                  pixinstdir.dety()) * pixsolid;
 
             } // endfor: Looped over all pixels in map
 
@@ -1455,13 +1494,13 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
 void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                        const GSkyRegionMap&   on)
 {
-    // Get true and reconstructed energy boundaries from RMF
+    // Get true and reconstructed energy boundaries from Rmf
     GEbounds etrue = m_rmf.etrue();
     GEbounds ereco = m_rmf.emeasured();
     int      ntrue = etrue.size();
     int      nreco = ereco.size();
 
-    // Continue only if there are RMF bins
+    // Continue only if there are Rmf bins
     if (ntrue > 0 && nreco > 0) {
 
         // Get CTA response pointer
@@ -1490,7 +1529,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
             // Loop over true energy
             for (int itrue = 0; itrue < ntrue; ++itrue) {
 
-                // Initialise RMF element
+                // Initialise Rmf element
                 m_rmf(itrue, ireco) = 0.0;
 
                 // Compute true energy and initialise weight for this bin
@@ -1527,11 +1566,11 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                     // Do Romberg integration
                     double value = integral.romberg(ereco_min, ereco_max);
 
-                    // Update RMF value
+                    // Update Rmf value
                     m_rmf(itrue, ireco) += value * aeff;
 
-                } // endfor: Looped over all pixels in map
-                
+                } // endfor: looped over all pixels in map
+
                 // Complete weighing by dividing by total effective area
                 if (weight > 0.0) {
                     m_rmf(itrue, ireco) /= weight;
@@ -1583,7 +1622,7 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
     for (int i = 0; i < npars; ++i) {
         (*grad)[i] = 0.0;
     }
-    
+
     // Continue only if bin number is in range and there are model parameters
     if ((ibin >= 0) && (ibin < m_on_spec.size()) && (npars > 0)) {
 
@@ -1720,11 +1759,6 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
  *
  * The method assumes that the model parameters are stored in the order
  * spectral-temporal.
- *
- * @todo So far only handles the GCTAModelIrfBackground background model;
- *       Should be more generic, but there is maybe for the moment no
- *       other choice than implementing something for all possible
- *       background models; that's not very satisfactory ...
  ***********************************************************************/
 double GCTAOnOffObservation::N_bgd(const GModels& models,
                                    const int&     ibin,
@@ -1740,21 +1774,37 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
     }
 
     // Continue only if bin number is valid and if there are model parameters
-    if ((ibin >= 0) && (ibin < m_off_spec.size()) && (npars > 0))  {
+    if ((ibin >= 0) && (ibin < m_on_spec.size()) && (npars > 0))  {
 
         // Initialise parameter index
         int ipar = 0;
 
-        // Get reference to background rates (events/MeV/s)
-        const std::vector<double>& background = m_arf["BACKRESP"];
+        // Get reference to background response (events/MeV/s)
+        const std::vector<double>& backresp = m_arf["BACKRESP"];
 
         // Get reconstructed energy bin mean and width
-        const GEnergy emean  = m_off_spec.ebounds().elogmean(ibin);
-        const double  ewidth = m_off_spec.ebounds().ewidth(ibin).MeV();
+        GEnergy emean  = m_on_spec.ebounds().elogmean(ibin);
+        double  ewidth = m_on_spec.ebounds().ewidth(ibin).MeV();
+
+        // Perform log-log interpolation of background rate at reconstructed
+        // energy
+        m_logetrue.set_value(emean.log10TeV());
+        double wgt_left   = m_logetrue.wgt_left();
+        double wgt_right  = m_logetrue.wgt_right();
+        double bkg_left   = backresp[m_logetrue.inx_left()];
+        double bkg_right  = backresp[m_logetrue.inx_right()];
+        double background = 0.0;
+        if (bkg_left > 0.0 && bkg_right > 0.0) {
+            background = std::exp(wgt_left  * std::log(bkg_left) +
+                                  wgt_right * std::log(bkg_right));
+        }
+        if (background < 0.0) {
+            background = 0.0;
+        }
 
         // Compute normalisation factor (events)
-        double exposure = m_off_spec.exposure();
-        double norm     = background[ibin] * exposure * ewidth;
+        double exposure = m_on_spec.exposure();
+        double norm     = background * exposure * ewidth;
 
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
@@ -1785,9 +1835,9 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
             if (spectral != NULL)  {
 
                 // Determine the number of background events in model by
-                // computing the model normalization at the mean bin energy bin
-                // and multiplying the normalisation with the number of
-                // background events. The eval() method needs a time in case
+                // computing the model normalization at the mean value of the
+                // energy bin and multiplying the normalisation with the number
+                // of background events. The eval() method needs a time in case
                 // that the spectral model has a time dependence. We simply
                 // use a dummy time here.
                 value += spectral->eval(emean, GTime(), true) * norm;
