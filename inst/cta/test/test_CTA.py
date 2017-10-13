@@ -312,7 +312,7 @@ class Test(gammalib.GPythonTestSuite):
         # Test On/Off model fitting results
         sky = outobs.models()['Crab']
         bgd = outobs.models()['Background']
-        self.test_value(sky['Prefactor'].value(), 6.456877e-16, 1.0e-20,
+        self.test_value(sky['Prefactor'].value(), 6.456877e-16, 1.0e-18,
                         'Check sky model prefactor value')
         self.test_value(sky['Prefactor'].error(), 2.176260e-17, 1.0e-20,
                         'Check sky model prefactor error')
@@ -320,13 +320,13 @@ class Test(gammalib.GPythonTestSuite):
                         'Check sky model index value')
         self.test_value(sky['Index'].error(), 0.030702, 1.0e-4,
                         'Check sky model index error')
-        self.test_value(bgd['Prefactor'].value(), 1.182291, 1.0e-4,
+        self.test_value(bgd['Prefactor'].value(), 1.182291, 0.01,
                         'Check background model prefactor value')
-        self.test_value(bgd['Prefactor'].error(), 0.152625, 1.0e-4,
+        self.test_value(bgd['Prefactor'].error(), 0.152625, 0.01,
                         'Check background model prefactor error')
-        self.test_value(bgd['Index'].value(), 0.520937, 1.0e-4,
+        self.test_value(bgd['Index'].value(), 0.520937, 0.01,
                         'Check background model index value')
-        self.test_value(bgd['Index'].error(), 0.086309, 1.0e-4,
+        self.test_value(bgd['Index'].error(), 0.086309, 0.01,
                         'Check background model index error')
 
         # Save PHA, ARF and RMFs
