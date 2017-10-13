@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<observation_list title="observation list">
+  <observation name="Crab" id="00001" instrument="CTAOnOff">
+    <parameter name="Pha_on"  file="onoff_pha_on.fits" />
+    <parameter name="Pha_off" file="onoff_pha_off.fits" />
+    <parameter name="Arf"     file="onoff_arf.fits" />
+    <parameter name="Rmf"     file="onoff_rmf.fits" />
+  </observation>
+</observation_list>

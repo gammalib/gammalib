@@ -80,7 +80,7 @@ const std::string cta_stacked_edispcube = datadir+"/stacked_edispcube.fits";
 const std::string cta_stacked_bkgcube   = datadir+"/stacked_bkgcube.fits";
 
 /* __ Test files for On/Off analysis _____________________________________ */
-const std::string cta_onoff_xml   = datadir+"/onoff_obs.xml";
+const std::string cta_onoff_obs   = datadir+"/onoff_obs.xml";
 const std::string cta_onoff_model = datadir+"/onoff_model.xml";
 
 
@@ -2004,7 +2004,7 @@ void TestGCTAObservation::test_stacked_obs(void)
 void TestGCTAObservation::test_onoff_obs(void)
 {
     // Load On/Off observation into container
-    GObservations obs(cta_onoff_xml);
+    GObservations obs(cta_onoff_obs);
     //std::cout << *(obs[0]) << std::endl;
 
     // Save observation container into XML file
@@ -2187,17 +2187,17 @@ void TestGCTAOptimize::test_onoff_optimizer(void)
     // Set reference result
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
-                            6.260318e-16, 2.125503e-17,
-                            -2.559187, 0.030780,
+                            5.750910e-16, 7.604206e-18,
+                            -2.472779, 0.012290,
                             300000, 0,
                             1, 0,
-                            1.150905, 0.147595,
-                            0.546094, 0.087232,
+                            0.994676, 0.050424,
+                            -0.015947, 0.029617,
                             1.0e6, 0,
                             1, 0};
     
     // Load On/Off CTA observation
-    GObservations obs(cta_onoff_xml);
+    GObservations obs(cta_onoff_obs);
 
     // Load models from XML file
     obs.models(cta_onoff_model);
