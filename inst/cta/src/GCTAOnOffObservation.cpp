@@ -614,9 +614,59 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 	return;
 }
 
-
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for On/Off analysis
+ *
+ * @param[in] models Models.
+ * @param[in,out] gradient Pointer to gradients.
+ * @param[in,out] curvature Pointer to curvature matrix.
+ * @param[in,out] npred Pointer to Npred value.
+ * @return Log-likelihood value.
+ *
+ * @exception GException::
+***********************************************************************/
+double GCTAOnOffObservation::likelihood(const GModels& models,
+                                        GVector*       gradient,
+                                        GMatrixSparse* curvature,
+                                        double*        npred) const
+{
+    // Initialise likelihood value
+    double value = 0.0;
+
+    // Extract statistics for this observation
+    std::string statistics = gammalib::toupper(this->statistics());
+
+    // Poisson statistics with modeled background
+    if (statistics == "POISSON-MODELEDBKG") {
+        value = likelihood_cstat(models,
+        							gradient,
+								curvature,
+								npred);
+    }
+
+    // ... or Poisson statistics with measured background
+    else if (statistics == "POISSON-MEASUREDBKG") {
+        value = likelihood_wstat(models,
+        							gradient,
+								curvature,
+								npred);
+    }
+
+    // ... or unsupported
+    else {
+        throw GException::invalid_statistics(G_LIKELIHOOD, statistics,
+              "On/Off optimization requires Poisson statistics"
+              " with modeled or measured background.");
+    }
+
+    // Return likelihood
+    return value;
+
+}
+
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for On/Off analysis in the
+ * case of Poisson signal with modeled Poisson background
  *
  * @param[in] models Models.
  * @param[in,out] gradient Pointer to gradients.
@@ -716,10 +766,10 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
  *    \left( \frac{\partial N_{\rm bgd}}{\partial p_{\rm bgd}} \right)^2
  * \f]
  ***********************************************************************/
-double GCTAOnOffObservation::likelihood(const GModels& models,
-                                        GVector*       gradient,
-                                        GMatrixSparse* curvature,
-                                        double*        npred) const
+double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
+											GVector*       gradient,
+											GMatrixSparse* curvature,
+											double*        npred) const
 {
     // Timing measurement
     #if defined(G_LIKELIHOOD_DEBUG)
@@ -940,6 +990,56 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     return value;
 }
 
+ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
+                                         	 GVector*       gradient,
+											 GMatrixSparse* curvature,
+											 double*        npred) const
+ {
+     // Timing measurement
+     #if defined(G_LIKELIHOOD_DEBUG)
+     #ifdef _OPENMP
+     double t_start = omp_get_wtime();
+     #else
+     clock_t t_start = clock();
+     #endif
+     #endif
+
+     // Initialise statistics
+     #if defined(G_LIKELIHOOD_DEBUG)
+     int    n_bins        = m_on_spec.size();
+     int    n_used        = 0;
+     int    n_small_model = 0;
+     int    n_zero_data   = 0;
+     double sum_data      = 0.0;
+     double sum_model     = 0.0;
+     double init_npred    = *npred;
+     #endif
+
+ 	// Initialise log-likelihood value
+     double value = 0.0;
+
+     // Optionally dump gradient and curvature matrix
+     #if defined(G_LIKELIHOOD_DEBUG)
+     std::cout << *gradient << std::endl;
+     std::cout << *curvature << std::endl;
+     #endif
+
+     // Timing measurement
+     #if defined(G_LIKELIHOOD_DEBUG)
+     #ifdef _OPENMP
+     double t_elapse = omp_get_wtime()-t_start;
+     #else
+     double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+     #endif
+     std::cout << "GCTAOnOffObservation::optimizer::likelihood: CPU usage = "
+ 	          << t_elapse << " sec" << std::endl;
+     #endif
+
+     // Return
+     return value;
+ }
+
+
 
 /***********************************************************************//**
  * @brief Print On/Off observation information
@@ -991,6 +1091,7 @@ void GCTAOnOffObservation::init_members(void)
     m_ontime     = 0.0;
     m_livetime   = 0.0;
     m_deadc      = 1.0;
+    m_statistics = "POISSON-MEASUREDBKG";
     m_on_spec.clear();
     m_off_spec.clear();
     m_arf.clear();
