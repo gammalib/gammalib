@@ -44,6 +44,7 @@ The following methods have been added:
 - GCOMInstDir(GSkyDir&, double&)
 - GEbounds::operator==(GEbounds&, GEbounds&)
 - GEbounds::operator!=(GEbounds&, GEbounds&)
+- GNdarray::shape(std::vector<int>&)
 - GPha::operator+=(GPha&)
 - GPha::operator-=(GPha&)
 - GPha::operator*=(double&)

@@ -106,6 +106,7 @@ public:
     int                     size(void) const;
     const std::vector<int>& shape(void) const;
     const std::vector<int>& strides(void) const;
+    void                    shape(const std::vector<int>& shape);
     double&                 at(const int& ix);
     double&                 at(const int& ix, const int& iy);
     double&                 at(const int& ix, const int& iy, const int& iz);

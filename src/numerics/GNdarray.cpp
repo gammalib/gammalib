@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNdarray.cpp - N-dimensional array class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ADD                            "GNdarray::operator+=(GNdarray&)"
 #define G_OP_SUB                            "GNdarray::operator-=(GNdarray&)"
+#define G_SHAPE                          "GNdarray::shape(std::vector<int>&)"
 #define G_AT1                                            "GNdarray::at(int&)"
 #define G_AT2                                      "GNdarray::at(int&, int&)"
 #define G_AT3                                "GNdarray::at(int&, int&, int&)"
@@ -487,6 +488,46 @@ GNdarray* GNdarray::clone(void) const
 {
     // Clone array
     return new GNdarray(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set shape of array
+ *
+ * @param[in] shape Shape vector.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid shape factorisation specified.
+ *
+ * Set the shape of the array. The shape specifies how the information is
+ * arranged in a n-dimensional array.
+ ***************************************************************************/
+void GNdarray::shape(const std::vector<int>& shape)
+{
+    // Computes the number of array elements
+    int nelements = 0;
+    if (shape.size() > 0) {
+        nelements = 1;
+        for (int i = 0; i < shape.size(); ++i) {
+            nelements *= shape[i];
+        }
+    }
+
+    // Throw an exception if resulting number of elements is not equal to
+    // the existing number of elements
+    if (nelements != size()) {
+        std::string msg = "Number of elements "+gammalib::str(nelements)+
+                          " in specified shape is not identical to the "
+                          "number of elements "+gammalib::str(size())+
+                          " in the array.";
+        throw GException::invalid_argument(G_SHAPE, msg);
+    }
+
+    // Set shape
+    m_shape = shape;
+
+    // Return
+    return;
 }
 
 

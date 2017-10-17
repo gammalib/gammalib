@@ -68,6 +68,7 @@ public:
     int                     size(void) const;
     const std::vector<int>& shape(void) const;
     const std::vector<int>& strides(void) const;
+    void                    shape(const std::vector<int>& shape);
     double*                 data(void);
 };
 
