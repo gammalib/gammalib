@@ -384,7 +384,7 @@ double& GNdarray::at(const std::vector<int>& i)
 inline
 const double* GNdarray::data(void) const
 {
-    return m_data.data();
+    return (&(m_data[0]));
 }
 
 
@@ -396,7 +396,7 @@ const double* GNdarray::data(void) const
 inline
 double* GNdarray::data(void)
 {
-    return m_data.data();
+    return (&(m_data[0]));
 }
 
 
