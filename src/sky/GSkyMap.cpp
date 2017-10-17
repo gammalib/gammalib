@@ -195,7 +195,7 @@ GSkyMap::GSkyMap(const std::string& coords,
     m_shape.push_back(nmaps);
 
     // Allocate pixels
-    alloc_pixels();
+    m_pixels = GNdarray(m_num_pixels, m_num_maps);
 
     // Return
     return;
@@ -269,7 +269,7 @@ GSkyMap::GSkyMap(const std::string& wcs,
     m_shape.push_back(nmaps);
 
     // Allocate pixels
-    alloc_pixels();
+    m_pixels = GNdarray(nx, ny, nmaps);
 
     // Return
     return;
@@ -355,11 +355,11 @@ GSkyMap& GSkyMap::operator=(const GSkyMap& map)
 GSkyMap& GSkyMap::operator=(const double& value)
 {
     // Get number of pixels
-    int num = m_num_pixels * m_num_maps;
+    int num = m_pixels.size();
 
     // Loop over all pixels
     for (int i = 0; i < num; ++i) {
-        m_pixels[i] = value;
+        m_pixels(i) = value;
     }
 
     // Return this object
@@ -428,13 +428,8 @@ GSkyMap& GSkyMap::operator+=(const GSkyMap& map)
  ***************************************************************************/
 GSkyMap& GSkyMap::operator+=(const double& value)
 {
-    // Set total number of sky map pixels
-    int num = m_num_pixels * m_num_maps;
-
-    // Loop over all pixels of sky map
-    for (int i = 0; i < num; ++i) {
-        m_pixels[i] += value;
-    }
+    // Add value to all pixels
+    m_pixels += value;
 
     // Return this object
     return *this;
@@ -502,13 +497,8 @@ GSkyMap& GSkyMap::operator-=(const GSkyMap& map)
  ***************************************************************************/
 GSkyMap& GSkyMap::operator-=(const double& value)
 {
-    // Set total number of sky map pixels
-    int num = m_num_pixels * m_num_maps;
-
-    // Loop over all pixels of sky map
-    for (int i = 0; i < num; ++i) {
-        m_pixels[i] -= value;
-    }
+    // Subtract value from all pixels
+    m_pixels -= value;
 
     // Return this object
     return *this;
@@ -576,14 +566,8 @@ GSkyMap& GSkyMap::operator*=(const GSkyMap& map)
  ***************************************************************************/
 GSkyMap& GSkyMap::operator*=(const double& factor)
 {
-    // Compute total number of pixels
-    int n = npix() * nmaps();
-
-    // Loop over all pixels
-    double* pixel = m_pixels;
-    for (int i = 0; i < n; ++i) {
-        *pixel++ *= factor;
-    }
+    // Scale all pixels
+    m_pixels *= factor;
 
     // Return this object
     return *this;
@@ -670,14 +654,8 @@ GSkyMap& GSkyMap::operator/=(const double& factor)
         throw GException::invalid_argument(G_OP_UNARY_DIV2, msg);
     }
 
-    // Compute total number of pixels
-    int n = npix() * nmaps();
-
-    // Loop over all pixels
-    double* pixel = m_pixels;
-    for (int i = 0; i < n; ++i) {
-        *pixel++ /= factor;
-    }
+    // Divide all pixels by factor
+    m_pixels /= factor;
 
     // Return this object
     return *this;
@@ -714,7 +692,7 @@ double& GSkyMap::operator()(const int& index, const int& map)
     #endif
 
     // Return reference to pixel value
-    return m_pixels[index+m_num_pixels*map];
+    return m_pixels(index+m_num_pixels*map);
 }
 
 
@@ -747,7 +725,7 @@ const double& GSkyMap::operator()(const int& index, const int& map) const
     #endif
 
     // Return reference to pixel value
-    return m_pixels[index+m_num_pixels*map];
+    return m_pixels(index+m_num_pixels*map);
 }
 
 
@@ -785,7 +763,7 @@ double& GSkyMap::operator()(const GSkyPixel& pixel, const int& map)
     int index = pix2inx(pixel);
 
     // Return reference to pixel value
-    return m_pixels[index+m_num_pixels*map];
+    return m_pixels(index+m_num_pixels*map);
 }
 
 
@@ -823,7 +801,7 @@ const double& GSkyMap::operator()(const GSkyPixel& pixel, const int& map) const
     int index = pix2inx(pixel);
 
     // Return reference to pixel value
-    return m_pixels[index+m_num_pixels*map];
+    return m_pixels(index+m_num_pixels*map);
 }
 
 
@@ -984,7 +962,7 @@ double GSkyMap::operator()(const GSkyDir& dir, const int& map) const
         int offset = m_num_pixels * map;
 
         // Compute interpolated skymap value
-        intensity = m_interpol(m_pixels+offset);
+        intensity = m_interpol(m_pixels.data()+offset);
 
     } // endif: direction was contained in map
 
@@ -1056,31 +1034,18 @@ void GSkyMap::nmaps(const int& nmaps)
     // number of maps. Copy over any existing information.
     if (m_num_pixels > 0 && nmaps != m_num_maps) {
 
-        // Compute new skymap size
-        int new_size = m_num_pixels * nmaps;
-
-        // Allocate memory for new map
-        double* pixels = new double[new_size];
+        // Allocate new array
+        GNdarray new_pixels(m_num_pixels, nmaps);
 
         // Copy over existing pixels
         int num_copy = (nmaps > m_num_maps) ? m_num_maps : nmaps;
         num_copy    *= m_num_pixels;
         for (int i = 0; i < num_copy; ++i) {
-            pixels[i] = m_pixels[i];
+            new_pixels(i) = m_pixels(i);
         }
 
-        // Set any additional pixels to zero
-        if (nmaps > m_num_maps) {
-            for (int i = num_copy; i < new_size; ++i) {
-                pixels[i] = 0.0;
-            }
-        }
-
-        // Free existing pixels
-        if (m_pixels != NULL) delete [] m_pixels;
-
-        // Set pointer to stacked pixels
-        m_pixels = pixels;
+        // Set pixels to new array
+        m_pixels = new_pixels;
 
         // Set number of maps
         m_num_maps = nmaps;
@@ -1846,19 +1811,13 @@ GSkyMap GSkyMap::extract(const int& map, const int& nmaps) const
         throw GException::invalid_argument(G_EXTRACT, msg);
     }
 
-    // Compute memory size for extracted map
-    int n_size = m_num_pixels * nmaps;
-
-    // Allocate memory for extracted maps (handle the case that the
-    // extracted map can be empty)
-    double* pixels = NULL;
-    if (n_size > 0) {
-        pixels = new double[n_size];
-    }
+    // Allocate extracted pixels
+    GNdarray extracted_pixels(m_num_pixels, nmaps);
 
     // Extract pixels
-    double *src = m_pixels + map*m_num_pixels;
-    double *dst = pixels;
+    int           n_size = m_num_pixels * nmaps;
+    const double *src    = m_pixels.data() + map*m_num_pixels;
+    double       *dst    = extracted_pixels.data();
     for (int i = 0; i < n_size; ++i) {
         *dst++ = *src++;
     }
@@ -1866,11 +1825,8 @@ GSkyMap GSkyMap::extract(const int& map, const int& nmaps) const
     // Create a copy of the map
     GSkyMap result = *this;
 
-    // Delete pixels from that map
-    if (result.m_pixels != NULL) delete [] result.m_pixels;
-
     // Attach copied pixels to the map
-    result.m_pixels = pixels;
+    result.m_pixels = extracted_pixels;
 
     // Set number of maps
     result.m_num_maps = nmaps;
@@ -1899,23 +1855,20 @@ void GSkyMap::stack_maps(void)
     // Continue only if the map has pixels and if there is more than 1 map
     if (m_num_pixels > 0 && m_num_maps > 1) {
 
-        // Allocate memory for stacked map
-        double* pixels = new double[m_num_pixels];
+        // Allocate stacked pixels
+        GNdarray stacked_pixels(m_num_pixels);
 
-        // Stack map and save in memory
+        // Stack map and save in pixels
         for (int i = 0; i < m_num_pixels; ++i) {
             double sum = 0.0;
             for (int k = 0; k < m_num_maps; ++k) {
                 sum += (*this)(i,k);
             }
-            pixels[i] = sum;
+            stacked_pixels(i) = sum;
         }
 
-        // Free existing pixels
-        if (m_pixels != NULL) delete [] m_pixels;
-
         // Set pointer to stacked pixels
-        m_pixels = pixels;
+        m_pixels = stacked_pixels;
 
         // Set number of maps to 1
         m_num_maps = 1;
@@ -2308,37 +2261,13 @@ void GSkyMap::init_members(void)
     m_num_y      = 0;
     m_shape.clear();
     m_proj       = NULL;
-    m_pixels     = NULL;
+    m_pixels.clear();
 
     // Initialise computation cache
     m_hascache  = false;
     m_contained = false;
     m_last_dir.clear();
     m_interpol.clear();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Allocate skymap pixels
- ***************************************************************************/
-void GSkyMap::alloc_pixels(void)
-{
-    // Compute data size
-    int size = m_num_pixels * m_num_maps;
-
-    // Continue only if there are pixels
-    if (size > 0) {
-
-        // Allocate pixels and initialize them to 0
-        m_pixels = new double[size];
-        for (int i = 0; i < size; ++i) {
-            m_pixels[i] = 0.0;
-        }
-
-    } // endif: there were pixels
 
     // Return
     return;
@@ -2358,6 +2287,7 @@ void GSkyMap::copy_members(const GSkyMap& map)
     m_num_x      = map.m_num_x;
     m_num_y      = map.m_num_y;
     m_shape      = map.m_shape;
+    m_pixels     = map.m_pixels;
 
     // Copy computation cache
     m_hascache  = map.m_hascache;
@@ -2367,17 +2297,6 @@ void GSkyMap::copy_members(const GSkyMap& map)
 
     // Clone sky projection if it is valid
     if (map.m_proj != NULL) m_proj = map.m_proj->clone();
-
-    // Compute data size
-    int size = m_num_pixels * m_num_maps;
-
-    // Copy pixels
-    if (size > 0 && map.m_pixels != NULL) {
-        alloc_pixels();
-        for (int i = 0; i < size; ++i) {
-            m_pixels[i] = map.m_pixels[i];
-        }
-    }
 
     // Return
     return;
@@ -2390,12 +2309,12 @@ void GSkyMap::copy_members(const GSkyMap& map)
 void GSkyMap::free_members(void)
 {
     // Free memory
-    if (m_proj   != NULL) delete m_proj;
-    if (m_pixels != NULL) delete [] m_pixels;
+    if (m_proj != NULL) {
+        delete m_proj;
+    }
 
     // Signal free pointers
-    m_proj       = NULL;
-    m_pixels     = NULL;
+    m_proj = NULL;
 
     // Return
     return;
@@ -2532,7 +2451,7 @@ void GSkyMap::read_healpix(const GFitsTable& table)
     m_shape.push_back(m_num_maps);
 
     // Allocate pixels to hold the map
-    alloc_pixels();
+    m_pixels = GNdarray(m_num_pixels, m_num_maps);
 
     // Initialise map counter
     int imap = 0;
@@ -2555,7 +2474,7 @@ void GSkyMap::read_healpix(const GFitsTable& table)
             for (int i = 0; i < num; ++i) {
 
                 // Load map
-                double *ptr = m_pixels + m_num_pixels*imap;
+                double *ptr = m_pixels.data() + m_num_pixels*imap;
                 for (int row = 0; row < col->nrows(); ++row) {
                     for (int inx = inx_start; inx < inx_end; ++inx) {
                         *ptr++ = col->real(row,inx);
@@ -2656,10 +2575,10 @@ void GSkyMap::read_wcs(const GFitsImage& image)
     #endif
 
     // Allocate pixels to hold the map
-    alloc_pixels();
+    m_pixels = GNdarray(m_num_x, m_num_y, m_num_maps);
 
     // Read image
-    double* ptr  = m_pixels;
+    double* ptr  = m_pixels.data();
     int     size = m_num_pixels * m_num_maps;
     for (int i = 0; i < size; ++i) {
         *ptr++ = (double)image.pixel(i);
@@ -2759,7 +2678,7 @@ GFitsBinTable* GSkyMap::create_healpix_hdu(void) const
         GFitsTableDoubleCol column = GFitsTableDoubleCol("DATA", rows, number);
 
         // Fill data into column
-        double* ptr = m_pixels;
+        const double* ptr = m_pixels.data();
         for (int inx = 0; inx < number; ++inx) {
             for (int row = 0; row < rows; ++row) {
                 column(row,inx) = *ptr++;
@@ -2826,7 +2745,7 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
 
         // Store data in image
         if (naxes.size() == 2) {
-            double* ptr = m_pixels;
+            const double* ptr = m_pixels.data();
             for (int iy = 0; iy < m_num_y; ++iy) {
                 for (int ix = 0; ix < m_num_x; ++ix) {
                     (*hdu)(ix,iy) = *ptr++;
@@ -2834,7 +2753,7 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
             }
         }
         else {
-            double* ptr = m_pixels;
+            const double* ptr = m_pixels.data();
             for (int imap = 0; imap < m_num_maps; ++imap) {
                 for (int iy = 0; iy < m_num_y; ++iy) {
                     for (int ix = 0; ix < m_num_x; ++ix) {

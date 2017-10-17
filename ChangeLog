@@ -1,4 +1,4 @@
-2017-10-13
+2017-10-17
 
         * Version 1.5.0 released
         =========================
@@ -22,6 +22,7 @@
         Fix UTC rounding error in GTime::utc() method (#2177)
         Add time parameter to GApplicationPar class (#1864)
         Add time string constructor and set method to GTime class (#1864)
+        Use GNdarray to store GSkyMap pixels (#1729)
         Add GSkyRegionMap class (#1121)
 
 

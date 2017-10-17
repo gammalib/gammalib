@@ -35,6 +35,7 @@
 #include "GSkyPixel.hpp"
 #include "GSkyProjection.hpp"
 #include "GBilinear.hpp"
+#include "GNdarray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
@@ -180,7 +181,6 @@ public:
 private:
     // Private methods
     void              init_members(void);
-    void              alloc_pixels(void);
     void              copy_members(const GSkyMap& map);
     void              free_members(void);
     void              set_wcs(const std::string& wcs, const std::string& coords,
@@ -208,7 +208,7 @@ private:
     int               m_num_y;      //!< Number of pixels in y direction (only 2D)
     std::vector<int>  m_shape;      //!< Shape of the maps
     GSkyProjection*   m_proj;       //!< Pointer to sky projection
-    double*           m_pixels;     //!< Pointer to skymap pixels
+    GNdarray          m_pixels;     //!< Skymap pixels
 
     // Computation cache
     mutable bool      m_hascache;   //!< Cache is valid
@@ -414,7 +414,7 @@ const GSkyProjection* GSkyMap::projection(void) const
 inline
 const double* GSkyMap::pixels(void) const
 {
-    return m_pixels;
+    return (m_pixels.data());
 }
 
 #endif /* GSKYMAP_HPP */

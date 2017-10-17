@@ -47,6 +47,8 @@ Improvements
   Add time parameter to ``GApplicationPar`` class
 * [`1864 <https://cta-redmine.irap.omp.eu/issues/1864>`_] -
   Add time string constructor and set method to ``GTime`` class
+* [`1729 <https://cta-redmine.irap.omp.eu/issues/1729>`_] -
+  Use ``GNdarray`` to store ``GSkyMap`` pixels
 * [`1121 <https://cta-redmine.irap.omp.eu/issues/1121>`_] -
   Add ``GSkyRegionMap`` class
 

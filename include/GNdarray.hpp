@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNdarray.hpp - N-dimensional array class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -114,6 +114,8 @@ public:
     const double&           at(const int& ix, const int& iy) const;
     const double&           at(const int& ix, const int& iy, const int& iz) const;
     const double&           at(const std::vector<int>& i) const;
+    const double*           data(void) const;
+    double*                 data(void);
     std::string             print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -370,6 +372,30 @@ inline
 double& GNdarray::at(const std::vector<int>& i)
 {
     return const_cast<double &>(static_cast<const GNdarray &>(*this).at(i));
+}
+
+
+/***********************************************************************//**
+ * @brief Data access method (const version)
+ *
+ * @return Const reference to array data.
+ ***************************************************************************/
+inline
+const double* GNdarray::data(void) const
+{
+    return m_data.data();
+}
+
+
+/***********************************************************************//**
+ * @brief Data access method
+ *
+ * @return Reference to array data.
+ ***************************************************************************/
+inline
+double* GNdarray::data(void)
+{
+    return m_data.data();
 }
 
 
