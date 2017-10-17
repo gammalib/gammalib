@@ -11,6 +11,7 @@ GammaLib 1.5 is a major release that adds significant functionality.
 In particular, this release provides:
 
 * A code generator for GammaLib extensions
+* Enhanced support for CTA On/Off observations
 * IAQ response computation for COMPTEL
 * Event list support for COMPTEL
 
@@ -48,7 +49,7 @@ Improvements
 * [`1864 <https://cta-redmine.irap.omp.eu/issues/1864>`_] -
   Add time string constructor and set method to ``GTime`` class
 * [`1729 <https://cta-redmine.irap.omp.eu/issues/1729>`_] -
-  Use ``GNdarray`` to store ``GSkyMap`` pixels
+  Use ``GNdarray`` to store ``GSkyMap`` pixels and add ``GSkyMap::smooth()`` method
 * [`1121 <https://cta-redmine.irap.omp.eu/issues/1121>`_] -
   Add ``GSkyRegionMap`` class
 

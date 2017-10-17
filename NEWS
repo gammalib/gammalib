@@ -12,6 +12,7 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
+- GSkyRegionMap
 - GCOMD1Response
 - GCOMD2Response
 - GCOMInstChars
@@ -24,7 +25,6 @@ The following classes have been added:
 - GCOMOads
 - GCOMDri
 - GCOMStatus
-- GSkyRegionMap
 
 The following classes have been removed:
 - n.a.
@@ -41,9 +41,9 @@ The following methods have been added:
 - GApplicationPar::time(GTime&)
 - GModelSpectralNodes(GModelSpectral&, GEnergies&)
 - GFitsTableCol::scale(double&, double&)
-- GCOMInstDir(GSkyDir&, double&)
 - GEbounds::operator==(GEbounds&, GEbounds&)
 - GEbounds::operator!=(GEbounds&, GEbounds&)
+- GSkyMap::smooth(std::string&, double&)
 - GNdarray::shape(std::vector<int>&)
 - GPha::operator+=(GPha&)
 - GPha::operator-=(GPha&)
@@ -77,6 +77,7 @@ The following methods have been added:
 - operator*(double&, double&)
 - operator/(GRmf&, double&)
 - GCTAOnOffObservation(GObservations&)
+- GCOMInstDir(GSkyDir&, double&)
 
 The following methods have been removed:
 - n.a.
@@ -162,7 +163,9 @@ None
 The GSkyRegionMap class was added to handle arbitrary sky regions defined using
 a FITS file map. All positive pixels will define the region (#1121).
 
-The GNdarray class is now used to store GSkyMap pixels (#1729).
+The GNdarray class is now used to store GSkyMap pixels. A GSkyMap::smooth()
+method was added to allow smoothing of sky maps with uniform disk or Gaussian
+shaped kernels (#1729).
 
 
 13. Support module

@@ -31,6 +31,7 @@
 #include "GException.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
+#include "GFft.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -82,6 +83,7 @@
 #define G_SQRT                                       "GSkyMap sqrt(GSkyMap&)"
 #define G_LOG                                         "GSkyMap log(GSkyMap&)"
 #define G_LOG10                                     "GSkyMap log10(GSkyMap&)"
+#define G_SMOOTH_KERNEL       "GSkyMap::smooth_kernel(std::string&, double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -1776,6 +1778,61 @@ bool GSkyMap::overlaps(const GSkyRegion& region) const
 
 
 /***********************************************************************//**
+ * @brief Smooth sky map
+ *
+ * @param[in] kernel Smoothing kernel type ("DISK", "GAUSSIAN").
+ * @param[in] par Smoothing parameter.
+ *
+ * Smoothes all sky maps using the specified @p kernel and a smoothing
+ * parameter. For the "DISK" kernel the smoothing parameter is the disk
+ * radius in degrees. For the "GAUSSIAN" kernel the smoothing parameter is
+ * the Gaussian sigma in degrees.
+ ***************************************************************************/
+void GSkyMap::smooth(const std::string& kernel, const double& par)
+{
+    // Continue only if the smoothing parameter is positive
+    if (par > 0.0) {
+
+        // Get FFT of smoothing kernel
+        GFft fft_kernel(smooth_kernel(kernel, par));
+
+        // Loop over all sky maps
+        for (int i = 0; i < m_num_maps; ++i) {
+
+            // Extract sky map
+            GNdarray array(m_num_x, m_num_y);
+            const double *src = m_pixels.data() + i*m_num_pixels;
+            double       *dst = array.data();
+            for (int i = 0; i < m_num_pixels; ++i) {
+                *dst++ = *src++;
+            }
+
+            // FFT of sky map
+            GFft fft_array = GFft(array);
+
+            // Multiply FFT of sky map with FFT of kernel
+            GFft fft_smooth = fft_array * fft_kernel;
+
+            // Background transform sky map
+            GNdarray smooth = fft_smooth.backward();
+
+            // Insert sky map
+            src = smooth.data();
+            dst = m_pixels.data() + i*m_num_pixels;
+            for (int i = 0; i < m_num_pixels; ++i) {
+                *dst++ = *src++;
+            }
+
+        } // endfor: looped over all sky map
+
+    } // endif: smoothing parameter was positive
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Extract maps into a new sky map object
  *
  * @param[in] map First map to extract
@@ -3044,6 +3101,101 @@ bool GSkyMap::is_wcs(const GFitsHDU& hdu) const
 
     // Return flag
     return (flag);
+}
+
+
+/***********************************************************************//**
+ * @brief Return smoothing kernel
+ *
+ * @param[in] kernel Smoothing kernel type ("DISK", "GAUSSIAN").
+ * @param[in] par Smoothing parameter (>0).
+ * @return Array filled with smoothing kernel.
+ ***************************************************************************/
+GNdarray GSkyMap::smooth_kernel(const std::string& kernel,
+                                const double&      par) const
+{
+    // Get pointer on WCS projection
+    const GWcs* wcs = dynamic_cast<const GWcs*>(m_proj);
+    if (wcs == NULL) {
+        std::string msg = "Sky map is not a WCS projection. Method is only "
+                          "valid for WCS projects.";
+        throw GException::invalid_argument(G_SMOOTH_KERNEL, msg);
+    }
+
+    // Get X and Y step size
+    double dx = wcs->cdelt(0);
+    double dy = wcs->cdelt(1);
+
+    // Initialise kernel
+    GNdarray kern(m_num_x, m_num_y);
+
+    // Initialise kernel sum
+    double sum = 0.0;
+
+    // Handle disk kernel
+    if (gammalib::toupper(kernel) == "DISK") {
+
+        // Fill kernel
+        for (int ix1 = 0, ix2 = m_num_x; ix1 < m_num_x; ++ix1, --ix2) {
+            double x   = ix1 * dx;
+            double xqs = x * x;
+            for (int iy1 = 0, iy2 = m_num_y; iy1 < m_num_y; ++iy1, --iy2) {
+                double y = iy1 * dy;
+                if (std::sqrt(xqs + y*y) <= par) {
+                    kern(ix1,iy1) += 1.0;
+                    sum           += 1.0;
+                    if ((ix2 < m_num_x) && (iy2 < m_num_y)) {
+                        kern(ix2,iy2) += 1.0;
+                        sum           += 1.0;
+                    }
+                }
+            }
+        }
+
+    } // endif: handled disk kernel
+
+    // Handle Gaussian kernel
+    else if (gammalib::toupper(kernel) == "GAUSSIAN") {
+
+        // Compute the exponential normalisation
+        double norm = -0.5 / (par * par);
+
+        // Fill kernel
+        for (int ix1 = 0, ix2 = m_num_x; ix1 < m_num_x; ++ix1, --ix2) {
+            double x   = ix1 * dx;
+            double xqs = x * x;
+            for (int iy1 = 0, iy2 = m_num_y; iy1 < m_num_y; ++iy1, --iy2) {
+                double y       = iy1 * dy;
+                double value   = std::exp(norm * (xqs + y*y));
+                kern(ix1,iy1) += value;
+                sum           += value;
+                if ((ix2 < m_num_x) && (iy2 < m_num_y)) {
+                    kern(ix2,iy2) += value;
+                    sum           += value;
+                }
+            }
+        }
+
+    } // endif: handled Gaussian kernel
+
+    // ... otherwise throw an exception
+    else {
+        std::string msg = "Invalid kernel type \""+kernel+"\" specified. "
+                          "Please specify one of \"DISK\", \"GAUSSIAN\".";
+        throw GException::invalid_argument(G_SMOOTH_KERNEL, msg);
+    }
+
+    // Normalise kernel
+    if (sum > 0.0) {
+        for (int ix = 0; ix < m_num_x; ++ix) {
+            for (int iy = 0; iy < m_num_y; ++iy) {
+                kern(ix,iy) /= sum;
+            }
+        }
+    }
+
+    // Return kernel
+    return kern;
 }
 
 

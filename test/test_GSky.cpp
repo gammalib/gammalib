@@ -44,9 +44,10 @@
 #define G_WCS_COPY_DEBUG
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir    = std::getenv("TEST_DATA");
-const std::string sky_region = datadir + "/test_circle_region.reg";
+const std::string datadir        = std::getenv("TEST_DATA");
+const std::string sky_region     = datadir + "/test_circle_region.reg";
 const std::string sky_region_map = datadir + "/test_map_region.fits";
+const std::string sky_map        = datadir + "/cena_lobes_parkes.fits";
 
 
 /***********************************************************************//**
@@ -1185,6 +1186,37 @@ void TestGSky::test_GSkyMap(void)
 	test_value(map_load_shape3.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
 	test_value(map_load_shape3.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
 	test_value(map_load_shape3.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
+
+    // Load map for smoothing
+    GSkyMap map_smooth(sky_map);
+    
+    // Compute sum of sky map for reference
+    double ref_smooth = 0.0;
+    for (int pix = 0; pix < map_smooth.npix(); ++pix) {
+        ref_smooth += map_smooth(pix);
+    }
+
+    // Smooth map using DISK kernel
+    GSkyMap map_smooth1 = map_smooth;
+    map_smooth1.smooth("DISK", 0.2);
+
+    // Compute sum of smoothed sky map
+    double sum_smooth1 = 0.0;
+    for (int pix = 0; pix < map_smooth1.npix(); ++pix) {
+        sum_smooth1 += map_smooth1(pix);
+    }
+	test_value(sum_smooth1, ref_smooth, "Check DISK smoothing");
+
+    // Smooth map using GAUSSIAN kernel
+    GSkyMap map_smooth2 = map_smooth;
+    map_smooth2.smooth("GAUSSIAN", 0.2);
+
+    // Compute sum of smoothed sky map
+    double sum_smooth2 = 0.0;
+    for (int pix = 0; pix < map_smooth2.npix(); ++pix) {
+        sum_smooth2 += map_smooth2(pix);
+    }
+	test_value(sum_smooth2, ref_smooth, "Check GAUSSIAN smoothing");
 
     // Exit test
     return;

@@ -164,6 +164,7 @@ public:
     bool                    contains(const GSkyDir& dir) const;
     bool                    contains(const GSkyPixel& pixel) const;
     bool                    overlaps(const GSkyRegion& region) const;
+    void                    smooth(const std::string& kernel, const double& par);
     const GSkyProjection*   projection(void) const;
     void                    projection(const GSkyProjection& proj);
     const double*           pixels(void) const;
@@ -200,6 +201,8 @@ private:
     bool              overlaps_circle(const GSkyRegionCircle& region) const;
     bool              is_healpix(const GFitsHDU& hdu) const;
     bool              is_wcs(const GFitsHDU& hdu) const;
+    GNdarray          smooth_kernel(const std::string& kernel,
+                                    const double&      par) const;
 
     // Private data area
     int               m_num_pixels; //!< Number of pixels (used for pixel allocation)
