@@ -2198,10 +2198,6 @@ void TestGCTAOptimize::test_onoff_optimizer(void)
     
     // Load On/Off CTA observation
     GObservations obs(cta_onoff_obs);
-    //this should not be necessary, why isn't the default statistics loaded???
-    for (int i = 0; i < obs.size(); ++i) {
-    		obs[i]->statistics("POISSON-MODELEDBKG");
-    }
 
     // Load models from XML file
     obs.models(cta_onoff_model);

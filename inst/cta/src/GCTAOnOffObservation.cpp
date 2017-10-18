@@ -1091,12 +1091,14 @@ void GCTAOnOffObservation::init_members(void)
     m_ontime     = 0.0;
     m_livetime   = 0.0;
     m_deadc      = 1.0;
-    m_statistics = "POISSON-MEASUREDBKG";
     m_on_spec.clear();
     m_off_spec.clear();
     m_arf.clear();
     m_rmf.clear();
     m_logetrue.clear();
+
+    // Overwrite base class statistics
+    m_statistics = "POISSON-MODELEDBKG";
 
     // Return
     return;
