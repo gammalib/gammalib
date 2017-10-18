@@ -1527,71 +1527,18 @@ void GModelSpectralNodes::update_eval_cache(void) const
  *
  * Updates the flux computation cache if either the energy boundaries or the
  * intensity values have changed.
- *
- * @todo Handle special case emin=emax and fmin=fmax
  ***************************************************************************/
 void GModelSpectralNodes::update_flux_cache(void) const
 {
-    // Determine number of nodes
-    int nodes = m_energies.size(); // cast to int as size() returns unsigned
-
-    // Loop over all nodes-1
-    for (int i = 0; i < nodes-1; ++i) {
-
-        // Get energies and function values
-        double emin = m_energies[i].value();
-        double emax = m_energies[i+1].value();
-        double fmin = m_values[i].value();
-        double fmax = m_values[i+1].value();
-
-        // Update values only if energies or function values have changed
-        if (emin != m_lin_energies[i]   ||
-            emax != m_lin_energies[i+1] ||
-            fmin != m_lin_values[i]     ||
-            fmax != m_lin_values[i+1]) {
-
-            // Set flux cache
+    // Loop over all nodes. If energy or value of a node has changed then
+    // set cache
+    for (int i = 0; i < m_energies.size(); ++i) {
+        if ((m_lin_energies[i] != m_energies[i].value()) ||
+            (m_lin_values[i]   != m_values[i].value())) {
             set_flux_cache();
-
-            /*
-            // Update cache values
-            m_lin_energies[i]   = emin;
-            m_lin_energies[i+1] = emax;
-            m_lin_values[i]     = fmin;
-            m_lin_values[i+1]   = fmax;
-
-            // Compute pivot energy (MeV). We use here the geometric mean
-            // of the node boundaries.
-            double epivot = std::sqrt(emin*emax);
-
-            // Compute spectral index
-            double gamma = std::log(fmin/fmax) / std::log(emin/emax);
-
-            // Compute power law normalisation
-            double prefactor = fmin / std::pow(emin/epivot, gamma);
-
-            // Compute photon flux between nodes
-            double flux = prefactor *
-                          gammalib::plaw_photon_flux(emin, emax, epivot, gamma);
-
-            // Compute energy flux between nodes
-            double eflux = prefactor *
-                           gammalib::plaw_energy_flux(emin, emax, epivot, gamma);
-
-            // Convert energy flux from MeV/cm2/s to erg/cm2/s
-            eflux *= gammalib::MeV2erg;
-
-            // Store values on pre-computation cache
-            m_prefactor[i] = prefactor;
-            m_gamma[i]     = gamma;
-            m_epivot[i]    = epivot;
-            m_flux[i]      = flux;
-            m_eflux[i]     = eflux;
-            */
-
-        } // endif: update was required
-
-    } // endfor: looped over all nodes
+            break;
+        }
+    }
 
     // Return
     return;
