@@ -1539,16 +1539,26 @@ void GModelSpectralNodes::update_flux_cache(void) const
     for (int i = 0; i < nodes-1; ++i) {
 
         // Get energies and function values
-        double emin = m_lin_energies[i];
-        double emax = m_lin_energies[i+1];
+        double emin = m_energies[i].value();
+        double emax = m_energies[i+1].value();
         double fmin = m_values[i].value();
         double fmax = m_values[i+1].value();
 
         // Update values only if energies or function values have changed
-        if (emin != m_energies[i].value() ||
-            emax != m_energies[i+1].value() ||
-            fmin != m_values[i].value() ||
-            fmax != m_values[i+1].value()) {
+        if (emin != m_lin_energies[i]   ||
+            emax != m_lin_energies[i+1] ||
+            fmin != m_lin_values[i]     ||
+            fmax != m_lin_values[i+1]) {
+
+            // Set flux cache
+            set_flux_cache();
+
+            /*
+            // Update cache values
+            m_lin_energies[i]   = emin;
+            m_lin_energies[i+1] = emax;
+            m_lin_values[i]     = fmin;
+            m_lin_values[i+1]   = fmax;
 
             // Compute pivot energy (MeV). We use here the geometric mean
             // of the node boundaries.
@@ -1577,6 +1587,7 @@ void GModelSpectralNodes::update_flux_cache(void) const
             m_epivot[i]    = epivot;
             m_flux[i]      = flux;
             m_eflux[i]     = eflux;
+            */
 
         } // endif: update was required
 
