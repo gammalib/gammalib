@@ -48,7 +48,6 @@ public:
     GArf&   operator+=(const GArf& arf);
     GArf&   operator-=(const GArf& arf);
     GArf&   operator*=(const double& scale);
-    double& operator()(const int& index, const int& col);
 
     // Methods
     void             clear(void);
@@ -81,6 +80,9 @@ public:
         else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
+    }
+    std::vector<double> __getitem__(const std::string& colname) {
+        return (*self)[colname];
     }
     void __setitem__(const int& index, const double& value) {
         if (index>=0 && index < self->size()) {

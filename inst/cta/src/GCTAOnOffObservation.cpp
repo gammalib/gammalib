@@ -60,7 +60,9 @@ const GCTAOnOffObservation g_onoff_obs_cta_seed;
 const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCTOR              "GCTAOnOffObservation(GObservations& obs)"
+#define G_CONSTRUCTOR1   "GCTAOnOffObservation::GCTAOnOffObservation(GPha&, "\
+                                                       "GPha&, GArf&, GRmf&)"
+#define G_CONSTRUCTOR2             "GCTAOnOffObservation(GObservations& obs)"
 #define G_RESPONSE_SET           "GCTAOnOffObservation::response(GResponse&)"
 #define G_RESPONSE_GET                     "GCTAOnOffObservation::response()"
 #define G_WRITE                   "GCTAOnOffObservation::write(GXmlElement&)"
@@ -126,6 +128,42 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs) :
 
     // Copy members
     copy_members(obs);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief CTA observation constructor
+ *
+ * @param[in] pha_on On spectrum.
+ * @param[in] pha_off Off spectrum.
+ * @param[in] arf Auxiliary Response File.
+ * @param[in] rmf Redistribution Matrix File.
+ *
+ * Constructs On/Off observation from On and Off spectra, an Auxiliary
+ * Response File and a Redistribution Matrix File.
+ ***************************************************************************/
+GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
+                                           const GPha& pha_off,
+                                           const GArf& arf,
+                                           const GRmf& rmf)
+{
+    // Initialise private
+    init_members();
+
+    // Set data members
+    m_on_spec  = pha_on;
+	m_off_spec = pha_off;
+    m_arf      = arf;
+    m_rmf      = rmf;
+
+    // Set log true energy node array
+    set_logetrue();
+
+    // Check consistency of On/Off observation
+    check_consistency(G_CONSTRUCTOR1);
 
     // Return
     return;
@@ -249,7 +287,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
         }
 
         // Check consistency of On/Off observation
-        onoff->check_consistency(G_CONSTRUCTOR);
+        onoff->check_consistency(G_CONSTRUCTOR2);
 
         // If this is the first On/Off observation then store the data to
         // initialise the data definition
@@ -283,29 +321,29 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             // Check consistency of On spectrum
             if (m_on_spec.ebounds() != onoff->on_spec().ebounds()) {
                 std::string msg = "Incompatible energy binning of On spectrum.";
-                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+                throw GException::invalid_value(G_CONSTRUCTOR2, msg);
             }
 
             // Check consistency of Off spectrum
             if (m_off_spec.ebounds() != onoff->off_spec().ebounds()) {
                 std::string msg = "Incompatible energy binning of Off spectrum.";
-                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+                throw GException::invalid_value(G_CONSTRUCTOR2, msg);
             }
 
             // Check consistency of Arf
             if (m_arf.ebounds() != onoff->arf().ebounds()) {
                 std::string msg = "Incompatible energy binning of ARF.";
-                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+                throw GException::invalid_value(G_CONSTRUCTOR2, msg);
             }
 
             // Check consistency of Rmf
             if (m_rmf.etrue() != onoff->rmf().etrue()) {
                 std::string msg = "Incompatible true energy binning of RMF.";
-                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+                throw GException::invalid_value(G_CONSTRUCTOR2, msg);
             }
             if (m_rmf.emeasured() != onoff->rmf().emeasured()) {
                 std::string msg = "Incompatible measured energy binning of RMF.";
-                throw GException::invalid_value(G_CONSTRUCTOR, msg);
+                throw GException::invalid_value(G_CONSTRUCTOR2, msg);
             }
 
             // Compute background scaling factor

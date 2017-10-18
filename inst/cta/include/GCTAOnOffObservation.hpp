@@ -68,13 +68,17 @@ class GCTAOnOffObservation : public GObservation {
 public:
     // Constructors and destructors
     GCTAOnOffObservation(void);
+    GCTAOnOffObservation(const GObservations& obs);
+    GCTAOnOffObservation(const GPha& pha_on,
+                         const GPha& pha_off,
+                         const GArf& arf,
+                         const GRmf& rmf);
     GCTAOnOffObservation(const GCTAObservation& obs,
                          const GSkyDir&         srcdir,
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
                          const GSkyRegions&     on,
                          const GSkyRegions&     off);
-    GCTAOnOffObservation(const GObservations& obs);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
  

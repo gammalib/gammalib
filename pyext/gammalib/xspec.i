@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         xspec.i - XSPEC module                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,10 @@
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
+%include "std_vector.i"
+namespace std {
+   %template(vectord) vector<double>;
+};
 
 /* __ Include GammaLib typemaps __________________________________________ */
 %include typemap_GFilename.i

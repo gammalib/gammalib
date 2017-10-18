@@ -31,6 +31,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2231 <https://cta-redmine.irap.omp.eu/issues/2231>`_] -
+  Add ``GCTAOnOffObservation`` PHA, ARF and RMF constructor
 * [`2228 <https://cta-redmine.irap.omp.eu/issues/2228>`_] -
   Implement observation stacking in ``GCTAOnOffObservation``
 * [`2210 <https://cta-redmine.irap.omp.eu/issues/2210>`_] -
