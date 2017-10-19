@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATResponse.cpp - Fermi LAT response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,8 +66,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DUMP_MEAN_PSF  0                    //!< Dump mean PSF allocation
-#define G_DEBUG_MEAN_PSF 0                    //!< Debug mean PSF computation
+//#define G_DUMP_MEAN_PSF                     //!< Dump mean PSF allocation
+//#define G_DEBUG_MEAN_PSF                    //!< Debug mean PSF computation
 
 /* __ Constants __________________________________________________________ */
 
@@ -248,7 +248,7 @@ double GLATResponse::irf(const GEvent&       event,
         ipsf = m_ptsrc.size()-1;
 
         // Debug option: dump mean PSF
-        #if G_DUMP_MEAN_PSF
+        #if defined(G_DUMP_MEAN_PSF)
         std::cout << "Added new mean PSF \""+name+"\"" << std::endl;
         std::cout << *psf << std::endl;
         #endif
@@ -394,11 +394,17 @@ double GLATResponse::irf(const GLATEventBin& event,
     // then return response from mean PSF
     if ((idiff == -1 || m_force_mean) && ptsrc != NULL) {
 
-        // Search for mean PSF
-        int ipsf = -1;
+        // Search for mean PSF. If a mean PSF is found then check if the PSF
+        // needs to be updated, which may occur if the source direction
+        // changed by more then 0.01 deg.
+        int  ipsf   = -1;
+        bool update = false;
         for (int i = 0; i < m_ptsrc.size(); ++i) {
             if (m_ptsrc[i]->name() == source.name()) {
                 ipsf = i;
+                if (m_ptsrc[i]->dir().dist_deg(ptsrc->dir()) > 0.01) {
+                    update = true;
+                }
                 break;
             }
         }
@@ -407,8 +413,8 @@ double GLATResponse::irf(const GLATEventBin& event,
         if (ipsf == -1) {
 
             // Allocate new mean PSF
-            GLATMeanPsf* psf = 
-                new GLATMeanPsf(ptsrc->dir(), static_cast<const GLATObservation&>(obs));
+            GLATMeanPsf* psf = new GLATMeanPsf(ptsrc->dir(),
+                                   static_cast<const GLATObservation&>(obs));
 
             // Set source name
             psf->name(source.name());
@@ -420,20 +426,44 @@ double GLATResponse::irf(const GLATEventBin& event,
             ipsf = m_ptsrc.size()-1;
 
             // Debug option: dump mean PSF
-            #if G_DUMP_MEAN_PSF 
-            std::cout << "Added new mean PSF \""+source.name() << "\"" << std::endl;
-            std::cout << *psf << std::endl;
+            #if defined(G_DUMP_MEAN_PSF)
+            std::cout << "Added new mean PSF \""+source.name();
+            std::cout << "\"" << std::endl << *psf << std::endl;
             #endif
 
         } // endif: created new mean PSF
 
+        // ... otherwise if an update is needed then update mean PSF now
+        else if (update) {
+
+            // Allocate new mean PSF
+            GLATMeanPsf* psf = new GLATMeanPsf(ptsrc->dir(),
+                                   static_cast<const GLATObservation&>(obs));
+
+            // Set source name
+            psf->name(source.name());
+
+            // Delete existing mean PSF
+            if (m_ptsrc[ipsf] != NULL) delete m_ptsrc[ipsf];
+
+            // Set new mean PSF
+            const_cast<GLATResponse*>(this)->m_ptsrc[ipsf] = psf;
+
+            // Debug option: dump mean PSF
+            #if defined(G_DUMP_MEAN_PSF)
+            std::cout << "Replaced mean PSF \""+source.name();
+            std::cout << "\"" << std::endl << *psf << std::endl;
+            #endif
+
+        } // endelse: Mean PSF update was needed
+
         // Get PSF value
-        GSkyDir srcDir   = m_ptsrc[ipsf]->dir();
+        GSkyDir srcDir   = ptsrc->dir();
         double  offset   = event.dir().dir().dist_deg(srcDir);
         double  mean_psf = (*m_ptsrc[ipsf])(offset, srcEng.log10MeV()) / (event.ontime());
 
         // Debug option: compare mean PSF to diffuse response
-        #if G_DEBUG_MEAN_PSF
+        #if defined(G_DEBUG_MEAN_PSF)
         std::cout << "Energy=" << srcEng.MeV();
         std::cout << " MeanPsf=" << mean_psf;
         std::cout << " DiffusePsf=" << rsp;

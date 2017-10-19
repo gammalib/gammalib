@@ -213,7 +213,12 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-None
+The mean PSF is now updated in GLATResponse::irf(GLATEventBin&, GSource&,
+GObservation&) is the source position has changed by more than 0.01 degrees.
+This is smaller than reasonable values for the TS map computation, hence now
+for each test position the mean PSF gets updated. But it is larger than the
+typical step size in the numerical gradient computation in ctlike, so that
+also position fitting is now possible for Fermi-LAT (#604, #2183).
 
 
 20. CTA interface
