@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-18 October 2017
+19 October 2017
 
 
 1. Introduction
@@ -140,6 +140,10 @@ None
 
 10. Observation module
 ----------------------
+The GResponse::eval_prob() method was speed up by avoiding computation for the
+case that the spatial response is non-positive. In that case the spectral
+response is no longer evaluated.
+
 A time string constructor and set method was added to GTime to allow
 setting various time formats from a string. Variants exist to set the time in
 the native time reference or in a specific time reference (#1864).
@@ -232,6 +236,10 @@ File and a Redistribution Matrix File (#2231).
 
 21. COMPTEL interface
 ---------------------
+The GCOMResponse::irf() method no longer returns negative IRF values. This
+happened before due to the interpolation scheme that assumes that IRF values
+are taken at the pixel centre (#2234).
+
 COMPTEL SDA, SDB and ICT response files were added so that the information to
 compute the instrument response for any arbitrary energy band is available
 (#2186).

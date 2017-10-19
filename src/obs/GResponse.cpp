@@ -325,57 +325,82 @@ double GResponse::eval_prob(const GModelSky&    model,
         // Compute IRF value
         double irf = this->irf(event, source, obs);
 
-        // If required, apply instrument specific model scaling
-        if (model.has_scales()) {
-            irf *= model.scale(obs.instrument()).value();
-        }
+        // Continue only if IRF value is positive
+        if (irf > 0.0) {
 
-        // Evaluate spectral and temporal components
-        double spec = (model.spectral() != NULL)
-                      ? model.spectral()->eval(srcEng, srcTime, grad) : 1.0;
-        double temp = (model.temporal() != NULL)
-                      ? model.temporal()->eval(srcTime, grad) : 1.0;
+            // If required, apply instrument specific model scaling
+            if (model.has_scales()) {
+                irf *= model.scale(obs.instrument()).value();
+            }
 
-        // Compute probability
-        prob = spec * temp * irf;
+            // Evaluate spectral and temporal components
+            double spec = (model.spectral() != NULL)
+                          ? model.spectral()->eval(srcEng, srcTime, grad) : 1.0;
+            double temp = (model.temporal() != NULL)
+                          ? model.temporal()->eval(srcTime, grad) : 1.0;
 
-        // Optionally compute partial derivatives
-        if (grad) {
+            // Compute probability
+            prob = spec * temp * irf;
 
-            // Multiply factors to spectral gradients
+            // Optionally compute partial derivatives
+            if (grad) {
+
+                // Multiply factors to spectral gradients
+                if (model.spectral() != NULL) {
+                    double fact = temp * irf;
+                    if (fact != 1.0) {
+                        for (int i = 0; i < model.spectral()->size(); ++i) {
+                            (*model.spectral())[i].factor_gradient((*model.spectral())[i].factor_gradient() * fact);
+                        }
+                    }
+                }
+
+                // Multiply factors to temporal gradients
+                if (model.temporal() != NULL) {
+                    double fact = spec * irf;
+                    if (fact != 1.0) {
+                        for (int i = 0; i < model.temporal()->size(); ++i) {
+                            (*model.temporal())[i].factor_gradient((*model.temporal())[i].factor_gradient() * fact);
+                        }
+                    }
+                }
+
+            } // endif: computed partial derivatives
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
+                std::cout << "*** ERROR: GResponse::eval_prob:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (prob=" << prob;
+                std::cout << ", spec=" << spec;
+                std::cout << ", temp=" << temp;
+                std::cout << ", irf=" << irf;
+                std::cout << ")" << std::endl;
+            }
+            #endif
+
+        } // endif: IRF value was positive
+
+        // ... otherwise if gradient computation is requested then set the
+        // spectral and temporal gradients to zero
+        else if (grad) {
+
+            // Reset spectral gradients
             if (model.spectral() != NULL) {
-                double fact = temp * irf;
-                if (fact != 1.0) {
-                    for (int i = 0; i < model.spectral()->size(); ++i) {
-                        (*model.spectral())[i].factor_gradient((*model.spectral())[i].factor_gradient() * fact);
-                    }
+                for (int i = 0; i < model.spectral()->size(); ++i) {
+                    (*model.spectral())[i].factor_gradient(0.0);
                 }
             }
 
-            // Multiply factors to temporal gradients
+            // Reset temporal gradients
             if (model.temporal() != NULL) {
-                double fact = spec * irf;
-                if (fact != 1.0) {
-                    for (int i = 0; i < model.temporal()->size(); ++i) {
-                        (*model.temporal())[i].factor_gradient((*model.temporal())[i].factor_gradient() * fact);
-                    }
+                for (int i = 0; i < model.temporal()->size(); ++i) {
+                    (*model.temporal())[i].factor_gradient(0.0);
                 }
             }
 
-        } // endif: computed partial derivatives
-
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
-            std::cout << "*** ERROR: GResponse::eval_prob:";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (prob=" << prob;
-            std::cout << ", spec=" << spec;
-            std::cout << ", temp=" << temp;
-            std::cout << ", irf=" << irf;
-            std::cout << ")" << std::endl;
-        }
-        #endif
+        } // endelse: IRF value was not positive
 
     } // endif: Gamma-ray source model had a spatial component
 

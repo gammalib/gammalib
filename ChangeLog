@@ -1,8 +1,9 @@
-2017-10-18
+2017-10-19
 
         * Version 1.5.0 released
         =========================
 
+        Prevent negative response values for COMPTEL IRF (#2234)
         Add GCTAOnOffObservation PHA, ARF and RMF constructor (#2231)
         Implement observation stacking in GCTAOnOffObservation (#2228)
         Implement region integration in GCTAOnOffObservation (#2210)
