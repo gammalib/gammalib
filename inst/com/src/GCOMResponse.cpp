@@ -288,12 +288,15 @@ double GCOMResponse::irf(const GEvent&       event,
     // Compute scatter angle index
     int iphibar = int(obsDir.phibar() / m_phibar_bin_size);
 
-    // Extract IAQ value by linear inter/extrapolation in Phigeo
+    // Initialise IRF
     double iaq = 0.0;
+    double irf = 0.0;
+
+    // Extract IAQ value by linear inter/extrapolation in Phigeo
     if (iphibar < m_phibar_bins) {
         double phirat  = phigeo / m_phigeo_bin_size; // 0.5 at bin centre
         int    iphigeo = int(phirat);                // index into which Phigeo falls
-        double eps     = phirat - iphigeo - 0.5;     // 0.0 at bin centre
+        double eps     = phirat - iphigeo - 0.5;     // 0.0 at bin centre [-0.5, 0.5[
         if (iphigeo < m_phigeo_bins) {
             int i = iphibar * m_phigeo_bins + iphigeo;
             if (eps < 0.0) { // interpolate towards left
@@ -315,34 +318,44 @@ double GCOMResponse::irf(const GEvent&       event,
         }
     }
 
-    // Get DRG value (units: probability)
-    double drg = observation->drg()(obsDir.dir(), iphibar);
+    // Continue only if IAQ is positive
+    if (iaq > 0.0) {
 
-    // Get DRX value (units: cm^2 sec)
-    double drx = observation->drx()(srcDir);
+        // Get DRG value (units: probability)
+        double drg = observation->drg()(obsDir.dir(), iphibar);
 
-    // Get ontime
-    double ontime = observation->ontime(); // sec
+        // Get DRX value (units: cm^2 sec)
+        double drx = observation->drx()(srcDir);
 
-    // Compute IRF value
-    double irf = iaq * drg * drx / ontime;
+        // Get ontime
+        double ontime = observation->ontime(); // sec
 
-    // Apply deadtime correction
-    irf *= obs.deadc(srcTime);
+        // Compute IRF value
+        irf = iaq * drg * drx / ontime;
 
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GCOMResponse::irf:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (irf=" << irf;
-        std::cout << ", iaq=" << iaq;
-        std::cout << ", drg=" << drg;
-        std::cout << ", drx=" << drx;
-        std::cout << ")";
-        std::cout << std::endl;
-    }
-    #endif
+        // Apply deadtime correction
+        irf *= obs.deadc(srcTime);
+
+        // Make sure that IRF is positive
+        if (irf < 0.0) {
+            irf = 0.0;
+        }
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+            std::cout << "*** ERROR: GCOMResponse::irf:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", iaq=" << iaq;
+            std::cout << ", drg=" << drg;
+            std::cout << ", drx=" << drx;
+            std::cout << ")";
+            std::cout << std::endl;
+        }
+        #endif
+
+    } // endif: IAQ was positive
 
     // Return IRF value
     return irf;

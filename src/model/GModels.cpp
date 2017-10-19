@@ -873,7 +873,7 @@ double GModels::eval(const GEvent&       event,
     for (int i = 0; i < size(); ++i) {
         if (m_models[i]->is_valid(obs.instrument(), obs.id())) {
             value += m_models[i]->eval(event, obs, gradients);
-        }    
+        }
     }
 
     // Return

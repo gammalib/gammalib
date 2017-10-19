@@ -58,7 +58,7 @@ public:
     virtual ~GCOMEventBin(void);
 
     // Operators
-    virtual GCOMEventBin& operator= (const GCOMEventBin& bin);
+    virtual GCOMEventBin& operator=(const GCOMEventBin& bin);
 
     // Implemented pure virtual base class methods
     virtual void               clear(void);
