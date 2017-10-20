@@ -97,7 +97,7 @@ public:
                   "access operator.");
         }
         int index = 0;
-        for (int i = 0; i < self->shape().size(); ++i) {
+        for (size_t i = 0; i < self->shape().size(); ++i) {
             if (GTuple[i+1] < 0 || GTuple[i+1] >= self->shape()[i]) {
                 throw GException::out_of_range("__getitem__(int)", "Dimension "+
                       gammalib::str(i)+" index", GTuple[i+1], self->shape()[i]);
@@ -114,7 +114,7 @@ public:
                   "access operator.");
         }
         int index = 0;
-        for (int i = 0; i < self->shape().size(); ++i) {
+        for (size_t i = 0; i < self->shape().size(); ++i) {
             if (GTuple[i+1] < 0 || GTuple[i+1] >= self->shape()[i]) {
                 throw GException::out_of_range("__setitem__(int)", "Dimension "+
                       gammalib::str(i)+" index", GTuple[i+1], self->shape()[i]);

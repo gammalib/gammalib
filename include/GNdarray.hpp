@@ -156,7 +156,7 @@ std::string GNdarray::classname(void) const
 inline
 double& GNdarray::operator()(const int& ix)
 {
-	// Return array element
+    // Return array element
     return m_data[ix];
 }
 
@@ -171,7 +171,7 @@ double& GNdarray::operator()(const int& ix)
 inline
 double& GNdarray::operator()(const int& ix, const int& iy)
 {
-	// Return array element
+    // Return array element
     return m_data[ix+m_strides[1]*iy];
 }
 
@@ -187,7 +187,7 @@ double& GNdarray::operator()(const int& ix, const int& iy)
 inline
 double& GNdarray::operator()(const int& ix, const int& iy, const int& iz)
 {
-	// Return array element
+    // Return array element
     return m_data[ix+m_strides[1]*iy+m_strides[2]*iz];
 }
 
@@ -201,7 +201,7 @@ double& GNdarray::operator()(const int& ix, const int& iy, const int& iz)
 inline
 double& GNdarray::operator()(const std::vector<int>& i)
 {
-	// Return array element
+    // Return array element
     return m_data[index(i)];
 }
 
@@ -260,7 +260,7 @@ const double& GNdarray::operator()(const int& ix, const int& iy, const int& iz) 
 inline
 const double& GNdarray::operator()(const std::vector<int>& i) const
 {
-	// Return array element
+    // Return array element
     return m_data[index(i)];
 }
 
@@ -275,7 +275,7 @@ const double& GNdarray::operator()(const std::vector<int>& i) const
 inline
 int GNdarray::dim(void) const
 {
-    return m_shape.size();
+    return int(m_shape.size());
 }
 
 
@@ -289,7 +289,7 @@ int GNdarray::dim(void) const
 inline
 int GNdarray::size(void) const
 {
-    return m_data.size();
+    return int(m_data.size());
 }
 
 
