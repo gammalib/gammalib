@@ -138,7 +138,6 @@ public:
     GSkyMap       operator+(const GSkyMap& map) const;
     GSkyMap       operator-(const GSkyMap& map) const;
     GSkyMap       operator*(const GSkyMap& map) const;
-    GSkyMap       operator/(const GSkyMap& map) const;
     double        operator()(const int& index, const int& map = 0);
     double        operator()(const GSkyPixel& pixel, const int& map = 0);
     double        operator()(const GSkyDir& dir, const int& map = 0) const;
@@ -260,6 +259,13 @@ public:
         return sign(*self);
     }
     // Python 2.x operator/=
+    GSkyMap __div__(const GSkyMap& map) {
+        return ((*self) / map);
+    }
+    // Python 3.x operator/=
+    GSkyMap __truediv__(const GSkyMap& map) {
+        return ((*self) / map);
+    }    // Python 2.x operator/=
     GSkyMap __idiv__(const GSkyMap& map) {
         self->operator/=(map);
         return (*self);

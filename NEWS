@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-19 October 2017
+20 October 2017
 
 
 1. Introduction
@@ -165,12 +165,14 @@ None
 
 12. Sky module
 --------------
-The GSkyRegionMap class was added to handle arbitrary sky regions defined using
-a FITS file map. All positive pixels will define the region (#1121).
+Added a GSkyMap division operator that also works under Python 3.x (#2122)
 
 The GNdarray class is now used to store GSkyMap pixels. A GSkyMap::smooth()
 method was added to allow smoothing of sky maps with uniform disk or Gaussian
 shaped kernels (#1729).
+
+The GSkyRegionMap class was added to handle arbitrary sky regions defined using
+a FITS file map. All positive pixels will define the region (#1121).
 
 
 13. Support module

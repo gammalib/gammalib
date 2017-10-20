@@ -28,6 +28,8 @@ Bug fixes
   Correct output of COMPTEL DRB fitting XML model
 * [`2177 <https://cta-redmine.irap.omp.eu/issues/2177>`_] -
   Fix UTC rounding error in ``GTime::utc()`` method
+* [`2122 <https://cta-redmine.irap.omp.eu/issues/2122>`_] -
+  Add ``GSkyMap`` division operator for Python 3.x
 
 
 Improvements

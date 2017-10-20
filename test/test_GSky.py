@@ -207,7 +207,35 @@ class Test(gammalib.GPythonTestSuite):
         for pix in map:
             sum += pix
         self.test_value(sum, 16.0)        
-        
+
+        # Addition operator
+        map_res = map + map_b
+        self.test_value(map_res[0],  2.0)
+        self.test_value(map_res[1],  5.0)
+        self.test_value(map_res[2],  8.0)
+        self.test_value(map_res[3], 11.0)
+
+        # Subtraction operator
+        map_res = map - map_b
+        self.test_value(map_res[0], 0.0)
+        self.test_value(map_res[1], 1.0)
+        self.test_value(map_res[2], 2.0)
+        self.test_value(map_res[3], 3.0)
+
+        # Multiplication operator
+        map_res = map * map_b
+        self.test_value(map_res[0],  1.0)
+        self.test_value(map_res[1],  6.0)
+        self.test_value(map_res[2], 15.0)
+        self.test_value(map_res[3], 28.0)
+
+        # Division operator
+        map_res = map / map_b
+        self.test_value(map_res[0], 1.0/1.0)
+        self.test_value(map_res[1], 3.0/2.0)
+        self.test_value(map_res[2], 5.0/3.0)
+        self.test_value(map_res[3], 7.0/4.0)
+
         # Return
         return
 
