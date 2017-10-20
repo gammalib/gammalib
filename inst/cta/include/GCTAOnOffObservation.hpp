@@ -81,26 +81,26 @@ public:
                          const GSkyRegions&     off);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
- 
+
     // Operators
     GCTAOnOffObservation& operator=(const GCTAOnOffObservation& obs);
 
     // Implemented pure virtual methods
     virtual void                  clear(void);
     virtual GCTAOnOffObservation* clone(void) const;
-	virtual std::string           classname(void) const;
+    virtual std::string           classname(void) const;
     virtual void                  response(const GResponse& rsp);
     virtual const GCTAResponse*   response(void) const;
     virtual std::string           instrument(void) const;
-	virtual double                ontime(void) const;
-	virtual double                livetime(void) const;
-	virtual double                deadc(const GTime& time = GTime()) const;
+    virtual double                ontime(void) const;
+    virtual double                livetime(void) const;
+    virtual double                deadc(const GTime& time = GTime()) const;
     virtual void                  read(const GXmlElement& xml);
     virtual void                  write(GXmlElement& xml) const;
-	virtual std::string           print(const GChatter& chatter = NORMAL) const;
+    virtual std::string           print(const GChatter& chatter = NORMAL) const;
 
     // Overloaded virtual methods
-	virtual double likelihood(const GModels& models,
+    virtual double likelihood(const GModels& models,
                               GVector*       gradient,
                               GMatrixSparse* curvature,
                               double*        npred) const;
@@ -127,15 +127,15 @@ protected:
     void   compute_arf(const GCTAObservation& obs,
                        const GSkyDir&         srcdir,
                        const GSkyRegions&     on);
-	void   compute_bgd(const GCTAObservation& obs,
+    void   compute_bgd(const GCTAObservation& obs,
                        const GSkyRegions&     off);
-	void   compute_alpha(const GCTAObservation& obs,
+    void   compute_alpha(const GCTAObservation& obs,
                          const GSkyRegions&     on,
                          const GSkyRegions&     off);
     void   compute_rmf(const GCTAObservation& obs,
                        const GSkyRegions&     on);
     double N_gamma(const GModels& models, const int& ibin, GVector* grad) const;
-	double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
+    double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
 
     // Energy dispersion integration kernel
     class edisp_kern : public GFunction {
@@ -165,11 +165,11 @@ protected:
     // Protected data members
     std::string   m_instrument; //!< Instrument name
     GCTAResponse* m_response;   //!< Pointer to IRFs
-	double        m_ontime;     //!< Ontime (seconds)
+    double        m_ontime;     //!< Ontime (seconds)
     double        m_livetime;   //!< Livetime (seconds)
     double        m_deadc;      //!< Deadtime correction (livetime/ontime)
-    GPha 		  m_on_spec;    //!< On counts spectrum
-    GPha 		  m_off_spec;   //!< Off counts spectrum
+    GPha          m_on_spec;    //!< On counts spectrum
+    GPha          m_off_spec;   //!< Off counts spectrum
     GArf          m_arf;        //!< Auxiliary Response Function vector
     GRmf          m_rmf;        //!< Redistribution matrix
     GNodeArray    m_logetrue;   //!< Node array of log10 true energies in TeV
@@ -313,7 +313,7 @@ const GRmf& GCTAOnOffObservation::rmf(void) const
 inline
 int GCTAOnOffObservation::nobserved(void) const
 {
-    return (m_on_spec.counts());
+    return (int(m_on_spec.counts()+0.5));
 }
 
 #endif /* GCTAONOFFOBSERVATION_HPP */

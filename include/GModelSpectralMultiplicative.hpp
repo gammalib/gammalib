@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpectralMultiplicative.hpp - Multiplicative spectral model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                                    *
+ *  copyright (C) 2016-2017 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,8 +29,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GModelSpectral.hpp"
-#include "GModelPar.hpp"
 #include "GEnergy.hpp"
 #include "GModelSpectralNodes.hpp"
 #include "GFunction.hpp"
@@ -54,7 +54,7 @@ class GModelSpectralMultiplicative : public GModelSpectral {
 
 public:
     // Constructors and destructors
-	GModelSpectralMultiplicative(void);
+    GModelSpectralMultiplicative(void);
     explicit GModelSpectralMultiplicative(const GXmlElement& xml);
     GModelSpectralMultiplicative(const GModelSpectralMultiplicative& model);
     virtual ~GModelSpectralMultiplicative(void);
@@ -105,7 +105,7 @@ protected:
         double eval(const double& x) {
             GEnergy energy(x, "MeV");
             double value = m_spec[0]->eval(energy);
-            for (int i = 1 ; i < m_spec.size(); ++i) {
+            for (size_t i = 1 ; i < m_spec.size(); ++i) {
                 value *= m_spec[i]->eval(energy);
             }
             return value;
@@ -116,17 +116,17 @@ protected:
         std::vector<GModelSpectral*> m_spec; //!< Spectral models
     };
 
-	// Class to determine the integral energy flux, derived from flux_kern
-	class eflux_kern : public flux_kern {
-	public:
-		// Constructor
-		eflux_kern(std::vector<GModelSpectral*> spec) : flux_kern(spec) {}
+    // Class to determine the integral energy flux, derived from flux_kern
+    class eflux_kern : public flux_kern {
+    public:
+        // Constructor
+        eflux_kern(std::vector<GModelSpectral*> spec) : flux_kern(spec) {}
 
-		// Method
-		double eval(const double& x) {
-			return x * flux_kern::eval(x);
-		}
-	};
+        // Method
+        double eval(const double& x) {
+            return x * flux_kern::eval(x);
+        }
+    };
 
     // Protected members
     std::string                  m_type;        //!< Model type
