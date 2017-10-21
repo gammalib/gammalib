@@ -669,13 +669,18 @@ void GCTAObservation::read(const GXmlElement& xml)
         // Extract statistic value
         std::string statistic = gammalib::toupper(xml.attribute("statistic"));
 
-        // If statistic is not POISSON or GAUSSIAN than throw an exception
-        if ((statistic != "POISSON") && (statistic != "GAUSSIAN")) {
+        // If statistic is not POISSON, CSTAT, GAUSSIAN or CHI2 than throw
+        // an exception
+        if ((statistic != "POISSON")  &&
+            (statistic != "CSTAT")    &&
+            (statistic != "GAUSSIAN") &&
+            (statistic != "CHI2")) {
             std::string msg = "Invalid statistic \""+statistic+"\" encountered "
                               "in observation definition XML file for "
                               "\""+m_instrument+"\" observation with identifier "
-                              "\""+xml.attribute("id")+"\". Only \"POISSON\" "
-                              "or \"GAUSSIAN\" are supported.";
+                              "\""+xml.attribute("id")+"\". Only \"POISSON\", "
+                              "\"CSTAT\", \"GAUSSIAN\" or \"CHI2\" are "
+                              "supported.";
             throw GException::invalid_value(G_READ, msg);
         }
 
