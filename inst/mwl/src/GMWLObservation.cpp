@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.cpp - Multi-wavelength observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -350,7 +350,7 @@ std::string GMWLObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Name")+name());
         result.append("\n"+gammalib::parformat("Identifier")+id());
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
-        result.append("\n"+gammalib::parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Statistic")+statistic());
 
         // EXPLICIT: Append events
         if (chatter >=  EXPLICIT) {
@@ -386,8 +386,8 @@ void GMWLObservation::init_members(void)
     m_filename.clear();
     m_response.clear();
 
-    // Overwrite base class statistics
-    m_statistics = "Gaussian";
+    // Overwrite base class statistic
+    m_statistic = "Gaussian";
 
     // Return
     return;

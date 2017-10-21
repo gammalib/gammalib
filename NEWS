@@ -84,7 +84,8 @@ The following methods have been removed:
 - n.a.
 
 The following methods have been renamed:
-- n.a.
+- GObservation::statistic() was GObservation::statistics()
+- GObservation::statistic(std::string&) was GObservation::statistics(std::string&)
 
 The arguments for the following methods have been changed:
 - GCOMResponse(GCaldb&, std::string&)

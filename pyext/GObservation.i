@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GObservation.i - Abstract observation base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -94,10 +94,10 @@ public:
     // Implemented methods
     void               name(const std::string& name);
     void               id(const std::string& id);
-    void               statistics(const std::string& statistics);
+    void               statistic(const std::string& statistic);
     const std::string& name(void) const;
     const std::string& id(void) const;
-    const std::string& statistics(void) const;
+    const std::string& statistic(void) const;
 };
 
 

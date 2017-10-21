@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATObservation.cpp - Fermi LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -502,7 +502,7 @@ void GLATObservation::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print LAT observation information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing LAT observation information.
  ***************************************************************************/
 std::string GLATObservation::print(const GChatter& chatter) const
@@ -520,7 +520,7 @@ std::string GLATObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Name")+name());
         result.append("\n"+gammalib::parformat("Identifier")+id());
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
-        result.append("\n"+gammalib::parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Statistic")+statistic());
         result.append("\n"+gammalib::parformat("Ontime"));
         result.append(gammalib::str(ontime())+" s");
         result.append("\n"+gammalib::parformat("Livetime"));

@@ -78,4 +78,6 @@ New features
 Clean up
 --------
 
-* None
+* [`2238 <https://cta-redmine.irap.omp.eu/issues/2238>`_] -
+  Changed ``GObservation::statistics()`` to ``GObservation::statistic()``
+

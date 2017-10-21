@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -115,10 +115,10 @@ public:
     // Implemented methods
     void               name(const std::string& name);
     void               id(const std::string& id);
-    void               statistics(const std::string& statistics);
+    void               statistic(const std::string& statistic);
     const std::string& name(void) const;
     const std::string& id(void) const;
-    const std::string& statistics(void) const;
+    const std::string& statistic(void) const;
 
 protected:
     // Protected methods
@@ -209,7 +209,7 @@ protected:
     // Protected data area
     std::string m_name;        //!< Observation name
     std::string m_id;          //!< Observation identifier
-    std::string m_statistics;  //!< Optimizer statistics (default=Poisson)
+    std::string m_statistic;  //!< Optimizer statistic (default=Poisson)
     GEvents*    m_events;      //!< Pointer to event container
 };
 
@@ -245,16 +245,16 @@ void GObservation::id(const std::string& id)
 
 
 /***********************************************************************//**
- * @brief Set optimizer statistics
+ * @brief Set optimizer statistic
  *
- * @param[in] statistics Optimizer statistics.
+ * @param[in] statistic Optimizer statistic.
  *
- * Set optimizer statistics for the observation.
+ * Set optimizer statistic for the observation.
  ***************************************************************************/
 inline
-void GObservation::statistics(const std::string& statistics)
+void GObservation::statistic(const std::string& statistic)
 {
-    m_statistics = statistics;
+    m_statistic = statistic;
     return;
 }
 
@@ -284,14 +284,14 @@ const std::string& GObservation::id(void) const
 
 
 /***********************************************************************//**
- * @brief Return optimizer statistics
+ * @brief Return optimizer statistic
  *
- * @return Optimizer statistics.
+ * @return Optimizer statistic.
  ***************************************************************************/
 inline
-const std::string& GObservation::statistics(void) const
+const std::string& GObservation::statistic(void) const
 {
-    return (m_statistics);
+    return (m_statistic);
 }
 
 #endif /* GOBSERVATION_HPP */

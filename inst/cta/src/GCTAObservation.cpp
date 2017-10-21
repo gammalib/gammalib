@@ -1397,7 +1397,7 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
         result.append("\n"+gammalib::parformat("Event file")+eventfile().url());
         result.append("\n"+gammalib::parformat("Event type")+eventtype());
-        result.append("\n"+gammalib::parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Statistic")+statistic());
         result.append("\n"+gammalib::parformat("Ontime"));
         result.append(gammalib::str(ontime())+" s");
         result.append("\n"+gammalib::parformat("Livetime"));

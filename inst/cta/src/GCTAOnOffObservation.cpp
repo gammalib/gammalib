@@ -668,7 +668,7 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
  * @return Log-likelihood value.
  *
  * @exception GException::invalid_value
- *            Invalid statistics encountered.
+ *            Invalid statistic encountered.
  ***************************************************************************/
 double GCTAOnOffObservation::likelihood(const GModels& models,
                                         GVector*       gradient,
@@ -678,22 +678,22 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     // Initialise likelihood value
     double value = 0.0;
 
-    // Extract statistics for this observation
-    std::string statistics = gammalib::toupper(this->statistics());
+    // Extract statistic for this observation
+    std::string statistic = gammalib::toupper(this->statistic());
 
-    // Poisson statistics with modeled background
-    if ((statistics == "POISSON") || (statistics == "CSTAT")) {
+    // Poisson statistic with modeled background
+    if ((statistic == "POISSON") || (statistic == "CSTAT")) {
         value = likelihood_cstat(models, gradient, curvature, npred);
     }
 
-    // ... or Poisson statistics with measured background
-    else if (statistics == "WSTAT") {
+    // ... or Poisson statistic with measured background
+    else if (statistic == "WSTAT") {
         value = likelihood_wstat(models, gradient, curvature, npred);
     }
 
     // ... or unsupported
     else {
-        std::string msg = "Invalid statistics \""+statistics+"\" encountered. "
+        std::string msg = "Invalid statistic \""+statistic+"\" encountered. "
                           "Either specify \"POISSON\", \"CSTAT\" or "
                           "\"WSTAT\".";
         throw GException::invalid_value(G_LIKELIHOOD, msg);
@@ -761,8 +761,8 @@ void GCTAOnOffObservation::init_members(void)
     m_rmf.clear();
     m_logetrue.clear();
 
-    // Overwrite base class statistics
-    m_statistics = "POISSON";
+    // Overwrite base class statistic
+    m_statistic = "Poisson";
 
     // Return
     return;
@@ -2005,7 +2005,7 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
     std::cout << "Number of bins with zero data: " << n_zero_data << std::endl;
     std::cout << "Sum of data (On): " << sum_data << std::endl;
     std::cout << "Sum of model (On): " << sum_model << std::endl;
-    std::cout << "Statistics: " << value << std::endl;
+    std::cout << "Statistic: " << value << std::endl;
     #endif
 
     // Optionally dump gradient and curvature matrix

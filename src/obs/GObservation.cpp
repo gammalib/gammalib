@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -181,14 +181,14 @@ double GObservation::likelihood(const GModels& models,
     // Initialise likelihood value
     double value = 0.0;
 
-    // Extract statistics for this observation
-    std::string statistics = gammalib::toupper(this->statistics());
+    // Extract statistic for this observation
+    std::string statistic = gammalib::toupper(this->statistic());
 
     // Unbinned analysis
     if (dynamic_cast<const GEventList*>(events()) != NULL) {
 
-        // Poisson statistics
-        if (statistics == "POISSON") {
+        // Poisson statistic
+        if (statistic == "POISSON") {
 
             // Update the log-likelihood
             value = likelihood_poisson_unbinned(models,
@@ -196,12 +196,13 @@ double GObservation::likelihood(const GModels& models,
                                                 curvature,
                                                 npred);
 
-        } // endif: Poisson statistics
+        } // endif: Poisson statistic
 
         // ... otherwise throw an exception
         else {
-            throw GException::invalid_statistics(G_LIKELIHOOD, statistics,
-                  "Unbinned optimization requires Poisson statistics.");
+            std::string msg = "Invalid statistic \""+statistic+"\". Unbinned "
+                              "optimization requires \"POISSON\" statistic.";
+            throw GException::invalid_value(G_LIKELIHOOD, msg);
         }
 
     } // endif: unbinned analysis
@@ -209,27 +210,28 @@ double GObservation::likelihood(const GModels& models,
     // ... or binned analysis
     else {
 
-        // Poisson statistics
-        if (statistics == "POISSON") {
+        // Poisson statistic
+        if (statistic == "POISSON") {
             value = likelihood_poisson_binned(models,
                                               gradient,
                                               curvature,
                                               npred);
         }
 
-        // ... or Gaussian statistics
-        else if (statistics == "GAUSSIAN") {
+        // ... or Gaussian statistic
+        else if (statistic == "GAUSSIAN") {
             value = likelihood_gaussian_binned(models,
-                                              gradient,
-                                              curvature,
-                                              npred);
+                                               gradient,
+                                               curvature,
+                                               npred);
         }
 
         // ... or unsupported
         else {
-            throw GException::invalid_statistics(G_LIKELIHOOD, statistics,
-                  "Binned optimization requires Poisson or Gaussian"
-                  " statistics.");
+            std::string msg = "Invalid statistic \""+statistic+"\". Unbinned "
+                              "optimization requires \"POISSON\" or "
+                              "\"GAUSSIAN\" statistic.";
+            throw GException::invalid_value(G_LIKELIHOOD, msg);
         }
 
     } // endelse: binned analysis
@@ -833,8 +835,8 @@ void GObservation::init_members(void)
     // Initialise members
     m_name.clear();
     m_id.clear();
-    m_statistics = "Poisson";
-    m_events     = NULL;
+    m_statistic = "Poisson";
+    m_events    = NULL;
 
     // Return
     return;
@@ -851,9 +853,9 @@ void GObservation::init_members(void)
 void GObservation::copy_members(const GObservation& obs)
 {
     // Copy members
-    m_name       = obs.m_name;
-    m_id         = obs.m_id;
-    m_statistics = obs.m_statistics;
+    m_name      = obs.m_name;
+    m_id        = obs.m_id;
+    m_statistic = obs.m_statistic;
 
     // Clone members
     m_events = (obs.m_events != NULL) ? obs.m_events->clone() : NULL;
@@ -886,7 +888,7 @@ void GObservation::free_members(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Evaluate log-likelihood function for Poisson statistics and
+ * @brief Evaluate log-likelihood function for Poisson statistic and
  *        unbinned analysis (version with working arrays)
  *
  * @param[in] models Models.
@@ -896,7 +898,7 @@ void GObservation::free_members(void)
  * @return Likelihood value.
  *
  * This method evaluates the -(log-likelihood) function for parameter
- * optimisation using unbinned analysis and Poisson statistics.
+ * optimisation using unbinned analysis and Poisson statistic.
  * The -(log-likelihood) function is given by
  *
  * \f[
@@ -960,7 +962,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
             }
         }
 
-        // Update Poissonian statistics (excluding factorial term for faster
+        // Update Poissonian statistic (excluding factorial term for faster
         // computation)
         value -= log(model);
 
@@ -1006,7 +1008,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
 
 
 /***********************************************************************//**
- * @brief Evaluate log-likelihood function for Poisson statistics and
+ * @brief Evaluate log-likelihood function for Poisson statistic and
  *        binned analysis (version with working arrays)
  *
  * @param[in] models Models.
@@ -1016,7 +1018,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
  * @return Likelihood value.
  *
  * This method evaluates the -(log-likelihood) function for parameter
- * optimisation using binned analysis and Poisson statistics.
+ * optimisation using binned analysis and Poisson statistic.
  * The -(log-likelihood) function is given by
  *
  * \f[
@@ -1039,7 +1041,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
     // Initialise likelihood value
     double value = 0.0;
 
-    // Initialise statistics
+    // Initialise statistic
     #if defined(G_OPT_DEBUG)
     int    n_bins         = 0;
     int    n_used         = 0;
@@ -1096,7 +1098,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
             continue;
         }
 
-        // Update statistics
+        // Update statistic
         #if defined(G_OPT_DEBUG)
         n_used++;
         sum_data  += data;
@@ -1127,7 +1129,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
         // matrix ...
         if (data > 0.0) {
 
-            // Update Poissonian statistics (excluding factorial term for
+            // Update Poissonian statistic (excluding factorial term for
             // faster computation)
             value -= data * log(model) - model;
 
@@ -1168,12 +1170,12 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
         // ... handle now data=0
         else {
 
-            // Update statistics
+            // Update statistic
             #if defined(G_OPT_DEBUG)
             n_zero_data++;
             #endif
 
-            // Update Poissonian statistics (excluding factorial term for
+            // Update Poissonian statistic (excluding factorial term for
             // faster computation)
             value += model;
 
@@ -1196,7 +1198,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
     if (values != NULL) delete [] values;
     if (inx    != NULL) delete [] inx;
 
-    // Dump statistics
+    // Dump statistic
     #if defined(G_OPT_DEBUG)
     std::cout << "Number of bins: " << n_bins << std::endl;
     std::cout << "Number of bins used for computation: " << n_used << std::endl;
@@ -1205,8 +1207,8 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
     std::cout << "Number of bins with zero data: " << n_zero_data << std::endl;
     std::cout << "Sum of data: " << sum_data << std::endl;
     std::cout << "Sum of model: " << sum_model << std::endl;
-    std::cout << "Initial statistics: " << init_value << std::endl;
-    std::cout << "Statistics: " << m_value-init_value << std::endl;
+    std::cout << "Initial statistic: " << init_value << std::endl;
+    std::cout << "Statistic: " << m_value-init_value << std::endl;
     #endif
 
     // Return
@@ -1215,7 +1217,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
 
 
 /***********************************************************************//**
- * @brief Evaluate log-likelihood function for Gaussian statistics and
+ * @brief Evaluate log-likelihood function for Gaussian statistic and
  *        binned analysis (version with working arrays)
  *
  * @param[in] models Models.
@@ -1225,7 +1227,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
  * @return Likelihood value.
  *
  * This method evaluates the -(log-likelihood) function for parameter
- * optimisation using binned analysis and Poisson statistics.
+ * optimisation using binned analysis and Poisson statistic.
  * The -(log-likelihood) function is given by
  *
  * \f[
@@ -1311,7 +1313,7 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
         // Set weight
         double weight = 1.0 / (sigma * sigma);
 
-        // Update Gaussian statistics
+        // Update Gaussian statistic
         double fa = data - model;
         value  += 0.5 * (fa * fa * weight);
 

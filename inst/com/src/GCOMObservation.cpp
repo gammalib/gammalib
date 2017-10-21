@@ -696,7 +696,7 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Name")+name());
         result.append("\n"+gammalib::parformat("Identifier")+id());
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
-        result.append("\n"+gammalib::parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Statistic")+statistic());
         result.append("\n"+gammalib::parformat("Ontime"));
         result.append(gammalib::str(ontime())+" sec");
         result.append("\n"+gammalib::parformat("Livetime"));

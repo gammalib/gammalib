@@ -231,9 +231,9 @@ void TestGCTAOptimize::set(void)
     append(static_cast<pfunction>(&TestGCTAOptimize::test_stacked_optimizer),
            "Test stacked optimizer");
     append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer_cstat),
-           "Test On/Off optimizer using CSTAT statistics");
+           "Test On/Off optimizer using CSTAT statistic");
     append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer_wstat),
-           "Test On/Off optimizer using WSTAT statistics");
+           "Test On/Off optimizer using WSTAT statistic");
 
     // Return
     return;
@@ -2165,9 +2165,9 @@ void TestGCTAOptimize::test_onoff_optimizer_cstat(void)
     // Load On/Off CTA observation
     GObservations obs(cta_onoff_obs);
 
-    // Set fit statistics
+    // Set fit statistic
     for (int i = 0; i < obs.size(); ++i){
-        obs[i]->statistics("CSTAT");
+        obs[i]->statistic("CSTAT");
     }
 
     // Load models from XML file
@@ -2207,9 +2207,9 @@ void TestGCTAOptimize::test_onoff_optimizer_wstat(void)
     // Load On/Off CTA observation
     GObservations obs(cta_onoff_obs);
 
-    // Set fit statistics
+    // Set fit statistic
     for (int i = 0; i < obs.size(); ++i){
-        obs[i]->statistics("WSTAT");
+        obs[i]->statistic("WSTAT");
     }
 
     // Load models from XML file
