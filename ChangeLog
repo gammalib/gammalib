@@ -1,10 +1,11 @@
-2017-10-13
+2017-10-21
 
         * Version 1.5.0 released
         =========================
 
         Implement observation stacking in GCTAOnOffObservation (#2228)
         Implement region integration in GCTAOnOffObservation (#2210)
+        Implement WSTAT in GCTAOnOffObservation (#2209)
         Add GPha arithmetic operators and scale access methods
         Add GArf arithmetic operators
         Add GRmf arithmetic operators

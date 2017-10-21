@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-13 October 2017
+21 October 2017
 
 
 1. Introduction
@@ -213,6 +213,9 @@ Fix a segmentation fault issue when fetching CTA events from an event list
 The GCTAOnOffObservation class now performs a proper response integration over
 the On and Off regions and takes into account the energy dispersion using the
 Redistribution Matrix File (#2210).
+
+The WSTAT statistics was added to GCTAOnOffObservation for maximum likelihood
+fitting (#2209).
 
 A GCTAOnOffObservation(GObservations&) constructer has been added to the
 GCTAOnOffObservation class that creates a stacked CTA On/Off observations from
