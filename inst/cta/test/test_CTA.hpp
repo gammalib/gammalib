@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -144,7 +144,12 @@ public:
     void                      test_unbinned_optimizer(void);
     void                      test_binned_optimizer(void);
     void                      test_stacked_optimizer(void);
-    void                      test_onoff_optimizer(void);
+    void                      test_onoff_optimizer_poisson(void);
+    void                      test_onoff_optimizer_wstat(void);
+
+protected:
+    // Protected methods
+    void check_results(const GObservations& obs, const double* results);
 };
 
 

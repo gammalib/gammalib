@@ -230,8 +230,10 @@ void TestGCTAOptimize::set(void)
            "Test binned optimizer");
     append(static_cast<pfunction>(&TestGCTAOptimize::test_stacked_optimizer),
            "Test stacked optimizer");
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer),
-           "Test On/Off optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer_poisson),
+           "Test On/Off optimizer using Poisson statistics");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer_wstat),
+           "Test On/Off optimizer using WSTAT statistics");
 
     // Return
     return;
@@ -2052,19 +2054,7 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
     obs.errors(opt);
 
     // Verify fit results
-    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-        const GModel* model = obs.models()[i];
-        for (int k = 0; k < model->size(); ++k) {
-            GModelPar par  = (*model)[k];
-            std::string msg = "Verify optimization result for " + par.print();
-            test_value(par.value(), fit_results[j],
-                       std::abs(1.0e-4*fit_results[j]), msg);
-            j++;
-            test_value(par.error(), fit_results[j],
-                       std::abs(1.0e-4*fit_results[j]), msg);
-            j++;
-        }
-    }
+    check_results(obs, fit_results);
 
     // Return
     return;
@@ -2108,19 +2098,7 @@ void TestGCTAOptimize::test_binned_optimizer(void)
     obs.errors(opt);
 
     // Verify fit results
-    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-        const GModel* model = obs.models()[i];
-        for (int k = 0; k < model->size(); ++k) {
-            GModelPar par  = (*model)[k];
-            std::string msg = "Verify optimization result for " + par.print();
-            test_value(par.value(), fit_results[j],
-                       std::abs(1.0e-4*fit_results[j]), msg);
-            j++;
-            test_value(par.error(), fit_results[j],
-                       std::abs(1.0e-4*fit_results[j]), msg);
-            j++;
-        }
-    }
+    check_results(obs, fit_results);
 
     // Return
     return;
@@ -2160,19 +2138,7 @@ void TestGCTAOptimize::test_stacked_optimizer(void)
     obs.errors(opt);
 
     // Verify fit results
-    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-        const GModel* model = obs.models()[i];
-        for (int k = 0; k < model->size(); ++k) {
-            GModelPar par  = (*model)[k];
-            std::string msg = "Verify optimization result for " + par.print();
-            test_value(par.value(), fit_results[j],
-                       std::abs(1.0e-4*fit_results[j]), msg);
-            j++;
-            test_value(par.error(), fit_results[j],
-                       std::abs(1.0e-4*fit_results[j]), msg);
-            j++;
-        }
-    }
+    check_results(obs, fit_results);
 
     // Return
     return;
@@ -2182,9 +2148,9 @@ void TestGCTAOptimize::test_stacked_optimizer(void)
 /***********************************************************************//**
  * @brief Test On/Off optimizer
  ***************************************************************************/
-void TestGCTAOptimize::test_onoff_optimizer(void)
+void TestGCTAOptimize::test_onoff_optimizer_poisson(void)
 {
-    // Set reference result
+    // Reference result
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.750910e-16, 7.604206e-18,
@@ -2199,6 +2165,11 @@ void TestGCTAOptimize::test_onoff_optimizer(void)
     // Load On/Off CTA observation
     GObservations obs(cta_onoff_obs);
 
+    // Set fit statistics
+    for (int i = 0; i < obs.size(); ++i){
+        obs[i]->statistics("POISSON-MODELEDBKG");
+    }
+
     // Load models from XML file
     obs.models(cta_onoff_model);
 
@@ -2207,21 +2178,77 @@ void TestGCTAOptimize::test_onoff_optimizer(void)
     opt.max_iter(100);
     obs.optimize(opt);
     obs.errors(opt);
-    //std::cout << opt << std::endl;
-    //std::cout << obs << std::endl;
-    //std::cout << obs.models() << std::endl;
 
+    // Verify fit results
+    check_results(obs, fit_results);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test On/Off optimizer
+ ***************************************************************************/
+void TestGCTAOptimize::test_onoff_optimizer_wstat(void)
+{
+    // Reference result
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.7443543e-16, 4.813498e-18,
+                            -2.473535, 0.007931,
+                            300000, 0,
+                            1, 0,
+                            1.0, 0.,
+                            0., 0.,
+                            1.0e6, 0,
+                            1, 0};
+    
+    // Load On/Off CTA observation
+    GObservations obs(cta_onoff_obs);
+
+    // Set fit statistics
+    for (int i = 0; i < obs.size(); ++i){
+        obs[i]->statistics("POISSON-MEASUREDBKG");
+    }
+
+    // Load models from XML file
+    obs.models(cta_onoff_model);
+
+    // Perform LM optimization
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+
+    // Verify fit results
+    check_results(obs, fit_results);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check fit results
+ *
+ * @param[in] obs Observation container
+ * @param[in] results Pointer to array of expected fit results
+ ***************************************************************************/
+void TestGCTAOptimize::check_results(const GObservations& obs,
+                                     const double*        results)
+{
     // Verify fit results
     for (int i = 0, j = 0; i < obs.models().size(); ++i) {
         const GModel* model = obs.models()[i];
         for (int k = 0; k < model->size(); ++k) {
             GModelPar par  = (*model)[k];
             std::string msg = "Verify optimization result for " + par.print();
-            test_value(par.value(), fit_results[j],
-                       std::abs(1.0e-4*fit_results[j]), msg);
+            test_value(par.value(), results[j],
+                       std::abs(1.0e-4*results[j]), msg);
             j++;
-            test_value(par.error(), fit_results[j],
-                       std::abs(1.0e-4*fit_results[j]), msg);
+            test_value(par.error(), results[j],
+                       std::abs(1.0e-4*results[j]), msg);
             j++;
         }
     }

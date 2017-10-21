@@ -41,6 +41,8 @@ Improvements
   Implement observation stacking in ``GCTAOnOffObservation``
 * [`2210 <https://cta-redmine.irap.omp.eu/issues/2210>`_] -
   Implement region integration in ``GCTAOnOffObservation``
+* [`2209 <https://cta-redmine.irap.omp.eu/issues/2209>`_] -
+  Implement ``WSTAT`` in ``GCTAOnOffObservation``
 * Add ``GPha`` arithmetic operators and scale access methods
 * Add ``GArf`` arithmetic operators
 * Add ``GRmf`` arithmetic operators

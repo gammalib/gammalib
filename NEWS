@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-20 October 2017
+21 October 2017
 
 
 1. Introduction
@@ -225,20 +225,27 @@ also position fitting is now possible for Fermi-LAT (#604, #2183).
 
 20. CTA interface
 -----------------
-Fix a segmentation fault issue when fetching CTA events from an event list
-(#2192).
-
-The GCTAOnOffObservation class now performs a proper response integration over
-the On and Off regions and takes into account the energy dispersion using the
-Redistribution Matrix File (#2210).
+Added GCTAOnOffObservation(GPha&, GPha&, GArf&, GRmf&) constructor to allow
+creation of an On/Off observation from On and Off spectra, an Auxiliary Response
+File and a Redistribution Matrix File (#2231).
 
 Added GCTAOnOffObservation(GObservations&) constructor that creates a stacked
 CTA On/Off observation from all On/Off observations that are found in the
 observation container (#2228).
 
-Added GCTAOnOffObservation(GPha&, GPha&, GArf&, GRmf&) constructor to allow
-creation of an On/Off observation from On and Off spectra, an Auxiliary Response
-File and a Redistribution Matrix File (#2231).
+A GCTAOnOffObservation(GObservations&) constructer has been added to the
+GCTAOnOffObservation class that creates a stacked CTA On/Off observations from
+all On/Off observations that are found in the observation container (#2228).
+
+The GCTAOnOffObservation class now performs a proper response integration over
+the On and Off regions and takes into account the energy dispersion using the
+Redistribution Matrix File (#2210).
+
+The WSTAT statistics was added to GCTAOnOffObservation for maximum likelihood
+fitting (#2209).
+
+Fix a segmentation fault issue when fetching CTA events from an event list
+(#2192).
 
 
 21. COMPTEL interface

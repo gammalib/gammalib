@@ -137,6 +137,16 @@ protected:
     double N_gamma(const GModels& models, const int& ibin, GVector* grad) const;
     double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
 
+    // Likelihood methods
+    virtual double likelihood_cstat(const GModels& models,
+                                    GVector*       gradient,
+                                    GMatrixSparse* curvature,
+                                    double*        npred) const;
+    virtual double likelihood_wstat(const GModels& models,
+                                    GVector*       gradient,
+                                    GMatrixSparse* curvature,
+                                    double*        npred) const;
+
     // Energy dispersion integration kernel
     class edisp_kern : public GFunction {
     public:
