@@ -568,6 +568,9 @@ const GCTAResponse* GCTAOnOffObservation::response(void) const
  *
  * @param[in] xml XML element.
  *
+ * @exception GException::invalid_value
+ *            Invalid statistic attribute encountered
+ *
  * Reads information for an On/Off observation from an XML element. The
  * expected format of the XML element is
  *
@@ -578,6 +581,11 @@ const GCTAResponse* GCTAOnOffObservation::response(void) const
  *       <parameter name="Rmf"     file="..."/>
  *     </observation>
  *
+ * Optionally, the statistic used for maximum likelihood fitting can be
+ * specified:
+ *
+ *     <observation name="..." id="..." instrument="..." statistic="...">
+ *
  ***************************************************************************/
 void GCTAOnOffObservation::read(const GXmlElement& xml)
 {
@@ -586,6 +594,29 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
+
+    // Read in user defined statistic for this observation
+    if (xml.attribute("statistic") != "") {
+
+        // Extract statistic value
+        std::string statistic = gammalib::toupper(xml.attribute("statistic"));
+
+        // If statistic is not POISSON, CSTAT or WSTAT than throw an exception
+        if ((statistic != "POISSON") &&
+            (statistic != "CSTAT")   &&
+            (statistic != "WSTAT")) {
+            std::string msg = "Invalid statistic \""+statistic+"\" encountered "
+                              "in observation definition XML file for "
+                              "\""+m_instrument+"\" observation with identifier "
+                              "\""+xml.attribute("id")+"\". Only \"POISSON\" "
+                              ", \"CSTAT\" or \"WSTAT\" are supported.";
+            throw GException::invalid_value(G_READ, msg);
+        }
+
+        // Save statistic value
+        this->statistic(xml.attribute("statistic"));
+
+    }
 
     // Get file names
     std::string pha_on  = gammalib::xml_get_attr(G_READ, xml, "Pha_on",  "file");
@@ -624,7 +655,7 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
  * Writes information for an On/Off observation into an XML element. The
  * expected format of the XML element is
  *
- *     <observation name="..." id="..." instrument="...">
+ *     <observation name="..." id="..." instrument="..." statistic="...">
  *       <parameter name="Pha_on"  file="..."/>
  *       <parameter name="Pha_off" file="..."/>
  *       <parameter name="Arf"     file="..."/>
@@ -653,6 +684,11 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
     // Set Rmf parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "Rmf");
     par->attribute("file", gammalib::xml_file_reduce(xml, m_rmf.filename()));
+
+    // Add user defined statistic attributes
+    if (statistic() != "") {
+        xml.attribute("statistic", statistic());
+    }
 
 	// Return
 	return;

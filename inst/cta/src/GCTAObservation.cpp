@@ -575,6 +575,8 @@ GEbounds GCTAObservation::ebounds(void) const
  *            Invalid number of parameters found in XML element.
  * @exception GException::xml_invalid_parnames
  *            Invalid parameter names found in XML element.
+ * @exception GException::invalid_value
+ *            Invalid statistic attribute encountered
  *
  * Reads information for a CTA observation from an XML element. This method
  * handles two variants: a first where an event list of counts cube is
@@ -635,9 +637,10 @@ GEbounds GCTAObservation::ebounds(void) const
  * Note that the @p EdispCube is an optional parameter.
  *
  * Optional user energy thresholds can be specified by adding the @a emin
- * and @a emax attributes to the @p observation tag:
+ * and @a emax attributes to the @p observation tag. Also the statistic
+ * used for maximum likelihood fitting can be specified:
  *
- *     <observation name="..." id="..." instrument="..." emin="..." emax="...">
+ *     <observation name="..." id="..." instrument="..." emin="..." emax="..." statistic="...">
  *
  * The method does not load the events into memory but stores the file name
  * of the event file. The events are only loaded when required. This reduces
@@ -658,6 +661,27 @@ void GCTAObservation::read(const GXmlElement& xml)
     }
     if (xml.attribute("emax") != "") {
         m_hi_user_thres = gammalib::todouble(xml.attribute("emax"));
+    }
+
+    // Read in user defined statistic for this observation
+    if (xml.attribute("statistic") != "") {
+
+        // Extract statistic value
+        std::string statistic = gammalib::toupper(xml.attribute("statistic"));
+
+        // If statistic is not POISSON or GAUSSIAN than throw an exception
+        if ((statistic != "POISSON") && (statistic != "GAUSSIAN")) {
+            std::string msg = "Invalid statistic \""+statistic+"\" encountered "
+                              "in observation definition XML file for "
+                              "\""+m_instrument+"\" observation with identifier "
+                              "\""+xml.attribute("id")+"\". Only \"POISSON\" "
+                              "or \"GAUSSIAN\" are supported.";
+            throw GException::invalid_value(G_READ, msg);
+        }
+
+        // Save statistic value
+        this->statistic(xml.attribute("statistic"));
+
     }
 
     // Determine number of parameter nodes in XML element
@@ -854,7 +878,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * has been loaded from disk, the method will write the file name of the
  * event list using the format
  *
- *     <observation name="..." id="..." instrument="...">
+ *     <observation name="..." id="..." instrument="..." statistic="...">
  *       <parameter name="EventList" file="..."/>
  *       ...
  *     </observation>
@@ -863,7 +887,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * disk, the method will write the file name of the counts cube using the
  * format
  *
- *     <observation name="..." id="..." instrument="...">
+ *     <observation name="..." id="..." instrument="..." statistic="...">
  *       <parameter name="CountsCube" file="..."/>
  *       ...
  *     </observation>
@@ -871,7 +895,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * In all other cases the method will only write the metadata information
  * for the CTA observation using the format
  *
- *     <observation name="..." id="..." instrument="...">
+ *     <observation name="..." id="..." instrument="..." statistic="...">
  *       <parameter name="Pointing" ra="..." dec="..."/>
  *       <parameter name="Deadtime" deadc="..."/>
  *       ...
@@ -883,7 +907,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * an unbinned or binned observation has been loaded from the calibration
  * database, the format
  *
- *     <observation name="..." id="..." instrument="...">
+ *     <observation name="..." id="..." instrument="..." statistic="...">
  *       ...
  *       <parameter name="Calibration" database="..." response="..."/>
  *     </observation>
@@ -891,7 +915,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * will be written. If the response has been loaded from individual files,
  * the format
  *
- *     <observation name="..." id="..." instrument="...">
+ *     <observation name="..." id="..." instrument="..." statistic="...">
  *       ...
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
@@ -902,7 +926,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * will be written. If the observation contains information about the
  * response to a stacked analysis, the format
  *
- *     <observation name="..." id="..." instrument="...">
+ *     <observation name="..." id="..." instrument="..." statistic="...">
  *       ...
  *       <parameter name="ExposureCube" file="..."/>
  *       <parameter name="PsfCube"      file="..."/>
@@ -918,7 +942,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * additional @a emin and @a emax attributes will be written to the
  * @p observation tag:
  *
- *     <observation name="..." id="..." instrument="..." emin="..." emax="...">
+ *     <observation name="..." id="..." instrument="..." statistic="..." emin="..." emax="...">
  *
  ***************************************************************************/
 void GCTAObservation::write(GXmlElement& xml) const
@@ -945,6 +969,11 @@ void GCTAObservation::write(GXmlElement& xml) const
     }
     if (m_hi_user_thres > 0.0) {
         xml.attribute("emax", gammalib::str(m_hi_user_thres));
+    }
+
+    // Add user defined statistic attributes
+    if (statistic() != "") {
+        xml.attribute("statistic", statistic());
     }
 
     // If there is an event filename then write the event information to the

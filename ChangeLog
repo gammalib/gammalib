@@ -3,6 +3,7 @@
         * Version 1.5.0 released
         =========================
 
+        CTA observations handle "statistic" attribute in XML file (#2238)
         Changed GObservation::statistics() to statistic() (#2238)
         Prevent negative response values for COMPTEL IRF (#2234)
         Add GCTAOnOffObservation PHA, ARF and RMF constructor (#2231)
