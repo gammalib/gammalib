@@ -188,7 +188,7 @@ double GObservation::likelihood(const GModels& models,
     if (dynamic_cast<const GEventList*>(events()) != NULL) {
 
         // Poisson statistic
-        if (statistic == "POISSON") {
+        if ((statistic == "POISSON") || (statistic == "CSTAT")) {
 
             // Update the log-likelihood
             value = likelihood_poisson_unbinned(models,
@@ -201,7 +201,8 @@ double GObservation::likelihood(const GModels& models,
         // ... otherwise throw an exception
         else {
             std::string msg = "Invalid statistic \""+statistic+"\". Unbinned "
-                              "optimization requires \"POISSON\" statistic.";
+                              "optimization requires \"POISSON\" or \"CSTAT\" "
+                              "statistic.";
             throw GException::invalid_value(G_LIKELIHOOD, msg);
         }
 
@@ -211,7 +212,7 @@ double GObservation::likelihood(const GModels& models,
     else {
 
         // Poisson statistic
-        if (statistic == "POISSON") {
+        if ((statistic == "POISSON") || (statistic == "CSTAT")) {
             value = likelihood_poisson_binned(models,
                                               gradient,
                                               curvature,
@@ -219,7 +220,7 @@ double GObservation::likelihood(const GModels& models,
         }
 
         // ... or Gaussian statistic
-        else if (statistic == "GAUSSIAN") {
+        else if ((statistic == "GAUSSIAN")  || (statistic == "CHI2")) {
             value = likelihood_gaussian_binned(models,
                                                gradient,
                                                curvature,
@@ -228,9 +229,9 @@ double GObservation::likelihood(const GModels& models,
 
         // ... or unsupported
         else {
-            std::string msg = "Invalid statistic \""+statistic+"\". Unbinned "
-                              "optimization requires \"POISSON\" or "
-                              "\"GAUSSIAN\" statistic.";
+            std::string msg = "Invalid statistic \""+statistic+"\". Binned "
+                              "optimization requires \"POISSON\", \"CSTAT\", "
+                              "\"GAUSSIAN\" or \"CHI2\" statistic.";
             throw GException::invalid_value(G_LIKELIHOOD, msg);
         }
 
@@ -835,7 +836,7 @@ void GObservation::init_members(void)
     // Initialise members
     m_name.clear();
     m_id.clear();
-    m_statistic = "Poisson";
+    m_statistic = "cstat";
     m_events    = NULL;
 
     // Return

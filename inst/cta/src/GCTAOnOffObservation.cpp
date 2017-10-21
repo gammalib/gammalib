@@ -797,9 +797,6 @@ void GCTAOnOffObservation::init_members(void)
     m_rmf.clear();
     m_logetrue.clear();
 
-    // Overwrite base class statistic
-    m_statistic = "Poisson";
-
     // Return
     return;
 }

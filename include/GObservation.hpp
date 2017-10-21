@@ -209,7 +209,7 @@ protected:
     // Protected data area
     std::string m_name;        //!< Observation name
     std::string m_id;          //!< Observation identifier
-    std::string m_statistic;  //!< Optimizer statistic (default=Poisson)
+    std::string m_statistic;   //!< Optimizer statistic
     GEvents*    m_events;      //!< Pointer to event container
 };
 

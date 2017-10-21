@@ -141,6 +141,10 @@ None
 
 10. Observation module
 ----------------------
+The statistic were renamed. POISSON is now called CSTAT and GAUSSIAN is called
+CHI2. The code still accepts POISSON and GAUSSIAN, but it is recommended to use
+CSTAT and CHI2 instead (#2237).
+
 The GResponse::eval_prob() method was speed up by avoiding computation for the
 case that the spatial response is non-positive. In that case the spectral
 response is no longer evaluated.
