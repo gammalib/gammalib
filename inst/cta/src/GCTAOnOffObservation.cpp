@@ -682,26 +682,20 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     std::string statistics = gammalib::toupper(this->statistics());
 
     // Poisson statistics with modeled background
-    if (statistics == "POISSON-MODELEDBKG") {
-        value = likelihood_cstat(models,
-        							gradient,
-								curvature,
-								npred);
+    if ((statistics == "POISSON") || (statistics == "CSTAT")) {
+        value = likelihood_cstat(models, gradient, curvature, npred);
     }
 
     // ... or Poisson statistics with measured background
-    else if (statistics == "POISSON-MEASUREDBKG") {
-        value = likelihood_wstat(models,
-        							gradient,
-								curvature,
-								npred);
+    else if (statistics == "WSTAT") {
+        value = likelihood_wstat(models, gradient, curvature, npred);
     }
 
     // ... or unsupported
     else {
         std::string msg = "Invalid statistics \""+statistics+"\" encountered. "
-                          "Either specify \"POISSON-MODELEDBKG\" or "
-                          "\"POISSON-MEASUREDBKG\".";
+                          "Either specify \"POISSON\", \"CSTAT\" or "
+                          "\"WSTAT\".";
         throw GException::invalid_value(G_LIKELIHOOD, msg);
     }
 
@@ -768,7 +762,7 @@ void GCTAOnOffObservation::init_members(void)
     m_logetrue.clear();
 
     // Overwrite base class statistics
-    m_statistics = "POISSON-MODELEDBKG";
+    m_statistics = "POISSON";
 
     // Return
     return;

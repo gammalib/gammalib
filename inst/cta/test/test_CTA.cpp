@@ -230,8 +230,8 @@ void TestGCTAOptimize::set(void)
            "Test binned optimizer");
     append(static_cast<pfunction>(&TestGCTAOptimize::test_stacked_optimizer),
            "Test stacked optimizer");
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer_poisson),
-           "Test On/Off optimizer using Poisson statistics");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer_cstat),
+           "Test On/Off optimizer using CSTAT statistics");
     append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer_wstat),
            "Test On/Off optimizer using WSTAT statistics");
 
@@ -2148,7 +2148,7 @@ void TestGCTAOptimize::test_stacked_optimizer(void)
 /***********************************************************************//**
  * @brief Test On/Off optimizer
  ***************************************************************************/
-void TestGCTAOptimize::test_onoff_optimizer_poisson(void)
+void TestGCTAOptimize::test_onoff_optimizer_cstat(void)
 {
     // Reference result
     double fit_results[] = {83.6331, 0,
@@ -2167,7 +2167,7 @@ void TestGCTAOptimize::test_onoff_optimizer_poisson(void)
 
     // Set fit statistics
     for (int i = 0; i < obs.size(); ++i){
-        obs[i]->statistics("POISSON-MODELEDBKG");
+        obs[i]->statistics("CSTAT");
     }
 
     // Load models from XML file
@@ -2209,7 +2209,7 @@ void TestGCTAOptimize::test_onoff_optimizer_wstat(void)
 
     // Set fit statistics
     for (int i = 0; i < obs.size(); ++i){
-        obs[i]->statistics("POISSON-MEASUREDBKG");
+        obs[i]->statistics("WSTAT");
     }
 
     // Load models from XML file

@@ -144,7 +144,7 @@ public:
     void                      test_unbinned_optimizer(void);
     void                      test_binned_optimizer(void);
     void                      test_stacked_optimizer(void);
-    void                      test_onoff_optimizer_poisson(void);
+    void                      test_onoff_optimizer_cstat(void);
     void                      test_onoff_optimizer_wstat(void);
 
 protected:
