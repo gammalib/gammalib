@@ -168,6 +168,9 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
     // Set log true energy node array
     set_logetrue();
 
+    // Set the ontime, livetime and deadtime correction
+    set_exposure();
+
     // Check consistency of On/Off observation
     check_consistency(G_CONSTRUCTOR1);
 
@@ -639,6 +642,9 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
     // Set log true energy node array
     set_logetrue();
 
+    // Set the ontime, livetime and deadtime correction
+    set_exposure();
+
     // Check consistency of On/Off observation
     check_consistency(G_READ);
 
@@ -761,6 +767,14 @@ std::string GCTAOnOffObservation::print(const GChatter& chatter) const
         // Append parameters
         result.append("\n"+gammalib::parformat("Name")+m_name);
         result.append("\n"+gammalib::parformat("Identifier")+m_id);
+        result.append("\n"+gammalib::parformat("Instrument")+instrument());
+        result.append("\n"+gammalib::parformat("Statistic")+statistic());
+        result.append("\n"+gammalib::parformat("Ontime"));
+        result.append(gammalib::str(ontime())+" s");
+        result.append("\n"+gammalib::parformat("Livetime"));
+        result.append(gammalib::str(livetime())+" s");
+        result.append("\n"+gammalib::parformat("Deadtime correction"));
+        result.append(gammalib::str(m_deadc));
 
         // Append spectra, ARF and RMF
         result.append("\n"+m_on_spec.print(gammalib::reduce(chatter)));
@@ -866,6 +880,21 @@ void GCTAOnOffObservation::set_logetrue(void)
         } // endfor: appended log mean energies
 
     } // endif: there were true energies in Arf
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set ontime, livetime and deadtime correction factor
+ ***************************************************************************/
+void GCTAOnOffObservation::set_exposure(void)
+{
+    // Set the ontime, livetime and deadtime correction
+    m_ontime   = m_on_spec.exposure();
+    m_livetime = m_on_spec.exposure();
+    m_deadc    = 1.0;
 
     // Return
     return;

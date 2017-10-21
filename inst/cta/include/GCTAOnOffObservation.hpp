@@ -119,6 +119,7 @@ protected:
     void   copy_members(const GCTAOnOffObservation& obs);
     void   free_members(void);
     void   set_logetrue(void);
+    void   set_exposure(void);
     void   check_consistency(const std::string& method) const;
     void   set(const GCTAObservation& obs,
                const GSkyDir&         srcdir,
