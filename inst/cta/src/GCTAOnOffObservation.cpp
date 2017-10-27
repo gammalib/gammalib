@@ -1035,7 +1035,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
 
     // Continue only if there are ARF bins
     if (ntrue > 0) {
-    
+
         // Get CTA response pointer. Throw an exception if no response is found
         const GCTAResponseIrf* response =
               dynamic_cast<const GCTAResponseIrf*>(obs.response());
@@ -1061,10 +1061,6 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
             // Initialize effective area for this bin
             m_arf[i] = 0.0;
 
-            // Initialize totals
-            double totsolid = 0.0;
-            double totpsf   = 0.0;
-
             // Loop over regions
             for (int k = 0; k < on.size(); ++k) {
 
@@ -1088,43 +1084,30 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                     double theta = obsdir.dist(pixdir);
                     double phi   = obsdir.posang(pixdir);
 
-                    // Add up effective area
-                    m_arf[i] += response->aeff(theta,
+                    // Compute offset angle to source
+                    double delta = srcdir.dist(pixdir);
+
+                    // Get PSF value times the solid angle
+                    double psf = response->psf(delta,
+                                               theta,
                                                phi,
                                                zenith,
                                                azimuth,
                                                logEtrue) * pixsolid;
 
-                    // Add pixel solid angle to total for averaging later
-                    totsolid += pixsolid;
-
-                    // Compute offset angle to source
-                    double delta = srcdir.dist(pixdir);
-
-                    // Integrate PSF
-                    totpsf += response->psf(delta,
-                                            theta,
-                                            phi,
-                                            zenith,
-                                            azimuth,
-                                            logEtrue) * pixsolid;
+                    // Add up effective area
+                    m_arf[i] += response->aeff(theta,
+                                               phi,
+                                               zenith,
+                                               azimuth,
+                                               logEtrue) * psf;
 
                 } // endfor: looped over all pixels in region map
 
             } // endfor: looped over all regions
 
-            // Average effective area over solid angle
-            if (totsolid > 0.0) {
-                m_arf[i] /= totsolid;
-            }
-
-            // Correct effective area by containment fraction
-            if (totpsf >= 0.0 && totpsf <= 1.0) {
-                m_arf[i] *= totpsf;
-            }
-
         } // endfor: looped over true energies
-        
+
 	} // endif: there were energy bins
 
 	// Return
