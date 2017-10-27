@@ -2181,6 +2181,13 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
                     dlogLdsky   = -1.0/alpha;
                     d2logLdsky2 = 0.0;
                 }
+                else if (non == 0.0) { // Special case non = 0
+                    nbgd        = 0.0;
+                    nonpred     = ngam;
+                    value      += ngam;
+                    dlogLdsky   = 1.0;
+                    d2logLdsky2 = 0.0;
+                }
                 else {
                     nbgd        = 0.0;
                     nonpred     = ngam;
@@ -2189,7 +2196,7 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
                     d2logLdsky2 = non / (ngam * ngam);
                 }
             } // endif: noff = 0
-            
+
             // Special case non = 0
             else if (non == 0.0) {
                 nbgd        = noff / alphap1;
@@ -2250,7 +2257,7 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
                             !gammalib::is_infinite(sky_grad[k])) {
                             colvar[k] = sky_grad[j] * sky_grad[k] * d2logLdsky2;
                         }
-                        
+
                         // ...... else if spectral model for background component
                         // or neither sky nor background
                         else {
