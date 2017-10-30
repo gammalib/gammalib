@@ -514,7 +514,7 @@ const double& GPha::areascal(const int& index) const
  * @brief Set background scaling factor
  *
  * @param[in] index Bin index [0,...,size()-1].
- * @param[in] areascal Background scaling factor.
+ * @param[in] backscal Background scaling factor.
  *
  * @exception GException::out_of_range
  *            Spectral bin index is out of range.
