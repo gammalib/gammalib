@@ -2195,8 +2195,8 @@ void TestGCTAOptimize::test_onoff_optimizer_wstat(void)
     // Reference result
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
-                            5.7443543e-16, 4.813498e-18,
-                            -2.473535, 0.007931,
+                            5.74512365e-16, 7.61094369e-18,
+                            -2.472668, 0.0123336,
                             300000, 0,
                             1, 0,
                             1.0, 0.,
