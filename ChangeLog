@@ -1,3 +1,11 @@
+2017-10-31
+
+        * Bug fix version 1.4.3 released
+        ================================
+
+        Correct background interpolation in GCTACubeBackground::operator() (#2268)
+
+
 2017-08-24
 
         * Bug fix version 1.4.2 released

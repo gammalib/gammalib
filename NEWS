@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.4.2
+New Features and Important Changes in GammaLib 1.4.3
 
-24 August 2017
+31 October 2017
 
 
 1. Introduction
@@ -63,9 +63,7 @@ None
 
 8. Model module
 ---------------
-Fixed bug where the light curve normalization was taken into account twice in
-GModelTemporalLightCurve::mc() so that the number of events scaled with the
-squared of the normalization instead of a linear scaling (#2181).
+None
 
 
 9. Numerics module
@@ -125,8 +123,9 @@ None
 
 20. CTA interface
 -----------------
-None
-
+The interpolation of background rates in GCTACubeBackground::operator() is now
+done using a log-log interpolation to be consistent with the interpolation in
+GCTABackground3D::operator() that is also used for event simulations (#2268).
 
 
 21. COMPTEL interface
