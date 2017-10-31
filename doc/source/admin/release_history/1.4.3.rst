@@ -12,4 +12,6 @@ The following bugs have been fixed:
 
 * [`2268 <https://cta-redmine.irap.omp.eu/issues/2268>`_] -
   Correct background interpolation in ``GCTACubeBackground::operator()``
+* [`2192 <https://cta-redmine.irap.omp.eu/issues/2192>`_] -
+  Fix OpenMP segfault issue when fetching CTA events
 * Correct bug in ``GModelSpatialComposite::copy_members()``
