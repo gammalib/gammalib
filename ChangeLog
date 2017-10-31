@@ -15,8 +15,6 @@
         Add GArf arithmetic operators
         Add GRmf arithmetic operators
         Add GEbounds equality and inequality operators
-        Fix OpenMP segfault issue when fetching CTA events (#2192) 
-        Correct GModelSpatialComposite::copy_members() bug.
         Improve efficiency of GGti::contains() method.
         Add GFitsTableCol::scale() method (#2191)
         Implement code generator for GammaLib extensions (#2190)
@@ -26,12 +24,22 @@
         Correct output of COMPTEL DRB fitting XML model (#2184)
         Allow source position fitting for Fermi-LAT data (#2183)
         Add GModelSpectralNodes spectral model constructor (#2178)
-        Fix UTC rounding error in GTime::utc() method (#2177)
         Add GSkyMap division operator for Python 3.x (#2122)
         Add time parameter to GApplicationPar class (#1864)
         Add time string constructor and set method to GTime class (#1864)
         Use GNdarray to store GSkyMap pixels and add smooth() method (#1729)
         Add GSkyRegionMap class (#1121)
+
+
+2017-10-31
+
+        * Bug fix version 1.4.3 released
+        ================================
+
+        Correct background interpolation in GCTACubeBackground::operator() (#2268)
+        Fix OpenMP segfault issue when fetching CTA events (#2192)
+        Fix UTC rounding error in GTime::utc() method (#2177)
+        Correct GModelSpatialComposite::copy_members() bug
 
 
 2017-08-24

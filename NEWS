@@ -130,9 +130,6 @@ None
 A spectral model constructor was added to GModelSpectralNodes to allow
 conversion of any spectral model into a spectral node model (#2178).
 
-A bug was corrected in GModelSpatialComposite::copy_members() that led to a
-segmentation fault when writing a composite spatial model into an XML file.
-
 
 9. Numerics module
 ------------------
@@ -152,9 +149,6 @@ response is no longer evaluated.
 A time string constructor and set method was added to GTime to allow
 setting various time formats from a string. Variants exist to set the time in
 the native time reference or in a specific time reference (#1864).
-
-A rounding error was fixed in GTime::utc() so that times such as
-"2019-12-31T23:59:60" are now "2020-01-01T00:00:00" as they should be (#2177).
 
 The efficiency of the GGti::contains() method has been improved for subsequent
 checking of sorted times. Now a new time search always starts at the last
@@ -251,9 +245,6 @@ Redistribution Matrix File (#2210).
 
 The WSTAT statistics was added to GCTAOnOffObservation for maximum likelihood
 fitting (#2209).
-
-Fix a segmentation fault issue when fetching CTA events from an event list
-(#2192).
 
 
 21. COMPTEL interface

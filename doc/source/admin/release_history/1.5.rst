@@ -21,13 +21,8 @@ Bug fixes
 
 * [`2234 <https://cta-redmine.irap.omp.eu/issues/2234>`_] -
   Prevent negative response values for COMPTEL IRF
-* [`2192 <https://cta-redmine.irap.omp.eu/issues/2192>`_] -
-  Fix OpenMP segfault issue when fetching CTA events
-* Correct bug in ``GModelSpatialComposite::copy_members()``
 * [`2184 <https://cta-redmine.irap.omp.eu/issues/2184>`_] -
   Correct output of COMPTEL DRB fitting XML model
-* [`2177 <https://cta-redmine.irap.omp.eu/issues/2177>`_] -
-  Fix UTC rounding error in ``GTime::utc()`` method
 * [`2122 <https://cta-redmine.irap.omp.eu/issues/2122>`_] -
   Add ``GSkyMap`` division operator for Python 3.x
 

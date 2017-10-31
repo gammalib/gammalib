@@ -1,0 +1,19 @@
+.. _1.4.3:
+
+GammaLib 1.4.3 release (31 October 2017)
+========================================
+
+Overview
+--------
+
+GammaLib 1.4.3 is a bug fix for GammaLib release 1.4.
+
+The following bugs have been fixed:
+
+* [`2268 <https://cta-redmine.irap.omp.eu/issues/2268>`_] -
+  Correct background interpolation in ``GCTACubeBackground::operator()``
+* [`2192 <https://cta-redmine.irap.omp.eu/issues/2192>`_] -
+  Fix OpenMP segfault issue when fetching CTA events
+* [`2177 <https://cta-redmine.irap.omp.eu/issues/2177>`_] -
+  Fix UTC rounding error in ``GTime::utc()`` method
+* Correct bug in ``GModelSpatialComposite::copy_members()``
