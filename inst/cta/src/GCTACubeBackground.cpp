@@ -257,9 +257,14 @@ double GCTACubeBackground::operator()(const GCTAInstDir& dir,
     // Set indices and weighting factors for interpolation
     update(energy.log10TeV());
 
-    // Perform interpolation
-    double background = m_wgt_left  * m_cube(dir.dir(), m_inx_left) +
-                        m_wgt_right * m_cube(dir.dir(), m_inx_right);
+    // Perform logarithmic interpolation
+    double background       = 0.0;
+    double background_left  = m_cube(dir.dir(), m_inx_left);
+    double background_right = m_cube(dir.dir(), m_inx_right);
+    if (background_left > 0.0 && background_right > 0.0) {
+        background = std::exp(m_wgt_left  * std::log(background_left) +
+                              m_wgt_right * std::log(background_right));
+    }
 
     // Make sure that background rate does not become negative
     if (background < 0.0) {
@@ -330,9 +335,9 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
         ebounds.append(m_energies[i], m_energies[i]);
     }
 
-    // Set dummy GTI needed to genrate an event cube. It is not important what
-    // the actually value is since it will be overwritten later in any case,
-    // but it's important that there is one time slice
+    // Set dummy GTI needed to generate an event cube. It is not important
+    // what the actually value is since it will be overwritten later in any
+    // case, but it's important that there is one time slice
     GGti gti(GTime(0.0), GTime(1.0));
 
     // Initialise event cube to evaluate models
