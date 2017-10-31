@@ -129,6 +129,9 @@ The interpolation of background rates in GCTACubeBackground::operator() is now
 done using a log-log interpolation to be consistent with the interpolation in
 GCTABackground3D::operator() that is also used for event simulations (#2268).
 
+Fix a segmentation fault issue when fetching CTA events from an event list
+(#2192).
+
 
 21. COMPTEL interface
 ---------------------
