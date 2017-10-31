@@ -404,9 +404,9 @@ std::string GTime::utc(void) const
     int    day      = (int)mjd;
     double fraction = mjd - (double)day;
 
-    // Compute time in day. We add a margin to the seconds and subtract it
-    // later to avoid rounding of 59 to 60.
-    double second = fraction * gammalib::sec_in_day + 0.0000005;
+    // Compute time in day. We add a margin of 0.5 to the seconds and
+    // subtract it later to avoid rounding of 59 to 60.
+    double second = fraction * gammalib::sec_in_day + 0.5;
     int    hour   = (int)second / 3600;
     second       -= hour * 3600.0;
     int minute    = (int)second / 60;
@@ -415,7 +415,7 @@ std::string GTime::utc(void) const
         hour -= 24;
         day++;
     }
-    second -= 0.0000005;
+    second -= 0.5;
     if (second < 0.0) {
         second = 0.0;
     }

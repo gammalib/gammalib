@@ -5,6 +5,7 @@
 
         Correct background interpolation in GCTACubeBackground::operator() (#2268)
         Fix OpenMP segfault issue when fetching CTA events (#2192)
+        Fix UTC rounding error in GTime::utc() method (#2177)
         Correct GModelSpatialComposite::copy_members() bug
 
 
