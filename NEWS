@@ -63,7 +63,8 @@ None
 
 8. Model module
 ---------------
-None
+A bug was corrected in GModelSpatialComposite::copy_members() that led to a
+segmentation fault when writing a composite spatial model into an XML file.
 
 
 9. Numerics module

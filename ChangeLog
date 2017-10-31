@@ -4,6 +4,7 @@
         ================================
 
         Correct background interpolation in GCTACubeBackground::operator() (#2268)
+        Correct GModelSpatialComposite::copy_members() bug.
 
 
 2017-08-24
