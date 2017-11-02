@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-21 October 2017
+2 November 2017
 
 
 1. Introduction
@@ -62,6 +62,7 @@ The following methods have been added:
 - GArf::operator-=(GArf&)
 - GArf::operator*=(double&)
 - GArf::operator/=(double&)
+- GArf::operator(std::string&, GEnergy&)
 - operator+(GArf&, GArf&)
 - operator-(GArf&, GArf&)
 - operator*(GArf&, double&)
@@ -195,10 +196,12 @@ Added arithmetic operators for GPha class to add, subtract, scale and divide
 spectra, and methods to set and retrieve the area and background scaling
 factors.
 
-Added arithmetic operatirs for GArf class to add, subtract, scale and divide
-Auxiliary Response Files. 
+Added arithmetic operators for GArf class to add, subtract, scale and divide
+Auxiliary Response Files. Add also an operator that returns the content of
+an additional column as function of energy. The operator performs a log-log
+interpolation of the column values.
 
-Added arithmetic operatirs for GRmf class to add, subtract, scale and divide
+Added arithmetic operators for GRmf class to add, subtract, scale and divide
 Redistribution Matrix Files.
 
 

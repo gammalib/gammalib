@@ -33,6 +33,7 @@
 #include "GBase.hpp"
 #include "GEbounds.hpp"
 #include "GFilename.hpp"
+#include "GNodeArray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
@@ -80,6 +81,8 @@ public:
     // Additional column access operators
     std::vector<double>&       operator[](const std::string& colname);
     const std::vector<double>& operator[](const std::string& colname) const;
+    double                     operator()(const std::string& colname,
+                                          const GEnergy&     energy) const;
 
     // Methods
     void             clear(void);
@@ -107,11 +110,13 @@ protected:
     void init_members(void);
     void copy_members(const GArf& pha);
     void free_members(void);
+    void set_logetrue(void);
     int  column_index(const std::string& colname) const;
     
     // Protected members
     mutable GFilename                 m_filename; //!< Filename of origin
     GEbounds                          m_ebounds;  //!< Energy boundaries
+    GNodeArray                        m_logetrue; //!< Log10 energies in TeV
     std::vector<double>               m_specresp; //!< Spectral response
     std::vector<std::string>          m_colnames; //!< Additional column names
     std::vector<std::vector<double> > m_coldata;  //!< Additional column data

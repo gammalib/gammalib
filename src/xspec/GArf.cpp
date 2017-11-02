@@ -42,6 +42,7 @@
 #define G_OPERATOR_PLUS                             "GArf::operator+=(GArf&)"
 #define G_OPERATOR_MINUS                            "GArf::operator-=(GArf&)"
 #define G_OPERATOR                           "GArf::operator[](std::string&)"
+#define G_OPERATOR2                "GArf::operator()(std::string&, GEnergy&)"
 #define G_AT1                                                "GArf::at(int&)"
 #define G_AT2                                          "GArf::at(int&, int&)"
 #define G_APPEND           "GArf::append(std::string&, std::vector<double>&)"
@@ -102,6 +103,9 @@ GArf::GArf(const GEbounds& ebds)
 
     // Set energy boundaries
     m_ebounds = ebds;
+
+    // Set log true energy node array
+    set_logetrue();
 
     // Initialize spectral response
     m_specresp.assign(ebds.size(), 0.0);
@@ -329,6 +333,51 @@ const std::vector<double>& GArf::operator[](const std::string& colname) const
 
     // Return reference to vector column
     return (m_coldata[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return vector column content as function of energy
+ *
+ * @param[in] colname Vector column name.
+ * @param[in] energy Energy.
+ * @return Vector column content.
+ *
+ * Returns content of additional vector column as function of @p energy.
+ ***************************************************************************/
+double GArf::operator()(const std::string& colname,
+                        const GEnergy&     energy) const
+{
+    // Determine index of additional column (-1 if not found)
+    int index = column_index(colname);
+
+    // Throw exception if index not found
+    if (index == -1) {
+        std::string msg = "Could not find additional column with name \""+
+                          colname+"\".";
+        throw GException::invalid_value(G_OPERATOR2, msg);
+    }
+
+    // Get reference to vector column
+    const std::vector<double>& column = m_coldata[index];
+
+    // Perform log-log interpolation of vector column content
+    m_logetrue.set_value(energy.log10TeV());
+    double wgt_left    = m_logetrue.wgt_left();
+    double wgt_right   = m_logetrue.wgt_right();
+    double value_left  = column[m_logetrue.inx_left()];
+    double value_right = column[m_logetrue.inx_right()];
+    double value       = 0.0;
+    if (value_left > 0.0 && value_right > 0.0) {
+        value = std::exp(wgt_left  * std::log(value_left) +
+                         wgt_right * std::log(value_right));
+    }
+    if (value < 0.0) {
+        value = 0.0;
+    }
+
+    // Return value
+    return value;
 }
 
 
@@ -637,6 +686,9 @@ void GArf::read(const GFitsTable& table)
 
     } // endfor: looped over all additional columns
 
+    // Set log true energy node array
+    set_logetrue();
+
     // Return
     return;
 }
@@ -773,6 +825,7 @@ void GArf::init_members(void)
     // Initialise members
     m_filename.clear();
     m_ebounds.clear();
+    m_logetrue.clear();
     m_specresp.clear();
     m_colnames.clear();
     m_coldata.clear();
@@ -792,6 +845,7 @@ void GArf::copy_members(const GArf& arf)
     // Copy members
     m_filename = arf.m_filename;
     m_ebounds  = arf.m_ebounds;
+    m_logetrue = arf.m_logetrue;
     m_specresp = arf.m_specresp;
     m_colnames = arf.m_colnames;
     m_coldata  = arf.m_coldata;
@@ -806,6 +860,39 @@ void GArf::copy_members(const GArf& arf)
  ***************************************************************************/
 void GArf::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set true energy node array
+ ***************************************************************************/
+void GArf::set_logetrue(void)
+{
+    // Clear node array
+    m_logetrue.clear();
+
+    // Continue only if there are true energies in Arf
+    int netrue = m_ebounds.size();
+    if (netrue > 0) {
+
+        // Reserve space in node array
+        m_logetrue.reserve(netrue);
+
+        // Append all log mean energies to node array
+        for (int i = 0; i < netrue; ++i) {
+
+            // Get log mean of true energy in TeV
+            double logE = m_ebounds.elogmean(i).log10TeV();
+
+            // Append energy to node array
+            m_logetrue.append(logE);
+
+        } // endfor: appended log mean energies
+
+    } // endif: there were true energies in Arf
+
     // Return
     return;
 }

@@ -48,6 +48,9 @@ public:
     GArf&   operator+=(const GArf& arf);
     GArf&   operator-=(const GArf& arf);
     GArf&   operator*=(const double& scale);
+    double& operator()(const int& index, const int& col);
+    double  operator()(const std::string& colname,
+                       const GEnergy&     energy) const;
 
     // Methods
     void             clear(void);

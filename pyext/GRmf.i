@@ -47,7 +47,6 @@ public:
     virtual ~GRmf(void);
 
     // Operators
-    GRmf& operator=(const GRmf& rmf);
     GRmf& operator+=(const GRmf& rmf);
     GRmf& operator-=(const GRmf& rmf);
     GRmf& operator*=(const double& scale);
