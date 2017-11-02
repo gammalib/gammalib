@@ -165,9 +165,6 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
     m_arf      = arf;
     m_rmf      = rmf;
 
-    // Set log true energy node array
-    set_logetrue();
-
     // Set the ontime, livetime and deadtime correction
     set_exposure();
 
@@ -244,8 +241,12 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
  *
  * \f[
  *    \alpha(E_{\rm reco}) = \frac{\sum_i \alpha_i(E_{\rm reco})
- *                                        N^{\rm off}_i(E_{\rm reco})}
- *                                {\sum_i N^{\rm off}_i(E_{\rm reco})}
+ *                                        B_i(E_{\rm reco}) \tau_i}
+ *                                {\sum_i B_i(E_{\rm reco}) \tau_i}
+ * \f]
+ *
+ * \f[
+ *    B(E_{\rm reco}) = \frac{\sum_i B_i(E_{\rm reco}) \tau_i}{\sum_i \tau_i}
  * \f]
  *
  * \f[
@@ -265,6 +266,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
  * \f$i\f$,
  * \f$\alpha_i(E_{\rm reco})\f$ is the background scaling of observation
  * \f$i\f$,
+ * \f$B_i(E_{\rm reco})\f$ is the background rate for observation \f$i\f$,
  * \f$ARF_i(E_{\rm true})\f$ is the Auxiliary Response File of observation
  * \f$i\f$,
  * \f$RMF_i(E_{\rm true}, E_{\rm reco})\f$ is the Redistribution Matrix File
@@ -311,6 +313,23 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_livetime = onoff->livetime();
             exposure   = onoff->on_spec().exposure();
 
+            // Compute number of background events/MeV from BACKRESP column
+            // and store result intermediately into Arf BACKRESP column
+            std::vector<double>& backresp = m_arf["BACKRESP"];
+            for (int i = 0; i < backresp.size(); ++i) {
+                backresp[i] *= onoff->on_spec().exposure();
+            }
+
+            // Compute background scaling factor contribution
+            for (int i = 0; i < m_on_spec.size(); ++i) {
+                GEnergy emean      = m_on_spec.ebounds().elogmean(i);
+                double  background = onoff->arf()("BACKRESP", emean);
+                double  exposure   = onoff->on_spec().exposure();
+                double  alpha      = onoff->on_spec().backscal(i);
+                double  scale      = alpha * background * exposure;
+                m_on_spec.backscal(i,scale);
+            }
+
             // Compute RMF contribution
             for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
                 double arf = m_arf[itrue];
@@ -355,28 +374,30 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
                 throw GException::invalid_value(G_CONSTRUCTOR2, msg);
             }
 
-            // Compute background scaling factor
-            for (int i = 0; i < m_on_spec.size(); ++i) {
-
-                // Compute background scaling factor for spectral bin
-                double n1 = m_off_spec[i];                // Counts from Off
-                double n2 = onoff->off_spec()[i];         // Counts from Off
-                double a1 = m_on_spec.backscal(i);        // Alpha from On
-                double a2 = onoff->on_spec().backscal(i); // Alpha from On
-                double n  = n1 + n2;
-                double a  = (n > 0.0) ? (a1 * n1 + a2 * n2)/n : 1.0;
-
-                // Set background scaling factor of On Spectrum
-                m_on_spec.backscal(i,a);
-
-            } // endfor: computed background scaling factors
-
             // Add On and Off spectrum
             m_on_spec  += onoff->on_spec();
             m_off_spec += onoff->off_spec();
 
+            // Compute background scaling factor contribution
+            for (int i = 0; i < m_on_spec.size(); ++i) {
+                GEnergy emean      = m_on_spec.ebounds().elogmean(i);
+                double  background = onoff->arf()("BACKRESP", emean);
+                double  exposure   = onoff->on_spec().exposure();
+                double  alpha      = onoff->on_spec().backscal(i);
+                double  scale      = m_on_spec.backscal(i) +
+                                     alpha * background * exposure;
+                m_on_spec.backscal(i,scale);
+            }
+
             // Add ARF
             m_arf += onoff->arf() * onoff->on_spec().exposure();
+
+            // Add number of background events/MeV from BACKRESP column
+            const std::vector<double>& src = onoff->arf()["BACKRESP"];
+            std::vector<double>&       dst = m_arf["BACKRESP"];
+            for (int i = 0; i < dst.size(); ++i) {
+                dst[i] += src[i] * onoff->on_spec().exposure();
+            }
 
             // Add RMF
             for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
@@ -397,6 +418,19 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
 
     } // endfor: looped over observations
 
+    // Compute stacked background scaling factor
+    for (int i = 0; i < m_on_spec.size(); ++i) {
+        GEnergy emean = m_on_spec.ebounds().elogmean(i);
+        double  norm  = m_arf("BACKRESP", emean);
+        if (norm > 0.0) {
+            double scale = m_on_spec.backscal(i) / norm;
+            m_on_spec.backscal(i,scale);
+        }
+        else {
+            m_on_spec.backscal(i,0.0);
+        }
+    }
+
     // Compute RMF
     for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
         double arf = m_arf[itrue];
@@ -407,8 +441,18 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
 
     // Compute ARF
     if (exposure > 0.0) {
+
+        // Normalise Arf
         m_arf /= exposure;
-    }
+
+        // Compute background events/MeV/sec and store them in BACKRESP
+        // column
+        std::vector<double>& backresp = m_arf["BACKRESP"];
+        for (int i = 0; i < backresp.size(); ++i) {
+            backresp[i] /= exposure;
+        }
+
+    } // endif: total exposure was positive
 
     // Return
     return;
@@ -639,9 +683,6 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
     m_arf.load(arf);
     m_rmf.load(rmf);
 
-    // Set log true energy node array
-    set_logetrue();
-
     // Set the ontime, livetime and deadtime correction
     set_exposure();
 
@@ -809,7 +850,6 @@ void GCTAOnOffObservation::init_members(void)
     m_off_spec.clear();
     m_arf.clear();
     m_rmf.clear();
-    m_logetrue.clear();
 
     // Return
     return;
@@ -832,7 +872,6 @@ void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
     m_off_spec   = obs.m_off_spec;
     m_arf        = obs.m_arf;
     m_rmf        = obs.m_rmf;
-    m_logetrue   = obs.m_logetrue;
 
     // Clone members
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
@@ -848,39 +887,6 @@ void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
  ***************************************************************************/
 void GCTAOnOffObservation::free_members(void)
 {
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set true energy node array
- ***************************************************************************/
-void GCTAOnOffObservation::set_logetrue(void)
-{
-    // Clear node array
-    m_logetrue.clear();
-
-    // Continue only if there are true energies in Arf
-    int netrue = m_arf.size();
-    if (netrue > 0) {
-
-        // Reserve space in node array
-        m_logetrue.reserve(netrue);
-
-        // Append all log mean energies to node array
-        for (int i = 0; i < netrue; ++i) {
-
-            // Get log mean of true energy in TeV
-            double logE = m_arf.ebounds().elogmean(i).log10TeV();
-
-            // Append energy to node array
-            m_logetrue.append(logE);
-
-        } // endfor: appended log mean energies
-
-    } // endif: there were true energies in Arf
-
     // Return
     return;
 }
@@ -1006,9 +1012,6 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
 	compute_bgd(obs, reg_off);
 	compute_alpha(obs, reg_on, reg_off);
 	compute_rmf(obs, reg_on);
-
-    // Set log true energy node array
-    set_logetrue();
 
 	// Return
 	return;
@@ -1659,28 +1662,13 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
         // Initialise parameter index
         int ipar = 0;
 
-        // Get reference to background response (events/MeV/s)
-        const std::vector<double>& backresp = m_arf["BACKRESP"];
-
         // Get reconstructed energy bin mean and width
         GEnergy emean  = m_on_spec.ebounds().elogmean(ibin);
         double  ewidth = m_on_spec.ebounds().ewidth(ibin).MeV();
 
-        // Perform log-log interpolation of background rate at reconstructed
-        // energy
-        m_logetrue.set_value(emean.log10TeV());
-        double wgt_left   = m_logetrue.wgt_left();
-        double wgt_right  = m_logetrue.wgt_right();
-        double bkg_left   = backresp[m_logetrue.inx_left()];
-        double bkg_right  = backresp[m_logetrue.inx_right()];
-        double background = 0.0;
-        if (bkg_left > 0.0 && bkg_right > 0.0) {
-            background = std::exp(wgt_left  * std::log(bkg_left) +
-                                  wgt_right * std::log(bkg_right));
-        }
-        if (background < 0.0) {
-            background = 0.0;
-        }
+        // Perform log-log interpolation of background rate (events/MeV/s)
+        // at reconstructed energy
+        double background = m_arf("BACKRESP", emean);
 
         // Compute normalisation factor (events)
         double exposure = m_on_spec.exposure();

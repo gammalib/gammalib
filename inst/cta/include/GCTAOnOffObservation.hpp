@@ -118,7 +118,6 @@ protected:
     void   init_members(void);
     void   copy_members(const GCTAOnOffObservation& obs);
     void   free_members(void);
-    void   set_logetrue(void);
     void   set_exposure(void);
     void   check_consistency(const std::string& method) const;
     void   set(const GCTAObservation& obs,
@@ -183,7 +182,6 @@ protected:
     GPha          m_off_spec;   //!< Off counts spectrum
     GArf          m_arf;        //!< Auxiliary Response Function vector
     GRmf          m_rmf;        //!< Redistribution matrix
-    GNodeArray    m_logetrue;   //!< Node array of log10 true energies in TeV
 };
 
 
