@@ -1,9 +1,10 @@
 package:
   name: gammalib
-  version: @VERSION@
+  version: "@VERSION@"
   
 
 source:
+  fn: gammalib-@VERSION@.tar.gz
   url: http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-@VERSION@.tar.gz
   #md5: a2751da55f7b97d48db57156e8096792
   
@@ -23,8 +24,6 @@ requirements:
   run:
     - python
     - cfitsio
-    - readline
-    - ncurses
 
 about:
   home: http://cta.irap.omp.eu/gammalib

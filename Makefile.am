@@ -36,6 +36,12 @@ pkgconfigdir = $(libdir)/pkgconfig
 # Files to install in Pkgconfig directory
 pkgconfig_DATA = gammalib.pc
 
+# Conda activate directory
+condaactivatedir = $(sysconfdir)/conda/activate.d
+condaactivate_DATA = dev/gammalib-activate.sh
+condadeactivatedir = $(sysconfdir)/conda/deactivate.d
+condadeactivate_DATA = dev/gammalib-deactivate.sh
+
 # Manual pages to install
 man_MANS = 
 
