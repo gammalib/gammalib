@@ -1444,7 +1444,7 @@ AC_CONFIG_FILES([Makefile
                  pyext/Makefile
                  pyext/setup.py
                  pyext/gammalib/__init__.py
-                 dev/conda-recipes/meta.yaml
+                 dev/conda.recipe/meta.yaml
                  examples/Makefile
                  examples/cpp/Makefile
                  gammalib.pc
