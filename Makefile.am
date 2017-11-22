@@ -57,7 +57,12 @@ docdir = ${datadir}/doc/${PACKAGE}
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md \
-             doc/Doxyfile doc/source
+             doc/Doxyfile doc/source \
+             dev/testreport.py \
+             dev/gammalib-activate.sh dev/gammalib-deactivate.sh \
+             dev/conda.recipe/build.sh \
+             dev/conda.recipe/conda_build_config.yaml \
+             dev/conda.recipe/meta.yaml.in
 
 #install-data-local: $(HTML_INSTALL_DATA_TARGETS)
 #uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
