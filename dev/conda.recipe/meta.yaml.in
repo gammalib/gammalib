@@ -1,0 +1,30 @@
+package:
+  name: gammalib
+  version: "@VERSION@"
+  
+
+source:
+  fn: gammalib-@VERSION@.tar.gz
+  url: http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-@VERSION@.tar.gz
+  #md5: a2751da55f7b97d48db57156e8096792
+  
+build:
+  number: 1 
+  binary_relocation: True
+  detect_binary_files_with_prefix: True
+      
+requirements:
+  build:
+    - python  
+    - setuptools
+    - cfitsio
+    - readline
+    - ncurses
+    - swig
+  run:
+    - python
+    - cfitsio
+
+about:
+  home: http://cta.irap.omp.eu/gammalib
+  license: GPL3

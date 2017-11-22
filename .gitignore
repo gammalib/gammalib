@@ -20,6 +20,7 @@ inst/mwl/test/*.trs
 pyext/gammalib/*.py
 pyext/gammalib/*.cpp
 pyext/setup.py
+dev/conda.recipe/meta.yaml
 m4/libtool.m4
 m4/ltoptions.m4
 m4/ltsugar.m4
