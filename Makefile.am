@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for GammaLib package                                          #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -38,9 +38,9 @@ pkgconfig_DATA = gammalib.pc
 
 # Conda activate directory
 condaactivatedir = $(sysconfdir)/conda/activate.d
-condaactivate_DATA = dev/gammalib-activate.sh
+condaactivate_DATA = dev/00-gammalib-activate.sh
 condadeactivatedir = $(sysconfdir)/conda/deactivate.d
-condadeactivate_DATA = dev/gammalib-deactivate.sh
+condadeactivate_DATA = dev/01-gammalib-deactivate.sh
 
 # Manual pages to install
 man_MANS = 
@@ -57,7 +57,12 @@ docdir = ${datadir}/doc/${PACKAGE}
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md \
-             doc/Doxyfile doc/source
+             doc/Doxyfile doc/source \
+             dev/testreport.py \
+             dev/00-gammalib-activate.sh dev/01-gammalib-deactivate.sh \
+             dev/conda.recipe/build.sh \
+             dev/conda.recipe/conda_build_config.yaml \
+             dev/conda.recipe/meta.yaml.in
 
 #install-data-local: $(HTML_INSTALL_DATA_TARGETS)
 #uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
