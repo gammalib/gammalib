@@ -38,9 +38,9 @@ pkgconfig_DATA = gammalib.pc
 
 # Conda activate directory
 condaactivatedir = $(sysconfdir)/conda/activate.d
-condaactivate_DATA = dev/gammalib-activate.sh
+condaactivate_DATA = dev/00-gammalib-activate.sh
 condadeactivatedir = $(sysconfdir)/conda/deactivate.d
-condadeactivate_DATA = dev/gammalib-deactivate.sh
+condadeactivate_DATA = dev/01-gammalib-deactivate.sh
 
 # Manual pages to install
 man_MANS = 
@@ -59,7 +59,7 @@ docdir = ${datadir}/doc/${PACKAGE}
 EXTRA_DIST = README.md \
              doc/Doxyfile doc/source \
              dev/testreport.py \
-             dev/gammalib-activate.sh dev/gammalib-deactivate.sh \
+             dev/00-gammalib-activate.sh dev/01-gammalib-deactivate.sh \
              dev/conda.recipe/build.sh \
              dev/conda.recipe/conda_build_config.yaml \
              dev/conda.recipe/meta.yaml.in
