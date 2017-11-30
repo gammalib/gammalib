@@ -613,14 +613,7 @@ void GTestSuites::write(GXml& xml) const
     GXmlElement* testsuites = xml.append("testsuites");
 
     // Set attributes
-    testsuites->attribute("name", "GammaLib");
-    /*
-    testsuites->attribute("test",str(tests()));
-    testsuites->attribute("errors",str(errors()));
-    testsuites->attribute("failures",str(failures()));
-    testsuites->attribute("time","0"); // not used
-    testsuites->attribute("timestamp",str(timestamp()));
-    */
+    testsuites->attribute("name", m_name);
 
     // Loop over all test suites in the container
     for (int i = 0; i < m_testsuites.size(); ++i) {
