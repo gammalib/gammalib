@@ -30,6 +30,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2285 <https://cta-redmine.irap.omp.eu/issues/2285>`_] -
+  Add ``GSkyMap::array()`` method to Python interface
 * [`2238 <https://cta-redmine.irap.omp.eu/issues/2238>`_] -
   ``GCTAObservation`` and ``GCTAOnOffObservation`` handle ``statistic`` attribute in XML file
 * [`2231 <https://cta-redmine.irap.omp.eu/issues/2231>`_] -

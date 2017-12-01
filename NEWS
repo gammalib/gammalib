@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-2 November 2017
+1 December 2017
 
 
 1. Introduction
@@ -44,6 +44,7 @@ The following methods have been added:
 - GEbounds::operator==(GEbounds&, GEbounds&)
 - GEbounds::operator!=(GEbounds&, GEbounds&)
 - GSkyMap::smooth(std::string&, double&)
+- GSkyMap::array(int&) - only for Python interface
 - GNdarray::shape(std::vector<int>&)
 - GPha::operator+=(GPha&)
 - GPha::operator-=(GPha&)
@@ -165,6 +166,9 @@ None
 
 12. Sky module
 --------------
+Added the GSkyMap::array() method to the Python interface to returns the sky
+map pixels as a list of lists (#2285)
+
 Added a GSkyMap division operator that also works under Python 3.x (#2122)
 
 The GNdarray class is now used to store GSkyMap pixels. A GSkyMap::smooth()

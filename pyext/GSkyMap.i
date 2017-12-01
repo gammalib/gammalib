@@ -196,7 +196,8 @@ public:
 %extend GSkyMap {
     double __getitem__(int GSkyMapInx[]) {
         if (GSkyMapInx[1] < 0 || GSkyMapInx[1] >= self->npix()) {
-            throw GException::out_of_range("__getitem__(int)", "Sky map index",
+            throw GException::out_of_range("GSkyMap::__getitem__(int*)",
+                                           "Sky map index",
                                            GSkyMapInx[1], self->npix());
         }
         if (GSkyMapInx[0] == 1) {
@@ -207,7 +208,8 @@ public:
                 return (*self)(GSkyMapInx[1], GSkyMapInx[2]);
             }
             else {
-                throw GException::out_of_range("__getitem__(int)", "Sky map number",
+                throw GException::out_of_range("GSkyMap::__getitem__(int*)",
+                                               "Sky map number",
                                                GSkyMapInx[2], self->nmaps());
             }
         }
@@ -219,7 +221,8 @@ public:
     */
     void __setitem__(int GSkyMapInx[], double value) {
         if (GSkyMapInx[1] < 0 || GSkyMapInx[1] >= self->npix()) {
-            throw GException::out_of_range("__setitem__(int)", "Sky map index",
+            throw GException::out_of_range("GSkyMap::__setitem__(int*,double&)",
+                                           "Sky map index",
                                            GSkyMapInx[1], self->npix());
         }
         if (GSkyMapInx[0] == 1) {
@@ -230,7 +233,8 @@ public:
                 (*self)(GSkyMapInx[1], GSkyMapInx[2]) = value;
             }
             else {
-                throw GException::out_of_range("__setitem__(int)", "Sky map number",
+                throw GException::out_of_range("GSkyMap::__setitem__(int*,double&)",
+                                               "Sky map number",
                                                GSkyMapInx[2], self->nmaps());
             }
         }
@@ -284,5 +288,22 @@ public:
     GSkyMap __itruediv__(const double& factor) {
         self->operator/=(factor);
         return (*self);
+    }
+    // Add pixel access operator as Python array
+    PyObject* array(const int& imap = 0) {
+        if (imap < 0 || imap >= self->nmaps()) {
+            throw GException::out_of_range("GSkyMap::array(int&)", "Map index",
+                                           imap, self->nmaps());
+        }
+        PyObject* array  = PyList_New(self->ny());
+        int       offset = imap * self->nx() * self->ny();
+        for (int iy = 0; iy < self->ny(); ++iy, offset += self->nx()) {
+            PyObject* row = PyList_New(self->nx());
+            for (int ix = 0; ix < self->nx(); ++ix) {
+                PyList_SetItem(row, ix, PyFloat_FromDouble((self->pixels())[ix+offset]));
+            }
+            PyList_SetItem(array, iy, row);
+        }
+        return array;
     }
 };

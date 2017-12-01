@@ -116,6 +116,11 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(map.shape()[1], 3, "Check that sky map has 3 maps in second dimension")
         self.test_value(map.shape()[2], 2, "Check that sky map has 2 maps in third dimension")
 
+        # Test array method
+        array = map.array()
+        self.test_value(len(array),     8, 'Check number of lists in list returned by array() method')
+        self.test_value(len(array[0]), 10, 'Check number of elements in list returned by array() method')
+
         # Return
         return
 

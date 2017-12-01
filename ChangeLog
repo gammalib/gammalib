@@ -1,8 +1,9 @@
-2017-10-21
+2017-12-01
 
         * Version 1.5.0 released
         =========================
 
+        Add GSkyMap::array() method to Python interface (#2285)
         CTA observations handle "statistic" attribute in XML file (#2238)
         Use CSTAT and CHI2 instead of POISSON and GAUSSIAN for statistic (#2237)
         Changed GObservation::statistics() to statistic() (#2238)
