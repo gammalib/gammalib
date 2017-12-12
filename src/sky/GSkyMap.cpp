@@ -1940,6 +1940,58 @@ void GSkyMap::stack_maps(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Returns array with total number of counts for count maps
+ *
+ * @return Array of pixel counts sums.
+ *
+ * For a set of n count maps, the method returns a 1D array with n entries
+ * that correspond to the sum of the pixel counts in each map.
+ ***************************************************************************/
+GNdarray GSkyMap::total_counts(void) const
+{
+    // Initialise output array
+    GNdarray  collapsed_array = GNdarray(m_num_maps);
+
+    // Loop over maps and store sums in output array
+    for (int i = 0; i < m_num_maps; ++i) {
+      double sum = 0.0;
+      for (int k = 0; k < m_num_pixels; ++k) {
+                sum += (*this)(k,i);
+      }
+      collapsed_array(i) = sum;
+    }
+
+    // Return pixel
+    return collapsed_array;
+}
+
+/***********************************************************************//**
+ * @brief Returns array with total flux for sky maps
+ *
+ * @return Array of pixel flux sums.
+ *
+ * For a set of n sky maps, the method returns a 1D array with n entries
+ * that correspond to the sum of the pixel flux in each map.
+ ***************************************************************************/
+GNdarray GSkyMap::total_flux(void) const
+{
+    // Initialise output array
+    GNdarray  collapsed_array = GNdarray(m_num_maps);
+
+    // Loop over maps and store sums in output array
+    for (int i = 0; i < m_num_maps; ++i) {
+      double flux = 0.0;
+      for (int k = 0; k < m_num_pixels; ++k) {
+	        double solidangle = this->solidangle(k);
+                flux += (*this)(k,i) * solidangle;
+      }
+      collapsed_array(i) = flux;
+    }
+
+    // Return pixel
+    return collapsed_array;
+}
 
 /***********************************************************************//**
  * @brief Load skymap from FITS file.

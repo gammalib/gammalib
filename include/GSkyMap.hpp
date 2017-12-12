@@ -170,6 +170,8 @@ public:
     const double*           pixels(void) const;
     GSkyMap                 extract(const int& map, const int& nmaps = 1) const;
     void                    stack_maps(void);
+    GNdarray                total_counts(void) const;
+    GNdarray                total_flux(void) const;
     void                    load(const GFilename& filename);
     void                    save(const GFilename& filename,
                                  const bool&      clobber = false) const;
