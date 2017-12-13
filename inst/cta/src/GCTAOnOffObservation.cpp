@@ -1766,6 +1766,87 @@ GPha GCTAOnOffObservation::model_gamma(const GModels& models) const
   return gammas;
 }
 
+/***********************************************************************
+ * @brief Compute predicted background counts Pha for given model
+ *
+ * @param[in] models Model container.
+ * @return model background Pha.
+ *
+ * Returns spectrum of predicted number of background events in the Off
+ * regions. The computation method changed depending on the statistic used
+ * to match the spectrum used for likelihood fitting. 
+ * To be noted: for the WSTAT statistic the model background depends on
+ * on the model adopted for gamma rays, that therefore need to be passed
+ * to this function.
+ ***********************************************************************/
+GPha GCTAOnOffObservation::model_background(const GModels& models) const
+{
+   // Get number of model parameters in model container
+   int npars = models.npars();
+
+   // Create dummy gradient vectors to provide required argument to N_gamma
+   GVector dummy_grad(npars);
+
+   // Initialise output Pha
+   GEbounds ereco = m_arf.ebounds();
+   GPha bgds = GPha(ereco);
+
+   // Extract statistic for this observation
+   std::string statistic = gammalib::toupper(this->statistic());
+
+   // Loop over all energy bins
+   for (int i = 0; i < m_on_spec.size(); ++i) {
+     
+     // Initialise variable to store number of background counts
+     double nbgd = 0.0;
+
+     // Choose background evaluation method based on fit statistics
+     
+     // CSTAT
+     if ((statistic == "POISSON") || (statistic == "CSTAT")) {
+        nbgd = N_bgd(models, i, &dummy_grad);
+     }
+
+     // ... or Poisson statistic with measured background
+     else if (statistic == "WSTAT") {
+        // Get number of On and Off counts
+       double non  = m_on_spec[i];
+       double noff = m_off_spec[i];
+
+       // Get background scaling
+       double alpha = m_on_spec.backscal(i);
+
+       // Get number of gamma and background events (and corresponding
+       // spectral model gradients)
+       double ngam = N_gamma(models, i,  &dummy_grad);
+
+       // Initialise variables for likelihood computation
+       double nonpred = 0.0;
+       double dlogLdsky = 0.0;
+       double d2logLdsky2 = 0.0;
+
+       // Perform likelihood profiling and derive likelihood value
+       // The number of background counts is updated to the profile value
+       double logL = wstat_value(non,noff,alpha,ngam,
+				 nonpred,nbgd,dlogLdsky,d2logLdsky2);
+     }
+
+     // ... or unsupported
+     else {
+       std::string msg = "Invalid statistic \""+statistic+"\" encountered. "
+	 "Either specify \"POISSON\", \"CSTAT\" or "
+	 "\"WSTAT\".";
+       throw GException::invalid_value(G_LIKELIHOOD, msg);
+     }
+
+     // Fill background Pha
+     bgds.fill(ereco.emean(i),nbgd);
+   }
+
+  // Return model coun pha
+  return bgds;
+}
+
 
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for On/Off analysis in the
@@ -2323,6 +2404,7 @@ double  GCTAOnOffObservation::wstat_value(double non,
 
     // Case A: non = 0. In this case nbgd < 0 hence we set nbgd = 0
     if (non == 0.0) {
+      nbgd        = 0;
       nonpred     = ngam;
       logL        = ngam;
       dlogLdsky   = 1.0;
@@ -2331,7 +2413,7 @@ double  GCTAOnOffObservation::wstat_value(double non,
 
     // Case B: nbgd is positive
     else if (ngam < non * alpharat) {
-      double nbgd = non / alphap1 - ngam / alpha;
+      nbgd        = non / alphap1 - ngam / alpha;
       nonpred     = ngam + alpha * nbgd;
       logL        = -ngam / alpha - non * std::log(alpharat);
       dlogLdsky   = -1.0/alpha;
@@ -2340,6 +2422,7 @@ double  GCTAOnOffObservation::wstat_value(double non,
 
     // Case C: nbgd is zero or negative, hence set nbgd = 0
     else {
+      nbgd        = 0;
       nonpred     = ngam;
       logL        = ngam + non * (std::log(non) - std::log(ngam) - 1.0);
       dlogLdsky   = 1.0 - non / ngam;
@@ -2350,6 +2433,7 @@ double  GCTAOnOffObservation::wstat_value(double non,
 
   // Special case non = 0
   else if (non == 0.0) {
+    nbgd        = 0;
     nonpred     = ngam + alpharat * noff;
     logL        = ngam + noff * std::log(alphap1);
     dlogLdsky   = 1.0;
@@ -2363,7 +2447,7 @@ double  GCTAOnOffObservation::wstat_value(double non,
     double alphat2 = 2.0 * alpha;
     double C       = alpha * (non + noff) - alphap1 * ngam;
     double D       = std::sqrt(C*C + 4.0 * alpha * alphap1 * noff * ngam);
-    double nbgd    = (C + D) / (alphat2 * alphap1);
+    nbgd           = (C + D) / (alphat2 * alphap1);
     nonpred        = ngam + alpha * nbgd;
     logL           = ngam + alphap1 * nbgd - non - noff -
       non * (std::log(nonpred) - std::log(non)) -

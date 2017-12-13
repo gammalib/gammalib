@@ -117,6 +117,7 @@ public:
     const GArf& arf(void) const;
     const GRmf& rmf(void) const;
     GPha model_gamma(const GModels& models) const;
+    GPha model_background(const GModels& models) const;
 };
 
 
