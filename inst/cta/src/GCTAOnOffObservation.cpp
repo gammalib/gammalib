@@ -2299,14 +2299,14 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
  * \f$n_{\rm off}=0\f$ (i.e. if the special cases are encountered).
  ***********************************************************************/
 
-double wstat_value(double non,
-		   double noff,
-		   double alpha,
-		   double ngam,
-		   double& nonpred,
-		   double& nbgd,
-		   double& dlogLdsky,
-		   double& d2logLdsky2)
+double  GCTAOnOffObservation::wstat_value(double non,
+					  double noff,
+					  double alpha,
+					  double ngam,
+					  double& nonpred,
+					  double& nbgd,
+					  double& dlogLdsky,
+					  double& d2logLdsky2) const
 {
   // Initialise log-likelihood value
   double logL;
@@ -2418,193 +2418,7 @@ double wstat_value(double non,
  * The estimated number of background counts \f$\mu_b\f$ is derived based
  * on the measurement in the Off region by analytical minimization of
  * the Poisson likelihood, i.e., it is treated as a nuisance parameter.
- *
- * In the general case, the log-likelihood function is computed using
- *
- * \f[
- *   L = \mu_s + (1+\alpha) \mu_b - n_{\rm on} - n_{\rm off} -
- *       n_{\rm on} \left( \ln(\mu_s + \alpha \mu_b) - \ln(n_{\rm on})
- *       \right) -
- *       n_{\rm off} \left( \ln(\mu_b) - \ln(n_{\rm off}) \right)
- * \f]
- *
- * where
- *
- * \f[
- *    \mu_b = \frac{C+D}{2\alpha(1+\alpha)}
- * \f]
- *
- * are the estimated number of background counts with
- *
- * \f[
- *    C = \alpha (n_{\rm on} + n_{\rm off}) - (1 + \alpha) \mu_s
- * \f]
- *
- * and
- *
- * \f[
- *    D = \sqrt{C^2 + 4 (1 + \alpha) \, \alpha \, n_{\rm off} \, \mu_s}
- * \f]
- *
- * \
- *
- * The first derivative of the log-likelihood function is given by
- *
- * \f[
- *    \frac{\delta L}{\delta \mu_s} =
- *    1 + (1 + \alpha) \frac{\delta \mu_b}{\delta \mu_s} -
- *    \frac{n_{\rm on}}{\mu_s + \alpha \mu_b} \left( 1 + \alpha
- *    \frac{\delta \mu_b}{\delta \mu_s} \right) -
- *    \frac{n_{\rm off}}{\mu_b} \frac{\delta \mu_b}{\delta \mu_s}
- * \f]
- *
- * with
- *
- * \f[
- *    \frac{\delta \mu_b}{\delta \mu_s} =
- *    \frac{n_{\rm off} - C}{D} - \frac{1}{2 \alpha}
- * \f]
- *
- * The second derivative of the log-likelihood function is given by
- *
- * \f[
- *    \frac{\delta^2 L}{\delta \mu_s^2} =
- *    \frac{n_{\rm on}}{(\mu_s + \alpha \mu_b)^2} \left( 1 + \alpha
- *      \frac{\delta \mu_b}{\delta \mu_s} \right) +
- *    \frac{\delta^2 \mu_b}{\delta \mu_s^2} \left( (1 + \alpha) -
- *      \frac{\alpha n_{\rm on}}{\mu_s + \alpha \mu_b} -
- *      \frac{n_{\rm off}}{\mu_b} \right) +
- *    \frac{\delta \mu_b}{\delta \mu_s} \left(
- *      \frac{\alpha n_{\rm on}}{(\mu_s + \alpha \mu_b)^2} \left(
- *        1 + \alpha \frac{\delta \mu_b}{\delta \mu_s} \right) +
- *      \frac{n_{\rm off}}{\mu_b^2} \frac{\delta \mu_b}{\delta \mu_s}
- *      \right)
- * \f]
- *
- * with
- *
- * \f[
- *    \frac{\delta^2 \mu_b}{\delta \mu_s^2} =
- *    \frac{-1}{2 \alpha} \left(
- *    \frac{1}{D} \frac{\delta C}{\delta \mu_s} +
- *    \frac{2 \alpha \, n_{\rm off} - C}{D^2} \frac{\delta D}{\delta \mu_s}
- *    \right)
- * \f]
- *
- * where
- *
- * \f[
- *    \frac{\delta C}{\delta \mu_s} = -(1 + \alpha)
- * \f]
- *
- * and
- *
- * \f[
- *    \frac{\delta D}{\delta \mu_s} =
- *    \frac{4 (1 + \alpha) \, \alpha \, n_{\rm off} - 2 \, C \, (1 + \alpha)}
- *         {2D}
- * \f]
- *
- * In the special case \f$n_{\rm on}=n_{\rm off}=0\f$ the formal
- * background estimate becomes negative, hence we set \f$\mu_b=0\f$ and
- * the log-likelihood function becomes
- *
- * \f[
- *    L = \mu_s
- * \f]
- *
- * the first derivative
- *
- * \f[
- *    \frac{\delta L}{\delta \mu_s} = 1
- * \f]
- *
- * and the second derivative
- *
- * \f[
- *    \frac{\delta^2 L}{\delta \mu_s^2} = 0
- * \f]
- *
- * In the special case \f$n_{\rm on}=0\f$ and \f$n_{\rm off}>0\f$
- * the log-likelihood function becomes
- *
- * \f[
- *    L = \mu_s + n_{\rm off} \ln(1 + \alpha)
- * \f]
- *
- * the background estimate
- *
- * \f[
- *    \mu_b = \frac{n_{\rm off}}{1+\alpha}
- * \f]
- *
- * the first derivative
- *
- * \f[
- *    \frac{\delta L}{\delta \mu_s} = 1
- * \f]
- *
- * and the second derivative
- *
- * \f[
- *    \frac{\delta^2 L}{\delta \mu_s^2} = 0
- * \f]
- *
- * In the special case \f$n_{\rm on}>0\f$ and \f$n_{\rm off}=0\f$
- * the background estimate becomes
- *
- * \f[
- *    \mu_b = \frac{n_{\rm on}}{1+\alpha} - \frac{\mu_s}{\alpha}
- * \f]
- *
- * which is positive for
- *
- * \f[
- *    \mu_s < n_{\rm on} \frac{\alpha}{1+\alpha}
- * \f]
- *
- * For positive \f$\mu_b\f$ the log-likelihood function is given by
- *
- * \f[
- *    L = -\frac{\mu_s}{\alpha}
- *        - n_{\rm on} \ln \left(\frac{\alpha}{1 + \alpha} \right)
- * \f]
- *
- * the first derivative
- *
- * \f[
- *    \frac{\delta L}{\delta \mu_s} = -\frac{1}{\alpha}
- * \f]
- *
- * and the second derivative
- *
- * \f[
- *    \frac{\delta^2 L}{\delta \mu_s^2} = 0
- * \f]
- *
- * For negative \f$\mu_b\f$ we set \f$\mu_b=0\f$ and the log-likelihood
- * function becomes
- *
- * \f[
- *    L = \mu_s - n_{\rm on} -
- *        n_{\rm on} \left( \ln(\mu_s) - \ln(n_{\rm on}) \right)
- * \f]
- *
- * the first derivative
- *
- * \f[
- *    \frac{\delta L}{\delta \mu_s} = 1 - \frac{n_{\rm on}}{\mu_s}
- * \f]
- *
- * and the second derivative
- *
- * \f[
- *    \frac{\delta^2 L}{\delta \mu_s^2} = \frac{1}{\mu_s^2}
- * \f]
- *
- * Note that the fit results may be biased and the statistical errors
- * overestimated if for some bins \f$n_{\rm on}=0\f$ and/or
- * \f$n_{\rm off}=0\f$ (i.e. if the special cases are encountered).
+ * See the wstat_value function for the derivation.
  ***********************************************************************/
 double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
                                               GVector*       gradient,
@@ -2665,84 +2479,18 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
             // spectral model gradients)
             double ngam = N_gamma(models, i, &sky_grad);
 
-            // Precompute some values
-            double alphap1  = alpha + 1.0;
-            double alpharat = alpha / alphap1;
+	    // Initialise variables for likelihood computation
+	    double nonpred = 0.0;
+	    double nbgd = 0.0;
+	    double dlogLdsky = 0.0;
+	    double d2logLdsky2 = 0.0;
 
-            // Calculate number of background events, profile likelihood value
-            // and likelihood derivatives
-            double nonpred;
-            double dlogLdsky;
-            double d2logLdsky2;
+	    // Perform likelihood profiling and derive likelihood value
+	    double logL = wstat_value(non,noff,alpha,ngam,
+				      nonpred,nbgd,dlogLdsky,d2logLdsky2);
 
-            // Special case noff = 0
-            if (noff == 0.0) {
-
-                // Case A: non = 0. In this case nbgd < 0 hence we set nbgd = 0
-                if (non == 0.0) {
-                    nonpred     = ngam;
-                    value      += ngam;
-                    dlogLdsky   = 1.0;
-                    d2logLdsky2 = 0.0;
-                }
-
-                // Case B: nbgd is positive
-                else if (ngam < non * alpharat) {
-                    double nbgd = non / alphap1 - ngam / alpha;
-                    nonpred     = ngam + alpha * nbgd;
-                    value      += -ngam / alpha - non * std::log(alpharat);
-                    dlogLdsky   = -1.0/alpha;
-                    d2logLdsky2 = 0.0;
-                }
-
-                // Case C: nbgd is zero or negative, hence set nbgd = 0
-                else {
-                    nonpred     = ngam;
-                    value      += ngam + non * (std::log(non) - std::log(ngam) - 1.0);
-                    dlogLdsky   = 1.0 - non / ngam;
-                    d2logLdsky2 = non / (ngam * ngam);
-               }
-
-            } // endif: noff = 0
-
-            // Special case non = 0
-            else if (non == 0.0) {
-                nonpred     = ngam + alpharat * noff;
-                value      += ngam + noff * std::log(alphap1);
-                dlogLdsky   = 1.0;
-                d2logLdsky2 = 0.0;
-            } // endif: non = 0
-
-            // General case
-            else {
-
-                // Compute log-likelihood value
-                double alphat2 = 2.0 * alpha;
-                double C       = alpha * (non + noff) - alphap1 * ngam;
-                double D       = std::sqrt(C*C + 4.0 * alpha * alphap1 * noff * ngam);
-                double nbgd    = (C + D) / (alphat2 * alphap1);
-                nonpred        = ngam + alpha * nbgd;
-                value         += ngam + alphap1 * nbgd - non - noff -
-                                 non * (std::log(nonpred) - std::log(non)) -
-                                 noff * (std::log(nbgd) - std::log(noff));
-
-                // Compute derivatives
-                double f0     = alphat2 * noff - C;
-                double dCds   = -alphap1;
-                double dDds   = (C * dCds + 2.0 * alphap1 * alpha * noff) / D;
-                double dbds   = (f0 / D - 1.0) / alphat2;
-                double d2bds2 = (-dCds / D - f0 / (D*D) * dDds) / alphat2;
-                double f1     = alphap1 - alpha*non/nonpred - noff/nbgd;
-                double f2     = nonpred * nonpred;
-                double dpds   = 1.0 + alpha * dbds;
-                double f3     = non / f2 * dpds;
-                dlogLdsky     = 1.0 - non / nonpred + dbds * f1;
-                d2logLdsky2   = f3 + d2bds2 * f1 +
-                                dbds * (alpha * f3 + noff / (nbgd*nbgd) * dbds);
-
-            } // endelse: general case
-
-            // Update Npred
+            // Update global log-likelihood and Npred
+	    value += logL;
             *npred += nonpred;
 
             // Update statistics

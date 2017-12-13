@@ -146,7 +146,7 @@ protected:
 		       double& nonpred,
 		       double& nbgd,
 		       double& dlogLdsky,
-		       double& d2logLdsky2);
+		       double& d2logLdsky2) const;
     virtual double likelihood_cstat(const GModels& models,
                                     GVector*       gradient,
                                     GMatrixSparse* curvature,
