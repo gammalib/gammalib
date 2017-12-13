@@ -112,6 +112,7 @@ public:
     const GPha& off_spec(void) const;
     const GArf& arf(void) const;
     const GRmf& rmf(void) const;
+    GPha        model_gamma(const GModels& models) const;
 
 protected:
     // Protected methods
@@ -138,6 +139,14 @@ protected:
     double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
 
     // Likelihood methods
+    double wstat_value(double non,
+		       double noff,
+		       double alpha,
+		       double ngam,
+		       double& nonpred,
+		       double& nbgd,
+		       double& dlogLdsky,
+		       double& d2logLdsky2);
     virtual double likelihood_cstat(const GModels& models,
                                     GVector*       gradient,
                                     GMatrixSparse* curvature,

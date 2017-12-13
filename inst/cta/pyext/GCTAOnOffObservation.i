@@ -116,6 +116,7 @@ public:
     const GPha& off_spec(void) const;
     const GArf& arf(void) const;
     const GRmf& rmf(void) const;
+    GPha model_gamma(const GModels& models) const;
 };
 
 
