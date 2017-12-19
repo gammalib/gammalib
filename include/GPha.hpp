@@ -32,6 +32,7 @@
 #include "GBase.hpp"
 #include "GEbounds.hpp"
 #include "GFilename.hpp"
+#include "GNdarray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GEnergy;
@@ -95,6 +96,7 @@ public:
     const double&    at(const int& index) const;
     const GEbounds&  ebounds(void) const;
     double           counts(void) const;
+    GNdarray         counts_spectrum(void) const;
     void             areascal(const int& index, const double& areascal);
     const double&    areascal(const int& index) const;
     void             backscal(const int& index, const double& backscal);

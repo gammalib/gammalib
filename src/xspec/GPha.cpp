@@ -37,6 +37,7 @@
 #include "GFitsBinTable.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableFloatCol.hpp"
+#include "GNdarray.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR_PLUS                             "GPha::operator+=(GPha&)"
@@ -574,6 +575,26 @@ double GPha::counts(void) const
     // Compute content
     for (int i = 0; i < m_counts.size(); ++i) {
         counts += m_counts[i];
+    }
+
+    // Return counts
+    return counts;
+}
+
+/***********************************************************************//**
+ * @brief Number of counts in spectrum as GNdArray
+ *
+ * Returns the number of counts in the spectrum as a GNdArray.
+ ***************************************************************************/
+GNdarray GPha::counts_spectrum(void) const
+{
+    // Initialise array
+    int size = m_counts.size();
+    GNdarray counts = GNdarray(size);
+    
+    // Compute content
+    for (int i = 0; i < size; ++i) {
+      counts(i) = m_counts[i];
     }
 
     // Return counts

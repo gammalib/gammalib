@@ -57,6 +57,7 @@ public:
     double&          at(const int& index);
     const GEbounds&  ebounds(void) const;
     double           counts(void) const;
+    GNdarray         counts_spectrum(void) const;
     void             areascal(const int& index, const double& areascal);
     const double&    areascal(const int& index) const;
     void             backscal(const int& index, const double& backscal);
