@@ -209,6 +209,9 @@ public:
     GNdarray log10() {
         return log10(*self);
     }
+    GNdarray sign() {
+        return log10(*self);
+    }
     GNdarray sin() {
         return sin(*self);
     }

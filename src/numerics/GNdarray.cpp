@@ -374,10 +374,9 @@ GNdarray& GNdarray::operator/=(const GNdarray& array)
       if (array.m_data[i] != 0.0){
         m_data[i] /= array.m_data[i];
       }
-      // Otherwise throw exception
+      // Otherwise set ratio to 0
       else {
-        std::string msg = "Invalid value, division by 0";
-        throw GException::invalid_value(G_OP_DIV, msg);
+        m_data[i] = 0.0;
       }
     }
 
@@ -1216,6 +1215,44 @@ GNdarray log(const GNdarray& array)
     // Evaluate each array element
     for (int i = 0; i < array.m_data.size(); ++i) {
         result.m_data[i] = std::log(array.m_data[i]);
+    }
+
+    // Return array
+    return result;
+}
+
+/***********************************************************************//**
+ * @brief Computes sign of array elements
+ *
+ * @param[in] array Array.
+ * @return Array containing the sign of every element.
+ ***************************************************************************/
+GNdarray sign(const GNdarray& array)
+{
+    // Initialise result array
+    GNdarray result = array;
+
+    // Evaluate each array element
+    for (int i = 0; i < array.m_data.size(); ++i) {
+      
+      // Get array content
+      double content = array.m_data[i];
+
+      // Initialise sign
+      double sign;
+      
+       // Handle the 3 cases
+            if (content < 0.0) {
+                sign = -1.0;
+            }
+            else if (content > 0.0) {
+                sign = +1.0;
+            }
+            else {
+                sign = 0.0;
+            }
+
+        result.m_data[i] = sign;
     }
 
     // Return array

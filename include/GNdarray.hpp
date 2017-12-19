@@ -59,6 +59,7 @@ class GNdarray : public GBase {
     friend GNdarray abs(const GNdarray& array);
     friend GNdarray log(const GNdarray& array);
     friend GNdarray log10(const GNdarray& array);
+    friend GNdarray sign(const GNdarray& array);
     friend GNdarray sin(const GNdarray& array);
     friend GNdarray sinh(const GNdarray& array);
     friend GNdarray sqrt(const GNdarray& array);
