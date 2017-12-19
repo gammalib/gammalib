@@ -92,6 +92,7 @@ class GSkyMap : public GBase {
 	friend GSkyMap log10(const GSkyMap& map);
 	friend GSkyMap abs(const GSkyMap& map);
 	friend GSkyMap sign(const GSkyMap& map);
+        friend GSkyMap clip(const GSkyMap& map,const double& thresh);
 
 public:
     // Constructors and destructors

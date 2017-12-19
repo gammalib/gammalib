@@ -258,6 +258,9 @@ public:
     GSkyMap log10() {
         return log10(*self);
     }
+    GSkyMap clip(const double& thresh) {
+      return clip(*self,thresh);
+    }
     GSkyMap abs() {
         return abs(*self);
     }

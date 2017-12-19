@@ -3296,6 +3296,44 @@ GSkyMap sqrt(const GSkyMap& map)
     return result;
 }
 
+/***********************************************************************//**
+ * @brief Clips map at given value
+ *
+ * @param[in] map Sky map.
+ * @param[in] thresh Threshold value.
+ * @return Sky map containing the value in the original map if >= thresh,
+ * otherwise thresh 
+ ***************************************************************************/
+GSkyMap clip(const GSkyMap& map,const double& thresh)
+{
+    // Initialise result vector
+    GSkyMap result(map);
+
+    // Loop over all maps
+    for (int i = 0; i < map.nmaps(); ++i) {
+
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
+
+            // Get the content from the bin
+            double content = map(j,i);
+
+            // Ic content is below threshold, set to thresh
+            if (content < thresh) {
+                result(j,i) = thresh;
+            }
+
+	    else {
+	        result(j,i) = content;
+	    }
+
+        } // endfor: looped over all bins
+
+    } // endfor: looped over all maps
+
+    // Return sky map
+    return result;
+}
 
 /***********************************************************************//**
  * @brief Computes the natural logarithm of sky map elements
