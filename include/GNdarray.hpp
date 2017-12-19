@@ -92,6 +92,8 @@ public:
     bool      operator!=(const GNdarray& array) const;
     GNdarray& operator+=(const GNdarray& array);
     GNdarray& operator-=(const GNdarray& array);
+    GNdarray& operator*=(const GNdarray& array);
+    GNdarray& operator/=(const GNdarray& array);
     GNdarray& operator+=(const double& value);
     GNdarray& operator-=(const double& value);
     GNdarray& operator*=(const double& value);

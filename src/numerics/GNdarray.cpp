@@ -36,6 +36,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ADD                            "GNdarray::operator+=(GNdarray&)"
 #define G_OP_SUB                            "GNdarray::operator-=(GNdarray&)"
+#define G_OP_MUL                            "GNdarray::operator*=(GNdarray&)"
+#define G_OP_DIV                            "GNdarray::operator/=(GNdarray&)"
 #define G_SHAPE                          "GNdarray::shape(std::vector<int>&)"
 #define G_AT1                                            "GNdarray::at(int&)"
 #define G_AT2                                      "GNdarray::at(int&, int&)"
@@ -330,6 +332,59 @@ GNdarray& GNdarray::operator+=(const GNdarray& array)
     // Return array
     return *this;
 }
+
+/***********************************************************************//**
+ * @brief Unary multiplication operator
+ *
+ * @param[in] array Array.
+ * @return Array.
+ *
+ * Multiply an array by the current array.
+ ***************************************************************************/
+GNdarray& GNdarray::operator*=(const GNdarray& array)
+{
+    // Throw an exception if the arrays have not the same shape
+    require_same_shape(G_OP_MUL, array);
+
+    // Multiply elements
+    for (int i = 0; i < m_data.size(); ++i) {
+        m_data[i] *= array.m_data[i];
+    }
+
+    // Return array
+    return *this;
+}
+
+/***********************************************************************//**
+ * @brief Unary division operator
+ *
+ * @param[in] array Array.
+ * @return Array.
+ *
+ * Divide current array by array.
+ ***************************************************************************/
+GNdarray& GNdarray::operator/=(const GNdarray& array)
+{
+    // Throw an exception if the arrays have not the same shape
+    require_same_shape(G_OP_DIV, array);
+
+    // Divide elements
+    for (int i = 0; i < m_data.size(); ++i) {
+      // Only proceed if second array is non zero
+      if (array.m_data[i] != 0.0){
+        m_data[i] /= array.m_data[i];
+      }
+      // Otherwise throw exception
+      else {
+        std::string msg = "Invalid value, division by 0";
+        throw GException::invalid_value(G_OP_DIV, msg);
+      }
+    }
+
+    // Return array
+    return *this;
+}
+
 
 
 /***********************************************************************//**
