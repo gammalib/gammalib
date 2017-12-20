@@ -210,7 +210,7 @@ public:
         return log10(*self);
     }
     GNdarray sign() {
-        return log10(*self);
+        return sign(*self);
     }
     GNdarray sin() {
         return sin(*self);
