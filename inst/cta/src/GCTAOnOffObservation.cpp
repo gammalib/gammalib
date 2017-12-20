@@ -1753,7 +1753,7 @@ GPha GCTAOnOffObservation::model_gamma(const GModels& models) const
    GVector dummy_grad(npars);
 
    // Initialise output Pha
-   GEbounds ereco = m_arf.ebounds();
+   GEbounds ereco = m_on_spec.ebounds();
    GPha gammas = GPha(ereco);
 
    // Loop over all energy bins
@@ -1788,7 +1788,7 @@ GPha GCTAOnOffObservation::model_background(const GModels& models) const
    GVector dummy_grad(npars);
 
    // Initialise output Pha
-   GEbounds ereco = m_arf.ebounds();
+   GEbounds ereco = m_on_spec.ebounds();
    GPha bgds = GPha(ereco);
 
    // Extract statistic for this observation
