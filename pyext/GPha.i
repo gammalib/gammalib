@@ -62,6 +62,7 @@ public:
     const double&    areascal(const int& index) const;
     void             backscal(const int& index, const double& backscal);
     const double&    backscal(const int& index) const;
+    GNdarray         backscal_spectrum(void) const;
     const double&    underflow(void) const;
     const double&    overflow(void) const;
     const double&    outflow(void) const;

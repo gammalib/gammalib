@@ -601,6 +601,25 @@ GNdarray GPha::counts_spectrum(void) const
     return counts;
 }
 
+/***********************************************************************//**
+ * @brief Number of counts in spectrum as GNdArray
+ *
+ * Returns the number of counts in the spectrum as a GNdArray.
+ ***************************************************************************/
+GNdarray GPha::backscal_spectrum(void) const
+{
+    // Initialise array
+    int size = m_backscal.size();
+    GNdarray alpha = GNdarray(size);
+    
+    // Compute content
+    for (int i = 0; i < size; ++i) {
+      alpha(i) = m_backscal[i];
+    }
+
+    // Return counts
+    return alpha;
+}
 
 /***********************************************************************//**
  * @brief Fill spectrum with a value.
