@@ -274,7 +274,8 @@ public:
     // Python 3.x operator/=
     GSkyMap __truediv__(const GSkyMap& map) {
         return ((*self) / map);
-    }    // Python 2.x operator/=
+    }
+    // Python 2.x operator/=
     GSkyMap __idiv__(const GSkyMap& map) {
         self->operator/=(map);
         return (*self);
