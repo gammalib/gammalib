@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventCube.cpp  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,8 +30,7 @@
 #endif
 #include "GTools.hpp"
 #include "GFits.hpp"
-#include "GCTAException.hpp"
-#include "GCTAEventCube.hpp"
+#include "GCTALib.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GCTAEventCube::naxis(int)"
@@ -709,6 +708,9 @@ void GCTAEventCube::init_members(void)
 
     // Prepare event bin
     init_bin();
+
+    // Set CTA time reference for GTIs
+    m_gti.reference(GTimeReference(G_CTA_MJDREF, "s", "TT", "LOCAL"));
 
     // Return
     return;

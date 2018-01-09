@@ -3,6 +3,7 @@
         * Version 1.5.0 released
         =========================
 
+        Set reference time to CTA reference time in GCTAEventcube, GCTAEventList and GCTACubeExposure (#2295)
         Add GPha::counts_spectrum() and GPha::backscal_spectrum() methods (#2290)
         Add GNdarray sign(), operator*= and operator/= (#2290)
         Add GSkyMap::counts() and GSkyMap::flux() methods and clip() friend operator (#2290)

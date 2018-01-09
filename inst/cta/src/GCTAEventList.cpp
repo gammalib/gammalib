@@ -43,7 +43,7 @@
 #include "GFitsTableULongCol.hpp"
 #include "GTime.hpp"
 #include "GTimeReference.hpp"
-#include "GCTAEventList.hpp"
+#include "GCTALib.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -973,6 +973,9 @@ void GCTAEventList::init_members(void)
     // Initialise cache
     m_irf_names.clear();
     m_irf_values.clear();
+
+    // Set CTA time reference for GTIs
+    m_gti.reference(GTimeReference(G_CTA_MJDREF, "s", "TT", "LOCAL"));
 
     // Return
     return;

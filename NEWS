@@ -243,6 +243,9 @@ also position fitting is now possible for Fermi-LAT (#604, #2183).
 
 20. CTA interface
 -----------------
+Set the Good Time Interval time reference to the CTA time reference in
+GCTAEventList, GCTAEventCube and GCTACubeExposure (#2295).
+
 GCTAObservation and GCTAOnOffObservation handle statistic attribute in XML
 file (#2238).
 

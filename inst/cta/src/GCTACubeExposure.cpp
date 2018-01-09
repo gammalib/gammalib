@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTACubeExposure.cpp - CTA cube analysis exposure class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2017 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2018 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,11 +33,7 @@
 #include "GLog.hpp"
 #include "GObservations.hpp"
 #include "GSkyRegionCircle.hpp"
-#include "GCTACubeExposure.hpp"
-#include "GCTAObservation.hpp"
-#include "GCTAResponseIrf.hpp"
-#include "GCTAEventCube.hpp"
-#include "GCTAEventList.hpp"
+#include "GCTALib.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FILL_CUBE    "GCTACubeExposure::fill_cube(GCTAObservation&, GLog*)"
@@ -582,6 +578,9 @@ void GCTACubeExposure::init_members(void)
     m_inx_right = 0;
     m_wgt_left  = 0.0;
     m_wgt_right = 0.0;
+
+    // Set CTA time reference for GTIs
+    m_gti.reference(GTimeReference(G_CTA_MJDREF, "s", "TT", "LOCAL"));
 
     // Return
     return;

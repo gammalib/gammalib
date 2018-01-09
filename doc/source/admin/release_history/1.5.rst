@@ -30,6 +30,9 @@ Bug fixes
 Improvements
 ------------
 
+* [`2295 <https://cta-redmine.irap.omp.eu/issues/2295>`_] -
+  Set reference time to CTA reference time in ``GCTAEventcube``, ``GCTAEventList``
+  and ``GCTACubeExposure``
 * [`2290 <https://cta-redmine.irap.omp.eu/issues/2290>`_] -
   Add ``GSkyMap::counts()`` and ``GSkyMap::flux()`` methods and ``clip()``
   friend operator, ``GNdarray`` ``sign()``, ``operator*=`` and ``operator/=``,
