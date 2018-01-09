@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSkyMap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -164,8 +164,10 @@ public:
     int                     pix2inx(const GSkyPixel& pixel) const;
     int                     dir2inx(const GSkyDir& dir) const;
     GSkyPixel               dir2pix(const GSkyDir& dir) const;
+    GNdarray                counts(void);
     double                  flux(const int& index, const int& map = 0) const;
     double                  flux(const GSkyPixel& pixel, const int& map = 0) const;
+    GNdarray                flux(void);
     double                  solidangle(const int& index) const;
     double                  solidangle(const GSkyPixel& pixel) const;
     bool                    contains(const GSkyDir& dir) const;
@@ -177,8 +179,6 @@ public:
     const double*           pixels(void) const;
     GSkyMap                 extract(const int& map, const int& nmaps = 1) const;
     void                    stack_maps(void);
-    GNdarray                total_counts(void);
-    GNdarray                total_flux(void);
     void                    load(const GFilename& filename);
     void                    save(const GFilename& filename,
                                  const bool&      clobber = false) const;
@@ -259,7 +259,7 @@ public:
         return log10(*self);
     }
     GSkyMap clip(const double& thresh) {
-      return clip(*self,thresh);
+        return clip(*self,thresh);
     }
     GSkyMap abs() {
         return abs(*self);

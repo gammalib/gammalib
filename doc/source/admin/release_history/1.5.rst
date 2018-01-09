@@ -30,6 +30,10 @@ Bug fixes
 Improvements
 ------------
 
+* [`2290 <https://cta-redmine.irap.omp.eu/issues/2290>`_] -
+  Add ``GSkyMap::counts()`` and ``GSkyMap::flux()`` methods and ``clip()``
+  friend operator, ``GNdarray`` ``sign()``, ``operator*=`` and ``operator/=``,
+  and ``GPha::counts_spectrum()`` and ``GPha::backscal_spectrum()`` methods
 * [`2285 <https://cta-redmine.irap.omp.eu/issues/2285>`_] -
   Add ``GSkyMap::array()`` method to Python interface
 * [`2238 <https://cta-redmine.irap.omp.eu/issues/2238>`_] -

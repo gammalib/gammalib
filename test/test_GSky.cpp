@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1056,17 +1056,17 @@ void TestGSky::test_GSkyMap(void)
 	test_value(map_stacked.nmaps(), 1, "Test stack_maps() method");
 
     // Test total counts computation
-    GNdarray counts_spectrum = map_src.total_counts();
+    GNdarray counts_spectrum = map_src.counts();
     double total_counts = 0.0;
     for (int i = 0; i < counts_spectrum.size(); ++i) {
         total_counts += counts_spectrum(i);
     }
-	test_value(total_counts, total_src, 1.0e-3, "Test total_counts() method");
-	test_value(counts_spectrum.size(), map_src.nmaps(), "Test total_counts() method");
+	test_value(total_counts, total_src, 1.0e-3, "Test counts() method");
+	test_value(counts_spectrum.size(), map_src.nmaps(), "Test counts() method");
 
     // Test total flux computation
-    GNdarray flux_spectrum = map_src.total_flux();
-	test_value(flux_spectrum.size(), map_src.nmaps(), "Test total_flux() method"); 
+    GNdarray flux_spectrum = map_src.flux();
+	test_value(flux_spectrum.size(), map_src.nmaps(), "Test flux() method");
 
     // Test map number changing
     GSkyMap map_more = map_src;

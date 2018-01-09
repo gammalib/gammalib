@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-1 December 2017
+9 January 2018
 
 
 1. Introduction
@@ -45,6 +45,9 @@ The following methods have been added:
 - GEbounds::operator!=(GEbounds&, GEbounds&)
 - GSkyMap::smooth(std::string&, double&)
 - GSkyMap::array(int&) - only for Python interface
+- GSkyMap::counts()
+- GSkyMap::flux()
+- clip(GSkyMap&, double&)
 - GNdarray::shape(std::vector<int>&)
 - GPha::operator+=(GPha&)
 - GPha::operator-=(GPha&)
@@ -54,6 +57,8 @@ The following methods have been added:
 - GPha::areascal(int&)
 - GPha::backscal(int&, double&)
 - GPha::backscal(int&)
+- GPha::counts_spectrum()
+- GPha::backscal_spectrum()
 - operator+(GPha&, GPha&)
 - operator-(GPha&, GPha&)
 - operator*(GPha&, double&)
@@ -135,7 +140,8 @@ conversion of any spectral model into a spectral node model (#2178).
 
 9. Numerics module
 ------------------
-None
+Added GNdarray sign() friend operator and operator*= and operator/=
+(#2290).
 
 
 10. Observation module
@@ -166,6 +172,9 @@ None
 
 12. Sky module
 --------------
+Added GSkyMap::counts() and GSkyMap::flux() methods and clip() frield
+operators that allows clipping of sky map values (#2290)
+
 Added the GSkyMap::array() method to the Python interface to returns the sky
 map pixels as a list of lists (#2285)
 
@@ -196,6 +205,9 @@ None
 
 16. Xspec module
 ----------------
+Added GPha::counts_spectrum() and GPha::backscal_spectrum() methods to access
+the GPha content (#2290).
+
 Added arithmetic operators for GPha class to add, subtract, scale and divide
 spectra, and methods to set and retrieve the area and background scaling
 factors.

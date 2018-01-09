@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.hpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2018 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -140,14 +140,6 @@ protected:
     double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
 
     // Likelihood methods
-    double wstat_value(double non,
-		       double noff,
-		       double alpha,
-		       double ngam,
-		       double& nonpred,
-		       double& nbgd,
-		       double& dlogLdsky,
-		       double& d2logLdsky2) const;
     virtual double likelihood_cstat(const GModels& models,
                                     GVector*       gradient,
                                     GMatrixSparse* curvature,
@@ -156,6 +148,14 @@ protected:
                                     GVector*       gradient,
                                     GMatrixSparse* curvature,
                                     double*        npred) const;
+    virtual double wstat_value(const double& non,
+                               const double& noff,
+                               const double& alpha,
+                               const double& ngam,
+                               double&       nonpred,
+                               double&       nbgd,
+                               double&       dlogLdsky,
+                               double&       d2logLdsky2) const;
 
     // Energy dispersion integration kernel
     class edisp_kern : public GFunction {

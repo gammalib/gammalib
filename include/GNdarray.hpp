@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNdarray.hpp - N-dimensional array class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *

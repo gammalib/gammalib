@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1373,6 +1373,40 @@ GSkyPixel GSkyMap::dir2pix(const GSkyDir& dir) const
 
 
 /***********************************************************************//**
+ * @brief Returns array with total number of counts for count maps
+ *
+ * @return Array of pixel counts sums.
+ *
+ * For a set of n count maps, the method returns a 1D array with n entries
+ * that correspond to the sum of the pixel counts in each map.
+ ***************************************************************************/
+GNdarray GSkyMap::counts(void) const
+{
+    // Initialise output array
+    GNdarray sum_array = GNdarray(m_num_maps);
+
+    // Loop over maps and store sums in output array
+    for (int i = 0; i < m_num_maps; ++i) {
+
+        // Initialise sum for this map
+        double sum = 0.0;
+
+        // Compute map sum
+        for (int k = 0; k < m_num_pixels; ++k) {
+            sum += (*this)(k,i);
+        }
+
+        // Store map sum
+        sum_array(i) = sum;
+
+    } // endfor: looped over all maps
+
+    // Return sum array
+    return sum_array;
+}
+
+
+/***********************************************************************//**
  * @brief Returns flux in pixel
  *
  * @param[in] index Pixel index [0,...,npix()-1].
@@ -1577,6 +1611,41 @@ double GSkyMap::flux(const GSkyPixel& pixel, const int& map) const
 
     // Return flux
     return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns array with total flux for sky maps
+ *
+ * @return Array of pixel flux sums.
+ *
+ * For a set of n sky maps, the method returns a 1D array with n entries
+ * that correspond to the sum of the pixel flux in each map.
+ ***************************************************************************/
+GNdarray GSkyMap::flux(void) const
+{
+    // Initialise output array
+    GNdarray  flux_array = GNdarray(m_num_maps);
+
+    // Loop over maps and store sums in output array
+    for (int i = 0; i < m_num_maps; ++i) {
+
+        // Initialise flux for this map
+        double flux = 0.0;
+
+        // Compute map flux
+        for (int k = 0; k < m_num_pixels; ++k) {
+                double solidangle = this->solidangle(k);
+                flux             += (*this)(k,i) * solidangle;
+        }
+
+        // Store map flux
+        flux_array(i) = flux;
+
+    } // endfor: looped over all maps
+
+    // Return flux array
+    return flux_array;
 }
 
 
@@ -1940,58 +2009,6 @@ void GSkyMap::stack_maps(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Returns array with total number of counts for count maps
- *
- * @return Array of pixel counts sums.
- *
- * For a set of n count maps, the method returns a 1D array with n entries
- * that correspond to the sum of the pixel counts in each map.
- ***************************************************************************/
-GNdarray GSkyMap::total_counts(void) const
-{
-    // Initialise output array
-    GNdarray  collapsed_array = GNdarray(m_num_maps);
-
-    // Loop over maps and store sums in output array
-    for (int i = 0; i < m_num_maps; ++i) {
-      double sum = 0.0;
-      for (int k = 0; k < m_num_pixels; ++k) {
-                sum += (*this)(k,i);
-      }
-      collapsed_array(i) = sum;
-    }
-
-    // Return pixel
-    return collapsed_array;
-}
-
-/***********************************************************************//**
- * @brief Returns array with total flux for sky maps
- *
- * @return Array of pixel flux sums.
- *
- * For a set of n sky maps, the method returns a 1D array with n entries
- * that correspond to the sum of the pixel flux in each map.
- ***************************************************************************/
-GNdarray GSkyMap::total_flux(void) const
-{
-    // Initialise output array
-    GNdarray  collapsed_array = GNdarray(m_num_maps);
-
-    // Loop over maps and store sums in output array
-    for (int i = 0; i < m_num_maps; ++i) {
-      double flux = 0.0;
-      for (int k = 0; k < m_num_pixels; ++k) {
-	        double solidangle = this->solidangle(k);
-                flux += (*this)(k,i) * solidangle;
-      }
-      collapsed_array(i) = flux;
-    }
-
-    // Return pixel
-    return collapsed_array;
-}
 
 /***********************************************************************//**
  * @brief Load skymap from FITS file.
@@ -3296,44 +3313,6 @@ GSkyMap sqrt(const GSkyMap& map)
     return result;
 }
 
-/***********************************************************************//**
- * @brief Clips map at given value
- *
- * @param[in] map Sky map.
- * @param[in] thresh Threshold value.
- * @return Sky map containing the value in the original map if >= thresh,
- * otherwise thresh 
- ***************************************************************************/
-GSkyMap clip(const GSkyMap& map,const double& thresh)
-{
-    // Initialise result vector
-    GSkyMap result(map);
-
-    // Loop over all maps
-    for (int i = 0; i < map.nmaps(); ++i) {
-
-        // Loop over all bins
-        for (int j = 0; j < map.npix(); ++j) {
-
-            // Get the content from the bin
-            double content = map(j,i);
-
-            // Ic content is below threshold, set to thresh
-            if (content < thresh) {
-                result(j,i) = thresh;
-            }
-
-	    else {
-	        result(j,i) = content;
-	    }
-
-        } // endfor: looped over all bins
-
-    } // endfor: looped over all maps
-
-    // Return sky map
-    return result;
-}
 
 /***********************************************************************//**
  * @brief Computes the natural logarithm of sky map elements
@@ -3485,6 +3464,47 @@ GSkyMap sign(const GSkyMap& map)
         } // endfor: looped over all bins
 
     } // endfor: looed over all maps
+
+    // Return sky map
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Clips map at given value
+ *
+ * @param[in] map Sky map.
+ * @param[in] thresh Threshold value.
+ * @return Sky map containing the value in the original map if >= thresh,
+ * otherwise thresh 
+ ***************************************************************************/
+GSkyMap clip(const GSkyMap& map, const double& thresh)
+{
+    // Initialise result vector
+    GSkyMap result(map);
+
+    // Loop over all maps
+    for (int i = 0; i < map.nmaps(); ++i) {
+
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
+
+            // Get the content from the bin
+            double content = map(j,i);
+
+            // If content is below threshold, set to thresh
+            if (content < thresh) {
+                result(j,i) = thresh;
+            }
+
+            // ... otherwise keep content
+            else {
+                result(j,i) = content;
+            }
+
+        } // endfor: looped over all bins
+
+    } // endfor: looped over all maps
 
     // Return sky map
     return result;

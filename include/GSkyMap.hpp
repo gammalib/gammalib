@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -92,7 +92,7 @@ class GSkyMap : public GBase {
 	friend GSkyMap log10(const GSkyMap& map);
 	friend GSkyMap abs(const GSkyMap& map);
 	friend GSkyMap sign(const GSkyMap& map);
-        friend GSkyMap clip(const GSkyMap& map,const double& thresh);
+    friend GSkyMap clip(const GSkyMap& map, const double& thresh);
 
 public:
     // Constructors and destructors
@@ -158,8 +158,10 @@ public:
     int                     pix2inx(const GSkyPixel& pixel) const;
     int                     dir2inx(const GSkyDir& dir) const;
     GSkyPixel               dir2pix(const GSkyDir& dir) const;
+    GNdarray                counts(void) const;
     double                  flux(const int& index, const int& map = 0) const;
     double                  flux(const GSkyPixel& pixel, const int& map = 0) const;
+    GNdarray                flux(void) const;
     double                  solidangle(const int& index) const;
     double                  solidangle(const GSkyPixel& pixel) const;
     bool                    contains(const GSkyDir& dir) const;
@@ -171,8 +173,6 @@ public:
     const double*           pixels(void) const;
     GSkyMap                 extract(const int& map, const int& nmaps = 1) const;
     void                    stack_maps(void);
-    GNdarray                total_counts(void) const;
-    GNdarray                total_flux(void) const;
     void                    load(const GFilename& filename);
     void                    save(const GFilename& filename,
                                  const bool&      clobber = false) const;

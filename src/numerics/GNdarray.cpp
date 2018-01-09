@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNdarray.cpp - N-dimensional array class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -333,6 +333,7 @@ GNdarray& GNdarray::operator+=(const GNdarray& array)
     return *this;
 }
 
+
 /***********************************************************************//**
  * @brief Unary multiplication operator
  *
@@ -355,6 +356,7 @@ GNdarray& GNdarray::operator*=(const GNdarray& array)
     return *this;
 }
 
+
 /***********************************************************************//**
  * @brief Unary division operator
  *
@@ -370,20 +372,22 @@ GNdarray& GNdarray::operator/=(const GNdarray& array)
 
     // Divide elements
     for (int i = 0; i < m_data.size(); ++i) {
-      // Only proceed if second array is non zero
-      if (array.m_data[i] != 0.0){
-        m_data[i] /= array.m_data[i];
-      }
-      // Otherwise set ratio to 0
-      else {
-        m_data[i] = 0.0;
-      }
-    }
+
+        // Only proceed if second array is non zero
+        if (array.m_data[i] != 0.0){
+            m_data[i] /= array.m_data[i];
+        }
+
+        // ... otherwise set ratio to 0
+        else {
+            m_data[i] = 0.0;
+        }
+
+    } // endfor: looped over array elements
 
     // Return array
     return *this;
 }
-
 
 
 /***********************************************************************//**
@@ -1221,6 +1225,7 @@ GNdarray log(const GNdarray& array)
     return result;
 }
 
+
 /***********************************************************************//**
  * @brief Computes sign of array elements
  *
@@ -1234,26 +1239,28 @@ GNdarray sign(const GNdarray& array)
 
     // Evaluate each array element
     for (int i = 0; i < array.m_data.size(); ++i) {
-      
-      // Get array content
-      double content = array.m_data[i];
 
-      // Initialise sign
-      double sign;
-      
-       // Handle the 3 cases
-            if (content < 0.0) {
-                sign = -1.0;
-            }
-            else if (content > 0.0) {
-                sign = +1.0;
-            }
-            else {
-                sign = 0.0;
-            }
+        // Get array content
+        double content = array.m_data[i];
 
+        // Initialise sign
+        double sign;
+      
+        // Handle the 3 cases
+        if (content < 0.0) {
+            sign = -1.0;
+        }
+        else if (content > 0.0) {
+            sign = +1.0;
+        }
+        else {
+            sign = 0.0;
+        }
+
+        // Store sign
         result.m_data[i] = sign;
-    }
+
+    } // endfor: looped over all array elements
 
     // Return array
     return result;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPha.cpp - XSPEC Pulse Height Analyzer class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -582,44 +582,50 @@ double GPha::counts(void) const
 }
 
 /***********************************************************************//**
- * @brief Number of counts in spectrum as GNdArray
+ * @brief Get number of counts in spectrum as GNdarray
  *
- * Returns the number of counts in the spectrum as a GNdArray.
+ * @return GNdarray of number of counts in spectrum.
+ *
+ * Returns the number of counts in the spectrum as GNdarray.
  ***************************************************************************/
 GNdarray GPha::counts_spectrum(void) const
 {
     // Initialise array
-    int size = m_counts.size();
+    int      size   = m_counts.size();
     GNdarray counts = GNdarray(size);
-    
+
     // Compute content
     for (int i = 0; i < size; ++i) {
-      counts(i) = m_counts[i];
+        counts(i) = m_counts[i];
     }
 
     // Return counts
     return counts;
 }
 
+
 /***********************************************************************//**
- * @brief Number of counts in spectrum as GNdArray
+ * @brief Get background scaling factors as GNdarray
  *
- * Returns the number of counts in the spectrum as a GNdArray.
+ * @return GNdarray of background scaling factors.
+ *
+ * Returns the background scaling factors as GNdarray.
  ***************************************************************************/
 GNdarray GPha::backscal_spectrum(void) const
 {
     // Initialise array
-    int size = m_backscal.size();
+    int      size  = m_backscal.size();
     GNdarray alpha = GNdarray(size);
-    
+
     // Compute content
     for (int i = 0; i < size; ++i) {
-      alpha(i) = m_backscal[i];
+        alpha(i) = m_backscal[i];
     }
 
-    // Return counts
+    // Return background scaling factors
     return alpha;
 }
+
 
 /***********************************************************************//**
  * @brief Fill spectrum with a value.

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.cpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2018 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,12 +70,6 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 #define G_LIKELIHOOD            "GCTAOnOffObservation::likelihood(GModels&, "\
                                           "GOptimizerPars&, GMatrixSparse&, "\
                                                 "GVector&, double&, double&)"
-#define G_LIKELIHOOD_CSTAT          "GCTAOnOffObservation::likelihood_cstat("\
-                                "GModels&, GOptimizerPars&, GMatrixSparse&, "\
-                                                "GVector&, double&, double&)"
-#define G_LIKELIHOOD_WSTAT          "GCTAOnOffObservation::likelihood_wstat("\
-                                "GModels&, GOptimizerPars&, GMatrixSparse&, "\
-                                                "GVector&, double&, double&)"
 #define G_SET        "GCTAOnOffObservation::set(GCTAObservation&, GSkyDir&, "\
                                             "GSkyRegionMap&, GSkyRegionMap&)"
 #define G_COMPUTE_ARF  "GCTAOnOffObservation::compute_arf(GCTAObservation&, "\
@@ -86,6 +80,13 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
                           "GCTAObservation&, GSkyRegionMap&, GSkyRegionMap&)"
 #define G_COMPUTE_RMF  "GCTAOnOffObservation::compute_rmf(GCTAObservation&, "\
                                                             "GSkyRegionMap&)"
+#define G_MODEL_BACKGROUND "GCTAOnOffObservation::model_background(GModels&)"
+#define G_LIKELIHOOD_CSTAT          "GCTAOnOffObservation::likelihood_cstat("\
+                                "GModels&, GOptimizerPars&, GMatrixSparse&, "\
+                                                "GVector&, double&, double&)"
+#define G_LIKELIHOOD_WSTAT          "GCTAOnOffObservation::likelihood_wstat("\
+                                "GModels&, GOptimizerPars&, GMatrixSparse&, "\
+                                                "GVector&, double&, double&)"
 
 /* __ Constants __________________________________________________________ */
 const double minmod = 1.0e-100;                      //!< Minimum model value
@@ -1736,35 +1737,35 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 }
 
 /***********************************************************************
- * @brief Compute predicted gamma-ray counts Pha for given model
+ * @brief Compute predicted gamma-ray counts for given model
  *
  * @param[in] models Model container.
- * @return model gamma Pha.
+ * @return model Pha with predicted gamma-ray counts.
  *
- * Returns spectrum of predicted number of source events in the On regions 
- *
+ * Returns spectrum of predicted number of source events in the On
+ * regions.
  ***********************************************************************/
 GPha GCTAOnOffObservation::model_gamma(const GModels& models) const
 {
-   // Get number of model parameters in model container
-   int npars = models.npars();
+    // Get number of model parameters in model container
+    int npars = models.npars();
 
-   // Create dummy gradient vectors to provide required argument to N_gamma
-   GVector dummy_grad(npars);
+    // Create dummy gradient vectors to provide required argument to N_gamma
+    GVector dummy_grad(npars);
 
-   // Initialise output Pha
-   GEbounds ereco = m_on_spec.ebounds();
-   GPha gammas = GPha(ereco);
+    // Initialise output spectrum
+    GEbounds ereco  = m_on_spec.ebounds();
+    GPha     gammas = GPha(ereco);
 
-   // Loop over all energy bins
-   for (int i = 0; i < m_on_spec.size(); ++i) {
-     double ngam = N_gamma(models, i, &dummy_grad);
-     gammas.fill(ereco.emean(i),ngam);
-   }
+    // Loop over all energy bins
+    for (int i = 0; i < m_on_spec.size(); ++i) {
+        gammas.fill(ereco.emean(i), N_gamma(models, i, &dummy_grad));
+    }
 
-  // Return model coun pha
-  return gammas;
+    // Return predicted gamma-ray counts spectrum
+    return gammas;
 }
+
 
 /***********************************************************************
  * @brief Compute predicted background counts Pha for given model
@@ -1781,70 +1782,73 @@ GPha GCTAOnOffObservation::model_gamma(const GModels& models) const
  ***********************************************************************/
 GPha GCTAOnOffObservation::model_background(const GModels& models) const
 {
-   // Get number of model parameters in model container
-   int npars = models.npars();
+    // Get number of model parameters in model container
+    int npars = models.npars();
 
-   // Create dummy gradient vectors to provide required argument to N_gamma
-   GVector dummy_grad(npars);
+    // Create dummy gradient vectors to provide required argument to N_gamma
+    GVector dummy_grad(npars);
 
-   // Initialise output Pha
-   GEbounds ereco = m_on_spec.ebounds();
-   GPha bgds = GPha(ereco);
+    // Initialise output spectrum
+    GEbounds ereco = m_on_spec.ebounds();
+    GPha     bgds  = GPha(ereco);
 
-   // Extract statistic for this observation
-   std::string statistic = gammalib::toupper(this->statistic());
+    // Extract statistic for this observation
+    std::string statistic = gammalib::toupper(this->statistic());
 
-   // Loop over all energy bins
-   for (int i = 0; i < m_on_spec.size(); ++i) {
+    // Loop over all energy bins
+    for (int i = 0; i < m_on_spec.size(); ++i) {
      
-     // Initialise variable to store number of background counts
-     double nbgd = 0.0;
+        // Initialise variable to store number of background counts
+        double nbgd = 0.0;
 
-     // Choose background evaluation method based on fit statistics
+        // Choose background evaluation method based on fit statistics
      
-     // CSTAT
-     if ((statistic == "POISSON") || (statistic == "CSTAT")) {
-        nbgd = N_bgd(models, i, &dummy_grad);
-     }
+        // CSTAT
+        if ((statistic == "POISSON") || (statistic == "CSTAT")) {
+            nbgd = N_bgd(models, i, &dummy_grad);
+        }
 
-     // ... or Poisson statistic with measured background
-     else if (statistic == "WSTAT") {
-        // Get number of On and Off counts
-       double non  = m_on_spec[i];
-       double noff = m_off_spec[i];
+        // ... or Poisson statistic with measured background
+        else if (statistic == "WSTAT") {
 
-       // Get background scaling
-       double alpha = m_on_spec.backscal(i);
+            // Get number of On and Off counts
+            double non  = m_on_spec[i];
+            double noff = m_off_spec[i];
 
-       // Get number of gamma and background events (and corresponding
-       // spectral model gradients)
-       double ngam = N_gamma(models, i,  &dummy_grad);
+            // Get background scaling
+            double alpha = m_on_spec.backscal(i);
 
-       // Initialise variables for likelihood computation
-       double nonpred = 0.0;
-       double dlogLdsky = 0.0;
-       double d2logLdsky2 = 0.0;
+            // Get number of gamma and background events (and corresponding
+            // spectral model gradients)
+            double ngam = N_gamma(models, i,  &dummy_grad);
 
-       // Perform likelihood profiling and derive likelihood value
-       // The number of background counts is updated to the profile value
-       double logL = wstat_value(non,noff,alpha,ngam,
-				 nonpred,nbgd,dlogLdsky,d2logLdsky2);
-     }
+            // Initialise variables for likelihood computation
+            double nonpred     = 0.0;
+            double dlogLdsky   = 0.0;
+            double d2logLdsky2 = 0.0;
 
-     // ... or unsupported
-     else {
-       std::string msg = "Invalid statistic \""+statistic+"\" encountered. "
-	 "Either specify \"POISSON\", \"CSTAT\" or "
-	 "\"WSTAT\".";
-       throw GException::invalid_value(G_LIKELIHOOD, msg);
-     }
+            // Perform likelihood profiling and derive likelihood value
+            // The number of background counts is updated to the profile value
+            double logL = wstat_value(non, noff, alpha,  ngam, nonpred, nbgd,
+                                      dlogLdsky,d2logLdsky2);
 
-     // Fill background Pha
-     bgds.fill(ereco.emean(i),nbgd);
-   }
+        } // endelse: WSTAT
 
-  // Return model coun pha
-  return bgds;
+        // ... or unsupported
+        else {
+            std::string msg = "Invalid statistic \""+statistic+"\" encountered. "
+                              "Either specify \"POISSON\", \"CSTAT\" or "
+                              "\"WSTAT\".";
+            throw GException::invalid_value(G_MODEL_BACKGROUND, msg);
+        }
+
+        // Fill background spectrum
+        bgds.fill(ereco.emean(i), nbgd);
+
+    } // endfor: looped over energy bins
+
+    // Return model count spectrum
+    return bgds;
 }
 
 
@@ -1951,9 +1955,9 @@ GPha GCTAOnOffObservation::model_background(const GModels& models) const
  * \f]
  ***********************************************************************/
 double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
-											GVector*       gradient,
-											GMatrixSparse* curvature,
-											double*        npred) const
+                                              GVector*       gradient,
+                                              GMatrixSparse* curvature,
+                                              double*        npred) const
 {
     // Timing measurement
     #if defined(G_LIKELIHOOD_DEBUG)
@@ -2174,6 +2178,188 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
     return value;
 }
 
+
+
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for On/Off analysis in the
+ * case of Poisson signal with measured Poisson background
+ *
+ * @param[in] models Models.
+ * @param[in,out] gradient Pointer to gradients.
+ * @param[in,out] curvature Pointer to curvature matrix.
+ * @param[in,out] npred Pointer to Npred value.
+ * @return Log-likelihood value.
+ *
+ * @exception GException::invalid_value
+ *            There are no model parameters.
+ *
+ * Computes the log-likelihood value for the On/Off observation. The method
+ * loops over the energy bins to update the function value, its derivatives
+ * and the curvature matrix.
+ *
+ * The number of On counts \f$n_{\rm on}\f$ and Off counts \f$n_{\rm off}\f$
+ * are taken from the On and Off spectra, the expected number of gamma-ray
+ * events \f$\mu_s\f$ is computed from the spectral models of the relevant
+ * components in the model container (spatial and temporal components
+ * are ignored so far). See the N_gamma() method for details about the
+ * model computations.
+ *
+ * The estimated number of background counts \f$\mu_b\f$ is derived based
+ * on the measurement in the Off region by analytical minimization of
+ * the Poisson likelihood, i.e., it is treated as a nuisance parameter.
+ * See the wstat_value function for the derivation.
+ ***********************************************************************/
+double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
+                                              GVector*       gradient,
+                                              GMatrixSparse* curvature,
+                                              double*        npred) const
+{
+    // Timing measurement
+    #if defined(G_LIKELIHOOD_DEBUG)
+    #ifdef _OPENMP
+    double t_start = omp_get_wtime();
+    #else
+    clock_t t_start = clock();
+    #endif
+    #endif
+
+    // Initialise statistics
+    #if defined(G_LIKELIHOOD_DEBUG)
+    int    n_bins        = m_on_spec.size();
+    int    n_used        = 0;
+    int    n_small_model = 0;
+    int    n_zero_data   = 0;
+    double sum_data      = 0.0;
+    double sum_model     = 0.0;
+    double init_npred    = *npred;
+    #endif
+
+    // Initialise log-likelihood value
+    double value = 0.0;
+
+    // Get number of model parameters in model container
+    int npars = models.npars();
+
+    // Create model gradient vectors for sky parameters
+    GVector sky_grad(npars);
+
+    // Allocate working array
+    GVector colvar(npars);
+
+    // Check that there is at least one parameter
+    if (npars > 0) {
+
+        // Loop over all energy bins
+        for (int i = 0; i < m_on_spec.size(); ++i) {
+
+            // Reinitialize working arrays
+            for (int j = 0; j < npars; ++j) {
+                sky_grad[j] = 0.0;
+            }
+
+            // Get number of On and Off counts
+            double non  = m_on_spec[i];
+            double noff = m_off_spec[i];
+
+            // Get background scaling
+            double alpha = m_on_spec.backscal(i);
+
+            // Get number of gamma and background events (and corresponding
+            // spectral model gradients)
+            double ngam = N_gamma(models, i, &sky_grad);
+
+            // Initialise variables for likelihood computation
+            double nonpred     = 0.0;
+            double nbgd        = 0.0;
+            double dlogLdsky   = 0.0;
+            double d2logLdsky2 = 0.0;
+
+            // Perform likelihood profiling and derive likelihood value
+            double logL = wstat_value(non, noff, alpha, ngam,
+                                      nonpred, nbgd, dlogLdsky, d2logLdsky2);
+
+            // Update global log-likelihood and Npred
+            value  += logL;
+            *npred += nonpred;
+
+            // Update statistics
+            #if defined(G_LIKELIHOOD_DEBUG)
+            n_used++;
+            sum_data  += non;
+            sum_model += nonpred;
+            #endif
+
+            // Loop over all parameters
+            for (int j = 0; j < npars; ++j) {
+
+                // If spectral model for sky component is non-zero and
+                // non-infinite then handle sky component gradients and
+                // second derivatives including at least a sky component ...
+                if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
+
+                    // Gradient
+                    (*gradient)[j] += dlogLdsky * sky_grad[j];
+
+                    // Hessian (from first-order derivatives only)
+                    for (int k = 0; k < npars; ++k) {
+
+                        // If spectral model for sky component is non-zero and
+                        // non-infinite then we have the curvature element
+                        // of a sky component
+                        if (sky_grad[k] != 0.0  &&
+                            !gammalib::is_infinite(sky_grad[k])) {
+                            colvar[k] = sky_grad[j] * sky_grad[k] * d2logLdsky2;
+                        }
+
+                        // ...... else if spectral model for background component
+                        // or neither sky nor background
+                        else {
+                            colvar[k] = 0.0;
+                        }
+
+                    } // endfor: Hessian computation
+
+                    // Update matrix
+                    curvature->add_to_column(j, colvar);
+
+                } // endif: spectral model is non-zero and non-infinite
+
+            } // endfor: looped over all parameters for derivatives computation
+
+        } // endfor: looped over energy bins
+
+    } // endif: number of parameters was positive
+
+    // ... else there are no parameters, so throw an exception
+    else {
+        std::string msg ="No model parameter for the computation of the "
+                         "likelihood in observation \""+this->name()+
+                         "\" (ID "+this->id()+").\n";
+        throw GException::invalid_value(G_LIKELIHOOD_WSTAT, msg);
+    }
+
+    // Optionally dump gradient and curvature matrix
+    #if defined(G_LIKELIHOOD_DEBUG)
+    std::cout << *gradient << std::endl;
+    std::cout << *curvature << std::endl;
+    #endif
+
+    // Timing measurement
+    #if defined(G_LIKELIHOOD_DEBUG)
+    #ifdef _OPENMP
+    double t_elapse = omp_get_wtime()-t_start;
+    #else
+    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #endif
+    std::cout << "GCTAOnOffObservation::optimizer::likelihood_wstat: CPU usage = "
+              << t_elapse << " sec" << std::endl;
+    #endif
+
+    // Return
+    return value;
+}
+
+
 /***********************************************************************//**
  * @brief Evaluate log-likelihood value in energy bin for On/Off analysis
  * by profiling over the number of background counts
@@ -2379,279 +2565,96 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
  * overestimated if for some bins \f$n_{\rm on}=0\f$ and/or
  * \f$n_{\rm off}=0\f$ (i.e. if the special cases are encountered).
  ***********************************************************************/
-
-double  GCTAOnOffObservation::wstat_value(double non,
-					  double noff,
-					  double alpha,
-					  double ngam,
-					  double& nonpred,
-					  double& nbgd,
-					  double& dlogLdsky,
-					  double& d2logLdsky2) const
+double  GCTAOnOffObservation::wstat_value(const double& non,
+                                          const double& noff,
+                                          const double& alpha,
+                                          const double& ngam,
+                                          double&       nonpred,
+                                          double&       nbgd,
+                                          double&       dlogLdsky,
+                                          double&       d2logLdsky2) const
 {
-  // Initialise log-likelihood value
-  double logL;
-  
-  // Precompute some values
-  double alphap1  = alpha + 1.0;
-  double alpharat = alpha / alphap1;
-
-  // Calculate number of background events, profile likelihood value
-  // and likelihood derivatives
-
-  // Special case noff = 0
-  if (noff == 0.0) {
-
-    // Case A: non = 0. In this case nbgd < 0 hence we set nbgd = 0
-    if (non == 0.0) {
-      nbgd        = 0;
-      nonpred     = ngam;
-      logL        = ngam;
-      dlogLdsky   = 1.0;
-      d2logLdsky2 = 0.0;
-    }
-
-    // Case B: nbgd is positive
-    else if (ngam < non * alpharat) {
-      nbgd        = non / alphap1 - ngam / alpha;
-      nonpred     = ngam + alpha * nbgd;
-      logL        = -ngam / alpha - non * std::log(alpharat);
-      dlogLdsky   = -1.0/alpha;
-      d2logLdsky2 = 0.0;
-    }
-
-    // Case C: nbgd is zero or negative, hence set nbgd = 0
-    else {
-      nbgd        = 0;
-      nonpred     = ngam;
-      logL        = ngam + non * (std::log(non) - std::log(ngam) - 1.0);
-      dlogLdsky   = 1.0 - non / ngam;
-      d2logLdsky2 = non / (ngam * ngam);
-    }
-
-  } // endif: noff = 0
-
-  // Special case non = 0
-  else if (non == 0.0) {
-    nbgd        = 0;
-    nonpred     = ngam + alpharat * noff;
-    logL        = ngam + noff * std::log(alphap1);
-    dlogLdsky   = 1.0;
-    d2logLdsky2 = 0.0;
-  } // endif: non = 0
-
-  // General case
-  else {
-
-    // Compute log-likelihood value
-    double alphat2 = 2.0 * alpha;
-    double C       = alpha * (non + noff) - alphap1 * ngam;
-    double D       = std::sqrt(C*C + 4.0 * alpha * alphap1 * noff * ngam);
-    nbgd           = (C + D) / (alphat2 * alphap1);
-    nonpred        = ngam + alpha * nbgd;
-    logL           = ngam + alphap1 * nbgd - non - noff -
-      non * (std::log(nonpred) - std::log(non)) -
-      noff * (std::log(nbgd) - std::log(noff));
-
-    // Compute derivatives
-    double f0     = alphat2 * noff - C;
-    double dCds   = -alphap1;
-    double dDds   = (C * dCds + 2.0 * alphap1 * alpha * noff) / D;
-    double dbds   = (f0 / D - 1.0) / alphat2;
-    double d2bds2 = (-dCds / D - f0 / (D*D) * dDds) / alphat2;
-    double f1     = alphap1 - alpha*non/nonpred - noff/nbgd;
-    double f2     = nonpred * nonpred;
-    double dpds   = 1.0 + alpha * dbds;
-    double f3     = non / f2 * dpds;
-    dlogLdsky     = 1.0 - non / nonpred + dbds * f1;
-    d2logLdsky2   = f3 + d2bds2 * f1 +
-      dbds * (alpha * f3 + noff / (nbgd*nbgd) * dbds);
-
-  } // endelse: general case
-
-  // Return
-  return logL;
-}
-
-
-
-/***********************************************************************//**
- * @brief Evaluate log-likelihood function for On/Off analysis in the
- * case of Poisson signal with measured Poisson background
- *
- * @param[in] models Models.
- * @param[in,out] gradient Pointer to gradients.
- * @param[in,out] curvature Pointer to curvature matrix.
- * @param[in,out] npred Pointer to Npred value.
- * @return Log-likelihood value.
- *
- * @exception GException::invalid_value
- *            There are no model parameters.
- *
- * Computes the log-likelihood value for the On/Off observation. The method
- * loops over the energy bins to update the function value, its derivatives
- * and the curvature matrix.
- *
- * The number of On counts \f$n_{\rm on}\f$ and Off counts \f$n_{\rm off}\f$
- * are taken from the On and Off spectra, the expected number of gamma-ray
- * events \f$\mu_s\f$ is computed from the spectral models of the relevant
- * components in the model container (spatial and temporal components
- * are ignored so far). See the N_gamma() method for details about the
- * model computations.
- *
- * The estimated number of background counts \f$\mu_b\f$ is derived based
- * on the measurement in the Off region by analytical minimization of
- * the Poisson likelihood, i.e., it is treated as a nuisance parameter.
- * See the wstat_value function for the derivation.
- ***********************************************************************/
-double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
-                                              GVector*       gradient,
-                                              GMatrixSparse* curvature,
-                                              double*        npred) const
-{
-    // Timing measurement
-    #if defined(G_LIKELIHOOD_DEBUG)
-    #ifdef _OPENMP
-    double t_start = omp_get_wtime();
-    #else
-    clock_t t_start = clock();
-    #endif
-    #endif
-
-    // Initialise statistics
-    #if defined(G_LIKELIHOOD_DEBUG)
-    int    n_bins        = m_on_spec.size();
-    int    n_used        = 0;
-    int    n_small_model = 0;
-    int    n_zero_data   = 0;
-    double sum_data      = 0.0;
-    double sum_model     = 0.0;
-    double init_npred    = *npred;
-    #endif
-
     // Initialise log-likelihood value
-    double value = 0.0;
+    double logL;
+  
+    // Precompute some values
+    double alphap1  = alpha + 1.0;
+    double alpharat = alpha / alphap1;
 
-    // Get number of model parameters in model container
-    int npars = models.npars();
+    // Calculate number of background events, profile likelihood value
+    // and likelihood derivatives
+    // Special case noff = 0
+    if (noff == 0.0) {
 
-    // Create model gradient vectors for sky parameters
-    GVector sky_grad(npars);
+        // Case A: non = 0. In this case nbgd < 0 hence we set nbgd = 0
+        if (non == 0.0) {
+            nbgd        = 0;
+            nonpred     = ngam;
+            logL        = ngam;
+            dlogLdsky   = 1.0;
+            d2logLdsky2 = 0.0;
+        }
 
-    // Allocate working array
-    GVector colvar(npars);
+        // Case B: nbgd is positive
+        else if (ngam < non * alpharat) {
+            nbgd        = non / alphap1 - ngam / alpha;
+            nonpred     = ngam + alpha * nbgd;
+            logL        = -ngam / alpha - non * std::log(alpharat);
+            dlogLdsky   = -1.0/alpha;
+            d2logLdsky2 = 0.0;
+        }
 
-    // Check that there is at least one parameter
-    if (npars > 0) {
+        // Case C: nbgd is zero or negative, hence set nbgd = 0
+        else {
+            nbgd        = 0;
+            nonpred     = ngam;
+            logL        = ngam + non * (std::log(non) - std::log(ngam) - 1.0);
+            dlogLdsky   = 1.0 - non / ngam;
+            d2logLdsky2 = non / (ngam * ngam);
+        }
 
-        // Loop over all energy bins
-        for (int i = 0; i < m_on_spec.size(); ++i) {
+    } // endif: noff = 0
 
-            // Reinitialize working arrays
-            for (int j = 0; j < npars; ++j) {
-                sky_grad[j] = 0.0;
-            }
+    // Special case non = 0
+    else if (non == 0.0) {
+        nbgd        = 0;
+        nonpred     = ngam + alpharat * noff;
+        logL        = ngam + noff * std::log(alphap1);
+        dlogLdsky   = 1.0;
+        d2logLdsky2 = 0.0;
+    } // endif: non = 0
 
-            // Get number of On and Off counts
-            double non  = m_on_spec[i];
-            double noff = m_off_spec[i];
-
-            // Get background scaling
-            double alpha = m_on_spec.backscal(i);
-
-            // Get number of gamma and background events (and corresponding
-            // spectral model gradients)
-            double ngam = N_gamma(models, i, &sky_grad);
-
-	    // Initialise variables for likelihood computation
-	    double nonpred = 0.0;
-	    double nbgd = 0.0;
-	    double dlogLdsky = 0.0;
-	    double d2logLdsky2 = 0.0;
-
-	    // Perform likelihood profiling and derive likelihood value
-	    double logL = wstat_value(non,noff,alpha,ngam,
-				      nonpred,nbgd,dlogLdsky,d2logLdsky2);
-
-            // Update global log-likelihood and Npred
-	    value += logL;
-            *npred += nonpred;
-
-            // Update statistics
-            #if defined(G_LIKELIHOOD_DEBUG)
-            n_used++;
-            sum_data  += non;
-            sum_model += nonpred;
-            #endif
-
-            // Loop over all parameters
-            for (int j = 0; j < npars; ++j) {
-
-                // If spectral model for sky component is non-zero and
-                // non-infinite then handle sky component gradients and
-                // second derivatives including at least a sky component ...
-                if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
-
-                    // Gradient
-                    (*gradient)[j] += dlogLdsky * sky_grad[j];
-
-                    // Hessian (from first-order derivatives only)
-                    for (int k = 0; k < npars; ++k) {
-
-                        // If spectral model for sky component is non-zero and
-                        // non-infinite then we have the curvature element
-                        // of a sky component
-                        if (sky_grad[k] != 0.0  &&
-                            !gammalib::is_infinite(sky_grad[k])) {
-                            colvar[k] = sky_grad[j] * sky_grad[k] * d2logLdsky2;
-                        }
-
-                        // ...... else if spectral model for background component
-                        // or neither sky nor background
-                        else {
-                            colvar[k] = 0.0;
-                        }
-
-                    } // endfor: Hessian computation
-
-                    // Update matrix
-                    curvature->add_to_column(j, colvar);
-
-                } // endif: spectral model is non-zero and non-infinite
-
-            } // endfor: looped over all parameters for derivatives computation
-
-        } // endfor: looped over energy bins
-
-    } // endif: number of parameters was positive
-
-    // ... else there are no parameters, so throw an exception
+    // General case
     else {
-        std::string msg ="No model parameter for the computation of the "
-                         "likelihood in observation \""+this->name()+
-                         "\" (ID "+this->id()+").\n";
-        throw GException::invalid_value(G_LIKELIHOOD_WSTAT, msg);
-    }
 
-    // Optionally dump gradient and curvature matrix
-    #if defined(G_LIKELIHOOD_DEBUG)
-    std::cout << *gradient << std::endl;
-    std::cout << *curvature << std::endl;
-    #endif
+        // Compute log-likelihood value
+        double alphat2 = 2.0 * alpha;
+        double C       = alpha * (non + noff) - alphap1 * ngam;
+        double D       = std::sqrt(C*C + 4.0 * alpha * alphap1 * noff * ngam);
+        nbgd           = (C + D) / (alphat2 * alphap1);
+        nonpred        = ngam + alpha * nbgd;
+        logL           = ngam + alphap1 * nbgd - non - noff -
+                         non * (std::log(nonpred) - std::log(non)) -
+                         noff * (std::log(nbgd) - std::log(noff));
 
-    // Timing measurement
-    #if defined(G_LIKELIHOOD_DEBUG)
-    #ifdef _OPENMP
-    double t_elapse = omp_get_wtime()-t_start;
-    #else
-    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
-    #endif
-    std::cout << "GCTAOnOffObservation::optimizer::likelihood_wstat: CPU usage = "
-              << t_elapse << " sec" << std::endl;
-    #endif
+        // Compute derivatives
+        double f0     = alphat2 * noff - C;
+        double dCds   = -alphap1;
+        double dDds   = (C * dCds + 2.0 * alphap1 * alpha * noff) / D;
+        double dbds   = (f0 / D - 1.0) / alphat2;
+        double d2bds2 = (-dCds / D - f0 / (D*D) * dDds) / alphat2;
+        double f1     = alphap1 - alpha*non/nonpred - noff/nbgd;
+        double f2     = nonpred * nonpred;
+        double dpds   = 1.0 + alpha * dbds;
+        double f3     = non / f2 * dpds;
+        dlogLdsky     = 1.0 - non / nonpred + dbds * f1;
+        d2logLdsky2   = f3 + d2bds2 * f1 +
+                        dbds * (alpha * f3 + noff / (nbgd*nbgd) * dbds);
+
+    } // endelse: general case
 
     // Return
-    return value;
+    return logL;
 }
 
 

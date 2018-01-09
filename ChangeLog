@@ -1,8 +1,11 @@
-2017-12-01
+2018-01-09
 
         * Version 1.5.0 released
         =========================
 
+        Add GPha::counts_spectrum() and GPha::backscal_spectrum() methods (#2290)
+        Add GNdarray sign(), operator*= and operator/= (#2290)
+        Add GSkyMap::counts() and GSkyMap::flux() methods and clip() friend operator (#2290)
         Add GSkyMap::array() method to Python interface (#2285)
         CTA observations handle "statistic" attribute in XML file (#2238)
         Use CSTAT and CHI2 instead of POISSON and GAUSSIAN for statistic (#2237)
