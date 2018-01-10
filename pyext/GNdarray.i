@@ -56,7 +56,6 @@ public:
     GNdarray& operator+=(const GNdarray& array);
     GNdarray& operator-=(const GNdarray& array);
     GNdarray& operator*=(const GNdarray& array);
-    GNdarray& operator/=(const GNdarray& array);
     GNdarray& operator+=(const double& value);
     GNdarray& operator-=(const double& value);
     GNdarray& operator*=(const double& value);
@@ -147,6 +146,16 @@ public:
     // Python 3.x
     GNdarray __truediv__(const double &a) {
         return (*self) / a;
+    }
+    // Python 2.x operator/=
+    GNdarray __idiv__(const GNdarray& array) {
+        self->operator/=(array);
+        return (*self);
+    }
+    // Python 3.x operator/=
+    GNdarray __itruediv__(const GNdarray& array) {
+        self->operator/=(array);
+        return (*self);
     }
     // Python 2.x operator/=
     GNdarray __idiv__(const double& value) {
