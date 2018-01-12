@@ -1501,6 +1501,9 @@ std::string GCTAObservation::print(const GChatter& chatter) const
                 result.append("\n"+m_events->print(reduced_chatter));
             }
 
+            // Append Off regions
+            result.append("\n"+off_regions().print(reduced_chatter));
+
         } // endif: appended detailed information
 
     } // endif: chatter was not silent
