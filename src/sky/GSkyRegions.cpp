@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSkyRegions.cpp - Sky region container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Pierrick Martin                             *
+ *  copyright (C) 2013-2018 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -686,9 +686,7 @@ void GSkyRegions::init_members(void)
  *
  * @param[in] regions region container.
  *
- * Makes a copy of all class members. All regions are deep copied, and the
- * linear pointer array for parameter access through the GOptimizerPars
- * base class is set.
+ * Makes a copy of all class members. All regions are deep copied.
  ***************************************************************************/
 void GSkyRegions::copy_members(const GSkyRegions& regions)
 {
@@ -696,7 +694,6 @@ void GSkyRegions::copy_members(const GSkyRegions& regions)
     m_filename = regions.m_filename;
 
     // Copy regions
-    m_regions.clear();
     for (int i = 0; i < regions.m_regions.size(); ++i) {
         m_regions.push_back((regions.m_regions[i]->clone()));
     }
@@ -716,7 +713,9 @@ void GSkyRegions::free_members(void)
 {
     // Free regions
     for (int i = 0; i < m_regions.size(); ++i) {
-        delete m_regions[i];
+        if (m_regions[i] != NULL) {
+            delete m_regions[i];
+        }
         m_regions[i] = NULL;
     }
 
