@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,6 +82,7 @@ const std::string cta_stacked_bkgcube   = datadir+"/stacked_bkgcube.fits";
 /* __ Test files for On/Off analysis _____________________________________ */
 const std::string cta_onoff_obs   = datadir+"/onoff_obs.xml";
 const std::string cta_onoff_model = datadir+"/onoff_model.xml";
+const std::string cta_onoff_onreg = datadir+"/onoff_region_on.reg";
 
 
 /***********************************************************************//**
@@ -2000,17 +2001,39 @@ void TestGCTAObservation::test_stacked_obs(void)
 
 /***********************************************************************//**
  * @brief Test On/Off observation handling
- *
- * @todo Unit test to be implemented
  ***************************************************************************/
 void TestGCTAObservation::test_onoff_obs(void)
 {
     // Load On/Off observation into container
     GObservations obs(cta_onoff_obs);
-    //std::cout << *(obs[0]) << std::endl;
 
     // Save observation container into XML file
     obs.save("test_cta_onoff_obs.xml");
+
+    // Load CTA observations
+    obs.load(cta_unbin_xml);
+
+    // Setup sky regions
+    GSkyRegions regions(cta_onoff_onreg);
+
+    // Set and check regions
+    for (int i = 0; i < obs.size(); ++i) {
+        static_cast<GCTAObservation*>(obs[i])->off_regions(regions);
+        test_value(static_cast<const GCTAObservation*>(obs[i])->off_regions().size(),
+                   1, "Check number of sky regions");
+    }
+
+    // Save observation container into XML file
+    obs.save("test_cta_onoff_obs_regions.xml");
+
+    // Re-load observation container and check regions
+    obs.load("test_cta_onoff_obs_regions.xml");
+    
+    // Check regions
+    for (int i = 0; i < obs.size(); ++i) {
+        test_value(static_cast<const GCTAObservation*>(obs[i])->off_regions().size(),
+                   1, "Check number of sky regions");
+    }
 
     // Return
     return;

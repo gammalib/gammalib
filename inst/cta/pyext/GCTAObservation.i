@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAObservation.i - CTA Observation class interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -94,6 +94,8 @@ public:
                                  const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
+    void                off_regions(const GSkyRegions& off_regions);
+    const GSkyRegions&  off_regions(void) const;
     GCTARoi             roi(void) const;
     GGti                gti(void) const;
     GEbounds            ebounds(void) const;

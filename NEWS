@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-9 January 2018
+12 January 2018
 
 
 1. Introduction
@@ -83,6 +83,8 @@ The following methods have been added:
 - operator*(GRmf&, double&)
 - operator*(double&, double&)
 - operator/(GRmf&, double&)
+- GCTAObservation::off_regions(GSkyRegions&)
+- GCTAObservation::off_regions()
 - GCTAOnOffObservation(GObservations&)
 - GCTAOnOffObservation(GPha&, GPha&, GArf&, GRmf&)
 - GCOMInstDir(GSkyDir&, double&)
@@ -245,6 +247,11 @@ also position fitting is now possible for Fermi-LAT (#604, #2183).
 -----------------
 Set the Good Time Interval time reference to the CTA time reference in
 GCTAEventList, GCTAEventCube and GCTACubeExposure (#2295).
+
+Add Off sky regions attribute to the GCTAObservation class. The Off sky regions
+can be set and accessed using the GCTAObservation::off_regions() method. The
+Off regions filename is also read from and written into the observation
+definition XML file (#2284).
 
 GCTAObservation and GCTAOnOffObservation handle statistic attribute in XML
 file (#2238).

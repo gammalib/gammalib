@@ -1,13 +1,15 @@
-2018-01-09
+2018-01-12
 
         * Version 1.5.0 released
         =========================
 
-        Set reference time to CTA reference time in GCTAEventcube, GCTAEventList and GCTACubeExposure (#2295)
+        Set reference time to CTA reference time in GCTAEventcube, GCTAEventList and
+          GCTACubeExposure (#2295)
         Add GPha::counts_spectrum() and GPha::backscal_spectrum() methods (#2290)
         Add GNdarray sign(), operator*= and operator/= (#2290)
         Add GSkyMap::counts() and GSkyMap::flux() methods and clip() friend operator (#2290)
         Add GSkyMap::array() method to Python interface (#2285)
+        Add Off sky regions to GCTAObservation (#2284)
         CTA observations handle "statistic" attribute in XML file (#2238)
         Use CSTAT and CHI2 instead of POISSON and GAUSSIAN for statistic (#2237)
         Changed GObservation::statistics() to statistic() (#2238)

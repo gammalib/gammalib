@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -728,6 +728,18 @@ void GCTAObservation::read(const GXmlElement& xml)
 
         }
 
+        // Read Off regions
+        else if (par->attribute("name") == "OffRegions") {
+
+            // Read off regions file name
+            std::string filename = gammalib::xml_file_expand(xml,
+                                             par->attribute("file"));
+
+            // Load off regions
+            m_off_regions = GSkyRegions(filename);
+
+        }
+
     } // endfor: looped over observation parameters
 
     // Analyse parameters
@@ -1014,6 +1026,13 @@ void GCTAObservation::write(GXmlElement& xml) const
     // Write response information
     if (m_response != NULL) {
         m_response->write(xml);
+    }
+
+    // Write Off regions filename
+    if (!m_off_regions.filename().is_empty()) {
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "OffRegions");
+        par->attribute("file", gammalib::xml_file_reduce(xml,
+                               m_off_regions.filename().url()));
     }
 
     // Return
@@ -1509,6 +1528,7 @@ void GCTAObservation::init_members(void)
     m_bgdfile.clear();
     m_response = NULL;
     m_pointing.clear();
+    m_off_regions.clear();
     m_obs_id        = 0;
     m_ontime        = 0.0;
     m_livetime      = 0.0;
@@ -1537,6 +1557,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_eventfile     = obs.m_eventfile;
     m_bgdfile       = obs.m_bgdfile;
     m_pointing      = obs.m_pointing;
+    m_off_regions   = obs.m_off_regions;
     m_obs_id        = obs.m_obs_id;
     m_ontime        = obs.m_ontime;
     m_livetime      = obs.m_livetime;

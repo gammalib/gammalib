@@ -39,6 +39,8 @@ Improvements
   and ``GPha::counts_spectrum()`` and ``GPha::backscal_spectrum()`` methods
 * [`2285 <https://cta-redmine.irap.omp.eu/issues/2285>`_] -
   Add ``GSkyMap::array()`` method to Python interface
+* [`2284 <https://cta-redmine.irap.omp.eu/issues/2284>`_] -
+  Add Off sky regions to ``GCTAObservation``
 * [`2238 <https://cta-redmine.irap.omp.eu/issues/2238>`_] -
   ``GCTAObservation`` and ``GCTAOnOffObservation`` handle ``statistic`` attribute in XML file
 * [`2231 <https://cta-redmine.irap.omp.eu/issues/2231>`_] -

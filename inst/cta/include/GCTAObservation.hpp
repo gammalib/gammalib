@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.hpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <string>
 #include "GFilename.hpp"
 #include "GObservation.hpp"
+#include "GSkyRegions.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAEventList.hpp"
@@ -126,6 +127,8 @@ public:
                                  const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
+    void                off_regions(const GSkyRegions& off_regions);
+    const GSkyRegions&  off_regions(void) const;
     GCTARoi             roi(void) const;
     GGti                gti(void) const;
     GEbounds            ebounds(void) const;
@@ -162,6 +165,7 @@ protected:
     GFilename     m_eventfile;     //!< Event filename
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
     GCTAPointing  m_pointing;      //!< Pointing direction
+    GSkyRegions   m_off_regions;   //!< Off regions
     int           m_obs_id;        //!< Observation ID
     double        m_ontime;        //!< Ontime (seconds)
     double        m_livetime;      //!< Livetime (seconds)
@@ -292,6 +296,31 @@ inline
 void GCTAObservation::pointing(const GCTAPointing& pointing)
 {
     m_pointing = pointing;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky off regions
+ *
+ * @return Sky off regions
+ ***************************************************************************/
+inline
+const GSkyRegions& GCTAObservation::off_regions(void) const
+{
+    return m_off_regions;
+}
+
+
+/***********************************************************************//**
+ * @brief Set sky off regions
+ *
+ * @param[in] off_regions Sky off regions.
+ ***************************************************************************/
+inline
+void GCTAObservation::off_regions(const GSkyRegions& off_regions)
+{
+    m_off_regions = off_regions;
     return;
 }
 
