@@ -41,6 +41,8 @@ Improvements
   Add ``GSkyMap::array()`` method to Python interface
 * [`2284 <https://cta-redmine.irap.omp.eu/issues/2284>`_] -
   Add Off sky regions to ``GCTAObservation``
+* [`2265 <https://cta-redmine.irap.omp.eu/issues/2265>`_] -
+  By default require cfitsio library
 * [`2238 <https://cta-redmine.irap.omp.eu/issues/2238>`_] -
   ``GCTAObservation`` and ``GCTAOnOffObservation`` handle ``statistic`` attribute in XML file
 * [`2231 <https://cta-redmine.irap.omp.eu/issues/2231>`_] -
@@ -90,4 +92,3 @@ Clean up
   Changed ``GObservation::statistics()`` to ``GObservation::statistic()``
 * [`2237 <https://cta-redmine.irap.omp.eu/issues/2237>`_] -
   Use ``CSTAT`` and ``CHI2`` instead of ``POISSON`` and ``GAUSSIAN`` for statistic
-

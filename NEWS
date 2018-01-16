@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-12 January 2018
+16 January 2018
 
 
 1. Introduction
@@ -108,6 +108,10 @@ The return value of the following methods has been changed:
 -----------------
 A code generator script codegen.py has been added to the dev folder to ease
 the addition of code extensions to GammaLib.
+
+The configure script now aborts if cfitsio is not found. If GammaLib should be
+compiled without cfitsio the --without-cfitsio option has to be specified
+explicitly (#2265).
 
 
 4. Application module

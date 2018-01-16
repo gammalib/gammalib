@@ -2,7 +2,7 @@
 # Configuration for GammaLib - a versatile toolbox for high-level analysis  #
 #                              of astronomical gamma-ray data               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2006-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2006-2018 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -1365,6 +1365,11 @@ if [test "x$with_cfitsio" = "xyes"]; then
             esac
         fi
     
+    fi
+
+    # Break if cfitsio library is not found
+    if [test "x$has_cfitsio" = "xno"]; then
+        AC_MSG_ERROR([cfitsio library not found. Install cfitsio library or use --without-cfitsio option.])
     fi
 
 fi
