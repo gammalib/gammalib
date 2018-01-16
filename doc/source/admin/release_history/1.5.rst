@@ -30,6 +30,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2296 <https://cta-redmine.irap.omp.eu/issues/2296>`_] -
+  Non-point source model throws exception in On/Off fitting
 * [`2295 <https://cta-redmine.irap.omp.eu/issues/2295>`_] -
   Set reference time to CTA reference time in ``GCTAEventcube``, ``GCTAEventList``
   and ``GCTACubeExposure``

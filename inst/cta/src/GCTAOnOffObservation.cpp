@@ -80,6 +80,7 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
                           "GCTAObservation&, GSkyRegionMap&, GSkyRegionMap&)"
 #define G_COMPUTE_RMF  "GCTAOnOffObservation::compute_rmf(GCTAObservation&, "\
                                                             "GSkyRegionMap&)"
+#define G_N_GAMMA   "GCTAOnOffObservation::N_gamma(GModels&, int&, GVector*)"
 #define G_MODEL_BACKGROUND "GCTAOnOffObservation::model_background(GModels&)"
 #define G_LIKELIHOOD_CSTAT          "GCTAOnOffObservation::likelihood_cstat("\
                                 "GModels&, GOptimizerPars&, GMatrixSparse&, "\
@@ -1477,6 +1478,10 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
  * @param[in] models Model container.
  * @param[in] ibin Energy bin number.
  * @param[in,out] grad Model gradient vector.
+ * @returns Predicted number of source events.
+ *
+ * @exception GException::invalid_value
+ *            Source model is not a point source model
  *
  * Returns the predicted number of source events \f$N_{\gamma}\f$
  * in the On regions for a given energy bin. The method computes also
@@ -1545,6 +1550,17 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
             // Spectral component (the useful one)
             GModelSpectral* spectral = sky->spectral();
             if (spectral != NULL)  {
+
+                // Throw an exception if the spatila model is not a point
+                // source
+                if (spatial->type() != "PointSource") {
+                    std::string msg = "Spatial model of source \""+sky->name()+
+                                      "\" is of type \""+spatial->type()+
+                                      "\" while the method only works for "
+                                      "point sources. Please specify a point "
+                                      "source model.";
+                    throw GException::invalid_value(G_N_GAMMA, msg);
+                }
 
                 // Debug code
                 #if defined(G_N_GAMMA_DEBUG)

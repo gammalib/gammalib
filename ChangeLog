@@ -3,6 +3,7 @@
         * Version 1.5.0 released
         =========================
 
+        Non-point source model throws exception in On/Off fitting (#2296)
         Set reference time to CTA reference time in GCTAEventcube, GCTAEventList and
           GCTACubeExposure (#2295)
         Add GPha::counts_spectrum() and GPha::backscal_spectrum() methods (#2290)

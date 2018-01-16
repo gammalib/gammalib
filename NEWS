@@ -252,6 +252,9 @@ also position fitting is now possible for Fermi-LAT (#604, #2183).
 
 20. CTA interface
 -----------------
+If a non-point source model is fitted in an On/Off fitting an exception is thrown,
+since On/Off fitting so far only is correct for point source models (#2296).
+
 Set the Good Time Interval time reference to the CTA time reference in
 GCTAEventList, GCTAEventCube and GCTACubeExposure (#2295).
 
