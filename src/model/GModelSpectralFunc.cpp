@@ -579,7 +579,6 @@ void GModelSpectralFunc::read(const GXmlElement& xml)
     }
 
     // Load nodes from file
-    //load_nodes(xml.attribute("file"));
     load_nodes(gammalib::xml_file_expand(xml, xml.attribute("file")));
 
     // Return
@@ -646,7 +645,6 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
     }
 
     // Set file attribute
-    //xml.attribute("file", m_filename.url());
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return

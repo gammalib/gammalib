@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.cpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -371,57 +371,40 @@ bool GModelSpatialPointSource::contains(const GSkyDir& dir,
  ***************************************************************************/
 void GModelSpatialPointSource::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Point source model requires exactly 2 parameters.");
+    // Read RA/DEC parameters
+    if (gammalib::xml_has_par(xml, "RA") && gammalib::xml_has_par(xml, "DEC")) {
+
+        // Get parameters
+        const GXmlElement* ra  = gammalib::xml_get_par(G_READ, xml, "RA");
+        const GXmlElement* dec = gammalib::xml_get_par(G_READ, xml, "DEC");
+
+        // Read parameters
+        m_ra.read(*ra);
+        m_dec.read(*dec);
+
     }
 
-    // Extract model parameters
-    bool has_glon = false;
-    bool has_glat = false;
-    int  npar[]   = {0, 0};
-    for (int i = 0; i < 2; ++i) {
+    // ... otherwise read GLON/GLAT parameters
+    else {
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
+        // Get parameters
+        const GXmlElement* glon = gammalib::xml_get_par(G_READ, xml, "GLON");
+        const GXmlElement* glat = gammalib::xml_get_par(G_READ, xml, "GLAT");
 
-        // Handle RA/GLON
-        if (par->attribute("name") == "RA") {
-            m_ra.read(*par);
-            npar[0]++;
-        }
-        else if (par->attribute("name") == "GLON") {
-            m_ra.read(*par);
-            npar[0]++;
-            has_glon = true;
-        }
+        // Read parameters
+        m_ra.read(*glon);
+        m_dec.read(*glat);
 
-        // Handle DEC/GLAT
-        else if (par->attribute("name") == "DEC") {
-            m_dec.read(*par);
-            npar[1]++;
-        }
-        else if (par->attribute("name") == "GLAT") {
-            m_dec.read(*par);
-            npar[1]++;
-            has_glat = true;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check if we have to convert GLON/GLAT into RA/DEC
-    if (has_glon && has_glat) {
+        // Convert into RA/DEC
         GSkyDir dir;
         dir.lb_deg(ra(), dec()),
         m_ra.value(dir.ra_deg());
         m_dec.value(dir.dec_deg());
+
+        // Set names to RA/DEC
         m_ra.name("RA");
         m_dec.name("DEC");
-    }
-    else if (has_glon || has_glat) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-                          "Require either RA/DEC or GLON/GLAT.");
+
     }
 
     // Return
@@ -465,35 +448,13 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
               "Spatial model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 2 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"RA\""));
-        xml.append(GXmlElement("parameter name=\"DEC\""));
-    }
+    // Get or create parameters
+    GXmlElement* ra  = gammalib::xml_need_par(G_WRITE, xml, m_ra.name());
+    GXmlElement* dec = gammalib::xml_need_par(G_WRITE, xml, m_dec.name());
 
-    // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Point source model requires exactly 2 parameters.");
-    }
-
-    // Get pointers on both model parameters
-    GXmlElement* par1 = xml.element("parameter", 0);
-    GXmlElement* par2 = xml.element("parameter", 1);
-
-    // Set or update sky direction
-    if (par1->attribute("name") == "RA" && par2->attribute("name") == "DEC") {
-        m_ra.write(*par1);
-        m_dec.write(*par2);
-    }
-    else if (par2->attribute("name") == "RA" && par1->attribute("name") == "DEC") {
-        m_ra.write(*par2);
-        m_dec.write(*par1);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-                          "Require RA and DEC parameters.");
-    }
+    // Write parameters
+    m_ra.write(*ra);
+    m_dec.write(*dec);
 
     // Return
     return;

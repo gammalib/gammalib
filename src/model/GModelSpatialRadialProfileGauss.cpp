@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileGauss.cpp - Gaussian radial profile class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -265,7 +265,7 @@ void GModelSpatialRadialProfileGauss::read(const GXmlElement& xml)
     GModelSpatialRadial::read(xml);
 
     // Read Sigma parameter
-    const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Sigma");
+    const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, m_sigma.name());
     m_sigma.read(*par);
 
     // Return
@@ -293,7 +293,7 @@ void GModelSpatialRadialProfileGauss::write(GXmlElement& xml) const
     GModelSpatialRadial::write(xml);
 
     // Write Sigma parameter
-    GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Sigma");
+    GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_sigma.name());
     m_sigma.write(*par);
 
     // Return

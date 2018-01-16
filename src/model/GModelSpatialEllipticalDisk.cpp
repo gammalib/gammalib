@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Michael Mayer                               *
+ *  copyright (C) 2013-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -471,41 +471,13 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
     // Read disk location
     GModelSpatialElliptical::read(xml);
 
-    // Extract model parameters
-    int  npar[2] = {0, 0};
-    for (int i = 0; i < npars; ++i) {
+    // Get parameters
+    const GXmlElement* minor = gammalib::xml_get_par(G_READ, xml, m_semiminor.name());
+    const GXmlElement* major = gammalib::xml_get_par(G_READ, xml, m_semimajor.name());
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle semiminor radius
-        if (par->attribute("name") == "MinorRadius") {
-            
-            // Read parameter
-            m_semiminor.read(*par);
-            
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-        // Handle semimajor radius
-        else if (par->attribute("name") == "MajorRadius") {
-
-        	// Read parameter
-        	m_semimajor.read(*par);
-
-        	// Increment parameter counter
-        	npar[1]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Elliptical disk model requires \"MinorRadius\" and"
-              " \"MajorRadius\" parameters.");
-    }
+    // Read parameters
+    m_semiminor.read(*minor);
+    m_semimajor.read(*major);
 
     // Return
     return;
@@ -539,57 +511,13 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
     // Write disk location
     GModelSpatialElliptical::write(xml);
 
-    // If XML element has 3 nodes (which should be the location and PA nodes)
-    // then append 2 parameter nodes
-    if (xml.elements() == 3) {
-        xml.append(GXmlElement("parameter name=\"MinorRadius\""));
-        xml.append(GXmlElement("parameter name=\"MajorRadius\""));
-    }
+    // Get or create parameters
+    GXmlElement* minor = gammalib::xml_need_par(G_WRITE, xml, m_semiminor.name());
+    GXmlElement* major = gammalib::xml_need_par(G_WRITE, xml, m_semimajor.name());
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 5 parameters
-    if (xml.elements() != 5 || npars != 5) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Elliptical Disk model requires exactly 5 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[2] = {0, 0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle semiminor radius
-        if (par->attribute("name") == "MinorRadius") {
-
-        	// Write parameter
-            m_semiminor.write(*par);
-
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-        // Handle semimajor radius
-        else if (par->attribute("name") == "MajorRadius") {
-
-        	// Write parameter
-            m_semimajor.write(*par);
-
-            // Increment parameter counter
-            npar[1]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Elliptical disk model requires \"MinorRadius\" and"
-              " \"MajorRadius\" parameters.");
-    }
+    // Write parameters
+    m_semiminor.write(*minor);
+    m_semimajor.write(*major);
 
     // Return
     return;

@@ -641,7 +641,6 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
     }
 
     // Set filename
-    //xml.attribute("file", m_filename);
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return

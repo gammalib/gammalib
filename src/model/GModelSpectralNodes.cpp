@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralNodes.cpp - Spectral nodes model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -645,38 +645,13 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
         // Get node
         const GXmlElement* node = xml.element("node", i);
 
-        // Verify that node XML element has exactly 2 parameters
-        if (node->elements() != 2 || node->elements("parameter") != 2) {
-            throw GException::model_invalid_parnum(G_READ, xml,
-                  "Node requires exactly 2 parameters.");
-        }
+        // Get parameters
+        const GXmlElement* epar = gammalib::xml_get_par(G_READ, *node, "Energy");
+        const GXmlElement* ipar = gammalib::xml_get_par(G_READ, *node, "Intensity");
 
-        // Extract node parameters
-        int npar[] = {0, 0};
-        for (int k = 0; k < 2; ++k) {
-
-            // Get parameter element
-            const GXmlElement* par = node->element("parameter", k);
-
-            // Handle energy
-            if (par->attribute("name") == "Energy") {
-                energy.read(*par);
-                npar[0]++;
-            }
-
-            // Handle intensity
-            else if (par->attribute("name") == "Intensity") {
-                intensity.read(*par);
-                npar[1]++;
-            }
-
-        } // endfor: looped over parameters
-
-        // Verify that all parameters were found
-        if (npar[0] != 1 || npar[1] != 1) {
-            throw GException::model_invalid_parnames(G_READ, xml,
-                  "Require \"Energy\" and \"Intensity\" parameters.");
-        }
+        // Read parameters
+        energy.read(*epar);
+        intensity.read(*ipar);
 
         // Throw an exception if either energy or intensity is not positive
         if (energy.value() <= 0.0) {

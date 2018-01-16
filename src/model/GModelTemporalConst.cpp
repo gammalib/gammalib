@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelTemporalConst.cpp - Temporal constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -326,27 +326,11 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
  ***************************************************************************/
 void GModelTemporalConst::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        std::string msg = "Constant temporal model requires exactly 1 "
-                          "<parameter> tag but "+
-                          gammalib::str(xml.elements("parameter"))+
-                          " <parameter> tags were found.";
-        throw GException::invalid_value(G_READ, msg);
-    }
+    // Get parameter pointers
+    const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
 
-    // Get parameter element
-    const GXmlElement* par = xml.element("parameter", 0);
-
-    // Get value
-    if (par->attribute("name") == "Normalization") {
-        m_norm.read(*par);
-    }
-    else {
-        std::string msg = "Constant temporal model parameter "
-                          "\"Normalization\" not found in XML element.";
-        throw GException::invalid_value(G_READ, msg);
-    }
+    // Read parameters
+    m_norm.read(*norm);
 
     // Return
     return;
@@ -371,42 +355,20 @@ void GModelTemporalConst::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "Constant");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "Constant") {
-        std::string msg = "Temporal model of type "+xml.attribute("type")+
-                          " encountered while \"Constant\" was expected.";
-        throw GException::invalid_value(G_WRITE, msg);
+    if (xml.attribute("type") != type()) {
+        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
+              "Temporal model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append parameter node.
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Normalization\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
 
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        std::string msg = "Constant temporal model requires exactly 1 "
-                          "<parameter> tag but "+
-                          gammalib::str(xml.elements("parameter"))+
-                          " <parameter> tags were found.";
-        throw GException::invalid_value(G_WRITE, msg);
-    }
-
-    // Get parameter element
-    GXmlElement* par = xml.element("parameter", 0);
-
-    // Set parameyter
-    if (par->attribute("name") == "Normalization") {
-        m_norm.write(*par);
-    }
-    else {
-        std::string msg = "Constant temporal model parameter "
-                          "\"Normalization\" not found in XML element.";
-        throw GException::invalid_value(G_WRITE, msg);
-    }
+    // Write parameters
+    m_norm.write(*norm);
 
     // Return
     return;
@@ -416,7 +378,7 @@ void GModelTemporalConst::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print constant information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelTemporalConst::print(const GChatter& chatter) const

@@ -143,6 +143,9 @@ None
 A spectral model constructor was added to GModelSpectralNodes to allow
 conversion of any spectral model into a spectral node model (#2178).
 
+XML support functions are now used in all model classes to simplify the
+code (#1430).
+
 
 9. Numerics module
 ------------------

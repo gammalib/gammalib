@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.cpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Christoph Deil                              *
+ *  copyright (C) 2011-2018 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -421,32 +421,11 @@ void GModelSpatialRadialDisk::read(const GXmlElement& xml)
     // Read disk location
     GModelSpatialRadial::read(xml);
 
-    // Extract model parameters
-    int  npar[1] = {0};
-    for (int i = 0; i < npars; ++i) {
+    // Get parameters
+    const GXmlElement* radius = gammalib::xml_get_par(G_READ, xml, m_radius.name());
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Radius
-        if (par->attribute("name") == "Radius") {
-            
-            // Read parameter
-            m_radius.read(*par);
-            
-            //TODO: Check parameter
-            
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Radius\" parameter.");
-    }
+    // Read parameters
+    m_radius.read(*radius);
 
     // Return
     return;
@@ -478,41 +457,11 @@ void GModelSpatialRadialDisk::write(GXmlElement& xml) const
     // Write disk location
     GModelSpatialRadial::write(xml);
 
-    // If XML element has 2 nodes (which should be the location nodes)
-    // then append 1 parameter node
-    if (xml.elements() == 2) {
-        xml.append(GXmlElement("parameter name=\"Radius\""));
-    }
+    // Get or create parameters
+    GXmlElement* radius = gammalib::xml_need_par(G_WRITE, xml, m_radius.name());
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || npars != 3) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Disk model requires exactly 3 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[1] = {0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Radius
-        if (par->attribute("name") == "Radius") {
-            m_radius.write(*par);
-            npar[0]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Radius\" parameter.");
-    }
+    // Write parameters
+    m_radius.write(*radius);
 
     // Return
     return;

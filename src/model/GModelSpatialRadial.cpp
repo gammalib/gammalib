@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadial.cpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -215,66 +215,40 @@ double GModelSpatialRadial::eval(const GPhoton& photon,
  ***************************************************************************/
 void GModelSpatialRadial::read(const GXmlElement& xml)
 {
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
+    // Read RA/DEC parameters
+    if (gammalib::xml_has_par(xml, "RA") && gammalib::xml_has_par(xml, "DEC")) {
 
-    // Verify that XML element has at least 2 parameters
-    if (xml.elements() < 2 || npars < 2) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Radial model requires at least 2 parameters.");
+        // Get parameters
+        const GXmlElement* ra  = gammalib::xml_get_par(G_READ, xml, "RA");
+        const GXmlElement* dec = gammalib::xml_get_par(G_READ, xml, "DEC");
+
+        // Read parameters
+        m_ra.read(*ra);
+        m_dec.read(*dec);
+
     }
 
-    // Extract model parameters
-    bool has_glon = false;
-    bool has_glat = false;
-    int  npar[2]  = {0, 0};
-    for (int i = 0; i < npars; ++i) {
+    // ... otherwise read GLON/GLAT parameters
+    else {
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
+        // Get parameters
+        const GXmlElement* glon = gammalib::xml_get_par(G_READ, xml, "GLON");
+        const GXmlElement* glat = gammalib::xml_get_par(G_READ, xml, "GLAT");
 
-        // Handle RA/GLON
-        if (par->attribute("name") == "RA") {
-            m_ra.read(*par);
-            npar[0]++;
-        }
-        else if (par->attribute("name") == "GLON") {
-            m_ra.read(*par);
-            npar[0]++;
-            has_glon = true;
-        }
+        // Read parameters
+        m_ra.read(*glon);
+        m_dec.read(*glat);
 
-        // Handle DEC/GLAT
-        else if (par->attribute("name") == "DEC") {
-            m_dec.read(*par);
-            npar[1]++;
-        }
-        else if (par->attribute("name") == "GLAT") {
-            m_dec.read(*par);
-            npar[1]++;
-            has_glat = true;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check if we have to convert GLON/GLAT into RA/DEC
-    if (has_glon && has_glat) {
+        // Convert into RA/DEC
         GSkyDir dir;
         dir.lb_deg(ra(), dec()),
         m_ra.value(dir.ra_deg());
         m_dec.value(dir.dec_deg());
+
+        // Set names to RA/DEC
         m_ra.name("RA");
         m_dec.name("DEC");
-    }
-    else if (has_glon || has_glat) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require either \"RA\"/\"DEC\" or \"GLON\"/\"GLAT\".");
-    }
 
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"RA\"/\"DEC\" and \"GLON\"/\"GLAT\" parameters.");
     }
 
     // Return
@@ -319,47 +293,13 @@ void GModelSpatialRadial::write(GXmlElement& xml) const
               "Radial model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 2 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"RA\""));
-        xml.append(GXmlElement("parameter name=\"DEC\""));
-    }
+    // Get or create parameters
+    GXmlElement* ra  = gammalib::xml_need_par(G_WRITE, xml, m_ra.name());
+    GXmlElement* dec = gammalib::xml_need_par(G_WRITE, xml, m_dec.name());
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has at least 2 parameters
-    if (xml.elements() < 2 || npars < 2) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Radial source model requires at least 2 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[2] = {0, 0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle RA
-        if (par->attribute("name") == "RA") {
-            npar[0]++;
-            m_ra.write(*par);
-        }
-
-        // Handle DEC
-        else if (par->attribute("name") == "DEC") {
-            npar[1]++;
-            m_dec.write(*par);
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"RA\" and \"DEC\" parameters.");
-    }
+    // Write parameters
+    m_ra.write(*ra);
+    m_dec.write(*dec);
 
     // Return
     return;

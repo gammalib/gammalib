@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.cpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -417,32 +417,11 @@ void GModelSpatialRadialGauss::read(const GXmlElement& xml)
     // Read Gaussian location
     GModelSpatialRadial::read(xml);
 
-    // Extract model parameters
-    int  npar[1] = {0};
-    for (int i = 0; i < npars; ++i) {
+    // Get parameters
+    const GXmlElement* sigma = gammalib::xml_get_par(G_READ, xml, m_sigma.name());
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Gaussian width
-        if (par->attribute("name") == "Sigma") {
-            
-            // Read parameter
-            m_sigma.read(*par);
-            
-            //TODO: Check parameter
-            
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Sigma\" parameters.");
-    }
+    // Read parameters
+    m_sigma.read(*sigma);
 
     // Return
     return;
@@ -476,41 +455,11 @@ void GModelSpatialRadialGauss::write(GXmlElement& xml) const
     // Write Gaussian location
     GModelSpatialRadial::write(xml);
 
-    // If XML element has 2 nodes (which should be the location nodes)
-    // then append 1 parameter node
-    if (xml.elements() == 2) {
-        xml.append(GXmlElement("parameter name=\"Sigma\""));
-    }
+    // Get or create parameters
+    GXmlElement* sigma = gammalib::xml_need_par(G_WRITE, xml, m_sigma.name());
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || npars != 3) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Point source model requires exactly 3 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[1] = {0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Sigma
-        if (par->attribute("name") == "Sigma") {
-            m_sigma.write(*par);
-            npar[0]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Sigma\" parameter.");
-    }
+    // Write parameters
+    m_sigma.write(*sigma);
 
     // Return
     return;

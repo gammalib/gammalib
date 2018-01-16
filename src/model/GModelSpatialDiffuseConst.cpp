@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseConst.cpp - Spatial isotropic model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -422,7 +422,7 @@ double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
 void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
 {
     // Get value parameter
-    const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
+    const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, m_value.name());
 
     // Read value parameter
     m_value.read(*par);
@@ -462,7 +462,7 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
     }
 
     // Get or create Value parameter
-    GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Value");
+    GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_value.name());
 
     // Write parameter
     m_value.write(*par);

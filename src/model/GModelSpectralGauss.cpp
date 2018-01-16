@@ -503,48 +503,15 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralGauss::read(const GXmlElement& xml)
 {
-    // Set number of parameters
-    const int n_pars = 3;
+    // Get parameters
+    const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
+    const GXmlElement* mean  = gammalib::xml_get_par(G_READ, xml, m_mean.name());
+    const GXmlElement* sigma = gammalib::xml_get_par(G_READ, xml, m_sigma.name());
 
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != n_pars || xml.elements("parameter") != n_pars) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Gaussian model requires exactly 3 parameters.");
-    }
-
-    // Extract model parameters
-    int npar[] = {0, 0, 0};
-    for (int i = 0; i < n_pars; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle normalization
-        if (par->attribute("name") == "Normalization") {
-            m_norm.read(*par);
-            npar[0]++;
-        }
-
-        // Handle mean
-        else if (par->attribute("name") == "Mean") {
-            m_mean.read(*par);
-            npar[1]++;
-        }
-
-        // Handle sigma
-        else if (par->attribute("name") == "Sigma") {
-            m_sigma.read(*par);
-            npar[2]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Normalization\", \"Mean\", and \"Sigma\""
-              " parameters.");
-    }
+    // Read parameters
+    m_norm.read(*norm);
+    m_mean.read(*mean);
+    m_sigma.read(*sigma);
 
     // Return
     return;
@@ -576,62 +543,24 @@ void GModelSpectralGauss::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "Gaussian");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "Gaussian") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"Gaussian\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 3 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Normalization\""));
-        xml.append(GXmlElement("parameter name=\"Mean\""));
-        xml.append(GXmlElement("parameter name=\"Sigma\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* mean  = gammalib::xml_need_par(G_WRITE, xml, m_mean.name());
+    GXmlElement* sigma = gammalib::xml_need_par(G_WRITE, xml, m_sigma.name());
 
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Power law model requires exactly 3 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0};
-    for (int i = 0; i < 3; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle normalization
-        if (par->attribute("name") == "Normalization") {
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle mean
-        else if (par->attribute("name") == "Mean") {
-            npar[1]++;
-            m_mean.write(*par);
-        }
-
-        // Handle sigma
-        else if (par->attribute("name") == "Sigma") {
-            npar[2]++;
-            m_sigma.write(*par);
-        }
-
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 ) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Normalization\", \"Mean\" and \"Sigma\""
-              " parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    m_mean.write(*mean);
+    m_sigma.write(*sigma);
 
     // Return
     return;

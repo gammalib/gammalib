@@ -608,7 +608,6 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
     }
 
     // Set sky map file name
-    //xml.attribute("file", m_filename);
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // If XML element has 0 nodes then append parameter node. The name

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.cpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Christoph Deil                              *
+ *  copyright (C) 2011-2018 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -477,47 +477,13 @@ void GModelSpatialRadialShell::read(const GXmlElement& xml)
     // Read shell location
     GModelSpatialRadial::read(xml);
 
-    // Extract remaining model parameters. Note that we have to loop over
-    // all parameters to find the remaining 2 parameters that are
-    // implemented by this class (the location is implemented by the base
-    // class)
-    int npar[2] = {0, 0};
-    for (int i = 0; i < npars; ++i) {
+    // Get parameters
+    const GXmlElement* radius = gammalib::xml_get_par(G_READ, xml, m_radius.name());
+    const GXmlElement* width  = gammalib::xml_get_par(G_READ, xml, m_width.name());
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Radius
-        if (par->attribute("name") == "Radius") {
-            
-            // Read parameter
-            m_radius.read(*par);
-            
-            //TODO: Check parameter
-            
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-        // Handle Width
-        else if (par->attribute("name") == "Width") {
-            
-            // Read parameter
-            m_width.read(*par);
-            
-            //TODO: Check parameter
-            
-            // Increment parameter counter
-            npar[1]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Radius\" and \"Width\" parameters.");
-    }
+    // Read parameters
+    m_radius.read(*radius);
+    m_width.read(*width);
 
     // Return
     return;
@@ -552,48 +518,13 @@ void GModelSpatialRadialShell::write(GXmlElement& xml) const
     // Write shell location
     GModelSpatialRadial::write(xml);
 
-    // If XML element has 2 nodes (which should be the location nodes)
-    // then append 2 parameter nodes
-    if (xml.elements() == 2) {
-        xml.append(GXmlElement("parameter name=\"Radius\""));
-        xml.append(GXmlElement("parameter name=\"Width\""));
-    }
+    // Get or create parameters
+    GXmlElement* radius = gammalib::xml_need_par(G_WRITE, xml, m_radius.name());
+    GXmlElement* width  = gammalib::xml_need_par(G_WRITE, xml, m_width.name());
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Shell source model requires exactly 4 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[2] = {0, 0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Radius
-        if (par->attribute("name") == "Radius") {
-            m_radius.write(*par);
-            npar[0]++;
-        }
-
-        // Handle Width
-        else if (par->attribute("name") == "Width") {
-            m_width.write(*par);
-            npar[1]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Radius\" and \"Width\" parameters.");
-    }
+    // Write parameters
+    m_radius.write(*radius);
+    m_width.write(*width);
 
     // Return
     return;
