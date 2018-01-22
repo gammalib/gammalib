@@ -6,7 +6,8 @@ Getting GammaLib
 .. toctree::
    :maxdepth: 1
 
+   install_conda
+   install_source
    download
-   install
    release_history/index
 
