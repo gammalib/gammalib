@@ -8,6 +8,7 @@ Getting GammaLib
 
    install_conda
    install_source
+   install_devel
    download
    release_history/index
 

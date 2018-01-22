@@ -1,28 +1,32 @@
-.. _sec_installation:
+.. _sec_install_source:
 
-Installation
-============
+Installation from source code
+=============================
+
+Compiling GammaLib from source is the recommended method to install the package
+in case that you do not use Anaconda (if you use Anaconda, please follow
+the instructions at :ref:`sec_install_conda`, and better do not try to compile
+the source code against your Anaconda Python installation). You also need to
+compile from source if you want to use the development version of GammaLib.
 
 .. note ::
-
    These installation instructions apply to gammalib-1.1.0 and
-   later. gammalib-1.1.0 has been built, installed and tested
+   later. gammalib-1.1.0 was built, installed and tested
    successfully on Debian, Ubuntu, Mandriva, OpenSUSE, Scientific Linux,
    CentOS, Mac OS X, FreeBSD, and OpenSolaris (using gcc), so
-   hopefully it also installs on your distribution. In case you encounter
-   problems, please post a report on the bug tracker or send an e-mail to the
-   `mailing list <mailto:ctools@irap.omp.eu>`_.
+   hopefully it also installs on your distribution.
+   **Windows is not supported.**
+   In case you encounter problems, please post a report on the bug tracker or
+   send an e-mail to the `mailing list <mailto:ctools@irap.omp.eu>`_.
 
-.. _getting:
 
 Getting GammaLib
 ----------------
 
 The latest version of the GammaLib source code, documentation, and
 example programs are available on the World-Wide Web from
-`http://cta.irap.omp.eu/ctools/download.html <http://cta.irap.omp.eu/ctools/download.html>`_.
+`http://cta.irap.omp.eu/gammalib/download.html <http://cta.irap.omp.eu/gammalib/download.html>`_.
 
-.. _prerequisits:
 
 Prerequisites
 -------------
@@ -43,7 +47,9 @@ and installed from the source files (for details, please refer to the
 installation instructions on the
 `HEASARC <http://heasarc.gsfc.nasa.gov/fitsio>`_ site). We recommend
 installation of cfitsio in the default GammaLib install directory as a
-shared library by typing ::
+shared library by typing
+
+.. code-block:: bash
 
    $ ./configure --prefix=/usr/local/gamma
    $ make shared
@@ -71,53 +77,27 @@ the Python development package including the ``Python.h`` header file needs
 to be installed on your system.
 
 
-.. _build:
-
 Building GammaLib
 -----------------
 
-.. note ::
-
-   You will now learn how to build the GammaLib library from the source files.
-   For Mac OS X there exist also binary packages that are bundled together 
-   with ctools, and we recommend using directly these binary packages. The
-   Mac OS X binary packages can be downloaded 
-   `here <http://cta.irap.omp.eu/ctools/download.html>`_.
-
-.. note ::
-
-   If you need the latest source code from the git repository that has not 
-   yet been released you may also clone the gammalib git repository using ::
-
-   $ git clone https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git
-
-   In case you encounter an SSL certificat problem, type ::
-
-   $ export GIT_SSL_NO_VERIFY=true
-
-   before cloning from git. Step then in the cloned ``gammalib`` directory
-   and type ::
-
-   $ git checkout devel
-   $ ./autogen.sh
-
-   This will make sure that you use the development trunk. It also
-   creates the configuration file that is needed to configure 
-   GammaLib before compilation. Continue then with the procedure below
-   starting with ``./configure``.
-
 To build GammaLib from the source files, download the latest release
 tarball, save it in an appropriate location,
-and type ::
+and type
+
+.. code-block:: bash
 
    $ tar xvfz gammalib-x.y.z.tar.gz
 
 where ``x.y.z`` is the version number of the library. Step in the created
-directory using ::
+directory using
+
+.. code-block:: bash
 
    $ cd gammalib-x.y.z
 
-and build GammaLib by typing ::
+and build GammaLib by typing
+
+.. code-block:: bash
 
    $ ./configure
    $ make
@@ -127,30 +107,49 @@ Makefiles for your particular system, the make command compiles the
 source files and builds the C++ library and Python module. Type
 ``./configure`` and not simply ``configure`` to ensure that the configuration
 script in the current directory is used and not some other system-wide
-configuration script. By default, the install directory is set to 
-``/usr/local/gamma``. To change the install directory, provide an optional
-``--prefix`` argument, for example ::
+configuration script.
+
+.. note::
+   To accelerate compilation you may type
+
+   .. code-block:: bash
+
+      $ make -j8
+
+   which will instruct the automake system to perform a parallelized compilation,
+   where ``8`` specifies the maximum number of parallel threads (set this number
+   to about twice the number of cores you have available).
+
+By default, the install directory is set to ``/usr/local/gamma``. To change the
+install directory, provide an optional ``--prefix`` argument, for example
+
+.. code-block:: bash
 
    $ ./configure --prefix=/usr/local
 
 If cfitsio and/or readline is not installed in a standard location for
 libraries (such as ``/usr/lib`` or ``/usr/local/lib``), you can specify
 the appropriate location(s) using the ``LDFLAGS`` (for the library
-directory) and ``CPPFLAGS`` (for the include directory) options::
+directory) and ``CPPFLAGS`` (for the include directory) options
+
+.. code-block:: bash
 
    $ ./configure LDFLAGS='-L/opt/local/lib' CPPFLAGS='-I/opt/local/include'
 
-You can find a full list of configuration options using ::
+You can find a full list of configuration options using
+
+.. code-block:: bash
 
    $ ./configure --help
 
-.. _test:
 
 Testing GammaLib
 ----------------
 
 Before you install GammaLib you should test the C++ library and Python 
-module by typing::
+module by typing
+
+.. code-block:: bash
 
    $ make check
 
@@ -174,16 +173,19 @@ Eventually, loading the shared cfitsio and/or readline libraries may
 fail during the test if the libraries are not located in standard
 locations. In this case, add the library directories to the
 ``LD_LIBRARY_PATH`` environment variables (``DYLD_LIBRARY_PATH`` on Mac OS
-X), e.g. ::
+X), e.g.
+
+.. code-block:: bash
 
    $ export LD_LIBRARY_PATH=/opt/local/lib:$LD_LIBRARY_PATH
 
-.. _install:
 
 Installing GammaLib
 -------------------
 
-Now you are ready to install GammaLib by typing ::
+Now you are ready to install GammaLib by typing
+
+.. code-block:: bash
 
    $ make install
 
@@ -192,7 +194,6 @@ case that you need administrator privileges to access the install
 directory. If you do not have such privileges, chose an install directory
 that you can access using the ``--prefix`` option.
 
-.. _setup:
 
 Setting up your environment
 ---------------------------
@@ -217,13 +218,11 @@ If you use C shell or a variant then add the following to your
    setenv GAMMALIB /usr/local/gamma
    source $GAMMALIB/bin/gammalib-init.csh
 
-.. _documentation:
 
 Installing documentation
 ------------------------
 
 .. note ::
-
    The documentation of the latest GammaLib release can be found at
    `http://cta.irap.omp.eu/gammalib/ <http://cta.irap.omp.eu/gammalib/>`_.
    The documentation corresponding to the git development branch can be
@@ -251,19 +250,25 @@ complete documentation of the implemented C++ classes in a set of html
 pages. In addition, it will create a set of man files that can be accessed 
 using the ``man`` command.
 
-To build and install all documentation, type the following::
+To build and install all documentation, type the following
+
+.. code-block:: bash
 
    $ ./configure
    $ make doc
    $ make install
 
-To build only user documentation, type::
+To build only user documentation, type
+
+.. code-block:: bash
 
    $ ./configure
    $ make sphinx
    $ make install
 
-and to build only Doxygen documentation, type::
+and to build only Doxygen documentation, type
+
+.. code-block:: bash
 
    $ ./configure
    $ make doxygen
@@ -273,7 +278,9 @@ The Doxygen documentation will be installed into
 ``$(prefix)/share/doc/gammalib/html/doxygen`` and can be browsed using a
 regular web browser.
 
-To check man support, type for example ::
+To check man support, type for example
+
+.. code-block:: bash
 
    $ man GObservations
 
