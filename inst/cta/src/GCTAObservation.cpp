@@ -1699,10 +1699,10 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     hdu.card("CREATOR",  "GammaLib",   "Program which created the file");
     hdu.card("TELESCOP", instrument(), "Telescope");
     hdu.card("OBS_ID",   obs_id(),     "Observation identifier");
-    hdu.card("DATE_OBS", date_obs,     "Observation start date");
-    hdu.card("TIME_OBS", time_obs,     "Observation start time");
-    hdu.card("DATE_END", date_end,     "Observation end date");
-    hdu.card("TIME_END", time_end,     "Observation end time");
+    hdu.card("DATE-OBS", date_obs,     "Observation start date");
+    hdu.card("TIME-OBS", time_obs,     "Observation start time");
+    hdu.card("DATE-END", date_end,     "Observation end date");
+    hdu.card("TIME-END", time_end,     "Observation end time");
 
     // Set observation time information
     hdu.card("TSTART",   tstart, "[s] Mission time of start of observation");

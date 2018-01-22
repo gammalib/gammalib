@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-16 January 2018
+22 January 2018
 
 
 1. Introduction
@@ -252,6 +252,9 @@ also position fitting is now possible for Fermi-LAT (#604, #2183).
 
 20. CTA interface
 -----------------
+Change DATE_OBS, DATE_END, TIME_OBS and TIME_END FITS keywords into DATA-OBS,
+DATE-END, TIME-OBS and TIME-END.
+
 If a non-point source model is fitted in an On/Off fitting an exception is thrown,
 since On/Off fitting so far only is correct for point source models (#2296).
 

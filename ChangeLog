@@ -1,8 +1,10 @@
-2018-01-16
+2018-01-22
 
         * Version 1.5.0 released
         =========================
 
+        Change DATE_OBS, DATE_END, TIME_OBS and TIME_END FITS keywords into DATA-OBS,
+          DATE-END, TIME-OBS and TIME-END
         Non-point source model throws exception in On/Off fitting (#2296)
         Set reference time to CTA reference time in GCTAEventcube, GCTAEventList and
           GCTACubeExposure (#2295)
