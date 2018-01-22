@@ -1778,7 +1778,7 @@ void TestGCTAObservation::test_unbinned_obs(void)
         test_value(run.deadc(), 0.95);
         test_value(run.ra_obj(), 0.0);
         test_value(run.dec_obj(), 0.0);
-        test_value(run.obs_id(), 0);
+        test_value(run.id(), "0");
         test_value(run.pointing().dir().ra_deg(), 83.63);
         test_value(run.pointing().dir().dec_deg(), 22.01);
         test_try_success();
@@ -1804,7 +1804,7 @@ void TestGCTAObservation::test_unbinned_obs(void)
         test_value(run.deadc(), 0.95);
         test_value(run.ra_obj(), 0.0);
         test_value(run.dec_obj(), 0.0);
-        test_value(run.obs_id(), 0);
+        test_value(run.id(), "0");
         test_value(run.pointing().dir().ra_deg(), 83.63);
         test_value(run.pointing().dir().dec_deg(), 22.01);
         test_try_success();
@@ -1852,7 +1852,7 @@ void TestGCTAObservation::test_unbinned_obs(void)
         test_value(run->deadc(), 0.95);
         test_value(run->ra_obj(), 0.0);
         test_value(run->dec_obj(), 0.0);
-        test_value(run->obs_id(), 0);
+        test_value(run->id(), "00001");
         test_value(run->pointing().dir().ra_deg(), 83.63);
         test_value(run->pointing().dir().dec_deg(), 22.01);
         test_try_success();

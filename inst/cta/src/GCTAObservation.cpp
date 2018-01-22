@@ -1532,7 +1532,6 @@ void GCTAObservation::init_members(void)
     m_response = NULL;
     m_pointing.clear();
     m_off_regions.clear();
-    m_obs_id        = 0;
     m_ontime        = 0.0;
     m_livetime      = 0.0;
     m_deadc         = 1.0;
@@ -1561,7 +1560,6 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_bgdfile       = obs.m_bgdfile;
     m_pointing      = obs.m_pointing;
     m_off_regions   = obs.m_off_regions;
-    m_obs_id        = obs.m_obs_id;
     m_ontime        = obs.m_ontime;
     m_livetime      = obs.m_livetime;
     m_deadc         = obs.m_deadc;
@@ -1635,15 +1633,18 @@ void GCTAObservation::read_attributes(const GFitsHDU& hdu)
     m_livetime = (hdu.has_card("LIVETIME")) ? hdu.real("LIVETIME") : 0.0;
 
     // Read optional attributes
-    m_object     = (hdu.has_card("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
-    m_deadc      = (hdu.has_card("DEADC"))    ? hdu.real("DEADC") : 0.0;
-    m_ra_obj     = (hdu.has_card("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
-    m_dec_obj    = (hdu.has_card("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
-    m_obs_id     = (hdu.has_card("OBS_ID"))   ? hdu.integer("OBS_ID") : 0;
-    double alt   = (hdu.has_card("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
-    double az    = (hdu.has_card("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
-    m_instrument = (hdu.has_card("TELESCOP")) ? hdu.string("TELESCOP") : "CTA";
-    m_n_tels     = (hdu.has_card("N_TELS"))   ? hdu.integer("N_TELS") : 0;
+    m_object       = (hdu.has_card("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
+    m_deadc        = (hdu.has_card("DEADC"))    ? hdu.real("DEADC") : 0.0;
+    m_ra_obj       = (hdu.has_card("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
+    m_dec_obj      = (hdu.has_card("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
+    std::string id = (hdu.has_card("OBS_ID"))   ? hdu.string("OBS_ID") : "";
+    double alt     = (hdu.has_card("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
+    double az      = (hdu.has_card("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
+    m_instrument   = (hdu.has_card("TELESCOP")) ? hdu.string("TELESCOP") : "CTA";
+    m_n_tels       = (hdu.has_card("N_TELS"))   ? hdu.integer("N_TELS") : 0;
+
+    // Set attributes
+    this->id(id);
 
     // Kluge: compute DEADC from livetime and ontime instead of using the
     // keyword value as the original event lists had this values badly
@@ -1698,7 +1699,7 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     // Set observation information
     hdu.card("CREATOR",  "GammaLib",   "Program which created the file");
     hdu.card("TELESCOP", instrument(), "Telescope");
-    hdu.card("OBS_ID",   obs_id(),     "Observation identifier");
+    hdu.card("OBS_ID",   id(),         "Observation identifier");
     hdu.card("DATE-OBS", date_obs,     "Observation start date");
     hdu.card("TIME-OBS", time_obs,     "Observation start time");
     hdu.card("DATE-END", date_end,     "Observation end date");

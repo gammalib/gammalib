@@ -98,3 +98,5 @@ Clean up
   Changed ``GObservation::statistics()`` to ``GObservation::statistic()``
 * [`2237 <https://cta-redmine.irap.omp.eu/issues/2237>`_] -
   Use ``CSTAT`` and ``CHI2`` instead of ``POISSON`` and ``GAUSSIAN`` for statistic
+* [`1836 <https://cta-redmine.irap.omp.eu/issues/1836>`_] -
+  Remove ``GCTAObservation::obs_id()`` methods

@@ -38,6 +38,7 @@
         Add GSkyMap division operator for Python 3.x (#2122)
         Add time parameter to GApplicationPar class (#1864)
         Add time string constructor and set method to GTime class (#1864)
+        Remove GCTAObservation::obs_id() methods (#1836)
         Use GNdarray to store GSkyMap pixels and add smooth() method (#1729)
         Use XML support functions in all model classes (#1430)
         Add GSkyRegionMap class (#1121)

@@ -90,7 +90,7 @@ The following methods have been added:
 - GCOMInstDir(GSkyDir&, double&)
 
 The following methods have been removed:
-- n.a.
+- GCTAObservation::obs_id()
 
 The following methods have been renamed:
 - GObservation::statistic() was GObservation::statistics()
@@ -287,6 +287,10 @@ Redistribution Matrix File (#2210).
 
 The WSTAT statistics was added to GCTAOnOffObservation for maximum likelihood
 fitting (#2209).
+
+The GCTAObservation::obs_id() methods have been removed since the generic
+observation identified string, accessed via the GObservation::id() methods,
+will now be used (#1836).
 
 
 21. COMPTEL interface

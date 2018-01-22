@@ -134,8 +134,6 @@ public:
     GEbounds            ebounds(void) const;
     void                object(const std::string& object);
     const std::string&  object(void) const;
-    void                obs_id(const int& id);
-    const int&          obs_id(void) const;
     void                ra_obj(const double& ra);
     const double&       ra_obj(void) const;
     void                dec_obj(const double& dec);
@@ -166,7 +164,6 @@ protected:
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
     GCTAPointing  m_pointing;      //!< Pointing direction
     GSkyRegions   m_off_regions;   //!< Off regions
-    int           m_obs_id;        //!< Observation ID
     double        m_ontime;        //!< Ontime (seconds)
     double        m_livetime;      //!< Livetime (seconds)
     double        m_deadc;         //!< Deadtime correction (livetime/ontime)
@@ -347,31 +344,6 @@ inline
 const std::string& GCTAObservation::object(void) const
 {
     return m_object;
-}
-
-
-/***********************************************************************//**
- * @brief Set CTA observation identifier
- *
- * @param[in] id Observation identifier.
- ***************************************************************************/
-inline
-void GCTAObservation::obs_id(const int& id)
-{
-    m_obs_id = id;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return CTA observation identifier
- *
- * @return Observation identifier.
- ***************************************************************************/
-inline
-const int& GCTAObservation::obs_id(void) const
-{
-    return m_obs_id;
 }
 
 
