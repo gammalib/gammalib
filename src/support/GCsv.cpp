@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCsv.cpp - Comma-separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -441,10 +441,15 @@ void GCsv::load(const GFilename& filename, const std::string& sep)
 
         // Get line with leading and trailing whitespace removed
         std::string sline =
-            gammalib::strip_chars(gammalib::strip_whitespace(std::string(line)),"\n");
+        gammalib::strip_chars(gammalib::strip_whitespace(std::string(line)),"\n");
 
-        // Skip line if empty
+        // Skip empty lines
         if (sline.length() == 0) {
+            continue;
+        }
+
+        // Skip lines starting with a hash as those are comment lines
+        if (sline[0] == '#') {
             continue;
         }
 

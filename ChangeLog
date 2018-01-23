@@ -1,4 +1,4 @@
-2018-01-22
+2018-01-23
 
         * Version 1.5.0 released
         =========================
@@ -8,9 +8,11 @@
         Non-point source model throws exception in On/Off fitting (#2296)
         Set reference time to CTA reference time in GCTAEventcube, GCTAEventList and
           GCTACubeExposure (#2295)
+        GCsv interprets lines in CSV files starting with # as comment lines (#2291)
         Add GPha::counts_spectrum() and GPha::backscal_spectrum() methods (#2290)
         Add GNdarray sign(), operator*= and operator/= (#2290)
-        Add GSkyMap::counts() and GSkyMap::flux() methods and clip() friend operator (#2290)
+        Add GSkyMap::counts() and GSkyMap::flux() methods and clip() friend operator
+          (#2290)
         Add GSkyMap::array() method to Python interface (#2285)
         Add Off sky regions to GCTAObservation (#2284)
         By default require cfitsio library (#2265)

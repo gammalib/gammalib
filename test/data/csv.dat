@@ -1,5 +1,6 @@
 ra,dec,duration
 10.0,-12.0,1800.0
 12.0,-10.0,1000.0
+# This is a comment line
 14.0,-8.0,100.0
 

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.0
 
-22 January 2018
+23 January 2018
 
 
 1. Introduction
@@ -199,7 +199,7 @@ a FITS file map. All positive pixels will define the region (#1121).
 
 13. Support module
 ------------------
-None
+The GCsv class now accepts lines staring with # as comment lines (#2291).
 
 
 14. XML module
