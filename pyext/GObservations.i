@@ -94,6 +94,8 @@ public:
     void          set(GObservations* obs);
     double        npred(void) const;
     GMatrixSparse hessian(const GOptimizerPars& pars);
+    GMatrixSparse covariance(void) const;
+    void          save(const GFilename& filename) const;
 };
 %nestedworkaround GObservations::likelihood;
 %{

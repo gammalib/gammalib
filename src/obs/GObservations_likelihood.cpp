@@ -388,7 +388,6 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
     //const double step_tolerance     = 0.1;
     //const double gradient_tolerance = 0.02;
 
-
     // Create working copy of parameters
     GOptimizerPars wrk_pars = pars;
 
@@ -598,22 +597,33 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
  * that are stored with the observations and multiplies the covariance
  * matrix with the scaling factors of the model parameters. Hence the
  * covariance matrix is covariance with respect to the true model values.
+ *
+ * If the curvature matrix does not exist, an empty covariance matrix is
+ * returned.
  ***************************************************************************/
 GMatrixSparse GObservations::likelihood::covariance(void) const
 {
-    // Compute covariance matrix (circumvent const correctness)
-    GMatrixSparse covmat =
-        const_cast<GObservations::likelihood*>(this)->curvature()->invert();
+    // Initialise covariance matrix
+    GMatrixSparse covmat;
 
-    // Get model parameters
-    GOptimizerPars pars = m_this->m_models.pars();
+    // Get pointer on curvature matrix. Only continue if pointer is valid
+    GMatrixSparse* curvature = const_cast<GObservations::likelihood*>(this)->curvature();
+    if (curvature != NULL) {
 
-    // Multiply covariance matrix elements with scale factors
-    for (int row = 0; row < covmat.rows(); ++row) {
-        for (int col = 0; col < covmat.columns(); ++col) {
-            covmat(row,col) *= pars[row]->scale() * pars[col]->scale();
+        // Compute covariance matrix
+        covmat = curvature->invert();
+
+        // Get model parameters
+        GOptimizerPars pars = m_this->m_models.pars();
+
+        // Multiply covariance matrix elements with scale factors
+        for (int row = 0; row < covmat.rows(); ++row) {
+            for (int col = 0; col < covmat.columns(); ++col) {
+                covmat(row,col) *= pars[row]->scale() * pars[col]->scale();
+            }
         }
-    }
+
+    } // endif: curvature matrix was valid
 
     // Return covariance matrix
     return covmat;
