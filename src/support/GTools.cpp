@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1045,15 +1045,16 @@ double gammalib::plaw_photon_flux(const double& emin, const double& emax,
 
         // Compute photon flux. Computations dependend on the exponent. We
         // add here a kluge to assure numerical accuracy.
-        double xmin     = emin/epivot;
-        double xmax     = emax/epivot;
         double exponent = gamma + 1.0;
         if (std::abs(exponent) > 1.0e-11) {
-            flux = epivot / exponent * (std::pow(xmax, exponent) -
-                                        std::pow(xmin, exponent));
+            double xmin = emin   / epivot;
+            double xmax = emax   / epivot;
+            flux        = epivot / exponent * (std::pow(xmax, exponent) -
+                                               std::pow(xmin, exponent));
         }
         else {
-            flux = epivot * (std::log(xmax) - std::log(xmin));
+            double ratio = emax / emin;
+            flux         = epivot * std::log(ratio);
         }
 
     } // endif: emax > emin
@@ -1092,16 +1093,17 @@ double gammalib::plaw_energy_flux(const double& emin, const double& emax,
 
         // Compute energy flux. Computations dependend on the exponent. We
         // add here a kluge to assure numerical accuracy.
-        double xmin     = emin/epivot;
-        double xmax     = emax/epivot;
         double exponent = gamma + 2.0;
         double epivot2  = epivot * epivot;
         if (std::abs(exponent) > 1.0e-11) {
-            flux = epivot2 / exponent * (std::pow(xmax, exponent) -
-                                         std::pow(xmin, exponent));
+            double xmin = emin    / epivot;
+            double xmax = emax    / epivot;
+            flux        = epivot2 / exponent * (std::pow(xmax, exponent) -
+                                                std::pow(xmin, exponent));
         }
         else {
-            flux = epivot2 * (std::log(xmax) - std::log(xmin));
+            double ratio = emax / emin;
+            flux         = epivot2 * (std::log(ratio));
         }
 
     } // endif: emax > emin

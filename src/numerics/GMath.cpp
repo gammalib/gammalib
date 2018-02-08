@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GMath.cpp - Mathematical functions                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -483,4 +483,49 @@ double gammalib::modulo(const double& v1, const double& v2)
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns the integral of a power law
+ *
+ * @param[in] x1 First x value.
+ * @param[in] f1 Power law value at first x value.
+ * @param[in] x2 Second x value.
+ * @param[in] f2 Power law value at second x value.
+ * @return Integral of power law
+ *
+ * Analytically computes
+ *
+ * \f[\int_{x_1}^{x_2} F_1 \left( \frac{x}{x_1} \right)^m dx\f]
+ *
+ * where
+ *
+ * \f[m = \frac{\ln (F_2 / F_1)}{\ln (x_2 / x_1)}\f]
+ *
+ * and
+ * \f$F_1\f$ is the power law value at point \f$x_1\f$ and
+ * \f$F_2\f$ is the power law value at point \f$x_2\f$.
+ ***************************************************************************/
+double gammalib::plaw_integral(const double& x1,
+                               const double& f1,
+                               const double& x2,
+                               const double& f2)
+{
+    // Compute power law slope
+    double fratio = std::log(f2/f1);
+    double xratio = std::log(x2/x1);
+    double slope  = fratio / xratio;
+
+    // Compute integral
+    double integral;
+    if (slope != -1.0) {
+        integral = f1 / (slope + 1.0) * (x2 * std::pow(x2/x1, slope) - x1);
+    }
+    else {
+        integral = f1 * x1 * xratio;
+    }
+
+    // Return integral
+    return integral;
 }

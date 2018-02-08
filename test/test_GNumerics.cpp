@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.cpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,8 @@ void TestGNumerics::set(void)
     m_sigma = 2.5;
 
     // Append tests
+    append(static_cast<pfunction>(&TestGNumerics::test_math),
+           "Test GMath");
     append(static_cast<pfunction>(&TestGNumerics::test_ndarray),
            "Test GNdarray");
     append(static_cast<pfunction>(&TestGNumerics::test_fft),
@@ -77,6 +79,20 @@ TestGNumerics* TestGNumerics::clone(void) const
 {
     // Clone test suite
     return new TestGNumerics(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Test mathematics functions
+ ***************************************************************************/
+void TestGNumerics::test_math(void)
+{
+    // Test power law integration
+    test_value(gammalib::plaw_integral(2.0, 3.0, 9.0, 5.0), 29.112577);
+    test_value(gammalib::plaw_integral(2.0, 9.0, 9.0, 2.0), 27.073393);
+
+    // Exit test
+    return;
 }
 
 
