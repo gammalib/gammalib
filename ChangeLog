@@ -1,7 +1,13 @@
+2018-02-06
+
+        * Version 1.6.0 released
+        ========================
+
+
 2018-01-23
 
         * Version 1.5.0 released
-        =========================
+        ========================
 
         Change DATE_OBS, DATE_END, TIME_OBS and TIME_END FITS keywords into DATA-OBS,
           DATE-END, TIME-OBS and TIME-END
@@ -76,7 +82,7 @@
 2017-07-28
 
         * Version 1.4.0 released
-        =========================
+        ========================
 
         Add GCTAEventBin::ipix() and ieng() setter methods (#2171)
         Write response information into simulated observation definition file (#2170)
@@ -99,7 +105,7 @@
 2017-06-06
 
         * Version 1.3.0 released
-        =========================
+        ========================
 
         Add header card keyword map to GFitsHeader for fast access (#2120)
         Correct set names of spatial GLON/GLAT model parameters (#2113)
@@ -148,7 +154,7 @@
 2017-02-24
 
         * Version 1.2.0 released
-        =========================
+        ========================
 
         Reduce length of LAT response filenames by unzipping a number of energy dispersion files (#1931)
         Skip zero livetime observations in stacked cubes for CTA (#1920)
@@ -190,7 +196,7 @@
 2016-07-24
 
         * Version 1.1.0 released
-        =========================
+        ========================
 
         Check on model parameters in spectral registry (#1824)
         Rename spectral model components (#1821)
@@ -273,7 +279,7 @@
 2015-12-18
 
         * Version 1.0.0 released
-        =========================
+        ========================
 
         Ignore errors for El Capitan post processing (#1605)
         Read only mandatory columns in GCTAEventList (#1600)

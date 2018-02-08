@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.5.0
+New Features and Important Changes in GammaLib 1.6.0
 
-23 January 2018
+8 February 2018
 
 
 1. Introduction
@@ -12,113 +12,38 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- GSkyRegionMap
-- GCOMD1Response
-- GCOMD2Response
-- GCOMInstChars
-- GCOMIaq
-- GCOMRoi
-- GCOMEventAtom
-- GCOMEventList
-- GCOMTim
-- GCOMOad
-- GCOMOads
-- GCOMDri
-- GCOMStatus
+- none
 
 The following classes have been removed:
-- n.a.
+- none
 
 The following classes have been renamed:
-- n.a.
+- none
 
 The following methods have been added:
-- GTime(std::string&)
-- GTime(std::string&, GTimeReference&)
-- GTime::set(std::string&)
-- GTime::set(std::string&, GTimeReference&)
-- GApplicationPar::time(GTimeReference&)
-- GApplicationPar::time(GTime&)
-- GModelSpectralNodes(GModelSpectral&, GEnergies&)
-- GFitsTableCol::scale(double&, double&)
-- GEbounds::operator==(GEbounds&, GEbounds&)
-- GEbounds::operator!=(GEbounds&, GEbounds&)
-- GSkyMap::smooth(std::string&, double&)
-- GSkyMap::array(int&) - only for Python interface
-- GSkyMap::counts()
-- GSkyMap::flux()
-- clip(GSkyMap&, double&)
-- GNdarray::shape(std::vector<int>&)
-- GPha::operator+=(GPha&)
-- GPha::operator-=(GPha&)
-- GPha::operator*=(double&)
-- GPha::operator/=(double&)
-- GPha::areascal(int&, double&)
-- GPha::areascal(int&)
-- GPha::backscal(int&, double&)
-- GPha::backscal(int&)
-- GPha::counts_spectrum()
-- GPha::backscal_spectrum()
-- operator+(GPha&, GPha&)
-- operator-(GPha&, GPha&)
-- operator*(GPha&, double&)
-- operator*(double&, double&)
-- operator/(GPha&, double&)
-- GArf::operator+=(GArf&)
-- GArf::operator-=(GArf&)
-- GArf::operator*=(double&)
-- GArf::operator/=(double&)
-- GArf::operator(std::string&, GEnergy&)
-- operator+(GArf&, GArf&)
-- operator-(GArf&, GArf&)
-- operator*(GArf&, double&)
-- operator*(double&, double&)
-- operator/(GArf&, double&)
-- GRmf::operator+=(GRmf&)
-- GRmf::operator-=(GRmf&)
-- GRmf::operator*=(double&)
-- GRmf::operator/=(double&)
-- operator+(GRmf&, GRmf&)
-- operator-(GRmf&, GRmf&)
-- operator*(GRmf&, double&)
-- operator*(double&, double&)
-- operator/(GRmf&, double&)
-- GCTAObservation::off_regions(GSkyRegions&)
-- GCTAObservation::off_regions()
-- GCTAOnOffObservation(GObservations&)
-- GCTAOnOffObservation(GPha&, GPha&, GArf&, GRmf&)
-- GCOMInstDir(GSkyDir&, double&)
+- none
 
 The following methods have been removed:
-- GCTAObservation::obs_id()
+- none
 
 The following methods have been renamed:
-- GObservation::statistic() was GObservation::statistics()
-- GObservation::statistic(std::string&) was GObservation::statistics(std::string&)
+- none
 
 The arguments for the following methods have been changed:
-- GCOMResponse(GCaldb&, std::string&)
-- GCOMObservation::response(GCaldb&, std::string&)
+- none
 
 The return value of the following methods has been changed:
-- n.a.
+- none
 
 
 3. Configuration
 -----------------
-A code generator script codegen.py has been added to the dev folder to ease
-the addition of code extensions to GammaLib.
-
-The configure script now aborts if cfitsio is not found. If GammaLib should be
-compiled without cfitsio the --without-cfitsio option has to be specified
-explicitly (#2265).
+None
 
 
 4. Application module
 ---------------------
-A time parameter with type "t" has was to allow specifying time values in
-various formats to time systems to an application. Methods were added to set
-and retrieve the time value (#1864).
+None
 
 
 5. Base module
@@ -128,9 +53,7 @@ None
 
 6. FITS I/O Interface
 ---------------------
-The GFitsTableCol::scale() method has been added to allow setting the
-TSCALE and TZERO values before reading the column data. The keywords
-that may exist in the FITS file are not affected by the setting (#2191).
+None
 
 
 7. Linear algebra module
@@ -140,38 +63,17 @@ None
 
 8. Model module
 ---------------
-A spectral model constructor was added to GModelSpectralNodes to allow
-conversion of any spectral model into a spectral node model (#2178).
-
-XML support functions are now used in all model classes to simplify the
-code (#1430).
+None
 
 
 9. Numerics module
 ------------------
-Added GNdarray sign() friend operator and operator*= and operator/=
-(#2290).
+None
 
 
 10. Observation module
 ----------------------
-The statistic were renamed. POISSON is now called CSTAT and GAUSSIAN is called
-CHI2. The code still accepts POISSON and GAUSSIAN, but it is recommended to use
-CSTAT and CHI2 instead (#2237).
-
-The GResponse::eval_prob() method was speed up by avoiding computation for the
-case that the spatial response is non-positive. In that case the spectral
-response is no longer evaluated.
-
-A time string constructor and set method was added to GTime to allow
-setting various time formats from a string. Variants exist to set the time in
-the native time reference or in a specific time reference (#1864).
-
-The efficiency of the GGti::contains() method has been improved for subsequent
-checking of sorted times. Now a new time search always starts at the last
-successful index so that the number of search loops is minimized.
-
-Add equality and inequality operators for the GEbounds class.
+None
 
 
 11. Optimization module
@@ -181,25 +83,12 @@ None
 
 12. Sky module
 --------------
-Added GSkyMap::counts() and GSkyMap::flux() methods and clip() frield
-operators that allows clipping of sky map values (#2290)
-
-Added the GSkyMap::array() method to the Python interface to returns the sky
-map pixels as a list of lists (#2285)
-
-Added a GSkyMap division operator that also works under Python 3.x (#2122)
-
-The GNdarray class is now used to store GSkyMap pixels. A GSkyMap::smooth()
-method was added to allow smoothing of sky maps with uniform disk or Gaussian
-shaped kernels (#1729).
-
-The GSkyRegionMap class was added to handle arbitrary sky regions defined using
-a FITS file map. All positive pixels will define the region (#1121).
+None
 
 
 13. Support module
 ------------------
-The GCsv class now accepts lines staring with # as comment lines (#2291).
+None
 
 
 14. XML module
@@ -214,20 +103,7 @@ None
 
 16. Xspec module
 ----------------
-Added GPha::counts_spectrum() and GPha::backscal_spectrum() methods to access
-the GPha content (#2290).
-
-Added arithmetic operators for GPha class to add, subtract, scale and divide
-spectra, and methods to set and retrieve the area and background scaling
-factors.
-
-Added arithmetic operators for GArf class to add, subtract, scale and divide
-Auxiliary Response Files. Add also an operator that returns the content of
-an additional column as function of energy. The operator performs a log-log
-interpolation of the column values.
-
-Added arithmetic operators for GRmf class to add, subtract, scale and divide
-Redistribution Matrix Files.
+None
 
 
 17. Test module
@@ -242,89 +118,14 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-The mean PSF is now updated in GLATResponse::irf(GLATEventBin&, GSource&,
-GObservation&) is the source position has changed by more than 0.01 degrees.
-This is smaller than reasonable values for the TS map computation, hence now
-for each test position the mean PSF gets updated. But it is larger than the
-typical step size in the numerical gradient computation in ctlike, so that
-also position fitting is now possible for Fermi-LAT (#604, #2183).
+None
 
 
 20. CTA interface
 -----------------
-Change DATE_OBS, DATE_END, TIME_OBS and TIME_END FITS keywords into DATA-OBS,
-DATE-END, TIME-OBS and TIME-END.
-
-If a non-point source model is fitted in an On/Off fitting an exception is thrown,
-since On/Off fitting so far only is correct for point source models (#2296).
-
-Set the Good Time Interval time reference to the CTA time reference in
-GCTAEventList, GCTAEventCube and GCTACubeExposure (#2295).
-
-Add Off sky regions attribute to the GCTAObservation class. The Off sky regions
-can be set and accessed using the GCTAObservation::off_regions() method. The
-Off regions filename is also read from and written into the observation
-definition XML file (#2284).
-
-GCTAObservation and GCTAOnOffObservation handle statistic attribute in XML
-file (#2238).
-
-Added GCTAOnOffObservation(GPha&, GPha&, GArf&, GRmf&) constructor to allow
-creation of an On/Off observation from On and Off spectra, an Auxiliary Response
-File and a Redistribution Matrix File (#2231).
-
-Added GCTAOnOffObservation(GObservations&) constructor that creates a stacked
-CTA On/Off observation from all On/Off observations that are found in the
-observation container (#2228).
-
-A GCTAOnOffObservation(GObservations&) constructer has been added to the
-GCTAOnOffObservation class that creates a stacked CTA On/Off observations from
-all On/Off observations that are found in the observation container (#2228).
-
-The GCTAOnOffObservation class now performs a proper response integration over
-the On and Off regions and takes into account the energy dispersion using the
-Redistribution Matrix File (#2210).
-
-The WSTAT statistics was added to GCTAOnOffObservation for maximum likelihood
-fitting (#2209).
-
-The GCTAObservation::obs_id() methods have been removed since the generic
-observation identified string, accessed via the GObservation::id() methods,
-will now be used (#1836).
+None
 
 
 21. COMPTEL interface
 ---------------------
-The GCOMResponse::irf() method no longer returns negative IRF values. This
-happened before due to the interpolation scheme that assumes that IRF values
-are taken at the pixel centre (#2234).
-
-COMPTEL SDA, SDB and ICT response files were added so that the information to
-compute the instrument response for any arbitrary energy band is available
-(#2186).
-
-The classes GCOMD1Response and GCOMD2Response were added to handle the energy
-response of the D1 and D2 modules, respectively. These classes handle reading
-of the SDA and SDB response files (#2186).
-
-The class GCOMInstChar was added to handle the instrument characteristics that
-are necessary to perform the response computation. The class handles reading
-of the ICT file (#2186).
-
-The class GCOMIaq was added to perform the computation of an IAQ response. This
-allows now to generate an own IAQ within GammaLib. Below 10 MeV the resulting
-IAQs are very close to simulated ones from UNH, above there are some deviations.
-Definitely more cross-checking is needed, but for now the functionality is
-there (#2186).
-
-The classes GCOMRoi, GCOMEventAtom and GCOMEventList were added to support
-handling of COMPTEL event lists in EVP FITS format. In addition, the class
-GCOMTim was added to support reading of TIM FITS files. Furthermore the classes
-GCOMOad and GCOMOads were added to handle the COMPTEL Orbit Aspect Data. And
-finally the class GCOMDri now handles all COMPTEL data cubes (#2187).
-
-The class GCOMStatus was added to handle a mission wide database of D1 and D2
-module status that forms now part of the COMPTEL calibration database (#2187).
-
-The COMPTEL Phibar fitting background model now writes out a format that can be
-used again (#2184).
+None

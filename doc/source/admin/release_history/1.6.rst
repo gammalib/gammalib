@@ -1,0 +1,37 @@
+.. _1.6:
+
+GammaLib 1.6 release
+====================
+
+Overview
+--------
+
+GammaLib 1.6 is a major release that adds significant functionality.
+
+In particular, this release provides:
+
+* ...
+
+
+Bug fixes
+---------
+
+* ...
+
+
+Improvements
+------------
+
+* ...
+
+
+New features
+------------
+
+* ...
+
+
+Clean up
+--------
+
+* ...
