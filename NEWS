@@ -21,7 +21,10 @@ The following classes have been renamed:
 - none
 
 The following methods have been added:
-- gammalib::plaw_integral
+- gammalib::atan2(double&, double&)
+- gammalib::plaw_integral(double&, double&, double&, double&)
+- GCTAInstDir::theta()
+- GCTAInstDir::phi()
 
 The following methods have been removed:
 - none
@@ -68,8 +71,11 @@ None
 
 9. Numerics module
 ------------------
-The gammalib::plaw_integral() function has been added to compute the area under
-a power law between two boundaries.
+The gammalib::atan2() function was added to compute the arc tangens of a ratio
+in radians (#2308).
+
+The gammalib::plaw_integral() function was added to compute the area under a
+power law between two boundaries (#2308).
 
 
 10. Observation module
@@ -124,7 +130,8 @@ None
 
 20. CTA interface
 -----------------
-None
+A GCTAInstDir::theta() and GCTAInstDir::phi() methods were added that return the
+distance to the camera centre in radians and the azimuth angle, respectively (#2308).
 
 
 21. COMPTEL interface

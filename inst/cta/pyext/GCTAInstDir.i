@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAInstDir.i - CTA instrument direction class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,8 @@ public:
     void          dety(const double &y);
     const double& detx(void) const;
     const double& dety(void) const;
+    double        theta(void) const;
+    double        phi(void) const;
 };
 
 

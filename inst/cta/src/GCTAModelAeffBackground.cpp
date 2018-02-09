@@ -318,18 +318,14 @@ double GCTAModelAeffBackground::eval(const GEvent&       event,
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
-    // Set DETX and DETY in instrument direction
+    // Set instrument direction
     GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
-
-    // Set theta and phi from instrument coordinates
-    double theta = std::sqrt(inst_dir.detx() * inst_dir.detx() +
-                             inst_dir.dety() * inst_dir.dety());
-    double phi   = gammalib::atan2d(inst_dir.dety(), inst_dir.detx()) *
-                   gammalib::deg2rad;
 
     // Evaluate function
     double logE = event.energy().log10TeV();
-    double spat = (*aeff)(logE, theta, phi,
+    double spat = (*aeff)(logE,
+                          inst_dir.theta(),
+                          inst_dir.phi(),
                           cta->pointing().zenith(),
                           cta->pointing().azimuth(), false);
     double spec = (spectral() != NULL)

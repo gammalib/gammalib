@@ -86,6 +86,29 @@ const std::string cta_onoff_onreg = datadir+"/onoff_region_on.reg";
 
 
 /***********************************************************************//**
+ * @brief Set miscellaneous CTA classes test methods
+ ***************************************************************************/
+void TestGCTA::set(void)
+{
+    // Set test name
+    name("Miscellaneous CTA classes");
+
+    // Append GCTAInstDir tests to test suite
+    append(static_cast<pfunction>(&TestGCTA::test_instdir),
+           "Test GCTAInstDir class");
+
+    // Append GCTAPointing tests to test suite
+    append(static_cast<pfunction>(&TestGCTA::test_pointing_load_table),
+           "Test loading of table into GCTAPointing instance");
+    append(static_cast<pfunction>(&TestGCTA::test_pointing_interpolate_altaz),
+           "Test alt/az interpolation given a time");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set CTA response test methods
  ***************************************************************************/
 void TestGCTAResponse::set(void)
@@ -133,18 +156,6 @@ void TestGCTAResponse::set(void)
 
 
 /***********************************************************************//**
- * @brief Clone test suite
- *
- * @return Pointer to deep copy of test suite.
- ***************************************************************************/
-TestGCTAResponse* TestGCTAResponse::clone(void) const
-{
-    // Clone test suite
-    return new TestGCTAResponse(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Set CTA model test methods
  ***************************************************************************/
 void TestGCTAModel::set(void)
@@ -162,18 +173,6 @@ void TestGCTAModel::set(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone test suite
- *
- * @return Pointer to deep copy of test suite.
- ***************************************************************************/
-TestGCTAModel* TestGCTAModel::clone(void) const
-{
-    // Clone test suite
-    return new TestGCTAModel(*this);
 }
 
 
@@ -205,18 +204,6 @@ void TestGCTAObservation::set(void)
 
 
 /***********************************************************************//**
- * @brief Clone test suite
- *
- * @return Pointer to deep copy of test suite.
- ***************************************************************************/
-TestGCTAObservation* TestGCTAObservation::clone(void) const
-{
-    // Clone test suite
-    return new TestGCTAObservation(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Set CTA optimizer test methods
  ***************************************************************************/
 void TestGCTAOptimize::set(void)
@@ -242,33 +229,46 @@ void TestGCTAOptimize::set(void)
 
 
 /***********************************************************************//**
- * @brief Clone test suite
- *
- * @return Pointer to deep copy of test suite.
+ * @brief Test GCTAInstDir class
  ***************************************************************************/
-TestGCTAOptimize* TestGCTAOptimize::clone(void) const
+void TestGCTA::test_instdir(void)
 {
-    // Clone test suite
-    return new TestGCTAOptimize(*this);
-}
+    // Check content of empty instance
+    GCTAInstDir instdir1;
+    test_value(instdir1.dir().ra(), 0.0, "Right Ascension of empty instance");
+    test_value(instdir1.dir().dec(), 0.0, "Declination of empty instance");
+    test_value(instdir1.detx(), 0.0, "DETX of empty instance");
+    test_value(instdir1.dety(), 0.0, "DETY of empty instance");
+    test_value(instdir1.theta(), 0.0, "Theta of empty instance");
+    test_value(instdir1.phi(), 0.0, "Phi of empty instance");
 
+    // Set content
+    double ra   = 83.6331 * gammalib::deg2rad;
+    double dec  = 22.0145 * gammalib::deg2rad;
+    double detx =     0.5 * gammalib::deg2rad;
+    double dety =     1.5 * gammalib::deg2rad;
+    GSkyDir dir;
+    dir.radec(ra, dec);
+    instdir1.dir(dir);
+    instdir1.detx(detx);
+    instdir1.dety(dety);
 
+    // Check content of filled instance
+    test_value(instdir1.dir().ra(), ra, "Right Ascension of filled instance");
+    test_value(instdir1.dir().dec(), dec, "Declination of filled instance");
+    test_value(instdir1.detx(), detx, "DETX of filled instance");
+    test_value(instdir1.dety(), dety, "DETY of filled instance");
+    test_value(instdir1.theta(), 0.02759607852, "Theta of filled instance");
+    test_value(instdir1.phi(), 1.24904577, "Phi of filled instance");
 
-
-/***********************************************************************//**
- * @brief Set CTA pointing test methods
- ***************************************************************************/
-void TestGCTAPointing::set(void)
-{
-    // Set test name
-    name("GCTAPointing");
-
-    // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAPointing::test_load_table), 
-           "Test load pointing from table");
-
-    append(static_cast<pfunction>(&TestGCTAPointing::test_interpolate_altaz),
-           "Test alt/az interpolation given a time");
+    // Check copying of instance
+    GCTAInstDir instdir2(instdir1);
+    test_value(instdir2.dir().ra(), ra, "Right Ascension of copied instance");
+    test_value(instdir2.dir().dec(), dec, "Declination of copied instance");
+    test_value(instdir2.detx(), detx, "DETX of copied instance");
+    test_value(instdir2.dety(), dety, "DETY of copied instance");
+    test_value(instdir2.theta(), 0.02759607852, "Theta of copied instance");
+    test_value(instdir2.phi(), 1.24904577, "Phi of copied instance");
 
     // Return
     return;
@@ -276,23 +276,14 @@ void TestGCTAPointing::set(void)
 
 
 /***********************************************************************//**
- * @brief Clone test suite
- *
- * @return Pointer to deep copy of test suite.
- ***************************************************************************/
-TestGCTAPointing* TestGCTAPointing::clone(void) const
-{
-    // Clone test suite
-    return new TestGCTAPointing(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Test ability to load a CTA pointing table
  ***************************************************************************/
-void TestGCTAPointing::test_load_table(void)
+void TestGCTA::test_pointing_load_table(void)
 {
+    // Allocate classes
     GCTAPointing pnt;
+
+    // Load pointing table
     pnt.load(cta_point_table);
 
     // Return
@@ -303,12 +294,13 @@ void TestGCTAPointing::test_load_table(void)
 /***********************************************************************//**
  * @brief Test interpolation of alt/az pointing dir as a function of time
  ***************************************************************************/
-void TestGCTAPointing::test_interpolate_altaz(void)
+void TestGCTA::test_pointing_interpolate_altaz(void)
 {
-
+    // Allocate classes
     GCTAObservation run;
+    GCTAPointing    pnt;
 
-    GCTAPointing pnt;
+    // Load pointing table
     pnt.load(cta_point_table);
 
     // Test an out-of bounds time
@@ -405,7 +397,6 @@ void TestGCTAResponse::test_response_aeff(void)
     for (int i = 0; i < 30; ++i) {
         eng.TeV(pow(10.0, -1.7 + 0.1*double(i)));
         double aeff = rsp.aeff(0.0, 0.0, 0.0, 0.0, eng.log10TeV());
-        //std::cout << eng << " " << eng.log10TeV() << " " << aeff << std::endl;
         sum += aeff;
     }
     test_value(sum, ref, 0.1, "Effective area verification");
@@ -2299,17 +2290,17 @@ int main(void)
     bool success = true;
 
     // Create test suites and append them to the container
+    TestGCTA                test;
     TestGCTAResponse        rsp;
     TestGCTAModel           model;
     TestGCTAOptimize        opt;
     TestGCTAObservation     obs;
-    TestGCTAPointing        pnt;
     testsuites.append(rsp);
     if (has_data) {
+        testsuites.append(test);
     	testsuites.append(model);
         testsuites.append(opt);
         testsuites.append(obs);
-        testsuites.append(pnt);
     }
 
     // Run the testsuites

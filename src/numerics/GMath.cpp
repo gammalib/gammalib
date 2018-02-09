@@ -92,6 +92,39 @@ double gammalib::acos(const double& arg)
 
 
 /***********************************************************************//**
+ * @brief Compute arc tangens in radians
+ *
+ * @param[in] y Nominator
+ * @param[in] x Denominator
+ *
+ * This code has been adapted from the WCSLIB function wcstrig.c::atan2d().
+ ***************************************************************************/
+double gammalib::atan2(const double& y, const double& x)
+{
+    // Check for rounding errors
+    if (y == 0.0) {
+        if (x >= 0.0) {
+            return 0.0;
+        }
+        else if (x < 0.0) {
+            return pi;
+        }
+    }
+    else if (x == 0.0) {
+        if (y > 0.0) {
+            return pihalf;
+        }
+        else if (y < 0.0) {
+            return -pihalf;
+        }
+    }
+
+    // Return arc sine
+    return (std::atan2(y,x));
+}
+
+
+/***********************************************************************//**
  * @brief Compute cosine of angle in degrees
  *
  * @param[in] angle Angle in degrees

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAInstDir.hpp - CTA instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,8 +38,9 @@
  *
  * @brief CTA instrument direction class.
  *
- * The CTA instrument direction is an encapsulation of a sky direction
- * as CTA is an imaging device.
+ * The CTA instrument direction defines the measured (or reconstructed)
+ * direction of an event. The instrument direction is given in sky and
+ * detector coordinates.
  ***************************************************************************/
 class GCTAInstDir : public GInstDir {
 
@@ -67,6 +68,8 @@ public:
     void           dety(const double &y);
     const double&  detx(void) const;
     const double&  dety(void) const;
+    double         theta(void) const;
+    double         phi(void) const;
 
 protected:
     // Protected methods
@@ -90,6 +93,21 @@ inline
 std::string GCTAInstDir::classname(void) const
 {
     return ("GCTAInstDir");
+}
+
+
+/***********************************************************************//**
+ * @brief Set sky direction
+ *
+ * @param[in] dir Sky direction.
+ *
+ * Set the sky direction.
+ ***************************************************************************/
+inline
+void GCTAInstDir::dir(const GSkyDir& dir)
+{
+    m_dir = dir;
+    return;
 }
 
 
@@ -122,16 +140,31 @@ const GSkyDir& GCTAInstDir::dir(void) const
 
 
 /***********************************************************************//**
- * @brief Set sky direction
+ * @brief Set DETX coordinate (in radians)
  *
- * @param[in] dir Sky direction.
+ * @param[in] x DETX coordinate (in radians).
  *
- * Set the sky direction.
+ * Set DETX coordinate.
  ***************************************************************************/
 inline
-void GCTAInstDir::dir(const GSkyDir& dir)
+void GCTAInstDir::detx(const double &x)
 {
-    m_dir = dir;
+    m_detx = x;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set DETY coordinate (in radians)
+ *
+ * @param[in] y DETY coordinate (in radians).
+ *
+ * Set DETY coordinate.
+ ***************************************************************************/
+inline
+void GCTAInstDir::dety(const double &y)
+{
+    m_dety = y;
     return;
 }
 
@@ -165,32 +198,41 @@ const double& GCTAInstDir::dety(void) const
 
 
 /***********************************************************************//**
- * @brief Set DETX coordinate (in radians)
+ * @brief Return offset angle (in radians)
  *
- * @param[in] x DETX coordinate (in radians).
+ * @return Offset angle (in radians).
  *
- * Set DETX coordinate.
+ * Returns the offset angle from the camera centre (in radians). The offset
+ * angle \f$\theta\f$ is computed using
+ *
+ * \f[\theta = \sqrt{{\rm DETX}^2 + {\rm DETY}^2}\f]
+ *
+ * where \f${\rm DETX}\f$ and \f${\rm DETY}\f$ are the detector coordinates.
  ***************************************************************************/
 inline
-void GCTAInstDir::detx(const double &x)
+double GCTAInstDir::theta(void) const
 {
-    m_detx = x;
-    return;
+    return (std::sqrt(m_detx*m_detx + m_dety*m_dety));
 }
 
 
 /***********************************************************************//**
- * @brief Set DETY coordinate (in radians)
+ * @brief Return azimuth angle (in radians)
  *
- * @param[in] y DETY coordinate (in radians).
+ * @return Azimuth angle (in radians).
  *
- * Set DETY coordinate.
+ * Returns the azimuth angle from the camera centre (in radians). The
+ * azimuth angle \f$\phi\f$ is computed using
+ *
+ * \f[\phi = \arctan \left( \frac{{\rm DETY}}{{\rm DETX}} \right)\f]
+ *
+ * where \f${\rm DETX}\f$ and \f${\rm DETY}\f$ are the detector coordinates.
+ * The \c atan2(DETY,DETX) function is used for the computation.
  ***************************************************************************/
 inline
-void GCTAInstDir::dety(const double &y)
+double GCTAInstDir::phi(void) const
 {
-    m_dety = y;
-    return;
+    return (gammalib::atan2(m_dety, m_detx));
 }
 
 #endif /* GCTAINSTDIR_HPP */

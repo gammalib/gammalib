@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,30 @@
 
 
 /***********************************************************************//**
+ * @class TestGCTA
+ *
+ * @brief Test suite for miscellaneous CTA classes
+ *
+ * This class defines a unit test suite for miscellaneous CTA classes
+ ***************************************************************************/
+class TestGCTA : public GTestSuite {
+public:
+
+    // Constructors and destructors
+    TestGCTA(void) : GTestSuite() {}
+    virtual ~TestGCTA(void) {}
+
+    // Methods
+    virtual void        set(void);
+    virtual TestGCTA*   clone(void) const { return new TestGCTA(*this); }
+    virtual std::string classname(void) const { return "TestGCTA"; }
+    void                test_instdir(void);
+    void                test_pointing_load_table(void);
+    void                test_pointing_interpolate_altaz(void);
+};
+
+
+/***********************************************************************//**
  * @class TestGCTAResponse
  *
  * @brief Test suite for CTA response class testing
@@ -46,7 +70,7 @@ public:
 
     // Methods
     virtual void              set(void);
-    virtual TestGCTAResponse* clone(void) const;
+    virtual TestGCTAResponse* clone(void) const { return new TestGCTAResponse(*this); }
     virtual std::string       classname(void) const { return "TestGCTAResponse"; }
     void                      test_response(void);
     void                      test_response_aeff(void);
@@ -90,7 +114,7 @@ public:
 
     // Methods
     virtual void           set(void);
-    virtual TestGCTAModel* clone(void) const;
+    virtual TestGCTAModel* clone(void) const { return new TestGCTAModel(*this); }
     virtual std::string    classname(void) const { return "TestGCTAModel"; }
     void                   test_model_cube_bgd(void);
     void                   test_model_irf_bgd(void);
@@ -113,7 +137,7 @@ public:
 
     // Methods
     virtual void                 set(void);
-    virtual TestGCTAObservation* clone(void) const;
+    virtual TestGCTAObservation* clone(void) const { return new TestGCTAObservation(*this); }
     virtual std::string          classname(void) const { return "TestGCTAObservation"; }
     void                         test_event_bin(void);
     void                         test_event_cube(void);
@@ -139,7 +163,7 @@ public:
 
     // Methods
     virtual void              set(void);
-    virtual TestGCTAOptimize* clone(void) const;
+    virtual TestGCTAOptimize* clone(void) const { return new TestGCTAOptimize(*this); }
     virtual std::string       classname(void) const { return "TestGCTAOptimize"; }
     void                      test_unbinned_optimizer(void);
     void                      test_binned_optimizer(void);
@@ -150,29 +174,6 @@ public:
 protected:
     // Protected methods
     void check_results(const GObservations& obs, const double* results);
-};
-
-
-/***********************************************************************//**
- * @class TestGCTAPointing
- *
- * @brief Test suite for CTA pointing class testing
- *
- * This class defines a unit test suite for the CTA response class.
- ***************************************************************************/
-class TestGCTAPointing : public GTestSuite {
-public:
-
-    // Constructors and destructors
-    TestGCTAPointing(void) : GTestSuite() {}
-    virtual ~TestGCTAPointing(void) {}
-
-    // Methods
-    virtual void              set(void);
-    virtual TestGCTAPointing* clone(void) const;
-    virtual std::string       classname(void) const { return "TestGCTAPointing"; }
-    void                      test_load_table(void);
-    void                      test_interpolate_altaz(void);
 };
 
 #endif /* TEST_CTA_HPP */

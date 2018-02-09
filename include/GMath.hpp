@@ -61,6 +61,7 @@ namespace gammalib {
 
     // Trigonometric functions
     double acos(const double& arg);
+    double atan2(const double& y, const double& x);
     double cosd(const double& angle);
     double sind(const double& angle);
     double tand(const double& angle);
