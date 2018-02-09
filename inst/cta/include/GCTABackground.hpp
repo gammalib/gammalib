@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTABackground.hpp - CTA background model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,11 +30,14 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GFilename.hpp"
-#include "GModelSpectralNodes.hpp"
-#include "GCTAInstDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GRan;
+class GEnergy;
+class GTime;
+class GFilename;
+class GCTAInstDir;
+class GModelSpectralNodes;
 
 
 /***********************************************************************//**
@@ -68,6 +71,9 @@ public:
                                           const GTime& time,
                                           GRan& ran) const = 0;
     virtual const GModelSpectralNodes& spectrum(void) const = 0;
+    virtual double                     rate_ebin(const GCTAInstDir& dir,
+                                                 const GEnergy&     emin,
+                                                 const GEnergy&     emax) const = 0;
     virtual std::string                print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:

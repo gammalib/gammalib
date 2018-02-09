@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTABackgroundPerfTable.i - CTA performance table background class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,9 @@ public:
                                   const GTime& time,
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
+    double                     rate_ebin(const GCTAInstDir& dir,
+                                         const GEnergy&     emin,
+                                         const GEnergy&     emax) const;
 
     // Methods
     int           size(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTABackgroundPerfTable.hpp - CTA performance table background class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,8 +30,10 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GFilename.hpp"
+#include "GEnergies.hpp"
+#include "GNodeArray.hpp"
+#include "GModelSpectralNodes.hpp"
 #include "GCTABackground.hpp"
-#include "GCTAResponseTable.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -68,6 +70,9 @@ public:
                                   const GTime& time,
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
+    double                     rate_ebin(const GCTAInstDir& dir,
+                                         const GEnergy&     emin,
+                                         const GEnergy&     emax) const;
     std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Methods
@@ -82,6 +87,7 @@ private:
     void   free_members(void);
     double solidangle(void) const;
     void   init_mc_cache(void) const;
+    double rate(const double& logE) const;
 
     // Radial integration class (used by solidangle() method). Note that
     // the sigma parameter is given in rad^2
@@ -99,10 +105,12 @@ private:
     };
 
     // Members
-    GFilename           m_filename;   //!< Name of background response file
-    GNodeArray          m_logE;       //!< log(E) nodes for background interpolation
-    std::vector<double> m_background; //!< Background rate
-    double              m_sigma;      //!< Sigma for offset angle computation (0=none)
+    GFilename           m_filename;       //!< Name of background response file
+    GEnergies           m_energy;         //!< Vector of energies
+    GNodeArray          m_log10_energy;   //!< log10(E) nodes for background interpolation
+    std::vector<double> m_background;     //!< Background rate
+    std::vector<double> m_log_background; //!< log(background rate)
+    double              m_sigma;          //!< Sigma for offset angle computation (0=none)
 
     // Monte Carlo cache
     mutable GModelSpectralNodes m_mc_spectrum; //!< Background spectrum
@@ -142,7 +150,7 @@ GFilename GCTABackgroundPerfTable::filename(void) const
 inline
 int GCTABackgroundPerfTable::size(void) const
 {
-    return (m_logE.size());
+    return (m_energy.size());
 }
 
 

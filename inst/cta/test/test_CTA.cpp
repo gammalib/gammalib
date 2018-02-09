@@ -64,9 +64,10 @@ const std::string cta_aeff_bgd_xml  = datadir+"/cta_model_aeff_bgd.xml";
 const std::string cta_caldb_king    = cta_caldb+"/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king      = "irf_file.fits";
 const std::string cta_psf_table     = caldbdir+"/psf_table.fits[PSF_2D_TABLE]";
-const std::string cta_edisp_perf    = caldbdir+"/cta_dummy_irf.dat";
+const std::string cta_perf_table    = caldbdir+"/cta_dummy_irf.dat";
 const std::string cta_edisp_rmf     = caldbdir+"/dc1/rmf.fits";
 const std::string cta_edisp_2D      = caldbdir+"/edisp_matrix.fits";
+const std::string cta_bgd_3D        = caldbdir+"/edisp_matrix.fits";
 const std::string cta_modbck_fit    = datadir+"/bg_test.fits";
 const std::string cta_point_table   = datadir+"/crab_pointing.fits";
 
@@ -83,6 +84,9 @@ const std::string cta_stacked_bkgcube   = datadir+"/stacked_bkgcube.fits";
 const std::string cta_onoff_obs   = datadir+"/onoff_obs.xml";
 const std::string cta_onoff_model = datadir+"/onoff_model.xml";
 const std::string cta_onoff_onreg = datadir+"/onoff_region_on.reg";
+
+/* __ Debug definitions __________________________________________________ */
+//#define G_COMPUTE_REF_RATE_EBIN    //!< Compute reference rate
 
 
 /***********************************************************************//**
@@ -129,26 +133,30 @@ void TestGCTAResponse::set(void)
            "Test Table point spread function");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf),
            "Test integrated point spread function");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp),
-           "Test energy dispersion");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_PerfTable),
-           "Test Performance Table energy dispersion");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_RMF),
-           "Test RMF energy dispersion");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_2D),
-           "Test 2D energy dispersion");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse),
            "Test diffuse IRF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse),
            "Test diffuse IRF integration");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp),
+           "Test GCTAEdisp class");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_PerfTable),
+           "Test GCTAEdispPerfTable class");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_RMF),
+           "Test GCTAEdispRmf class");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_2D),
+           "Test GCTAEdisp2D class");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bgd_PerfTable),
+           "Test GCTABackgroundPerfTable class");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bgd_3D),
+           "Test GCTABackground3D class");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube),
-           "Test exposure cube");
+           "Test GCTACubeExposure class");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube),
-           "Test point spread function cube");
+           "Test GCTACubePsf class");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispcube),
-           "Test energy dispersion cube");
+           "Test GCTACubeEdisp class");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_bkgcube),
-           "Test background cube");
+           "Test GCTACubeBackground class");
 
     // Return
     return;
@@ -608,179 +616,6 @@ void TestGCTAResponse::test_response_npsf(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Test CTA Energy Dispersion computation
- *
- * The Energy Dispersion computation is tested by integrating numerically
- * the edisp function. Integration is done in a rather simplistic way, by
- * stepping through the energy range. The integration is done for a set of
- * true energies from 0.1-10 TeV.
- ***************************************************************************/
-void TestGCTAResponse::test_response_edisp(void)
-{
-    // Load response
-    GCTAResponseIrf rsp;
-
-	// Set performance table response
-    rsp.caldb(GCaldb(cta_caldb));
-    rsp.load(cta_irf);
-
-    // Test energy dispersion integration
-    test_response_edisp_integration(rsp);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Test CTA performance table energy dispersion class
- ***************************************************************************/
-void TestGCTAResponse::test_response_edisp_PerfTable(void)
-{
-    // Test GCTAEdispPerfTable constructor
-    test_try("GCTAEdispPerfTable constructor");
-    try {
-        GCTAEdispPerfTable test(cta_edisp_perf);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Load energy dispersion
-    GCTAEdispPerfTable edisp(cta_edisp_perf);
-
-    // Test ebounds_obs and ebounds_src methods
-    test_try("GCTAEdispPerfTable ebounds_obs and ebounds_src methods");
-    try {
-        //std::cout << "TEST EBOUNDS PERFTABLE" << std::endl;
-        // ebounds_obs (for a given logEsrc)
-        //std::cout << edisp.ebounds_obs(-1.0).print(EXPLICIT) << std::endl;
-        // ebounds_src (for a given logEobs)
-        //std::cout << edisp.ebounds_src(2.0).print(EXPLICIT) << std::endl;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test mc method
-    test_try("GCTAEdispPerfTable mc method");
-    try {
-        GRan ran;
-        //std::cout << "TEST MC PERFTABLE" << std::endl;
-        for (int i = 0; i < 20; ++i) {
-            //std::cout << edisp.mc(ran, -1.0).GeV() << std::endl;
-        }
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test normalisation
-    test_edisp_integration(edisp);
-
-    // Return
-    return;
-}
-
-
-
-
-/***********************************************************************//**
- * @brief Test CTA RMF energy dispersion class
- ***************************************************************************/
-void TestGCTAResponse::test_response_edisp_RMF(void)
-{
-    // Test void constructor
-    test_try("GRmf void constructor");
-    try {
-        GRmf rmf;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test source energy boundary constructor
-    test_try("GRmf energy boundary constructor");
-    try {
-        GEbounds ebounds_src(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
-        GRmf     rmf(ebounds_src, ebounds_src);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test observed energy boundary constructor
-    test_try("GRmf energy boundary constructor");
-    try {
-        GEbounds ebounds_obs(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
-        GRmf     rmf(ebounds_obs, ebounds_obs);
-        test_try_success();
-        }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Load RMF
-    GCTAEdispRmf edisp(cta_edisp_rmf);
-
-    // Test if non-diagonal element (below diagonal) is zero
-    test_value(edisp(std::log10(30.0), std::log10(1.0)), 0.0);
-
-    // Test that diagonal element is non-zero
-    //test_value(edisp(std::log10(30.0),std::log10(30.0)), 0.354952753 ,1e-9);
-
-    // Test if non-diagonal element (above diagonal) is zero
-    test_value(edisp(std::log10(1.0), std::log10(30.0)), 0.0);
-
-    // Test normalisation
-    test_edisp_integration(edisp, 0.5, 10.0);
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Test CTA 2D energy dispersion class
- ***************************************************************************/
-void TestGCTAResponse::test_response_edisp_2D(void)
-{
-    // Test void constructor
-    test_try("GCTAEdisp2D void constructor");
-    try {
-        GCTAEdisp2D edisp;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test GCTAEdisp2D file constructor
-    test_try("GCTAEdisp2D file constructor");
-    try {
-        GCTAEdisp2D edisp(cta_edisp_2D);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Load 2D energy dispersion
-    GCTAEdisp2D edisp(cta_edisp_2D);
-
-    // Test normalisation
-    test_edisp_integration(edisp);
-
-
-    // Return
-    return;
-}
-
 
 /***********************************************************************//**
  * @brief Test CTA IRF computation for diffuse source model
@@ -934,6 +769,375 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
 
     // Test Npred
     test_value(npred, ref, 0.2, "Diffuse Npred computation");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA Energy Dispersion computation
+ *
+ * The Energy Dispersion computation is tested by integrating numerically
+ * the edisp function. Integration is done in a rather simplistic way, by
+ * stepping through the energy range. The integration is done for a set of
+ * true energies from 0.1-10 TeV.
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edisp(void)
+{
+    // Load response
+    GCTAResponseIrf rsp;
+
+	// Set performance table response
+    rsp.caldb(GCaldb(cta_caldb));
+    rsp.load(cta_irf);
+
+    // Test energy dispersion integration
+    test_response_edisp_integration(rsp);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA performance table energy dispersion class
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edisp_PerfTable(void)
+{
+    // Test GCTAEdispPerfTable constructor
+    test_try("GCTAEdispPerfTable constructor");
+    try {
+        GCTAEdispPerfTable test(cta_perf_table);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Load energy dispersion
+    GCTAEdispPerfTable edisp(cta_perf_table);
+
+    // Test ebounds_obs and ebounds_src methods
+    test_try("GCTAEdispPerfTable ebounds_obs and ebounds_src methods");
+    try {
+        //std::cout << "TEST EBOUNDS PERFTABLE" << std::endl;
+        // ebounds_obs (for a given logEsrc)
+        //std::cout << edisp.ebounds_obs(-1.0).print(EXPLICIT) << std::endl;
+        // ebounds_src (for a given logEobs)
+        //std::cout << edisp.ebounds_src(2.0).print(EXPLICIT) << std::endl;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test mc method
+    test_try("GCTAEdispPerfTable mc method");
+    try {
+        GRan ran;
+        //std::cout << "TEST MC PERFTABLE" << std::endl;
+        for (int i = 0; i < 20; ++i) {
+            //std::cout << edisp.mc(ran, -1.0).GeV() << std::endl;
+        }
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test normalisation
+    test_edisp_integration(edisp);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA RMF energy dispersion class
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edisp_RMF(void)
+{
+    // Test void constructor
+    test_try("GRmf void constructor");
+    try {
+        GRmf rmf;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test source energy boundary constructor
+    test_try("GRmf energy boundary constructor");
+    try {
+        GEbounds ebounds_src(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
+        GRmf     rmf(ebounds_src, ebounds_src);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test observed energy boundary constructor
+    test_try("GRmf energy boundary constructor");
+    try {
+        GEbounds ebounds_obs(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
+        GRmf     rmf(ebounds_obs, ebounds_obs);
+        test_try_success();
+        }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Load RMF
+    GCTAEdispRmf edisp(cta_edisp_rmf);
+
+    // Test if non-diagonal element (below diagonal) is zero
+    test_value(edisp(std::log10(30.0), std::log10(1.0)), 0.0);
+
+    // Test that diagonal element is non-zero
+    //test_value(edisp(std::log10(30.0),std::log10(30.0)), 0.354952753 ,1e-9);
+
+    // Test if non-diagonal element (above diagonal) is zero
+    test_value(edisp(std::log10(1.0), std::log10(30.0)), 0.0);
+
+    // Test normalisation
+    test_edisp_integration(edisp, 0.5, 10.0);
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Test CTA 2D energy dispersion class
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edisp_2D(void)
+{
+    // Test void constructor
+    test_try("GCTAEdisp2D void constructor");
+    try {
+        GCTAEdisp2D edisp;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GCTAEdisp2D file constructor
+    test_try("GCTAEdisp2D file constructor");
+    try {
+        GCTAEdisp2D edisp(cta_edisp_2D);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Load 2D energy dispersion
+    GCTAEdisp2D edisp(cta_edisp_2D);
+
+    // Test normalisation
+    test_edisp_integration(edisp);
+
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCTABackgroundPerfTable class
+ ***************************************************************************/
+void TestGCTAResponse::test_response_bgd_PerfTable(void)
+{
+    // Set reference values
+    const double ref_rate_below       = 0.000612295557409636;
+    const double ref_rate_above       = 5.74072516267095e-11;
+    const double ref_rate_onaxis      = 3.62782669235078e-05;
+    const double ref_rate_offaxis     = 3.12350491143832e-05;
+    const double ref_rate_ebin_within = 44.9181299290927;
+    const double ref_rate_ebin_below  = 3676.68195289697;
+    const double ref_rate_ebin_above  = 76.2328310391366;
+
+    // Set energies for energy range for rate integration
+    const GEnergy ebelow(10.0, "GeV");
+    const GEnergy emin(1.0, "TeV");
+    const GEnergy emax(10.0, "TeV");
+    const GEnergy eabove(200.0, "TeV");
+
+    // Test GCTABackgroundPerfTable constructor
+    test_try("GCTABackgroundPerfTable constructor");
+    try {
+        GCTABackgroundPerfTable bgd1(cta_perf_table);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Check content of empty instance
+    GCTABackgroundPerfTable bgd1;
+    test_value(bgd1.size(), 0, "Nodes of empty instance");
+    test_value(bgd1.sigma(), 3.0, "Sigma value of empty instance");
+    test_value(bgd1.filename(), "", "Filename of empty instance");
+    test_value(bgd1(0.0, 0.0, 0.0), 0.0,
+        "Onaxis operator value of empty instance");
+    test_value(bgd1(0.0, 0.01, 0.02), 0.0,
+        "Offaxis operator value of empty instance");
+    test_value(bgd1.rate_ebin(GCTAInstDir(), emin, emax), 0.0,
+        "Integrated rate value of empty instance");
+   
+    // Check content of filled instance
+    GCTABackgroundPerfTable bgd2(cta_perf_table);
+    test_value(bgd2.size(), 20, "Nodes of filled instance");
+    test_value(bgd2.sigma(), 3.0, "Sigma value of filled instance");
+    test_value(bgd2.filename(), cta_perf_table, "Filename of filled instance");
+    test_value(bgd2(-2.0, 0.0, 0.0), ref_rate_below,
+        "Operator value of filled instance extrapolated below lowest energy");
+    test_value(bgd2(3.0, 0.0, 0.0), ref_rate_above,
+        "Operator value of filled instance extrapolated above highest energy");
+    test_value(bgd2(0.0, 0.0, 0.0), ref_rate_onaxis,
+        "Onaxis operator value of filled instance");
+    test_value(bgd2(0.0, 0.01, 0.02), ref_rate_offaxis,
+        "Offaxis operator value of filled instance");
+    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, emax), ref_rate_ebin_within,
+        "Integrated rate value of filled instance (within covered energies)");
+    test_value(bgd2.rate_ebin(GCTAInstDir(), ebelow, emax), ref_rate_ebin_below,
+        "Integrated rate value of filled instance (extrapolate below lowest energy)");
+    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, eabove), ref_rate_ebin_above,
+        "Integrated rate value of filled instance (extrapolate above highest energy)");
+    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, emin), 0.0,
+        "Integrated rate value of filled instance for zero interval");
+
+    // Check content of copied instance
+    GCTABackgroundPerfTable bgd3(bgd2);
+    test_value(bgd3.size(), 20, "Nodes of copied instance");
+    test_value(bgd3.sigma(), 3.0, "Sigma value of copied instance");
+    test_value(bgd3.filename(), cta_perf_table, "Filename of copied instance");
+    test_value(bgd3(-2.0, 0.0, 0.0), ref_rate_below,
+        "Operator value of copied instance extrapolated below lowest energy");
+    test_value(bgd3(3.0, 0.0, 0.0), ref_rate_above,
+        "Operator value of copied instance extrapolated above highest energy");
+    test_value(bgd3(0.0, 0.0, 0.0), ref_rate_onaxis,
+        "Onaxis operator value of copied instance");
+    test_value(bgd3(0.0, 0.01, 0.02), ref_rate_offaxis,
+        "Offaxis operator value of copied instance");
+    test_value(bgd3.rate_ebin(GCTAInstDir(), emin, emax), ref_rate_ebin_within,
+        "Integrated rate value of copied instance");
+    test_value(bgd3.rate_ebin(GCTAInstDir(), emin, emin), 0.0,
+        "Integrated rate value of copied instance for zero interval");
+
+    // Compute reference rate
+    #if defined(G_COMPUTE_REF_RATE_EBIN)
+    double  rate          = 0.0;
+    int     nbins         = 10000;
+    GEnergy E             = emin;
+    GEnergy dE            = (eabove-emin)/nbins;
+    for (int i = 0; i < nbins; ++i) {
+        rate += bgd2(E.log10TeV(), 0.0, 0.0) * dE.MeV();
+        E    += dE;
+    }
+    std::cout << rate << std::endl;
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCTABackground3D class
+ ***************************************************************************/
+void TestGCTAResponse::test_response_bgd_3D(void)
+{
+    // Set reference values
+    const double ref_rate_below       =  0.0;
+    const double ref_rate_above       =  0.0;
+    const double ref_rate_onaxis      =  9.7632195934345e-05;
+    const double ref_rate_offaxis     = 13.5162501643753e-05;
+    const double ref_rate_ebin_within = 65.6069433285784;
+    const double ref_rate_ebin_below  = 4647.37614735018;
+    const double ref_rate_ebin_above  = 69.5331125123672;
+
+    // Set energies for energy range for rate integration
+    const GEnergy ebelow(10.0, "GeV");
+    const GEnergy emin(1.0, "TeV");
+    const GEnergy emax(10.0, "TeV");
+    const GEnergy eabove(200.0, "TeV");
+
+    // Test GCTABackground3D constructor
+    test_try("GCTABackground3D constructor");
+    try {
+        GCTABackground3D bgd1(cta_bgd_3D);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Check content of empty instance
+    GCTABackground3D bgd1;
+    test_value(bgd1.table().axes(), 0, "Response table axes of empty instance");
+    test_value(bgd1.filename(), "", "Filename of empty instance");
+    test_value(bgd1(0.0, 0.0, 0.0), 0.0,
+        "Onaxis operator value of empty instance");
+    test_value(bgd1(0.0, 0.01, 0.02), 0.0,
+        "Offaxis operator value of empty instance");
+    test_value(bgd1.rate_ebin(GCTAInstDir(), emin, emax), 0.0,
+        "Integrated rate value of empty instance");
+
+    // Check content of filled instance
+    GCTABackground3D bgd2(cta_bgd_3D);
+    test_value(bgd2.table().axes(), 3, "Response table axes of filled instance");
+    test_value(bgd2.filename(), cta_bgd_3D, "Filename of filled instance");
+    test_value(bgd2(-2.0, 0.0, 0.0), ref_rate_below,
+        "Operator value of filled instance extrapolated below lowest energy");
+    test_value(bgd2(3.0, 0.0, 0.0), ref_rate_above,
+        "Operator value of filled instance extrapolated above highest energy");
+    test_value(bgd2(0.0, 0.0, 0.0), ref_rate_onaxis,
+        "Onaxis operator value of filled instance");
+    test_value(bgd2(0.0, 0.01, 0.02), ref_rate_offaxis,
+        "Offaxis operator value of filled instance");
+    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, emax), ref_rate_ebin_within,
+        "Integrated rate value of filled instance");
+    test_value(bgd2.rate_ebin(GCTAInstDir(), ebelow, emax), ref_rate_ebin_below,
+        "Integrated rate value of filled instance (extrapolate below lowest energy)");
+    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, eabove), ref_rate_ebin_above,
+        "Integrated rate value of filled instance (extrapolate above highest energy)");
+    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, emin), 0.0,
+        "Integrated rate value of filled instance for zero interval");
+
+    // Check content of copied instance
+    GCTABackground3D bgd3(bgd2);
+    test_value(bgd3.table().axes(), 3, "Response table axes of copied instance");
+    test_value(bgd3.filename(), cta_bgd_3D, "Filename of copied instance");
+    test_value(bgd3(-2.0, 0.0, 0.0), ref_rate_below,
+        "Operator value of copied instance extrapolated below lowest energy");
+    test_value(bgd3(3.0, 0.0, 0.0), ref_rate_above,
+        "Operator value of copied instance extrapolated above highest energy");
+    test_value(bgd3(0.0, 0.0, 0.0), ref_rate_onaxis,
+        "Onaxis operator value of copied instance");
+    test_value(bgd3(0.0, 0.01, 0.02), ref_rate_offaxis,
+        "Offaxis operator value of copied instance");
+    test_value(bgd3.rate_ebin(GCTAInstDir(), emin, emax), ref_rate_ebin_within,
+        "Integrated rate value of copied instance");
+    test_value(bgd3.rate_ebin(GCTAInstDir(), emin, emin), 0.0,
+        "Integrated rate value of copied instance for zero interval");
+
+    // Compute reference rate
+    #if defined(G_COMPUTE_REF_RATE_EBIN)
+    double  rate          = 0.0;
+    int     nbins         = 10000;
+    GEnergy E             = emin;
+    GEnergy dE            = (eabove-E)/nbins;
+    for (int i = 0; i < nbins; ++i) {
+        rate += bgd2(E.log10TeV(), 0.0, 0.0) * dE.MeV();
+        E    += dE;
+    }
+    std::cout << rate << std::endl;
+    #endif
 
     // Return
     return;

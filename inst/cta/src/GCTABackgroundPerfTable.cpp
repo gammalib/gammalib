@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTABackgroundPerfTable.cpp - CTA performance table background class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GMath.hpp"
 #include "GIntegral.hpp"
 #include "GRan.hpp"
+#include "GCTAInstDir.hpp"
 #include "GCTABackgroundPerfTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -45,7 +46,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_MC            //!< Debug Monte Carlo method
-#define G_LOG_INTERPOLATION   //!< Energy interpolate log10(background rate)
+#define G_LOG_INTERPOLATION   //!< Energy interpolate log(background rate)
 
 /* __ Constants __________________________________________________________ */
 
@@ -163,27 +164,23 @@ GCTABackgroundPerfTable& GCTABackgroundPerfTable::operator=(const GCTABackground
  * @brief Return background rate in units of events/s/MeV/sr
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] detx Tangential coord in nominal sys (rad).
- * @param[in] dety Tangential coord in nominal sys (rad).
+ * @param[in] detx Tangential coordinate in nominal system (rad).
+ * @param[in] dety Tangential coordinate in nominal system (rad).
+ * @return Background rate (events/s/MeV/sr)
  *
  * Returns the background rate in units of events/s/MeV/sr for a given energy
  * and detector coordinates. The method assures that the background rate
  * never becomes negative.
+ *
+ * If the performance table contains less than 2 nodes an empty value is
+ * returned.
  ***************************************************************************/
 double GCTABackgroundPerfTable::operator()(const double& logE, 
                                            const double& detx, 
                                            const double& dety) const
 {
-    // Get background rate
-    double rate = m_logE.interpolate(logE, m_background);
-    #if defined(G_LOG_INTERPOLATION)
-    rate = std::pow(10.0, rate);
-    #endif
-
-    // Make sure that background rate is not negative
-    if (rate < 0.0) {
-        rate = 0.0;
-    }
+    // Initialise rate
+    double rate = this->rate(logE);
 
     // Optionally add in Gaussian offset angle dependence
     if (m_sigma != 0.0) {
@@ -192,7 +189,7 @@ double GCTABackgroundPerfTable::operator()(const double& logE,
         double scale  = std::exp(-0.5 * arg * arg);
         rate         *= scale;
     }
-    
+
     // Return background rate
     return rate;
 }
@@ -248,8 +245,10 @@ GCTABackgroundPerfTable* GCTABackgroundPerfTable::clone(void) const
 void GCTABackgroundPerfTable::load(const GFilename& filename)
 {
     // Clear arrays
-    m_logE.clear();
+    m_energy.clear();
+    m_log10_energy.clear();
     m_background.clear();
+    m_log_background.clear();
 
     // Allocate line buffer
     const int n = 1000;
@@ -297,13 +296,15 @@ void GCTABackgroundPerfTable::load(const GFilename& filename)
             bgrate = 0.0;
         }
 
-        // Push elements in node array and vector
-        m_logE.append(logE);
-        #if defined(G_LOG_INTERPOLATION)
-        m_background.push_back(std::log10(bgrate));
-        #else
+        // Set energy
+        GEnergy energy;
+        energy.log10TeV(logE);
+
+        // Push elements in node array and vectors
+        m_energy.append(energy);
+        m_log10_energy.append(logE);
         m_background.push_back(bgrate);
-        #endif
+        m_log_background.push_back(std::log(bgrate));
 
     } // endwhile: looped over lines
 
@@ -376,9 +377,96 @@ GCTAInstDir GCTABackgroundPerfTable::mc(const GEnergy& energy,
 
 
 /***********************************************************************//**
+ * @brief Returns background count rate integrated over energy interval
+ *
+ * @param[in] dir Instrument direction.
+ * @param[in] emin Minimum energy of energy interval.
+ * @param[in] emax Maximum energy of energy interval.
+ * @return Integrated background count rate (counts/src/sr).
+ *
+ * Returns the background count rate for a given instrument direction that
+ * is integrated over a specified energy interval.
+ *
+ * If the energy interval is not positive, a zero background rate is
+ * returned.
+ ***************************************************************************/
+double GCTABackgroundPerfTable::rate_ebin(const GCTAInstDir& dir,
+                                          const GEnergy&     emin,
+                                          const GEnergy&     emax) const
+{
+    // Initialise rate
+    double rate = 0.0;
+
+    // Continue only if energy interval is positive
+    if (emax > emin) {
+
+        // Initialise first and second node
+        double x1 = emin.MeV();
+        double x2 = 0.0;
+        double f1 = this->rate(emin.log10TeV());
+        double f2 = 0.0;
+
+        // Loop over all nodes
+        for (int i = 0; i < size(); ++i) {
+
+            // If node energy is below x1 then skip node
+            if (m_energy[i].MeV() <= x1) {
+                continue;
+            }
+
+            // If node energy is above emax then use emax as energy
+            if (m_energy[i] > emax) {
+                x2 = emax.MeV();
+                f2 = this->rate(emax.log10TeV());
+            }
+
+            // ... otherwise use node energy
+            else {
+                x2 = m_energy[i].MeV();
+                f2 = m_background[i];
+            }
+
+            // Compute integral
+            rate += gammalib::plaw_integral(x1, f1, x2, f2);
+
+            // Set second node as first node
+            x1 = x2;
+            f1 = f2;
+
+            // If node energy is above emax then break now
+            if (m_energy[i] > emax) {
+                break;
+            }
+
+        } // endfor: looped over all nodes
+
+        // If last node energy is below emax then compute last part of
+        // integral up to emax
+        if (x1 < emax.MeV()) {
+            x2    = emax.MeV();
+            f2    = this->rate(emax.log10TeV());
+            rate += gammalib::plaw_integral(x1, f1, x2, f2);
+        }
+
+        // Optionally add in Gaussian offset angle dependence
+        if (m_sigma != 0.0) {
+            double theta  = dir.theta() * gammalib::rad2deg;
+            double arg    = theta * theta / m_sigma;
+            double scale  = std::exp(-0.5 * arg * arg);
+            rate         *= scale;
+        }
+
+    } // endif: energy interval was positive
+
+    // Return background rate
+    return rate;
+}
+
+
+/***********************************************************************//**
  * @brief Print background information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing background information.
  ***************************************************************************/
 std::string GCTABackgroundPerfTable::print(const GChatter& chatter) const
@@ -390,8 +478,8 @@ std::string GCTABackgroundPerfTable::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Compute energy boundaries in TeV
-        double emin = std::pow(10.0, m_logE[0]);
-        double emax = std::pow(10.0, m_logE[size()-1]);
+        double emin = (size() > 0) ? m_energy[0].TeV() : 0.0;
+        double emax = (size() > 1) ? m_energy[size()-1].TeV() : 0.0;
 
         // Append header
         result.append("=== GCTABackgroundPerfTable ===");
@@ -400,7 +488,7 @@ std::string GCTABackgroundPerfTable::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
                       gammalib::str(size()));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin) +
                       " - " +
                       gammalib::str(emax) +
@@ -437,8 +525,10 @@ void GCTABackgroundPerfTable::init_members(void)
 {
     // Initialise members
     m_filename.clear();
-    m_logE.clear();
+    m_energy.clear();
+    m_log10_energy.clear();
     m_background.clear();
+    m_log_background.clear();
     m_sigma = 3.0;
 
     // Initialise MC cache
@@ -457,10 +547,12 @@ void GCTABackgroundPerfTable::init_members(void)
 void GCTABackgroundPerfTable::copy_members(const GCTABackgroundPerfTable& bgd)
 {
     // Copy members
-    m_filename   = bgd.m_filename;
-    m_logE       = bgd.m_logE;
-    m_background = bgd.m_background;
-    m_sigma      = bgd.m_sigma;
+    m_filename       = bgd.m_filename;
+    m_energy         = bgd.m_energy;
+    m_log10_energy   = bgd.m_log10_energy;
+    m_background     = bgd.m_background;
+    m_log_background = bgd.m_log_background;
+    m_sigma          = bgd.m_sigma;
 
     // Copy MC cache
     m_mc_spectrum = bgd.m_mc_spectrum;
@@ -539,24 +631,49 @@ void GCTABackgroundPerfTable::init_mc_cache(void) const
     // Loop over nodes
     for (int i = 0; i < size(); ++i) {
 
-        // Set energy
-        GEnergy energy;
-        energy.log10TeV(m_logE[i]);
-
         // Compute total rate
-        #if defined(G_LOG_INTERPOLATION)
-        double total_rate = std::pow(10.0, m_background[i]) * solidangle;
-        #else
         double total_rate = m_background[i] * solidangle;
-        #endif
 
         // Set node
         if (total_rate > 0.0) {
-            m_mc_spectrum.append(energy, total_rate);
+            m_mc_spectrum.append(m_energy[i], total_rate);
         }
 
     }
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return background rate for a given energy (events/s/MeV/sr)
+ *
+ * @param[in] logE Log10 of the true photon energy (TeV).
+ * @return Background rate (events/s/MeV/sr)
+ ***************************************************************************/
+double GCTABackgroundPerfTable::rate(const double& logE) const
+{
+    // Initialise rate
+    double rate = 0.0;
+
+    // Continue only if there are at least two nodes
+    if (size() > 1) {
+
+        // Get background rate
+        #if defined(G_LOG_INTERPOLATION)
+        rate = std::exp(m_log10_energy.interpolate(logE, m_log_background));
+        #else
+        rate = m_log10_energy.interpolate(logE, m_background);
+        #endif
+
+        // Make sure that background rate is not negative
+        if (rate < 0.0) {
+            rate = 0.0;
+        }
+
+    } // endif: there were enough rates
+
+    // Return
+    return rate;
 }

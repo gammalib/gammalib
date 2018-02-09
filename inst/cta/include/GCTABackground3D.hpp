@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.hpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,7 +29,9 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GEnergies.hpp"
 #include "GFilename.hpp"
+#include "GModelSpectralNodes.hpp"
 #include "GCTABackground.hpp"
 #include "GCTAResponseTable.hpp"
 
@@ -75,6 +77,9 @@ public:
                                   const GTime& time,
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
+    double                     rate_ebin(const GCTAInstDir& dir,
+                                         const GEnergy&     emin,
+                                         const GEnergy&     emax) const;
     std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Methods
@@ -91,17 +96,19 @@ private:
     void   init_members(void);
     void   copy_members(const GCTABackground3D& bgd);
     void   free_members(void);
-    void   set_limits(void);
+    void   set_members(void);
     int    index(const int& idetx, const int& idety, const int& iebin) const;
     void   init_mc_cache(void) const;
     void   init_mc_max_rate(void) const;
     double solid_angle(const double& detx1, const double& dety1,
                        const double& detx2, const double& dety2,
                        const double& detx3, const double& dety3) const;
+    double rate(const int& iebin, const double& detx, const double& dety) const;
 
     // Members
     GFilename         m_filename;    //!< Name of background response file
     GCTAResponseTable m_background;  //!< Background response table
+    GEnergies         m_energy;      //!< Vector of energies
     int               m_inx_detx;    //!< DETX index
     int               m_inx_dety;    //!< DETY index
     int               m_inx_energy;  //!< Energy index
@@ -199,6 +206,7 @@ inline
 void GCTABackground3D::table(const GCTAResponseTable& table)
 {
      m_background = table;
+     set_members();
 }
 
 #endif /* GCTABACKGROUND3D_HPP */

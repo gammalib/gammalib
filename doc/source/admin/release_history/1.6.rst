@@ -22,7 +22,8 @@ Bug fixes
 Improvements
 ------------
 
-* ...
+* [`2308 <https://cta-redmine.irap.omp.eu/issues/2308>`_] -
+  Add `GCTABackground::rate_ebin()` method
 
 
 New features

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTABackground.i - CTA background model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,9 @@ public:
                                           const GTime& time,
                                           GRan& ran) const = 0;
     virtual const GModelSpectralNodes& spectrum(void) const = 0;
+    virtual double                     rate_ebin(const GCTAInstDir& dir,
+                                                 const GEnergy&     emin,
+                                                 const GEnergy&     emax) const = 0;
 };
 
 
