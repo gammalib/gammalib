@@ -31,6 +31,7 @@
 #include <string>
 #include "GInstDir.hpp"
 #include "GSkyDir.hpp"
+#include "GMath.hpp"
 
 
 /***********************************************************************//**
