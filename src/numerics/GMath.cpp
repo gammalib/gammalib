@@ -546,14 +546,17 @@ double gammalib::plaw_integral(const double& x1,
                                const double& f2)
 {
     // Compute power law slope
-    double fratio = std::log(f2/f1);
-    double xratio = std::log(x2/x1);
-    double slope  = fratio / xratio;
+    double x2x1    = x2/x1;
+    double fratio  = std::log(f2/f1);
+    double xratio  = std::log(x2x1);
+    double slope   = fratio / xratio;
+    double slopep1 = slope + 1.0;
 
-    // Compute integral
+    // Compute integral. Computations dependend on the slope. We add here a
+    // kluge to assure numerical accuracy.
     double integral;
-    if (slope != -1.0) {
-        integral = f1 / (slope + 1.0) * (x2 * std::pow(x2/x1, slope) - x1);
+    if (std::abs(slopep1) > 1.0e-11) {
+        integral = f1 / slopep1 * (x2 * std::pow(x2x1, slope) - x1);
     }
     else {
         integral = f1 * x1 * xratio;

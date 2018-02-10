@@ -90,6 +90,7 @@ void TestGNumerics::test_math(void)
     // Test power law integration
     test_value(gammalib::plaw_integral(2.0, 3.0, 9.0, 5.0), 29.112577);
     test_value(gammalib::plaw_integral(2.0, 9.0, 9.0, 2.0), 27.073393);
+    test_value(gammalib::plaw_integral(2.0, 9.0, 5.0, 2.0), 12.471065);
 
     // Exit test
     return;
