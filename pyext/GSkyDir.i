@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.i - Sky direction class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,7 @@ public:
     double        ra_deg(void) const;
     double        dec_deg(void) const;
     GVector       celvector(void) const;
+    double        cos_dist(const GSkyDir& dir) const;
     double        dist(const GSkyDir& dir) const;
     double        dist_deg(const GSkyDir& dir) const;
     double        posang(const GSkyDir& dir) const;

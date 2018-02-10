@@ -1428,7 +1428,7 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
 
     // Test contain dirs
 	test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
-  test_assert(refregion.contains(centre), "test if centre in circle");
+    test_assert(refregion.contains(centre), "test if centre in circle");
 	test_assert(!refregion.contains(refdir_outside_refregion), "test2 for containment");
 
 	// Test contain regions
@@ -1574,6 +1574,7 @@ void TestGSky::test_GSkyRegionMap_logic(void)
         
 }
 
+
 /***************************************************************************
  * @brief Test GHorizDir class
  ***************************************************************************/
@@ -1600,7 +1601,7 @@ void TestGSky::test_GHorizDir(void){
     // Return
     return;
 }          
-          
+
 
 /***************************************************************************
  * @brief Main test function

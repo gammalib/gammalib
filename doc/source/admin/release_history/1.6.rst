@@ -22,6 +22,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2309 <https://cta-redmine.irap.omp.eu/issues/2309>`_] -
+  Add `GSkyDir::cos_dist()` method
 * [`2308 <https://cta-redmine.irap.omp.eu/issues/2308>`_] -
   Add `GCTABackground::rate_ebin()` method
 

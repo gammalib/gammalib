@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.cpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,7 +31,6 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GMath.hpp"
 #include "GSkyDir.hpp"
 #include "GMatrix.hpp"
 #include "GVector.hpp"
@@ -354,76 +353,6 @@ void GSkyDir::rotate_deg(const double& phi, const double& theta)
 }
 
 
-
-
-/***********************************************************************//**
- * @brief Return galactic longitude in degrees
- *
- * @return Galactic longitude in degrees.
- ***************************************************************************/
-double GSkyDir::l_deg(void) const
-{
-    // If we have no galactic coordinates then get them now
-    if (!m_has_lb && m_has_radec) {
-        equ2gal();
-    }
-
-    // Return galactic longitude
-    return m_l * gammalib::rad2deg;
-}
-
-
-/***********************************************************************//**
- * @brief Returns galactic latitude in degrees
- *
- * @return Galactic latitude in degrees.
- ***************************************************************************/
-double GSkyDir::b_deg(void) const
-{
-    // If we have no galactic coordinates then get them now
-    if (!m_has_lb && m_has_radec) {
-        equ2gal();
-    }
-
-    // Return galactic latitude
-    return m_b * gammalib::rad2deg;
-}
-
-
-/***********************************************************************//**
- * @brief Returns Right Ascension in degrees
- *
- * @return Right Ascension in degrees.
- ***************************************************************************/
-double GSkyDir::ra_deg(void) const
-{
-    // If we have no equatorial coordinates then get them now
-    if (!m_has_radec && m_has_lb) {
-        gal2equ();
-    }
-
-    // Return Right Ascension
-    return m_ra * gammalib::rad2deg;
-}
-
-
-/***********************************************************************//**
- * @brief Returns Declination in degrees
- *
- * @return Declination in degrees.
- ***************************************************************************/
-double GSkyDir::dec_deg(void) const
-{
-    // If we have no equatorial coordinates then get them now
-    if (!m_has_radec && m_has_lb) {
-        gal2equ();
-    }
-
-    // Return Declination
-    return m_dec * gammalib::rad2deg;
-}
-
-
 /***********************************************************************//**
  * @brief Return sky direction as 3D vector in celestial coordinates
  *
@@ -458,14 +387,15 @@ GVector GSkyDir::celvector(void) const
 
 
 /***********************************************************************//**
- * @brief Compute angular distance between sky directions in radians
+ * @brief Compute cosine of angular distance between sky directions
  *
- * @param[in] dir Sky direction to which distance is to be computed.
- * @return Angular distance in radians.
+ * @param[in] dir Sky direction to which cosine of distance is to be computed.
+ * @return Cosine of angular distance.
  *
- * Computes the angular distance between two sky directions in radians.
+ * Computes the cosine of the angular distance between two sky directions in
+ * radians.
  ***************************************************************************/
-double GSkyDir::dist(const GSkyDir& dir) const
+double GSkyDir::cos_dist(const GSkyDir& dir) const
 {
     // Initialise cosine of distance
     double cosdis;
@@ -550,26 +480,8 @@ double GSkyDir::dist(const GSkyDir& dir) const
                  std::cos(dir.ra() - ra());
     }
 
-    // Compute distance (use argument save GTools function)
-    double dist = gammalib::acos(cosdis);
-
-    // Return distance
-    return dist;
-}
-
-
-/***********************************************************************//**
- * @brief Compute angular distance between sky directions in degrees
- *
- * @param[in] dir Sky direction to which distance is to be computed.
- * @return Angular distance in degrees.
- *
- * Computes the angular distance between two sky directions in degrees.
- ***************************************************************************/
-double GSkyDir::dist_deg(const GSkyDir& dir) const
-{
-    // Return distance in degrees
-    return (dist(dir) * gammalib::rad2deg);
+    // Return cosine of distance
+    return cosdis;
 }
 
 
@@ -672,27 +584,9 @@ double GSkyDir::posang(const GSkyDir& dir) const
 
 
 /***********************************************************************//**
- * @brief Compute position angle between sky directions in degrees
- *
- * @param[in] dir Sky direction.
- * @return Position angle in degrees.
- *
- * Returns the position angle of a sky direction in degrees.
- *
- * See the posang() method for more information about the computation of the
- * position angle.
- ***************************************************************************/
-double GSkyDir::posang_deg(const GSkyDir& dir) const
-{
-    // Return position angle in degrees
-    return (posang(dir) * gammalib::rad2deg);
-}
-
-
-/***********************************************************************//**
  * @brief Print sky direction information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing sky direction information.
  ***************************************************************************/
 std::string GSkyDir::print(const GChatter& chatter) const
@@ -967,4 +861,3 @@ bool operator!=(const GSkyDir &a, const GSkyDir &b)
     // Return non equality
     return (!(a==b));
 }
-

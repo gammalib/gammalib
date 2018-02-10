@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-9 February 2018
+10 February 2018
 
 
 1. Introduction
@@ -21,8 +21,9 @@ The following classes have been renamed:
 - none
 
 The following methods have been added:
-- gammalib::atan2(double&, double&)
-- gammalib::plaw_integral(double&, double&, double&, double&)
+- gammalib::atan2()
+- gammalib::plaw_integral()
+- GSkyDir::cos_dist()
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTABackground::rate_ebin()
@@ -93,7 +94,9 @@ None
 
 12. Sky module
 --------------
-None
+Add GSkyDir::cos_dist() method that computes the cosine of the angular distance
+between two sky directions. Using this method avoids computation of the arc
+cosine (#2309).
 
 
 13. Support module
