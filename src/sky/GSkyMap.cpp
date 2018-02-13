@@ -1866,11 +1866,11 @@ void GSkyMap::smooth(const std::string& kernel, const double& par)
         GFft fft_kernel(smooth_kernel(kernel, par));
 
         // Loop over all sky maps
-        for (int i = 0; i < m_num_maps; ++i) {
+        for (int k = 0; k < m_num_maps; ++k) {
 
             // Extract sky map
             GNdarray array(m_num_x, m_num_y);
-            const double *src = m_pixels.data() + i*m_num_pixels;
+            const double *src = m_pixels.data() + k*m_num_pixels;
             double       *dst = array.data();
             for (int i = 0; i < m_num_pixels; ++i) {
                 *dst++ = *src++;
@@ -1882,12 +1882,12 @@ void GSkyMap::smooth(const std::string& kernel, const double& par)
             // Multiply FFT of sky map with FFT of kernel
             GFft fft_smooth = fft_array * fft_kernel;
 
-            // Background transform sky map
+            // Backward transform sky map
             GNdarray smooth = fft_smooth.backward();
 
             // Insert sky map
             src = smooth.data();
-            dst = m_pixels.data() + i*m_num_pixels;
+            dst = m_pixels.data() + k*m_num_pixels;
             for (int i = 0; i < m_num_pixels; ++i) {
                 *dst++ = *src++;
             }
@@ -3187,7 +3187,7 @@ GNdarray GSkyMap::smooth_kernel(const std::string& kernel,
     const GWcs* wcs = dynamic_cast<const GWcs*>(m_proj);
     if (wcs == NULL) {
         std::string msg = "Sky map is not a WCS projection. Method is only "
-                          "valid for WCS projects.";
+                          "valid for WCS projections.";
         throw GException::invalid_argument(G_SMOOTH_KERNEL, msg);
     }
 
