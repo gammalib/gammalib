@@ -3213,6 +3213,14 @@ GNdarray GSkyMap::smooth_kernel(const std::string& kernel,
                 if (std::sqrt(xqs + y*y) <= par) {
                     kern(ix1,iy1) += 1.0;
                     sum           += 1.0;
+                    if (ix2 < m_num_x) {
+                        kern(ix2,iy1) += 1.0;
+                        sum           += 1.0;
+                    }
+                    if (iy2 < m_num_y) {
+                        kern(ix1,iy2) += 1.0;
+                        sum           += 1.0;
+                    }
                     if ((ix2 < m_num_x) && (iy2 < m_num_y)) {
                         kern(ix2,iy2) += 1.0;
                         sum           += 1.0;
@@ -3238,6 +3246,14 @@ GNdarray GSkyMap::smooth_kernel(const std::string& kernel,
                 double value   = std::exp(norm * (xqs + y*y));
                 kern(ix1,iy1) += value;
                 sum           += value;
+                if (ix2 < m_num_x) {
+                    kern(ix2,iy1) += value;
+                    sum           += value;
+                }
+                if (iy2 < m_num_y) {
+                    kern(ix1,iy2) += value;
+                    sum           += value;
+                }
                 if ((ix2 < m_num_x) && (iy2 < m_num_y)) {
                     kern(ix2,iy2) += value;
                     sum           += value;

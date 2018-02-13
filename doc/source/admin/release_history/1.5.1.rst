@@ -1,0 +1,18 @@
+.. _1.5.1:
+
+GammaLib 1.5.1 release
+======================
+
+Overview
+--------
+
+GammaLib 1.5.1 is a bug fix release for GammaLib release 1.5.
+
+The following bugs were fixed:
+
+* Correct sky map smoothing
+
+
+The following improvements were made:
+
+* ...

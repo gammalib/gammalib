@@ -7,6 +7,7 @@ Release History
    :maxdepth: 1
 
    GammaLib 1.6 <1.6>
+   GammaLib 1.5.1 <1.5.1>
    GammaLib 1.5 <1.5>
    GammaLib 1.4.3 <1.4.3>
    GammaLib 1.4.2 <1.4.2>
