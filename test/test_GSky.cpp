@@ -1212,6 +1212,7 @@ void TestGSky::test_GSkyMap(void)
     // Smooth map using DISK kernel
     GSkyMap map_smooth1 = map_smooth;
     map_smooth1.smooth("DISK", 0.2);
+    map_smooth1.save("test_map_smooth_disk.fits", true);
 
     // Compute sum of smoothed sky map
     double sum_smooth1 = 0.0;
@@ -1223,6 +1224,7 @@ void TestGSky::test_GSkyMap(void)
     // Smooth map using GAUSSIAN kernel
     GSkyMap map_smooth2 = map_smooth;
     map_smooth2.smooth("GAUSSIAN", 0.2);
+    map_smooth2.save("test_map_smooth_gaussian.fits", true);
 
     // Compute sum of smoothed sky map
     double sum_smooth2 = 0.0;

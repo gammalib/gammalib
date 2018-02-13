@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.1
 
-8 February 2018
+13 February 2018
 
 
 1. Introduction
@@ -83,7 +83,9 @@ None
 
 12. Sky module
 --------------
-None
+The smoothing kernel covered before only two sectors, now all four sectors
+are covered. The smoothing now also works correctly in case that more than
+a single sky map is comprised in a GSkyMap object.
 
 
 13. Support module
