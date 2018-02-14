@@ -1209,7 +1209,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
     std::cout << "Sum of data: " << sum_data << std::endl;
     std::cout << "Sum of model: " << sum_model << std::endl;
     std::cout << "Initial statistic: " << init_value << std::endl;
-    std::cout << "Statistic: " << m_value-init_value << std::endl;
+    std::cout << "Statistic: " << value-init_value << std::endl;
     #endif
 
     // Return
