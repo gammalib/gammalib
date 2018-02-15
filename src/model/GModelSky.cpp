@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -411,8 +411,11 @@ GModelSky* GModelSky::clone(void) const
  ***************************************************************************/
 void GModelSky::spatial(const GModelSpatial* spatial)
 {
-    // Free spatial model component
-    if (m_spatial  != NULL) delete m_spatial;
+    // Free spatial model component only if it differs from current
+    // component. This prevents unintential deallocation of the argument
+    if ((m_spatial != NULL) && (m_spatial != spatial)) {
+        delete m_spatial;
+    }
 
     // Clone spatial model component if it exists, otherwise set pointer
     // to NULL
@@ -438,8 +441,11 @@ void GModelSky::spatial(const GModelSpatial* spatial)
  ***************************************************************************/
 void GModelSky::spectral(const GModelSpectral* spectral)
 {
-    // Free spectral model component
-    if (m_spectral  != NULL) delete m_spectral;
+    // Free spectral model component only if it differs from current
+    // component. This prevents unintential deallocation of the argument
+    if ((m_spectral != NULL) && (m_spectral != spectral)) {
+        delete m_spectral;
+    }
 
     // Clone spectral model component if it exists, otherwise set pointer
     // to NULL
@@ -462,8 +468,11 @@ void GModelSky::spectral(const GModelSpectral* spectral)
  ***************************************************************************/
 void GModelSky::temporal(const GModelTemporal* temporal)
 {
-    // Free temporal model component
-    if (m_temporal  != NULL) delete m_temporal;
+    // Free temporal model component only if it differs from current
+    // component. This prevents unintential deallocation of the argument
+    if ((m_temporal != NULL) && (m_temporal != temporal)) {
+        delete m_temporal;
+    }
 
     // Clone temporal model component if it exists, otherwise set pointer
     // to NULL

@@ -1744,8 +1744,11 @@ double GSkyMap::solidangle(const GSkyPixel& pixel) const
  ***************************************************************************/
 void GSkyMap::projection(const GSkyProjection& proj)
 {
-    // Free any existing WCS
-    if (m_proj != NULL) delete m_proj;
+    // Free existing projection only if it differs from current projection.
+    // This prevents unintential deallocation of the argument
+    if ((m_proj != NULL) && (m_proj != &proj)) {
+        delete m_proj;
+    }
 
     // Clone input WCS
     m_proj = proj.clone();

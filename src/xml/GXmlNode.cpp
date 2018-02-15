@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.cpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -253,8 +253,11 @@ GXmlNode* GXmlNode::set(const int& index, const GXmlNode& node)
     }
     #endif
 
-    // Delete any existing node
-    if (m_nodes[index] != NULL) delete m_nodes[index];
+    // Free existing node only if it differs from current node. This
+    // prevents unintential deallocation of the argument
+    if ((m_nodes[index] != NULL) && (m_nodes[index] != &node)) {
+        delete m_nodes[index];
+    }
 
     // Assign new child node by cloning
     m_nodes[index] = node.clone();

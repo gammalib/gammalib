@@ -7,11 +7,12 @@
         Add GCTABackground::rate_ebin() method (#2308)
 
 
-2018-02-13
+2018-02-15
 
         * Bug fix version 1.5.1 released
         ================================
 
+        Prevent unintentional deallocation of arguments (#2340).
         Correct sky map smoothing.
 
 

@@ -264,8 +264,11 @@ GSkyRegion* GSkyRegions::set(const int& index, const GSkyRegion& region)
     }
     #endif
 
-    // Delete any existing region
-    if (m_regions[index] != NULL) delete m_regions[index];
+    // Free existing region only if it differs from current region. This
+    // prevents unintential deallocation of the argument
+    if ((m_regions[index] != NULL) && (m_regions[index] != &region)) {
+        delete m_regions[index];
+    }
 
     // Assign new region by cloning
     m_regions[index] = region.clone();
