@@ -338,8 +338,11 @@ GFitsTableCol* GFitsTable::set(const int& colnum, const GFitsTableCol& column)
         throw GException::out_of_range(G_SET1, "Column number", colnum, ncols());
     }
 
-    // Free existing column
-    if (m_columns[colnum] != NULL) delete m_columns[colnum];
+    // Free existing column only if it differs from current column. This
+    // prevents unintential deallocation of the argument
+    if ((m_columns[colnum] != NULL) && (m_columns[colnum] != &column)) {
+        delete m_columns[colnum];
+    }
 
     // Clone column
     m_columns[colnum] = column.clone();
