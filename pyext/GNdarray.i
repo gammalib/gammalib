@@ -108,21 +108,34 @@ public:
         return ((*self)(index));
     }
     void __setitem__(int GTuple[], const double& value) {
-        if (GTuple[0] != self->dim()) {
-            throw GException::invalid_value("__setitem__(int)", "Invalid "
-                  "access of "+gammalib::str(self->dim())+"-dimensional "
-                  "array with "+gammalib::str(GTuple[0])+"-dimensional "
-                  "access operator.");
-        }
-        int index = 0;
-        for (size_t i = 0; i < self->shape().size(); ++i) {
-            if (GTuple[i+1] < 0 || GTuple[i+1] >= self->shape()[i]) {
-                throw GException::out_of_range("__setitem__(int)", "Dimension "+
-                      gammalib::str(i)+" index", GTuple[i+1], self->shape()[i]);
+        // Handle first the special case of a single index. In Python we want
+        // to support accessing a n-dimensional array with a single index
+        if (GTuple[0] == 1) {
+            if (GTuple[1] >= 0 && GTuple[1] < self->size()) {
+                (*self)(GTuple[1]) = value;
             }
-            index += self->strides()[i] * GTuple[i+1];
+            else {
+                throw GException::out_of_range("__ssetitem__(int)", "Array "
+                      "index", GTuple[1], self->size());
+            }
         }
-        (*self)(index) = value;
+        else {
+            if (GTuple[0] != self->dim()) {
+                throw GException::invalid_value("__setitem__(int)", "Invalid "
+                      "access of "+gammalib::str(self->dim())+"-dimensional "
+                      "array with "+gammalib::str(GTuple[0])+"-dimensional "
+                      "access operator.");
+            }
+            int index = 0;
+            for (size_t i = 0; i < self->shape().size(); ++i) {
+                if (GTuple[i+1] < 0 || GTuple[i+1] >= self->shape()[i]) {
+                    throw GException::out_of_range("__setitem__(int)", "Dimension "+
+                          gammalib::str(i)+" index", GTuple[i+1], self->shape()[i]);
+                }
+                index += self->strides()[i] * GTuple[i+1];
+            }
+            (*self)(index) = value;
+        }
     }
     GNdarray __add__(const GNdarray &a) {
         return (*self) + a;
