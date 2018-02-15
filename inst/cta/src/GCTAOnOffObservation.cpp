@@ -575,8 +575,11 @@ void GCTAOnOffObservation::response(const GResponse& rsp)
         throw GException::invalid_argument(G_RESPONSE_SET, msg);
     }
 
-    // Free response
-    if (m_response != NULL) delete m_response;
+    // Free existing response only if it differs from current response. This
+    // prevents unintential deallocation of the argument
+    if ((m_response != NULL) && (m_response != &rsp)) {
+        delete m_response;
+    }
 
     // Clone response function
     m_response = ptr->clone();

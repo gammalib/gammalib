@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp - FITS file access class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -601,8 +601,11 @@ GFitsHDU* GFits::set(const int& extno, const GFitsHDU& hdu)
         throw GException::invalid_argument(G_SET1, msg);
     }
 
-    // Delete any existing HDU
-    if (m_hdu[extno] != NULL) delete m_hdu[extno];
+    // Free existing HDU only if it differs from current HDU. This prevents
+    // unintential deallocation of the argument
+    if ((m_hdu[extno] != NULL) && (m_hdu[extno] != &hdu)) {
+        delete m_hdu[extno];
+    }
 
     // Assign new HDU by cloning
     m_hdu[extno] = hdu.clone();

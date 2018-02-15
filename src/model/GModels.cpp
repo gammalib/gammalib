@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.cpp - Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -332,8 +332,11 @@ GModel* GModels::set(const int& index, const GModel& model)
         throw GException::invalid_value(G_SET1, msg);
     }
 
-    // Delete any existing model
-    if (m_models[index] != NULL) delete m_models[index];
+    // Free existing model only if it differs from current model. This
+    // prevents unintential deallocation of the argument
+    if ((m_models[index] != NULL) && (m_models[index] != &model)) {
+        delete m_models[index];
+    }
 
     // Assign new model by cloning
     m_models[index] = model.clone();
@@ -379,8 +382,11 @@ GModel* GModels::set(const std::string& name, const GModel& model)
         throw GException::invalid_value(G_SET2, msg);
     }
 
-    // Delete any existing model
-    if (m_models[index] != NULL) delete m_models[index];
+    // Free existing model only if it differs from current model. This
+    // prevents unintential deallocation of the argument
+    if ((m_models[index] != NULL) && (m_models[index] != &model)) {
+        delete m_models[index];
+    }
 
     // Assign new model by cloning
     m_models[index] = model.clone();

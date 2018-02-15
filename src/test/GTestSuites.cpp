@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.cpp - Test suite container class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2018 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -248,8 +248,11 @@ GTestSuite* GTestSuites::set(const int& index, const GTestSuite& suite)
     }
     #endif
 
-    // Delete any existing test suite
-    if (m_testsuites[index] != NULL) delete m_testsuites[index];
+    // Free existing test suite only if it differs from current test suite.
+    // This prevents unintential deallocation of the argument
+    if ((m_testsuites[index] != NULL) && (m_testsuites[index] != &suite)) {
+        delete m_testsuites[index];
+    }
 
     // Assign new test suite by cloning
     m_testsuites[index] = suite.clone();

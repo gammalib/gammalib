@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GOptimizerPars.cpp - Optimizer parameter container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -346,8 +346,9 @@ GOptimizerPar* GOptimizerPars::set(const int& index, const GOptimizerPar& par)
     }
     #endif
 
-    // Delete parameter if it has been allocated
-    if (m_alloc[index]) {
+    // Free existing parameter only if it differs from current parameter.
+    // This prevents unintential deallocation of the argument
+    if ((m_alloc[index]) && (m_pars[index] != &par)) {
         delete m_pars[index];
     }
 

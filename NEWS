@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.1
 
-13 February 2018
+15 February 2018
 
 
 1. Introduction
@@ -53,7 +53,10 @@ None
 
 6. FITS I/O Interface
 ---------------------
-None
+The GFits::set() and GFitsTable::set() methods now only deallocate the previous
+content if the reference to the argument differs from the reference of the
+previous content. Otherwise the method would deallocate an instance that is
+owned by the client (#2340).
 
 
 7. Linear algebra module
@@ -63,7 +66,10 @@ None
 
 8. Model module
 ---------------
-None
+The GModels::set() and GModelSky::spatial(), spectral() and temporal() methods
+now only deallocate the previous content if the reference to the argument
+differs from the reference of the previous content. Otherwise the method
+would deallocate an instance that is owned by the client (#2340).
 
 
 9. Numerics module
@@ -73,16 +79,27 @@ None
 
 10. Observation module
 ----------------------
-None
+The GObservation::events() method now only deallocate the previous content
+if the reference to the argument differs from the reference of the previous
+content. Otherwise the method would deallocate an instance that is owned by
+the client (#2340).
 
 
 11. Optimization module
 -----------------------
-None
+The GOptimizerPars::set() method now only deallocate the previous content 
+if the reference to the argument differs from the reference of the previous 
+content. Otherwise the method would deallocate an instance that is owned by 
+the client (#2340).
 
 
 12. Sky module
 --------------
+The GSkyMap::projection() and GSkyRegions::set() methods now only deallocate
+the previous content if the reference to the argument differs from the
+reference of the previous content. Otherwise the method would deallocate an
+instance that is owned by the client (#2340).
+
 The smoothing kernel covered before only two sectors, now all four sectors
 are covered. The smoothing now also works correctly in case that more than
 a single sky map is comprised in a GSkyMap object.
@@ -95,7 +112,10 @@ None
 
 14. XML module
 --------------
-None
+The GXmlNode::set() method now only deallocate the previous content if the
+reference to the argument differs from the reference of the previous content. 
+Otherwise the method would deallocate an instance that is owned by the client 
+(#2340).
 
 
 15. VO module
@@ -110,7 +130,10 @@ None
 
 17. Test module
 ---------------
-None
+The GTestSuite::set() method now only deallocate the previous content if the
+reference to the argument differs from the reference of the previous content.
+Otherwise the method would deallocate an instance that is owned by the client
+(#2340).
 
 
 18. Multi-wavelength interface
@@ -125,7 +148,10 @@ None
 
 20. CTA interface
 -----------------
-None
+The GCTAObservation::response() and GCTAOnOffObservation::response() methods
+now only deallocate the previous content if the reference to the argument
+differs from the reference of the previous content. Otherwise the method would
+deallocate an instance that is owned by the client (#2340).
 
 
 21. COMPTEL interface

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsTable.cpp - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -401,12 +401,6 @@ GFitsTableCol* GFitsTable::set(const std::string&   colname,
  ***************************************************************************/
 GFitsTableCol* GFitsTable::insert(int colnum, const GFitsTableCol& column)
 {
-    // Make sure that 'colnum' is valid. Since we add one column the total
-    // number of columns at return will be m_cols+1, hence the column
-    // index is comprised between [0,m_cols]
-    //if (colnum <      0) colnum = 0;
-    //if (colnum > m_cols) colnum = m_cols;
-
     // Check if column number is valid
     if (colnum < 0 || colnum > ncols()) {
         throw GException::out_of_range(G_INSERT1, "Column number", colnum, ncols()+1);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -769,8 +769,11 @@ double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
  ***************************************************************************/
 void GObservation::events(const GEvents& events)
 {
-    // Remove an existing event container
-    if (m_events != NULL) delete m_events;
+    // Free existing event container only if it differs from current event
+    // container. This prevents unintential deallocation of the argument
+    if ((m_events != NULL) && (m_events != &events)) {
+        delete m_events;
+    }
 
     // Clone events
     m_events = events.clone();
