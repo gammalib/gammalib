@@ -1053,13 +1053,13 @@ void TestGCTAResponse::test_response_bgd_PerfTable(void)
 void TestGCTAResponse::test_response_bgd_3D(void)
 {
     // Set reference values
-    const double ref_rate_below       =  0.0;
-    const double ref_rate_above       =  0.0;
-    const double ref_rate_onaxis      =  9.7632195934345e-05;
-    const double ref_rate_offaxis     = 13.5162501643753e-05;
-    const double ref_rate_ebin_within = 65.6069433285784;
-    const double ref_rate_ebin_below  = 4647.37614735018;
-    const double ref_rate_ebin_above  = 69.5331125123672;
+    const double ref_rate_below       =     0.00402260284428378;
+    const double ref_rate_above       =     0.0;
+    const double ref_rate_onaxis      =     0.000133831125491202;
+    const double ref_rate_offaxis     =     0.000128514485663256;
+    const double ref_rate_ebin_within =   109.618252655233;
+    const double ref_rate_ebin_below  = 14239.8196215465;
+    const double ref_rate_ebin_above  =   114.826571413223;
 
     // Set energies for energy range for rate integration
     const GEnergy ebelow(10.0, "GeV");
