@@ -1,8 +1,9 @@
-2018-02-15
+2018-02-23
 
         * Bug fix version 1.5.1 released
         ================================
 
+        Add kludge to handle noisy CTA 2D energy dispersion (#2342).
         Prevent unintentional deallocation of arguments (#2340).
         Correct sky map smoothing.
 

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.5.1
 
-15 February 2018
+23 February 2018
 
 
 1. Introduction
@@ -148,6 +148,11 @@ None
 
 20. CTA interface
 -----------------
+Add a kludge to handle the noisy energy dispersion that is shipped with the 1DC
+data and that is included in the Prod3 release. Noisy pixel values are skipped
+and a slight smoothing is applied in true energy to reduce the noise level
+(#2342).
+
 The GCTAObservation::response() and GCTAOnOffObservation::response() methods
 now only deallocate the previous content if the reference to the argument
 differs from the reference of the previous content. Otherwise the method would
