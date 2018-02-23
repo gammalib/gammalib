@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdisp2D.hpp - CTA 2D energy dispersion class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2017 by Florent Forest                              *
+ *  copyright (C) 2015-2018 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 #include "GCTAResponseTable.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GFft;
 class GRan;
 class GFits;
 class GFitsBinTable;
@@ -119,10 +120,16 @@ private:
                              const double& phi = 0.0,
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0) const;
-    void set_indices(void);
+    void set_table(void);
     void set_boundaries(void);
     void set_max_edisp(void) const;
     void normalize_table(void);
+    void clip_table(const int& threshold);
+    void smooth_table(const double& sigma, const double& threshold);
+    GFft fft_smooth_kernel(const int&    netrue,
+                           const int&    nmigra,
+                           const double& sigma) const;
+    GNdarray clip_array(const GNdarray& array, const double& threshold) const;
 
     // Protected classes
     class edisp_kern : public GFunction {
