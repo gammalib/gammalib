@@ -447,6 +447,7 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  * @param[in] phi Azimuth angle in camera system (rad).
  * @param[in] zenith Zenith angle in Earth system (rad).
  * @param[in] azimuth Azimuth angle in Earth system (rad).
+ * @return Observed energy.
  *
  * @exception GException::invalid_return_value
  *            No energy dispersion information found for parameters or
@@ -475,11 +476,12 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
     // energy (this means that no energy dispersion information is available
     // for that energy)
     if (emin >= emax) {
+        double      eng = std::pow(10.0, logEsrc);
         std::string msg = "No valid energy dispersion information available "
-                          "for true photon energy "+ebounds.emin().print()+
-                          ", offset angle "+
+                          "for true photon energy "+gammalib::str(eng)+" TeV,"
+                          "offset angle "+
                           gammalib::str(theta*gammalib::rad2deg)+" deg "
-                          " and azimuth angle "+
+                          "and azimuth angle "+
                           gammalib::str(phi*gammalib::rad2deg)+" deg. Either "
                           "provide an energy dispersion matrix covering these "
                           "parameters or restrict the parameter space.";
@@ -516,9 +518,10 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
             if (f == 0.0) {
                 zeros++;
                 if (zeros > max_subsequent_zeros) {
+                    double      eng = std::pow(10.0, logEsrc);
                     std::string msg = "No valid energy dispersion information "
                                       "available  for true photon energy "+
-                                      ebounds.emin().print()+", offset angle "+
+                                      gammalib::str(eng)+" TeV, offset angle "+
                                       gammalib::str(theta*gammalib::rad2deg)+
                                       " deg and azimuth angle "+
                                       gammalib::str(phi*gammalib::rad2deg)+
@@ -534,7 +537,7 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
         // Get uniform random value between zero and the maximum energy
         // dispersion value. The loop is quite if the random number is smaller
         // than the energy dispersion value
-        ftest   = ran.uniform() * m_max_edisp;
+        ftest = ran.uniform() * m_max_edisp;
 
     } // endwhile:
 
@@ -555,6 +558,7 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @return Observed energy boundaries.
  *
  * Returns the band of observed energies outside of which the energy
  * dispersion becomes negligible for a given true energy @p logEsrc and
@@ -576,6 +580,7 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
         // Set computation flag
         m_ebounds_obs_computed = true;
         m_last_theta_obs       = theta;
+        m_last_logEsrc         = -30.0; // force update
 
         // Compute ebounds_obs
         compute_ebounds_obs(theta, phi, zenith, azimuth);
@@ -620,6 +625,7 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @return True energy boundaries.
  *
  * Returns the band of true photon energies outside of which the energy
  * dispersion becomes negligible for a given observed energy @p logEobs and
@@ -635,12 +641,13 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
     // Make sure that energy dispersion is online
     fetch();
 
-    // Compute only if parameters changed
+    // Compute true energy boundaries only if parameters changed
     if (!m_ebounds_src_computed || theta != m_last_theta_src) {
 
         // Set computation flag
         m_ebounds_src_computed = true;
         m_last_theta_src       = theta;
+        m_last_logEobs         = -30.0; // force update
 
         // Compute ebounds_src
         compute_ebounds_src(theta, phi, zenith, azimuth);
