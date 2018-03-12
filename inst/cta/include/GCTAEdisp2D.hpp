@@ -124,12 +124,30 @@ private:
     void set_boundaries(void);
     void set_max_edisp(void) const;
     void normalize_table(void);
-    void clip_table(const int& threshold);
-    void smooth_table(const double& sigma, const double& threshold);
-    GFft fft_smooth_kernel(const int&    netrue,
-                           const int&    nmigra,
-                           const double& sigma) const;
-    GNdarray clip_array(const GNdarray& array, const double& threshold) const;
+
+    // Kludge
+    void     clean_table(const int& threshold);
+    GFft     fft_smooth_kernel(const int&    nbins,
+                               const double& sigma) const;
+    void     clip_table(const double& threshold);
+    void     denoise_table(void);
+    GNdarray smooth_array(const GNdarray& array, const double& mean,
+                          const double& rms) const;
+    GNdarray gaussian_array(const double& mean, const double& rms) const;
+    GNdarray get_gaussian_pars(const double& sigma) const;
+    void     get_mean_rms(const GNdarray& array, double* mean, double* rms) const;
+    double   get_single_event_value(const GNdarray& array) const;
+
+    // Obsolete kludge
+    void     smooth_table(const double& sigma);
+    void     smooth_table2(const double& sigma_etrue, const double& sigma_migra);
+    GFft     fft_smooth_kernel(const int&    netrue,
+                               const int&    nmigra,
+                               const double& sigma) const;
+    GFft     fft_smooth_kernel2(const int&    netrue,
+                                const int&    nmigra,
+                                const double& sigma_etrue,
+                                const double& sigma_migra) const;
 
     // Protected classes
     class edisp_kern : public GFunction {
