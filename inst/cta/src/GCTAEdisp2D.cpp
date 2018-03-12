@@ -53,7 +53,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 #define G_SMOOTH_EDISP_KLUDGE    //!< Get rid of noise in energy dispersion
-#define G_SMOOTH_EDISP_SAVE_TEST //!< Save test matrix
+//#define G_SMOOTH_EDISP_SAVE_TEST //!< Save test matrix
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -1200,15 +1200,9 @@ void GCTAEdisp2D::set_table(void)
 
     // Smooth energy dispersion table
     #if defined(G_SMOOTH_EDISP_KLUDGE)
-    denoise_table();
+    denoise_table(10.0);
     clean_table(15);
     clip_table(0.001);
-    /*
-    denoise_table();
-    clean_table(20);
-    smooth_table(5.0);
-    clip_table(0.01);
-    */
     #endif
 
     // Normalize energy dispersion table
@@ -1369,11 +1363,11 @@ void GCTAEdisp2D::normalize_table(void)
 
 
 /***********************************************************************//**
- * @brief Clip energy dispersion table
+ * @brief Clean energy dispersion table
  *
  * @param[in] threshold Minimum number of consecutive non-zeros
  *
- * Clips noise in the energy dispersion table.
+ * Removes noise from the energy dispersion table.
  *
  * For each offset angle and true energy, the method determines the maximum
  * value of the energy dispersion table and then walks towards smaller and
@@ -1485,282 +1479,9 @@ void GCTAEdisp2D::clean_table(const int& threshold)
 
 
 /***********************************************************************//**
- * @brief Smooth energy dispersion table
- *
- * @param[in] sigma Smoothing width (number of bins in true energy)
- *
- * Smooth the energy dispersion table in true energy. The smoothing is done
- * using a fast-fourrier transform. For this purpose the energy disperison
- * table for each offset angle is copied into a 2D array, padded with some
- * zero pixels on the left and the right to avoid wrap around.
- ***************************************************************************/
-void GCTAEdisp2D::smooth_table(const double& sigma)
-{
-    // Get axes dimensions
-    int netrue        = m_edisp.axis_bins(m_inx_etrue);
-    int nmigra        = m_edisp.axis_bins(m_inx_migra);
-    int ntheta        = m_edisp.axis_bins(m_inx_theta);
-    int netrue_pad    = int(3.0*sigma);
-    int netrue_padded = netrue + 2*netrue_pad; // Array padded with zeros
-    int npix          = netrue * nmigra;
-
-    // Get smoothing kernel
-    GFft fft_kernel = fft_smooth_kernel(netrue_padded, nmigra, sigma);
-
-    // Loop over all offset angles
-    for (int itheta = 0; itheta < ntheta; ++itheta) {
-
-        // Compute base index
-        int ibase = itheta * npix;
-
-        // Extract matrix in GNdarray
-        GNdarray array(netrue_padded, nmigra);
-        for (int imigra = 0, i = ibase; imigra < nmigra; ++imigra) {
-            double* ptr = array.data() + imigra * netrue_padded + netrue_pad;
-            for (int ietrue = 0; ietrue < netrue; ++ietrue, ++i) {
-                *ptr++ = m_edisp(m_inx_matrix, i);
-            }
-        }
-
-        // FFT of array
-        GFft fft_array(array);
-
-        // Smooth array
-        GFft fft_smooth = fft_array * fft_kernel;
-
-        // Backward transform array
-        GNdarray smooth = fft_smooth.backward();
-
-        // Put back array values in matrix
-        for (int imigra = 0, i = ibase; imigra < nmigra; ++imigra) {
-            double* ptr = smooth.data() + imigra * netrue_padded + netrue_pad;
-            for (int ietrue = 0; ietrue < netrue; ++ietrue, ++i) {
-                m_edisp(m_inx_matrix, i) = *ptr++;
-            }
-        }
-
-    } // endfor: looped over all offset angles
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Smooth energy dispersion table
- *
- * @param[in] sigma Smoothing width (number of bins in true energy)
- *
- * Smooth the energy dispersion table in true energy. The smoothing is done
- * using a fast-fourrier transform. For this purpose the energy disperison
- * table for each offset angle is copied into a 2D array, padded with some
- * zero pixels on the left and the right to avoid wrap around.
- ***************************************************************************/
-void GCTAEdisp2D::smooth_table2(const double& sigma_etrue,
-                                const double& sigma_migra)
-{
-    // Get axes dimensions
-    int netrue        = m_edisp.axis_bins(m_inx_etrue);
-    int nmigra        = m_edisp.axis_bins(m_inx_migra);
-    int ntheta        = m_edisp.axis_bins(m_inx_theta);
-    int netrue_pad    = int(3.0*sigma_etrue);
-    int netrue_padded = netrue + 2*netrue_pad; // Array padded with zeros
-    int npix          = netrue * nmigra;
-
-    // Get smoothing kernel
-    GFft fft_kernel = fft_smooth_kernel2(netrue_padded, nmigra, sigma_etrue, sigma_migra);
-
-    // Loop over all offset angles
-    for (int itheta = 0; itheta < ntheta; ++itheta) {
-
-        // Compute base index
-        int ibase = itheta * npix;
-
-        // Extract matrix in GNdarray
-        GNdarray array(netrue_padded, nmigra);
-        for (int imigra = 0, i = ibase; imigra < nmigra; ++imigra) {
-            double* ptr = array.data() + imigra * netrue_padded + netrue_pad;
-            for (int ietrue = 0; ietrue < netrue; ++ietrue, ++i) {
-                *ptr++ = m_edisp(m_inx_matrix, i);
-            }
-        }
-
-        // FFT of array
-        GFft fft_array(array);
-
-        // Smooth array
-        GFft fft_smooth = fft_array * fft_kernel;
-
-        // Backward transform array
-        GNdarray smooth = fft_smooth.backward();
-
-        // Put back array values in matrix
-        for (int imigra = 0, i = ibase; imigra < nmigra; ++imigra) {
-            double* ptr = smooth.data() + imigra * netrue_padded + netrue_pad;
-            for (int ietrue = 0; ietrue < netrue; ++ietrue, ++i) {
-                m_edisp(m_inx_matrix, i) = *ptr++;
-            }
-        }
-
-    } // endfor: looped over all offset angles
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Get FFT of smoothing kernel
- *
- * @param[in] nbins Number of kernel bins.
- * @param[in] sigma Gaussian kernel sigma in bins.
- * @return FFT of smoothing kernel
- *
- * Returns the fast-fourrier transform of a Gaussian smoothing kernel.
- ***************************************************************************/
-GFft GCTAEdisp2D::fft_smooth_kernel(const int&    nbins,
-                                    const double& sigma) const
-{
-    // Allocate kernel
-    GNdarray kernel(nbins);
-
-    // Initialise sum and compute Gaussian normalisation
-    double sum  =  0.0;
-    double norm = -0.5 / (sigma * sigma);
-
-    // Set Gaussian kernel
-    for (int i = 0; i < nbins; ++i) {
-        double value = std::exp(norm*double(i*i));
-        kernel(i) += value;
-        sum       += value;
-        if (i > 0) {
-            kernel(nbins-i) += value;
-            sum             += value;
-        }
-    }
-
-    // Normalize kernel
-    if (sum > 0.0) {
-        for (int i = 0; i < nbins; ++i) {
-            kernel(i) /= sum;
-        }
-    }
-
-    // Return FFT of kernel
-    return (GFft(kernel));
-}
-
-
-/***********************************************************************//**
- * @brief Get FFT of smoothing kernel for true energy smoothing
- *
- * @param[in] netrue Number of true energy bins.
- * @param[in] nmigra Number of migration bins bins.
- * @param[in] sigma Gaussian kernel sigma in true energy direction.
- * @return FFT of smoothing kernel
- *
- * Returns the fast-fourrier transform of a Gaussian smoothing kernel in
- * true energy.
- ***************************************************************************/
-GFft GCTAEdisp2D::fft_smooth_kernel(const int&    netrue,
-                                    const int&    nmigra,
-                                    const double& sigma) const
-{
-    // Allocate kernel
-    GNdarray kernel(netrue, nmigra);
-
-    // Initialise sum and compute Gaussian normalisation
-    double sum  =  0.0;
-    double norm = -0.5 / (sigma * sigma);
-
-    // Set Gaussian kernel
-    for (int i = 0; i < netrue; ++i) {
-        double value = std::exp(norm*double(i*i));
-        kernel(i,0) += value;
-        sum         += value;
-        if (i > 0) {
-            kernel(netrue-i,0) += value;
-            sum                += value;
-        }
-    }
-
-    // Normalize kernel
-    if (sum > 0.0) {
-        for (int i = 0; i < netrue; ++i) {
-            kernel(i,0) /= sum;
-        }
-    }
-
-    // Return FFT of kernel
-    return (GFft(kernel));
-}
-
-
-/***********************************************************************//**
- * @brief Get FFT of smoothing kernel for 2D smoothing
- *
- * @param[in] netrue Number of true energy bins.
- * @param[in] nmigra Number of migration bins bins.
- * @param[in] sigma_etrue Gaussian kernel sigma in true energy direction.
- * @param[in] sigma_migra Gaussian kernel sigma in migration direction.
- * @return FFT of smoothing kernel
- *
- * Returns the fast-fourrier transform of a Gaussian smoothing kernel in
- * true energy and migration.
- ***************************************************************************/
-GFft GCTAEdisp2D::fft_smooth_kernel2(const int&    netrue,
-                                     const int&    nmigra,
-                                     const double& sigma_etrue,
-                                     const double& sigma_migra) const
-{
-    // Allocate kernel
-    GNdarray kernel(netrue, nmigra);
-
-    // Initialise sum and compute Gaussian normalisation
-    double sum        =  0.0;
-    double norm_etrue = -0.5 / (sigma_etrue * sigma_etrue);
-    double norm_migra = -0.5 / (sigma_migra * sigma_migra);
-
-    // Set Gaussian kernel
-    for (int itrue = 0; itrue < netrue; ++itrue) {
-        double value_true = std::exp(norm_etrue*double(itrue*itrue));
-        for (int imigra = 0; imigra < nmigra; ++imigra) {
-            double value = std::exp(norm_migra*double(imigra*imigra)) * value_true;
-            kernel(itrue,imigra) += value;
-            sum                  += value;
-            if (itrue > 0) {
-                kernel(netrue-itrue,imigra) += value;
-                sum                         += value;
-            }
-            if (imigra > 0) {
-                kernel(itrue,nmigra-imigra) += value;
-                sum                         += value;
-            }
-            if ((itrue > 0) && (imigra > 0)) {
-                kernel(netrue-itrue,nmigra-imigra) += value;
-                sum                                += value;
-            }
-        }
-    }
-
-    // Normalize kernel
-    if (sum > 0.0) {
-        for (int itrue = 0; itrue < netrue; ++itrue) {
-            for (int imigra = 0; imigra < nmigra; ++imigra) {
-                kernel(itrue,imigra) /= sum;
-            }
-        }
-    }
-
-    // Return FFT of kernel
-    return (GFft(kernel));
-}
-
-
-/***********************************************************************//**
  * @brief Clip energy dispersion table
  *
- * @param[in] threshold Clipping threshold in fraction of maximum value.
+ * @param[in] threshold Clipping threshold as fraction of maximum value.
  *
  * Clips all migration vectors at a threshold that is a fraction of the
  * maximum value in the migration vector.
@@ -1808,58 +1529,19 @@ void GCTAEdisp2D::clip_table(const double& threshold)
 
 
 /***********************************************************************//**
- * @brief Clip array
- *
- * @param[in] array Ndarray that should be clipped.
- * @param[in] threshold Clipping threshold in fraction of maximum value.
- * @return Clipped Ndarray
- *
- * Clips all values below a threshold to zero.
- ***************************************************************************/
-/*
-GNdarray GCTAEdisp2D::clip_array(const GNdarray& array,
-                                 const double&   threshold) const
-{
-    // Set clipped array
-    GNdarray clipped = array;
-
-    // Initialise variables
-    int nsize = clipped.size();
-
-    // Determine maximum value in array
-    double  max  = 0.0;
-    double* cptr = clipped.data();
-    for (int i = 0; i < nsize; ++i, cptr++) {
-        if (*cptr > max) {
-            max = *cptr;
-        }
-    }
-
-    // Clip values below threshold
-    double clip_value = max * threshold;
-    cptr              = clipped.data();
-    for (int i = 0; i < nsize; ++i, cptr++) {
-        if (std::abs(*cptr) < clip_value) {
-            *cptr = 0.0;
-        }
-    }
-
-    // Return clipped array
-    return clipped;
-}
-*/
-
-
-/***********************************************************************//**
  * @brief Denoise energy dispersion table
  *
- * Denoise the energy dispersion table by smoothing the energy dispersion
- * for each offset angle and true energy using the smooth_array() method.
+ * @param[in] sigma Gaussian smoothing single in true energy.
+ *
+ * Denoise the energy dispersion table by replacing the energy dispersion
+ * for each offset angle and true energy by a Gaussian function. The mean
+ * and rms of the Gaussian is smoothed as function of true energy using a
+ * Gaussian smoothing kernel with a width of @p sigma pixels.
  *
  * True energy values with no energy dispersion information are interpolated
  * from neighbouring energy dispersion values.
  ***************************************************************************/
-void GCTAEdisp2D::denoise_table(void)
+void GCTAEdisp2D::denoise_table(const double& sigma)
 {
     // Log entrance
     //std::cout << "GCTAEdisp2D::denoise_table in" << std::endl;
@@ -1871,7 +1553,7 @@ void GCTAEdisp2D::denoise_table(void)
     int npix   = netrue * nmigra;
 
     // Get Gaussian parameters for all offset angles and true energies
-    GNdarray gpars = get_gaussian_pars(5.0);
+    GNdarray gpars = get_gaussian_pars(sigma);
 
     // Loop over all offset angles
     for (int itheta = 0; itheta < ntheta; ++itheta) {
@@ -1974,119 +1656,6 @@ void GCTAEdisp2D::denoise_table(void)
 
 
 /***********************************************************************//**
- * @brief Smooth array
- *
- * @param[in] array Energy dispersion array.
- * @param[in] mean Mean of Gaussian.
- * @param[in] rms Root mean square of Gaussian.
- * @return Smoothed energy dispersion array.
- ***************************************************************************/
-GNdarray GCTAEdisp2D::smooth_array(const GNdarray& array,
-                                   const double&   mean,
-                                   const double&   rms) const
-{
-    // Get reference to migration values
-    const GNodeArray& migras = m_edisp.axis_nodes(m_inx_migra);
-    int               nmigra = migras.size();
-
-    // Initialise empty smoothed array
-    GNdarray smoothed_array(nmigra);
-
-    // Set required number of events and minimum and maximum sigma
-    double num_events = 200.0;          // required number of events under Gaussian
-    double min_events =   2.0;          // at least 2 events are required
-    double sigma_min  =   1.0;          // minimum sigma
-    double sigma_max  =   0.1 * nmigra; // maximum sigma (< 20)
-    if (sigma_max > 20.0) {
-       sigma_max = 20.0;
-    }
-
-    // Compute single event value
-    double event_value = get_single_event_value(array);
-
-    // Continue only there are pixels with the requested minimum number of
-    // events (otherwise the returned vector will be zero)
-    if (max(array) >= min_events*event_value) {
-
-        // Get Gaussian approximation
-        GNdarray gaussian = gaussian_array(mean, rms);
-
-        // Get residual by subtracting Gaussian from array
-        GNdarray residual = array - gaussian;
-
-        // Initialise smoothed residual
-        GNdarray smoothed_residual(nmigra);
-
-        // Loop over all migration pixels
-        for (int imigra = 0; imigra < nmigra; ++imigra) {
-
-            // Get pixel value
-            double value = array(imigra);
-
-            // Fall through if pixel value is empty
-            if (value == 0.0) {
-                continue;
-            }
-
-            // Set Gaussian sigma. Make sure that sigma is within the allowed
-            // range
-            double sigma = num_events * event_value / value;
-            if (sigma < sigma_min) {
-                sigma = sigma_min;
-            }
-            else if (sigma > sigma_max) {
-                sigma = sigma_max;
-            }
-
-            // Convolve residual with a Gaussian function
-            double   total =  0.0;
-            double   norm  = -0.5 / (sigma * sigma);
-            GNdarray work(nmigra);
-            for (int k = 0; k < nmigra; ++k) {
-                double weight = std::exp(norm*k*k);
-                if (weight > 1.0e-30) {
-                    if (k == 0) {
-                        work(imigra) = weight;
-                        total       += weight;
-                    }
-                    else {
-                        int ileft = imigra - k;
-                        if (ileft >= 0) {
-                            work(ileft) = weight;
-                            total      += weight;
-                        }
-                        int iright = imigra + k;
-                        if (iright < nmigra) {
-                            work(iright) = weight;
-                            total       += weight;
-                        }
-                    }
-                }
-            }
-            if (total > 0.0) {
-                smoothed_residual += work * residual(imigra) / total;
-            }
-
-        } // endfor: looped over all migration pixels
-
-        // Set smoothed array
-        smoothed_array = gaussian; // + smoothed_residual;
-
-        // Make sure that smooth array is not negative
-        for (int imigra = 0; imigra < nmigra; ++imigra) {
-            if (smoothed_array(imigra) < 0.0) {
-                smoothed_array(imigra) = 0.0;
-            }
-        }
-
-    } // endif: single event value was positive
-
-    // Return smoothed array
-    return smoothed_array;
-}
-
-
-/***********************************************************************//**
  * @brief Return Gaussian approximation of energy dispersion array
  *
  * @param[in] mean Gaussian mean.
@@ -2104,13 +1673,6 @@ GNdarray GCTAEdisp2D::gaussian_array(const double& mean, const double& rms) cons
     // Initialise empty Gaussian array
     int      nmigra = m_edisp.axis_bins(m_inx_migra);
     GNdarray gaussian(nmigra);
-
-    // Get mean and rms of migration values in array
-    /*
-    double mean = 0.0;
-    double rms  = 0.0;
-    get_mean_rms(array, &mean, &rms);
-    */
 
     // If the array contains information then compute a Gaussian
     // approximation
@@ -2253,6 +1815,48 @@ GNdarray GCTAEdisp2D::get_gaussian_pars(const double& sigma) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Get FFT of smoothing kernel
+ *
+ * @param[in] nbins Number of kernel bins.
+ * @param[in] sigma Gaussian kernel sigma in bins.
+ * @return FFT of smoothing kernel
+ *
+ * Returns the fast-fourrier transform of a Gaussian smoothing kernel.
+ ***************************************************************************/
+GFft GCTAEdisp2D::fft_smooth_kernel(const int&    nbins,
+                                    const double& sigma) const
+{
+    // Allocate kernel
+    GNdarray kernel(nbins);
+
+    // Initialise sum and compute Gaussian normalisation
+    double sum  =  0.0;
+    double norm = -0.5 / (sigma * sigma);
+
+    // Set Gaussian kernel
+    for (int i = 0; i < nbins; ++i) {
+        double value = std::exp(norm*double(i*i));
+        kernel(i) += value;
+        sum       += value;
+        if (i > 0) {
+            kernel(nbins-i) += value;
+            sum             += value;
+        }
+    }
+
+    // Normalize kernel
+    if (sum > 0.0) {
+        for (int i = 0; i < nbins; ++i) {
+            kernel(i) /= sum;
+        }
+    }
+
+    // Return FFT of kernel
+    return (GFft(kernel));
 }
 
 
