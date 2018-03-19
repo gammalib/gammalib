@@ -126,15 +126,23 @@ private:
     void normalize_table(void);
 
     // Kludge
-    void     clean_table(const int& threshold);
-    void     clip_table(const double& threshold);
-    void     denoise_table(const double& sigma);
-    GNdarray gaussian_array(const double& mean, const double& rms) const;
-    GNdarray get_gaussian_pars(const double& sigma) const;
-    GFft     fft_smooth_kernel(const int&    nbins,
-                               const double& sigma) const;
+    void     smooth_table(void);
+    GNdarray smooth_array(const GNdarray& array,
+                          const int&      nstart,
+                          const int&      nstop,
+                          const double&   limit) const;
+    double   smoothed_array_value(const int&      inx,
+                                  const GNdarray& array,
+                                  const int&      nodes,
+                                  const double&   limit) const;
+    void     get_moments(const int& itheta,
+                         GNdarray*  mean,
+                         GNdarray*  rms,
+                         GNdarray*  total) const;
     void     get_mean_rms(const GNdarray& array, double* mean, double* rms) const;
-    double   get_single_event_value(const GNdarray& array) const;
+    GNdarray gaussian_array(const double& mean,
+                            const double& rms,
+                            const double& total) const;
 
     // Protected classes
     class edisp_kern : public GFunction {
