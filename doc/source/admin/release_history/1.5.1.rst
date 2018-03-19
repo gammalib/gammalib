@@ -10,6 +10,8 @@ GammaLib 1.5.1 is a bug fix release for GammaLib release 1.5.
 
 The following bugs were fixed:
 
+* [`2403 <https://cta-redmine.irap.omp.eu/issues/2403>`_] -
+  Refine kludge to handle noisy CTA 2D energy dispersion
 * [`2342 <https://cta-redmine.irap.omp.eu/issues/2342>`_] -
   Add kludge to handle noisy CTA 2D energy dispersion
 * [`2340 <https://cta-redmine.irap.omp.eu/issues/2340>`_] -

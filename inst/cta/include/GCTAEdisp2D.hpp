@@ -124,12 +124,25 @@ private:
     void set_boundaries(void);
     void set_max_edisp(void) const;
     void normalize_table(void);
-    void clip_table(const int& threshold);
-    void smooth_table(const double& sigma, const double& threshold);
-    GFft fft_smooth_kernel(const int&    netrue,
-                           const int&    nmigra,
-                           const double& sigma) const;
-    GNdarray clip_array(const GNdarray& array, const double& threshold) const;
+
+    // Kludge
+    void     smooth_table(void);
+    GNdarray smooth_array(const GNdarray& array,
+                          const int&      nstart,
+                          const int&      nstop,
+                          const double&   limit) const;
+    double   smoothed_array_value(const int&      inx,
+                                  const GNdarray& array,
+                                  const int&      nodes,
+                                  const double&   limit) const;
+    void     get_moments(const int& itheta,
+                         GNdarray*  mean,
+                         GNdarray*  rms,
+                         GNdarray*  total) const;
+    void     get_mean_rms(const GNdarray& array, double* mean, double* rms) const;
+    GNdarray gaussian_array(const double& mean,
+                            const double& rms,
+                            const double& total) const;
 
     // Protected classes
     class edisp_kern : public GFunction {

@@ -7,12 +7,12 @@
         Add GCTABackground::rate_ebin() method (#2308)
 
 
-2018-02-23
+2018-03-19
 
         * Bug fix version 1.5.1 released
         ================================
 
-        Add kludge to handle noisy CTA 2D energy dispersion (#2342).
+        Add kludge to handle noisy CTA 2D energy dispersion (#2342, #2403).
         Prevent unintentional deallocation of arguments (#2340).
         Correct sky map smoothing.
 

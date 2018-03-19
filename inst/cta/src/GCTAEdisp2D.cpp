@@ -52,7 +52,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_SMOOTH_EDISP_KLUDGE      //!< Get rid of noise in energy dispersion
+#define G_SMOOTH_EDISP_KLUDGE    //!< Get rid of noise in energy dispersion
+//#define G_SMOOTH_EDISP_SAVE_TEST //!< Save test matrix
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -1199,8 +1200,7 @@ void GCTAEdisp2D::set_table(void)
 
     // Smooth energy dispersion table
     #if defined(G_SMOOTH_EDISP_KLUDGE)
-    clip_table(15);
-    smooth_table(3.0, 0.0001);
+    smooth_table();
     #endif
 
     // Normalize energy dispersion table
@@ -1208,6 +1208,11 @@ void GCTAEdisp2D::set_table(void)
 
     // Set maximum energy dispersion value
     set_max_edisp();
+
+    // Save test
+    #if defined(G_SMOOTH_EDISP_SAVE_TEST)
+    this->save("test_edisp.fits", true);
+    #endif
 
     // Return
     return;
@@ -1355,116 +1360,80 @@ void GCTAEdisp2D::normalize_table(void)
 }
 
 
+
 /***********************************************************************//**
- * @brief Clip energy dispersion table
- *
- * @param[in] threshold Minimum number of consecutive non-zeros
- *
- * Clips noise in the energy dispersion table.
- *
- * For each offset angle and true energy, the method determines the maximum
- * value of the energy dispersion table and then walks towards smaller and
- * larger migration value to determine the first pixel for which the energy
- * dispersion becomes zero. All pixels beyond these pixels are then clipped
- * to zero. This removes noise that is at small or large migration values.
- *
- * The method then computes the number of remaining contiguos non-zero pixels
- * for each offset angle and true energy, and if this number is smaller than
- * 10, all pixels are set to zero. This removes true energy bins that are
- * sparesely filled.
+ * @brief Smoothed energy dispersion table
  ***************************************************************************/
-void GCTAEdisp2D::clip_table(const int& threshold)
+void GCTAEdisp2D::smooth_table(void)
 {
+    // Log entrance
+    //std::cout << "GCTAEdisp2D::smooth_table in" << std::endl;
+
     // Get axes dimensions
     int netrue = m_edisp.axis_bins(m_inx_etrue);
     int nmigra = m_edisp.axis_bins(m_inx_migra);
     int ntheta = m_edisp.axis_bins(m_inx_theta);
+    int npix   = netrue * nmigra;
 
     // Loop over all offset angles
     for (int itheta = 0; itheta < ntheta; ++itheta) {
 
-        // Loop ober all true energies
+        // Compute means, rms and total as function of etrue
+        GNdarray mean(netrue);
+        GNdarray rms(netrue);
+        GNdarray total(netrue);
+        get_moments(itheta, &mean, &rms, &total);
+
+        // Smooth all three
+        mean  = smooth_array(mean,  30, 30, 0.5);
+        rms   = smooth_array(rms,   30, 30, 0.03);
+        total = smooth_array(total, 30, 30, 0.0);
+
+        // Make sure that total is not negative
+        for (int ietrue = 0; ietrue < netrue; ++ietrue) {
+            if (total(ietrue) < 0.0) {
+                total(ietrue) = 0.0;
+            }
+        }
+        
+        // Replace matrix by Gaussians
         for (int ietrue = 0; ietrue < netrue; ++ietrue) {
 
-            // Compute base index
-            int ibase = ietrue + itheta * netrue * nmigra;
+            // Continue only if there is information
+            if (total(ietrue) > 0.0) {
 
-            // Determine index of maximum value
-            int    imax = 0;
-            double max  = m_edisp(m_inx_matrix,ibase+ietrue);
-            for (int imigra = 1; imigra < nmigra; ++imigra) {
-                int    inx   = ibase + imigra*netrue;
-                double value = m_edisp(m_inx_matrix, inx);
-                if (value > max) {
-                    imax = imigra;
-                    max  = value;
-                }
-            }
+                // Get Gaussian
+                GNdarray gauss = gaussian_array(mean(ietrue), rms(ietrue), total(ietrue));
 
-            // Do nothing if all pixels are zero
-            if (max == 0.0) {
-                continue;
-            }
-
-            // Walk from maximum to the first pixel
-            bool clip = false;
-            for (int imigra = imax; imigra >= 0; imigra--) {
-                int inx = ibase + imigra*netrue;
-                if (clip) {
-                    m_edisp(m_inx_matrix, inx) = 0.0;
-                }
-                else {
-                    double value = m_edisp(m_inx_matrix, inx);
-                    if (value == 0.0) {
-                        clip = true;
-                    }
-                }
-            }
-
-            // Walk from maximum to the last pixel
-            clip = false;
-            for (int imigra = imax; imigra < nmigra; ++imigra) {
-                int inx = ibase + imigra*netrue;
-                if (clip) {
-                    m_edisp(m_inx_matrix, inx) = 0.0;
-                }
-                else {
-                    double value = m_edisp(m_inx_matrix, inx);
-                    if (value == 0.0) {
-                        clip = true;
-                    }
-                }
-            }
-
-            // Determine number of contiguous non-zero pixels
-            int nonzero            = 0;
-            int contiguous_nonzero = 0;
-            for (int imigra = 0; imigra < nmigra; ++imigra) {
-                int    inx   = ibase + imigra*netrue;
-                double value = m_edisp(m_inx_matrix, inx);
-                if (value != 0.0) {
-                    nonzero++;
-                    if (nonzero > contiguous_nonzero) {
-                        contiguous_nonzero = nonzero;
+                // Compute base index
+                int ibase = itheta * npix + ietrue;
+                if ((mean(ietrue) > 0.0) && (rms(ietrue))) {
+                    for (int imigra = 0, i = ibase; imigra < nmigra; ++imigra, i += netrue) {
+                        m_edisp(m_inx_matrix, i) = gauss(imigra);
                     }
                 }
                 else {
-                    nonzero = 0;
+                    for (int imigra = 0, i = ibase; imigra < nmigra; ++imigra, i += netrue) {
+                        m_edisp(m_inx_matrix, i) = 0.0;
+                    }
+                }
+                
+            } // endif: there was information
+
+            // ... otherwise reset the matrix to zero
+            else {
+                int ibase = itheta * npix + ietrue;
+                for (int imigra = 0, i = ibase; imigra < nmigra; ++imigra, i += netrue) {
+                    m_edisp(m_inx_matrix, i) = 0.0;
                 }
             }
 
-            // If there are less than threshold contiguous non-zero pixels we
-            // only have noise, hence all pixels are set to zero
-            if (contiguous_nonzero < threshold) {
-                for (int imigra = 0; imigra < nmigra; ++imigra) {
-                    int inx = ibase + imigra*netrue;
-                    m_edisp(m_inx_matrix, inx) = 0.0;
-                }
-            }
+        } // endfor: looped over true energies
 
-        } // endfor: looped over all true energies
+    } // endfor: looped over offset angles
 
-    } // endfor: looped over all offset angles
+    // Log exit
+    //std::cout << "GCTAEdisp2D::smooth_table out" << std::endl;
 
     // Return
     return;
@@ -1472,67 +1441,195 @@ void GCTAEdisp2D::clip_table(const int& threshold)
 
 
 /***********************************************************************//**
- * @brief Smooth energy dispersion table
+ * @brief Smoothed array
  *
- * @param[in] sigma Smoothing width (number of bins in true energy)
- * @param[in] threshold Clipping threshold
+ * @param[in] array Array.
+ * @param[in] nstart Number of nodes used for regression at first array value.
+ * @param[in] nstop Number of nodes used for regression at last array value.
+ * @param[in] limit Limit for array element exclusion.
+ * @return Smoothed array.
  *
- * Smooth the energy dispersion table in true energy. The smoothing is done
- * using a fast-fourrier transform. For this purpose the energy disperison
- * table for each offset angle is copied into a 2D array, padded with some
- * zero pixels on the left and the right to avoid wrap around. After
- * smoothing the array is clipped using the clip_array() method to avoid
- * marginal non-zero energy dispersion values.
+ * Returns a smoothed array that is computed by locally adjusting a linear
+ * regression law to the array elements.
  ***************************************************************************/
-void GCTAEdisp2D::smooth_table(const double& sigma, const double& threshold)
+GNdarray GCTAEdisp2D::smooth_array(const GNdarray& array,
+                                   const int&      nstart,
+                                   const int&      nstop,
+                                   const double&   limit) const
+{
+    // Initialise smoothed array
+    GNdarray smoothed_array(array.size());
+
+    // Compute node step size
+    double nstep = double(nstop - nstart)/double(array.size());
+
+    // Loop over all array elements and computed the smoothed value
+    for (int i = 0; i < array.size(); ++i) {
+        int nodes         = nstart + int(i*nstep);
+        smoothed_array(i) = smoothed_array_value(i, array, nodes, limit);
+    }
+
+    // Return smoothed array
+    return smoothed_array;
+}
+
+
+/***********************************************************************//**
+ * @brief Get smoothed array value
+ *
+ * @param[in] inx Index of array element.
+ * @param[in] array Array.
+ * @param[in] nodes Number of nodes used for regression.
+ * @param[in] limit Limit for array element exclusion.
+ * @return Smoothed array value.
+ *
+ * Returns a smoothed array value that is derived from adjusting a linear
+ * law using regression to @p nodes adjacent array elements. Array elements
+ * with values below @p limit are excluded from the regression.
+ ***************************************************************************/
+double GCTAEdisp2D::smoothed_array_value(const int&      inx,
+                                         const GNdarray& array,
+                                         const int&      nodes,
+                                         const double&   limit) const
+{
+    // Initialise variables
+    double mean_x = 0.0;
+    double mean_y = 0.0;
+    int    ileft  = inx - 1;
+    int    iright = inx + 1;
+    int    nleft  = 0;
+    int    nright = 0;
+
+    // Allocate vector of elements used for regression
+    std::vector<double> x_vals;
+    std::vector<double> y_vals;
+
+    // Add nodes on the left of the element of interest
+    while (nleft < nodes) {
+        if (ileft < 0) {
+            break;
+        }
+        if (array(ileft) > limit) {
+            double x = double(ileft);
+            double y = array(ileft);
+            x_vals.push_back(x);
+            y_vals.push_back(y);
+            mean_x += x;
+            mean_y += y;
+            nleft++;
+        }
+        ileft--;
+    }
+
+    // Add remaining nodes on the right of the element of interest
+    while (nright < 2*nodes-nleft) {
+        if (iright >= array.size()) {
+            break;
+        }
+        if (array(iright) > limit) {
+            double x = double(iright);
+            double y = array(iright);
+            x_vals.push_back(x);
+            y_vals.push_back(y);
+            mean_x += x;
+            mean_y += y;
+            nright++;
+        }
+        iright++;
+    }
+
+    // Add remaining nodes on the left if all right nodes were not exhausted
+    while (nleft < 2*nodes-nright) {
+        if (ileft < 0) {
+            break;
+        }
+        if (array(ileft) > limit) {
+            double x = double(ileft);
+            double y = array(ileft);
+            x_vals.push_back(x);
+            y_vals.push_back(y);
+            mean_x += x;
+            mean_y += y;
+            nleft++;
+        }
+        ileft--;
+    }
+
+    // Compute mean x and y values
+    double total = double(nleft+nright);
+    if (total > 0.0) {
+        mean_x /= total;
+        mean_y /= total;
+    }
+
+    // Compute regression line slope
+    double beta_nom   = 0.0;
+    double beta_denom = 0.0;
+    for (int i = 0; i < x_vals.size(); ++i) {
+        double x    = x_vals[i];
+        double y    = y_vals[i];
+        beta_nom   += (x - mean_x) * (y - mean_y);
+        beta_denom += (x - mean_x) * (x - mean_x);
+    }
+    double beta = beta_nom / beta_denom;
+
+    // Compute regression line offset
+    double alpha = mean_y - beta * mean_x;
+
+    // Compute value
+    double value = alpha + beta * double(inx);
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute moments
+ *
+ * @param[in] itheta Offset angle index.
+ * @param[out] mean Pointer to mean array.
+ * @param[out] rms Pointer to rms array.
+ * @param[out] total Pointer to total array.
+ *
+ * Computes the mean and root mean square values as function of true energy
+ * for a given offset angle.
+ ***************************************************************************/
+void GCTAEdisp2D::get_moments(const int& itheta,
+                              GNdarray*  mean,
+                              GNdarray*  rms,
+                              GNdarray*  total) const
 {
     // Get axes dimensions
-    int netrue        = m_edisp.axis_bins(m_inx_etrue);
-    int nmigra        = m_edisp.axis_bins(m_inx_migra);
-    int ntheta        = m_edisp.axis_bins(m_inx_theta);
-    int netrue_pad    = int(3.0*sigma);
-    int netrue_padded = netrue + 2*netrue_pad; // Array padded with zeros
-    int npix          = netrue * nmigra;
+    int netrue = m_edisp.axis_bins(m_inx_etrue);
+    int nmigra = m_edisp.axis_bins(m_inx_migra);
+    int npix   = netrue * nmigra;
 
-    // Get smoothing kernel
-    GFft fft_kernel = fft_smooth_kernel(netrue_padded, nmigra, sigma);
-
-    // Loop over all offset angles
-    for (int itheta = 0; itheta < ntheta; ++itheta) {
+    // Loop over all true energies
+    for (int ietrue = 0; ietrue < netrue; ++ietrue) {
 
         // Compute base index
-        int ibase = itheta * npix;
+        int ibase = itheta * npix + ietrue;
 
-        // Extract matrix in GNdarray
-        GNdarray array(netrue_padded, nmigra);
-        for (int imigra = 0, i = 0; imigra < nmigra; ++imigra) {
-            double* ptr = array.data() + imigra * netrue_padded + netrue_pad;
-            for (int ietrue = 0; ietrue < netrue; ++ietrue, ++i) {
-                *ptr++ = m_edisp(m_inx_matrix, ibase+i);
-            }
+        // Extract array
+        GNdarray array(nmigra);
+        for (int imigra = 0, i = ibase; imigra < nmigra; ++imigra, i += netrue) {
+            array(imigra) = m_edisp(m_inx_matrix, i);
         }
 
-        // FFT of array
-        GFft fft_array(array);
+        // Store sum
+        (*total)(ietrue) = sum(array);
 
-        // Smooth array
-        GFft fft_smooth = fft_array * fft_kernel;
+        // Get Gaussian mean and rms
+        double mean_value = 0.0;
+        double rms_value  = 0.0;
+        get_mean_rms(array, &mean_value, &rms_value);
 
-        // Backward transform array
-        GNdarray smooth = fft_smooth.backward();
+        // Store mean and rms
+        (*mean)(ietrue) = mean_value;
+        (*rms)(ietrue)  = rms_value;
 
-        // Clip array
-        smooth = clip_array(smooth, threshold);
-
-        // Put back array values in matrix
-        for (int imigra = 0, i = 0; imigra < nmigra; ++imigra) {
-            double* ptr = smooth.data() + imigra * netrue_padded + netrue_pad;
-            for (int ietrue = 0; ietrue < netrue; ++ietrue, ++i) {
-                m_edisp(m_inx_matrix, ibase+i) = *ptr++;
-            }
-        }
-
-    } // endfor: looped over all offset angles
+    } // endfor: looped over all true energies
 
     // Return
     return;
@@ -1540,85 +1637,101 @@ void GCTAEdisp2D::smooth_table(const double& sigma, const double& threshold)
 
 
 /***********************************************************************//**
- * @brief Get FFT of smoothing kernel
+ * @brief Compute mean and root mean square of migration array
  *
- * @return FFT of smoothing kernel
+ * @param[in] array Energy dispersion array.
+ * @param[out] mean Pointer to mean migration value.
+ * @param[out] rms Pointer to root mean square value.
  *
- * Returns the fast-fourrier transform of a Gaussian smoothing kernel in
- * true energy.
+ * Computes the mean and the root mean square of the migration array. If the
+ * migration array is empty the mean and root mean square values are set to
+ * zero.
+ *
+ * The method does not check whether the @p mean and @p rms pointers are
+ * valid.
  ***************************************************************************/
-GFft GCTAEdisp2D::fft_smooth_kernel(const int&    netrue,
-                                    const int&    nmigra,
-                                    const double& sigma) const
+void GCTAEdisp2D::get_mean_rms(const GNdarray& array,
+                               double*         mean,
+                               double*         rms) const
 {
-    // Allocate kernel
-    GNdarray kernel(netrue, nmigra);
+    // Initialise mean and rms
+    *mean = 0.0;
+    *rms  = 0.0;
 
-    // Initialise sum and compute Gaussian normalisation
-    double sum  =  0.0;
-    double norm = -0.5 / (sigma * sigma);
+    // Get reference to migration values
+    const GNodeArray& migras = m_edisp.axis_nodes(m_inx_migra);
+    int               nmigra = migras.size();
 
-    // Set Gaussian kernel
-    for (int i = 0; i < netrue; ++i) {
-        double value = std::exp(norm*double(i*i));
-        kernel(i,0) += value;
-        sum         += value;
-        if (i > 0) {
-            kernel(netrue-i,0) += value;
-            sum                += value;
-        }
+    // Pre-compute values for mean and rms computation
+    double sum = 0.0;
+    for (int imigra = 0; imigra < nmigra; ++imigra) {
+        double migra   = migras[imigra];
+        double weight  = migra * array(imigra);
+        *mean         += migra * array(imigra);
+        *rms          += weight * migra;
+        sum           += array(imigra);
     }
 
-    // Normalize kernel
+    // If the array is not empty then compute now mean and standard deviation
     if (sum > 0.0) {
-        for (int i = 0; i < netrue; ++i) {
-            kernel(i,0) /= sum;
-        }
+        *mean /= sum;
+        *rms  /= sum;
+        *rms  -= (*mean) * (*mean);
+        *rms   = std::sqrt(*rms);
     }
 
-    // Return FFT of kernel
-    return (GFft(kernel));
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Clip array
+ * @brief Return Gaussian approximation of energy dispersion array
  *
- * @param[in] array Ndarray that should be clipped.
- * @param[in] threshold Clipping threshold in fraction of maximum value.
- * @return Clipped Ndarray
+ * @param[in] mean Gaussian mean.
+ * @param[in] rms Gaussian rms.
+ * @param[in] total Gaussian total.
+ * @return Gaussian approximation of energy dispersion array.
  *
- * Clips all values below a threshold of 10 to zero.
+ * Returns a Gaussian approximation of the energy dispersion array by
+ * computing the mean migration value and its root mean square and by using
+ * these values as the centre and the width of a Gaussian function. The
+ * Gaussian function is normalized so that the sum of the output array is
+ * unity.
  ***************************************************************************/
-GNdarray GCTAEdisp2D::clip_array(const GNdarray& array,
-                                 const double&   threshold) const
+GNdarray GCTAEdisp2D::gaussian_array(const double& mean,
+                                     const double& rms,
+                                     const double& total) const
 {
-    // Set clipped array
-    GNdarray clipped = array;
+    // Initialise empty Gaussian array
+    int      nmigra = m_edisp.axis_bins(m_inx_migra);
+    GNdarray gaussian(nmigra);
 
-    // Initialise variables
-    int nsize = clipped.size();
+    // If the rms is valid then compute Gaussian
+    if (rms > 0.0) {
 
-    // Determine maximum value in array
-    double  max  = 0.0;
-    double* cptr = clipped.data();
-    for (int i = 0; i < nsize; ++i, cptr++) {
-        if (*cptr > max) {
-            max = *cptr;
+        // Get reference to migration values
+        const GNodeArray& migras = m_edisp.axis_nodes(m_inx_migra);
+        int               nmigra = migras.size();
+
+        // Compute Gaussian
+        double total_gauss = 0.0;
+        for (int imigra = 0; imigra < nmigra; ++imigra) {
+            double arg       = (migras[imigra] - mean) / rms;
+            double value     = std::exp(-0.5*arg*arg);
+            gaussian(imigra) = value;
+            total_gauss     += value;
         }
-    }
 
-    // Clip values below threshold
-    double clip_value = max * threshold;
-    cptr              = clipped.data();
-    for (int i = 0; i < nsize; ++i, cptr++) {
-        if (std::abs(*cptr) < clip_value) {
-            *cptr = 0.0;
+        // Normalise Gaussian
+        if (total_gauss > 0.0) {
+            gaussian *= total / total_gauss;
         }
-    }
 
-    // Return clipped array
-    return clipped;
+    } // endif: computed Gaussian
+
+    // Return Gaussian array
+    return gaussian;
 }
 
 
