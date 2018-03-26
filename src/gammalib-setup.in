@@ -170,13 +170,17 @@ fi
 #
 # Set MANPATH
 # ===========
-if [ "x$MANPATH" = x ]; then
-  manpath=${manpath:-}
-  MANPATH="$man_dir:${manpath}"
+if [ -z "${MANPATH}" ]; then
+  if `which manpath > /dev/null 2>&1` ; then
+    default_manpath=`manpath`
+  else
+    default_manpath=`man -w 2> /dev/null`
+  fi
+fi
+if [ -z "${MANPATH}" ]; then
+  MANPATH=$man_dir:${default_manpath}; export MANPATH
 else
-  MANPATH=`echo ":$MANPATH:" | \
-    sed "s%:$man_dir:%:%g" | sed "s%::*$%%"`
-  MANPATH="$man_dir$MANPATH"
+  MANPATH=$man_dir:$MANPATH; export MANPATH
 fi
 
 #
