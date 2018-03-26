@@ -1,7 +1,7 @@
 .. _1.5.1:
 
-GammaLib 1.5.1 release
-======================
+GammaLib 1.5.1 release (26 March 2018)
+======================================
 
 Overview
 --------
@@ -19,8 +19,3 @@ The following bugs were fixed:
 * [`2340 <https://cta-redmine.irap.omp.eu/issues/2340>`_] -
   Prevent unintentional deallocation of arguments
 * Correct sky map smoothing
-
-
-The following improvements were made:
-
-* ...

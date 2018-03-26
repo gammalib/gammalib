@@ -6,7 +6,7 @@ Installing the development version
 The current development version of the code can be downloaded as source
 tarballs or directly from the `Git <https://git-scm.com/>`_ repository.
 
-The current GammaLib development release is ``gammalib-1.5.0.dev1``.
+The current GammaLib development release is ``gammalib-1.6.0.dev1``.
 
 
 Source tarball
@@ -14,7 +14,7 @@ Source tarball
 
 Download the source tarball from the following link
 
-- `GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.5.0.dev1.tar.gz>`_
+- `GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.6.0.dev1.tar.gz>`_
 
 and follow the instructions on :ref:`sec_install_source`.
 
