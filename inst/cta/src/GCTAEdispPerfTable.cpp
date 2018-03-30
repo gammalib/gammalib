@@ -428,10 +428,18 @@ double GCTAEdispPerfTable::prob_erecobin(const GEnergy& ereco_min,
                                          const GEnergy& etrue,
                                          const double&  theta) const
 {
-    // TODO
+    // Update the parameter cache
+    update(etrue.log10TeV());
+
+    // Get normalized energy boundaries in log10 energy
+    double xmin = (ereco_min.log10TeV() - etrue.log10TeV()) / m_par_sigma;
+    double xmax = (ereco_max.log10TeV() - etrue.log10TeV()) / m_par_sigma;
+
+    // Compute fraction of probability within the energy boundaries
+    double prob = gammalib::gauss_integral(xmin, xmax);
 
     // Return
-    return 0.0;
+    return prob;
 }
 
 

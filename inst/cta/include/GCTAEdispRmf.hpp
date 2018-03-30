@@ -94,7 +94,7 @@ public:
     std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int         size(void) const;
+    //int         size(void) const;
     const GRmf& rmf(void) const;
 
 private:

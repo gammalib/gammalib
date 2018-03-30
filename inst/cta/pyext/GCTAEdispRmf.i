@@ -79,7 +79,7 @@ public:
                                 const double&  theta) const;
 
     // Other methods
-    int         size(void) const;
+    //int         size(void) const;
     const GRmf& rmf(void) const;
 };
 
