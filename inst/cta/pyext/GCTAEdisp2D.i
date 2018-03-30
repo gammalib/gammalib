@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEdisp2D.i - CTA 2D energy dispersion class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Florent Forest                              *
+ *  copyright (C) 2015-2018 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,8 +73,13 @@ public:
                              const double& phi = 0.0,
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0) const;
+    double       prob_erecobin(const GEnergy& ereco_min,
+                               const GEnergy& ereco_max,
+                               const GEnergy& etrue,
+                               const double&  theta) const;
 
     // Methods
+    void                     fetch(void) const;
     const GCTAResponseTable& table(void) const;
     void                     table(const GCTAResponseTable& table);
     void                     read(const GFitsTable& table);

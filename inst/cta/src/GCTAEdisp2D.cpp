@@ -779,6 +779,146 @@ void GCTAEdisp2D::fetch(void) const
 
 
 /***********************************************************************//**
+ * @brief Integrate energy dispersion probability over reconstructed energy
+ *        interval
+ *
+ * @param[in] ereco_min Minimum of reconstructed energy interval.
+ * @param[in] ereco_max Maximum of reconstructed energy interval.
+ * @param[in] etrue True energy.
+ * @param[in] theta Offset angle (rad).
+ * @return Integrated energy dispersion probability.
+ *
+ * Integrates the energy dispersion probability over an interval in
+ * reconstructed energy, defined by @p ereco_min and @p ereco_max, for a
+ * given true energy @p etrue and offset angle @p theta.
+ *
+ * The method takes into account that the energy dispersion data are stored
+ * in a matrix and uses the trapezoidal rule for integration of the tabulated
+ * data. This assures the fastest possible integration.
+ ***************************************************************************/
+double GCTAEdisp2D::prob_erecobin(const GEnergy& ereco_min,
+                                  const GEnergy& ereco_max,
+                                  const GEnergy& etrue,
+                                  const double&  theta) const
+{
+    // Make sure that energy dispersion is online
+    fetch();
+
+    // Initalize probability
+    double prob = 0.0;
+
+    // Get log10 of true energy
+    double logEsrc = etrue.log10TeV();
+
+    // Get migration limits
+    double migra_min = ereco_min / etrue;
+    double migra_max = ereco_max / etrue;
+
+    // Continue only if logEsrc and theta are in validity range and migration
+    // interval overlaps with response table
+    if ((logEsrc   >= m_logEsrc_min) && (logEsrc   <= m_logEsrc_max) &&
+        (theta     >= m_theta_min)   && (theta     <= m_theta_max)   &&
+        (migra_max >  m_migra_min)   && (migra_min <  m_migra_max)) {
+
+        // Constrain migration limits to response table
+        if (migra_min < m_migra_min) {
+            migra_min = m_migra_min;
+        }
+        if (migra_max > m_migra_max) {
+            migra_max = m_migra_max;
+        }
+
+        // Retrieve references to node arrays
+        const GNodeArray& etrue_nodes = m_edisp.axis_nodes(m_inx_etrue);
+        const GNodeArray& theta_nodes = m_edisp.axis_nodes(m_inx_theta);
+        const GNodeArray& migra_nodes = m_edisp.axis_nodes(m_inx_migra);
+
+        // Set logEsrc and theta for node array interpolation
+        etrue_nodes.set_value(logEsrc);
+        theta_nodes.set_value(theta);
+
+        // Compute base indices
+        int base_ll = table_index(etrue_nodes.inx_left(),  0, theta_nodes.inx_left());
+        int base_lr = table_index(etrue_nodes.inx_left(),  0, theta_nodes.inx_right());
+        int base_rl = table_index(etrue_nodes.inx_right(), 0, theta_nodes.inx_left());
+        int base_rr = table_index(etrue_nodes.inx_right(), 0, theta_nodes.inx_right());
+
+        // Get migration stride
+        int stride = table_stride(m_inx_migra);
+
+        // Initialise first and second node
+        double x1 = migra_min;
+        double f1 = table_value(base_ll, base_lr, base_rl, base_rr,
+                                etrue_nodes.wgt_left(),
+                                etrue_nodes.wgt_right(),
+                                theta_nodes.wgt_left(),
+                                theta_nodes.wgt_right(), x1);
+        double x2 = 0.0;
+        double f2 = 0.0;
+
+        // Loop over all migration nodes
+        for (int i = 0, offset = 0; i < migra_nodes.size(); ++i, offset += stride) {
+
+            // If migration value is below migra_min then skip node
+            if (migra_nodes[i] <= migra_min) {
+                continue;
+            }
+
+            // If migration value is above maximum migration value then use
+            // migra_max as migration value
+            if (migra_nodes[i] > migra_max) {
+                x2 = migra_max;
+                f2 = table_value(base_ll, base_lr, base_rl, base_rr,
+                                 etrue_nodes.wgt_left(),
+                                 etrue_nodes.wgt_right(),
+                                 theta_nodes.wgt_left(),
+                                 theta_nodes.wgt_right(), x2);
+            }
+
+            // ... otherwise use migration value
+            else {
+                x2 = migra_nodes[i];
+                f2 = table_value(base_ll, base_lr, base_rl, base_rr,
+                                 etrue_nodes.wgt_left(),
+                                 etrue_nodes.wgt_right(),
+                                 theta_nodes.wgt_left(),
+                                 theta_nodes.wgt_right(), offset);
+            }
+
+            // Compute integral
+            prob += 0.5 * (f1 + f2) * std::log10(x2/x1);
+
+            // Set second node as first node
+            x1 = x2;
+            f1 = f2;
+
+            // If node energy is above migra_max then break now
+            if (migra_nodes[i] > migra_max) {
+                break;
+            }
+
+        } // endfor: looped over all nodes
+
+        // If last node energy is below migra_max then compute last part of
+        // integral up to emax
+        if (x1 < migra_max) {
+            x2    = migra_max;
+            f2    = table_value(base_ll, base_lr, base_rl, base_rr,
+                                etrue_nodes.wgt_left(),
+                                etrue_nodes.wgt_right(),
+                                theta_nodes.wgt_left(),
+                                theta_nodes.wgt_right(), x2);
+            prob += 0.5 * (f1 + f2) * std::log10(x2/x1);
+        }
+
+    } // endif: logEsrc, theta and migration range were valid
+
+    // Return probability
+    return prob;
+}
+
+
+/***********************************************************************//**
  * @brief Print energy dispersion information
  *
  * @param[in] chatter Chattiness.
@@ -1345,8 +1485,9 @@ void GCTAEdisp2D::normalize_table(void)
             for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue, ++inx) {
                 double sum = sums[inx];
                 if (sum > 0.0) {
-                    int offset = i_etrue + (i_theta*migra_size) * etrue_size;
-                    for (int k = 0, i = offset; k < migra_size; ++k, i += etrue_size) {
+                    int offset = table_index(i_etrue, 0, i_theta);
+                    int stride = table_stride(m_inx_migra);
+                    for (int k = 0, i = offset; k < migra_size; ++k, i += stride) {
                         m_edisp(m_inx_matrix,i) /= sum;
                     }
                 }
@@ -1360,15 +1501,160 @@ void GCTAEdisp2D::normalize_table(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Return index of response table element
+ *
+ * @param[in] ietrue True energy index.
+ * @param[in] imigra Migration index.
+ * @param[in] itheta Offset index.
+ * @return Index of response table element.
+ ***************************************************************************/
+int GCTAEdisp2D::table_index(const int& ietrue,
+                             const int& imigra,
+                             const int& itheta) const
+{
+    // Set index vector
+    int inx[3];
+    inx[m_inx_etrue] = ietrue;
+    inx[m_inx_migra] = imigra;
+    inx[m_inx_theta] = itheta;
+
+    // Compute index
+    int index = inx[0] + (inx[1] + inx[2] * m_edisp.axis_bins(1)) *
+                         m_edisp.axis_bins(0);
+
+    // Return index
+    return index;
+}
+
+
+/***********************************************************************//**
+ * @brief Return stride of response table axis
+ *
+ * @param[in] axis Response table axis.
+ * @return Stride of response table axis.
+ ***************************************************************************/
+int GCTAEdisp2D::table_stride(const int& axis) const
+{
+    // Initialise stride
+    int stride = 1;
+
+    // Multiply in higher
+    if (axis > 0) {
+        stride *= m_edisp.axis_bins(0);
+    }
+    if (axis > 1) {
+        stride *= m_edisp.axis_bins(1);
+    }
+
+    // Return stride
+    return stride;
+}
+
+
+/***********************************************************************//**
+ * @brief Return bi-linearly interpolate table value for given migration bin
+ *
+ * @param[in] base_ll Base index for left true energy and left offset angle.
+ * @param[in] base_lr Base index for left true energy and right offset angle.
+ * @param[in] base_rl Base index for right true energy and left offset angle.
+ * @param[in] base_rr Base index for right true energy and right offset angle.
+ * @param[in] wgt_el Weighting for left true energy.
+ * @param[in] wgt_er Weighting for right true energy.
+ * @param[in] wgt_tl Weighting for left offset angle.
+ * @param[in] wgt_tr Weighting for right offset angle.
+ * @param[in] offset Offset of migration bin with respect to base indices.
+ * @return Bi-linearly interpolate table value.
+ ***************************************************************************/
+double GCTAEdisp2D::table_value(const int&    base_ll,
+                                const int&    base_lr,
+                                const int&    base_rl,
+                                const int&    base_rr,
+                                const double& wgt_el,
+                                const double& wgt_er,
+                                const double& wgt_tl,
+                                const double& wgt_tr,
+                                const int&    offset) const
+{
+    // Compute table element indices
+    int inx_ll = base_ll + offset;
+    int inx_lr = base_lr + offset;
+    int inx_rl = base_rl + offset;
+    int inx_rr = base_rr + offset;
+
+    // Get
+    double value = wgt_el * (m_edisp(m_inx_matrix, inx_ll) * wgt_tl  +
+                             m_edisp(m_inx_matrix, inx_lr) * wgt_tr) +
+                   wgt_er * (m_edisp(m_inx_matrix, inx_rl) * wgt_tl +
+                             m_edisp(m_inx_matrix, inx_rr) * wgt_tr);
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return bi-linearly interpolate table value for given migration value
+ *
+ * @param[in] base_ll Base index for left true energy and left offset angle.
+ * @param[in] base_lr Base index for left true energy and right offset angle.
+ * @param[in] base_rl Base index for right true energy and left offset angle.
+ * @param[in] base_rr Base index for right true energy and right offset angle.
+ * @param[in] wgt_el Weighting for left true energy.
+ * @param[in] wgt_er Weighting for right true energy.
+ * @param[in] wgt_tl Weighting for left offset angle.
+ * @param[in] wgt_tr Weighting for right offset angle.
+ * @param[in] migra Migration value.
+ * @return Bi-linearly interpolate table value.
+ ***************************************************************************/
+double GCTAEdisp2D::table_value(const int&    base_ll,
+                                const int&    base_lr,
+                                const int&    base_rl,
+                                const int&    base_rr,
+                                const double& wgt_el,
+                                const double& wgt_er,
+                                const double& wgt_tl,
+                                const double& wgt_tr,
+                                const double& migra) const
+{
+    // Retrieve references to migration node array
+    const GNodeArray& migra_nodes = m_edisp.axis_nodes(m_inx_migra);
+
+    // Set migration value for node array interpolation
+    migra_nodes.set_value(migra);
+
+    // Get migration stride
+    int stride = table_stride(m_inx_migra);
+
+    // Get left value
+    double value_left = table_value(base_ll, base_lr, base_rl, base_rr,
+                                    wgt_el, wgt_er, wgt_tl, wgt_tr,
+                                    migra_nodes.inx_left() * stride);
+
+    // Get right value
+    double value_right = table_value(base_ll, base_lr, base_rl, base_rr,
+                                     wgt_el, wgt_er, wgt_tl, wgt_tr,
+                                     migra_nodes.inx_right() * stride);
+
+    // Interpolate result
+    double value = migra_nodes.wgt_left()  * value_left +
+                   migra_nodes.wgt_right() * value_right;
+
+    // Make sure that interpolation result is not negative
+    if (value < 0.0) {
+        value = 0.0;
+    }
+
+    // Return
+    return value;
+}
+
 
 /***********************************************************************//**
  * @brief Smoothed energy dispersion table
  ***************************************************************************/
 void GCTAEdisp2D::smooth_table(void)
 {
-    // Log entrance
-    //std::cout << "GCTAEdisp2D::smooth_table in" << std::endl;
-
     // Get axes dimensions
     int netrue = m_edisp.axis_bins(m_inx_etrue);
     int nmigra = m_edisp.axis_bins(m_inx_migra);
@@ -1431,9 +1717,6 @@ void GCTAEdisp2D::smooth_table(void)
         } // endfor: looped over true energies
 
     } // endfor: looped over offset angles
-
-    // Log exit
-    //std::cout << "GCTAEdisp2D::smooth_table out" << std::endl;
 
     // Return
     return;

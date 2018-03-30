@@ -1818,7 +1818,7 @@ double GCTAResponseIrf::psf_delta_max(const double& theta,
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion (in units or MeV^-1)
+ * @brief Return energy dispersion (in units of MeV^-1)
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] theta Radial offset angle in camera (radians).

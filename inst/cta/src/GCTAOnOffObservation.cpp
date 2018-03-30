@@ -96,6 +96,7 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_RMF_INTEGRATION //!< Use numerical integration for RMF computation
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_LIKELIHOOD_DEBUG                //!< Debug likelihood computation
@@ -1428,6 +1429,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                                  logEtrue);
 
                     // Setup energy dispersion integral
+                    #if defined(G_RMF_INTEGRATION)
                     GCTAOnOffObservation::edisp_kern integrand(response,
                                                                theta,
                                                                phi,
@@ -1436,16 +1438,24 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                                                logEtrue);
                     GIntegral integral(&integrand);
                     integral.eps(1.0e-4);
+                    #endif
 
                     // Loop over reconstructed energy
                     for (int ireco = 0; ireco < nreco; ++ireco) {
 
-                        // Get log of reconstructed energy boundaries
+                        #if defined(G_RMF_INTEGRATION)
+                        // Get log of reconstructed energy boundaries in MeV
                         double ereco_min = std::log(ereco.emin(ireco).MeV());
                         double ereco_max = std::log(ereco.emax(ireco).MeV());
 
                         // Do Romberg integration
                         double value = integral.romberg(ereco_min, ereco_max);
+                        #else
+                        double value = response->edisp()->prob_erecobin(ereco.emin(ireco),
+                                                                        ereco.emax(ireco),
+                                                                        etrue.elogmean(itrue),
+                                                                        theta);
+                        #endif
 
                         // Update Rmf value and weight
                         m_rmf(itrue, ireco)  += value * aeff;

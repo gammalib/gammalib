@@ -93,6 +93,10 @@ public:
                              const double& phi = 0.0,
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0) const;
+    double       prob_erecobin(const GEnergy& ereco_min,
+                               const GEnergy& ereco_max,
+                               const GEnergy& etrue,
+                               const double&  theta) const;
     std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Methods
@@ -106,24 +110,46 @@ public:
 
 private:
     // Methods
-    void init_members(void);
-    void copy_members(const GCTAEdisp2D& edisp);
-    void free_members(void);
-    void update(const double& logEobs,
-                const double& logEsrc,
-                const double& theta) const;
-    void compute_ebounds_obs(const double& theta = 0.0,
-                             const double& phi = 0.0,
-                             const double& zenith = 0.0,
-                             const double& azimuth = 0.0) const;
-    void compute_ebounds_src(const double& theta = 0.0,
-                             const double& phi = 0.0,
-                             const double& zenith = 0.0,
-                             const double& azimuth = 0.0) const;
-    void set_table(void);
-    void set_boundaries(void);
-    void set_max_edisp(void) const;
-    void normalize_table(void);
+    void   init_members(void);
+    void   copy_members(const GCTAEdisp2D& edisp);
+    void   free_members(void);
+    void   update(const double& logEobs,
+                  const double& logEsrc,
+                  const double& theta) const;
+    void   compute_ebounds_obs(const double& theta = 0.0,
+                               const double& phi = 0.0,
+                               const double& zenith = 0.0,
+                               const double& azimuth = 0.0) const;
+    void   compute_ebounds_src(const double& theta = 0.0,
+                               const double& phi = 0.0,
+                               const double& zenith = 0.0,
+                               const double& azimuth = 0.0) const;
+    void   set_table(void);
+    void   set_boundaries(void);
+    void   set_max_edisp(void) const;
+    void   normalize_table(void);
+    int    table_index(const int& ietrue,
+                       const int& imigra,
+                       const int& itheta) const;
+    int    table_stride(const int& axis) const;
+    double table_value(const int& base_ll,
+                                const int& base_lr,
+                                const int& base_rl,
+                                const int& base_rr,
+                                const double& wgt_el,
+                                const double& wgt_er,
+                                const double& wgt_tl,
+                                const double& wgt_tr,
+                                const int& offset) const;
+    double table_value(const int& base_ll,
+                                const int& base_lr,
+                                const int& base_rl,
+                                const int& base_rr,
+                                const double& wgt_el,
+                                const double& wgt_er,
+                                const double& wgt_tl,
+                                const double& wgt_tr,
+                                const double& migra) const;
 
     // Kludge
     void     smooth_table(void);

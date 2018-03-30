@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEdispRmf.hpp - CTA RMF energy dispersion class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2018 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -87,6 +87,10 @@ public:
                               const double& phi = 0.0,
                               const double& zenith = 0.0,
                               const double& azimuth = 0.0) const;
+    double        prob_erecobin(const GEnergy& ereco_min,
+                                const GEnergy& ereco_max,
+                                const GEnergy& etrue,
+                                const double&  theta) const;
     std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods

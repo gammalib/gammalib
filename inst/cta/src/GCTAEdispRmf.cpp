@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdispRmf.cpp - CTA RMF energy dispersion class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2018 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -427,9 +427,30 @@ GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
 
 
 /***********************************************************************//**
+ * @brief Integrated energy dispersion probability over reconstructed energy
+ *
+ * @param[in] ereco_min Minimum reconstructed energy.
+ * @param[in] ereco_max Maximum reconstructed energy.
+ * @param[in] etrue True energy.
+ * @param[in] theta Offset angle (degrees).
+ * @return Integrated energy dispersion probability.
+ ***************************************************************************/
+double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
+                                   const GEnergy& ereco_max,
+                                   const GEnergy& etrue,
+                                   const double&  theta) const
+{
+    // TODO
+
+    // Return
+    return 0.0;
+}
+
+
+/***********************************************************************//**
  * @brief Print RMF information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing energy dispersion information.
  ***************************************************************************/
 std::string GCTAEdispRmf::print(const GChatter& chatter) const

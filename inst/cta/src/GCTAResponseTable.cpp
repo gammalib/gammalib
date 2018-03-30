@@ -609,7 +609,7 @@ double GCTAResponseTable::operator()(const int&    table,
                                      const double& arg2,
                                      const double& arg3) const
 {
-    // Throw exception if table is not 2D
+    // Throw exception if table is not 3D
     if (axes() != 3) {
         std::string msg = "Invalid response table dimension "+
                           gammalib::str(axes())+" encountered. Response "
@@ -2020,30 +2020,43 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2,
     // Compute offsets
     int size1          = axis_bins(0);
     int size2          = axis_bins(1);
+    int size12         = size1 * size2;
     int offset_left_2  = nodes2->inx_left()  * size1;
     int offset_right_2 = nodes2->inx_right() * size1;
-    int offset_left_3  = nodes3->inx_left()  * size1 * size2;
-    int offset_right_3 = nodes3->inx_right() * size1 * size2;
+    int offset_left_3  = nodes3->inx_left()  * size12;
+    int offset_right_3 = nodes3->inx_right() * size12;
+
+    // Pre-compute stuff
+    int inx1l2l = nodes1->inx_left()  + offset_left_2;
+    int inx1l2r = nodes1->inx_left()  + offset_right_2;
+    int inx1r2l = nodes1->inx_right() + offset_left_2;
+    int inx1r2r = nodes1->inx_right() + offset_right_2;
 
     // Set indices for tri-linear interpolation
-    m_inx1 = nodes1->inx_left()  + offset_left_2  + offset_left_3 ;
-    m_inx2 = nodes1->inx_left()  + offset_left_2  + offset_right_3;
-    m_inx3 = nodes1->inx_left()  + offset_right_2 + offset_left_3 ;
-    m_inx4 = nodes1->inx_left()  + offset_right_2 + offset_right_3;
-    m_inx5 = nodes1->inx_right() + offset_left_2  + offset_left_3 ;
-    m_inx6 = nodes1->inx_right() + offset_left_2  + offset_right_3;
-    m_inx7 = nodes1->inx_right() + offset_right_2 + offset_left_3 ;
-    m_inx8 = nodes1->inx_right() + offset_right_2 + offset_right_3;
+    m_inx1 = inx1l2l + offset_left_3;
+    m_inx2 = inx1l2l + offset_right_3;
+    m_inx3 = inx1l2r + offset_left_3;
+    m_inx4 = inx1l2r + offset_right_3;
+    m_inx5 = inx1r2l + offset_left_3;
+    m_inx6 = inx1r2l + offset_right_3;
+    m_inx7 = inx1r2r + offset_left_3;
+    m_inx8 = inx1r2r + offset_right_3;
+
+    // Pre-compute stuff
+    double wgt1l2l = nodes1->wgt_left()  * nodes2->wgt_left();
+    double wgt1l2r = nodes1->wgt_left()  * nodes2->wgt_right();
+    double wgt1r2l = nodes1->wgt_right() * nodes2->wgt_left();
+    double wgt1r2r = nodes1->wgt_right() * nodes2->wgt_right();
 
     // Set weighting factors for tri-linear interpolation
-    m_wgt1 = nodes1->wgt_left()  * nodes2->wgt_left()  *  nodes3->wgt_left();
-    m_wgt2 = nodes1->wgt_left()  * nodes2->wgt_left()  *  nodes3->wgt_right();
-    m_wgt3 = nodes1->wgt_left()  * nodes2->wgt_right() *  nodes3->wgt_left();
-    m_wgt4 = nodes1->wgt_left()  * nodes2->wgt_right() *  nodes3->wgt_right();
-    m_wgt5 = nodes1->wgt_right() * nodes2->wgt_left()  *  nodes3->wgt_left();
-    m_wgt6 = nodes1->wgt_right() * nodes2->wgt_left()  *  nodes3->wgt_right();
-    m_wgt7 = nodes1->wgt_right() * nodes2->wgt_right() *  nodes3->wgt_left();
-    m_wgt8 = nodes1->wgt_right() * nodes2->wgt_right() *  nodes3->wgt_right();
+    m_wgt1 = wgt1l2l * nodes3->wgt_left();
+    m_wgt2 = wgt1l2l * nodes3->wgt_right();
+    m_wgt3 = wgt1l2r * nodes3->wgt_left();
+    m_wgt4 = wgt1l2r * nodes3->wgt_right();
+    m_wgt5 = wgt1r2l * nodes3->wgt_left();
+    m_wgt6 = wgt1r2l * nodes3->wgt_right();
+    m_wgt7 = wgt1r2r * nodes3->wgt_left();
+    m_wgt8 = wgt1r2r * nodes3->wgt_right();
 
     // Return
     return;

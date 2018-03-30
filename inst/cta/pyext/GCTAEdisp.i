@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAEdisp.i - Abstract CTA energy dispersion base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,6 +72,10 @@ public:
                                     const double& phi = 0.0,
                                     const double& zenith = 0.0,
                                     const double& azimuth = 0.0) const = 0;
+    virtual double      prob_erecobin(const GEnergy& ereco_min,
+                                      const GEnergy& ereco_max,
+                                      const GEnergy& etrue,
+                                      const double&  theta) const = 0;
 };
 
 
