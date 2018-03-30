@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-10 February 2018
+30 March 2018
 
 
 1. Introduction
@@ -23,6 +23,7 @@ The following classes have been renamed:
 The following methods have been added:
 - gammalib::atan2()
 - gammalib::plaw_integral()
+- gammalib::gauss_integral()
 - GSkyDir::cos_dist()
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
@@ -75,6 +76,9 @@ None
 
 9. Numerics module
 ------------------
+The gammalib::gauss_integral() function was added to compute the area under a
+Gaussian between two boundaries (#2422).
+
 The gammalib::atan2() function was added to compute the arc tangens of a ratio
 in radians (#2308).
 

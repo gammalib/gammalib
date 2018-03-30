@@ -1,10 +1,12 @@
-2018-02-10
+2018-03-30
 
         * Version 1.6.0 released
         ========================
 
+        Add gammalib::gauss_integral() function (#2422)
         Add GSkyDir::cos_dist() method (#2309)
-        Add GCTABackground::rate_ebin() method (#2308)
+        Add GCTABackground::rate_ebin() method and gammalib::atan2() and
+          gammalib::plaw_integral() functions (#2308)
 
 
 2018-03-26

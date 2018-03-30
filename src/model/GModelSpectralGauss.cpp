@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralGauss.cpp - Spectral Gaussian model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2018 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -363,12 +363,11 @@ double GModelSpectralGauss::flux(const GEnergy& emin,
         double norm       = m_norm.value();
         double mean       = m_mean.value();
         double sigma      = m_sigma.value();
-        double denom      = 1.0 / (gammalib::sqrt_two*sigma);
-        double zmin       = (energy_min - mean) * denom;
-        double zmax       = (energy_max - mean) * denom;
+        double zmin       = (energy_min - mean) / sigma;
+        double zmax       = (energy_max - mean) / sigma;
 
         // Compute flux for a constant model
-        flux = norm*(gammalib::erfcc(zmin) - gammalib::erfcc(zmax))/2.0;
+        flux = norm * gammalib::gauss_integral(zmin, zmax);
     
     } // endif: integration range was valid
 

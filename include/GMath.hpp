@@ -73,13 +73,15 @@ namespace gammalib {
 
     // Other functions
     double gammln(const double& arg);
-    double erfcc(const double& arg);
+    double erf(const double& arg);
+    double erfc(const double& arg);
     double erfinv(const double& arg);
     double modulo(const double& v1, const double& v2);
     double plaw_integral(const double& x1,
                          const double& f1,
                          const double& x2,
                          const double& f2);
+    double gauss_integral(const double& x1, const double& x2);
 }
 
 #endif /* GMATH_HPP */

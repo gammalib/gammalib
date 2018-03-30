@@ -407,6 +407,39 @@ double gammalib::gammln(const double& arg) {
 
 
 /***********************************************************************//**
+ * @brief Computes error function
+ *
+ * @param[in] arg Argument.
+ * @return Error function.
+ *
+ * Reference: http://en.wikipedia.org/wiki/Complementary_error_function
+ ***************************************************************************/
+double gammalib::erf(const double& arg)
+{
+    // Initialise
+    double z = std::abs(arg);
+    double t = 1.0/(1.0+0.5*z);
+
+    // Compute tau
+    double tau = t*std::exp(-z*z -  1.26551223 + t *
+                                  ( 1.00002368 + t *
+                                  ( 0.37409196 + t *
+                                  ( 0.09678418 + t *
+                                  (-0.18628806 + t *
+                                  ( 0.27886807 + t *
+                                  (-1.13520398 + t *
+                                  ( 1.48851587 + t *
+                                  (-0.82215223 + t * 0.17087277)))))))));
+
+    // Compute result
+    double result = (arg >= 0.0) ? 1.0 - tau : tau - 1.0;
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Computes complementary error function
  *
  * @param[in] arg Argument.
@@ -414,20 +447,10 @@ double gammalib::gammln(const double& arg) {
  *
  * Reference: http://en.wikipedia.org/wiki/Complementary_error_function
  ***************************************************************************/
-double gammalib::erfcc(const double& arg)
+double gammalib::erfc(const double& arg)
 {
-    // Copied from Gaussian.cxx in the Fermi ScienceTools software
-    double t, z, ans;
-
-    z = std::abs(arg);
-    t = 1.0/(1.0+0.5*z);
-    ans = t*std::exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
-          t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
-          t*(-0.82215223+t*0.17087277)))))))));
-    double result = arg >= 0.0 ? ans : 2.0-ans;
-
     // Return result
-    return result;
+    return (1.0 - erf(arg));
 }
 
 
@@ -561,6 +584,32 @@ double gammalib::plaw_integral(const double& x1,
     else {
         integral = f1 * x1 * xratio;
     }
+
+    // Return integral
+    return integral;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns the integral of a Gaussian function
+ *
+ * @param[in] x1 Lower x boundary (in units of Gaussian sigma).
+ * @param[in] x2 Upper x boundary (in units of Gaussian sigma).
+ * @return Integral of Gaussian
+ *
+ * Analytically computes
+ *
+ * \f[\frac{1}{\sqrt{\pi}}\int_{x_1}^{x_2} e^{-\frac{1}{2}x^2} dx\f]
+ *
+ ***************************************************************************/
+double gammalib::gauss_integral(const double& x1,
+                                const double& x2)
+{
+    // Get integral
+    const double norm = 1.0 / gammalib::sqrt_two;
+    double xmin       = x1 * norm;
+    double xmax       = x2 * norm;
+    double integral   = 0.5 * (gammalib::erfc(xmin) - gammalib::erfc(xmax));
 
     // Return integral
     return integral;

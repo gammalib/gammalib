@@ -22,10 +22,13 @@ Bug fixes
 Improvements
 ------------
 
+* [`2422 <https://cta-redmine.irap.omp.eu/issues/2422>`_] -
+  Add ``gammalib::gauss_integral()`` function
 * [`2309 <https://cta-redmine.irap.omp.eu/issues/2309>`_] -
-  Add `GSkyDir::cos_dist()` method
+  Add ``GSkyDir::cos_dist()`` method
 * [`2308 <https://cta-redmine.irap.omp.eu/issues/2308>`_] -
-  Add `GCTABackground::rate_ebin()` method
+  Add ``GCTABackground::rate_ebin()`` method and ``gammalib::atan2()`` and
+  ``gammalib::plaw_integral()`` functions
 
 
 New features
