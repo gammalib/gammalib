@@ -415,12 +415,13 @@ GEbounds GCTAEdispPerfTable::ebounds_src(const double& logEobs,
 
 
 /***********************************************************************//**
- * @brief Integrated energy dispersion probability over reconstructed energy
+ * @brief Return energy dispersion probability for reconstructed energy
+ *        interval
  *
- * @param[in] ereco_min Minimum reconstructed energy.
- * @param[in] ereco_max Maximum reconstructed energy.
+ * @param[in] ereco_min Minimum of reconstructed energy interval.
+ * @param[in] ereco_max Maximum of reconstructed energy interval.
  * @param[in] etrue True energy.
- * @param[in] theta Offset angle (degrees).
+ * @param[in] theta Offset angle (not used).
  * @return Integrated energy dispersion probability.
  ***************************************************************************/
 double GCTAEdispPerfTable::prob_erecobin(const GEnergy& ereco_min,

@@ -168,6 +168,7 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @return Energy dispersion
  *
  * Returns the energy resolution, i.e. the probability density in observed
  * photon energy at a given (log10(E_src), log10(E_obs)).
@@ -188,6 +189,11 @@ double GCTAEdispRmf::operator()(const double& logEobs,
                     m_wgt2 * m_matrix(m_itrue1, m_imeas2) +
                     m_wgt3 * m_matrix(m_itrue2, m_imeas1) +
                     m_wgt4 * m_matrix(m_itrue2, m_imeas2);
+
+    // Make sure that energy dispersion is not negative
+    if (edisp < 0.0) {
+        edisp = 0.0;
+    }
 
     // Return energy dispersion
     return edisp;
@@ -427,12 +433,13 @@ GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
 
 
 /***********************************************************************//**
- * @brief Integrated energy dispersion probability over reconstructed energy
+ * @brief Return energy dispersion probability for reconstructed energy
+ *        interval
  *
- * @param[in] ereco_min Minimum reconstructed energy.
- * @param[in] ereco_max Maximum reconstructed energy.
+ * @param[in] ereco_min Minimum of reconstructed energy interval.
+ * @param[in] ereco_max Maximum of reconstructed energy interval.
  * @param[in] etrue True energy.
- * @param[in] theta Offset angle (degrees).
+ * @param[in] theta Offset angle (not used).
  * @return Integrated energy dispersion probability.
  ***************************************************************************/
 double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
@@ -440,10 +447,78 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
                                    const GEnergy& etrue,
                                    const double&  theta) const
 {
-    // TODO
+    // Initalize probability
+    double prob = 0.0;
 
-    // Return
-    return 0.0;
+    // Get log10 of energies
+    double logEsrc     = etrue.log10TeV();
+    double logEobs_min = ereco_min.log10TeV();
+    double logEobs_max = ereco_max.log10TeV();
+
+    // Set logEsrc for node array interpolation
+    m_etrue.set_value(logEsrc);
+
+    // Store indices and weights for interpolation
+    int    inx_left  = m_etrue.inx_left();
+    int    inx_right = m_etrue.inx_right();
+    double wgt_left  = m_etrue.wgt_left();
+    double wgt_right = m_etrue.wgt_right();
+
+    // Initialise first and second node
+    double x1 = logEobs_min;
+    double f1 = this->operator()(x1, logEsrc);
+    double x2 = 0.0;
+    double f2 = 0.0;
+
+    // Loop over all measured energy nodes
+    for (int i = 0; i < m_emeasured.size(); ++i) {
+
+        // If measured energy is below logEobs_min then skip node
+        if (m_emeasured[i] <= logEobs_min) {
+            continue;
+        }
+
+        // If measured energy is above maximum migration value then use
+        // logEobs_max as measured energy
+        if (m_emeasured[i] > logEobs_max) {
+            x2 = logEobs_max;
+            f2 = this->operator()(x2, logEsrc);
+        }
+
+        // ... otherwise use measured energy
+        else {
+            x2 = m_emeasured[i];
+            f2 = wgt_left  * m_matrix(inx_left,  i) +
+                 wgt_right * m_matrix(inx_right, i);
+            if (f2 < 0.0) {
+                f2 = 0.0;
+            }
+        }
+
+        // Compute integral
+        prob += 0.5 * (f1 + f2) * (x2 - x1);
+
+        // Set second node as first node
+        x1 = x2;
+        f1 = f2;
+
+        // If node energy is above migra_max then break now
+        if (m_emeasured[i] > logEobs_max) {
+            break;
+        }
+
+    } // endfor: looped over all nodes
+
+    // If last node energy is below migra_max then compute last part of
+    // integral up to emax
+    if (x1 < logEobs_max) {
+        x2    = logEobs_max;
+        f2    = this->operator()(x2, logEsrc);
+        prob += 0.5 * (f1 + f2) * (x2 - x1);
+    }
+
+    // Return probability
+    return prob;
 }
 
 
@@ -621,27 +696,12 @@ void GCTAEdispRmf::set_matrix(void)
         // Get integration boundaries
         GEbounds ebounds = ebounds_obs(logEsrc, 0.0);
 
-        // Initialise integration
+        // Integrate contributions over energy boundaries
         double sum = 0.0;
-
-        // Loop over all energy intervals
         for (int i = 0; i < ebounds.size(); ++i) {
-
-            // Get energy boundaries
-            double emin = ebounds.emin(i).log10TeV();
-            double emax = ebounds.emax(i).log10TeV();
-
-            // Setup integration function
-            edisp_kern integrand(this, logEsrc, 0.0);
-            GIntegral  integral(&integrand);
-
-            // Set integration precision
-            integral.eps(1.0e-6);
-
-            // Do Romberg integration
-            sum += integral.romberg(emin, emax);
-            
-        } // endfor: looped over all energy intervals
+            sum += prob_erecobin(ebounds.emin(i), ebounds.emax(i),
+                                 m_rmf.etrue().elogmean(itrue), 0.0);
+        }
 
         // Store matrix sum
         row_sums.push_back(sum);
@@ -715,8 +775,8 @@ void GCTAEdispRmf::set_max_edisp(void) const
 /***********************************************************************//**
  * @brief Update cache
  *
- * @param[in] etrue True energy.
- * @param[in] emeasured Measured energy.
+ * @param[in] etrue Log10 of true energy in TeV.
+ * @param[in] emeasured Log10 of measured energy in TeV.
  *
  * Updates the interpolation cache. The interpolation cache is composed
  * of four indices and weights that define 4 data values of the RMF matrix
@@ -767,6 +827,9 @@ void GCTAEdispRmf::compute_ebounds_obs(const double& theta,
                                        const double& zenith,
                                        const double& azimuth) const
 {
+    // Clear boundaries
+    m_ebounds_obs.clear();
+
     // Loop over Etrue
     for (int i = 0; i < m_rmf.ntrue(); ++i) {
 
@@ -800,6 +863,9 @@ void GCTAEdispRmf::compute_ebounds_src(const double& theta,
                                        const double& zenith,
                                        const double& azimuth) const
 {
+    // Clear boundaries
+    m_ebounds_src.clear();
+
     // Loop over Eobs
     for (int i = 0; i < m_rmf.nmeasured(); ++i) {
 
@@ -817,33 +883,4 @@ void GCTAEdispRmf::compute_ebounds_src(const double& theta,
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Integration kernel for edisp_kern() class
- *
- * @param[in] x Function value.
- *
- * This method implements the integration kernel needed for the edisp_kern()
- * class.
- ***************************************************************************/
-double GCTAEdispRmf::edisp_kern::eval(const double& x)
-{
-    // Get function value
-    double value = m_parent->operator()(x, m_logEsrc, m_theta);
-
-    // Compile option: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GCTAEdispRmf::edisp_kern::eval";
-        std::cout << "(x=" << x << "): ";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return value
-    return value;
 }

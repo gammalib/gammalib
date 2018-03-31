@@ -94,7 +94,6 @@ public:
     std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    //int         size(void) const;
     const GRmf& rmf(void) const;
 
 private:
@@ -114,22 +113,6 @@ private:
                              const double& phi = 0.0,
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0) const;
-
-    // Protected classes
-    class edisp_kern : public GFunction {
-    public:
-        edisp_kern(const GCTAEdispRmf* parent,
-                   const double&       logEsrc,
-                   const double&       theta) :
-                   m_parent(parent),
-                   m_logEsrc(logEsrc),
-                   m_theta(theta) { }
-        double eval(const double& x);
-    protected:
-        const GCTAEdispRmf* m_parent;  //!< Pointer to parent class
-        double              m_logEsrc; //!< True photon energy
-        double              m_theta;   //!< Offset angle
-    };
 
     // Members
     GFilename     m_filename;  //!< Name of response file

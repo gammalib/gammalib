@@ -779,7 +779,7 @@ void GCTAEdisp2D::fetch(void) const
 
 
 /***********************************************************************//**
- * @brief Integrate energy dispersion probability over reconstructed energy
+ * @brief Return energy dispersion probability for reconstructed energy
  *        interval
  *
  * @param[in] ereco_min Minimum of reconstructed energy interval.
