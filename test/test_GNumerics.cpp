@@ -87,10 +87,84 @@ TestGNumerics* TestGNumerics::clone(void) const
  ***************************************************************************/
 void TestGNumerics::test_math(void)
 {
+    // Test acos function
+    test_value(gammalib::acos(0.0), 1.57079633);
+    test_value(gammalib::acos(0.37), 1.19178731);
+
+    // Test atan2 function
+    test_value(gammalib::atan2( 1.0, 2.0),  0.463647609001);
+    test_value(gammalib::atan2( 1.0,-3.0),  2.819842099193);
+    test_value(gammalib::atan2(-2.0,-3.0), -2.553590050042);
+    test_value(gammalib::atan2(-2.0, 1.0), -1.107148717794);
+
+    // Test cosd function
+    test_value(gammalib::cosd(  0.0),  1.0);
+    test_value(gammalib::cosd( 33.0),  0.83867057);
+    test_value(gammalib::cosd(178.1), -0.99945022);
+
+    // Test sind function
+    test_value(gammalib::sind(  0.0), 0.0);
+    test_value(gammalib::sind( 33.0), 0.54463904);
+    test_value(gammalib::sind(178.1), 0.03315518);
+
+    // Test tand function
+    test_value(gammalib::tand(-10.0), -0.176326980708);
+    test_value(gammalib::tand( 12.0),  0.21255656167);
+    test_value(gammalib::tand(178.1), -0.0331734166041);
+
+    // Test asind function
+    test_value(gammalib::asind(0.0), 0.0);
+    test_value(gammalib::asind(0.37), 21.7156172833);
+
+    // Test acosd function
+    test_value(gammalib::acosd(0.0), 90.0);
+    test_value(gammalib::acosd(0.37), 68.28438272);
+
+    // Test atan2d function
+    test_value(gammalib::atan2d( 1.0, 2.0),   26.5650511771);
+    test_value(gammalib::atan2d( 1.0,-3.0),  161.565051177);
+    test_value(gammalib::atan2d(-2.0,-3.0), -146.309932474);
+    test_value(gammalib::atan2d(-2.0, 1.0),  -63.4349488229);
+
+    // Test sincosd function
+    double s;
+    double c;
+    gammalib::sincosd(33.0, &s, &c);
+    test_value(s, 0.54463904);
+    test_value(c, 0.83867057);
+
+    // Test logarithm of gamma function
+    test_value(gammalib::gammln(0.5), 0.572364942925);
+    test_value(gammalib::gammln(1.5), -0.120782237635);
+
+    // Test error function
+    test_value(gammalib::erf(0.0), 0.0);
+    test_value(gammalib::erf(1.0), 0.8427008);
+    test_value(gammalib::erf(2.0), 0.9953223);
+
+    // Test complementary error function
+    test_value(gammalib::erfc(0.0), 1.0);
+    test_value(gammalib::erfc(0.1), 0.887537084);
+    test_value(gammalib::erfc(0.8), 0.257899035);
+
+    // Test inverse error function
+    test_value(gammalib::erfinv(0.3), 0.2724627147);
+    test_value(gammalib::erfinv(0.9), 1.1630871537);
+
+    // Test modulo function
+    test_value(gammalib::modulo(3.1, 2.8), 0.3);
+    test_value(gammalib::modulo(-5.7, 1.37), 1.15);
+
     // Test power law integration
     test_value(gammalib::plaw_integral(2.0, 3.0, 9.0, 5.0), 29.112577);
     test_value(gammalib::plaw_integral(2.0, 9.0, 9.0, 2.0), 27.073393);
     test_value(gammalib::plaw_integral(2.0, 9.0, 5.0, 2.0), 12.471065);
+
+    // Test Gaussian integration
+    test_value(gammalib::gauss_integral(0.0, 1.0),  0.341344746069);
+    test_value(gammalib::gauss_integral(-1.0, 1.0), 0.682689492137086);
+    test_value(gammalib::gauss_integral(-2.0, 2.0), 0.954499736103642);
+    test_value(gammalib::gauss_integral(-3.0, 3.0), 0.997300203936740);
 
     // Exit test
     return;
