@@ -805,49 +805,52 @@ void TestGCTAResponse::test_response_edisp(void)
  ***************************************************************************/
 void TestGCTAResponse::test_response_edisp_PerfTable(void)
 {
-    // Test GCTAEdispPerfTable constructor
-    test_try("GCTAEdispPerfTable constructor");
-    try {
-        GCTAEdispPerfTable test(cta_perf_table);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test GCTAEdispPerfTable void constructor
+    GCTAEdispPerfTable edisp1;
+    test_value(edisp1.filename(), "", "Test filename of void constructor");
 
-    // Load energy dispersion
-    GCTAEdispPerfTable edisp(cta_perf_table);
+    // Test GCTAEdispPerfTable filename constructor
+    GCTAEdispPerfTable edisp2(cta_perf_table);
+    test_value(edisp2.filename(), cta_perf_table,
+               "Test filename of filename constructor");
 
-    // Test ebounds_obs and ebounds_src methods
-    test_try("GCTAEdispPerfTable ebounds_obs and ebounds_src methods");
-    try {
-        //std::cout << "TEST EBOUNDS PERFTABLE" << std::endl;
-        // ebounds_obs (for a given logEsrc)
-        //std::cout << edisp.ebounds_obs(-1.0).print(EXPLICIT) << std::endl;
-        // ebounds_src (for a given logEobs)
-        //std::cout << edisp.ebounds_src(2.0).print(EXPLICIT) << std::endl;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test load method
+    edisp2.load(cta_perf_table);
+    test_value(edisp2.filename(), cta_perf_table,
+               "Test filename after loading perfromance table");
+
+    // Test ebounds_obs method
+    test_value(edisp2.ebounds_obs(-1.0).emin().GeV(),  31.6795127349936);
+    test_value(edisp2.ebounds_obs(-1.0).emax().GeV(), 315.661420794325);
+
+    // Test ebounds_src method
+    test_value(edisp2.ebounds_src(-1.0).emin().GeV(),  31.6795127349936);
+    test_value(edisp2.ebounds_src(-1.0).emax().GeV(), 315.661420794325);
+
+    // Test if non-diagonal element (below diagonal) is zero
+    test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
+
+    // Test that diagonal element is non-zero
+    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 14.7025305813298);
+
+    // Test if non-diagonal element (above diagonal) is zero
+    test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
+
+
+    // Test prob_erecobin method
+    GEnergy etrue(1.0, "TeV");
+    GEnergy emin(0.1, "TeV");
+    GEnergy emax(10.0, "TeV");
+    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0), 1.0);
+    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.5);
+    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.5);
 
     // Test mc method
-    test_try("GCTAEdispPerfTable mc method");
-    try {
-        GRan ran;
-        //std::cout << "TEST MC PERFTABLE" << std::endl;
-        for (int i = 0; i < 20; ++i) {
-            //std::cout << edisp.mc(ran, -1.0).GeV() << std::endl;
-        }
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GRan ran;
+    test_value(edisp2.mc(ran, 0.0).TeV(), 0.88667418590027);
 
     // Test normalisation
-    test_edisp_integration(edisp);
+    test_edisp_integration(edisp2);
 
     // Return
     return;
@@ -859,52 +862,51 @@ void TestGCTAResponse::test_response_edisp_PerfTable(void)
  ***************************************************************************/
 void TestGCTAResponse::test_response_edisp_RMF(void)
 {
-    // Test void constructor
-    test_try("GRmf void constructor");
-    try {
-        GRmf rmf;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test GCTAEdispRmf void constructor
+    GCTAEdispRmf edisp1;
+    test_value(edisp1.filename(), "", "Test filename of void constructor");
 
-    // Test source energy boundary constructor
-    test_try("GRmf energy boundary constructor");
-    try {
-        GEbounds ebounds_src(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
-        GRmf     rmf(ebounds_src, ebounds_src);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test GCTAEdispRmf filename constructor
+    GCTAEdispRmf edisp2(cta_edisp_rmf);
+    test_value(edisp2.filename(), cta_edisp_rmf,
+               "Test filename of filename constructor");
 
-    // Test observed energy boundary constructor
-    test_try("GRmf energy boundary constructor");
-    try {
-        GEbounds ebounds_obs(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
-        GRmf     rmf(ebounds_obs, ebounds_obs);
-        test_try_success();
-        }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test load method
+    edisp2.load(cta_edisp_rmf);
+    test_value(edisp2.filename(), cta_edisp_rmf,
+               "Test filename after loading RMF file");
 
-    // Load RMF
-    GCTAEdispRmf edisp(cta_edisp_rmf);
+    // Test ebounds_obs method
+    test_value(edisp2.ebounds_obs(1.0).emin().TeV(),  5.75439929962158);
+    test_value(edisp2.ebounds_obs(1.0).emax().TeV(), 15.8489322662354);
+
+    // Test ebounds_src method
+    test_value(edisp2.ebounds_src(1.0).emin().TeV(),  5.75439929962158);
+    test_value(edisp2.ebounds_src(1.0).emax().TeV(), 15.8489322662354);
 
     // Test if non-diagonal element (below diagonal) is zero
-    test_value(edisp(std::log10(30.0), std::log10(1.0)), 0.0);
+    test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
 
     // Test that diagonal element is non-zero
-    //test_value(edisp(std::log10(30.0),std::log10(30.0)), 0.354952753 ,1e-9);
+    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 7.4480009344395);
 
     // Test if non-diagonal element (above diagonal) is zero
-    test_value(edisp(std::log10(1.0), std::log10(30.0)), 0.0);
+    test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
+
+    // Test prob_erecobin method
+    GEnergy etrue(1.0, "TeV");
+    GEnergy emin(0.1, "TeV");
+    GEnergy emax(10.0, "TeV");
+    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0),  0.999664174482241);
+    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.494679101633454);
+    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.504985072848788);
+
+    // Test mc method
+    GRan ran;
+    test_value(edisp2.mc(ran, 0.0).TeV(), 0.942937281664539);
 
     // Test normalisation
-    test_edisp_integration(edisp, 0.5, 10.0);
+    test_edisp_integration(edisp2, 0.5, 10.0);
 
     // Return
     return;
@@ -915,32 +917,51 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
  ***************************************************************************/
 void TestGCTAResponse::test_response_edisp_2D(void)
 {
-    // Test void constructor
-    test_try("GCTAEdisp2D void constructor");
-    try {
-        GCTAEdisp2D edisp;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test GCTAEdisp2D void constructor
+    GCTAEdisp2D edisp1;
+    test_value(edisp1.filename(), "", "Test filename of void constructor");
 
-    // Test GCTAEdisp2D file constructor
-    test_try("GCTAEdisp2D file constructor");
-    try {
-        GCTAEdisp2D edisp(cta_edisp_2D);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test GCTAEdisp2D filename constructor
+    GCTAEdisp2D edisp2(cta_edisp_2D);
+    test_value(edisp2.filename(), cta_edisp_2D,
+               "Test filename of filename constructor");
 
-    // Load 2D energy dispersion
-    GCTAEdisp2D edisp(cta_edisp_2D);
+    // Test load method
+    edisp2.load(cta_edisp_2D);
+    test_value(edisp2.filename(), cta_edisp_2D,
+               "Test filename after loading response table file");
+
+    // Test ebounds_obs method
+    test_value(edisp2.ebounds_obs(1.0).emin().TeV(),  6.82816152379073);
+    test_value(edisp2.ebounds_obs(1.0).emax().TeV(), 13.2011115155942);
+
+    // Test ebounds_src method
+    test_value(edisp2.ebounds_src(1.0).emin().TeV(),  7.72198100249182);
+    test_value(edisp2.ebounds_src(1.0).emax().TeV(), 19.8348918834691);
+
+    // Test if non-diagonal element (below diagonal) is zero
+    test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
+
+    // Test that diagonal element is non-zero
+    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 11.7884028286084);
+
+    // Test if non-diagonal element (above diagonal) is zero
+    test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
+
+    // Test prob_erecobin method
+    GEnergy etrue(1.0, "TeV");
+    GEnergy emin(0.1, "TeV");
+    GEnergy emax(10.0, "TeV");
+    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0),  1.00008878464952);
+    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.448839360815326);
+    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.551249618415791);
+
+    // Test mc method
+    GRan ran;
+    test_value(edisp2.mc(ran, 0.0).TeV(), 0.97532927330811);
 
     // Test normalisation
-    test_edisp_integration(edisp);
-
+    test_edisp_integration(edisp2);
 
     // Return
     return;
