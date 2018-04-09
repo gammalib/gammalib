@@ -1,8 +1,9 @@
-2018-03-30
+2018-04-09
 
         * Version 1.6.0 released
         ========================
 
+        Add GCTAEdisp::prob_erecobin() method (#2422)
         Add gammalib::gauss_integral() function (#2422)
         Add GSkyDir::cos_dist() method (#2309)
         Add GCTABackground::rate_ebin() method and gammalib::atan2() and

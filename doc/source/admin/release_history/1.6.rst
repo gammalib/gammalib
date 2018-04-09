@@ -23,6 +23,8 @@ Improvements
 ------------
 
 * [`2422 <https://cta-redmine.irap.omp.eu/issues/2422>`_] -
+  Add ``GCTAEdisp::prob_erecobin()`` method
+* [`2422 <https://cta-redmine.irap.omp.eu/issues/2422>`_] -
   Add ``gammalib::gauss_integral()`` function
 * [`2309 <https://cta-redmine.irap.omp.eu/issues/2309>`_] -
   Add ``GSkyDir::cos_dist()`` method

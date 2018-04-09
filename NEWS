@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-30 March 2018
+9 April 2018
 
 
 1. Introduction
@@ -30,6 +30,10 @@ The following methods have been added:
 - GCTABackground::rate_ebin()
 - GCTABackgroundPerfTable::rate_ebin()
 - GCTABackground3D::rate_ebin()
+- GCTAEdisp::prob_erecobin()
+- GCTAEdispPerfTable::prob_erecobin()
+- GCTAEdispRmf::prob_erecobin()
+- GCTAEdisp2D::prob_erecobin()
 
 The following methods have been removed:
 - none
@@ -140,6 +144,12 @@ None
 
 20. CTA interface
 -----------------
+A GCTAEdisp::prob_erecobin() method has been defined and implemented in the
+derived energy dispersion classes that returns the probability that a photon with
+a given true energy is reconstructed with a energy comprised in a given energy
+interval. The method makes use of the internal structure of the response information
+and avoids a numerical integration over reconstructed energy (#2422).
+
 A GCTAInstDir::theta() and GCTAInstDir::phi() methods were added that return the
 distance to the camera centre in radians and the azimuth angle, respectively (#2308).
 
