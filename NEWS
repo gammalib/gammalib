@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-9 April 2018
+10 April 2018
 
 
 1. Introduction
@@ -50,7 +50,7 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-None
+Keep existing library path in installation script on Mac OS X (#2420)
 
 
 4. Application module

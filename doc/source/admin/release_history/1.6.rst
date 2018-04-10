@@ -16,7 +16,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
-* ...
+* [`2420 <https://cta-redmine.irap.omp.eu/issues/2420>`_] -
+  Keep existing library path in installation script on Mac OS X
 
 
 Improvements

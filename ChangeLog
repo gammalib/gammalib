@@ -1,8 +1,9 @@
-2018-04-09
+2018-04-10
 
         * Version 1.6.0 released
         ========================
 
+        Keep existing library path in installation script on Mac OS X (#2420)
         Add GCTAEdisp::prob_erecobin() method (#2422)
         Add gammalib::gauss_integral() function (#2422)
         Add GSkyDir::cos_dist() method (#2309)
