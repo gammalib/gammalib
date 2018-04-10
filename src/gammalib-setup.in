@@ -1,5 +1,4 @@
-#! /bin/sh
-#    Filename: gammalib-setup(.in)
+# Filename:    gammalib-setup(.in)
 # Description: Writes an initialization script for GammaLib software
 #              which is custom fit to the user and the particular
 #              software installation. Note that this script is
@@ -96,33 +95,29 @@ fi
 #
 # Set LD_LIBRARY_PATH
 # ===================
-if [ "x$LD_LIBRARY_PATH" = x ]; then
-  LD_LIBRARY_PATH="$gammalib_lib"
+if [ -z "${LD_LIBRARY_PATH}" ]; then
+  LD_LIBRARY_PATH=$gammalib_lib
 else
-  LD_LIBRARY_PATH=`echo ":$LD_LIBRARY_PATH:" | \
-    sed "s%:$gammalib_lib:%:%g" | sed "s%::*$%%"`
-  LD_LIBRARY_PATH="$gammalib_lib$LD_LIBRARY_PATH"
+  LD_LIBRARY_PATH=$gammalib_lib:$LD_LIBRARY_PATH
 fi
+
 
 #
 # Set DYLD_LIBRARY_PATH if required
 # =================================
 case $uname_system in
   Darwin*)
-    if [ "x$DYLD_LIBRARY_PATH" = x ]; then
-         DYLD_LIBRARY_PATH="$gammalib_lib"
+    if [ -z "${DYLD_LIBRARY_PATH}" ]; then
+      DYLD_LIBRARY_PATH=$gammalib_lib
     else
-      DYLD_LIBRARY_PATH=`echo ":$DYLD_LIBRARY_PATH:" | \
-        sed "s%:$gammalib_lib:%:%g" | sed "s%::*$%%"`
-      DYLD_LIBRARY_PATH="$gammalib_lib$DYLD_LIBRARY_PATH"
+      DYLD_LIBRARY_PATH=$gammalib_lib:$DYLD_LIBRARY_PATH
     fi
     ;;
   CYGWIN*)
-    if [ "x$PATH" = x ]; then
-      PATH="$gammalib_lib"
+    if [ -z "${PATH}" ]; then
+      PATH=$gammalib_lib
     else
-      PATH=`echo ":$PATH:" | sed "s%:$gammalib_lib:%:%g" | sed "s%::*$%%"`
-      PATH="$gammalib_lib$PATH"
+      PATH=$gammalib_lib:$PATH
     fi
     ;;
 esac
@@ -130,41 +125,28 @@ esac
 #
 # Set PYTHONPATH
 # ==============
-if [ "x$PYTHONPATH" = x ]; then
-  PYTHONPATH="$python_dir"
+if [ -z "${PYTHONPATH}" ]; then
+  PYTHONPATH=$python_dir:$python_exec_dir
 else
-  PYTHONPATH=`echo ":$PYTHONPATH:" | \
-    sed "s%:$python_dir:%:%g" | sed "s%::*$%%"`
-  PYTHONPATH="$python_dir$PYTHONPATH"
-fi
-if [ "x$PYTHONPATH" = x ]; then
-  PYTHONPATH="$python_exec_dir"
-else
-  PYTHONPATH=`echo ":$PYTHONPATH:" | \
-    sed "s%:$python_exec_dir:%:%g" | sed "s%::*$%%"`
-  PYTHONPATH="$python_exec_dir$PYTHONPATH"
+  PYTHONPATH=$python_dir:$python_exec_dir:$PYTHONPATH
 fi
 
 #
 # Set PKG_CONFIG_PATH
 # ===================
-if [ "x$PKG_CONFIG_PATH" = x ]; then
-  PKG_CONFIG_PATH="$pkgconfig_dir"
+if [ -z "${PKG_CONFIG_PATH}" ]; then
+  PKG_CONFIG_PATH=$pkgconfig_dir
 else
-  PKG_CONFIG_PATH=`echo ":$PKG_CONFIG_PATH:" | \
-    sed "s%:$pkgconfig_dir:%:%g" | sed "s%::*$%%"`
-  PKG_CONFIG_PATH="$pkgconfig_dir$PKG_CONFIG_PATH"
+  PKG_CONFIG_PATH=$pkgconfig_dir:$PKG_CONFIG_PATH
 fi
 
 #
 # Set PATH
 # ========
-if [ "x$PATH" = x ]; then
-  PATH="$gammalib_bin"
+if [ -z "${PATH}" ]; then
+  PATH=$gammalib_bin
 else
-  PATH=`echo ":$PATH:" | \
-    sed "s%:$gammalib_bin:%:%g" | sed "s%::*$%%"`
-  PATH="$gammalib_bin$PATH"
+  PATH=$gammalib_bin:$PATH
 fi
 
 #
@@ -178,16 +160,16 @@ if [ -z "${MANPATH}" ]; then
   fi
 fi
 if [ -z "${MANPATH}" ]; then
-  MANPATH=$man_dir:${default_manpath}; export MANPATH
+  MANPATH=$man_dir:${default_manpath}
 else
-  MANPATH=$man_dir:$MANPATH; export MANPATH
+  MANPATH=$man_dir:$MANPATH
 fi
 
 #
 # Set CALDB (if not yet set)
-# ===================================
-if [ "x$CALDB" = x ]; then
-  CALDB="$caldb_dir"
+# ==========================
+if [ -z "${CALDB}" ]; then
+  CALDB=$caldb_dir
 fi
 
 #

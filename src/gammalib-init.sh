@@ -1,4 +1,4 @@
-# Filename: gammalib-init.sh
+# Filename:    gammalib-init.sh
 # Description: Bourne-shell flavor initialization for GammaLib.
 #              Runs gammalib-setup to generate a sh script tailored
 #              specifically to this user and GammaLib installation,

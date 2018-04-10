@@ -1,4 +1,4 @@
-# Filename: gammalib-init.csh
+# Filename:    gammalib-init.csh
 # Description: C-shell flavor initialization for GammaLib
 #              runs gammalib-setup to generate a temporary csh script
 #              tailored specifically to this user and GammaLib
