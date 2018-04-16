@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialAcceptance.cpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -265,13 +265,92 @@ void GCTAModelRadialAcceptance::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  *
- * Clone a CTA radial acceptance model. Cloning performs a deep copy of the
- * information, so the original object can be destroyed after cloning without
- * any loss of information.
+ * @return Pointer to deep copy of CTA radial acceptance model.
  ***************************************************************************/
 GCTAModelRadialAcceptance* GCTAModelRadialAcceptance::clone(void) const
 {
     return new GCTAModelRadialAcceptance(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set radial model component
+ *
+ * @param[in] radial Pointer to radial model component.
+ *
+ * Sets the radial model component of the model.
+ ***************************************************************************/
+void GCTAModelRadialAcceptance::radial(const GCTAModelRadial* radial)
+{
+    // Free spatial model component only if it differs from current
+    // component. This prevents unintential deallocation of the argument
+    if ((m_radial != NULL) && (m_radial != radial)) {
+        delete m_radial;
+    }
+
+    // Clone spatial model component if it exists, otherwise set pointer
+    // to NULL
+    m_radial = (radial != NULL) ? radial->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set spectral model component
+ *
+ * @param[in] spectral Pointer to spectral model component.
+ *
+ * Sets the spectral model component of the model.
+ ***************************************************************************/
+void GCTAModelRadialAcceptance::spectral(const GModelSpectral* spectral)
+{
+    // Free spectral model component only if it differs from current
+    // component. This prevents unintential deallocation of the argument
+    if ((m_spectral != NULL) && (m_spectral != spectral)) {
+        delete m_spectral;
+    }
+
+    // Clone spectral model component if it exists, otherwise set pointer
+    // to NULL
+    m_spectral = (spectral != NULL) ? spectral->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set temporal model component
+ *
+ * @param[in] temporal Pointer to temporal model component.
+ *
+ * Sets the temporal model component of the model.
+ ***************************************************************************/
+void GCTAModelRadialAcceptance::temporal(const GModelTemporal* temporal)
+{
+    // Free temporal model component only if it differs from current
+    // component. This prevents unintential deallocation of the argument
+    if ((m_temporal != NULL) && (m_temporal != temporal)) {
+        delete m_temporal;
+    }
+
+    // Clone temporal model component if it exists, otherwise set pointer
+    // to NULL
+    m_temporal = (temporal != NULL) ? temporal->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
 }
 
 

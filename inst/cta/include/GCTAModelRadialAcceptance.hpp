@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialAcceptance.hpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -83,6 +83,9 @@ public:
     GCTAModelRadial* radial(void)   const;
     GModelSpectral*  spectral(void) const;
     GModelTemporal*  temporal(void) const;
+    void             radial(const GCTAModelRadial* radial);
+    void             spectral(const GModelSpectral* spectral);
+    void             temporal(const GModelTemporal* temporal);
 
 protected:
     // Protected methods

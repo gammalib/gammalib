@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-10 April 2018
+16 April 2018
 
 
 1. Introduction
@@ -34,6 +34,9 @@ The following methods have been added:
 - GCTAEdispPerfTable::prob_erecobin()
 - GCTAEdispRmf::prob_erecobin()
 - GCTAEdisp2D::prob_erecobin()
+- GCTAModelRadialAcceptance::radial(GCTAModelRadial*)
+- GCTAModelRadialAcceptance::spectral(GModelSpectral*)
+- GCTAModelRadialAcceptance::temporal(GModelTemporal*)
 
 The following methods have been removed:
 - none

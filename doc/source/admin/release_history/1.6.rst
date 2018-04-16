@@ -37,7 +37,7 @@ Improvements
 New features
 ------------
 
-* ...
+* Add ``GCTAModelRadialAcceptance`` model component setter methods
 
 
 Clean up
