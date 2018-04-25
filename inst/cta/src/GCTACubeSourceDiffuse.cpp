@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTACubeSourceDiffuse.cpp - CTA cube analysis diffuse source class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -411,9 +411,13 @@ double GCTACubeSourceDiffuse::psf(const GCTAResponseCube* rsp,
                                   const GEnergy&          srcEng,
                                   const GTime&            srcTime) const
 {
-    // Set number of iterations for Romberg integration.
-    static const int iter_delta = 5;
-    static const int iter_phi   = 5;
+    // Set minimum and maximum number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/2458
+    static const int min_iter_delta = 5;
+    static const int min_iter_phi   = 5;
+    static const int max_iter_delta = 8;
+    static const int max_iter_phi   = 8;
 
     // Initialise PSF
     double psf = 0.0;
@@ -431,18 +435,27 @@ double GCTACubeSourceDiffuse::psf(const GCTAResponseCube* rsp,
     double delta_min = 0.0;
     double delta_max = 1.1 * rsp->psf().delta_max();
 
+    // Get resolution of spatial model
+    double resolution = gammalib::resolution(model);
+
+
     // Setup integration kernel. We take here the observed photon arrival
     // direction as the true photon arrival direction because the PSF does
     // not vary significantly over a small region.
     cta_psf_diffuse_kern_delta integrand(rsp, model, &rot,
                                          obsDir, srcEng, srcTime,
-                                         iter_phi);
+                                         min_iter_phi, max_iter_phi,
+                                         resolution);
+
+    // Set number of radial integration iterations
+    int iter  = gammalib::iter_rho(delta_max, resolution,
+                                   min_iter_delta, max_iter_delta);
 
     // Setup integration
     GIntegral integral(&integrand);
 
     // Set fixed number of iterations
-    integral.fixed_iter(iter_delta);
+    integral.fixed_iter(iter);
 
     // Integrate over PSF delta angle
     psf = integral.romberg(delta_min, delta_max);

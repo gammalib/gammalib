@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2734,11 +2734,14 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
                                     const GSource&      source,
                                     const GObservation& obs) const
 {
-    // Set number of iterations for Romberg integration.
+    // Set minimum and maximum number of iterations for Romberg integration.
     // These values have been determined after careful testing, see
     // https://cta-redmine.irap.omp.eu/issues/1248
-    static const int iter_rho = 5;
-    static const int iter_phi = 5;
+    // https://cta-redmine.irap.omp.eu/issues/2458
+    static const int min_iter_rho = 5;
+    static const int min_iter_phi = 5;
+    static const int max_iter_rho = 8;
+    static const int max_iter_phi = 8;
 
     // Initialise IRF value
     bool   has_irf = false;
@@ -2770,7 +2773,7 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
     if (!has_irf) {
 
         // Get CTA instrument direction
-        const GCTAInstDir&  dir = retrieve_dir(G_IRF_ELLIPTICAL, event);
+        const GCTAInstDir& dir = retrieve_dir(G_IRF_ELLIPTICAL, event);
 
         // Get pointer on spatial model
         const GModelSpatial* model =
@@ -2779,8 +2782,10 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
             throw GCTAException::bad_model_type(G_IRF_DIFFUSE);
         }
 
+        // Get resolution of spatial model
+        double resolution = gammalib::resolution(model);
+
         // Get event attributes
-        //const GSkyDir& obsDir = dir.dir();
         const GEnergy& obsEng = event.energy();
 
         // Get source attributes
@@ -2836,11 +2841,17 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
                                                  srcLogEng,
                                                  obsEng,
                                                  eta,
-                                                 iter_phi);
+                                                 min_iter_phi,
+                                                 max_iter_phi,
+                                                 resolution);
+
+            // Set number of radial integration iterations
+            int iter  = gammalib::iter_rho(delta_max, resolution,
+                                           min_iter_rho, max_iter_rho);
 
             // Integrate over Psf delta angle
             GIntegral integral(&integrand);
-            integral.fixed_iter(iter_rho);
+            integral.fixed_iter(iter);
             irf = integral.romberg(0.0, delta_max);
 
             // Compile option: Check for NaN/Inf

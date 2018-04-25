@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse_helpers.cpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,9 @@
 #include "GCTAResponse_helpers.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTASupport.hpp"
+#include "GModelSpatialDiffuseMap.hpp"
+#include "GModelSpatialDiffuseCube.hpp"
+#include "GWcs.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -49,8 +52,8 @@
 //#define G_DEBUG_MODEL_ZERO           //!< Debug check for zero model values
 
 /* __ Constants __________________________________________________________ */
-const double g_kulge_radius = 1.0e-12;         //!< Tiny angle (radians)
-const double g_ellipse_kulge_radius = 1.0e-6;  //!< About 0.2 arc seconds
+const double g_kludge_radius = 1.0e-12;        //!< Tiny angle (radians)
+const double g_ellipse_kludge_radius = 1.0e-6; //!< About 0.2 arc seconds
                                                //   A larger radius is used
                                                //   as the ellipse is defined
                                                //   in cartesian coordinates
@@ -154,6 +157,145 @@ cta_omega_intervals gammalib::limit_omega(const double& min,
 
     // Return intervals
     return intervals;
+}
+
+
+/***********************************************************************//**
+ * @brief Determine number of radial Romberg iterations
+ *
+ * @param[in] rho_max Maximum radial offset (radians).
+ * @param[in] resolution Requested angular resolution (radians).
+ * @param[in] iter_min Minimum number of iterations.
+ * @param[in] iter_max Maximum number of iterations.
+ * @return Number of radial Romberg iterations.
+ *
+ * Determines the number of radial Romberg iterations using the formula
+ *
+ * \f[
+ *    iter = \log_2 \left( \frac{\rho_{\rm max}}{resolution} \right) + 1
+ * \f]
+ *
+ * where
+ * \f$\rho_{\rm max}\f$ is the maximum radial offset and
+ * \f$resolution\f$ is the required angular resolution.
+ *
+ * The result will be constrained to the interval [@p iter_min,@p iter_max].
+ ***************************************************************************/
+int gammalib::iter_rho(const double& rho_max,
+                       const double& resolution,
+                       const int&    iter_min,
+                       const int&    iter_max)
+{
+    // Initialise number of iterations
+    int iter = iter_min;
+
+    // Continue only if radial offset and resolution are positive
+    if ((rho_max > 0.0) && (resolution > 0.0)) {
+        double arg = rho_max / resolution;
+        iter       = int(std::log(arg) * gammalib::inv_ln2) + 1;
+        if (iter < iter_min) {
+            iter = iter_min;
+        }
+        else if (iter > iter_max) {
+            iter = iter_max;
+        }
+    }
+
+    // Return number of iterations
+    return iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Determine number of azimuthal Romberg iterations
+ *
+ * @param[in] rho Radial offset (radians).
+ * @param[in] resolution Requested angular resolution (radians).
+ * @param[in] iter_min Minimum number of iterations.
+ * @param[in] iter_max Maximum number of iterations.
+ * @return Number of azimuthal Romberg iterations.
+ *
+ * Determines the number of azimuthal Romberg iterations using the formula
+ *
+ * \f[
+ *    iter = \log_2 \left( \frac{2\pi \rho}{resolution} \right) + 1
+ * \f]
+ *
+ * where
+ * \f$\rho\f$ is the radial offset and
+ * \f$resolution\f$ is the required angular resolution.
+ *
+ * The result will be constrained to the interval [@p iter_min,@p iter_max].
+ ***************************************************************************/
+int gammalib::iter_phi(const double& rho,
+                       const double& resolution,
+                       const int&    iter_min,
+                       const int&    iter_max)
+{
+    // Initialise number of iterations
+    int iter = iter_min;
+
+    // Continue only if radial offset and resolution are positive
+    if ((rho > 0.0) && (resolution > 0.0)) {
+        double arg = gammalib::twopi * rho / resolution;
+        iter       = int(std::log(arg) * gammalib::inv_ln2) + 1;
+        if (iter < iter_min) {
+            iter = iter_min;
+        }
+        else if (iter > iter_max) {
+            iter = iter_max;
+        }
+    }
+
+    // Return number of iterations
+    return iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Determine resolution of spatial model
+ *
+ * @param[in] model Pointer to spatial model.
+ * @return Resolution of spatial model (radians).
+ *
+ * Determine the resolution of a spatial model. So far the method only works
+ * for a spatial map or cube model holding a WCS projection.
+ *
+ * If the resolution of the model could not be determined, the method returns
+ * a resolution of 0.01 deg.
+ ***************************************************************************/
+double gammalib::resolution(const GModelSpatial* model)
+{
+    // Initialise resolution to default resolution
+    double resolution = 0.01 * gammalib::deg2rad;
+
+    // Extract pointer to spatial map. The pointer will be NULL if no spatial
+    // map exists.
+    const GSkyMap* map = NULL;
+    const GModelSpatialDiffuseMap* pmap =
+          dynamic_cast<const GModelSpatialDiffuseMap*>(model);
+    if (pmap != NULL) {
+        map = &(pmap->map());
+    }
+    else {
+        const GModelSpatialDiffuseCube* pcube =
+              dynamic_cast<const GModelSpatialDiffuseCube*>(model);
+        map = &(pcube->cube());
+    }
+
+    // If a spatial map exists then get it's resolution. This so far only
+    // works for WCS maps.
+    if (map != NULL) {
+        const GWcs* wcs = dynamic_cast<const GWcs*>(map->projection());
+        if (wcs != NULL) {
+            double dx = std::abs(wcs->cdelt(0));
+            double dy = std::abs(wcs->cdelt(1));
+            resolution = ((dx < dy) ? dx : dy) * gammalib::deg2rad;
+        }
+    }
+
+    // Return resolution
+    return resolution;
 }
 
 
@@ -295,13 +437,13 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
 
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model
-            double rho_kluge = rho - g_kulge_radius;
-            if (rho_kluge < 0.0) {
-                rho_kluge = 0.0;
+            double rho_kludge = rho - g_kludge_radius;
+            if (rho_kludge < 0.0) {
+                rho_kludge = 0.0;
             }
 
             // Evaluate sky model
-            double model = m_model->eval(rho_kluge, m_srcEng, m_srcTime);
+            double model = m_model->eval(rho_kludge, m_srcEng, m_srcTime);
 
             // Debug: test if model is non positive
             #if defined(G_DEBUG_MODEL_ZERO)
@@ -493,13 +635,13 @@ double cta_nroi_radial_kern_rho::eval(const double& rho)
 
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model
-            double rho_kluge = rho - g_kulge_radius;
-            if (rho_kluge < 0.0) {
-                rho_kluge = 0.0;
+            double rho_kludge = rho - g_kludge_radius;
+            if (rho_kludge < 0.0) {
+                rho_kludge = 0.0;
             }
 
             // Get radial model value
-            double model = m_model->eval(rho_kluge, m_srcEng, m_srcTime);
+            double model = m_model->eval(rho_kludge, m_srcEng, m_srcTime);
 
             // Debug: test if model is non positive
             #if defined(G_DEBUG_MODEL_ZERO)
@@ -675,9 +817,9 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model (e.g. an elliptical
             // disk model)
-            double rho_kluge = rho - g_ellipse_kulge_radius;
-            if (rho_kluge < 0.0) {
-                rho_kluge = 0.0;
+            double rho_kludge = rho - g_ellipse_kludge_radius;
+            if (rho_kludge < 0.0) {
+                rho_kludge = 0.0;
             }
 
             // Setup integration kernel
@@ -691,7 +833,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
                                                     m_obsEng,
                                                     m_posangle_obs,
                                                     m_omega_pnt,
-                                                    rho_kluge,
+                                                    rho_kludge,
                                                     cos_psf,
                                                     sin_psf,
                                                     cos_ph,
@@ -976,9 +1118,9 @@ double cta_nroi_elliptical_kern_rho::eval(const double& rho)
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model (e.g. an elliptical
             // disk model)
-            double rho_kluge = rho - g_ellipse_kulge_radius;
-            if (rho_kluge < 0.0) {
-                rho_kluge = 0.0;
+            double rho_kludge = rho - g_ellipse_kludge_radius;
+            if (rho_kludge < 0.0) {
+                rho_kludge = 0.0;
             }
 
             // Setup phi integration kernel
@@ -990,7 +1132,7 @@ double cta_nroi_elliptical_kern_rho::eval(const double& rho)
                                                      m_srcTime,
                                                      m_obsEng,
                                                      m_obsTime,
-                                                     rho_kluge,
+                                                     rho_kludge,
                                                      sin_rho,
                                                      cos_rho,
                                                      m_posangle_roi);
@@ -1259,10 +1401,17 @@ double cta_irf_diffuse_kern_theta::eval(const double& theta)
                                                cos_theta,
                                                sin_ph,
                                                cos_ph);
+
+            // Set number of azimuthal integration iterations
+            int iter = gammalib::iter_phi(theta, m_resolution,
+                                          m_min_iter, m_max_iter);
+
             // Integrate over phi
             GIntegral integral(&integrand);
-            integral.fixed_iter(m_iter);
+            integral.fixed_iter(iter);
             irf = integral.romberg(0.0, gammalib::twopi) * psf * sin_theta;
+
+            // Compile option: Debugging
             #if defined(G_DEBUG_INTEGRAL)
             if (!integral.isvalid()) {
                 std::cout << "cta_irf_diffuse_kern_theta(theta=";
@@ -1586,13 +1735,13 @@ double cta_psf_radial_kern_rho::eval(const double& rho)
 
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model
-            double rho_kluge = rho - g_kulge_radius;
-            if (rho_kluge < 0.0) {
-                rho_kluge = 0.0;
+            double rho_kludge = rho - g_kludge_radius;
+            if (rho_kludge < 0.0) {
+                rho_kludge = 0.0;
             }
 
             // Evaluate sky model
-            double model = m_model->eval(rho_kluge, m_srcEng, m_srcTime);
+            double model = m_model->eval(rho_kludge, m_srcEng, m_srcTime);
 
             // Debug: test if model is non positive
             #if defined(G_DEBUG_MODEL_ZERO)
@@ -1933,9 +2082,9 @@ double cta_psf_elliptical_kern_rho::eval(const double& rho)
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model (e.g. an elliptical
             // disk model)
-            double rho_kluge = rho - g_ellipse_kulge_radius;
-            if (rho_kluge < 0.0) {
-                rho_kluge = 0.0;
+            double rho_kludge = rho - g_ellipse_kludge_radius;
+            if (rho_kludge < 0.0) {
+                rho_kludge = 0.0;
             }
 
             // Setup integration kernel
@@ -1945,7 +2094,7 @@ double cta_psf_elliptical_kern_rho::eval(const double& rho)
                                                     m_srcEng,
                                                     m_srcTime,
                                                     m_posangle_obs,
-                                                    rho_kluge,
+                                                    rho_kludge,
                                                     cos_psf,
                                                     sin_psf);
 
@@ -2189,11 +2338,15 @@ double cta_psf_diffuse_kern_delta::eval(const double& delta)
                                                m_srcEng, m_srcTime,
                                                sin_delta, cos_delta);
 
+            // Set number of azimuthal integration iterations
+            int iter = gammalib::iter_phi(delta, m_resolution,
+                                          m_min_iter, m_max_iter);
+
             // Setup untegration
             GIntegral integral(&integrand);
 
             // Set fixed number of iterations
-            integral.fixed_iter(m_iter);
+            integral.fixed_iter(iter);
 
             // Azimuthally integrate model
             value *= integral.romberg(0.0, gammalib::twopi) * sin_delta;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse_helpers.hpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,15 @@ namespace gammalib {
     cta_omega_intervals limit_omega(const double& min,
                                     const double& max,
                                     const double& domega);
+    int                 iter_rho(const double& rho_max,
+                                 const double& resolution,
+                                 const int&    iter_min,
+                                 const int&    iter_max);
+    int                 iter_phi(const double& rho,
+                                 const double& resolution,
+                                 const int&    iter_min,
+                                 const int&    iter_max);
+    double              resolution(const GModelSpatial* model);
 }
 
 
@@ -791,7 +800,9 @@ public:
                                const double&          srcLogEng,
                                const GEnergy&         obsEng,
                                const double&          eta,
-                               const int&             iter) :
+                               const int&             min_iter,
+                               const int&             max_iter,
+                               const double&          resolution) :
                                m_rsp(rsp),
                                m_model(model),
                                m_rot(rot),
@@ -805,7 +816,9 @@ public:
                                m_obsEng(obsEng),
                                m_sin_eta(std::sin(eta)),
                                m_cos_eta(std::cos(eta)),
-                               m_iter(iter) { }
+                               m_min_iter(min_iter),
+                               m_max_iter(max_iter),
+                               m_resolution(resolution) { }
     double eval(const double& theta);
 protected:
     const GCTAResponseIrf* m_rsp;        //!< CTA response
@@ -825,7 +838,9 @@ protected:
     double                 m_cos_eta;    //!< Cosine of angular distance between
                                          //   observed photon direction and
                                          //   camera centre
-    int                    m_iter;       // Integration iterations
+    int                    m_min_iter;   // Minimum integration iterations
+    int                    m_max_iter;   // Maximum integration iterations
+    double                 m_resolution; // Resolution of spatial model
 };
 
 
@@ -1338,25 +1353,31 @@ public:
                                const GSkyDir&          srcDir,
                                const GEnergy&          srcEng,
                                const GTime&            srcTime,
-                               const int&              iter) :
+                               const int&              min_iter,
+                               const int&              max_iter,
+                               const double&           resolution) :
                                m_rsp(rsp),
                                m_model(model),
                                m_rot(rot),
                                m_srcDir(srcDir),
                                m_srcEng(srcEng),
                                m_srcTime(srcTime),
-                               m_iter (iter),
+                               m_min_iter(min_iter),
+                               m_max_iter(max_iter),
+                               m_resolution(resolution),
                                m_psf_max(rsp->psf()(srcDir, 0.0, srcEng)) { }
     double eval(const double& delta);
 protected:
-    const GCTAResponseCube* m_rsp;     //!< Response cube
-    const GModelSpatial*    m_model;   //!< Spatial model
-    const GMatrix*          m_rot;     //!< Rotation matrix
-    GSkyDir                 m_srcDir;  //!< True photon arrival direction
-    GEnergy                 m_srcEng;  //!< True photon energy
-    GTime                   m_srcTime; //!< True photon arrival time
-    int                     m_iter;    //!< Romberg iterations
-    double                  m_psf_max; //!< Maximum PSF value
+    const GCTAResponseCube* m_rsp;        //!< Response cube
+    const GModelSpatial*    m_model;      //!< Spatial model
+    const GMatrix*          m_rot;        //!< Rotation matrix
+    GSkyDir                 m_srcDir;     //!< True photon arrival direction
+    GEnergy                 m_srcEng;     //!< True photon energy
+    GTime                   m_srcTime;    //!< True photon arrival time
+    int                     m_min_iter;   //!< Minimum number of Romberg iterations
+    int                     m_max_iter;   //!< Maximum number of Romberg iterations
+    double                  m_resolution; //!< Spatial map resolution
+    double                  m_psf_max;    //!< Maximum PSF value
 };
 
 
