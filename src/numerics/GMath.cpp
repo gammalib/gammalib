@@ -38,7 +38,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_USE_ASIN_FOR_ACOS             //!< Use asin for acos computations
+//#define G_USE_ASIN_FOR_ACOS             //!< Use asin for acos computations
 
 /* __ Debug definitions __________________________________________________ */
 
