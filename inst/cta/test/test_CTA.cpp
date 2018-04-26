@@ -633,7 +633,8 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     //const double ref = 13803.6932774; // after GWcs::solidangle improvement
     //const double ref = 13803.3453994; // after Irf computation improvements
     //const double ref = 13803.3461768; // using skymap flux() method
-    const double ref = 13803.5251338; // after correcting contains() method
+    //const double ref = 13803.5251338; // after correcting contains() method
+    const double ref = 13803.058889257; // after increasing integration accuracy
 
     // Set parameters
     double src_ra  = 201.3651;

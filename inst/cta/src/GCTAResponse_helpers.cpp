@@ -38,6 +38,7 @@
 #include "GCTASupport.hpp"
 #include "GModelSpatialDiffuseMap.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
+#include "GModelSpatialDiffuseConst.hpp"
 #include "GWcs.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -259,7 +260,8 @@ int gammalib::iter_phi(const double& rho,
  * @return Resolution of spatial model (radians).
  *
  * Determine the resolution of a spatial model. So far the method only works
- * for a spatial map or cube model holding a WCS projection.
+ * for a spatial map or cube model holding a WCS projection. If a constant
+ * spatial model is encountered a resolution of 180 deg is returned.
  *
  * If the resolution of the model could not be determined, the method returns
  * a resolution of 0.01 deg.
@@ -280,7 +282,16 @@ double gammalib::resolution(const GModelSpatial* model)
     else {
         const GModelSpatialDiffuseCube* pcube =
               dynamic_cast<const GModelSpatialDiffuseCube*>(model);
-        map = &(pcube->cube());
+        if (pcube != NULL) {
+            map = &(pcube->cube());
+        }
+        else {
+            const GModelSpatialDiffuseConst* pconst =
+                  dynamic_cast<const GModelSpatialDiffuseConst*>(model);
+            if (pconst != NULL) {
+                resolution = gammalib::pi;
+            }
+        }
     }
 
     // If a spatial map exists then get it's resolution. This so far only

@@ -1143,7 +1143,8 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     double irf = 0.0;
 
     // Get pointer to model source model
-    const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
+    const GModelSpatialPointSource* ptsrc =
+          static_cast<const GModelSpatialPointSource*>(source.model());
 
     // Get point source direction
     GSkyDir srcDir = ptsrc->dir();
@@ -1256,7 +1257,8 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     GEnergy srcEng = source.energy();
 
     // Get pointer to radial model
-    const GModelSpatialRadial* model = static_cast<const GModelSpatialRadial*>(source.model());
+    const GModelSpatialRadial* model =
+          static_cast<const GModelSpatialRadial*>(source.model());
 
     // Compute angle between model centre and measured photon direction
     // (radians)
@@ -1272,7 +1274,12 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     // the model centre to get a non-zero response
     if ((livetime > 0.0) && (rho_obs <= model->theta_max()+psf().delta_max())) {
 
-        // Get exposure
+        // Get exposure at the observed event direction.
+        //
+        // The current code assumes that the exposure at the observed and
+        // true event direction does not vary significantly. In other words,
+        // the code assumes that the exposure is constant over the size of
+        // the PSF.
         irf = exposure()(obsDir, obsEng);
 
         // Continue only if exposure is positive
@@ -1288,6 +1295,11 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
             if (use_edisp() && irf > 0.0) {
 
                 // Multiply-in energy dispersion
+                //
+                // The current code assumes that the energy dispersion at the
+                // observed and true event direction does not vary
+                // significantly. In other words, the code assumes that the
+                // energy dispersion is constant over the size of the PSF.
                 irf *= edisp()(obsDir, migra, srcEng);
 
             } // endif: energy dispersion was available and psf was non-zero
@@ -1368,6 +1380,11 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
     if ((livetime > 0.0) && (rho_obs <= model->theta_max()+psf().delta_max())) {
 
         // Get exposure
+        //
+        // The current code assumes that the exposure at the observed and
+        // true event direction does not vary significantly. In other words,
+        // the code assumes that the exposure is constant over the size of
+        // the PSF.
         irf = exposure()(obsDir, obsEng);
 
         // Continue only if exposure is positive
@@ -1383,6 +1400,11 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
             if (use_edisp() && irf > 0.0) {
 
                 // Multiply-in energy dispersion
+                //
+                // The current code assumes that the energy dispersion at the
+                // observed and true event direction does not vary
+                // significantly. In other words, the code assumes that the
+                // energy dispersion is constant over the size of the PSF.
                 irf *= edisp()(obsDir, migra, srcEng);
 
             } // endif: energy dispersion was available and psf was non-zero

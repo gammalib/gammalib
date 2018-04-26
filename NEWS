@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-16 April 2018
+26 April 2018
 
 
 1. Introduction
@@ -147,6 +147,9 @@ None
 
 20. CTA interface
 -----------------
+The integration precision of the diffuse model response was increase to cope with
+sky maps that have a higher spatial resolution than the size of the PSF (#2458).
+
 A GCTAEdisp::prob_erecobin() method has been defined and implemented in the
 derived energy dispersion classes that returns the probability that a photon with
 a given true energy is reconstructed with a energy comprised in a given energy
