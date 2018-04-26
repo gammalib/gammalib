@@ -13,6 +13,14 @@
           gammalib::plaw_integral() functions (#2308)
 
 
+2018-04-26
+
+        * Bug fix version 1.5.2 released
+        ================================
+
+        Correct number of internal spectral nodes in GCTABackground3D (#2462)
+
+
 2018-03-26
 
         * Bug fix version 1.5.1 released

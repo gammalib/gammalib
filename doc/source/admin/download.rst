@@ -4,13 +4,14 @@ Download
 ========
 
 The latest GammaLib release is
-`gammalib-1.5.1 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.5.1.tar.gz>`_
-(26 March 2018).
+`gammalib-1.5.2 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.5.2.tar.gz>`_
+(26 April 2018).
 
 Below a list of older GammaLib releases. Please read the :ref:`sec_release` to
 learn more about new features and corrected bugs in a given release.
 
 To download an older release, click on the corresponding release number:
+`1.5.1 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.5.1.tar.gz>`_
 `1.5.0 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.5.0.tar.gz>`_
 `1.4.3 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.4.3.tar.gz>`_
 `1.4.2 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.4.2.tar.gz>`_
