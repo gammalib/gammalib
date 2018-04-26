@@ -1,0 +1,14 @@
+.. _1.5.2:
+
+GammaLib 1.5.2 release (26 April 2018)
+======================================
+
+Overview
+--------
+
+GammaLib 1.5.2 is a bug fix release for GammaLib release 1.5.
+
+The following bugs were fixed:
+
+* [`2462 <https://cta-redmine.irap.omp.eu/issues/2462>`_] -
+  Correct number of internal spectral nodes in ``GCTABackground3D``

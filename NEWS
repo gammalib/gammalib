@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.5.1
+New Features and Important Changes in GammaLib 1.5.2
 
-26 Mars 2018
+26 April 2018
 
 
 1. Introduction
@@ -53,10 +53,7 @@ None
 
 6. FITS I/O Interface
 ---------------------
-The GFits::set() and GFitsTable::set() methods now only deallocate the previous
-content if the reference to the argument differs from the reference of the
-previous content. Otherwise the method would deallocate an instance that is
-owned by the client (#2340).
+None
 
 
 7. Linear algebra module
@@ -66,10 +63,7 @@ None
 
 8. Model module
 ---------------
-The GModels::set() and GModelSky::spatial(), spectral() and temporal() methods
-now only deallocate the previous content if the reference to the argument
-differs from the reference of the previous content. Otherwise the method
-would deallocate an instance that is owned by the client (#2340).
+None
 
 
 9. Numerics module
@@ -79,30 +73,17 @@ None
 
 10. Observation module
 ----------------------
-The GObservation::events() method now only deallocate the previous content
-if the reference to the argument differs from the reference of the previous
-content. Otherwise the method would deallocate an instance that is owned by
-the client (#2340).
+None
 
 
 11. Optimization module
 -----------------------
-The GOptimizerPars::set() method now only deallocate the previous content 
-if the reference to the argument differs from the reference of the previous 
-content. Otherwise the method would deallocate an instance that is owned by 
-the client (#2340).
+None
 
 
 12. Sky module
 --------------
-The GSkyMap::projection() and GSkyRegions::set() methods now only deallocate
-the previous content if the reference to the argument differs from the
-reference of the previous content. Otherwise the method would deallocate an
-instance that is owned by the client (#2340).
-
-The smoothing kernel covered before only two sectors, now all four sectors
-are covered. The smoothing now also works correctly in case that more than
-a single sky map is comprised in a GSkyMap object.
+None
 
 
 13. Support module
@@ -112,10 +93,7 @@ None
 
 14. XML module
 --------------
-The GXmlNode::set() method now only deallocate the previous content if the
-reference to the argument differs from the reference of the previous content. 
-Otherwise the method would deallocate an instance that is owned by the client 
-(#2340).
+None
 
 
 15. VO module
@@ -130,10 +108,7 @@ None
 
 17. Test module
 ---------------
-The GTestSuite::set() method now only deallocate the previous content if the
-reference to the argument differs from the reference of the previous content.
-Otherwise the method would deallocate an instance that is owned by the client
-(#2340).
+None
 
 
 18. Multi-wavelength interface
@@ -148,13 +123,9 @@ None
 
 20. CTA interface
 -----------------
-Add a kludge to handle the noisy energy dispersion that is shipped with the 1DC
-data and that is included in the Prod3 release (#2342, #2403).
-
-The GCTAObservation::response() and GCTAOnOffObservation::response() methods
-now only deallocate the previous content if the reference to the argument
-differs from the reference of the previous content. Otherwise the method would
-deallocate an instance that is owned by the client (#2340).
+The number of internal spectral nodes was not computed correctly in
+GCTABackground3D::init_mc_cache(), and hence energies could be simulated by the
+Monte Carlo method that fell outside the valid energy interval (#2462).
 
 
 21. COMPTEL interface

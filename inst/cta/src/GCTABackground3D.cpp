@@ -839,7 +839,7 @@ void GCTABackground3D::init_mc_cache(void) const
     // Compute DETX and DETY binsize in radians and energy binsize in log10(TeV)
     double detx_bin = (m_detx_max - m_detx_min) / m_num_detx;
     double dety_bin = (m_dety_max - m_dety_min) / m_num_dety;
-    double logE_bin = (m_logE_max - m_logE_min) / (nbins+1);
+    double logE_bin = (m_logE_max - m_logE_min) / (nbins-1);
 
     // Loop over all energy bins
     for (int i = 0; i < nbins; ++i) {
