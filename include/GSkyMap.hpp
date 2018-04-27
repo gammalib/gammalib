@@ -218,8 +218,10 @@ private:
 
     // Computation cache
     mutable bool      m_hascache;   //!< Cache is valid
+    mutable bool      m_haspixcache;//!< Cached pixel is valid
     mutable bool      m_contained;  //!< Sky direction is contained in map
     mutable GSkyDir   m_last_dir;   //!< Last sky direction
+    mutable GSkyPixel m_last_pix;   //!< Last sky pixel computed with dir2pix
     mutable GBilinear m_interpol;   //!< Bilinear interpolator
 };
 
