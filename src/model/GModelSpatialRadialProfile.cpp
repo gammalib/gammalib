@@ -388,29 +388,19 @@ int GModelSpatialRadialProfile::cache_index(void) const
         prf.mc_max = 0.0;
 
         // Set profile parameters
-        std::cout << "CACHE:" << std::endl;
         for (int k = 0; k < m_pars.size(); ++k) {
             prf.pars.push_back(m_pars[k]->value());
-            std::cout << "  pars[" << m_pars[k]->name() << "] = " << m_pars[k]->value() << std::endl;
         }
 
         // Pre-compute radial values, MC values, and mc_max. Compute
         // also the normalization.
         double rmax = theta_max();
         double dr   = rmax / m_num_nodes;
-        std::cout << "  rmax=" << rmax << "  dr=" << dr << std::endl;
         double r    = theta_min();
         double norm = 0.0;
         for (int j = 0; j < m_num_nodes; ++j) {
             double value = profile_value(r);
             double mc    = value * std::sin(r) * dr;
-            std::cout << "  j=" << j << "  r=" << r << "  (deg=" ;
-            std::cout.width(4) ;
-            std::cout << r * gammalib::rad2deg << ")  value=" ;
-            std::cout.width(7);
-            std::cout << value << "  mc=" ;
-            std::cout.width(7) ;
-            std::cout << mc << std::endl;
             norm        += mc;
             if (mc > prf.mc_max) {
                 prf.mc_max = mc;
@@ -421,7 +411,6 @@ int GModelSpatialRadialProfile::cache_index(void) const
             r += dr;
         }
         norm *= gammalib::twopi;
-        std::cout << "  prf.mc_max=" << prf.mc_max << "  norm=" << norm << std::endl;
 
         // Normalize radial profile
         if (norm > 0.0) {
@@ -439,13 +428,22 @@ int GModelSpatialRadialProfile::cache_index(void) const
 
         // Log pre-computation
         #if defined(G_DEBUG_PRECOMPUTATION)
-        std::cout << "GModelSpatialRadialProfile::cache_index";
-        std::cout << std::endl;
-        std::cout << "  dr=" << dr << std::endl;
+        std::cout << "GModelSpatialRadialProfile::cache_index" << std::endl;
         for (int k = 0; k < m_pars.size(); ++k) {
             std::cout << "  par[" << k << "]=" << m_pars[k]->value();
             std::cout << " (" << m_pars[k]->name();
             std::cout << ")" << std::endl;
+        }
+        std::cout << "  rmax=" << rmax << "  dr=" << dr << std::endl;
+        std::cout << "  prf.mc_max=" << prf.mc_max << "  norm=" << norm << std::endl;
+        for (int j = 0; j < m_num_nodes; ++j) {
+            std::cout << "  j=" << j << "  r=" << prf.nodes[j] << "  (deg=" ;
+            std::cout.width(4) ;
+            std::cout << r * gammalib::rad2deg << ")  value=" ;
+            std::cout.width(7);
+            std::cout << prf.values[j] << "  mc=" ;
+            std::cout.width(7) ;
+            std::cout << prf.mc[j] << std::endl;
         }
         std::cout << "  norm=" << norm << std::endl;
         #endif
