@@ -382,6 +382,9 @@ void GModelSpatialRadialProfileGauss::init_members(void)
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);
 
+    // Profile is independent of spatial coordinates of model center
+    m_coord_indep = true;
+
     // Return
     return;
 }
