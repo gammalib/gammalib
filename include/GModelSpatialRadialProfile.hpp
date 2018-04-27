@@ -106,7 +106,8 @@ protected:
     };
 
     // Pre-computation cache
-    mutable std::vector<profile> m_profile; // Pre-computation cache
+    mutable std::vector<profile> m_profile;     //!< Pre-computation cache
+    bool                         m_coord_indep; //!< True if model independent of sky coordinates
 };
 
 

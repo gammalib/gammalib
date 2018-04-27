@@ -293,7 +293,8 @@ bool GModelSpatialRadialProfile::contains(const GSkyDir& dir,
 void GModelSpatialRadialProfile::init_members(void)
 {
     // Initialise members
-    m_num_nodes = 100;
+    m_coord_indep = false;
+    m_num_nodes   = 100;
     m_region.clear();
 
     // Initialise pre-computation cache
@@ -312,9 +313,10 @@ void GModelSpatialRadialProfile::init_members(void)
 void GModelSpatialRadialProfile::copy_members(const GModelSpatialRadialProfile& model)
 {
     // Copy members
-    m_num_nodes = model.m_num_nodes;
-    m_profile   = model.m_profile;
-    m_region    = model.m_region;
+    m_coord_indep = model.m_coord_indep;
+    m_num_nodes   = model.m_num_nodes;
+    m_profile     = model.m_profile;
+    m_region      = model.m_region;
 
     // Return
     return;
@@ -355,7 +357,13 @@ int GModelSpatialRadialProfile::cache_index(void) const
         // to the parameters in the pre-computation cache. Break and set
         // the found flag to false on non-equality.
         for (int k = 0; k < m_pars.size(); ++k) {
-            if (m_pars[k]->value() != m_profile[i].pars[k]) {
+            
+            // Skip if model is coordinate independent and par is RA or DEC
+            if (m_coord_indep && (m_pars[k]->name()=="RA" || m_pars[k]->name()=="DEC")) {
+                continue;
+            } 
+            // Otherwise ...
+            else if (m_pars[k]->value() != m_profile[i].pars[k]) {
                 found = false;
                 break;
             }
