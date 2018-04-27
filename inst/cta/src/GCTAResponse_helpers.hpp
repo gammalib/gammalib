@@ -891,7 +891,9 @@ public:
                              m_sin_theta(sin_theta),
                              m_cos_theta(cos_theta),
                              m_sin_ph(sin_ph),
-                             m_cos_ph(cos_ph) { }
+                             m_cos_ph(cos_ph),
+                             m_native(3),
+                             m_photon() { }
     double eval(const double& phi);
 protected:
     const GCTAResponseIrf* m_rsp;        //!< CTA response
@@ -906,7 +908,9 @@ protected:
     double                 m_sin_theta;  //!< Sine of offset angle
     double                 m_cos_theta;  //!< Cosine of offset angle
     double                 m_sin_ph;     //!< Sine term in angular distance equation
-    double                 m_cos_ph;     //!< Cosine term in angular distance equation    
+    double                 m_cos_ph;     //!< Cosine term in angular distance equation
+    GVector                m_native;     //!< Pre-allocate memory for native coordinates
+    GPhoton                m_photon;     //!< Pre-allocate memory for a photon object
 };
 
 
