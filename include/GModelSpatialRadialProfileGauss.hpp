@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileGauss.hpp - Gaussian radial profile class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,7 @@ public:
     // Constructors and destructors
     GModelSpatialRadialProfileGauss(void);
     explicit GModelSpatialRadialProfileGauss(const GXmlElement& xml);
+    GModelSpatialRadialProfileGauss(const GSkyDir& dir, const double& sigma);
     GModelSpatialRadialProfileGauss(const GModelSpatialRadialProfileGauss& model);
     virtual ~GModelSpatialRadialProfileGauss(void);
 
@@ -66,6 +67,10 @@ public:
     virtual void                             read(const GXmlElement& xml);
     virtual void                             write(GXmlElement& xml) const;
     virtual std::string                      print(const GChatter& chatter = NORMAL) const;
+
+    // Other methods
+    double  sigma(void) const;
+    void    sigma(const double& sigma);
 
 protected:
     // Protected methods
@@ -103,5 +108,35 @@ std::string GModelSpatialRadialProfileGauss::type(void) const
 {
     return "GaussianProfile";
 }
+
+
+/***********************************************************************//**
+ * @brief Return Gaussian sigma
+ *
+ * @return Gaussian sigma (degrees).
+ *
+ * Returns the Gaussian sigma in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialRadialProfileGauss::sigma(void) const
+{
+    return (m_sigma.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set Gaussian sigma
+ *
+ * @param[in] sigma Gaussian sigma (degrees).
+ *
+ * Sets the Gaussian sigma in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialProfileGauss::sigma(const double& sigma)
+{
+    m_sigma.value(sigma);
+    return;
+}
+
 
 #endif /* GMODELSPATIALRADIALPROFILEGAUSS_HPP */

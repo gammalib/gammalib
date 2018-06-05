@@ -25,6 +25,8 @@ Improvements
 
 * [`2466 <https://cta-redmine.irap.omp.eu/issues/2466>`_] -
   Speed up computation of diffuse map models for CTA
+* [`2463 <https://cta-redmine.irap.omp.eu/issues/2463>`_] -
+  Enhance ``GModelSpatialRadialProfileGauss`` class
 * [`2458 <https://cta-redmine.irap.omp.eu/issues/2458>`_] -
   Increase integration precision for CTA diffuse model response
 * [`2422 <https://cta-redmine.irap.omp.eu/issues/2422>`_] -

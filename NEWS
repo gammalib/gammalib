@@ -37,6 +37,8 @@ The following methods have been added:
 - GCTAModelRadialAcceptance::radial(GCTAModelRadial*)
 - GCTAModelRadialAcceptance::spectral(GModelSpectral*)
 - GCTAModelRadialAcceptance::temporal(GModelTemporal*)
+- GModelSpatialRadialProfileGauss(GSkyDir&, double&)
+- GModelSpatialRadialProfileGauss::sigma()
 
 The following methods have been removed:
 - none
@@ -78,7 +80,9 @@ None
 
 8. Model module
 ---------------
-None
+Add a GModelSpatialRadialProfileGauss() position and width constructor, add
+GModelSpatialRadialProfileGauss::sigma() getter and setter methods, and avoid
+recomputations if the position of the Gaussian changed (#2463). 
 
 
 9. Numerics module

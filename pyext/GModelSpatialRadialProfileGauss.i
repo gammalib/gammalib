@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialProfileGauss.i - Gaussian radial profile class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,7 @@ public:
     // Constructors and destructors
     GModelSpatialRadialProfileGauss(void);
     explicit GModelSpatialRadialProfileGauss(const GXmlElement& xml);
+    GModelSpatialRadialProfileGauss(const GSkyDir& dir, const double& sigma);
     GModelSpatialRadialProfileGauss(const GModelSpatialRadialProfileGauss& model);
     virtual ~GModelSpatialRadialProfileGauss(void);
 
@@ -55,6 +56,10 @@ public:
     virtual double                           theta_max(void) const;
     virtual void                             read(const GXmlElement& xml);
     virtual void                             write(GXmlElement& xml) const;
+
+    // Other methods
+    double  sigma(void) const;
+    void    sigma(const double& sigma);
 };
 
 

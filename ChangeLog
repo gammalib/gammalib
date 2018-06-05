@@ -4,6 +4,7 @@
         ========================
 
         Speed up computation of diffuse map models for CTA (#2466)
+        Enhance GModelSpatialRadialProfileGauss class (#2463)
         Increase integration precision for CTA diffuse model response (#2458)
         Add GCTAModelRadialAcceptance model component setter methods
         Keep existing library path in installation script on Mac OS X (#2420)

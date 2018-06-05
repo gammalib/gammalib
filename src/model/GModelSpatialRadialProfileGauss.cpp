@@ -98,6 +98,31 @@ GModelSpatialRadialProfileGauss::GModelSpatialRadialProfileGauss(const GXmlEleme
 
 
 /***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] dir Sky position of Gaussian.
+ * @param[in] sigma Width of Gaussian (in degrees).
+ *
+ * Constructs a Gaussian spatial model using a sky direction (@p dir) and
+ * a Gaussian width parameter @p sigma in degrees.
+ ***************************************************************************/
+GModelSpatialRadialProfileGauss::GModelSpatialRadialProfileGauss(const GSkyDir& dir,
+                                                                 const double&  sigma) :
+                                 GModelSpatialRadialProfile()
+{
+    // Initialise members
+    init_members();
+
+    // Assign direction and sigma
+    this->dir(dir);
+    this->sigma(sigma);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] model Radial Gaussian profile model.
@@ -356,6 +381,9 @@ void GModelSpatialRadialProfileGauss::init_members(void)
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);
+
+    // Profile is independent of spatial coordinates of model center
+    m_coord_indep = true;
 
     // Return
     return;
