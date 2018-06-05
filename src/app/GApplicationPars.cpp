@@ -765,7 +765,7 @@ void GApplicationPars::save(const GFilename& filename)
 /***********************************************************************//**
  * @brief Print parameters
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing parameter information.
  ***************************************************************************/
 std::string GApplicationPars::print(const GChatter& chatter) const

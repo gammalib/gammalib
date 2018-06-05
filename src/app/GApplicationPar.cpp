@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPar.cpp - Application parameter               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -117,6 +117,10 @@ GApplicationPar::GApplicationPar(const std::string& name,
     m_max    = max;
     this->value(value);
     m_prompt = prompt;
+
+    // Since the call to the value method stops the query, we reset the
+    // queried flag so that the parameter will get queried.
+    m_queried = false;
 
     // Return
     return;
@@ -795,7 +799,7 @@ bool GApplicationPar::is_notanumber(void)
 /***********************************************************************//**
  * @brief Print parameter
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing parameter information.
  ***************************************************************************/
 std::string GApplicationPar::print(const GChatter& chatter) const
@@ -858,7 +862,8 @@ std::string GApplicationPar::print(const GChatter& chatter) const
 void GApplicationPar::init_members(void)
 {
     // Initialise members
-    m_update = false;
+    m_update  = false;
+    m_queried = false;
     m_name.clear();
     m_type.clear();
     m_mode.clear();
@@ -881,15 +886,16 @@ void GApplicationPar::init_members(void)
 void GApplicationPar::copy_members(const GApplicationPar& par)
 {
     // Copy attributes
-    m_update = par.m_update;
-    m_name   = par.m_name;
-    m_type   = par.m_type;
-    m_mode   = par.m_mode;
-    m_value  = par.m_value;
-    m_min    = par.m_min;
-    m_max    = par.m_max;
-    m_prompt = par.m_prompt;
-    m_status = par.m_status;
+    m_update  = par.m_update;
+    m_queried = par.m_queried;
+    m_name    = par.m_name;
+    m_type    = par.m_type;
+    m_mode    = par.m_mode;
+    m_value   = par.m_value;
+    m_min     = par.m_min;
+    m_max     = par.m_max;
+    m_prompt  = par.m_prompt;
+    m_status  = par.m_status;
 
     // Return
     return;
@@ -1400,8 +1406,8 @@ void GApplicationPar::set_value(const std::string& value)
  ***************************************************************************/
 void GApplicationPar::query(void)
 {
-    // Continue only if parameter has query mode
-    if (is_query()) {
+    // Continue only if parameter has query mode and it was not yet queried
+    if (is_query() && !was_queried()) {
 
         // Dump prompt string
         std::string prompt = m_prompt;
@@ -1451,14 +1457,12 @@ void GApplicationPar::query(void)
 
 
 /***********************************************************************//**
- * @brief Don't query parameter
+ * @brief Don't query parameter again
  ***************************************************************************/
 void GApplicationPar::stop_query(void)
 {
     // Don't query parameter again
-    if (m_mode == "q")  m_mode = "h";
-    if (m_mode == "ql") m_mode = "hl";
-    if (m_mode == "lq") m_mode = "lh";
+    m_queried = true;
 
     // Return
     return;

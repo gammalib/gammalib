@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplicationPar.hpp - Application parameter class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -24,8 +24,8 @@
  * @author Juergen Knoedlseder
  */
 
-#ifndef GPAR_HPP
-#define GPAR_HPP
+#ifndef GAPPLICATIONPAR_HPP
+#define GAPPLICATIONPAR_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -95,6 +95,7 @@ public:
     bool               is_valid(void);
     bool               is_undefined(void);
     bool               is_notanumber(void);
+    bool               was_queried(void) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
   
 protected:
@@ -130,6 +131,7 @@ protected:
 
     // Protected data members
     bool        m_update;  //!< Signal value updating
+    bool        m_queried; //!< Signal that parameter was queried
     std::string m_name;    //!< Parameter name
     std::string m_type;    //!< Parameter type
     std::string m_mode;    //!< Parameter mode
@@ -248,4 +250,16 @@ GTime GApplicationPar::time(void)
     return (time(native.reference()));
 }
 
-#endif /* GPAR_HPP */
+
+/***********************************************************************//**
+ * @brief Signals if parameter was queried
+ *
+ * @return True if parameter was queried, false otherwise.
+ ***************************************************************************/
+inline
+bool GApplicationPar::was_queried(void) const
+{
+    return m_queried;
+}
+
+#endif /* GAPPLICATIONPAR_HPP */

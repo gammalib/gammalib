@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -774,7 +774,8 @@ void GApplication::log_parameters(const GChatter& chatter)
             name = name + gammalib::fill(".", 28-name.length()) + ": ";
 
             // Write parameter
-            if (m_pars.m_pars[i].is_query()) {
+            if (m_pars.m_pars[i].is_query() &&
+                !m_pars.m_pars[i].was_queried()) {
                 log << name << "[not queried]" << std::endl;
             }
             else {
