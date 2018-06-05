@@ -1496,8 +1496,8 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
     double cos_phi = std::cos(phi);
 
     // Compute sky direction vector in native coordinates
-    m_native[0] = -cos_phi*m_sin_theta;
-    m_native[1] = sin_phi*m_sin_theta;
+    m_native[0] = -cos_phi * m_sin_theta;
+    m_native[1] =  sin_phi * m_sin_theta;
     m_native[2] = m_cos_theta;
 
     // Rotate from native into celestial system
@@ -1507,10 +1507,12 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
     GSkyDir srcDir;
     srcDir.celvector(cel);
 
-    // Get sky intensity for this sky direction
+    // Set photon
     m_photon.dir(srcDir);
     m_photon.energy(m_srcEng);
     m_photon.time(m_srcTime);
+
+    // Get sky intensity for photon
     double intensity = m_model->eval(m_photon);
 
     // Continue only if sky intensity is positive

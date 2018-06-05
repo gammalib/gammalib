@@ -1,8 +1,9 @@
-2018-04-26
+2018-06-05
 
         * Version 1.6.0 released
         ========================
 
+        Speed up computation of diffuse map models for CTA (#2466)
         Increase integration precision for CTA diffuse model response (#2458)
         Add GCTAModelRadialAcceptance model component setter methods
         Keep existing library path in installation script on Mac OS X (#2420)

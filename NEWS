@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-26 April 2018
+5 June 2018
 
 
 1. Introduction
@@ -147,6 +147,10 @@ None
 
 20. CTA interface
 -----------------
+The computation of diffuse map models was sped-up by including some value caching
+and avoiding allocation and de-allocation of variables during response computation
+(#2466).
+
 The integration precision of the diffuse model response was increase to cope with
 sky maps that have a higher spatial resolution than the size of the PSF (#2458).
 
