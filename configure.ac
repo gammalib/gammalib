@@ -650,23 +650,6 @@ AC_C_INLINE
 
 
 #############################################################################
-# Checks for profile precompation debugging option (G_DEBUG_PRECOMPUTATION) #
-#############################################################################
-AC_MSG_CHECKING(whether to enable radial profile precomp. debugging)
-AC_ARG_ENABLE([debug_precomputation],
-              AS_HELP_STRING([--enable-debug-precomputation],
-                             [performs profile precomputation debugging [default=no]]),
-             [DEBUG_PRECOMPUTATION="$enableval"],
-             [DEBUG_PRECOMPUTATION="no"])
-if test "x$DEBUG_PRECOMPUTATION" = "xyes"; then
-  AC_DEFINE([G_DEBUG_PRECOMPUTATION], [1], [Define if radial profile precomp should be debugged])
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-fi
-
-
-#############################################################################
 # Checks for NaN/Inf checking option (G_NAN_CHECK)                          #
 #############################################################################
 AC_MSG_CHECKING(whether to enable NaN/Inf checking)

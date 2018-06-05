@@ -93,8 +93,10 @@ protected:
     void           set_region(void) const;
 
     // Protected members
-    int                      m_num_nodes; //!< Number of profile nodes
-    mutable GSkyRegionCircle m_region;    //!< Bounding circle
+    bool                     m_coord_indep; //!< True if model independent
+                                            //!< of sky coordinates
+    int                      m_num_nodes;   //!< Number of profile nodes
+    mutable GSkyRegionCircle m_region;      //!< Bounding circle
 
     // Pre-computed radial profile
     struct profile {
@@ -107,7 +109,6 @@ protected:
 
     // Pre-computation cache
     mutable std::vector<profile> m_profile;     //!< Pre-computation cache
-    bool                         m_coord_indep; //!< True if model independent of sky coordinates
 };
 
 

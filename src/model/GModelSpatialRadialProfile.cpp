@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfile.cpp - Radial profile source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,7 +47,6 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_PRECOMPUTATION
 
 
 /*==========================================================================
@@ -358,11 +357,16 @@ int GModelSpatialRadialProfile::cache_index(void) const
         // the found flag to false on non-equality.
         for (int k = 0; k < m_pars.size(); ++k) {
             
-            // Skip if model is coordinate independent and par is RA or DEC
-            if (m_coord_indep && (m_pars[k]->name()=="RA" || m_pars[k]->name()=="DEC")) {
+            // Skip if model is coordinate independent and par is RA, DEC,
+            // GLON or GLAT
+            if (m_coord_indep && (m_pars[k]->name() == "RA"   ||
+                                  m_pars[k]->name() == "DEC"  ||
+                                  m_pars[k]->name() == "GLON" ||
+                                  m_pars[k]->name() == "GLAT")) {
                 continue;
-            } 
-            // Otherwise ...
+            }
+
+            // otherwise ...
             else if (m_pars[k]->value() != m_profile[i].pars[k]) {
                 found = false;
                 break;
@@ -425,28 +429,6 @@ int GModelSpatialRadialProfile::cache_index(void) const
 
         // Get index to last profile
         index = m_profile.size() - 1;
-
-        // Log pre-computation
-        #if defined(G_DEBUG_PRECOMPUTATION)
-        std::cout << "GModelSpatialRadialProfile::cache_index" << std::endl;
-        for (int k = 0; k < m_pars.size(); ++k) {
-            std::cout << "  par[" << k << "]=" << m_pars[k]->value();
-            std::cout << " (" << m_pars[k]->name();
-            std::cout << ")" << std::endl;
-        }
-        std::cout << "  rmax=" << rmax << "  dr=" << dr << std::endl;
-        std::cout << "  prf.mc_max=" << prf.mc_max << "  norm=" << norm << std::endl;
-        for (int j = 0; j < m_num_nodes; ++j) {
-            std::cout << "  j=" << j << "  r=" << prf.nodes[j] << "  (deg=" ;
-            std::cout.width(4) ;
-            std::cout << r * gammalib::rad2deg << ")  value=" ;
-            std::cout.width(7);
-            std::cout << prf.values[j] << "  mc=" ;
-            std::cout.width(7) ;
-            std::cout << prf.mc[j] << std::endl;
-        }
-        std::cout << "  norm=" << norm << std::endl;
-        #endif
 
     } // endif: allocated new pre-computation cache
 
