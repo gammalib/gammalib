@@ -1364,16 +1364,11 @@ GSkyPixel GSkyMap::dir2pix(const GSkyDir& dir) const
         throw GException::invalid_value(G_DIR2PIX, msg);
     }
 
-    // Update pixel for a given sky direction if pixel has not yet been
-    // computed or sky direction was changed
-    if (!m_haspixcache || (dir != m_last_pix_dir)) {
-        m_last_pix     = m_proj->dir2pix(dir);
-        m_last_pix_dir = dir;
-        m_haspixcache  = true;
-    }
+    // Determine pixel for a given sky direction
+    GSkyPixel pixel = m_proj->dir2pix(dir);
 
     // Return pixel
-    return m_last_pix;
+    return pixel;
 }
 
 
@@ -2399,11 +2394,8 @@ void GSkyMap::init_members(void)
 
     // Initialise computation cache
     m_hascache    = false;
-    m_haspixcache = false;
     m_contained   = false;
     m_last_dir.clear();
-    m_last_pix_dir.clear();
-    m_last_pix.clear();
     m_interpol.clear();
 
     // Return
@@ -2427,13 +2419,10 @@ void GSkyMap::copy_members(const GSkyMap& map)
     m_pixels     = map.m_pixels;
 
     // Copy computation cache
-    m_hascache     = map.m_hascache;
-    m_haspixcache  = map.m_haspixcache;
-    m_contained    = map.m_contained;
-    m_last_dir     = map.m_last_dir;
-    m_last_pix_dir = map.m_last_pix_dir;
-    m_last_pix     = map.m_last_pix;
-    m_interpol     = map.m_interpol;
+    m_hascache  = map.m_hascache;
+    m_contained = map.m_contained;
+    m_last_dir  = map.m_last_dir;
+    m_interpol  = map.m_interpol;
 
     // Clone sky projection if it is valid
     if (map.m_proj != NULL) m_proj = map.m_proj->clone();
