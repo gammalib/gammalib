@@ -10,7 +10,8 @@ GammaLib 1.6 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* ...
+* Various computational speed ups
+* Handling of observation-specific energy thresholds in CTA On/Off analyses
 
 
 Bug fixes
@@ -25,6 +26,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2429 <https://cta-redmine.irap.omp.eu/issues/2429>`_] -
+  Handle observation-specific energy thresholds in CTA On/Off analysis
 * [`2466 <https://cta-redmine.irap.omp.eu/issues/2466>`_] -
   Speed up computation of diffuse map models for CTA
 * [`2463 <https://cta-redmine.irap.omp.eu/issues/2463>`_] -

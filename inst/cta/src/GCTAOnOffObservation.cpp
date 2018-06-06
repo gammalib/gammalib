@@ -97,6 +97,7 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 
 /* __ Coding definitions _________________________________________________ */
 //#define G_RMF_INTEGRATION //!< Use numerical integration for RMF computation
+#define G_APPLY_ARF_EBOUNDS    //!< Apply ARF and RMF etrue energy boundaries
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_LIKELIHOOD_DEBUG                //!< Debug likelihood computation
@@ -1019,6 +1020,9 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
 	compute_alpha(obs, reg_on, reg_off);
 	compute_rmf(obs, reg_on);
 
+    // Apply energy boundaries
+    apply_ebounds(obs);
+
 	// Return
 	return;
 }
@@ -1485,6 +1489,76 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
 }
 
 
+/***********************************************************************//**
+ * @brief Apply CTA observation energy boundaries to On/Off observation
+ *
+ * @param[in] obs CTA observation.
+ *
+ * Applies CTA energy boundaries to all histograms used for the On/Off
+ * analysis.
+ *
+ * For the PHA On and Off spectra, all bins are set to zero that do not fully
+ * overlap with the CTA observation energy boundaries. Specifically,
+ * partially overlapping bins are excluded. Some margin is applied that
+ * effectively reduces the width of the PHA energy bin, which should cope
+ * with any rounding errors.
+ *
+ * For the background response, stored in the ARF, all bins are set to zero
+ * that do not fully overlap with the CTA observation energy boundaries. The
+ * ARF values remain unchanged to properly account for energy migration.
+ *
+ * For the RMF, all reconstructued energy bins are set to zero that do not
+ * fully overlap with the CTA observation energy boundaries. True energy
+ * bins remain unchanged to properly account for energy migration.
+ ***************************************************************************/
+void GCTAOnOffObservation::apply_ebounds(const GCTAObservation& obs)
+{
+    // Set energy margin
+    const GEnergy energy_margin(0.01, "GeV");
+
+    // Get true and reconstructed energy boundaries from Rmf
+    GEbounds etrue = m_rmf.etrue();
+    GEbounds ereco = m_rmf.emeasured();
+    int      ntrue = etrue.size();
+    int      nreco = ereco.size();
+
+    // Get energy boundaries of observations
+    GEbounds eobs = obs.ebounds();
+
+    // Get reference to background response
+    std::vector<double>& background = m_arf["BACKRESP"];
+
+    // Apply energy boundaries in reconstructed energy
+    for (int ireco = 0; ireco < nreco; ++ireco) {
+        if (!eobs.contains(ereco.emin(ireco) + energy_margin,
+                           ereco.emax(ireco) - energy_margin)) {
+            m_on_spec[ireco]  = 0.0;
+            m_off_spec[ireco] = 0.0;
+            for (int itrue = 0; itrue < ntrue; ++itrue) {
+                m_rmf(itrue, ireco) = 0.0;
+            }
+        }
+    }
+
+    // Apply energy boundaries in true energy
+    for (int itrue = 0; itrue < ntrue; ++itrue) {
+        if (!eobs.contains(etrue.emin(itrue) + energy_margin,
+                           etrue.emax(itrue) - energy_margin)) {
+            background[itrue] = 0.0;
+            #if defined(G_APPLY_ARF_EBOUNDS)
+            m_arf[itrue] = 0.0;
+            for (int ireco = 0; ireco < nreco; ++ireco) {
+                m_rmf(itrue, ireco) = 0.0;
+            }
+            #endif
+        }
+    }
+
+    // Return
+    return;
+}
+
+
 /***********************************************************************
  * @brief Compute \f$N_{\gamma}\f$ value and model parameter gradients
  *
@@ -1583,6 +1657,12 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                 // Loop over true energy bins
                 for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
 
+                    // Get Arf value. Continue only if it is positive
+                    double arf = m_arf[itrue];
+                    if (arf <= 0.0) {
+                        continue;
+                    }
+
                     // Get RMF value. Continue only if it is positive
                     double rmf = m_rmf(itrue, ibin);
                     if (rmf <= 0.0) {
@@ -1602,7 +1682,7 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
 
                     // Compute normalisation factors
                     double exposure  = m_on_spec.exposure();
-                    double norm_flux = m_arf[itrue] * exposure * rmf;
+                    double norm_flux = arf * exposure * rmf;
                     double norm_grad = norm_flux * etruewidth;
 
                     // Determine number of gamma-ray events in model by
@@ -1700,64 +1780,69 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
         // at reconstructed energy
         double background = m_arf("BACKRESP", emean);
 
-        // Compute normalisation factor (events)
-        double exposure = m_on_spec.exposure();
-        double norm     = background * exposure * ewidth;
+        // Continue only if background rate is positive
+        if (background > 0.0) {
 
-        // Loop over models
-        for (int j = 0; j < models.size(); ++j) {
+            // Compute normalisation factor (events)
+            double exposure = m_on_spec.exposure();
+            double norm     = background * exposure * ewidth;
 
-            // Get model pointer. Fall through if pointer is not valid
-            const GModel* mptr = models[j];
-            if (mptr == NULL) {
-                continue;
-            }
+            // Loop over models
+            for (int j = 0; j < models.size(); ++j) {
 
-            // Fall through if model does not apply to specific instrument
-            // and observation identifier.
-            if (!mptr->is_valid(this->instrument(), this->id())) {
-                ipar += mptr->size();
-                continue;
-            }
-
-            // Fall through if model is not an IRF background component
-            const GCTAModelIrfBackground* bgd =
-                  dynamic_cast<const GCTAModelIrfBackground*>(mptr);
-            if (bgd == NULL) {
-                ipar += mptr->size();
-                continue;
-            }
-
-            // Get spectral component
-            GModelSpectral* spectral = bgd->spectral();
-            if (spectral != NULL)  {
-
-                // Determine the number of background events in model by
-                // computing the model normalization at the mean value of the
-                // energy bin and multiplying the normalisation with the number
-                // of background events. The eval() method needs a time in case
-                // that the spectral model has a time dependence. We simply
-                // use a dummy time here.
-                value += spectral->eval(emean, GTime(), true) * norm;
-
-                // Compute the parameter gradients for all spectral model
-                // parameters
-                for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
-                    GModelPar& par = (*spectral)[k];
-                    if (par.is_free() && ipar < npars)  {
-                        (*grad)[ipar] += par.factor_gradient() * norm;
-                    }
+                // Get model pointer. Fall through if pointer is not valid
+                const GModel* mptr = models[j];
+                if (mptr == NULL) {
+                    continue;
                 }
 
-            } // endif: pointer to spectral component was not NULL
+                // Fall through if model does not apply to specific instrument
+                // and observation identifier.
+                if (!mptr->is_valid(this->instrument(), this->id())) {
+                    ipar += mptr->size();
+                    continue;
+                }
 
-            // Increase parameter counter for temporal parameter
-            GModelTemporal* temporal = bgd->temporal();
-            if (temporal != NULL)  {
-                ipar += temporal->size();
-            }
+                // Fall through if model is not an IRF background component
+                const GCTAModelIrfBackground* bgd =
+                      dynamic_cast<const GCTAModelIrfBackground*>(mptr);
+                if (bgd == NULL) {
+                    ipar += mptr->size();
+                    continue;
+                }
 
-        } // endfor: looped over model components
+                // Get spectral component
+                GModelSpectral* spectral = bgd->spectral();
+                if (spectral != NULL)  {
+
+                    // Determine the number of background events in model by
+                    // computing the model normalization at the mean value of
+                    // the energy bin and multiplying the normalisation with
+                    // the number of background events. The eval() method needs
+                    // a time in case that the spectral model has a time
+                    // dependence. We simply use a dummy time here.
+                    value += spectral->eval(emean, GTime(), true) * norm;
+
+                    // Compute the parameter gradients for all spectral model
+                    // parameters
+                    for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
+                        GModelPar& par = (*spectral)[k];
+                        if (par.is_free() && ipar < npars)  {
+                            (*grad)[ipar] += par.factor_gradient() * norm;
+                        }
+                    }
+
+                } // endif: pointer to spectral component was not NULL
+
+                // Increase parameter counter for temporal parameter
+                GModelTemporal* temporal = bgd->temporal();
+                if (temporal != NULL)  {
+                    ipar += temporal->size();
+                }
+
+            } // endfor: looped over model components
+
+        } // endif: background rate was positive
 
 	} // endif: bin number is in the range and model container is not empty
 

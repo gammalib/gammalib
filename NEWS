@@ -160,6 +160,10 @@ None
 
 20. CTA interface
 -----------------
+The energy bounds of a CTA observations are now taken into account when setting
+up a GCTAOnOffObservation so that observation-specific energy thresholds are
+correctly handled (#2429).
+
 The computation of diffuse map models was sped-up by including some value caching
 and avoiding allocation and de-allocation of variables during response computation
 (#2466).

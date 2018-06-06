@@ -3,6 +3,7 @@
         * Version 1.6.0 released
         ========================
 
+        Handle observation-specific energy thresholds in CTA On/Off analysis (#2429)
         Fix handling of q-mode parameters (#2495)
         Speed up computation of diffuse map models for CTA (#2466)
         Enhance GModelSpatialRadialProfileGauss class (#2463)

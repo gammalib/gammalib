@@ -136,6 +136,7 @@ protected:
                          const GSkyRegions&     off);
     void   compute_rmf(const GCTAObservation& obs,
                        const GSkyRegions&     on);
+    void   apply_ebounds(const GCTAObservation& obs);
     double N_gamma(const GModels& models, const int& ibin, GVector* grad) const;
     double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
 
