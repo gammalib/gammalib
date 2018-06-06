@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.cpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -107,10 +107,10 @@ GWcs::GWcs(const std::string& coords,
 {
     // Initialise class members
     init_members();
-    
+
     // Set standard parameters
     set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
-    
+
     // Return
     return;
 }
@@ -317,9 +317,9 @@ void GWcs::write(GFitsHDU& hdu) const
         std::string comment = "Pixel coordinate of reference point (starting from 1)";
         hdu.card(keyname, m_crpix.at(i), comment);
     }
-    
+
     //TODO: Write linear transformation matrix
-    
+
     // Write coordinate increment at reference point
     for (int i = 0; i < m_naxis; ++i) {
         std::string keyname = "CDELT"+gammalib::str(i+1);
@@ -330,7 +330,7 @@ void GWcs::write(GFitsHDU& hdu) const
         comment += "Coordinate increment at reference point";
         hdu.card(keyname, m_cdelt.at(i), comment);
     }
-    
+
     // Write units of coordinate increment and reference value
     for (int i = 0; i < m_naxis; ++i) {
         if (m_cunit.at(i).length() > 0) {
@@ -339,7 +339,7 @@ void GWcs::write(GFitsHDU& hdu) const
             hdu.card(keyname, m_cunit.at(0), comment);
         }
     }
-    
+
     // Write coordinate type
     wcs_set_ctype();
     for (int i = 0; i < m_naxis; ++i) {
@@ -367,12 +367,12 @@ void GWcs::write(GFitsHDU& hdu) const
         comment += "Coordinate value at reference point";
         hdu.card(keyname, m_crval.at(i), comment);
     }
-    
+
     //TODO: Parameter values
     hdu.card("CROTA2", 0.0, "[deg] Rotation Angle"); // Old style, use PV instead
     //hdu.card("PV2_1",   0.0,          "Projection parameter 1");
     //hdu.card("PV2_2",   0.0,          "Projection parameter 2");
-    
+
     // Celestial and spectral transformation parameters
     if (!undefined(m_lonpole)) {
         hdu.card("LONPOLE", m_lonpole, "[deg] Native longitude of celestial pole");
@@ -386,35 +386,35 @@ void GWcs::write(GFitsHDU& hdu) const
     if (!undefined(m_restwav)) {
         hdu.card("RESTWAV", m_restwav, "[Hz] Line rest wavelength");
     }
-    
+
     // Equatorial coordinate system type
     if (m_radesys.length() > 0) {
         hdu.card("RADESYS", m_radesys, "Equatorial coordinate system");
     }
-    
+
     // Equinox of equatorial coordinate system
     if (!undefined(m_equinox)) {
         hdu.card("EQUINOX", m_equinox, "[yr] Equinox of equatorial coordinates");
     }
-    
+
     //TODO: Reference frame of spectral coordinates
-    
+
     //TODO: Reference frame of spectral observation
-    
+
     //TODO: Observer's velocity towards source
-    
+
     //TODO: Reference frame of source redshift
-    
+
     //TODO: Redshift of the source
-    
+
     //TODO: Observatory coordinates
-    
+
     //TODO: MJD of observation
-    
+
     //TODO: MJD mid-observation time
-    
+
     //TODO: ISO-8601 date corresponding to MJD-OBS
-    
+
     //TODO: ISO-8601 date corresponding to MJD-AVG
 
     // Return
@@ -649,44 +649,56 @@ double GWcs::solidangle(const GSkyPixel& pixel) const
  * Returns the sky direction of a sky map @p pixel. Note that the sky
  * map pixel values start from 0 while the WCS pixel reference starts from
  * 1.
+ *
+ * A pre-computation cache is implemented so that successive calls with the
+ * same @p pixel value will returned the cached sky direction.
  ***************************************************************************/
 GSkyDir GWcs::pix2dir(const GSkyPixel& pixel) const
 {
-    // Allocate memory for transformation
-    double pixcrd[2];
-    double imgcrd[2];
-    double phi;
-    double theta;
-    double world[2];
-    int    stat;
-    
-    // Set sky pixel. We have to add 1.0 here as the WCS pixel reference
-    // (CRPIX) starts from one while GSkyPixel starts from 0.
-    pixcrd[0] = pixel.x() + 1.0;
-    pixcrd[1] = pixel.y() + 1.0;
-    
-    // Trasform pixel-to-world coordinate
-    wcs_p2s(1, 2, pixcrd, imgcrd, &phi, &theta, world, &stat);
+    // Compute sky direction only if pre-computation cache is not set or
+    // the sky pixel has changed
+    if (!m_has_pix2dir_cache || (m_last_pix2dir_pix != pixel)) {
 
-    // Set sky direction
-    GSkyDir dir;
-    if (m_coordsys == 0) {
-        dir.radec_deg(world[0], world[1]);
-    }
-    else {
-        dir.lb_deg(world[0], world[1]);
-    }
+        // Allocate memory for transformation
+        double pixcrd[2];
+        double imgcrd[2];
+        double phi;
+        double theta;
+        double world[2];
+        int    stat;
 
-    // Debug: Dump transformation steps
-    #if defined(G_XY2DIR_DEBUG)
-    std::cout << "xy2dir: pixel=" << pixel
-              << " (x,y)=(" << pixcrd[0] << "," << pixcrd[1] << ")"
-              << " (phi,theta)=(" << phi << "," << theta << ")"
-              << " (lng,lat)=(" << world[0] << "," << world[1] << ")" << std::endl;
-    #endif
+        // Set sky pixel. We have to add 1.0 here as the WCS pixel reference
+        // (CRPIX) starts from one while GSkyPixel starts from 0.
+        pixcrd[0] = pixel.x() + 1.0;
+        pixcrd[1] = pixel.y() + 1.0;
+
+        // Trasform pixel-to-world coordinate
+        wcs_p2s(1, 2, pixcrd, imgcrd, &phi, &theta, world, &stat);
+
+        // Set sky direction
+        if (m_coordsys == 0) {
+            m_last_pix2dir_dir.radec_deg(world[0], world[1]);
+        }
+        else {
+            m_last_pix2dir_dir.lb_deg(world[0], world[1]);
+        }
+
+        // Signal that cache is set and store sky pixel
+        m_has_pix2dir_cache = true;
+        m_last_pix2dir_pix  = pixel;
+
+        // Debug: Dump transformation steps
+        #if defined(G_XY2DIR_DEBUG)
+        std::cout << "xy2dir: pixel=" << pixel
+                  << " (x,y)=(" << pixcrd[0] << "," << pixcrd[1] << ")"
+                  << " (phi,theta)=(" << phi << "," << theta << ")"
+                  << " (lng,lat)=(" << world[0] << "," << world[1] << ")" << std::endl;
+        #endif
+
+    } // endif: sky direction computation requested
 
     // Return
-    return dir;
+    return m_last_pix2dir_dir;
 }
 
 
@@ -699,44 +711,57 @@ GSkyDir GWcs::pix2dir(const GSkyPixel& pixel) const
  * Returns the sky map pixel for a given sky direction. Note that the sky
  * map pixel values start from 0 while the WCS pixel reference starts from
  * 1.
+ *
+ * A pre-computation cache is implemented so that successive calls with the
+ * same @p dir value will returned the cached sky pixel.
  ***************************************************************************/
 GSkyPixel GWcs::dir2pix(const GSkyDir& dir) const
 {
-    // Allocate memory for transformation
-    double pixcrd[2];
-    double imgcrd[2];
-    double phi;
-    double theta;
-    double world[2];
-    int    stat;
-    
-    // Set world coordinate
-    if (m_coordsys == 0) {
-        world[0] = dir.ra_deg();
-        world[1] = dir.dec_deg();
-    }
-    else {
-        world[0] = dir.l_deg();
-        world[1] = dir.b_deg();
-    }
-    
-    // Transform world-to-pixel coordinate
-    wcs_s2p(1, 2, world, &phi, &theta, imgcrd, pixcrd, &stat);
-    
-    // Set sky pixel. We have to subtract 1 here as GSkyPixel starts from
-    // zero while the WCS reference (CRPIX) starts from one.
-    GSkyPixel pixel(pixcrd[0]-1.0, pixcrd[1]-1.0);
+    // Compute sky map pixel only if pre-computation cache is not set or
+    // the sky direction has changed
+    if (!m_has_dir2pix_cache || (m_last_dir2pix_dir != dir)) {
 
-    // Debug: Dump transformation steps
-    #if defined(G_DIR2XY_DEBUG)
-    std::cout << "dir2xy: dir=" << dir
-              << " (lng,lat)=(" << world[0] << "," << world[1] << ")"
-              << " (phi,theta)=(" << phi << "," << theta << ")"
-              << " (x,y)=" << pixel << std::endl;
-    #endif
+        // Allocate memory for transformation
+        double pixcrd[2];
+        double imgcrd[2];
+        double phi;
+        double theta;
+        double world[2];
+        int    stat;
+
+        // Set world coordinate
+        if (m_coordsys == 0) {
+            world[0] = dir.ra_deg();
+            world[1] = dir.dec_deg();
+        }
+        else {
+            world[0] = dir.l_deg();
+            world[1] = dir.b_deg();
+        }
+
+        // Transform world-to-pixel coordinate
+        wcs_s2p(1, 2, world, &phi, &theta, imgcrd, pixcrd, &stat);
+
+        // Set sky pixel. We have to subtract 1 here as GSkyPixel starts from
+        // zero while the WCS reference (CRPIX) starts from one.
+        m_last_dir2pix_pix.xy(pixcrd[0]-1.0, pixcrd[1]-1.0);
+
+        // Signal that cache is set and store sky direction
+        m_has_dir2pix_cache = true;
+        m_last_dir2pix_dir  = dir;
+
+        // Debug: Dump transformation steps
+        #if defined(G_DIR2XY_DEBUG)
+        std::cout << "dir2xy: dir=" << dir
+                  << " (lng,lat)=(" << world[0] << "," << world[1] << ")"
+                  << " (phi,theta)=(" << phi << "," << theta << ")"
+                  << " (x,y)=" << pixel << std::endl;
+        #endif
+
+    } // endif: sky pixel computation requested
 
     // Return sky pixel
-    return pixel;
+    return m_last_dir2pix_pix;
 }
 
 
@@ -754,19 +779,19 @@ GSkyPixel GWcs::dir2pix(const GSkyDir& dir) const
  * This method sets the WCS parameters.
  ***************************************************************************/
 void GWcs::set(const std::string& coords,
-                  const double& crval1, const double& crval2,
-                  const double& crpix1, const double& crpix2,
-                  const double& cdelt1, const double& cdelt2)
+               const double& crval1, const double& crval2,
+               const double& crpix1, const double& crpix2,
+               const double& cdelt1, const double& cdelt2)
 {
     // Clear any existing information
     clear();
-    
+
     // Set standard parameters
     set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
-    
+
     // Setup WCS derived parameters
     wcs_set();
-    
+
     // Return
     return;
 }
@@ -857,10 +882,18 @@ void GWcs::init_members(void)
 {
     // Initialise World Coordinate System with 0 axes
     wcs_ini(0);
- 
+
     // Setup World Coordinate System
     wcs_set();
-   
+
+    // Initialise pre-computation cache
+    m_has_pix2dir_cache = false;
+    m_has_dir2pix_cache = false;
+    m_last_pix2dir_dir.clear();
+    m_last_dir2pix_dir.clear();
+    m_last_pix2dir_pix.clear();
+    m_last_dir2pix_pix.clear();
+
     // Return
     return;
 }
@@ -929,6 +962,14 @@ void GWcs::copy_members(const GWcs& wcs)
         m_pv[i] = wcs.m_pv[i];
     }
 
+    // Copy pre-computation cache
+    m_has_pix2dir_cache = wcs.m_has_pix2dir_cache;
+    m_has_dir2pix_cache = wcs.m_has_dir2pix_cache;
+    m_last_pix2dir_dir  = wcs.m_last_pix2dir_dir;
+    m_last_dir2pix_dir  = wcs.m_last_dir2pix_dir;
+    m_last_pix2dir_pix  = wcs.m_last_pix2dir_pix;
+    m_last_dir2pix_pix  = wcs.m_last_dir2pix_pix;
+
     // Return
     return;
 }
@@ -984,7 +1025,7 @@ void GWcs::set_members(const std::string& coords,
     m_cdelt[1] = cdelt2;
     m_crval[0] = crval1;
     m_crval[1] = crval2;
-    
+
     // Return
     return;
 }
@@ -1004,11 +1045,11 @@ bool GWcs::compare(const GSkyProjection& proj) const
 {
     // Initialise result
     bool result = false;
-    
+
     // Continue only we compare to a GWcs object
     const GWcs* ptr = dynamic_cast<const GWcs*>(&proj);
     if (ptr != NULL) {
-    
+
         // Perform comparion of standard (non derived) parameters
         result = ((code()     == ptr->code())     &&
                   (m_coordsys == ptr->m_coordsys) &&
@@ -1017,7 +1058,7 @@ bool GWcs::compare(const GSkyProjection& proj) const
                   (m_crval    == ptr->m_crval)    &&
                   (m_crpix    == ptr->m_crpix)    &&
                   (m_cdelt    == ptr->m_cdelt));
-        
+
     }
 
     // Return result
@@ -1046,7 +1087,7 @@ void GWcs::wcs_ini(int naxis)
     // Signal that WCS information has not been set so far. This will be done
     // in wcs_set() upon request
     m_wcsset = false;
-    
+
     // Clear vectors
     m_crpix.clear();
     m_pc.clear();
@@ -1060,10 +1101,10 @@ void GWcs::wcs_ini(int naxis)
 
     // Set number of axes
     m_naxis = naxis;
-    
+
     // Set defaults for the linear transformation (sets m_Crpix, m_pc, m_Cdelt)
     lin_ini(naxis);
-    
+
     // Set default axes parameters
     if (naxis > 0) {
         for (int i = 0; i < naxis; ++i) {
@@ -1073,17 +1114,17 @@ void GWcs::wcs_ini(int naxis)
             m_ctype_c.push_back("");
         }
     }
-    
+
     // Set defaults for the celestial transformation parameters
     m_lonpole = UNDEFINED;
     m_latpole = +90.0;
-    
+
     // Set defaults for the spectral transformation parameters
     m_restfrq = UNDEFINED; // 0.0 in wcslib
     m_restwav = UNDEFINED; // 0.0 in wcslib
-    
+
     //TODO: Default parameter values
-    
+
     // Defaults for alternate linear transformations
     if (naxis > 0) {
         for (int i = 0; i < naxis; ++i) {
@@ -1093,22 +1134,22 @@ void GWcs::wcs_ini(int naxis)
             m_crota.push_back(0.0);
         }
     }
-    
+
     //TODO: Defaults for auxiliary coordinate system information
     m_radesys.clear();
     m_equinox = UNDEFINED;
-    
+
     // Reset derived values
     m_lng  = -1;
     m_lat  = -1;
     m_spec = -1;
-    
+
     // Initialise celestial transformation parameters
     cel_ini();
 
     // Initialise spectral transformation parameters
     spc_ini();
-    
+
     // Return
     return;
 }
@@ -1136,55 +1177,55 @@ void GWcs::wcs_ini(int naxis)
 void GWcs::wcs_set(void) const
 {
     //TODO: Determine axis types from CTYPEia
-    
+
     //TODO: Convert to canonical units
-    
+
     // Non-linear celestial axes present?
     if (m_lng >= 0) {
-        
+
         // Initialise celestial parameters
         cel_ini();
-        
+
         // Set CRVALia, LONPOLEa, and LATPOLEa keyvalues
         m_ref[0] = m_crval[m_lng]; // Longitude reference value
         m_ref[1] = m_crval[m_lat]; // Latitude reference value
         m_ref[2] = m_lonpole;      // LONPOLE
         m_ref[3] = m_latpole;      // LATPOLE
-        
+
         //TODO: Do we have PVi_ma keyvalues?
-        
+
         // Do simple alias translations
         if (code() == "GLS") {
             m_offset = true;
             m_phi0   = 0.0;
             m_theta0 = m_crval[m_lat];
         }
-        
+
         // Initialize the celestial transformation routines
         m_r0 = 0.0; // Forces initialisation
         cel_set();
-        
+
         // Update LONPOLE and LATPOLE 
         m_lonpole = m_ref[2];
         m_latpole = m_ref[3];
-        
+
         //TODO: Update PVi_ma keyvalues
-        
+
     } // endif: non-linear celestial axes were present
-    
+
     //TODO: Non-linear spectral axis present?
-    
+
     //TODO: Tabular axes present?
-    
+
     // Initialize the linear transformation
     lin_set();
-    
+
     // Signal that WCS is set
     m_wcsset = true;
-    
+
     // Return
     return;
-}    
+}
 
 
 /***********************************************************************//**
@@ -1204,10 +1245,10 @@ void GWcs::wcs_set_ctype(void) const
         throw GException::wcs_invalid(G_WCS_SET_CTYPE, code(),
               "3-character type required.");
     }
-    
+
     // Set longitude keyword
     if (m_lng >= 0) {
-    
+
         // Set coordinate system
         if (m_coordsys == 0) {
             m_ctype.at(m_lng) = "RA---" + code();
@@ -1232,7 +1273,7 @@ void GWcs::wcs_set_ctype(void) const
         else {
             throw GException::wcs_bad_coords(G_WCS_SET_CTYPE, coordsys());
         }
-        
+
         // Add projection name to comment
         m_ctype_c.at(m_lng).append(name());
         m_ctype_c.at(m_lng).append(" projection");
@@ -1240,7 +1281,7 @@ void GWcs::wcs_set_ctype(void) const
 
     // Set latitude keyword
     if (m_lat >= 0) {
-    
+
         // Set coordinate system
         if (m_coordsys == 0) {
             m_ctype.at(m_lat) = "DEC--" + code();
@@ -1276,7 +1317,7 @@ void GWcs::wcs_set_ctype(void) const
         m_ctype.at(m_spec) = "NONE";
         m_ctype_c.at(m_spec) = "Not yet implemented";
     }
-    
+
     // Return
     return;
 }
@@ -1311,12 +1352,13 @@ void GWcs::wcs_set_ctype(void) const
  * @todo Zero the unused world coordinate elements
  ***************************************************************************/
 void GWcs::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
-                      double* phi, double* theta, double* world, int* stat) const
+                   double* phi, double* theta, double* world, int* stat) const
 {
     // Initialize if required
-    if (!m_wcsset)
+    if (!m_wcsset) {
         wcs_set();
-    
+    }
+
     // Sanity check
     if (ncoord < 1 || (ncoord > 1 && nelem < m_naxis)) {
         std::string message;
@@ -1328,23 +1370,23 @@ void GWcs::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
         }
         throw GException::wcs_invalid_parameter(G_WCS_P2S, message);
     }
-    
+
     // Apply pixel-to-world linear transformation
     lin_p2x(ncoord, nelem, pixcrd, imgcrd);
-    
+
     //TODO: Check for constant x and/or y
     int nx = ncoord;
     int ny = 0;
-        
+
     // Transform projection plane coordinates to celestial coordinates
     cel_x2s(nx, ny, nelem, nelem, imgcrd+m_lng, imgcrd+m_lat, phi, theta,
             world+m_lng, world+m_lat, stat);
 
     //TODO: Zero the unused world coordinate elements
-    
+
     // Return
     return;
-}    
+}
 
 
 /***********************************************************************//**
@@ -1376,13 +1418,14 @@ void GWcs::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
  * @todo Zero the unused world coordinate elements
  ***************************************************************************/
 void GWcs::wcs_s2p(int ncoord, int nelem, const double* world,
-                      double* phi, double* theta,  double* imgcrd,
-                      double* pixcrd, int* stat) const
+                   double* phi, double* theta,  double* imgcrd,
+                   double* pixcrd, int* stat) const
 {
     // Initialize if required
-    if (!m_wcsset)
+    if (!m_wcsset) {
         wcs_set();
-    
+    }
+
     // Sanity check
     if (ncoord < 1 || (ncoord > 1 && nelem < m_naxis)) {
         std::string message;
@@ -1407,10 +1450,10 @@ void GWcs::wcs_s2p(int ncoord, int nelem, const double* world,
 
     // Apply world-to-pixel linear transformation
     lin_x2p(ncoord, nelem, imgcrd, pixcrd);
-    
+
     // Return
     return;
-}    
+}
 
 
 /***********************************************************************//**
@@ -1441,7 +1484,7 @@ std::string GWcs::wcs_print(const GChatter& chatter) const
 
         // Append coordinate system
         result.append("\n"+gammalib::parformat("Coodinate system")+coordsys());
- 
+
         // Append projection parameters
         result.append("\n"+gammalib::parformat("Projection code")+code());
         result.append("\n"+gammalib::parformat("Projection name")+name());
@@ -1449,7 +1492,7 @@ std::string GWcs::wcs_print(const GChatter& chatter) const
             result.append("\n"+gammalib::parformat("Radius of the gen. sphere"));
             result.append(gammalib::str(m_r0)+" deg");
         }
-   
+
         // Append coordinates
         result.append("\n"+gammalib::parformat("Reference coordinate")+"(");
         for (int i = 0; i < m_crval.size(); ++i) {
@@ -1481,17 +1524,16 @@ std::string GWcs::wcs_print(const GChatter& chatter) const
             }
         }
         result.append(")");
-        
+
         // Append origin
         result.append("\n"+gammalib::parformat("(Phi_0, Theta_0)")+"(");
         result.append(wcs_print_value(m_phi0)+", ");
         result.append(wcs_print_value(m_theta0)+") deg");
-    
+
         // Append native pole
         result.append("\n"+gammalib::parformat("(Phi_p, Theta_p)")+"(");
         result.append(wcs_print_value(m_lonpole)+", ");
         result.append(wcs_print_value(m_latpole)+") deg");
-
 
         // Append details
         if (chatter >= EXPLICIT) {
@@ -1537,7 +1579,7 @@ std::string GWcs::wcs_print(const GChatter& chatter) const
                 }
             }
             result.append(")");
-    
+
             // Append latitude preservement flag
             result.append("\n"+gammalib::parformat("Latitude preserved"));
             if (m_isolat) {
@@ -1591,7 +1633,7 @@ std::string GWcs::wcs_print(const GChatter& chatter) const
             }
             result.append("\n"+gammalib::parformat("Fiducial offset"));
             result.append("("+gammalib::str(m_x0)+", "+gammalib::str(m_y0)+")");
-    
+
             // Append spectral transformation parameters
             result.append("\n"+gammalib::parformat("Rest frequency"));
             result.append(wcs_print_value(m_restfrq));
@@ -1619,7 +1661,7 @@ std::string GWcs::wcs_print_value(const double& value) const
 {
     // Initialise result
     std::string result;
-    
+
     // Depend value dependent string
     if (undefined(value)) {
         result.append("UNDEFINED");
@@ -1627,7 +1669,7 @@ std::string GWcs::wcs_print_value(const double& value) const
     else {
         result.append(gammalib::str(value));
     }
-    
+
     // Return result
     return result;
 }
@@ -1657,15 +1699,15 @@ void GWcs::cel_ini(void) const
     m_ref[3]  = +90.0;
     m_latpreq = -1;
     m_isolat  = false;
-    
+
     // Clear Euler angles
     for (int k = 0; k < 5; ++k) {
         m_euler[k] = 0.0;
     }
-    
+
     // Initialise projection parameters
     prj_ini();
-   
+
     // Return
     return;
 }
@@ -1703,18 +1745,18 @@ void GWcs::cel_set(void) const
 {
     // Set tolerance
     const double tol = 1.0e-10;
-    
+
     // If no fiducial offsets are requested then make sure that (phi0,theta0)
     // are undefined
     if (!m_offset) {
         m_phi0   = UNDEFINED;
         m_theta0 = UNDEFINED;
     }
-    
+
     // Setup projection. This method will set (phi0,theta0) if they were
     // undefined.
     prj_set();
-    
+
     // Initialise celestial parameters
     double lng0 = m_ref[0];
     double lat0 = m_ref[1];
@@ -1737,17 +1779,17 @@ void GWcs::cel_set(void) const
 
     // Initialise
     m_latpreq = 0;
-    
+
     // Compute celestial coordinates of the native pole
     // Fiducial point at the native pole?
     if (m_theta0 == 90.0) {
         lngp = lng0;
         latp = lat0;
     }
-    
+
     // ... otherwise fiducial point is away from the native pole
     else {
-    
+
         // Compute sine and cosine of lat0 and theta0
         double slat0;
         double clat0;
@@ -1767,10 +1809,10 @@ void GWcs::cel_set(void) const
             u     = m_theta0;
             v     = 90.0 - lat0;
         }
-        
+
         // ...
         else {
-            
+
             // Compute sine and cosine of Phi_p - Phi_0
             gammalib::sincosd(phip - m_phi0, &sphip, &cphip);
 
@@ -1779,7 +1821,7 @@ void GWcs::cel_set(void) const
             double y = sthe0;
             double z = std::sqrt(x*x + y*y);
             if (z == 0.0) {
-                
+
                 // Check of an invalid coordinate transformation parameter
                 // has been encountered. Since z=0 we exlect sin(lat0)=0.
                 if (slat0 != 0.0) {
@@ -1795,9 +1837,9 @@ void GWcs::cel_set(void) const
                 else if (latp < -90.0) {
                     latp = -90.0;
                 }
-                
+
             }
-            
+
             // ... otherwise ...
             else {
                 double slz = slat0/z;
@@ -1868,7 +1910,7 @@ void GWcs::cel_set(void) const
         // ...
         double z = gammalib::cosd(latp) * clat0;
         if (std::abs(z) < tol) {
-        
+
             // Celestial pole at the fiducial point
             if (std::abs(clat0) < tol) {
                 lngp = lng0;
@@ -1885,7 +1927,7 @@ void GWcs::cel_set(void) const
             }
 
         }
-        
+
         // ...
         else {
             double x = (sthe0 - gammalib::sind(latp)*slat0)/z;
@@ -1917,9 +1959,9 @@ void GWcs::cel_set(void) const
                 lngp += 360.0;
             }
         }
-        
+
     } // endelse: fiducial point was away from native pole
-    
+
     // Store LATPOLEa
     m_ref[3] = latp;
 
@@ -1928,7 +1970,7 @@ void GWcs::cel_set(void) const
     m_euler[1] = 90.0 - latp;
     m_euler[2] = phip;
     gammalib::sincosd(m_euler[1], &m_euler[4], &m_euler[3]);
-    
+
     // Signal if |latitude| is preserved
     m_isolat = (m_euler[4] == 0.0);
 
@@ -1941,7 +1983,7 @@ void GWcs::cel_set(void) const
 
     // Celestial parameter have been set
     m_celset = true;
-    
+
     // Return
     return;
 }
@@ -1970,9 +2012,9 @@ void GWcs::cel_set(void) const
  * wcslib function cel.c::celx2s.
  ***************************************************************************/
 void GWcs::cel_x2s(int nx, int ny, int sxy, int sll,
-                      const double* x, const double *y,
-                      double* phi, double* theta,
-                      double* lng, double* lat, int* stat) const
+                   const double* x, const double *y,
+                   double* phi, double* theta,
+                   double* lng, double* lat, int* stat) const
 {
     // Initialize celestial transformations if required
     if (!m_celset) {
@@ -1981,10 +2023,10 @@ void GWcs::cel_x2s(int nx, int ny, int sxy, int sll,
 
     // Apply spherical deprojection
     prj_x2s(nx, ny, sxy, 1, x, y, phi, theta, stat);
-    
+
     // Compute number of Phi values
     int nphi = (ny > 0) ? (nx*ny) : nx;
-    
+
     // Compute celestial coordinates
     sph_x2s(nphi, 0, 1, sll, phi, theta, lng, lat);
 
@@ -2016,9 +2058,9 @@ void GWcs::cel_x2s(int nx, int ny, int sxy, int sll,
  * wcslib function cel.c::celx2s.
  ***************************************************************************/
 void GWcs::cel_s2x(int nlng, int nlat, int sll, int sxy,
-                      const double* lng, const double* lat,
-                      double* phi, double* theta,
-                      double* x, double* y, int* stat) const
+                   const double* lng, const double* lat,
+                   double* phi, double* theta,
+                   double* x, double* y, int* stat) const
 {
     // Initialize celestial transformations if required
     if (!m_celset) {
@@ -2034,7 +2076,7 @@ void GWcs::cel_s2x(int nlng, int nlat, int sll, int sxy,
     if (m_isolat) {
         nphi   = nlng;
         ntheta = nlat;
-    } 
+    }
     else {
         nphi   = (nlat > 0) ? (nlng*nlat) : nlng;
         ntheta = 0;
@@ -2042,7 +2084,7 @@ void GWcs::cel_s2x(int nlng, int nlat, int sll, int sxy,
 
     // Apply spherical projection
     prj_s2x(nphi, ntheta, 1, sxy, phi, theta, x, y, stat);
-    
+
     // Return
     return;
 }
@@ -2077,7 +2119,7 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
 {
     // Set tolerance
     const double tol = 1.0e-5;
-    
+
     // Set value replication length mphi,mtheta
     int mphi;
     int mtheta;
@@ -2093,16 +2135,16 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
 
     // Check for a simple change in origin of longitude
     if (m_euler[4] == 0.0) {
-        
+
         // Initialise pointers
         double*       lngp   = lng;
         double*       latp   = lat;
         const double* phip   = phi;
         const double* thetap = theta;
-            
+
         // Case A: ...
         if (m_euler[1] == 0.0) {
-        
+
             // ...
             double dlng = fmod(m_euler[0] + 180.0 - m_euler[2], 360.0);
 
@@ -2131,15 +2173,15 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
                     else if (*lngp < -360.0) {
                         *lngp += 360.0;
                     }
-                        
+
                 } // endfor: looped over phi
             } // endfor: looped over theta
 
         } // endif: ...
-        
+
         // Case B: ...
         else {
-            
+
             // ...
             double dlng = fmod(m_euler[0] + m_euler[2], 360.0);
 
@@ -2168,7 +2210,7 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
                     else if (*lngp < -360.0) {
                         *lngp += 360.0;
                     }
-                        
+
                 } // endfor: looped over phi
             } // endfor: looped over theta
         } // endelse: ...
@@ -2195,12 +2237,12 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
         double*       lngp   = lng;
         double*       latp   = lat;
         for (int itheta = 0; itheta < ntheta; ++itheta, thetap += spt) {
-            
+
             // ...
             double sinthe;
             double costhe;
             gammalib::sincosd(*thetap, &sinthe, &costhe);
-            
+
             // ...
             double costhe3 = costhe * m_euler[3];
             double costhe4 = costhe * m_euler[4];
@@ -2209,7 +2251,7 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
 
             // Loop over Phi
             for (int iphi = 0; iphi < mphi; ++iphi, lngp += sll, latp += sll) {
-            
+
                 //
                 double dphi = *lngp;
                 double sinphi;
@@ -2219,7 +2261,7 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
                 // Compute the celestial longitude
                 double x =  sinthe4 - costhe3*cosphi;
                 double y = -costhe*sinphi;
-                
+
                 // Rearrange longitude formula to reduce roundoff errors
                 if (std::abs(x) < tol) {
                     x = -gammalib::cosd(*thetap + m_euler[1]) +
@@ -2234,7 +2276,7 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
                 else {
                     dlng = (m_euler[1] < 90.0) ? dphi + 180.0 : -dphi;
                 }
-                
+
                 // Set celestial longitude
                 *lngp = m_euler[0] + dlng;
 
@@ -2263,7 +2305,7 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
                     if (*latp >  90.0) *latp =  180.0 - *latp;
                     if (*latp < -90.0) *latp = -180.0 - *latp;
                 }
-                
+
                 // ... then handle the case of general longitude shifts
                 else {
                     // Use alternative formulae for greater accuracy
@@ -2278,11 +2320,11 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
                         *latp = gammalib::asind(z);
                     }
                 } // endelse: general longitude shift
-                
+
             } // endfor: looped over phi
-  
+
         } // endfor: looped over theta
-    
+
     } // endelse: did general transformation
 
     // Return
@@ -2308,8 +2350,8 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
  * The interface follows very closely that of wcslib.
  ***************************************************************************/
 void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
-                      const double* lng, const double* lat,
-                      double* phi, double* theta) const
+                   const double* lng, const double* lat,
+                   double* phi, double* theta) const
 {
     // Set tolerance
     const double tol = 1.0e-5;
@@ -2329,7 +2371,7 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
 
     // Check for a simple change in origin of longitude
     if (m_euler[4] == 0.0) {
-        
+
         // Initialise pointers
         const double* lngp   = lng;
         const double* latp   = lat;
@@ -2338,14 +2380,14 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
 
         // Case A: ...
         if (m_euler[1] == 0.0) {
-        
+
             // Compute longitude shift
             double dphi = fmod(m_euler[2] - 180.0 - m_euler[0], 360.0);
 
             // Apply longitude shift
             for (int ilat = 0; ilat < nlat; ++ilat, lngp += sll, latp += sll) {
                 for (int ilng = 0; ilng < mlng; ++ilng, phip += spt, thetap += spt) {
-                
+
                     // Shift longitude, keep Theta
                     *phip   = fmod(*lngp + dphi, 360.0);
                     *thetap = *latp;
@@ -2357,22 +2399,22 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
                     else if (*phip < -180.0) {
                         *phip += 360.0;
                     }
-        
+
                 } // endfor: looped over longitude
             } // endfor: looped over latitude
 
         } // endif: Case A
-        
+
         // Case B: ...
         else {
-            
+
             // Compute longitude shift
             double dphi = fmod(m_euler[2] + m_euler[0], 360.0);
 
             // Apply longitude shift
             for (int ilat = 0; ilat < nlat; ++ilat, lngp += sll, latp += sll) {
                 for (int ilng = 0; ilng < mlng; ++ilng, phip += spt, thetap += spt) {
-                
+
                     // Shift longitude, flip Theta
                     *phip   = fmod(dphi - *lngp, 360.0);
                     *thetap = -(*latp);
@@ -2384,14 +2426,14 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
                     else if (*phip < -180.0) {
                         *phip += 360.0;
                     }
-          
+
                 } // endfor: looped over longitude
             } // endfor: looped over latitude
-            
+
         } // endelse: Case B
 
     } // endif: simple change in origin
-    
+
     // ... otherwise compute general transformation
     else {
 
@@ -2412,7 +2454,7 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
         double*       phip   = phi;
         double*       thetap = theta;
         for (int ilat = 0; ilat < nlat; ++ilat, latp += sll) {
-            
+
             // ...
             double sinlat;
             double coslat;
@@ -2424,7 +2466,7 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
 
             // Loop over longitudes
             for (int ilng = 0; ilng < mlng; ++ilng, phip += spt, thetap += spt) {
-            
+
                 // ...
                 double dlng = *phip;
                 double sinlng;
@@ -2434,7 +2476,7 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
                 // Compute the native longitude
                 double x = sinlat4 - coslat3*coslng;
                 double y = -coslat*sinlng;
-                
+
                 // Rearrange formula to reduce roundoff errors
                 if (std::abs(x) < tol) {
                     x = -gammalib::cosd(*latp+m_euler[1]) +
@@ -2454,7 +2496,7 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
                         dphi = -dlng;
                     }
                 }
-                
+
                 // Set Phi
                 *phip = fmod(m_euler[2] + dphi, 360.0);
 
@@ -2473,7 +2515,7 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
                     if (*thetap >  90.0) *thetap =  180.0 - *thetap;
                     if (*thetap < -90.0) *thetap = -180.0 - *thetap;
                 }
-                
+
                 // ... then handle the case of general longitude shifts
                 else {
                     // Use alternative formulae for greater accuracy
@@ -2488,11 +2530,11 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
                         *thetap = gammalib::asind(z);
                     }
                 }
-      
+
             } // endfor: looped over longitudes
-    
+
         } // endfor: looped over latitude
-  
+
     } // endelse: handled general case
 
     // Return
@@ -2514,7 +2556,6 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
  ***************************************************************************/
 void GWcs::spc_ini(void)
 {
-   
     // Return
     return;
 }
@@ -2536,23 +2577,23 @@ void GWcs::lin_ini(int naxis)
     // Initialise parameters
     m_linset = false;
     m_unity  = false;
-    
+
     // Clear vectors
     m_crpix.clear();
     m_pc.clear();
     m_cdelt.clear();
     m_piximg.clear();
     m_imgpix.clear();
-    
+
     // Continue only if there are axes
     if (naxis > 0) {
-   
+
         // Loop over axes
         for (int i = 0; i < naxis; ++i) {
-        
+
             // CRPIXja defaults to 0.0
             m_crpix.push_back(0.0);
-            
+
             // PCi_ja defaults to the unit matrix
             for (int j = 0; j < naxis; ++j) {
                 if (j == i) {
@@ -2562,12 +2603,12 @@ void GWcs::lin_ini(int naxis)
                     m_pc.push_back(0.0);
                 }
             }
-            
+
             // CDELTia defaults to 1.0
             m_cdelt.push_back(1.0);
-        
+
         } // endfor: looped over axes
-        
+
     } // endif: there were axes
 
     // Return
@@ -2586,7 +2627,7 @@ void GWcs::lin_set(void) const
     // Clear transformation matrices
     m_piximg.clear();
     m_imgpix.clear();
-    
+
     // Check for unity PC matrix
     m_unity = true;
     for (int i = 0, index = 0; i < m_naxis; ++i) {
@@ -2608,28 +2649,28 @@ void GWcs::lin_set(void) const
             break;
         }
     }
-    
+
     // Debug option: force PC usage for testing purposes
     #if defined(G_LIN_MATINV_FORCE_PC)
     m_unity = false;
     std::cout << "DEBUG: Force PC usage in linear transformations." << std::endl;
     #endif
-    
+
     // Compute transformation matrices for non-uniform PC matrix
     if (!m_unity) {
-    
+
         // Compute the pixel-to-image transformation matrix
         for (int i = 0, index = 0; i < m_naxis; ++i) {
             for (int j = 0; j < m_naxis; ++j, ++index) {
                 m_piximg.push_back(m_cdelt[i] * m_pc[index]);
             }
         }
-    
+
         // Compute the image-to-pixel transformation matrix
         lin_matinv(m_piximg, m_imgpix);
-        
+
     }
-    
+
     // Signal that linear transformation matrix has been set
     m_linset = true;
 
@@ -2657,36 +2698,36 @@ void GWcs::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcrd) 
     if (!m_linset) {
         lin_set();
     }
-    
+
     // Convert pixel coordinates to intermediate world coordinates
     const double* pix = pixcrd;
     double*       img = imgcrd;
 
     // Case A: we have a unity PC matrix
     if (m_unity) {
-    
+
         // Loop over all coordinates
         for (int k = 0; k < ncoord; ++k) {
-            
+
             // Transform the first m_naxis elements
             for (int i = 0; i < m_naxis; ++i) {
                 *(img++) = m_cdelt[i] * (*(pix++) - m_crpix[i]);
             }
-            
+
             // Go to next coordinate
             pix += (nelem - m_naxis);
             img += (nelem - m_naxis);
-            
+
         } // endfor: looped over all coordinates
 
-    } 
-    
+    }
+
     // Case B: we have a non-unity PC matrix
     else {
-    
+
         // Loop over all coordinates
         for (int k = 0; k < ncoord; ++k) {
-        
+
             // Clear first m_naxis elements
             for (int i = 0; i < m_naxis; ++i) {
                 img[i] = 0.0;
@@ -2704,11 +2745,11 @@ void GWcs::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcrd) 
             // Go to next coordinate
             pix += (nelem - m_naxis);
             img += nelem;
-    
+
         } // endfor: looped over all coordinates
-        
+
     } // endelse: PC matrix was not unity
-        
+
     // Return
     return;
 }
@@ -2733,36 +2774,36 @@ void GWcs::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcrd) 
     if (!m_linset) {
         lin_set();
     }
-    
+
     // Convert pixel coordinates to intermediate world coordinates
     const double* img = imgcrd;
     double*       pix = pixcrd;
 
     // Case A: we have a unity PC matrix
     if (m_unity) {
-    
+
         // Loop over all coordinates
         for (int k = 0; k < ncoord; ++k) {
-            
+
             // Transform the first m_naxis elements
             for (int i = 0; i < m_naxis; ++i) {
                 *(pix++) = (*(img++) / m_cdelt[i]) + m_crpix[i];
             }
-            
+
             // Go to next coordinate
             pix += (nelem - m_naxis);
             img += (nelem - m_naxis);
-            
+
         } // endfor: looped over all coordinates
 
-    } 
-    
+    }
+
     // Case B: we have a non-unity PC matrix
     else {
-    
+
         // Loop over all coordinates
         for (int k = 0; k < ncoord; ++k) {
-        
+
             // Perform matrix multiplication
             for (int j = 0, ji = 0; j < m_naxis; ++j) {
                 *pix = 0.0;
@@ -2775,11 +2816,11 @@ void GWcs::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcrd) 
             // Go to next coordinate
             pix += (nelem - m_naxis);
             img += nelem;
-    
+
         } // endfor: looped over all coordinates
-        
+
     } // endelse: PC matrix was not unity
-        
+
     // Return
     return;
 }
@@ -2808,18 +2849,18 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
         std::vector<int>    lxm;
         std::vector<double> rowmax;
         std::vector<double> lu = mat;
-        
+
         // Clear inverse matrix
         inv.clear();
         inv.assign(m_naxis*m_naxis, 0.0);
-        
+
         // Initialize arrays
         for (int i = 0, ij = 0; i < m_naxis; ++i) {
-        
+
             // Vector that records row interchanges
             mxl.push_back(i);
             lxm.push_back(0);
-            
+
             // Maximum element value in row
             rowmax.push_back(0.0);
             for (int j = 0; j < m_naxis; ++j, ++ij) {
@@ -2828,18 +2869,17 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
                     rowmax[i] = dtemp;
                 }
             }
-            
+
             // Throw exception if matrix is singular
             if (rowmax[i] == 0.0) {
                 throw GException::wcs_singular_matrix(G_LIN_MATINV, m_naxis, mat);
             }
-        
-        } // endfor: initialized array
 
+        } // endfor: initialized array
 
         // Form the LU triangular factorization using scaled partial pivoting
         for (int k = 0; k < m_naxis; ++k) {
-        
+
             // Decide whether to pivot
             double colmax = std::abs(lu[k*m_naxis+k]) / rowmax[k];
             int    pivot  = k;
@@ -2851,10 +2891,10 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
                     pivot  = i;
                 }
             }
-            
+
             // Do we need to pivot
             if (pivot > k) {
-            
+
                 // We must pivot, interchange the rows of the design matrix
                 for (int j = 0, pj = pivot*m_naxis, kj = k*m_naxis; j < m_naxis; ++j, ++pj, ++kj) {
                     double dtemp = lu[pj];
@@ -2871,18 +2911,18 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
                 int itemp  = mxl[pivot];
                 mxl[pivot] = mxl[k];
                 mxl[k]     = itemp;
-    
+
             } // endif: pivoting required
 
             // Gaussian elimination
             for (int i = k+1; i < m_naxis; ++i) {
-                
+
                 // Compute matrix index
                 int ik = i*m_naxis + k;
 
                 // Nothing to do if lu[ik] is zero
                 if (lu[ik] != 0.0) {
-                    
+
                     // Save the scaling factor
                     lu[ik] /= lu[k*m_naxis+k];
 
@@ -2892,11 +2932,10 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
                     }
 
                 } // endif: lu[ik] was not zero
-    
-            } // endfor: Gaussian elimination
-            
-        } // endfor: formed LU triangular factorization
 
+            } // endfor: Gaussian elimination
+
+        } // endfor: formed LU triangular factorization
 
         // mxl[i] records which row of mat corresponds to row i of lu
         // lxm[i] records which row of lu  corresponds to row i of mat
@@ -2906,7 +2945,7 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
 
         // Determine the inverse matrix
         for (int k = 0; k < m_naxis; ++k) {
-        
+
             // ...
             inv[lxm[k]*m_naxis+k] = 1.0;
 
@@ -2924,9 +2963,9 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
                 }
                 inv[i*m_naxis+k] /= lu[i*m_naxis+i];
             }
-            
+
         } // endfor: determined inverse matrix
-    
+
     } // endif: naxis was valid
 
     // Return
@@ -2961,7 +3000,7 @@ void GWcs::prj_ini(void) const
     m_x0     = 0.0;
     m_y0     = 0.0;
     m_w.clear();
-    
+
     // Return
     return;
 }
@@ -2980,13 +3019,13 @@ void GWcs::prj_off(const double& phi0, const double& theta0) const
     // Initialise fiducial offsets
     m_x0 = 0.0;
     m_y0 = 0.0;
-    
+
     // Set both to the projection-specific default if either undefined
     if (undefined(m_phi0) || undefined(m_theta0)) {
         m_phi0   = phi0;
         m_theta0 = theta0;
     }
-    
+
     // ... otherwise compute (x,y) for (phi0,theta0)
     else {
         // Get (x,y) at (phi0,theta0) from projection
@@ -2997,7 +3036,7 @@ void GWcs::prj_off(const double& phi0, const double& theta0) const
         m_x0 = x0;
         m_y0 = y0;
     }
-    
+
     // Return
     return;
 }

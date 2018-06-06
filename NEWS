@@ -114,6 +114,10 @@ None
 
 12. Sky module
 --------------
+A precomputation cache was added to the GWcs::dir2pix() and GWcs::pix2dir()
+methods so that results are not recomputed for the same arguments. This should
+provide some speed-up as it avoids unnecessary coordinate transformations.
+
 Add GSkyDir::cos_dist() method that computes the cosine of the angular distance
 between two sky directions. Using this method avoids computation of the arc
 cosine (#2309).

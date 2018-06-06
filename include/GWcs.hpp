@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.hpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,7 +66,7 @@ public:
     virtual std::string code(void) const = 0;
     virtual std::string name(void) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
-    
+
     // Implemented virtual base class methods
     virtual int         size(void) const;
     virtual void        read(const GFitsHDU& hdu);
@@ -112,7 +112,7 @@ protected:
                         double* pixcrd, int* stat) const;
     std::string wcs_print(const GChatter& chatter = NORMAL) const;
     std::string wcs_print_value(const double& value) const;
-    
+
     // Methods adapted from wcslib::cel.c
     void cel_ini(void) const;
     void cel_set(void) const;
@@ -153,7 +153,7 @@ protected:
     virtual void prj_s2x(int nphi, int ntheta, int spt, int sxy,
                          const double* phi, const double* theta,
                          double* x, double* y, int* stat) const = 0;
-    
+
     // World Coordinate System parameters
     mutable bool                     m_wcsset;  //!< WCS information is set
     int                              m_naxis;   //!< Number of axes
@@ -172,7 +172,7 @@ protected:
     int                              m_lng;     //!< Longitude axis
     int                              m_lat;     //!< Latitude axis
     int                              m_spec;    //!< Spectral axis
-    
+
     // Linear transformation parameters
     mutable bool                     m_linset;  //!< Linear transformation is set
     mutable bool                     m_unity;   //!< Signals unity PC matrix
@@ -193,7 +193,7 @@ protected:
     mutable double                   m_euler[5];//!< Euler angles and functions thereof
     mutable int                      m_latpreq; //!< LATPOLEa requirement
     mutable bool                     m_isolat;  //!< True if |latitude| is preserved
-    
+
     // Projection parameters
     mutable bool                     m_prjset;  //!< Projection is set
     mutable double                   m_r0;      //!< Radius of the generating sphere
@@ -202,9 +202,17 @@ protected:
     mutable double                   m_x0;      //!< Fiducial x offset
     mutable double                   m_y0;      //!< Fiducial y offset
     mutable std::vector<double>      m_w;       //!< Intermediate values
-    
+
     // Spectral transformation parameters
     //struct spcprm spc
+
+    // Pre-computation cache
+    mutable bool      m_has_pix2dir_cache; //!< Has valid pix2dir cache value
+    mutable bool      m_has_dir2pix_cache; //!< Has valid dir2pix cache value
+    mutable GSkyDir   m_last_pix2dir_dir;  //!< Last sky direction for pix2dir
+    mutable GSkyDir   m_last_dir2pix_dir;  //!< Last sky direction for dir2pix
+    mutable GSkyPixel m_last_pix2dir_pix;  //!< Last pixel for pix2dir
+    mutable GSkyPixel m_last_dir2pix_pix;  //!< Last pixel for dir2pix
 };
 
 
