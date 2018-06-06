@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyPixel.hpp - Sky map pixel class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,6 +72,10 @@
  * 0.
  ***************************************************************************/
 class GSkyPixel : public GBase {
+
+    // Operator friends
+    friend bool operator==(const GSkyPixel& a, const GSkyPixel& b);
+    friend bool operator!=(const GSkyPixel& a, const GSkyPixel& b);
 
 public:
     // Constructors and destructors
@@ -282,6 +286,34 @@ inline
 const double& GSkyPixel::y(void) const
 {
     return m_y;
+}
+
+
+/***********************************************************************//**
+ * @brief Equality operator
+ *
+ * @param[in] a First sky pixel.
+ * @param[in] b Second sky pixel.
+ * @return True if first and second sky pixels are identical.
+ ***************************************************************************/
+inline
+bool operator==(const GSkyPixel &a, const GSkyPixel &b)
+{
+    return ((a.m_size == b.m_size) && (a.m_x == b.m_x) && (a.m_y == b.m_y));
+}
+
+
+/***********************************************************************//**
+ * @brief Inqquality operator
+ *
+ * @param[in] a First sky pixel.
+ * @param[in] b Second sky pixel.
+ * @return True if first and second sky pixels are different.
+ ***************************************************************************/
+inline
+bool operator!=(const GSkyPixel &a, const GSkyPixel &b)
+{
+    return ((a.m_size != b.m_size) || (a.m_x != b.m_x) || (a.m_y != b.m_y));
 }
 
 #endif /* GSKYPIXEL_HPP */

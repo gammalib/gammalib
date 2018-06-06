@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-5 June 2018
+6 June 2018
 
 
 1. Introduction
@@ -26,6 +26,8 @@ The following methods have been added:
 - gammalib::gauss_integral()
 - GSkyDir::cos_dist()
 - GApplicationPar::was_queried()
+- operator==(GSkyPixel&, GSkyPixel&)
+- operator!=(GSkyPixel&, GSkyPixel&)
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTABackground::rate_ebin()

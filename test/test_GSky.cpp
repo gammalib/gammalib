@@ -301,119 +301,80 @@ double TestGSky::wcs_copy(GWcs*   wcs,
 void TestGSky::test_GSkyPixel(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GSkyPixel pixel;
-        test_value(pixel.size(), 0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GSkyPixel pixel1;
+    test_value(pixel1.size(), 0);
 
     // Test 1D constructor
-    test_try("Test 1D constructor (int version)");
-    try {
-        GSkyPixel pixel(41);
-        test_assert(pixel.is_1D(), "Pixel is not 1D");
-        test_assert(!pixel.is_2D(), "Pixel is 2D but it should be 1D");
-        test_value(pixel.size(), 1);
-        test_value(pixel.index(), 41.0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GSkyPixel pixel2(41);
+    test_assert(pixel2.is_1D(), "Pixel is not 1D");
+    test_assert(!pixel2.is_2D(), "Pixel is 2D but it should be 1D");
+    test_value(pixel2.size(), 1);
+    test_value(pixel2.index(), 41.0);
 
     // Test 1D constructor
-    test_try("Test 1D constructor (double version)");
-    try {
-        GSkyPixel pixel(41.001);
-        test_assert(pixel.is_1D(), "Pixel is not 1D");
-        test_assert(!pixel.is_2D(), "Pixel is 2D but it should be 1D");
-        test_value(pixel.size(), 1);
-        test_value(pixel.index(), 41.001);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GSkyPixel pixel3(41.001);
+    test_assert(pixel3.is_1D(), "Pixel is not 1D");
+    test_assert(!pixel3.is_2D(), "Pixel is 2D but it should be 1D");
+    test_value(pixel3.size(), 1);
+    test_value(pixel3.index(), 41.001);
 
     // Test 2D constructor
-    test_try("Test 2D constructor (int version)");
-    try {
-        GSkyPixel pixel(41,14);
-        test_assert(!pixel.is_1D(), "Pixel is 1D but it should be 2D");
-        test_assert(pixel.is_2D(), "Pixel is not 2D");
-        test_value(pixel.size(), 2);
-        test_value(pixel.x(), 41.0);
-        test_value(pixel.y(), 14.0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GSkyPixel pixel4(41,14);
+    test_assert(!pixel4.is_1D(), "Pixel is 1D but it should be 2D");
+    test_assert(pixel4.is_2D(), "Pixel is not 2D");
+    test_value(pixel4.size(), 2);
+    test_value(pixel4.x(), 41.0);
+    test_value(pixel4.y(), 14.0);
 
     // Test 2D constructor
-    test_try("Test 2D constructor (double version)");
-    try {
-        GSkyPixel pixel(41.001,14.003);
-        test_assert(!pixel.is_1D(), "Pixel is 1D but it should be 2D");
-        test_assert(pixel.is_2D(), "Pixel is not 2D");
-        test_value(pixel.size(), 2);
-        test_value(pixel.x(), 41.001);
-        test_value(pixel.y(), 14.003);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GSkyPixel pixel5(41.001,14.003);
+    test_assert(!pixel5.is_1D(), "Pixel is 1D but it should be 2D");
+    test_assert(pixel5.is_2D(), "Pixel is not 2D");
+    test_value(pixel5.size(), 2);
+    test_value(pixel5.x(), 41.001);
+    test_value(pixel5.y(), 14.003);
 
     // Test 1D indexing
-    test_try("Test 1D indexing");
-    try {
-        GSkyPixel pixel;
-        test_value(pixel.size(), 0);
-        pixel = 41;
-        int index = pixel;
-        test_value(index, 41);
-        pixel = 41.001;
-        index = pixel;
-        test_value(index, 41);
-        double dindex = pixel;
-        test_value(dindex, 41.001);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GSkyPixel pixel6;
+    test_value(pixel6.size(), 0);
+    pixel6 = 41;
+    int index6 = pixel6;
+    test_value(index6, 41);
+    pixel6 = 41.001;
+    index6 = pixel6;
+    test_value(index6, 41);
+    double dindex6 = pixel6;
+    test_value(dindex6, 41.001);
 
     // Test cloning
-    test_try("Test cloning");
-    try {
-        GSkyPixel pixel;
-        test_value(pixel.size(), 0);
-        GSkyPixel* clone = pixel.clone();
-        test_value(clone->size(), 0);
-        delete clone;
-        pixel = 41;
-        clone = pixel.clone();
-        test_value(clone->size(), 1);
-        int index = pixel;
-        test_value(index, 41);
-        delete clone;
-        pixel.x(41.001);
-        pixel.y(14.003);
-        clone = pixel.clone();
-        test_value(clone->size(), 2);
-        test_value(clone->x(), 41.001);
-        test_value(clone->y(), 14.003);
-        delete clone;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GSkyPixel pixel7;
+    test_value(pixel7.size(), 0);
+    GSkyPixel* clone = pixel7.clone();
+    test_value(clone->size(), 0);
+    delete clone;
+    pixel7 = 41;
+    clone = pixel7.clone();
+    test_value(clone->size(), 1);
+    int index7 = pixel7;
+    test_value(index7, 41);
+    delete clone;
+    pixel7.x(41.001);
+    pixel7.y(14.003);
+    clone = pixel7.clone();
+    test_value(clone->size(), 2);
+    test_value(clone->x(), 41.001);
+    test_value(clone->y(), 14.003);
+    delete clone;
+
+    // Test equality and inequality operators using pixels from above
+    test_assert(pixel1 == pixel1, "Test equality operator for empty pixel");
+    test_assert(!(pixel1 != pixel1), "Test inequality operator for empty pixel");
+    test_assert(pixel2 == pixel2, "Test equality operator for 1D pixel");
+    test_assert(!(pixel2 != pixel2), "Test inequality operator for 1D pixel");
+    test_assert(pixel4 == pixel4, "Test equality operator for 2D pixel");
+    test_assert(!(pixel4 != pixel4), "Test inequality operator for 2D pixel");
+    test_assert(!(pixel2 == pixel4), "Test equality operator for 1D and 2D pixels");
+    test_assert(pixel2 != pixel4, "Test inequality operator for 1D and 2D pixels");
 
     // Return
     return;

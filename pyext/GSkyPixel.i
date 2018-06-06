@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GSkyPixel.i - Sky map pixel class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,6 +67,12 @@ public:
  * @brief GSkyPixel class extension
  ***************************************************************************/
 %extend GSkyPixel {
+    bool __eq__(const GSkyPixel& pixel) const {
+        return ((*self) == pixel);
+    }
+    bool __ne__(const GSkyPixel& pixel) const {
+        return ((*self) != pixel);
+    }
     GSkyPixel copy() {
         return (*self);
     }
