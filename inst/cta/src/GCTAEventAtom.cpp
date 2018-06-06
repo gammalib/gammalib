@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventAtom.cpp - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,30 @@ GCTAEventAtom::GCTAEventAtom(void) : GEventAtom()
 {
     // Initialise class members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Event constructor
+ *
+ * @param[in] dir Event instrument direction.
+ * @param[in] energy Event energy.
+ * @param[in] time Event time.
+ ***************************************************************************/
+GCTAEventAtom::GCTAEventAtom(const GCTAInstDir& dir,
+                             const GEnergy&     energy,
+                             const GTime&       time) : GEventAtom()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Set members
+    m_dir    = dir;
+    m_energy = energy;
+    m_time   = time;
 
     // Return
     return;

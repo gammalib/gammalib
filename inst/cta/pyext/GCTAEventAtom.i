@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventAtom.i - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@ class GCTAEventAtom : public GEventAtom {
 public:
     // Constructors and destructors
     GCTAEventAtom(void);
+    GCTAEventAtom(const GCTAInstDir& dir, const GEnergy& energy, const GTime& time);
     GCTAEventAtom(const GCTAEventAtom& atom);
     virtual ~GCTAEventAtom(void);
 

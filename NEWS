@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-6 June 2018
+7 June 2018
 
 
 1. Introduction
@@ -30,6 +30,7 @@ The following methods have been added:
 - operator!=(GSkyPixel&, GSkyPixel&)
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
+- GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)
 - GCTABackground::rate_ebin()
 - GCTABackgroundPerfTable::rate_ebin()
 - GCTABackground3D::rate_ebin()
