@@ -651,13 +651,25 @@ double GWcs::solidangle(const GSkyPixel& pixel) const
  * 1.
  *
  * A pre-computation cache is implemented so that successive calls with the
- * same @p pixel value will returned the cached sky direction.
+ * same @p pixel value will returned the cached sky direction. The
+ * pre-computation cache is OMP thread safe.
  ***************************************************************************/
 GSkyDir GWcs::pix2dir(const GSkyPixel& pixel) const
 {
-    // Compute sky direction only if pre-computation cache is not set or
-    // the sky pixel has changed
-    if (!m_has_pix2dir_cache || (m_last_pix2dir_pix != pixel)) {
+    // Initialise sky direction
+    GSkyDir dir;
+
+    // If there is a pre-computation cache and the sky pixel is identical to
+    // the one used for the cache, then get the cached sky direction. We need
+    // to put this in a OMP critical zone so that no other thread will change
+    // the cache in the meantime
+    #pragma omp critical(GWcs_pix2dir_1)
+    if (m_has_pix2dir_cache && (m_last_pix2dir_pix == pixel)) {
+        dir = m_last_pix2dir_dir;
+    }
+
+    // ... otherwise the computation of the sky direction is needed
+    else {
 
         // Allocate memory for transformation
         double pixcrd[2];
@@ -677,28 +689,34 @@ GSkyDir GWcs::pix2dir(const GSkyPixel& pixel) const
 
         // Set sky direction
         if (m_coordsys == 0) {
-            m_last_pix2dir_dir.radec_deg(world[0], world[1]);
+            dir.radec_deg(world[0], world[1]);
         }
         else {
-            m_last_pix2dir_dir.lb_deg(world[0], world[1]);
+            dir.lb_deg(world[0], world[1]);
         }
 
-        // Signal that cache is set and store sky pixel
-        m_has_pix2dir_cache = true;
-        m_last_pix2dir_pix  = pixel;
+        // Store result in cache. We need to put this in a OMP critical zone
+        // to make sure that no other thread is fiddeling with the cache
+        #pragma omp critical(GWcs_pix2dir_2)
+        {
+            m_has_pix2dir_cache = true;
+            m_last_pix2dir_pix  = pixel;
+            m_last_pix2dir_dir  = dir;
+        }
 
         // Debug: Dump transformation steps
         #if defined(G_XY2DIR_DEBUG)
         std::cout << "xy2dir: pixel=" << pixel
                   << " (x,y)=(" << pixcrd[0] << "," << pixcrd[1] << ")"
                   << " (phi,theta)=(" << phi << "," << theta << ")"
-                  << " (lng,lat)=(" << world[0] << "," << world[1] << ")" << std::endl;
+                  << " (lng,lat)=(" << world[0] << "," << world[1] << ")"
+                  << std::endl;
         #endif
 
     } // endif: sky direction computation requested
 
     // Return
-    return m_last_pix2dir_dir;
+    return dir;
 }
 
 
@@ -713,13 +731,25 @@ GSkyDir GWcs::pix2dir(const GSkyPixel& pixel) const
  * 1.
  *
  * A pre-computation cache is implemented so that successive calls with the
- * same @p dir value will returned the cached sky pixel.
+ * same @p dir value will returned the cached sky pixel. The pre-computation
+ * cache is OMP thread safe.
  ***************************************************************************/
 GSkyPixel GWcs::dir2pix(const GSkyDir& dir) const
 {
-    // Compute sky map pixel only if pre-computation cache is not set or
-    // the sky direction has changed
-    if (!m_has_dir2pix_cache || (m_last_dir2pix_dir != dir)) {
+    // Initialise sky pixel
+    GSkyPixel pixel;
+
+    // If there is a pre-computation cache and the sky direction is identical
+    // to the one used for the cache, then get the cached sky pixel. We need
+    // to put this in a OMP critical zone so that no other thread will change
+    // the cache in the meantime
+    #pragma omp critical(GWcs_dir2pix_1)
+    if (m_has_dir2pix_cache && (m_last_dir2pix_dir == dir)) {
+        pixel = m_last_dir2pix_pix;
+    }
+
+    // ... otherwise the computation of the sky pixel is needed
+    else {
 
         // Allocate memory for transformation
         double pixcrd[2];
@@ -744,11 +774,16 @@ GSkyPixel GWcs::dir2pix(const GSkyDir& dir) const
 
         // Set sky pixel. We have to subtract 1 here as GSkyPixel starts from
         // zero while the WCS reference (CRPIX) starts from one.
-        m_last_dir2pix_pix.xy(pixcrd[0]-1.0, pixcrd[1]-1.0);
+        pixel.xy(pixcrd[0]-1.0, pixcrd[1]-1.0);
 
-        // Signal that cache is set and store sky direction
-        m_has_dir2pix_cache = true;
-        m_last_dir2pix_dir  = dir;
+        // Store result in cache. We need to put this in a OMP critical zone
+        // to make sure that no other thread is fiddeling with the cache
+        #pragma omp critical(GWcs_dir2pix_2)
+        {
+            m_has_dir2pix_cache = true;
+            m_last_dir2pix_dir  = dir;
+            m_last_dir2pix_pix  = pixel;
+        }
 
         // Debug: Dump transformation steps
         #if defined(G_DIR2XY_DEBUG)
@@ -761,7 +796,7 @@ GSkyPixel GWcs::dir2pix(const GSkyDir& dir) const
     } // endif: sky pixel computation requested
 
     // Return sky pixel
-    return m_last_dir2pix_pix;
+    return pixel;
 }
 
 
