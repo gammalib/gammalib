@@ -61,6 +61,7 @@ public:
     const std::string& name(void) const;
     const std::string& type(void) const;
     const std::string& mode(void) const;
+    void               query(void);
     std::string        value(void);
     std::string        string(void);
     GFilename          filename(void);

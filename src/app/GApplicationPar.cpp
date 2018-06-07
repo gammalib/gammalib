@@ -464,6 +464,64 @@ void GApplicationPar::real(const double& value)
 
 
 /***********************************************************************//**
+ * @brief Query parameter if required
+ *
+ * This method queries the parameter from the stardard input if it is needed
+ * to be input by the user.
+ ***************************************************************************/
+void GApplicationPar::query(void)
+{
+    // Continue only if parameter has query mode and it was not yet queried
+    if (is_query() && !was_queried()) {
+
+        // Dump prompt string
+        std::string prompt = m_prompt;
+        if (m_min.length() > 0 && m_max.length() > 0) {
+            prompt += " ("+m_min+"-"+m_max+")";
+        }
+        else if (m_min.length() > 0) {
+            prompt += " ("+m_min+")";
+        }
+        else if (m_max.length() > 0) {
+            prompt += " ("+m_max+")";
+        }
+        prompt += " ["+m_value+"] ";
+
+        // Get value
+        #ifdef HAVE_LIBREADLINE
+        std::string value;
+        char* line = readline(prompt.c_str());
+        if (line != NULL) {
+            value = std::string(line);
+            delete line;
+        }
+        #else
+        std::cout << prompt;
+        char line[1000];
+        std::cin.getline(line, 1000);
+        std::string value = std::string(line);
+        #endif
+
+        // Strip any whitespace from string
+        value = gammalib::strip_whitespace(value);
+
+        // Update value if value is not the default
+        if (value.length() > 0) {
+            set_value(value);
+            m_update = true;
+        }
+
+        // Don't query parameter again
+        stop_query();
+
+    } // endif: parameter had query mode
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns parameter value as string
  *
  * This method queries any parameter and returns it as a string. No parameter
@@ -1296,6 +1354,12 @@ bool GApplicationPar::check_options(const std::string& value) const
  * For a real parameter, INDEF, NONE, UNDEF or UNDEFINED will result in a
  * status of "undefined", while INF, INFINITY or NAN will result in a status
  * of "nan".
+ *
+ * For a time parameter, INDEF, NONE, UNDEF or UNDEFINED will result in a
+ * status of "undefined".
+ *
+ * For a filename parameter, an empty string or INDEF, NONE, UNDEF or
+ * UNDEFINED will result in a status of "undefined".
  ***************************************************************************/
 std::string GApplicationPar::set_status(const std::string& value)
 {
@@ -1344,11 +1408,27 @@ std::string GApplicationPar::set_status(const std::string& value)
         }
     }
 
-    // Set time and filename status. Catch the special values that signal that
-    // a parameter is undefined.
-    else if ((m_type == "t") || (m_type == "f")) {
+    // Set time status. Catch the special values that signal that a parameter
+    // is undefined.
+    else if (m_type == "t") {
         std::string lvalue = gammalib::tolower(value);
         if (lvalue == "indef" ||
+            lvalue == "none"  ||
+            lvalue == "undef" ||
+            lvalue == "undefined") {
+            m_status = ST_UNDEFINED;
+        }
+        else {
+            m_status = ST_VALID;
+        }
+    }
+
+    // Set filename status. Catch the special values that signal that a
+    // parameter is undefined.
+    else if (m_type == "f") {
+        std::string lvalue = gammalib::tolower(value);
+        if (lvalue == ""      ||
+            lvalue == "indef" ||
             lvalue == "none"  ||
             lvalue == "undef" ||
             lvalue == "undefined") {
@@ -1392,64 +1472,6 @@ void GApplicationPar::set_value(const std::string& value)
 
     // Don't query parameter again
     stop_query();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Query parameter if required
- *
- * This method queries the parameter from the stardard input if it is needed
- * to be input by the user.
- ***************************************************************************/
-void GApplicationPar::query(void)
-{
-    // Continue only if parameter has query mode and it was not yet queried
-    if (is_query() && !was_queried()) {
-
-        // Dump prompt string
-        std::string prompt = m_prompt;
-        if (m_min.length() > 0 && m_max.length() > 0) {
-            prompt += " ("+m_min+"-"+m_max+")";
-        }
-        else if (m_min.length() > 0) {
-            prompt += " ("+m_min+")";
-        }
-        else if (m_max.length() > 0) {
-            prompt += " ("+m_max+")";
-        }
-        prompt += " ["+m_value+"] ";
-
-        // Get value
-        #ifdef HAVE_LIBREADLINE
-        std::string value;
-        char* line = readline(prompt.c_str());
-        if (line != NULL) {
-            value = std::string(line);
-            delete line;
-        }
-        #else
-        std::cout << prompt;
-        char line[1000];
-        std::cin.getline(line, 1000);
-        std::string value = std::string(line);
-        #endif
-
-        // Strip any whitespace from string
-        value = gammalib::strip_whitespace(value);
-
-        // Update value if value is not the default
-        if (value.length() > 0) {
-            set_value(value);
-            m_update = true;
-        }
-
-        // Don't query parameter again
-        stop_query();
-
-    } // endif: parameter had query mode
 
     // Return
     return;

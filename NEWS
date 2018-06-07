@@ -25,6 +25,7 @@ The following methods have been added:
 - gammalib::plaw_integral()
 - gammalib::gauss_integral()
 - GSkyDir::cos_dist()
+- GApplicationPar::query()
 - GApplicationPar::was_queried()
 - operator==(GSkyPixel&, GSkyPixel&)
 - operator!=(GSkyPixel&, GSkyPixel&)
@@ -64,6 +65,8 @@ Keep existing library path in installation script on Mac OS X (#2420)
 
 4. Application module
 ---------------------
+The GApplicationPar::query() method was made public.
+
 Add GApplicationPar::was_queried() method and do no longer change the mode
 of queried parameters to hidden. This makes sure that the correct mode will
 be written to the parfile, also for q-mode parameters (#2495).

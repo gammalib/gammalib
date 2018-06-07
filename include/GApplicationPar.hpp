@@ -77,6 +77,7 @@ public:
     const std::string& name(void) const;
     const std::string& type(void) const;
     const std::string& mode(void) const;
+    void               query(void);
     std::string        value(void);
     std::string        string(void);
     GFilename          filename(void);
@@ -124,7 +125,6 @@ protected:
     bool        check_options(const std::string& value) const;
     std::string set_status(const std::string& value);
     void        set_value(const std::string& value);
-    void        query(void);
     void        stop_query(void);
     std::string par_type_string(const std::string& type) const;
     std::string par_status_string(void) const;
