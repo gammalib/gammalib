@@ -1344,9 +1344,9 @@ std::string GApplicationPar::set_status(const std::string& value)
         }
     }
 
-    // Set time status. Catch the special values that signal that
+    // Set time and filename status. Catch the special values that signal that
     // a parameter is undefined.
-    else if (m_type == "t") {
+    else if ((m_type == "t") || (m_type == "f")) {
         std::string lvalue = gammalib::tolower(value);
         if (lvalue == "indef" ||
             lvalue == "none"  ||
