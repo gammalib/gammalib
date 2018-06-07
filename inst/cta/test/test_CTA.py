@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib CTA module.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -273,6 +273,9 @@ class Test(gammalib.GPythonTestSuite):
         crab = gammalib.GSkyDir()
         crab.radec_deg(83.6331, 22.0145)
 
+        # Set point-source spatial model based on Crab position
+        spatial = gammalib.GModelSpatialPointSource(crab)
+
         # Create On region
         on = gammalib.GSkyRegions()
         on.append(gammalib.GSkyRegionCircle(crab, 0.2))
@@ -294,7 +297,7 @@ class Test(gammalib.GPythonTestSuite):
         inobs    = gammalib.GObservations(filename)
         outobs   = gammalib.GObservations()
         for run in inobs:
-            onoff = gammalib.GCTAOnOffObservation(run, crab, etrue, ereco, on, off)
+            onoff = gammalib.GCTAOnOffObservation(run, spatial, etrue, ereco, on, off)
             outobs.append(onoff)
 
         # Load model container and attach it to the observations
@@ -305,9 +308,6 @@ class Test(gammalib.GPythonTestSuite):
         lm = gammalib.GOptimizerLM()
         outobs.optimize(lm)
         outobs.errors(lm)
-        #print(lm)
-        #print(outobs)
-        #print(outobs.models())
 
         # Test On/Off model fitting results
         sky = outobs.models()['Crab']
