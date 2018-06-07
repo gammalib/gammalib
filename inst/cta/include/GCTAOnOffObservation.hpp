@@ -39,6 +39,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GModels;
+class GModelSpatial;
 class GOptimizerPars;
 class GObservations;
 class GSkyRegions;
@@ -74,7 +75,7 @@ public:
                          const GArf& arf,
                          const GRmf& rmf);
     GCTAOnOffObservation(const GCTAObservation& obs,
-                         const GSkyDir&         srcdir,
+                         const GModelSpatial&   spatial,
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
                          const GSkyRegions&     on,
@@ -123,11 +124,11 @@ protected:
     void   set_exposure(void);
     void   check_consistency(const std::string& method) const;
     void   set(const GCTAObservation& obs,
-               const GSkyDir&         srcdir,
+               const GModelSpatial&   spatial,
                const GSkyRegions&     on,
                const GSkyRegions&     off);
     void   compute_arf(const GCTAObservation& obs,
-                       const GSkyDir&         srcdir,
+                       const GModelSpatial&   spatial,
                        const GSkyRegions&     on);
     void   compute_bgd(const GCTAObservation& obs,
                        const GSkyRegions&     off);

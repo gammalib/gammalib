@@ -11,7 +11,8 @@ GammaLib 1.6 is a major release that adds significant functionality.
 In particular, this release provides:
 
 * Various computational speed ups
-* Handling of observation-specific energy thresholds in CTA On/Off analyses
+* Handling of observation-specific energy thresholds and extended models in
+  CTA On/Off analyses
 
 
 Bug fixes
@@ -26,14 +27,14 @@ Bug fixes
 Improvements
 ------------
 
-* [`2429 <https://cta-redmine.irap.omp.eu/issues/2429>`_] -
-  Handle observation-specific energy thresholds in CTA On/Off analysis
 * [`2466 <https://cta-redmine.irap.omp.eu/issues/2466>`_] -
   Speed up computation of diffuse map models for CTA
 * [`2463 <https://cta-redmine.irap.omp.eu/issues/2463>`_] -
   Enhance ``GModelSpatialRadialProfileGauss`` class
 * [`2458 <https://cta-redmine.irap.omp.eu/issues/2458>`_] -
   Increase integration precision for CTA diffuse model response
+* [`2429 <https://cta-redmine.irap.omp.eu/issues/2429>`_] -
+  Handle observation-specific energy thresholds in CTA On/Off analysis
 * [`2422 <https://cta-redmine.irap.omp.eu/issues/2422>`_] -
   Add ``GCTAEdisp::prob_erecobin()`` method
 * [`2422 <https://cta-redmine.irap.omp.eu/issues/2422>`_] -
@@ -43,6 +44,8 @@ Improvements
 * [`2308 <https://cta-redmine.irap.omp.eu/issues/2308>`_] -
   Add ``GCTABackground::rate_ebin()`` method and ``gammalib::atan2()`` and
   ``gammalib::plaw_integral()`` functions
+* [`2292 <https://cta-redmine.irap.omp.eu/issues/2292>`_] -
+  Handle extended models in CTA On/Off analysis
 
 
 New features

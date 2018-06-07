@@ -51,7 +51,7 @@ The following methods have been renamed:
 - none
 
 The arguments for the following methods have been changed:
-- none
+- GCTAOnOffObservation CTA observation constructor now takes a spatial model component
 
 The return value of the following methods has been changed:
 - none
@@ -161,6 +161,11 @@ None
 
 20. CTA interface
 -----------------
+The GCTAOnOffObservation observation constructor now takes a spatial model
+component of type GModelSpatial instead of a sky direction as argument, and the
+ARF computation is performed by computing the IRF for the spatial model over the
+On region. In that way also extended source can be properly handled (#2292).
+
 The energy bounds of a CTA observations are now taken into account when setting
 up a GCTAOnOffObservation so that observation-specific energy thresholds are
 correctly handled (#2429).

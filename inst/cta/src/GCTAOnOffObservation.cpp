@@ -38,6 +38,7 @@
 #include "GModelSpatial.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
+#include "GSource.hpp"
 #include "GSkyRegions.hpp"
 #include "GSkyRegionMap.hpp"
 #include "GOptimizerPars.hpp"
@@ -70,10 +71,10 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 #define G_LIKELIHOOD            "GCTAOnOffObservation::likelihood(GModels&, "\
                                           "GOptimizerPars&, GMatrixSparse&, "\
                                                 "GVector&, double&, double&)"
-#define G_SET        "GCTAOnOffObservation::set(GCTAObservation&, GSkyDir&, "\
+#define G_SET  "GCTAOnOffObservation::set(GCTAObservation&, GModelSpatial&, "\
                                             "GSkyRegionMap&, GSkyRegionMap&)"
 #define G_COMPUTE_ARF  "GCTAOnOffObservation::compute_arf(GCTAObservation&, "\
-                                                  "GSkyDir&, GSkyRegionMap&)"
+                                            "GModelSpatial&, GSkyRegionMap&)"
 #define G_COMPUTE_BGD  "GCTAOnOffObservation::compute_bgd(GCTAObservation&, "\
                                                             "GSkyRegionMap&)"
 #define G_COMPUTE_ALPHA                "GCTAOnOffObservation::compute_alpha("\
@@ -184,11 +185,11 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
  * @brief CTA observation constructor
  *
  * @param[in] obs CTA observation.
+ * @param[in] spatial Spatial source model.
  * @param[in] etrue True energy boundaries.
  * @param[in] ereco Reconstructed energy boundaries.
  * @param[in] on On regions.
  * @param[in] off Off regions.
- * @param[in] srcdir Point source location.
  *
  * Constructs On/Off observation by filling the On and Off spectra and
  * computing the Auxiliary Response File (ARF) and Redistribution Matrix
@@ -197,7 +198,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
  * regions.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
-                                           const GSkyDir&         srcdir,
+                                           const GModelSpatial&   spatial,
                                            const GEbounds&        etrue,
                                            const GEbounds&        ereco,
                                            const GSkyRegions&     on,
@@ -215,7 +216,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     m_rmf = GRmf(etrue, ereco);
 
     // Set On/Off observation from CTA observation
-    set(obs, srcdir, on, off);
+    set(obs, spatial, on, off);
 
     // Return
     return;
@@ -953,7 +954,7 @@ void GCTAOnOffObservation::check_consistency(const std::string& method) const
  * @brief Set On/Off observation from a CTA observation
  *
  * @param[in] obs CTA observation.
- * @param[in] srcdir Point source location.
+ * @param[in] spatial Spatial source model.
  * @param[in] on On regions.
  * @param[in] off Off regions.
  *
@@ -965,7 +966,7 @@ void GCTAOnOffObservation::check_consistency(const std::string& method) const
  * the corresponding ARF and RMF response functions.
  ***************************************************************************/
 void GCTAOnOffObservation::set(const GCTAObservation& obs,
-                               const GSkyDir&         srcdir,
+                               const GModelSpatial&   spatial,
                                const GSkyRegions&     on,
                                const GSkyRegions&     off)
 {
@@ -1015,7 +1016,7 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
     }
 
 	// Compute response components
-	compute_arf(obs, srcdir, reg_on);
+	compute_arf(obs, spatial, reg_on);
 	compute_bgd(obs, reg_off);
 	compute_alpha(obs, reg_on, reg_off);
 	compute_rmf(obs, reg_on);
@@ -1032,14 +1033,17 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
  * @brief Compute ARF of On/Off observation
  *
  * @param[in] obs CTA observation.
- * @param[in] srcdir Point source location.
+ * @param[in] spatial Spatial source model.
  * @param[in] on On regions.
  *
  * @exception GException::invalid_value
  *            No CTA response found in CTA observation.
+ *
+ * Computes the ARF for an On/Off observation by integration over the IRF
+ * for the specified @p spatial source model over the @p on regions.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
-                                       const GSkyDir&         srcdir,
+                                       const GModelSpatial&   spatial,
                                        const GSkyRegions&     on)
 {
     // Get reconstructed energy boundaries from on ARF
@@ -1065,11 +1069,18 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
         double       zenith  = obspnt.zenith();
         double       azimuth = obspnt.azimuth();
 
+        // Set dummy time
+        const GTime time;
+
         // Loop over true energies
         for (int i = 0; i < ntrue; ++i) {
 
             // Get mean energy of bin
-            double logEtrue = etrue.elogmean(i).log10TeV();
+            GEnergy energy   = etrue.elogmean(i);
+            double  logEtrue = energy.log10TeV();
+
+            // Set source
+            GSource source("", const_cast<GModelSpatial*>(&spatial), energy, time);
 
             // Initialize effective area for this bin
             m_arf[i] = 0.0;
@@ -1088,32 +1099,20 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                     int pixidx = on_map->nonzero_indices()[j];
 
                     // Get direction to pixel center
-                    GSkyDir pixdir = on_map->map().inx2dir(pixidx);
+                    GCTAInstDir pixdir = GCTAInstDir(on_map->map().inx2dir(pixidx));
 
                     // Get solid angle subtended by this pixel
                     double pixsolid = on_map->map().solidangle(pixidx);
 
-                    // Compute position of pixel centre in instrument coordinates
-                    double theta = obsdir.dist(pixdir);
-                    double phi   = obsdir.posang(pixdir);
+                    // Set event
+                    GCTAEventAtom event(pixdir, energy, time);
 
-                    // Compute offset angle to source
-                    double delta = srcdir.dist(pixdir);
-
-                    // Get PSF value times the solid angle
-                    double psf = response->psf(delta,
-                                               theta,
-                                               phi,
-                                               zenith,
-                                               azimuth,
-                                               logEtrue) * pixsolid;
+                    // Get ARF value. We need to devide by the deadtime
+                    // correction since the IRF method multiplies with it.
+                    double arf = response->irf(event, source, obs) / m_deadc;
 
                     // Add up effective area
-                    m_arf[i] += response->aeff(theta,
-                                               phi,
-                                               zenith,
-                                               azimuth,
-                                               logEtrue) * psf;
+                    m_arf[i] += arf  * pixsolid;
 
                 } // endfor: looped over all pixels in region map
 
