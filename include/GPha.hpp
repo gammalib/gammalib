@@ -86,14 +86,25 @@ public:
     GPha&         operator/=(const double& scale);
     double&       operator[](const int& index);
     const double& operator[](const int& index) const;
+    double&       operator()(const int& index, const int& col);
+    const double& operator()(const int& index, const int& col) const;
+
+    // Additional column access operators
+    std::vector<double>&       operator[](const std::string& colname);
+    const std::vector<double>& operator[](const std::string& colname) const;
 
     // Methods
     void             clear(void);
     GPha*            clone(void) const;
     std::string      classname(void) const;
     int              size(void) const;
+    int              columns(void) const;
     double&          at(const int& index);
     const double&    at(const int& index) const;
+    double&          at(const int& index, const int& col);
+    const double&    at(const int& index, const int& col) const;
+    void             append(const std::string&         name,
+                            const std::vector<double>& column);
     const GEbounds&  ebounds(void) const;
     double           counts(void) const;
     GNdarray         counts_spectrum(void) const;
@@ -107,6 +118,10 @@ public:
     const double&    outflow(void) const;
     void             exposure(const double& exposure);
     const double&    exposure(void) const;
+    void             obs_emin(const GEnergy& obs_emin);
+    const GEnergy&   obs_emin(void) const;
+    void             obs_emax(const GEnergy& obs_emax);
+    const GEnergy&   obs_emax(void) const;
     void             fill(const GEnergy& energy, const double& value = 1.0);
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,
@@ -122,17 +137,22 @@ protected:
     void copy_members(const GPha& pha);
     void free_members(void);
     void alloc(const int& size);
+    int  column_index(const std::string& colname) const;
 
     // Protected members
-    mutable GFilename   m_filename;  //!< Filename of origin
-    std::vector<double> m_counts;    //!< Counts data
-    std::vector<double> m_areascal;  //!< Area scaling
-    std::vector<double> m_backscal;  //!< Background scaling
-    double              m_underflow; //!< Number of underflowing events
-    double              m_overflow;  //!< Number of overflowing events
-    double              m_outflow;   //!< Number of outflowing events
-    double              m_exposure;  //!< Deadtime corrected exposure time (sec)
-    GEbounds            m_ebounds;   //!< Energy boundaries
+    mutable GFilename                 m_filename;  //!< Filename of origin
+    std::vector<double>               m_counts;    //!< Counts data
+    std::vector<double>               m_areascal;  //!< Area scaling
+    std::vector<double>               m_backscal;  //!< Background scaling
+    std::vector<std::string>          m_colnames;  //!< Additional column names
+    std::vector<std::vector<double> > m_coldata;   //!< Additional column data
+    GEnergy                           m_obs_emin;  //!< Minimum energy of observation
+    GEnergy                           m_obs_emax;  //!< Minimum energy of observation
+    double                            m_underflow; //!< Number of underflowing events
+    double                            m_overflow;  //!< Number of overflowing events
+    double                            m_outflow;   //!< Number of outflowing events
+    double                            m_exposure;  //!< Deadtime corr. exp. time (sec)
+    GEbounds                          m_ebounds;   //!< Energy boundaries
 };
 
 
@@ -177,6 +197,36 @@ const double& GPha::operator[](const int& index) const
 
 
 /***********************************************************************//**
+ * @brief Return content of additional columns
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+inline
+double& GPha::operator()(const int& index, const int& col)
+{
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return content of additional columns (const version)
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+inline
+const double& GPha::operator()(const int& index, const int& col) const
+{
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
  * @brief Return number of bins in spectrum
  *
  * @return Number of bins in spectrum.
@@ -187,6 +237,20 @@ inline
 int GPha::size(void) const
 {
     return (int)m_counts.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of additional columns
+ *
+ * @return Number of additional columns.
+ *
+ * Returns the number of additional columns.
+ ***************************************************************************/
+inline
+int GPha::columns(void) const
+{
+    return (int)m_colnames.size();
 }
 
 
@@ -273,6 +337,64 @@ inline
 void GPha::exposure(const double& exposure)
 {
     m_exposure = exposure;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum energy of observations
+ *
+ * @return Minimum energy of observation.
+ *
+ * Returns the minimum energy of the observation.
+ ***************************************************************************/
+inline
+const GEnergy& GPha::obs_emin(void) const
+{
+    return (m_obs_emin);
+}
+
+
+/***********************************************************************//**
+ * @brief Set minimum energy of observations
+ *
+ * @param[in] obs_emin Minimum energy of observation.
+ *
+ * Set the minimum energy of the observation.
+ ***************************************************************************/
+inline
+void GPha::obs_emin(const GEnergy& obs_emin)
+{
+    m_obs_emin = obs_emin;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum energy of observations
+ *
+ * @return Maximum energy of observation.
+ *
+ * Returns the maximum energy of the observation.
+ ***************************************************************************/
+inline
+const GEnergy& GPha::obs_emax(void) const
+{
+    return (m_obs_emax);
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum energy of observations
+ *
+ * @param[in] obs_emax Maximum energy of observation.
+ *
+ * Set the maximum energy of the observation.
+ ***************************************************************************/
+inline
+void GPha::obs_emax(const GEnergy& obs_emax)
+{
+    m_obs_emax = obs_emax;
     return;
 }
 

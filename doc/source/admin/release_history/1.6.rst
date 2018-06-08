@@ -27,6 +27,7 @@ Bug fixes
 Improvements
 ------------
 
+* Add methods and operators to handle additional columns in ``GPha``
 * Made ``GApplicationPar::query()`` method public
 * [`2466 <https://cta-redmine.irap.omp.eu/issues/2466>`_] -
   Speed up computation of diffuse map models for CTA

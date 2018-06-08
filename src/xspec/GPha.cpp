@@ -42,7 +42,10 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR_PLUS                             "GPha::operator+=(GPha&)"
 #define G_OPERATOR_MINUS                            "GPha::operator-=(GPha&)"
-#define G_AT                                                 "GPha::at(int&)"
+#define G_OPERATOR                           "GPha::operator[](std::string&)"
+#define G_AT1                                                "GPha::at(int&)"
+#define G_AT2                                          "GPha::at(int&, int&)"
+#define G_APPEND           "GPha::append(std::string&, std::vector<double>&)"
 #define G_AREASCAL_SET                        "GPha::areascal(int&, double&)"
 #define G_AREASCAL_GET                                 "GPha::areascal(int&)"
 #define G_BACKSCAL_SET                        "GPha::backscal(int&, double&)"
@@ -380,6 +383,56 @@ GPha& GPha::operator/=(const double& scale)
 }
 
 
+/***********************************************************************//**
+ * @brief Return additional vector column
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column.
+ *
+ * Returns reference to additional vector column.
+ ***************************************************************************/
+std::vector<double>& GPha::operator[](const std::string& colname)
+{
+    // Determine index of additional column (-1 if not found)
+    int index = column_index(colname);
+
+    // Throw exception if index not found
+    if (index == -1) {
+        std::string msg = "Could not find additional column with name \""+
+                          colname+"\".";
+        throw GException::invalid_value(G_OPERATOR, msg);
+    }
+
+    // Return reference to vector column
+    return (m_coldata[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return additional vector column (const version)
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column.
+ *
+ * Returns reference to additional vector column.
+ ***************************************************************************/
+const std::vector<double>& GPha::operator[](const std::string& colname) const
+{
+    // Determine index of additional column (-1 if not found)
+    int index = column_index(colname);
+
+    // Throw exception if index not found
+    if (index == -1) {
+        std::string msg = "Could not find additional column with name \""+
+                          colname+"\".";
+        throw GException::invalid_value(G_OPERATOR, msg);
+    }
+
+    // Return reference to vector column
+    return (m_coldata[index]);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -430,7 +483,7 @@ double& GPha::at(const int& index)
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, "Spectral bin index", index, size());
+        throw GException::out_of_range(G_AT1, "Spectral bin index", index, size());
     }
 
     // Return reference
@@ -452,11 +505,91 @@ const double& GPha::at(const int& index) const
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, "Spectral bin index", index, size());
+        throw GException::out_of_range(G_AT1, "Spectral bin index", index, size());
     }
 
     // Return reference
     return (m_counts[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return content of additional columns
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin or column index is out of range.
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+double& GPha::at(const int& index, const int& col)
+{
+    // Throw an exception if bin or column index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT2, "Bin index", index, size());
+    }
+    if (col < 0 || col >= columns()) {
+        throw GException::out_of_range(G_AT2, "Column index", col, columns());
+    }
+
+    // Return reference
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return content of additional columns (const version)
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin or column index is out of range.
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+const double& GPha::at(const int& index, const int& col) const
+{
+    // Throw an exception if bin or column index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT2, "Bin index", index, size());
+    }
+    if (col < 0 || col >= columns()) {
+        throw GException::out_of_range(G_AT2, "Column index", col, columns());
+    }
+
+    // Return reference
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Append additional column to spectrum
+ *
+ * @param[in] name Additional column name.
+ * @param[in] column Additional column data.
+ ***************************************************************************/
+void GPha::append(const std::string& name, const std::vector<double>& column)
+{
+    // Throw an exception if the number of elements in the column does not
+    // correspond to the size of the spectrum
+    if (column.size() != size()) {
+        std::string msg = "Size of column "+gammalib::str(column.size())+
+                          " is incompatible with size of spectrum "+
+                          gammalib::str(size())+".";
+        throw GException::invalid_argument(G_APPEND, msg);
+    }
+
+    // Append column name
+    m_colnames.push_back(name);
+    
+    // Append column data
+    m_coldata.push_back(column);
+
+    // Return
+    return;
 }
 
 
@@ -796,6 +929,44 @@ void GPha::read(const GFitsTable& table)
         m_backscal[i] = col_back->real(i);
     }
 
+    // Read any additional columns
+    for (int icol = 0; icol < table.ncols(); ++icol) {
+
+        // Fall through if the column is a standard column
+        std::string colname(table[icol]->name());
+        if ((colname == "CHANNEL")  ||
+            (colname == "COUNTS")   ||
+            (colname == "STAT_ERR") ||
+            (colname == "SYS_ERR")  ||
+            (colname == "QUALITY")  ||
+            (colname == "GROUPING") ||
+            (colname == "AREASCAL") ||
+            (colname == "BACKSCAL")) {
+            continue;
+        }
+
+        // Get pointer to column
+        const GFitsTableCol* column = table[icol];
+
+        // Set column vector
+        std::vector<double> coldata;
+        for (int i = 0; i < length; ++i) {
+            coldata.push_back(column->real(i));
+        }
+
+        // Append column
+        append(colname, coldata);
+
+    } // endfor: looped over all additional columns
+
+    // Read energy band for observations
+    if (table.has_card("OBS-EMIN")) {
+        m_obs_emin.MeV(table.real("OBS-EMIN"));
+    }
+    if (table.has_card("OBS-EMAX")) {
+        m_obs_emax.MeV(table.real("OBS-EMAX"));
+    }
+
     // Read keywords
     m_underflow = (table.has_card("UNDEFLOW")) ? table.real("UNDEFLOW") : 0.0;
     m_overflow  = (table.has_card("OVERFLOW")) ? table.real("OVERFLOW") : 0.0;
@@ -877,7 +1048,25 @@ void GPha::write(GFits& fits) const
         hdu.append(col_area);
         hdu.append(col_back);
 
+        // Append any additional columns
+        for (int icol = 0; icol < columns(); ++icol) {
+
+            // Allocate floating point vector columns
+            GFitsTableFloatCol column(m_colnames[icol], length);
+
+            // Fill columns
+            for (int i = 0; i < length; ++i) {
+                column(i) = (float)m_coldata[icol][i];
+            }
+
+            // Append columns to table
+            hdu.append(column);
+
+        } // endfor: looped over all additional columns
+
         // Write keywords
+        hdu.card("OBS-EMIN", m_obs_emin.MeV(), "[MeV] Minimum energy of observation");
+        hdu.card("OBS-EMAX", m_obs_emax.MeV(), "[MeV] Maximum energy of observation");
         hdu.card("UNDEFLOW", m_underflow, "Number of underflowing events");
         hdu.card("OVERFLOW", m_overflow,  "Number of overflowing events");
         hdu.card("OUTFLOW",  m_outflow,   "Number of outflowing events");
@@ -962,6 +1151,10 @@ void GPha::init_members(void)
     m_counts.clear();
     m_areascal.clear();
     m_backscal.clear();
+    m_colnames.clear();
+    m_coldata.clear();
+    m_obs_emin.clear();
+    m_obs_emax.clear();
     m_underflow = 0.0;
     m_overflow  = 0.0;
     m_outflow   = 0.0;
@@ -984,6 +1177,10 @@ void GPha::copy_members(const GPha& pha)
     m_counts    = pha.m_counts;
     m_areascal  = pha.m_areascal;
     m_backscal  = pha.m_backscal;
+    m_colnames  = pha.m_colnames;
+    m_coldata   = pha.m_coldata;
+    m_obs_emin  = pha.m_obs_emin;
+    m_obs_emax  = pha.m_obs_emax;
     m_underflow = pha.m_underflow;
     m_overflow  = pha.m_overflow;
     m_outflow   = pha.m_outflow;
@@ -1028,4 +1225,31 @@ void GPha::alloc(const int& size)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns index of additional vector column
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column index.
+ *
+ * Returns index of additional vector column. Returns -1 if the vector column
+ * has not found.
+ ***************************************************************************/
+int GPha::column_index(const std::string& colname) const
+{
+    // Initialise index
+    int index(-1);
+
+    // Search vector column name
+    for (int i = 0; i < columns(); ++i) {
+        if (m_colnames[i] == colname) {
+            index = i;
+            break;
+        }
+    }
+
+    // Return index
+    return index;
 }

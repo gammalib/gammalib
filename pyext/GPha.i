@@ -45,16 +45,21 @@ public:
     virtual ~GPha(void);
 
     // Operators
-    GPha& operator+=(const GPha& pha);
-    GPha& operator-=(const GPha& pha);
-    GPha& operator*=(const double& scale);
+    GPha&   operator+=(const GPha& pha);
+    GPha&   operator-=(const GPha& pha);
+    GPha&   operator*=(const double& scale);
+    double& operator()(const int& index, const int& col);
 
     // Methods
     void             clear(void);
     GPha*            clone(void) const;
     std::string      classname(void) const;
     int              size(void) const;
+    int              columns(void) const;
     double&          at(const int& index);
+    double&          at(const int& index, const int& col);
+    void             append(const std::string&         name,
+                            const std::vector<double>& column);
     const GEbounds&  ebounds(void) const;
     double           counts(void) const;
     GNdarray         counts_spectrum(void) const;
@@ -68,6 +73,10 @@ public:
     const double&    outflow(void) const;
     void             exposure(const double& exposure);
     const double&    exposure(void) const;
+    void             obs_emin(const GEnergy& obs_emin);
+    const GEnergy&   obs_emin(void) const;
+    void             obs_emax(const GEnergy& obs_emax);
+    const GEnergy&   obs_emax(void) const;
     void             fill(const GEnergy& energy, const double& value = 1.0);
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,
@@ -89,6 +98,9 @@ public:
         else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
+    }
+    std::vector<double> __getitem__(const std::string& colname) {
+        return (*self)[colname];
     }
     void __setitem__(const int& index, const double& value) {
         if (index>=0 && index < self->size()) {

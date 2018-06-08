@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-7 June 2018
+8 June 2018
 
 
 1. Introduction
@@ -29,6 +29,15 @@ The following methods have been added:
 - GApplicationPar::was_queried()
 - operator==(GSkyPixel&, GSkyPixel&)
 - operator!=(GSkyPixel&, GSkyPixel&)
+- GPha::operator(int&, int&)
+- GPha::operator[](std::string&)
+- GPha::columns()
+- GPha::at(int&, int&)
+- GPha::append(std::string&, std::vector<double>&)
+- GPha::obs_emin(GEnergy&)
+- GPha::obs_emin()
+- GPha::obs_emax(GEnergy&)
+- GPha::obs_emax()
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)
@@ -144,7 +153,11 @@ None
 
 16. Xspec module
 ----------------
-None
+Add methods and operators to GPha to store additional columns in the data
+structure, similar to what exists for GArf. In addition, GPha::obs_emin()
+and GPha::obs_emax() setter and getter methods were added that allow storing
+and retrieving the minimum and maximum energy of the observation that was
+used to fill the spectrum. This allows to define an ROI for On/Off analysis. 
 
 
 17. Test module
