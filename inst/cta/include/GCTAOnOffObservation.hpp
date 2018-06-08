@@ -123,6 +123,8 @@ protected:
     void   free_members(void);
     void   set_exposure(void);
     void   check_consistency(const std::string& method) const;
+    GArf   arf_stacked(const GArf& arf, const GEnergy& emin, const GEnergy& emax) const;
+    GRmf   rmf_stacked(const GRmf& rmf, const GEnergy& emin, const GEnergy& emax) const;
     void   set(const GCTAObservation& obs,
                const GModelSpatial&   spatial,
                const GSkyRegions&     on,
@@ -158,31 +160,6 @@ protected:
                                double&       nbgd,
                                double&       dlogLdsky,
                                double&       d2logLdsky2) const;
-
-    // Energy dispersion integration kernel
-    class edisp_kern : public GFunction {
-    public:
-        edisp_kern(const GCTAResponseIrf* irf,
-                   const double&          theta,
-                   const double&          phi,
-                   const double&          zenith,
-                   const double&          azimuth,
-                   const double&          logEtrue) :
-                   m_irf(irf),
-                   m_theta(theta),
-                   m_phi(phi),
-                   m_zenith(zenith),
-                   m_azimuth(azimuth),
-                   m_logEtrue(logEtrue) { }
-        double eval(const double& x);
-    protected:
-        const GCTAResponseIrf* m_irf;      //!< Response pointer
-        double                 m_theta;    //!< Offset angle
-        double                 m_phi;      //!< Polar angle
-        double                 m_zenith;   //!< Zenith angle
-        double                 m_azimuth;  //!< Azimuth angle
-        double                 m_logEtrue; //!< Log10 true energy in TeV
-    };
 
     // Protected data members
     std::string   m_instrument; //!< Instrument name

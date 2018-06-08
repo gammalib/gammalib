@@ -81,7 +81,6 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
                           "GCTAObservation&, GSkyRegionMap&, GSkyRegionMap&)"
 #define G_COMPUTE_RMF  "GCTAOnOffObservation::compute_rmf(GCTAObservation&, "\
                                                             "GSkyRegionMap&)"
-#define G_N_GAMMA   "GCTAOnOffObservation::N_gamma(GModels&, int&, GVector*)"
 #define G_MODEL_BACKGROUND "GCTAOnOffObservation::model_background(GModels&)"
 #define G_LIKELIHOOD_CSTAT          "GCTAOnOffObservation::likelihood_cstat("\
                                 "GModels&, GOptimizerPars&, GMatrixSparse&, "\
@@ -97,8 +96,6 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-//#define G_RMF_INTEGRATION //!< Use numerical integration for RMF computation
-#define G_APPLY_ARF_EBOUNDS    //!< Apply ARF and RMF etrue energy boundaries
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_LIKELIHOOD_DEBUG                //!< Debug likelihood computation
@@ -305,6 +302,10 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
         // Check consistency of On/Off observation
         onoff->check_consistency(G_CONSTRUCTOR2);
 
+        // Get energy boundaries of observation
+        GEnergy emin = onoff->on_spec().obs_emin();
+        GEnergy emax = onoff->on_spec().obs_emax();
+
         // If this is the first On/Off observation then store the data to
         // initialise the data definition
         if (first) {
@@ -312,23 +313,23 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             // Store PHA, ARF and RMF
             m_on_spec  = onoff->on_spec();
             m_off_spec = onoff->off_spec();
-            m_arf      = onoff->arf() * onoff->on_spec().exposure();
-            m_rmf      = onoff->rmf();
+            m_arf      = arf_stacked(onoff->arf(), emin, emax) * onoff->on_spec().exposure();
+            m_rmf      = rmf_stacked(onoff->rmf(), emin, emax);
             m_ontime   = onoff->ontime();
             m_livetime = onoff->livetime();
             exposure   = onoff->on_spec().exposure();
 
             // Compute number of background events/MeV from BACKRESP column
-            // and store result intermediately into Arf BACKRESP column
-            std::vector<double>& backresp = m_arf["BACKRESP"];
+            // and store result intermediately into BACKRESP column of off
+            // spectum
+            std::vector<double>& backresp = m_off_spec["BACKRESP"];
             for (int i = 0; i < backresp.size(); ++i) {
                 backresp[i] *= onoff->on_spec().exposure();
             }
 
             // Compute background scaling factor contribution
             for (int i = 0; i < m_on_spec.size(); ++i) {
-                GEnergy emean      = m_on_spec.ebounds().elogmean(i);
-                double  background = onoff->arf()("BACKRESP", emean);
+                double  background = onoff->off_spec()["BACKRESP"][i];
                 double  exposure   = onoff->on_spec().exposure();
                 double  alpha      = onoff->on_spec().backscal(i);
                 double  scale      = alpha * background * exposure;
@@ -363,13 +364,13 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
                 throw GException::invalid_value(G_CONSTRUCTOR2, msg);
             }
 
-            // Check consistency of Arf
+            // Check consistency of ARF
             if (m_arf.ebounds() != onoff->arf().ebounds()) {
                 std::string msg = "Incompatible energy binning of ARF.";
                 throw GException::invalid_value(G_CONSTRUCTOR2, msg);
             }
 
-            // Check consistency of Rmf
+            // Check consistency of RMF
             if (m_rmf.etrue() != onoff->rmf().etrue()) {
                 std::string msg = "Incompatible true energy binning of RMF.";
                 throw GException::invalid_value(G_CONSTRUCTOR2, msg);
@@ -385,8 +386,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
 
             // Compute background scaling factor contribution
             for (int i = 0; i < m_on_spec.size(); ++i) {
-                GEnergy emean      = m_on_spec.ebounds().elogmean(i);
-                double  background = onoff->arf()("BACKRESP", emean);
+                double  background = onoff->off_spec()["BACKRESP"][i];
                 double  exposure   = onoff->on_spec().exposure();
                 double  alpha      = onoff->on_spec().backscal(i);
                 double  scale      = m_on_spec.backscal(i) +
@@ -395,11 +395,14 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             }
 
             // Add ARF
-            m_arf += onoff->arf() * onoff->on_spec().exposure();
+            m_arf += arf_stacked(onoff->arf(), emin, emax) * onoff->on_spec().exposure();
+
+            // Get RMF
+            GRmf rmf = rmf_stacked(onoff->rmf(), emin, emax);
 
             // Add number of background events/MeV from BACKRESP column
-            const std::vector<double>& src = onoff->arf()["BACKRESP"];
-            std::vector<double>&       dst = m_arf["BACKRESP"];
+            const std::vector<double>& src = onoff->off_spec()["BACKRESP"];
+            std::vector<double>&       dst = m_off_spec["BACKRESP"];
             for (int i = 0; i < dst.size(); ++i) {
                 dst[i] += src[i] * onoff->on_spec().exposure();
             }
@@ -408,7 +411,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
                 double arf = onoff->arf()[itrue] * onoff->on_spec().exposure();
                 for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
-                    m_rmf(itrue,imeasured) += onoff->rmf()(itrue,imeasured) * arf;
+                    m_rmf(itrue,imeasured) += rmf(itrue,imeasured) * arf;
                 }
             }
 
@@ -425,8 +428,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
 
     // Compute stacked background scaling factor
     for (int i = 0; i < m_on_spec.size(); ++i) {
-        GEnergy emean = m_on_spec.ebounds().elogmean(i);
-        double  norm  = m_arf("BACKRESP", emean);
+        double  norm  = m_off_spec["BACKRESP"][i];
         if (norm > 0.0) {
             double scale = m_on_spec.backscal(i) / norm;
             m_on_spec.backscal(i,scale);
@@ -439,25 +441,25 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     // Compute RMF
     for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
         double arf = m_arf[itrue];
-        for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
-            m_rmf(itrue,imeasured) /= arf;
+        if (arf > 0.0) {
+            for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
+                m_rmf(itrue,imeasured) /= arf;
+            }
         }
     }
 
     // Compute ARF
     if (exposure > 0.0) {
-
-        // Normalise Arf
         m_arf /= exposure;
+    }
 
-        // Compute background events/MeV/sec and store them in BACKRESP
-        // column
-        std::vector<double>& backresp = m_arf["BACKRESP"];
+    // Compute background events/MeV/sec and store them in BACKRESP column
+    if (exposure > 0.0) {
+        std::vector<double>& backresp = m_off_spec["BACKRESP"];
         for (int i = 0; i < backresp.size(); ++i) {
             backresp[i] /= exposure;
         }
-
-    } // endif: total exposure was positive
+    }
 
     // Return
     return;
@@ -920,6 +922,9 @@ void GCTAOnOffObservation::set_exposure(void)
  *
  * @param[in] method Calling method.
  *
+ * @exception GException::invalid_value
+ *            Inconsistency found.
+ *
  * Checks the consistency of data members and throw exceptions in case that
  * inconsistencies are found.
  ***************************************************************************/
@@ -947,6 +952,104 @@ void GCTAOnOffObservation::check_consistency(const std::string& method) const
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return ARF for stacking
+ *
+ * @param[in] arf Auxiliary Response File.
+ * @param[in] emin Minimum observation energy.
+ * @param[in] emax Maximum observation energy.
+ * @return Auxiliary Response File for stacking.
+ *
+ * Returns an Auxiliary Response File for stacking that has all elements with
+ * true energies outside the interval [@p emin, @p emax] clipped to zero.
+ * This prevents spill over from one observation into another.
+ ***************************************************************************/
+GArf GCTAOnOffObservation::arf_stacked(const GArf&    arf,
+                                       const GEnergy& emin,
+                                       const GEnergy& emax) const
+{
+    // Copy ARF
+    GArf arf_stacked = arf;
+
+    // Get true energy boundaries of ARF
+    const GEbounds& etrue = arf_stacked.ebounds();
+
+    // Set all ARF bins outside energy interval to zero
+    for (int itrue = 0; itrue < etrue.size(); ++itrue) {
+        if ((etrue.emax(itrue) < emin) || (etrue.emin(itrue) > emax)) {
+            arf_stacked[itrue] = 0.0;
+        }
+    }
+
+    // Return ARF
+    return arf_stacked;
+}
+
+
+/***********************************************************************//**
+ * @brief Return RMF for stacking
+ *
+ * @param[in] rmf Redistribution Matrix File.
+ * @param[in] emin Minimum observation energy.
+ * @param[in] emax Maximum observation energy.
+ * @return Redistribution Matrix File for stacking.
+ *
+ * Returns a Redistribution Matrix File for stacking that has all matrix
+ * elements with true energies outside the interval [@p emin, @p emax]
+ * clipped to zero. This prevents spill over from one observation into
+ * another.
+ *
+ * To correct for the missing events at the edges, the Redistribution Matrix
+ * File is renormalized so that for each reconstructed energy the sum over
+ * the true energies is the same as before the clipping.
+ ***************************************************************************/
+GRmf GCTAOnOffObservation::rmf_stacked(const GRmf&    rmf,
+                                       const GEnergy& emin,
+                                       const GEnergy& emax) const
+{
+    // Copy RMF
+    GRmf rmf_stacked = rmf;
+
+    // Get true energy boundaries of RMF
+    const GEbounds& etrue = rmf_stacked.etrue();
+    int             nreco = rmf_stacked.emeasured().size();
+
+    // Get RMF totals for all reconstructed energy bins
+    std::vector<double> sums(nreco, 0.0);
+    for (int ireco = 0; ireco < nreco; ++ireco) {
+        for (int itrue = 0; itrue < etrue.size(); ++itrue) {
+            sums[ireco] += rmf_stacked(itrue, ireco);
+        }
+    }
+
+    // Set all RMF bins outside energy interval to zero (clipping)
+    for (int itrue = 0; itrue < etrue.size(); ++itrue) {
+        if ((etrue.emax(itrue) < emin) || (etrue.emin(itrue) > emax)) {
+            for (int ireco = 0; ireco < nreco; ++ireco) {
+                rmf_stacked(itrue, ireco) = 0.0;
+            }
+        }
+    }
+
+    // Renormalize RMF
+    for (int ireco = 0; ireco < nreco; ++ireco) {
+        double sum = 0.0;
+        for (int itrue = 0; itrue < etrue.size(); ++itrue) {
+            sum += rmf_stacked(itrue, ireco);
+        }
+        if (sum > 0.0) {
+            double norm = sums[ireco] / sum;
+            for (int itrue = 0; itrue < etrue.size(); ++itrue) {
+                rmf_stacked(itrue, ireco) *= norm;
+            }
+        }
+    }
+
+    // Return RMF
+    return rmf_stacked;
 }
 
 
@@ -1021,8 +1124,14 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
 	compute_alpha(obs, reg_on, reg_off);
 	compute_rmf(obs, reg_on);
 
-    // Apply energy boundaries
+    // Apply reconstructed energy boundaries
     apply_ebounds(obs);
+
+    // Set observation energy band
+    m_on_spec.obs_emin(obs.ebounds().emin());
+    m_on_spec.obs_emax(obs.ebounds().emax());
+    m_off_spec.obs_emin(obs.ebounds().emin());
+    m_off_spec.obs_emax(obs.ebounds().emax());
 
 	// Return
 	return;
@@ -1047,8 +1156,8 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                                        const GSkyRegions&     on)
 {
     // Get reconstructed energy boundaries from on ARF
-    GEbounds etrue = m_arf.ebounds();
-    int      ntrue = etrue.size();
+    const GEbounds& etrue = m_arf.ebounds();
+    int             ntrue = etrue.size();
 
     // Continue only if there are ARF bins
     if (ntrue > 0) {
@@ -1139,17 +1248,19 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
  *
  * Compute the background rate in units of events/s/MeV in the Off region
  * map and stores the result as additional column with name `BACKRESP` in
- * the Auxiliary Response File (ARF).
+ * the Off spectrum.
+ *
+ * @todo Integrate background rate over energy bin instead of computing the
+ *       rate at the bin centre.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
                                        const GSkyRegions&     off)
 {
-    // Get true energy boundaries from on Arf and interpret them as
-    // reconstructed energies for the background rates
-	GEbounds ereco = m_arf.ebounds();
-    int      nreco = ereco.size();
+    // Get reconstructed energies for the background rates
+	const GEbounds& ereco = m_off_spec.ebounds();
+    int             nreco = ereco.size();
 
-    // Continue only if there are Arf bins
+    // Continue only if there are energy bins
     if (nreco > 0) {
 
 		// Initialise background rates to zero
@@ -1215,7 +1326,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
         } // endfor: looped over all regions
 
         // Append background vector to ARF
-        m_arf.append("BACKRESP", background);
+        m_off_spec.append("BACKRESP", background);
 
     } // endif: there were spectral bins
 
@@ -1238,14 +1349,16 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  * gives the ratio between the On and Off region background acceptance
  * multiplied by the ratio between On and Off region solid angles.
  *
+ * @todo Compute alpha by integrating the background rate over the energy
+ *       bins and not at the bin centre.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                                          const GSkyRegions&     on,
                                          const GSkyRegions&     off)
 {
     // Get reconstructed energy boundaries from RMF
-	GEbounds ereco = m_rmf.emeasured();
-    int      nreco = ereco.size();
+	const GEbounds& ereco = m_rmf.emeasured();
+    int             nreco = ereco.size();
 
     // Continue only if there are reconstructed energy bins
     if (nreco > 0) {
@@ -1366,13 +1479,13 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
 void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                        const GSkyRegions&     on)
 {
-    // Get true and reconstructed energy boundaries from Rmf
-    GEbounds etrue = m_rmf.etrue();
-    GEbounds ereco = m_rmf.emeasured();
-    int      ntrue = etrue.size();
-    int      nreco = ereco.size();
+    // Get true and reconstructed energy boundaries from RMF
+    const GEbounds& etrue = m_rmf.etrue();
+    const GEbounds& ereco = m_rmf.emeasured();
+    int             ntrue = etrue.size();
+    int             nreco = ereco.size();
 
-    // Continue only if there are Rmf bins
+    // Continue only if there are RMF bins
     if (ntrue > 0 && nreco > 0) {
 
         // Get CTA response pointer
@@ -1391,7 +1504,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
         double       zenith  = obspnt.zenith();
         double       azimuth = obspnt.azimuth();
 
-        // Initialise Rmf matrix
+        // Initialise RMF matrix
         for (int itrue = 0; itrue < ntrue; ++itrue) {
             for (int ireco = 0; ireco < nreco; ++ireco) {
                 m_rmf(itrue, ireco) = 0.0;
@@ -1431,36 +1544,16 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                                  zenith, azimuth,
                                                  logEtrue);
 
-                    // Setup energy dispersion integral
-                    #if defined(G_RMF_INTEGRATION)
-                    GCTAOnOffObservation::edisp_kern integrand(response,
-                                                               theta,
-                                                               phi,
-                                                               zenith,
-                                                               azimuth,
-                                                               logEtrue);
-                    GIntegral integral(&integrand);
-                    integral.eps(1.0e-4);
-                    #endif
-
                     // Loop over reconstructed energy
                     for (int ireco = 0; ireco < nreco; ++ireco) {
 
-                        #if defined(G_RMF_INTEGRATION)
-                        // Get log of reconstructed energy boundaries in MeV
-                        double ereco_min = std::log(ereco.emin(ireco).MeV());
-                        double ereco_max = std::log(ereco.emax(ireco).MeV());
-
-                        // Do Romberg integration
-                        double value = integral.romberg(ereco_min, ereco_max);
-                        #else
+                        // Get RMF value
                         double value = response->edisp()->prob_erecobin(ereco.emin(ireco),
                                                                         ereco.emax(ireco),
                                                                         etrue.elogmean(itrue),
                                                                         theta);
-                        #endif
 
-                        // Update Rmf value and weight
+                        // Update RMF value and weight
                         m_rmf(itrue, ireco)  += value * aeff;
                         weight(itrue, ireco) += aeff;
 
@@ -1472,7 +1565,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
 
         } // endfor: looped over all regions
 
-        // Normalise Rmf matrix
+        // Normalise RMF matrix
         for (int itrue = 0; itrue < ntrue; ++itrue) {
             for (int ireco = 0; ireco < nreco; ++ireco) {
                 if (weight(itrue, ireco) > 0.0) {
@@ -1494,7 +1587,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
  * @param[in] obs CTA observation.
  *
  * Applies CTA energy boundaries to all histograms used for the On/Off
- * analysis.
+ * analysis in.
  *
  * For the PHA On and Off spectra, all bins are set to zero that do not fully
  * overlap with the CTA observation energy boundaries. Specifically,
@@ -1502,9 +1595,9 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
  * effectively reduces the width of the PHA energy bin, which should cope
  * with any rounding errors.
  *
- * For the background response, stored in the ARF, all bins are set to zero
- * that do not fully overlap with the CTA observation energy boundaries. The
- * ARF values remain unchanged to properly account for energy migration.
+ * For the background response, stored in the Off spectrum, all bins are set
+ * to zero that do not fully overlap with the CTA observation energy
+ * boundaries.
  *
  * For the RMF, all reconstructued energy bins are set to zero that do not
  * fully overlap with the CTA observation energy boundaries. True energy
@@ -1515,17 +1608,17 @@ void GCTAOnOffObservation::apply_ebounds(const GCTAObservation& obs)
     // Set energy margin
     const GEnergy energy_margin(0.01, "GeV");
 
-    // Get true and reconstructed energy boundaries from Rmf
-    GEbounds etrue = m_rmf.etrue();
-    GEbounds ereco = m_rmf.emeasured();
-    int      ntrue = etrue.size();
-    int      nreco = ereco.size();
+    // Get true and reconstructed energy boundaries from RMF
+    const GEbounds& etrue = m_rmf.etrue();
+    const GEbounds& ereco = m_rmf.emeasured();
+    int             ntrue = etrue.size();
+    int             nreco = ereco.size();
 
     // Get energy boundaries of observations
     GEbounds eobs = obs.ebounds();
 
     // Get reference to background response
-    std::vector<double>& background = m_arf["BACKRESP"];
+    std::vector<double>& background = m_off_spec["BACKRESP"];
 
     // Apply energy boundaries in reconstructed energy
     for (int ireco = 0; ireco < nreco; ++ireco) {
@@ -1533,23 +1626,10 @@ void GCTAOnOffObservation::apply_ebounds(const GCTAObservation& obs)
                            ereco.emax(ireco) - energy_margin)) {
             m_on_spec[ireco]  = 0.0;
             m_off_spec[ireco] = 0.0;
+            background[ireco] = 0.0;
             for (int itrue = 0; itrue < ntrue; ++itrue) {
                 m_rmf(itrue, ireco) = 0.0;
             }
-        }
-    }
-
-    // Apply energy boundaries in true energy
-    for (int itrue = 0; itrue < ntrue; ++itrue) {
-        if (!eobs.contains(etrue.emin(itrue) + energy_margin,
-                           etrue.emax(itrue) - energy_margin)) {
-            background[itrue] = 0.0;
-            #if defined(G_APPLY_ARF_EBOUNDS)
-            m_arf[itrue] = 0.0;
-            for (int ireco = 0; ireco < nreco; ++ireco) {
-                m_rmf(itrue, ireco) = 0.0;
-            }
-            #endif
         }
     }
 
@@ -1581,9 +1661,6 @@ void GCTAOnOffObservation::apply_ebounds(const GCTAObservation& obs)
  *
  * The method assumes that parameters are stored in the order
  * spatial-spectral-temporal.
- *
- * @todo I think this method only works for point sources. What happens
- *       for an extended source?
  ***********************************************************************/
 double GCTAOnOffObservation::N_gamma(const GModels& models,
                                      const int&     ibin,
@@ -1637,17 +1714,6 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
             GModelSpectral* spectral = sky->spectral();
             if (spectral != NULL)  {
 
-                // Throw an exception if the spatila model is not a point
-                // source
-                if (spatial->type() != "PointSource") {
-                    std::string msg = "Spatial model of source \""+sky->name()+
-                                      "\" is of type \""+spatial->type()+
-                                      "\" while the method only works for "
-                                      "point sources. Please specify a point "
-                                      "source model.";
-                    throw GException::invalid_value(G_N_GAMMA, msg);
-                }
-
                 // Debug code
                 #if defined(G_N_GAMMA_DEBUG)
                 double rmf_sum = 0.0;
@@ -1656,7 +1722,7 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                 // Loop over true energy bins
                 for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
 
-                    // Get Arf value. Continue only if it is positive
+                    // Get ARF value. Continue only if it is positive
                     double arf = m_arf[itrue];
                     if (arf <= 0.0) {
                         continue;
@@ -1708,7 +1774,7 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
 
                 // Debug code
                 #if defined(G_N_GAMMA_DEBUG)
-                std::cout << "sum(Rmf) = " << rmf_sum << std::endl;
+                std::cout << "sum(RMF) = " << rmf_sum << std::endl;
                 #endif
 
                 // Increment parameter counter for spectral parameter
@@ -1777,7 +1843,8 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 
         // Perform log-log interpolation of background rate (events/MeV/s)
         // at reconstructed energy
-        double background = m_arf("BACKRESP", emean);
+        //double background = m_arf("BACKRESP", emean);
+        double background = m_off_spec["BACKRESP"][ibin];
 
         // Continue only if background rate is positive
         if (background > 0.0) {
@@ -1849,11 +1916,12 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 	return value;
 }
 
+
 /***********************************************************************
  * @brief Compute predicted gamma-ray counts for given model
  *
  * @param[in] models Model container.
- * @return model Pha with predicted gamma-ray counts.
+ * @return Model PHA with predicted gamma-ray counts.
  *
  * Returns spectrum of predicted number of source events in the On
  * regions.
@@ -1881,10 +1949,10 @@ GPha GCTAOnOffObservation::model_gamma(const GModels& models) const
 
 
 /***********************************************************************
- * @brief Compute predicted background counts Pha for given model
+ * @brief Compute predicted background counts PHA for given model
  *
  * @param[in] models Model container.
- * @return model background Pha.
+ * @return Model background PHA.
  *
  * Returns spectrum of predicted number of background events in the Off
  * regions. The computation method changed depending on the statistic used
@@ -2768,30 +2836,4 @@ double  GCTAOnOffObservation::wstat_value(const double& non,
 
     // Return
     return logL;
-}
-
-
-/***********************************************************************//**
- * @brief Energy dispersion integration kernel evaluation
- *
- * @param[in] x Function value.
- *
- * This method implements the integration kernel for the energy dispersion.
- ***************************************************************************/
-double GCTAOnOffObservation::edisp_kern::eval(const double& x)
-{
-    // Set energy
-    GEnergy ereco;
-    double expx = std::exp(x);
-    ereco.MeV(expx);
-
-    // Get function value
-    double value = m_irf->edisp(ereco, m_theta, m_phi, m_zenith, m_azimuth,
-                                m_logEtrue);
-
-    // Correct for variable substitution
-    value *= expx;
-
-    // Return value
-    return value;
 }
