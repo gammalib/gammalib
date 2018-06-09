@@ -287,6 +287,10 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     // Initialise exposure
     double exposure = 0.0;
 
+    // Allocate observation energy range
+    GEnergy obs_emin;
+    GEnergy obs_emax;
+
     // Loop over all observation in container
     for (int i = 0; i < obs.size(); ++i) {
 
@@ -306,6 +310,10 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
         GEnergy emin = onoff->on_spec().obs_emin();
         GEnergy emax = onoff->on_spec().obs_emax();
 
+        // Get stacked ARF and RMF
+        GArf arf_stacked = this->arf_stacked(onoff->arf(), emin, emax);
+        GRmf rmf_stacked = this->rmf_stacked(onoff->rmf(), emin, emax);
+
         // If this is the first On/Off observation then store the data to
         // initialise the data definition
         if (first) {
@@ -313,8 +321,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             // Store PHA, ARF and RMF
             m_on_spec  = onoff->on_spec();
             m_off_spec = onoff->off_spec();
-            m_arf      = arf_stacked(onoff->arf(), emin, emax) * onoff->on_spec().exposure();
-            m_rmf      = rmf_stacked(onoff->rmf(), emin, emax);
+            m_arf      = arf_stacked * onoff->on_spec().exposure();
+            m_rmf      = rmf_stacked;
             m_ontime   = onoff->ontime();
             m_livetime = onoff->livetime();
             exposure   = onoff->on_spec().exposure();
@@ -343,6 +351,10 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
                     m_rmf(itrue,imeasured) *= arf;
                 }
             }
+
+            // Set observation energy range
+            obs_emin = emin;
+            obs_emax = emax;
 
             // Signal that the On/Off definition has been set
             first = false;
@@ -387,18 +399,14 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             // Compute background scaling factor contribution
             for (int i = 0; i < m_on_spec.size(); ++i) {
                 double  background = onoff->off_spec()["BACKRESP"][i];
-                double  exposure   = onoff->on_spec().exposure();
                 double  alpha      = onoff->on_spec().backscal(i);
                 double  scale      = m_on_spec.backscal(i) +
-                                     alpha * background * exposure;
+                                     alpha * background * onoff->on_spec().exposure();
                 m_on_spec.backscal(i,scale);
             }
 
             // Add ARF
-            m_arf += arf_stacked(onoff->arf(), emin, emax) * onoff->on_spec().exposure();
-
-            // Get RMF
-            GRmf rmf = rmf_stacked(onoff->rmf(), emin, emax);
+            m_arf += arf_stacked * onoff->on_spec().exposure();
 
             // Add number of background events/MeV from BACKRESP column
             const std::vector<double>& src = onoff->off_spec()["BACKRESP"];
@@ -408,10 +416,10 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             }
 
             // Add RMF
-            for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
-                double arf = onoff->arf()[itrue] * onoff->on_spec().exposure();
+            for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
+                double arf = arf_stacked[itrue] * onoff->on_spec().exposure();
                 for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
-                    m_rmf(itrue,imeasured) += rmf(itrue,imeasured) * arf;
+                    m_rmf(itrue,imeasured) += rmf_stacked(itrue,imeasured) * arf;
                 }
             }
 
@@ -422,13 +430,21 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_ontime   += onoff->ontime();
             m_livetime += onoff->livetime();
 
+            // Update observation energy range
+            if (emin < obs_emin) {
+                obs_emin = emin;
+            }
+            if (emax > obs_emax) {
+                obs_emax = emax;
+            }
+
         } // endelse: stacked data
 
     } // endfor: looped over observations
 
     // Compute stacked background scaling factor
     for (int i = 0; i < m_on_spec.size(); ++i) {
-        double  norm  = m_off_spec["BACKRESP"][i];
+        double norm = m_off_spec["BACKRESP"][i];
         if (norm > 0.0) {
             double scale = m_on_spec.backscal(i) / norm;
             m_on_spec.backscal(i,scale);
@@ -439,7 +455,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     }
 
     // Compute RMF
-    for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
+    for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
         double arf = m_arf[itrue];
         if (arf > 0.0) {
             for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
@@ -460,6 +476,12 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             backresp[i] /= exposure;
         }
     }
+
+    // Set energy boundaries of observation
+    m_on_spec.obs_emin(obs_emin);
+    m_on_spec.obs_emax(obs_emax);
+    m_off_spec.obs_emin(obs_emin);
+    m_off_spec.obs_emax(obs_emax);
 
     // Return
     return;
