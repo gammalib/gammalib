@@ -1117,6 +1117,17 @@ std::string GPha::print(const GChatter& chatter) const
             result.append("not specified");
         }
 
+        // Append observation energy range
+        result.append("\n"+gammalib::parformat("Valid energy range"));
+        if (m_obs_emax > m_obs_emin) {
+            result.append(m_obs_emin.print());
+            result.append(" - ");
+            result.append(m_obs_emax.print());
+        }
+        else {
+            result.append("not specified");
+        }
+
         // Append content information
         result.append("\n"+gammalib::parformat("Total number of counts"));
         result.append(gammalib::str(counts()));
