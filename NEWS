@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-8 June 2018
+11 June 2018
 
 
 1. Introduction
@@ -38,6 +38,7 @@ The following methods have been added:
 - GPha::obs_emin()
 - GPha::obs_emax(GEnergy&)
 - GPha::obs_emax()
+- GFitsHeaderCard boolean constructor
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)

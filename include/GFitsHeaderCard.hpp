@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeaderCard.hpp - FITS header card class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,8 @@ public:
     GFitsHeaderCard(const std::string& keyname, const double& value,
                     const std::string& comment);
     GFitsHeaderCard(const std::string& keyname, const int& value,
+                    const std::string& comment);
+    GFitsHeaderCard(const std::string& keyname, const bool& value,
                     const std::string& comment);
     GFitsHeaderCard(const GFitsHeaderCard& card);
     virtual ~GFitsHeaderCard(void);

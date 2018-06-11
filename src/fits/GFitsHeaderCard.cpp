@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsHeaderCard.cpp - FITS header card class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -127,7 +127,7 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
 
 
 /***********************************************************************//**
- * @brief Constructor for integer cards
+ * @brief Constructor for boolean cards
  *
  * @param[in] keyname Card name.
  * @param[in] value Card integer value.
@@ -137,6 +137,32 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
  ***************************************************************************/
 GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
                                  const int&         value,
+                                 const std::string& comment)
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    this->keyname(keyname);
+    this->value(value);
+    this->comment(comment);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor for integer cards
+ *
+ * @param[in] keyname Card name.
+ * @param[in] value Card boolean value.
+ * @param[in] comment Card comment.
+ *
+ * This constructor builds a header card from the keyname, value and comment.
+ ***************************************************************************/
+GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
+                                 const bool&        value,
                                  const std::string& comment)
 {
     // Initialise class members
