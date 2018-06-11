@@ -73,10 +73,10 @@ public:
     const double&    outflow(void) const;
     void             exposure(const double& exposure);
     const double&    exposure(void) const;
-    void             obs_emin(const GEnergy& obs_emin);
-    const GEnergy&   obs_emin(void) const;
-    void             obs_emax(const GEnergy& obs_emax);
-    const GEnergy&   obs_emax(void) const;
+    void             emin_obs(const GEnergy& emin_obs);
+    const GEnergy&   emin_obs(void) const;
+    void             emax_obs(const GEnergy& emax_obs);
+    const GEnergy&   emax_obs(void) const;
     void             fill(const GEnergy& energy, const double& value = 1.0);
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,

@@ -288,8 +288,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     double exposure = 0.0;
 
     // Allocate observation energy range
-    GEnergy obs_emin;
-    GEnergy obs_emax;
+    GEnergy emin_obs;
+    GEnergy emax_obs;
 
     // Loop over all observation in container
     for (int i = 0; i < obs.size(); ++i) {
@@ -307,8 +307,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
         onoff->check_consistency(G_CONSTRUCTOR2);
 
         // Get energy boundaries of observation
-        GEnergy emin = onoff->on_spec().obs_emin();
-        GEnergy emax = onoff->on_spec().obs_emax();
+        GEnergy emin = onoff->on_spec().emin_obs();
+        GEnergy emax = onoff->on_spec().emax_obs();
 
         // Get stacked ARF and RMF
         GArf arf_stacked = this->arf_stacked(onoff->arf(), emin, emax);
@@ -353,8 +353,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             }
 
             // Set observation energy range
-            obs_emin = emin;
-            obs_emax = emax;
+            emin_obs = emin;
+            emax_obs = emax;
 
             // Signal that the On/Off definition has been set
             first = false;
@@ -431,11 +431,11 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_livetime += onoff->livetime();
 
             // Update observation energy range
-            if (emin < obs_emin) {
-                obs_emin = emin;
+            if (emin < emin_obs) {
+                emin_obs = emin;
             }
-            if (emax > obs_emax) {
-                obs_emax = emax;
+            if (emax > emax_obs) {
+                emax_obs = emax;
             }
 
         } // endelse: stacked data
@@ -478,10 +478,10 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     }
 
     // Set energy boundaries of observation
-    m_on_spec.obs_emin(obs_emin);
-    m_on_spec.obs_emax(obs_emax);
-    m_off_spec.obs_emin(obs_emin);
-    m_off_spec.obs_emax(obs_emax);
+    m_on_spec.emin_obs(emin_obs);
+    m_on_spec.emax_obs(emax_obs);
+    m_off_spec.emin_obs(emin_obs);
+    m_off_spec.emax_obs(emax_obs);
 
     // Return
     return;
@@ -1150,10 +1150,10 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
     apply_ebounds(obs);
 
     // Set observation energy band
-    m_on_spec.obs_emin(obs.ebounds().emin());
-    m_on_spec.obs_emax(obs.ebounds().emax());
-    m_off_spec.obs_emin(obs.ebounds().emin());
-    m_off_spec.obs_emax(obs.ebounds().emax());
+    m_on_spec.emin_obs(obs.ebounds().emin());
+    m_on_spec.emax_obs(obs.ebounds().emax());
+    m_off_spec.emin_obs(obs.ebounds().emin());
+    m_off_spec.emax_obs(obs.ebounds().emax());
 
 	// Return
 	return;

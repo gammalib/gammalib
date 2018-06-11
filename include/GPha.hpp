@@ -118,10 +118,10 @@ public:
     const double&    outflow(void) const;
     void             exposure(const double& exposure);
     const double&    exposure(void) const;
-    void             obs_emin(const GEnergy& obs_emin);
-    const GEnergy&   obs_emin(void) const;
-    void             obs_emax(const GEnergy& obs_emax);
-    const GEnergy&   obs_emax(void) const;
+    void             emin_obs(const GEnergy& emin_obs);
+    const GEnergy&   emin_obs(void) const;
+    void             emax_obs(const GEnergy& emax_obs);
+    const GEnergy&   emax_obs(void) const;
     void             fill(const GEnergy& energy, const double& value = 1.0);
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,
@@ -146,8 +146,8 @@ protected:
     std::vector<double>               m_backscal;  //!< Background scaling
     std::vector<std::string>          m_colnames;  //!< Additional column names
     std::vector<std::vector<double> > m_coldata;   //!< Additional column data
-    GEnergy                           m_obs_emin;  //!< Minimum energy of observation
-    GEnergy                           m_obs_emax;  //!< Minimum energy of observation
+    GEnergy                           m_emin_obs;  //!< Minimum energy of observation
+    GEnergy                           m_emax_obs;  //!< Minimum energy of observation
     double                            m_underflow; //!< Number of underflowing events
     double                            m_overflow;  //!< Number of overflowing events
     double                            m_outflow;   //!< Number of outflowing events
@@ -349,23 +349,23 @@ void GPha::exposure(const double& exposure)
  * Returns the minimum energy of the observation.
  ***************************************************************************/
 inline
-const GEnergy& GPha::obs_emin(void) const
+const GEnergy& GPha::emin_obs(void) const
 {
-    return (m_obs_emin);
+    return (m_emin_obs);
 }
 
 
 /***********************************************************************//**
  * @brief Set minimum energy of observations
  *
- * @param[in] obs_emin Minimum energy of observation.
+ * @param[in] emin_obs Minimum energy of observation.
  *
  * Set the minimum energy of the observation.
  ***************************************************************************/
 inline
-void GPha::obs_emin(const GEnergy& obs_emin)
+void GPha::emin_obs(const GEnergy& emin_obs)
 {
-    m_obs_emin = obs_emin;
+    m_emin_obs = emin_obs;
     return;
 }
 
@@ -378,23 +378,23 @@ void GPha::obs_emin(const GEnergy& obs_emin)
  * Returns the maximum energy of the observation.
  ***************************************************************************/
 inline
-const GEnergy& GPha::obs_emax(void) const
+const GEnergy& GPha::emax_obs(void) const
 {
-    return (m_obs_emax);
+    return (m_emax_obs);
 }
 
 
 /***********************************************************************//**
  * @brief Set maximum energy of observations
  *
- * @param[in] obs_emax Maximum energy of observation.
+ * @param[in] emax_obs Maximum energy of observation.
  *
  * Set the maximum energy of the observation.
  ***************************************************************************/
 inline
-void GPha::obs_emax(const GEnergy& obs_emax)
+void GPha::emax_obs(const GEnergy& emax_obs)
 {
-    m_obs_emax = obs_emax;
+    m_emax_obs = emax_obs;
     return;
 }
 

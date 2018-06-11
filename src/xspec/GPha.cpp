@@ -960,11 +960,11 @@ void GPha::read(const GFitsTable& table)
     } // endfor: looped over all additional columns
 
     // Read energy band for observations
-    if (table.has_card("OBS-EMIN")) {
-        m_obs_emin.MeV(table.real("OBS-EMIN"));
+    if (table.has_card("EMIN_OBS")) {
+        m_emin_obs.MeV(table.real("EMIN_OBS"));
     }
-    if (table.has_card("OBS-EMAX")) {
-        m_obs_emax.MeV(table.real("OBS-EMAX"));
+    if (table.has_card("EMAX_OBS")) {
+        m_emax_obs.MeV(table.real("EMAX_OBS"));
     }
 
     // Read keywords
@@ -1065,8 +1065,8 @@ void GPha::write(GFits& fits) const
         } // endfor: looped over all additional columns
 
         // Write keywords
-        hdu.card("OBS-EMIN", m_obs_emin.MeV(), "[MeV] Minimum energy of observation");
-        hdu.card("OBS-EMAX", m_obs_emax.MeV(), "[MeV] Maximum energy of observation");
+        hdu.card("EMIN_OBS", m_emin_obs.MeV(), "[MeV] Minimum energy of observation");
+        hdu.card("EMAX_OBS", m_emax_obs.MeV(), "[MeV] Maximum energy of observation");
         hdu.card("UNDEFLOW", m_underflow, "Number of underflowing events");
         hdu.card("OVERFLOW", m_overflow,  "Number of overflowing events");
         hdu.card("OUTFLOW",  m_outflow,   "Number of outflowing events");
@@ -1118,11 +1118,11 @@ std::string GPha::print(const GChatter& chatter) const
         }
 
         // Append observation energy range
-        result.append("\n"+gammalib::parformat("Valid energy range"));
-        if (m_obs_emax > m_obs_emin) {
-            result.append(m_obs_emin.print());
+        result.append("\n"+gammalib::parformat("Observation energy range"));
+        if (m_emax_obs > m_emin_obs) {
+            result.append(m_emin_obs.print());
             result.append(" - ");
-            result.append(m_obs_emax.print());
+            result.append(m_emax_obs.print());
         }
         else {
             result.append("not specified");
@@ -1164,8 +1164,8 @@ void GPha::init_members(void)
     m_backscal.clear();
     m_colnames.clear();
     m_coldata.clear();
-    m_obs_emin.clear();
-    m_obs_emax.clear();
+    m_emin_obs.clear();
+    m_emax_obs.clear();
     m_underflow = 0.0;
     m_overflow  = 0.0;
     m_outflow   = 0.0;
@@ -1190,8 +1190,8 @@ void GPha::copy_members(const GPha& pha)
     m_backscal  = pha.m_backscal;
     m_colnames  = pha.m_colnames;
     m_coldata   = pha.m_coldata;
-    m_obs_emin  = pha.m_obs_emin;
-    m_obs_emax  = pha.m_obs_emax;
+    m_emin_obs  = pha.m_emin_obs;
+    m_emax_obs  = pha.m_emax_obs;
     m_underflow = pha.m_underflow;
     m_overflow  = pha.m_overflow;
     m_outflow   = pha.m_outflow;
