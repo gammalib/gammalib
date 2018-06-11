@@ -1194,21 +1194,20 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
             throw GException::invalid_value(G_COMPUTE_ARF, msg);
         }
 
-        // Get CTA observation pointing direction, zenith, and azimuth
-        GCTAPointing obspnt  = obs.pointing();
-        GSkyDir      obsdir  = obspnt.dir();
-        double       zenith  = obspnt.zenith();
-        double       azimuth = obspnt.azimuth();
-
         // Set dummy time
         const GTime time;
+
+        // Save original energy dispersion application status
+        bool save_edisp = response->apply_edisp();
+
+        // Switch-off application of energy dispersion
+        const_cast<GCTAResponseIrf*>(response)->apply_edisp(false);
 
         // Loop over true energies
         for (int i = 0; i < ntrue; ++i) {
 
             // Get mean energy of bin
-            GEnergy energy   = etrue.elogmean(i);
-            double  logEtrue = energy.log10TeV();
+            GEnergy energy = etrue.elogmean(i);
 
             // Set source
             GSource source("", const_cast<GModelSpatial*>(&spatial), energy, time);
@@ -1235,21 +1234,30 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                     // Get solid angle subtended by this pixel
                     double pixsolid = on_map->map().solidangle(pixidx);
 
-                    // Set event
-                    GCTAEventAtom event(pixdir, energy, time);
+                    // Set event. Use an event bin and not an event atom for
+                    // this to avoid IRF caching. That's a dirty kludge, but
+                    // it works for now.
+                    //GCTAEventAtom event(pixdir, energy, time);
+                    GCTAEventBin event;
+                    event.dir(pixdir);
+                    event.energy(energy);
+                    event.time(time);
 
                     // Get ARF value. We need to devide by the deadtime
                     // correction since the IRF method multiplies with it.
-                    double arf = response->irf(event, source, obs) / m_deadc;
+                    double irf = response->irf(event, source, obs) / m_deadc;
 
                     // Add up effective area
-                    m_arf[i] += arf  * pixsolid;
+                    m_arf[i] += irf * pixsolid;
 
                 } // endfor: looped over all pixels in region map
 
             } // endfor: looped over all regions
 
         } // endfor: looped over true energies
+
+        // Put back original energy dispersion application status
+        const_cast<GCTAResponseIrf*>(response)->apply_edisp(save_edisp);
 
 	} // endif: there were energy bins
 
