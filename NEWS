@@ -39,6 +39,7 @@ The following methods have been added:
 - GPha::obs_emax(GEnergy&)
 - GPha::obs_emax()
 - GFitsHeaderCard boolean constructor
+- GFitsHDU::card(std::string&, bool&, std::string&)
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)

@@ -359,8 +359,11 @@ void GHealpix::write(GFitsHDU& hdu) const
     // Set extension name
     hdu.extname("HEALPIX");
 
+    // Set pixtype (kludge to avoid that a boolean is written)
+    std::string pixtype = "HEALPIX";
+
     // Set keywords
-    hdu.card("PIXTYPE",  "HEALPIX",  "HEALPix pixelisation");
+    hdu.card("PIXTYPE",  pixtype,    "HEALPix pixelisation");
     hdu.card("NSIDE",    nside(),    "HEALPix resolution parameter");
     hdu.card("FIRSTPIX", 0,          "Index of first pixel");
     hdu.card("LASTPIX",  npix()-1,   "Index of last pixel");

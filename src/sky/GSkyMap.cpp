@@ -2829,7 +2829,9 @@ GFitsBinTable* GSkyMap::create_healpix_hdu(void) const
     hdu->extname("HEALPIX");
 
     // If we have WCS information then write into FITS header
-    if (m_proj != NULL) m_proj->write(*hdu);
+    if (m_proj != NULL) {
+        m_proj->write(*hdu);
+    }
 
     // Set additional keywords
     hdu->card("NBRBINS", m_num_maps, "Number of HEALPix maps");
@@ -2903,7 +2905,9 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
     hdu->extname("IMAGE");
 
     // If we have sky projection information then write into FITS header
-    if (m_proj != NULL) m_proj->write(*hdu);
+    if (m_proj != NULL) {
+    	m_proj->write(*hdu);
+	}
 
     // Set additional keywords
     //TODO
