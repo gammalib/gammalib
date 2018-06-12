@@ -317,7 +317,7 @@ GObservation* GObservations::append(const GObservation& obs)
 
     // Clone observation
     GObservation* ptr = obs.clone();
-    
+
     // Append to list
     m_obs.push_back(ptr);
 
@@ -462,7 +462,7 @@ void GObservations::extend(const GObservations& obs)
         }
 
     } // endif: observation container was not empty
-    
+
     // Return
     return;
 }
@@ -743,6 +743,7 @@ void GObservations::errors(GOptimizer& opt)
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Computes parameter errors using hessian matrix and optimizer

@@ -225,6 +225,8 @@ implemented for the GCTABackgroundPerfTable and GCTABackground3D classes. The me
 computes for a given instrument direction the background rate integrated over an
 energy bin (#2308).
 
+The GTIs a preserved when copying a GCTAEventList or GCTAEventCube object (#2054).
+
 
 21. COMPTEL interface
 ---------------------

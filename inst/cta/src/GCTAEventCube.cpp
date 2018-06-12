@@ -734,13 +734,15 @@ void GCTAEventCube::copy_members(const GCTAEventCube& cube)
     // original class.
     m_map        = cube.m_map;
     m_weights    = cube.m_weights;
-    //m_bin        = cube.m_bin;
     m_time       = cube.m_time;
     m_dirs       = cube.m_dirs;
     m_solidangle = cube.m_solidangle;
     m_energies   = cube.m_energies;
     m_ewidth     = cube.m_ewidth;
     m_ontime     = cube.m_ontime;
+
+    // Copy GTIs
+    m_gti = cube.m_gti;
 
     // Prepare event bin
     init_bin();

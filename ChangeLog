@@ -20,6 +20,7 @@
         Add GCTABackground::rate_ebin() method and gammalib::atan2() and
           gammalib::plaw_integral() functions (#2308)
         Handle extended models in CTA On/Off analysis (#2292)
+        Preserve GTIs when copying GCTAEventList and GCTAEventCube objects (#2054)
 
 
 2018-04-26
