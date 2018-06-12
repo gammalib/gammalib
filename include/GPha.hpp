@@ -94,42 +94,50 @@ public:
     const std::vector<double>& operator[](const std::string& colname) const;
 
     // Methods
-    void             clear(void);
-    GPha*            clone(void) const;
-    std::string      classname(void) const;
-    int              size(void) const;
-    int              columns(void) const;
-    double&          at(const int& index);
-    const double&    at(const int& index) const;
-    double&          at(const int& index, const int& col);
-    const double&    at(const int& index, const int& col) const;
-    void             append(const std::string&         name,
-                            const std::vector<double>& column);
-    const GEbounds&  ebounds(void) const;
-    double           counts(void) const;
-    GNdarray         counts_spectrum(void) const;
-    void             areascal(const int& index, const double& areascal);
-    const double&    areascal(const int& index) const;
-    void             backscal(const int& index, const double& backscal);
-    const double&    backscal(const int& index) const;
-    GNdarray         backscal_spectrum(void) const;
-    const double&    underflow(void) const;
-    const double&    overflow(void) const;
-    const double&    outflow(void) const;
-    void             exposure(const double& exposure);
-    const double&    exposure(void) const;
-    void             emin_obs(const GEnergy& emin_obs);
-    const GEnergy&   emin_obs(void) const;
-    void             emax_obs(const GEnergy& emax_obs);
-    const GEnergy&   emax_obs(void) const;
-    void             fill(const GEnergy& energy, const double& value = 1.0);
-    void             load(const GFilename& filename);
-    void             save(const GFilename& filename,
-                          const bool&      clobber = false) const;
-    void             read(const GFitsTable& table);
-    void             write(GFits& fits) const;
-    const GFilename& filename(void) const;
-    std::string      print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GPha*              clone(void) const;
+    std::string        classname(void) const;
+    int                size(void) const;
+    int                columns(void) const;
+    double&            at(const int& index);
+    const double&      at(const int& index) const;
+    double&            at(const int& index, const int& col);
+    const double&      at(const int& index, const int& col) const;
+    void               append(const std::string&         name,
+                              const std::vector<double>& column);
+    const GEbounds&    ebounds(void) const;
+    double             counts(void) const;
+    GNdarray           counts_spectrum(void) const;
+    void               areascal(const int& index, const double& areascal);
+    const double&      areascal(const int& index) const;
+    void               backscal(const int& index, const double& backscal);
+    const double&      backscal(const int& index) const;
+    GNdarray           backscal_spectrum(void) const;
+    const double&      underflow(void) const;
+    const double&      overflow(void) const;
+    const double&      outflow(void) const;
+    void               exposure(const double& exposure);
+    const double&      exposure(void) const;
+    void               emin_obs(const GEnergy& emin_obs);
+    const GEnergy&     emin_obs(void) const;
+    void               emax_obs(const GEnergy& emax_obs);
+    const GEnergy&     emax_obs(void) const;
+    void               backfile(const std::string& backfile);
+    const std::string& backfile(void) const;
+    void               corrfile(const std::string& corrfile);
+    const std::string& corrfile(void) const;
+    void               respfile(const std::string& respfile);
+    const std::string& respfile(void) const;
+    void               ancrfile(const std::string& ancrfile);
+    const std::string& ancrfile(void) const;
+    void               fill(const GEnergy& energy, const double& value = 1.0);
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    void               read(const GFitsTable& table);
+    void               write(GFits& fits) const;
+    const GFilename&   filename(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -153,6 +161,10 @@ protected:
     double                            m_outflow;   //!< Number of outflowing events
     double                            m_exposure;  //!< Deadtime corr. exp. time (sec)
     GEbounds                          m_ebounds;   //!< Energy boundaries
+    std::string                       m_backfile;  //!< Background file
+    std::string                       m_corrfile;  //!< Correction file
+    std::string                       m_respfile;  //!< RMF file
+    std::string                       m_ancrfile;  //!< ARF file
 };
 
 
@@ -313,20 +325,6 @@ const double& GPha::outflow(void) const
 
 
 /***********************************************************************//**
- * @brief Return exposure time
- *
- * @return Exposure time (seconds).
- *
- * Returns the exposure time in seconds.
- ***************************************************************************/
-inline
-const double& GPha::exposure(void) const
-{
-    return (m_exposure);
-}
-
-
-/***********************************************************************//**
  * @brief Set exposure time
  *
  * @param[in] exposure Exposure time (seconds).
@@ -342,16 +340,16 @@ void GPha::exposure(const double& exposure)
 
 
 /***********************************************************************//**
- * @brief Return minimum energy of observations
+ * @brief Return exposure time
  *
- * @return Minimum energy of observation.
+ * @return Exposure time (seconds).
  *
- * Returns the minimum energy of the observation.
+ * Returns the exposure time in seconds.
  ***************************************************************************/
 inline
-const GEnergy& GPha::emin_obs(void) const
+const double& GPha::exposure(void) const
 {
-    return (m_emin_obs);
+    return (m_exposure);
 }
 
 
@@ -371,16 +369,16 @@ void GPha::emin_obs(const GEnergy& emin_obs)
 
 
 /***********************************************************************//**
- * @brief Return maximum energy of observations
+ * @brief Return minimum energy of observations
  *
- * @return Maximum energy of observation.
+ * @return Minimum energy of observation.
  *
- * Returns the maximum energy of the observation.
+ * Returns the minimum energy of the observation.
  ***************************************************************************/
 inline
-const GEnergy& GPha::emax_obs(void) const
+const GEnergy& GPha::emin_obs(void) const
 {
-    return (m_emax_obs);
+    return (m_emin_obs);
 }
 
 
@@ -396,6 +394,136 @@ void GPha::emax_obs(const GEnergy& emax_obs)
 {
     m_emax_obs = emax_obs;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum energy of observations
+ *
+ * @return Maximum energy of observation.
+ *
+ * Returns the maximum energy of the observation.
+ ***************************************************************************/
+inline
+const GEnergy& GPha::emax_obs(void) const
+{
+    return (m_emax_obs);
+}
+
+
+/***********************************************************************//**
+ * @brief Set background file name
+ *
+ * @param[in] backfile Background file name.
+ *
+ * Set the background file name.
+ ***************************************************************************/
+inline
+void GPha::backfile(const std::string& backfile)
+{
+    m_backfile = backfile;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return background file name
+ *
+ * @return Background file name.
+ *
+ * Returns the background file name.
+ ***************************************************************************/
+inline
+const std::string& GPha::backfile(void) const
+{
+    return (m_backfile);
+}
+
+
+/***********************************************************************//**
+ * @brief Set correction file name
+ *
+ * @param[in] corrfile Correction file name.
+ *
+ * Set the correction file name.
+ ***************************************************************************/
+inline
+void GPha::corrfile(const std::string& corrfile)
+{
+    m_corrfile = corrfile;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return correction file name
+ *
+ * @return Correction file name.
+ *
+ * Returns the correction file name.
+ ***************************************************************************/
+inline
+const std::string& GPha::corrfile(void) const
+{
+    return (m_corrfile);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Redistribution Matrix File name
+ *
+ * @param[in] respfile Redistribution Matrix File name.
+ *
+ * Set the Redistribution Matrix File name.
+ ***************************************************************************/
+inline
+void GPha::respfile(const std::string& respfile)
+{
+    m_respfile = respfile;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Redistribution Matrix File name
+ *
+ * @return Redistribution Matrix File name.
+ *
+ * Returns the Redistribution Matrix File name.
+ ***************************************************************************/
+inline
+const std::string& GPha::respfile(void) const
+{
+    return (m_respfile);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Ancilliary Response File name
+ *
+ * @param[in] ancrfile Ancilliary Response File name.
+ *
+ * Set the Ancilliary Response File name.
+ ***************************************************************************/
+inline
+void GPha::ancrfile(const std::string& ancrfile)
+{
+    m_ancrfile = ancrfile;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Ancilliary Response File name
+ *
+ * @return Ancilliary Response File name.
+ *
+ * Returns the Ancilliary Response File name.
+ ***************************************************************************/
+inline
+const std::string& GPha::ancrfile(void) const
+{
+    return (m_ancrfile);
 }
 
 

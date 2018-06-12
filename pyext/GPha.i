@@ -51,39 +51,49 @@ public:
     double& operator()(const int& index, const int& col);
 
     // Methods
-    void             clear(void);
-    GPha*            clone(void) const;
-    std::string      classname(void) const;
-    int              size(void) const;
-    int              columns(void) const;
-    double&          at(const int& index);
-    double&          at(const int& index, const int& col);
-    void             append(const std::string&         name,
-                            const std::vector<double>& column);
-    const GEbounds&  ebounds(void) const;
-    double           counts(void) const;
-    GNdarray         counts_spectrum(void) const;
-    void             areascal(const int& index, const double& areascal);
-    const double&    areascal(const int& index) const;
-    void             backscal(const int& index, const double& backscal);
-    const double&    backscal(const int& index) const;
-    GNdarray         backscal_spectrum(void) const;
-    const double&    underflow(void) const;
-    const double&    overflow(void) const;
-    const double&    outflow(void) const;
-    void             exposure(const double& exposure);
-    const double&    exposure(void) const;
-    void             emin_obs(const GEnergy& emin_obs);
-    const GEnergy&   emin_obs(void) const;
-    void             emax_obs(const GEnergy& emax_obs);
-    const GEnergy&   emax_obs(void) const;
-    void             fill(const GEnergy& energy, const double& value = 1.0);
-    void             load(const GFilename& filename);
-    void             save(const GFilename& filename,
-                          const bool&      clobber = false) const;
-    void             read(const GFitsTable& table);
-    void             write(GFits& fits) const;
-    const GFilename& filename(void) const;
+    void               clear(void);
+    GPha*              clone(void) const;
+    std::string        classname(void) const;
+    int                size(void) const;
+    int                columns(void) const;
+    double&            at(const int& index);
+    const double&      at(const int& index) const;
+    double&            at(const int& index, const int& col);
+    const double&      at(const int& index, const int& col) const;
+    void               append(const std::string&         name,
+                              const std::vector<double>& column);
+    const GEbounds&    ebounds(void) const;
+    double             counts(void) const;
+    GNdarray           counts_spectrum(void) const;
+    void               areascal(const int& index, const double& areascal);
+    const double&      areascal(const int& index) const;
+    void               backscal(const int& index, const double& backscal);
+    const double&      backscal(const int& index) const;
+    GNdarray           backscal_spectrum(void) const;
+    const double&      underflow(void) const;
+    const double&      overflow(void) const;
+    const double&      outflow(void) const;
+    void               exposure(const double& exposure);
+    const double&      exposure(void) const;
+    void               emin_obs(const GEnergy& emin_obs);
+    const GEnergy&     emin_obs(void) const;
+    void               emax_obs(const GEnergy& emax_obs);
+    const GEnergy&     emax_obs(void) const;
+    void               backfile(const std::string& backfile);
+    const std::string& backfile(void) const;
+    void               corrfile(const std::string& corrfile);
+    const std::string& corrfile(void) const;
+    void               respfile(const std::string& respfile);
+    const std::string& respfile(void) const;
+    void               ancrfile(const std::string& ancrfile);
+    const std::string& ancrfile(void) const;
+    void               fill(const GEnergy& energy, const double& value = 1.0);
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    void               read(const GFitsTable& table);
+    void               write(GFits& fits) const;
+    const GFilename&   filename(void) const;
 };
 
 

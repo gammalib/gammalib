@@ -959,6 +959,18 @@ void GPha::read(const GFitsTable& table)
 
     } // endfor: looped over all additional columns
 
+    // Read file names
+    std::string backfile = (table.has_card("BACKFILE")) ? table.string("BACKFILE") : "";
+    std::string corrfile = (table.has_card("CORRFILE")) ? table.string("CORRFILE") : "";
+    std::string respfile = (table.has_card("RESPFILE")) ? table.string("RESPFILE") : "";
+    std::string ancrfile = (table.has_card("ANCRFILE")) ? table.string("ANCRFILE") : "";
+
+    // Set file names
+    m_backfile = (gammalib::tolower(backfile) != "none") ? backfile : "";
+    m_corrfile = (gammalib::tolower(corrfile) != "none") ? corrfile : "";
+    m_respfile = (gammalib::tolower(respfile) != "none") ? respfile : "";
+    m_ancrfile = (gammalib::tolower(ancrfile) != "none") ? ancrfile : "";
+
     // Read energy band for observations
     if (table.has_card("EMIN_OBS")) {
         m_emin_obs.MeV(table.real("EMIN_OBS"));
@@ -1031,6 +1043,7 @@ void GPha::write(GFits& fits) const
             col_chan(i) = i+1; // Channels start at 1
             col_data(i) = float(m_counts[i]);
             col_stat(i) = float(std::sqrt(std::abs(m_counts[i])));
+            col_grpg(i) = 1;
             col_area(i) = float(m_areascal[i]);
             col_back(i) = float(m_backscal[i]);
         }
@@ -1064,13 +1077,33 @@ void GPha::write(GFits& fits) const
 
         } // endfor: looped over all additional columns
 
-        // Write keywords
+        // Set file names
+        std::string backfile = (m_backfile.empty()) ? "none" : m_backfile;
+        std::string corrfile = (m_corrfile.empty()) ? "none" : m_corrfile;
+        std::string respfile = (m_respfile.empty()) ? "none" : m_respfile;
+        std::string ancrfile = (m_ancrfile.empty()) ? "none" : m_ancrfile;
+
+        // Write header keywords
+        hdu.card("TELESCOP", "unknown",        "Telescope");
+        hdu.card("INSTRUME", "unknown",        "Instrument");
+        hdu.card("FILTER",   "none",           "Filter");
+        hdu.card("EXPOSURE", m_exposure,       "[s] Deadtime corrected exposure time");
+        hdu.card("BACKFILE", backfile,         "Associated background filename");
+        hdu.card("CORRFILE", corrfile,         "Associated correction filename");
+        hdu.card("CORRSCAL", 1.0,              "Correction scaling factor");
+        hdu.card("RESPFILE", respfile,         "Associated RMF filename");
+        hdu.card("ANCRFILE", ancrfile,         "Associated ARF filename");
+        hdu.card("HDUCLASS", "OGIP",           "Format conforms to OGIP srandard");
+        hdu.card("HDUCLAS1", "SPECTRUM",       "PHA dataset");
+        hdu.card("HDUVERS",  "1.2.1",          "Version of the file format");
+        hdu.card("POISSERR", true,             "Poisson errors to be assumed");
+        hdu.card("CHANTYPE", "PI",             "Channel type");
+        hdu.card("DETCHANS", size(),           "Total number of possible channels");
         hdu.card("EMIN_OBS", m_emin_obs.MeV(), "[MeV] Minimum energy of observation");
         hdu.card("EMAX_OBS", m_emax_obs.MeV(), "[MeV] Maximum energy of observation");
-        hdu.card("UNDEFLOW", m_underflow, "Number of underflowing events");
-        hdu.card("OVERFLOW", m_overflow,  "Number of overflowing events");
-        hdu.card("OUTFLOW",  m_outflow,   "Number of outflowing events");
-        hdu.card("EXPOSURE", m_exposure,  "[s] Deadtime corrected exposure time");
+        hdu.card("UNDEFLOW", m_underflow,      "Number of underflowing events");
+        hdu.card("OVERFLOW", m_overflow,       "Number of overflowing events");
+        hdu.card("OUTFLOW",  m_outflow,        "Number of outflowing events");
 
         // Append HDU to FITS file
         fits.append(hdu);
@@ -1170,6 +1203,10 @@ void GPha::init_members(void)
     m_overflow  = 0.0;
     m_outflow   = 0.0;
     m_exposure  = 0.0;
+    m_backfile.clear();
+    m_corrfile.clear();
+    m_respfile.clear();
+    m_ancrfile.clear();
 
     // Return
     return;
@@ -1197,6 +1234,10 @@ void GPha::copy_members(const GPha& pha)
     m_outflow   = pha.m_outflow;
     m_ebounds   = pha.m_ebounds;
     m_exposure  = pha.m_exposure;
+    m_backfile  = pha.m_backfile;
+    m_corrfile  = pha.m_corrfile;
+    m_respfile  = pha.m_respfile;
+    m_ancrfile  = pha.m_ancrfile;
 
     // Return
     return;

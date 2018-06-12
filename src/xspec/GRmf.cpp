@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.cpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -788,6 +788,18 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         hdu.append(f_chan);
         hdu.append(n_chan);
         hdu.append(matrix);
+
+        // Write mandatory header keywords for RMF matrix
+        hdu.card("TELESCOP", "unknown",    "Telescope");
+        hdu.card("INSTRUME", "unknown",    "Instrument");
+        hdu.card("FILTER",   "none",       "Filter");
+        hdu.card("CHANTYPE", "PI",         "Channel type");
+        hdu.card("DETCHANS", nmeasured(),  "Total number of possible channels");
+        hdu.card("HDUCLASS", "OGIP",       "Format conforms to OGIP srandard");
+        hdu.card("HDUCLAS1", "RESPONSE",   "Extension contains response data");
+        hdu.card("HDUCLAS2", "RSP_MATRIX", "Extension contains a RMF");
+        hdu.card("HDUVERS",  "1.3.0",      "Version of the file format");
+        hdu.card("TLMIN4",   0,            "Minimum value allowed in column 4");
 
         // Append HDU to FITS file
         fits.append(hdu);
