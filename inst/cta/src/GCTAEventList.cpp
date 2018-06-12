@@ -1006,6 +1006,9 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
     m_irf_names  = list.m_irf_names;
     m_irf_values = list.m_irf_values;
 
+    // Copy GTIs
+    m_gti = list.m_gti;
+
     // Copy column pointers
     m_columns.clear();
     for (int i = 0; i < list.m_columns.size(); ++i) {
