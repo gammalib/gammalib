@@ -103,6 +103,9 @@ public:
     void                   card(const std::string& keyname,
                                 const bool& value,
                                 const std::string& comment);
+    void                   card(const std::string& keyname,
+                                const char* value,
+                                const std::string& comment);
     std::string            string(const std::string& keyname) const;
     double                 real(const std::string& keyname) const;
     int                    integer(const std::string& keyname) const;
@@ -373,6 +376,24 @@ void GFitsHDU::card(const std::string& keyname, const bool& value,
                     const std::string& comment)
 {
     GFitsHeaderCard card(keyname,  value, comment);
+    m_header.append(card);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append or update character value header card
+ *
+ * @param[in] keyname Name of the header card.
+ * @param[in] value Character value of the header card.
+ * @param[in] comment Comment of the header card.
+ ***************************************************************************/
+inline
+void GFitsHDU::card(const std::string& keyname, const char* value,
+                    const std::string& comment)
+{
+    std::string string(value);
+    GFitsHeaderCard card(keyname, string, comment);
     m_header.append(card);
     return;
 }

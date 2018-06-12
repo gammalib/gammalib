@@ -85,6 +85,9 @@ public:
     void               card(const std::string& keyname,
                             const bool& value,
                             const std::string& comment);
+    void               card(const std::string& keyname,
+                            const char* value,
+                            const std::string& comment);
     std::string        string(const std::string& keyname) const;
     double             real(const std::string& keyname) const;
     int                integer(const std::string& keyname) const;

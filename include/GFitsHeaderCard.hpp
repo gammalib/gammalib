@@ -57,6 +57,8 @@ public:
                     const std::string& comment);
     GFitsHeaderCard(const std::string& keyname, const bool& value,
                     const std::string& comment);
+    GFitsHeaderCard(const std::string& keyname, const char* value,
+                    const std::string& comment);
     GFitsHeaderCard(const GFitsHeaderCard& card);
     virtual ~GFitsHeaderCard(void);
 

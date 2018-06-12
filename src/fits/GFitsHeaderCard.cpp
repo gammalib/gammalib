@@ -179,6 +179,32 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
 
 
 /***********************************************************************//**
+ * @brief Constructor for character string cards
+ *
+ * @param[in] keyname Card name.
+ * @param[in] value Card character string value.
+ * @param[in] comment Card comment.
+ *
+ * This constructor builds a header card from the keyname, value and comment.
+ ***************************************************************************/
+GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
+                                 const char*        value,
+                                 const std::string& comment)
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    this->keyname(keyname);
+    this->value(std::string(value));
+    this->comment(comment);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] card Header card.

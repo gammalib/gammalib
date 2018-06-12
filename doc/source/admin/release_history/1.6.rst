@@ -41,6 +41,9 @@ Improvements
   Add ``GCTAEdisp::prob_erecobin()`` method
 * [`2422 <https://cta-redmine.irap.omp.eu/issues/2422>`_] -
   Add ``gammalib::gauss_integral()`` function
+* [`2404 <https://cta-redmine.irap.omp.eu/issues/2404>`_] -
+  Make ``GPha``, ``GArf`` and ``GRmf`` output files XSPEC compliant.
+  Add methods to store file attributes in ``GPha``
 * [`2309 <https://cta-redmine.irap.omp.eu/issues/2309>`_] -
   Add ``GSkyDir::cos_dist()`` method
 * [`2308 <https://cta-redmine.irap.omp.eu/issues/2308>`_] -

@@ -74,75 +74,78 @@ TestGXspec* TestGXspec::clone(void) const
 void TestGXspec::test_GPha(void)
 {
     // Test void constructor
-    test_try("GPha void constructor");
-    try {
-        GPha pha;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GPha pha1;
+    test_value(pha1.size(), 0, "Check if empty PHA has zero size");
+    test_value(pha1.columns(), 0, "Check if empty PHA has zero columns");
+    test_value(pha1.counts(), 0.0, "Check if empty PHA has zero counts");
+    test_value(pha1.underflow(), 0.0, "Check if empty PHA has zero underflow");
+    test_value(pha1.overflow(), 0.0, "Check if empty PHA has zero overflow");
+    test_value(pha1.outflow(), 0.0, "Check if empty PHA has zero outflow");
+    test_value(pha1.exposure(), 0.0, "Check if empty PHA has zero exposure");
+    test_value(pha1.backfile(), "", "Check if empty PHA has empty background file");
+    test_value(pha1.corrfile(), "", "Check if empty PHA has empty correction file");
+    test_value(pha1.respfile(), "", "Check if empty PHA has empty RMF");
+    test_value(pha1.ancrfile(), "", "Check if empty PHA has empty ARF");
 
-    // Test energy boundary constructor
-    test_try("GPha energy boundary constructor");
-    try {
-        GEbounds ebds(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
-        GPha     pha(ebds);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test filling and accessing
-    GEbounds ebds(9, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"), false);
-    GPha     pha(ebds);
+    // Test energy boundary constructor, filling and accessing
+    GEbounds ebds2(9, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"), false);
+    GPha     pha2(ebds2);
+    pha2.exposure(1234.5);
+    pha2.backfile("background");
+    pha2.corrfile("correction");
+    pha2.respfile("rmf");
+    pha2.ancrfile("arf");
+    test_value(pha2.size(), 9, "Check if non-empty PHA has expected size");
+    test_value(pha2.exposure(), 1234.5, "Check if non-empty PHA has expected exposure");
+    test_value(pha2.backfile(), "background", "Check if non-empty PHA has expected background file");
+    test_value(pha2.corrfile(), "correction", "Check if non-empty PHA has expected correction file");
+    test_value(pha2.respfile(), "rmf", "Check if non-empty PHA has expected RMF");
+    test_value(pha2.ancrfile(), "arf", "Check if non-empty PHA has expected ARF");
     for (int i = 0; i < 12; i += 2) {
-        pha.fill(GEnergy(double(i), "TeV"), 1.0);
+        pha2.fill(GEnergy(double(i), "TeV"), 1.0);
     }
-    test_value(pha.counts(),    4.0);
-    test_value(pha.underflow(), 1.0);
-    test_value(pha.overflow(),  1.0);
-    test_value(pha.outflow(),   0.0);
+    test_value(pha2.counts(),    4.0);
+    test_value(pha2.underflow(), 1.0);
+    test_value(pha2.overflow(),  1.0);
+    test_value(pha2.outflow(),   0.0);
     for (int i = 0; i < 9; i += 2) {
-        test_value(pha.at(i), 0.0);
-        test_value(pha[i], 0.0);
+        test_value(pha2.at(i), 0.0);
+        test_value(pha2[i], 0.0);
     }
     for (int i = 1; i < 9; i += 2) {
-        test_value(pha.at(i), 1.0);
-        test_value(pha[i], 1.0);
+        test_value(pha2.at(i), 1.0);
+        test_value(pha2[i], 1.0);
     }
-    pha[0] = 5.0;
-    pha[1] = 3.7;
-    test_value(pha[0], 5.0);
-    test_value(pha[1], 3.7);
+    pha2[0] = 5.0;
+    pha2[1] = 3.7;
+    test_value(pha2[0], 5.0);
+    test_value(pha2[1], 3.7);
 
-    // Test saving and loading
-    pha.save("pha.fits", true);
-    test_assert(pha.filename().url() == "pha.fits",
-                "Unexpected filename \""+pha.filename().url()+"\".");
-    pha.load("pha.fits");
-    test_assert(pha.filename().url() == "pha.fits",
-                "Unexpected filename \""+pha.filename().url()+"\".");
-    test_value(pha[0], 5.0, 1.0e-6);
-    test_value(pha[1], 3.7, 1.0e-6);
-    test_value(pha.counts(),   11.7, 1.0e-6);
-    test_value(pha.underflow(), 1.0, 1.0e-6);
-    test_value(pha.overflow(),  1.0, 1.0e-6);
-    test_value(pha.outflow(),   0.0, 1.0e-6);
-    for (int i = 2; i < 9; i += 2) {
-        test_value(pha.at(i), 0.0);
-        test_value(pha[i], 0.0);
-    }
-    for (int i = 3; i < 9; i += 2) {
-        test_value(pha.at(i), 1.0);
-        test_value(pha[i], 1.0);
-    }
-
-    // Test constructing
-    GPha pha2("pha.fits");
-    test_assert(pha2.filename().url() == "pha.fits",
-                "Unexpected filename \""+pha2.filename().url()+"\".");
+    // Test content after saving and loading
+    test_value(pha2.filename().url(), "", "Unexpected filename \""+pha2.filename().url()+"\".");
+    pha2.save("test_pha.fits", true);
+    test_value(pha2.filename().url(), "test_pha.fits",
+               "Unexpected filename \""+pha2.filename().url()+"\".");
+    pha2.clear();
+    test_value(pha2.size(), 0, "Check if cleared PHA has zero size");
+    test_value(pha2.counts(), 0.0, "Check if clear PHA has zero counts");
+    test_value(pha2.underflow(), 0.0, "Check if empty PHA has zero underflow");
+    test_value(pha2.overflow(), 0.0, "Check if empty PHA has zero overflow");
+    test_value(pha2.outflow(), 0.0, "Check if empty PHA has zero outflow");
+    test_value(pha2.exposure(), 0.0, "Check if empty PHA has zero exposure");
+    test_value(pha2.backfile(), "", "Check if empty PHA has empty background file");
+    test_value(pha2.corrfile(), "", "Check if empty PHA has empty correction file");
+    test_value(pha2.respfile(), "", "Check if empty PHA has empty RMF");
+    test_value(pha2.ancrfile(), "", "Check if empty PHA has empty ARF");
+    pha2.load("test_pha.fits");
+    test_value(pha2.filename().url(), "test_pha.fits",
+               "Unexpected filename \""+pha2.filename().url()+"\".");
+    test_value(pha2.size(), 9, "Check if loaded PHA has expected size");
+    test_value(pha2.exposure(), 1234.5, "Check if loaded PHA has expected exposure");
+    test_value(pha2.backfile(), "background", "Check if loaded PHA has expected background file");
+    test_value(pha2.corrfile(), "correction", "Check if loaded PHA has expected correction file");
+    test_value(pha2.respfile(), "rmf", "Check if loaded PHA has expected RMF");
+    test_value(pha2.ancrfile(), "arf", "Check if loaded PHA has expected ARF");
     test_value(pha2[0], 5.0, 1.0e-6);
     test_value(pha2[1], 3.7, 1.0e-6);
     test_value(pha2.counts(),   11.7, 1.0e-6);
@@ -158,26 +161,33 @@ void TestGXspec::test_GPha(void)
         test_value(pha2[i], 1.0);
     }
 
-    // Test addition operator
-    GPha pha3 = pha2 + pha2;
-    test_value(pha3[0], 10.0, 1.0e-6);
-    test_value(pha3[1],  7.4, 1.0e-6);
-    test_value(pha3.counts(),   23.4, 1.0e-6);
-    test_value(pha3.underflow(), 2.0, 1.0e-6);
-    test_value(pha3.overflow(),  2.0, 1.0e-6);
-    test_value(pha3.outflow(),   0.0, 1.0e-6);
-
-    // Test subtraction operator
-    GPha pha4 = pha2 - pha2;
-    test_value(pha4[0], 0.0, 1.0e-6);
-    test_value(pha4[1], 0.0, 1.0e-6);
-    test_value(pha4.counts(),    0.0, 1.0e-6);
-    test_value(pha4.underflow(), 0.0, 1.0e-6);
-    test_value(pha4.overflow(),  0.0, 1.0e-6);
+    // Test constructing from file
+    GPha pha4("test_pha.fits");
+    test_value(pha4.filename().url(), "test_pha.fits",
+               "Unexpected filename \""+pha4.filename().url()+"\".");
+    test_value(pha4.size(), 9, "Check if loaded PHA has expected size");
+    test_value(pha4.exposure(), 1234.5, "Check if constructed PHA has expected exposure");
+    test_value(pha4.backfile(), "background", "Check if constructed PHA has expected background file");
+    test_value(pha4.corrfile(), "correction", "Check if constructed PHA has expected correction file");
+    test_value(pha4.respfile(), "rmf", "Check if constructed PHA has expected RMF");
+    test_value(pha4.ancrfile(), "arf", "Check if constructed PHA has expected ARF");
+    test_value(pha4[0], 5.0, 1.0e-6);
+    test_value(pha4[1], 3.7, 1.0e-6);
+    test_value(pha4.counts(),   11.7, 1.0e-6);
+    test_value(pha4.underflow(), 1.0, 1.0e-6);
+    test_value(pha4.overflow(),  1.0, 1.0e-6);
     test_value(pha4.outflow(),   0.0, 1.0e-6);
+    for (int i = 2; i < 9; i += 2) {
+        test_value(pha4.at(i), 0.0);
+        test_value(pha4[i], 0.0);
+    }
+    for (int i = 3; i < 9; i += 2) {
+        test_value(pha4.at(i), 1.0);
+        test_value(pha4[i], 1.0);
+    }
 
-    // Test scale operator
-    GPha pha5 = pha2 * 2.0;
+    // Test addition operator
+    GPha pha5 = pha4 + pha4;
     test_value(pha5[0], 10.0, 1.0e-6);
     test_value(pha5[1],  7.4, 1.0e-6);
     test_value(pha5.counts(),   23.4, 1.0e-6);
@@ -185,27 +195,26 @@ void TestGXspec::test_GPha(void)
     test_value(pha5.overflow(),  2.0, 1.0e-6);
     test_value(pha5.outflow(),   0.0, 1.0e-6);
 
-    // Test scale operator
-    GPha pha6 = 2.0 * pha2;
-    test_value(pha6[0], 10.0, 1.0e-6);
-    test_value(pha6[1],  7.4, 1.0e-6);
-    test_value(pha6.counts(),   23.4, 1.0e-6);
-    test_value(pha6.underflow(), 2.0, 1.0e-6);
-    test_value(pha6.overflow(),  2.0, 1.0e-6);
+    // Test subtraction operator
+    GPha pha6 = pha4 - pha4;
+    test_value(pha6[0], 0.0, 1.0e-6);
+    test_value(pha6[1], 0.0, 1.0e-6);
+    test_value(pha6.counts(),    0.0, 1.0e-6);
+    test_value(pha6.underflow(), 0.0, 1.0e-6);
+    test_value(pha6.overflow(),  0.0, 1.0e-6);
     test_value(pha6.outflow(),   0.0, 1.0e-6);
 
-    // Test division operator
-    GPha pha7 = pha2 / 2.0;
-    test_value(pha7[0],  2.5, 1.0e-6);
-    test_value(pha7[1],  1.85, 1.0e-6);
-    test_value(pha7.counts(),   5.85, 1.0e-6);
-    test_value(pha7.underflow(), 0.5, 1.0e-6);
-    test_value(pha7.overflow(),  0.5, 1.0e-6);
+    // Test scale operator
+    GPha pha7 = pha4 * 2.0;
+    test_value(pha7[0], 10.0, 1.0e-6);
+    test_value(pha7[1],  7.4, 1.0e-6);
+    test_value(pha7.counts(),   23.4, 1.0e-6);
+    test_value(pha7.underflow(), 2.0, 1.0e-6);
+    test_value(pha7.overflow(),  2.0, 1.0e-6);
     test_value(pha7.outflow(),   0.0, 1.0e-6);
 
-    // Test unary addition operator
-    GPha pha8 = pha2;
-    pha8 += pha2;
+    // Test scale operator
+    GPha pha8 = 2.0 * pha4;
     test_value(pha8[0], 10.0, 1.0e-6);
     test_value(pha8[1],  7.4, 1.0e-6);
     test_value(pha8.counts(),   23.4, 1.0e-6);
@@ -213,19 +222,18 @@ void TestGXspec::test_GPha(void)
     test_value(pha8.overflow(),  2.0, 1.0e-6);
     test_value(pha8.outflow(),   0.0, 1.0e-6);
 
-    // Test unary subtraction operator
-    GPha pha9 = pha2;
-    pha9 -= pha2;
-    test_value(pha9[0], 0.0, 1.0e-6);
-    test_value(pha9[1], 0.0, 1.0e-6);
-    test_value(pha9.counts(),    0.0, 1.0e-6);
-    test_value(pha9.underflow(), 0.0, 1.0e-6);
-    test_value(pha9.overflow(),  0.0, 1.0e-6);
+    // Test division operator
+    GPha pha9 = pha4 / 2.0;
+    test_value(pha9[0],  2.5, 1.0e-6);
+    test_value(pha9[1],  1.85, 1.0e-6);
+    test_value(pha9.counts(),   5.85, 1.0e-6);
+    test_value(pha9.underflow(), 0.5, 1.0e-6);
+    test_value(pha9.overflow(),  0.5, 1.0e-6);
     test_value(pha9.outflow(),   0.0, 1.0e-6);
 
-    // Test unary scale operator
-    GPha pha10 = pha2;
-    pha10 *= 2.0;
+    // Test unary addition operator
+    GPha pha10 = pha4;
+    pha10     += pha4;
     test_value(pha10[0], 10.0, 1.0e-6);
     test_value(pha10[1],  7.4, 1.0e-6);
     test_value(pha10.counts(),   23.4, 1.0e-6);
@@ -233,15 +241,35 @@ void TestGXspec::test_GPha(void)
     test_value(pha10.overflow(),  2.0, 1.0e-6);
     test_value(pha10.outflow(),   0.0, 1.0e-6);
 
-    // Test unary division operator
-    GPha pha11 = pha2;
-    pha11 /= 2.0;
-    test_value(pha11[0],  2.5, 1.0e-6);
-    test_value(pha11[1],  1.85, 1.0e-6);
-    test_value(pha11.counts(),   5.85, 1.0e-6);
-    test_value(pha11.underflow(), 0.5, 1.0e-6);
-    test_value(pha11.overflow(),  0.5, 1.0e-6);
+    // Test unary subtraction operator
+    GPha pha11 = pha4;
+    pha11     -= pha4;
+    test_value(pha11[0], 0.0, 1.0e-6);
+    test_value(pha11[1], 0.0, 1.0e-6);
+    test_value(pha11.counts(),    0.0, 1.0e-6);
+    test_value(pha11.underflow(), 0.0, 1.0e-6);
+    test_value(pha11.overflow(),  0.0, 1.0e-6);
     test_value(pha11.outflow(),   0.0, 1.0e-6);
+
+    // Test unary scale operator
+    GPha pha12 = pha4;
+    pha12     *= 2.0;
+    test_value(pha12[0], 10.0, 1.0e-6);
+    test_value(pha12[1],  7.4, 1.0e-6);
+    test_value(pha12.counts(),   23.4, 1.0e-6);
+    test_value(pha12.underflow(), 2.0, 1.0e-6);
+    test_value(pha12.overflow(),  2.0, 1.0e-6);
+    test_value(pha12.outflow(),   0.0, 1.0e-6);
+
+    // Test unary division operator
+    GPha pha13 = pha4;
+    pha13     /= 2.0;
+    test_value(pha13[0],  2.5, 1.0e-6);
+    test_value(pha13[1],  1.85, 1.0e-6);
+    test_value(pha13.counts(),   5.85, 1.0e-6);
+    test_value(pha13.underflow(), 0.5, 1.0e-6);
+    test_value(pha13.overflow(),  0.5, 1.0e-6);
+    test_value(pha13.outflow(),   0.0, 1.0e-6);
 
     // Return
     return;

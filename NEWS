@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-11 June 2018
+12 June 2018
 
 
 1. Introduction
@@ -34,10 +34,18 @@ The following methods have been added:
 - GPha::columns()
 - GPha::at(int&, int&)
 - GPha::append(std::string&, std::vector<double>&)
-- GPha::obs_emin(GEnergy&)
-- GPha::obs_emin()
-- GPha::obs_emax(GEnergy&)
-- GPha::obs_emax()
+- GPha::emin_obs(GEnergy&)
+- GPha::emin_obs()
+- GPha::emax_obs(GEnergy&)
+- GPha::emax_obs()
+- GPha::backfile(std::string&)
+- GPha::backfile()
+- GPha::corrfile(std::string&)
+- GPha::corrfile()
+- GPha::respfile(std::string&)
+- GPha::respfile()
+- GPha::ancrfile(std::string&)
+- GPha::ancrfile()
 - GFitsHeaderCard boolean constructor
 - GFitsHDU::card(std::string&, bool&, std::string&)
 - GCTAInstDir::theta()
@@ -155,11 +163,19 @@ None
 
 16. Xspec module
 ----------------
+Add setter and getter methods to access the attributes backfile, corrfile,
+respfile and ancrfile that inform about related files, and that are needed
+for OGIP/XSPEC compliance. The attributes are written and read from FITS
+files (#2404).
+
 Add methods and operators to GPha to store additional columns in the data
-structure, similar to what exists for GArf. In addition, GPha::obs_emin()
-and GPha::obs_emax() setter and getter methods were added that allow storing
+structure, similar to what exists for GArf. In addition, GPha::emin_obs()
+and GPha::emax_obs() setter and getter methods were added that allow storing
 and retrieving the minimum and maximum energy of the observation that was
 used to fill the spectrum. This allows to define an ROI for On/Off analysis. 
+
+The output files of the GPha, GArf and GRmf files are now compliant with the
+OGIP format that is needed for a XSPEC analysis (#2404).
 
 
 17. Test module

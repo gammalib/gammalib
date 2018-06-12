@@ -1,4 +1,4 @@
-2018-06-08
+2018-06-12
 
         * Version 1.6.0 released
         ========================
@@ -14,6 +14,8 @@
         Add GCTAEdisp::prob_erecobin() method (#2422)
         Add gammalib::gauss_integral() function (#2422)
         Keep existing library path in installation script on Mac OS X (#2420)
+        Make GPha, GArf and GRmf output files XSPEC compliant (#2404)
+        Add methods to store file attributes in GPha (#2404)
         Add GSkyDir::cos_dist() method (#2309)
         Add GCTABackground::rate_ebin() method and gammalib::atan2() and
           gammalib::plaw_integral() functions (#2308)
