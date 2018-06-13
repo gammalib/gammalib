@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GTimeReference.hpp - Time reference class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,7 +59,7 @@ public:
     // Constructors and destructors
     GTimeReference(void);
     GTimeReference(const GTimeReference& ref);
-    explicit GTimeReference(const double&      mrdref,
+    explicit GTimeReference(const double&      mjdref,
                             const std::string& timeunit,
                             const std::string& timesys = "TT",
                             const std::string& timeref = "LOCAL");
