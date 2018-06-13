@@ -23,8 +23,9 @@ Bug fixes
 * [`2420 <https://cta-redmine.irap.omp.eu/issues/2420>`_] -
   Keep existing library path in installation script on Mac OS X
 * [`2054 <https://cta-redmine.irap.omp.eu/issues/2054>`_] -
-  Preserve GTIs when copying ``GCTAEventList`` and ``GCTAEventCube`` objects
-
+  Preserve GTIs when copying ``GCTAEventList`` and ``GCTAEventCube`` objects.
+  Use MJD reference of first observation for exposure cube building in
+  ``GCTACubeExposure``.
 
 Improvements
 ------------

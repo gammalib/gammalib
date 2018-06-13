@@ -749,6 +749,12 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
 
             } // endfor: looped over all pixels
 
+            // If GTI is empty then set its time reference from the
+            // observation. From then on we keep that time reference
+            if (m_gti.is_empty()) {
+                m_gti.reference(obs.gti().reference());
+            }
+
             // Append GTIs and increment livetime
             m_gti.extend(obs.gti());
             m_livetime += obs.livetime();

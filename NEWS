@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-12 June 2018
+13 June 2018
 
 
 1. Introduction
@@ -225,7 +225,9 @@ implemented for the GCTABackgroundPerfTable and GCTABackground3D classes. The me
 computes for a given instrument direction the background rate integrated over an
 energy bin (#2308).
 
-The GTIs a preserved when copying a GCTAEventList or GCTAEventCube object (#2054).
+The GTIs a preserved when copying a GCTAEventList or GCTAEventCube object. In addition,
+the MJD reference of the first observation is used when building an exposure cube
+(#2054).
 
 
 21. COMPTEL interface
