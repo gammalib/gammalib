@@ -274,11 +274,11 @@ CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
 clean-local:
 	rm -rf build
 if BUILD_WRAPPERS
-	rm -rf $(top_builddir)/pyext/gammalib/*.py
+	rm -rf $(top_builddir)/pyext/gammalib/[a-z]*.py
 	rm -rf $(top_builddir)/pyext/gammalib/*_wrap.cpp
 else
 	if test "x$(top_builddir)" != "x$(top_srcdir)"; then \
-		rm -rf $(top_builddir)/pyext/gammalib/*.py; \
+		rm -rf $(top_builddir)/pyext/gammalib/[a-z]*.py; \
 		rm -rf $(top_builddir)/pyext/gammalib/*_wrap.cpp; \
 	fi
 endif
