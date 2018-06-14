@@ -30,6 +30,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2513 <https://cta-redmine.irap.omp.eu/issues/2513>`_] -
+  Support application specific system parameter files
 * Add methods and operators to handle additional columns in ``GPha``
 * Made ``GApplicationPar::query()`` method public
 * [`2466 <https://cta-redmine.irap.omp.eu/issues/2466>`_] -

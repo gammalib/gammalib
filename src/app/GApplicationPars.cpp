@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPars.cpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -632,23 +632,58 @@ bool GApplicationPars::contains(const std::string& name) const
  *            Parameter file not found.
  *
  * Loads all parameters from parameter file.
+ *
+ * If the syspfiles path is set then load the parameter file from that
+ * location and update the parameters using a paramater file that is found
+ * in the users "pfiles" directory.
+ *
+ * Otherwise, search the parameter file in the usual location (see the
+ * GApplicationPars::inpath method for more information).
  ***************************************************************************/
 void GApplicationPars::load(const GFilename& filename)
 {
     // Reset parameters
     m_parfile.clear();
 
-    // Get path to parameter file for input
-    std::string path = inpath(filename.url());
-    if (path.length() == 0) {
-        throw GException::par_file_not_found(G_LOAD1, filename.url());
+    // If a syspfiles path was set then get parfile from this path and
+    // update the parameters using a copy found in the users "pfiles"
+    // directory
+    std::string path = syspfiles_path(filename.url());
+    if (!path.empty()) {
+
+        // Read parfile
+        read(path);
+
+        // Parse parfile
+        parse();
+
+        // Synchronize parfile using a copy found in the users "pfiles"
+        // directory
+        path = pfiles_path(filename.url());
+        if (!path.empty()) {
+            synchronise(path);
+        }
+
     }
 
-    // Read parfile
-    read(path);
+    // ... otherwise get path to parameter file for input
+    else {
 
-    // Parse parfile
-    parse();
+        // Get parfile file path
+        path = inpath(filename.url());
+
+        // If file path is empty then throw an exception
+        if (path.empty()) {
+            throw GException::par_file_not_found(G_LOAD1, filename.url());
+        }
+
+        // Read parfile
+        read(path);
+
+        // Parse parfile
+        parse();
+
+    }
 
     // Return
     return;
@@ -661,8 +696,6 @@ void GApplicationPars::load(const GFilename& filename)
  * @param[in] filename Parameter filename.
  * @param[in] args Command line arguments. 
  *
- * @exception GException::par_file_not_found
- *            Parameter file not found.
  * @exception GException::bad_cmdline_argument
  *            Invalid command line argument encountered.
  *
@@ -672,20 +705,8 @@ void GApplicationPars::load(const GFilename& filename)
 void GApplicationPars::load(const GFilename&                filename,
                             const std::vector<std::string>& args)
 {
-    // Reset parameters
-    m_parfile.clear();
-
-    // Get path to parameter file for input
-    std::string path = inpath(filename.url());
-    if (path.length() == 0) {
-        throw GException::par_file_not_found(G_LOAD2, filename.url());
-    }
-
-    // Read parfile
-    read(path);
-
-    // Parse parfile
-    parse();
+    // Load parameters
+    load(filename);
 
     // Overwrite parameter values that are specified in the command line
     for (int i = 1; i < args.size(); ++i) {
@@ -809,6 +830,7 @@ void GApplicationPars::init_members(void)
     m_vstart.clear();
     m_vstop.clear();
     m_mode = "h";
+    m_syspfiles.clear();
 
     // Return
     return;
@@ -823,12 +845,13 @@ void GApplicationPars::init_members(void)
 void GApplicationPars::copy_members(const GApplicationPars& pars)
 {
     // Copy attributes
-    m_parfile = pars.m_parfile;
-    m_pars    = pars.m_pars;
-    m_line    = pars.m_line;
-    m_vstart  = pars.m_vstart;
-    m_vstop   = pars.m_vstop;
-    m_mode    = pars.m_mode;
+    m_parfile   = pars.m_parfile;
+    m_pars      = pars.m_pars;
+    m_line      = pars.m_line;
+    m_vstart    = pars.m_vstart;
+    m_vstop     = pars.m_vstop;
+    m_mode      = pars.m_mode;
+    m_syspfiles = pars.m_syspfiles;
 
     // Return
     return;
@@ -930,6 +953,98 @@ std::string GApplicationPars::inpath(const std::string& filename) const
     #endif
 
     //printf("parfile=%s\n", path.c_str());
+
+    // Return path
+    return path;
+}
+
+
+/***********************************************************************//**
+ * @brief Return path to parfile in $PFILES or $HOME/pfiles folder
+ *
+ * @param[in] filename Parameter filename to search for.
+ * @return Full parameter filename, including absolute access path.
+ *
+ * Locates parameter file in the directories that are listed in the PFILES
+ * environment variable. Directories may be separated by : or by ; in the
+ * PFILES environment variable.
+ *
+ * If the PFILES environment variable is not set the parameter file is
+ * searched in the users pfiles directory.
+ *
+ * If parameter file was not found, or the parameter file is not
+ * read-accessible, an empty string is returned.
+ ***************************************************************************/
+std::string GApplicationPars::pfiles_path(const std::string& filename) const
+{
+    // Allocate result path
+    std::string path;
+
+    // Search for parameter file in PFILES directories if the PFILES
+    // environment variable has been set
+    char* ptr = std::getenv("PFILES");
+    if (ptr != NULL) {
+
+        // Extract directories from PFILES environment variable
+        std::string              pfiles = ptr;
+        std::vector<std::string> dirs   = gammalib::split(pfiles, ":;");
+
+        // Search for first occurence of parameter file
+        for (int i = 0; i < dirs.size(); ++i) {
+
+            // Build filename
+            std::string fname = dirs[i] + "/" + filename;
+
+            // If file is accessible for reading then exit loop
+            if (access(fname.c_str(), R_OK) == 0) {
+                path = fname;
+                break;
+            }
+
+        } // endfor: searched all directories given in PFILES
+
+    } // endif: PFILES environment variable has been set
+
+    // ... otherwise, if no PFILES environment variable has been set
+    // then search in users pfiles directory
+    else {
+        uid_t uid         = geteuid();
+        struct passwd* pw = getpwuid(uid);
+        if (pw != NULL) {
+            std::string fname = std::string(pw->pw_dir) + "/pfiles/" + filename;
+            if (access(fname.c_str(), R_OK) == 0) {
+                path = fname;
+            }
+        }    
+    } // endif: searched in users pfiles directory
+
+    // Return path
+    return path;
+}
+
+
+/***********************************************************************//**
+ * @brief Return path to parfile in m_syspfiles folder
+ *
+ * @param[in] filename Parameter filename to search for.
+ * @return Full parameter filename, including absolute access path.
+ *
+ * Locates parameter file in the directory that is specified by the
+ * m_syspfiles string. If the string is empty, the specified file is not
+ * found or read accessible, an empty string is returned.
+ ***************************************************************************/
+std::string GApplicationPars::syspfiles_path(const std::string& filename) const
+{
+    // Allocate result path
+    std::string path;
+
+    // Continue only if m_syspfiles is not empty
+    if (!m_syspfiles.empty()) {
+        std::string fname = m_syspfiles + "/" + filename;
+        if (access(fname.c_str(), R_OK) == 0) {
+            path = fname;
+        }
+    }
 
     // Return path
     return path;
@@ -1338,6 +1453,54 @@ void GApplicationPars::update(void)
                                    m_parfile[m_line[i]].substr(m_vstop[i]);
             m_vstop[i] = m_vstart[i] + m_pars[i].m_value.length();
         }
+
+    } // endfor: looped over all parameters
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Synchronise parameter file with the parameter values in a another
+ *        parameter file
+ *
+ * @param[in] filename File name of other parameter file.
+ *
+ * Copies over all values from another parameter file that correspond to
+ * parameters with the same name and type, and that are signaled as "learn"
+ * in the other parameter file.
+ ***************************************************************************/
+void GApplicationPars::synchronise(const std::string& filename)
+{
+    // Allocate other application parameters
+    GApplicationPars pars;
+
+    // Read other application parameters
+    pars.read(filename);
+
+    // Parse other parameters
+    pars.parse();
+
+    // Loop over all parameters in parameter file
+    for (int i = 0; i < m_pars.size(); ++i) {
+
+        // If a parameter with the same name and type exists in the other
+        // parameter file
+        int inx = pars.get_index(m_pars[i].name());
+        if (inx != -1) {
+
+            // If the parameter types match, the mode in the other parameter
+            // file is "learn", and the parameter values differ, then copy
+            // over the value and signal value updating
+            if ((m_pars[i].type() == pars[inx].type()) &&
+                 pars[inx].is_learn() &&
+                 m_pars[i].m_value != pars[inx].m_value) {
+                m_pars[i].m_value  = pars[inx].m_value;
+                m_pars[i].m_update = true;
+            }
+
+        } // endif: parameter with same name existed
 
     } // endfor: looped over all parameters
 

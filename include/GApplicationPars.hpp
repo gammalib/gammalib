@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPars.hpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -83,6 +83,8 @@ public:
     void                   reserve(const int& num);
     void                   extend(const GApplicationPars& pars);
     bool                   contains(const std::string& name) const;
+    void                   syspfiles(const std::string& syspfiles);
+    const std::string&     syspfiles(void) const;
     void                   load(const GFilename& filename);
     void                   load(const GFilename&                filename,
                                 const std::vector<std::string>& args);
@@ -95,11 +97,14 @@ protected:
     void        copy_members(const GApplicationPars& pars);
     void        free_members(void);
     std::string inpath(const std::string& filename) const;
+    std::string pfiles_path(const std::string& filename) const;
+    std::string syspfiles_path(const std::string& filename) const;
     std::string outpath(const std::string& filename) const;
     void        read(const std::string& filename);
     void        write(const std::string& filename) const;
     void        parse(void);
     void        update(void);
+    void        synchronise(const std::string& filename);
     int         get_index(const std::string& name) const;
     std::string parline(GApplicationPar& par, size_t* start, size_t* stop) const;
 
@@ -110,6 +115,7 @@ protected:
     std::vector<size_t>          m_vstart;    //!< Column of value start
     std::vector<size_t>          m_vstop;     //!< Column of value stop
     std::string                  m_mode;      //!< Effective mode
+    std::string                  m_syspfiles; //!< Optional location of syspfiles
 };
 
 
@@ -184,7 +190,7 @@ bool GApplicationPars::is_empty(void) const
 /***********************************************************************//**
  * @brief Reserves space for parameters in container
  *
- * @param[in] num Number of parameter
+ * @param[in] num Number of parameters.
  *
  * Reserves space for @p num parameters in the container.
  ***************************************************************************/
@@ -193,6 +199,35 @@ void GApplicationPars::reserve(const int& num)
 {
     m_pars.reserve(num);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set path to system pfiles
+ *
+ * @param[in] syspfiles Path to system pfiles.
+ *
+ * Sets the path to system parameter files.
+ ***************************************************************************/
+inline
+void GApplicationPars::syspfiles(const std::string& syspfiles)
+{
+    m_syspfiles = syspfiles;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return path to system pfiles
+ *
+ * @return Path to system pfiles.
+ *
+ * Returns path to system parameter files.
+ ***************************************************************************/
+inline
+const std::string& GApplicationPars::syspfiles(void) const
+{
+    return (m_syspfiles);
 }
 
 #endif /* GAPPLICATIONPARS_HPP */

@@ -91,7 +91,7 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     m_parfile = name+".par";
     m_logfile = name+".log";
 
-    // Initialise application parameters
+    // Load application parameters
     m_pars.load(par_filename());
 
     // Signal that application parameters have been loaded

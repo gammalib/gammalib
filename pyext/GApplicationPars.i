@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GApplicationPars.i - Application parameter container          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,26 +48,28 @@ public:
     virtual ~GApplicationPars(void);
  
     // Methods
-    void              clear(void);
-    GApplicationPars* clone(void) const;
-    std::string       classname(void) const;
-    GApplicationPar&  at(const int& index);
-    int               size(void) const;
-    bool              is_empty(void) const;
-    GApplicationPar&  append(const GApplicationPar& par);
-    void              append_standard(void);
-    GApplicationPar&  insert(const int& index, const GApplicationPar& par);
-    GApplicationPar&  insert(const std::string& name,
-                             const GApplicationPar& par);
-    void              remove(const int& index);
-    void              remove(const std::string& name);
-    void              reserve(const int& num);
-    void              extend(const GApplicationPars& pars);
-    bool              contains(const std::string& name) const;
-    void              load(const GFilename& filename);
-    void              load(const GFilename& filename,
-                           const std::vector<std::string>& args);
-    void              save(const GFilename& filename);
+    void               clear(void);
+    GApplicationPars*  clone(void) const;
+    std::string        classname(void) const;
+    GApplicationPar&   at(const int& index);
+    int                size(void) const;
+    bool               is_empty(void) const;
+    GApplicationPar&   append(const GApplicationPar& par);
+    void               append_standard(void);
+    GApplicationPar&   insert(const int& index, const GApplicationPar& par);
+    GApplicationPar&   insert(const std::string& name,
+                              const GApplicationPar& par);
+    void               remove(const int& index);
+    void               remove(const std::string& name);
+    void               reserve(const int& num);
+    void               extend(const GApplicationPars& pars);
+    bool               contains(const std::string& name) const;
+    void               syspfiles(const std::string& syspfiles);
+    const std::string& syspfiles(void) const;
+    void               load(const GFilename& filename);
+    void               load(const GFilename& filename,
+                            const std::vector<std::string>& args);
+    void               save(const GFilename& filename);
 };
 
 

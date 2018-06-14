@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-13 June 2018
+14 June 2018
 
 
 1. Introduction
@@ -27,6 +27,7 @@ The following methods have been added:
 - GSkyDir::cos_dist()
 - GApplicationPar::query()
 - GApplicationPar::was_queried()
+- GApplicationPars::syspfiles()
 - operator==(GSkyPixel&, GSkyPixel&)
 - operator!=(GSkyPixel&, GSkyPixel&)
 - GPha::operator(int&, int&)
@@ -84,6 +85,14 @@ Keep existing library path in installation script on Mac OS X (#2420)
 
 4. Application module
 ---------------------
+A GApplicationPars::syspfiles() setter and getter method was added to allow the
+specification of an application specific system parameter file path. If such a
+file path is specified, the loading of the application parameters needs to be
+redone by the client. The GApplicationPars::load() methods now gives priority
+to a parameter file found in the syspfiles folder and updates parameter values
+using the parameter file found in the user's pfiles folder. In that way, any
+changes in the parameter file structure should be handled transparently (#2513).
+
 The GApplicationPar::query() method was made public.
 
 Add GApplicationPar::was_queried() method and do no longer change the mode

@@ -1,8 +1,9 @@
-2018-06-13
+2018-06-14
 
         * Version 1.6.0 released
         ========================
 
+        Support application specific system parameter files (#2513)
         Add methods and operators to handle additional columns in GPha 
         Made GApplicationPar::query() method public
         Fix handling of q-mode parameters (#2495)
