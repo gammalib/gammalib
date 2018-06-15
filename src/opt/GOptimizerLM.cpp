@@ -385,7 +385,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                 // ... otherwise, convergence was reached and we can stop
                 // now
                 break;
-                
+
             } // endif: convergence check
 
             // Monitor the number of subsequent increases of lambda and
@@ -402,7 +402,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             lambda_old = m_lambda;
 
         } // endfor: iterations
-        
+
         // Free now all temporarily frozen parameters so that the resulting
         // model has the same attributes as the initial model
         for (int ipar = 0; ipar < m_npars; ++ipar) {
@@ -420,7 +420,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
     } // endif: there were free parameters to fit
 
-    // ... otherwise just execute final step
+    // ... otherwise just evaluate function and store the parameters
     else {
 
     	// Evaluate function
@@ -428,6 +428,13 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // Save function value
         m_value = fct.value();
+
+        // Optionally write initial iteration into logger
+        if (m_logger != NULL) {
+            (*m_logger)(">Iteration %3d: -logL=%.3f, Lambda=%.1e (no free parameters)",
+                        0, m_value, m_lambda);   
+        }
+
     }
 
     // Return
@@ -751,7 +758,7 @@ double GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
             (*curvature)(ipar,ipar) *= (1.0 + m_lambda);
             (*grad)[ipar]            = -(*grad)[ipar];
         }
-        
+
         // Debug option: dump gradient and curvature matrix
         #if defined(G_DEBUG_ITER)
         std::cout << "Gradient : ";
