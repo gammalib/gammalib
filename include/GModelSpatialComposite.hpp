@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GModelSpatialPointSource.hpp - Spatial point source model class     *
+ *       GModelSpatialComposite.hpp - Spatial composite model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Domenico Tiziani                            *
+ *  copyright (C) 2016-2018 by Domenico Tiziani                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -170,7 +170,7 @@ double GModelSpatialComposite::mc_norm(const GSkyDir& dir,
 inline
 int GModelSpatialComposite::components(void) const
 {
-    return m_components.size();
+    return ((int)m_components.size());
 }
 
 

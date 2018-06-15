@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralComposite.hpp - Spectral composite model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                                    *
+ *  copyright (C) 2016-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -145,7 +145,7 @@ std::string GModelSpectralComposite::type(void) const
 inline
 int GModelSpectralComposite::components(void) const
 {
-    return (m_spectral.size());
+    return ((int)m_spectral.size());
 }
 
 #endif /* GMODELSPECTRALCOMPOSITE_HPP */

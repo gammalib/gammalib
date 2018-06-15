@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFftWavetable.hpp - Lookup table class for Fast Fourier transformation *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -145,7 +145,7 @@ const int& GFftWavetable::index(const int& factor) const
 inline
 int GFftWavetable::size(void) const
 {
-    return (m_trig.size());
+    return ((int)m_trig.size());
 }
 
 
@@ -157,7 +157,7 @@ int GFftWavetable::size(void) const
 inline
 int GFftWavetable::factors(void) const
 {
-    return (m_factors.size());
+    return ((int)m_factors.size());
 }
 
 #endif /* GFFTWAVETABLE_HPP */

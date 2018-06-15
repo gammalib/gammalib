@@ -396,7 +396,7 @@ const std::vector<int>& GSkyMap::shape(void) const
 inline
 int GSkyMap::ndim(void) const
 {
-    return m_shape.size();
+    return (int)m_shape.size();
 }
 
 

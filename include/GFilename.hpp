@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GFilename.hpp - Filename class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -173,7 +173,7 @@ bool GFilename::is_empty(void) const
 inline
 int GFilename::length(void) const
 {
-    return (m_url.length());
+    return ((int)m_url.length());
 }
 
 

@@ -57,9 +57,7 @@ public:
     int                size(void) const;
     int                columns(void) const;
     double&            at(const int& index);
-    const double&      at(const int& index) const;
     double&            at(const int& index, const int& col);
-    const double&      at(const int& index, const int& col) const;
     void               append(const std::string&         name,
                               const std::vector<double>& column);
     const GEbounds&    ebounds(void) const;

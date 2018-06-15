@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFft.hpp - Fast Fourier transformation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,7 +36,6 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GNdarray;
-//class GFftWavetable;
 
 
 /***********************************************************************//**
@@ -268,7 +267,7 @@ const std::complex<double>& GFft::operator()(const int& ix, const int& iy) const
 inline
 int GFft::dim(void) const
 {
-    return m_shape.size();
+    return ((int)m_shape.size());
 }
 
 
