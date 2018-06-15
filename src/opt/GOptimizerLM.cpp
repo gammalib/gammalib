@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -191,16 +191,17 @@ GOptimizerLM* GOptimizerLM::clone(void) const
 void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 {
     // Initialize optimizer parameters
+    m_lambda  = m_lambda_start;
+    m_value   = 0.0;
+    m_delta   = 0.0;
+    m_status  = G_LM_CONVERGED;
+    m_iter    = 0;
     m_num_dec = 0;
 
     // Get number of parameters. Continue only if there are free parameters
     m_npars = pars.size();
     m_nfree = pars.nfree();
     if (m_nfree > 0) {
-
-        // Initialise optimization parameters
-        m_lambda  = m_lambda_start;
-        m_status  = G_LM_CONVERGED;
 
         // Initialise bookkeeping arrays
         m_hit_boundary.clear();
@@ -550,7 +551,7 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
 /***********************************************************************//**
  * @brief Print optimizer information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing optimizer information.
  ***************************************************************************/
 std::string GOptimizerLM::print(const GChatter& chatter) const
