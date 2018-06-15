@@ -205,12 +205,11 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
     // Single loop for common exit point
     do {
 
-        // Get number of parameters
+        // Get number of parameters for allocation of vectors and matrices.
+        // Make sure that this number is at least 1
         int npars = pars.size();
-
-        // Fall through if we have no free parameters
         if (npars < 1) {
-            continue;
+            npars = 1;
         }
 
         // Free old memory
