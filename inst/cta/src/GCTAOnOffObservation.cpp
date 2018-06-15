@@ -82,12 +82,6 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 #define G_COMPUTE_RMF  "GCTAOnOffObservation::compute_rmf(GCTAObservation&, "\
                                                             "GSkyRegionMap&)"
 #define G_MODEL_BACKGROUND "GCTAOnOffObservation::model_background(GModels&)"
-#define G_LIKELIHOOD_CSTAT          "GCTAOnOffObservation::likelihood_cstat("\
-                                "GModels&, GOptimizerPars&, GMatrixSparse&, "\
-                                                "GVector&, double&, double&)"
-#define G_LIKELIHOOD_WSTAT          "GCTAOnOffObservation::likelihood_wstat("\
-                                "GModels&, GOptimizerPars&, GMatrixSparse&, "\
-                                                "GVector&, double&, double&)"
 
 /* __ Constants __________________________________________________________ */
 const double minmod = 1.0e-100;                      //!< Minimum model value
@@ -2203,157 +2197,144 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
     // Allocate working array
     GVector colvar(npars);
 
-	// Check that there is at least one parameter
-	if (npars > 0) {
+    // Loop over all energy bins
+    for (int i = 0; i < m_on_spec.size(); ++i) {
 
-        // Loop over all energy bins
-        for (int i = 0; i < m_on_spec.size(); ++i) {
+        // Reinitialize working arrays
+        for (int j = 0; j < npars; ++j) {
+            sky_grad[j] = 0.0;
+            bgd_grad[j] = 0.0;
+        }
 
-            // Reinitialize working arrays
-            for (int j = 0; j < npars; ++j) {
-                sky_grad[j] = 0.0;
-                bgd_grad[j] = 0.0;
-            }
+        // Get number of On and Off counts
+        double non  = m_on_spec[i];
+        double noff = m_off_spec[i];
 
-            // Get number of On and Off counts
-            double non  = m_on_spec[i];
-            double noff = m_off_spec[i];
+        // Get background scaling
+        double alpha = m_on_spec.backscal(i);
 
-            // Get background scaling
-            double alpha = m_on_spec.backscal(i);
+        // Get number of gamma and background events (and corresponding
+        // spectral model gradients)
+        double ngam = N_gamma(models, i, &sky_grad);
+        double nbgd = N_bgd(models, i, &bgd_grad);
 
-            // Get number of gamma and background events (and corresponding
-            // spectral model gradients)
-            double ngam = N_gamma(models, i, &sky_grad);
-            double nbgd = N_bgd(models, i, &bgd_grad);
-
-            // Skip bin if model is too small (avoids -Inf or NaN gradients)
-            double nonpred = ngam + alpha * nbgd;
-            if ((nbgd <= minmod) || (nonpred <= minmod)) {
-                #if defined(G_LIKELIHOOD_DEBUG)
-                n_small_model++;
-                #endif
-                continue;
-            }
-
-            // Now we have all predicted gamma and background events for
-            // current energy bin. Update the log(likelihood) and predicted
-            // number of events
-            value  += -non * log(nonpred) + nonpred - noff * log(nbgd) + nbgd;
-            *npred += nonpred;
-
-            // Update statistics
+        // Skip bin if model is too small (avoids -Inf or NaN gradients)
+        double nonpred = ngam + alpha * nbgd;
+        if ((nbgd <= minmod) || (nonpred <= minmod)) {
             #if defined(G_LIKELIHOOD_DEBUG)
-            n_used++;
-            sum_data  += non;
-            sum_model += nonpred;
+            n_small_model++;
             #endif
+            continue;
+        }
 
-            // Fill derivatives
-            double fa         = non/nonpred;
-            double fb         = fa/nonpred;
-            double fc         = alpha * fb;
-            double fd         = fc * alpha + noff/(nbgd*nbgd);
-            double sky_factor = 1.0 - fa;
-            double bgd_factor = 1.0 + alpha - alpha * fa - noff/nbgd;
+        // Now we have all predicted gamma and background events for
+        // current energy bin. Update the log(likelihood) and predicted
+        // number of events
+        value  += -non * log(nonpred) + nonpred - noff * log(nbgd) + nbgd;
+        *npred += nonpred;
 
-            // Loop over all parameters
-            for (int j = 0; j < npars; ++j) {
+        // Update statistics
+        #if defined(G_LIKELIHOOD_DEBUG)
+        n_used++;
+        sum_data  += non;
+        sum_model += nonpred;
+        #endif
 
-                // If spectral model for sky component is non-zero and
-                // non-infinite then handle sky component gradients and
-                // second derivatives including at least a sky component ...
-                if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
+        // Fill derivatives
+        double fa         = non/nonpred;
+        double fb         = fa/nonpred;
+        double fc         = alpha * fb;
+        double fd         = fc * alpha + noff/(nbgd*nbgd);
+        double sky_factor = 1.0 - fa;
+        double bgd_factor = 1.0 + alpha - alpha * fa - noff/nbgd;
 
-                    // Gradient
-                    (*gradient)[j] += sky_factor * sky_grad[j];
+        // Loop over all parameters
+        for (int j = 0; j < npars; ++j) {
 
-                    // Hessian (from first-order derivatives only)
-                    for (int k = 0; k < npars; ++k) {
+            // If spectral model for sky component is non-zero and
+            // non-infinite then handle sky component gradients and
+            // second derivatives including at least a sky component ...
+            if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
 
-                        // If spectral model for sky component is non-zero and
-                        // non-infinite then we have the curvature element
-                        // of a sky component
-                        if (sky_grad[k] != 0.0  &&
-                            !gammalib::is_infinite(sky_grad[k])) {
-                            colvar[k] = sky_grad[j] * sky_grad[k] * fb;
-                        }
+                // Gradient
+                (*gradient)[j] += sky_factor * sky_grad[j];
 
-                        // ... else if spectral model for background component
-                        // is non-zero and non-infinite then we have the mixed
-                        // curvature element between a sky and a background
-                        // component
-                        else if (bgd_grad[k] != 0.0  &&
-                                 !gammalib::is_infinite(bgd_grad[k])) {
-                            colvar[k] = sky_grad[j] * bgd_grad[k] * fc;
-                        }
+                // Hessian (from first-order derivatives only)
+                for (int k = 0; k < npars; ++k) {
 
-                        // ...else neither sky nor background
-                        else {
-                            colvar[k] = 0.0;
-                        }
+                    // If spectral model for sky component is non-zero and
+                    // non-infinite then we have the curvature element
+                    // of a sky component
+                    if (sky_grad[k] != 0.0  &&
+                        !gammalib::is_infinite(sky_grad[k])) {
+                        colvar[k] = sky_grad[j] * sky_grad[k] * fb;
+                    }
 
-                    } // endfor: Hessian computation
+                    // ... else if spectral model for background component
+                    // is non-zero and non-infinite then we have the mixed
+                    // curvature element between a sky and a background
+                    // component
+                    else if (bgd_grad[k] != 0.0  &&
+                             !gammalib::is_infinite(bgd_grad[k])) {
+                        colvar[k] = sky_grad[j] * bgd_grad[k] * fc;
+                    }
 
-                    // Update matrix
-                    curvature->add_to_column(j, colvar);
+                    // ...else neither sky nor background
+                    else {
+                        colvar[k] = 0.0;
+                    }
 
-                } // endif: spectral model is non-zero and non-infinite
+                } // endfor: Hessian computation
 
-                // ... otherwise if spectral model for background component is
-                // non-zero and non-infinite then handle background component
-                // gradients and second derivatives including at least a
-                // background component
-                else if (bgd_grad[j] != 0.0  &&
-                         !gammalib::is_infinite(bgd_grad[j])) {
+                // Update matrix
+                curvature->add_to_column(j, colvar);
 
-                    // Gradient
-                    (*gradient)[j] += bgd_factor * bgd_grad[j];
+            } // endif: spectral model is non-zero and non-infinite
 
-                    // Hessian (from first-order derivatives only)
-                    for (int k = 0; k < npars; ++k) {
+            // ... otherwise if spectral model for background component is
+            // non-zero and non-infinite then handle background component
+            // gradients and second derivatives including at least a
+            // background component
+            else if (bgd_grad[j] != 0.0  &&
+                     !gammalib::is_infinite(bgd_grad[j])) {
 
-                        // If spectral model for sky component is non-zero and
-                        // non-infinite then we have the mixed curvature element
-                        // between a sky and a background component
-                        if (sky_grad[k] != 0.0  &&
-                            !gammalib::is_infinite(sky_grad[k])) {
-                            colvar[k] = bgd_grad[j] * sky_grad[k] * fc;
-                        }
+                // Gradient
+                (*gradient)[j] += bgd_factor * bgd_grad[j];
 
-						// ... else if spectral model for background component
-                        // is non-zero and non-infinite then we have the
-                        // curvature element of a background component
-                        else if (bgd_grad[k] != 0.0  &&
-                                 !gammalib::is_infinite(bgd_grad[k])) {
-                            colvar[k] = bgd_grad[j] * bgd_grad[k] * fd;
-                        }
+                // Hessian (from first-order derivatives only)
+                for (int k = 0; k < npars; ++k) {
 
-						// ... else neither sky nor background
-                        else {
-                            colvar[k] = 0.0;
-                        }
+                    // If spectral model for sky component is non-zero and
+                    // non-infinite then we have the mixed curvature element
+                    // between a sky and a background component
+                    if (sky_grad[k] != 0.0  &&
+                        !gammalib::is_infinite(sky_grad[k])) {
+                        colvar[k] = bgd_grad[j] * sky_grad[k] * fc;
+                    }
 
-                    } // endfor: Hessian computation
+					// ... else if spectral model for background component
+                    // is non-zero and non-infinite then we have the
+                    // curvature element of a background component
+                    else if (bgd_grad[k] != 0.0  &&
+                             !gammalib::is_infinite(bgd_grad[k])) {
+                        colvar[k] = bgd_grad[j] * bgd_grad[k] * fd;
+                    }
 
-                    // Update matrix
-                    curvature->add_to_column(j, colvar);
+					// ... else neither sky nor background
+                    else {
+                        colvar[k] = 0.0;
+                    }
 
-                } // endif: spectral model for background component valid
+                } // endfor: Hessian computation
 
-            } // endfor: looped over all parameters for derivatives computation
+                // Update matrix
+                curvature->add_to_column(j, colvar);
 
-        } // endfor: looped over energy bins
+            } // endif: spectral model for background component valid
 
-    } // endif: number of parameters was positive
+        } // endfor: looped over all parameters for derivatives computation
 
-	// ... else there are no parameters, so throw an exception
-	else {
-		std::string msg ="No model parameter for the computation of the "
-						 "likelihood in observation \""+this->name()+
-		                 "\" (ID "+this->id()+").\n";
-		throw GException::invalid_value(G_LIKELIHOOD_CSTAT, msg);
-	}
+    } // endfor: looped over energy bins
 
     // Dump statistics
     #if defined(G_LIKELIHOOD_DEBUG)
@@ -2400,9 +2381,6 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
  * @param[in,out] curvature Pointer to curvature matrix.
  * @param[in,out] npred Pointer to Npred value.
  * @return Log-likelihood value.
- *
- * @exception GException::invalid_value
- *            There are no model parameters.
  *
  * Computes the log-likelihood value for the On/Off observation. The method
  * loops over the energy bins to update the function value, its derivatives
@@ -2457,97 +2435,84 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
     // Allocate working array
     GVector colvar(npars);
 
-    // Check that there is at least one parameter
-    if (npars > 0) {
+    // Loop over all energy bins
+    for (int i = 0; i < m_on_spec.size(); ++i) {
 
-        // Loop over all energy bins
-        for (int i = 0; i < m_on_spec.size(); ++i) {
+        // Reinitialize working arrays
+        for (int j = 0; j < npars; ++j) {
+            sky_grad[j] = 0.0;
+        }
 
-            // Reinitialize working arrays
-            for (int j = 0; j < npars; ++j) {
-                sky_grad[j] = 0.0;
-            }
+        // Get number of On and Off counts
+        double non  = m_on_spec[i];
+        double noff = m_off_spec[i];
 
-            // Get number of On and Off counts
-            double non  = m_on_spec[i];
-            double noff = m_off_spec[i];
+        // Get background scaling
+        double alpha = m_on_spec.backscal(i);
 
-            // Get background scaling
-            double alpha = m_on_spec.backscal(i);
+        // Get number of gamma and background events (and corresponding
+        // spectral model gradients)
+        double ngam = N_gamma(models, i, &sky_grad);
 
-            // Get number of gamma and background events (and corresponding
-            // spectral model gradients)
-            double ngam = N_gamma(models, i, &sky_grad);
+        // Initialise variables for likelihood computation
+        double nonpred     = 0.0;
+        double nbgd        = 0.0;
+        double dlogLdsky   = 0.0;
+        double d2logLdsky2 = 0.0;
 
-            // Initialise variables for likelihood computation
-            double nonpred     = 0.0;
-            double nbgd        = 0.0;
-            double dlogLdsky   = 0.0;
-            double d2logLdsky2 = 0.0;
+        // Perform likelihood profiling and derive likelihood value
+        double logL = wstat_value(non, noff, alpha, ngam,
+                                  nonpred, nbgd, dlogLdsky, d2logLdsky2);
 
-            // Perform likelihood profiling and derive likelihood value
-            double logL = wstat_value(non, noff, alpha, ngam,
-                                      nonpred, nbgd, dlogLdsky, d2logLdsky2);
+        // Update global log-likelihood and Npred
+        value  += logL;
+        *npred += nonpred;
 
-            // Update global log-likelihood and Npred
-            value  += logL;
-            *npred += nonpred;
+        // Update statistics
+        #if defined(G_LIKELIHOOD_DEBUG)
+        n_used++;
+        sum_data  += non;
+        sum_model += nonpred;
+        #endif
 
-            // Update statistics
-            #if defined(G_LIKELIHOOD_DEBUG)
-            n_used++;
-            sum_data  += non;
-            sum_model += nonpred;
-            #endif
+        // Loop over all parameters
+        for (int j = 0; j < npars; ++j) {
 
-            // Loop over all parameters
-            for (int j = 0; j < npars; ++j) {
+            // If spectral model for sky component is non-zero and
+            // non-infinite then handle sky component gradients and
+            // second derivatives including at least a sky component ...
+            if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
 
-                // If spectral model for sky component is non-zero and
-                // non-infinite then handle sky component gradients and
-                // second derivatives including at least a sky component ...
-                if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
+                // Gradient
+                (*gradient)[j] += dlogLdsky * sky_grad[j];
 
-                    // Gradient
-                    (*gradient)[j] += dlogLdsky * sky_grad[j];
+                // Hessian (from first-order derivatives only)
+                for (int k = 0; k < npars; ++k) {
 
-                    // Hessian (from first-order derivatives only)
-                    for (int k = 0; k < npars; ++k) {
+                    // If spectral model for sky component is non-zero and
+                    // non-infinite then we have the curvature element
+                    // of a sky component
+                    if (sky_grad[k] != 0.0  &&
+                        !gammalib::is_infinite(sky_grad[k])) {
+                        colvar[k] = sky_grad[j] * sky_grad[k] * d2logLdsky2;
+                    }
 
-                        // If spectral model for sky component is non-zero and
-                        // non-infinite then we have the curvature element
-                        // of a sky component
-                        if (sky_grad[k] != 0.0  &&
-                            !gammalib::is_infinite(sky_grad[k])) {
-                            colvar[k] = sky_grad[j] * sky_grad[k] * d2logLdsky2;
-                        }
+                    // ...... else if spectral model for background component
+                    // or neither sky nor background
+                    else {
+                        colvar[k] = 0.0;
+                    }
 
-                        // ...... else if spectral model for background component
-                        // or neither sky nor background
-                        else {
-                            colvar[k] = 0.0;
-                        }
+                } // endfor: Hessian computation
 
-                    } // endfor: Hessian computation
+                // Update matrix
+                curvature->add_to_column(j, colvar);
 
-                    // Update matrix
-                    curvature->add_to_column(j, colvar);
+            } // endif: spectral model is non-zero and non-infinite
 
-                } // endif: spectral model is non-zero and non-infinite
+        } // endfor: looped over all parameters for derivatives computation
 
-            } // endfor: looped over all parameters for derivatives computation
-
-        } // endfor: looped over energy bins
-
-    } // endif: number of parameters was positive
-
-    // ... else there are no parameters, so throw an exception
-    else {
-        std::string msg ="No model parameter for the computation of the "
-                         "likelihood in observation \""+this->name()+
-                         "\" (ID "+this->id()+").\n";
-        throw GException::invalid_value(G_LIKELIHOOD_WSTAT, msg);
-    }
+    } // endfor: looped over energy bins
 
     // Optionally dump gradient and curvature matrix
     #if defined(G_LIKELIHOOD_DEBUG)

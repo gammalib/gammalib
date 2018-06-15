@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-14 June 2018
+15 June 2018
 
 
 1. Introduction
@@ -204,6 +204,12 @@ None
 
 20. CTA interface
 -----------------
+The likelihood value is now also computed in GObservations::likelihood::eval(),
+CTAOnOffObservation::likelihood_wstat() and CTAOnOffObservation::likelihood_cstat()
+for the case that the model has no parameters. This is particularily needed for
+the TS computation with the "wstat" statistic which is meaningful without any
+model (#2312).
+
 The GCTAOnOffObservation observation constructor now takes a spatial model
 component of type GModelSpatial instead of a sky direction as argument, and the
 ARF computation is performed by computing the IRF for the spatial model over the
