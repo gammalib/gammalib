@@ -69,7 +69,7 @@ The following methods have been removed:
 - none
 
 The following methods have been renamed:
-- none
+- GPhoton::mc_id() from GPhoton::mcid()
 
 The arguments for the following methods have been changed:
 - GCTAOnOffObservation CTA observation constructor now takes a spatial model component

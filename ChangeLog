@@ -3,6 +3,7 @@
         * Version 1.6.0 released
         ========================
 
+        Renamed GPhoton::mcid() to GPhoton::mc_id()
         Remove at() methods from Python interface (#2515)
         Support application specific system parameter files (#2513)
         Add methods and operators to handle additional columns in GPha 

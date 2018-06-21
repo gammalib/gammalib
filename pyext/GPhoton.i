@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GPhoton.i - Photon class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,7 +43,7 @@ public:
     // Constructors and destructors
     GPhoton(void);
     GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time,
-            const int& mcid = -1);
+            const int& mc_id = -1);
     GPhoton(const GPhoton& photon);
     virtual ~GPhoton(void);
  
@@ -54,11 +54,11 @@ public:
     const GSkyDir& dir(void) const;
     const GEnergy& energy(void) const;
     const GTime&   time(void) const;
-    const int&     mcid(void) const;
+    const int&     mc_id(void) const;
     void           dir(const GSkyDir& dir);
     void           energy(const GEnergy& energy);
     void           time(const GTime& time);
-    void           mcid(const int& mcid);
+    void           mc_id(const int& mc_id);
 };
 
 
@@ -75,4 +75,15 @@ public:
     GPhoton copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = self.dir(), self.energy(), self.time(), self.mc_id()
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.dir(state[0])
+        self.energy(state[1])
+        self.time(state[2])
+        self.mc_id(state[3])
+}
 };

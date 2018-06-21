@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GPhoton.hpp - Photon class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,10 +67,10 @@ GPhoton::GPhoton(void)
  * @param[in] dir Sky direction.
  * @param[in] energy Energy.
  * @param[in] time Time.
- * @param[in] mcid Monte-Carlo identifier.
+ * @param[in] mc_id Monte-Carlo identifier.
  ***************************************************************************/
 GPhoton::GPhoton(const GSkyDir& dir, const GEnergy& energy,
-                 const GTime& time, const int& mcid)
+                 const GTime& time, const int& mc_id)
 { 
     // Initialise private members
     init_members();
@@ -79,7 +79,7 @@ GPhoton::GPhoton(const GSkyDir& dir, const GEnergy& energy,
     m_dir    = dir;
     m_energy = energy;
     m_time   = time;
-    m_mc_id  = mcid;
+    m_mc_id  = mc_id;
 
     // Return
     return;
@@ -205,7 +205,7 @@ std::string GPhoton::print(const GChatter& chatter) const
         result.append(", E="+m_energy.print());
         result.append(", MET="+m_time.print());
         if (m_mc_id >= 0) {
-            result.append(", MCid="+gammalib::str(m_mc_id));
+            result.append(", MC_ID="+gammalib::str(m_mc_id));
         }
         result.append(")");
 

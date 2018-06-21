@@ -32,6 +32,7 @@ Bug fixes
 Improvements
 ------------
 
+* Renamed ``GPhoton::mcid()`` to ``GPhoton::mc_id()``
 * [`2513 <https://cta-redmine.irap.omp.eu/issues/2513>`_] -
   Support application specific system parameter files
 * Add methods and operators to handle additional columns in ``GPha``
