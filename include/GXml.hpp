@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GXml.hpp - XML class                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -181,6 +181,7 @@ public:
     GXml(void);
     GXml(const GXml& xml);
     explicit GXml(const std::string& xml);
+    explicit GXml(const GXmlDocument& root);
     virtual ~GXml(void);
 
     // Operators
@@ -189,33 +190,35 @@ public:
     const GXmlNode* operator[](const int& index) const;
 
     // Methods
-    void               clear(void);
-    GXml*              clone(void) const;
-    std::string        classname(void) const;
-    int                size(void) const;
-    bool               is_empty(void) const;
-    GXmlNode*          set(const int& index, const GXmlNode& node);
-    GXmlNode*          append(const GXmlNode& node);
-    GXmlElement*       append(const std::string& segment);
-    GXmlNode*          insert(const int& index, const GXmlNode& node);
-    void               remove(const int& index);
-    void               reserve(const int& num);
-    void               extend(const GXmlNode& node);
-    int                elements(void) const;
-    int                elements(const std::string& name) const;
-    GXmlElement*       element(const int& index);
-    const GXmlElement* element(const int& index) const;
-    GXmlElement*       element(const std::string& name);
-    const GXmlElement* element(const std::string& name) const;
-    GXmlElement*       element(const std::string& name, const int& index);
-    const GXmlElement* element(const std::string& name, const int& index) const;
-    void               load(const GFilename& filename);
-    void               save(const GFilename& filename) const;
-    void               read(const GUrl& url);
-    void               write(GUrl& url, const int& indent = 0) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
-    std::string        print(const GChatter& chatter = NORMAL,
-                             const int&      indent = 0) const;
+    void                clear(void);
+    GXml*               clone(void) const;
+    std::string         classname(void) const;
+    int                 size(void) const;
+    bool                is_empty(void) const;
+    GXmlNode*           set(const int& index, const GXmlNode& node);
+    GXmlNode*           append(const GXmlNode& node);
+    GXmlElement*        append(const std::string& segment);
+    GXmlNode*           insert(const int& index, const GXmlNode& node);
+    void                remove(const int& index);
+    void                reserve(const int& num);
+    void                extend(const GXmlNode& node);
+    int                 elements(void) const;
+    int                 elements(const std::string& name) const;
+    GXmlElement*        element(const int& index);
+    const GXmlElement*  element(const int& index) const;
+    GXmlElement*        element(const std::string& name);
+    const GXmlElement*  element(const std::string& name) const;
+    GXmlElement*        element(const std::string& name, const int& index);
+    const GXmlElement*  element(const std::string& name, const int& index) const;
+    const GXmlDocument& root(void) const;
+    void                root(const GXmlDocument& root);
+    void                load(const GFilename& filename);
+    void                save(const GFilename& filename) const;
+    void                read(const GUrl& url);
+    void                write(GUrl& url, const int& indent = 0) const;
+    std::string         print(const GChatter& chatter = NORMAL) const;
+    std::string         print(const GChatter& chatter = NORMAL,
+                              const int&      indent = 0) const;
 
 protected:
     // Protected enumerators
@@ -276,6 +279,31 @@ inline
 bool GXml::is_empty(void) const
 {
     return m_root.is_empty();
+}
+
+
+/***********************************************************************//**
+ * @brief Return document root
+ *
+ * @return Document root.
+ ***************************************************************************/
+inline
+const GXmlDocument& GXml::root(void) const
+{
+    return m_root;
+}
+
+
+/***********************************************************************//**
+ * @brief Set document root
+ *
+ * @param[in] root Document root.
+ ***************************************************************************/
+inline
+void GXml::root(const GXmlDocument& root)
+{
+    m_root = root;
+    return;
 }
 
 #endif /* GXML_HPP */

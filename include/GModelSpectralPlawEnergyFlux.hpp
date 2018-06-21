@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralPlawEnergyFlux.hpp - Spectral power law model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                                    *
+ *  copyright (C) 2016-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -112,6 +112,7 @@ public:
     virtual std::string                   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  eflux(void) const;
     void    eflux(const double& eflux);
     double  index(void) const;
@@ -173,6 +174,21 @@ inline
 std::string GModelSpectralPlawEnergyFlux::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the spectral power law model.
+ ***************************************************************************/
+inline
+void GModelSpectralPlawEnergyFlux::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

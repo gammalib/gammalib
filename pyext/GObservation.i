@@ -92,6 +92,7 @@ public:
                                         const GModelPar& par) const;
 
     // Implemented methods
+    bool               has_events(void) const;
     void               name(const std::string& name);
     void               id(const std::string& id);
     void               statistic(const std::string& statistic);
@@ -107,13 +108,18 @@ public:
 %extend GObservation {
 %pythoncode {
     def __getstate__(self):
-        args = (self.name(), self.id(), self.statistic(), self.events())
+        if self.has_events():
+            events = self.events()
+        else:
+            events = None
+        args = (self.name(), self.id(), self.statistic(), events)
         return args
     def __setstate__(self, state):
         self.__init__()
         self.name(state[0])
         self.id(state[1])
         self.statistic(state[2])
-        self.events(state[3])
+        if state[3] != None:
+            self.events(state[3])
 }
 };

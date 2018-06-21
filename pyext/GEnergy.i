@@ -146,10 +146,10 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = self.MeV()
-        return args
+        state = self.MeV(),
+        return state
     def __setstate__(self, state):
         self.__init__()
-        self.MeV(state)
+        self.MeV(state[0])
 }
 };

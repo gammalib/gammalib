@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelTemporalLightCurve.cpp - Temporal light curve model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -601,86 +601,91 @@ void GModelTemporalLightCurve::load_nodes(const GFilename& filename)
     // Set filename
     m_filename = filename;
 
-    // Load FITS file
-    GFits fits = GFits(filename);
+    // Continue only if filename is not empty
+    if (!filename.is_empty()) {
 
-    // Extract binary table (so far always load extension 1 as table)
-    GFitsTable* table = fits.table(1);
+        // Load FITS file
+        GFits fits = GFits(filename);
 
-    // Read time reference from binary table
-    m_timeref.read(*table);
+        // Extract binary table (so far always load extension 1 as table)
+        GFitsTable* table = fits.table(1);
 
-    // Extract columns
-    GFitsTableCol* time_col = (*table)["TIME"];
-    GFitsTableCol* norm_col = (*table)["NORM"];
+        // Read time reference from binary table
+        m_timeref.read(*table);
 
-    // Check that there are at least two nodes in table
-    if (time_col->nrows() < 2) {
-        std::string msg = "\"TIME\" column contains "+
-                          gammalib::str(time_col->nrows())+" rows but at "
-                          "least two rows are required. Please specify a valid "
-                          "temporal file function.";
-        throw GException::invalid_value(G_LOAD_NODES, msg);
-    }
+        // Extract columns
+        GFitsTableCol* time_col = (*table)["TIME"];
+        GFitsTableCol* norm_col = (*table)["NORM"];
 
-    // Check that both columns are consistent
-    if (time_col->nrows() != norm_col->nrows()) {
-        std::string msg = "\"TIME\" and \"NORM\" columns have inconsistent "
-                          "number of rows ("+
-                          gammalib::str(time_col->nrows())+", "+
-                          gammalib::str(norm_col->nrows())+"). Please "
-                          "specify a valid temporal file function.";
-        throw GException::invalid_value(G_LOAD_NODES, msg);
-    }
-
-    // Set number of nodes
-    int nodes = time_col->nrows();
-
-    // Check that time values are in ascending order and that no node is
-    // larger than 1
-    double last_time = -1.0;
-    for (int i = 0; i < nodes; ++i) {
-
-        // Check if time has increased
-        if (last_time >= 0.0 && time_col->real(i) <= last_time) {
-            std::string msg = "Time "+gammalib::str(time_col->real(i))+
-                              " in row "+gammalib::str(i+1)+" of \"TIME\" "
-                              "column is equal to or smaller than preceeding "
-                              "value. Please provide a light curve file with "
-                              "monotonically increasing times.";
+        // Check that there are at least two nodes in table
+        if (time_col->nrows() < 2) {
+            std::string msg = "\"TIME\" column contains "+
+                              gammalib::str(time_col->nrows())+" rows but at "
+                              "least two rows are required. Please specify a valid "
+                              "temporal file function.";
             throw GException::invalid_value(G_LOAD_NODES, msg);
         }
 
-        // Check if value is smaller than maximum allowed normalisation
-        if (norm_col->real(i) > max_norm) {
-            std::string msg = "Value "+gammalib::str(norm_col->real(i))+" at "
-                              "time "+gammalib::str(time_col->real(i))+" is "
-                              "larger than 1. Please provide a light curve file "
-                              "with normalizations not exceeding 1.";
+        // Check that both columns are consistent
+        if (time_col->nrows() != norm_col->nrows()) {
+            std::string msg = "\"TIME\" and \"NORM\" columns have inconsistent "
+                              "number of rows ("+
+                              gammalib::str(time_col->nrows())+", "+
+                              gammalib::str(norm_col->nrows())+"). Please "
+                              "specify a valid temporal file function.";
             throw GException::invalid_value(G_LOAD_NODES, msg);
         }
+
+        // Set number of nodes
+        int nodes = time_col->nrows();
+
+        // Check that time values are in ascending order and that no node is
+        // larger than 1
+        double last_time = -1.0;
+        for (int i = 0; i < nodes; ++i) {
+
+            // Check if time has increased
+            if (last_time >= 0.0 && time_col->real(i) <= last_time) {
+                std::string msg = "Time "+gammalib::str(time_col->real(i))+
+                                  " in row "+gammalib::str(i+1)+" of \"TIME\" "
+                                  "column is equal to or smaller than preceeding "
+                                  "value. Please provide a light curve file with "
+                                  "monotonically increasing times.";
+                throw GException::invalid_value(G_LOAD_NODES, msg);
+            }
+
+            // Check if value is smaller than maximum allowed normalisation
+            if (norm_col->real(i) > max_norm) {
+                std::string msg = "Value "+gammalib::str(norm_col->real(i))+" at "
+                                  "time "+gammalib::str(time_col->real(i))+" is "
+                                  "larger than 1. Please provide a light curve file "
+                                  "with normalizations not exceeding 1.";
+                throw GException::invalid_value(G_LOAD_NODES, msg);
+            }
         
-    } // endfor: looped over nodes
+        } // endfor: looped over nodes
 
-    // Extract nodes
-    for (int i = 0; i < nodes; ++i) {
-        m_nodes.append(time_col->real(i));
-        m_values.push_back(norm_col->real(i));
-    }
-
-    // Make sure that no node exceeds 1
-    for (int i = 0; i < m_values.size(); ++i) {
-        if (m_values[i] > 1.0) {
-            m_values[i] = 1.0;
+        // Extract nodes
+        for (int i = 0; i < nodes; ++i) {
+            m_nodes.append(time_col->real(i));
+            m_values.push_back(norm_col->real(i));
         }
-    }
 
-    // Set minimum and maximum times (assumes that times are ordered)
-    m_tmin.set(time_col->real(0), m_timeref);
-    m_tmax.set(time_col->real(time_col->nrows()-1), m_timeref);
+        // Make sure that no node exceeds 1
+        for (int i = 0; i < m_values.size(); ++i) {
+            if (m_values[i] > 1.0) {
+                m_values[i] = 1.0;
+            }
+        }
 
-    // Close FITS file
-    fits.close();
+        // Set minimum and maximum times (assumes that times are ordered)
+        m_tmin.set(time_col->real(0), m_timeref);
+        m_tmax.set(time_col->real(time_col->nrows()-1), m_timeref);
+
+        // Close FITS file
+        fits.close();
+
+    } // endif: filename was not empty
 
     // Return
     return;

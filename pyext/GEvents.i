@@ -99,8 +99,8 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = self.gti(), self.ebounds()
-        return args
+        state = self.gti(), self.ebounds()
+        return state
     def __setstate__(self, state):
         self.__init__()
         self.gti(state[0])

@@ -96,6 +96,7 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     double  index(void) const;
     GEnergy pivot(void) const;
@@ -156,6 +157,21 @@ inline
 std::string GModelSpectralPlaw::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the spectral power law model.
+ ***************************************************************************/
+inline
+void GModelSpectralPlaw::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

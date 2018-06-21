@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib support module.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 # ==========================================================================
 import gammalib
 import math
+import test_support
 
 
 # =============================== #
@@ -279,6 +280,34 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests of empty classes
+        #test_support._pickeling(self, gammalib.GBilinear())
+        #test_support._pickeling(self, gammalib.GCsv())
+        test_support._pickeling(self, gammalib.GFilename())
+        #test_support._pickeling(self, gammalib.GNodeArray())
+        #test_support._pickeling(self, gammalib.GRan())
+        #test_support._pickeling(self, gammalib.GUrl())
+        #test_support._pickeling(self, gammalib.GUrlFile())
+        #test_support._pickeling(self, gammalib.GUrlString())
+
+        # Perform pickeling tests of filled classes
+        #test_support._pickeling(self, gammalib.GBilinear())
+        #test_support._pickeling(self, gammalib.GCsv())
+        test_support._pickeling(self, gammalib.GFilename('test.fits[URL]'))
+        #test_support._pickeling(self, gammalib.GNodeArray())
+        #test_support._pickeling(self, gammalib.GRan())
+        #test_support._pickeling(self, gammalib.GUrl())
+        #test_support._pickeling(self, gammalib.GUrlFile())
+        #test_support._pickeling(self, gammalib.GUrlString())
+
+        # Return
+        return
+
     # Set all test functions
     def set(self):
         """
@@ -295,6 +324,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_url_string, 'Test GUrlString')
         self.append(self._test_filename,   'Test GFilename')
         self.append(self._test_csv,        'Test GCsv')
+        self.append(self._test_pickeling, 'Test pickeling of "support" classes')
 
         # Return
         return

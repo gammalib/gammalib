@@ -2,7 +2,7 @@
  *                 GModelSpectralSmoothBrokenPlaw.hpp                      *
  *               Smoothly broken power law spectrum class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Josh Cardenzana                                  *
+ *  copyright (C) 2017-2018 by Josh Cardenzana                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -118,6 +118,7 @@ public:
     virtual std::string                     print(const GChatter& chatter = NORMAL) const;
     
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     double  index1(void) const;
     double  index2(void) const;
@@ -249,6 +250,21 @@ inline
 std::string GModelSpectralSmoothBrokenPlaw::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the spectral smoothly broken power law model.
+ ***************************************************************************/
+inline
+void GModelSpectralSmoothBrokenPlaw::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

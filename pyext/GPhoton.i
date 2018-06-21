@@ -80,10 +80,6 @@ public:
         args = self.dir(), self.energy(), self.time(), self.mc_id()
         return args
     def __setstate__(self, state):
-        self.__init__()
-        self.dir(state[0])
-        self.energy(state[1])
-        self.time(state[2])
-        self.mc_id(state[3])
+        self.__init__(state[0], state[1], state[2], state[3])
 }
 };

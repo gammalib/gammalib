@@ -64,4 +64,11 @@ public:
  * @brief GModelData class extension
  ***************************************************************************/
 %extend GModelData {
+%pythoncode {
+    def __getstate__(self):
+        state = gammalib.GModel.__getstate__(self)
+        return state
+    def __setstate__(self, state):
+        gammalib.GModel.__setstate__(self, state)
+}
 };

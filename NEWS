@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-21 June 2018
+22 June 2018
 
 
 1. Introduction
@@ -49,9 +49,20 @@ The following methods have been added:
 - GPha::ancrfile()
 - GFitsHeaderCard boolean constructor
 - GFitsHDU::card(std::string&, bool&, std::string&)
+- GObservation::has_events()
+- GModelSpatialPointSource::type(std::string&)
+- GModelSpectralPlaw::type(std::string&)
+- GModelSpatialRadialProfileGauss(GSkyDir&, double&)
+- GModelSpatialRadialProfileGauss::sigma()
+- GXml::GXml(GXmlDocument&)
+- GXml::root()
+- GXmlElement::attributes()
+- GXmlElement::attribute(int&)
+- GXmlDocument::GXmlDocument(GFilename&, std::string&, std::string&, std::string&)
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)
+- GCTAEventAtom::index(int&)
 - GCTABackground::rate_ebin()
 - GCTABackgroundPerfTable::rate_ebin()
 - GCTABackground3D::rate_ebin()
@@ -62,8 +73,8 @@ The following methods have been added:
 - GCTAModelRadialAcceptance::radial(GCTAModelRadial*)
 - GCTAModelRadialAcceptance::spectral(GModelSpectral*)
 - GCTAModelRadialAcceptance::temporal(GModelTemporal*)
-- GModelSpatialRadialProfileGauss(GSkyDir&, double&)
-- GModelSpatialRadialProfileGauss::sigma()
+- GCTAModelIrfBackground::spectral(GModelSpectral*)
+- GCTAModelIrfBackground::temporal(GModelTemporal*)
 
 The following methods have been removed:
 - none

@@ -84,8 +84,8 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = self.ra(), self.dec()
-        return args
+        state = self.ra(), self.dec()
+        return state
     def __setstate__(self, state):
         self.__init__()
         self.radec(state[0], state[1])

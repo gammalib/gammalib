@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralConst.i - Spectral constant model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,7 @@ public:
     virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
+    void   type(const std::string& type);
     double value(void) const;
     void   value(const double& value);
 };
@@ -74,4 +75,13 @@ public:
     GModelSpectralConst copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.type(), self[0])
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.type(state[0])
+        self[0] = state[1]
+}
 };

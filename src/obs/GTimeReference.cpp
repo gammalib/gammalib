@@ -672,7 +672,7 @@ void GTimeReference::init_members(void)
     m_mjdref   = 0.0;
     m_timeunit = "secs";
     m_timesys  = "TT";
-    m_timeref  = "local";
+    m_timeref  = "LOCAL";
     m_unit_sec = true;
   
     // Return

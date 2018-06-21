@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralConst.hpp - Spectral constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -89,6 +89,7 @@ public:
     virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void   type(const std::string& type);
     double value(void) const;
     void   value(const double& value);
 
@@ -127,6 +128,21 @@ inline
 std::string GModelSpectralConst::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the constant spectral model.
+ ***************************************************************************/
+inline
+void GModelSpectralConst::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

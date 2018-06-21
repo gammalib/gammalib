@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib optimizer module.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,17 +98,31 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests
+        #test_support._pickeling(self, gammalib.GOptimizerLM())
+        test_support._pickeling(self, gammalib.GOptimizerPar())
+        #test_support._pickeling(self, gammalib.GOptimizerPars())
+
+        # Return
+        return
+
     # Set test functions
     def set(self):
         """
-        Set all test functions.
+        Set all test functions
         """
         # Set test name
         self.name('opt')
 
         # Append tests
-        self.append(self._test_pars_access, "Test GOptimizerPars parameter access")
-        self.append(self._test_pars_slicing, "Test GOptimizerPars slicing")
+        self.append(self._test_pars_access, 'Test GOptimizerPars parameter access')
+        self.append(self._test_pars_slicing, 'Test GOptimizerPars slicing')
+        self.append(self._test_pickeling, 'Test pickeling of "opt" classes')
 
         # Return
         return

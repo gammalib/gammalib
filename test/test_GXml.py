@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib xml module.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -157,6 +157,32 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GXml())
+        test_support._pickeling(self, gammalib.GXmlAttribute())
+        test_support._pickeling(self, gammalib.GXmlComment())
+        test_support._pickeling(self, gammalib.GXmlDocument())
+        test_support._pickeling(self, gammalib.GXmlElement())
+        test_support._pickeling(self, gammalib.GXmlPI())
+        test_support._pickeling(self, gammalib.GXmlText())
+
+        # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GXml('<?xml version="1.0" standalone="no"?><a>Text</a>'))
+        test_support._pickeling(self, gammalib.GXmlAttribute('name','value'))
+        test_support._pickeling(self, gammalib.GXmlComment('comment'))
+        test_support._pickeling(self, gammalib.GXmlDocument('test.xml','a','b','c'))
+        test_support._pickeling(self, gammalib.GXmlElement('a file="x"'))
+        test_support._pickeling(self, gammalib.GXmlPI('<?PI?>'))
+        test_support._pickeling(self, gammalib.GXmlText('Text'))
+
+        # Return
+        return
+
     # Set test functions
     def set(self):
         """
@@ -170,6 +196,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_xml_slicing, 'Test GXml slicing')
         self.append(self._test_elements_access, 'Test GXmlElement parameter access')
         self.append(self._test_elements_slicing, 'Test GXmlElement slicing')
+        self.append(self._test_pickeling, 'Test pickeling of "xml" classes')
 
         # Return
         return

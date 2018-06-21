@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlPI.i - XML PI node class definition                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,4 +62,12 @@ public:
     GXmlPI copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.pi(),)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.pi(state[0])
+}
 };

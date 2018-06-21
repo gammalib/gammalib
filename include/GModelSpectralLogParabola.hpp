@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralLogParabola.hpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Michael Mayer                               *
+ *  copyright (C) 2012-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -103,6 +103,7 @@ public:
     virtual std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     void    prefactor(const double& prefactor);
     double  index(void) const;
@@ -207,7 +208,7 @@ std::string GModelSpectralLogParabola::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "LogParabola".
+ * @return Model type.
  *
  * Returns the type of the log parabola spectral model.
  ***************************************************************************/
@@ -215,6 +216,21 @@ inline
 std::string GModelSpectralLogParabola::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the log parabola spectral model.
+ ***************************************************************************/
+inline
+void GModelSpectralLogParabola::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

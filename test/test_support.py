@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module provides support functions for the Python unit tests
 #
-# Copyright (C) 2017 Juergen Knoedlseder
+# Copyright (C) 2017-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import pickle
 
 
 # ============================== #
@@ -232,6 +233,43 @@ def _energy_container_slicing(testsuite, container):
     testsuite.test_value(container[:-7][0].energy().MeV(), 0.0)
     testsuite.test_value(container[:-7][1].energy().MeV(), 1.0)
     testsuite.test_value(container[:-7][2].energy().MeV(), 2.0)
+
+    # Return
+    return
+
+
+# ============== #
+# Test pickeling #
+# ============== #
+def _pickeling(testsuite, object):
+    """
+    Test class pickeling
+
+    Parameters
+    ----------
+    testsuite : `~gammalib.GPythonTestSuite`
+        Test suite class
+    container : `~gammalib.GBase`
+        GammaLib class
+    """
+    # Get class name
+    name = object.classname()
+    
+    # Start exception catching
+    testsuite.test_try('Test pickeling of "%s" class.' % name)
+
+    # Test if pickling results in an exception
+    try:
+        dump       = pickle.dumps(object)
+        obj        = pickle.loads(dump)
+        dump_again = pickle.dumps(obj)
+        testsuite.test_assert(dump == dump_again,
+                              'Check pickled dump of "%s\n%s\n%s"' %
+                              (name, str(object), str(obj)))
+        testsuite.test_try_success()
+    except Exception as e:
+        testsuite.test_try_failure('Error in pickeling "%s" (%s).' %
+                                   (name, str(e)))
 
     # Return
     return

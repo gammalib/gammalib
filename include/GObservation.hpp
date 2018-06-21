@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -113,6 +113,7 @@ public:
                                         const GModelPar& par) const;
 
     // Implemented methods
+    bool               has_events(void) const;
     void               name(const std::string& name);
     void               id(const std::string& id);
     void               statistic(const std::string& statistic);
@@ -212,6 +213,18 @@ protected:
     std::string m_statistic;   //!< Optimizer statistic
     GEvents*    m_events;      //!< Pointer to event container
 };
+
+
+/***********************************************************************//**
+ * @brief Signal if observation has events
+ *
+ * @return True if observation contains events.
+ ***************************************************************************/
+inline
+bool GObservation::has_events(void) const
+{
+    return (m_events != NULL);
+}
 
 
 /***********************************************************************//**

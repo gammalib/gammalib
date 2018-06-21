@@ -69,6 +69,7 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     double  index(void) const;
     GEnergy pivot(void) const;
@@ -85,4 +86,15 @@ public:
     GModelSpectralPlaw copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.type(), self[0], self[1], self[2])
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.type(state[0])
+        self[0] = state[1]
+        self[1] = state[2]
+        self[2] = state[3]
+}
 };

@@ -381,14 +381,22 @@ void GModelSpatialComposite::read(const GXmlElement& xml)
                 }
             }
 
-            // If there is a "scale_min" attribute set the minimum accordingly
+            // If there is a "scale_min" attribute set the minimum accordingly;
+            // otherwise remove minimum
             if (spec->has_attribute("scale_min")) {
                 scale.min(gammalib::todouble(spec->attribute("scale_min")));
             }
+            else {
+                scale.remove_min();
+            }
 
-            // If there is a "scale_max" attribute set the maximum accordingly
+            // If there is a "scale_max" attribute set the maximum accordingly;
+            // otherwise remove maximum
             if (spec->has_attribute("scale_max")) {
                 scale.max(gammalib::todouble(spec->attribute("scale_max")));
+            }
+            else {
+                scale.remove_max();
             }
 
         } // endif: there was a scale attribute
@@ -505,8 +513,12 @@ void GModelSpatialComposite::write(GXmlElement& xml) const
             if (m_scales[i]->is_free()) {
                 matching_model->attribute("scale_error",
             	                          gammalib::str(m_scales[i]->error()));
+            }
+            if (m_scales[i]->has_min()) {
                 matching_model->attribute("scale_min",
             	                          gammalib::str(m_scales[i]->min()));
+            }
+            if (m_scales[i]->has_max()) {
                 matching_model->attribute("scale_max",
                                           gammalib::str(m_scales[i]->max()));
             }

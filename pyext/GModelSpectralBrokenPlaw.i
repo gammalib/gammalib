@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpectralBrokenPlaw.i - Broken power law spectrum class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Anneli Schulz                               *
+ *  copyright (C) 2013-2018 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,6 +71,7 @@ public:
     virtual void                      write(GXmlElement& xml) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     double  index1(void) const;
     double  index2(void) const;
@@ -89,4 +90,16 @@ public:
     GModelSpectralBrokenPlaw copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.type(), self[0], self[1], self[2], self[3])
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.type(state[0])
+        self[0] = state[1]
+        self[1] = state[2]
+        self[2] = state[3]
+        self[3] = state[4]
+}
 };

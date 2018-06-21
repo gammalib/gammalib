@@ -416,8 +416,8 @@ GModel* GModels::append(const GModel& model)
         std::string msg = 
             "Attempt to append model with name \""+model.name()+"\" to model"
             " container, but a model with the same name exists already at"
-            " index "+gammalib::str(inx)+" in the container.\n"
-            "Every model in the model container needs a unique name.";
+            " index "+gammalib::str(inx)+" in the container."
+            " Every model in the model container needs a unique name.";
         throw GException::invalid_value(G_APPEND, msg);
     }
 

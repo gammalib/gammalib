@@ -75,6 +75,7 @@ public:
     const unsigned long& event_id(void) const;
     const int&           mc_id(void) const;
     const float&         phase(void) const;
+    void                 index(const int& index);
     void                 event_id(const unsigned long& id);
     void                 mc_id(const int& id);
     void                 phase(const float& phase);
@@ -230,6 +231,19 @@ inline
 const float& GCTAEventAtom::phase(void) const
 {
     return (m_phase);
+}
+
+
+/***********************************************************************//**
+ * @brief Set event index
+ *
+ * @param[in] index Event index.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::index(const int& index)
+{
+    m_index = index;
+    return;
 }
 
 

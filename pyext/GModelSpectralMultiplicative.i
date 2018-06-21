@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralMultiplicative.i - Multiplicative spectral model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 Michael Mayer                                       *
+ *  copyright (C) 2016-2018 Michael Mayer                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,4 +76,13 @@ public:
     GModelSpectralMultiplicative copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = xml,
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+}
 };

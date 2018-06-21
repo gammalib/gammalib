@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlDocument.i - XML document node class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,10 @@ class GXmlDocument : public GXmlNode {
 public:
     // Constructors and destructors
     GXmlDocument(void);
+    GXmlDocument(const GFilename&   filename,
+                 const std::string& version,
+                 const std::string& encoding,
+                 const std::string& standalone);
     GXmlDocument(const GXmlDocument& node);
     virtual ~GXmlDocument(void);
 
@@ -67,4 +71,15 @@ public:
     GXmlDocument copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.filename(), self.version(), self.encoding(), self.standalone())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.filename(state[0])
+        self.version(state[1])
+        self.encoding(state[2])
+        self.standalone(state[3])
+}
 };

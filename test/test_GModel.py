@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib model module
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import os
 import gammalib
 import test_support
 
@@ -106,6 +107,110 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GModelPar())
+        test_support._pickeling(self, gammalib.GModels())
+        test_support._pickeling(self, gammalib.GModelSky())
+        test_support._pickeling(self, gammalib.GModelSpatialComposite())
+        #test_support._pickeling(self, gammalib.GModelSpatialDiffuseConst())
+        #test_support._pickeling(self, gammalib.GModelSpatialDiffuseCube())
+        #test_support._pickeling(self, gammalib.GModelSpatialDiffuseMap())
+        #test_support._pickeling(self, gammalib.GModelSpatialEllipticalDisk())
+        #test_support._pickeling(self, gammalib.GModelSpatialEllipticalGauss())
+        test_support._pickeling(self, gammalib.GModelSpatialPointSource())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialDisk())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialGauss())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialProfileDMBurkert())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialProfileDMEinasto())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialProfileDMZhao())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialProfileGauss())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialShell())
+        test_support._pickeling(self, gammalib.GModelSpectralBrokenPlaw())
+        test_support._pickeling(self, gammalib.GModelSpectralComposite())
+        test_support._pickeling(self, gammalib.GModelSpectralConst())
+        test_support._pickeling(self, gammalib.GModelSpectralExpInvPlaw())
+        test_support._pickeling(self, gammalib.GModelSpectralExpPlaw())
+        test_support._pickeling(self, gammalib.GModelSpectralFunc())
+        test_support._pickeling(self, gammalib.GModelSpectralGauss())
+        test_support._pickeling(self, gammalib.GModelSpectralLogParabola())
+        test_support._pickeling(self, gammalib.GModelSpectralMultiplicative())
+        test_support._pickeling(self, gammalib.GModelSpectralNodes())
+        test_support._pickeling(self, gammalib.GModelSpectralPlaw())
+        test_support._pickeling(self, gammalib.GModelSpectralPlawEnergyFlux())
+        test_support._pickeling(self, gammalib.GModelSpectralPlawPhotonFlux())
+        test_support._pickeling(self, gammalib.GModelSpectralSmoothBrokenPlaw())
+        test_support._pickeling(self, gammalib.GModelSpectralSuperExpPlaw())
+        test_support._pickeling(self, gammalib.GModelTemporalConst())
+        test_support._pickeling(self, gammalib.GModelTemporalLightCurve())
+        test_support._pickeling(self, gammalib.GModelTemporalPhaseCurve())
+
+        # Setup for tests
+        time   = gammalib.GTime(1.0,'sec')
+        pivot  = gammalib.GEnergy(1.0,'TeV')
+        ptsrc  = gammalib.GModelSpatialPointSource(1.0,2.0)
+        plaw   = gammalib.GModelSpectralPlaw(1.0,-2.0,pivot)
+        cnst   = gammalib.GModelTemporalConst(3.0)
+        sky    = gammalib.GModelSky(ptsrc, plaw, cnst)
+        engs   = gammalib.GEnergies(10,pivot,gammalib.GEnergy(10.0,'TeV'))
+        spacom = gammalib.GModelSpatialComposite()
+        spacom.append(ptsrc, 'Src1')
+        spacom.append(ptsrc, 'Src2')
+        specom = gammalib.GModelSpectralComposite()
+        specom.append(plaw, 'Src1')
+        specom.append(plaw, 'Src2')
+        spemul = gammalib.GModelSpectralMultiplicative()
+        spemul.append(plaw, 'Src1')
+        spemul.append(plaw, 'Src2')
+        nodes = gammalib.GModelSpectralNodes(plaw, engs)
+        fct   = gammalib.GFilename(os.environ['TEST_DATA']+'/filefunction.txt')
+        lcrv  = gammalib.GFilename(os.environ['TEST_DATA']+'/model_temporal_lightcurve.fits')
+        pcrv  = gammalib.GFilename(os.environ['TEST_DATA']+'/model_temporal_phasecurve.fits')
+
+        # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GModelPar('Par',2.0,5.0))
+        test_support._pickeling(self, gammalib.GModels(self._setup_models()))
+        test_support._pickeling(self, gammalib.GModelSky(sky))
+        test_support._pickeling(self, gammalib.GModelSpatialComposite(spacom))
+        #test_support._pickeling(self, gammalib.GModelSpatialDiffuseConst())
+        #test_support._pickeling(self, gammalib.GModelSpatialDiffuseCube())
+        #test_support._pickeling(self, gammalib.GModelSpatialDiffuseMap())
+        #test_support._pickeling(self, gammalib.GModelSpatialEllipticalDisk())
+        #test_support._pickeling(self, gammalib.GModelSpatialEllipticalGauss())
+        test_support._pickeling(self, gammalib.GModelSpatialPointSource(ptsrc))
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialDisk())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialGauss())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialProfileDMBurkert())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialProfileDMEinasto())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialProfileDMZhao())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialProfileGauss())
+        #test_support._pickeling(self, gammalib.GModelSpatialRadialShell())
+        test_support._pickeling(self, gammalib.GModelSpectralBrokenPlaw(1.0,-2.0,pivot,-2.1))
+        test_support._pickeling(self, gammalib.GModelSpectralComposite(specom))
+        test_support._pickeling(self, gammalib.GModelSpectralConst(3.0))
+        test_support._pickeling(self, gammalib.GModelSpectralExpInvPlaw(1.0,-2.0,pivot,0.9))
+        test_support._pickeling(self, gammalib.GModelSpectralExpPlaw(1.0,-2.0,pivot,pivot))
+        test_support._pickeling(self, gammalib.GModelSpectralFunc(fct, 2.0))
+        test_support._pickeling(self, gammalib.GModelSpectralGauss(1.0,pivot,pivot))
+        test_support._pickeling(self, gammalib.GModelSpectralLogParabola(1.0,-2.0,pivot,0.9))
+        test_support._pickeling(self, gammalib.GModelSpectralMultiplicative(spemul))
+        test_support._pickeling(self, gammalib.GModelSpectralNodes(nodes))
+        test_support._pickeling(self, gammalib.GModelSpectralPlaw(plaw))
+        test_support._pickeling(self, gammalib.GModelSpectralPlawEnergyFlux(1.0,-2.0,pivot,pivot))
+        test_support._pickeling(self, gammalib.GModelSpectralPlawPhotonFlux(1.0,-2.0,pivot,pivot))
+        test_support._pickeling(self, gammalib.GModelSpectralSmoothBrokenPlaw(1.0,-2.0,pivot,-2.1,pivot,0.9))
+        test_support._pickeling(self, gammalib.GModelSpectralSuperExpPlaw(1.0,-2.0,pivot,pivot,0.9))
+        test_support._pickeling(self, gammalib.GModelTemporalConst(cnst))
+        test_support._pickeling(self, gammalib.GModelTemporalLightCurve(lcrv, 2.0))
+        test_support._pickeling(self, gammalib.GModelTemporalPhaseCurve(pcrv, time, 0.5, 1.0, 1.0, 1.0, 2.0))
+
+        # Return
+        return
+
     # Set test functions
     def set(self):
         """
@@ -117,6 +222,7 @@ class Test(gammalib.GPythonTestSuite):
         # Append tests
         self.append(self._test_models_access, 'Test GModels model access')
         self.append(self._test_models_slicing, 'Test GModels slicing')
+        self.append(self._test_pickeling, 'Test pickeling of "model" classes')
 
         # Return
         return

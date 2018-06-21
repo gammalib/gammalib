@@ -87,8 +87,8 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = (self.mjdref(), self.timeunit(), self.timesys(), self.timeref())
-        return args
+        state = (self.mjdref(), self.timeunit(), self.timesys(), self.timeref())
+        return state
     def __setstate__(self, state):
         self.__init__(state[0], state[1], state[2], state[3])
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralGauss.i - Spectral gaussian model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2018 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,4 +81,14 @@ public:
     GModelSpectralGauss copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self[0], self[1], self[2])
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self[0] = state[0]
+        self[1] = state[1]
+        self[2] = state[2]
+}
 };

@@ -108,4 +108,18 @@ public:
         (*self)[name] = val;
         return;
     }
+%pythoncode {
+    def __getstate__(self):
+        state = self.name(), self.instruments(), self.ids(), self.tscalc(), \
+                self.has_ts(), self.ts()
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.name(state[0])
+        self.instruments(state[1])
+        self.ids(state[2])
+        self.tscalc(state[3])
+        if state[4]:
+            self.ts(state[5])
+}
 };

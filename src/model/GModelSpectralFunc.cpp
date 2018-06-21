@@ -823,62 +823,67 @@ void GModelSpectralFunc::load_nodes(const GFilename& filename)
     // Set filename
     m_filename = filename;
 
-    // Load file
-    GCsv csv = GCsv(filename.url());
+    // Continue only if filename is not empty
+    if (!filename.is_empty()) {
 
-    // Check if there are at least 2 nodes
-    if (csv.nrows() < 2) {
-        throw GException::file_function_data(G_LOAD_NODES, filename.url(),
-                                             csv.nrows());
-    }
+        // Load file
+        GCsv csv = GCsv(filename.url());
 
-    // Check if there are at least 2 columns
-    if (csv.ncols() < 2) {
-        throw GException::file_function_columns(G_LOAD_NODES, filename.url(),
-                                                csv.ncols());
-    }
-
-    // Setup nodes
-    double last_energy = 0.0;
-    for (int i = 0; i < csv.nrows(); ++i) {
-
-        // Get log10 of node energy and value. Make sure they are valid.
-        double log10energy;
-        double log10value;
-        if (csv.real(i,0) > 0) {
-            log10energy = std::log10(csv.real(i,0));
-        }
-        else {
-            throw GException::file_function_value(G_LOAD_NODES, filename.url(),
-                  csv.real(i,0), "Energy value must be positive.");
-        }
-        if (csv.real(i,1) > 0) {
-            log10value = std::log10(csv.real(i,1));
-        }
-        else {
-            throw GException::file_function_value(G_LOAD_NODES, filename.url(),
-                  csv.real(i,1), "Intensity value must be positive.");
+        // Check if there are at least 2 nodes
+        if (csv.nrows() < 2) {
+            throw GException::file_function_data(G_LOAD_NODES, filename.url(),
+                                                 csv.nrows());
         }
 
-        // Make sure that energies are increasing
-        if (csv.real(i,0) <= last_energy) {
-            throw GException::file_function_value(G_LOAD_NODES, filename.url(),
-                  csv.real(i,0), "Energy values must be monotonically increasing.");
+        // Check if there are at least 2 columns
+        if (csv.ncols() < 2) {
+            throw GException::file_function_columns(G_LOAD_NODES, filename.url(),
+                                                    csv.ncols());
         }
 
-        // Append log10 of node energy and value    
-        m_lin_nodes.append(csv.real(i,0));
-        m_log_nodes.append(log10energy);
-        m_lin_values.push_back(csv.real(i,1));
-        m_log_values.push_back(log10value);
+        // Setup nodes
+        double last_energy = 0.0;
+        for (int i = 0; i < csv.nrows(); ++i) {
 
-        // Store last energy for monotonically increasing check
-        last_energy = csv.real(i,0);
+            // Get log10 of node energy and value. Make sure they are valid.
+            double log10energy;
+            double log10value;
+            if (csv.real(i,0) > 0) {
+                log10energy = std::log10(csv.real(i,0));
+            }
+            else {
+                throw GException::file_function_value(G_LOAD_NODES, filename.url(),
+                      csv.real(i,0), "Energy value must be positive.");
+            }
+            if (csv.real(i,1) > 0) {
+                log10value = std::log10(csv.real(i,1));
+            }
+            else {
+                throw GException::file_function_value(G_LOAD_NODES, filename.url(),
+                      csv.real(i,1), "Intensity value must be positive.");
+            }
 
-    } // endfor: looped over nodes
+            // Make sure that energies are increasing
+            if (csv.real(i,0) <= last_energy) {
+                throw GException::file_function_value(G_LOAD_NODES, filename.url(),
+                      csv.real(i,0), "Energy values must be monotonically increasing.");
+            }
 
-    // Set pre-computation cache
-    set_cache();
+            // Append log10 of node energy and value
+            m_lin_nodes.append(csv.real(i,0));
+            m_log_nodes.append(log10energy);
+            m_lin_values.push_back(csv.real(i,1));
+            m_log_values.push_back(log10value);
+
+            // Store last energy for monotonically increasing check
+            last_energy = csv.real(i,0);
+
+        } // endfor: looped over nodes
+
+        // Set pre-computation cache
+        set_cache();
+
+    } // endif: filename was not empty
 
     // Return
     return;

@@ -62,6 +62,7 @@ public:
     virtual void                    write(GXmlElement& xml) const;
 
     // Other methods
+    void                 type(const std::string& type);
     int                  components(void) const;
     void                 append(const GModelSpatial& component,
                                 const std::string&   name = "",
@@ -80,4 +81,13 @@ public:
     GModelSpatialComposite copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = xml,
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+}
 };

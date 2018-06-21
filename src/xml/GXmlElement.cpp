@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GXmlElement.cpp - XML element node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 #include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ATTRIBUTE                            "GXmlElement::attribute(int&)"
 #define G_PARSE_START                "GXmlElement::parse_start(std::string&)"
 #define G_PARSE_STOP                  "GXmlElement::parse_stop(std::string&)"
 #define G_PARSE_ATTRIBUTE            "GXmlElement::parse_attribute(size_t*, "\
@@ -193,6 +194,26 @@ GXmlElement* GXmlElement::clone(void) const
 {
     // Clone element
     return new GXmlElement(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return attribute
+ *
+ * @param[in] index Attribute index.
+ * @return Pointer to attribute.
+ ***************************************************************************/
+const GXmlAttribute* GXmlElement::attribute(const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= attributes()) {
+        throw GException::out_of_range(G_ATTRIBUTE, index, attributes());
+    }
+    #endif
+
+    // Return pointer to attribute
+    return (m_attr[index]);
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAModelIrfBackground.i - CTA IRF background model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,8 @@ public:
     // Other methods
     GModelSpectral* spectral(void) const;
     GModelTemporal* temporal(void) const;
+    void            spectral(const GModelSpectral* spectral);
+    void            temporal(const GModelTemporal* temporal);
 };
 
 /***********************************************************************//**
@@ -71,4 +73,14 @@ public:
     GCTAModelIrfBackground copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = gammalib.GModelData.__getstate__(self), self.spectral(), \
+               self.temporal()
+        return args
+    def __setstate__(self, state):
+        gammalib.GModelData.__setstate__(self, state[0])
+        self.spectral(state[1])
+        self.temporal(state[2])
+}
 };

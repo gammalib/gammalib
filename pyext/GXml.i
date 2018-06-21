@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GXml.i - XML class                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,30 +42,33 @@ public:
     GXml(void);
     GXml(const GXml& xml);
     explicit GXml(const std::string& filename);
+    explicit GXml(const GXmlDocument& root);
     virtual ~GXml(void);
 
     // Methods
-    void         clear(void);
-    GXml*        clone(void) const;
-    std::string  classname(void) const;
-    int          size(void) const;
-    bool         is_empty(void) const;
-    GXmlNode*    set(const int& index, const GXmlNode& node);
-    GXmlNode*    append(const GXmlNode& node);
-    GXmlElement* append(const std::string& segment);
-    GXmlNode*    insert(const int& index, const GXmlNode& node);
-    void         remove(const int& index);
-    void         reserve(const int& num);
-    void         extend(const GXmlNode& node);
-    int          elements(void) const;
-    int          elements(const std::string& name) const;
-    GXmlElement* element(const int& index);
-    GXmlElement* element(const std::string& name);
-    GXmlElement* element(const std::string& name, const int& index);
-    void         load(const GFilename& filename);
-    void         save(const GFilename& filename) const;
-    void         read(const GUrl& url);
-    void         write(GUrl& url, const int& indent = 0) const;
+    void                clear(void);
+    GXml*               clone(void) const;
+    std::string         classname(void) const;
+    int                 size(void) const;
+    bool                is_empty(void) const;
+    GXmlNode*           set(const int& index, const GXmlNode& node);
+    GXmlNode*           append(const GXmlNode& node);
+    GXmlElement*        append(const std::string& segment);
+    GXmlNode*           insert(const int& index, const GXmlNode& node);
+    void                remove(const int& index);
+    void                reserve(const int& num);
+    void                extend(const GXmlNode& node);
+    int                 elements(void) const;
+    int                 elements(const std::string& name) const;
+    GXmlElement*        element(const int& index);
+    GXmlElement*        element(const std::string& name);
+    GXmlElement*        element(const std::string& name, const int& index);
+    const GXmlDocument& root(void) const;
+    void                root(const GXmlDocument& root);
+    void                load(const GFilename& filename);
+    void                save(const GFilename& filename) const;
+    void                read(const GUrl& url);
+    void                write(GUrl& url, const int& indent = 0) const;
 };
 
 
@@ -131,4 +134,11 @@ public:
     GXml copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.root(),)
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+}
 };

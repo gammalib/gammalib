@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralSuperExpPlaw.hpp - Super exp. cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Michael Mayer                               *
+ *  copyright (C) 2014-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -107,6 +107,7 @@ public:
     virtual std::string                 print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     void    prefactor(const double& prefactor);
     double  index1(void) const;
@@ -213,12 +214,27 @@ std::string GModelSpectralSuperExpPlaw::classname(void) const
  *
  * @return "SuperExpCutoff".
  *
- * Returns the type of the exponentially cut off power law model.
+ * Returns the type of the super exponentially cut off power law model.
  ***************************************************************************/
 inline
 std::string GModelSpectralSuperExpPlaw::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the super exponentially cut off power law model.
+ ***************************************************************************/
+inline
+void GModelSpectralSuperExpPlaw::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

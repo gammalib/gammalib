@@ -124,10 +124,10 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = self.secs()
-        return args
+        state = self.secs(),
+        return state
     def __setstate__(self, state):
         self.__init__()
-        self.secs(state)
+        self.secs(state[0])
 }
 };

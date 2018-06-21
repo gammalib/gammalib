@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GXml.cpp - XML class                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -116,6 +116,24 @@ GXml::GXml(const std::string& xml)
     else {
         load(xml);
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Document constructor
+ *
+ * @param[in] root Root document.
+ ***************************************************************************/
+GXml::GXml(const GXmlDocument& root)
+{
+    // Initialise members
+    init_members();
+
+    // Set document root
+    this->root(root);
 
     // Return
     return;

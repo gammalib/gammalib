@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib sky module.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -550,30 +550,49 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GSkyDir())
+
+        # Setup test
+        dir = gammalib.GSkyDir()
+        dir.lb_deg(1.0, 2.0)
+
+        # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GSkyDir(dir))
+
+        # Return
+        return
+
     def set(self):
         """
         Set all test functions.
         """
         # Set test name
-        self.name("sky")
+        self.name('sky')
 
         # Append tests
-        self.append(self._test_methods, "Test sky map methods")
-        self.append(self._test_friend_methods, "Test sky map friend methods")
-        self.append(self._test_operators, "Test sky map operators")
-        self.append(self._test_skymap_healpix, "Test HEALPix map")
-        self.append(self._test_skymap_ait, "Test AIT projection map")
-        self.append(self._test_skymap_azp, "Test AZP projection map")
-        self.append(self._test_skymap_car, "Test CAR projection map")
-        self.append(self._test_skymap_gls, "Test GLS projection map")
-        self.append(self._test_skymap_mer, "Test MER projection map")
-        self.append(self._test_skymap_mol, "Test MOL projection map")
-        self.append(self._test_skymap_sfl, "Test SFL projection map")
-        self.append(self._test_skymap_sin, "Test SIN projection map")
-        self.append(self._test_skymap_stg, "Test STG projection map")
-        self.append(self._test_skymap_tan, "Test TAN projection map")
-        self.append(self._test_regions_access, "Test GSkyRegions region access")
-        self.append(self._test_regions_slicing, "Test GSkyRegions slicing")
+        self.append(self._test_methods, 'Test sky map methods')
+        self.append(self._test_friend_methods, 'Test sky map friend methods')
+        self.append(self._test_operators, 'Test sky map operators')
+        self.append(self._test_skymap_healpix, 'Test HEALPix map')
+        self.append(self._test_skymap_ait, 'Test AIT projection map')
+        self.append(self._test_skymap_azp, 'Test AZP projection map')
+        self.append(self._test_skymap_car, 'Test CAR projection map')
+        self.append(self._test_skymap_gls, 'Test GLS projection map')
+        self.append(self._test_skymap_mer, 'Test MER projection map')
+        self.append(self._test_skymap_mol, 'Test MOL projection map')
+        self.append(self._test_skymap_sfl, 'Test SFL projection map')
+        self.append(self._test_skymap_sin, 'Test SIN projection map')
+        self.append(self._test_skymap_stg, 'Test STG projection map')
+        self.append(self._test_skymap_tan, 'Test TAN projection map')
+        self.append(self._test_regions_access, 'Test GSkyRegions region access')
+        self.append(self._test_regions_slicing, 'Test GSkyRegions slicing')
+        self.append(self._test_pickeling, 'Test pickeling of "sky" classes')
 
         # Return
         return

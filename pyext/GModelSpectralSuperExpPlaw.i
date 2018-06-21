@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralSuperExpPlaw.i - Super exp. cut off power law model    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Michael Mayer                               *
+ *  copyright (C) 2014-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,6 +73,7 @@ public:
     virtual void                        write(GXmlElement& xml) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     void    prefactor(const double& prefactor);
     double  index1(void) const;
@@ -93,4 +94,17 @@ public:
     GModelSpectralSuperExpPlaw copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.type(), self[0], self[1], self[2], self[3], self[4])
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.type(state[0])
+        self[0] = state[1]
+        self[1] = state[2]
+        self[2] = state[3]
+        self[3] = state[4]
+        self[4] = state[5]
+}
 };

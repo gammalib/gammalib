@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralPlawPhotonFlux.hpp - Spectral power law model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -112,6 +112,7 @@ public:
     virtual std::string                   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  flux(void) const;
     void    flux(const double& flux);
     double  index(void) const;
@@ -173,6 +174,21 @@ inline
 std::string GModelSpectralPlawPhotonFlux::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the spectral power law model.
+ ***************************************************************************/
+inline
+void GModelSpectralPlawPhotonFlux::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

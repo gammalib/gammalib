@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GXmlElement.i - XML element node class definition           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,8 @@ public:
     virtual std::string  classname(void) const;
     const std::string&   name(void) const;
     void                 name(const std::string& name);
+    int                  attributes(void) const;
+    const GXmlAttribute* attribute(const int& index) const;
     std::string          attribute(const std::string& name) const;
     void                 attribute(const std::string& name, const std::string& value);
     bool                 has_attribute(const std::string& name) const;
@@ -119,4 +121,18 @@ public:
     GXmlElement copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (gammalib.GXmlNode.__getstate__(self), self.name(),
+                 tuple([self.attribute(i) for i in range(self.attributes())]))
+        return state
+    def __setstate__(self, state):
+        gammalib.GXmlNode.__setstate__(self, state[0])
+        self.__init__()
+        self.name(state[1])
+        for i in range(len(state[2])):
+            name  = state[2][i].name()
+            value = state[2][i].value()
+            self.attribute(name, value)
+}
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GXmlDocument.cpp - XML document node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,8 +51,35 @@
  ***************************************************************************/
 GXmlDocument::GXmlDocument(void) : GXmlNode()
 {
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] filename Filename.
+ * @param[in] version Version string.
+ * @param[in] encoding Encoding string.
+ * @param[in] standalone Standalone string.
+ ***************************************************************************/
+GXmlDocument::GXmlDocument(const GFilename&   filename,
+                           const std::string& version,
+                           const std::string& encoding,
+                           const std::string& standalone) : GXmlNode()
+{
+    // Initialise private members
+    init_members();
+
+    // Set members
+    this->filename(filename);
+    this->version(version);
+    this->encoding(encoding);
+    this->standalone(standalone);
 
     // Return
     return;

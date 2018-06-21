@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlDocument.hpp - XML document node class definition         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,6 +53,10 @@ class GXmlDocument : public GXmlNode {
 public:
     // Constructors and destructors
     GXmlDocument(void);
+    GXmlDocument(const GFilename&   filename,
+                 const std::string& version,
+                 const std::string& encoding,
+                 const std::string& standalone);
     GXmlDocument(const GXmlDocument& node);
     virtual ~GXmlDocument(void);
 

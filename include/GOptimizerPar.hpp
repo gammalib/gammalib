@@ -171,9 +171,9 @@ protected:
     mutable double m_factor_gradient; //!< Function gradient factor
     double         m_scale;           //!< Parameter scaling (true = factor * scale)
     bool           m_free;            //!< Parameter is free
-    bool           m_has_min;          //!< Parameter has minimum boundary
-    bool           m_has_max;          //!< Parameter has maximum boundary
-    bool           m_has_grad;         //!< Parameter has analytic gradient
+    bool           m_has_min;         //!< Parameter has minimum boundary
+    bool           m_has_max;         //!< Parameter has maximum boundary
+    bool           m_has_grad;        //!< Parameter has analytic gradient
 };
 
 

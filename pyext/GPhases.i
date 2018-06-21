@@ -97,9 +97,9 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = tuple([self.pmin(i) for i in range(self.size())]), \
-               tuple([self.pmax(i) for i in range(self.size())])
-        return args
+        state = tuple([self.pmin(i) for i in range(self.size())]), \
+                tuple([self.pmax(i) for i in range(self.size())])
+        return state
     def __setstate__(self, state):
         self.__init__()
         size = len(state[0])

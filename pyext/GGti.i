@@ -119,10 +119,10 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = tuple([self.tstart(i) for i in range(self.size())]), \
-               tuple([self.tstop(i)  for i in range(self.size())]), \
-               self.reference()
-        return args
+        state = tuple([self.tstart(i) for i in range(self.size())]), \
+                tuple([self.tstop(i)  for i in range(self.size())]), \
+                self.reference()
+        return state
     def __setstate__(self, state):
         self.__init__()
         size = len(state[0])

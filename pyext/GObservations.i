@@ -170,8 +170,8 @@ typedef GObservations::likelihood likelihood;
     }
 %pythoncode {
     def __getstate__(self):
-        args = self.models(), tuple([x for x in self])
-        return args
+        state = self.models(), tuple([x for x in self])
+        return state
     def __setstate__(self, state):
         self.__init__()
         self.models(state[0])

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralExpInvPlaw.hpp - Exponential cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Alexander Ziegler                                *
+ *  copyright (C) 2016-2018 by Alexander Ziegler                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -106,6 +106,7 @@ public:
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     void    prefactor(const double& prefactor);
     double  index(void) const;
@@ -209,6 +210,21 @@ inline
 std::string GModelSpectralExpInvPlaw::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the exponentially cut off power law model.
+ ***************************************************************************/
+inline
+void GModelSpectralExpInvPlaw::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

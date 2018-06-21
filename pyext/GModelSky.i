@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GModelSky.i - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -93,4 +93,19 @@ public:
     GModelSky copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (gammalib.GModel.__getstate__(self),
+                 self.type(), self.spatial(), self.spectral(), self.temporal())
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[1])
+        gammalib.GModel.__setstate__(self, state[0])
+        if state[2] != None:
+            self.spatial(state[2])
+        if state[3] != None:
+            self.spectral(state[3])
+        if state[4] != None:
+            self.temporal(state[4])
+}
 };

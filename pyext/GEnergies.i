@@ -137,12 +137,13 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = tuple([x for x in self])
-        return args
+        state = tuple([x for x in self]),
+        return state
     def __setstate__(self, state):
         self.__init__()
-        self.reserve(len(state))
-        for x in state:
+        size = len(state[0])
+        self.reserve(size)
+        for x in state[0]:
             self.append(x)
 }
 };

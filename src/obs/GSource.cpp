@@ -203,7 +203,12 @@ std::string GSource::print(const GChatter& chatter) const
         // Build photon string
         result.append("GSource(");
         result.append(m_name);
-        result.append(", "+m_model->type());
+        if (m_model != NULL) {
+            result.append(", "+m_model->type());
+        }
+        else {
+            result.append(", None");
+        }
         result.append(", E="+m_energy.print(chatter));
         result.append(", MET="+m_time.print(chatter));
         result.append(")");

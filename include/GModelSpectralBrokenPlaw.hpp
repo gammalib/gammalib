@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralBrokenPlaw.hpp - Broken power law spectrum class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Anneli Schulz                               *
+ *  copyright (C) 2013-2018 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -104,6 +104,7 @@ public:
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     double  index1(void) const;
     double  index2(void) const;
@@ -172,6 +173,21 @@ inline
 std::string GModelSpectralBrokenPlaw::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the spectral broken power law model.
+ ***************************************************************************/
+inline
+void GModelSpectralBrokenPlaw::type(const std::string& type)
+{
+    m_type = type;
+    return;
 }
 
 

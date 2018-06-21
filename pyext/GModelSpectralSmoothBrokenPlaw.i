@@ -2,7 +2,7 @@
  *                  GModelSpectralSmoothBrokenPlaw.i                       *
  *               Smoothly broken power law spectrum class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Josh Cardenzana                                  *
+ *  copyright (C) 2017-2018 by Josh Cardenzana                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,6 +76,7 @@ public:
     virtual void                            write(GXmlElement& xml) const;
     
     // Other methods
+    void    type(const std::string& type);
     double  prefactor(void) const;
     double  index1(void) const;
     double  index2(void) const;
@@ -98,4 +99,18 @@ public:
     GModelSpectralSmoothBrokenPlaw copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.type(), self[0], self[1], self[2], self[3], self[4], self[5])
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.type(state[0])
+        self[0] = state[1]
+        self[1] = state[2]
+        self[2] = state[3]
+        self[3] = state[4]
+        self[4] = state[5]
+        self[5] = state[6]
+}
 };

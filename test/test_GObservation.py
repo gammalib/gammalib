@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -729,6 +729,58 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests of empty classes
+        #test_support._pickeling(self, gammalib.GCaldb())
+        test_support._pickeling(self, gammalib.GEbounds())
+        test_support._pickeling(self, gammalib.GEnergy())
+        test_support._pickeling(self, gammalib.GEnergies())
+        test_support._pickeling(self, gammalib.GGti())
+        test_support._pickeling(self, gammalib.GObservations())
+        test_support._pickeling(self, gammalib.GPhases())
+        test_support._pickeling(self, gammalib.GPhoton())
+        test_support._pickeling(self, gammalib.GPhotons())
+        test_support._pickeling(self, gammalib.GSource())
+        test_support._pickeling(self, gammalib.GTime())
+        test_support._pickeling(self, gammalib.GTimes())
+        test_support._pickeling(self, gammalib.GTimeReference())
+
+        # Setup for tests
+        dir     = gammalib.GSkyDir()
+        emin    = gammalib.GEnergy(1.0,'TeV')
+        emax    = gammalib.GEnergy(100.0,'TeV')
+        tmin    = gammalib.GTime(1.0,'sec')
+        tmax    = gammalib.GTime(10.0,'sec')
+        model   = gammalib.GModelSpatialPointSource()
+        photons = gammalib.GPhotons()
+        photons.append(gammalib.GPhoton())
+        photons.append(gammalib.GPhoton())
+        times   = gammalib.GTimes()
+        times.append(tmin)
+        times.append(tmax)
+
+        # Perform pickeling tests of filled classes
+        #test_support._pickeling(self, gammalib.GCaldb())
+        test_support._pickeling(self, gammalib.GEbounds(10, emin, emax))
+        test_support._pickeling(self, gammalib.GEnergy(emin))
+        test_support._pickeling(self, gammalib.GEnergies(10, emin, emax))
+        test_support._pickeling(self, gammalib.GGti(tmin, tmax))
+        test_support._pickeling(self, gammalib.GObservations(self._setup_obs()))
+        test_support._pickeling(self, gammalib.GPhases(0.3, 0.7))
+        test_support._pickeling(self, gammalib.GPhoton(dir, emin, tmin))
+        test_support._pickeling(self, gammalib.GPhotons(photons))
+        test_support._pickeling(self, gammalib.GSource('Crab', model, emin, tmin))
+        test_support._pickeling(self, gammalib.GTime(tmin))
+        test_support._pickeling(self, gammalib.GTimes(times))
+        test_support._pickeling(self, gammalib.GTimeReference(12.345,'sec','utc','local'))
+
+        # Return
+        return
+
     # Set test functions
     def set(self):
         """
@@ -751,6 +803,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_times_slicing, 'Test GTimes slicing')
         self.append(self._test_photons_slicing, 'Test GPhotons slicing')
         self.append(self._test_observations_slicing, 'Test GObservations slicing')
+        self.append(self._test_pickeling, 'Test pickeling of "obs" classes')
 
         # Return
         return
