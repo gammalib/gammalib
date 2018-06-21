@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.i - Vector class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,6 @@ public:
     GVector*    clone(void) const;
     std::string classname(void) const;
     const int&  size(void) const;
-    double&     at(const int& index);
     int         non_zeros(void) const;
 };
 

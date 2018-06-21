@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelTemporal.i - Abstract temporal model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,7 +57,6 @@ public:
     virtual void            write(GXmlElement& xml) const = 0;
 
     // Methods
-    GModelPar& at(const int& index);
     bool       has_par(const std::string& name) const;
     int        size(void) const;
     void       autoscale(void);

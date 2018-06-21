@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GOptimizerPars.i - Optimizer parameter container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,7 +46,6 @@ public:
     void            clear(void);
     GOptimizerPars* clone(void) const;
     std::string     classname(void) const;
-    GOptimizerPar*  at(const int& index);
     int             size(void) const;
     bool            is_empty(void) const;
     int             nfree(void) const;

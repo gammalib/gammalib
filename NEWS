@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-15 June 2018
+21 June 2018
 
 
 1. Introduction
@@ -76,6 +76,8 @@ The arguments for the following methods have been changed:
 
 The return value of the following methods has been changed:
 - none
+
+All at() methods were removed from the Python interface.
 
 
 3. Configuration

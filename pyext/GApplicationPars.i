@@ -51,7 +51,6 @@ public:
     void               clear(void);
     GApplicationPars*  clone(void) const;
     std::string        classname(void) const;
-    GApplicationPar&   at(const int& index);
     int                size(void) const;
     bool               is_empty(void) const;
     GApplicationPar&   append(const GApplicationPar& par);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GRmf.i - XSPEC Redistribution Matrix File class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,7 +58,6 @@ public:
     int                  size(void) const;
     int                  ntrue(void) const;
     int                  nmeasured(void) const;
-    double&              at(const int& itrue, const int& imeasured);
     const GEbounds&      etrue(void) const;
     const GEbounds&      emeasured(void) const;
     GEbounds             etrue(const GEnergy& emeasured) const;

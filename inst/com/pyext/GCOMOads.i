@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMOads.i - COMPTEL Orbit Aspect Data container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knodlseder                               *
+ *  copyright (C) 2017-2018 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,7 +47,6 @@ public:
     void        clear(void);
     GCOMOads*   clone(void) const;
     std::string classname(void) const;
-    GCOMOad&    at(const int& index);
     int         size(void) const;
     bool        is_empty(void) const;
     GCOMOad&    append(const GCOMOad& oad);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegions.i - Sky region container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Pierrick Martin                             *
+ *  copyright (C) 2013-2018 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,7 +46,6 @@ public:
     void              clear(void);
     GSkyRegions*      clone(void) const;
     std::string       classname(void) const;
-    GSkyRegion*       at(const int& index);
     int               size(void) const;
     bool              is_empty(void) const;
     GSkyRegion*       set(const int& index, const GSkyRegion& region);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrix.i - General Matrix class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,7 +66,6 @@ public:
     virtual void          clear(void);
     virtual GMatrix*      clone(void) const;
     virtual std::string   classname(void) const;
-    virtual double&       at(const int& row, const int& column);
     virtual GVector       row(const int& row) const;
     virtual void          row(const int& row, const GVector& vector);
     virtual GVector       column(const int& column) const;

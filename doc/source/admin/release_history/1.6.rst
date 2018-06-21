@@ -69,4 +69,5 @@ New features
 Clean up
 --------
 
-* ...
+* [`2515 <https://cta-redmine.irap.omp.eu/issues/2515>`_] -
+  Remove ``at()`` methods from Python interface

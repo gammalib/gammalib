@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GFits.i - FITS file class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,8 +61,6 @@ public:
     void             clear(void);
     GFits*           clone(void) const;
     std::string      classname(void) const;
-    GFitsHDU*        at(const int& extno);
-    GFitsHDU*        at(const std::string& extname);
     GFitsImage*      image(const int& extno);
     GFitsImage*      image(const std::string& extname);
     GFitsTable*      table(const int& extno);

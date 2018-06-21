@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.i - Test suite container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2018 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,7 +47,6 @@ public:
     void               clear(void);
     GTestSuites*       clone(void) const;
     std::string        classname(void) const;
-    GTestSuite*        at(const int& index);
     int                size(void) const;
     bool               is_empty(void) const;
     GTestSuite*        set(const int& index, const GTestSuite& suite);

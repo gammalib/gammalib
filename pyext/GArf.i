@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.i - XSPEC Auxiliary Response File class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,8 +58,6 @@ public:
     std::string      classname(void) const;
     int              size(void) const;
     int              columns(void) const;
-    double&          at(const int& index);
-    double&          at(const int& index, const int& col);
     void             append(const std::string&         name,
                             const std::vector<double>& column);
     const GEbounds&  ebounds(void) const;

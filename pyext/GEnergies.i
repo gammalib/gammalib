@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GEnergies.i - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,7 +52,6 @@ public:
     void        clear(void);
     GEnergies*  clone(void) const;
     std::string classname(void) const;
-    GEnergy&    at(const int& index);
     int         size(void) const;
     bool        is_empty(void) const;
     GEnergy&    append(const GEnergy& energy);
