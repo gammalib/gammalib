@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEvents.i - Abstract event container class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,4 +97,13 @@ public:
     GEvents* copy() {
         return (self->clone());
     }
+%pythoncode {
+    def __getstate__(self):
+        args = self.gti(), self.ebounds()
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.gti(state[0])
+        self.ebounds(state[1])
+}
 };

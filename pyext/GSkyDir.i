@@ -82,4 +82,12 @@ public:
     GSkyDir copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = self.ra(), self.dec()
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.radec(state[0], state[1])
+}
 };

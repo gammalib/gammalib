@@ -135,4 +135,14 @@ public:
     GEnergies copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = tuple([x for x in self])
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.reserve(len(state))
+        for x in state:
+            self.append(x)
+}
 };

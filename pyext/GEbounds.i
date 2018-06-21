@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GEbounds.i - Energy boundaries class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -131,4 +131,16 @@ public:
     GEbounds copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = tuple([self.emin(i) for i in range(self.size())]), \
+               tuple([self.emin(i) for i in range(self.size())])
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        size = len(state[0])
+        self.reserve(size)
+        for i in range(size):
+            self.append(state[0][i], state[1][i])
+}
 };

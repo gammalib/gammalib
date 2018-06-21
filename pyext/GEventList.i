@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GEventList.i - Abstract event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,4 +61,12 @@ public:
  * @brief GEventList class extension
  ***************************************************************************/
 %extend GEventList {
+%pythoncode {
+    def __getstate__(self):
+        args = gammalib.GEvents.__getstate__(self)
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        gammalib.GEvents.__setstate__(self, state)
+}
 };

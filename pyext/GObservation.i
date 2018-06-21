@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GObservation.i - Abstract observation base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,4 +105,15 @@ public:
  * @brief GObservation class extension
  ***************************************************************************/
 %extend GObservation {
+%pythoncode {
+    def __getstate__(self):
+        args = (self.name(), self.id(), self.statistic(), self.events())
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.name(state[0])
+        self.id(state[1])
+        self.statistic(state[2])
+        self.events(state[3])
+}
 };

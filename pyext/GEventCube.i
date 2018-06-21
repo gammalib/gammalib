@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GEventCube.i - Abstract event bin container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,4 +61,12 @@ public:
  * @brief GEventCube class extension
  ***************************************************************************/
 %extend GEventCube {
+%pythoncode {
+    def __getstate__(self):
+        args = gammalib.GEvents.__getstate__(self)
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        gammalib.GEvents.__setstate__(self, state)
+}
 };

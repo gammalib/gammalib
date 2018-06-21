@@ -85,4 +85,11 @@ public:
     GTimeReference copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = (self.mjdref(), self.timeunit(), self.timesys(), self.timeref())
+        return args
+    def __setstate__(self, state):
+        self.__init__(state[0], state[1], state[2], state[3])
+}
 };

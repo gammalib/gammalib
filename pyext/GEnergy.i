@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GEnergy.i - Energy class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -144,4 +144,12 @@ public:
     GEnergy copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = self.MeV()
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.MeV(state)
+}
 };

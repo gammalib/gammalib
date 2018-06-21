@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.i - Observations container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -168,4 +168,15 @@ typedef GObservations::likelihood likelihood;
     GObservations copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = self.models(), tuple([x for x in self])
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.models(state[0])
+        self.reserve(len(state[1]))
+        for x in state[1]:
+            self.append(x)
+}
 };

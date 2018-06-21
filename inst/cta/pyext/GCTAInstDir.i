@@ -67,4 +67,14 @@ public:
     GCTAInstDir copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = self.dir(), self.detx(), self.dety()
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.dir(state[0])
+        self.detx(state[1])
+        self.dety(state[2])
+}
 };

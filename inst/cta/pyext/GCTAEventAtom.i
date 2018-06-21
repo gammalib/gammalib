@@ -58,6 +58,7 @@ public:
     const unsigned long& event_id(void) const;
     const int&           mc_id(void) const;
     const float&         phase(void) const;
+    void                 index(const int& index);
     void                 event_id(const unsigned long& id);
     void                 mc_id(const int& id);
     void                 phase(const float& phase);
@@ -71,4 +72,19 @@ public:
     GCTAEventAtom copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = self.index(), self.dir(), self.energy(), self.time(), \
+               self.event_id(), self.mc_id(), self.phase()
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.index(state[0])
+        self.dir(state[1])
+        self.energy(state[2])
+        self.time(state[3])
+        self.event_id(state[4])
+        self.mc_id(state[5])
+        self.phase(state[6])
+}
 };

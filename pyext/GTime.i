@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GTime.i - Time class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -122,4 +122,12 @@ public:
     GTime copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = self.secs()
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        self.secs(state)
+}
 };
