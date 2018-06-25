@@ -126,4 +126,12 @@ public:
     GCTAObservation copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        args = gammalib.GObservation.__getstate__(self) + ()
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        gammalib.GObservation.__setstate__(self, state)
+}
 };

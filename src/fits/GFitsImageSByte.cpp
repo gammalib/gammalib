@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsImageSByte.cpp - Signed Byte FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -167,8 +167,7 @@ GFitsImageSByte::GFitsImageSByte(const int& nx, const int& ny, const int& nz,
  * @param[in] pixels Optional pointer to image pixel array
  *
  * Construct instance of GFitsImageSByte by specifying the image dimension and
- * the number of pixels in each dimension. Note that this constructor does
- * not allocate any memory for the actual image.
+ * the number of pixels in each dimension.
  ***************************************************************************/
 GFitsImageSByte::GFitsImageSByte(const std::vector<int>& naxes,
                                  const char*             pixels) :
@@ -211,7 +210,7 @@ GFitsImageSByte::GFitsImageSByte(const GFitsImage& image) :
     m_bitpix = G_BITPIX;
 
     // Update header card
-    header()["BITPIX"].value(G_BITPIX);
+    card("BITPIX").value(G_BITPIX);
 
     // Return
     return;

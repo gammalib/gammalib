@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAEventCube.i - CTA event bin container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,9 +75,6 @@ public:
  * @brief GCTAEventCube class extension
  ***************************************************************************/
 %extend GCTAEventCube {
-    GCTAEventCube copy() {
-        return (*self);
-    }
     GCTAEventBin* __getitem__(int index) {
         if (index >= 0 && index < self->size())
             return (*self)[index];
@@ -90,4 +87,15 @@ public:
         else
             throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
+    GCTAEventCube copy() {
+        return (*self);
+    }
+%pythoncode {
+    def __getstate__(self):
+        args = gammalib.GEventCube.__getstate__(self)
+        return args
+    def __setstate__(self, state):
+        self.__init__()
+        gammalib.GEventCube.__setstate__(self, state)
+}
 };

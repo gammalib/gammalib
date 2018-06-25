@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMIaq.cpp - COMPTEL instrument response representation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -640,22 +640,22 @@ void GCOMIaq::remove_cards(void)
 {
     // Remove extra header cards
     if (m_iaq.has_card("ENERGY")) {
-        m_iaq.header().remove("ENERGY");
+        const_cast<GFitsHeader&>(m_iaq.header()).remove("ENERGY");
     }
     if (m_iaq.has_card("SPECTRUM")) {
-        m_iaq.header().remove("SPECTRUM");
+        const_cast<GFitsHeader&>(m_iaq.header()).remove("SPECTRUM");
     }
     if (m_iaq.has_card("PLAWINX")) {
-        m_iaq.header().remove("PLAWINX");
+        const_cast<GFitsHeader&>(m_iaq.header()).remove("PLAWINX");
     }
     if (m_iaq.has_card("NENG")) {
-        m_iaq.header().remove("NENG");
+        const_cast<GFitsHeader&>(m_iaq.header()).remove("NENG");
     }
     if (m_iaq.has_card("EIMIN")) {
-        m_iaq.header().remove("EIMIN");
+        const_cast<GFitsHeader&>(m_iaq.header()).remove("EIMIN");
     }
     if (m_iaq.has_card("EIMAX")) {
-        m_iaq.header().remove("EIMAX");
+        const_cast<GFitsHeader&>(m_iaq.header()).remove("EIMAX");
     }
 
     // Return

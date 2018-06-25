@@ -26,9 +26,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsHeaderCard.hpp"
-#include "GTools.hpp"
 %}
-%include stl.i
 
 
 /***********************************************************************//**
@@ -45,6 +43,8 @@ class GFitsHeaderCard : public GBase {
 public:
     // Constructors & Destructors
     GFitsHeaderCard(void);
+    GFitsHeaderCard(const std::string& keyname, const std::string& value,
+                    const std::string& unit,    const std::string& comment);
     GFitsHeaderCard(const std::string& keyname, const std::string& value,
                     const std::string& comment);
     GFitsHeaderCard(const std::string& keyname, const double& value,
@@ -94,4 +94,11 @@ public:
     GFitsHeaderCard copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.keyname(), self.value(), self.unit(), self.comment())
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0], state[1], state[2], state[3])
+}
 }

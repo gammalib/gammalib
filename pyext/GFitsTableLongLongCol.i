@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GFitsTableLongLongCol.i - FITS table long long integer column class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -113,4 +113,15 @@ public:
     GFitsTableLongLongCol copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.name(), self.nrows(), self.number(),
+                 [[self[row,inx] for inx in range(self.elements(row))] for row in range(self.nrows())])
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0], state[1], state[2])
+        for row in range(len(state[3])):
+            for inx in range(len(state[3][row])):
+                self[row,inx] = state[3][row][inx]
+}
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFitsImage.i - Abstract FITS image base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -109,7 +109,6 @@ public:
     virtual void        clear(void) = 0;
     virtual GFitsImage* clone(void) const = 0;
     virtual std::string classname(void) const = 0;
-    virtual void*       pixels(void) = 0;
     virtual double      pixel(const int& ix) const = 0;
     virtual double      pixel(const int& ix, const int& iy) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz) const = 0;

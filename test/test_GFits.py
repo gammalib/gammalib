@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib FITS module.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 import os
 import math
 import gammalib
+import test_support
 
 
 # =================================== #
@@ -613,6 +614,107 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GFits())
+        test_support._pickeling(self, gammalib.GFitsAsciiTable())
+        test_support._pickeling(self, gammalib.GFitsBinTable())
+        test_support._pickeling(self, gammalib.GFitsHeader())
+        test_support._pickeling(self, gammalib.GFitsHeaderCard())
+        test_support._pickeling(self, gammalib.GFitsImageByte())
+        test_support._pickeling(self, gammalib.GFitsImageDouble())
+        test_support._pickeling(self, gammalib.GFitsImageFloat())
+        test_support._pickeling(self, gammalib.GFitsImageLong())
+        test_support._pickeling(self, gammalib.GFitsImageLongLong())
+        test_support._pickeling(self, gammalib.GFitsImageSByte())
+        test_support._pickeling(self, gammalib.GFitsImageShort())
+        test_support._pickeling(self, gammalib.GFitsImageULong())
+        test_support._pickeling(self, gammalib.GFitsImageUShort())
+        test_support._pickeling(self, gammalib.GFitsTableBitCol())
+        test_support._pickeling(self, gammalib.GFitsTableBoolCol())
+        test_support._pickeling(self, gammalib.GFitsTableByteCol())
+        #test_support._pickeling(self, gammalib.GFitsTableCDoubleCol())
+        #test_support._pickeling(self, gammalib.GFitsTableCFloatCol())
+        test_support._pickeling(self, gammalib.GFitsTableDoubleCol())
+        test_support._pickeling(self, gammalib.GFitsTableFloatCol())
+        test_support._pickeling(self, gammalib.GFitsTableLongCol())
+        test_support._pickeling(self, gammalib.GFitsTableLongLongCol())
+        test_support._pickeling(self, gammalib.GFitsTableShortCol())
+        test_support._pickeling(self, gammalib.GFitsTableStringCol())
+        test_support._pickeling(self, gammalib.GFitsTableULongCol())
+        test_support._pickeling(self, gammalib.GFitsTableUShortCol())
+
+        # Setup for tests
+        fits   = gammalib.GFits(os.environ['TEST_DATA']+'/test_cube.fits')
+        header = gammalib.GFitsHeader()
+        header.append(gammalib.GFitsHeaderCard('key1','"string"','deg','test1'))
+        header.append(gammalib.GFitsHeaderCard('key2','1.0','deg','test2'))
+        col_bit    = gammalib.GFitsTableBitCol('a',2,3)
+        col_bool   = gammalib.GFitsTableBoolCol('a',2,3)
+        col_byte   = gammalib.GFitsTableByteCol('a',2,3)
+        col_double = gammalib.GFitsTableDoubleCol('a',2,3)
+        col_float  = gammalib.GFitsTableFloatCol('a',2,3)
+        col_long   = gammalib.GFitsTableLongCol('a',2,3)
+        col_llong  = gammalib.GFitsTableLongLongCol('a',2,3)
+        col_short  = gammalib.GFitsTableShortCol('a',2,3)
+        col_ulong  = gammalib.GFitsTableULongCol('a',2,3)
+        col_ushort = gammalib.GFitsTableUShortCol('a',2,3)
+        col_string = gammalib.GFitsTableStringCol('a',2,10,3)
+        bit        = False
+        for row in range(2):
+            for col in range(3):
+                if bit:
+                    bit = False
+                else:
+                    bit = True
+                col_bit[row,col]    = bit
+                col_bool[row,col]   = not bit
+                col_byte[row,col]   = row*10+col
+                col_double[row,col] = row*10+col
+                col_float[row,col]  = row*10+col
+                col_long[row,col]   = row*10+col
+                col_llong[row,col]  = row*10+col
+                col_short[row,col]  = row*10+col
+                col_ulong[row,col]  = row*10+col
+                col_ushort[row,col] = row*10+col
+                col_string[row,col] = str(row*10+col)
+
+        # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GFits(fits))
+        test_support._pickeling(self, gammalib.GFitsAsciiTable(3))
+        test_support._pickeling(self, gammalib.GFitsBinTable(4))
+        test_support._pickeling(self, gammalib.GFitsHeader(header))
+        test_support._pickeling(self, gammalib.GFitsHeaderCard('key','value','deg','test'))
+        test_support._pickeling(self, gammalib.GFitsImageByte(2,2,[1,2,3,4]))
+        test_support._pickeling(self, gammalib.GFitsImageDouble(2,2,[1.0,2.0,3.0,4.0]))
+        test_support._pickeling(self, gammalib.GFitsImageFloat(2,2,[1.0,2.0,3.0,4.0]))
+        test_support._pickeling(self, gammalib.GFitsImageLong(2,2,[1,2,3,4]))
+        test_support._pickeling(self, gammalib.GFitsImageLongLong(2,2,[1,2,3,4]))
+        test_support._pickeling(self, gammalib.GFitsImageSByte(2,2,[1,2,3,4]))
+        test_support._pickeling(self, gammalib.GFitsImageShort([2,2],[1,2,3,4]))
+        test_support._pickeling(self, gammalib.GFitsImageULong(2,2,1,[1,2,3,4]))
+        test_support._pickeling(self, gammalib.GFitsImageUShort(3,[1,2,3]))
+        test_support._pickeling(self, gammalib.GFitsTableBitCol(col_bit))
+        test_support._pickeling(self, gammalib.GFitsTableBoolCol(col_bool))
+        test_support._pickeling(self, gammalib.GFitsTableByteCol(col_byte))
+        #test_support._pickeling(self, gammalib.GFitsTableCDoubleCol())
+        #test_support._pickeling(self, gammalib.GFitsTableCFloatCol())
+        test_support._pickeling(self, gammalib.GFitsTableDoubleCol(col_double))
+        test_support._pickeling(self, gammalib.GFitsTableFloatCol(col_float))
+        test_support._pickeling(self, gammalib.GFitsTableLongCol(col_long))
+        test_support._pickeling(self, gammalib.GFitsTableLongLongCol(col_llong))
+        test_support._pickeling(self, gammalib.GFitsTableShortCol(col_short))
+        test_support._pickeling(self, gammalib.GFitsTableStringCol(col_string))
+        test_support._pickeling(self, gammalib.GFitsTableULongCol(col_ulong))
+        test_support._pickeling(self, gammalib.GFitsTableUShortCol(col_ushort))
+
+        # Return
+        return
+
     # Set test functions
     def set(self):
         """
@@ -623,13 +725,14 @@ class Test(gammalib.GPythonTestSuite):
 
         # Append tests
         self.append(self._test_fits, 'Test GFits')
-        self.append(self._test_fits_access, 'Test GFits parameter access')
+        self.append(self._test_fits_access, 'Test GFits member access')
         self.append(self._test_fits_slicing, 'Test GFits slicing')
-        self.append(self._test_header_access, 'Test GFitsHeader parameter access')
+        self.append(self._test_header_access, 'Test GFitsHeader member access')
         self.append(self._test_header_slicing, 'Test GFitsHeader slicing')
         self.append(self._test_fits_image, 'Test GFitsImage')
         self.append(self._test_fits_table, 'Test GFitsTable')
         self.append(self._test_fits_table_columns, 'Test GFitsTableCol')
+        self.append(self._test_pickeling, 'Test pickeling of "fits" classes')
 
         # Return
         return

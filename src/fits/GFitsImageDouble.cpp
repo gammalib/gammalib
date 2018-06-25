@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsImageDouble.cpp - Double precision FITS image class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -166,8 +166,7 @@ GFitsImageDouble::GFitsImageDouble(const int& nx, const int& ny, const int& nz,
  * @param[in] pixels Optional pointer to image pixel array
  *
  * Construct instance of GFitsImageDouble by specifying the image dimension and
- * the number of pixels in each dimension. Note that this constructor does
- * not allocate any memory for the actual image.
+ * the number of pixels in each dimension.
  ***************************************************************************/
 GFitsImageDouble::GFitsImageDouble(const std::vector<int>& naxes,
                                    const double*           pixels) :
@@ -210,7 +209,7 @@ GFitsImageDouble::GFitsImageDouble(const GFitsImage& image) :
     m_bitpix = G_BITPIX;
 
     // Update header card
-    header()["BITPIX"].value(G_BITPIX);
+    card("BITPIX").value(G_BITPIX);
 
     // Return
     return;

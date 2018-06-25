@@ -440,7 +440,6 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-
     # Set test functions
     def set(self):
         """

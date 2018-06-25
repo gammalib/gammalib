@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-22 June 2018
+25 June 2018
 
 
 1. Introduction
@@ -47,8 +47,10 @@ The following methods have been added:
 - GPha::respfile()
 - GPha::ancrfile(std::string&)
 - GPha::ancrfile()
-- GFitsHeaderCard boolean constructor
+- GFitsHDU::header(GFitsHeader&)
 - GFitsHDU::card(std::string&, bool&, std::string&)
+- GFitsHeaderCard general card constructor
+- GFitsHeaderCard boolean constructor
 - GObservation::has_events()
 - GModelSpatialPointSource::type(std::string&)
 - GModelSpectralPlaw::type(std::string&)

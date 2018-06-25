@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -850,7 +850,7 @@ void GLATEventCube::read_gti(const GFitsTable& hdu)
     // here the Fermi LAT time reference to circumvent the problem.
     if (hdu.has_card("MJDREF")) {
         if (gammalib::strip_whitespace(hdu.string("MJDREF")).empty()) {
-            hdu_local->header().remove("MJDREF");
+            const_cast<GFitsHeader&>(hdu_local->header()).remove("MJDREF");
             hdu_local->card("MJDREFI", 51910,
                             "Integer part of MJD reference");
             hdu_local->card("MJDREFF", 0.00074287037037037,

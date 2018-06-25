@@ -50,6 +50,8 @@ public:
     // Constructors & Destructors
     GFitsHeaderCard(void);
     GFitsHeaderCard(const std::string& keyname, const std::string& value,
+                    const std::string& unit,    const std::string& comment);
+    GFitsHeaderCard(const std::string& keyname, const std::string& value,
                     const std::string& comment);
     GFitsHeaderCard(const std::string& keyname, const double& value,
                     const std::string& comment);
@@ -98,6 +100,10 @@ private:
     void init_members(void);
     void copy_members(const GFitsHeaderCard& card);
     void free_members(void);
+    void set_members(const std::string& keyname,
+                     const std::string& value,
+                     const std::string& unit,
+                     const std::string& comment);
     void copy_dtype(const GFitsHeaderCard& card);
     void free_dtype(void);
     void set_dtype(const std::string& value);

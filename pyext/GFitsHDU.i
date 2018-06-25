@@ -67,7 +67,8 @@ public:
     void               extname(const std::string& extname);
     const int&         extno(void) const;
     void               extno(const int& extno);
-    GFitsHeader&       header(void);
+    const GFitsHeader& header(void) const;
+    void               header(const GFitsHeader& header);
     bool               has_card(const int& cardno) const;
     bool               has_card(const std::string& keyname) const;
     GFitsHeaderCard&   card(const int& cardno);
@@ -98,4 +99,13 @@ public:
  * @brief GFitsHDU class SWIG extension
  ***************************************************************************/
 %extend GFitsHDU {
+%pythoncode {
+    def __getstate__(self):
+        state = (self.extname(), self.header())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.extname(state[0])
+        self.header(state[1])
+}
 };

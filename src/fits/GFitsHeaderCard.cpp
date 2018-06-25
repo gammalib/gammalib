@@ -75,6 +75,35 @@ GFitsHeaderCard::GFitsHeaderCard(void)
 
 
 /***********************************************************************//**
+ * @brief Card constructor
+ *
+ * @param[in] keyname Card name.
+ * @param[in] value Card value.
+ * @param[in] unit Card unit.
+ * @param[in] comment Card comment.
+ *
+ * Constructs a header card from @p keyname, @p value, @p unit and
+ * @p comment string. The card type is determined from the card value format.
+ ***************************************************************************/
+GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
+                                 const std::string& value,
+                                 const std::string& unit,
+                                 const std::string& comment)
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    set_members(keyname, value, unit, comment);
+
+    // Return
+    return;
+}
+
+
+
+
+/***********************************************************************//**
  * @brief Constructor for string cards
  *
  * @param[in] keyname Card name.
@@ -819,6 +848,35 @@ void GFitsHeaderCard::free_members(void)
 {
     // Free members
     free_dtype();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set card members
+ *
+ * @param[in] keyname Card name.
+ * @param[in] value Card value.
+ * @param[in] unit Card unit.
+ * @param[in] comment Card comment.
+ *
+ * Sets the card members from @p keyname, @p value, @p unit, and @p comment
+ * strings. The card type is determined from the format of the card value.
+ ***************************************************************************/
+void GFitsHeaderCard::set_members(const std::string& keyname,
+                                  const std::string& value,
+                                  const std::string& unit,
+                                  const std::string& comment) {
+
+    // Store attributes
+    m_keyname = keyname;
+    m_value   = value;
+    m_comment = comment;
+
+    // Determine card type
+    set_dtype(m_value);
 
     // Return
     return;

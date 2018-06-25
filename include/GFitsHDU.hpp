@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsHDU.hpp - Abstract FITS extension base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,8 +82,8 @@ public:
     void                   extname(const std::string& extname);
     const int&             extno(void) const;
     void                   extno(const int& extno);
-    GFitsHeader&           header(void);
     const GFitsHeader&     header(void) const;
+    void                   header(const GFitsHeader& header);
     bool                   has_card(const int& cardno) const;
     bool                   has_card(const std::string& keyname) const;
     GFitsHeaderCard&       card(const int& cardno);
@@ -202,23 +202,24 @@ void GFitsHDU::extno(const int& extno)
  * Returns the extension header.
  ***************************************************************************/
 inline
-GFitsHeader& GFitsHDU::header(void)
+const GFitsHeader& GFitsHDU::header(void) const
 {
     return (m_header);
 }
 
 
 /***********************************************************************//**
- * @brief Return extension header (const version)
+ * @brief Set extension header
  *
- * @return Extension header.
+ * @param[in] header Extension header.
  *
- * Returns the extension header.
+ * Sets the extension header.
  ***************************************************************************/
 inline
-const GFitsHeader& GFitsHDU::header(void) const
+void GFitsHDU::header(const GFitsHeader& header)
 {
-    return (m_header);
+    m_header = header;
+    return;
 }
 
 
