@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import os
 import gammalib
 import test_support
 
@@ -35,6 +36,9 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
+
+        # Set CALDB
+        os.environ['CALDB'] = os.environ['TEST_DATA']+'/caldb'
 
         # Return
         return
@@ -764,7 +768,7 @@ class Test(gammalib.GPythonTestSuite):
         times.append(tmax)
 
         # Perform pickeling tests of filled classes
-        #test_support._pickeling(self, gammalib.GCaldb())
+        test_support._pickeling(self, gammalib.GCaldb('cta','prod2'))
         test_support._pickeling(self, gammalib.GEbounds(10, emin, emax))
         test_support._pickeling(self, gammalib.GEnergy(emin))
         test_support._pickeling(self, gammalib.GEnergies(10, emin, emax))

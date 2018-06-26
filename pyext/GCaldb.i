@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCaldb.i - Calibration database class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,4 +75,11 @@ public:
     GCaldb copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.mission(), self.instrument())
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0], state[1])
+}
 };
