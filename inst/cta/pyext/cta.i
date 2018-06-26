@@ -1,7 +1,7 @@
 /***************************************************************************
  *                cta.i - Cherenkov Telescope Array module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -177,6 +177,28 @@
         mycast = mycast->next;
     }
     $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+%typemap(out) GCTAModelRadial* {
+    if ($1 == NULL) {
+        $result = Py_None;
+        Py_INCREF(Py_None); // Py_None is a singleton so increment its reference
+    }
+    else {
+        char classname[80];
+        strcpy(classname, "_p_");
+        strcat(classname, result->classname().c_str());
+        swig_type_info *myinfo = SWIGTYPE_p_GCTAModelRadial;
+        swig_cast_info *mycast = 0;
+        mycast = myinfo->cast;
+        while (mycast != 0) {
+            if (strcmp(classname, mycast->type->name) == 0) {
+                myinfo = mycast->type;
+                break;
+            }
+            mycast = mycast->next;
+        }
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 | 0);
+    }
 }
 %typemap(out) GModelSpectral* {
     if ($1 == NULL) {

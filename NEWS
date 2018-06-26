@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-25 June 2018
+28 June 2018
 
 
 1. Introduction
@@ -24,12 +24,16 @@ The following methods have been added:
 - gammalib::atan2()
 - gammalib::plaw_integral()
 - gammalib::gauss_integral()
-- GSkyDir::cos_dist()
+- GApplication(std::string&, std::string&, std::vector<std::string>&)
+- GApplicationPar::pickle()
 - GApplicationPar::query()
 - GApplicationPar::was_queried()
+- GApplicationPars::pickle()
 - GApplicationPars::syspfiles()
 - operator==(GSkyPixel&, GSkyPixel&)
 - operator!=(GSkyPixel&, GSkyPixel&)
+- GArf::read(GFits&)
+- GPha::read(GFits&)
 - GPha::operator(int&, int&)
 - GPha::operator[](std::string&)
 - GPha::columns()
@@ -47,20 +51,27 @@ The following methods have been added:
 - GPha::respfile()
 - GPha::ancrfile(std::string&)
 - GPha::ancrfile()
+- GRmf::read(GFits&)
 - GFitsHDU::header(GFitsHeader&)
 - GFitsHDU::card(std::string&, bool&, std::string&)
-- GFitsHeaderCard general card constructor
-- GFitsHeaderCard boolean constructor
+- GFitsHeaderCard(std::string&, std::string&, std::string&, std::string&)
+- GFitsHeaderCard(std::string&, bool&, std::string&)
 - GObservation::has_events()
 - GModelSpatialPointSource::type(std::string&)
 - GModelSpectralPlaw::type(std::string&)
 - GModelSpatialRadialProfileGauss(GSkyDir&, double&)
 - GModelSpatialRadialProfileGauss::sigma()
+- GSkyDir::cos_dist()
+- GSkyRegions::filename(GFilename&)
 - GXml::GXml(GXmlDocument&)
 - GXml::root()
 - GXmlElement::attributes()
 - GXmlElement::attribute(int&)
 - GXmlDocument::GXmlDocument(GFilename&, std::string&, std::string&, std::string&)
+- GCTAObservation::instrument(std::string&)
+- GCTAObservation::lo_user_thres(double&)
+- GCTAObservation::hi_user_thres(double&)
+- GCTAOnOffObservation::has_response()
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)
@@ -72,6 +83,9 @@ The following methods have been added:
 - GCTAEdispPerfTable::prob_erecobin()
 - GCTAEdispRmf::prob_erecobin()
 - GCTAEdisp2D::prob_erecobin()
+- GCTAModelAeffBackground(GModelSpectral&, GModelTemporal&)
+- GCTAModelCubeBackground(GModelSpectral&, GModelTemporal&)
+- GCTAModelRadialAcceptance(GCTAModelRadial&, GModelSpectral&, GModelTemporal&)
 - GCTAModelRadialAcceptance::radial(GCTAModelRadial*)
 - GCTAModelRadialAcceptance::spectral(GModelSpectral*)
 - GCTAModelRadialAcceptance::temporal(GModelTemporal*)
@@ -79,13 +93,13 @@ The following methods have been added:
 - GCTAModelIrfBackground::temporal(GModelTemporal*)
 
 The following methods have been removed:
-- none
+- GSkyRegionMap::filename()
 
 The following methods have been renamed:
 - GPhoton::mc_id() from GPhoton::mcid()
 
 The arguments for the following methods have been changed:
-- GCTAOnOffObservation CTA observation constructor now takes a spatial model component
+- GCTAOnOffObservation(GCTAObservation&, GModelSpatial&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&)
 
 The return value of the following methods has been changed:
 - none

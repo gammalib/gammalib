@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelCubeBackground.i - CTA cube background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Michael Mayer                               *
+ *  copyright (C) 2013-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,8 @@ public:
     GCTAModelCubeBackground(void);
     explicit GCTAModelCubeBackground(const GXmlElement& xml);
     explicit GCTAModelCubeBackground(const GModelSpectral& spectral);
+    GCTAModelCubeBackground(const GModelSpectral& spectral,
+                            const GModelTemporal& temporal);
     GCTAModelCubeBackground(const GCTAModelCubeBackground& model);
     
     virtual ~GCTAModelCubeBackground(void);
@@ -72,4 +74,18 @@ public:
     GCTAModelCubeBackground copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.spectral(), self.temporal(),
+                 gammalib.GModelData.__getstate__(self))
+        return state
+    def __setstate__(self, state):
+        if state[0] == None and state[1] == None:
+            self.__init__()
+        elif state[1] == None:
+            self.__init__(state[0])
+        else:
+            self.__init__(state[0], state[1])
+        gammalib.GModelData.__setstate__(self, state[2])
+}
 };

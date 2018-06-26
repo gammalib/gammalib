@@ -152,10 +152,12 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = gammalib.GEventList.__getstate__(self)
-        return args
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits,)
+        return state
     def __setstate__(self, state):
         self.__init__()
-        gammalib.GEventList.__setstate__(self, state)
+        self.read(state[0])
 }
 };

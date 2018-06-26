@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegionMap.i - Sky region map class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Pierrick Martin                                  *
+ *  copyright (C) 2017-2018 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,9 +38,9 @@ class GSkyRegionMap : public GSkyRegion {
 public:
     // Constructors and destructors
     GSkyRegionMap(void);
-    GSkyRegionMap(const GFilename& filename);
-    GSkyRegionMap(const GSkyMap& map); 
-    GSkyRegionMap(const GSkyRegion* region);
+    explicit GSkyRegionMap(const GFilename& filename);
+    explicit GSkyRegionMap(const GSkyMap& map);
+    explicit GSkyRegionMap(const GSkyRegion* region);
 	GSkyRegionMap(const GSkyRegionMap& region);
     virtual ~GSkyRegionMap(void);
 
@@ -58,7 +58,6 @@ public:
     void                    load(const GFilename& filename);
     void                    map(const GSkyMap& map);
     const GSkyMap&          map(void) const;
-    const GFilename&        filename(void) const;
     const std::vector<int>& nonzero_indices(void) const;
 };
 
@@ -70,4 +69,11 @@ public:
     GSkyRegionMap copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.map(),)
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+}
 };

@@ -801,9 +801,7 @@ void GPha::fill(const GEnergy& energy, const double& value)
  *
  * @param[in] filename File name.
  *
- * Loads the Pulse Height Analyzer spectrum from the `SPECTRUM` extension
- * of the FITS file. If the file contains also an `EBOUNDS` extension the
- * energy boundaries of all Pulse Height Analyzer channels are also loaded.
+ * Loads the Pulse Height Analyzer spectrum from a FITS file.
  ***************************************************************************/
 void GPha::load(const GFilename& filename)
 {
@@ -814,22 +812,8 @@ void GPha::load(const GFilename& filename)
     // to modify the extension names)
     GFits fits(filename.url());
 
-    // Get PHA table
-    const GFitsTable& pha = *fits.table(gammalib::extname_pha);
-
     // Read PHA data
-    read(pha);
-
-    // Optionally read energy boundaries
-    if (fits.contains(gammalib::extname_ebounds)) {
-
-        // Get energy boundary table
-        const GFitsTable& ebounds = *fits.table(gammalib::extname_ebounds);
-
-        // Read energy boundaries
-        m_ebounds.read(ebounds);
-
-    } // endif: had energy boundary table
+    read(fits);
 
     // Close FITS file
     fits.close();
@@ -872,6 +856,42 @@ void GPha::save(const GFilename& filename, const bool& clobber) const
 
     // Store filename
     m_filename = filename.url();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read Pulse Height Analyzer spectrum
+ *
+ * @param[in] fits File file.
+ *
+ * Reads the Pulse Height Analyzer spectrum from the `SPECTRUM` extension
+ * of the FITS file. If the file contains also an `EBOUNDS` extension the
+ * energy boundaries of all Pulse Height Analyzer channels are also loaded.
+ ***************************************************************************/
+void GPha::read(const GFits& fits)
+{
+    // Clear spectrum
+    clear();
+
+    // Get PHA table
+    const GFitsTable& pha = *fits.table(gammalib::extname_pha);
+
+    // Read PHA data
+    read(pha);
+
+    // Optionally read energy boundaries
+    if (fits.contains(gammalib::extname_ebounds)) {
+
+        // Get energy boundary table
+        const GFitsTable& ebounds = *fits.table(gammalib::extname_ebounds);
+
+        // Read energy boundaries
+        m_ebounds.read(ebounds);
+
+    } // endif: had energy boundary table
 
     // Return
     return;

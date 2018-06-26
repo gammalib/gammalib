@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GHealpix.i - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,4 +77,14 @@ public:
     GHealpix copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        hdu = gammalib.GFitsBinTable()
+        self.write(hdu)
+        state = (hdu,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.read(state[0])
+}
 };

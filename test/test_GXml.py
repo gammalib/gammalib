@@ -196,7 +196,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_xml_slicing, 'Test GXml slicing')
         self.append(self._test_elements_access, 'Test GXmlElement parameter access')
         self.append(self._test_elements_slicing, 'Test GXmlElement slicing')
-        self.append(self._test_pickeling, 'Test pickeling of "xml" classes')
+        self.append(self._test_pickeling, 'Test Xml class pickeling')
 
         # Return
         return

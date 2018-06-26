@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GWcsCAR.cpp - Plate carree (CAR) projection class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -89,6 +89,9 @@ GWcsCAR::GWcsCAR(const std::string& coords,
 {
     // Initialise class members
     init_members();
+
+    // Setup WCS derived parameters
+    wcs_set();
 
     // Return
     return;

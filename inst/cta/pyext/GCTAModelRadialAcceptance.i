@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAModelRadialAcceptance.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -41,8 +40,11 @@ public:
     // Constructors and destructors
     GCTAModelRadialAcceptance(void);
     explicit GCTAModelRadialAcceptance(const GXmlElement& xml);
-    explicit GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
-                                       const GModelSpectral& spectral);
+    GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
+                              const GModelSpectral&  spectral);
+    GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
+                              const GModelSpectral&  spectral,
+                              const GModelTemporal&  temporal);
     GCTAModelRadialAcceptance(const GCTAModelRadialAcceptance& model);
     virtual ~GCTAModelRadialAcceptance(void);
 
@@ -72,7 +74,24 @@ public:
 
 
 /***********************************************************************//**
- * @brief GCTAModelRadial class extension
+ * @brief GCTAModelRadialAcceptance class extension
  ***************************************************************************/
-%extend GCTAModelRadial {
+%extend GCTAModelRadialAcceptance {
+    GCTAModelRadialAcceptance copy() {
+        return (*self);
+    }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.radial(), self.spectral(), self.temporal(),
+                 gammalib.GModelData.__getstate__(self))
+        return state
+    def __setstate__(self, state):
+        if state[0] != None and state[1] != None and state[2] != None:
+            self.__init__(state[0], state[1], state[2])
+        elif state[0] != None and state[1] != None:
+            self.__init__(state[0], state[1])
+        else:
+            self.__init__()
+        gammalib.GModelData.__setstate__(self, state[3])
+}
 };

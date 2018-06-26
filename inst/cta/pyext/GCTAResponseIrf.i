@@ -129,4 +129,14 @@ public:
     GCTAResponseIrf copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.rspname(), self.caldb())
+        return state
+    def __setstate__(self, state):
+        if state[0]:
+            self.__init__(state[0], state[1])
+        else:
+            self.__init__()
+}
 };

@@ -34,6 +34,7 @@
 #include <sys/stat.h>      // mkdir() function
 #include <cstdlib>         // std::getenv() function
 #include <cstdio>          // std::fopen(), etc. functions
+#include <sstream>
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GFilename.hpp"
@@ -780,6 +781,124 @@ void GApplicationPars::save(const GFilename& filename)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set class from pickled string vector
+ *
+ * @param[in] string String vector containing class information.
+ ***************************************************************************/
+void GApplicationPars::pickle(const std::vector<std::string>& string)
+{
+    // Clear object
+    clear();
+
+    // Extract vector sizes
+    int n_parfile = gammalib::toint(string[0]);
+    int n_pars    = gammalib::toint(string[1]);
+    int n_line    = gammalib::toint(string[2]);
+    int n_vstart  = gammalib::toint(string[3]);
+    int n_vstop   = gammalib::toint(string[4]);
+
+    // Initialise string pointer
+    int istring = 5;
+
+    // Extract parameter file lines
+    for (int i = 0; i < n_parfile; ++i, ++istring) {
+        m_parfile.push_back(string[istring]);
+    }
+
+    // Extract application parameters
+    for (int i = 0; i < n_pars; ++i) {
+        int n_par   = gammalib::toint(string[istring]);
+        int i_start = istring + 1;
+        int i_end   = i_start + n_par;
+        //std::vector<std::string> sub(string.begin()+i_start,
+        //                             string.begin()+i_end);
+        GApplicationPar par;
+        par.pickle(std::vector<std::string>(string.begin()+i_start,
+                                            string.begin()+i_end));
+        m_pars.push_back(par);
+        istring = i_end;
+    }
+
+    // Extract line numbers
+    for (int i = 0; i < n_line; ++i, ++istring) {
+        m_line.push_back(gammalib::toint(string[istring]));
+    }
+
+    // Extract columns of start values
+    for (int i = 0; i < n_vstart; ++i, ++istring) {
+        m_vstart.push_back((size_t)gammalib::toint(string[istring]));
+    }
+
+    // Extract columns of stop values
+    for (int i = 0; i < n_vstop; ++i, ++istring) {
+        m_vstop.push_back((size_t)gammalib::toint(string[istring]));
+    }
+
+    // Extract effective mode and location of syspfiles
+    m_mode      = string[istring++];
+    m_syspfiles = string[istring++];
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pickled string vector
+ *
+ * @return String vector containing class information.
+ ***************************************************************************/
+std::vector<std::string> GApplicationPars::pickle(void) const
+{
+    // Allocate vector of strings
+    std::vector<std::string> string;
+
+    // Store vector lengths
+    string.push_back(gammalib::str(m_parfile.size()));
+    string.push_back(gammalib::str(m_pars.size()));
+    string.push_back(gammalib::str(m_line.size()));
+    string.push_back(gammalib::str(m_vstart.size()));
+    string.push_back(gammalib::str(m_vstop.size()));
+
+    // Store parfile lines
+    for (int i = 0; i < m_parfile.size(); ++i) {
+        string.push_back(m_parfile[i]);
+    }
+
+    // Store application parameters
+    for (int i = 0; i < m_pars.size(); ++i) {
+        std::vector<std::string> par = m_pars[i].pickle();
+        string.push_back(gammalib::str(par.size()));
+        for (int k = 0; k < par.size(); ++k) {
+            string.push_back(par[k]);
+        }
+    }
+
+    // Store line numbers
+    for (int i = 0; i < m_line.size(); ++i) {
+        string.push_back(gammalib::str(m_line[i]));
+    }
+
+    // Store columns of start values
+    for (int i = 0; i < m_vstart.size(); ++i) {
+        string.push_back(gammalib::str(m_vstart[i]));
+    }
+
+    // Store columns of stop values
+    for (int i = 0; i < m_vstop.size(); ++i) {
+        string.push_back(gammalib::str(m_vstop[i]));
+    }
+
+    // Store effective mode and location of syspfiles
+    string.push_back(m_mode);
+    string.push_back(m_syspfiles);
+
+    // Return string vector
+    return string;
 }
 
 

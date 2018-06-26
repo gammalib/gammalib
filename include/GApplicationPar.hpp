@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GBase.hpp"
 #include "GTime.hpp"
 
@@ -62,42 +63,44 @@ public:
     GApplicationPar& operator=(const GApplicationPar& par);
 
     // Methods
-    void               clear(void);
-    GApplicationPar*   clone(void) const;
-    std::string        classname(void) const;
-    void               type(const std::string& type);
-    void               mode(const std::string& mode);
-    void               value(const std::string& value);
-    void               string(const std::string& value);
-    void               filename(const GFilename& value);
-    void               time(const GTime& value);
-    void               boolean(const bool& value);
-    void               integer(const int& value);
-    void               real(const double& value);
-    const std::string& name(void) const;
-    const std::string& type(void) const;
-    const std::string& mode(void) const;
-    void               query(void);
-    std::string        value(void);
-    std::string        string(void);
-    GFilename          filename(void);
-    GTime              time(void);
-    GTime              time(const GTimeReference& ref);
-    bool               boolean(void);
-    int                integer(void);
-    double             real(void);
-    const std::string& current_value(void) const;
-    const std::string& min(void) const;
-    const std::string& max(void) const;
-    const std::string& prompt(void) const;
-    bool               is_learn(void) const;
-    bool               is_query(void) const;
-    bool               is_filename(void) const;
-    bool               is_valid(void);
-    bool               is_undefined(void);
-    bool               is_notanumber(void);
-    bool               was_queried(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    void                     clear(void);
+    GApplicationPar*         clone(void) const;
+    std::string              classname(void) const;
+    void                     type(const std::string& type);
+    void                     mode(const std::string& mode);
+    void                     value(const std::string& value);
+    void                     string(const std::string& value);
+    void                     filename(const GFilename& value);
+    void                     time(const GTime& value);
+    void                     boolean(const bool& value);
+    void                     integer(const int& value);
+    void                     real(const double& value);
+    const std::string&       name(void) const;
+    const std::string&       type(void) const;
+    const std::string&       mode(void) const;
+    void                     query(void);
+    std::string              value(void);
+    std::string              string(void);
+    GFilename                filename(void);
+    GTime                    time(void);
+    GTime                    time(const GTimeReference& ref);
+    bool                     boolean(void);
+    int                      integer(void);
+    double                   real(void);
+    const std::string&       current_value(void) const;
+    const std::string&       min(void) const;
+    const std::string&       max(void) const;
+    const std::string&       prompt(void) const;
+    bool                     is_learn(void) const;
+    bool                     is_query(void) const;
+    bool                     is_filename(void) const;
+    bool                     is_valid(void);
+    bool                     is_undefined(void);
+    bool                     is_notanumber(void);
+    bool                     was_queried(void) const;
+    void                     pickle(const std::vector<std::string>& string);
+    std::vector<std::string> pickle(void) const;
+    std::string              print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected enumerators

@@ -80,6 +80,9 @@ public:
         state = (self.mission(), self.instrument())
         return state
     def __setstate__(self, state):
-        self.__init__(state[0], state[1])
+        if state[0] and state[1]:
+            self.__init__(state[0], state[1])
+        else:
+            self.__init__()
 }
 };

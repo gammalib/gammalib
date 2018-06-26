@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib application module
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -409,6 +409,33 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Set PFILES environment variable
+        os.environ['PFILES'] = os.environ['TEST_DATA']
+
+        # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GApplication())
+        test_support._pickeling(self, gammalib.GApplicationPar())
+        test_support._pickeling(self, gammalib.GApplicationPars())
+        #test_support._pickeling(self, gammalib.GLog())
+
+        # Setup for tests
+        par = gammalib.GApplicationPar('Test','r','a','1.0','0.0','2.0','Dummy text')
+        app = gammalib.GApplication('test_GApplication', '1.1.0')
+
+        # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GApplication(app))
+        test_support._pickeling(self, gammalib.GApplicationPar(par))
+        test_support._pickeling(self, gammalib.GApplicationPars('test_GApplication.par'))
+        #test_support._pickeling(self, gammalib.GLog())
+
+        # Return
+        return
+
     # Set test functions
     def set(self):
         """
@@ -423,6 +450,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_pars, 'Test GApplicationPars')
         self.append(self._test_pars_access, 'Test GApplicationPars parameter access')
         self.append(self._test_pars_access, 'Test GApplicationPars slicing')
+        self.append(self._test_pickeling, 'Test application class pickeling')
 
         # Return
         return

@@ -739,7 +739,7 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        #test_support._pickeling(self, gammalib.GCaldb())
+        test_support._pickeling(self, gammalib.GCaldb())
         test_support._pickeling(self, gammalib.GEbounds())
         test_support._pickeling(self, gammalib.GEnergy())
         test_support._pickeling(self, gammalib.GEnergies())
@@ -807,7 +807,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_times_slicing, 'Test GTimes slicing')
         self.append(self._test_photons_slicing, 'Test GPhotons slicing')
         self.append(self._test_observations_slicing, 'Test GObservations slicing')
-        self.append(self._test_pickeling, 'Test pickeling of "obs" classes')
+        self.append(self._test_pickeling, 'Test observation class pickeling')
 
         # Return
         return

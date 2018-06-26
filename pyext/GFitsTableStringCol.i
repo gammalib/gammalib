@@ -136,13 +136,14 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.name(), self.nrows(), self.width(), self.number(),
+        state = (self.name(), self.nrows(), self.width(), self.number(), self.unit(),
                  [[self[row,inx] for inx in range(self.elements(row))] for row in range(self.nrows())])
         return state
     def __setstate__(self, state):
         self.__init__(state[0], state[1], state[2], state[3])
-        for row in range(len(state[4])):
-            for inx in range(len(state[4][row])):
-                self[row,inx] = state[4][row][inx]
+        self.unit(state[4])
+        for row in range(len(state[5])):
+            for inx in range(len(state[5][row])):
+                self[row,inx] = state[5][row][inx]
 }
 };

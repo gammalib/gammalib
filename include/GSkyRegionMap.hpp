@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GSkyRegionMap.hpp - Sky region map class                  *
  * ----------------------------------------------------------------------- *
- * copyright (C) 2017 by Pierrick Martin                                   *
+ * copyright (C) 2017-2018 by Pierrick Martin                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,17 +45,17 @@ class GSkyRegionMap;
  * @brief Interface for a sky region map
  *
  * This class provides an implementation for a sky region defined by a
- * sky map. The map is provided as a FITS file filled with 0 and non-zero
- * values.
+ * sky map. The map is provided as a FITS file. Pixels with non-zero values
+ * are within the region, pixels with zero values outside the region.
  ***************************************************************************/
 class GSkyRegionMap : public GSkyRegion {
 
 public:
     // Constructors and destructors
     GSkyRegionMap(void);
-    GSkyRegionMap(const GFilename& filename);
-    GSkyRegionMap(const GSkyMap& map);
-    GSkyRegionMap(const GSkyRegion* region);
+    explicit GSkyRegionMap(const GFilename& filename);
+    explicit GSkyRegionMap(const GSkyMap& map);
+    explicit GSkyRegionMap(const GSkyRegion* region);
     GSkyRegionMap(const GSkyRegionMap& region);
     virtual ~GSkyRegionMap(void);
 
@@ -77,7 +77,6 @@ public:
     void                    load(const GFilename& filename);
     void                    map(const GSkyMap& map);
     const GSkyMap&          map(void) const;
-    const GFilename&        filename(void) const;
     const std::vector<int>& nonzero_indices(void) const;
 
 protected:
@@ -92,7 +91,6 @@ protected:
     // Protected members
     GSkyMap	          m_map;             //!< The region map
     std::vector<int>  m_nonzero_indices; //!< Vector of non-zero pixel indices
-    mutable GFilename m_filename;        //!< Filename of origin (if any)
 };
 
 
@@ -142,10 +140,12 @@ const std::vector<int>& GSkyRegionMap::nonzero_indices(void) const
  * which the region was saved. The returned string will be empty if
  * no load() or save() method has been called before.
  ***************************************************************************/
+/*
 inline
 const GFilename& GSkyRegionMap::filename(void) const
 {
     return (m_filename);
 }
+*/
 
 #endif /* GSKYREGIONMAP_HPP */

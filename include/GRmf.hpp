@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.hpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,6 +97,7 @@ public:
     void                 save(const GFilename&   filename,
                               const bool&        clobber = false,
                               const std::string& unit = "keV") const;
+    void                 read(const GFits& fits);
     void                 read(const GFitsTable& table);
     void                 write(GFits& fits,
                                const std::string& unit = "keV") const;

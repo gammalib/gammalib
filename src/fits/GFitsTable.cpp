@@ -621,7 +621,7 @@ bool GFitsTable::contains(const std::string& colname) const
 /***********************************************************************//**
  * @brief Print table information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing table information.
  ***************************************************************************/
 std::string GFitsTable::print(const GChatter& chatter) const
@@ -693,6 +693,75 @@ std::string GFitsTable::print(const GChatter& chatter) const
  =                             Protected methods                           =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GFitsTable::init_members(void)
+{
+    // Initialise members
+    m_type    = -1;
+    m_rows    = 0;
+    m_cols    = 0;
+    m_columns = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] table Table to copy
+ ***************************************************************************/
+void GFitsTable::copy_members(const GFitsTable& table)
+{
+    // Copy attributes
+    m_type = table.m_type;
+    m_rows = table.m_rows;
+    m_cols = table.m_cols;
+
+    // Copy column definition
+    if (table.m_columns != NULL && m_cols > 0) {
+        m_columns = new GFitsTableCol*[m_cols];
+        for (int i = 0; i < m_cols; ++i) {
+            if (table.m_columns[i] != NULL) {
+                m_columns[i] = table.m_columns[i]->clone();
+            }
+            else {
+                m_columns[i] = NULL;
+            }
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ *
+ * De-allocates all column pointers
+ ***************************************************************************/
+void GFitsTable::free_members(void)
+{
+    // Free memory
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i] != NULL) delete m_columns[i];
+        }
+        delete [] m_columns;
+    }
+
+    // Mark memory as freed
+    m_columns = NULL;
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Open Table
@@ -1449,75 +1518,6 @@ char* GFitsTable::get_tunit(const int& colnum) const
  =                              Private methods                            =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GFitsTable::init_members(void)
-{
-    // Initialise members
-    m_type    = -1;
-    m_rows    = 0;
-    m_cols    = 0;
-    m_columns = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] table Table to copy
- ***************************************************************************/
-void GFitsTable::copy_members(const GFitsTable& table)
-{
-    // Copy attributes
-    m_type = table.m_type;
-    m_rows = table.m_rows;
-    m_cols = table.m_cols;
-
-    // Copy column definition
-    if (table.m_columns != NULL && m_cols > 0) {
-        m_columns = new GFitsTableCol*[m_cols];
-        for (int i = 0; i < m_cols; ++i) {
-            if (table.m_columns[i] != NULL) {
-                m_columns[i] = table.m_columns[i]->clone();
-            }
-            else {
-                m_columns[i] = NULL;
-            }
-        }
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- *
- * De-allocates all column pointers
- ***************************************************************************/
-void GFitsTable::free_members(void)
-{
-    // Free memory
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i] != NULL) delete m_columns[i];
-        }
-        delete [] m_columns;
-    }
-
-    // Mark memory as freed
-    m_columns = NULL;
-
-    // Return
-    return;
-}
-
 
 /***********************************************************************//**
  * @brief Allocates column

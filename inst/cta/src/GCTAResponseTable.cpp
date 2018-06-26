@@ -1836,7 +1836,7 @@ void GCTAResponseTable::read_tables(const GFitsTable& hdu)
     m_tables.clear();
 
     // Compute expected cube size
-    m_nelements = axis_bins(0);
+    m_nelements = (axes() > 0) ? axis_bins(0) : 0;
     for (int i = 1; i < axes(); ++i) {
         m_nelements *= axis_bins(i);
     }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialRadialProfileDMEinasto.i - Einasto radial profile class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
+ *  copyright (C) 2016-2018 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,4 +77,13 @@ public:
     GModelSpatialRadialProfileDMEinasto copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+}
 };

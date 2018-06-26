@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GHorizDir.i - Horizontal direction class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Karl Kosack                                 *
+ *  copyright (C) 2014-2018 by Karl Kosack                                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,4 +74,12 @@ public:
     GHorizDir copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.alt(), self.az())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.altaz(state[0], state[1])
+}
 };

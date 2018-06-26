@@ -732,7 +732,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_fits_image, 'Test GFitsImage')
         self.append(self._test_fits_table, 'Test GFitsTable')
         self.append(self._test_fits_table_columns, 'Test GFitsTableCol')
-        self.append(self._test_pickeling, 'Test pickeling of "fits" classes')
+        self.append(self._test_pickeling, 'Test Fits class pickeling')
 
         # Return
         return

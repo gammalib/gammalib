@@ -65,6 +65,7 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    void                instrument(const std::string& instrument);
     bool                has_response(void) const;
     bool                has_events(void) const;
     void                read(const GFits& fits);
@@ -112,7 +113,9 @@ public:
     const GFilename&    eventfile(void) const;
     std::string         eventtype(void) const;
     void                dispose_events(void);
+    void                lo_user_thres(const double& lo_user_thres);
     const double&       lo_user_thres(void) const;
+    void                hi_user_thres(const double& hi_user_thres);
     const double&       hi_user_thres(void) const;
     void                n_tels(const int& tels);
     const int&          n_tels(void) const;
@@ -128,10 +131,32 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = gammalib.GObservation.__getstate__(self) + ()
-        return args
+        if self.has_response():
+            response = self.response()
+        else:
+            response = None
+        state = (gammalib.GObservation.__getstate__(self),
+                 self.instrument(), self.eventfile(), response,
+                 self.pointing(), self.off_regions(), self.ontime(),
+                 self.livetime(), self.deadc(), self.ra_obj(), self.dec_obj(),
+                 self.lo_user_thres(), self.hi_user_thres(), self.n_tels())
+        return state
     def __setstate__(self, state):
         self.__init__()
-        gammalib.GObservation.__setstate__(self, state)
+        gammalib.GObservation.__setstate__(self, state[0])
+        self.instrument(state[1])
+        self.eventfile(state[2])
+        if state[3] != None:
+            self.response(state[3])
+        self.pointing(state[4])
+        self.off_regions(state[5])
+        self.ontime(state[6])
+        self.livetime(state[7])
+        self.deadc(state[8])
+        self.ra_obj(state[9])
+        self.dec_obj(state[10])
+        self.lo_user_thres(state[11])
+        self.hi_user_thres(state[12])
+        self.n_tels(state[13])
 }
 };

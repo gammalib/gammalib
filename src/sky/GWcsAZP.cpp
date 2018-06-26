@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GWcsAZP.cpp - Zenithal/azimuthal perspective (AZP) projection class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -94,6 +94,9 @@ GWcsAZP::GWcsAZP(const std::string& coords,
 {
     // Initialise class members
     init_members();
+
+    // Setup WCS derived parameters
+    wcs_set();
 
     // Return
     return;

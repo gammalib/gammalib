@@ -855,6 +855,60 @@ bool GApplicationPar::is_notanumber(void)
 
 
 /***********************************************************************//**
+ * @brief Set class from pickled string vector
+ *
+ * @param[in] string String vector containing class information.
+ ***************************************************************************/
+void GApplicationPar::pickle(const std::vector<std::string>& string)
+{
+    // Clear object
+    clear();
+
+    // Extract members
+    m_update  = (bool)gammalib::toint(string[0]);
+    m_queried = (bool)gammalib::toint(string[1]);
+    m_name    = string[2];
+    m_type    = string[3];
+    m_mode    = string[4];
+    m_value   = string[5];
+    m_min     = string[6];
+    m_max     = string[7];
+    m_prompt  = string[8];
+    m_status  = (Status)gammalib::toint(string[9]);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pickled string vector
+ *
+ * @return String vector containing class information.
+ ***************************************************************************/
+std::vector<std::string> GApplicationPar::pickle(void) const
+{
+    // Allocate vector of strings with 10 elements
+    std::vector<std::string> string(10);
+
+    // Set vector elements from class members
+    string[0] = gammalib::str(m_update);
+    string[1] = gammalib::str(m_queried);
+    string[2] = m_name;
+    string[3] = m_type;
+    string[4] = m_mode;
+    string[5] = m_value;
+    string[6] = m_min;
+    string[7] = m_max;
+    string[8] = m_prompt;
+    string[9] = gammalib::str((int)m_status);
+
+    // Return string vector
+    return (string);
+}
+
+
+/***********************************************************************//**
  * @brief Print parameter
  *
  * @param[in] chatter Chattiness.

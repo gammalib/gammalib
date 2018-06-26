@@ -583,7 +583,7 @@ double GCTAPsfTable::containment_radius(const double& fraction,
 /***********************************************************************//**
  * @brief Print point spread function information
  *
- * @return Content of point spread function instance.
+ * @param[in] chatter Chattiness.
  * @return String containing point spread function information.
  ***************************************************************************/
 std::string GCTAPsfTable::print(const GChatter& chatter) const
@@ -594,32 +594,42 @@ std::string GCTAPsfTable::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Compute energy boundaries in TeV
-        double emin = m_psf.axis_lo(m_inx_energy,0);
-        double emax = m_psf.axis_hi(m_inx_energy,
-                                    m_psf.axis_bins(m_inx_energy)-1);
-
-        // Compute offset angle boundaries in deg
-        double omin = m_psf.axis_lo(m_inx_theta,0);
-        double omax = m_psf.axis_hi(m_inx_theta,
-                                    m_psf.axis_bins(m_inx_theta)-1);
-
-        // Compute delta angle boundaries in deg
-        double dmin = m_psf.axis_lo(m_inx_delta,0);
-        double dmax = m_psf.axis_hi(m_inx_delta,
-                                    m_psf.axis_bins(m_inx_delta)-1);
-
         // Append header
         result.append("=== GCTAPsfTable ===");
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+
+        // Initialise information
+        int    nebins     = 0;
+        int    nthetabins = 0;
+        int    ndeltabins = 0;
+        double emin       = 0.0;
+        double emax       = 0.0;
+        double omin       = 0.0;
+        double omax       = 0.0;
+        double dmin       = 0.0;
+        double dmax       = 0.0;
+
+        // Extract information if there are axes in the response table
+        if (m_psf.axes() > 0) {
+            nebins     = m_psf.axis_bins(m_inx_energy);
+            nthetabins = m_psf.axis_bins(m_inx_theta);
+            ndeltabins = m_psf.axis_bins(m_inx_delta);
+            emin       = m_psf.axis_lo(m_inx_energy,0);
+            emax       = m_psf.axis_hi(m_inx_energy,nebins-1);
+            omin       = m_psf.axis_lo(m_inx_theta,0);
+            omax       = m_psf.axis_hi(m_inx_theta,nthetabins-1);
+            dmin       = m_psf.axis_lo(m_inx_delta,0);
+            dmax       = m_psf.axis_hi(m_inx_delta,ndeltabins-1);
+        }
+
 
         // Append information
-        result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_psf.axis_bins(m_inx_energy)));
+                      gammalib::str(nebins));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_psf.axis_bins(m_inx_theta)));
+                      gammalib::str(nthetabins));
         result.append("\n"+gammalib::parformat("Number of delta bins") +
-                      gammalib::str(m_psf.axis_bins(m_inx_delta)));
+                      gammalib::str(ndeltabins));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));
