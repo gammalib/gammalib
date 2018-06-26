@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile for gammalib Python extension module                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2018 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -120,7 +120,11 @@ testdata = $(top_srcdir)/test/data/initial_coords.txt \
            $(top_srcdir)/test/data/fk5_to_galactic.txt \
            $(top_srcdir)/test/data/file.fits.gz \
            $(top_srcdir)/test/data/test_GApplication.par \
-           $(top_srcdir)/test/data/model_point_plaw.xml
+           $(top_srcdir)/test/data/model_point_plaw.xml \
+           $(top_srcdir)/test/data/test_cube.fits \
+           $(top_srcdir)/test/data/filefunction.txt \
+           $(top_srcdir)/test/data/model_temporal_lightcurve.fits \
+           $(top_srcdir)/test/data/model_temporal_phasecurve.fits
 
 # Test data to be distributed in $(pyexecdir)/gammalib/tests/data/caldb/data/cta/prod2
 testcaldbidx = $(top_srcdir)/test/data/caldb/data/cta/prod2/caldb.indx
