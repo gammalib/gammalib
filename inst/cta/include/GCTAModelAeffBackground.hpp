@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelAeffBackground.hpp - CTA Aeff background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Michael Mayer                               *
+ *  copyright (C) 2015-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,8 @@ public:
     GCTAModelAeffBackground(void);
     explicit GCTAModelAeffBackground(const GXmlElement& xml);
     explicit GCTAModelAeffBackground(const GModelSpectral& spectral);
+    GCTAModelAeffBackground(const GModelSpectral& spectral,
+                            const GModelTemporal& temporal);
     GCTAModelAeffBackground(const GCTAModelAeffBackground& bgd);
     virtual ~GCTAModelAeffBackground(void);
 

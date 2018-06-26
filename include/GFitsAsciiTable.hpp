@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsAsciiTable.hpp - FITS ASCII table class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,7 @@ private:
     void init_members(void);
     void copy_members(const GFitsAsciiTable& table);
     void free_members(void);
+    void init_table_header(void);
 };
 
 

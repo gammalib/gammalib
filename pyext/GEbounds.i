@@ -29,6 +29,11 @@
 #include "GTools.hpp"
 %}
 
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_ebounds = "EBOUNDS";
+}
+
 
 /***********************************************************************//**
  * @class GEbounds

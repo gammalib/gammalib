@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalGauss.i - Elliptical gauss source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Michael Mayer                               *
+ *  copyright (C) 2015-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -79,4 +79,13 @@ public:
     double eval(const GPhoton& photon, const bool& gradients) const {
         return self->GModelSpatialElliptical::eval(photon, gradients);
     }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+}
 };

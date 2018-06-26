@@ -122,7 +122,7 @@ class Test(gammalib.GPythonTestSuite):
         # Append tests
         self.append(self._test_pars_access, 'Test GOptimizerPars parameter access')
         self.append(self._test_pars_slicing, 'Test GOptimizerPars slicing')
-        self.append(self._test_pickeling, 'Test pickeling of "opt" classes')
+        self.append(self._test_pickeling, 'Test optimizer class pickeling')
 
         # Return
         return

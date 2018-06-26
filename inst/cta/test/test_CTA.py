@@ -65,6 +65,31 @@ class Test(gammalib.GPythonTestSuite):
         # Return event list container
         return list
 
+    # Setup GCTAEventCube
+    def _setup_eventcube(self):
+        """
+        Setup GCTAEventCube
+
+        Returns
+        -------
+        cube : `~gammalib.GCTAEventCube`
+            GCTAEventCube
+        """
+        # Setup event cube
+        map    = gammalib.GSkyMap('CAR','CEL',0.0,0.0,1.0,1.0,5,5,2)
+        ebds   = gammalib.GEbounds(2, gammalib.GEnergy(1.0, 'TeV'),
+                                      gammalib.GEnergy(10.0, 'TeV'))
+        gti    = gammalib.GGti(gammalib.GTime(0.0,'sec'),
+                               gammalib.GTime(1.0,'sec'))
+        cube   = gammalib.GCTAEventCube(map, ebds, gti)
+        counts = 0.0
+        for bin in cube:
+            counts += 1.0
+            bin.counts(1.0)
+
+        # Return event cube
+        return cube
+
     # Test GCTAEventList class access operators
     def _test_eventlist_access(self):
         """
@@ -347,48 +372,52 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test class pickeling
         """
+        # Set CALDB
+        os.environ['CALDB'] = os.environ['TEST_DATA']+'/caldb'
+
         # Perform pickeling tests of empty classes
-        #test_support._pickeling(self, gammalib.GCTAAeff2D())
+        test_support._pickeling(self, gammalib.GCTAAeff2D())
         #test_support._pickeling(self, gammalib.GCTAAeffArf())
         #test_support._pickeling(self, gammalib.GCTAAeffPerfTable())
-        #test_support._pickeling(self, gammalib.GCTABackground3D())
+        test_support._pickeling(self, gammalib.GCTABackground3D())
         #test_support._pickeling(self, gammalib.GCTABackgroundPerfTable())
-        #test_support._pickeling(self, gammalib.GCTACubeBackground())
-        #test_support._pickeling(self, gammalib.GCTACubeEdisp())
-        #test_support._pickeling(self, gammalib.GCTACubeExposure())
-        #test_support._pickeling(self, gammalib.GCTACubePsf())
+        test_support._pickeling(self, gammalib.GCTACubeBackground())
+        test_support._pickeling(self, gammalib.GCTACubeEdisp())
+        test_support._pickeling(self, gammalib.GCTACubeExposure())
+        test_support._pickeling(self, gammalib.GCTACubePsf())
         #test_support._pickeling(self, gammalib.GCTACubeSourceDiffuse())
         #test_support._pickeling(self, gammalib.GCTACubeSourcePoint())
-        #test_support._pickeling(self, gammalib.GCTAEdisp2D())
+        test_support._pickeling(self, gammalib.GCTAEdisp2D())
         #test_support._pickeling(self, gammalib.GCTAEdispPerfTable())
         #test_support._pickeling(self, gammalib.GCTAEdispRmf())
         test_support._pickeling(self, gammalib.GCTAEventAtom())
-        #test_support._pickeling(self, gammalib.GCTAEventBin())
-        #test_support._pickeling(self, gammalib.GCTAEventCube())
-        #test_support._pickeling(self, gammalib.GCTAEventList())
+        test_support._pickeling(self, gammalib.GCTAEventBin())
+        test_support._pickeling(self, gammalib.GCTAEventCube())
+        test_support._pickeling(self, gammalib.GCTAEventList())
         test_support._pickeling(self, gammalib.GCTAInstDir())
-        #test_support._pickeling(self, gammalib.GCTAModelAeffBackground())
-        #test_support._pickeling(self, gammalib.GCTAModelCubeBackground())
+        test_support._pickeling(self, gammalib.GCTAModelAeffBackground())
+        test_support._pickeling(self, gammalib.GCTAModelCubeBackground())
         test_support._pickeling(self, gammalib.GCTAModelIrfBackground())
-        #test_support._pickeling(self, gammalib.GCTAModelRadialAcceptance())
-        #test_support._pickeling(self, gammalib.GCTAModelRadialGauss())
-        #test_support._pickeling(self, gammalib.GCTAModelRadialPolynom())
-        #test_support._pickeling(self, gammalib.GCTAModelRadialProfile())
-        #test_support._pickeling(self, gammalib.GCTAObservation())
-        #test_support._pickeling(self, gammalib.GCTAOnOffObservation())
-        #test_support._pickeling(self, gammalib.GCTAPointing())
-        #test_support._pickeling(self, gammalib.GCTAPsf2D())
-        #test_support._pickeling(self, gammalib.GCTAPsfKing())
+        test_support._pickeling(self, gammalib.GCTAModelRadialAcceptance())
+        test_support._pickeling(self, gammalib.GCTAModelRadialGauss())
+        test_support._pickeling(self, gammalib.GCTAModelRadialPolynom())
+        test_support._pickeling(self, gammalib.GCTAModelRadialProfile())
+        test_support._pickeling(self, gammalib.GCTAObservation())
+        test_support._pickeling(self, gammalib.GCTAOnOffObservation())
+        test_support._pickeling(self, gammalib.GCTAPointing())
+        test_support._pickeling(self, gammalib.GCTAPsf2D())
+        test_support._pickeling(self, gammalib.GCTAPsfKing())
         #test_support._pickeling(self, gammalib.GCTAPsfPerfTable())
-        #test_support._pickeling(self, gammalib.GCTAPsfTable())
+        test_support._pickeling(self, gammalib.GCTAPsfTable())
         #test_support._pickeling(self, gammalib.GCTAPsfVector())
-        #test_support._pickeling(self, gammalib.GCTAResponseCube())
-        #test_support._pickeling(self, gammalib.GCTAResponseIrf())
-        #test_support._pickeling(self, gammalib.GCTAResponseTable())
-        #test_support._pickeling(self, gammalib.GCTARoi())
+        test_support._pickeling(self, gammalib.GCTAResponseCube())
+        test_support._pickeling(self, gammalib.GCTAResponseIrf())
+        test_support._pickeling(self, gammalib.GCTAResponseTable())
+        test_support._pickeling(self, gammalib.GCTARoi())
 
         # Setup test
         list    = self._setup_eventlist()
+        cube    = self._setup_eventcube()
         atom    = list[0]
         dir     = gammalib.GSkyDir()
         instdir = gammalib.GCTAInstDir(dir)
@@ -396,46 +425,92 @@ class Test(gammalib.GPythonTestSuite):
         plaw    = gammalib.GModelSpectralPlaw(1.0,-2.0,pivot)
         instdir.detx(2.0)
         instdir.dety(-3.0)
+        irfname = os.environ['TEST_DATA']+'/caldb/data/cta/prod2/bcf/North_0.5h/irf_file.fits.gz'
+        bin     = gammalib.GCTAEventBin()
+        bin.dir(instdir)
+        bin.energy(pivot)
+        bin.time(gammalib.GTime(1.0,'sec'))
+        bin.counts(1.0)
+        bin.solidangle(0.1)
+        bin.ewidth(pivot)
+        bin.ontime(100.0)
+        bin.weight(1.0)
+        emin      = gammalib.GEnergy(1.0,'TeV')
+        emax      = gammalib.GEnergy(10.0,'TeV')
+        engs      = gammalib.GEnergies(10,emin,emax)
+        ebds      = gammalib.GEbounds(2,emin,emax)
+        region    = gammalib.GSkyRegionCircle(dir, 0.2)
+        regs      = gammalib.GSkyRegions()
+        regs.append(region)
+        ptsrc     = gammalib.GModelSpatialPointSource()
+        expcube   = gammalib.GCTACubeExposure('CAR','CEL',0.,0.,0.1,0.1,10,10,engs)
+        psfcube   = gammalib.GCTACubePsf('CAR','CEL',0.,0.,0.1,0.1,10,10,engs,1.0,10)
+        bgdcube   = gammalib.GCTACubeBackground('CAR','CEL',0.,0.,0.1,0.1,10,10,engs)
+        edispcube = gammalib.GCTACubeEdisp('CAR','CEL',0.,0.,0.1,0.1,10,10,engs,1.0,10)
+        caldb     = gammalib.GCaldb('cta','prod2')
+        rspirf    = gammalib.GCTAResponseIrf('North_0.5h', caldb)
+        rspcube1  = gammalib.GCTAResponseCube(expcube, psfcube, bgdcube)
+        rspcube2  = gammalib.GCTAResponseCube(expcube, psfcube, edispcube, bgdcube)
+        obs1      = gammalib.GCTAObservation()
+        obs1.events(list)
+        obs1.response(rspirf)
+        obs2      = gammalib.GCTAObservation()
+        obs2.events(cube)
+        obs2.response(rspirf)
+        obs3      = gammalib.GCTAObservation()
+        obs3.events(cube)
+        obs3.response(rspcube1)
+        obs4      = gammalib.GCTAObservation()
+        obs4.events(cube)
+        obs4.response(rspcube2)
+        obs5      = gammalib.GCTAOnOffObservation(obs1, ptsrc, ebds, ebds, regs, regs)
+        radgauss  = gammalib.GCTAModelRadialGauss(1.0)
+        radacc    = gammalib.GCTAModelRadialAcceptance(radgauss, plaw)
+        kingname  = self._caldb + '/prod1_king.fits'
 
         # Perform pickeling tests of filled classes
-        #test_support._pickeling(self, gammalib.GCTAAeff2D())
+        test_support._pickeling(self, gammalib.GCTAAeff2D(irfname))
         #test_support._pickeling(self, gammalib.GCTAAeffArf())
         #test_support._pickeling(self, gammalib.GCTAAeffPerfTable())
-        #test_support._pickeling(self, gammalib.GCTABackground3D())
+        test_support._pickeling(self, gammalib.GCTABackground3D(irfname))
         #test_support._pickeling(self, gammalib.GCTABackgroundPerfTable())
-        #test_support._pickeling(self, gammalib.GCTACubeBackground())
-        #test_support._pickeling(self, gammalib.GCTACubeEdisp())
-        #test_support._pickeling(self, gammalib.GCTACubeExposure())
-        #test_support._pickeling(self, gammalib.GCTACubePsf())
+        test_support._pickeling(self, gammalib.GCTACubeBackground(bgdcube))
+        test_support._pickeling(self, gammalib.GCTACubeEdisp(edispcube))
+        test_support._pickeling(self, gammalib.GCTACubeExposure(expcube))
+        test_support._pickeling(self, gammalib.GCTACubePsf(psfcube))
         #test_support._pickeling(self, gammalib.GCTACubeSourceDiffuse())
         #test_support._pickeling(self, gammalib.GCTACubeSourcePoint())
-        #test_support._pickeling(self, gammalib.GCTAEdisp2D())
+        test_support._pickeling(self, gammalib.GCTAEdisp2D(irfname))
         #test_support._pickeling(self, gammalib.GCTAEdispPerfTable())
         #test_support._pickeling(self, gammalib.GCTAEdispRmf())
         test_support._pickeling(self, gammalib.GCTAEventAtom(atom))
-        #test_support._pickeling(self, gammalib.GCTAEventBin())
-        #test_support._pickeling(self, gammalib.GCTAEventCube())
-        #test_support._pickeling(self, gammalib.GCTAEventList())
+        test_support._pickeling(self, gammalib.GCTAEventBin(bin))
+        test_support._pickeling(self, gammalib.GCTAEventCube(cube))
+        test_support._pickeling(self, gammalib.GCTAEventList(list))
         test_support._pickeling(self, gammalib.GCTAInstDir(instdir))
-        #test_support._pickeling(self, gammalib.GCTAModelAeffBackground())
-        #test_support._pickeling(self, gammalib.GCTAModelCubeBackground())
+        test_support._pickeling(self, gammalib.GCTAModelAeffBackground(plaw))
+        test_support._pickeling(self, gammalib.GCTAModelCubeBackground(plaw))
         test_support._pickeling(self, gammalib.GCTAModelIrfBackground(plaw))
-        #test_support._pickeling(self, gammalib.GCTAModelRadialAcceptance())
-        #test_support._pickeling(self, gammalib.GCTAModelRadialGauss())
-        #test_support._pickeling(self, gammalib.GCTAModelRadialPolynom())
-        #test_support._pickeling(self, gammalib.GCTAModelRadialProfile())
-        #test_support._pickeling(self, gammalib.GCTAObservation())
-        #test_support._pickeling(self, gammalib.GCTAOnOffObservation())
-        #test_support._pickeling(self, gammalib.GCTAPointing())
-        #test_support._pickeling(self, gammalib.GCTAPsf2D())
-        #test_support._pickeling(self, gammalib.GCTAPsfKing())
+        test_support._pickeling(self, gammalib.GCTAModelRadialAcceptance(radacc))
+        test_support._pickeling(self, gammalib.GCTAModelRadialGauss(1.0))
+        test_support._pickeling(self, gammalib.GCTAModelRadialPolynom([1.0,2.0]))
+        test_support._pickeling(self, gammalib.GCTAModelRadialProfile(1.0,2.0,3.0))
+        test_support._pickeling(self, gammalib.GCTAObservation(obs1))
+        test_support._pickeling(self, gammalib.GCTAObservation(obs2))
+        test_support._pickeling(self, gammalib.GCTAObservation(obs3))
+        test_support._pickeling(self, gammalib.GCTAObservation(obs4))
+        test_support._pickeling(self, gammalib.GCTAOnOffObservation(obs5))
+        test_support._pickeling(self, gammalib.GCTAPointing(dir))
+        test_support._pickeling(self, gammalib.GCTAPsf2D(irfname))
+        test_support._pickeling(self, gammalib.GCTAPsfKing(kingname))
         #test_support._pickeling(self, gammalib.GCTAPsfPerfTable())
-        #test_support._pickeling(self, gammalib.GCTAPsfTable())
+        #test_support._pickeling(self, gammalib.GCTAPsfTable()) # No test data
         #test_support._pickeling(self, gammalib.GCTAPsfVector())
-        #test_support._pickeling(self, gammalib.GCTAResponseCube())
-        #test_support._pickeling(self, gammalib.GCTAResponseIrf())
-        #test_support._pickeling(self, gammalib.GCTAResponseTable())
-        #test_support._pickeling(self, gammalib.GCTARoi())
+        test_support._pickeling(self, gammalib.GCTAResponseCube(rspcube1))
+        test_support._pickeling(self, gammalib.GCTAResponseCube(rspcube2))
+        test_support._pickeling(self, gammalib.GCTAResponseIrf(rspirf))
+        #test_support._pickeling(self, gammalib.GCTAResponseTable()) # No constructor
+        test_support._pickeling(self, gammalib.GCTARoi(instdir,2.0))
 
         # Return
         return
@@ -456,7 +531,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_edisp, 'Test CTA energy dispersion classes')
         self.append(self._test_response, 'Test CTA response classes')
         self.append(self._test_onoff, 'Test CTA On/Off analysis')
-        self.append(self._test_pickeling, 'Test pickeling of "cta" classes')
+        self.append(self._test_pickeling, 'Test CTA class pickeling')
 
         # Return
         return

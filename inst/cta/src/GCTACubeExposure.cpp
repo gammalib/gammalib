@@ -420,8 +420,10 @@ void GCTACubeExposure::write(GFits& fits) const
     m_cube.write(fits);
 
     // Get last HDU and write attributes
-    GFitsHDU& hdu = *fits[fits.size()-1];
-    write_attributes(hdu);
+    if (fits.size() > 0) {
+        GFitsHDU& hdu = *fits[fits.size()-1];
+        write_attributes(hdu);
+    }
 
     // Write energies
     m_energies.write(fits);

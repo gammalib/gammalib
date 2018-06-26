@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelCubeBackground.hpp - CTA cube background model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Michael Mayer                               *
+ *  copyright (C) 2013-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,8 @@ public:
     GCTAModelCubeBackground(void);
     explicit GCTAModelCubeBackground(const GXmlElement& xml);
     explicit GCTAModelCubeBackground(const GModelSpectral& spectral);
+    GCTAModelCubeBackground(const GModelSpectral& spectral,
+                            const GModelTemporal& temporal);
     GCTAModelCubeBackground(const GCTAModelCubeBackground& bgd);
     virtual ~GCTAModelCubeBackground(void);
 

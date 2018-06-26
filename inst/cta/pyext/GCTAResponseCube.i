@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAResponseCube.i - CTA cube analysis response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -90,4 +90,16 @@ public:
     GCTAResponseCube copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.exposure(), self.psf(), self.edisp(), self.background(),
+                 self.apply_edisp())
+        return state
+    def __setstate__(self, state):
+        if state[2].energies().is_empty():
+            self.__init__(state[0], state[1], state[3])
+        else:
+            self.__init__(state[0], state[1], state[2], state[3])
+        self.apply_edisp(state[4])
+}
 };

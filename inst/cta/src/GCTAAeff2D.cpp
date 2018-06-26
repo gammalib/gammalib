@@ -548,25 +548,33 @@ std::string GCTAAeff2D::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Compute energy boundaries in TeV
-        double emin = m_aeff.axis_lo(m_inx_energy,0);
-        double emax = m_aeff.axis_hi(m_inx_energy,
-                                     m_aeff.axis_bins(m_inx_energy)-1);
-
-        // Compute offset angle boundaries in deg
-        double omin = m_aeff.axis_lo(m_inx_theta,0);
-        double omax = m_aeff.axis_hi(m_inx_theta,
-                                     m_aeff.axis_bins(m_inx_theta)-1);
-
         // Append header
         result.append("=== GCTAAeff2D ===");
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+
+        // Initialise information
+        int    nebins     = 0;
+        int    nthetabins = 0;
+        double emin       = 0.0;
+        double emax       = 0.0;
+        double omin       = 0.0;
+        double omax       = 0.0;
+
+        // Extract information if there are axes in the response table
+        if (m_aeff.axes() > 0) {
+            nebins     = m_aeff.axis_bins(m_inx_energy);
+            nthetabins = m_aeff.axis_bins(m_inx_theta);
+            emin       = m_aeff.axis_lo(m_inx_energy,0);
+            emax       = m_aeff.axis_hi(m_inx_energy,nebins-1);
+            omin       = m_aeff.axis_lo(m_inx_theta,0);
+            omax       = m_aeff.axis_hi(m_inx_theta,nthetabins-1);
+        }
 
         // Append information
-        result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_aeff.axis_bins(m_inx_energy)));
+                      gammalib::str(nebins));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_aeff.axis_bins(m_inx_theta)));
+                      gammalib::str(nthetabins));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));

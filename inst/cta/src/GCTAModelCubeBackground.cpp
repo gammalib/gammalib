@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelCubeBackground.cpp - CTA cube background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Michael Mayer                               *
+ *  copyright (C) 2013-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -112,10 +112,8 @@ GCTAModelCubeBackground::GCTAModelCubeBackground(const GXmlElement& xml) :
  *
  * @param[in] spectral Spectral model component.
  *
- * Constructs a CTA cube background model from a spectral model component.
- * The temporal component is assumed to be constant. Please refer to the
- * class GModelSpectral to learn more about the definition of the spectral
- * components.
+ * Constructs a CTA cube background model from a @p spectral model component.
+ * The temporal component is assumed to be constant.
  ***************************************************************************/
 GCTAModelCubeBackground::GCTAModelCubeBackground(const GModelSpectral& spectral) :
                          GModelData()
@@ -125,6 +123,34 @@ GCTAModelCubeBackground::GCTAModelCubeBackground(const GModelSpectral& spectral)
 
     // Allocate temporal constant model
     GModelTemporalConst temporal;
+
+    // Clone model components
+    m_spectral = spectral.clone();
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct from model components
+ *
+ * @param[in] spectral Spectral model component.
+ * @param[in] temporal Temporal model component.
+ *
+ * Constructs a CTA cube background model from a @p spectral and a
+ * @p temporal component.
+ ***************************************************************************/
+GCTAModelCubeBackground::GCTAModelCubeBackground(const GModelSpectral& spectral,
+                                                 const GModelTemporal& temporal) :
+                         GModelData()
+{
+    // Initialise members
+    init_members();
 
     // Clone model components
     m_spectral = spectral.clone();

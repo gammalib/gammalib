@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAModelRadial.hpp - Radial model abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadial.hpp
  * @brief Abstract radial acceptance model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAMODELRADIAL_HPP
@@ -73,7 +73,7 @@ public:
     virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
 
     // Methods
-    int size(void) const { return (int)m_pars.size(); }
+    int size(void) const;
 
 protected:
     // Protected methods
@@ -84,5 +84,17 @@ protected:
     // Proteced members
     std::vector<GModelPar*> m_pars;  //!< Parameter pointers
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of model parameters
+ *
+ * @return Number of model parameters.
+ ***************************************************************************/
+inline
+int GCTAModelRadial::size(void) const
+{
+    return ((int)m_pars.size());
+}
 
 #endif /* GCTAMODELRADIAL_HPP */

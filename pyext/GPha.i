@@ -28,6 +28,11 @@
 #include "GPha.hpp"
 %}
 
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_pha = "SPECTRUM";
+}
+
 
 /***********************************************************************//**
  * @class GPha
@@ -87,6 +92,7 @@ public:
     void               load(const GFilename& filename);
     void               save(const GFilename& filename,
                             const bool&      clobber = false) const;
+    void               read(const GFits& fits);
     void               read(const GFitsTable& table);
     void               write(GFits& fits) const;
     const GFilename&   filename(void) const;
@@ -148,4 +154,15 @@ public:
     GPha copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        if not state[0].is_empty():
+            self.read(state[0])
+}
 };

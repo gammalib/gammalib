@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAPointing.i  -  CTA pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,4 +73,13 @@ public:
     GCTAPointing copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.dir(), self.zenith(), self.azimuth())
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+        self.zenith(state[1])
+        self.azimuth(state[2])
+}
 };

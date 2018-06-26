@@ -312,4 +312,23 @@ public:
         }
         return array;
     }
+// Pickeling
+%pythoncode {
+    def __getstate__(self):
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        for hdu in state[0]:
+            if ((hdu.exttype() == 0 and
+                 hdu.has_card('NAXIS') and
+                 hdu.integer('NAXIS') >= 2) or
+                (hdu.exttype() == 0 and
+                 hdu.has_card('PIXTYPE') and
+                 hdu.string('PIXTYPE') == 'HEALPIX')):
+                self.read(hdu)
+                break
+}
 };

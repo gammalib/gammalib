@@ -110,8 +110,8 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = self.name(), self.instruments(), self.ids(), self.tscalc(), \
-                self.has_ts(), self.ts()
+        state = (self.name(), self.instruments(), self.ids(), self.tscalc(),
+                 self.has_ts(), self.ts())
         return state
     def __setstate__(self, state):
         self.__init__()

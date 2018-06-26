@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.cpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -364,10 +364,12 @@ void GCTAPsf2D::write(GFitsBinTable& table) const
     // Create a copy of the response table
     GCTAResponseTable psf(m_psf);
 
-    // Convert sigma parameters back to degrees
-    psf.scale(m_inx_sigma1, gammalib::rad2deg);
-    psf.scale(m_inx_sigma2, gammalib::rad2deg);
-    psf.scale(m_inx_sigma3, gammalib::rad2deg);
+    // Convert sigma parameters back to degrees (only if there are tables)
+    if (psf.tables() > 0) {
+        psf.scale(m_inx_sigma1, gammalib::rad2deg);
+        psf.scale(m_inx_sigma2, gammalib::rad2deg);
+        psf.scale(m_inx_sigma3, gammalib::rad2deg);
+    }
 
     // Write response table
     psf.write(table);
@@ -670,7 +672,7 @@ double GCTAPsf2D::containment_radius(const double& fraction,
 /***********************************************************************//**
  * @brief Print point spread function information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing point spread function information.
  ***************************************************************************/
 std::string GCTAPsf2D::print(const GChatter& chatter) const
@@ -681,25 +683,33 @@ std::string GCTAPsf2D::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Compute energy boundaries in TeV
-        double emin = m_psf.axis_lo(m_inx_energy,0);
-        double emax = m_psf.axis_hi(m_inx_energy,
-                                    m_psf.axis_bins(m_inx_energy)-1);
-
-        // Compute offset angle boundaries in deg
-        double omin = m_psf.axis_lo(m_inx_theta,0);
-        double omax = m_psf.axis_hi(m_inx_theta,
-                                    m_psf.axis_bins(m_inx_theta)-1);
-
         // Append header
         result.append("=== GCTAPsf2D ===");
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+
+        // Initialise information
+        int    nebins     = 0;
+        int    nthetabins = 0;
+        double emin       = 0.0;
+        double emax       = 0.0;
+        double omin       = 0.0;
+        double omax       = 0.0;
+
+        // Extract information if there are axes in the response table
+        if (m_psf.axes() > 0) {
+            nebins     = m_psf.axis_bins(m_inx_energy);
+            nthetabins = m_psf.axis_bins(m_inx_theta);
+            emin       = m_psf.axis_lo(m_inx_energy,0);
+            emax       = m_psf.axis_hi(m_inx_energy,nebins-1);
+            omin       = m_psf.axis_lo(m_inx_theta,0);
+            omax       = m_psf.axis_hi(m_inx_theta,nthetabins-1);
+        }
 
         // Append information
-        result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_psf.axis_bins(m_inx_energy)));
+                      gammalib::str(nebins));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_psf.axis_bins(m_inx_theta)));
+                      gammalib::str(nthetabins));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));

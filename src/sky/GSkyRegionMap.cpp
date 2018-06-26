@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GSkyRegionMap.cpp - Sky region map class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Pierrick Martin                                  *
+ *  copyright (C) 2017-2018 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -261,7 +261,7 @@ void GSkyRegionMap::map(const GSkyMap& map)
 
 
 /***********************************************************************//**
- * @brief Load region map from FITS file name
+ * @brief Load region map from FITS file
  *
  * @param[in] filename FITS file name.
  ***************************************************************************/
@@ -275,9 +275,6 @@ void GSkyRegionMap::load(const GFilename& filename)
 
     // Load map
     m_map.load(filename);
-    
-    // Store filename
-    m_filename = filename;
     
     // Set non-zero indices
     set_nonzero_indices();
@@ -495,7 +492,6 @@ void GSkyRegionMap::init_members(void)
     // Initialise members
     m_map.clear();
     m_nonzero_indices.clear();
-    m_filename.clear();
 
     //Return
     return;
@@ -510,9 +506,8 @@ void GSkyRegionMap::init_members(void)
 void GSkyRegionMap::copy_members(const GSkyRegionMap& map)
 {
     // Copy members
-    m_map              = map.m_map;
-    m_nonzero_indices  = map.m_nonzero_indices;
-    m_filename         = map.m_filename;
+    m_map             = map.m_map;
+    m_nonzero_indices = map.m_nonzero_indices;
     
     // Compute solid angle
     compute_solid_angle();

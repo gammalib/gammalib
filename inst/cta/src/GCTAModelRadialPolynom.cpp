@@ -79,8 +79,8 @@ GCTAModelRadialPolynom::GCTAModelRadialPolynom(void) : GCTAModelRadial()
  *
  * @param[in] coeffs Vector of polynomial coefficients.
  ***************************************************************************/
-GCTAModelRadialPolynom::GCTAModelRadialPolynom(const std::vector<double>& coeffs)
-                                                          : GCTAModelRadial()
+GCTAModelRadialPolynom::GCTAModelRadialPolynom(const std::vector<double>& coeffs) :
+                        GCTAModelRadial()
 {
     // Initialise members
     init_members();
@@ -95,7 +95,7 @@ GCTAModelRadialPolynom::GCTAModelRadialPolynom(const std::vector<double>& coeffs
         par.value(coeffs[i]);
 
         // Set other attributes
-        std::string name = "coeff" + gammalib::str(i);
+        std::string name = "Coeff" + gammalib::str(i);
         par.name(name);
         par.unit("");
         par.free();

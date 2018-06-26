@@ -83,7 +83,8 @@ public:
     void                       load(const GFilename& filename);
     void                       save(const GFilename& filename,
                                     const bool& clobber = false) const;
-    void                       write(GFits& file) const;
+    void                       read(const GFits& fits);
+    void                       write(GFits& fits) const;
 };
 
 
@@ -94,4 +95,16 @@ public:
     GModelSpatialDiffuseCube copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits, self.filename(), self[0])
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.read(state[0])
+        self.filename(state[1])
+        self[0] = state[2]
+}
 };

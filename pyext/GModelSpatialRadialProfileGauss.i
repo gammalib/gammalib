@@ -70,4 +70,13 @@ public:
     GModelSpatialRadialProfileGauss copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+}
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.cpp - XSPEC Auxiliary Response File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -556,11 +556,8 @@ void GArf::load(const GFilename& filename)
     // to modify the extension names)
     GFits fits(filename.url());
 
-    // Get ARF table
-    const GFitsTable& table = *fits.table(gammalib::extname_arf);
-
     // Read ARF data
-    read(table);
+    read(fits);
 
     // Close FITS file
     fits.close();
@@ -601,6 +598,30 @@ void GArf::save(const GFilename& filename, const bool& clobber) const
 
     // Store filename
     m_filename = filename.url();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read Auxiliary Response File
+ *
+ * @param[in] fits FITS file.
+ *
+ * Loads the Auxiliary Response File from the `SPECRESP` extension of the
+ * FITS file.
+ ***************************************************************************/
+void GArf::read(const GFits& fits)
+{
+    // Clear response
+    clear();
+
+    // Get ARF table
+    const GFitsTable& table = *fits.table(gammalib::extname_arf);
+
+    // Read ARF data
+    read(table);
 
     // Return
     return;

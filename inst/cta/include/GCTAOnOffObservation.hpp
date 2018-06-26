@@ -109,6 +109,7 @@ public:
 
     // Other methods
     void        instrument(const std::string& instrument);
+    bool        has_response(void) const;
     const GPha& on_spec(void) const;
     const GPha& off_spec(void) const;
     const GArf& arf(void) const;
@@ -239,6 +240,18 @@ inline
 double GCTAOnOffObservation::deadc(const GTime& time) const
 {
     return (m_deadc);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if observation contains response information
+ *
+ * @return True if observation contains response information.
+ ***************************************************************************/
+inline
+bool GCTAOnOffObservation::has_response(void) const
+{
+    return (m_response != NULL);
 }
 
 

@@ -556,14 +556,55 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GHealpix())
+        test_support._pickeling(self, gammalib.GHorizDir())
         test_support._pickeling(self, gammalib.GSkyDir())
+        test_support._pickeling(self, gammalib.GSkyMap())
+        test_support._pickeling(self, gammalib.GSkyPixel())
+        test_support._pickeling(self, gammalib.GSkyRegionCircle())
+        test_support._pickeling(self, gammalib.GSkyRegionMap())
+        test_support._pickeling(self, gammalib.GSkyRegions())
+        test_support._pickeling(self, gammalib.GWcsAIT())
+        test_support._pickeling(self, gammalib.GWcsAZP())
+        test_support._pickeling(self, gammalib.GWcsCAR())
+        test_support._pickeling(self, gammalib.GWcsGLS())
+        test_support._pickeling(self, gammalib.GWcsMER())
+        test_support._pickeling(self, gammalib.GWcsMOL())
+        test_support._pickeling(self, gammalib.GWcsSFL())
+        test_support._pickeling(self, gammalib.GWcsSIN())
+        test_support._pickeling(self, gammalib.GWcsSTG())
+        test_support._pickeling(self, gammalib.GWcsTAN())
 
         # Setup test
-        dir = gammalib.GSkyDir()
+        dir      = gammalib.GSkyDir()
         dir.lb_deg(1.0, 2.0)
+        map      = gammalib.GFilename(os.environ['TEST_DATA']+'/test_cube.fits')
+        regions  = gammalib.GSkyRegions()
+        regions.append(gammalib.GSkyRegionCircle(dir,2.0))
+        regions.append(gammalib.GSkyRegionMap(map))
+        horizdir = gammalib.GHorizDir()
+        horizdir.altaz_deg(2.0, 3.0)
 
         # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GHealpix(4))
+        test_support._pickeling(self, horizdir)
         test_support._pickeling(self, gammalib.GSkyDir(dir))
+        test_support._pickeling(self, gammalib.GSkyMap(map))
+        test_support._pickeling(self, gammalib.GSkyPixel(1.0))
+        test_support._pickeling(self, gammalib.GSkyPixel(2.0,3.0))
+        test_support._pickeling(self, gammalib.GSkyRegionCircle(dir,2.0))
+        test_support._pickeling(self, gammalib.GSkyRegionMap(map))
+        test_support._pickeling(self, gammalib.GSkyRegions(regions))
+        test_support._pickeling(self, gammalib.GWcsAIT('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsAZP('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsCAR('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsGLS('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsMER('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsMOL('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsSFL('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsSIN('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsSTG('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsTAN('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
 
         # Return
         return
@@ -592,7 +633,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_skymap_tan, 'Test TAN projection map')
         self.append(self._test_regions_access, 'Test GSkyRegions region access')
         self.append(self._test_regions_slicing, 'Test GSkyRegions slicing')
-        self.append(self._test_pickeling, 'Test pickeling of "sky" classes')
+        self.append(self._test_pickeling, 'Test sky class pickeling')
 
         # Return
         return

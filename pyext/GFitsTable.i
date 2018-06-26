@@ -154,11 +154,12 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (tuple([self[i] for i in range(self.ncols())]),)
+        state = (gammalib.GFitsHDU.__getstate__(self), tuple([self[i] for i in range(self.ncols())]))
         return state
     def __setstate__(self, state):
         self.__init__()
-        for x in state[0]:
+        gammalib.GFitsHDU.__setstate__(self, state[0])
+        for x in state[1]:
             self.append(x)
 }
 };

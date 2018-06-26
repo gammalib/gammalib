@@ -63,7 +63,7 @@ public:
     virtual ~GCTAModelRadialPolynom(void);
 
     // Operators
-    virtual GCTAModelRadialPolynom& operator= (const GCTAModelRadialPolynom& model);
+    virtual GCTAModelRadialPolynom& operator=(const GCTAModelRadialPolynom& model);
 
     // Implemented pure virtual methods
     virtual void                    clear(void);
@@ -79,7 +79,6 @@ public:
     virtual std::string             print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int    size(void) const;
     //double coeff(void) const;
     //void   coeff(const double& value);
 
@@ -128,18 +127,6 @@ inline
 std::string GCTAModelRadialPolynom::type(void) const
 {
     return ("Polynom");
-}
-
-
-/***********************************************************************//**
- * @brief Return number of coefficients in polynomial
- *
- * @return Number of coefficients in polynomial.
- ***************************************************************************/
-inline
-int GCTAModelRadialPolynom::size(void) const
-{
-    return (int)m_coeffs.size();
 }
 
 #endif /* GCTAMODELRADIALPOLYNOM_HPP */

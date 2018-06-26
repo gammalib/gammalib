@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsBinTable.cpp - FITS binary table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,9 @@ GFitsBinTable::GFitsBinTable(const int& nrows) : GFitsTable(nrows)
 {
     // Initialise class members for clean destruction
     init_members();
+
+    // Initialise header
+    init_table_header();
 
     // Return
     return;
@@ -217,6 +220,40 @@ void GFitsBinTable::copy_members(const GFitsBinTable& table)
  ***************************************************************************/
 void GFitsBinTable::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise binary table header
+ *
+ * Initialises the table header by setting the default header cards.
+ ***************************************************************************/
+void GFitsBinTable::init_table_header(void)
+{
+    // Compute total width in Bytes
+    int width = 0;
+    for (int i = 0; i < ncols(); ++i) {
+        width += m_columns[i]->width();
+    }
+
+    // Set image header keywords
+    m_header.append(GFitsHeaderCard("XTENSION", "BINTABLE",
+                                    "binary table extension"));
+    m_header.append(GFitsHeaderCard("BITPIX", 8,
+                                    "8-bit bytes"));
+    m_header.append(GFitsHeaderCard("NAXIS", 2,
+                                    "2-dimensional binary table"));
+    m_header.append(GFitsHeaderCard("NAXIS1", width,
+                                    "width of table in bytes"));
+    m_header.append(GFitsHeaderCard("NAXIS2", nrows(),
+                                    "number of rows in table"));
+    m_header.append(GFitsHeaderCard("PCOUNT", 0,
+                                    "size of special data area"));
+    m_header.append(GFitsHeaderCard("GCOUNT", 1,
+                                    "one data group (required keyword)"));
+
     // Return
     return;
 }

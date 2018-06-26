@@ -98,6 +98,7 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void                instrument(const std::string& instrument);
     bool                has_response(void) const;
     bool                has_events(void) const;
     void                read(const GFits& fits);
@@ -145,7 +146,9 @@ public:
     const GFilename&    eventfile(void) const;
     std::string         eventtype(void) const;
     void                dispose_events(void);
+    void                lo_user_thres(const double& lo_user_thres);
     const double&       lo_user_thres(void) const;
+    void                hi_user_thres(const double& hi_user_thres);
     const double&       hi_user_thres(void) const;
     void                n_tels(const int& tels);
     const int&          n_tels(void) const;
@@ -189,6 +192,19 @@ inline
 std::string GCTAObservation::classname(void) const
 {
     return ("GCTAObservation");
+}
+
+
+/***********************************************************************//**
+ * @brief Set instrument name
+ *
+ * @param[in] instrument Instrument name.
+ ***************************************************************************/
+inline
+void GCTAObservation::instrument(const std::string& instrument)
+{
+    m_instrument = instrument;
+    return;
 }
 
 
@@ -462,6 +478,19 @@ const GFilename& GCTAObservation::eventfile(void) const
 
 
 /***********************************************************************//**
+ * @brief Set user low energy threshold
+ *
+ * @param[in] lo_user_thres User low energy threshold.
+ ***************************************************************************/
+inline
+void GCTAObservation::lo_user_thres(const double& lo_user_thres)
+{
+    m_lo_user_thres = lo_user_thres;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return user low energy threshold
  *
  * @return User low energy threshold.
@@ -471,6 +500,20 @@ const double& GCTAObservation::lo_user_thres(void) const
 {
     return m_lo_user_thres;
 }
+
+
+/***********************************************************************//**
+ * @brief Set user high energy threshold
+ *
+ * @param[in] hi_user_thres User high energy threshold.
+ ***************************************************************************/
+inline
+void GCTAObservation::hi_user_thres(const double& hi_user_thres)
+{
+    m_hi_user_thres = hi_user_thres;
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Return user high energy threshold

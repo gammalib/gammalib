@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAAeff2D.i - CTA 2D effective area class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,4 +80,21 @@ public:
     GCTAAeff2D copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        if self.filename().is_empty():
+            hdu = gammalib.GFitsBinTable()
+            self.write(hdu)
+            state = (self.filename(), hdu)
+        else:
+            state = (self.filename(),)
+        return state
+    def __setstate__(self, state):
+        if state[0].is_empty():
+            self.__init__()
+            if state[1].nrows() > 0:
+                self.read(state[1])
+        else:
+            self.__init__(state[0])
+}
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsAsciiTable.cpp - FITS ASCII table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,9 @@ GFitsAsciiTable::GFitsAsciiTable(const int& nrows) : GFitsTable(nrows)
 {
     // Initialise class members for clean destruction
     init_members();
+
+    // Initialise header
+    init_table_header();
 
     // Return
     return;
@@ -213,6 +216,42 @@ void GFitsAsciiTable::copy_members(const GFitsAsciiTable& table)
  ***************************************************************************/
 void GFitsAsciiTable::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+
+
+/***********************************************************************//**
+ * @brief Initialise ASCII table header
+ *
+ * Initialises the table header by setting the default header cards.
+ ***************************************************************************/
+void GFitsAsciiTable::init_table_header(void)
+{
+    // Compute total width in Bytes
+    int width = 0;
+    for (int i = 0; i < ncols(); ++i) {
+        width += m_columns[i]->width();
+    }
+
+    // Set image header keywords
+    m_header.append(GFitsHeaderCard("XTENSION", "TABLE",
+                                    "ASCII table extension"));
+    m_header.append(GFitsHeaderCard("BITPIX", 8,
+                                    "8-bit ASCII characters"));
+    m_header.append(GFitsHeaderCard("NAXIS", 2,
+                                    "2-dimensional ASCII table"));
+    m_header.append(GFitsHeaderCard("NAXIS1", width,
+                                    "width of table in characters"));
+    m_header.append(GFitsHeaderCard("NAXIS2", nrows(),
+                                    "number of rows in table"));
+    m_header.append(GFitsHeaderCard("PCOUNT", 0,
+                                    "no group parameters (required keyword)"));
+    m_header.append(GFitsHeaderCard("GCOUNT", 1,
+                                    "one data group (required keyword)"));
+
     // Return
     return;
 }

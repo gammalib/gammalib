@@ -797,23 +797,30 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
  *
  * Loads skymap into the model class. The method calls the protected method
  * prepare_map() that prepares the map for usage by the class.
+ *
+ * If the @p filename is empty, no map will be loaded.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::load(const GFilename& filename)
 {
     // Initialise skymap
     m_map.clear();
 
-    // Store filename of skymap (for XML writing). Note that we do not
-    // expand any environment variable at this level, so that if we write
-    // back the XML element we write the filepath with the environment
-    // variables
-    m_filename = filename;
+    // Continue only if filename is not empty
+    if (!filename.is_empty()) {
 
-    // Load sky map
-    m_map.load(m_filename);
+        // Store filename of skymap (for XML writing). Note that we do not
+        // expand any environment variable at this level, so that if we
+        // write back the XML element we write the filepath with the
+        // environment variables
+        m_filename = filename;
 
-    // Prepare sky map
-    prepare_map();
+        // Load sky map
+        m_map.load(m_filename);
+
+        // Prepare sky map
+        prepare_map();
+
+    } // endif: filename was not empty
 
     // Return
     return;

@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import sys
 import pickle
 
 
@@ -267,7 +268,8 @@ def _pickeling(testsuite, object):
                               'Check pickled dump of "%s\n%s\n%s"' %
                               (name, str(object), str(obj)))
         testsuite.test_try_success()
-    except Exception as e:
+    except:
+        _, e, _ = sys.exc_info()
         testsuite.test_try_failure('Error in pickeling "%s" (%s).' %
                                    (name, str(e)))
 
