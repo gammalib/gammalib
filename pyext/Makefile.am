@@ -122,11 +122,21 @@ testdata = $(top_srcdir)/test/data/initial_coords.txt \
            $(top_srcdir)/test/data/test_GApplication.par \
            $(top_srcdir)/test/data/model_point_plaw.xml
 
+# Test data to be distributed in $(pyexecdir)/gammalib/tests/data/caldb/data/cta/prod2
+testcaldbidx = $(top_srcdir)/test/data/caldb/data/cta/prod2/caldb.indx
+
+# Test data to be distributed in $(pyexecdir)/gammalib/tests/data/caldb/data/cta/prod2/bcf/North_0.5h
+testcaldbbcf = $(top_srcdir)/test/data/caldb/data/cta/prod2/bcf/North_0.5h/irf_file.fits.gz
+
 # Distribute scripts
-testscriptsdir   = $(pyexecdir)/gammalib/tests
-testscripts_DATA = $(testscripts)
-testdatadir      = $(pyexecdir)/gammalib/tests/data
-testdata_DATA    = $(testdata)
+testscriptsdir    = $(pyexecdir)/gammalib/tests
+testscripts_DATA  = $(testscripts)
+testdatadir       = $(pyexecdir)/gammalib/tests/data
+testdata_DATA     = $(testdata)
+testcaldbidxdir   = $(pyexecdir)/gammalib/tests/data/caldb/data/cta/prod2
+testcaldbidx_DATA = $(testcaldbidx)
+testcaldbbcfdir   = $(pyexecdir)/gammalib/tests/data/caldb/data/cta/prod2/bcf/North_0.5h
+testcaldbbcf_DATA = $(testcaldbbcf)
 
 # Distribute CTA test data (optionally)
 if WITH_INST_CTA
