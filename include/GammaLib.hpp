@@ -225,6 +225,7 @@
 #include "GModelSpectralConst.hpp"
 #include "GModelSpectralExpPlaw.hpp"
 #include "GModelSpectralExpInvPlaw.hpp"
+#include "GModelSpectralExponential.hpp"
 #include "GModelSpectralSuperExpPlaw.hpp"
 #include "GModelSpectralFunc.hpp"
 #include "GModelSpectralGauss.hpp"

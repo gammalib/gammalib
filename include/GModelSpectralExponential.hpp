@@ -56,8 +56,8 @@ public:
     // Constructors and destructors
     GModelSpectralExponential(void);
     explicit GModelSpectralExponential(const GXmlElement& xml);
-    GModelSpectralExpoenential(const GModelSpectralexponential& model);
-    virtual ~GModelSpectralMultiplicative(void);
+    GModelSpectralExponential(const GModelSpectralExponential& model);
+    virtual ~GModelSpectralExponential(void);
 
     // Operators
     virtual GModelSpectralExponential& operator=(const GModelSpectralExponential& model);
@@ -97,19 +97,17 @@ protected:
     class flux_kern : public GFunction {
     public:
         // Constructor
-        flux_kern(const GModelSpectral& spec) : m_spec(spec) {}
+        flux_kern(const GModelSpectral& spec) : m_exp(spec) {}
 
         // Method
         double eval(const double& x) {
             GEnergy energy(x, "MeV");
-            double value = m_spec->eval(energy);
+            double value = m_exp->eval(energy);
             value = exp(value);
             return value;
         }
-
     protected:
-        // Protected members
-        m_spec; //!< Exponent spectral model
+        mutable GModelSpectral* m_exp;
     };
 
     // Class to determine the integral energy flux, derived from flux_kern
@@ -125,7 +123,8 @@ protected:
     };
 
     // Protected members
-    std::string                  m_type;        //!< Model type
+    std::string					m_type;        //!< Model type
+    mutable GModelSpectral*		m_exponent;	   //!< Exponent
 
     // MC cache
     mutable GModelSpectralNodes  m_mc_spectrum; //!< MC spectrum cache

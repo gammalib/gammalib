@@ -183,6 +183,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralConst.hpp \
                      GModelSpectralExpInvPlaw.hpp \
                      GModelSpectralExpPlaw.hpp \
+		     GModelSpectralExponential.hpp \
                      GModelSpectralSuperExpPlaw.hpp \
                      GModelSpectralFunc.hpp \
                      GModelSpectralGauss.hpp \
