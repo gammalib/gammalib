@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        app.i - Application module                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,11 @@
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
+%include std_string.i
+%include std_vector.i
+namespace std {
+   %template(vectors) vector<std::string>;
+};
 
 /* __ Include GammaLib typemaps __________________________________________ */
 %include typemap_GFilename.i

@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GApplicationPars.hpp"
-#include "GException.hpp"
 #include "GFilename.hpp"
 %}
 
@@ -48,27 +47,29 @@ public:
     virtual ~GApplicationPars(void);
  
     // Methods
-    void               clear(void);
-    GApplicationPars*  clone(void) const;
-    std::string        classname(void) const;
-    int                size(void) const;
-    bool               is_empty(void) const;
-    GApplicationPar&   append(const GApplicationPar& par);
-    void               append_standard(void);
-    GApplicationPar&   insert(const int& index, const GApplicationPar& par);
-    GApplicationPar&   insert(const std::string& name,
-                              const GApplicationPar& par);
-    void               remove(const int& index);
-    void               remove(const std::string& name);
-    void               reserve(const int& num);
-    void               extend(const GApplicationPars& pars);
-    bool               contains(const std::string& name) const;
-    void               syspfiles(const std::string& syspfiles);
-    const std::string& syspfiles(void) const;
-    void               load(const GFilename& filename);
-    void               load(const GFilename& filename,
-                            const std::vector<std::string>& args);
-    void               save(const GFilename& filename);
+    void                     clear(void);
+    GApplicationPars*        clone(void) const;
+    std::string              classname(void) const;
+    int                      size(void) const;
+    bool                     is_empty(void) const;
+    GApplicationPar&         append(const GApplicationPar& par);
+    void                     append_standard(void);
+    GApplicationPar&         insert(const int& index, const GApplicationPar& par);
+    GApplicationPar&         insert(const std::string&     name,
+                                    const GApplicationPar& par);
+    void                     remove(const int& index);
+    void                     remove(const std::string& name);
+    void                     reserve(const int& num);
+    void                     extend(const GApplicationPars& pars);
+    bool                     contains(const std::string& name) const;
+    void                     syspfiles(const std::string& syspfiles);
+    const std::string&       syspfiles(void) const;
+    void                     load(const GFilename& filename);
+    void                     load(const GFilename&                filename,
+                                  const std::vector<std::string>& args);
+    void                     save(const GFilename& filename);
+    void                     pickle(const std::vector<std::string>& string);
+    std::vector<std::string> pickle(void) const;
 };
 
 
@@ -142,4 +143,12 @@ public:
     GApplicationPars copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.pickle(),)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.pickle(state[0])
 }
+};

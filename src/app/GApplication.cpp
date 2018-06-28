@@ -104,7 +104,32 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     // Return
     return;
 }
-    
+
+
+/***********************************************************************//**
+ * @brief Application constructor
+ *
+ * @param[in] name Application name.
+ * @param[in] version Application version.
+ * @param[in] args Command line arguments
+ *
+ * Constructs an application from an application @p name, @p version and a
+ * number of command line arguments @p args.
+ ***************************************************************************/
+GApplication::GApplication(const std::string&              name,
+                           const std::string&              version,
+                           const std::vector<std::string>& args)
+{
+    // Initialise members
+    init_members();
+
+    // Set members
+    set_members(name, version, args);
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Application constructor
@@ -115,12 +140,7 @@ GApplication::GApplication(const std::string& name, const std::string& version)
  * @param[in] argv Command line arguments
  *
  * Constructs an application from an application @p name, @p version and a
- * number @p argc of command line arguments @p argv. The constructor will
- * set the parameter filename to "<name>.par" and the log filename to
- * "<name>".log. The parameters will be loaded from the parameter file.
- *
- * No log file will be opened. To open the log file an explicit call to the
- * logFileOpen() method is required.
+ * number @p argc of command line arguments @p argv.
  *
  * This constructor should be used for C++ applications.
  ***************************************************************************/
@@ -130,45 +150,14 @@ GApplication::GApplication(const std::string& name, const std::string& version,
     // Initialise members
     init_members();
 
-    // Set application name and version
-    m_name    = name;
-    m_version = version;
-
-    // Set default parfile and logfile name
-    m_parfile = name+".par";
-    m_logfile = name+".log";
-
-    // Save arguments as vector of strings
+    // Put arguments in vector string
+    std::vector<std::string> args;
     for (int i = 0; i < argc; ++i) {
-        m_args.push_back(gammalib::strip_whitespace(argv[i]));
+        args.push_back(gammalib::strip_whitespace(argv[i]));
     }
 
-    // Catch --help option before doing anything else. The actual action
-    // needs to be done by the client, but we skip the loading of the
-    // parameter file and the opening of the logger if the help option
-    // was specified.
-    m_need_help = false;
-    if (m_args.size() >= 2) {
-        if (m_args[1] == "--help") {
-            m_need_help = true;
-        }
-    }
-
-    // If no --help option has been specified then proceed with loading
-    // the parameter file and opening the logger
-    if (!m_need_help) {
-
-        // Initialise application parameters
-        m_pars.load(par_filename(), m_args);
-
-        // Signal that application parameters have been loaded
-        m_pars_loaded = true;
-
-        // Set log filename and chattiness
-        set_log_filename();
-        set_log_chatter();
-
-    } // endif: no --help option specified
+    // Set members
+    set_members(name, version, args);
 
     // Return
     return;
@@ -912,6 +901,68 @@ void GApplication::free_members(void)
 
     // Close log file
     logFileClose();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set application members
+ *
+ * @param[in] name Application name.
+ * @param[in] version Application version.
+ * @param[in] args Command line arguments
+ *
+ * Sets the application members from an application @p name, @p version and
+ * a number of command line arguments @p args. The method will set the
+ * parameter filename to "<name>.par" and the log filename to "<name>".log.
+ * The parameters will be loaded from the parameter file.
+ *
+ * No log file will be opened. To open the log file an explicit call to the
+ * logFileOpen() method is required.
+ ***************************************************************************/
+void GApplication::set_members(const std::string&              name,
+                               const std::string&              version,
+                               const std::vector<std::string>& args)
+{
+    // Set application name and version
+    m_name    = name;
+    m_version = version;
+
+    // Set default parfile and logfile name
+    m_parfile = name+".par";
+    m_logfile = name+".log";
+
+    // Save arguments
+    m_args = args;
+
+    // Catch --help option before doing anything else. The actual action
+    // needs to be done by the client, but we skip the loading of the
+    // parameter file and the opening of the logger if the help option
+    // was specified.
+    m_need_help = false;
+    if (m_args.size() >= 2) {
+        if (m_args[1] == "--help") {
+            m_need_help = true;
+        }
+    }
+
+    // If no --help option has been specified then proceed with loading
+    // the parameter file and opening the logger
+    if (!m_need_help) {
+
+        // Initialise application parameters
+        m_pars.load(par_filename(), m_args);
+
+        // Signal that application parameters have been loaded
+        m_pars_loaded = true;
+
+        // Set log filename and chattiness
+        set_log_filename();
+        set_log_chatter();
+
+    } // endif: no --help option specified
 
     // Return
     return;

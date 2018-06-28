@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GApplication.i - GammaLib application base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,8 @@ public:
     GApplication(void);
     GApplication(const std::string& name, const std::string& version);
     GApplication(const std::string& name, const std::string& version,
+                 const std::vector<std::string>& args);
+    GApplication(const std::string& name, const std::string& version,
                  int ARGC, char **ARGV);
     GApplication(const GApplication& app);
     ~GApplication(void);
@@ -76,28 +78,34 @@ public:
     %rename(_log_header)    log_header;
     %rename(_log_trailer)   log_trailer;
     %rename(_need_help)     need_help;
+    %rename(_args)          args;
     %rename(_log)           log;
 
     // Methods
-    void                    clear(void);
-    GApplication*           clone(void) const;
-    std::string             classname(void) const;
-    const std::string&      name(void) const;
-    const std::string&      version(void) const;
-    bool                    logTerse(void) const;
-    bool                    logNormal(void) const;
-    bool                    logExplicit(void) const;
-    bool                    logVerbose(void) const;
-    bool                    logDebug(void) const;
-    bool                    clobber(void) const;
-    bool                    has_par(const std::string& name) const;
-    const std::string&      par_filename(void) const;
-    const std::string&      log_filename(void) const;
-    void                    log_header(void);
-    void                    log_trailer(void);
-    const bool&             need_help(void) const;
-    const GApplicationPars& pars(void) const;
-    void                    pars(const GApplicationPars& pars);
+    void                            clear(void);
+    GApplication*                   clone(void) const;
+    std::string                     classname(void) const;
+    const std::string&              name(void) const;
+    const std::string&              version(void) const;
+    double                          telapse(void) const;
+    double                          celapse(void) const;
+    void                            logFileOpen(const bool& clobber = true);
+    void                            logFileClose(void);
+    bool                            logTerse(void) const;
+    bool                            logNormal(void) const;
+    bool                            logExplicit(void) const;
+    bool                            logVerbose(void) const;
+    bool                            logDebug(void) const;
+    bool                            clobber(void) const;
+    bool                            has_par(const std::string& name) const;
+    const std::string&              par_filename(void) const;
+    const std::string&              log_filename(void) const;
+    void                            log_header(void);
+    void                            log_trailer(void);
+    const bool&                     need_help(void) const;
+    const GApplicationPars&         pars(void) const;
+    void                            pars(const GApplicationPars& pars);
+    const std::vector<std::string>& args(void) const;
 
     // Public members
     GLog log;   //!< Application logger
@@ -276,4 +284,15 @@ GApplication._log_value = _log_value
     GApplication copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self._name(), self._version(), self._args(), self.pars())
+        return state
+    def __setstate__(self, state):
+        if state[0] and state[1]:
+            self.__init__(state[0], state[1], state[2])
+        else:
+            self.__init__()
+        self.pars(state[3])
+}
 };
