@@ -582,7 +582,7 @@ void GModelSpectralExponential::init_members(void)
     m_type = "Exponential";
 
     // Clear exponent
-    m_exponent->clear();
+    m_exponent = NULL;
 
     // Clear MC cache
     m_mc_spectrum.clear();
@@ -612,8 +612,9 @@ void GModelSpectralExponential::copy_members(const GModelSpectralExponential& mo
     m_mc_values   = model.m_mc_values;
 
     // Set exponent
-    m_exponent->clear();
-    exponent(model.m_exponent);
+    if (model.m_exponent != NULL) {
+        m_exponent = model.m_exponent->clone();
+    }
 
     // Return
     return;
