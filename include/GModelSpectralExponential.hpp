@@ -83,8 +83,8 @@ public:
     virtual std::string                   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                  exponent(const GModelSpectral& spec);
-    const GModelSpectral* exponent(void) const;
+    void                   exponent(const GModelSpectral* spec);
+    const GModelSpectral*  exponent(void) const;
 
 protected:
     // Protected methods
@@ -97,7 +97,7 @@ protected:
     class flux_kern : public GFunction {
     public:
         // Constructor
-        flux_kern(const GModelSpectral& spec) : m_exp(spec) {}
+        flux_kern(const GModelSpectral* spec) : m_exp(spec) {}
 
         // Method
         double eval(const double& x) {
@@ -107,14 +107,14 @@ protected:
             return value;
         }
     protected:
-        mutable GModelSpectral* m_exp;
+        const GModelSpectral* m_exp;
     };
 
     // Class to determine the integral energy flux, derived from flux_kern
     class eflux_kern : public flux_kern {
     public:
         // Constructor
-        eflux_kern(const GModelSpectral& spec) : flux_kern(spec) {}
+        eflux_kern(const GModelSpectral* spec) : flux_kern(spec) {}
 
         // Method
         double eval(const double& x) {
@@ -122,9 +122,10 @@ protected:
         }
     };
 
+
     // Protected members
     std::string					m_type;        //!< Model type
-    mutable GModelSpectral*		m_exponent;	   //!< Exponent
+    GModelSpectral*				m_exponent;	   //!< Exponent
 
     // MC cache
     mutable GModelSpectralNodes  m_mc_spectrum; //!< MC spectrum cache
@@ -159,4 +160,4 @@ std::string GModelSpectralExponential::type(void) const
     return (m_type);
 }
 
-#endif /* GMODELSPECTRALMULTIPLICATIVE_HPP */
+#endif /* GMODELSPECTRALEXPONENTIAL_HPP */

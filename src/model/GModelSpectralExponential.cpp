@@ -41,8 +41,8 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralExponential g_spectral_multi_seed;
-const GModelSpectralRegistry    g_spectral_multi_registry(&g_spectral_multi_seed);
+const GModelSpectralExponential g_spectral_expo_seed;
+const GModelSpectralRegistry    g_spectral_expo_registry(&g_spectral_expo_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC  "GModelSpectralExponential::mc(GEnergy&, GEnergy&, GTime&, "\
@@ -284,30 +284,31 @@ double GModelSpectralExponential::eval(const GEnergy& srcEng,
  * Computes the photon flux of Exponential spectral model
  ***************************************************************************/
 double GModelSpectralExponential::flux(const GEnergy& emin,
-                                          const GEnergy& emax) const
+		const GEnergy& emax) const
 {
-    // Initialise flux
-    double flux = 0.0;
+	// Initialise flux
+	double flux = 0.0;
 
-    // Compute only if integration range is valid and exponent are available
-    if (emin < emax && m_exponent != NULL) {
+	// Compute only if integration range is valid and exponent are available
+	if (emin < emax && m_exponent != NULL) {
 
-        // Initialise function to integrate
-        flux_kern kernel(m_exponent);
+		// Initialise function to integrate
+		flux_kern kernel(m_exponent);
 
-        // Initialise integral class with function
-        GIntegral integral(&kernel);
+		// Initialise integral class with function
+		GIntegral integral(&kernel);
 
-        // Set integration precision
-        integral.eps(1.0e-8);
+		// Set integration precision
+		integral.eps(1.0e-8);
 
-        // Calculate integral between emin and emax
-        flux = integral.romberg(emin.MeV(), emax.MeV());
+		// Calculate integral between emin and emax
+		flux = integral.romberg(emin.MeV(), emax.MeV());
 
-    } // endif: integration range was valid
+	} // endif: integration range was valid
 
-    // Return flux
-    return flux;
+	// Return flux
+	return flux;
+
 }
 
 
@@ -321,30 +322,31 @@ double GModelSpectralExponential::flux(const GEnergy& emin,
  * Computes the energy flux of Exponential spectral model
  ***************************************************************************/
 double GModelSpectralExponential::eflux(const GEnergy& emin,
-                                           const GEnergy& emax) const
+		const GEnergy& emax) const
 {
-    // Initialise eflux
-    double eflux = 0.0;
+	// Initialise eflux
+	double eflux = 0.0;
 
-    // Compute only if integration range is valid and exponent are available
-    if (emin < emax && m_exponent != NULL) {
+	// Compute only if integration range is valid and exponent are available
+	if (emin < emax && m_exponent != NULL) {
 
-        // Initialise function to integrate
-        eflux_kern kernel(m_exponent);
+		// Initialise function to integrate
+		eflux_kern kernel(m_exponent);
 
-        // Initialise integral class with function
-        GIntegral integral(&kernel);
+		// Initialise integral class with function
+		GIntegral integral(&kernel);
 
-        // Set integration precision
-        integral.eps(1.0e-8);
+		// Set integration precision
+		integral.eps(1.0e-8);
 
-        // Calculate integral between emin and emax
-        eflux = integral.romberg(emin.MeV(), emax.MeV());
+		// Calculate integral between emin and emax
+		eflux = integral.romberg(emin.MeV(), emax.MeV());
 
-    } // endif: integration range was valid
+	} // endif: integration range was valid
 
-    // Return flux
-    return eflux;
+	// Return flux
+	return eflux;
+	
 }
 
 
@@ -411,7 +413,7 @@ void GModelSpectralExponential::read(const GXmlElement& xml)
     GModelSpectral* ptr = registry.alloc(*spec);
     
     // Set spectral component as exponent
-    exponent(*ptr);
+    exponent(ptr);
 
     // Free spectral model
     delete ptr;
@@ -496,20 +498,20 @@ void GModelSpectralExponential::write(GXmlElement& xml) const
  *
  * Set a spectral model as exponent
  ***************************************************************************/
-void GModelSpectralExponential::exponent(const GModelSpectral& spec)
+void GModelSpectralExponential::exponent(const GModelSpectral* spec)
 {
 	// Set exponent
-	m_exponent = spec.clone();
+	m_exponent = spec->clone();
 	
 	// Get number of spectral parameters from model
 	int npars = m_exponent->size();
 	
     // Store pointers to spectral parameters
     m_pars.clear();
-	for (int ipar = 0; ipar < spec->size(); ++ipar) {
+	for (int ipar = 0; ipar < npars; ++ipar) {
 
 		// Get model parameter reference
-		GModelPar& par = spec->operator[](ipar);
+		GModelPar& par = m_exponent->operator[](ipar);
 
 		// Append model parameter pointer to internal container
 		m_pars.push_back(&par);
@@ -520,20 +522,17 @@ void GModelSpectralExponential::exponent(const GModelSpectral& spec)
 	
 }
 
-
 /***********************************************************************//**
  * @brief Return exponent
- * 
- * @return Pointer to spectral model.
  *
- * Returns the exponent of the Exponential spectral model.
+ * Returns pointer to exponent spectral model
  ***************************************************************************/
-const GModelSpectral* GModelSpectralExponential::component(void) const
+const GModelSpectral* GModelSpectralExponential::exponent(void) const
 {
-    // Return exponent
+	// Returns exponent
     return m_exponent;
+	
 }
-
 
 /***********************************************************************//**
  * @brief Print Exponential spectral model information
@@ -583,7 +582,7 @@ void GModelSpectralExponential::init_members(void)
     m_type = "Exponential";
 
     // Clear exponent
-    m_exponent.clear();
+    m_exponent->clear();
 
     // Clear MC cache
     m_mc_spectrum.clear();
@@ -613,7 +612,7 @@ void GModelSpectralExponential::copy_members(const GModelSpectralExponential& mo
     m_mc_values   = model.m_mc_values;
 
     // Set exponent
-    m_exponent.clear();
+    m_exponent->clear();
     exponent(model.m_exponent);
 
     // Return
