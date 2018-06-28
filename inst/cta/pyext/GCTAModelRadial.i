@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAModelRadial.i - Abstract radial model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAModelRadial.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -56,7 +55,7 @@ public:
     virtual void             write(GXmlElement& xml) const = 0;
 
     // Methods
-    int size(void) const { return m_pars.size(); }
+    int size(void) const;
 };
 
 

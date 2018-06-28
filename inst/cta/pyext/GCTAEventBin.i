@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAEventBin.i - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -83,4 +83,22 @@ public:
     GCTAEventBin copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.ipix(), self.dir(), self.energy(), self.time(),
+                 self.counts(), self.solidangle(), self.ewidth(),
+                 self.ontime(), self.weight())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        if state[0] == -1:
+            self.dir(state[1])
+            self.energy(state[2])
+            self.time(state[3])
+            self.counts(state[4])
+            self.solidangle(state[5])
+            self.ewidth(state[6])
+            self.ontime(state[7])
+            self.weight(state[8])
+}
 };

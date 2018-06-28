@@ -87,6 +87,7 @@ public:
     void              load(const GFilename& filename);
     void              save(const GFilename& filename) const;
     const GFilename&  filename(void) const;
+    void              filename(const GFilename& filename);
     std::string       print(const GChatter& chatter = NORMAL) const;
 	
 protected:
@@ -185,19 +186,34 @@ void GSkyRegions::reserve(const int& num)
 
 
 /***********************************************************************//**
- * @brief Return file name
+ * @brief Return regions file name
  *
  * @return File name from which the regions have been loaded or into which
  *         the regions have been saved.
  *
  * Returns the file name from which the regions have been loaded or into
- * which the regions have been saved. The returned string will be empty if
- * no load() or save() method has been called before.
+ * which the regions have been saved. The returned string will be set if
+ * the load(), save() or filename() setter methods were called.
  ***************************************************************************/
 inline
 const GFilename& GSkyRegions::filename(void) const
 {
     return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Set regions file name
+ *
+ * @param[in] filename Regions file name.
+ *
+ * Set the regions file name.
+ ***************************************************************************/
+inline
+void GSkyRegions::filename(const GFilename& filename)
+{
+    m_filename = filename;
+    return;
 }
 
 #endif /* GSKYREGIONS_HPP */

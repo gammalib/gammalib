@@ -2184,25 +2184,15 @@ void GSkyMap::read(const GFitsHDU& hdu)
     free_members();
     init_members();
 
-    // Initialize load flag
-    bool loaded = false;
-
-    // If PIXTYPE keyword equals "HEALPIX" then load map
-    if (hdu.has_card("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
+    // If HDU is a Healpix HDU then load a Healpix map
+    if (is_healpix(hdu)) {
         read_healpix(static_cast<const GFitsTable&>(hdu));
-        loaded = true;
     }
 
-    // ... otherwise try loading as non HEALPix map
-    if (!loaded) {
-
-        // Load only if HDU contains an image
-        if (hdu.exttype() == 0) {
-            read_wcs(static_cast<const GFitsImage&>(hdu));
-            //loaded = true;
-        }
-
-    } // endif
+    // ... otherwise try loading as WCS map
+    else if (is_wcs(hdu)) {
+        read_wcs(static_cast<const GFitsImage&>(hdu));
+    }
 
     // Return
     return;
@@ -3140,6 +3130,9 @@ bool GSkyMap::overlaps_circle(const GSkyRegionCircle& region) const
  *
  * @param[in] hdu FITS Header Data Unit.
  * @return True is HDU contains HEALPix data.
+ *
+ * Returns true if the HDU is not an image and the HDU has the "PIXTYPE"
+ * keyword set to "HEALPIX".
  ***************************************************************************/
 bool GSkyMap::is_healpix(const GFitsHDU& hdu) const
 {
@@ -3149,8 +3142,7 @@ bool GSkyMap::is_healpix(const GFitsHDU& hdu) const
     // If PIXTYPE keyword equals "HEALPIX" then signal that we have
     // HEALPix data
     if ((hdu.exttype() != GFitsHDU::HT_IMAGE) &&
-        (hdu.has_card("PIXTYPE"))   &&
-        (hdu.string("PIXTYPE") == "HEALPIX")) {
+        (hdu.has_card("PIXTYPE") && (hdu.string("PIXTYPE") == "HEALPIX"))) {
         flag = true;
     }
 
@@ -3164,6 +3156,9 @@ bool GSkyMap::is_healpix(const GFitsHDU& hdu) const
  *
  * @param[in] hdu FITS Header Data Unit.
  * @return True is HDU contains WCS data.
+ *
+ * Returns true if the HDU is an image and the HDU has the "NAXIS" keyword
+ * set to a value >= 2.
  ***************************************************************************/
 bool GSkyMap::is_wcs(const GFitsHDU& hdu) const
 {
@@ -3171,7 +3166,8 @@ bool GSkyMap::is_wcs(const GFitsHDU& hdu) const
     bool flag(false);
 
     // If extension is an image thn signal that we have WCS data
-    if (hdu.exttype() == GFitsHDU::HT_IMAGE)  {
+    if ((hdu.exttype() == GFitsHDU::HT_IMAGE) &&
+        (hdu.has_card("NAXIS") && (hdu.integer("NAXIS") >= 2))) {
         flag = true;
     }
 

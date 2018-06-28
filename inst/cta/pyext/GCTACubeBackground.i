@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTACubeBackground.i - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Michael Mayer                               *
+ *  copyright (C) 2015-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,4 +81,20 @@ public:
     GCTACubeBackground copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        if self.filename().is_empty():
+            fits = gammalib.GFits()
+            self.write(fits)
+            state = (self.filename(), fits)
+        else:
+            state = (self.filename(),)
+        return state
+    def __setstate__(self, state):
+        if state[0].is_empty():
+            self.__init__()
+            self.read(state[1])
+        else:
+            self.__init__(state[0])
+}
 };

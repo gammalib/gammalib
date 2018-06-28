@@ -324,7 +324,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_url_string, 'Test GUrlString')
         self.append(self._test_filename,   'Test GFilename')
         self.append(self._test_csv,        'Test GCsv')
-        self.append(self._test_pickeling, 'Test pickeling of "support" classes')
+        self.append(self._test_pickeling, 'Test support class pickeling')
 
         # Return
         return

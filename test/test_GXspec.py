@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib xspec module.
 #
-# Copyright (C) 2013-2015 Juergen Knoedlseder
+# Copyright (C) 2013-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #
 # ==========================================================================
 import gammalib
+import test_support
 
 
 # ==================================== #
@@ -38,31 +39,15 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    # Set test functions
-    def set(self):
-        """
-        Set all test functions.
-        """
-        # Set test name
-        self.name("xspec")
-
-        # Append tests
-        self.append(self.test_pha, "Test GPha")
-        self.append(self.test_arf, "Test GArf")
-        self.append(self.test_rmf, "Test GRmf")
-
-        # Return
-        return
-
     # Test GPha class
-    def test_pha(self):
+    def _test_pha(self):
         """
-        Test GPha class.
+        Test GPha class
         """
         # Allocate GPha object and check its size
         nmeasured = 10
-        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"),
-                                                 gammalib.GEnergy(10.0, "TeV"))
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, 'TeV'),
+                                                 gammalib.GEnergy(10.0, 'TeV'))
         pha       = gammalib.GPha(emeasured)
         self.test_value(pha.size(), nmeasured)
 
@@ -75,14 +60,14 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test GArf class
-    def test_arf(self):
+    def _test_arf(self):
         """
-        Test GArf class.
+        Test GArf class
         """
         # Allocate GArf object and check its size
         nmeasured = 10
-        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"),
-                                                 gammalib.GEnergy(10.0, "TeV"))
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, 'TeV'),
+                                                 gammalib.GEnergy(10.0, 'TeV'))
         arf       = gammalib.GArf(emeasured)
         self.test_value(arf.size(), nmeasured)
 
@@ -95,17 +80,17 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test GRmf class
-    def test_rmf(self):
+    def _test_rmf(self):
         """
-        Test GRmf class.
+        Test GRmf class
         """
         # Allocate GRmf object and check its size
         ntrue     = 20
         nmeasured = 10
-        etrue     = gammalib.GEbounds(ntrue, gammalib.GEnergy(1.0, "TeV"),
-                                             gammalib.GEnergy(10.0, "TeV"))
-        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"),
-                                                 gammalib.GEnergy(10.0, "TeV"))
+        etrue     = gammalib.GEbounds(ntrue, gammalib.GEnergy(1.0, 'TeV'),
+                                             gammalib.GEnergy(10.0, 'TeV'))
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, 'TeV'),
+                                                 gammalib.GEnergy(10.0, 'TeV'))
         rmf       = gammalib.GRmf(etrue, emeasured)
         self.test_value(rmf.size(), ntrue*nmeasured)
         self.test_value(rmf.ntrue(), ntrue)
@@ -116,5 +101,49 @@ class Test(gammalib.GPythonTestSuite):
         rmf[3,5] = value
         self.test_value(rmf[3,5], value)
         
+        # Return
+        return
+
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GArf())
+        test_support._pickeling(self, gammalib.GPha())
+        test_support._pickeling(self, gammalib.GRmf())
+
+        # Setup test
+        emin  = gammalib.GEnergy(1.0, 'TeV')
+        emax  = gammalib.GEnergy(10.0, 'TeV')
+        etrue = gammalib.GEbounds(2, emin, emax)
+        ereco = gammalib.GEbounds(2, emin, emax)
+        arf   = gammalib.GArf(etrue)
+        pha   = gammalib.GPha(ereco)
+        rmf   = gammalib.GRmf(etrue, ereco)
+
+        # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GArf(arf))
+        test_support._pickeling(self, gammalib.GPha(pha))
+        test_support._pickeling(self, gammalib.GRmf(rmf))
+
+        # Return
+        return
+
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name('xspec')
+
+        # Append tests
+        self.append(self._test_pha, 'Test GPha')
+        self.append(self._test_arf, 'Test GArf')
+        self.append(self._test_rmf, 'Test GRmf')
+        self.append(self._test_pickeling, 'Test Xspec class pickeling')
+
         # Return
         return

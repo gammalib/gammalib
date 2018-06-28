@@ -691,8 +691,6 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
  * @exception GException::file_error
  *            File not found.
  *            Unable to load energy dispersion.
- * @exception GException::invalid_value
- *            No file name has been specified.
  *
  * Fetches the energy dispersion by reading it from a FITS file. This method
  * does nothing if the energy dispersion is already loaded, if there is
@@ -763,13 +761,6 @@ void GCTAEdisp2D::fetch(void) const
             }
 
         } // endif: filename was not empty
-
-        // Throw an exception if the FITS file name is not known
-        else {
-            std::string msg = "Unable to fetch energy dispersion since no "
-                              "filename is specified.";
-            throw GException::invalid_value(G_FETCH, msg);
-        }
     
     } // endif: energy dispersion had not yet been fetched
     
@@ -932,35 +923,44 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
+        // Append header
+        result.append("=== GCTAEdisp2D ===");
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+
         // Make sure that energy dispersion is online
         fetch();
 
-        // Compute energy boundaries in TeV
-        double emin = m_edisp.axis_lo(m_inx_etrue,0);
-        double emax = m_edisp.axis_hi(m_inx_etrue,
-                                      m_edisp.axis_bins(m_inx_etrue)-1);
+        // Initialise information
+        int    nebins     = 0;
+        int    nmigrabins = 0;
+        int    nthetabins = 0;
+        double emin       = 0.0;
+        double emax       = 0.0;
+        double mmin       = 0.0;
+        double mmax       = 0.0;
+        double omin       = 0.0;
+        double omax       = 0.0;
 
-        // Compute mingration
-        double mmin = m_edisp.axis_lo(m_inx_migra,0);
-        double mmax = m_edisp.axis_hi(m_inx_migra,
-                                      m_edisp.axis_bins(m_inx_migra)-1);
-
-        // Compute offset angle boundaries in deg
-        double omin = m_edisp.axis_lo(m_inx_theta,0);
-        double omax = m_edisp.axis_hi(m_inx_theta,
-                                      m_edisp.axis_bins(m_inx_theta)-1);
-
-        // Append header
-        result.append("=== GCTAEdisp2D ===");
+        // Extract information if there are axes in the response table
+        if (m_edisp.axes() > 0) {
+            nebins     = m_edisp.axis_bins(m_inx_etrue);
+            nmigrabins = m_edisp.axis_bins(m_inx_migra);
+            nthetabins = m_edisp.axis_bins(m_inx_theta);
+            emin       = m_edisp.axis_lo(m_inx_etrue,0);
+            emax       = m_edisp.axis_hi(m_inx_etrue,nebins-1);
+            mmin       = m_edisp.axis_lo(m_inx_migra,0);
+            mmax       = m_edisp.axis_hi(m_inx_migra,nmigrabins-1);
+            omin       = m_edisp.axis_lo(m_inx_theta,0);
+            omax       = m_edisp.axis_hi(m_inx_theta,nthetabins-1);
+        }
 
         // Append information
-        result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_edisp.axis_bins(m_inx_etrue)));
+                      gammalib::str(nebins));
         result.append("\n"+gammalib::parformat("Number of migration bins") +
-                      gammalib::str(m_edisp.axis_bins(m_inx_migra)));
+                      gammalib::str(nmigrabins));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_edisp.axis_bins(m_inx_theta)));
+                      gammalib::str(nthetabins));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Migration range"));

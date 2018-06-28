@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseCube.cpp - Spatial map cube model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,7 @@ const GModelSpatialRegistry    g_spatial_cube_legacy_registry(&g_spatial_cube_le
 #define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
 #define G_ENERGIES           "GModelSpatialDiffuseCube::energies(GEnergies&)"
 #define G_LOAD_CUBE         "GModelSpatialDiffuseCube::load_cube(GFilename&)"
+#define G_READ_FITS                  "GModelSpatialDiffuseCube::read(GFits&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -930,14 +931,80 @@ void GModelSpatialDiffuseCube::save(const GFilename& filename,
 
 
 /***********************************************************************//**
- * @brief Write skymap into FITS file
+ * @brief Read diffuse cube from FITS file
  *
- * @param[in] file FITS file pointer.
+ * @param[in] fits FITS file.
+ *
+ * @exception GException::invalid_value
+ *            ENERGIES extension incompatible with map cube.
+ *
+ * Reads the diffuse cube sky map from the first extension in the @p fits
+ * file and the energy extension from the "ENERGIES" extension.
  ***************************************************************************/
-void GModelSpatialDiffuseCube::write(GFits& file) const
+void GModelSpatialDiffuseCube::read(const GFits& fits)
 {
+    // Initialise skymap
+    m_cube.clear();
+    m_logE.clear();
+
+    // Read cube from the first valid WCS image
+    for (int extno = 0; extno < fits.size(); ++extno) {
+        const GFitsHDU& hdu = *fits.at(extno);
+        if ((hdu.exttype() == GFitsHDU::HT_IMAGE) &&
+            (hdu.has_card("NAXIS") && (hdu.integer("NAXIS") >= 2))) {
+            m_cube.read(hdu);
+            break;
+        }
+    }
+
+    // Read energies
+    GEnergies energies;
+    energies.read(*(fits.table(gammalib::extname_energies)));
+
+    // Extract number of energy bins
+    int num = energies.size();
+
+    // Check if energy binning is consistent with primary image hdu
+    if (num != m_cube.nmaps() ) {
+        std::string msg = "Number of energies in \"ENERGIES\" extension ("+
+                          gammalib::str(num)+") does not match the number of "
+                          "maps ("+gammalib::str(m_cube.nmaps())+" in the "
+                          "map cube. The \"ENERGIES\" extension table shall "
+                          "provide one enegy value for each map in the cube.";
+        throw GException::invalid_value(G_READ_FITS, msg);
+    }
+
+    // Set log10(energy) nodes, where energy is in units of MeV
+    for (int i = 0; i < num; ++i) {
+        m_logE.append(energies[i].log10MeV());
+    }
+
+    // Signal that cube has been loaded
+    m_loaded = true;
+
+    // Set energy boundaries
+    set_energy_boundaries();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write diffuse cube into FITS file
+ *
+ * @param[in] fits FITS file.
+ *
+ * Writes the diffuse cube sky map and the energy intervals into @p fits
+ * file.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::write(GFits& fits) const
+{
+    // Make sure that cube is fetched
+    fetch_cube();
+
     // Write cube
-    m_cube.write(file);
+    m_cube.write(fits);
 
     // Create energy intervals
     GEnergies energies;
@@ -947,7 +1014,7 @@ void GModelSpatialDiffuseCube::write(GFits& file) const
     }
 
     // Write energy intervals
-    energies.write(file);
+    energies.write(fits);
 
     // Return
     return;
@@ -957,7 +1024,7 @@ void GModelSpatialDiffuseCube::write(GFits& file) const
 /***********************************************************************//**
  * @brief Print map cube information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
@@ -1153,14 +1220,14 @@ void GModelSpatialDiffuseCube::fetch_cube(void) const
 
 
 /***********************************************************************//**
- * @brief Load cube
+ * @brief Load map cube
  *
- * @param[in] filename Cube file.
+ * @param[in] filename Map cube file.
  *
  * @exception GException::invalid_value
  *            Number of maps in cube mismatches number of energy bins.
  *
- * Load diffuse cube.
+ * Load diffuse map cube.
  ***************************************************************************/
 void GModelSpatialDiffuseCube::load_cube(const GFilename& filename)
 {
@@ -1185,14 +1252,11 @@ void GModelSpatialDiffuseCube::load_cube(const GFilename& filename)
 
     // Check if energy binning is consistent with primary image hdu
     if (num != m_cube.nmaps() ) {
-        std::string msg = "Number of energies in \"ENERGIES\""
-                          " extension ("+gammalib::str(num)+")"
-                          " does not match the number of maps ("+
-                          gammalib::str(m_cube.nmaps())+" in the"
-                          " map cube.\n"
-                          "The \"ENERGIES\" extension table shall"
-                          " provide one enegy value for each map"
-                          " in the cube.";
+        std::string msg = "Number of energies in \"ENERGIES\" extension ("+
+                          gammalib::str(num)+") does not match the number of "
+                          "maps ("+gammalib::str(m_cube.nmaps())+" in the "
+                          "map cube. The \"ENERGIES\" extension table shall "
+                          "provide one enegy value for each map in the cube.";
         throw GException::invalid_value(G_LOAD_CUBE, msg);
     }
 

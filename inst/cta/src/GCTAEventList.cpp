@@ -444,9 +444,10 @@ void GCTAEventList::read(const GFits& fits)
     // Read phase intervals from data sub-space keyword
     m_phases = gammalib::read_ds_phase(events);
 
-    // If the file name contains an expression then load the events now.
-    // We do this at the end to make sure that the GTI has been set before.
-    if (m_filename.has_expression()) {
+    // If the file name contains an expression or the filename is empty then
+    // load the events now. We do this at the end to make sure that the GTI
+    // has been set before.
+    if (m_filename.has_expression() || m_filename.is_empty()) {
         read_events(events);
     }
 

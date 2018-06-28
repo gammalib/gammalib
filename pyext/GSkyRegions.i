@@ -60,6 +60,7 @@ public:
     void              load(const GFilename& filename);
     void              save(const GFilename& filename) const;
     const GFilename&  filename(void) const;
+    void              filename(const GFilename& filename);
 };
 
 /***********************************************************************//**
@@ -124,4 +125,16 @@ public:
     GSkyRegions copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (tuple([x for x in self]), self.filename())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        size = len(state[0])
+        self.reserve(size)
+        for x in state[0]:
+            self.append(x)
+        self.filename(state[1])
+}
 };

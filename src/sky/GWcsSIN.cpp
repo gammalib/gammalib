@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GWcsSIN.cpp - Orthographic/synthesis (SIN) projection class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -93,6 +93,9 @@ GWcsSIN::GWcsSIN(const std::string& coords,
 {
     // Initialise class members
     init_members();
+
+    // Setup WCS derived parameters
+    wcs_set();
 
     // Return
     return;

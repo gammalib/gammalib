@@ -76,4 +76,16 @@ public:
     GSkyPixel copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.is_1D(), self.is_2D(), self.x(), self.y(), self.index())
+        return state
+    def __setstate__(self, state):
+        if state[0]:
+            self.__init__(state[4])
+        elif state[1]:
+            self.__init__(state[2], state[3])
+        else:
+            self.__init__()
+}
 };

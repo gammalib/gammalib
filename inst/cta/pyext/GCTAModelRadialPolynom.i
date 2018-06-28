@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAModelRadialPolynom.i - Radial Polynom model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAModelRadialPolynom.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -57,7 +56,6 @@ public:
     virtual void                    write(GXmlElement& xml) const;
 
     // Other methods
-    int    size(void) const { return m_coeffs.size(); }
     //double coeff(void) const;
     //void   coeff(const double& value);
 };
@@ -67,4 +65,19 @@ public:
  * @brief GCTAModelRadialPolynom class extension
  ***************************************************************************/
 %extend GCTAModelRadialPolynom {
+    GCTAModelRadialPolynom copy() {
+        return (*self);
+    }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
+        return state
+    def __setstate__(self, state):
+        if state[0].elements('parameter') == 0:
+            self.__init__()
+        else:
+            self.__init__(state[0])
+}
 };

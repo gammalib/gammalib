@@ -92,10 +92,13 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = gammalib.GEventCube.__getstate__(self)
-        return args
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits,)
+        return state
     def __setstate__(self, state):
         self.__init__()
-        gammalib.GEventCube.__setstate__(self, state)
+        if state[0][0].has_card('NAXIS') and state[0][0].integer('NAXIS') >= 2:
+            self.read(state[0])
 }
 };

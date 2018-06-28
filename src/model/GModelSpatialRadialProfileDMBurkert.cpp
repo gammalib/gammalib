@@ -421,6 +421,17 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
     m_scale_radius.gradient(0.0);
     m_scale_radius.has_grad(false);  // Radial components never have gradients
 
+    // Initialise scale density
+    m_scale_density.clear();
+    m_scale_density.name("ScaleDensity");
+    m_scale_density.unit("GeV/cm^3");
+    m_scale_density.value(0.2);       // GeV/cm3, default to GC scale density
+    m_scale_density.min(1.0e-6);
+    m_scale_density.fix();
+    m_scale_density.scale(1.0);
+    m_scale_density.gradient(0.0);
+    m_scale_density.has_grad(false);  // Radial components never have gradients
+
     // Initialise halo distance
     m_halo_distance.clear();
     m_halo_distance.name("HaloDistance");
@@ -497,6 +508,7 @@ void GModelSpatialRadialProfileDMBurkert::copy_members(const GModelSpatialRadial
     // stack as this should have been done by init_members() that was called
     // before. Otherwise we would have sigma twice on the stack.
     m_scale_radius  = model.m_scale_radius;
+    m_scale_density = model.m_scale_density;
     m_halo_distance = model.m_halo_distance;
     m_theta_min     = model.m_theta_min;
     m_theta_max     = model.m_theta_max;

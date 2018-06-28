@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAResponseTable.i - CTA response table class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -169,9 +169,6 @@ public:
  * @brief GCTAResponse class extension
  ***************************************************************************/
 %extend GCTAResponseTable {
-    GCTAResponseTable copy() {
-        return (*self);
-    }
     double __getitem__(int GCTAResponseTableInx[]) {
         if (GCTAResponseTableInx[0] == 1) {
             return (*self)(GCTAResponseTableInx[1]);
@@ -188,4 +185,17 @@ public:
             (*self)(GCTAResponseTableInx[1], GCTAResponseTableInx[2]) = value;
         }
     } 
+    GCTAResponseTable copy() {
+        return (*self);
+    }
+%pythoncode {
+    def __getstate__(self):
+        hdu = gammalib.GFitsBinTable()
+        self.write(hdu)
+        state = (hdu,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.read(state[0])
+}
 };

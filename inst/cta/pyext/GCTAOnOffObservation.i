@@ -112,6 +112,7 @@ public:
 
     // Other methods
     void        instrument(const std::string& instrument);
+    bool        has_response(void) const;
     const GPha& on_spec(void) const;
     const GPha& off_spec(void) const;
     const GArf& arf(void) const;
@@ -128,4 +129,21 @@ public:
     GCTAOnOffObservation copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        if self.has_response():
+            response = self.response()
+        else:
+            response = None
+        state = (gammalib.GObservation.__getstate__(self),
+                 self.instrument(), response, self.on_spec(), self.off_spec(),
+                 self.arf(), self.rmf())
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[3], state[4], state[5], state[6])
+        gammalib.GObservation.__setstate__(self, state[0])
+        self.instrument(state[1])
+        if state[2] != None:
+            self.response(state[2])
+}
 }

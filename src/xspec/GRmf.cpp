@@ -500,8 +500,8 @@ GEbounds GRmf::emeasured(const GEnergy& etrue) const
  * @param[in] filename File name.
  *
  * Loads the Redistribution Matrix File from the `MATRIX` extension of the
- * FITS file. If the file contains also an `EBOUNDS` extension the energy
- * boundaries of all measured energies are also loaded.
+ * FITS file and the reconstructed energy boundaries from the `EBOUNDS`
+ * extension.
  ***************************************************************************/
 void GRmf::load(const GFilename& filename)
 {
@@ -512,14 +512,8 @@ void GRmf::load(const GFilename& filename)
     // to modify the extension names)
     GFits fits(filename.url());
 
-    // Read measured energy boundaries
-    m_ebds_measured.load(filename.url());
-
-    // Get RMF table
-    const GFitsTable& table = *fits.table(gammalib::extname_rmf);
-
-    // Read RMF data
-    read(table);
+    // Read data
+    read(fits);
 
     // Close FITS file
     fits.close();
@@ -566,6 +560,37 @@ void GRmf::save(const GFilename&   filename,
 
     // Store filename
     m_filename = filename.url();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read Redistribution Matrix File
+ *
+ * @param[in] fits File file.
+ *
+ * Reads the Redistribution Matrix File from the `MATRIX` extension of the
+ * FITS file and the reconstructed energy boundaries from the `EBOUNDS`
+ * extension.
+ ***************************************************************************/
+void GRmf::read(const GFits& fits)
+{
+    // Clear spectrum
+    clear();
+
+    // Get energy boundary table
+    const GFitsTable& ebounds = *fits.table(gammalib::extname_ebounds);
+
+    // Read measured energy boundaries
+    m_ebds_measured.read(ebounds);
+
+    // Get RMF table
+    const GFitsTable& rmf = *fits.table(gammalib::extname_rmf);
+
+    // Read RMF data
+    read(rmf);
 
     // Return
     return;

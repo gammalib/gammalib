@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialDiffuseCube.hpp - Spatial map cube model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -110,7 +110,8 @@ public:
     void                       load(const GFilename& filename);
     void                       save(const GFilename& filename,
                                     const bool&      clobber = false) const;
-    void                       write(GFits& file) const;
+    void                       read(const GFits& fits);
+    void                       write(GFits& fits) const;
 
 protected:
     // Protected methods

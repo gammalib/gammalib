@@ -92,14 +92,13 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(void) : GModelData()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
  *
  * Constructs a CTA radial acceptance model from the information that is
- * found in a XML element. Please refer to the method
- * GCTAModelRadialAcceptance::read
- * to learn more about the information that is expected in the XML element.
+ * found in a XML element. Please refer to the read() method to learn about
+ * the expected structure of the XML element.
  ***************************************************************************/
 GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GXmlElement& xml) :
                            GModelData(xml)
@@ -124,10 +123,9 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GXmlElement& xml) :
  * @param[in] radial Radial CTA model component.
  * @param[in] spectral Spectral model component.
  *
- * Constructs a CTA radial acceptance model from a radial and a spectral
- * model component. The temporal component is assumed to be constant.
- * Please refer to the classes GCTAModelRadial and GModelSpectral to learn
- * more about the definition of the radial and spectral components.
+ * Constructs a CTA radial acceptance model from a @p radial and a
+ * @p spectral model component. The temporal component is assumed to be
+ * constant.
  ***************************************************************************/
 GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
                                                      const GModelSpectral&  spectral) :
@@ -138,6 +136,37 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radi
 
     // Allocate temporal constant model
     GModelTemporalConst temporal;
+
+    // Clone model components
+    m_radial   = radial.clone();
+    m_spectral = spectral.clone();
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct from model components
+ *
+ * @param[in] radial Radial CTA model component.
+ * @param[in] spectral Spectral model component.
+ * @param[in] temporal Temporal model component.
+ *
+ * Constructs a CTA radial acceptance model from a @p radial, a @p spectral
+ * and a @p temporal model component.
+ ***************************************************************************/
+GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
+                                                     const GModelSpectral&  spectral,
+                                                     const GModelTemporal&  temporal) :
+                           GModelData()
+{
+    // Initialise members
+    init_members();
 
     // Clone model components
     m_radial   = radial.clone();

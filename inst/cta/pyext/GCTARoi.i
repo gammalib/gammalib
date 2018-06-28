@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTARoi.i - CTA region of interest class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,4 +69,14 @@ public:
     GCTARoi copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.centre(), self.radius())
+        return state
+    def __setstate__(self, state):
+        if state[1] > 0.0:
+            self.__init__(state[0], state[1])
+        else:
+            self.__init__()
+}
 };
