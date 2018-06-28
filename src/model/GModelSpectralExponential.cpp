@@ -612,9 +612,22 @@ void GModelSpectralExponential::copy_members(const GModelSpectralExponential& mo
     m_mc_values   = model.m_mc_values;
 
     // Set exponent
+    m_exponent = NULL;
     if (model.m_exponent != NULL) {
         m_exponent = model.m_exponent->clone();
     }
+    	
+	// Store pointers to spectral parameters
+	m_pars.clear();
+	int npars = model.m_exponent->size();    
+    	for (int ipar = 0; ipar < npars; ++ipar) {
+
+    		// Get model parameter reference
+    		GModelPar& par = m_exponent->operator[](ipar);
+
+    		// Append model parameter pointer to internal container
+    		m_pars.push_back(&par);
+    	}
 
     // Return
     return;
