@@ -174,6 +174,25 @@ GException::model_invalid_temporal::model_invalid_temporal(std::string origin,
     return;
 }
 
+/***********************************************************************//**
+ * @brief Invalid number of nodes in XML element
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] xml XML element.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::model_invalid_nodenum::model_invalid_nodenum(std::string origin,
+                                                         GXmlElement xml,
+                                                         std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid number of nodes found in XML element. " +
+                message;
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Invalid number of model parameters in XML element

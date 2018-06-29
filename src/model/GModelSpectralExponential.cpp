@@ -48,6 +48,7 @@ const GModelSpectralRegistry    g_spectral_expo_registry(&g_spectral_expo_seed);
 #define G_MC  "GModelSpectralExponential::mc(GEnergy&, GEnergy&, GTime&, "\
                                                                      "GRan&)"
 #define G_WRITE           "GModelSpectralExponential::write(GXmlElement&)"
+#define G_READ            "GModelSpectralExponential::read(GXmlElement&)"
 #define G_SETEXPONENT     "GModelSpectralExponential::exponent(GModelSpectral&)"
 #define G_RETURNEXPONENT  "GModelSpectralExponential::exponent(void)"
 
@@ -377,7 +378,7 @@ GEnergy GModelSpectralExponential::mc(const GEnergy& emin,
     }
 
     // Throw exception if exponent is undefined
-    if (m_exponent == 0) {
+    if (m_exponent == NULL) {
         std::string msg = "Exponent is undefined";
     	throw GException::runtime_error(G_MC, msg);
     }
@@ -402,21 +403,40 @@ GEnergy GModelSpectralExponential::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralExponential::read(const GXmlElement& xml)
 {
-
-	// Get exponent XML element
-	const GXmlElement* spec = xml.element("spectrum",0);
+	// Read number of spectrum nodes in xml
+	int n_spectrals = xml.elements("spectrum");
 	
-    // Allocate a spectral registry object
-    GModelSpectralRegistry registry;
-
-    // Read spectral model
-    GModelSpectral* ptr = registry.alloc(*spec);
-    
-    // Set spectral component as exponent
-    exponent(ptr);
-
-    // Free spectral model
-    delete ptr;
+	// If xml has no spectrum node pass
+	if (n_spectrals == 0.){}
+	
+	// Otherwise check if there is one spectrum node
+	else{
+		// Check that there is only one spectrum node
+		if (n_spectrals == 1.){
+			// Get exponent XML element
+			const GXmlElement* spec = xml.element("spectrum",0);
+			
+			// Allocate a spectral registry object
+			GModelSpectralRegistry registry;
+		
+			// Read spectral model
+			GModelSpectral* ptr = registry.alloc(*spec);
+			
+			// Set spectral component as exponent
+			exponent(ptr);
+		
+			// Free spectral model
+			delete ptr;
+		}//endif check one spectrum node
+		
+		//Otherwise pass, TBD, implement exception
+		else {
+			throw GException::model_invalid_nodenum(G_READ, xml,
+			              "Exponential model requires only one spectrum node to define exponent.");
+			
+		}//endif check there is only one spectrum node
+		
+	}//endif check number of spectrum nodes
 			
 	// Return
 	return;
@@ -617,17 +637,19 @@ void GModelSpectralExponential::copy_members(const GModelSpectralExponential& mo
         m_exponent = model.m_exponent->clone();
     }
     	
-	// Store pointers to spectral parameters
+	// Store pointers to spectral parameters if exponent is defined
 	m_pars.clear();
-	int npars = model.m_exponent->size();    
-    	for (int ipar = 0; ipar < npars; ++ipar) {
-
-    		// Get model parameter reference
-    		GModelPar& par = m_exponent->operator[](ipar);
-
-    		// Append model parameter pointer to internal container
-    		m_pars.push_back(&par);
-    	}
+	if (m_exponent != NULL){
+		int npars = model.m_exponent->size();    
+			for (int ipar = 0; ipar < npars; ++ipar) {
+	
+				// Get model parameter reference
+				GModelPar& par = m_exponent->operator[](ipar);
+	
+				// Append model parameter pointer to internal container
+				m_pars.push_back(&par);
+			}
+	}
 
     // Return
     return;
