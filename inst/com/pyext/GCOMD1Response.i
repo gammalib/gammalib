@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCOMD1Response.i - COMPTEL D1 module response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,7 @@ public:
     const GCaldb&   caldb(void) const;
     void            load(const std::string& sdaname);
     void            read(const GFitsTable& hdu);
+    void            write(GFitsBinTable& table);
     double          position(const double& etrue) const;
     double          sigma(const double& etrue) const;
     double          amplitude(const double& etrue) const;
@@ -72,4 +73,14 @@ public:
     GCOMD1Response copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        table = gammalib.GFitsBinTable()
+        self.write(table)
+        state = (table,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.read(state[0])
+}
 };

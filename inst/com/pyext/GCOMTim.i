@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMTim.i - COMPTEL Good Time Intervals class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knodlseder                               *
+ *  copyright (C) 2017-2018 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,7 @@ class GCOMTim : public GBase {
 public:
     // Constructors and destructors
     GCOMTim(void);
+    explicit GCOMTim(const GGti& gti);
     GCOMTim(const GCOMTim& tim);
     GCOMTim(const GFilename& filename, const std::string& usage = "",
                                        const std::string& mode  = "");
@@ -67,4 +68,11 @@ public:
     GCOMTim copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.gti(),)
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
+}
 };

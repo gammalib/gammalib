@@ -277,7 +277,7 @@ const GTime& GCTAEventBin::time(void) const
  *
  * @return Number of counts in event bin
  *
- * @exception GCTAException::no_member
+ * @exception GCTAException::invalid_value
  *            Invalid counts pointer.
  *
  * Returns reference to the number of counts in the event bin.

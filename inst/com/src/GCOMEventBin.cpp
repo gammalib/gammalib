@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventBin.cpp - COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,20 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_DIR_GET                                       "GCOMEventBin::dir()"
+#define G_ENERGY_GET                                 "GCOMEventBin::energy()"
+#define G_TIME_GET                                     "GCOMEventBin::time()"
+#define G_COUNTS_GET                                 "GCOMEventBin::counts()"
+#define G_SOLIDANGLE_GET                         "GCOMEventBin::solidangle()"
+#define G_EWIDTH_GET                                 "GCOMEventBin::ewidth()"
+#define G_ONTIME_GET                                 "GCOMEventBin::ontime()"
+#define G_DIR_SET                           "GCOMEventBin::dir(GCOMInstDir&)"
+#define G_ENERGY_SET                         "GCOMEventBin::energy(GEnergy&)"
+#define G_TIME_SET                               "GCOMEventBin::time(GTime&)"
+#define G_COUNTS_SET                          "GCOMEventBin::counts(double&)"
+#define G_SOLIDANGLE_SET                  "GCOMEventBin::solidangle(double&)"
+#define G_EWIDTH_SET                         "GCOMEventBin::ewidth(GEnergy&)"
+#define G_ONTIME_SET                          "GCOMEventBin::ontime(double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -190,6 +204,98 @@ double GCOMEventBin::size(void) const
 
 
 /***********************************************************************//**
+ * @brief Return instrument direction of event bin
+ *
+ * @return Instrument direction of event bin
+ *
+ * @exception GException::invalid_value
+ *            Invalid instrument direction pointer.
+ *
+ * Returns reference to the instrument direction of the event bin.
+ ***************************************************************************/
+const GCOMInstDir& GCOMEventBin::dir(void) const
+{
+    // Throw an exception if instrument direction pointer is not valid
+    if (m_dir == NULL) {
+        std::string msg = "No valid instrument direction found in event bin";
+        throw GException::invalid_value(G_DIR_GET, msg);
+    }
+
+    // Return instrument direction
+    return *m_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy of event bin
+ *
+ * @return Energy of event bin
+ *
+ * @exception GException::invalid_value
+ *            Invalid energy pointer.
+ *
+ * Returns reference to the energy of the event bin.
+ ***************************************************************************/
+const GEnergy& GCOMEventBin::energy(void) const
+{
+    // Throw an exception if energy pointer is not valid
+    if (m_energy == NULL) {
+        std::string msg = "No valid energy found in event bin";
+        throw GException::invalid_value(G_ENERGY_GET, msg);
+    }
+
+    // Return energy
+    return *m_energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time of event bin
+ *
+ * @return Time of event bin
+ *
+ * @exception GException::invalid_value
+ *            Invalid time pointer.
+ *
+ * Returns reference to the time of the event bin.
+ ***************************************************************************/
+const GTime& GCOMEventBin::time(void) const
+{
+    // Throw an exception if time pointer is not valid
+    if (m_energy == NULL) {
+        std::string msg = "No valid time found in event bin";
+        throw GException::invalid_value(G_TIME_GET, msg);
+    }
+
+    // Return time
+    return *m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of counts in event bin
+ *
+ * @return Number of counts in event bin
+ *
+ * @exception GCTAException::invalid_value
+ *            Invalid counts pointer.
+ *
+ * Returns reference to the number of counts in the event bin.
+ ***************************************************************************/
+double GCOMEventBin::counts(void) const
+{
+    // Throw an exception if counts pointer is not valid
+    if (m_counts == NULL) {
+        std::string msg = "No valid counts found in event bin";
+        throw GException::invalid_value(G_COUNTS_GET, msg);
+    }
+
+    // Return counts
+    return *m_counts;
+}
+
+
+/***********************************************************************//**
  * @brief Return error in number of counts
  *
  * @return Error in number of counts in event bin.
@@ -209,6 +315,257 @@ double GCOMEventBin::error(void) const
 
     // Return error
     return error;
+}
+
+
+/***********************************************************************//**
+ * @brief Return solid angle of event bin
+ *
+ * @return Solid angle of event bin
+ *
+ * @exception GException::invalid_value
+ *            Invalid solid angle pointer.
+ *
+ * Returns reference to the solid angle of the event bin.
+ ***************************************************************************/
+const double& GCOMEventBin::solidangle(void) const
+{
+    // Throw an exception if counts pointer is not valid
+    if (m_solidangle == NULL) {
+        std::string msg = "No valid solid angle found in event bin";
+        throw GException::invalid_value(G_SOLIDANGLE_GET, msg);
+    }
+
+    // Return solid angle
+    return *m_solidangle;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy width of event bin
+ *
+ * @return Energy width of event bin
+ *
+ * @exception GException::invalid_value
+ *            Invalid energy width pointer.
+ *
+ * Returns reference to the energy width of the event bin.
+ ***************************************************************************/
+const GEnergy& GCOMEventBin::ewidth(void) const
+{
+    // Throw an exception if energy width pointer is not valid
+    if (m_ewidth == NULL) {
+        std::string msg = "No valid energy width found in event bin";
+        throw GException::invalid_value(G_EWIDTH_GET, msg);
+    }
+
+    // Return energy width
+    return *m_ewidth;
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime of event bin
+ *
+ * @return Ontime of event bin
+ *
+ * @exception GException::invalid_value
+ *            Invalid ontime pointer.
+ *
+ * Returns reference to the ontime of the event bin.
+ ***************************************************************************/
+const double& GCOMEventBin::ontime(void) const
+{
+    // Throw an exception if energy width pointer is not valid
+    if (m_ontime == NULL) {
+        std::string msg = "No valid ontime found in event bin";
+        throw GException::invalid_value(G_ONTIME_GET, msg);
+    }
+
+    // Return ontime
+    return *m_ontime;
+}
+
+
+/***********************************************************************//**
+ * @brief Set instrument direction of event bin
+ *
+ * @param[in] dir Instrument direction of event bin
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold instrument direction.
+ *
+ * Sets the instrument direction of the event bin.
+ ***************************************************************************/
+void GCOMEventBin::dir(const GCOMInstDir& dir)
+{
+    // Throw an exception if no memory has been allocated
+    if (m_dir == NULL) {
+        std::string msg = "No memory available to hold instrument direction.";
+        throw GException::invalid_value(G_DIR_SET, msg);
+    }
+
+    // Set instrument direction
+    *m_dir = dir;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy of event bin
+ *
+ * @param[in] energy Energy of event bin
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold energy.
+ *
+ * Sets the energy of the event bin.
+ ***************************************************************************/
+void GCOMEventBin::energy(const GEnergy& energy)
+{
+    // Throw an exception if no memory has been allocated
+    if (m_energy == NULL) {
+        std::string msg = "No memory available to hold energy.";
+        throw GException::invalid_value(G_ENERGY_SET, msg);
+    }
+
+    // Set energy
+    *m_energy = energy;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time of event bin
+ *
+ * @param[in] time Time of event bin
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold instrument direction.
+ *
+ * Sets the time of the event bin.
+ ***************************************************************************/
+void GCOMEventBin::time(const GTime& time)
+{
+    // Throw an exception if no memory has been allocated
+    if (m_time == NULL) {
+        std::string msg = "No memory available to hold time.";
+        throw GException::invalid_value(G_TIME_SET, msg);
+    }
+
+    // Set time
+    *m_time = time;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set number of counts in event bin
+ *
+ * @param[in] counts Number of counts.
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold counts.
+ *
+ * Set the number of counts in the event bin.
+ ***************************************************************************/
+void GCOMEventBin::counts(const double& counts)
+{
+    // Throw an exception if counts pointer is not valid
+    if (m_counts == NULL) {
+        std::string msg = "No memory available to hold counts.";
+        throw GException::invalid_value(G_COUNTS_SET, msg);
+    }
+
+    // Set number of counts in event bin
+    *m_counts = counts;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set solid angle of event bin
+ *
+ * @param[in] solidangle Solid angle of event bin
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold solid angle.
+ *
+ * Sets the solid angle of the event bin.
+ ***************************************************************************/
+void GCOMEventBin::solidangle(const double& solidangle)
+{
+    // Throw an exception if no memory has been allocated
+    if (m_solidangle == NULL) {
+        std::string msg = "No memory available to hold solid angle.";
+        throw GException::invalid_value(G_SOLIDANGLE_SET, msg);
+    }
+
+    // Set solid angle
+    *m_solidangle = solidangle;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy width of event bin
+ *
+ * @param[in] ewidth Energy width of event bin
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold energy width.
+ *
+ * Sets the energy width of the event bin.
+ ***************************************************************************/
+void GCOMEventBin::ewidth(const GEnergy& ewidth)
+{
+    // Throw an exception if no memory has been allocated
+    if (m_ewidth == NULL) {
+        std::string msg = "No memory available to hold energy width.";
+        throw GException::invalid_value(G_EWIDTH_SET, msg);
+    }
+
+    // Set energy width
+    *m_ewidth = ewidth;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set ontime of event bin
+ *
+ * @param[in] ontime Ontime of event bin (sec).
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold ontime.
+ *
+ * Sets the ontime of the event bin.
+ ***************************************************************************/
+void GCOMEventBin::ontime(const double& ontime)
+{
+    // Throw an exception if no memory has been allocated
+    if (m_ontime == NULL) {
+        std::string msg = "No memory available to hold ontime.";
+        throw GException::invalid_value(G_ONTIME_SET, msg);
+    }
+
+    // Set solid angle
+    *m_ontime = ontime;
+
+    // Return
+    return;
 }
 
 

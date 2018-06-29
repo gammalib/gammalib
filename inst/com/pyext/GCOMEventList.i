@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventList.i - COMPTEL event list class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCOMEventList.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -129,4 +128,15 @@ public:
     GCOMEventList copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        if not state[0].is_empty():
+            self.read(state[0])
+}
 };

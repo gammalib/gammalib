@@ -92,6 +92,16 @@ The following methods have been added:
 - GCTAModelRadialAcceptance::temporal(GModelTemporal*)
 - GCTAModelIrfBackground::spectral(GModelSpectral*)
 - GCTAModelIrfBackground::temporal(GModelTemporal*)
+- GCOMD1Response::write(GFitsBinTable&)
+- GCOMD2Response::write(GFitsBinTable&)
+- GCOMEventBin::index(int&)
+- GCOMEventBin::dir(GCOMInstDir&)
+- GCOMEventBin::energy(GEnergy&)
+- GCOMEventBin::time(GTime&)
+- GCOMEventBin::counts(double&)
+- GCOMEventBin::solidangle(double&)
+- GCOMEventBin::ewidth(GEnergy&)
+- GCOMEventBin::ontime(double&)
 
 The following methods have been removed:
 - GSkyRegionMap::filename()

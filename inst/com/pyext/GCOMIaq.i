@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMIaq.i - COMPTEL instrument response representation         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,8 +40,8 @@ public:
     // Constructors and destructors
     GCOMIaq(void);
     GCOMIaq(const GCOMIaq& iaq);
-    GCOMIaq(const double&   phigeo_max, const double& phigeo_bin_size,
-            const double&   phibar_max, const double& phibar_bin_size);
+    GCOMIaq(const double& phigeo_max, const double& phigeo_bin_size,
+            const double& phibar_max, const double& phibar_bin_size);
     ~GCOMIaq(void);
 
     // Methods

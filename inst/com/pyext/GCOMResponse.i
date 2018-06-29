@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMResponse.i - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,6 +66,7 @@ public:
     const std::string& rspname(void) const;
     void               load(const std::string& rspname);
     void               read(const GFitsImage& hdu);
+    void               write(GFitsImageFloat& image) const;
 };
 
 
@@ -76,4 +77,14 @@ public:
     GCOMResponse copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        image = gammalib.GFitsImageFloat()
+        self.write(image)
+        state = (image,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.read(state[0])
+}
 };

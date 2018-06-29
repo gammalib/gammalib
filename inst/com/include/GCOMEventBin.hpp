@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventBin.hpp - COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -78,6 +78,13 @@ public:
     const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
+    void           index(const int& index);
+    void           dir(const GCOMInstDir& dir);
+    void           energy(const GEnergy& energy);
+    void           time(const GTime& time);
+    void           solidangle(const double& solidangle);
+    void           ewidth(const GEnergy& ewidth);
+    void           ontime(const double& ontime);
 
 protected:
     // Protected methods
@@ -111,77 +118,6 @@ std::string GCOMEventBin::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return instrument direction
- *
- * @return Instrument direction.
- *
- * Returns the instrument direction of the event bin.
- ***************************************************************************/
-inline
-const GCOMInstDir& GCOMEventBin::dir(void) const
-{
-    return (*m_dir);
-}
-
-
-/***********************************************************************//**
- * @brief Return energy
- *
- * @return Energy.
- *
- * Returns the energy of the event bin.
- ***************************************************************************/
-inline
-const GEnergy& GCOMEventBin::energy(void) const
-{
-    return (*m_energy);
-}
-
-
-/***********************************************************************//**
- * @brief Return time
- *
- * @return Time.
- *
- * Returns the time of the event bin.
- ***************************************************************************/
-inline
-const GTime& GCOMEventBin::time(void) const
-{
-    return (*m_time);
-}
-
-
-/***********************************************************************//**
- * @brief Return number of counts
- *
- * @return Number of counts.
- *
- * Returns the number of counts in the event bin.
- ***************************************************************************/
-inline
-double GCOMEventBin::counts(void) const
-{
-    return (*m_counts);
-}
-
-
-/***********************************************************************//**
- * @brief Set number of counts
- *
- * @param[in] counts Number of counts.
- *
- * Set the number of counts in the event bin.
- ***************************************************************************/
-inline
-void GCOMEventBin::counts(const double& counts)
-{
-    *m_counts = counts;
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Return bin index
  *
  * @return Bin index.
@@ -197,44 +133,18 @@ const int& GCOMEventBin::index(void) const
 
 
 /***********************************************************************//**
- * @brief Return solid angle
+ * @brief Set bin index
  *
- * @return Solid angle.
+ * @return Bin index.
  *
- * Returns the solid angle of the event bin.
+ * Set the index of the event bin if the bin is part of an event cube. If
+ * the event is not part of an event cube the index should be set to -1.
  ***************************************************************************/
 inline
-const double& GCOMEventBin::solidangle(void) const
+void GCOMEventBin::index(const int& index)
 {
-    return (*m_solidangle);
-}
-
-
-/***********************************************************************//**
- * @brief Return energy width
- *
- * @return Energy width.
- *
- * Returns the energy width of the event bin.
- ***************************************************************************/
-inline
-const GEnergy& GCOMEventBin::ewidth(void) const
-{
-    return (*m_ewidth);
-}
-
-
-/***********************************************************************//**
- * @brief Return ontime
- *
- * @return Ontime.
- *
- * Returns the ontime of the event bin.
- ***************************************************************************/
-inline
-const double& GCOMEventBin::ontime(void) const
-{
-    return (*m_ontime);
+    m_index = index;
+    return;
 }
 
 #endif /* GCOMEVENTBIN_HPP */

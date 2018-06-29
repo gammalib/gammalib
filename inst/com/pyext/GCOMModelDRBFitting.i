@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMModelDRBFitting.i - COMPTEL DRB model fitting class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,4 +66,16 @@ public:
     GCOMModelDRBFitting copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
+        return state
+    def __setstate__(self, state):
+        if state[0][0].elements('node') == 0:
+            self.__init__()
+        else:
+            self.__init__(state[0][0])
+}
 };

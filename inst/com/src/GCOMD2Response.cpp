@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMD2Response.cpp - COMPTEL D2 module response class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,10 @@
 #include "GMath.hpp"
 #include "GIntegral.hpp"
 #include "GCOMD2Response.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableFloatCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -345,6 +349,75 @@ void GCOMD2Response::read(const GFitsTable& table)
         }
 
     } // endif: there were entries
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write COMPTEL D2 module response.
+ *
+ * @param[in] table FITS table.
+ *
+ * Write the COMPTEL D2 module response into a SDB FITS table.
+ ***************************************************************************/
+void GCOMD2Response::write(GFitsBinTable& table)
+{
+    // Set extension name
+    table.extname("SDB");
+
+    // Set number of entries
+    int num = m_energies.size();
+
+    // Allocate columns
+    GFitsTableFloatCol  col_energy("ENERGY", num);
+    GFitsTableDoubleCol col_position("POSITION", num);
+    GFitsTableDoubleCol col_width("WIDTH", num);
+    GFitsTableDoubleCol col_amplitude("AMPLITUDE", num);
+    GFitsTableDoubleCol col_escape1("ESCAPE1", num);
+    GFitsTableDoubleCol col_escape2("ESCAPE2", num);
+    GFitsTableDoubleCol col_tail("TAIL", num);
+    GFitsTableDoubleCol col_background("BACKGROUND", num);
+    GFitsTableDoubleCol col_emin("EMIN", num);
+    GFitsTableDoubleCol col_ewidth("EWIDTH", num);
+    GFitsTableDoubleCol col_emax("EMAX", num);
+
+    // Set column units
+    col_energy.unit("MeV");
+    col_position.unit("MeV");
+    col_width.unit("MeV");
+    col_emin.unit("MeV");
+    col_ewidth.unit("MeV");
+    col_emax.unit("MeV");
+
+    // Copy data from vectors into table
+    for (int i = 0; i < num; ++i) {
+        col_energy(i)     = m_energies[i];
+        col_position(i)   = m_positions[i];
+        col_width(i)      = m_sigmas[i];
+        col_amplitude(i)  = m_amplitudes[i];
+        col_escape1(i)    = m_escapes1[i];
+        col_escape2(i)    = m_escapes2[i];
+        col_tail(i)       = m_tails[i];
+        col_background(i) = m_backgrounds[i];
+        col_emin(i)       = m_emins[i];
+        col_ewidth(i)     = m_ewidths[i];
+        col_emax(i)       = m_emaxs[i];
+    }
+
+    // Append columns to table
+    table.append(col_energy);
+    table.append(col_position);
+    table.append(col_width);
+    table.append(col_amplitude);
+    table.append(col_escape1);
+    table.append(col_escape2);
+    table.append(col_tail);
+    table.append(col_background);
+    table.append(col_emin);
+    table.append(col_ewidth);
+    table.append(col_emax);
 
     // Return
     return;

@@ -78,4 +78,22 @@ public:
     GCOMOad copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.tstart(), self.tstop(), self.zaxis(), self.xaxis(),
+                 self.tjd(), self.tics(), self.gcaz(), self.gcel(),
+                 self.georad())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.tstart(state[0])
+        self.tstop(state[1])
+        self.zaxis(state[2])
+        self.xaxis(state[3])
+        self.tjd(state[4])
+        self.tics(state[5])
+        self.gcaz(state[6])
+        self.gcel(state[7])
+        self.georad(state[8])
+}
 };

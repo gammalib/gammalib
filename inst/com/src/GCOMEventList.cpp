@@ -333,7 +333,7 @@ void GCOMEventList::read(const GFits& file)
  *
  * @param[in] file FITS file.
  *
- * Write the LCOMPTELAT event list into FITS file.
+ * Write the COMPTEL event list into FITS file.
  *
  * @todo Implement method.
  ***************************************************************************/

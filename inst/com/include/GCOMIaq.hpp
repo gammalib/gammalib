@@ -55,8 +55,8 @@ public:
     // Constructors and destructors
     GCOMIaq(void);
     GCOMIaq(const GCOMIaq& iaq);
-    GCOMIaq(const double&   phigeo_max, const double& phigeo_bin_size,
-            const double&   phibar_max, const double& phibar_bin_size);
+    GCOMIaq(const double& phigeo_max, const double& phigeo_bin_size,
+            const double& phibar_max, const double& phibar_bin_size);
     ~GCOMIaq(void);
 
     // Operators

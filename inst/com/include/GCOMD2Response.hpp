@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCOMD2Response.hpp - COMPTEL D2 module response class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GFitsTable;
+class GFitsBinTable;
 
 
 /***********************************************************************//**
@@ -66,6 +67,7 @@ public:
     const GCaldb&   caldb(void) const;
     void            load(const std::string& sdbname);
     void            read(const GFitsTable& table);
+    void            write(GFitsBinTable& table);
     double          position(const double& etrue) const;
     double          sigma(const double& etrue) const;
     double          amplitude(const double& etrue) const;

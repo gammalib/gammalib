@@ -165,6 +165,25 @@ if WITH_INST_CTA
   testdc1cta_DATA   = $(testdc1cta)
 endif
 
+# Distribute COM test data (optionally)
+if WITH_INST_COM
+  testdatacom       = $(top_srcdir)/inst/com/test/data/obs.xml \
+                      $(top_srcdir)/inst/com/test/data/crab.xml \
+                      $(top_srcdir)/inst/com/test/data/m32171_drx.fits.gz \
+                      $(top_srcdir)/inst/com/test/data/m34997_drg.fits.gz \
+                      $(top_srcdir)/inst/com/test/data/m50439_dre.fits.gz
+  testdatacomdir    = $(pyexecdir)/gammalib/tests/com/data
+  testdatacom_DATA  = $(testdatacom)
+  testcaldbcom      = $(top_srcdir)/inst/com/test/caldb/data/cgro/comptel/caldb.indx
+  testcaldbcomdir   = $(pyexecdir)/gammalib/tests/com/caldb/data/cgro/comptel
+  testcaldbcom_DATA = $(testcaldbcom)
+  testirfcom        = $(top_srcdir)/inst/com/test/caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
+                      $(top_srcdir)/inst/com/test/caldb/data/cgro/comptel/bcf/m10564_sdb.fits.gz \
+                      $(top_srcdir)/inst/com/test/caldb/data/cgro/comptel/bcf/u47569_iaq.fits.gz
+  testirfcomdir     = $(pyexecdir)/gammalib/tests/com/caldb/data/cgro/comptel/bcf
+  testirfcom_DATA   = $(testirfcom)
+endif
+
 # If building of Python wrappers was requested then add them to the build
 # source
 if BUILD_WRAPPERS

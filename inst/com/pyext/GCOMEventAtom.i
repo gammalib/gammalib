@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventAtom.i - COMPTEL event atom class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -87,4 +87,28 @@ public:
     GCOMEventAtom copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.dir(), self.energy(), self.time(),
+                 self.e1(), self.e2(), self.phibar(), self.theta(),
+                 self.phi(), self.eha(), self.psd(), self.tof(),
+                 self.modcom(), self.reflag(), self.veto())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.dir(state[0])
+        self.energy(state[1])
+        self.time(state[2])
+        self.e1(state[3])
+        self.e2(state[4])
+        self.phibar(state[5])
+        self.theta(state[6])
+        self.phi(state[7])
+        self.eha(state[8])
+        self.psd(state[9])
+        self.tof(state[10])
+        self.modcom(state[11])
+        self.reflag(state[12])
+        self.veto(state[13])
+}
 };

@@ -77,7 +77,7 @@ GCOMModelDRBFitting::GCOMModelDRBFitting(void) : GModelData()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
  *

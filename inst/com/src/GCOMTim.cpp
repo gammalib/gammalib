@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMTim.cpp - COMPTEL Good Time Intervals class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knodlseder                               *
+ *  copyright (C) 2017-2018 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,24 @@ GCOMTim::GCOMTim(void)
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Good Time Interval constructor
+ *
+ * @param[in] gti Good Time Intervals.
+ ***************************************************************************/
+GCOMTim::GCOMTim(const GGti& gti)
+{
+    // Initialise class members
+    init_members();
+
+    // Set GTIs
+    m_gti = gti;
 
     // Return
     return;

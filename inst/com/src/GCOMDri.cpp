@@ -861,7 +861,9 @@ void GCOMDri::write(GFits& fits, const std::string& extname) const
     GFitsHDU *image = m_dri.write(fits, extname);
 
     // Write DRI attributes
-    write_attributes(image);
+    if (image != NULL) {
+        write_attributes(image);
+    }
 
     // Return
     return;
@@ -1124,7 +1126,9 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
     GTime tstop  = com_time(hdu->integer("VIEDAY"), hdu->integer("VIETIM"));
 
     // Set Good Time Intervals
-    m_gti = GGti(tstart, tstop);
+    if (tstop > tstart) {
+        m_gti = GGti(tstart, tstop);
+    }
 
     // Optionally read Phibar attributes
     if (hdu->has_card("CDELT3") &&

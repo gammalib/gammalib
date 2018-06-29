@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,7 @@
 #include "GTime.hpp"
 #include "GObservation.hpp"
 #include "GFitsImage.hpp"
+#include "GFitsImageFloat.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GCOMResponse.hpp"
@@ -592,47 +593,107 @@ void GCOMResponse::load(const std::string& rspname)
  ***************************************************************************/
 void GCOMResponse::read(const GFitsImage& image)
 {
-    // Store IAQ dimensions
-    m_phigeo_bins = image.naxes(0);
-    m_phibar_bins = image.naxes(1);
+    // Continue only if there are two image axis
+    if (image.naxis() == 2) {
 
-    // Store IAQ axes definitions
-    m_phigeo_ref_value = image.real("CRVAL1");
-    m_phigeo_ref_pixel = image.real("CRPIX1");
-    m_phigeo_bin_size  = image.real("CDELT1");
-    m_phibar_ref_value = image.real("CRVAL2");
-    m_phibar_ref_pixel = image.real("CRPIX2");
-    m_phibar_bin_size  = image.real("CDELT2");
+        // Store IAQ dimensions
+        m_phigeo_bins = image.naxes(0);
+        m_phibar_bins = image.naxes(1);
 
-    // Get axes minima (values of first bin)
-    m_phigeo_min = m_phigeo_ref_value + (1.0-m_phigeo_ref_pixel) * m_phigeo_bin_size;
-    m_phibar_min = m_phibar_ref_value + (1.0-m_phibar_ref_pixel) * m_phibar_bin_size;
+        // Store IAQ axes definitions
+        m_phigeo_ref_value = image.real("CRVAL1");
+        m_phigeo_ref_pixel = image.real("CRPIX1");
+        m_phigeo_bin_size  = image.real("CDELT1");
+        m_phibar_ref_value = image.real("CRVAL2");
+        m_phibar_ref_pixel = image.real("CRPIX2");
+        m_phibar_bin_size  = image.real("CDELT2");
 
-    // Compute IAQ size. Continue only if size is positive
-    int size = m_phigeo_bins * m_phibar_bins;
-    if (size > 0) {
+        // Get axes minima (values of first bin)
+        m_phigeo_min = m_phigeo_ref_value + (1.0-m_phigeo_ref_pixel) * m_phigeo_bin_size;
+        m_phibar_min = m_phibar_ref_value + (1.0-m_phibar_ref_pixel) * m_phibar_bin_size;
 
-        // Allocate memory for IAQ
-        m_iaq.assign(size, 0.0);
+        // Compute IAQ size. Continue only if size is positive
+        int size = m_phigeo_bins * m_phibar_bins;
+        if (size > 0) {
 
-        // Copy over IAQ values
-        for (int i = 0; i < size; ++i) {
-            m_iaq[i] = image.pixel(i);
+            // Allocate memory for IAQ
+            m_iaq.assign(size, 0.0);
+
+            // Copy over IAQ values
+            for (int i = 0; i < size; ++i) {
+                m_iaq[i] = image.pixel(i);
+            }
+
+        } // endif: size was positive
+
+        // Convert IAQ matrix from probability per Phigeo bin into a
+        // probability per steradian
+        double omega0 = gammalib::fourpi *
+                        std::sin(0.5 * m_phigeo_bin_size * gammalib::deg2rad);
+        for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
+            double phigeo = iphigeo * m_phigeo_bin_size + m_phigeo_min;
+            double omega  = omega0 * std::sin(phigeo * gammalib::deg2rad);
+            for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
+                m_iaq[iphigeo+iphibar*m_phigeo_bins] /= omega;
+            }
         }
 
-    } // endif: size was positive
+    } // endif: image had two axes
 
-    // Convert IAQ matrix from probability per Phigeo bin into a
-    // probability per steradian
-    double omega0 = gammalib::fourpi *
-                    std::sin(0.5 * m_phigeo_bin_size * gammalib::deg2rad);
-    for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
-        double phigeo = iphigeo * m_phigeo_bin_size + m_phigeo_min;
-        double omega  = omega0 * std::sin(phigeo * gammalib::deg2rad);
-        for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
-            m_iaq[iphigeo+iphibar*m_phigeo_bins] /= omega;
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write COMPTEL response into FITS image.
+ *
+ * @param[in] image FITS image.
+ *
+ * Writes the COMPTEL response into an IAQ FITS file.
+ ***************************************************************************/
+void GCOMResponse::write(GFitsImageFloat& image) const
+{
+    // Continue only if response is not empty
+    if (m_phigeo_bins > 0 && m_phibar_bins > 0) {
+
+        // Initialise image
+        image = GFitsImageFloat(m_phigeo_bins, m_phibar_bins);
+
+        // Convert IAQ matrix from probability per steradian into
+        //probability per Phigeo bin
+        double omega0 = gammalib::fourpi *
+                        std::sin(0.5 * m_phigeo_bin_size * gammalib::deg2rad);
+        for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
+            double phigeo = iphigeo * m_phigeo_bin_size + m_phigeo_min;
+            double omega  = omega0 * std::sin(phigeo * gammalib::deg2rad);
+            for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
+                int i          = iphigeo + iphibar*m_phigeo_bins;
+                image(iphigeo, iphibar) = m_iaq[i] * omega;
+            }
         }
-    }
+
+        // Set header keywords
+        image.card("CTYPE1", "Phigeo", "Geometrical scatter angle");
+        image.card("CRVAL1", m_phigeo_ref_value,
+                   "[deg] Geometrical scatter angle for reference bin");
+        image.card("CDELT1", m_phigeo_bin_size,
+                   "[deg] Geometrical scatter angle bin size");
+        image.card("CRPIX1", m_phigeo_ref_pixel,
+                   "Reference bin of geometrical scatter angle");
+        image.card("CTYPE2", "Phibar", "Compton scatter angle");
+        image.card("CRVAL2", m_phibar_ref_value,
+                   "[deg] Compton scatter angle for reference bin");
+        image.card("CDELT2", m_phibar_bin_size, "[deg] Compton scatter angle bin size");
+        image.card("CRPIX2", m_phibar_ref_pixel,
+                   "Reference bin of Compton scatter angle");
+        image.card("BUNIT", "Probability per bin", "Unit of bins");
+        image.card("TELESCOP", "GRO", "Name of telescope");
+        image.card("INSTRUME", "COMPTEL", "Name of instrument");
+        image.card("ORIGIN", "GammaLib", "Origin of FITS file");
+        image.card("OBSERVER", "Unknown", "Observer that created FITS file");
+
+    } // endif: response was not empty
 
     // Return
     return;

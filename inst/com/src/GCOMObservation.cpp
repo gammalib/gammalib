@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -78,6 +78,27 @@ GCOMObservation::GCOMObservation(void) : GObservation()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs a COMPTEL observation from the information that is found in an
+ * XML element.
+ ***************************************************************************/
+GCOMObservation::GCOMObservation(const GXmlElement& xml) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Read XML
+    read(xml);
 
     // Return
     return;
@@ -487,7 +508,7 @@ void GCOMObservation::write(GXmlElement& xml) const
         par->attribute("file", gammalib::xml_file_reduce(xml, m_drxname));
 
         // Set IAQ parameter
-        par = gammalib::xml_need_par(G_WRITE, xml, "DRX");
+        par = gammalib::xml_need_par(G_WRITE, xml, "IAQ");
         par->attribute("value", m_response.rspname());
 
     } // endif: observation was binned
