@@ -87,10 +87,6 @@ public:
     std::string                     classname(void) const;
     const std::string&              name(void) const;
     const std::string&              version(void) const;
-    double                          telapse(void) const;
-    double                          celapse(void) const;
-    void                            logFileOpen(const bool& clobber = true);
-    void                            logFileClose(void);
     bool                            logTerse(void) const;
     bool                            logNormal(void) const;
     bool                            logExplicit(void) const;

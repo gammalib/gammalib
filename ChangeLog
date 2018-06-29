@@ -1,4 +1,4 @@
-2018-06-21
+2018-06-29
 
         * Version 1.6.0 released
         ========================
@@ -26,6 +26,7 @@
         Handle extended models in CTA On/Off analysis (#2292)
         Preserve GTIs when copying GCTAEventList and GCTAEventCube objects (#2054)
         Use MJD reference of first observation for exposure cube (#2054)
+        Implement Python pickeling support (#1938)
 
 
 2018-04-26

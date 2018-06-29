@@ -250,7 +250,7 @@ def _pickeling(testsuite, object):
     ----------
     testsuite : `~gammalib.GPythonTestSuite`
         Test suite class
-    container : `~gammalib.GBase`
+    object : `~gammalib.GBase`
         GammaLib class
     """
     # Get class name

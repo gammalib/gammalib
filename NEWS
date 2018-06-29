@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-28 June 2018
+29 June 2018
 
 
 1. Introduction
@@ -109,7 +109,9 @@ All at() methods were removed from the Python interface.
 
 3. Configuration
 -----------------
-Keep existing library path in installation script on Mac OS X (#2420)
+Keep existing library path in installation script on Mac OS X (#2420).
+
+GammaLib classes can now be pickled from Python (#1938).
 
 
 4. Application module
