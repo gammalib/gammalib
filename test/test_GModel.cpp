@@ -2030,12 +2030,12 @@ void TestGModel::test_multiplicative(void)
 void TestGModel::test_exponential(void)
 {
     // Test void constructor
-	GModelSpectralExponential model1;
-    test_value(model1.type(), "Exponential", "Check void model type");
+	GModelSpectralExponential model0;
+    test_value(model0.type(), "Exponential", "Check void model type");
 
-    // Test value constructor
+    // Test exponent constructor
     GModelSpectral *ptr = new GModelSpectralConst(1.);
-    model1.exponent(ptr);
+    GModelSpectralExponential model1(ptr);
 
     // Test eval method
     test_value(model1.eval(GEnergy(1.0, "TeV")), std::exp(1.));

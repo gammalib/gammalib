@@ -95,6 +95,26 @@ GModelSpectralExponential::GModelSpectralExponential(const GXmlElement& xml) :
     return;
 }
 
+/***********************************************************************//**
+ * @brief Model constructor
+ *
+ * @param[in] GModelSpectral spectral model
+ *
+ * Constructs exponential spectral model by setting the exponent model.
+ ***************************************************************************/
+GModelSpectralExponential::GModelSpectralExponential(const GModelSpectral* spec) :
+                     GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set exponent
+	exponent(spec);
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Copy constructor

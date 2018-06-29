@@ -56,6 +56,7 @@ public:
     // Constructors and destructors
     GModelSpectralExponential(void);
     explicit GModelSpectralExponential(const GXmlElement& xml);
+    explicit GModelSpectralExponential(const GModelSpectral* spec);
     GModelSpectralExponential(const GModelSpectralExponential& model);
     virtual ~GModelSpectralExponential(void);
 
