@@ -142,6 +142,13 @@ testcaldbidx_DATA = $(testcaldbidx)
 testcaldbbcfdir   = $(pyexecdir)/gammalib/tests/data/caldb/data/cta/prod2/bcf/North_0.5h
 testcaldbbcf_DATA = $(testcaldbbcf)
 
+# Distribute MWL test data (optionally)
+if WITH_INST_MWL
+  testdatamwl       = $(top_srcdir)/inst/mwl/test/data/crab_mwl.fits
+  testdatamwldir    = $(pyexecdir)/gammalib/tests/mwl/data
+  testdatamwl_DATA  = $(testdatamwl)
+endif
+
 # Distribute CTA test data (optionally)
 if WITH_INST_CTA
   testdatacta       = $(top_srcdir)/inst/cta/test/data/irf_1dc.xml \

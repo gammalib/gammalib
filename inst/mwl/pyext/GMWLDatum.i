@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLDatum.i - Multi-wavelength spectral point class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,8 @@ class GMWLDatum : public GEventBin {
 public:
     // Constructors and destructors
     GMWLDatum(void);
+    GMWLDatum(const GEnergy& energy, const GEnergy& energy_err,
+              const double&  flux,   const double&  flux_err);
     GMWLDatum(const GMWLDatum& datum);
     virtual ~GMWLDatum(void);
 
@@ -57,11 +59,13 @@ public:
     virtual void               counts(const double& flux);
 
     // Other methods
-    const GEnergy& energy_err(void) const;
     const double&  flux(void) const;
     const double&  flux_err(void) const;
+    const GEnergy& energy_err(void) const;
     void           flux(const double& flux);
     void           flux_err(const double& error);
+    void           energy(const GEnergy& energy);
+    void           energy_err(const GEnergy& error);
 };
 
 
@@ -72,4 +76,11 @@ public:
     GMWLDatum copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.energy(), self.energy_err(), self.flux(), self.flux_err())
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0], state[1], state[2], state[3])
+}
 };

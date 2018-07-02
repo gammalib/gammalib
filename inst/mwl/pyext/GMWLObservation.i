@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.i - Multi-wavelength observation class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,4 +74,15 @@ public:
     GMWLObservation copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = xml,
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        if gammalib.xml_get_attr('GMWLObservation.__setstate__', state[0], 'Data', 'file') != '':
+            self.read(state[0])
+}
 };

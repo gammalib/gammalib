@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GMWLDatum.cpp - Multi-wavelength spectral point class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,8 +55,37 @@
  ***************************************************************************/
 GMWLDatum::GMWLDatum(void) : GEventBin()
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Value constructor
+ *
+ * @param[in] energy Energy.
+ * @param[in] energy_err Uncertainty in energy.
+ * @param[in] flux Flux.
+ * @param[in] flux_err Uncertainty in flux.
+ *
+ * Constructs spectral point.
+ ***************************************************************************/
+GMWLDatum::GMWLDatum(const GEnergy& energy,
+                     const GEnergy& energy_err,
+                     const double&  flux,
+                     const double&  flux_err) : GEventBin()
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    m_eng      = energy;
+    m_eng_err  = energy_err;
+    m_flux     = flux;
+    m_flux_err = flux_err;
 
     // Return
     return;
@@ -72,7 +101,7 @@ GMWLDatum::GMWLDatum(void) : GEventBin()
  ***************************************************************************/
 GMWLDatum::GMWLDatum(const GMWLDatum& datum) : GEventBin(datum)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
@@ -108,10 +137,11 @@ GMWLDatum::~GMWLDatum(void)
  * @brief Assignment operator
  *
  * @param[in] datum Spectral point.
+ * @return Spectral point.
  *
  * Copies spectral point into the instance.
  ***************************************************************************/
-GMWLDatum& GMWLDatum::operator= (const GMWLDatum& datum)
+GMWLDatum& GMWLDatum::operator=(const GMWLDatum& datum)
 {
     // Execute only if object is not identical
     if (this != &datum) {
@@ -175,10 +205,11 @@ GMWLDatum* GMWLDatum::clone(void) const
 /***********************************************************************//**
  * @brief Returns flux error
  *
- * Returns flux error value in units of ph/cm2/s/MeV. If the flux error is
- * 0 it is assumed that no flux error information is available, and in that
- * case the flux error is assumed to 10% of the flux value. This is mainly
- * needed for the optimizer methods to work.
+ * Returns flux error value in units of ph/cm2/s/MeV.
+ *
+ * If the flux error is 0 it is assumed that no flux error information is
+ * available, and in that case the flux error is assumed to 10% of the flux
+ * value. This is mainly needed for the optimizer methods to work.
  ***************************************************************************/
 double GMWLDatum::error(void) const
 {
@@ -193,7 +224,7 @@ double GMWLDatum::error(void) const
 /***********************************************************************//**
  * @brief Print spectral point information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing spectral point information.
  ***************************************************************************/
 std::string GMWLDatum::print(const GChatter& chatter) const

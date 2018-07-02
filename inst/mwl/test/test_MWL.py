@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib MWL module.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import os
 import gammalib
+import test_support
 
 
 # ================================== #
@@ -25,12 +27,12 @@ import gammalib
 # ================================== #
 class Test(gammalib.GPythonTestSuite):
     """
-    Test class for GammaLib MWL module.
+    Test class for GammaLib MWL module
     """
     # Constructor
     def __init__(self):
         """
-        Constructor.
+        Constructor
         """
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
@@ -38,24 +40,40 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    # Set test functions
-    def set(self):
+    # Test class pickeling
+    def _test_pickeling(self):
         """
-        Set all test functions.
+        Test class pickeling
         """
-        # Set test name
-        self.name("MWL")
+        # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GMWLDatum())
+        test_support._pickeling(self, gammalib.GMWLObservation())
+        test_support._pickeling(self, gammalib.GMWLSpectrum())
 
-        # Append tests
-        self.append(self.test, "MWL dummy test")
+        # Setup test
+        eng   = gammalib.GEnergy(1.0, 'TeV')
+        datum = gammalib.GMWLDatum(eng, eng, 1.0, 0.1)
+        obs   = gammalib.GMWLObservation(os.environ['TEST_MWL_DATA']+'/crab_mwl.fits')
+        spec  = gammalib.GMWLSpectrum(os.environ['TEST_MWL_DATA']+'/crab_mwl.fits')
+
+        # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GMWLDatum(datum))
+        test_support._pickeling(self, gammalib.GMWLObservation(obs))
+        test_support._pickeling(self, gammalib.GMWLSpectrum(spec))
 
         # Return
         return
 
-    # Test function
-    def test(self):
+    # Set test functions
+    def set(self):
         """
-        Test function.
+        Set all test functions
         """
+        # Set test name
+        self.name('MWL')
+
+        # Append tests
+        self.append(self._test_pickeling, 'Test MWL class pickeling')
+
         # Return
         return

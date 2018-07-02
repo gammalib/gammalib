@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLDatum.hpp - Multi-wavelength spectral point class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,11 +50,13 @@ class GMWLDatum : public GEventBin {
 public:
     // Constructors and destructors
     GMWLDatum(void);
+    GMWLDatum(const GEnergy& energy, const GEnergy& energy_err,
+              const double&  flux,   const double&  flux_err);
     GMWLDatum(const GMWLDatum& datum);
     virtual ~GMWLDatum(void);
 
     // Operators
-    virtual GMWLDatum& operator= (const GMWLDatum& datum);
+    virtual GMWLDatum& operator=(const GMWLDatum& datum);
 
     // Implemented pure virtual base class methods
     virtual void               clear(void);
@@ -70,11 +72,13 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const GEnergy& energy_err(void) const;
     const double&  flux(void) const;
     const double&  flux_err(void) const;
+    const GEnergy& energy_err(void) const;
     void           flux(const double& flux);
     void           flux_err(const double& error);
+    void           energy(const GEnergy& energy);
+    void           energy_err(const GEnergy& error);
 
 protected:
     // Protected methods
@@ -191,18 +195,6 @@ const double& GMWLDatum::flux(void) const
 
 
 /***********************************************************************//**
- * @brief Return flux error of spectral bin
- *
- * @return Flux error of spectral bin.
- ***************************************************************************/
-inline
-const double& GMWLDatum::flux_err(void) const
-{
-    return m_flux_err;
-}
-
-
-/***********************************************************************//**
  * @brief Set flux of spectral bin
  *
  * @param[in] flux Flux of spectral bin.
@@ -212,6 +204,18 @@ void GMWLDatum::flux(const double& flux)
 {
     m_flux = flux;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return flux error of spectral bin
+ *
+ * @return Flux error of spectral bin.
+ ***************************************************************************/
+inline
+const double& GMWLDatum::flux_err(void) const
+{
+    return m_flux_err;
 }
 
 
@@ -229,6 +233,19 @@ void GMWLDatum::flux_err(const double& error)
 
 
 /***********************************************************************//**
+ * @brief Set energy of spectral bin
+ *
+ * @param[in] energy Energy of spectral bin.
+ ***************************************************************************/
+inline
+void GMWLDatum::energy(const GEnergy& energy)
+{
+    m_eng = energy;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return energy error of spectral bin
  *
  * @return Energy error of spectral bin.
@@ -237,6 +254,19 @@ inline
 const GEnergy& GMWLDatum::energy_err(void) const
 {
     return m_eng_err;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy error of spectral bin
+ *
+ * @param[in] error Energy error of spectral bin.
+ ***************************************************************************/
+inline
+void GMWLDatum::energy_err(const GEnergy& error)
+{
+    m_eng_err = error;
+    return;
 }
 
 #endif /* GMWLDATUM_HPP */

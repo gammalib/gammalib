@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GMWLSpectrum.i - Multi-wavelength spectrum class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,9 +68,6 @@ public:
  * @brief GMWLSpectrum class extension
  ***************************************************************************/
 %extend GMWLSpectrum {
-    GMWLSpectrum copy() {
-        return (*self);
-    }
     GMWLDatum* __getitem__(int index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
@@ -80,4 +77,18 @@ public:
                                            index, self->size());
         }
     }
+    GMWLSpectrum copy() {
+        return (*self);
+    }
+%pythoncode {
+    def __getstate__(self):
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        if state[0].size() > 0:
+            self.read(state[0])
+}
 };
