@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-29 June 2018
+2 July 2018
 
 
 1. Introduction
@@ -12,7 +12,7 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- none
+- GModelSpectralExponential
 
 The following classes have been removed:
 - none
@@ -148,6 +148,9 @@ None
 
 8. Model module
 ---------------
+The GModelSpectralExponential class was added that implements an exponential
+function that can be used for EBL studies (#2454).
+
 Add a GModelSpatialRadialProfileGauss() position and width constructor, add
 GModelSpatialRadialProfileGauss::sigma() getter and setter methods, and avoid
 recomputations if the position of the Gaussian changed (#2463). 

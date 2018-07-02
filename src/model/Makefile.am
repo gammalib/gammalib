@@ -57,6 +57,7 @@ sources = GModelPar.cpp \
           GModelSpectralConst.cpp \
           GModelSpectralExpInvPlaw.cpp \
           GModelSpectralExpPlaw.cpp \
+          GModelSpectralExponential.cpp \
           GModelSpectralSuperExpPlaw.cpp \
           GModelSpectralFunc.cpp \
           GModelSpectralGauss.cpp \

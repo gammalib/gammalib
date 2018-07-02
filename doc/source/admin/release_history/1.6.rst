@@ -65,6 +65,8 @@ Improvements
 New features
 ------------
 
+* [`2454 <https://cta-redmine.irap.omp.eu/issues/2454>`_] -
+  Add ``GModelSpectralExponential`` class
 * Add ``GCTAModelRadialAcceptance`` model component setter methods
 * [`1938 <https://cta-redmine.irap.omp.eu/issues/1938>`_] -
   Support pickeling of GammaLib classes in Python

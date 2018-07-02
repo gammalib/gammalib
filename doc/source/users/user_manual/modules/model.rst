@@ -944,6 +944,29 @@ The XML format for specifying a multiplicative spectral model is:
     </spectrum>
 
 
+Exponential model
+====================
+
+Yet another composite model is the exponential model that is implemented by
+the  :doxy:`GModelSpectralExponential class`. The class computes the
+exponential of a spectral model
+
+.. math::
+   M_{\rm spectral}(E | t) = \exp \left( M_{\rm spectral}(E | t) \right)
+
+where :math:`M_{\rm spectral}(E | t)` is any spectral model component.
+
+The XML format for specifying an exponential spectral model is:
+
+.. code-block:: xml
+
+	<spectrum type="Exponential">
+	  <spectrum type="Constant">
+	    <parameter name="Normalization" scale="-1.0" value="3.5" min="0.0" max="1000." free="1"/>
+	  </spectrum>
+    </spectrum>
+
+
 Temporal components
 ^^^^^^^^^^^^^^^^^^^
 

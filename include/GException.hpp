@@ -657,6 +657,11 @@ public:
         model_invalid_parnum(std::string origin, GXmlElement xml,
                              std::string message = "");
     };
+    class model_invalid_nodenum : public GExceptionHandler {
+        public:
+            model_invalid_nodenum(std::string origin, GXmlElement xml,
+                                 std::string message = "");
+        };
     class model_invalid_parnames : public GExceptionHandler {
     public:
         model_invalid_parnames(std::string origin, GXmlElement xml,

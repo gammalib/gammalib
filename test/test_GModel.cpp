@@ -68,6 +68,7 @@ void TestGModel::set(void)
     m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
     m_xml_model_point_logparabola  = datadir + "/model_point_logparabola.xml";
     m_xml_point_multiplicative     = datadir + "/model_point_multiplicative.xml";
+    m_xml_point_exponential        = datadir + "/model_point_exponential.xml";
     m_xml_model_point_nodes        = datadir + "/model_point_nodes.xml";
     m_xml_model_point_filefct      = datadir + "/model_point_filefct.xml";
     m_xml_model_spectral_composite = datadir + "/model_spectral_composite.xml";
@@ -156,6 +157,8 @@ void TestGModel::set(void)
            "Test GModelSpectralLogParabola");
     append(static_cast<pfunction>(&TestGModel::test_multiplicative),
            "Test GModelSpectralMultiplicative");
+    append(static_cast<pfunction>(&TestGModel::test_exponential),
+           "Test GModelSpectralExponential");
     append(static_cast<pfunction>(&TestGModel::test_nodes),
            "Test GModelSpectralNodes");
     append(static_cast<pfunction>(&TestGModel::test_filefct),
@@ -2021,6 +2024,45 @@ void TestGModel::test_multiplicative(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Test GModelSpectralExponential class
+ ***************************************************************************/
+void TestGModel::test_exponential(void)
+{
+    // Test void constructor
+	GModelSpectralExponential model0;
+    test_value(model0.type(), "Exponential", "Check void model type");
+
+    // Test exponent constructor
+    GModelSpectral *ptr = new GModelSpectralConst(1.);
+    GModelSpectralExponential model1(ptr);
+
+    // Test eval method
+    test_value(model1.eval(GEnergy(1.0, "TeV")), std::exp(1.));
+    test_value(model1.eval(GEnergy(5.0, "TeV")), std::exp(1.));
+
+    // Test XML constructor
+    GXml         xml(m_xml_point_exponential);
+    GXmlElement* element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralExponential model2(*element);
+    test_value(model2.size(), 1);
+    test_value(model2.type(), "Exponential", "Check model type");
+    test_value(model2.eval(GEnergy(1.0, "TeV")), std::exp(-35.));
+
+    // Create copy of model2
+    GModelSpectralExponential model3(model2);
+
+    // Change model2
+    model2["Normalization"].value(-36.);
+    test_value(model2["Normalization"].value(), -36.);
+
+    // Verify model3 hasnt been changed
+    test_value(model3["Normalization"].value(), -35.);
+
+    // Exit test
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Test GModelSpectralNodes class
@@ -3276,7 +3318,6 @@ void TestGModel::test_legacy_model_point_smoothbplaw(void)
     // Exit test
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Test exponentially cut off power law legacy model

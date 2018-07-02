@@ -67,6 +67,7 @@ public:
     void                test_plaw_eflux(void);
     void                test_eplaw(void);
     void                test_einvplaw(void);
+    void                test_exponential(void);
     void                test_bplaw(void);
     void                test_smoothbplaw(void);
     void                test_supeplaw(void);
@@ -122,6 +123,7 @@ private:
     std::string m_xml_model_point_supeplaw;
     std::string m_xml_model_point_logparabola;
     std::string m_xml_point_multiplicative;
+    std::string m_xml_point_exponential;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_point_filefct;
     std::string m_xml_model_spectral_composite;

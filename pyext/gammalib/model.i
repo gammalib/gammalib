@@ -191,6 +191,7 @@
 %include "GModelSpectralSmoothBrokenPlaw.i"
 %include "GModelSpectralConst.i"
 %include "GModelSpectralExpInvPlaw.i"
+%include "GModelSpectralExponential.i"
 %include "GModelSpectralExpPlaw.i"
 %include "GModelSpectralSuperExpPlaw.i"
 %include "GModelSpectralFunc.i"
