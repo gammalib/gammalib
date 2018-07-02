@@ -102,6 +102,11 @@ The following methods have been added:
 - GCOMEventBin::solidangle(double&)
 - GCOMEventBin::ewidth(GEnergy&)
 - GCOMEventBin::ontime(double&)
+- GCOMResponse::write(GFitsImageFloat&)
+- GCOMTim(GGti&)
+- GMWLDatum(GEnergy&, GEnergy&, double&, double&)
+- GMWLDatum::energy(GEnergy&)
+- GMWLDatum::energy_err(GEnergy&)
 
 The following methods have been removed:
 - GSkyRegionMap::filename()
