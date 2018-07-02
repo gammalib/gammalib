@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpectralExponential.cpp - Exponential spectral model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018- by Lluigi Tibaldo                                  *
+ *  copyright (C) 2018 by Luigi Tibaldo                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,12 +45,9 @@ const GModelSpectralExponential g_spectral_expo_seed;
 const GModelSpectralRegistry    g_spectral_expo_registry(&g_spectral_expo_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC  "GModelSpectralExponential::mc(GEnergy&, GEnergy&, GTime&, "\
+#define G_MC     "GModelSpectralExponential::mc(GEnergy&, GEnergy&, GTime&, "\
                                                                      "GRan&)"
-#define G_WRITE           "GModelSpectralExponential::write(GXmlElement&)"
-#define G_READ            "GModelSpectralExponential::read(GXmlElement&)"
-#define G_SETEXPONENT     "GModelSpectralExponential::exponent(GModelSpectral&)"
-#define G_RETURNEXPONENT  "GModelSpectralExponential::exponent(void)"
+#define G_WRITE              "GModelSpectralExponential::write(GXmlElement&)"
 
 
 /*==========================================================================
@@ -63,7 +60,7 @@ const GModelSpectralRegistry    g_spectral_expo_registry(&g_spectral_expo_seed);
  * @brief Void constructor
  ***************************************************************************/
 GModelSpectralExponential::GModelSpectralExponential(void) :
-                              GModelSpectral()
+                           GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -78,12 +75,11 @@ GModelSpectralExponential::GModelSpectralExponential(void) :
  *
  * @param[in] xml XML element containing spectral model information.
  *
- * Constructs a Exponential spectral model by extracting information from
- * an XML element. See the read() method for more information about the
- * expected structure of the XML element.
+ * Constructs an exponential spectral model by extracting information from
+ * an XML element.
  ***************************************************************************/
 GModelSpectralExponential::GModelSpectralExponential(const GXmlElement& xml) :
-                              GModelSpectral()
+                           GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -95,15 +91,16 @@ GModelSpectralExponential::GModelSpectralExponential(const GXmlElement& xml) :
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Model constructor
  *
- * @param[in] GModelSpectral spectral model
+ * @param[in] spec Spectral model
  *
  * Constructs exponential spectral model by setting the exponent model.
  ***************************************************************************/
 GModelSpectralExponential::GModelSpectralExponential(const GModelSpectral* spec) :
-                     GModelSpectral()
+                           GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -122,7 +119,7 @@ GModelSpectralExponential::GModelSpectralExponential(const GModelSpectral* spec)
  * @param[in] model Exponential spectral model.
  ***************************************************************************/
 GModelSpectralExponential::GModelSpectralExponential(const GModelSpectralExponential& model) :
-                              GModelSpectral(model)
+                           GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -246,8 +243,8 @@ GModelSpectralExponential* GModelSpectralExponential::clone(void) const
  * where \f${P_{\rm i}}\f$ is the i-th parameter.
  ***************************************************************************/
 double GModelSpectralExponential::eval(const GEnergy& srcEng,
-                                          const GTime&   srcTime,
-                                          const bool&    gradients) const
+                                       const GTime&   srcTime,
+                                       const bool&    gradients) const
 {
     // Initialise result
     double value = 0.0;
@@ -257,26 +254,27 @@ double GModelSpectralExponential::eval(const GEnergy& srcEng,
 
         // Calculate exponent value
         value = m_exponent->eval(srcEng, srcTime, gradients);
-        // calculate exponential
-        value = exp(value);
-        
+
+        // Calculate exponential
+        value = std::exp(value);
+
 		// Modify gradients if requested
 		if (gradients) {
-	
-				// Loop over model parameters
-				for (int ipar = 0; ipar < m_exponent->size(); ++ipar) {
-	
-					// Get reference to model parameter
-					GModelPar& par = m_exponent->operator[](ipar);
-	
-					// Scale parameter gradient
-					par.gradient(par.gradient()*value);
-	
-				} // endfor: loop over model parameters
-				
-		}// endif: compute grdients
-	
-	}//endif compute value and gradients
+
+            // Loop over model parameters
+            for (int ipar = 0; ipar < m_exponent->size(); ++ipar) {
+
+                // Get reference to model parameter
+                GModelPar& par = m_exponent->operator[](ipar);
+
+                // Scale parameter gradient
+                par.gradient(par.gradient()*value);
+
+            } // endfor: loop over model parameters
+
+		} // endif: compute grdients
+
+	} //endif compute value and gradients
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -305,7 +303,7 @@ double GModelSpectralExponential::eval(const GEnergy& srcEng,
  * Computes the photon flux of Exponential spectral model
  ***************************************************************************/
 double GModelSpectralExponential::flux(const GEnergy& emin,
-		const GEnergy& emax) const
+                                       const GEnergy& emax) const
 {
 	// Initialise flux
 	double flux = 0.0;
@@ -343,7 +341,7 @@ double GModelSpectralExponential::flux(const GEnergy& emin,
  * Computes the energy flux of Exponential spectral model
  ***************************************************************************/
 double GModelSpectralExponential::eflux(const GEnergy& emin,
-		const GEnergy& emax) const
+		                                const GEnergy& emax) const
 {
 	// Initialise eflux
 	double eflux = 0.0;
@@ -387,20 +385,23 @@ double GModelSpectralExponential::eflux(const GEnergy& emin,
  * spectral model.
  ***************************************************************************/
 GEnergy GModelSpectralExponential::mc(const GEnergy& emin,
-                                         const GEnergy& emax,
-                                         const GTime&   time,
-                                         GRan&          ran) const
+                                      const GEnergy& emax,
+                                      const GTime&   time,
+                                      GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
-        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
+        std::string msg = "Minimum energy "+emin.print()+" is equal or larger "
+                          "than maximum energy "+emax.print()+". Please specify "
+                          "a minimum energy that is smaller than the maximum "
+                          "energy.";
+        throw GException::invalid_argument(G_MC, msg);
     }
 
     // Throw exception if exponent is undefined
     if (m_exponent == NULL) {
-        std::string msg = "Exponent is undefined";
-    	throw GException::runtime_error(G_MC, msg);
+        std::string msg = "Exponent model is undefined.";
+    	throw GException::invalid_value(G_MC, msg);
     }
 
     // Update MC cache
@@ -419,49 +420,43 @@ GEnergy GModelSpectralExponential::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element.
  *
- * Reads the spectral information from an XML element.
+ * Reads the spectral information from an XML element. The XML element shall
+ * have the following format
+ *
+ *    <spectrum type="Exponential">
+ *      <spectrum type="Constant">
+ *        <parameter name="Normalization" scale="1" value="1" min="0" max="2" free="1"/>
+ *	    </spectrum>
+ *    </spectrum>
+ *
  ***************************************************************************/
 void GModelSpectralExponential::read(const GXmlElement& xml)
 {
-	// Read number of spectrum nodes in xml
-	int n_spectrals = xml.elements("spectrum");
-	
-	// If xml has no spectrum node pass
-	if (n_spectrals == 0.){}
-	
-	// Otherwise check if there is one spectrum node
-	else{
-		// Check that there is only one spectrum node
-		if (n_spectrals == 1.){
-			// Get exponent XML element
-			const GXmlElement* spec = xml.element("spectrum",0);
-			
-			// Allocate a spectral registry object
-			GModelSpectralRegistry registry;
-		
-			// Read spectral model
-			GModelSpectral* ptr = registry.alloc(*spec);
-			
-			// Set spectral component as exponent
-			exponent(ptr);
-		
-			// Free spectral model
-			delete ptr;
-		}//endif check one spectrum node
-		
-		//Otherwise pass, TBD, implement exception
-		else {
-			throw GException::model_invalid_nodenum(G_READ, xml,
-			              "Exponential model requires only one spectrum node to define exponent.");
-			
-		}//endif check there is only one spectrum node
-		
-	}//endif check number of spectrum nodes
-			
+    // Get exponent XML element
+    const GXmlElement* spec = xml.element("spectrum", 0);
+
+    // Continue only if the XML element contains children
+    if (spec->elements() > 0) {
+
+        // Allocate a spectral registry object
+        GModelSpectralRegistry registry;
+
+        // Read spectral model
+        GModelSpectral* ptr = registry.alloc(*spec);
+
+        // Set spectral component as exponent
+        exponent(ptr);
+
+        // Free spectral model
+        delete ptr;
+
+    } // endif: XML element contains children
+
 	// Return
 	return;
 
 }
+
 
 /***********************************************************************//**
  * @brief Write model into XML element
@@ -471,7 +466,21 @@ void GModelSpectralExponential::read(const GXmlElement& xml)
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of the expected type.
  *
- * Writes the spectral information into an XML element.
+ * Writes the spectral information into an XML element. The XML element
+ * will have the following format:
+ *
+ *    <spectrum type="Exponential">
+ *      <spectrum type="Constant">
+ *        <parameter name="Normalization" scale="1" value="1" min="0" max="2" free="1"/>
+ *	    </spectrum>
+ *    </spectrum>
+ *
+ * If no exponential model component is defined the method writes the
+ * following XML structure
+ *
+ *    <spectrum type="Exponential">
+ *    </spectrum>
+ *
  ***************************************************************************/
 void GModelSpectralExponential::write(GXmlElement& xml) const
 {
@@ -485,51 +494,22 @@ void GModelSpectralExponential::write(GXmlElement& xml) const
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
               "Spectral model is not of type \""+type()+"\".");
     }
-    
-    // Check if exponent is defined
+
+    // Create a spectrum node
+    xml.append(GXmlElement("spectrum"));
+
+    // Get spectrum node
+    GXmlElement* spec = xml.element("spectrum", 0);
+
+    // Write spectral component if it exists
     if (m_exponent != NULL) {
-    	
-        // Create a spectrum node
-        xml.append(GXmlElement("spectrum"));
-        
-        // Get spectrum node
-        GXmlElement* spec = xml.element("spectrum", 0);
-        
-        // Create temporary copy of the exponent. This is a kludge to
-        // write out the original parameters.
-		GModelSpectral* cpy = m_exponent->clone();
-		
-		// Loop over parameters of model
-		for (int i = 0; i < cpy->size(); ++i) {
-
-			// Get model parameter and name
-			GModelPar&  par     = (*cpy)[i];
-			std::string parname = par.name();
-
-			// Check if name contains colon
-			if (gammalib::contains(parname, ":")) {
-
-				// Split at the colon
-				std::vector<std::string> splits = gammalib::split(parname, ":");
-
-				// Use second part of the string to recover original
-				// parameter name
-				par.name(splits[1]);
-			}
-
-		} // endfor: loop over parameters
-
-		// Write spectral component
-		cpy->write(*spec);
-		
-        // Remove temporary copy
-        delete cpy;
-    	
+        m_exponent->write(*spec);
     }
 
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Set exponent
@@ -542,10 +522,10 @@ void GModelSpectralExponential::exponent(const GModelSpectral* spec)
 {
 	// Set exponent
 	m_exponent = spec->clone();
-	
+
 	// Get number of spectral parameters from model
 	int npars = m_exponent->size();
-	
+
     // Store pointers to spectral parameters
     m_pars.clear();
 	for (int ipar = 0; ipar < npars; ++ipar) {
@@ -571,8 +551,8 @@ const GModelSpectral* GModelSpectralExponential::exponent(void) const
 {
 	// Returns exponent
     return m_exponent;
-	
 }
+
 
 /***********************************************************************//**
  * @brief Print Exponential spectral model information
@@ -652,9 +632,8 @@ void GModelSpectralExponential::copy_members(const GModelSpectralExponential& mo
     m_mc_values   = model.m_mc_values;
 
     // Set exponent
-    m_exponent = NULL;
     if (model.m_exponent != NULL) {
-    		exponent(model.m_exponent);
+        exponent(model.m_exponent);
     }
 
     // Return
@@ -669,14 +648,14 @@ void GModelSpectralExponential::free_members(void)
 {
 	// Free exponent
 	if (m_exponent != NULL) delete m_exponent;
-	
+
 	// Signal free pointer
 	m_exponent = NULL;
-	
+
     // Return
     return;
-	
 }
+
 
 /***********************************************************************//**
  * @brief Update Monte Carlo pre computation cache
@@ -692,7 +671,7 @@ void GModelSpectralExponential::free_members(void)
  * method for simulations.
  ***************************************************************************/
 void GModelSpectralExponential::update_mc_cache(const GEnergy& emin,
-                                                   const GEnergy& emax) const
+                                                const GEnergy& emax) const
 
 {
     // Check if one of the parameters has changed. If the dimension of the

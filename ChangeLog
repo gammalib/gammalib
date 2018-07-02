@@ -1,4 +1,4 @@
-2018-06-21
+2018-07-02
 
         * Version 1.6.0 released
         ========================
@@ -12,6 +12,7 @@
         Speed up computation of diffuse map models for CTA (#2466)
         Enhance GModelSpatialRadialProfileGauss class (#2463)
         Increase integration precision for CTA diffuse model response (#2458)
+        Add GModelSpectralExponential class (#2454)
         Add GCTAModelRadialAcceptance model component setter methods
         Handle observation-specific energy thresholds in CTA On/Off analysis (#2429)
         Add GCTAEdisp::prob_erecobin() method (#2422)

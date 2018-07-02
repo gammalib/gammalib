@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpectralExponential.hpp - Exponential spectral model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018- by Luigi Tibaldo                                   *
+ *  copyright (C) 2018 by Luigi Tibaldo                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,9 +44,9 @@ class GXmlElement;
 /***********************************************************************//**
  * @class GModelSpectralExponential
  *
- * @brief Multiplicative spectral model class
+ * @brief Exponential spectral model class
  *
- * This class implements a spectral model that is the expoenential of a
+ * This class implements a spectral model that is the exponential of a
  * spectral model component. The spectral model component can be defined in
  * an XML file, or using the exponent() method.
  ***************************************************************************/
@@ -64,28 +64,28 @@ public:
     virtual GModelSpectralExponential& operator=(const GModelSpectralExponential& model);
 
     // Implemented pure virtual methods
-    virtual void                          clear(void);
-    virtual GModelSpectralExponential*    clone(void) const;
-    virtual std::string                   classname(void) const;
-    virtual std::string                   type(void) const;
-    virtual double                        eval(const GEnergy& srcEng,
-                                               const GTime&   srcTime = GTime(),
-                                               const bool&    gradients = false) const;
-    virtual double                        flux(const GEnergy& emin,
-                                               const GEnergy& emax) const;
-    virtual double                        eflux(const GEnergy& emin,
-                                                const GEnergy& emax) const;
-    virtual GEnergy                       mc(const GEnergy& emin,
-                                             const GEnergy& emax,
-                                             const GTime&   time,
-                                             GRan&          ran) const;
-    virtual void                          read(const GXmlElement& xml);
-    virtual void                          write(GXmlElement& xml) const;
-    virtual std::string                   print(const GChatter& chatter = NORMAL) const;
+    virtual void                       clear(void);
+    virtual GModelSpectralExponential* clone(void) const;
+    virtual std::string                classname(void) const;
+    virtual std::string                type(void) const;
+    virtual double                     eval(const GEnergy& srcEng,
+                                            const GTime&   srcTime = GTime(),
+                                            const bool&    gradients = false) const;
+    virtual double                     flux(const GEnergy& emin,
+                                            const GEnergy& emax) const;
+    virtual double                     eflux(const GEnergy& emin,
+                                             const GEnergy& emax) const;
+    virtual GEnergy                    mc(const GEnergy& emin,
+                                          const GEnergy& emax,
+                                          const GTime&   time,
+                                          GRan&          ran) const;
+    virtual void                       read(const GXmlElement& xml);
+    virtual void                       write(GXmlElement& xml) const;
+    virtual std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                   exponent(const GModelSpectral* spec);
-    const GModelSpectral*  exponent(void) const;
+    void                  exponent(const GModelSpectral* spec);
+    const GModelSpectral* exponent(void) const;
 
 protected:
     // Protected methods
@@ -123,10 +123,9 @@ protected:
         }
     };
 
-
     // Protected members
-    std::string					m_type;        //!< Model type
-    GModelSpectral*				m_exponent;	   //!< Exponent
+    std::string					 m_type;        //!< Model type
+    GModelSpectral*				 m_exponent;	//!< Exponent model component
 
     // MC cache
     mutable GModelSpectralNodes  m_mc_spectrum; //!< MC spectrum cache

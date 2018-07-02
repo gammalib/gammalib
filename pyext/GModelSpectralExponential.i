@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralExponential.i - Exponential spectral model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018- Luigi Tibaldo                                      *
+ *  copyright (C) 2018 Luigi Tibaldo                                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,28 +49,27 @@ public:
     virtual GModelSpectralExponential& operator=(const GModelSpectralExponential& model);
 
     // Implemented pure virtual methods
-    virtual void                          clear(void);
-    virtual GModelSpectralExponential*    clone(void) const;
-    virtual std::string                   classname(void) const;
-    virtual std::string                   type(void) const;
-    virtual double                        eval(const GEnergy& srcEng,
-                                               const GTime&   srcTime = GTime(),
-                                               const bool&    gradients = false) const;
-    virtual double                        flux(const GEnergy& emin,
-                                               const GEnergy& emax) const;
-    virtual double                        eflux(const GEnergy& emin,
-                                                const GEnergy& emax) const;
-    virtual GEnergy                       mc(const GEnergy& emin,
-                                             const GEnergy& emax,
-                                             const GTime&   time,
-                                             GRan&          ran) const;
-    virtual void                          read(const GXmlElement& xml);
-    virtual void                          write(GXmlElement& xml) const;
-    virtual std::string                   print(const GChatter& chatter = NORMAL) const;
+    virtual void                       clear(void);
+    virtual GModelSpectralExponential* clone(void) const;
+    virtual std::string                classname(void) const;
+    virtual std::string                type(void) const;
+    virtual double                     eval(const GEnergy& srcEng,
+                                            const GTime&   srcTime = GTime(),
+                                            const bool&    gradients = false) const;
+    virtual double                     flux(const GEnergy& emin,
+                                            const GEnergy& emax) const;
+    virtual double                     eflux(const GEnergy& emin,
+                                             const GEnergy& emax) const;
+    virtual GEnergy                    mc(const GEnergy& emin,
+                                          const GEnergy& emax,
+                                          const GTime&   time,
+                                          GRan&          ran) const;
+    virtual void                       read(const GXmlElement& xml);
+    virtual void                       write(GXmlElement& xml) const;
 
     // Other methods
-    void                   exponent(const GModelSpectral* spec);
-    const GModelSpectral*  exponent(void) const;
+    void                  exponent(const GModelSpectral* spec);
+    const GModelSpectral* exponent(void) const;
     
 };
 
@@ -86,7 +85,7 @@ public:
     def __getstate__(self):
         xml = gammalib.GXmlElement()
         self.write(xml)
-        state = xml,
+        state = (xml,)
         return state
     def __setstate__(self, state):
         self.__init__(state[0])
