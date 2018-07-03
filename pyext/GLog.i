@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GLog.i - Information logger                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,6 +73,7 @@ public:
     const int&         indent(void) const;
     const GChatter&    chatter(void) const;
     const GFilename&   filename(void) const;
+    const std::string& buffer(void) const;
 };
 
 

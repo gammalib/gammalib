@@ -1,8 +1,9 @@
-2018-07-02
+2018-07-03
 
         * Version 1.6.0 released
         ========================
 
+        Add GLog::buffer() method.
         Renamed GPhoton::mcid() to GPhoton::mc_id()
         Remove at() methods from Python interface (#2515)
         Support application specific system parameter files (#2513)

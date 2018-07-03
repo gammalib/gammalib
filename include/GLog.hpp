@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.hpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -112,6 +112,7 @@ public:
     const int&         indent(void) const;
     const GChatter&    chatter(void) const;
     const GFilename&   filename(void) const;
+    const std::string& buffer(void) const;
 
 protected:
     // Protected methods
@@ -491,6 +492,20 @@ inline
 const GFilename& GLog::filename(void) const
 {
     return m_filename;
+}
+
+
+/***********************************************************************//**
+ * @brief Return logger buffer
+ *
+ * @return Logger buffer.
+ *
+ * Returns the buffer of the logger as string.
+ ***************************************************************************/
+inline
+const std::string& GLog::buffer(void) const
+{
+    return m_buffer;
 }
 
 #endif /* GLOG_HPP */

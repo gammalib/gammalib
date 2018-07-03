@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-2 July 2018
+3 July 2018
 
 
 1. Introduction
@@ -30,6 +30,7 @@ The following methods have been added:
 - GApplicationPar::was_queried()
 - GApplicationPars::pickle()
 - GApplicationPars::syspfiles()
+- GLog::buffer()
 - operator==(GSkyPixel&, GSkyPixel&)
 - operator!=(GSkyPixel&, GSkyPixel&)
 - GArf::read(GFits&)
@@ -116,6 +117,8 @@ GammaLib classes can now be pickled from Python (#1938).
 
 4. Application module
 ---------------------
+Add GLog::buffer() method that returns the content of the logger buffer.
+
 A GApplicationPars::syspfiles() setter and getter method was added to allow the
 specification of an application specific system parameter file path. If such a
 file path is specified, the loading of the application parameters needs to be

@@ -30,9 +30,11 @@ Bug fixes
   Use MJD reference of first observation for exposure cube building in
   ``GCTACubeExposure``.
 
+
 Improvements
 ------------
 
+* Add ``GLog::buffer()`` method
 * Renamed ``GPhoton::mcid()`` to ``GPhoton::mc_id()``
 * [`2513 <https://cta-redmine.irap.omp.eu/issues/2513>`_] -
   Support application specific system parameter files
