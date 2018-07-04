@@ -139,7 +139,7 @@ public:
 %pythoncode {
     def __getstate__(self):
         state = tuple([self.emin(i) for i in range(self.size())]), \
-                tuple([self.emin(i) for i in range(self.size())])
+                tuple([self.emax(i) for i in range(self.size())])
         return state
     def __setstate__(self, state):
         self.__init__()
