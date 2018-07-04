@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-3 July 2018
+4 July 2018
 
 
 1. Introduction
@@ -24,7 +24,7 @@ The following methods have been added:
 - gammalib::atan2()
 - gammalib::plaw_integral()
 - gammalib::gauss_integral()
-- GApplication(std::string&, std::string&, std::vector<std::string>&)
+- GApplication(std::string&, std::string&, GApplicationPars&)
 - GApplicationPar::pickle()
 - GApplicationPar::query()
 - GApplicationPar::was_queried()

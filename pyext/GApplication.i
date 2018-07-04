@@ -26,10 +26,9 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GApplication.hpp"
-#include "GTools.hpp"
 %}
 
-// Include (int ARGC, char **ARGV) typemap to allow passing command line
+// Include (int ARGC, char** ARGV) typemap to allow passing command line
 // arguments to GApplication constructor
 %include "argcargv.i"
 
@@ -46,11 +45,15 @@ class GApplication : public GBase {
 public:
     // Constructors and destructors
     GApplication(void);
-    GApplication(const std::string& name, const std::string& version);
-    GApplication(const std::string& name, const std::string& version,
-                 const std::vector<std::string>& args);
-    GApplication(const std::string& name, const std::string& version,
-                 int ARGC, char **ARGV);
+    GApplication(const std::string& name,
+                 const std::string& version);
+    GApplication(const std::string&      name,
+                 const std::string&      version,
+                 const GApplicationPars& pars);
+    GApplication(const std::string& name,
+                 const std::string& version,
+                 int                ARGC,
+                 char               **ARGV);
     GApplication(const GApplication& app);
     ~GApplication(void);
 
@@ -282,13 +285,15 @@ GApplication._log_value = _log_value
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self._name(), self._version(), self._args(), self.pars())
+        pars = self.pars()
+        if pars.contains('logfile'):
+            pars['logfile'].filename('')
+        state = (self._name(), self._version(), pars)
         return state
     def __setstate__(self, state):
         if state[0] and state[1]:
             self.__init__(state[0], state[1], state[2])
         else:
             self.__init__()
-        self.pars(state[3])
 }
 };

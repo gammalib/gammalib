@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,11 +51,15 @@ class GApplication : public GBase {
 public:
     // Constructors and destructors
     GApplication(void);
-    GApplication(const std::string& name, const std::string& version);
-    GApplication(const std::string& name, const std::string& version,
-                 const std::vector<std::string>& args);
-    GApplication(const std::string& name, const std::string& version,
-                 int argc, char* argv[]);
+    GApplication(const std::string& name,
+                 const std::string& version);
+    GApplication(const std::string&      name,
+                 const std::string&      version,
+                 const GApplicationPars& pars);
+    GApplication(const std::string& name,
+                 const std::string& version,
+                 int                argc,
+                 char*              argv[]);
     GApplication(const GApplication& app);
     ~GApplication(void);
 
@@ -120,9 +124,6 @@ protected:
     void init_members(void);
     void copy_members(const GApplication& app);
     void free_members(void);
-    void set_members(const std::string&              name,
-                     const std::string&              version,
-                     const std::vector<std::string>& args);
     void set_log_chatter(void);
     void set_log_filename(void);
 
