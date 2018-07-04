@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATLtCube.cpp - Fermi/LAT livetime cube class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -179,7 +179,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
     // energy-dependent efficiency corrections
     /*
     if (aeff.has_efficiency()) {
-    
+
         // Compute correction factors
         double f1 = aeff.efficiency_factor1(energy);
         double f2 = aeff.efficiency_factor2(energy);
@@ -231,7 +231,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
     // energy-dependent efficiency corrections
     /*
     if (aeff.has_efficiency()) {
-    
+
         // Compute correction factors
         double f1 = aeff.efficiency_factor1(energy);
         double f2 = aeff.efficiency_factor2(energy);
@@ -277,7 +277,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
     if (aeff.has_efficiency()) {
-    
+
         // Compute correction factors
         double f1 = aeff.efficiency_factor1(energy);
         double f2 = aeff.efficiency_factor2(energy);
@@ -330,7 +330,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
     if (aeff.has_efficiency()) {
-    
+
         // Compute correction factors
         double f1 = aeff.efficiency_factor1(energy);
         double f2 = aeff.efficiency_factor2(energy);
@@ -385,10 +385,6 @@ GLATLtCube* GLATLtCube::clone(void) const
  * @brief Load livetime cube from FITS file
  *
  * @param[in] filename FITS file name.
- *
- * @todo Loading of cos theta boundaries not yet implemented. This is not
- *       critical since they are not really needed. We just need them once
- *       we want to implement also saving.
  ***************************************************************************/
 void GLATLtCube::load(const GFilename& filename)
 {
@@ -398,22 +394,8 @@ void GLATLtCube::load(const GFilename& filename)
     // Open livetime cube FITS file
     GFits fits(filename);
 
-    // Get HDUs
-    const GFitsTable& hdu_exposure          = *fits.table(gammalib::extname_lat_exposure);
-    const GFitsTable& hdu_weighted_exposure = *fits.table(gammalib::extname_lat_wgtexposure);
-    //const GFitsTable& hdu_cthetabounds      = *fits.table(gammalib::extname_lat_cthetabounds);
-    const  GFitsTable& hdu_gti               = *fits.table(gammalib::extname_gti);
-
-    // Load exposure
-    m_exposure.read(hdu_exposure);
-
-    // Load weighted exposure
-    m_weighted_exposure.read(hdu_weighted_exposure);
-
-    // Load cos theta boundaries
-    
-    // Load GTIs
-    m_gti.read(hdu_gti);
+    // Read livetime cube
+    GLATLtCube::read(fits);
 
     // Close FITS file
     fits.close();
@@ -433,6 +415,78 @@ void GLATLtCube::load(const GFilename& filename)
  ***************************************************************************/
 void GLATLtCube::save(const GFilename& filename, const bool& clobber) const
 {
+    // Create FITS file
+    GFits fits;
+
+    // Write effective area into file
+    write(fits);
+
+    // Close FITS file
+    fits.saveto(filename, clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read livetime cube from FITS file
+ *
+ * @param[in] fits FITS.
+ *
+ * Reads a livetime cube from a FITS file.
+ *
+ * @todo Reading of cos theta boundaries not yet implemented. This is not
+ *       critical since they are not really needed. We just need them once
+ *       we want to implement also saving.
+ ***************************************************************************/
+void GLATLtCube::read(const GFits& fits)
+{
+    // Clear object
+    clear();
+
+    // Get HDUs
+    const GFitsTable& hdu_exposure          = *fits.table(gammalib::extname_lat_exposure);
+    const GFitsTable& hdu_weighted_exposure = *fits.table(gammalib::extname_lat_wgtexposure);
+    //const GFitsTable& hdu_cthetabounds      = *fits.table(gammalib::extname_lat_cthetabounds);
+    const  GFitsTable& hdu_gti               = *fits.table(gammalib::extname_gti);
+
+    // Load exposure
+    m_exposure.read(hdu_exposure);
+
+    // Load weighted exposure
+    m_weighted_exposure.read(hdu_weighted_exposure);
+
+    // Load cos theta boundaries
+
+    // Load GTIs
+    m_gti.read(hdu_gti);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write livetime cube into FITS file
+ *
+ * @param[in] fits FITS file.
+ *
+ * Writes the livetime cube into a FITS file.
+ ***************************************************************************/
+void GLATLtCube::write(GFits& fits) const
+{
+    // Write exposure
+    m_exposure.write(fits, gammalib::extname_lat_exposure);
+
+    // Write weighted exposure
+    m_weighted_exposure.write(fits, gammalib::extname_lat_wgtexposure);
+
+    // Write cos theta boundaries
+
+    // Write GTIs
+    m_gti.write(fits, gammalib::extname_gti);
+
     // Return
     return;
 }
@@ -441,7 +495,7 @@ void GLATLtCube::save(const GFilename& filename, const bool& clobber) const
 /***********************************************************************//**
  * @brief Print livetime cube information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing livetime cube information.
  ***************************************************************************/
 std::string GLATLtCube::print(const GChatter& chatter) const

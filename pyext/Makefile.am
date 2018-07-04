@@ -142,55 +142,6 @@ testcaldbidx_DATA = $(testcaldbidx)
 testcaldbbcfdir   = $(pyexecdir)/gammalib/tests/data/caldb/data/cta/prod2/bcf/North_0.5h
 testcaldbbcf_DATA = $(testcaldbbcf)
 
-# Distribute MWL test data (optionally)
-if WITH_INST_MWL
-  testdatamwl       = $(top_srcdir)/inst/mwl/test/data/crab_mwl.fits
-  testdatamwldir    = $(pyexecdir)/gammalib/tests/mwl/data
-  testdatamwl_DATA  = $(testdatamwl)
-endif
-
-# Distribute CTA test data (optionally)
-if WITH_INST_CTA
-  testdatacta       = $(top_srcdir)/inst/cta/test/data/irf_1dc.xml \
-                      $(top_srcdir)/inst/cta/test/data/irf_unbinned.xml \
-                      $(top_srcdir)/inst/cta/test/data/crab_irf.xml \
-                      $(top_srcdir)/inst/cta/test/data/onoff_model.xml \
-                      $(top_srcdir)/inst/cta/test/data/crab_events.fits.gz \
-                      $(top_srcdir)/inst/cta/test/data/crab_cntmap.fits.gz
-  testdatactadir    = $(pyexecdir)/gammalib/tests/cta/data
-  testdatacta_DATA  = $(testdatacta)
-  testcaldbcta      = $(top_srcdir)/inst/cta/test/caldb/cta_dummy_irf.dat \
-                      $(top_srcdir)/inst/cta/test/caldb/prod1_gauss.fits.gz \
-                      $(top_srcdir)/inst/cta/test/caldb/prod1_king.fits.gz
-  testcaldbctadir   = $(pyexecdir)/gammalib/tests/cta/caldb
-  testcaldbcta_DATA = $(testcaldbcta)
-  testdc1cta        = $(top_srcdir)/inst/cta/test/caldb/dc1/arf.fits.gz \
-                      $(top_srcdir)/inst/cta/test/caldb/dc1/psf.fits.gz \
-                      $(top_srcdir)/inst/cta/test/caldb/dc1/psf_magic.fits.gz \
-                      $(top_srcdir)/inst/cta/test/caldb/dc1/rmf.fits.gz
-  testdc1ctadir     = $(pyexecdir)/gammalib/tests/cta/caldb/dc1
-  testdc1cta_DATA   = $(testdc1cta)
-endif
-
-# Distribute COM test data (optionally)
-if WITH_INST_COM
-  testdatacom       = $(top_srcdir)/inst/com/test/data/obs.xml \
-                      $(top_srcdir)/inst/com/test/data/crab.xml \
-                      $(top_srcdir)/inst/com/test/data/m32171_drx.fits.gz \
-                      $(top_srcdir)/inst/com/test/data/m34997_drg.fits.gz \
-                      $(top_srcdir)/inst/com/test/data/m50439_dre.fits.gz
-  testdatacomdir    = $(pyexecdir)/gammalib/tests/com/data
-  testdatacom_DATA  = $(testdatacom)
-  testcaldbcom      = $(top_srcdir)/inst/com/test/caldb/data/cgro/comptel/caldb.indx
-  testcaldbcomdir   = $(pyexecdir)/gammalib/tests/com/caldb/data/cgro/comptel
-  testcaldbcom_DATA = $(testcaldbcom)
-  testirfcom        = $(top_srcdir)/inst/com/test/caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
-                      $(top_srcdir)/inst/com/test/caldb/data/cgro/comptel/bcf/m10564_sdb.fits.gz \
-                      $(top_srcdir)/inst/com/test/caldb/data/cgro/comptel/bcf/u47569_iaq.fits.gz
-  testirfcomdir     = $(pyexecdir)/gammalib/tests/com/caldb/data/cgro/comptel/bcf
-  testirfcom_DATA   = $(testirfcom)
-endif
-
 # If building of Python wrappers was requested then add them to the build
 # source
 if BUILD_WRAPPERS

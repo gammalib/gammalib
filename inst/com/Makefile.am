@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for com module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -94,16 +94,33 @@ caldb_irfs = caldb/data/cgro/comptel/bcf/module_status.fits.gz \
              caldb/data/cgro/comptel/bcf/plaw2_10-30MeV_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/plaw2_3-10MeV_iaq.fits.gz
 
-# Build libtool library
-noinst_LTLIBRARIES = libcom.la
-libcom_la_SOURCES = $(sources)
-libcom_la_LDFLAGS =
-
 # Distribute calibration database files
 caldbindxdir   = $(datadir)/caldb/data/cgro/comptel
 caldbindx_DATA = $(caldb_indx)
 caldbirfsdir   = $(datadir)/caldb/data/cgro/comptel/bcf
 caldbirfs_DATA = $(caldb_irfs)
+
+# Test data to distribute
+testdatacom       = test/data/obs.xml \
+                    test/data/crab.xml \
+                    test/data/m32171_drx.fits.gz \
+                    test/data/m34997_drg.fits.gz \
+                    test/data/m50439_dre.fits.gz
+testdatacomdir    = $(pyexecdir)/gammalib/tests/com/data
+testdatacom_DATA  = $(testdatacom)
+testcaldbcom      = test/caldb/data/cgro/comptel/caldb.indx
+testcaldbcomdir   = $(pyexecdir)/gammalib/tests/com/caldb/data/cgro/comptel
+testcaldbcom_DATA = $(testcaldbcom)
+testirfcom        = test/caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
+                    test/caldb/data/cgro/comptel/bcf/m10564_sdb.fits.gz \
+                    test/caldb/data/cgro/comptel/bcf/u47569_iaq.fits.gz
+testirfcomdir     = $(pyexecdir)/gammalib/tests/com/caldb/data/cgro/comptel/bcf
+testirfcom_DATA   = $(testirfcom)
+
+# Build libtool library
+noinst_LTLIBRARIES = libcom.la
+libcom_la_SOURCES = $(sources)
+libcom_la_LDFLAGS =
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md caldb pyext \

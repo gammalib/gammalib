@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATLtCube.i - Fermi/LAT livetime cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -27,6 +27,13 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATLtCube.hpp"
 %}
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_lat_exposure     = "EXPOSURE";
+    const std::string extname_lat_wgtexposure  = "WEIGHTED_EXPOSURE";
+    const std::string extname_lat_cthetabounds = "CTHETABOUNDS";
+}
 
 
 /***********************************************************************//**
@@ -61,6 +68,8 @@ public:
     void        load(const GFilename& filename);
     void        save(const GFilename& filename,
                      const bool&      clobber = false) const;
+    void        read(const GFits& file);
+    void        write(GFits& file) const;
 };
 
 
@@ -71,4 +80,15 @@ public:
     GLATLtCube copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        if state[0].size() > 3:
+            self.read(state[0])
+}
 };

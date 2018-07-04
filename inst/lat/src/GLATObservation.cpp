@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATObservation.cpp - Fermi LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,6 +68,27 @@ GLATObservation::GLATObservation(void) : GObservation()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs a LAT observation from the information that is found in an
+ * XML element.
+ ***************************************************************************/
+GLATObservation::GLATObservation(const GXmlElement& xml) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Read XML
+    read(xml);
 
     // Return
     return;

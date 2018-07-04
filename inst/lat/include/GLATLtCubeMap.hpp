@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATLtCubeMap.hpp - Fermi LAT livetime cube map class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,11 +30,19 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GFitsTable.hpp"
 #include "GSkyMap.hpp"
-#include "GSkyDir.hpp"
-#include "GLATAeff.hpp"
-#include "GLATPsf.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFits;
+class GFitsTable;
+class GSkyDir;
+class GLATAeff;
+class GLATPsf;
+
+/* __ Constants __________________________________________________________ */
+namespace gammalib {
+    const std::string extname_lat_ltcubemap = "EXPOSURE";
+}
 
 /* __ Typedefs ___________________________________________________________ */
 typedef double (*_ltcube_ctheta)(const double& costheta);
@@ -72,7 +80,8 @@ public:
     GLATLtCubeMap* clone(void) const;
     std::string    classname(void) const;
     void           read(const GFitsTable& table);
-    void           write(GFits& file) const;
+    void           write(GFits& fits,
+                         const std::string& extname = gammalib::extname_lat_ltcubemap) const;
     const int&     ncostheta(void) const;
     const int&     nphi(void) const;
     bool           has_phi(void) const;
@@ -87,7 +96,7 @@ private:
     void init_members(void);
     void copy_members(const GLATLtCubeMap& cube);
     void free_members(void);
-    
+
     // Protected members
     GSkyMap m_map;          //!< Lifetime cube map
     int     m_num_ctheta;   //!< Number of bins in cos theta

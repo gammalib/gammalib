@@ -51,6 +51,7 @@ class GLATObservation : public GObservation {
 public:
     // Constructors and destructors
     GLATObservation(void);
+    explicit GLATObservation(const GXmlElement& xml);
     GLATObservation(const GLATObservation& obs);
     virtual ~GLATObservation(void);
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATLtCubeMap.cpp - Fermi LAT livetime cube map class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,10 +28,13 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATLtCubeMap.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GEnergy.hpp"
+#include "GFitsBinTable.hpp"
+#include "GLATAeff.hpp"
+#include "GLATPsf.hpp"
+#include "GLATLtCubeMap.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COSTHETA                            "GLATLtCubeMap::costheta(int&)"
@@ -378,7 +381,7 @@ void GLATLtCubeMap::read(const GFitsTable& table)
     // Clear object
     clear();
 
-    // Load skymap
+    // Read skymap
     m_map.read(table);
 
     // Set costheta binning scheme
@@ -397,14 +400,32 @@ void GLATLtCubeMap::read(const GFitsTable& table)
 
 
 /***********************************************************************//**
- * @brief Save livetime cube map into FITS file
+ * @brief Write livetime cube map into FITS file
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
+ * @param[in] extname Livetime cube map extension name.
  *
- * @todo Not yet implemented.
+ * Writes livetime cube map into a FITS file.
  ***************************************************************************/
-void GLATLtCubeMap::write(GFits& file) const
+void GLATLtCubeMap::write(GFits& fits, const std::string& extname) const
 {
+    // If the FITS file contains already an extension with the same name
+    // then remove this extension now
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
+
+    // Write sky map info FITS file
+    GFitsHDU* hdu = m_map.write(fits, extname);
+
+    // If HDU is valid then set sky map keywords
+    if (hdu != NULL) {
+        hdu->card("THETABIN", costhetabin(), "Costheta binning scheme");
+        hdu->card("NBRBINS",  m_num_ctheta, "Number of costheta bins");
+        hdu->card("PHIBINS",  m_num_phi, "Number of phi bins");
+        hdu->card("COSMIN",   m_min_ctheta, "Minimum costheta value");
+    }
+
     // Return
     return;
 }
@@ -432,14 +453,16 @@ double GLATLtCubeMap::costheta(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_num_ctheta)
+    if (index < 0 || index >= m_num_ctheta) {
         throw GException::out_of_range(G_COSTHETA, index, 0, m_num_ctheta-1);
+    }
     #endif
 
     // Set cos theta scale
     double f = (index+0.5)/m_num_ctheta;
-    if (m_sqrt_bin)
+    if (m_sqrt_bin) {
         f = f*f;
+    }
 
     // Set cos theta value
     double costheta = 1.0 - f * (1.0 - m_min_ctheta); 
@@ -467,8 +490,9 @@ double GLATLtCubeMap::phi(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_num_phi)
+    if (index < 0 || index >= m_num_phi) {
         throw GException::out_of_range(G_PHI, index, 0, m_num_phi-1);
+    }
     #endif
 
     // Set phi value

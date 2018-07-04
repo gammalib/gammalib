@@ -1,7 +1,7 @@
 #############################################################################
-# Makefile.am for com module                                                #
+# Makefile.am for mwl module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -52,6 +52,11 @@ pkginclude_HEADERS = include/GMWLException.hpp \
 noinst_LTLIBRARIES = libmwl.la
 libmwl_la_SOURCES = $(sources)
 libmwl_la_LDFLAGS =
+
+# Test data to distribute
+testdatamwl       = test/data/crab_mwl.fits
+testdatamwldir    = $(pyexecdir)/gammalib/tests/mwl/data
+testdatamwl_DATA  = $(testdatamwl)
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md pyext \

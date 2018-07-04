@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATRoi.i - Fermi/LAT region of interest class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,4 +63,11 @@ public:
     GLATRoi copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.centre(), self.radius())
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0], state[1])
+}
 };

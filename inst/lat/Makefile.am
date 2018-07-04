@@ -243,11 +243,6 @@ caldb_psf   = caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_front.fits.gz \
               caldb/data/glast/lat/bcf/psf/psf_P8R2_ULTRACLEAN_V6_FB.fits.gz \
               caldb/data/glast/lat/bcf/psf/psf_P8R2_ULTRACLEAN_V6_PSF.fits.gz
 
-# Build libtool library
-noinst_LTLIBRARIES = liblat.la
-liblat_la_SOURCES = $(sources)
-liblat_la_LDFLAGS =
-
 # Distribute calibration database files
 caldbindxdir    = $(datadir)/caldb/data/glast/lat
 caldbindx_DATA  = $(caldb_indx)
@@ -259,6 +254,67 @@ caldbedispdir   = $(datadir)/caldb/data/glast/lat/bcf/edisp
 caldbedisp_DATA = $(caldb_edisp)
 caldbpsfdir     = $(datadir)/caldb/data/glast/lat/bcf/psf
 caldbpsf_DATA   = $(caldb_psf)
+
+# Test data to distribute
+testdatalat       = test/data/p8v2/binned_expmap.fits.gz \
+                    test/data/p8v2/cntmap.fits.gz \
+                    test/data/p8v2/ft1.fits.gz \
+                    test/data/p8v2/ft2.fits.gz \
+                    test/data/p8v2/iso_P8R2_SOURCE_V6_v06.txt \
+                    test/data/p8v2/ltcube.fits.gz \
+                    test/data/p8v2/modmap.fits.gz \
+                    test/data/p8v2/obs_binned.xml \
+                    test/data/p8v2/obs_unbinned.xml \
+                    test/data/p8v2/source_model.xml \
+                    test/data/p8v2/srcmap.fits.gz
+testdatalatdir    = $(pyexecdir)/gammalib/tests/lat/data/p8v2
+testdatalat_DATA  = $(testdatalat)
+testcaldblat      = test/caldb/data/glast/lat/caldb.indx.gz
+testcaldblatdir   = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat
+testcaldblat_DATA = $(testcaldblat)
+testbcflat        = test/caldb/data/glast/lat/bcf/irf_index.fits.gz \
+                    test/caldb/data/glast/lat/bcf/valid_evclass_selections.txt	\
+                    test/caldb/data/glast/lat/bcf/valid_evtype_selections.txt
+testbcflatdir     = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf
+testbcflat_DATA   = $(testbcflat)
+testealat         = test/caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P7SOURCE_V6_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P7SOURCE_V6_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P7REP_SOURCE_V15_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P7REP_SOURCE_V15_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_EDISP.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_FB.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_PSF.fits.gz
+testealatdir      = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf/ea
+testealat_DATA    = $(testealat)
+testedisplat      = test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_EDISP.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_FB.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_PSF.fits.gz
+testedisplatdir   = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf/edisp
+testedisplat_DATA = $(testedisplat)
+testpsflat        = test/caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P7SOURCE_V6_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P7SOURCE_V6_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P7REP_SOURCE_V15_back.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P7REP_SOURCE_V15_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_EDISP.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_FB.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_PSF.fits.gz
+testpsflatdir     = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf/psf
+testpsflat_DATA   = $(testpsflat)
+
+# Build libtool library
+noinst_LTLIBRARIES = liblat.la
+liblat_la_SOURCES = $(sources)
+liblat_la_LDFLAGS =
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md caldb pyext \

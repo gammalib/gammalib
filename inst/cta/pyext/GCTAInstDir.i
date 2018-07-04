@@ -69,8 +69,8 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = self.dir(), self.detx(), self.dety()
-        return args
+        state = self.dir(), self.detx(), self.dety()
+        return state
     def __setstate__(self, state):
         self.__init__()
         self.dir(state[0])

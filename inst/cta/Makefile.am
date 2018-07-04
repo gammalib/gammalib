@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for cta module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -135,6 +135,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
                      include/GCTALib.hpp
 
+
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
 libcta_la_SOURCES = $(sources)
@@ -156,6 +157,28 @@ caldb_prod2_south2dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_5h
 caldb_prod2_south2_DATA  = caldb/data/cta/prod2/bcf/South_5h/irf_file.fits.gz
 caldb_prod2_south3dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_50h
 caldb_prod2_south3_DATA  = caldb/data/cta/prod2/bcf/South_50h/irf_file.fits.gz
+
+# Test data to distribute
+testdatacta       = test/data/irf_1dc.xml \
+                    test/data/irf_unbinned.xml \
+                    test/data/crab_irf.xml \
+                    test/data/onoff_model.xml \
+                    test/data/crab_events.fits.gz \
+                    test/data/crab_cntmap.fits.gz
+testdatactadir    = $(pyexecdir)/gammalib/tests/cta/data
+testdatacta_DATA  = $(testdatacta)
+testcaldbcta      = test/caldb/cta_dummy_irf.dat \
+                    test/caldb/prod1_gauss.fits.gz \
+                    test/caldb/prod1_king.fits.gz
+testcaldbctadir   = $(pyexecdir)/gammalib/tests/cta/caldb
+testcaldbcta_DATA = $(testcaldbcta)
+testdc1cta        = test/caldb/dc1/arf.fits.gz \
+                    test/caldb/dc1/psf.fits.gz \
+                    test/caldb/dc1/psf_magic.fits.gz \
+                    test/caldb/dc1/rmf.fits.gz
+testdc1ctadir     = $(pyexecdir)/gammalib/tests/cta/caldb/dc1
+testdc1cta_DATA   = $(testdc1cta)
+
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md caldb pyext \

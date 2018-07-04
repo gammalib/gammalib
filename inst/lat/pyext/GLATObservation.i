@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATObservation.i - Fermi/LAT observation class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@ class GLATObservation : public GObservation {
 public:
     // Constructors and destructors
     GLATObservation();
+    explicit GLATObservation(const GXmlElement& xml);
     GLATObservation(const GLATObservation& obs);
     virtual ~GLATObservation();
 
@@ -73,4 +74,17 @@ public:
     GLATObservation copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        if self.has_events():
+            self.write(xml)
+        state = (xml,)
+        return state
+    def __setstate__(self, state):
+        if state[0].elements() == 0:
+            self.__init__()
+        else:
+            self.__init__(state[0])
+}
 };
