@@ -174,7 +174,10 @@ def test(installed=False):
 
         # Copy over test data
         os.system('cp -r %s %s' % (head+'/data', 'data'))
+        os.system('cp -r %s %s' % (head+'/com',  'com'))
         os.system('cp -r %s %s' % (head+'/cta',  'cta'))
+        os.system('cp -r %s %s' % (head+'/lat',  'lat'))
+        os.system('cp -r %s %s' % (head+'/mwl',  'mwl'))
 
         # Special post processing for CTA files. This is needed because
         # the XML files contain absolute PATH information. This is a kluge
