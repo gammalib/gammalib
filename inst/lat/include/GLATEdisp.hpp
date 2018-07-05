@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.hpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,7 +76,7 @@ public:
                             const std::string& evtype);
     void               save(const GFilename& filename,
                             const bool&      clobber = false);
-    void               read(const GFits& file);
+    void               read(const GFits& file, const std::string& evtype);
     void               write(GFits& file) const;
     int                size(void) const;
     int                nenergies(void) const;

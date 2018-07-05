@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATPsf.cpp - Fermi LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -230,14 +230,11 @@ GLATPsf* GLATPsf::clone(void) const
  ***************************************************************************/
 void GLATPsf::load(const GFilename& filename, const std::string& evtype)
 {
-    // Store event type
-    m_evtype = evtype;
-
     // Open FITS file
     GFits fits(filename);
 
     // Read point spread function from file
-    read(fits);
+    read(fits, evtype);
 
     // Return
     return;
@@ -272,6 +269,7 @@ void GLATPsf::save(const GFilename& filename, const bool& clobber)
  * @brief Read point spread function from FITS file
  *
  * @param[in] fits FITS file.
+ * @param[in] evtype Event type.
  *
  * @exception GException::invalid_response
  *            Invalid response type or unsupported response version found.
@@ -283,11 +281,12 @@ void GLATPsf::save(const GFilename& filename, const bool& clobber)
  *
  * @todo Implement PSF version 2.
  ***************************************************************************/
-void GLATPsf::read(const GFits& fits)
+void GLATPsf::read(const GFits& fits, const std::string& evtype)
 {
-    // Clear instance (keep event type)
-    std::string evtype = m_evtype;
+    // Clear instance
     clear();
+
+    // Store event type
     m_evtype = evtype;
 
     // Set extension names

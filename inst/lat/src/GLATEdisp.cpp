@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEdisp.cpp - Fermi LAT energy dispersion               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -198,14 +198,11 @@ GLATEdisp* GLATEdisp::clone(void) const
  ***************************************************************************/
 void GLATEdisp::load(const GFilename& filename, const std::string& evtype)
 {
-    // Store event type
-    m_evtype = evtype;
-
     // Open FITS file
     GFits fits(filename);
 
     // Read energy dispersion from file
-    read(fits);
+    read(fits, evtype);
 
     // Return
     return;
@@ -238,14 +235,16 @@ void GLATEdisp::save(const GFilename& filename, const bool& clobber)
  * @brief Read energy dispersion from FITS file
  *
  * @param[in] fits FITS file.
+ * @param[in] evtype Event type.
  *
  * @todo Implement reading of scaling parameters
  ***************************************************************************/
-void GLATEdisp::read(const GFits& fits)
+void GLATEdisp::read(const GFits& fits, const std::string& evtype)
 {
-    // Clear instance (keep event type)
-    std::string evtype = m_evtype;
+    // Clear instance
     clear();
+
+    // Store event type
     m_evtype = evtype;
 
     // Set extension names
@@ -260,7 +259,7 @@ void GLATEdisp::read(const GFits& fits)
 
     // Get pointer to effective area HDU
     const GFitsTable& hdu_edisp = *fits.table(engdisp);
-    const GFitsTable& hdu_scale = *fits.table(escales);
+    //const GFitsTable& hdu_scale = *fits.table(escales);
 
     // Read energy dispersion
     read_edisp(hdu_edisp);
@@ -288,7 +287,7 @@ void GLATEdisp::write(GFits& fits) const
 /***********************************************************************//**
  * @brief Print energy dispersion information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing energy dispersion information.
  ***************************************************************************/
 std::string GLATEdisp::print(const GChatter& chatter) const
@@ -432,15 +431,16 @@ void GLATEdisp::write_edisp(GFits& file) const
     int size = m_edisp_bins.size();
     if (size > 0) {
 
-        // Create new binary table
-        GFitsBinTable* hdu_edisp = new GFitsBinTable;
+        // Allocate new binary table
+        GFitsBinTable hdu_edisp;
 
         // Set table attributes
-        hdu_edisp->extname(gammalib::extname_lat_edisp);
+        hdu_edisp.extname(gammalib::extname_lat_edisp);
 
         // Write boundaries into table
-        m_edisp_bins.write(*hdu_edisp);
+        m_edisp_bins.write(hdu_edisp);
 
+/*
         // Allocate floating point vector columns
         GFitsTableFloatCol col_norm = GFitsTableFloatCol("NORM",  1, size);
         GFitsTableFloatCol col_ls1  = GFitsTableFloatCol("LS1",   1, size);
@@ -452,14 +452,11 @@ void GLATEdisp::write_edisp(GFits& file) const
         }
 
         // Append columns to table
-        hdu_edisp->append(col_norm);
-        hdu_edisp->append(col_ls1);
-
+        hdu_edisp.append(col_norm);
+        hdu_edisp.append(col_ls1);
+*/
         // Append HDU to FITS file
-        file.append(*hdu_edisp);
-
-        // Free table
-        delete hdu_edisp;
+        file.append(hdu_edisp);
 
     } // endif: there were data to write
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GLATEfficiency.hpp - Fermi/LAT IRF efficiency factor functor      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,10 +52,11 @@ public:
     double          operator()(const double& logE) const;
 
     // Methods
-    void            clear(void);
-    GLATEfficiency* clone(void) const;
-    std::string     classname(void) const;
-    std::string     print(const GChatter& chatter = NORMAL) const;
+    void                clear(void);
+    GLATEfficiency*     clone(void) const;
+    std::string         classname(void) const;
+    std::vector<double> pars(void) const;
+    std::string         print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

@@ -101,8 +101,8 @@ class Test(gammalib.GPythonTestSuite):
         test_support._pickeling(self, gammalib.GLATEdisp())
         #test_support._pickeling(self, gammalib.GLATEventAtom())
         #test_support._pickeling(self, gammalib.GLATEventBin())
-        #test_support._pickeling(self, gammalib.GLATEventCube())
-        #test_support._pickeling(self, gammalib.GLATEventList())
+        test_support._pickeling(self, gammalib.GLATEventCube())
+        test_support._pickeling(self, gammalib.GLATEventList())
         test_support._pickeling(self, gammalib.GLATInstDir())
         test_support._pickeling(self, gammalib.GLATLtCube())
         test_support._pickeling(self, gammalib.GLATObservation())
@@ -111,25 +111,30 @@ class Test(gammalib.GPythonTestSuite):
         test_support._pickeling(self, gammalib.GLATRoi())
 
         # Setup test
-        datadir  = os.environ['TEST_LAT_DATA'] + '/p8v2'
-        ltcube   = datadir + '/ltcube.fits'
-        unbinned = gammalib.GObservations(datadir + '/obs_unbinned.xml')
-        binned   = gammalib.GObservations(datadir + '/obs_binned.xml')
-        dir      = gammalib.GSkyDir()
-        instdir  = gammalib.GLATInstDir(dir)
+        datadir   = os.environ['TEST_LAT_DATA'] + '/p8v2'
+        ltcube    = datadir + '/ltcube.fits'
+        eventlist = datadir + '/ft1.fits'
+        eventcube = datadir + '/cntmap.fits'
+        unbinned  = gammalib.GObservations(datadir + '/obs_unbinned.xml')
+        binned    = gammalib.GObservations(datadir + '/obs_binned.xml')
+        dir       = gammalib.GSkyDir()
+        instdir   = gammalib.GLATInstDir(dir)
+        aeff      = os.environ['CALDB']+'/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_FB.fits'
+        edisp     = os.environ['CALDB']+'/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_FB.fits'
+        psf       = os.environ['CALDB']+'/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_FB.fits'
 
         # Perform pickeling tests of filled classes
-        #test_support._pickeling(self, gammalib.GLATAeff())   # No test data
-        #test_support._pickeling(self, gammalib.GLATEdisp())  # No test data
+        test_support._pickeling(self, gammalib.GLATAeff(aeff,'FRONT'))
+        test_support._pickeling(self, gammalib.GLATEdisp(edisp,'FRONT'))
         #test_support._pickeling(self, gammalib.GLATEventAtom())
         #test_support._pickeling(self, gammalib.GLATEventBin())
-        #test_support._pickeling(self, gammalib.GLATEventCube())
-        #test_support._pickeling(self, gammalib.GLATEventList())
+        test_support._pickeling(self, gammalib.GLATEventCube(eventcube))
+        test_support._pickeling(self, gammalib.GLATEventList(eventlist))
         test_support._pickeling(self, gammalib.GLATInstDir(dir))
         test_support._pickeling(self, gammalib.GLATLtCube(ltcube))
         test_support._pickeling(self, gammalib.GLATObservation(unbinned[0]))
         test_support._pickeling(self, gammalib.GLATObservation(binned[0]))
-        #test_support._pickeling(self, gammalib.GLATPsf())    # No test data
+        test_support._pickeling(self, gammalib.GLATPsf(psf,'FRONT'))
         #test_support._pickeling(self, gammalib.GLATResponse())
         test_support._pickeling(self, gammalib.GLATRoi(instdir, 2.0))
 

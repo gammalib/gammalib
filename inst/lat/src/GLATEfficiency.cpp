@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GLATEfficiency.cpp - Fermi-LAT IRF efficiency factor functor       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -214,9 +214,34 @@ GLATEfficiency* GLATEfficiency::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return efficiency parameters
+ *
+ * @return Vector of efficiency parameters.
+ *
+ * Returns a vector with 6 elements containing the efficiency parameters.
+ ***************************************************************************/
+std::vector<double> GLATEfficiency::pars(void) const
+{
+    // Initialise vector
+    std::vector<double> pars(6);
+    
+    // Set vector
+    pars[0] = m_a0;
+    pars[1] = m_b0;
+    pars[2] = m_a1;
+    pars[3] = m_logEb1;
+    pars[4] = m_a2;
+    pars[5] = m_logEb2;
+
+    // Return vector
+    return pars;
+}
+
+
+/***********************************************************************//**
  * @brief Print efficiency factors
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing efficiency factors information.
  ***************************************************************************/
 std::string GLATEfficiency::print(const GChatter& chatter) const
