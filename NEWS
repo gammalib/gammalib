@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-4 July 2018
+5 July 2018
 
 
 1. Introduction
@@ -107,6 +107,7 @@ The following methods have been added:
 - GLATObservation(GXmlElement&)
 - GLATLtCube::read(GFits&)
 - GLATLtCube::write(GFits&)
+- GLATEfficiency::pars()
 - GMWLDatum(GEnergy&, GEnergy&, double&, double&)
 - GMWLDatum::energy(GEnergy&)
 - GMWLDatum::energy_err(GEnergy&)
@@ -119,6 +120,9 @@ The following methods have been renamed:
 
 The arguments for the following methods have been changed:
 - GCTAOnOffObservation(GCTAObservation&, GModelSpatial&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&)
+- GLATAeff(GFits&, std::string&)
+- GLATEdisp(GFits&, std::string&)
+- GLATPsf(GFits&, std::string&)
 
 The return value of the following methods has been changed:
 - none

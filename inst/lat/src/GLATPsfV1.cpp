@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GLATPsfV1.cpp - Fermi/LAT point spread function version 1 class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -291,6 +291,13 @@ void GLATPsfV1::write(GFits& file) const
         hdu_rpsf->append(col_sigma);
         hdu_rpsf->append(col_gcore);
         hdu_rpsf->append(col_gtail);
+
+        // Set detector section
+        std::string detnam = (front()) ? "FRONT" : "BACK";
+
+        // Set header keywords
+        hdu_rpsf->card("PSFVER", 1, "File format version");
+        hdu_rpsf->card("DETNAM", detnam, "Detector section");
 
         // Append HDU to FITS file
         file.append(*hdu_rpsf);

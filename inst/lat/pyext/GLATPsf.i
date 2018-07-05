@@ -56,7 +56,7 @@ public:
                             const std::string& evtype);
     void               save(const GFilename& filename,
                             const bool&      clobber = false);
-    void               read(const GFits& file);
+    void               read(const GFits& file, const std::string& evtype);
     void               write(GFits& file) const;
     int                size(void) const;
     int                nenergies(void) const;
@@ -79,11 +79,11 @@ public:
     def __getstate__(self):
         fits = gammalib.GFits()
         self.write(fits)
-        state = (fits,)
+        state = (fits, self.evtype())
         return state
     def __setstate__(self, state):
         self.__init__()
         if state[0].size() > 0:
-            self.read(state[0])
+            self.read(state[0], state[1])
 }
 };

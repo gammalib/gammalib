@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventCube.i - Fermi/LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,4 +84,15 @@ public:
     GLATEventCube copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits, self.npix())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        if state[1] > 0:
+            self.read(state[0])
+}
 };

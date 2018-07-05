@@ -80,7 +80,7 @@ public:
                             const std::string& evtype);
     void               save(const GFilename& filename,
                             const bool&      clobber = false);
-    void               read(const GFits& file);
+    void               read(const GFits& file, const std::string& evtype);
     void               write(GFits& file) const;
     int                size(void) const;
     int                nenergies(void) const;

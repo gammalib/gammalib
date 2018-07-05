@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATAeff.cpp - Fermi LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -263,14 +263,11 @@ GLATAeff* GLATAeff::clone(void) const
  ***************************************************************************/
 void GLATAeff::load(const GFilename& filename, const std::string& evtype)
 {
-    // Store event type
-    m_evtype = evtype;
-
     // Open FITS file
     GFits fits(filename);
 
     // Read effective area from file
-    read(fits);
+    read(fits, evtype);
 
     // Return
     return;
@@ -307,6 +304,7 @@ void GLATAeff::save(const GFilename& filename, const bool& clobber)
  * @brief Read effective area from FITS file
  *
  * @param[in] fits FITS file.
+ * @param[in] evtype Event type.
  *
  * Reads the effective area and efficiency parameter information form the
  * FITS file. The effective area is read from the extension `EFFECTIVE AREA`
@@ -317,11 +315,12 @@ void GLATAeff::save(const GFilename& filename, const bool& clobber)
  *
  * @todo Implement reading of Phi-dependence information.
  ***************************************************************************/
-void GLATAeff::read(const GFits& fits)
+void GLATAeff::read(const GFits& fits, const std::string& evtype)
 {
-    // Clear instance (keep event type)
-    std::string evtype = m_evtype;
+    // Clear instance
     clear();
+
+    // Store event type
     m_evtype = evtype;
 
     // Set extension names
@@ -451,7 +450,7 @@ double GLATAeff::efficiency_factor2(const GEnergy& srcEng) const
 /***********************************************************************//**
  * @brief Print effective area information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing effective area information.
  ***************************************************************************/
 std::string GLATAeff::print(const GChatter& chatter) const
@@ -594,12 +593,54 @@ void GLATAeff::read_aeff(const GFitsTable& hdu)
 
     } // endif: there were effective area bins
 
-    // Set detector section using the DETNAM keyword in the HDU
-    /*
-    std::string detnam = gammalib::strip_whitespace(hdu.string("DETNAM"));
-    m_front            = (detnam == "FRONT");
-    m_back             = (detnam == "BACK");
-    */
+    // Set event type using the DETNAM keyword in the HDU
+    m_evtype = gammalib::strip_whitespace(hdu.string("DETNAM"));
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write effective area into FITS file
+ *
+ * @param[in] file FITS file.
+ *
+ * This method does not write anything if the instance is empty.
+ ***************************************************************************/
+void GLATAeff::write_aeff(GFits& file) const
+{
+    // Continue only if there are bins
+    int size = m_aeff_bins.size();
+    if (size > 0) {
+
+        // Create new binary table
+        GFitsBinTable aeff;
+
+        // Set table attributes
+        aeff.extname(gammalib::extname_lat_aeff);
+
+        // Write boundaries into table
+        m_aeff_bins.write(aeff);
+
+        // Allocate floating point vector columns
+        GFitsTableFloatCol col_aeff = GFitsTableFloatCol("EFFAREA",  1, size);
+
+        // Fill columns, converting from cm2 into m2
+        for (int i = 0; i < size; ++i) {
+            col_aeff(0,i) = m_aeff[i] * 1.0e-4;
+        }
+
+        // Append columns to table
+        aeff.append(col_aeff);
+
+        // Set event type using the DETNAM keyword in the HDU
+        aeff.card("DETNAM", m_evtype, "Event type");
+
+        // Append HDU to FITS file
+        file.append(aeff);
+
+    } // endif: there were data to write
 
     // Return
     return;
@@ -686,60 +727,47 @@ void GLATAeff::read_efficiency(const GFitsTable& hdu)
 
 
 /***********************************************************************//**
- * @brief Write effective area into FITS file
- *
- * @param[in] file FITS file.
- *
- * This method does not write anything if the instance is empty.
- ***************************************************************************/
-void GLATAeff::write_aeff(GFits& file) const
-{
-    // Continue only if there are bins
-    int size = m_aeff_bins.size();
-    if (size > 0) {
-
-        // Create new binary table
-        GFitsBinTable* hdu_aeff = new GFitsBinTable;
-
-        // Set table attributes
-        hdu_aeff->extname(gammalib::extname_lat_aeff);
-
-        // Write boundaries into table
-        m_aeff_bins.write(*hdu_aeff);
-
-        // Allocate floating point vector columns
-        GFitsTableFloatCol col_aeff = GFitsTableFloatCol("EFFAREA",  1, size);
-
-        // Fill columns
-        for (int i = 0; i < size; ++i) {
-            col_aeff(0,i) = m_aeff[i];
-        }
-
-        // Append columns to table
-        hdu_aeff->append(col_aeff);
-
-        // Append HDU to FITS file
-        file.append(*hdu_aeff);
-
-        // Free binary table
-        delete hdu_aeff;
-
-    } // endif: there were data to write
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Write efficiency factors into FITS file
  *
  * @param[in] file FITS file.
  *
- * @todo To be implemented.
+ * Writes efficiency factors into FITS file. The Pass 8 response format is
+ * used for writing the factors.
  ***************************************************************************/
 void GLATAeff::write_efficiency(GFits& file) const
 {
+    // Continue only if there are efficiency factors
+    if (has_efficiency()) {
+
+        // Create binary table
+        GFitsBinTable efficiency;
+
+        // Set table attributes
+        efficiency.extname(gammalib::extname_lat_efficiency);
+
+        // Allocate floating point vector columns
+        GFitsTableFloatCol col_eff = GFitsTableFloatCol("EFFICIENCY_PARS", 2, 6);
+
+        // Get efficiency parameters
+        std::vector<double> par1 = m_eff_func1->pars();
+        std::vector<double> par2 = m_eff_func2->pars();
+
+        // Fill columns (Pass 8 response format)
+        for (int i = 0; i < par1.size(); ++i) {
+            col_eff(0,i) = par1[i];
+        }
+        for (int i = 0; i < par2.size(); ++i) {
+            col_eff(1,i) = par2[i];
+        }
+
+        // Append columns to table
+        efficiency.append(col_eff);
+
+        // Append HDU to FITS file
+        file.append(efficiency);
+
+    } // endif: there were efficiency factors
+
     // Return
     return;
 }

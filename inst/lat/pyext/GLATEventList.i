@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventList.i - Fermi/LAT event list class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATEventList.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -128,4 +127,15 @@ public:
     GLATEventList copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        fits = gammalib.GFits()
+        self.write(fits)
+        state = (fits,)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        if state[0].size() > 0:
+            self.read(state[0])
+}
 };
