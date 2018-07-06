@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GOptimizerLM.i - Levenberg Marquardt optimizer class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GOptimizerLM.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -85,4 +84,21 @@ public:
     const double& lambda_value(void) {
         return (self->lambda());
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (self.max_iter(), self.max_stalls(), self.max_boundary_hits(),
+                 self.lambda_start(), self.lambda_inc(), self.lambda_dec(),
+                 self.eps(), self.accept_dec())
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.max_iter(state[0])
+        self.max_stalls(state[1])
+        self.max_boundary_hits(state[2])
+        self.lambda_start(state[3])
+        self.lambda_inc(state[4])
+        self.lambda_dec(state[5])
+        self.eps(state[6])
+        self.accept_dec(state[7])
+}
 };

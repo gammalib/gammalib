@@ -683,7 +683,7 @@ bool GOptimizerPars::contains(const std::string& name) const
 /***********************************************************************//**
  * @brief Print parameters
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing parameter container information.
  *
  * Prints all parameters into a string.
@@ -705,7 +705,6 @@ std::string GOptimizerPars::print(const GChatter& chatter) const
 
         // Append parameters
         for (int i = 0; i < size(); ++i) {
-std::cout << i << " " << m_pars[i] << std::endl;
             result.append("\n"+m_pars[i]->print(chatter));
         }
 

@@ -101,30 +101,30 @@ protected:
     double step_size(const GVector& grad, const GOptimizerPars& pars);
 
     // Protected members
-    int               m_npars;           //!< Number of parameters
-    int               m_nfree;           //!< Number of free parameters
-    double            m_lambda_start;    //!< Initial start value
-    double            m_lambda_inc;      //!< Lambda increase
-    double            m_lambda_dec;      //!< Lambda decrease
-    double            m_eps;             //!< Absolute precision
-    double            m_accept_dec;      //!< Acceptable function decrease
-    int               m_max_iter;        //!< Maximum number of iterations
-    int               m_max_stall;       //!< Maximum number of stalls
-    int               m_max_hit;         //!< Maximum number of successive hits
-    int               m_max_dec;         //!< Maximum number of function decrease
-    bool              m_step_adjust;     //!< Adjust step size to boundaries
-    std::vector<bool> m_hit_boundary;    //!< Bookkeeping array for boundary hits
-    std::vector<int>  m_hit_minimum;     //!< Bookkeeping of successive minimum hits
-    std::vector<int>  m_hit_maximum;     //!< Bookkeeping of successive maximum hits
-    std::vector<bool> m_par_freeze;      //!< Bookkeeping of parameter freeze
-    std::vector<bool> m_par_remove;      //!< Bookkeeping of parameter removal
-    double            m_lambda;          //!< Actual lambda
-    double            m_value;           //!< Actual function value
-    double            m_delta;           //!< Function improvement
-    int               m_status;          //!< Fit status
-    int               m_iter;            //!< Iteration
-    int               m_num_dec;         //!< Number of function decreases
-    GLog*             m_logger;          //!< Pointer to optional logger
+    int               m_npars;        //!< Number of parameters
+    int               m_nfree;        //!< Number of free parameters
+    double            m_lambda_start; //!< Initial start value
+    double            m_lambda_inc;   //!< Lambda increase
+    double            m_lambda_dec;   //!< Lambda decrease
+    double            m_eps;          //!< Absolute precision
+    double            m_accept_dec;   //!< Acceptable function decrease
+    int               m_max_iter;     //!< Maximum number of iterations
+    int               m_max_stall;    //!< Maximum number of stalls
+    int               m_max_hit;      //!< Maximum number of successive hits
+    int               m_max_dec;      //!< Maximum number of function decrease
+    bool              m_step_adjust;  //!< Adjust step size to boundaries
+    std::vector<bool> m_hit_boundary; //!< Bookkeeping array for boundary hits
+    std::vector<int>  m_hit_minimum;  //!< Bookkeeping of successive minimum hits
+    std::vector<int>  m_hit_maximum;  //!< Bookkeeping of successive maximum hits
+    std::vector<bool> m_par_freeze;   //!< Bookkeeping of parameter freeze
+    std::vector<bool> m_par_remove;   //!< Bookkeeping of parameter removal
+    double            m_lambda;       //!< Actual lambda
+    double            m_value;        //!< Actual function value
+    double            m_delta;        //!< Function improvement
+    int               m_status;       //!< Fit status
+    int               m_iter;         //!< Iteration
+    int               m_num_dec;      //!< Number of function decreases
+    GLog*             m_logger;       //!< Pointer to optional logger
 
 };
 
