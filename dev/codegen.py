@@ -297,18 +297,21 @@ def add_instrument_class(name, tokens, classname, tmpname=None):
             line = line.replace(line, line+insertline)
         print line,
 
-    # Update module Makefile.am
-    filename    = 'inst/%s/Makefile.am' % (name)
-    insertline1 = '          src/%s.cpp ' % (classname)
-    insertline2 = '                     include/%s.hpp ' % (classname)
-    for line in fileinput.FileInput(filename,inplace=1):
-        if 'sources=' in line.replace(' ', ''):
-            last = line[-2]
-            line = line.replace(line, line+insertline1+last+'\n')
-        if 'pkginclude_HEADERS=' in line.replace(' ', ''):
-            last = line[-2]
-            line = line.replace(line, line+insertline2+last+'\n')
-        print line,
+    # Update module Makefile.am (excluding GXXXObservation and GXXXResponse)
+    test_obs = 'G'+name.upper()+'Observation'
+    test_rsp = 'G'+name.upper()+'Response'
+    if classname != test_obs and classname != test_rsp:
+        filename    = 'inst/%s/Makefile.am' % (name)
+        insertline1 = '          src/%s.cpp ' % (classname)
+        insertline2 = '                     include/%s.hpp ' % (classname)
+        for line in fileinput.FileInput(filename,inplace=1):
+            if 'sources=' in line.replace(' ', ''):
+                last = line[-2]
+                line = line.replace(line, line+insertline1+last+'\n')
+            if 'pkginclude_HEADERS=' in line.replace(' ', ''):
+                last = line[-2]
+                line = line.replace(line, line+insertline2+last+'\n')
+            print line,
 
     # Update Python module
     filename = 'inst/%s/pyext/%s.i' % (name, name)
@@ -329,6 +332,18 @@ def adjust_config(name):
     name : str
         Module name
     """
+    # Adjust src/Makefile.am
+    config = 'if WITH_INST_%s\n' \
+             '  INST_%s = $(top_builddir)/inst/%s/lib%s.la\n' \
+             'endif\n' % (name.upper(), name.upper(), name, name)
+    build  = '                     $(INST_%s) \\' % (name.upper())
+    for line in fileinput.FileInput('src/Makefile.am',inplace=1):
+        if '# Optional instrument specific libraries' in line:
+            line = line.replace(line, line+config)
+        elif '$(INST_MWL)' in line:
+            print(build)
+        print line,
+
     # Adjust inst/Makefile.am
     config = 'if WITH_INST_%s\nINST_%s = %s\nendif\n' % (name.upper(), name.upper(), name)
     for line in fileinput.FileInput('inst/Makefile.am',inplace=1):
@@ -569,7 +584,7 @@ def module_menu():
             if baseclass in baseclasses:
                 baseclasses.remove(baseclass)
 
-        # If all baseclasses are already there then exist now
+        # If all baseclasses are already there then exit now
         if len(baseclasses) == 0:
             print('\nAll right. The module exists already and all base classes '
                   'are already implemented. Return now to main menu.')

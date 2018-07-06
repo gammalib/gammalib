@@ -46,13 +46,6 @@ noinst_LTLIBRARIES = libxxx.la
 libxxx_la_SOURCES = $(sources)
 libxxx_la_LDFLAGS =
 
-# Extra files to be distributed in the tar file
-#EXTRA_DIST = README.md caldb pyext \
-#             include/GXXXLib.hpp \
-#             test/test_XXX.hpp test/test_XXX.py test/data
-EXTRA_DIST = README.md caldb pyext \
-             include/GXXXLib.hpp
-
 # Calibration files to distribute
 # TODO: Follow the example below to distribution your calibration data
 #caldb_indx = caldb/data/cgro/comptel/caldb.indx
@@ -64,3 +57,11 @@ EXTRA_DIST = README.md caldb pyext \
 #caldbindx_DATA = $(caldb_indx)
 #caldbirfsdir   = $(datadir)/caldb/data/cgro/comptel/bcf
 #caldbirfs_DATA = $(caldb_irfs)
+
+# Test data to distribute
+# TODO: Add all test data to distribute
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = README.md caldb pyext \
+             include/GXXXLib.hpp \
+             test/test_XXX.hpp test/test_XXX.py test/data
