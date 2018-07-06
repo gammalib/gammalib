@@ -2,7 +2,7 @@
 # ==========================================================================
 # GammaLib code generator
 #
-# Copyright (C) 2017 Juergen Knoedlseder
+# Copyright (C) 2017-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -432,6 +432,13 @@ def adjust_python_config(name, instrument):
             print(rule)
         print line,
 
+    # Adjust pyext/gammalib/__init__.py.in
+    module = ('from gammalib.%s import *' % name)
+    for line in fileinput.FileInput('pyext/gammalib/__init__.py.in',inplace=1):
+        if '# Insert new module here' in line:
+            print(module)
+        print line,
+
     # Return
     return
 
@@ -479,13 +486,15 @@ def adjust_test_config(name, instrument):
             '    has_%s = False\n' % \
             (instrument, name.upper(), name, name)
     data  = '        os.environ[\'TEST_%s_DATA\'] = \'%s/data\'' % \
-             (name.upper(), name)
+            (name.upper(), name)
     suite = '    # Optionally handle %s suite\n' \
             '    if has_%s:\n' \
             '        suite_%s = test_%s.Test()\n' \
             '        suite_%s.set()\n' \
             '        suites.append(suite_%s)\n' % \
             (instrument, name, name, name.upper(), name, name)
+    cpy   = '        os.system(\'cp -r %%s %%s\' %% (head+\'/%s\',  \'%s\'))' % \
+            (name, name)
     for line in fileinput.FileInput('test/test_python.py',inplace=1):
         if '# Insert new test here' in line:
             print(test)
@@ -493,6 +502,8 @@ def adjust_test_config(name, instrument):
             print(data)
         if '# Insert new suite here' in line:
             print(suite)
+        if '# Copy over test data' in line:
+            print(cpy)
         print line,
 
     # Return
