@@ -269,14 +269,17 @@ testdatalat       = test/data/p8v2/binned_expmap.fits.gz \
                     test/data/p8v2/srcmap.fits.gz
 testdatalatdir    = $(pyexecdir)/gammalib/tests/lat/data/p8v2
 testdatalat_DATA  = $(testdatalat)
+#
 testcaldblat      = test/caldb/data/glast/lat/caldb.indx.gz
 testcaldblatdir   = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat
 testcaldblat_DATA = $(testcaldblat)
+#
 testbcflat        = test/caldb/data/glast/lat/bcf/irf_index.fits.gz \
                     test/caldb/data/glast/lat/bcf/valid_evclass_selections.txt	\
                     test/caldb/data/glast/lat/bcf/valid_evtype_selections.txt
 testbcflatdir     = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf
 testbcflat_DATA   = $(testbcflat)
+#
 testealat         = test/caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_front.fits.gz \
                     test/caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_back.fits.gz \
                     test/caldb/data/glast/lat/bcf/ea/aeff_P7SOURCE_V6_front.fits.gz \
@@ -288,6 +291,7 @@ testealat         = test/caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_front.fits.
                     test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_PSF.fits.gz
 testealatdir      = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf/ea
 testealat_DATA    = $(testealat)
+#
 testedisplat      = test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.fits.gz \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_back.fits.gz \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_front.fits.gz \
@@ -299,6 +303,7 @@ testedisplat      = test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.f
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_PSF.fits.gz
 testedisplatdir   = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf/edisp
 testedisplat_DATA = $(testedisplat)
+#
 testpsflat        = test/caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_front.fits.gz \
                     test/caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_back.fits.gz \
                     test/caldb/data/glast/lat/bcf/psf/psf_P7SOURCE_V6_front.fits.gz \
@@ -319,4 +324,4 @@ liblat_la_LDFLAGS =
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md caldb pyext \
              include/GLATLib.hpp \
-             test/test_LAT.hpp test/test_LAT.py test/data
+             test/test_LAT.hpp test/test_LAT.py test/caldb test/data

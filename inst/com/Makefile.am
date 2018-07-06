@@ -126,4 +126,4 @@ libcom_la_LDFLAGS =
 EXTRA_DIST = README.md caldb pyext \
              include/GCOMLib.hpp \
              src/GCOMSupport.hpp \
-             test/test_COM.hpp test/test_COM.py test/data
+             test/test_COM.hpp test/test_COM.py test/caldb test/data
