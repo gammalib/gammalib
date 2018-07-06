@@ -119,4 +119,14 @@ public:
     GTPLContainer copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = (tuple([x for x in self]),)
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.reserve(len(state[0]))
+        for x in state[0]:
+            self.append(x)
+}
 };

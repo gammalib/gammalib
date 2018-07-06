@@ -66,9 +66,6 @@ public:
  * @brief GXXXEventCube class extension
  ***************************************************************************/
 %extend GXXXEventCube {
-    GXXXEventCube copy() {
-        return (*self);
-    }
     GXXXEventBin* __getitem__(int index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
@@ -85,4 +82,14 @@ public:
             throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
     }
+    GXXXEventCube copy() {
+        return (*self);
+    }
+%pythoncode {
+    def __getstate__(self):
+        state = ()
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+}
 };

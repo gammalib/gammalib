@@ -60,4 +60,11 @@ public:
     GXXXRoi copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = ()
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+}
 };

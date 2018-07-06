@@ -18,6 +18,7 @@
 #
 # ==========================================================================
 import gammalib
+import test_support
 
 
 # ====================================== #
@@ -25,12 +26,12 @@ import gammalib
 # ====================================== #
 class Test(gammalib.GPythonTestSuite):
     """
-    Test class for GammaLib [INSTRUMENT] module.
+    Test class for GammaLib [INSTRUMENT] module
     """
     # Constructor
     def __init__(self):
         """
-        Constructor.
+        Constructor
         """
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
@@ -38,24 +39,63 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    # Set test functions
-    def set(self):
+    # Dummy test function
+    def _dummy_test(self):
         """
-        Set all test functions.
+        Dummy test function
         """
-        # Set test name
-        self.name("[INSTRUMENT]")
+        # Return
+        return
 
-        # Append tests
-        self.append(self.test, "[INSTRUMENT] dummy test")
+    # Test class pickeling
+    def _test_pickeling(self):
+        """
+        Test class pickeling
+        """
+        # Perform pickeling tests of empty classes
+        test_support._pickeling(self, gammalib.GXXXEventAtom())
+        test_support._pickeling(self, gammalib.GXXXEventBin())
+        test_support._pickeling(self, gammalib.GXXXEventCube())
+        test_support._pickeling(self, gammalib.GXXXEventList())
+        test_support._pickeling(self, gammalib.GXXXInstDir())
+        test_support._pickeling(self, gammalib.GXXXObservation())
+        test_support._pickeling(self, gammalib.GXXXResponse())
+        test_support._pickeling(self, gammalib.GXXXRoi())
+
+        # Setup test (TODO: to be filled with meaningful values)
+        atom = gammalib.GXXXEventAtom()
+        bin  = gammalib.GXXXEventBin()
+        cube = gammalib.GXXXEventCube()
+        list = gammalib.GXXXEventList()
+        dir  = gammalib.GXXXInstDir()
+        obs  = gammalib.GXXXObservation()
+        rsp  = gammalib.GXXXResponse()
+        roi  = gammalib.GXXXRoi()
+
+        # Perform pickeling tests of filled classes
+        test_support._pickeling(self, gammalib.GXXXEventAtom(atom))
+        test_support._pickeling(self, gammalib.GXXXEventBin(bin))
+        test_support._pickeling(self, gammalib.GXXXEventCube(cube))
+        test_support._pickeling(self, gammalib.GXXXEventList(list))
+        test_support._pickeling(self, gammalib.GXXXInstDir(dir))
+        test_support._pickeling(self, gammalib.GXXXObservation(obs))
+        test_support._pickeling(self, gammalib.GXXXResponse(rsp))
+        test_support._pickeling(self, gammalib.GXXXRoi(roi))
 
         # Return
         return
 
-    # Test function
-    def test(self):
+    # Set test functions
+    def set(self):
         """
-        Test function.
+        Set all test functions
         """
+        # Set test name
+        self.name('[INSTRUMENT]')
+
+        # Append tests
+        self.append(self._dummy_test, '[INSTRUMENT] dummy test')
+        self.append(self._test_pickeling, 'Test [INSTRUMENT] class pickeling')
+
         # Return
         return
