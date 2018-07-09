@@ -297,7 +297,7 @@ testedisplat      = test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.f
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_front.fits.gz \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_back.fits.gz \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_back.fits.gz \
-                    test/caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_front.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_front.fits \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_EDISP.fits.gz \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_FB.fits.gz \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_PSF.fits.gz
