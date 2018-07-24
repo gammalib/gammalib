@@ -2,7 +2,7 @@
  *                 GModelSpectralSmoothBrokenPlaw.cpp                      *
  *               Smoothly broken power law spectrum class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Joshua Cardenzana                                *
+ *  copyright (C) 2017-2018 by Joshua Cardenzana                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -835,8 +835,7 @@ void GModelSpectralSmoothBrokenPlaw::init_members(void)
  *
  * @param[in] model Smooth broken power law.
  ***************************************************************************/
-void GModelSpectralSmoothBrokenPlaw::copy_members(
-                                     const GModelSpectralSmoothBrokenPlaw& model)
+void GModelSpectralSmoothBrokenPlaw::copy_members(const GModelSpectralSmoothBrokenPlaw& model)
 {
     // Copy members
     m_type        = model.m_type;
@@ -851,8 +850,8 @@ void GModelSpectralSmoothBrokenPlaw::copy_members(
     m_pars.clear();
     m_pars.push_back(&m_norm);
     m_pars.push_back(&m_index1);
-    m_pars.push_back(&m_index2);
     m_pars.push_back(&m_pivot);
+    m_pars.push_back(&m_index2);
     m_pars.push_back(&m_breakenergy);
     m_pars.push_back(&m_beta);
     
