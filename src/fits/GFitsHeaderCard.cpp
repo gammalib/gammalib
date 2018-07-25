@@ -586,8 +586,10 @@ void GFitsHeaderCard::value(const long long& value)
 /***********************************************************************//**
  * @brief Return header card value as string
  *
- * Convert header card value into a string.
- * Any hyphens that may occur in the FITS card will be automatically stripped.
+ * @return Header card value as string
+ *
+ * Returns header card value as string. Any hyphens that may occur in the
+ * FITS card will be stripped.
  ***************************************************************************/
 std::string GFitsHeaderCard::string(void) const
 {
@@ -598,8 +600,14 @@ std::string GFitsHeaderCard::string(void) const
     if (m_value_dtype != NULL) {
         switch (m_dtype) {
         case __TSTRING:
-            if (m_value.length() > 2) {
-                result = gammalib::strip_whitespace(m_value.substr(1, m_value.length() - 2));
+            {
+            int n = m_value.length();
+            if (n > 2) {
+                result = gammalib::strip_whitespace(m_value.substr(1, n-2));
+            }
+            else {
+                result = "";
+            }
             }
             break;
         default:
