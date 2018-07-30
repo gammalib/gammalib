@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for include module                                            #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -117,6 +117,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsRegistry.hpp \
                      GWcs.hpp \
                      GWcsAIT.hpp \
+                     GWcsARC.hpp \
                      GWcsAZP.hpp \
                      GWcsCAR.hpp \
                      GWcsGLS.hpp \

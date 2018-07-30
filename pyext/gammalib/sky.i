@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          sky.i - Sky module                             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2018 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -122,6 +122,7 @@ namespace std {
 %include "GWcsRegistry.i"
 %include "GWcs.i"
 %include "GWcsAIT.i"
+%include "GWcsARC.i"
 %include "GWcsAZP.i"
 %include "GWcsCAR.i"
 %include "GWcsGLS.i"

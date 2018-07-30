@@ -34,6 +34,8 @@
 #include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_PRJ_X2S    "GWcsCAR::prj_x2s(int, int, int, int, double*, double*,"\
+                                                   " double*, double*, int*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -381,6 +383,16 @@ void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt,
             *thetap    = t;
             *(statp++) = 0;
         }
+    }
+
+    // Do boundary checking
+    int status = prj_bchk(1.0e-13, nx, my, spt, phi, theta, stat);
+    
+    // Handle status code
+    if (status != 0) {
+        std::string msg = "One or more of the (x, y) coordinates were invalid "
+                          "for the "+name()+" ("+code()+") projection.";
+        throw GException::invalid_value(G_PRJ_X2S, msg);
     }
 
     // Return

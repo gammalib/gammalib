@@ -358,6 +358,17 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test ARC projection
+    def _test_skymap_arc(self):
+        """
+        Test ARC projection.
+        """
+        # Execute generic test
+        self._test_skymap_proj('ARC')
+
+        # Return
+        return
+
     # Test AZP projection
     def _test_skymap_azp(self):
         """
@@ -565,6 +576,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support._pickeling(self, gammalib.GSkyRegionMap())
         test_support._pickeling(self, gammalib.GSkyRegions())
         test_support._pickeling(self, gammalib.GWcsAIT())
+        test_support._pickeling(self, gammalib.GWcsARC())
         test_support._pickeling(self, gammalib.GWcsAZP())
         test_support._pickeling(self, gammalib.GWcsCAR())
         test_support._pickeling(self, gammalib.GWcsGLS())
@@ -596,6 +608,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support._pickeling(self, gammalib.GSkyRegionMap(map))
         test_support._pickeling(self, gammalib.GSkyRegions(regions))
         test_support._pickeling(self, gammalib.GWcsAIT('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support._pickeling(self, gammalib.GWcsARC('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
         test_support._pickeling(self, gammalib.GWcsAZP('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
         test_support._pickeling(self, gammalib.GWcsCAR('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
         test_support._pickeling(self, gammalib.GWcsGLS('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
@@ -622,6 +635,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_operators, 'Test sky map operators')
         self.append(self._test_skymap_healpix, 'Test HEALPix map')
         self.append(self._test_skymap_ait, 'Test AIT projection map')
+        self.append(self._test_skymap_arc, 'Test ARC projection map')
         self.append(self._test_skymap_azp, 'Test AZP projection map')
         self.append(self._test_skymap_car, 'Test CAR projection map')
         self.append(self._test_skymap_gls, 'Test GLS projection map')

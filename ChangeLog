@@ -1,8 +1,9 @@
-2018-07-03
+2018-07-30
 
         * Version 1.6.0 released
         ========================
 
+        Add ARC WCS projection (#2541)
         Add GLog::buffer() method.
         Renamed GPhoton::mcid() to GPhoton::mc_id()
         Remove at() methods from Python interface (#2515)

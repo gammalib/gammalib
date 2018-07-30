@@ -3090,3 +3090,109 @@ void GWcs::prj_off(const double& phi0, const double& theta0) const
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Performs bounds checking on native spherical coordinates
+ *
+ * @param[in] tol Tolerance for the bounds check [deg]
+ * @param[in] nphi Number of bins in phi.
+ * @param[in] ntheta Number of bins in theta.
+ * @param[in] spt Step size.
+ * @param[in,out] phi Pointer to phi array [deg]
+ * @param[in,out] theta Pointer to theta array [deg]
+ * @param[in,out] stat Pointer to status array.
+ *
+ * Performs bounds checking on native spherical coordinates. As returned by
+ * the deprojection (x2s) routines, native longitude is expected to lie in
+ * the closed interval [-180,180], with latitude in [-90,90].
+ *
+ * A tolerance may be specified to provide a small allowance for numerical
+ * imprecision. Values that lie outside the allowed range by not more than
+ * the specified tolerance will be adjusted back into range.
+ *
+ * Code adapted from prj.c::prjbchk().
+ ***************************************************************************/
+int GWcs::prj_bchk(const double& tol,
+                   const int&    nphi,
+                   const int&    ntheta,
+                   const int&    spt,
+                   double*       phi,
+                   double*       theta,
+                   int*          stat) const
+{
+    // Initialize result
+    int status = 0;
+
+    // Continue only if bounds checking is requested
+    if (m_bounds) {
+
+        // Initialise array pointers
+        register double* phip   = phi;
+        register double* thetap = theta;
+        register int*    statp  = stat;
+
+        // Loop over all theta bins
+        for (int itheta = 0; itheta < ntheta; ++itheta) {
+
+            // Loop over all phi bins
+            for (int iphi = 0; iphi < nphi; ++iphi, phip += spt, thetap += spt, statp++) {
+
+                // Skip values already marked as illegal
+                if (*statp == 0) {
+
+                    // Check lower phi boundary
+                    if (*phip < -180.0) {
+                        if (*phip < -180.0-tol) {
+                            *statp = 1;
+                            status = 1;
+                        }
+                        else {
+                            *phip = -180.0;
+                        }
+                    }
+
+                    // Check upper phi boundary
+                    else if (180.0 < *phip) {
+                        if (180.0+tol < *phip) {
+                            *statp = 1;
+                            status = 1;
+                        }
+                        else {
+                            *phip = 180.0;
+                        }
+                    }
+
+                    // Check lower theta boundary
+                    if (*thetap < -90.0) {
+                        if (*thetap < -90.0-tol) {
+                            *statp = 1;
+                            status = 1;
+                        }
+                        else {
+                            *thetap = -90.0;
+                        }
+                    }
+
+                    // Check upper theta boundary
+                    else if (90.0 < *thetap) {
+                        if (90.0+tol < *thetap) {
+                            *statp = 1;
+                            status = 1;
+                        }
+                        else {
+                            *thetap = 90.0;
+                        }
+                    }
+
+                } // endif: values were marked as valid
+
+            } // endfor: looped over phi
+
+        } // endfor: looped over theta
+
+    } // endif: bounds checking was requested
+
+    // Return status
+    return status;
+}

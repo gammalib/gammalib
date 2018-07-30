@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GWcsAIT.cpp - Aitoff (AIT) projection class               *
+ *   GWcsAIT.cpp - Zenithal/azimuthal equidistant (AIT) projection class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -306,21 +306,21 @@ void GWcsAIT::prj_set(void) const
 
     // Initialise projection parameters
     m_w.assign(4, 0.0);
-    
+
     // Set undefined parameters
     if (m_r0 == 0.0) {
         m_r0 = gammalib::rad2deg;
     }
-    
+
     // Precompute 
     m_w[0] = 2.0 * m_r0 * m_r0;
     m_w[1] = 1.0 / (2.0 * m_w[0]);
     m_w[2] = m_w[1] / 4.0;
     m_w[3] = 1.0 / (2.0 * m_r0);
-    
+
     // Compute fiducial offset
     prj_off(0.0, 0.0);
-    
+
     // Return
     return;
 }
@@ -381,7 +381,7 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
     // Initialise status code and statistics
     int status    = 0;
     int n_invalid = 0;
-    
+
     // Do x dependence
     const double* xp     = x;
     int           rowoff = 0;
@@ -480,6 +480,11 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
         throw GException::wcs_invalid_x_y(G_PRJ_X2S, n_invalid);
     }
 
+    // Do bounds checking on the native coordinates
+  	// if (prj->bounds&4 && prjbchk(1.0e-13, nx, my, spt, phi, theta, stat)) {
+    //   if (!status) status = PRJERR_BAD_PIX_SET("aitx2s");
+  	// }
+
     // Return
     return;
 }
@@ -537,7 +542,7 @@ void GWcsAIT::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     // Initialise status code and statistics
     int status    = 0;
     int n_invalid = 0;
-    
+
     // Do phi dependence
     const double* phip   = phi;
     int           rowoff = 0;
@@ -563,7 +568,7 @@ void GWcsAIT::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     double*       yp     = y;
     int*          statp  = stat;
     for (int itheta = 0; itheta < ntheta; ++itheta, thetap += spt) {
-    
+
         // Compute sin(theta) and cos(theta)
         double sinthe;
         double costhe;
@@ -578,12 +583,12 @@ void GWcsAIT::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         } // endfor: phi
 
     } // endfor: theta
-  
+
     // Handle status code
     if (status == 4) {
         throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
     }
-    
+
     // Return
     return;
 }

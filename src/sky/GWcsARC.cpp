@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GWcsMER.cpp - Mercator's (MER) projection class            *
+ *   GWcsARC.cpp - Zenithal/azimuthal equidistant (ARC) projection class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcsMER.cpp
- * @brief Mercator's (MER) projection class implementation
+ * @file GWcsARC.cpp
+ * @brief Zenithal/azimuthal equidistant (ARC) projection class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,11 +30,14 @@
 #endif
 #include "GException.hpp"
 #include "GMath.hpp"
-#include "GWcsMER.hpp"
+#include "GTools.hpp"
+#include "GWcsARC.hpp"
 #include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PRJ_X2S    "GWcsMER::prj_x2s(int, int, int, int, double*, double*,"\
+#define G_PRJ_X2S    "GWcsARC::prj_x2s(int, int, int, int, double*, double*,"\
+                                                   " double*, double*, int*)"
+#define G_PRJ_S2X    "GWcsARC::prj_s2x(int, int, int, int, double*, double*,"\
                                                    " double*, double*, int*)"
 
 /* __ Macros _____________________________________________________________ */
@@ -48,8 +51,8 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GWcsMER      g_wcs_mer_seed;
-const GWcsRegistry g_wcs_mer_registry(&g_wcs_mer_seed);
+const GWcsARC      g_wcs_arc_seed;
+const GWcsRegistry g_wcs_arc_registry(&g_wcs_arc_seed);
 
 
 /*==========================================================================
@@ -61,7 +64,7 @@ const GWcsRegistry g_wcs_mer_registry(&g_wcs_mer_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsMER::GWcsMER(void) : GWcs()
+GWcsARC::GWcsARC(void) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -72,7 +75,7 @@ GWcsMER::GWcsMER(void) : GWcs()
 
 
 /***********************************************************************//**
- * @brief Projection constructor
+ * @brief Constructor
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
@@ -82,7 +85,7 @@ GWcsMER::GWcsMER(void) : GWcs()
  * @param[in] cdelt1 Increment in x direction at reference pixel [deg].
  * @param[in] cdelt2 Increment in y direction at reference pixel [deg].
  ***************************************************************************/
-GWcsMER::GWcsMER(const std::string& coords,
+GWcsARC::GWcsARC(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2) :
@@ -105,7 +108,7 @@ GWcsMER::GWcsMER(const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsMER::GWcsMER(const GWcsMER& wcs) : GWcs(wcs)
+GWcsARC::GWcsARC(const GWcsARC& wcs) : GWcs(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -121,7 +124,7 @@ GWcsMER::GWcsMER(const GWcsMER& wcs) : GWcs(wcs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GWcsMER::~GWcsMER(void)
+GWcsARC::~GWcsARC(void)
 {
     // Free members
     free_members();
@@ -143,7 +146,7 @@ GWcsMER::~GWcsMER(void)
  * @param[in] wcs World Coordinate System.
  * @return World Coordinate System.
  ***************************************************************************/
-GWcsMER& GWcsMER::operator=(const GWcsMER& wcs)
+GWcsARC& GWcsARC::operator=(const GWcsARC& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
@@ -174,11 +177,11 @@ GWcsMER& GWcsMER::operator=(const GWcsMER& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear Mercator's projection
+ * @brief Clear instance
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GWcsMER::clear(void)
+void GWcsARC::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -196,23 +199,24 @@ void GWcsMER::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone Mercator's projection
+ * @brief Clone instance
  *
- * @return Pointer to deep copy of Mercator's projection.
+ * @return Pointer to deep copy of Zenithal/azimuthal equidistant projection.
  ***************************************************************************/
-GWcsMER* GWcsMER::clone(void) const
+GWcsARC* GWcsARC::clone(void) const
 {
-    return new GWcsMER(*this);
+    return new GWcsARC(*this);
 }
+
 
 
 /***********************************************************************//**
  * @brief Print WCS information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing Mercator's projection information.
+ * @param[in] chatter Chattiness.
+ * @return String containing WCS information.
  ***************************************************************************/
-std::string GWcsMER::print(const GChatter& chatter) const
+std::string GWcsARC::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -221,7 +225,7 @@ std::string GWcsMER::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GWcsMER ===");
+        result.append("=== GWcsARC ===");
 
         // Append information
         result.append(wcs_print(chatter));
@@ -242,7 +246,7 @@ std::string GWcsMER::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GWcsMER::init_members(void)
+void GWcsARC::init_members(void)
 {
     // Return
     return;
@@ -254,7 +258,7 @@ void GWcsMER::init_members(void)
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-void GWcsMER::copy_members(const GWcsMER& wcs)
+void GWcsARC::copy_members(const GWcsARC& wcs)
 {
     // Return
     return;
@@ -264,7 +268,7 @@ void GWcsMER::copy_members(const GWcsMER& wcs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GWcsMER::free_members(void)
+void GWcsARC::free_members(void)
 {
     // Return
     return;
@@ -275,12 +279,12 @@ void GWcsMER::free_members(void)
  * @brief Setup of projection
  *
  * This method sets up the projection information. The method has been
- * adapted from the wcslib function prj.c::merset.
+ * adapted from the wcslib function prj.c::arcset.
  *
  *   Given and/or returned:
  *      m_r0      Reset to 180/pi if 0.
- *      m_phi0    Reset to 0.0 if undefined.
- *      m_theta0  Reset to 0.0 if undefined.
+ *      m_phi0    Reset to  0.0 if undefined.
+ *      m_theta0  Reset to 90.0 if undefined.
  *
  *   Returned:
  *      m_x0      Fiducial offset in x.
@@ -288,24 +292,24 @@ void GWcsMER::free_members(void)
  *      m_w[0]    r0*(pi/180)
  *      m_w[1]    (180/pi)/r0
  ***************************************************************************/
-void GWcsMER::prj_set(void) const
+void GWcsARC::prj_set(void) const
 {
     // Signal that projection has been set (needs to be done before calling
     // the prj_off() method to avoid an endless loop)
     m_prjset = true;
 
     // Initialise projection parameters
-    m_w.clear();
+    m_w.assign(2, 0.0);
     
-    // Precompute 
+    // Set undefined parameters
     if (m_r0 == 0.0) {
-        m_r0 = gammalib::rad2deg;
-        m_w.push_back(1.0);
-        m_w.push_back(1.0);
-    } 
+        m_r0   = gammalib::rad2deg;
+        m_w[0] = 1.0;
+        m_w[1] = 1.0;
+    }
     else {
-        m_w.push_back(m_r0 * gammalib::deg2rad);
-        m_w.push_back(1.0/m_w[0]);
+        m_w[0] = m_r0 * gammalib::deg2rad;
+        m_w[1] = 1.0/m_w[0];
     }
     
     // Compute fiducial offset
@@ -331,15 +335,19 @@ void GWcsMER::prj_set(void) const
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element (always 0)
  *
+ * @exception GException::wcs_invalid_x_y
+ *            One or more of the (x,y) coordinates were invalid, as indicated
+ *            by the stat vector.
+ *
  * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
- * This method has been adapted from the wcslib function prj.c::merx2s().
+ * This method has been adapted from the wcslib function prj.c::aitx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
  * setup previously (as this will be done by the constructor).
  ***************************************************************************/
-void GWcsMER::prj_x2s(int nx, int ny, int sxy, int spt, 
+void GWcsARC::prj_x2s(int nx, int ny, int sxy, int spt, 
                       const double* x, const double* y,
                       double* phi, double* theta, int* stat) const
 {
@@ -360,27 +368,38 @@ void GWcsMER::prj_x2s(int nx, int ny, int sxy, int spt,
         my = 1;
         ny = nx;
     }
-    
+
     // Do x dependence
     const double* xp     = x;
     int           rowoff = 0;
     int           rowlen = nx * spt;
     for (int ix = 0; ix < nx; ++ix, rowoff += spt, xp += sxy) {
-        double  s    = m_w[1] * (*xp + m_x0);
-        double* phip = phi + rowoff;
+        double  xj     = *xp + m_x0;
+        double* phip   = phi + rowoff;
         for (int iy = 0; iy < my; ++iy, phip += rowlen) {
-            *phip = s;
+            *phip   = xj;
         }
     }
 
     // Do y dependence
     const double* yp     = y;
+    double*       phip   = phi;
     double*       thetap = theta;
     int*          statp  = stat;
     for (int iy = 0; iy < ny; ++iy, yp += sxy) {
-        double t = 2.0 * gammalib::atand(std::exp((*yp + m_y0)/m_r0)) - 90.0;
-        for (int ix = 0; ix < mx; ++ix, thetap += spt) {
-            *thetap    = t;
+        double yj  = *yp + m_y0;
+        double yj2 = yj * yj;
+        for (int ix = 0; ix < mx; ++ix, phip += spt, thetap += spt) {
+            double xj = *phip;
+            double r  = std::sqrt(xj*xj + yj2);
+            if (r == 0.0) {
+                *phip   =  0.0;
+                *thetap = 90.0;
+            }
+            else {
+                *phip   = gammalib::atan2d(xj, -yj);
+                *thetap = 90.0 - r * m_w[1];
+            }
             *(statp++) = 0;
         }
     }
@@ -415,15 +434,19 @@ void GWcsMER::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
  *
+ * @exception GException::wcs_invalid_phi_theta
+ *            One or more of the (phi,theta) coordinates were invalid, as
+ *            indicated by the stat vector.
+ *
  * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
  *
- * This method has been adapted from the wcslib function prj.c::mers2x().
+ * This method has been adapted from the wcslib function prj.c::aits2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
  * setup previously (as this will be done by the constructor).
  ***************************************************************************/
-void GWcsMER::prj_s2x(int nphi, int ntheta, int spt, int sxy,
+void GWcsARC::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,
                       double* x, double* y, int* stat) const
 {
@@ -447,41 +470,51 @@ void GWcsMER::prj_s2x(int nphi, int ntheta, int spt, int sxy,
 
     // Initialise status code and statistics
     //int status    = 0;
-    int n_invalid = 0;
-
+    //int n_invalid = 0;
+    
     // Do phi dependence
     const double* phip   = phi;
     int           rowoff = 0;
     int           rowlen = nphi * sxy;
     for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sxy, phip += spt) {
-        double  xi = m_w[0] * (*phip) - m_x0;
+        double sinphi;
+        double cosphi;
+        gammalib::sincosd(*phip, &sinphi, &cosphi);
         double* xp = x + rowoff;
-        for (int itheta = 0; itheta < mtheta; ++itheta, xp += rowlen) {
-            *xp = xi;
+        double* yp = y + rowoff;
+        for (int itheta = 0; itheta < mtheta; ++itheta) {
+            *xp = sinphi;
+            *yp = cosphi;
+            xp += rowlen;
+            yp += rowlen;
         }
     }
-
 
     // Do theta dependence
     const double* thetap = theta;
+    double*       xp     = x;
     double*       yp     = y;
     int*          statp  = stat;
     for (int itheta = 0; itheta < ntheta; ++itheta, thetap += spt) {
-        double eta;
-        int    istat = 0;
-        if (*thetap <= -90.0 || *thetap >= 90.0) {
-            eta    = 0.0;
-            istat  = 1;
-            n_invalid++;
-        }
-        else {
-            eta = m_r0 * std::log(gammalib::tand((*thetap+90.0)/2.0)) - m_y0;
-        }
-        for (int iphi = 0; iphi < mphi; ++iphi, yp += sxy) {
-            *yp = eta;
-            *(statp++) = istat;
-        }
+    
+        // Compute r
+        double r = m_w[0] * (90.0 - *thetap);
+
+        // Do phi dependence
+        for (int iphi = 0; iphi < mphi; ++iphi, xp += sxy, yp += sxy) {
+            *xp        =  r * (*xp) - m_x0;
+            *yp        = -r * (*yp) - m_y0;
+            *(statp++) = 0;
+        } // endfor: phi
+
+    } // endfor: theta
+
+    // Handle status code
+    /*
+    if (status == 4) {
+        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
     }
+    */
     
     // Return
     return;

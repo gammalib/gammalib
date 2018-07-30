@@ -146,6 +146,13 @@ protected:
     // Methods adapted from wcslib::prj.c
     void         prj_ini(void) const;
     void         prj_off(const double& phi0, const double& theta0) const;
+    int          prj_bchk(const double& tol,
+                          const int&    nphi,
+                          const int&    ntheta,
+                          const int&    spt,
+                          double*       phi,
+                          double*       theta,
+                          int*          stat) const;
     virtual void prj_set(void) const = 0;
     virtual void prj_x2s(int nx, int ny, int sxy, int spt, 
                          const double* x, const double* y,

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-5 July 2018
+30 July 2018
 
 
 1. Introduction
@@ -13,6 +13,7 @@ made since the last release of GammaLib.
 ---------------------------------
 The following classes have been added:
 - GModelSpectralExponential
+- GWcsARC
 
 The following classes have been removed:
 - none
@@ -205,6 +206,10 @@ None
 
 12. Sky module
 --------------
+The class GWcsARC was added to handle ARC WCS projections (#2541). In addition
+the private GWcs::prj_bchk() method was added to implement boundary checking
+similar to the checking done in WCS.
+
 A precomputation cache was added to the GWcs::dir2pix() and GWcs::pix2dir()
 methods so that results are not recomputed for the same arguments. This should
 provide some speed-up as it avoids unnecessary coordinate transformations.

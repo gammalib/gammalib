@@ -529,6 +529,16 @@ void GWcsMOL::prj_x2s(int nx, int ny, int sxy, int spt,
         throw GException::wcs_invalid_x_y(G_PRJ_X2S, n_invalid);
     }
 
+    // Do boundary checking
+    status = prj_bchk(1.0e-11, nx, my, spt, phi, theta, stat);
+    
+    // Handle status code
+    if (status != 0) {
+        std::string msg = "One or more of the (x, y) coordinates were invalid "
+                          "for the "+name()+" ("+code()+") projection.";
+        throw GException::invalid_value(G_PRJ_X2S, msg);
+    }
+
     // Return
     return;
 }
