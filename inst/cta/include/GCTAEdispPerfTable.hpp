@@ -47,6 +47,15 @@ class GRan;
  * of energy as determined from a performance table. The performance table is
  * an ASCII file that specifies the CTA performance parameters in a simple
  * way.
+ *
+ * The energy dispersion is defined as
+ *
+ * \f[
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}) =
+ *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ * \f]
+ *
+ * and given in units of \f$(\log_{10} MeV)^{-1}\f$.
  ***************************************************************************/
 class GCTAEdispPerfTable : public GCTAEdisp {
 

@@ -46,6 +46,15 @@ class GEbounds;
  * @class GCTAEdispRmf
  *
  * @brief CTA Redistribution Matrix File (RMF) energy dispersion class
+ *
+ * The energy dispersion is defined as
+ *
+ * \f[
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}) =
+ *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ * \f]
+ *
+ * and given in units of \f$(\log_{10} MeV)^{-1}\f$.
  ***************************************************************************/
 class GCTAEdispRmf : public GCTAEdisp {
 

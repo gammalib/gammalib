@@ -158,7 +158,7 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion.
+ * @brief Return energy dispersion in units of \f$(\log_{10} MeV)^{-1}\f$
  *
  * @param[in] logEobs log10 of the observed photon energy (TeV).
  * @param[in] logEsrc log10 of the true photon energy (TeV).
@@ -167,15 +167,24 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
- * Returns the energy resolution, i.e. the probability density in observed
- * photon energy at a given (log10(E_src), log10(E_obs)).
- * To be precise: energy dispersion = dP / d(log10(E_obs)).
- * 
- * Evaluates
+ * Returns the energy dispersion
  *
  * \f[
- * S(E) = \frac{1}{\sqrt{2\pi}m\_sigma}
- *        \exp(\frac{-(logEobs-logEsrc)^2}{2 m\_sigma^2})
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}) =
+ *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ * \f]
+ *
+ * in units of \f$(\log_{10} MeV)^{-1}\f$ where
+ * \f$\log_{10} E_{\rm reco}\f$ is the logarithm of the reconstructed energy
+ * in TeV, and
+ * \f$\log_{10} E_{\rm true}\f$ is the logarithm of the true energy in TeV.
+ *
+ * The operator evaluates
+ *
+ * \f[
+ *    E_{\rm disp} = \frac{1}{\sqrt{2\pi}m\_sigma}
+ *                   \exp(\frac{-(\log_{10} E_{\rm reco} -
+ *                                \log_{10} E_{\rm true})^2}{2 m\_sigma^2})
  * \f]
  ***************************************************************************/
 double GCTAEdispPerfTable::operator()(const double& logEobs,

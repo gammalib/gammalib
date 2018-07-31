@@ -176,18 +176,27 @@ GCTAEdisp2D& GCTAEdisp2D::operator=(const GCTAEdisp2D& edisp)
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion in units of s^-1 MeV^-1
+ * @brief Return energy dispersion in units of \f$(\log_{10} MeV)^{-1}\f$
  *
  * @param[in] logEobs Log10 of the measured energy (TeV).
  * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Defaults to 0.0.
+ * @param[in] theta Offset angle in camera system (rad).
  * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
  *
- * Returns the energy dispersion in units of s^-1 MeV^-1 for a given observed
- * energy @p logEobs, true photon energy @p logEsrc and offset angle
- * @p theta.
+ * Returns the energy dispersion
+ *
+ * \f[
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}, \theta) =
+ *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ * \f]
+ *
+ * in units of \f$(\log_{10} MeV)^{-1}\f$ where
+ * \f$\log_{10} E_{\rm reco}\f$ is the logarithm of the reconstructed energy
+ * in TeV,
+ * \f$\log_{10} E_{\rm true}\f$ is the logarithm of the true energy in TeV and
+ * \f$\theta\f$ is the offset angle in radians.
  ***************************************************************************/
 double GCTAEdisp2D::operator()(const double& logEobs, 
                                const double& logEsrc, 
@@ -761,9 +770,9 @@ void GCTAEdisp2D::fetch(void) const
             }
 
         } // endif: filename was not empty
-    
+
     } // endif: energy dispersion had not yet been fetched
-    
+
     // Return
     return;
 }
@@ -1338,9 +1347,11 @@ void GCTAEdisp2D::set_table(void)
     // Set table boundaries
     set_boundaries();
 
-    // Smooth energy dispersion table
+    // Smooth energy dispersion table (kludge only for CTA)
     #if defined(G_SMOOTH_EDISP_KLUDGE)
-    smooth_table();
+    if (gammalib::strip_whitespace(m_edisp.telescope()) == "CTA") {
+        smooth_table();
+    }
     #endif
 
     // Normalize energy dispersion table
@@ -1413,6 +1424,31 @@ void GCTAEdisp2D::set_max_edisp(void) const
 
 /***********************************************************************//**
  * @brief Normalize energy dispersion table
+ *
+ * Normalize the energy dispersion table using
+ *
+ * \f[
+ *    \int_{\log_{10} E_{\rm reco}^{\rm min}}^{\log_{10} E_{\rm reco}^{\rm max}}
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}, \theta)
+ *    \, d(\log_{10} E_{\rm reco}) = 1
+ * \f]
+ *
+ * where
+ * \f$E_{\rm reco}^{\rm min}\f$ is the minimum and
+ * \f$E_{\rm reco}^{\rm max}\f$ the maximum reconstructed energy for a given
+ * true energy, returned by the method ebounds_obs(),
+ * \f$E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}, \theta)\f$
+ * is the energy dispersion returned by the GCTAEdisp2D::operator(), given in
+ * units of \f$(\log_{10} MeV)^{-1}\f$,
+ * \f$\log_{10} E_{\rm reco}\f$ is the logarithm of the reconstructued energy
+ * in TeV, and
+ * \f$\log_{10} E_{\rm true}\f$ is the logarithm of the true energy in TeV.
+ *
+ * The normalisation is performed for each \f$E_{\rm true}\f$ and
+ * \f$\theta\f$ bin using a Romberg integration method. Since the
+ * normalisation may affect the energy boundaries
+ * \f$E_{\rm reco}^{\rm min}\f$ and \f$E_{\rm reco}^{\rm max}\f$, two
+ * normalisation passes are performed to stabilize the result.
  ***************************************************************************/
 void GCTAEdisp2D::normalize_table(void)
 {
@@ -1681,7 +1717,7 @@ void GCTAEdisp2D::smooth_table(void)
                 total(ietrue) = 0.0;
             }
         }
-        
+
         // Replace matrix by Gaussians
         for (int ietrue = 0; ietrue < netrue; ++ietrue) {
 
@@ -1703,7 +1739,7 @@ void GCTAEdisp2D::smooth_table(void)
                         m_edisp(m_inx_matrix, i) = 0.0;
                     }
                 }
-                
+
             } // endif: there was information
 
             // ... otherwise reset the matrix to zero

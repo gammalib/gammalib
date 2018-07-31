@@ -160,7 +160,7 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion.
+ * @brief Return energy dispersion in units of \f$(\log_{10} MeV)^{-1}\f$
  *
  * @param[in] logEobs log10 of the observed photon energy (TeV).
  * @param[in] logEsrc log10 of the true photon energy (TeV).
@@ -170,9 +170,17 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  * @return Energy dispersion
  *
- * Returns the energy resolution, i.e. the probability density in observed
- * photon energy at a given (log10(E_src), log10(E_obs)).
- * To be precise: energy dispersion = dP / d(log10(E_obs)).
+ * Returns the energy dispersion
+ *
+ * \f[
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}) =
+ *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ * \f]
+ *
+ * in units of \f$(\log_{10} MeV)^{-1}\f$ where
+ * \f$\log_{10} E_{\rm reco}\f$ is the logarithm of the reconstructed energy
+ * in TeV, and
+ * \f$\log_{10} E_{\rm true}\f$ is the logarithm of the true energy in TeV.
  ***************************************************************************/
 double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& logEsrc,

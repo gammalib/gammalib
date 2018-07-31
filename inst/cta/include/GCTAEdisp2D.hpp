@@ -51,7 +51,15 @@ namespace gammalib {
  *
  * @brief CTA 2D energy dispersion class
  *
- * This class implements the energy dispersion for the CTA 2D response.
+ * This class implements the energy dispersion for the CTA 2D response. The
+ * energy dispersion is defined as
+ *
+ * \f[
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}, \theta) =
+ *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ * \f]
+ *
+ * and given in units of \f$(\log_{10} MeV)^{-1}\f$.
  ***************************************************************************/
 class GCTAEdisp2D : public GCTAEdisp {
 
