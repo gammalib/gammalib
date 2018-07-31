@@ -2,7 +2,7 @@
 # ==========================================================================
 # This scripts performs unit tests for the example executables
 #
-# Copyright (C) 2016-2017 Juergen Knoedlseder
+# Copyright (C) 2016-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ class Test(gammalib.GPythonTestSuite):
             Python script name with .py extension.
         """
         # Setup command
-        cmd = self._python_dir + name + '.py'
+        cmd = '@PYTHON_COVERAGE@' + self._python_dir + name + '.py'
 
         # Execute Python script, make sure we catch any exception
         try:
@@ -104,17 +104,17 @@ class Test(gammalib.GPythonTestSuite):
         self.name("examples")
 
         # Append tests
-        self.append(self.test_createfits, "Test createfits")
-        self.append(self.test_createskymap, "Test createskymap")
-        self.append(self.test_createxml, "Test createxml")
-        self.append(self.test_interpolate, "Test interpolate")
-        self.append(self.test_numerics, "Test numerics")
-        self.append(self.test_optimize, "Test optimize")
-        self.append(self.test_readmodel, "Test readmodel")
-        self.append(self.test_matrix_howto, "Test matrix howto")
-        self.append(self.test_models_howto, "Test models howto")
-        self.append(self.test_xml_howto, "Test XML howto")
-        self.append(self.test_xml_html_create, "Test HTML creation")
+        self.append(self.test_createfits, 'Test createfits')
+        self.append(self.test_createskymap, 'Test createskymap')
+        self.append(self.test_createxml, 'Test createxml')
+        self.append(self.test_interpolate, 'Test interpolate')
+        self.append(self.test_numerics, 'Test numerics')
+        self.append(self.test_optimize, 'Test optimize')
+        self.append(self.test_readmodel, 'Test readmodel')
+        self.append(self.test_matrix_howto, 'Test matrix howto')
+        self.append(self.test_models_howto, 'Test models howto')
+        self.append(self.test_xml_howto, 'Test XML howto')
+        self.append(self.test_xml_html_create, 'Test HTML creation')
 
         # Return
         return
