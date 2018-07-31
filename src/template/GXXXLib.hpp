@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 
-/* __ COMPTEL specific headers ___________________________________________ */
+/* __ [INSTRUMENT] specific headers ___________________________________________ */
 #include "GXXXObservation.hpp"
 #include "GXXXResponse.hpp"
 

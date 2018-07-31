@@ -130,7 +130,7 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = ()
+        state = (self.classname()) # TODO: Replace by appropriate class members
         return state
     def __setstate__(self, state):
         self.__init__()

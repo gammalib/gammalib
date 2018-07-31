@@ -34,10 +34,6 @@
 #include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GEventBin.hpp"
-#include "GEventAtom.hpp"
-#include "GEventCube.hpp"
-#include "GEventList.hpp"
 #include "GModelData.hpp"
 %}
 
