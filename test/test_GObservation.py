@@ -675,7 +675,7 @@ class Test(gammalib.GPythonTestSuite):
         photons = self._setup_photons()
 
         # Perform photons access tests
-        test_support._energy_container_access_index(self, photons)
+        test_support.energy_container_access_index(self, photons)
 
         # Return
         return
@@ -689,7 +689,7 @@ class Test(gammalib.GPythonTestSuite):
         photons = self._setup_photons()
 
         # Perform slicing tests
-        test_support._energy_container_slicing(self, photons)
+        test_support.energy_container_slicing(self, photons)
 
         # Return
         return
@@ -704,7 +704,7 @@ class Test(gammalib.GPythonTestSuite):
         run = gammalib.GCTAObservation()
 
         # Perform observation access tests
-        test_support._container_access_index(self, obs)
+        test_support.container_access_index(self, obs)
 
         # Return
         return
@@ -718,7 +718,7 @@ class Test(gammalib.GPythonTestSuite):
         obs = self._setup_obs()
 
         # Perform slicing tests
-        test_support._container_slicing(self, obs)
+        test_support.container_slicing(self, obs)
 
         # Perform additional slicing tests
         self.test_value(len(obs[3:5].models()), 10)
@@ -739,19 +739,19 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        test_support._pickeling(self, gammalib.GCaldb())
-        test_support._pickeling(self, gammalib.GEbounds())
-        test_support._pickeling(self, gammalib.GEnergy())
-        test_support._pickeling(self, gammalib.GEnergies())
-        test_support._pickeling(self, gammalib.GGti())
-        test_support._pickeling(self, gammalib.GObservations())
-        test_support._pickeling(self, gammalib.GPhases())
-        test_support._pickeling(self, gammalib.GPhoton())
-        test_support._pickeling(self, gammalib.GPhotons())
-        test_support._pickeling(self, gammalib.GSource())
-        test_support._pickeling(self, gammalib.GTime())
-        test_support._pickeling(self, gammalib.GTimes())
-        test_support._pickeling(self, gammalib.GTimeReference())
+        test_support.pickeling(self, gammalib.GCaldb())
+        test_support.pickeling(self, gammalib.GEbounds())
+        test_support.pickeling(self, gammalib.GEnergy())
+        test_support.pickeling(self, gammalib.GEnergies())
+        test_support.pickeling(self, gammalib.GGti())
+        test_support.pickeling(self, gammalib.GObservations())
+        test_support.pickeling(self, gammalib.GPhases())
+        test_support.pickeling(self, gammalib.GPhoton())
+        test_support.pickeling(self, gammalib.GPhotons())
+        test_support.pickeling(self, gammalib.GSource())
+        test_support.pickeling(self, gammalib.GTime())
+        test_support.pickeling(self, gammalib.GTimes())
+        test_support.pickeling(self, gammalib.GTimeReference())
 
         # Setup for tests
         dir     = gammalib.GSkyDir()
@@ -768,19 +768,19 @@ class Test(gammalib.GPythonTestSuite):
         times.append(tmax)
 
         # Perform pickeling tests of filled classes
-        test_support._pickeling(self, gammalib.GCaldb('cta','prod2'))
-        test_support._pickeling(self, gammalib.GEbounds(10, emin, emax))
-        test_support._pickeling(self, gammalib.GEnergy(emin))
-        test_support._pickeling(self, gammalib.GEnergies(10, emin, emax))
-        test_support._pickeling(self, gammalib.GGti(tmin, tmax))
-        test_support._pickeling(self, gammalib.GObservations(self._setup_obs()))
-        test_support._pickeling(self, gammalib.GPhases(0.3, 0.7))
-        test_support._pickeling(self, gammalib.GPhoton(dir, emin, tmin))
-        test_support._pickeling(self, gammalib.GPhotons(photons))
-        test_support._pickeling(self, gammalib.GSource('Crab', model, emin, tmin))
-        test_support._pickeling(self, gammalib.GTime(tmin))
-        test_support._pickeling(self, gammalib.GTimes(times))
-        test_support._pickeling(self, gammalib.GTimeReference(12.345,'sec','utc','local'))
+        test_support.pickeling(self, gammalib.GCaldb('cta','prod2'))
+        test_support.pickeling(self, gammalib.GEbounds(10, emin, emax))
+        test_support.pickeling(self, gammalib.GEnergy(emin))
+        test_support.pickeling(self, gammalib.GEnergies(10, emin, emax))
+        test_support.pickeling(self, gammalib.GGti(tmin, tmax))
+        test_support.pickeling(self, gammalib.GObservations(self._setup_obs()))
+        test_support.pickeling(self, gammalib.GPhases(0.3, 0.7))
+        test_support.pickeling(self, gammalib.GPhoton(dir, emin, tmin))
+        test_support.pickeling(self, gammalib.GPhotons(photons))
+        test_support.pickeling(self, gammalib.GSource('Crab', model, emin, tmin))
+        test_support.pickeling(self, gammalib.GTime(tmin))
+        test_support.pickeling(self, gammalib.GTimes(times))
+        test_support.pickeling(self, gammalib.GTimeReference(12.345,'sec','utc','local'))
 
         # Return
         return

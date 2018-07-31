@@ -69,7 +69,7 @@ class Test(gammalib.GPythonTestSuite):
         par  = gammalib.GOptimizerPar()
 
         # Perform GOptimizerPars access tests
-        test_support._container_access_index(self, pars)
+        test_support.container_access_index(self, pars)
 
         # Check parameter setting by index from start
         par.name('98')
@@ -93,7 +93,7 @@ class Test(gammalib.GPythonTestSuite):
         pars = self._setup_pars()
 
         # Perform slicing tests
-        test_support._container_slicing(self, pars)
+        test_support.container_slicing(self, pars)
 
         # Return
         return
@@ -104,9 +104,9 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        test_support._pickeling(self, gammalib.GOptimizerLM())
-        test_support._pickeling(self, gammalib.GOptimizerPar())
-        test_support._pickeling(self, gammalib.GOptimizerPars())
+        test_support.pickeling(self, gammalib.GOptimizerLM())
+        test_support.pickeling(self, gammalib.GOptimizerPar())
+        test_support.pickeling(self, gammalib.GOptimizerPars())
 
         # Setup tests
         pars = gammalib.GOptimizerPars()
@@ -116,9 +116,9 @@ class Test(gammalib.GPythonTestSuite):
         opt.eps(0.1)
 
         # Perform pickeling tests of filled classes
-        test_support._pickeling(self, gammalib.GOptimizerLM(opt))
-        test_support._pickeling(self, gammalib.GOptimizerPar('Test', 2.1))
-        test_support._pickeling(self, gammalib.GOptimizerPars(pars))
+        test_support.pickeling(self, gammalib.GOptimizerLM(opt))
+        test_support.pickeling(self, gammalib.GOptimizerPar('Test', 2.1))
+        test_support.pickeling(self, gammalib.GOptimizerPars(pars))
 
         # Return
         return

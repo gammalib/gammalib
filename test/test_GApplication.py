@@ -380,7 +380,7 @@ class Test(gammalib.GPythonTestSuite):
         pars = self._setup_pars()
 
         # Perform application parameter access tests
-        test_support._container_access_index(self, pars)
+        test_support.container_access_index(self, pars)
 
         # Check application parameter setting by index from start
         par     = gammalib.GApplicationPar('98','r','a','1.0','0.0','2.0','Dummy')
@@ -404,7 +404,7 @@ class Test(gammalib.GPythonTestSuite):
         pars = self._setup_pars()
 
         # Perform slicing tests
-        test_support._container_slicing(self, pars)
+        test_support.container_slicing(self, pars)
 
         # Return
         return
@@ -418,20 +418,20 @@ class Test(gammalib.GPythonTestSuite):
         os.environ['PFILES'] = os.environ['TEST_DATA']
 
         # Perform pickeling tests of empty classes
-        test_support._pickeling(self, gammalib.GApplication())
-        test_support._pickeling(self, gammalib.GApplicationPar())
-        test_support._pickeling(self, gammalib.GApplicationPars())
-        #test_support._pickeling(self, gammalib.GLog())
+        test_support.pickeling(self, gammalib.GApplication())
+        test_support.pickeling(self, gammalib.GApplicationPar())
+        test_support.pickeling(self, gammalib.GApplicationPars())
+        #test_support.pickeling(self, gammalib.GLog())
 
         # Setup for tests
         par = gammalib.GApplicationPar('Test','r','a','1.0','0.0','2.0','Dummy text')
         app = gammalib.GApplication('test_GApplication', '1.1.0')
 
         # Perform pickeling tests of filled classes
-        test_support._pickeling(self, gammalib.GApplication(app))
-        test_support._pickeling(self, gammalib.GApplicationPar(par))
-        test_support._pickeling(self, gammalib.GApplicationPars('test_GApplication.par'))
-        #test_support._pickeling(self, gammalib.GLog())
+        test_support.pickeling(self, gammalib.GApplication(app))
+        test_support.pickeling(self, gammalib.GApplicationPar(par))
+        test_support.pickeling(self, gammalib.GApplicationPars('test_GApplication.par'))
+        #test_support.pickeling(self, gammalib.GLog())
 
         # Return
         return

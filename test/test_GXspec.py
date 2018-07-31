@@ -110,9 +110,9 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        test_support._pickeling(self, gammalib.GArf())
-        test_support._pickeling(self, gammalib.GPha())
-        test_support._pickeling(self, gammalib.GRmf())
+        test_support.pickeling(self, gammalib.GArf())
+        test_support.pickeling(self, gammalib.GPha())
+        test_support.pickeling(self, gammalib.GRmf())
 
         # Setup test
         emin  = gammalib.GEnergy(1.0, 'TeV')
@@ -124,9 +124,9 @@ class Test(gammalib.GPythonTestSuite):
         rmf   = gammalib.GRmf(etrue, ereco)
 
         # Perform pickeling tests of filled classes
-        test_support._pickeling(self, gammalib.GArf(arf))
-        test_support._pickeling(self, gammalib.GPha(pha))
-        test_support._pickeling(self, gammalib.GRmf(rmf))
+        test_support.pickeling(self, gammalib.GArf(arf))
+        test_support.pickeling(self, gammalib.GPha(pha))
+        test_support.pickeling(self, gammalib.GRmf(rmf))
 
         # Return
         return

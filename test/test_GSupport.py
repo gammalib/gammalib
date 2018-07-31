@@ -286,24 +286,24 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        #test_support._pickeling(self, gammalib.GBilinear())
-        #test_support._pickeling(self, gammalib.GCsv())
-        test_support._pickeling(self, gammalib.GFilename())
-        #test_support._pickeling(self, gammalib.GNodeArray())
-        #test_support._pickeling(self, gammalib.GRan())
-        #test_support._pickeling(self, gammalib.GUrl())
-        #test_support._pickeling(self, gammalib.GUrlFile())
-        #test_support._pickeling(self, gammalib.GUrlString())
+        #test_support.pickeling(self, gammalib.GBilinear())
+        #test_support.pickeling(self, gammalib.GCsv())
+        test_support.pickeling(self, gammalib.GFilename())
+        #test_support.pickeling(self, gammalib.GNodeArray())
+        #test_support.pickeling(self, gammalib.GRan())
+        #test_support.pickeling(self, gammalib.GUrl())
+        #test_support.pickeling(self, gammalib.GUrlFile())
+        #test_support.pickeling(self, gammalib.GUrlString())
 
         # Perform pickeling tests of filled classes
-        #test_support._pickeling(self, gammalib.GBilinear())
-        #test_support._pickeling(self, gammalib.GCsv())
-        test_support._pickeling(self, gammalib.GFilename('test.fits[URL]'))
-        #test_support._pickeling(self, gammalib.GNodeArray())
-        #test_support._pickeling(self, gammalib.GRan())
-        #test_support._pickeling(self, gammalib.GUrl())
-        #test_support._pickeling(self, gammalib.GUrlFile())
-        #test_support._pickeling(self, gammalib.GUrlString())
+        #test_support.pickeling(self, gammalib.GBilinear())
+        #test_support.pickeling(self, gammalib.GCsv())
+        test_support.pickeling(self, gammalib.GFilename('test.fits[URL]'))
+        #test_support.pickeling(self, gammalib.GNodeArray())
+        #test_support.pickeling(self, gammalib.GRan())
+        #test_support.pickeling(self, gammalib.GUrl())
+        #test_support.pickeling(self, gammalib.GUrlFile())
+        #test_support.pickeling(self, gammalib.GUrlString())
 
         # Return
         return

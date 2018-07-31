@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib test module.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2018 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ class Test(gammalib.GPythonTestSuite):
         suite  = gammalib.GPythonTestSuite()
 
         # Perform GTestSuites access tests
-        test_support._container_access_index(self, suites)
+        test_support.container_access_index(self, suites)
 
         # Check parameter setting by index from start
         suite.name('98')
@@ -93,7 +93,7 @@ class Test(gammalib.GPythonTestSuite):
         suites = self._setup_suites()
 
         # Perform slicing tests
-        test_support._container_slicing(self, suites)
+        test_support.container_slicing(self, suites)
 
         # Return
         return

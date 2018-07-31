@@ -24,7 +24,7 @@ import pickle
 # ============================== #
 # Test container access by index #
 # ============================== #
-def _container_access_index(testsuite, container):
+def container_access_index(testsuite, container):
     """
     Test container access by index
 
@@ -72,7 +72,7 @@ def _container_access_index(testsuite, container):
 # ===================================== #
 # Test energy container access by index #
 # ===================================== #
-def _energy_container_access_index(testsuite, container):
+def energy_container_access_index(testsuite, container):
     """
     Test energy container access by index
 
@@ -122,7 +122,7 @@ def _energy_container_access_index(testsuite, container):
 # ====================== #
 # Test container slicing #
 # ====================== #
-def _container_slicing(testsuite, container):
+def container_slicing(testsuite, container):
     """
     Test container slicing
 
@@ -182,7 +182,7 @@ def _container_slicing(testsuite, container):
 # ============================= #
 # Test energy container slicing #
 # ============================= #
-def _energy_container_slicing(testsuite, container):
+def energy_container_slicing(testsuite, container):
     """
     Test energy container slicing
 
@@ -242,7 +242,7 @@ def _energy_container_slicing(testsuite, container):
 # ============== #
 # Test pickeling #
 # ============== #
-def _pickeling(testsuite, object):
+def pickeling(testsuite, object):
     """
     Test class pickeling
 

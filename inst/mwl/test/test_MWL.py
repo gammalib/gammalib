@@ -46,9 +46,9 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        test_support._pickeling(self, gammalib.GMWLDatum())
-        test_support._pickeling(self, gammalib.GMWLObservation())
-        test_support._pickeling(self, gammalib.GMWLSpectrum())
+        test_support.pickeling(self, gammalib.GMWLDatum())
+        test_support.pickeling(self, gammalib.GMWLObservation())
+        test_support.pickeling(self, gammalib.GMWLSpectrum())
 
         # Setup test
         eng   = gammalib.GEnergy(1.0, 'TeV')
@@ -57,9 +57,9 @@ class Test(gammalib.GPythonTestSuite):
         spec  = gammalib.GMWLSpectrum(os.environ['TEST_MWL_DATA']+'/crab_mwl.fits')
 
         # Perform pickeling tests of filled classes
-        test_support._pickeling(self, gammalib.GMWLDatum(datum))
-        test_support._pickeling(self, gammalib.GMWLObservation(obs))
-        test_support._pickeling(self, gammalib.GMWLSpectrum(spec))
+        test_support.pickeling(self, gammalib.GMWLDatum(datum))
+        test_support.pickeling(self, gammalib.GMWLObservation(obs))
+        test_support.pickeling(self, gammalib.GMWLSpectrum(spec))
 
         # Return
         return

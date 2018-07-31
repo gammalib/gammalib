@@ -532,7 +532,7 @@ class Test(gammalib.GPythonTestSuite):
         circle  = gammalib.GSkyRegionCircle()
 
         # Perform regions access tests
-        test_support._container_access_index(self, regions)
+        test_support.container_access_index(self, regions)
 
         # Check regions setting by index from start
         circle.name('98')
@@ -556,7 +556,7 @@ class Test(gammalib.GPythonTestSuite):
         regions = self._setup_regions()
 
         # Perform slicing tests
-        test_support._container_slicing(self, regions)
+        test_support.container_slicing(self, regions)
 
         # Return
         return
@@ -567,25 +567,25 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        test_support._pickeling(self, gammalib.GHealpix())
-        test_support._pickeling(self, gammalib.GHorizDir())
-        test_support._pickeling(self, gammalib.GSkyDir())
-        test_support._pickeling(self, gammalib.GSkyMap())
-        test_support._pickeling(self, gammalib.GSkyPixel())
-        test_support._pickeling(self, gammalib.GSkyRegionCircle())
-        test_support._pickeling(self, gammalib.GSkyRegionMap())
-        test_support._pickeling(self, gammalib.GSkyRegions())
-        test_support._pickeling(self, gammalib.GWcsAIT())
-        test_support._pickeling(self, gammalib.GWcsARC())
-        test_support._pickeling(self, gammalib.GWcsAZP())
-        test_support._pickeling(self, gammalib.GWcsCAR())
-        test_support._pickeling(self, gammalib.GWcsGLS())
-        test_support._pickeling(self, gammalib.GWcsMER())
-        test_support._pickeling(self, gammalib.GWcsMOL())
-        test_support._pickeling(self, gammalib.GWcsSFL())
-        test_support._pickeling(self, gammalib.GWcsSIN())
-        test_support._pickeling(self, gammalib.GWcsSTG())
-        test_support._pickeling(self, gammalib.GWcsTAN())
+        test_support.pickeling(self, gammalib.GHealpix())
+        test_support.pickeling(self, gammalib.GHorizDir())
+        test_support.pickeling(self, gammalib.GSkyDir())
+        test_support.pickeling(self, gammalib.GSkyMap())
+        test_support.pickeling(self, gammalib.GSkyPixel())
+        test_support.pickeling(self, gammalib.GSkyRegionCircle())
+        test_support.pickeling(self, gammalib.GSkyRegionMap())
+        test_support.pickeling(self, gammalib.GSkyRegions())
+        test_support.pickeling(self, gammalib.GWcsAIT())
+        test_support.pickeling(self, gammalib.GWcsARC())
+        test_support.pickeling(self, gammalib.GWcsAZP())
+        test_support.pickeling(self, gammalib.GWcsCAR())
+        test_support.pickeling(self, gammalib.GWcsGLS())
+        test_support.pickeling(self, gammalib.GWcsMER())
+        test_support.pickeling(self, gammalib.GWcsMOL())
+        test_support.pickeling(self, gammalib.GWcsSFL())
+        test_support.pickeling(self, gammalib.GWcsSIN())
+        test_support.pickeling(self, gammalib.GWcsSTG())
+        test_support.pickeling(self, gammalib.GWcsTAN())
 
         # Setup test
         dir      = gammalib.GSkyDir()
@@ -598,26 +598,26 @@ class Test(gammalib.GPythonTestSuite):
         horizdir.altaz_deg(2.0, 3.0)
 
         # Perform pickeling tests of filled classes
-        test_support._pickeling(self, gammalib.GHealpix(4))
-        test_support._pickeling(self, horizdir)
-        test_support._pickeling(self, gammalib.GSkyDir(dir))
-        test_support._pickeling(self, gammalib.GSkyMap(map))
-        test_support._pickeling(self, gammalib.GSkyPixel(1.0))
-        test_support._pickeling(self, gammalib.GSkyPixel(2.0,3.0))
-        test_support._pickeling(self, gammalib.GSkyRegionCircle(dir,2.0))
-        test_support._pickeling(self, gammalib.GSkyRegionMap(map))
-        test_support._pickeling(self, gammalib.GSkyRegions(regions))
-        test_support._pickeling(self, gammalib.GWcsAIT('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsARC('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsAZP('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsCAR('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsGLS('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsMER('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsMOL('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsSFL('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsSIN('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsSTG('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
-        test_support._pickeling(self, gammalib.GWcsTAN('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GHealpix(4))
+        test_support.pickeling(self, horizdir)
+        test_support.pickeling(self, gammalib.GSkyDir(dir))
+        test_support.pickeling(self, gammalib.GSkyMap(map))
+        test_support.pickeling(self, gammalib.GSkyPixel(1.0))
+        test_support.pickeling(self, gammalib.GSkyPixel(2.0,3.0))
+        test_support.pickeling(self, gammalib.GSkyRegionCircle(dir,2.0))
+        test_support.pickeling(self, gammalib.GSkyRegionMap(map))
+        test_support.pickeling(self, gammalib.GSkyRegions(regions))
+        test_support.pickeling(self, gammalib.GWcsAIT('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsARC('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsAZP('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsCAR('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsGLS('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsMER('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsMOL('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsSFL('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsSIN('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsSTG('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
+        test_support.pickeling(self, gammalib.GWcsTAN('GAL',1.0,2.0,1.0,1.0,0.1,0.1))
 
         # Return
         return

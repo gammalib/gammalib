@@ -89,7 +89,7 @@ class Test(gammalib.GPythonTestSuite):
         element = gammalib.GXmlElement()
 
         # Perform GXml access tests
-        test_support._container_access_index(self, xml)
+        test_support.container_access_index(self, xml)
 
         # Check parameter setting by index from start
         element.name('98')
@@ -113,7 +113,7 @@ class Test(gammalib.GPythonTestSuite):
         xml = self._setup_xml()
 
         # Perform slicing tests
-        test_support._container_slicing(self, xml)
+        test_support.container_slicing(self, xml)
 
         # Return
         return
@@ -128,7 +128,7 @@ class Test(gammalib.GPythonTestSuite):
         element  = gammalib.GXmlElement()
 
         # Perform GXmlElement access tests
-        test_support._container_access_index(self, elements)
+        test_support.container_access_index(self, elements)
 
         # Check parameter setting by index from start
         element.name('98')
@@ -152,7 +152,7 @@ class Test(gammalib.GPythonTestSuite):
         elements = self._setup_elements()
 
         # Perform slicing tests
-        test_support._container_slicing(self, elements)
+        test_support.container_slicing(self, elements)
 
         # Return
         return
@@ -163,22 +163,22 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        test_support._pickeling(self, gammalib.GXml())
-        test_support._pickeling(self, gammalib.GXmlAttribute())
-        test_support._pickeling(self, gammalib.GXmlComment())
-        test_support._pickeling(self, gammalib.GXmlDocument())
-        test_support._pickeling(self, gammalib.GXmlElement())
-        test_support._pickeling(self, gammalib.GXmlPI())
-        test_support._pickeling(self, gammalib.GXmlText())
+        test_support.pickeling(self, gammalib.GXml())
+        test_support.pickeling(self, gammalib.GXmlAttribute())
+        test_support.pickeling(self, gammalib.GXmlComment())
+        test_support.pickeling(self, gammalib.GXmlDocument())
+        test_support.pickeling(self, gammalib.GXmlElement())
+        test_support.pickeling(self, gammalib.GXmlPI())
+        test_support.pickeling(self, gammalib.GXmlText())
 
         # Perform pickeling tests of filled classes
-        test_support._pickeling(self, gammalib.GXml('<?xml version="1.0" standalone="no"?><a>Text</a>'))
-        test_support._pickeling(self, gammalib.GXmlAttribute('name','value'))
-        test_support._pickeling(self, gammalib.GXmlComment('comment'))
-        test_support._pickeling(self, gammalib.GXmlDocument('test.xml','a','b','c'))
-        test_support._pickeling(self, gammalib.GXmlElement('a file="x"'))
-        test_support._pickeling(self, gammalib.GXmlPI('<?PI?>'))
-        test_support._pickeling(self, gammalib.GXmlText('Text'))
+        test_support.pickeling(self, gammalib.GXml('<?xml version="1.0" standalone="no"?><a>Text</a>'))
+        test_support.pickeling(self, gammalib.GXmlAttribute('name','value'))
+        test_support.pickeling(self, gammalib.GXmlComment('comment'))
+        test_support.pickeling(self, gammalib.GXmlDocument('test.xml','a','b','c'))
+        test_support.pickeling(self, gammalib.GXmlElement('a file="x"'))
+        test_support.pickeling(self, gammalib.GXmlPI('<?PI?>'))
+        test_support.pickeling(self, gammalib.GXmlText('Text'))
 
         # Return
         return
