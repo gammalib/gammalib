@@ -783,7 +783,12 @@ void GCTABackground3D::set_members(void)
     m_inx_detx   = m_background.axis("DETX");
     m_inx_dety   = m_background.axis("DETY");
     m_inx_energy = m_background.axis("ENERG");
-    m_inx_bgd    = m_background.table("BGD");
+    if (m_background.has_table("BKG")) {
+        m_inx_bgd = m_background.table("BKG");
+    }
+    else {
+        m_inx_bgd = m_background.table("BGD"); // Old name, should not be used
+    }
 
     // Get axes dimensions
     m_num_detx   = m_background.axis_bins(m_inx_detx);

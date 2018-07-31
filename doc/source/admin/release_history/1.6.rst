@@ -57,6 +57,8 @@ Improvements
 * [`2404 <https://cta-redmine.irap.omp.eu/issues/2404>`_] -
   Make ``GPha``, ``GArf`` and ``GRmf`` output files XSPEC compliant.
   Add methods to store file attributes in ``GPha``
+* [`2343 <https://cta-redmine.irap.omp.eu/issues/2343>`_] -
+  CTA 3D background model now supports ``BKG`` column names
 * [`2309 <https://cta-redmine.irap.omp.eu/issues/2309>`_] -
   Add ``GSkyDir::cos_dist()`` method
 * [`2308 <https://cta-redmine.irap.omp.eu/issues/2308>`_] -

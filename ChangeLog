@@ -1,4 +1,4 @@
-2018-07-30
+2018-07-31
 
         * Version 1.6.0 released
         ========================
@@ -22,6 +22,7 @@
         Keep existing library path in installation script on Mac OS X (#2420)
         Make GPha, GArf and GRmf output files XSPEC compliant (#2404)
         Add methods to store file attributes in GPha (#2404)
+        CTA 3D background model now supports "BKG" column names (#2343)
         Compute likelihood values also if there are no model parameters (#2312)
         Add GSkyDir::cos_dist() method (#2309)
         Add GCTABackground::rate_ebin() method and gammalib::atan2() and

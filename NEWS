@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-30 July 2018
+31 July 2018
 
 
 1. Introduction
@@ -268,6 +268,10 @@ None
 
 20. CTA interface
 -----------------
+The 3D background model now supports "BKG" column names instead of the "BGD"
+column names. Since "BKG" should be the default, all "BGD" keywords in the
+calibration files were changed to "BKG" (#2343). 
+
 The likelihood value is now also computed in GObservations::likelihood::eval(),
 CTAOnOffObservation::likelihood_wstat() and CTAOnOffObservation::likelihood_cstat()
 for the case that the model has no parameters. This is particularily needed for
