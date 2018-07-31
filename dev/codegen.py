@@ -288,14 +288,17 @@ def add_instrument_class(name, tokens, classname, tmpname=None):
     add_file('src/template/%s.cpp' % tmpname, srcfile, tokens)
     add_file('src/template/%s.i'   % tmpname, pyfile, tokens)
 
-    # Update module header
-    filename   = 'inst/%s/include/G%sLib.hpp' % (name, name.upper())
-    afterline  = '#include "G%sObservation.hpp"' % (name.upper())
-    insertline = '#include "%s.hpp"\n' % (classname)
-    for line in fileinput.FileInput(filename,inplace=1):
-        if afterline in line:
-            line = line.replace(line, line+insertline)
-        print line,
+    # Update module header (excluding GXXXObservation and GXXXResponse)
+    test_obs = 'G'+name.upper()+'Observation'
+    test_rsp = 'G'+name.upper()+'Response'
+    if classname != test_obs and classname != test_rsp:
+        filename   = 'inst/%s/include/G%sLib.hpp' % (name, name.upper())
+        afterline  = '#include "G%sObservation.hpp"' % (name.upper())
+        insertline = '#include "%s.hpp"\n' % (classname)
+        for line in fileinput.FileInput(filename,inplace=1):
+            if afterline in line:
+                line = line.replace(line, line+insertline)
+            print line,
 
     # Update module Makefile.am (excluding GXXXObservation and GXXXResponse)
     test_obs = 'G'+name.upper()+'Observation'
