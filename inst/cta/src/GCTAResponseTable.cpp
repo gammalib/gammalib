@@ -1350,8 +1350,8 @@ void GCTAResponseTable::read(const GFitsTable& table)
     // Read tables
     read_tables(table);
 
-    // Read telescope keyword
-    m_telescope = (table.has_card("TELESCOPE")) ? table.string("TELESCOPE") : "";
+    // Read TELESCOPE keyword
+    m_telescope = (table.has_card("TELESCOP")) ? table.string("TELESCOP") : "";
 
     // Return
     return;
