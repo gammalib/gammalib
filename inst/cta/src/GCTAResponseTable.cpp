@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseTable.cpp - CTA response table class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1350,6 +1350,9 @@ void GCTAResponseTable::read(const GFitsTable& table)
     // Read tables
     read_tables(table);
 
+    // Read telescope keyword
+    m_telescope = (table.has_card("TELESCOPE")) ? table.string("TELESCOPE") : "";
+
     // Return
     return;
 }
@@ -1422,6 +1425,9 @@ void GCTAResponseTable::write(GFitsTable& table) const
 
     } // endfor: looped over all axes in response table
 
+    // Write TELESCOPE keyword
+    table.card("TELESCOP", m_telescope, "Telescope");
+
     // Return
     return;
 }
@@ -1430,7 +1436,7 @@ void GCTAResponseTable::write(GFitsTable& table) const
 /***********************************************************************//**
  * @brief Print response table information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing response table information.
  *
  * Puts CTA response table information into a std::string object for
@@ -1448,6 +1454,8 @@ std::string GCTAResponseTable::print(const GChatter& chatter) const
         result.append("=== GCTAResponseTable ===");
 
         // Append information
+        result.append("\n"+gammalib::parformat("Telescope") +
+                      m_telescope);
         result.append("\n"+gammalib::parformat("Dimension") +
                       gammalib::str(axes()));
 
@@ -1513,6 +1521,7 @@ void GCTAResponseTable::init_members(void)
     m_units_table.clear();
     m_axis_nodes.clear();
     m_tables.clear();
+    m_telescope.clear();
 
     // Initialise cache
     m_inx_left  = 0;
@@ -1564,6 +1573,7 @@ void GCTAResponseTable::copy_members(const GCTAResponseTable& table)
     m_units_table   = table.m_units_table;
     m_axis_nodes    = table.m_axis_nodes;
     m_tables        = table.m_tables;
+    m_telescope     = table.m_telescope;
 
     // Copy cache
     m_inx_left  = table.m_inx_left;

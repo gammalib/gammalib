@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseTable.hpp - CTA response table class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -99,7 +99,9 @@ public:
     void               axis_linear(const int& axis);
     void               axis_log10(const int& axis);
     void               axis_radians(const int& axis);
-    void               append_axis(const std::vector<double>& axis_lo, 
+    const std::string& telescope(void) const;
+    void               telescope(const std::string& telescope);
+    void               append_axis(const std::vector<double>& axis_lo,
                                    const std::vector<double>& axis_hi,
                                    const std::string&         name,
                                    const std::string&         unit);    
@@ -136,6 +138,7 @@ private:
     std::vector<std::string>          m_units_table;   //!< Parameter units
     std::vector<GNodeArray>           m_axis_nodes;    //!< Axes node arrays
     std::vector<std::vector<double> > m_tables;        //!< Tables
+    std::string                       m_telescope;     //!< Telescope keyword
 
     // Response table computation cache for 1D access
     mutable int    m_inx_left;        //!< Index of left node
@@ -217,6 +220,35 @@ inline
 const int& GCTAResponseTable::elements(void) const
 {
     return (m_nelements);
+}
+
+
+/***********************************************************************//**
+ * @brief Return telescope string
+ *
+ * @return Telescope name.
+ *
+ * Returns string containing the telescope name.
+ ***************************************************************************/
+inline
+const std::string& GCTAResponseTable::telescope(void) const
+{
+    return (m_telescope);
+}
+
+
+/***********************************************************************//**
+ * @brief Set telescope string
+ *
+ * @param[in] telescope Telescope name.
+ *
+ * Sets telescope name.
+ ***************************************************************************/
+inline
+void GCTAResponseTable::telescope(const std::string& telescope)
+{
+    m_telescope = telescope;
+    return;
 }
 
 #endif /* GCTARESPONSETABLE_HPP */

@@ -3,6 +3,7 @@
         * Version 1.6.0 released
         ========================
 
+        Apply CTA 2D energy dispersion kludge only to CTA data (#2654)
         Add ARC WCS projection (#2541)
         Add GLog::buffer() method.
         Renamed GPhoton::mcid() to GPhoton::mc_id()

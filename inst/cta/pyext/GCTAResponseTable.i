@@ -154,6 +154,8 @@ public:
     void               axis_linear(const int& axis);
     void               axis_log10(const int& axis);
     void               axis_radians(const int& axis);
+    const std::string& telescope(void) const;
+    void               telescope(const std::string& telescope);
     void               append_axis(const std::vector<double>& axis_lo, 
                                    const std::vector<double>& axis_hi,
                                    const std::string&         name,

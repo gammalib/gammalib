@@ -191,7 +191,7 @@ void GPhoton::time(const GTime& time)
 /***********************************************************************//**
  * @brief Set photon Monte-Carlo identifier
  *
- * @param[in] mcid Photon Monte-Carlo identifier.
+ * @param[in] mc_id Photon Monte-Carlo identifier.
  ***************************************************************************/
 inline
 void GPhoton::mc_id(const int& mc_id)

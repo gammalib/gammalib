@@ -19,6 +19,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`2654 <https://cta-redmine.irap.omp.eu/issues/2654>`_] -
+  Apply CTA 2D energy dispersion kludge only to CTA data
 * [`2495 <https://cta-redmine.irap.omp.eu/issues/2495>`_] -
   Fix handling of q-mode parameters
 * [`2420 <https://cta-redmine.irap.omp.eu/issues/2420>`_] -
@@ -35,7 +37,7 @@ Improvements
 ------------
 
 * [`2541 <https://cta-redmine.irap.omp.eu/issues/2541>`_] -
-  Add ``ARC`` WCS projection.
+  Add ``ARC`` WCS projection
 * Add ``GLog::buffer()`` method
 * Renamed ``GPhoton::mcid()`` to ``GPhoton::mc_id()``
 * [`2513 <https://cta-redmine.irap.omp.eu/issues/2513>`_] -
