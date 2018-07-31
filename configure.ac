@@ -1446,6 +1446,7 @@ AC_CONFIG_FILES([Makefile
                  test/Makefile
                  test/test_python.sh
                  test/test_examples.sh
+                 test/test_examples.py
                  pyext/Makefile
                  pyext/setup.py
                  pyext/gammalib/__init__.py
@@ -1456,6 +1457,7 @@ AC_CONFIG_FILES([Makefile
                  testconf.sh],
                 [if test -f test/test_python.sh; then chmod +x test/test_python.sh; fi;
                  if test -f test/test_examples.sh; then chmod +x test/test_examples.sh; fi;
+                 if test -f test/test_examples.py; then chmod +x test/test_examples.py; fi;
                  if test -f testconf.sh; then chmod +x testconf.sh; fi])
 
 if test "x$with_inst" = "xyes"; then
