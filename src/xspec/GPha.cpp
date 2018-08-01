@@ -1113,7 +1113,7 @@ void GPha::write(GFits& fits) const
         hdu.card("CORRSCAL", 1.0,              "Correction scaling factor");
         hdu.card("RESPFILE", respfile,         "Associated RMF filename");
         hdu.card("ANCRFILE", ancrfile,         "Associated ARF filename");
-        hdu.card("HDUCLASS", "OGIP",           "Format conforms to OGIP srandard");
+        hdu.card("HDUCLASS", "OGIP",           "Format conforms to OGIP standard");
         hdu.card("HDUCLAS1", "SPECTRUM",       "PHA dataset");
         hdu.card("HDUVERS",  "1.2.1",          "Version of the file format");
         hdu.card("POISSERR", true,             "Poisson errors to be assumed");

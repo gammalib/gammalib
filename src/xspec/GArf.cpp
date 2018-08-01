@@ -794,7 +794,7 @@ void GArf::write(GFits& fits) const
         hdu.card("TELESCOP", "unknown",  "Telescope");
         hdu.card("INSTRUME", "unknown",  "Instrument");
         hdu.card("FILTER",   "none",     "Filter");
-        hdu.card("HDUCLASS", "OGIP",     "Format conforms to OGIP srandard");
+        hdu.card("HDUCLASS", "OGIP",     "Format conforms to OGIP standard");
         hdu.card("HDUCLAS1", "RESPONSE", "Extension contains response data");
         hdu.card("HDUCLAS2", "SPECRESP", "Extension contains an ARF");
         hdu.card("HDUVERS",  "1.1.0",    "Version of the file format");

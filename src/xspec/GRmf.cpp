@@ -820,7 +820,7 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         hdu.card("FILTER",   "none",       "Filter");
         hdu.card("CHANTYPE", "PI",         "Channel type");
         hdu.card("DETCHANS", nmeasured(),  "Total number of possible channels");
-        hdu.card("HDUCLASS", "OGIP",       "Format conforms to OGIP srandard");
+        hdu.card("HDUCLASS", "OGIP",       "Format conforms to OGIP standard");
         hdu.card("HDUCLAS1", "RESPONSE",   "Extension contains response data");
         hdu.card("HDUCLAS2", "RSP_MATRIX", "Extension contains a RMF");
         hdu.card("HDUVERS",  "1.3.0",      "Version of the file format");
