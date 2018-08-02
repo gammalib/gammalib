@@ -282,18 +282,38 @@ GCTABackground3D* GCTABackground3D::clone(void) const
  *     DETY_HI  - DETY upper bin boundaries
  *     ENERG_LO - Energy lower bin boundaries
  *     ENERG_HI - Energy upper bin boundaries
- *     BGD      - Background template
+ *     BKG      - Background template (or BGD as legacy column name)
  *
  * The data are stored in the m_background member. The DETX and DETY axes
  * will be set to radians, the energy axis will be set to log10.
+ *
+ * This method ignores all column names that are not the mandatory column
+ * names in the FITS @p table.
  ***************************************************************************/
 void GCTABackground3D::read(const GFitsTable& table)
 {
     // Clear response table
     m_background.clear();
 
-    // Read background table
-    m_background.read(table);
+    // Copy response table and skip all columns that are not mandatory. This
+    // kludge is needed to get rid of additional columns in the HESS
+    // background model.
+    GFitsTable *ptr = table.clone();  // Make sure that table is of same type
+    for (int i = 0; i < table.ncols(); ++i) {
+        std::string colname = table[i]->name();
+        if ((colname != "DETX_LO")  && (colname != "DETX_HI")  &&
+            (colname != "DETY_LO")  && (colname != "DETY_HI")  &&
+            (colname != "ENERG_LO") && (colname != "ENERG_HI") &&
+            (colname != "BKG")      && (colname != "BGD")) {
+            ptr->remove(colname);
+        }
+    }
+
+    // Read background table from reduced FITS table
+    m_background.read(*ptr);
+
+    // Delete reduced FITS table
+    delete ptr;
 
     // Set class members
     set_members();
@@ -764,7 +784,7 @@ void GCTABackground3D::free_members(void)
  * @exception GException::invalid_value
  *            Response table is not three-dimensional.
  *
- * Set class members based on the background table.  The DETX and DETY axes
+ * Set class members based on the background table. The DETX and DETY axes
  * will be set to radians, the energy axis will be set to log10.
  ***************************************************************************/
 void GCTABackground3D::set_members(void)

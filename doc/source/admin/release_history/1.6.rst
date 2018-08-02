@@ -36,6 +36,7 @@ Bug fixes
 Improvements
 ------------
 
+* Add ``gammalib::replace_segment()`` function
 * [`2541 <https://cta-redmine.irap.omp.eu/issues/2541>`_] -
   Add ``ARC`` WCS projection
 * Add ``GLog::buffer()`` method
@@ -61,6 +62,9 @@ Improvements
   Add methods to store file attributes in ``GPha``
 * [`2343 <https://cta-redmine.irap.omp.eu/issues/2343>`_] -
   CTA 3D background model now supports ``BKG`` column names
+* [`2339 <https://cta-redmine.irap.omp.eu/issues/2339>`_] -
+  Ignore non-manadory columns in ``GCTABackground3D::read()`` method and
+  add ``GFitsTable::remove()`` methods
 * [`2309 <https://cta-redmine.irap.omp.eu/issues/2309>`_] -
   Add ``GSkyDir::cos_dist()`` method
 * [`2308 <https://cta-redmine.irap.omp.eu/issues/2308>`_] -

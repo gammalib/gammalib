@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -109,6 +109,11 @@ void TestGSupport::test_tools(void)
     test_value(gammalib::rstrip_chars("Worldxy", "xy"), "World");
     test_value(gammalib::rstrip_chars("xxWorld", "x"), "xxWorld");
     test_value(gammalib::rstrip_chars("0.0012300", "0"), "0.00123");
+
+    // Replace segments
+    test_value(gammalib::replace_segment("Wonderful","onder","ish"), "Wishful");
+    test_value(gammalib::replace_segment("Wonderful","Wonder","X"), "Xful");
+    test_value(gammalib::replace_segment("Wonderful","ful","X"), "WonderX");
 
     // Test noun number conversion
     test_value(gammalib::number("World", 0), "Worlds");

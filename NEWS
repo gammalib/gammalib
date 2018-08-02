@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-31 July 2018
+2 August 2018
 
 
 1. Introduction
@@ -58,6 +58,8 @@ The following methods have been added:
 - GFitsHDU::card(std::string&, bool&, std::string&)
 - GFitsHeaderCard(std::string&, std::string&, std::string&, std::string&)
 - GFitsHeaderCard(std::string&, bool&, std::string&)
+- GFitsTable::remove(int&)
+- GFitsTable::remove(std::string&)
 - GObservation::has_events()
 - GModelSpatialPointSource::type(std::string&)
 - GModelSpectralPlaw::type(std::string&)
@@ -165,6 +167,10 @@ None
 
 6. FITS I/O Interface
 ---------------------
+Add GFitsTable::remove() methods that allow the removal of table columns from
+a GFitsTable object. A protected GFitsTable::update_header() method was also
+added to update the header after FITS table row or column manipulations (#2339).
+
 None
 
 
@@ -222,7 +228,8 @@ cosine (#2309).
 
 13. Support module
 ------------------
-None
+The gammalib::replace_segment() function was added that replaces string segments
+by replacement strings.
 
 
 14. XML module
@@ -269,6 +276,9 @@ None
 
 20. CTA interface
 -----------------
+Non-mandatory column names are now ignored in GCTABackground3D::read() to
+make the code compatible with the current H.E.S.S. data structure (#2339).
+
 The 3D background model now supports "BKG" column names instead of the "BGD"
 column names. Since "BKG" should be the default, all "BGD" keywords in the
 calibration files were changed to "BKG" (#2343). 

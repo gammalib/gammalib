@@ -59,6 +59,8 @@
 #define G_SET2                "GFitsTable::set(std::string&, GFitsTableCol&)"
 #define G_INSERT1                   "GFitsTable::insert(int, GFitsTableCol&)"
 #define G_INSERT2          "GFitsTable::insert(std::string&, GFitsTableCol&)"
+#define G_REMOVE1                                  "GFitsTable::remove(int&)"
+#define G_REMOVE2                          "GFitsTable::remove(std::string&)"
 #define G_INSERT_ROWS                   "GFitsTable::insert_rows(int&, int&)"
 #define G_REMOVE_ROWS                   "GFitsTable::remove_rows(int&, int&)"
 #define G_DATA_OPEN                            "GFitsTable::data_open(void*)"
@@ -82,7 +84,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Construct void instance. 
+ * Construct empty FITS table.
  ***************************************************************************/
 GFitsTable::GFitsTable(void) : GFitsHDU()
 {
@@ -99,7 +101,7 @@ GFitsTable::GFitsTable(void) : GFitsHDU()
  *
  * @param[in] nrows Number of rows in table.
  *
- * Construct instance for a specified number of table rows.
+ * Construct FITS table with @p nrows table rows.
  ***************************************************************************/
 GFitsTable::GFitsTable(const int& nrows) : GFitsHDU()
 {
@@ -117,7 +119,7 @@ GFitsTable::GFitsTable(const int& nrows) : GFitsHDU()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] table Table.
+ * @param[in] table FITS table.
  ***************************************************************************/
 GFitsTable::GFitsTable(const GFitsTable& table) : GFitsHDU(table)
 {
@@ -154,8 +156,8 @@ GFitsTable::~GFitsTable(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] table Table.
- * @return Table.
+ * @param[in] table FITS table.
+ * @return FITS table.
  ***************************************************************************/
 GFitsTable& GFitsTable::operator=(const GFitsTable& table)
 {
@@ -347,6 +349,9 @@ GFitsTableCol* GFitsTable::set(const int& colnum, const GFitsTableCol& column)
     // Clone column
     m_columns[colnum] = column.clone();
 
+    // Update header
+    update_header();
+
     // Return pointer to column
     return m_columns[colnum];
 }
@@ -435,9 +440,7 @@ GFitsTableCol* GFitsTable::insert(int colnum, const GFitsTableCol& column)
 
         // Copy over old column pointers. Leave some space at the position
         // where we want to insert the column
-        int src;
-        int dst;
-        for (src = 0, dst = 0; dst < m_cols+1; ++dst) {
+        for (int src = 0, dst = 0; dst < m_cols+1; ++dst) {
             if (dst == colnum) {
                 tmp[dst] = NULL;
             }
@@ -447,7 +450,8 @@ GFitsTableCol* GFitsTable::insert(int colnum, const GFitsTableCol& column)
             }
         }
 
-        // Free old column pointer array
+        // Free old column pointer array. Do not free the columns since they
+        // are still alive in the new column pointer array.
         delete [] m_columns;
 
         // Connect new memory
@@ -464,6 +468,9 @@ GFitsTableCol* GFitsTable::insert(int colnum, const GFitsTableCol& column)
     // Reset column number since column does not already exist in FITS
     // file
     m_columns[colnum]->colnum(0);
+
+    // Update header
+    update_header();
 
     // Return column pointer
     return (m_columns[colnum]);
@@ -496,6 +503,98 @@ GFitsTableCol* GFitsTable::insert(const std::string&   colname,
 
 
 /***********************************************************************//**
+ * @brief Remove column from the table
+ *
+ * @param[in] colnum Column number [0,...,ncols()-1].
+ *
+ * @exception GException::fits_bad_col_length
+ *            The length of the column is incompatible with the number of
+ *            rows in the table.
+ *
+ * Remove the column at position @p colnum from the table.
+ ***************************************************************************/
+void GFitsTable::remove(const int& colnum)
+{
+    // Check if column number is valid
+    if (colnum < 0 || colnum >= ncols()) {
+        throw GException::out_of_range(G_REMOVE1, "Column number", colnum, ncols());
+    }
+
+    // At this point we should have at least one column in the table and we
+    // can now reduce the table by removing the column. If there is just a
+    // single column in the table then delete all columns and set the number
+    // of columns to zero ...
+    if (m_cols == 1) {
+        free_columns();
+        m_cols = 0;
+    }
+
+    // ... otherwise remove the specified column
+    else {
+
+        // Allocate fresh memory
+        GFitsTableCol** tmp = new GFitsTableCol*[m_cols-1];
+
+        // Copy over old column pointers, skipping the column that should be
+        // removed
+        for (int src = 0, dst = 0; src < m_cols; ++src) {
+            if (src != colnum) {
+                tmp[dst] = m_columns[src];
+                tmp[dst]->colnum(dst);
+                dst++;
+            }
+        }
+
+        // Free deleted column and old column pointer array. Do not free the
+        // other columns since they are still alive in the new column pointer
+        // array.
+        if (m_columns[colnum] != NULL) {
+            delete m_columns[colnum];
+        }
+        delete [] m_columns;
+
+        // Connect new memory
+        m_columns = tmp;
+
+        // Decerement column counter
+        m_cols--;
+
+    } // endelse: we made space to insert a column
+
+    // Update header
+    update_header();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove column from the table
+ *
+ * @param[in] colname Column name.
+ *
+ * Remove the column with name @p colname from the table.
+ ***************************************************************************/
+void GFitsTable::remove(const std::string& colname)
+{
+    // Get column number
+    int colnum = this->colnum(colname);
+
+    // If column has not been found throw an exception
+    if (colnum < 0) {
+        throw GException::fits_column_not_found(G_REMOVE2, colname);
+    }
+
+    // Remove column
+    remove(colnum);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Append rows to the table
  *
  * @param[in] nrows Number of rows to be appended.
@@ -508,7 +607,7 @@ void GFitsTable::append_rows(const int& nrows)
 {
     // Set row number for insertion to end of the file
     int rownum = this->nrows();
-    
+
     // Insert rows
     insert_rows(rownum, nrows);
 
@@ -546,11 +645,14 @@ void GFitsTable::insert_rows(const int& row, const int& nrows)
         for (int icol = 0; icol < m_cols; ++icol) {
             m_columns[icol]->insert(row, nrows);
         }
-        
+
         // Increment number of rows in table
         m_rows += nrows;
 
     } // endfor: there were rows to be inserted
+
+    // Update header
+    update_header();
 
     // Return
     return;
@@ -578,7 +680,7 @@ void GFitsTable::remove_rows(const int& row, const int& nrows)
     if (row < 0 || row >= m_rows) {
         throw GException::fits_invalid_row(G_REMOVE_ROWS, row, m_rows-1);
     }
-    
+
     // Make sure that we don't remove beyond the limit
     if (nrows < 0 || nrows > m_rows-row) {
         throw GException::fits_invalid_nrows(G_REMOVE_ROWS, nrows, m_rows-row);
@@ -591,11 +693,14 @@ void GFitsTable::remove_rows(const int& row, const int& nrows)
         for (int icol = 0; icol < m_cols; ++icol) {
             m_columns[icol]->remove(row, nrows);
         }
-        
+
         // Decrement number of rows in table
         m_rows -= nrows;
 
     } // endfor: there were rows to be removed
+
+    // Update header
+    update_header();
 
     // Return
     return;
@@ -606,13 +711,13 @@ void GFitsTable::remove_rows(const int& row, const int& nrows)
  * @brief Checks the presence of a column in table
  *
  * @param[in] colname Column name.
- * @return True of the column exists, false otherwise.
+ * @return True if the column exists, false otherwise.
  ***************************************************************************/
 bool GFitsTable::contains(const std::string& colname) const
 {
     // Get pointer in column
     GFitsTableCol* ptr = ptr_column(colname);
-    
+
     // Return state
     return (ptr != NULL);
 }
@@ -713,7 +818,9 @@ void GFitsTable::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] table Table to copy
+ * @param[in] table FITS Table.
+ *
+ * Copies FITS table members from @p table.
  ***************************************************************************/
 void GFitsTable::copy_members(const GFitsTable& table)
 {
@@ -741,11 +848,26 @@ void GFitsTable::copy_members(const GFitsTable& table)
 
 
 /***********************************************************************//**
- * @brief Delete class members
+ * @brief Free class members
  *
- * De-allocates all column pointers
+ * Free all class members.
  ***************************************************************************/
 void GFitsTable::free_members(void)
+{
+    // Free columns
+    free_columns();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Free column pointers
+ *
+ * De-allocates all column pointers.
+ ***************************************************************************/
+void GFitsTable::free_columns(void)
 {
     // Free memory
     if (m_columns != NULL) {
@@ -757,6 +879,166 @@ void GFitsTable::free_members(void)
 
     // Mark memory as freed
     m_columns = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update header after row or column manipulations
+ *
+ * Updates the header after row or column manipulations so that the header
+ * is kept up-to-date with the current table structure.
+ *
+ * The following keywords are updated:
+ *     - TFIELDS
+ *     - NAXIS1
+ *     - NAXIS2
+ *     - TTYPEi
+ *     - TFORMi
+ *     - TUNITi
+ *     - TZEROi (only for unsigned integer columns)
+ *     - TSCALi (only for unsigned integer columns)
+ *     - TDIMi (only for columns with dimensions)
+ *
+ * This method should be called after adding or removing table rows or
+ * columns.
+ ***************************************************************************/
+void GFitsTable::update_header(void)
+{
+    // Get non-const reference to header for manipulations
+    GFitsHeader& hdr = const_cast<GFitsHeader&>(header());
+
+    // Update TFIELDS keyword
+    card("TFIELDS", m_cols, "number of table fields");
+
+    // Compute NAXIS1 keyword value
+    int naxis1 = 0;
+    for (int i = 0; i < m_cols; ++i) {
+        if (m_columns[i] != NULL) {
+            naxis1 += m_columns[i]->number() * m_columns[i]->width();
+        }
+    }
+
+    // Update NAXIS keywords
+    card("NAXIS1", naxis1, "width of table in bytes");
+    card("NAXIS2", m_rows, "number of rows in table");
+
+    // Loop over all columns
+    for (int i = 0; i < m_cols; ++i) {
+
+        // Setup keywords
+        std::string key_ttype = "TTYPE" + gammalib::str(i+1);
+        std::string key_tform = "TFORM" + gammalib::str(i+1);
+        std::string key_tunit = "TUNIT" + gammalib::str(i+1);
+        std::string key_tzero = "TZERO" + gammalib::str(i+1);
+        std::string key_tscal = "TSCAL" + gammalib::str(i+1);
+        std::string key_tdim  = "TDIM"  + gammalib::str(i+1);
+
+        // Continue only if the column is valid
+        if (m_columns[i] != NULL) {
+
+            // Get values
+            char* ttype = get_ttype(i);
+            char* tform = get_tform(i);
+            char* tunit = get_tunit(i);
+
+            // Convert into strings
+            std::string val_ttype(ttype);
+            std::string val_tform(tform);
+            std::string val_tunit(tunit);
+
+            // Replace "U" by "I" and "V" by "J" in TFORM keyword. This is
+            // needed due to a cfitsio internal translation of these
+            // characters.
+            val_tform = gammalib::replace_segment(val_tform, "U", "I");
+            val_tform = gammalib::replace_segment(val_tform, "V", "J");
+
+            // Delete values
+            if (ttype != NULL) delete [] ttype;
+            if (tform != NULL) delete [] tform;
+            if (tunit != NULL) delete [] tunit;
+
+            // Build TDIM value
+            std::vector<int> tdim     = m_columns[i]->dim();
+            std::string      val_tdim = "";
+            if (tdim.size() > 0) {
+                val_tdim.append("("+gammalib::str(tdim[0]));
+                for (int k = 1; k < tdim.size(); ++k) {
+                    val_tdim.append(","+gammalib::str(tdim[k]));
+                }
+                val_tdim.append(")");
+            }
+
+            // Setup comments
+            std::string com_ttype = "label for field   " + gammalib::str(i+1);
+            std::string com_tform = "data format of field " + gammalib::str(i+1);
+            std::string com_tunit = "physical unit of field" + gammalib::str(i+1);
+            std::string com_tdim  = "dimensions of field " + gammalib::str(i+1);
+
+            // Set keywords
+            card(key_ttype, val_ttype, com_ttype);
+            card(key_tform, val_tform, com_tform);
+            card(key_tunit, val_tunit, com_tunit);
+            if (!val_tdim.empty()) {
+                card(key_tdim, val_tdim, com_tdim);
+            }
+            else {
+                if (hdr.contains(key_tdim)) {
+                    hdr.remove(key_tdim);
+                }
+            }
+
+            // Set TZERO and TSCAL keywords for unsigned columns
+            if (std::abs(m_columns[i]->type()) == __TUSHORT) {
+                card(key_tzero, 0, "offset for unsigned integers");
+                card(key_tscal, 0, "data are not scaled");
+                hdr[key_tzero].value((unsigned long)(32768)); // Use appropriate value method
+                hdr[key_tscal].value(1);
+            }
+            else if ((std::abs(m_columns[i]->type()) == __TULONG) ||
+                     (std::abs(m_columns[i]->type()) == __TUINT)) {
+                card(key_tzero, 0, "offset for unsigned integers");
+                card(key_tscal, 0, "data are not scaled");
+                hdr[key_tzero].value((unsigned long)(2147483648)); // Use appropriate value method
+                hdr[key_tscal].value(1);
+            }
+
+        } // endif: column was valid
+
+        // ... otherwise remove keywords
+        else {
+            if (hdr.contains(key_ttype)) hdr.remove(key_ttype);
+            if (hdr.contains(key_tform)) hdr.remove(key_tform);
+            if (hdr.contains(key_tunit)) hdr.remove(key_tunit);
+            if (hdr.contains(key_tzero)) hdr.remove(key_tzero);
+            if (hdr.contains(key_tscal)) hdr.remove(key_tscal);
+            if (hdr.contains(key_tdim))  hdr.remove(key_tdim);
+        }
+
+    } // endif: loop over all columns
+
+    // Loop over possible columns remaining in header
+    for (int i = m_cols; i < 100; ++i) {
+
+        // Setup keywords
+        std::string key_ttype = "TTYPE" + gammalib::str(i+1);
+        std::string key_tform = "TFORM" + gammalib::str(i+1);
+        std::string key_tunit = "TUNIT" + gammalib::str(i+1);
+        std::string key_tzero = "TZERO" + gammalib::str(i+1);
+        std::string key_tscal = "TSCAL" + gammalib::str(i+1);
+        std::string key_tdim  = "TDIM"  + gammalib::str(i+1);
+
+        // Remove keywords
+        if (hdr.contains(key_ttype)) hdr.remove(key_ttype);
+        if (hdr.contains(key_tform)) hdr.remove(key_tform);
+        if (hdr.contains(key_tunit)) hdr.remove(key_tunit);
+        if (hdr.contains(key_tzero)) hdr.remove(key_tzero);
+        if (hdr.contains(key_tscal)) hdr.remove(key_tscal);
+        if (hdr.contains(key_tdim))  hdr.remove(key_tdim);
+
+    } // endif: loop over possible columns remaining in header
 
     // Return
     return;
@@ -810,7 +1092,7 @@ void GFitsTable::data_open(void* vptr)
     // Allocate and initialise memory for column pointers. Note that this
     // initialisation is needed to allow for a clean free_members() call
     // in case of any exception.
-    if (m_columns != NULL) delete [] m_columns;
+    free_columns();
     m_columns = new GFitsTableCol*[m_cols];
     for (int i = 0; i < m_cols; ++i) {
         m_columns[i] = NULL;
@@ -899,7 +1181,7 @@ void GFitsTable::data_open(void* vptr)
         else {
             dim[strlen(dim)-1] = '\0';
         }
-        
+
         // If found, extract column dimension into vector array of integers
         std::vector<int> vdim;
         std::string      sdim = gammalib::strip_chars(gammalib::strip_whitespace(&(dim[1])),"()");
@@ -943,23 +1225,23 @@ void GFitsTable::data_open(void* vptr)
                 m_columns[i]->number(m_columns[i]->repeat());
             }
         }
-        
+
         // If TDIM information was set then check its consistency
         if (!vdim.empty()) {
-            
+
             // Compute expectation
             int num = vdim[0];
             for (int k = 1; k < vdim.size(); ++k) {
                 num *= vdim[k];
             }
-                
+
             // Compare with real size
             if (num != m_columns[i]->number()) {
                 throw GException::fits_inconsistent_tdim(G_DATA_OPEN,
                                                          vdim,
                                                          m_columns[i]->number());
             }
-                
+
         } // endif: Valid TDIM information was found
 
     } // endfor: looped over all columns
@@ -1021,7 +1303,7 @@ void GFitsTable::data_save(void)
     // Move to HDU
     int status = 0;
     int type   = 0;
-    status = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, &type, &status);
+    status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, &type, &status);
 
     // If move was successful but HDU type in file differs from HDU type
     // of object then replace the HDU in the file
@@ -1124,7 +1406,7 @@ void GFitsTable::data_save(void)
         #endif
 
     }
-    
+
     // ... otherwise we signal a FITS error
     else if (status != 0) {
         throw GException::fits_error(G_DATA_SAVE, status);
@@ -1136,7 +1418,7 @@ void GFitsTable::data_save(void)
     if (status != 0) {
         throw GException::fits_error(G_DATA_SAVE, status);
     }
-    
+
     // Debug option: Log number of columns in FITS table
     #if defined(G_DEBUG_SAVE)
     std::cout << "GFitsTable::save: FITS table contains ";
@@ -1175,7 +1457,7 @@ void GFitsTable::data_save(void)
         // deleting rows at the end of the table as we anyways rewrite the
         // entire table later
         if (m_rows > num_rows) {
-        
+
             // Insert rows at the end of the table
             long long firstrow = num_rows;
             long long nrows    = m_rows - num_rows;
@@ -1183,13 +1465,13 @@ void GFitsTable::data_save(void)
             if (status != 0) {
                 throw GException::fits_error(G_DATA_SAVE, status);
             }
-            
+
             // Debug option: Log row adding
             #if defined(G_DEBUG_SAVE)
             std::cout << "GFitsTable::save: Added " << nrows;
             std::cout << " rows to FITS table." << std::endl;
             #endif
-            
+
         }
         else if (m_rows < num_rows) {
 
@@ -1200,20 +1482,20 @@ void GFitsTable::data_save(void)
             if (status != 0) {
                 throw GException::fits_error(G_DATA_SAVE, status);
             }
-            
+
             // Debug option: Log row adding
             #if defined(G_DEBUG_SAVE)
             std::cout << "GFitsTable::save: Deleted " << nrows;
             std::cout << " rows from FITS table." << std::endl;
             #endif
-            
+
         }
 
         // Debug option: Show where we are
         #if defined(G_DEBUG_SAVE)
         std::cout << "GFitsTable::save: Now update all columns." << std::endl;
         #endif
-        
+
         // Update all columns. The 'm_colnum' field specifies where in the
         // FITS file the column resides. If 'm_colnum=0' then we have a new
         // column that does not yet exist. In this case we append a new column
@@ -1278,7 +1560,7 @@ void GFitsTable::data_save(void)
             }
             value[strlen(value)-1] = '\0';
             std::string colname = gammalib::strip_whitespace(&(value[1]));
-            
+
             // Check if this column is actually in our list of columns
             bool used = false;
             for (int i = 0; i < m_cols; ++i) {
@@ -1304,7 +1586,7 @@ void GFitsTable::data_save(void)
                 std::cout << "GFitsTable::save: Deleted obsolete column ";
                 std::cout << value << " from FITS table." << std::endl;
                 #endif
-                
+
             } // endif: deleted column
 
         } // endfor: Looped over all FITS columns
@@ -1317,46 +1599,8 @@ void GFitsTable::data_save(void)
     std::cout << std::endl;
     #endif
 
-    // Now update the header for all columns (unit and TDIM information)
-    for (int i = 0; i < m_cols; ++i) {
-
-        // Only consider valid columns
-        if (m_columns[i] != NULL) {
-
-            // Get column number
-            int colnum = m_columns[i]->colnum();
-
-            // Update column units if available
-            if (m_columns[i]->unit().length() > 0) {
-
-                // Build keyname
-                std::string keyname = "TUNIT"+gammalib::str(colnum);
-
-                // Update header card
-                card(keyname, m_columns[i]->unit(), "physical unit of field");
-            }
-
-            // Write TDIM keyword if available
-            if (m_columns[i]->dim().size() > 0) {
-        
-                // Build keyname
-                std::string keyname = "TDIM"+gammalib::str(colnum);
-            
-                // Build value string
-                std::string value = "("+gammalib::str(m_columns[i]->dim()[0]);
-                for (int k = 1; k < m_columns[i]->dim().size(); ++k) {
-                    value += ","+gammalib::str(m_columns[i]->dim()[k]);
-                }
-                value += ")";
-                
-                // Update header card
-                card(keyname, value, "dimensions of field");
-            
-            } // endif: wrote TDIM keyword
-
-        } // endif: column was valid
-
-    } // endfor: looped over all columns
+    // Now update the header (IS THIS REALLY NEEDED HERE???)
+    update_header();
 
     // Debug definition: Dump method exit
     #if defined(G_DEBUG_SAVE)
@@ -1607,7 +1851,7 @@ GFitsTableCol* GFitsTable::ptr_column(const std::string& colname) const
             }
         }
     }
-    
+
     // Return pointer
     return ptr;
 }

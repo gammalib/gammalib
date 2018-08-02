@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GTools.i - GammaLib tools                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,9 @@ namespace gammalib {
                                          const std::string& chars);
     std::string              rstrip_chars(const std::string& arg,
                                           const std::string& chars);
+    std::string              replace_segment(const std::string& arg,
+                                             const std::string& segment,
+                                             const std::string& replacement);
     std::string              expand_env(const std::string& arg);
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);

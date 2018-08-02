@@ -142,6 +142,44 @@ std::string gammalib::rstrip_chars(const std::string& arg,
 
 
 /***********************************************************************//**
+ * @brief Replace string segment in string
+ *
+ * @param[in] arg String in which character segements are to be replaced
+ * @param[in] segment String segment to be replaced.
+ * @param[in] replacement Replacement string.
+ * @return String with replaced segements.
+ *
+ * Replaces string segments by a replacement string in a given string.
+ *
+ * If the input string @p arg is "Wonderful", the @p segment is "onder" and
+ * the @p replacement is "ish" the method will return "Wishful".
+ ***************************************************************************/
+std::string gammalib::replace_segment(const std::string& arg,
+                                      const std::string& segment,
+                                      const std::string& replacement)
+{
+    // Initialise result string by argument
+    std::string result = arg;
+
+    // Initialise character pointer
+    std::string::size_type pos   = 0;
+    std::string::size_type start = 0;
+
+    // Loop over string
+    while (start != std::string::npos) {
+        start = result.find(segment, pos);
+        if (start != std::string::npos) {
+            result = result.replace(start, segment.length(), replacement);
+            pos    = start + replacement.length();
+        }
+    }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Expand environment variables in string
  *
  * @param[in] arg String.

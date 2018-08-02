@@ -327,6 +327,12 @@ std::string GFitsTableCol::tform_binary(void) const
     case __TLONG:
         typecode = "J";
         break;
+    case __TUINT:
+        typecode = "V";
+        break;
+    case __TINT:
+        typecode = "J";
+        break;
     case __TFLOAT:
         typecode = "E";
         break;
@@ -361,7 +367,7 @@ std::string GFitsTableCol::tform_binary(void) const
     if (is_variable() && m_varlen > 0) {
         tform.append("("+gammalib::str(m_varlen)+")");
     }
-    
+
     // Return TFORM code
     return tform;
 }
@@ -445,14 +451,14 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
 
         // Append dimensions (if available)
         if (!dim().empty()) {
-    
+
             // Build TDIM string
             std::string value = "("+gammalib::str(dim()[0]);
             for (int k = 1; k < dim().size(); ++k) {
                 value += ","+gammalib::str(dim()[k]);
             }
             value += ")";
-        
+
             // Append
             result.append(" "+value);
         }
@@ -599,14 +605,14 @@ void GFitsTableCol::load_column_fixed(void)
             status     = __ffmahd(FPTR(m_fitsfile),
                                   (FPTR(m_fitsfile)->HDUposition)+1,
                                   NULL, &status);
-            
+
             // If this failed because:
             // - the primary HDU was not found (status 252)
             // - we moved past the file (status 107)
             // we assume that no data have yet been written to the file and
             // we skip the loading.
             if (status != 252 && status != 107) {
-            
+
                 // Break on any other cfitsio error
                 if (status != 0) {
                     throw GException::fits_hdu_not_found(G_LOAD_COLUMN_FIXED,
@@ -622,7 +628,7 @@ void GFitsTableCol::load_column_fixed(void)
                     throw GException::fits_error(G_LOAD_COLUMN_FIXED, status,
                                     "for column '"+m_name+"'.");
                 }
-        
+
             } // endif: no primary HDU found
 
         } // endif: there was a FITS file attached
@@ -668,14 +674,14 @@ void GFitsTableCol::load_column_variable(void)
                               (FPTR(m_fitsfile)->HDUposition)+1,
                               NULL,
                               &status);
-            
+
         // If this failed because:
         // - the primary HDU was not found (status 252)
         // - we moved past the file (status 107)
         // we assume that no data have yet been written to the file and
         // we skip the loading.
         if (status != 252 && status != 107) {
-            
+
             // Break on any other cfitsio error
             if (status != 0) {
                 throw GException::fits_hdu_not_found(G_LOAD_COLUMN_VARIABLE,

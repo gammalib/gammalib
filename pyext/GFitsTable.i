@@ -125,6 +125,8 @@ public:
     GFitsTableCol* append(const GFitsTableCol& column);
     GFitsTableCol* insert(int colnum, const GFitsTableCol& column);
     GFitsTableCol* insert(const std::string& colname, const GFitsTableCol& column);
+    void           remove(const int& colnum);
+    void           remove(const std::string& colname);
     void           append_rows(const int& nrows);
     void           insert_rows(const int& row, const int& nrows);
     void           remove_rows(const int& row, const int& nrows);

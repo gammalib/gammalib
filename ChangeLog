@@ -1,8 +1,11 @@
-2018-07-31
+2018-08-02
 
         * Version 1.6.0 released
         ========================
 
+        Add gammalib::replace_segment() function
+        Ignore non-manadory columns in GCTABackground3D::read() method (#2339)
+        Add GFitsTable::remove() methods (#2339)
         Apply CTA 2D energy dispersion kludge only to CTA data (#2654)
         Add ARC WCS projection (#2541)
         Add GLog::buffer() method.

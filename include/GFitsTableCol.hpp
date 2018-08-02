@@ -137,9 +137,8 @@ protected:
                                   //!< correspondence.
     int              m_type;      //!< Column type
     int              m_repeat;    //!< Repeat value of column
-    int              m_width;     //!< Width of single column element
-    int              m_number;    //!< @brief Number of elements in column.
-                                  //!< m_number = m_repeat / m_width
+    int              m_width;     //!< Width in Bytes of single column element
+    int              m_number;    //!< Number of elements in column
     int              m_length;    //!< Length of column (number of rows)
     bool             m_variable;  //!< Signals if column is variable length
     int              m_varlen;    //!< Maximum number of elements in variable-length
@@ -295,11 +294,11 @@ void GFitsTableCol::type(const int& type)
  *  12 (TSBYTE)
  *  14 (TLOGICAL)
  *  16 (TSTRING)
- *  21 (TUSHORT)
+ *  20 (TUSHORT)
  *  21 (TSHORT)
- *  31 (TUINT)
+ *  30 (TUINT)
  *  31 (TINT)
- *  41 (TULONG)
+ *  40 (TULONG)
  *  41 (TLONG)
  *  42 (TFLOAT)
  *  81 (TLONGLONG)
@@ -345,9 +344,9 @@ const int& GFitsTableCol::repeat(void) const
 
 
 /***********************************************************************//**
- * @brief Set width value
+ * @brief Set width in Bytes of one column element
  *
- * @param[in] width Width value.
+ * @param[in] width Width in Bytes of one column element.
  ***************************************************************************/
 inline
 void GFitsTableCol::width(const int& width)
@@ -361,9 +360,9 @@ void GFitsTableCol::width(const int& width)
 
 
 /***********************************************************************//**
- * @brief Returns width of one column element
+ * @brief Return width in Bytes of one column element
  *
- * @return Width of one column element.
+ * @return Width in Bytes of one column element.
  ***************************************************************************/
 inline
 const int& GFitsTableCol::width(void) const

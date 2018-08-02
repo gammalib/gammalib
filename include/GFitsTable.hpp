@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsTable.hpp - FITS table abstract base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,8 +40,6 @@
  * This class defines the abstract interface for a FITS table. A FITS table
  * is a collection of columns with an identical number of rows. This class
  * provides high level access to table columns.
- *
- * @todo Implement remove() method
  ***************************************************************************/
 class GFitsTable : public GFitsHDU {
 
@@ -71,6 +69,8 @@ public:
     GFitsTableCol* append(const GFitsTableCol& column);
     GFitsTableCol* insert(int colnum, const GFitsTableCol& column);
     GFitsTableCol* insert(const std::string& colname, const GFitsTableCol& column);
+    void           remove(const int& colnum);
+    void           remove(const std::string& colname);
     void           append_rows(const int& nrows);
     void           insert_rows(const int& row, const int& nrows);
     void           remove_rows(const int& row, const int& nrows);
@@ -84,6 +84,8 @@ protected:
     void  init_members(void);
     void  copy_members(const GFitsTable& table);
     void  free_members(void);
+    void  free_columns(void);
+    void  update_header(void);
     void  data_open(void* vptr);
     void  data_save(void);
     void  data_close(void);
