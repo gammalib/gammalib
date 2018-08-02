@@ -1270,7 +1270,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
  *            Observation does not contain relevant response or background
  *            information
  *
- * Compute the background rate in units of events/s/MeV in the Off region
+ * Computes the background rate in units of events/s/MeV in the Off region
  * map and stores the result as additional column with name `BACKRESP` in
  * the Off spectrum.
  *
@@ -1349,7 +1349,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
 
         } // endfor: looped over all regions
 
-        // Append background vector to ARF
+        // Append background vector to Off spectrum
         m_off_spec.append("BACKRESP", background);
 
     } // endif: there were spectral bins
@@ -1867,7 +1867,6 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 
         // Perform log-log interpolation of background rate (events/MeV/s)
         // at reconstructed energy
-        //double background = m_arf("BACKRESP", emean);
         double background = m_off_spec["BACKRESP"][ibin];
 
         // Continue only if background rate is positive
@@ -2450,8 +2449,8 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
         // Get background scaling
         double alpha = m_on_spec.backscal(i);
 
-        // Get number of gamma and background events (and corresponding
-        // spectral model gradients)
+        // Get number of gamma events (and corresponding spectral model
+        // gradients)
         double ngam = N_gamma(models, i, &sky_grad);
 
         // Initialise variables for likelihood computation
