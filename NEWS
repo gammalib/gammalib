@@ -87,6 +87,7 @@ The following methods have been added:
 - GCTAEdispPerfTable::prob_erecobin()
 - GCTAEdispRmf::prob_erecobin()
 - GCTAEdisp2D::prob_erecobin()
+- GCTAAeff2D::rad_max()
 - GCTAResponseTable::telescope()
 - GCTAModelAeffBackground(GModelSpectral&, GModelTemporal&)
 - GCTAModelCubeBackground(GModelSpectral&, GModelTemporal&)

@@ -64,6 +64,8 @@ public:
     GEbounds    ebounds(void) const;
 
     // Methods
+    const double&            rad_max(void) const;
+    void                     rad_max(const double& rad_max);
     const GCTAResponseTable& table(void) const;
     void                     table(const GCTAResponseTable& table);
     void                     read(const GFitsTable& table);

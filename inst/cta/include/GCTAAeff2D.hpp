@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAAeff2D.hpp - CTA 2D effective area class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,6 +84,8 @@ public:
     std::string print(const GChatter& chatter = NORMAL) const;
 
     // Methods
+    const double&            rad_max(void) const;
+    void                     rad_max(const double& rad_max);
     const GCTAResponseTable& table(void) const;
     void                     table(const GCTAResponseTable& table);
     void                     read(const GFitsTable& table);
@@ -111,6 +113,9 @@ private:
     double            m_logE_max;      //!< Maximum logE (log10(E/TeV))
     double            m_theta_min;     //!< Minimum theta (radians)
     double            m_theta_max;     //!< Maximum theta (radians)
+    double            m_lo_thres;      //!< Lower energy threshold (TeV)
+    double            m_hi_thres;      //!< Upper energy threshold (TeV)
+    double            m_rad_max;       //!< Radius cut (degrees)
 };
 
 
@@ -147,6 +152,31 @@ inline
 GEbounds GCTAAeff2D::ebounds(void) const
 {
     return m_ebounds;
+}
+
+
+/***********************************************************************//**
+ * @brief Return radius cut value
+ *
+ * @return Radius cut value (degrees)
+ ***************************************************************************/
+inline
+const double& GCTAAeff2D::rad_max(void) const
+{
+    return m_rad_max;
+}
+
+
+/***********************************************************************//**
+ * @brief Set radius cut value
+ *
+ * @param[in] rad_max Radius cut value (degrees)
+ ***************************************************************************/
+inline
+void GCTAAeff2D::rad_max(const double& rad_max)
+{
+    m_rad_max = rad_max;
+    return;
 }
 
 

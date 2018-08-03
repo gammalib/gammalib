@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeff2D.cpp - CTA 2D effective area class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -322,18 +322,23 @@ void GCTAAeff2D::read(const GFitsTable& table)
     // The "LO_THRES" and "HI_THRES" keywords give the energy boundaries in
     // TeV.
     if (table.has_card("LO_THRES")) {
-        double value = table.real("LO_THRES");
-        m_ebounds.emin(0, GEnergy(value, "TeV"));
-        if (value > 0.0) {
-            m_logE_min = std::log10(value);
+        m_lo_thres = table.real("LO_THRES");
+        m_ebounds.emin(0, GEnergy(m_lo_thres, "TeV"));
+        if (m_lo_thres > 0.0) {
+            m_logE_min = std::log10(m_lo_thres);
         }
     }
     if (table.has_card("HI_THRES")) {
-        double value = table.real("HI_THRES");
-        m_ebounds.emax(0, GEnergy(value, "TeV"));
-        if (value > 0.0) {
-            m_logE_max = std::log10(value);
+        m_hi_thres = table.real("HI_THRES");
+        m_ebounds.emax(0, GEnergy(m_hi_thres, "TeV"));
+        if (m_hi_thres > 0.0) {
+            m_logE_max = std::log10(m_hi_thres);
         }
+    }
+
+    // Optionally get radius cut value
+    if (table.has_card("RAD_MAX")) {
+        m_rad_max = table.real("RAD_MAX");
     }
 
     // Return
@@ -347,8 +352,6 @@ void GCTAAeff2D::read(const GFitsTable& table)
  * @param[in] table FITS binary table.
  *
  * Writes effective area into a FITS binary @p table.
- *
- * @todo Add keywords.
  ***************************************************************************/
 void GCTAAeff2D::write(GFitsBinTable& table) const
 {
@@ -362,6 +365,19 @@ void GCTAAeff2D::write(GFitsBinTable& table) const
 
     // Write response table
     aeff.write(table);
+
+    // If thresholds were specified then write them into the header
+    if (m_lo_thres > 0.0) {
+        table.card("LO_THRES", m_lo_thres, "[TeV] Lower energy threshold");
+    }
+    if (m_hi_thres > 0.0) {
+        table.card("HI_THRES", m_hi_thres, "[TeV] Upper energy threshold");
+    }
+
+    // If a radius cut was specified then write the cut value into the header
+    if (m_rad_max > 0.0) {
+        table.card("RAD_MAX", m_rad_max, "[deg] Applied radius cut");
+    }
 
     // Return
     return;
@@ -580,6 +596,29 @@ std::string GCTAAeff2D::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Offset angle range"));
         result.append(gammalib::str(omin)+" - "+gammalib::str(omax)+" deg");
 
+        // Append optional keywords
+        result.append("\n"+gammalib::parformat("Lower energy threshold"));
+        if (m_lo_thres > 0.0) {
+            result.append(gammalib::str(m_lo_thres)+" TeV");
+        }
+        else {
+            result.append("not specified");
+        }
+        result.append("\n"+gammalib::parformat("Upper energy threshold"));
+        if (m_hi_thres > 0.0) {
+            result.append(gammalib::str(m_hi_thres)+" TeV");
+        }
+        else {
+            result.append("not specified");
+        }
+        result.append("\n"+gammalib::parformat("Radius cut"));
+        if (m_rad_max > 0.0) {
+            result.append(gammalib::str(m_rad_max)+" deg");
+        }
+        else {
+            result.append("none");
+        }
+
     } // endif: chatter was not silent
 
     // Return result
@@ -610,6 +649,9 @@ void GCTAAeff2D::init_members(void)
     m_logE_max      = 0.0;
     m_theta_min     = 0.0;
     m_theta_max     = 0.0;
+    m_lo_thres      = 0.0;
+    m_hi_thres      = 0.0;
+    m_rad_max       = 0.0;
 
     // Return
     return;
@@ -635,6 +677,9 @@ void GCTAAeff2D::copy_members(const GCTAAeff2D& aeff)
     m_logE_max      = aeff.m_logE_max;
     m_theta_min     = aeff.m_theta_min;
     m_theta_max     = aeff.m_theta_max;
+    m_lo_thres      = aeff.m_lo_thres;
+    m_hi_thres      = aeff.m_hi_thres;
+    m_rad_max       = aeff.m_rad_max;
 
     // Return
     return;
