@@ -36,6 +36,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2659 <https://cta-redmine.irap.omp.eu/issues/2659>`_] -
+  Add ``use_irf_bkg`` argument to ``GCTAOnOffObservation`` constructor
 * Add ``gammalib::replace_segment()`` function
 * [`2541 <https://cta-redmine.irap.omp.eu/issues/2541>`_] -
   Add ``ARC`` WCS projection

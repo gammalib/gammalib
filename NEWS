@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-2 August 2018
+3 August 2018
 
 
 1. Introduction
@@ -123,7 +123,7 @@ The following methods have been renamed:
 - GPhoton::mc_id() from GPhoton::mcid()
 
 The arguments for the following methods have been changed:
-- GCTAOnOffObservation(GCTAObservation&, GModelSpatial&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&)
+- GCTAOnOffObservation(GCTAObservation&, GModelSpatial&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&, bool&)
 - GLATAeff(GFits&, std::string&)
 - GLATEdisp(GFits&, std::string&)
 - GLATPsf(GFits&, std::string&)
@@ -276,6 +276,17 @@ None
 
 20. CTA interface
 -----------------
+The optional argument "use_irf_bkg" was assed to the GCTAOnOffObservation
+constructor to turn off the usage of the IRF background template in the
+computation of the On/Off observation and to assume an identical background
+rate in the On and Off regions instead. This is the classical analysis method
+for IACT data using reflected regions. If use_irf_bkg=false the alpha parameter
+that is stored in the "BACKSCAL" column of the On spectrum will become energy
+independent, and reflect the solid angle between On and Off regions. The
+"BACKRESP" column, stored in the Off spectrum, will be set to zero. Fitting
+using the "cstat" statistic will not be possible, the usage of the "wstat"
+statistic is mandatory (#2659).
+
 Non-mandatory column names are now ignored in GCTABackground3D::read() to
 make the code compatible with the current H.E.S.S. data structure (#2339).
 

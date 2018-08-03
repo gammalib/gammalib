@@ -79,7 +79,8 @@ public:
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
                          const GSkyRegions&     on,
-                         const GSkyRegions&     off);
+                         const GSkyRegions&     off,
+                         const bool&            use_irf_bkg = true);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
 
@@ -129,15 +130,18 @@ protected:
     void   set(const GCTAObservation& obs,
                const GModelSpatial&   spatial,
                const GSkyRegions&     on,
-               const GSkyRegions&     off);
+               const GSkyRegions&     off,
+               const bool&            use_irf_bkg);
     void   compute_arf(const GCTAObservation& obs,
                        const GModelSpatial&   spatial,
                        const GSkyRegions&     on);
     void   compute_bgd(const GCTAObservation& obs,
-                       const GSkyRegions&     off);
+                       const GSkyRegions&     off,
+                       const bool&            use_irf_bkg);
     void   compute_alpha(const GCTAObservation& obs,
                          const GSkyRegions&     on,
-                         const GSkyRegions&     off);
+                         const GSkyRegions&     off,
+                         const bool&            use_irf_bkg);
     void   compute_rmf(const GCTAObservation& obs,
                        const GSkyRegions&     on);
     void   apply_ebounds(const GCTAObservation& obs);

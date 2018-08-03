@@ -1,11 +1,10 @@
-2018-08-02
+2018-08-03
 
         * Version 1.6.0 released
         ========================
 
+        Add use_irf_bkg argument to GCTAOnOffObservation constructor (#2659)
         Add gammalib::replace_segment() function
-        Ignore non-manadory columns in GCTABackground3D::read() method (#2339)
-        Add GFitsTable::remove() methods (#2339)
         Apply CTA 2D energy dispersion kludge only to CTA data (#2654)
         Add ARC WCS projection (#2541)
         Add GLog::buffer() method.
@@ -27,6 +26,8 @@
         Make GPha, GArf and GRmf output files XSPEC compliant (#2404)
         Add methods to store file attributes in GPha (#2404)
         CTA 3D background model now supports "BKG" column names (#2343)
+        Ignore non-manadory columns in GCTABackground3D::read() method (#2339)
+        Add GFitsTable::remove() methods (#2339)
         Compute likelihood values also if there are no model parameters (#2312)
         Add GSkyDir::cos_dist() method (#2309)
         Add GCTABackground::rate_ebin() method and gammalib::atan2() and

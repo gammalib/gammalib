@@ -181,19 +181,27 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
  * @param[in] ereco Reconstructed energy boundaries.
  * @param[in] on On regions.
  * @param[in] off Off regions.
+ * @param[in] use_irf_bkg Use IRF background template.
  *
  * Constructs On/Off observation by filling the On and Off spectra and
  * computing the Auxiliary Response File (ARF) and Redistribution Matrix
  * File (RMF). The method requires the specification of the true and
  * reconstructed energy boundaries, as well as the definition of On and Off
  * regions.
+ *
+ * The @p use_irf_bkg flags controls whether the IRF background template
+ * should be used for computations or not. This impacts the computations of
+ * the @c BACKSCAL column in the On spectrum and the @c BACKRESP column in
+ * the Off spectrum. See the compute_alpha() and compute_bgd() methods for
+ * more information on the applied formulae.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
                                            const GModelSpatial&   spatial,
                                            const GEbounds&        etrue,
                                            const GEbounds&        ereco,
                                            const GSkyRegions&     on,
-                                           const GSkyRegions&     off)
+                                           const GSkyRegions&     off,
+                                           const bool&            use_irf_bkg)
 {
     // Initialise private
     init_members();
@@ -207,7 +215,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     m_rmf = GRmf(etrue, ereco);
 
     // Set On/Off observation from CTA observation
-    set(obs, spatial, on, off);
+    set(obs, spatial, on, off, use_irf_bkg);
 
     // Return
     return;
@@ -1076,6 +1084,7 @@ GRmf GCTAOnOffObservation::rmf_stacked(const GRmf&    rmf,
  * @param[in] spatial Spatial source model.
  * @param[in] on On regions.
  * @param[in] off Off regions.
+ * @param[in] use_irf_bkg Use IRF background template.
  *
  * @exception GException::invalid_value
  *            No CTA event list found in CTA observation.
@@ -1083,11 +1092,18 @@ GRmf GCTAOnOffObservation::rmf_stacked(const GRmf&    rmf,
  * Sets an On/Off observation from a CTA observation by filling the events
  * that fall in the On and Off regions into the PHA spectra and by computing
  * the corresponding ARF and RMF response functions.
+ *
+ * The @p use_irf_bkg flags controls whether the IRF background template
+ * should be used for computations or not. This impacts the computations of
+ * the `BACKSCAL` column in the On spectrum and the `BACKRESP` column in
+ * the Off spectrum. See the compute_alpha() and compute_bgd() methods for
+ * more information on the applied formulae.
  ***************************************************************************/
 void GCTAOnOffObservation::set(const GCTAObservation& obs,
                                const GModelSpatial&   spatial,
                                const GSkyRegions&     on,
-                               const GSkyRegions&     off)
+                               const GSkyRegions&     off,
+                               const bool&            use_irf_bkg)
 {
     // Get CTA event list pointer
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
@@ -1136,8 +1152,8 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
 
 	// Compute response components
 	compute_arf(obs, spatial, reg_on);
-	compute_bgd(obs, reg_off);
-	compute_alpha(obs, reg_on, reg_off);
+	compute_bgd(obs, reg_off, use_irf_bkg);
+	compute_alpha(obs, reg_on, reg_off, use_irf_bkg);
 	compute_rmf(obs, reg_on);
 
     // Apply reconstructed energy boundaries
@@ -1166,6 +1182,9 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
  *
  * Computes the ARF for an On/Off observation by integration over the IRF
  * for the specified @p spatial source model over the @p on regions.
+ *
+ * All On regions contained in @p on are expected to be sky region maps,
+ * i.e. of type GSkyRegionMap.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                                        const GModelSpatial&   spatial,
@@ -1231,7 +1250,6 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                     // Set event. Use an event bin and not an event atom for
                     // this to avoid IRF caching. That's a dirty kludge, but
                     // it works for now.
-                    //GCTAEventAtom event(pixdir, energy, time);
                     GCTAEventBin event;
                     event.dir(pixdir);
                     event.energy(energy);
@@ -1265,20 +1283,53 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
  *
  * @param[in] obs CTA observation.
  * @param[in] off Off regions.
+ * @param[in] use_irf_bkg Use IRF background template.
  *
  * @exception GException::invalid_argument
  *            Observation does not contain relevant response or background
  *            information
  *
- * Computes the background rate in units of events/s/MeV in the Off region
- * map and stores the result as additional column with name `BACKRESP` in
- * the Off spectrum.
+ * Computes the background rate in units of
+ *           \f${\rm events} \, {\rm MeV}^{-1} \, {\rm s}^{-1}\f$
+ * in the Off regions and stores the result as additional column with name
+ * `BACKRESP` in the Off spectrum.
+ *
+ * All Off regions contained in @p off are expected to be sky region maps,
+ * i.e. of type GSkyRegionMap.
+ *
+ * If @p use_irf_bkg is @c true, the IRF background template will be used
+ * for the computation, and `BACKRESP` will be computed using
+ *
+ * \f[
+ *    {\tt BACKRESP}(E_{\rm reco}) = \sum_{\rm off} \sum_p
+ *                                   {\tt BKG}_{{\rm off},p}(E_{\rm reco})
+ *                                   \times \Omega_{{\rm off},p}
+ * \f]
+ *
+ * where \f${\rm off}\f$ is the index of the Off region and \f$p\f$ is the
+ * pixel in the Off region (note that each Off region is transformed into a
+ * region map and \f$p\f$ indicates the pixels of this map).
+ * \f${\tt BKG}_{{\rm off},p}(E_{\rm reco})\f$ is the background rate as
+ * provided by the IRF background template in units of
+ *  \f${\rm events} \, {\rm MeV}^{-1} \, {\rm s}^{-1} \, {\rm sr}^{-1}\f$
+ * for a reconstructed energy \f$E_{\rm reco}\f$ and a pixel index \f$p\f$
+ * in the Off region \f${\rm off}\f$.
+ * \f$\Omega_{{\rm off},p}\f$ is the solid angle in units of \f${\rm sr}\f$
+ * of the pixel index \f$p\f$ in the Off region \f${\rm off}\f$.
+ *
+ * If @p use_irf_bkg is @c false, all `BACKRESP` elements will be set to
+ * zero, i.e.
+ *
+ * \f[
+ *    {\tt BACKRESP}(E_{\rm reco}) = 0
+ * \f]
  *
  * @todo Integrate background rate over energy bin instead of computing the
- *       rate at the bin centre.
+ *       rate at the energy bin centre.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
-                                       const GSkyRegions&     off)
+                                       const GSkyRegions&     off,
+                                       const bool&            use_irf_bkg)
 {
     // Get reconstructed energies for the background rates
 	const GEbounds& ereco = m_off_spec.ebounds();
@@ -1290,64 +1341,70 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
 		// Initialise background rates to zero
         std::vector<double> background(nreco, 0.0);
 
-		// Get CTA observation pointing direction
-		GCTAPointing obspnt = obs.pointing();
+        // Continue only if the IRF background template should be used
+        if (use_irf_bkg) {
 
-        // Get pointer on CTA IRF response
-        const GCTAResponseIrf* rsp =
-              dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        if (rsp == NULL) {
-            std::string msg = "Specified observation does not contain an "
-                              "IRF response.\n" + obs.print();
-            throw GException::invalid_argument(G_COMPUTE_BGD, msg);
-        }
+            // Get CTA observation pointing direction
+            GCTAPointing obspnt = obs.pointing();
 
-        // Get pointer to CTA background
-        const GCTABackground* bgd = rsp->background();
-        if (bgd == NULL) {
-            std::string msg = "Specified observation contains no "
-                              "background information.\n" + obs.print();
-            throw GException::invalid_argument(G_COMPUTE_BGD, msg);
-        }
+            // Get pointer on CTA IRF response
+            const GCTAResponseIrf* rsp =
+                  dynamic_cast<const GCTAResponseIrf*>(obs.response());
+            if (rsp == NULL) {
+                std::string msg = "Specified observation does not contain "
+                                  "an IRF response.\n" + obs.print();
+                throw GException::invalid_argument(G_COMPUTE_BGD, msg);
+            }
 
-        // Loop over regions
-        for (int k = 0; k < off.size(); ++k) {
+            // Get pointer to CTA background
+            const GCTABackground* bgd = rsp->background();
+            if (bgd == NULL) {
+                std::string msg = "Specified observation contains no "
+                                  "background information.\n" + obs.print();
+                throw GException::invalid_argument(G_COMPUTE_BGD, msg);
+            }
 
-            // Get pointer on sky region map
-            const GSkyRegionMap* off_map = static_cast<const GSkyRegionMap*>(off[k]);
+            // Loop over regions
+            for (int k = 0; k < off.size(); ++k) {
 
-            // Loop over pixels in Off region map and integrate background
-            // rate
-            for (int j = 0; j < off_map->nonzero_indices().size(); ++j) {
+                // Get pointer on sky region map
+                const GSkyRegionMap* off_map =
+                      static_cast<const GSkyRegionMap*>(off[k]);
 
-                // Get pixel index
-                int pixidx = off_map->nonzero_indices()[j];
+                // Loop over pixels in Off region map and integrate
+                // background rate
+                for (int j = 0; j < off_map->nonzero_indices().size(); ++j) {
 
-                // Get direction to pixel center
-                GSkyDir pixdir = off_map->map().inx2dir(pixidx);
+                    // Get pixel index
+                    int pixidx = off_map->nonzero_indices()[j];
 
-                // Translate sky direction into instrument direction
-                GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+                    // Get direction to pixel center
+                    GSkyDir pixdir = off_map->map().inx2dir(pixidx);
 
-                // Get solid angle subtended by this pixel
-                double pixsolid = off_map->map().solidangle(pixidx);
+                    // Translate sky direction into instrument direction
+                    GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
 
-                // Loop over energy bins
-                for (int i = 0; i < nreco; ++i) {
+                    // Get solid angle subtended by this pixel
+                    double pixsolid = off_map->map().solidangle(pixidx);
 
-                    // Get log10(E/TeV) of mean reconstructed bin energy
-                    double logEreco = ereco.elogmean(i).log10TeV();
+                    // Loop over energy bins
+                    for (int i = 0; i < nreco; ++i) {
 
-                    // Get background rate in events/s/MeV
-                    background[i] += (*bgd)(logEreco,
-                                            pixinstdir.detx(),
-                                            pixinstdir.dety()) * pixsolid;
+                        // Get log10(E/TeV) of mean reconstructed bin energy
+                        double logEreco = ereco.elogmean(i).log10TeV();
 
-                } // endfor: looped over energy bins
+                        // Get background rate in events/s/MeV
+                        background[i] += (*bgd)(logEreco,
+                                                pixinstdir.detx(),
+                                                pixinstdir.dety()) * pixsolid;
 
-            } // endfor: looped over all pixels in map
+                    } // endfor: looped over energy bins
 
-        } // endfor: looped over all regions
+                } // endfor: looped over all pixels in map
+
+            } // endfor: looped over all regions
+
+        } // endif: IRF background template was used
 
         // Append background vector to Off spectrum
         m_off_spec.append("BACKRESP", background);
@@ -1365,20 +1422,58 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  * @param[in] obs CTA observation.
  * @param[in] on On regions.
  * @param[in] off Off regions.
+ * @param[in] use_irf_bkg Use IRF background template.
  *
- * @exception GException::invalid_value
- *            No CTA response found in CTA observation.
+ * @exception GException::invalid_argument
+ *            Observation does not contain relevant response or background
+ *            information
  *
- * Compute the alpha parameters for all energy bins. The alpha parameter
- * gives the ratio between the On and Off region background acceptance
- * multiplied by the ratio between On and Off region solid angles.
+ * Compute the \f$\alpha\f$ parameters for all reconstructed energy bins.
+ * The \f$\alpha\f$ parameter gives the ratio between the On and Off region
+ * background acceptance multiplied by the On and Off region solid angles.
+ *
+ * If @p use_irf_bkg is @c true, the IRF background template will be used
+ * for the computation, and \f$\alpha(E_{\rm reco})\f$ is given by
+ *
+ * \f[
+ *    \alpha(E_{\rm reco}) =
+ *    \frac{\sum_{\rm on} \sum_p {\tt BKG}_{{\rm on},p}(E_{\rm reco})
+ *          \times \Omega_{{\rm on},p}}
+ *         {\sum_{\rm off} \sum_p {\tt BKG}_{{\rm off},p}(E_{\rm reco})
+ *          \times \Omega_{{\rm off},p}}
+ * \f]
+ *
+ * where the nominator sums over the On regions, indicated by the index
+ * \f${\rm on}\f$, and the denominator sums over the Off regions, indicated
+ * by the index \f${\rm off}\f$. Each On or Off region is defined by a
+ * region sky map of type GSkyRegionMap, and the pixels of these maps
+ * are index by \f$p\f$.
+ * \f${\tt BKG}_{{\rm on/off},p}(E_{\rm reco})\f$ is the background rate as
+ * provided by the IRF background template in units of
+ *  \f${\rm events} \, {\rm MeV}^{-1} \, {\rm s}^{-1} \, {\rm sr}^{-1}\f$
+ * for a reconstructed energy \f$E_{\rm reco}\f$ and a pixel index \f$p\f$
+ * in the On or Off region \f${\rm on/off}\f$.
+ * \f$\Omega_{{\rm on/off},p}\f$ is the solid angle in units of
+ * \f${\rm sr}\f$ of the pixel index \f$p\f$ in the On or Off region
+ * \f${\rm on/off}\f$.
+ *
+ * If @p use_irf_bkg is @c false, the background acceptance is assumed
+ * constant and hence cancels out, which makes the \f$\alpha\f$ parameter
+ * independent of reconstructed energy \f$E_{\rm reco}\f$.
+ * The \f$\alpha\f$ parameter is then given by
+ *
+ * \f[
+ *    \alpha = \frac{\sum_{\rm on} \sum_p \Omega_{{\rm on},p}}
+ *                  {\sum_{\rm off} \sum_p \Omega_{{\rm off},p}}
+ * \f]
  *
  * @todo Compute alpha by integrating the background rate over the energy
  *       bins and not at the bin centre.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                                          const GSkyRegions&     on,
-                                         const GSkyRegions&     off)
+                                         const GSkyRegions&     off,
+                                         const bool&            use_irf_bkg)
 {
     // Get reconstructed energy boundaries from RMF
 	const GEbounds& ereco = m_rmf.emeasured();
@@ -1387,25 +1482,117 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
     // Continue only if there are reconstructed energy bins
     if (nreco > 0) {
 
-        // Get CTA response pointer. Throw an exception if no response is found
-        const GCTAResponseIrf* response =
-              dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        if (response == NULL) {
-            std::string msg = "Response in CTA observation \""+obs.name()+"\" "
-                              "(ID="+obs.id()+") is not of the GCTAResponseIrf "
-                              "type.";
-            throw GException::invalid_value(G_COMPUTE_ALPHA, msg);
-        }
-
         // Get CTA observation pointing direction, zenith, and azimuth
-        GCTAPointing obspnt  = obs.pointing();
-        GSkyDir      obsdir  = obspnt.dir();
+        GCTAPointing obspnt = obs.pointing();
 
-        // Loop over reconstructed energies
-        for (int i = 0; i < nreco; ++i) {
+        // If IRF background templates shall be used then compute the
+        // energy dependent alpha factors
+        if (use_irf_bkg) {
 
-            // Get mean log10 energy in TeV of bin
-            double logEreco = ereco.elogmean(i).log10TeV();
+            // Get pointer on CTA IRF response
+            const GCTAResponseIrf* rsp =
+                  dynamic_cast<const GCTAResponseIrf*>(obs.response());
+            if (rsp == NULL) {
+                std::string msg = "Response in CTA observation \""+obs.name()+
+                                  "\" (ID="+obs.id()+") is not of the "
+                                  "GCTAResponseIrf type.";
+                throw GException::invalid_argument(G_COMPUTE_ALPHA, msg);
+            }
+
+            // Get pointer to CTA background
+            const GCTABackground* bgd = rsp->background();
+            if (bgd == NULL) {
+                std::string msg = "Specified observation contains no "
+                                  "background information.\n" + obs.print();
+                throw GException::invalid_argument(G_COMPUTE_ALPHA, msg);
+            }
+
+            // Loop over reconstructed energies
+            for (int i = 0; i < nreco; ++i) {
+
+                // Get mean log10 energy in TeV of bin
+                double logEreco = ereco.elogmean(i).log10TeV();
+
+                // Initialise background rate totals
+                double aon  = 0.0;
+                double aoff = 0.0;
+
+                // Loop over On regions
+                for (int k = 0; k < on.size(); ++k) {
+
+                    // Get pointer on sky region map
+                    const GSkyRegionMap* on_map =
+                          static_cast<const GSkyRegionMap*>(on[k]);
+
+                    // Loop over pixels in On region map and integrate acceptance
+                    for (int j = 0; j < on_map->nonzero_indices().size(); ++j) {
+
+                        // Get pixel index
+                        int pixidx = on_map->nonzero_indices()[j];
+
+                        // Get direction to pixel center
+                        GSkyDir pixdir = on_map->map().inx2dir(pixidx);
+
+                        // Translate sky direction into instrument direction
+                        GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+
+                        // Get solid angle subtended by this pixel
+                        double pixsolid = on_map->map().solidangle(pixidx);
+
+                        // Add up acceptance
+                        aon += (*bgd)(logEreco,
+                                      pixinstdir.detx(),
+                                      pixinstdir.dety()) *
+                                      pixsolid;
+
+                    } // endfor: looped over all pixels in map
+
+                } // endfor: looped over regions
+
+                // Loop over Off regions
+                for (int k = 0; k < off.size(); ++k) {
+
+                    // Get pointer on sky region map
+                    const GSkyRegionMap* off_map =
+                          static_cast<const GSkyRegionMap*>(off[k]);
+
+                    // Loop over pixels in Off region map and integrate acceptance
+                    for (int j = 0; j < off_map->nonzero_indices().size(); ++j) {
+
+                        // Get pixel index
+                        int pixidx = off_map->nonzero_indices()[j];
+
+                        // Get direction to pixel center
+                        GSkyDir pixdir = off_map->map().inx2dir(pixidx);
+
+                        // Translate sky direction into instrument direction
+                        GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+
+                        // Get solid angle subtended by this pixel
+                        double pixsolid = off_map->map().solidangle(pixidx);
+
+                        // Add up acceptance
+                        aoff += (*bgd)(logEreco,
+                                       pixinstdir.detx(),
+                                       pixinstdir.dety()) *
+                                       pixsolid;
+
+                    } // endfor: looped over all pixels in map
+
+                } // endfor: looped over all regions
+
+                // Compute alpha for this energy bin
+                double alpha = (aoff > 0.0) ? aon/aoff : 1.0;
+
+                // Set background scaling in On spectra
+                m_on_spec.backscal(i, alpha);
+
+            } // endfor: looped over reconstructed energies
+
+        } // endif: IRF background templates were used
+
+        // ... otherwise compute energy independent alpha factor
+        else {
 
             // Initialise background rate totals
             double aon  = 0.0;
@@ -1415,7 +1602,8 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
             for (int k = 0; k < on.size(); ++k) {
 
                 // Get pointer on sky region map
-                const GSkyRegionMap* on_map = static_cast<const GSkyRegionMap*>(on[k]);
+                const GSkyRegionMap* on_map =
+                      static_cast<const GSkyRegionMap*>(on[k]);
 
                 // Loop over pixels in On region map and integrate acceptance
                 for (int j = 0; j < on_map->nonzero_indices().size(); ++j) {
@@ -1429,14 +1617,8 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                     // Translate sky direction into instrument direction
                     GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
 
-                    // Get solid angle subtended by this pixel
-                    double pixsolid = on_map->map().solidangle(pixidx);
-
-                    // Add up acceptance
-                    aon += (*response->background())(logEreco,
-                                                     pixinstdir.detx(),
-                                                     pixinstdir.dety()) *
-                                                     pixsolid;
+                    // Add up solid angle subtended by this pixel
+                    aon += on_map->map().solidangle(pixidx);
 
                 } // endfor: looped over all pixels in map
 
@@ -1446,7 +1628,8 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
             for (int k = 0; k < off.size(); ++k) {
 
                 // Get pointer on sky region map
-                const GSkyRegionMap* off_map = static_cast<const GSkyRegionMap*>(off[k]);
+                const GSkyRegionMap* off_map =
+                      static_cast<const GSkyRegionMap*>(off[k]);
 
                 // Loop over pixels in Off region map and integrate acceptance
                 for (int j = 0; j < off_map->nonzero_indices().size(); ++j) {
@@ -1460,26 +1643,22 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                     // Translate sky direction into instrument direction
                     GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
 
-                    // Get solid angle subtended by this pixel
-                    double pixsolid = off_map->map().solidangle(pixidx);
-
-                    // Add up acceptance
-                    aoff += (*response->background())(logEreco,
-                                                      pixinstdir.detx(),
-                                                      pixinstdir.dety()) *
-                                                      pixsolid;
+                    // Add up solid angle subtended by this pixel
+                    aoff += off_map->map().solidangle(pixidx);
 
                 } // endfor: looped over all pixels in map
 
             } // endfor: looped over all regions
 
-			// Compute alpha for this energy bin
+            // Compute alpha for this energy bin
             double alpha = (aoff > 0.0) ? aon/aoff : 1.0;
 
             // Set background scaling in On spectra
-            m_on_spec.backscal(i, alpha);
-
-        } // endfor: looped over reconstructed energies
+            for (int i = 0; i < nreco; ++i) {
+                m_on_spec.backscal(i, alpha);
+            }
+            
+        } // endelse: computed energy independent alpha factor
 
     } // endif: there were energy bins
 

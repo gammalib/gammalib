@@ -86,7 +86,8 @@ public:
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
                          const GSkyRegions&     on,
-                         const GSkyRegions&     off);
+                         const GSkyRegions&     off,
+                         const bool&            use_irf_bkg = true);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
  
