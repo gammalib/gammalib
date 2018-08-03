@@ -77,6 +77,8 @@ public:
     void                 write(GFits& fits,
                                const std::string& unit = "keV") const;
     const GFilename&     filename(void) const;
+    const GFitsHeader&   header(void) const;
+    void                 header(const GFitsHeader& header);
 };
 
 

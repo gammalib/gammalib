@@ -34,6 +34,7 @@
 #include "GEbounds.hpp"
 #include "GFilename.hpp"
 #include "GNodeArray.hpp"
+#include "GFitsHeader.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
@@ -85,26 +86,28 @@ public:
                                           const GEnergy&     energy) const;
 
     // Methods
-    void             clear(void);
-    GArf*            clone(void) const;
-    std::string      classname(void) const;
-    int              size(void) const;
-    int              columns(void) const;
-    double&          at(const int& index);
-    const double&    at(const int& index) const;
-    double&          at(const int& index, const int& col);
-    const double&    at(const int& index, const int& col) const;
-    void             append(const std::string&         name,
-                            const std::vector<double>& column);
-    const GEbounds&  ebounds(void) const;
-    void             load(const GFilename& filename);
-    void             save(const GFilename& filename,
-                          const bool&      clobber = false) const;
-    void             read(const GFits& fits);
-    void             read(const GFitsTable& table);
-    void             write(GFits& fits) const;
-    const GFilename& filename(void) const;
-    std::string      print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GArf*              clone(void) const;
+    std::string        classname(void) const;
+    int                size(void) const;
+    int                columns(void) const;
+    double&            at(const int& index);
+    const double&      at(const int& index) const;
+    double&            at(const int& index, const int& col);
+    const double&      at(const int& index, const int& col) const;
+    void               append(const std::string&         name,
+                              const std::vector<double>& column);
+    const GEbounds&    ebounds(void) const;
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    void               read(const GFits& fits);
+    void               read(const GFitsTable& table);
+    void               write(GFits& fits) const;
+    const GFilename&   filename(void) const;
+    const GFitsHeader& header(void) const;
+    void               header(const GFitsHeader& header);
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -121,6 +124,7 @@ protected:
     std::vector<double>               m_specresp; //!< Spectral response
     std::vector<std::string>          m_colnames; //!< Additional column names
     std::vector<std::vector<double> > m_coldata;  //!< Additional column data
+    GFitsHeader                       m_header;   //!< FITS header cards
 };
 
 
@@ -250,6 +254,31 @@ inline
 const GFilename& GArf::filename(void) const
 {
     return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Return FITS header
+ *
+ * @return FITS header or ARF file.
+ ***************************************************************************/
+inline
+const GFitsHeader& GArf::header(void) const
+{
+    return (m_header);
+}
+
+
+/***********************************************************************//**
+ * @brief Set FITS header
+ *
+ * @param[in] header FITS header.
+ ***************************************************************************/
+inline
+void GArf::header(const GFitsHeader& header)
+{
+    m_header = header;
+    return;
 }
 
 

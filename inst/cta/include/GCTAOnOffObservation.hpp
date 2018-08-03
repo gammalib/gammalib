@@ -148,7 +148,7 @@ protected:
     void   compute_rmf(const GCTAObservation& obs,
                        const GSkyRegions&     on);
     void   apply_ebounds(const GCTAObservation& obs);
-    bool   arf_radius_cut(const GCTAObservation& obs, const GSkyRegions& on) const;
+    double arf_rad_max(const GCTAObservation& obs, const GSkyRegions& on) const;
     double N_gamma(const GModels& models, const int& ibin, GVector* grad) const;
     double N_bgd(const GModels& models, const int& ibin, GVector* grad) const;
 

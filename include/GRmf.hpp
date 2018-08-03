@@ -33,6 +33,7 @@
 #include "GFilename.hpp"
 #include "GEbounds.hpp"
 #include "GMatrixSparse.hpp"
+#include "GFitsHeader.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
@@ -102,6 +103,8 @@ public:
     void                 write(GFits& fits,
                                const std::string& unit = "keV") const;
     const GFilename&     filename(void) const;
+    const GFitsHeader&   header(void) const;
+    void                 header(const GFitsHeader& header);
     std::string          print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -117,7 +120,7 @@ protected:
     GMatrixSparse     m_matrix;        //!< Sparse redistribution matrix
     int               m_imeasmax;      //!< Index of measured maximum
     int               m_itruemax;      //!< Index of true maximum
-    
+    GFitsHeader       m_header;        //!< FITS header cards
 };
 
 
@@ -291,6 +294,31 @@ inline
 const GFilename& GRmf::filename(void) const
 {
     return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Return FITS header
+ *
+ * @return FITS header or RMF file.
+ ***************************************************************************/
+inline
+const GFitsHeader& GRmf::header(void) const
+{
+    return (m_header);
+}
+
+
+/***********************************************************************//**
+ * @brief Set FITS header
+ *
+ * @param[in] header FITS header.
+ ***************************************************************************/
+inline
+void GRmf::header(const GFitsHeader& header)
+{
+    m_header = header;
+    return;
 }
 
 

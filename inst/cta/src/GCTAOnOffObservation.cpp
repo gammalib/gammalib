@@ -41,12 +41,14 @@
 #include "GSource.hpp"
 #include "GSkyRegions.hpp"
 #include "GSkyRegionMap.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GOptimizerPars.hpp"
 #include "GObservations.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTAResponseIrf.hpp"
+#include "GCTAAeff2D.hpp"
 #include "GCTACubeBackground.hpp"
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAOnOffObservation.hpp"
@@ -75,6 +77,8 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
                                             "GSkyRegionMap&, GSkyRegionMap&)"
 #define G_COMPUTE_ARF  "GCTAOnOffObservation::compute_arf(GCTAObservation&, "\
                                             "GModelSpatial&, GSkyRegionMap&)"
+#define G_COMPUTE_ARF_CUT            "GCTAOnOffObservation::compute_arf_cut("\
+                          "GCTAObservation&, GModelSpatial&, GSkyRegionMap&)"
 #define G_COMPUTE_BGD  "GCTAOnOffObservation::compute_bgd(GCTAObservation&, "\
                                                             "GSkyRegionMap&)"
 #define G_COMPUTE_ALPHA                "GCTAOnOffObservation::compute_alpha("\
@@ -82,6 +86,8 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 #define G_COMPUTE_RMF  "GCTAOnOffObservation::compute_rmf(GCTAObservation&, "\
                                                             "GSkyRegionMap&)"
 #define G_MODEL_BACKGROUND "GCTAOnOffObservation::model_background(GModels&)"
+#define G_ARF_RADIUS_CUT              "GCTAOnOffObservation::arf_radius_cut("\
+                                            "GCTAObservation&, GSkyRegions&)"
 
 /* __ Constants __________________________________________________________ */
 const double minmod = 1.0e-100;                      //!< Minimum model value
@@ -111,7 +117,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(void) : GObservation()
 {
     // Initialise private members
     init_members();
-  
+
     // Return
     return;
 }
@@ -124,7 +130,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(void) : GObservation()
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs) :
                       GObservation(obs)
-{ 
+{
     // Initialise private
     init_members();
 
@@ -775,6 +781,7 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 	return;
 }
 
+
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for On/Off analysis
  *
@@ -1150,8 +1157,16 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
         reg_off.append(GSkyRegionMap(off[i]));
     }
 
+    // Get effective area radius cut
+    double rad_max = arf_rad_max(obs, on);
+
 	// Compute response components
-	compute_arf(obs, spatial, reg_on);
+    if (rad_max > 0.0) {
+        compute_arf_cut(obs, spatial, reg_on);
+    }
+    else {
+        compute_arf(obs, spatial, reg_on);
+    }
 	compute_bgd(obs, reg_off, use_irf_bkg);
 	compute_alpha(obs, reg_on, reg_off, use_irf_bkg);
 	compute_rmf(obs, reg_on);
@@ -1165,6 +1180,46 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
     m_off_spec.emin_obs(obs.ebounds().emin());
     m_off_spec.emax_obs(obs.ebounds().emax());
 
+    // Get mission, instrument and response name
+    std::string mission;
+    std::string instrument;
+    std::string rspname;
+    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
+    if (rsp != NULL) {
+        mission    = gammalib::toupper(rsp->caldb().mission());
+        instrument = gammalib::toupper(rsp->caldb().instrument());
+        rspname    = gammalib::toupper(rsp->rspname());
+    }
+
+    // Set header keywords
+    GFitsHeader arf_header;
+    GFitsHeader pha_header;
+    GFitsHeader rmf_header;
+    if (!mission.empty()) {
+        arf_header.append(GFitsHeaderCard("TELESCOP", mission, "Telescope"));
+        pha_header.append(GFitsHeaderCard("TELESCOP", mission, "Telescope"));
+        rmf_header.append(GFitsHeaderCard("TELESCOP", mission, "Telescope"));
+    }
+    if (!instrument.empty()) {
+        arf_header.append(GFitsHeaderCard("INSTRUME", instrument, "Instrument"));
+        pha_header.append(GFitsHeaderCard("INSTRUME", instrument, "Instrument"));
+        rmf_header.append(GFitsHeaderCard("INSTRUME", instrument, "Instrument"));
+    }
+    if (!rspname.empty()) {
+        arf_header.append(GFitsHeaderCard("RESPNAME", rspname, "Response name"));
+        pha_header.append(GFitsHeaderCard("RESPNAME", rspname, "Response name"));
+        rmf_header.append(GFitsHeaderCard("RESPNAME", rspname, "Response name"));
+    }
+    if (rad_max > 0.0) {
+        arf_header.append(GFitsHeaderCard("RAD_MAX", rad_max, "[deg] Applied radius cut"));
+    }
+
+    // Store header keywords
+    m_on_spec.header(pha_header);
+    m_off_spec.header(pha_header);
+    m_arf.header(arf_header);
+    m_rmf.header(rmf_header);
+
 	// Return
 	return;
 }
@@ -1177,7 +1232,7 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
  * @param[in] spatial Spatial source model.
  * @param[in] on On regions.
  *
- * @exception GException::invalid_value
+ * @exception GException::invalid_argument
  *            No CTA response found in CTA observation.
  *
  * Computes the ARF for an On/Off observation by integration over the IRF
@@ -1204,7 +1259,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
             std::string msg = "Response in CTA observation \""+obs.name()+"\" "
                               "(ID="+obs.id()+") is not of the GCTAResponseIrf "
                               "type.";
-            throw GException::invalid_value(G_COMPUTE_ARF, msg);
+            throw GException::invalid_argument(G_COMPUTE_ARF, msg);
         }
 
         // Set dummy time
@@ -1270,6 +1325,115 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
 
         // Put back original energy dispersion application status
         const_cast<GCTAResponseIrf*>(response)->apply_edisp(save_edisp);
+
+	} // endif: there were energy bins
+
+	// Return
+	return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute ARF of On/Off observation for a IRF with radius cut
+ *
+ * @param[in] obs CTA observation.
+ * @param[in] spatial Spatial source model.
+ * @param[in] on On regions.
+ *
+ * @exception GException::invalid_argument
+ *            No CTA response found in CTA observation.
+ *
+ * Computes the ARF for an On/Off observation by computing the average
+ * effective area over the @p on regions for the specified @p spatial source
+ * model.
+ *
+ * All On regions contained in @p on are expected to be sky region maps,
+ * i.e. of type GSkyRegionMap.
+ ***************************************************************************/
+void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
+                                           const GModelSpatial&   spatial,
+                                           const GSkyRegions&     on)
+{
+    // Get reconstructed energy boundaries from on ARF
+    const GEbounds& etrue = m_arf.ebounds();
+    int             ntrue = etrue.size();
+
+    // Continue only if there are ARF bins
+    if (ntrue > 0) {
+
+        // Get CTA response pointer. Throw an exception if no response is found
+        const GCTAResponseIrf* response =
+              dynamic_cast<const GCTAResponseIrf*>(obs.response());
+        if (response == NULL) {
+            std::string msg = "Response in CTA observation \""+obs.name()+"\" "
+                              "(ID="+obs.id()+") is not of the GCTAResponseIrf "
+                              "type.";
+            throw GException::invalid_argument(G_COMPUTE_ARF_CUT, msg);
+        }
+
+        // Get CTA observation pointing direction, zenith, and azimuth
+        GCTAPointing obspnt  = obs.pointing();
+        GSkyDir      obsdir  = obspnt.dir();
+        double       zenith  = obspnt.zenith();
+        double       azimuth = obspnt.azimuth();
+
+        // Loop over true energies
+        for (int i = 0; i < ntrue; ++i) {
+
+            // Get mean energy of bin
+            double logEtrue = etrue.elogmean(i).log10TeV();
+
+            // Initialize effective area and solid angle sum for this bin
+            m_arf[i]   = 0.0;
+            double sum = 0.0;
+
+            // Loop over regions
+            for (int k = 0; k < on.size(); ++k) {
+
+                // Get pointer on sky region map
+                const GSkyRegionMap* on_map = static_cast<const GSkyRegionMap*>(on[k]);
+
+                // Loop over pixels in On region map and integrate effective
+                // area
+                for (int j = 0; j < on_map->nonzero_indices().size(); ++j) {
+
+                    // Get pixel index
+                    int pixidx = on_map->nonzero_indices()[j];
+
+                    // Get direction to pixel center
+                    GSkyDir pixdir = on_map->map().inx2dir(pixidx);
+
+                    // Get solid angle subtended by this pixel
+                    double pixsolid = on_map->map().solidangle(pixidx);
+
+                    // Compute position of pixel centre in instrument coordinates
+                    double theta = obsdir.dist(pixdir);
+                    double phi   = obsdir.posang(pixdir);
+
+                    // Add up effective area
+                    m_arf[i] += response->aeff(theta,
+                                               phi,
+                                               zenith,
+                                               azimuth,
+                                               logEtrue) * pixsolid;
+
+                    // Sum up solid angles
+                    sum += pixsolid;
+
+                } // endfor: looped over all pixels in region map
+
+            } // endfor: looped over all regions
+
+            // Divide effective area by solid angle so that ARF contains the
+            // average effective area over the On region
+            if (sum > 0.0) {
+                m_arf[i] /= sum;
+            }
+            else {
+                m_arf[i] = 0.0;
+            }
+
+        } // endfor: looped over true energies
 
 	} // endif: there were energy bins
 
@@ -1657,7 +1821,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
             for (int i = 0; i < nreco; ++i) {
                 m_on_spec.backscal(i, alpha);
             }
-            
+
         } // endelse: computed energy independent alpha factor
 
     } // endif: there were energy bins
@@ -1673,7 +1837,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
  * @param[in] obs CTA observation.
  * @param[in] on On regions.
  *
- * @exception GException::invalid_value
+ * @exception GException::invalid_argument
  *            Observation does not contain IRF response
  *
  * Compute the energy redistribution matrix for an On/Off observation. The
@@ -1698,7 +1862,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
             std::string msg = "Response in CTA observation \""+obs.name()+"\" "
                               "(ID="+obs.id()+") is not of the GCTAResponseIrf "
                               "type.";
-            throw GException::invalid_value(G_COMPUTE_RMF, msg);
+            throw GException::invalid_argument(G_COMPUTE_RMF, msg);
         }
 
         // Get CTA observation pointing direction, zenith, and azimuth
@@ -1838,6 +2002,88 @@ void GCTAOnOffObservation::apply_ebounds(const GCTAObservation& obs)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if effective area IRF has a radius cut
+ *
+ * @param[in] obs CTA observation.
+ * @param[in] on On regions.
+ * @return Radius cut value in degrees (zero for no radius cut).
+ *
+ * @exception GException::invalid_argument
+ *            IRF has a radius cut that is incompatible with the On regions
+ *
+ * Checks if the effective area IRF has a radius cut. If a radius cut is
+ * found the cut value is checked against the radii of the On regions. If
+ * the On regions are not circular, or if they have a radius that differs
+ * from the IRF cut value, an exception is thrown.
+ ***************************************************************************/
+double GCTAOnOffObservation::arf_rad_max(const GCTAObservation& obs,
+                                         const GSkyRegions&     on) const
+{
+    // Initialise radius cut value
+    double rad_max = 0.0;
+
+    // Get pointer on CTA IRF response. Continue only if a valid response
+    // was found
+    const GCTAResponseIrf* rsp =
+          dynamic_cast<const GCTAResponseIrf*>(obs.response());
+    if (rsp != NULL) {
+
+        // Get pointer to CTA 2D effective area. Continue only if a 2D
+        // effective area was found
+        const GCTAAeff2D* aeff = dynamic_cast<const GCTAAeff2D*>(rsp->aeff());
+        if (aeff != NULL) {
+
+            // Get cut radius. Continue only if cut radius is positive
+            rad_max = aeff->rad_max();
+            if (rad_max > 0.0) {
+
+                // Verify that all On regions are circular regions and make
+                // sure that they have, within some margin, the same radius
+                // than the cut radius.
+                for (int i = 0; i < on.size(); ++i) {
+
+                    // Check that region is a circular region
+                    const GSkyRegionCircle* region =
+                          dynamic_cast<const GSkyRegionCircle*>(on[i]);
+                    if (region == NULL) {
+                        std::string msg = "An effective area IRF with a theta "
+                                          "cut was specified, but the On region "
+                                          "is not a circle, hence the "
+                                          "consistency of the event selection "
+                                          "could not be checked. Please specify "
+                                          "a circular On region if an effective "
+                                          "area with a theta cut is used.";
+                        throw GException::invalid_argument(G_ARF_RADIUS_CUT, msg);
+                    }
+
+                    // Check that the cut radius is consistent
+                    if (std::abs(region->radius()-rad_max) > 1.0e-3) {
+                        std::string msg = "An effective area IRF with a theta "
+                                          "cut of "+gammalib::str(rad_max)+ " deg "
+                                          "was specified but an On region with "
+                                          "a radius of "+
+                                          gammalib::str(region->radius())+" deg "
+                                          "was encountered. Please specify On "
+                                          "regions with a radius of "+
+                                          gammalib::str(rad_max)+" deg for this "
+                                          "IRF.";
+                        throw GException::invalid_argument(G_ARF_RADIUS_CUT, msg);
+                    }
+
+                } // endfor: looped over On regions
+
+            } // endif: cut radius was positive
+
+        } // endif: 2D effective area was found
+
+    } // endif: CTA response was found
+
+    // Return radius cut flag
+    return rad_max;
 }
 
 
@@ -2180,12 +2426,12 @@ GPha GCTAOnOffObservation::model_background(const GModels& models) const
 
     // Loop over all energy bins
     for (int i = 0; i < m_on_spec.size(); ++i) {
-     
+
         // Initialise variable to store number of background counts
         double nbgd = 0.0;
 
         // Choose background evaluation method based on fit statistics
-     
+
         // CSTAT
         if ((statistic == "POISSON") || (statistic == "CSTAT")) {
             nbgd = N_bgd(models, i, &dummy_grad);
@@ -2930,7 +3176,7 @@ double  GCTAOnOffObservation::wstat_value(const double& non,
 {
     // Initialise log-likelihood value
     double logL;
-  
+
     // Precompute some values
     double alphap1  = alpha + 1.0;
     double alpharat = alpha / alphap1;

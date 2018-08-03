@@ -673,6 +673,9 @@ void GRmf::read(const GFitsTable& table)
 
     } // endfor: looped over true energy bins
 
+    // Store FITS header
+    m_header = table.header();
+
     // Return
     return;
 }
@@ -826,6 +829,17 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         hdu.card("HDUVERS",  "1.3.0",      "Version of the file format");
         hdu.card("TLMIN4",   0,            "Minimum value allowed in column 4");
 
+        // Write additional header keywords (do not overwrite any existing
+        // keywords, except of "TELESCOP", "INSTRUME" and "FILTER")
+        for (int i = 0; i < m_header.size(); ++i) {
+            if ((!hdu.contains(m_header[i].keyname())) ||
+                (m_header[i].keyname() == "TELESCOP")  ||
+                (m_header[i].keyname() == "INSTRUME")  ||
+                (m_header[i].keyname() == "FILTER")) {
+                hdu.card(m_header[i]);
+            }
+        }
+
         // Append HDU to FITS file
         fits.append(hdu);
 
@@ -895,6 +909,7 @@ void GRmf::init_members(void)
     m_matrix.clear();
     m_itruemax = 0;
     m_imeasmax = 0;
+    m_header.clear();
 
     // Return
     return;
@@ -915,6 +930,7 @@ void GRmf::copy_members(const GRmf& rmf)
     m_matrix        = rmf.m_matrix;
     m_itruemax      = rmf.m_itruemax;
     m_imeasmax      = rmf.m_imeasmax;
+    m_header        = rmf.m_header;
 
     // Return
     return;

@@ -710,6 +710,9 @@ void GArf::read(const GFitsTable& table)
     // Set log true energy node array
     set_logetrue();
 
+    // Store FITS header
+    m_header = table.header();
+
     // Return
     return;
 }
@@ -799,6 +802,17 @@ void GArf::write(GFits& fits) const
         hdu.card("HDUCLAS2", "SPECRESP", "Extension contains an ARF");
         hdu.card("HDUVERS",  "1.1.0",    "Version of the file format");
 
+        // Write additional header keywords (do not overwrite any existing
+        // keywords, except of "TELESCOP", "INSTRUME" and "FILTER")
+        for (int i = 0; i < m_header.size(); ++i) {
+            if ((!hdu.contains(m_header[i].keyname())) ||
+                (m_header[i].keyname() == "TELESCOP")  ||
+                (m_header[i].keyname() == "INSTRUME")  ||
+                (m_header[i].keyname() == "FILTER")) {
+                hdu.card(m_header[i]);
+            }
+        }
+
         // Append HDU to FITS file
         fits.append(hdu);
 
@@ -859,6 +873,7 @@ void GArf::init_members(void)
     m_specresp.clear();
     m_colnames.clear();
     m_coldata.clear();
+    m_header.clear();
 
     // Return
     return;
@@ -879,6 +894,7 @@ void GArf::copy_members(const GArf& arf)
     m_specresp = arf.m_specresp;
     m_colnames = arf.m_colnames;
     m_coldata  = arf.m_coldata;
+    m_header   = arf.m_header;
 
     // Return
     return;

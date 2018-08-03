@@ -1005,6 +1005,9 @@ void GPha::read(const GFitsTable& table)
     m_outflow   = (table.has_card("OUTFLOW"))  ? table.real("OUTFLOW")  : 0.0;
     m_exposure  = (table.has_card("EXPOSURE")) ? table.real("EXPOSURE") : 0.0;
 
+    // Store FITS header
+    m_header = table.header();
+
     // Return
     return;
 }
@@ -1125,6 +1128,17 @@ void GPha::write(GFits& fits) const
         hdu.card("OVERFLOW", m_overflow,       "Number of overflowing events");
         hdu.card("OUTFLOW",  m_outflow,        "Number of outflowing events");
 
+        // Write additional header keywords (do not overwrite any existing
+        // keywords, except of "TELESCOP", "INSTRUME" and "FILTER")
+        for (int i = 0; i < m_header.size(); ++i) {
+            if ((!hdu.contains(m_header[i].keyname())) ||
+                (m_header[i].keyname() == "TELESCOP")  ||
+                (m_header[i].keyname() == "INSTRUME")  ||
+                (m_header[i].keyname() == "FILTER")) {
+                hdu.card(m_header[i]);
+            }
+        }
+
         // Append HDU to FITS file
         fits.append(hdu);
 
@@ -1227,6 +1241,7 @@ void GPha::init_members(void)
     m_corrfile.clear();
     m_respfile.clear();
     m_ancrfile.clear();
+    m_header.clear();
 
     // Return
     return;
@@ -1258,6 +1273,7 @@ void GPha::copy_members(const GPha& pha)
     m_corrfile  = pha.m_corrfile;
     m_respfile  = pha.m_respfile;
     m_ancrfile  = pha.m_ancrfile;
+    m_header    = pha.m_header;
 
     // Return
     return;

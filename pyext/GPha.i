@@ -96,6 +96,8 @@ public:
     void               read(const GFitsTable& table);
     void               write(GFits& fits) const;
     const GFilename&   filename(void) const;
+    const GFitsHeader& header(void) const;
+    void               header(const GFitsHeader& header);
 };
 
 

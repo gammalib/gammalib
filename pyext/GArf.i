@@ -58,21 +58,27 @@ public:
                        const GEnergy&     energy) const;
 
     // Methods
-    void             clear(void);
-    GArf*            clone(void) const;
-    std::string      classname(void) const;
-    int              size(void) const;
-    int              columns(void) const;
-    void             append(const std::string&         name,
-                            const std::vector<double>& column);
-    const GEbounds&  ebounds(void) const;
-    void             load(const GFilename& filename);
-    void             save(const GFilename& filename,
-                          const bool&      clobber = false) const;
-    void             read(const GFits& fits);
-    void             read(const GFitsTable& table);
-    void             write(GFits& fits) const;
-    const GFilename& filename(void) const;
+    void               clear(void);
+    GArf*              clone(void) const;
+    std::string        classname(void) const;
+    int                size(void) const;
+    int                columns(void) const;
+    double&            at(const int& index);
+    const double&      at(const int& index) const;
+    double&            at(const int& index, const int& col);
+    const double&      at(const int& index, const int& col) const;
+    void               append(const std::string&         name,
+                              const std::vector<double>& column);
+    const GEbounds&    ebounds(void) const;
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    void               read(const GFits& fits);
+    void               read(const GFitsTable& table);
+    void               write(GFits& fits) const;
+    const GFilename&   filename(void) const;
+    const GFitsHeader& header(void) const;
+    void               header(const GFitsHeader& header);
 };
 
 

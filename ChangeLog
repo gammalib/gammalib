@@ -4,6 +4,7 @@
         ========================
 
         Add use_irf_bkg argument to GCTAOnOffObservation constructor (#2659)
+        Support effective area with theta cut in GCTAOnOffObservation (#2657)
         Add gammalib::replace_segment() function
         Apply CTA 2D energy dispersion kludge only to CTA data (#2654)
         Add ARC WCS projection (#2541)

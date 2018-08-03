@@ -33,6 +33,7 @@
 #include "GEbounds.hpp"
 #include "GFilename.hpp"
 #include "GNdarray.hpp"
+#include "GFitsHeader.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GEnergy;
@@ -138,6 +139,8 @@ public:
     void               read(const GFitsTable& table);
     void               write(GFits& fits) const;
     const GFilename&   filename(void) const;
+    const GFitsHeader& header(void) const;
+    void               header(const GFitsHeader& header);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -166,6 +169,7 @@ protected:
     std::string                       m_corrfile;  //!< Correction file
     std::string                       m_respfile;  //!< RMF file
     std::string                       m_ancrfile;  //!< ARF file
+    GFitsHeader                       m_header;    //!< FITS header cards
 };
 
 
@@ -542,6 +546,31 @@ inline
 const GFilename& GPha::filename(void) const
 {
     return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Return FITS header
+ *
+ * @return FITS header or PHA file.
+ ***************************************************************************/
+inline
+const GFitsHeader& GPha::header(void) const
+{
+    return (m_header);
+}
+
+
+/***********************************************************************//**
+ * @brief Set FITS header
+ *
+ * @param[in] header FITS header.
+ ***************************************************************************/
+inline
+void GPha::header(const GFitsHeader& header)
+{
+    m_header = header;
+    return;
 }
 
 

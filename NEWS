@@ -35,7 +35,9 @@ The following methods have been added:
 - operator==(GSkyPixel&, GSkyPixel&)
 - operator!=(GSkyPixel&, GSkyPixel&)
 - GArf::read(GFits&)
+- GArf::header()
 - GPha::read(GFits&)
+- GPha::header()
 - GPha::operator(int&, int&)
 - GPha::operator[](std::string&)
 - GPha::columns()
@@ -54,6 +56,7 @@ The following methods have been added:
 - GPha::ancrfile(std::string&)
 - GPha::ancrfile()
 - GRmf::read(GFits&)
+- GRmf::header()
 - GFitsHDU::header(GFitsHeader&)
 - GFitsHDU::card(std::string&, bool&, std::string&)
 - GFitsHeaderCard(std::string&, std::string&, std::string&, std::string&)
@@ -277,6 +280,13 @@ None
 
 20. CTA interface
 -----------------
+The GCTAOnOffObservation now supports IRFs where the effective area is given
+for an applied theta-cut. In that case, the "RAD_MAX" keyword is set, and
+GCTAOnOffObservation will detect this and will not compute the PSF containment
+since it is already included in the IRF. The class will check whether the radial
+cut is consistent with the size of the On region, so that inconsistent computations
+are avoided (#2657).
+
 The optional argument "use_irf_bkg" was assed to the GCTAOnOffObservation
 constructor to turn off the usage of the IRF background template in the
 computation of the On/Off observation and to assume an identical background
