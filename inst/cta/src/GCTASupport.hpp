@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.hpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,16 +40,49 @@ class GFitsHDU;
 class GCTARoi;
 class GEbounds;
 class GPhases;
+class GObservation;
+class GResponse;
+class GEvent;
+class GCTAObservation;
+class GCTAPointing;
+class GCTAResponse;
+class GCTAResponseIrf;
+class GCTAResponseCube;
+class GCTAAeff;
+class GCTABackground;
+class GCTAEventList;
+class GCTAInstDir;
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
-    double      cta_roi_arclength(const double& rad,     const double& dist,
-                                  const double& cosdist, const double& sindist,
-                                  const double& roi,     const double& cosroi);
-    GCTARoi     read_ds_roi(const GFitsHDU& hdu);
-    GEbounds    read_ds_ebounds(const GFitsHDU& hdu);
-    GPhases     read_ds_phase(const GFitsHDU& hdu);
-    std::string read_ds_gti_extname(const GFitsHDU& hdu);
+    const GCTAObservation&  cta_obs(const std::string&  origin,
+                                    const GObservation& obs);
+    const GCTAPointing&     cta_pnt(const std::string&  origin,
+                                    const GObservation& obs);
+    const GCTAResponse*     cta_rsp(const std::string& origin,
+                                    const GResponse&   rsp);
+    const GCTAResponseIrf&  cta_rsp_irf(const std::string&  origin,
+                                        const GObservation& obs);
+    const GCTAResponseCube& cta_rsp_cube(const std::string&  origin,
+                                         const GObservation& obs);
+    const GCTAAeff&         cta_rsp_aeff(const std::string&  origin,
+                                         const GObservation& obs);
+    const GCTABackground&   cta_rsp_bkg(const std::string&  origin,
+                                        const GObservation& obs);
+    const GCTAEventList&    cta_event_list(const std::string&  origin,
+                                           const GObservation& obs);
+    const GCTAInstDir&      cta_dir(const std::string&  origin,
+                                    const GEvent&       event);
+    double                  cta_roi_arclength(const double& rad,
+                                              const double& dist,
+                                              const double& cosdist,
+                                              const double& sindist,
+                                              const double& roi,
+                                              const double& cosroi);
+    GCTARoi                 read_ds_roi(const GFitsHDU& hdu);
+    GEbounds                read_ds_ebounds(const GFitsHDU& hdu);
+    GPhases                 read_ds_phase(const GFitsHDU& hdu);
+    std::string             read_ds_gti_extname(const GFitsHDU& hdu);
 }
 
 #endif /* GCTASUPPORT_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.cpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,7 @@
 #include "GCTACubeSourceDiffuse.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAEventBin.hpp"
+#include "GCTASupport.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialShell.hpp"
@@ -314,7 +315,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
                              const GObservation& obs) const
 {
     // Retrieve event instrument direction
-    const GCTAInstDir& dir = retrieve_dir(G_IRF, event);
+    const GCTAInstDir& dir = gammalib::cta_dir(G_IRF, event);
 
     // Get event attributes
     const GSkyDir& obsDir = dir.dir();

@@ -325,8 +325,8 @@ double GCTAResponseIrf::irf(const GEvent&       event,
                             const GObservation& obs) const
 {
     // Retrieve CTA pointing and instrument direction
-    const GCTAPointing& pnt = retrieve_pnt(G_IRF, obs);
-    const GCTAInstDir&  dir = retrieve_dir(G_IRF, event);
+    const GCTAPointing& pnt = gammalib::cta_pnt(G_IRF, obs);
+    const GCTAInstDir&  dir = gammalib::cta_dir(G_IRF, event);
 
     // Get event attributes
     const GSkyDir& obsDir = dir.dir();
@@ -609,7 +609,7 @@ GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
     GCTAEventAtom* event = NULL;
 
     // Retrieve CTA pointing
-    const GCTAPointing& pnt = retrieve_pnt(G_MC, obs);
+    const GCTAPointing& pnt = gammalib::cta_pnt(G_MC, obs);
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt.zenith();
@@ -1930,8 +1930,8 @@ double GCTAResponseIrf::nirf(const GPhoton&      photon,
                              const GObservation& obs) const
 {
     // Retrieve CTA observation, ROI and pointing
-    const GCTAObservation& cta = retrieve_obs(G_NIRF, obs);
-    const GCTARoi&         roi = retrieve_roi(G_NIRF, obs);
+    const GCTAObservation& cta = gammalib::cta_obs(G_NIRF, obs);
+    const GCTARoi&         roi = gammalib::cta_event_list(G_NIRF, obs).roi();
     const GCTAPointing&    pnt = cta.pointing();
 
     // Get photon attributes
@@ -2321,8 +2321,8 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
                                    const GObservation& obs) const
 {
     // Retrieve CTA pointing
-    const GCTAPointing& pnt = retrieve_pnt(G_IRF_RADIAL, obs);
-    const GCTAInstDir&  dir = retrieve_dir(G_IRF_RADIAL, event);
+    const GCTAPointing& pnt = gammalib::cta_pnt(G_IRF_RADIAL, obs);
+    const GCTAInstDir&  dir = gammalib::cta_dir(G_IRF_RADIAL, event);
 
     // Get pointer on radial model
     const GModelSpatialRadial* model =
@@ -2546,8 +2546,8 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     static const int iter_phi = 5;
 
     // Retrieve CTA pointing
-    const GCTAPointing& pnt = retrieve_pnt(G_IRF_ELLIPTICAL, obs);
-    const GCTAInstDir&  dir = retrieve_dir(G_IRF_ELLIPTICAL, event);
+    const GCTAPointing& pnt = gammalib::cta_pnt(G_IRF_ELLIPTICAL, obs);
+    const GCTAInstDir&  dir = gammalib::cta_dir(G_IRF_ELLIPTICAL, event);
 
     // Get pointer on elliptical model
     const GModelSpatialElliptical* model =
@@ -2748,7 +2748,7 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
     double irf     = 0.0;
 
     // Retrieve CTA pointing
-    const GCTAPointing& pnt = retrieve_pnt(G_IRF_DIFFUSE, obs);
+    const GCTAPointing& pnt = gammalib::cta_pnt(G_IRF_DIFFUSE, obs);
 
     // Try getting the IRF value from cache
     #if defined(G_USE_IRF_CACHE)
@@ -2773,7 +2773,7 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
     if (!has_irf) {
 
         // Get CTA instrument direction
-        const GCTAInstDir& dir = retrieve_dir(G_IRF_ELLIPTICAL, event);
+        const GCTAInstDir& dir = gammalib::cta_dir(G_IRF_ELLIPTICAL, event);
 
         // Get pointer on spatial model
         const GModelSpatial* model =
@@ -3030,8 +3030,8 @@ double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
     double nroi = 0.0;
 
     // Retrieve CTA observation, ROI and pointing
-    const GCTAObservation& cta = retrieve_obs(G_NROI_RADIAL, obs);
-    const GCTARoi&         roi = retrieve_roi(G_NROI_RADIAL, obs);
+    const GCTAObservation& cta = gammalib::cta_obs(G_NROI_RADIAL, obs);
+    const GCTARoi&         roi = gammalib::cta_event_list(G_NROI_RADIAL, obs).roi();
     const GCTAPointing&    pnt = cta.pointing();
 
     // Get pointer on radial model
@@ -3214,8 +3214,8 @@ double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
     double nroi = 0.0;
 
     // Retrieve CTA observation, ROI and pointing
-    const GCTAObservation& cta = retrieve_obs(G_NROI_ELLIPTICAL, obs);
-    const GCTARoi&         roi = retrieve_roi(G_NROI_ELLIPTICAL, obs);
+    const GCTAObservation& cta = gammalib::cta_obs(G_NROI_ELLIPTICAL, obs);
+    const GCTARoi&         roi = gammalib::cta_event_list(G_NROI_ELLIPTICAL, obs).roi();
     const GCTAPointing&    pnt = cta.pointing();
 
     // Get pointer on elliptical model
@@ -3432,8 +3432,8 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
     if (!has_nroi) {
 
         // Retrieve CTA observation, ROI and pointing
-        const GCTAObservation& cta = retrieve_obs(G_NROI_DIFFUSE, obs);
-        const GCTARoi&         roi = retrieve_roi(G_NROI_DIFFUSE, obs);
+        const GCTAObservation& cta = gammalib::cta_obs(G_NROI_DIFFUSE, obs);
+        const GCTARoi&         roi = gammalib::cta_event_list(G_NROI_DIFFUSE, obs).roi();
         const GCTAPointing&    pnt = cta.pointing();
 
         // Get pointer on spatial model

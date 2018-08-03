@@ -40,6 +40,7 @@
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTABackground.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GCTAModelAeffBackground g_cta_aeff_background_seed;
@@ -52,6 +53,8 @@ const GModelRegistry          g_cta_aeff_background_registry(&g_cta_aeff_backgro
 #define G_MC              "GCTAModelAeffBackground::mc(GObservation&, GRan&)"
 #define G_XML_SPECTRAL  "GCTAModelAeffBackground::xml_spectral(GXmlElement&)"
 #define G_XML_TEMPORAL  "GCTAModelAeffBackground::xml_temporal(GXmlElement&)"
+#define G_AEFF_INTEGRAL             "GCTAModelAeffBackground::aeff_integral("\
+                                                    "GObservation&, double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -301,9 +304,6 @@ GCTAModelAeffBackground* GCTAModelAeffBackground::clone(void) const
  * @param[in] gradients Compute gradients?
  * @return Function value.
  *
- * @exception GException::invalid_argument
- *            Specified observation is not of the expected type.
- *
  * If the @p gradients flag is true the method will also set the parameter
  * gradients of the model parameters.
  *
@@ -313,47 +313,22 @@ double GCTAModelAeffBackground::eval(const GEvent&       event,
                                      const GObservation& obs,
                                      const bool&         gradients) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-    if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Get pointer on CTA IRF response
-    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-    if (rsp == NULL) {
-        std::string msg = "Specified observation does not contain an IRF response.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Retrieve pointer to CTA Effective Area
-    const GCTAAeff* aeff = rsp->aeff();
-    if (aeff == NULL) {
-        std::string msg = "Specified observation contains no effective area"
-                          " information.\n" + obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Extract CTA instrument direction from event
-    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        std::string msg = "No CTA instrument direction found in event.";
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
+    // Get reference on CTA pointing and effective area response from
+    // observation and reference on CTA instrument direction from event
+    const GCTAPointing& pnt  = gammalib::cta_pnt(G_EVAL, obs);
+    const GCTAAeff&     aeff = gammalib::cta_rsp_aeff(G_EVAL, obs);
+    const GCTAInstDir&  dir  = gammalib::cta_dir(G_EVAL, event);
 
     // Set instrument direction
-    GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
+    GCTAInstDir inst_dir = pnt.instdir(dir.dir());
 
     // Evaluate function
     double logE = event.energy().log10TeV();
-    double spat = (*aeff)(logE,
-                          inst_dir.theta(),
-                          inst_dir.phi(),
-                          cta->pointing().zenith(),
-                          cta->pointing().azimuth(), false);
+    double spat = aeff(logE,
+                       inst_dir.theta(),
+                       inst_dir.phi(),
+                       pnt.zenith(),
+                       pnt.azimuth(), false);
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time(), gradients)
                   : 1.0;
@@ -402,9 +377,6 @@ double GCTAModelAeffBackground::eval(const GEvent&       event,
  * @param[in] obsTime Measured event time.
  * @param[in] obs Observation.
  * @return Spatially integrated model.
- *
- * @exception GException::invalid_argument
- *            The specified observation is not a CTA observation.
  *
  * Spatially integrates the effective area background model for a given
  * measured event energy and event time. This method also applies a deadtime
@@ -502,9 +474,6 @@ double GCTAModelAeffBackground::npred(const GEnergy&      obsEng,
  * @return Pointer to list of simulated events (needs to be de-allocated by
  *         client)
  *
- * @exception GException::invalid_argument
- *            Specified observation is not a CTA observation.
- *
  * Draws a sample of events from the background model using a Monte
  * Carlo simulation. The region of interest, the energy boundaries and the
  * good time interval for the sampling will be extracted from the observation
@@ -528,47 +497,15 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Retrieve CTA observation
-        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-        if (cta == NULL) {
-            std::string msg = "Specified observation is not a CTA "
-                              "observation.\n" + obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Get pointer on CTA IRF response
-        const GCTAResponseIrf* rsp =
-              dynamic_cast<const GCTAResponseIrf*>(cta->response());
-        if (rsp == NULL) {
-            std::string msg = "Specified observation does not contain"
-                              " an IRF response.\n" + obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Retrieve CTA response and pointing
-        const GCTAPointing& pnt = cta->pointing();
-
-        // Get pointer to CTA effective area
-        const GCTAAeff* aeff = rsp->aeff();
-        if (aeff == NULL) {
-            std::string msg = "Specified observation contains no effective area"
-                              " information.\n" + obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Retrieve event list to access the ROI, energy boundaries and GTIs
-        const GCTAEventList* events =
-              dynamic_cast<const GCTAEventList*>(obs.events());
-        if (events == NULL) {
-            std::string msg = "No CTA event list found in observation.\n" +
-                              obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
+        // Retrieve CTA pointing, effective area response and event list
+        const GCTAPointing&  pnt    = gammalib::cta_pnt(G_MC, obs);
+        const GCTAAeff&      aeff   = gammalib::cta_rsp_aeff(G_MC, obs);
+        const GCTAEventList& events = gammalib::cta_event_list(G_MC, obs);
 
         // Get simulation region
-        const GCTARoi&  roi     = events->roi();
-        const GEbounds& ebounds = events->ebounds();
-        const GGti&     gti     = events->gti();
+        const GCTARoi&  roi     = events.roi();
+        const GEbounds& ebounds = events.ebounds();
+        const GGti&     gti     = events.gti();
 
         // Get maximum offset value for simulations
         double max_theta     = pnt.dir().dist(roi.centre().dir()) +
@@ -590,7 +527,7 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
         for (int i = 0; i < spectral_ebounds.size(); ++i) {
             GEnergy energy    = spectral_ebounds.elogmean(i);
             double  intensity = aeff_integral(obs, energy.log10TeV());
-            double  norm      = m_spectral->eval(energy, events->tstart());
+            double  norm      = m_spectral->eval(energy, events.tstart());
             double  arg       = norm * intensity;
             if (arg > 0.0) {
                 spectral.append(energy, arg);
@@ -664,8 +601,8 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
                                                  ran);
 
                     // Get maximum effective area for rejection method
-                    double max_aeff = aeff->max(energy.log10TeV(), pnt.zenith(),
-                                                pnt.azimuth(), false);
+                    double max_aeff = aeff.max(energy.log10TeV(), pnt.zenith(),
+                                               pnt.azimuth(), false);
 
                     // Skip event if the maximum effective area is not positive
                     if (max_aeff <= 0.0) {
@@ -691,9 +628,9 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
                         phi    = ran.uniform() * gammalib::twopi;
 
                         // Compute function value at this offset angle
-                        double value = (*aeff)(energy.log10TeV(), offset, phi,
-                                               pnt.zenith(), pnt.azimuth(),
-                                               false);
+                        double value = aeff(energy.log10TeV(), offset, phi,
+                                            pnt.zenith(), pnt.azimuth(),
+                                            false);
 
                         // If the value is not positive then increment the
                         // zeros counter and fall through. The counter assures
@@ -746,7 +683,7 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
                     event.time(times[i]);
 
                     // Append event to list if it falls in ROI
-                    if (events->roi().contains(event)) {
+                    if (events.roi().contains(event)) {
                         list->append(event);
                     }
                     #if defined(G_DUMP_MC)
@@ -925,7 +862,7 @@ void GCTAModelAeffBackground::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print CTA effective area background model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing CTA effective area background model information.
  ***************************************************************************/
 std::string GCTAModelAeffBackground::print(const GChatter& chatter) const
@@ -1163,43 +1100,16 @@ double GCTAModelAeffBackground::aeff_integral(const GObservation& obs,
     static const int iter_theta = 6;
     static const int iter_phi   = 6;
 
-    // Get pointer on CTA observation
-    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-    if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA"
-                          " observation.\n" + obs.print();
-        throw GException::invalid_argument(G_NPRED, msg);
-    }
-
-    // Get pointer on CTA IRF response
-    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-    if (rsp == NULL) {
-        std::string msg = "Specified observation does not contain"
-                          " an IRF response.\n" + obs.print();
-        throw GException::invalid_argument(G_NPRED, msg);
-    }
-
-    // Retrieve pointer to CTA effective area
-    const GCTAAeff* aeff = rsp->aeff();
-    if (aeff == NULL) {
-        std::string msg = "Specified observation contains no effective area"
-                          " information.\n" + obs.print();
-        throw GException::invalid_argument(G_NPRED, msg);
-    }
-
-    // Get CTA event list
-    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-    if (events == NULL) {
-        std::string msg = "No CTA event list found in observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_NPRED, msg);
-    }
+    // Get reference on CTA effective area response and event list from
+    // observation
+    const GCTAAeff&      aeff   = gammalib::cta_rsp_aeff(G_AEFF_INTEGRAL, obs);
+    const GCTAEventList& events = gammalib::cta_event_list(G_AEFF_INTEGRAL, obs);
 
     // Get ROI radius in radians
-    double roi_radius = events->roi().radius() * gammalib::deg2rad;
+    double roi_radius = events.roi().radius() * gammalib::deg2rad;
 
     // Setup integration function
-    GCTAModelAeffBackground::npred_roi_kern_theta integrand(aeff,
+    GCTAModelAeffBackground::npred_roi_kern_theta integrand(&aeff,
                                                             logE,
                                                             iter_phi);
 

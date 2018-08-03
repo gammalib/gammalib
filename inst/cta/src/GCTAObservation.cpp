@@ -316,24 +316,12 @@ GCTAObservation* GCTAObservation::clone(void) const
  *
  * @param[in] rsp Response function.
  *
- * @exception GException::invalid_argument
- *            Invalid response class specified.
- *
  * Sets the response function for the observation.
  ***************************************************************************/
 void GCTAObservation::response(const GResponse& rsp)
 {
-    // Cast response dynamically
-    const GCTAResponse* ptr = dynamic_cast<const GCTAResponse*>(&rsp);
-
-    // Throw exception if response is not of correct type
-    if (ptr == NULL) {
-        std::string cls = std::string(typeid(&rsp).name());
-        std::string msg = "Invalid response type \""+cls+"\" provided on "
-                          "input. Please specify a \"GCTAResponse\" "
-                          "object as argument.";
-        throw GException::invalid_argument(G_RESPONSE_SET, msg);
-    }
+    // Retrieve CTA response pointer
+    const GCTAResponse* ptr = gammalib::cta_rsp(G_RESPONSE_SET, rsp);
 
     // Free existing response only if it differs from current response. This
     // prevents unintential deallocation of the argument

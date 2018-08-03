@@ -412,23 +412,13 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
                                        const GObservation& obs,
                                        const bool&         gradients) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
-
-    // Get instrument direction
-    const GInstDir*    inst_dir = &(event.dir());
-    const GCTAInstDir* cta_dir  = static_cast<const GCTAInstDir*>(inst_dir);
+    // Get reference on CTA pointing from observation and reference on CTA
+    // instrument direction from event
+    const GCTAPointing& pnt = gammalib::cta_pnt(G_EVAL, obs);
+    const GCTAInstDir&  dir = gammalib::cta_dir(G_EVAL, event);
 
     // Compute offset angle (in degrees)
-    double offset = cta_dir->dir().dist_deg(pnt.dir());
+    double offset = dir.dir().dist_deg(pnt.dir());
 
     // Evaluate function and gradients
     double rad  = (radial()   != NULL)
@@ -509,28 +499,15 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
     // Evaluate only if model is valid
     if (valid_model()) {
 
-        // Get pointer on CTA events list
-        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-        if (events == NULL) {
-            throw GException::no_list(G_NPRED);
-        }
-
-        // Get pointer on CTA observation
-        const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-        if (ctaobs == NULL) {
-            std::string msg = "Specified observation is not a CTA observation.\n" +
-                            obs.print();
-            throw GException::invalid_argument(G_NPRED, msg);
-        }
-
-        // Get pointer on CTA pointing
-        const GCTAPointing& pnt = ctaobs->pointing();
+        // Retrieve CTA pointing and event list
+        const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
+        const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
 
         // Get ROI radius in radians
-        double roi_radius = events->roi().radius() * gammalib::deg2rad;
+        double roi_radius = events.roi().radius() * gammalib::deg2rad;
 
         // Get distance from ROI centre in radians
-        double roi_distance = events->roi().centre().dir().dist(pnt.dir());
+        double roi_distance = events.roi().centre().dir().dist(pnt.dir());
 
         // Setup integration function
         GCTAModelRadialAcceptance::roi_kern integrand(radial(), roi_radius, roi_distance);
@@ -588,16 +565,8 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Get pointer on CTA observation
-        const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-        if (ctaobs == NULL) {
-            std::string msg = "Specified observation is not a CTA observation.\n" +
-                            obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Get pointer on CTA pointing
-        const GCTAPointing& pnt = ctaobs->pointing();
+        // Retrieve CTA pointing
+        const GCTAPointing& pnt = gammalib::cta_pnt(G_NPRED, obs);
 
         // Convert CTA pointing direction in instrument system
         GCTAInstDir pnt_dir(pnt.dir());

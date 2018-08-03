@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAResponse.hpp - CTA response abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -92,15 +92,6 @@ protected:
     void                   init_members(void);
     void                   copy_members(const GCTAResponse& rsp);
     void                   free_members(void);
-    const GCTAObservation& retrieve_obs(const std::string& origin,
-                                        const GObservation& obs) const;
-    const GCTAPointing&    retrieve_pnt(const std::string& origin,
-                                        const GObservation& obs) const;
-    const GCTARoi&         retrieve_roi(const std::string& origin,
-                                        const GObservation& obs) const;
-    const GCTAInstDir&     retrieve_dir(const std::string& origin,
-                                        const GEvent&      event) const;
-
 };
 
 #endif /* GCTARESPONSE_HPP */

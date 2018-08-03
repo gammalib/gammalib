@@ -52,6 +52,7 @@
 #include "GCTACubeBackground.hpp"
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAOnOffObservation.hpp"
+#include "GCTASupport.hpp"
 
 /* __ OpenMP section _____________________________________________________ */
 #ifdef _OPENMP
@@ -598,17 +599,8 @@ GCTAOnOffObservation* GCTAOnOffObservation::clone(void) const
  ***************************************************************************/
 void GCTAOnOffObservation::response(const GResponse& rsp)
 {
-    // Cast response dynamically
-    const GCTAResponse* ptr = dynamic_cast<const GCTAResponse*>(&rsp);
-
-    // Throw exception if response is not of correct type
-    if (ptr == NULL) {
-        std::string cls = std::string(typeid(&rsp).name());
-        std::string msg = "Invalid response type \""+cls+"\" provided on "
-                          "input. Please specify a \"GCTAResponse\" "
-                          "as argument.";
-        throw GException::invalid_argument(G_RESPONSE_SET, msg);
-    }
+    // Retrieve CTA response pointer
+    const GCTAResponse* ptr = gammalib::cta_rsp(G_RESPONSE_SET, rsp);
 
     // Free existing response only if it differs from current response. This
     // prevents unintential deallocation of the argument
@@ -1252,24 +1244,17 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
     // Continue only if there are ARF bins
     if (ntrue > 0) {
 
-        // Get CTA response pointer. Throw an exception if no response is found
-        const GCTAResponseIrf* response =
-              dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        if (response == NULL) {
-            std::string msg = "Response in CTA observation \""+obs.name()+"\" "
-                              "(ID="+obs.id()+") is not of the GCTAResponseIrf "
-                              "type.";
-            throw GException::invalid_argument(G_COMPUTE_ARF, msg);
-        }
+        // Get CTA IRF response
+        const GCTAResponseIrf& rsp = gammalib::cta_rsp_irf(G_COMPUTE_ARF, obs);
 
         // Set dummy time
         const GTime time;
 
         // Save original energy dispersion application status
-        bool save_edisp = response->apply_edisp();
+        bool save_edisp = rsp.apply_edisp();
 
         // Switch-off application of energy dispersion
-        const_cast<GCTAResponseIrf*>(response)->apply_edisp(false);
+        const_cast<GCTAResponseIrf&>(rsp).apply_edisp(false);
 
         // Loop over true energies
         for (int i = 0; i < ntrue; ++i) {
@@ -1312,7 +1297,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
 
                     // Get ARF value. We need to devide by the deadtime
                     // correction since the IRF method multiplies with it.
-                    double irf = response->irf(event, source, obs) / m_deadc;
+                    double irf = rsp.irf(event, source, obs) / m_deadc;
 
                     // Add up effective area
                     m_arf[i] += irf * pixsolid;
@@ -1324,7 +1309,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
         } // endfor: looped over true energies
 
         // Put back original energy dispersion application status
-        const_cast<GCTAResponseIrf*>(response)->apply_edisp(save_edisp);
+        const_cast<GCTAResponseIrf&>(rsp).apply_edisp(save_edisp);
 
 	} // endif: there were energy bins
 
@@ -1361,15 +1346,8 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
     // Continue only if there are ARF bins
     if (ntrue > 0) {
 
-        // Get CTA response pointer. Throw an exception if no response is found
-        const GCTAResponseIrf* response =
-              dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        if (response == NULL) {
-            std::string msg = "Response in CTA observation \""+obs.name()+"\" "
-                              "(ID="+obs.id()+") is not of the GCTAResponseIrf "
-                              "type.";
-            throw GException::invalid_argument(G_COMPUTE_ARF_CUT, msg);
-        }
+        // Get CTA IRF response
+        const GCTAResponseIrf& rsp = gammalib::cta_rsp_irf(G_COMPUTE_ARF, obs);
 
         // Get CTA observation pointing direction, zenith, and azimuth
         GCTAPointing obspnt  = obs.pointing();
@@ -1411,11 +1389,9 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
                     double phi   = obsdir.posang(pixdir);
 
                     // Add up effective area
-                    m_arf[i] += response->aeff(theta,
-                                               phi,
-                                               zenith,
-                                               azimuth,
-                                               logEtrue) * pixsolid;
+                    m_arf[i] += rsp.aeff(theta, phi,
+                                         zenith, azimuth,
+                                         logEtrue) * pixsolid;
 
                     // Sum up solid angles
                     sum += pixsolid;
@@ -1511,22 +1487,8 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
             // Get CTA observation pointing direction
             GCTAPointing obspnt = obs.pointing();
 
-            // Get pointer on CTA IRF response
-            const GCTAResponseIrf* rsp =
-                  dynamic_cast<const GCTAResponseIrf*>(obs.response());
-            if (rsp == NULL) {
-                std::string msg = "Specified observation does not contain "
-                                  "an IRF response.\n" + obs.print();
-                throw GException::invalid_argument(G_COMPUTE_BGD, msg);
-            }
-
-            // Get pointer to CTA background
-            const GCTABackground* bgd = rsp->background();
-            if (bgd == NULL) {
-                std::string msg = "Specified observation contains no "
-                                  "background information.\n" + obs.print();
-                throw GException::invalid_argument(G_COMPUTE_BGD, msg);
-            }
+            // Get CTA background
+            const GCTABackground& bgd = gammalib::cta_rsp_bkg(G_COMPUTE_BGD, obs);
 
             // Loop over regions
             for (int k = 0; k < off.size(); ++k) {
@@ -1558,9 +1520,9 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
                         double logEreco = ereco.elogmean(i).log10TeV();
 
                         // Get background rate in events/s/MeV
-                        background[i] += (*bgd)(logEreco,
-                                                pixinstdir.detx(),
-                                                pixinstdir.dety()) * pixsolid;
+                        background[i] += bgd(logEreco,
+                                             pixinstdir.detx(),
+                                             pixinstdir.dety()) * pixsolid;
 
                     } // endfor: looped over energy bins
 
@@ -1653,23 +1615,8 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
         // energy dependent alpha factors
         if (use_irf_bkg) {
 
-            // Get pointer on CTA IRF response
-            const GCTAResponseIrf* rsp =
-                  dynamic_cast<const GCTAResponseIrf*>(obs.response());
-            if (rsp == NULL) {
-                std::string msg = "Response in CTA observation \""+obs.name()+
-                                  "\" (ID="+obs.id()+") is not of the "
-                                  "GCTAResponseIrf type.";
-                throw GException::invalid_argument(G_COMPUTE_ALPHA, msg);
-            }
-
-            // Get pointer to CTA background
-            const GCTABackground* bgd = rsp->background();
-            if (bgd == NULL) {
-                std::string msg = "Specified observation contains no "
-                                  "background information.\n" + obs.print();
-                throw GException::invalid_argument(G_COMPUTE_ALPHA, msg);
-            }
+            // Get CTA background
+            const GCTABackground& bgd = gammalib::cta_rsp_bkg(G_COMPUTE_ALPHA, obs);
 
             // Loop over reconstructed energies
             for (int i = 0; i < nreco; ++i) {
@@ -1704,10 +1651,10 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                         double pixsolid = on_map->map().solidangle(pixidx);
 
                         // Add up acceptance
-                        aon += (*bgd)(logEreco,
-                                      pixinstdir.detx(),
-                                      pixinstdir.dety()) *
-                                      pixsolid;
+                        aon += bgd(logEreco,
+                                   pixinstdir.detx(),
+                                   pixinstdir.dety()) *
+                                   pixsolid;
 
                     } // endfor: looped over all pixels in map
 
@@ -1736,10 +1683,10 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                         double pixsolid = off_map->map().solidangle(pixidx);
 
                         // Add up acceptance
-                        aoff += (*bgd)(logEreco,
-                                       pixinstdir.detx(),
-                                       pixinstdir.dety()) *
-                                       pixsolid;
+                        aoff += bgd(logEreco,
+                                    pixinstdir.detx(),
+                                    pixinstdir.dety()) *
+                                    pixsolid;
 
                     } // endfor: looped over all pixels in map
 
@@ -1855,15 +1802,8 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
     // Continue only if there are RMF bins
     if (ntrue > 0 && nreco > 0) {
 
-        // Get CTA response pointer
-        const GCTAResponseIrf* response =
-              dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        if (response == NULL) {
-            std::string msg = "Response in CTA observation \""+obs.name()+"\" "
-                              "(ID="+obs.id()+") is not of the GCTAResponseIrf "
-                              "type.";
-            throw GException::invalid_argument(G_COMPUTE_RMF, msg);
-        }
+        // Get CTA IRF response
+        const GCTAResponseIrf& rsp = gammalib::cta_rsp_irf(G_COMPUTE_RMF, obs);
 
         // Get CTA observation pointing direction, zenith, and azimuth
         GCTAPointing obspnt  = obs.pointing();
@@ -1907,18 +1847,18 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                     double logEtrue = etrue.elogmean(itrue).log10TeV();
 
                     // Get effective area for weighting
-                    double aeff = response->aeff(theta, phi,
-                                                 zenith, azimuth,
-                                                 logEtrue);
+                    double aeff = rsp.aeff(theta, phi,
+                                           zenith, azimuth,
+                                           logEtrue);
 
                     // Loop over reconstructed energy
                     for (int ireco = 0; ireco < nreco; ++ireco) {
 
                         // Get RMF value
-                        double value = response->edisp()->prob_erecobin(ereco.emin(ireco),
-                                                                        ereco.emax(ireco),
-                                                                        etrue.elogmean(itrue),
-                                                                        theta);
+                        double value = rsp.edisp()->prob_erecobin(ereco.emin(ireco),
+                                                                  ereco.emax(ireco),
+                                                                  etrue.elogmean(itrue),
+                                                                  theta);
 
                         // Update RMF value and weight
                         m_rmf(itrue, ireco)  += value * aeff;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.cpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <typeinfo>
 #include <cmath>
 #include <iostream>
 #include <string>
@@ -37,6 +38,15 @@
 #include "GFitsHDU.hpp"
 #include "GEbounds.hpp"
 #include "GPhases.hpp"
+#include "GResponse.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAPointing.hpp"
+#include "GCTAResponse.hpp"
+#include "GCTAResponseIrf.hpp"
+#include "GCTAResponseCube.hpp"
+#include "GCTAAeff.hpp"
+#include "GCTABackground.hpp"
+#include "GCTAEventList.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAInstDir.hpp"
 
@@ -50,6 +60,293 @@
 
 /* __ Debug definitions __________________________________________________ */
 #define G_CHECK_FOR_NAN 0
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA observation from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ * @return Reference to CTA observation.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs is not a CTA observations.
+ *
+ * Dynamically casts generic observation into a CTA observation. If the
+ * generic observation is not a CTA observation, an exception is thrown.
+ ***************************************************************************/
+const GCTAObservation& gammalib::cta_obs(const std::string&  origin,
+                                         const GObservation& obs)
+{
+    // Get pointer on CTA observation
+    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
+
+    // If pointer is not valid then throw an exception
+    if (cta == NULL) {
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Invalid observation type \""+cls+"\" provided with "
+                          "name \""+obs.name()+"\" (ID="+obs.id()+"). "
+                          "Please specify a \"GCTAObservation\" instance as "
+                          "argument.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return reference
+    return (*cta);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA pointing from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ * @return Reference to CTA pointing.
+ *
+ * Extract CTA pointing from a CTA observation.
+ ***************************************************************************/
+const GCTAPointing& gammalib::cta_pnt(const std::string&  origin,
+                                      const GObservation& obs)
+{
+    // Retrieve CTA observation
+    const GCTAObservation& cta = gammalib::cta_obs(origin, obs);
+
+    // Return CTA pointing
+    return (cta.pointing());
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA response from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] rsp Generic response.
+ * @return Pointer to CTA response.
+ *
+ * @exception GException::invalid_argument
+ *            Response @p rsp is not a CTA response.
+ *
+ * Extract CTA response from a CTA observation.
+ ***************************************************************************/
+const GCTAResponse* gammalib::cta_rsp(const std::string& origin,
+                                      const GResponse&   rsp)
+{
+    // Retrieve CTA response
+    const GCTAResponse* ptr = dynamic_cast<const GCTAResponse*>(&rsp);
+
+    // If pointer is not valid then throw an exception
+    if (ptr == NULL) {
+        std::string cls = std::string(typeid(&rsp).name());
+        std::string msg = "Invalid response type \""+cls+"\" provided. Please "
+                          "specify a \"GCTAResponse\" as argument.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return CTA response
+    return (ptr);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA IRF response from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ * @return Reference to CTA IRF response.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs does not contain a CTA IRF response.
+ *
+ * Extract CTA IRF response from a CTA observation.
+ ***************************************************************************/
+const GCTAResponseIrf& gammalib::cta_rsp_irf(const std::string&  origin,
+                                             const GObservation& obs)
+{
+    // Retrieve CTA observation
+    const GCTAObservation& cta = gammalib::cta_obs(origin, obs);
+
+    // Get pointer on CTA IRF response
+    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta.response());
+
+    // If pointer is not valid then throw an exception
+    if (rsp == NULL) {
+        std::string cls = std::string(typeid(cta.response()).name());
+        std::string msg = "Invalid response type \""+cls+"\" provided in "
+                          "CTA observation \""+obs.name()+"\" (ID="+obs.id()+"). "
+                          "Please specify a CTA observation containing an IRF "
+                          "response as argument.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return CTA IRF response
+    return (*rsp);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA cube response from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ * @return Reference to CTA cube response.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs does not contain a CTA cube response.
+ *
+ * Extract CTA cube response from a CTA observation.
+ ***************************************************************************/
+const GCTAResponseCube& gammalib::cta_rsp_cube(const std::string&  origin,
+                                               const GObservation& obs)
+{
+    // Retrieve CTA observation
+    const GCTAObservation& cta = gammalib::cta_obs(origin, obs);
+
+    // Get pointer on CTA response cube
+    const GCTAResponseCube* rsp = dynamic_cast<const GCTAResponseCube*>(cta.response());
+
+    // If pointer is not valid then throw an exception
+    if (rsp == NULL) {
+        std::string cls = std::string(typeid(cta.response()).name());
+        std::string msg = "Invalid response type \""+cls+"\" provided. Please "
+                          "specify a CTA observation containing a response cube "
+                          "as argument.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return CTA response cube
+    return (*rsp);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA effective area response from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ * @return Reference to CTA effective area response.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs does not contain a CTA effective area
+ *            response.
+ *
+ * Extract CTA effective area response from a CTA observation.
+ ***************************************************************************/
+const GCTAAeff& gammalib::cta_rsp_aeff(const std::string&  origin,
+                                       const GObservation& obs)
+{
+    // Retrieve CTA IRF response
+    const GCTAResponseIrf& rsp = gammalib::cta_rsp_irf(origin, obs);
+
+    // Get pointer on CTA effective area
+    const GCTAAeff* aeff = rsp.aeff();
+    if (aeff == NULL) {
+        std::string msg = "Specified observation does not contain a valid "
+                          "effective area response. Please specify a CTA "
+                          "observation containing an effective area response.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return CTA effective area response
+    return (*aeff);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA background response from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ * @return Reference to CTA background response.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs does not contain a CTA background response.
+ *
+ * Extract CTA background response from a CTA observation.
+ ***************************************************************************/
+const GCTABackground& gammalib::cta_rsp_bkg(const std::string&  origin,
+                                            const GObservation& obs)
+{
+    // Retrieve CTA IRF response
+    const GCTAResponseIrf& rsp = gammalib::cta_rsp_irf(origin, obs);
+
+    // Get pointer on CTA background response
+    const GCTABackground* bkg = rsp.background();
+    if (bkg == NULL) {
+        std::string msg = "Specified observation does not contain a valid "
+                          "background response. Please specify a CTA "
+                          "observation containing a background response.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return CTA background response
+    return (*bkg);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA event list from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ * @return Reference to CTA event list.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs does not contain a CTA event list.
+ *
+ * Extract CTA event list from a CTA observation.
+ ***************************************************************************/
+const GCTAEventList& gammalib::cta_event_list(const std::string&  origin,
+                                              const GObservation& obs)
+{
+    // Retrieve CTA observation
+    const GCTAObservation& cta = gammalib::cta_obs(origin, obs);
+
+    // Get pointer on CTA events list
+    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(cta.events());
+
+    // If pointer is not valid then throw an exception
+    if (events == NULL) {
+        std::string msg = "Specified observation does not contain a CTA event "
+                          "list. Please specify a CTA observation containing "
+                          "a CTA event list as argument.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return CTA event list
+    return (*events);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA instrument direction from generic event
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] event Generic event.
+ * @return Reference to CTA RoI.
+ *
+ * @exception GException::invalid_argument
+ *            @p event does not contain a CTA instrument direction.
+ *
+ * Extract CTA Instrument Direction from an event.
+ ***************************************************************************/
+const GCTAInstDir& gammalib::cta_dir(const std::string& origin,
+                                     const GEvent&      event)
+{
+    // Get pointer on CTA instrument direction
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
+
+    // If pointer is not valid then throw an exception
+    if (dir == NULL) {
+        std::string cls = std::string(typeid(&event).name());
+        std::string msg = "Invalid event type \""+cls+"\" provided. Please "
+                          "specify a \"GCTAEventAtom\" or \"GCTAEventBin\" "
+                          "instance as argument.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return reference
+    return (*dir);
+}
 
 
 /***********************************************************************//**
@@ -324,7 +621,8 @@ GPhases gammalib::read_ds_phase(const GFitsHDU& hdu)
 
 
 /***********************************************************************//**
- * @brief Return Good Time Intervals extension name from data sub-space keywords
+ * @brief Return Good Time Intervals extension name from data sub-space
+ *        keywords
  *
  * @param[in] hdu FITS HDU
  * @return Good Time Interval extension name

@@ -38,6 +38,7 @@
 #include "GCTAObservation.hpp"
 #include "GCTAResponseCube.hpp"
 #include "GCTACubeBackground.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GCTAModelCubeBackground g_cta_inst_background_seed;
@@ -278,9 +279,6 @@ GCTAModelCubeBackground* GCTAModelCubeBackground::clone(void) const
  * @param[in] gradients Compute gradients?
  * @return Function value.
  *
- * @exception GException::invalid_argument
- *            Specified observation is not of the expected type.
- *
  * If the @p gradients flag is true the method will also set the parameter
  * gradients of the model parameters.
  ***************************************************************************/
@@ -288,33 +286,16 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
                                      const GObservation& obs,
                                      const bool&         gradients) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-    if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.";
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Get pointer on CTA IRF response
-    const GCTAResponseCube* rsp = dynamic_cast<const GCTAResponseCube*>(cta->response());
-    if (rsp == NULL) {
-        std::string msg = "Specified observation does not contain a cube response.";
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Extract CTA instrument direction from event
-    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        std::string msg = "No CTA instrument direction found in event.";
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
+    // Get reference on CTA response cube from observation and reference on
+    // CTA instrument direction from event
+    const GCTAResponseCube& rsp = gammalib::cta_rsp_cube(G_EVAL, obs);
+    const GCTAInstDir&      dir = gammalib::cta_dir(G_EVAL, event);
 
     // Retrieve reference to CTA cube background
-    const GCTACubeBackground& bgd = rsp->background();
+    const GCTACubeBackground& bgd = rsp.background();
 
     // Evaluate function
-    //double logE = event.energy().log10TeV();
-    double spat = bgd((*dir), event.energy());
+    double spat = bgd(dir, event.energy());
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time(), gradients)
                   : 1.0;
@@ -362,9 +343,6 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
  * @param[in] obs Observation.
  * @return Spatially integrated model.
  *
- * @exception GException::invalid_argument
- *            The specified observation is not a CTA observation.
- *
  * Spatially integrates the cube background model for a given measured event
  * energy and event time. This method also applies a deadtime correction
  * factor, so that the normalization of the model is a real rate
@@ -409,27 +387,14 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
         // Evaluate only if model is valid
         if (valid_model()) {
 
-            // Get pointer on CTA observation
-            const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-            if (cta == NULL) {
-                std::string msg = "Specified observation is not a CTA"
-                                  " observation.\n" + obs.print();
-                throw GException::invalid_argument(G_NPRED, msg);
-            }
+            // Get reference on CTA response cube from observation
+            const GCTAResponseCube& rsp = gammalib::cta_rsp_cube(G_NPRED, obs);
 
-            // Get pointer on CTA cube response
-            const GCTAResponseCube* rsp = dynamic_cast<const GCTAResponseCube*>(cta->response());
-            if (rsp == NULL) {
-                std::string msg = "Specified observation does not contain"
-                                  " a cube response.\n" + obs.print();
-                throw GException::invalid_argument(G_NPRED, msg);
-            }
+            // Retrieve CTA background
+            const GCTACubeBackground bgd = rsp.background();
 
             // Get log10 of energy in TeV
             double logE = obsEng.log10TeV();
-
-            // Retrieve CTA background
-            const GCTACubeBackground bgd = rsp->background();
 
             // Integrate the background map at a certain energy
             npred = bgd.integral(logE);
@@ -643,7 +608,7 @@ void GCTAModelCubeBackground::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print CTA cube background model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing CTA cube background model information.
  ***************************************************************************/
 std::string GCTAModelCubeBackground::print(const GChatter& chatter) const

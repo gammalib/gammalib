@@ -40,6 +40,7 @@
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTABackground.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GCTAModelIrfBackground g_cta_inst_background_seed;
@@ -329,9 +330,6 @@ void GCTAModelIrfBackground::temporal(const GModelTemporal* temporal)
  * @param[in] gradients Compute gradients?
  * @return Function value.
  *
- * @exception GException::invalid_argument
- *            Specified observation is not of the expected type.
- *
  * If the @p gradients flag is true the method will also set the parameter
  * gradients of the model parameters.
  *
@@ -341,43 +339,18 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
                                     const GObservation& obs,
                                     const bool&         gradients) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-    if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Get pointer on CTA IRF response
-    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-    if (rsp == NULL) {
-        std::string msg = "Specified observation does not contain an IRF response.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Retrieve pointer to CTA background
-    const GCTABackground* bgd = rsp->background();
-    if (bgd == NULL) {
-        std::string msg = "Specified observation contains no background"
-                          " information.\n" + obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Extract CTA instrument direction from event
-    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        std::string msg = "No CTA instrument direction found in event.";
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
+    // Get reference on CTA pointing and effective area response from
+    // observation and reference on CTA instrument direction from event
+    const GCTAPointing&   pnt = gammalib::cta_pnt(G_EVAL, obs);
+    const GCTABackground& bgd = gammalib::cta_rsp_bkg(G_EVAL, obs);
+    const GCTAInstDir&    dir = gammalib::cta_dir(G_EVAL, event);
 
     // Set DETX and DETY in instrument direction
-    GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
+    GCTAInstDir inst_dir = pnt.instdir(dir.dir());
     
     // Evaluate function
     double logE = event.energy().log10TeV();
-    double spat = (*bgd)(logE, inst_dir.detx(), inst_dir.dety());
+    double spat = bgd(logE, inst_dir.detx(), inst_dir.dety());
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time(), gradients)
                   : 1.0;
@@ -428,9 +401,6 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
  * @param[in] obs Observation.
  * @return Spatially integrated model.
  *
- * @exception GException::invalid_argument
- *            The specified observation is not a CTA observation.
- *
  * Spatially integrates the instrumental background model for a given
  * measured event energy and event time. This method also applies a deadtime
  * correction factor, so that the normalization of the model is a real rate
@@ -479,49 +449,21 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
         // Evaluate only if model is valid
         if (valid_model()) {
 
-            // Get pointer on CTA observation
-            const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-            if (cta == NULL) {
-                std::string msg = "Specified observation is not a CTA"
-                                  " observation.\n" + obs.print();
-                throw GException::invalid_argument(G_NPRED, msg);
-            }
-
-            // Get pointer on CTA IRF response
-            const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-            if (rsp == NULL) {
-                std::string msg = "Specified observation does not contain"
-                                  " an IRF response.\n" + obs.print();
-                throw GException::invalid_argument(G_NPRED, msg);
-            }
-
-            // Retrieve pointer to CTA background
-            const GCTABackground* bgd = rsp->background();
-            if (bgd == NULL) {
-                std::string msg = "Specified observation contains no background"
-                                  " information.\n" + obs.print();
-                throw GException::invalid_argument(G_NPRED, msg);
-            }
-
-            // Get CTA event list
-            const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-            if (events == NULL) {
-                std::string msg = "No CTA event list found in observation.\n" +
-                                  obs.print();
-                throw GException::invalid_argument(G_NPRED, msg);
-            }
+            // Retrieve CTA background response and event list
+            const GCTABackground& bgd    = gammalib::cta_rsp_bkg(G_MC, obs);
+            const GCTAEventList&  events = gammalib::cta_event_list(G_MC, obs);
 
             // Get reference to ROI centre
-            //const GSkyDir& roi_centre = events->roi().centre().dir();
+            //const GSkyDir& roi_centre = events.roi().centre().dir();
 
             // Get ROI radius in radians
-            double roi_radius = events->roi().radius() * gammalib::deg2rad;
+            double roi_radius = events.roi().radius() * gammalib::deg2rad;
 
             // Get log10 of energy in TeV
             double logE = obsEng.log10TeV();
 
             // Setup integration function
-            GCTAModelIrfBackground::npred_roi_kern_theta integrand(bgd,
+            GCTAModelIrfBackground::npred_roi_kern_theta integrand(&bgd,
                                                                    logE,
                                                                    iter_phi);
 
@@ -577,9 +519,6 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
  * @return Pointer to list of simulated events (needs to be de-allocated by
  *         client)
  *
- * @exception GException::invalid_argument
- *            Specified observation is not a CTA observation.
- *
  * Draws a sample of events from the background model using a Monte
  * Carlo simulation. The region of interest, the energy boundaries and the
  * good time interval for the sampling will be extracted from the observation
@@ -602,47 +541,16 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Retrieve CTA observation
-        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-        if (cta == NULL) {
-            std::string msg = "Specified observation is not a CTA "
-                              "observation.\n" + obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Get pointer on CTA IRF response
-        const GCTAResponseIrf* rsp =
-              dynamic_cast<const GCTAResponseIrf*>(cta->response());
-        if (rsp == NULL) {
-            std::string msg = "Specified observation does not contain"
-                              " an IRF response.\n" + obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Retrieve CTA response and pointing
-        const GCTAPointing& pnt = cta->pointing();
-
-        // Get pointer to CTA background
-        const GCTABackground* bgd = rsp->background();
-        if (bgd == NULL) {
-            std::string msg = "Specified observation contains no background"
-                              " information.\n" + obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Retrieve event list to access the ROI, energy boundaries and GTIs
-        const GCTAEventList* events =
-              dynamic_cast<const GCTAEventList*>(obs.events());
-        if (events == NULL) {
-            std::string msg = "No CTA event list found in observation.\n" +
-                              obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
+        // Get reference on CTA pointing, background response and event list
+        // from observation
+        const GCTAPointing&   pnt    = gammalib::cta_pnt(G_MC, obs);
+        const GCTABackground& bgd    = gammalib::cta_rsp_bkg(G_MC, obs);
+        const GCTAEventList&  events = gammalib::cta_event_list(G_MC, obs);
 
         // Get simulation region
-        const GCTARoi&  roi     = events->roi();
-        const GEbounds& ebounds = events->ebounds();
-        const GGti&     gti     = events->gti();
+        const GCTARoi&  roi     = events.roi();
+        const GEbounds& ebounds = events.ebounds();
+        const GGti&     gti     = events.gti();
 
         // Set simulation region for result event list
         list->roi(roi);
@@ -651,7 +559,7 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
 
         // Create a spectral model that combines the information from the
         // background information and the spectrum provided by the model
-        GModelSpectralNodes spectral(bgd->spectrum());
+        GModelSpectralNodes spectral(bgd.spectrum());
         for (int i = 0; i < spectral.nodes(); ++i) {
             GEnergy energy    = spectral.energy(i);
             double  intensity = spectral.intensity(i);
@@ -727,7 +635,7 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
 
                     // Get Monte Carlo event direction from spatial model.
                     // This only will set the DETX and DETY coordinates.
-                    GCTAInstDir instdir = bgd->mc(energy, times[i], ran);
+                    GCTAInstDir instdir = bgd.mc(energy, times[i], ran);
 
                     // Derive sky direction from instrument coordinates
                     GSkyDir skydir = pnt.skydir(instdir);
@@ -744,7 +652,7 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
                     event.time(times[i]);
 
                     // Append event to list if it falls in ROI
-                    if (events->roi().contains(event)) {
+                    if (events.roi().contains(event)) {
                         list->append(event);
                     }
                     #if defined(G_DUMP_MC)
@@ -923,7 +831,7 @@ void GCTAModelIrfBackground::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print CTA instrument background model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing CTA instrument background model information.
  ***************************************************************************/
 std::string GCTAModelIrfBackground::print(const GChatter& chatter) const
