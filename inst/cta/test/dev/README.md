@@ -5,6 +5,18 @@ during code development. None of the scripts actually needs to work, they
 may actually be outdated, but could still be useful for further testing
 if needed.
 
+`benchmark_irf_computing.py`
+
+>  This script performs a benchmark of the response computation for all
+>  different analysis methods (unbinned, binned, stacked). Specifically it
+>  compares the total number of modelled counts to the expected number from
+>  Monte-Carlo simulations. This script is used to validate the absolute
+>  normalization of the CTA response computations.
+
+`benchmark_ml_fitting.py`
+>  This script performs a benchmark for maximum likelihood fitting of CTA
+>  data.
+
 `example_binned_ml_fit.py`
 >  Illustrates a binned maximum likelihood fit of CTA data.
 >  This script implements a full analysis chain, and computes
