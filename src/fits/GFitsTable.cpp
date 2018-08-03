@@ -910,20 +910,35 @@ void GFitsTable::update_header(void)
     // Get non-const reference to header for manipulations
     GFitsHeader& hdr = const_cast<GFitsHeader&>(header());
 
-    // Update TFIELDS keyword
-    card("TFIELDS", m_cols, "number of table fields");
+    // Initialise TFIELDS, NAXIS1 and NAXIS2 keywords
+    int tfields = 0;
+    int naxis1  = 0;
+    int naxis2  = 0;
 
     // Compute NAXIS1 keyword value
-    int naxis1 = 0;
     for (int i = 0; i < m_cols; ++i) {
         if (m_columns[i] != NULL) {
             naxis1 += m_columns[i]->number() * m_columns[i]->width();
         }
     }
 
-    // Update NAXIS keywords
-    card("NAXIS1", naxis1, "width of table in bytes");
-    card("NAXIS2", m_rows, "number of rows in table");
+    // Set TFIELDS, NAXIS1 and NAXIS2 keywords. In case that there are no
+    // rows, columns or the table has a zero width, all keywords will be
+    // set to zero for compliance with cfitsio.
+    if ((m_cols > 0) && (m_rows > 0) && (naxis1 > 0)) {
+        tfields = m_cols;
+        naxis2  = m_rows;
+    }
+    else {
+        tfields = 0;
+        naxis1  = 0;
+        naxis2  = 0;
+    }
+
+    // Update TFIELDS, NAXIS1 and NAXIS2 keywords
+    card("TFIELDS", tfields, "number of table fields");
+    card("NAXIS1",  naxis1,  "width of table in bytes");
+    card("NAXIS2",  naxis2,  "number of rows in table");
 
     // Loop over all columns
     for (int i = 0; i < m_cols; ++i) {
