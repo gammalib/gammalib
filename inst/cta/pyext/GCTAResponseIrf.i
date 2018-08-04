@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponseIrf.i - CTA instrument response function class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,9 +51,6 @@ public:
     virtual bool             use_tdisp(void) const;
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
-                                 const GObservation& obs) const;
-    virtual double           irf(const GEvent&       event,
-                                 const GSource&      source,
                                  const GObservation& obs) const;
     virtual double           nroi(const GModelSky&    model,
                                   const GEnergy&      obsEng,

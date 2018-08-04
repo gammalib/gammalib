@@ -62,6 +62,9 @@ class GCTAInstDir;
 class GCTAResponseIrf : public GCTAResponse {
 
 public:
+    // Expose GCTAResponse::irf method
+    using GCTAResponse::irf;
+
     // Constructors and destructors
     GCTAResponseIrf(void);
     GCTAResponseIrf(const GCTAResponseIrf& rsp);
@@ -83,9 +86,6 @@ public:
     virtual void             apply_edisp(const bool& apply_edisp) const;
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
-                                 const GObservation& obs) const;
-    virtual double           irf(const GEvent&       event,
-                                 const GSource&      source,
                                  const GObservation& obs) const;
     virtual double           nroi(const GModelSky&    model,
                                   const GEnergy&      obsEng,
@@ -177,9 +177,6 @@ private:
     double    irf_diffuse(const GEvent&       event,
                           const GSource&      source,
                           const GObservation& obs) const;
-    double    irf_composite(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const;
     double    nroi_ptsrc(const GModelSky&    model,
                          const GEnergy&      srcEng,
                          const GTime&        srcTime,

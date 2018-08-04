@@ -34,14 +34,14 @@
 /* __ Type definitions ___________________________________________________ */
 
 /* __ Forward declarations _______________________________________________ */
-class GPhoton;
+class GModelSky;
+class GEnergy;
+class GTime;
 class GEvent;
+class GPhoton;
+class GSource;
 class GObservation;
 class GXmlElement;
-class GCTAObservation;
-class GCTAPointing;
-class GCTARoi;
-class GCTAInstDir;
 
 
 /***********************************************************************//**
@@ -75,9 +75,6 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const = 0;
-    virtual double        irf(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const = 0;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,
@@ -87,11 +84,35 @@ public:
     virtual void          write(GXmlElement& xml) const = 0;
     virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
 
+    // Implemeted methods
+    virtual double irf(const GEvent&       event,
+                       const GSource&      source,
+                       const GObservation& obs) const;
+
 protected:
     // Protected methods
-    void                   init_members(void);
-    void                   copy_members(const GCTAResponse& rsp);
-    void                   free_members(void);
+    void init_members(void);
+    void copy_members(const GCTAResponse& rsp);
+    void free_members(void);
+
+    // Pure virtual protected methods
+    virtual double irf_ptsrc(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const = 0;
+    virtual double irf_radial(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const = 0;
+    virtual double irf_elliptical(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const = 0;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const = 0;
+
+    // Implemented protected methods
+    virtual double irf_composite(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const;
 };
 
 #endif /* GCTARESPONSE_HPP */

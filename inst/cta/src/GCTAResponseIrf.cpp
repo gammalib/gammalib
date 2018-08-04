@@ -403,49 +403,6 @@ double GCTAResponseIrf::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return instrument response
- *
- * @param[in] event Event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- * @return Instrument response.
- *
- * Returns the instrument response for a given event, source and observation.
- ***************************************************************************/
-double GCTAResponseIrf::irf(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const
-{
-    // Initialise IRF value
-    double irf = 0.0;
-
-    // Select IRF depending on the spatial model type
-    switch (source.model()->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            irf = irf_ptsrc(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_RADIAL:
-            irf = irf_radial(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_ELLIPTICAL:
-            irf = irf_elliptical(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_DIFFUSE:
-            irf = irf_diffuse(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_COMPOSITE:
-            irf = irf_composite(event, source, obs);
-            break;
-        default:
-            break;
-    }
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
  * @brief Return integral of event probability for a given sky model over ROI
  *
  * @param[in] model Sky model.
@@ -1588,7 +1545,7 @@ double GCTAResponseIrf::offset_sigma(void) const
 /***********************************************************************//**
  * @brief Print CTA response information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing CTA response information.
  ***************************************************************************/
 std::string GCTAResponseIrf::print(const GChatter& chatter) const
@@ -2887,52 +2844,6 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
         #endif
 
     } // endif: has no IRF
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to composite source
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- * @return Instrument response to composite source.
- *
- * Returns the instrument response to a specified composite source.
- ***************************************************************************/
-double GCTAResponseIrf::irf_composite(const GEvent&       event,
-                                      const GSource&      source,
-                                      const GObservation& obs) const
-{
-    // Initialise IRF
-    double irf = 0.0;
-
-    // Get pointer to composite model
-    const GModelSpatialComposite* model =
-        dynamic_cast<const GModelSpatialComposite*>(source.model());
-
-    // Loop over model components
-    for (int i = 0; i < model->components(); ++i) {
-
-        // Get pointer to spatial component
-        GModelSpatial* spat = const_cast<GModelSpatial*>(model->component(i));
-
-        // Create new GSource object
-        GSource src(source.name(), spat, source.energy(), source.time());
-
-        // Compute irf value
-        irf += this->irf(event, src, obs) * model->scale(i);
-
-    }
-
-    // Divide by number of model components
-    double sum = model->sum_of_scales();
-    if (sum > 0.0) {
-        irf /= sum;
-    }
 
     // Return IRF value
     return irf;
