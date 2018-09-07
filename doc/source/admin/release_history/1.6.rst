@@ -36,6 +36,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2670 <https://cta-redmine.irap.omp.eu/issues/2670>`_] -
+  Support ``ENERG`` column name for CTA energy dispersion FITS file
 * [`2659 <https://cta-redmine.irap.omp.eu/issues/2659>`_] -
   Add ``use_irf_bkg`` argument to ``GCTAOnOffObservation`` constructor
 * [`2657 <https://cta-redmine.irap.omp.eu/issues/2657>`_] -

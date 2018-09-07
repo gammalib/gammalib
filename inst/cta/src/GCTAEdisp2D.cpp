@@ -314,8 +314,8 @@ void GCTAEdisp2D::table(const GCTAResponseTable& table)
  * Reads the energy dispersion form the FITS @p table. The following column
  * names are mandatory:
  *
- *     ETRUE_LO - True energy lower bin boundaries
- *     ETRUE_HI - True energy upper bin boundaries
+ *     ENERG_LO - True energy lower bin boundaries (alternative name: ETRUE_LO)
+ *     ENERG_HI - True energy upper bin boundaries (alternative name: ETRUE_HI)
  *     MIGRA_LO - Migration lower bin boundaries
  *     MIGRA_HI - Migration upper bin boundaries
  *     THETA_LO - Offset angle lower bin boundaries
@@ -1333,7 +1333,12 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
 void GCTAEdisp2D::set_table(void)
 {
     // Set table indices
-    m_inx_etrue  = m_edisp.axis("ETRUE");
+    if (m_edisp.has_table("ENERG")) {
+        m_inx_etrue = m_edisp.axis("ENERG");
+    }
+    else {
+        m_inx_etrue = m_edisp.axis("ETRUE"); // Old name, should not be used
+    }
     m_inx_migra  = m_edisp.axis("MIGRA");
     m_inx_theta  = m_edisp.axis("THETA");
     m_inx_matrix = m_edisp.table("MATRIX");

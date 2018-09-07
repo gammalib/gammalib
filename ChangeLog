@@ -1,8 +1,9 @@
-2018-08-03
+2018-09-07
 
         * Version 1.6.0 released
         ========================
 
+        Support "ENERG" column name for CTA energy dispersion FITS file (#2670)
         Add use_irf_bkg argument to GCTAOnOffObservation constructor (#2659)
         Support effective area with theta cut in GCTAOnOffObservation (#2657)
         Add gammalib::replace_segment() function
