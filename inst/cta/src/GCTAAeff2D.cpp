@@ -36,6 +36,7 @@
 #include "GFitsBinTable.hpp"
 #include "GFitsTable.hpp"
 #include "GCTAAeff2D.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                "GCTAAeff2D::read(GFitsTable&)"
@@ -373,17 +374,29 @@ void GCTAAeff2D::write(GFitsBinTable& table) const
  *
  * @param[in] filename FITS file name.
  *
- * Loads the effective area from a FITS file. If no extension name is given
- * the effective area will be loaded from the `EFFECTIVE AREA` extension.
+ * Loads the effective area from a FITS file.
+ *
+ * If no extension name is given the method scans the `HDUCLASS` keywords
+ * of all extensions and loads the effective area from the first extension
+ * for which `HDUCLAS4=AEFF_2D`.
+ *
+ * Otherwise, the effective area will be loaded from the `EFFECTIVE AREA`
+ * extension.
  ***************************************************************************/
 void GCTAAeff2D::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
 
+    // Get the default extension name. If no GADF compliant name was found
+    // then set the default extension name to "EFFECTIVE AREA".
+    std::string extname = gammalib::gadf_hduclas4(fits, "AEFF_2D");
+    if (extname.empty()) {
+        extname = gammalib::extname_cta_aeff2d;
+    }
+
     // Get effective area table
-    const GFitsTable& table =
-          *fits.table(filename.extname(gammalib::extname_cta_aeff2d));
+    const GFitsTable& table = *fits.table(filename.extname(extname));
 
     // Read effective area from table
     read(table);

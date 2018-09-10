@@ -37,6 +37,7 @@
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAPsf2D.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                 "GCTAPsf2D::read(GFitsTable&)"
@@ -386,17 +387,27 @@ void GCTAPsf2D::write(GFitsBinTable& table) const
  *
  * Loads the point spread function from a FITS file.
  *
- * If no extension name is provided, the point spread function will be loaded
- * from the `POINT SPREAD FUNCTION` extension.
+ * If no extension name is given the method scans the `HDUCLASS` keywords
+ * of all extensions and loads the background from the first extension
+ * for which `HDUCLAS4=PSF_3GAUSS`.
+ *
+ * Otherwise, the background will be loaded from the `POINT SPREAD FUNCTION`
+ * extension.
  ***************************************************************************/
 void GCTAPsf2D::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
 
-    // Get PSFa table
-    const GFitsTable& table =
-          *fits.table(filename.extname(gammalib::extname_cta_psf2d));
+    // Get the default extension name. If no GADF compliant name was found
+    // then set the default extension name to "POINT SPREAD FUNCTION".
+    std::string extname = gammalib::gadf_hduclas4(fits, "PSF_3GAUSS");
+    if (extname.empty()) {
+        extname = gammalib::extname_cta_psf2d;
+    }
+
+    // Get PSF table
+    const GFitsTable& table = *fits.table(filename.extname(extname));
 
     // Read PSF from table
     read(table);

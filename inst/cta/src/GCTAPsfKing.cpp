@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.cpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Michael Mayer                               *
+ *  copyright (C) 2013-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,7 @@
 #include "GFitsBinTable.hpp"
 #include "GCTAPsfKing.hpp"
 #include "GCTAException.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                               "GCTAPsfKing::read(GFitsTable&)"
@@ -361,17 +362,27 @@ void GCTAPsfKing::write(GFitsBinTable& table) const
  *
  * Loads the point spread function from a FITS file.
  *
- * If no extension name is provided, the point spread function will be loaded
- * from the `POINT SPREAD FUNCTION` extension.
+ * If no extension name is given the method scans the `HDUCLASS` keywords
+ * of all extensions and loads the background from the first extension
+ * for which `HDUCLAS4=PSF_KING`.
+ *
+ * Otherwise, the background will be loaded from the `POINT SPREAD FUNCTION`
+ * extension.
  ***************************************************************************/
 void GCTAPsfKing::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
 
-    // Get PSFa table
-    const GFitsTable& table =
-          *fits.table(filename.extname(gammalib::extname_cta_psfking));
+    // Get the default extension name. If no GADF compliant name was found
+    // then set the default extension name to "POINT SPREAD FUNCTION".
+    std::string extname = gammalib::gadf_hduclas4(fits, "PSF_KING");
+    if (extname.empty()) {
+        extname = gammalib::extname_cta_psfking;
+    }
+
+    // Get PSF table
+    const GFitsTable& table = *fits.table(filename.extname(extname));
 
     // Read PSF from table
     read(table);

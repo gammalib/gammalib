@@ -36,6 +36,7 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Forward declarations _______________________________________________ */
+class GFits;
 class GFitsHDU;
 class GCTARoi;
 class GEbounds;
@@ -83,6 +84,8 @@ namespace gammalib {
     GEbounds                read_ds_ebounds(const GFitsHDU& hdu);
     GPhases                 read_ds_phase(const GFitsHDU& hdu);
     std::string             read_ds_gti_extname(const GFitsHDU& hdu);
+    std::string             gadf_hduclas4(const GFits&       fits,
+                                          const std::string& hduclas4);
 }
 
 #endif /* GCTASUPPORT_HPP */

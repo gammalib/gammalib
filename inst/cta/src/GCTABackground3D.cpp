@@ -37,6 +37,7 @@
 #include "GFitsBinTable.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTABackground3D.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
@@ -348,17 +349,27 @@ void GCTABackground3D::write(GFitsBinTable& table) const
  *
  * Loads the background from a FITS file.
  *
- * If no extension name is provided, the background will be loaded from the
- * `BACKGROUND` extension.
+ * If no extension name is given the method scans the `HDUCLASS` keywords
+ * of all extensions and loads the background from the first extension
+ * for which `HDUCLAS4=BKG_3D`.
+ *
+ * Otherwise, the background will be loaded from the `BACKGROUND`
+ * extension.
  ***************************************************************************/
 void GCTABackground3D::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
 
+    // Get the default extension name. If no GADF compliant name was found
+    // then set the default extension name to "BACKGROUND".
+    std::string extname = gammalib::gadf_hduclas4(fits, "BKG_3D");
+    if (extname.empty()) {
+        extname = gammalib::extname_cta_background3d;
+    }
+
     // Get background table
-    const GFitsTable& table =
-          *fits.table(filename.extname(gammalib::extname_cta_background3d));
+    const GFitsTable& table = *fits.table(filename.extname(extname));
 
     // Read effective area from table
     read(table);

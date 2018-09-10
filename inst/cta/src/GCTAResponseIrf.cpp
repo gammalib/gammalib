@@ -1110,13 +1110,14 @@ void GCTAResponseIrf::load_aeff(const GFilename& filename)
         GFits fits(filename);
 
         // Get the extension name. If an extension name has been specified
-        // then use this name, otherwise use either the "EFFECTIVE AREA"
-        // or the "SPECRESP" extension.
-        std::string extname = "";
+        // then use this name, otherwise preset the extension name according
+        // to the GADF specifications. If no GADF compliant name was found,
+        // search either for "EFFECTIVE AREA" or the "SPECRESP" extension.
+        std::string extname = gammalib::gadf_hduclas4(fits, "AEFF_2D");
         if (filename.has_extname()) {
             extname = filename.extname();
         }
-        else {
+        if (extname.empty()) {
             if (fits.contains(gammalib::extname_cta_aeff2d)) {
                 extname = gammalib::extname_cta_aeff2d;
             }
@@ -1238,24 +1239,19 @@ void GCTAResponseIrf::load_psf(const GFilename& filename)
         GFits fits(filename);
 
         // Get the extension name. If an extension name has been specified
-        // then use this name, otherwise use either the following extensions
-        // if they exist:
-        // - "POINT SPREAD FUNCTION"
-        // - "PSF"
-        // - "PSF_2D_TABLE"
-        std::string extname = "";
+        // then use this name, otherwise preset the extension name according
+        // to the GADF specifications. If no GADF compliant name was found,
+        // search either for "POINT SPREAD FUNCTION" or the "PSF" extension.
+        std::string extname = gammalib::gadf_hduclas4(fits, "PSF_TABLE");
         if (filename.has_extname()) {
             extname = filename.extname();
         }
-        else {
+        if (extname.empty()) {
             if (fits.contains("POINT SPREAD FUNCTION")) {
                 extname = "POINT SPREAD FUNCTION";
             }
             else if (fits.contains("PSF")) {
                 extname = "PSF";
-            }
-            else if (fits.contains("PSF_2D_TABLE")) {
-                extname = "PSF_2D_TABLE";
             }
         }
 
@@ -1379,18 +1375,16 @@ void GCTAResponseIrf::load_edisp(const GFilename& filename)
         GFits fits(filename);
 
         // Get the extension name. If an extension name has been specified
-        // then use this name, otherwise use either the "ENERGY DISPERSION",
-        // "EDISP_2D" or the "MATRIX" extension.
-        std::string extname = "";
+        // then use this name, otherwise preset the extension name according
+        // to the GADF specifications. If no GADF compliant name was found,
+        // search either for "ENERGY DISPERSION" or the "MATRIX" extension.
+        std::string extname = gammalib::gadf_hduclas4(fits, "EDISP_2D");
         if (filename.has_extname()) {
             extname = filename.extname();
         }
-        else {
+        if (extname.empty()) {
             if (fits.contains(gammalib::extname_cta_edisp2d)) {
                 extname = gammalib::extname_cta_edisp2d;
-            }
-            else if (fits.contains("EDISP_2D")) {
-                extname = "EDISP_2D";
             }
             else if (fits.contains(gammalib::extname_rmf)) {
                 extname = gammalib::extname_rmf;

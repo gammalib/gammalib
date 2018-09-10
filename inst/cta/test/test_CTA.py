@@ -467,11 +467,15 @@ class Test(gammalib.GPythonTestSuite):
         radgauss  = gammalib.GCTAModelRadialGauss(1.0)
         radacc    = gammalib.GCTAModelRadialAcceptance(radgauss, plaw)
         kingname  = self._caldb + '/prod1_king.fits'
+        hessaeff  = self._data  + '/irf_hess_aeff.fits.gz'
         hesspsf   = self._data  + '/irf_hess_psf.fits.gz'
         hessedisp = self._data  + '/irf_hess_edisp.fits.gz'
+        hessbkg   = self._data  + '/irf_hess_bkg.fits.gz'
         hessirf   = gammalib.GCTAResponseIrf()
+        hessirf.load_aeff(hessaeff)
         hessirf.load_psf(hesspsf)
         hessirf.load_edisp(hessedisp)
+        hessirf.load_background(hessbkg)
 
         # Perform pickeling tests of filled classes
         test_support.pickeling(self, gammalib.GCTAAeff2D(irfname))

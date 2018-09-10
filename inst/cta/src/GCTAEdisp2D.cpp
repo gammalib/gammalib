@@ -42,6 +42,7 @@
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAEdisp2D.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                               "GCTAEdisp2D::read(GFitsTable&)"
@@ -382,8 +383,9 @@ void GCTAEdisp2D::write(GFitsBinTable& table) const
  *
  * Loads the energy dispersion from a FITS file.
  *
- * If no extension name is provided, the energy dispersion will be loaded
- * from the `ENERGY DISPERSION` extension.
+ * The method does not actually load the FITS file, which will only be loaded
+ * on request. Only the filename is stored. See the fetch() method for the
+ * actually loading of the energy dispersion.
  ***************************************************************************/
 void GCTAEdisp2D::load(const GFilename& filename)
 {
@@ -701,9 +703,17 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
  *            File not found.
  *            Unable to load energy dispersion.
  *
- * Fetches the energy dispersion by reading it from a FITS file. This method
- * does nothing if the energy dispersion is already loaded, if there is
- * nothing to fetch, or if the m_filename member is empty.
+ * Fetches the energy dispersion by reading it from a FITS file.
+ *
+ * If the filename contains no extension name the method scans the `HDUCLASS`
+ * keywords of all extensions and loads the energy dispersion from the first
+ * extension for which `HDUCLAS4=EDISP_2D`.
+ *
+ * Otherwise, the background will be loaded from the `ENERGY DISPERSION`
+ * extension.
+ *
+ * This method does nothing if the energy dispersion is already loaded, if
+ * there is nothing to fetch, or if the m_filename member is empty.
  *
  * The method is thread save. The method checks whether the file from which
  * the energy dispersion should be loaded actually exists.
@@ -743,24 +753,16 @@ void GCTAEdisp2D::fetch(void) const
                 // Open FITS file
                 GFits fits(m_filename);
 
-                // Initialise energy dispersion extension name. Handle the
-                // special case that the energy dispersion extension name is
-                // "EDISP_2D".
-                std::string extname;
-                if (m_filename.has_extname()) {
-                    extname = m_filename.extname();
-                }
-                else {
-                    if (fits.contains(gammalib::extname_cta_edisp2d)) {
-                        extname = gammalib::extname_cta_edisp2d;
-                    }
-                    else if (fits.contains("EDISP_2D")) {
-                        extname = "EDISP_2D";
-                    }
+                // Get the default extension name. If no GADF compliant name
+                // was found then set the default extension name to
+                // "ENERGY DISPERSION".
+                std::string extname = gammalib::gadf_hduclas4(fits, "EDISP_2D");
+                if (extname.empty()) {
+                    extname = gammalib::extname_cta_edisp2d;
                 }
 
                 // Get energy dispersion table
-                const GFitsTable& table = *fits.table(extname);
+                const GFitsTable& table = *fits.table(m_filename.extname(extname));
 
                 // Read energy dispersion from table
                 const_cast<GCTAEdisp2D*>(this)->read(table);
