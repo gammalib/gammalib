@@ -1333,7 +1333,7 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
 void GCTAEdisp2D::set_table(void)
 {
     // Set table indices
-    if (m_edisp.has_table("ENERG")) {
+    if (m_edisp.has_axis("ENERG")) {
         m_inx_etrue = m_edisp.axis("ENERG");
     }
     else {
