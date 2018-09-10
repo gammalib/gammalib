@@ -289,8 +289,10 @@ in GCTAAeff2D (#2674).
 GCTAEdisp2D now supports "ENERG" as column name instead of "ETRUE" in an energy
 dispersion FITS file (#2670).
 
-Change PSF table default extension name in GCTAPsfTable.hpp to "PSF_2D_TABLE"
-(#2660).
+Change PSF table default extension name in GCTAPsfTable.hpp to "PSF_2D_TABLE".
+Allow also "EDISP_2D" as extension name for the energy dispersion and pickle
+GCTAResponseIrf class via XML interface. Drop the storing of component filenames
+and use instead directly the filenames stored with the IRF components (#2660).
 
 The GCTAOnOffObservation now supports IRFs where the effective area is given
 for an applied theta-cut. In that case, the "RAD_MAX" keyword is set, and

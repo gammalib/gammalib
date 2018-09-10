@@ -731,13 +731,13 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
             const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "EffectiveArea");
 
             // Get filename
-            m_xml_aeff = gammalib::strip_whitespace(par->attribute("file"));
+            std::string filename = gammalib::strip_whitespace(par->attribute("file"));
 
             // If filename is not empty then load effective area
-            if (!m_xml_aeff.empty()) {
+            if (!filename.empty()) {
 
                 // Load effective area
-                load_aeff(m_xml_aeff);
+                load_aeff(filename);
 
                 // Optional attributes
                 double thetacut = 0.0;
@@ -784,11 +784,11 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
             const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "PointSpreadFunction");
 
             // Get filename
-            m_xml_psf = gammalib::strip_whitespace(par->attribute("file"));
+            std::string filename = gammalib::strip_whitespace(par->attribute("file"));
 
             // If filename is not empty then load point spread function
-            if (!m_xml_psf.empty()) {
-                load_psf(m_xml_psf);
+            if (!filename.empty()) {
+                load_psf(filename);
             }
 
         } // endif: handled PSF
@@ -800,11 +800,11 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
             const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "EnergyDispersion");
 
             // Get filename
-            m_xml_edisp = gammalib::strip_whitespace(par->attribute("file"));
+            std::string filename = gammalib::strip_whitespace(par->attribute("file"));
 
             // If filename is not empty then load energy dispersion
-            if (!m_xml_edisp.empty()) {
-                load_edisp(m_xml_edisp);
+            if (!filename.empty()) {
+                load_edisp(filename);
             }
 
         } // endif: handled energy dispersion
@@ -816,11 +816,11 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
             const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Background");
 
             // Get filename
-            m_xml_background = gammalib::strip_whitespace(par->attribute("file"));
+            std::string filename = gammalib::strip_whitespace(par->attribute("file"));
 
             // If filename is not empty then load background model
-            if (!m_xml_background.empty()) {
-                load_background(m_xml_background);
+            if (!filename.empty()) {
+                load_background(filename);
             }
 
             // Optional attributes
@@ -897,10 +897,16 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
 
         // Add effective area if it exists
         if (aeff() != NULL) {
-            if (!(m_xml_aeff.empty())) {
+
+            // Get effective area filename
+            GFilename filename = aeff()->filename();
+
+            // Continue only if filename is not empty
+            if (!(filename.is_empty())) {
 
                 // Get pointer to effective area
-                GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EffectiveArea");
+                GXmlElement* par =
+                    gammalib::xml_need_par(G_WRITE, xml, "EffectiveArea");
 
                 // Initialise attributes
                 double thetacut = 0.0;
@@ -908,7 +914,8 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
                 double sigma    = 0.0;
 
                 // Get optional ARF attributes
-                const GCTAAeffArf* arf = dynamic_cast<const GCTAAeffArf*>(aeff());
+                const GCTAAeffArf* arf =
+                      dynamic_cast<const GCTAAeffArf*>(aeff());
                 if (arf != NULL) {
                     thetacut = arf->thetacut();
                     scale    = arf->scale();
@@ -916,13 +923,14 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
                 }
 
                 // Get optional performance table attributes
-                const GCTAAeffPerfTable* perf = dynamic_cast<const GCTAAeffPerfTable*>(aeff());
+                const GCTAAeffPerfTable* perf =
+                      dynamic_cast<const GCTAAeffPerfTable*>(aeff());
                 if (perf != NULL) {
                     sigma = perf->sigma();
                 }
 
                 // Set attributes
-                par->attribute("file", m_xml_aeff);
+                par->attribute("file", filename);
                 if (thetacut > 0.0) {
                     par->attribute("thetacut", gammalib::str(thetacut));
                 }
@@ -938,25 +946,28 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
 
         // Add PSF if it exists
         if (psf() != NULL) {
-            if (!(m_xml_psf.empty())) {
-                GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "PointSpreadFunction");
-                par->attribute("file", m_xml_psf);
+            if (!(psf()->filename().is_empty())) {
+                GXmlElement* par =
+                    gammalib::xml_need_par(G_WRITE, xml, "PointSpreadFunction");
+                par->attribute("file", psf()->filename());
             }
         }
 
         // Add Edisp if it exists
         if (edisp() != NULL) {
-            if (!(m_xml_edisp.empty())) {
-                GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EnergyDispersion");
-                par->attribute("file", m_xml_edisp);                
+            if (!(edisp()->filename().is_empty())) {
+                GXmlElement* par =
+                    gammalib::xml_need_par(G_WRITE, xml, "EnergyDispersion");
+                par->attribute("file", edisp()->filename());
             }
         }
 
         // Add background if it exists
         if (background() != NULL) {
-            if (!(m_xml_background.empty())) {
-                GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Background");
-                par->attribute("file", m_xml_background);
+            if (!(background()->filename().is_empty())) {
+                GXmlElement* par =
+                    gammalib::xml_need_par(G_WRITE, xml, "Background");
+                par->attribute("file", background()->filename());
             }
         }
 
@@ -1368,8 +1379,8 @@ void GCTAResponseIrf::load_edisp(const GFilename& filename)
         GFits fits(filename);
 
         // Get the extension name. If an extension name has been specified
-        // then use this name, otherwise use either the "ENERGY DISPERSION"
-        // or the "MATRIX" extension.
+        // then use this name, otherwise use either the "ENERGY DISPERSION",
+        // "EDISP_2D" or the "MATRIX" extension.
         std::string extname = "";
         if (filename.has_extname()) {
             extname = filename.extname();
@@ -1377,6 +1388,9 @@ void GCTAResponseIrf::load_edisp(const GFilename& filename)
         else {
             if (fits.contains(gammalib::extname_cta_edisp2d)) {
                 extname = gammalib::extname_cta_edisp2d;
+            }
+            else if (fits.contains("EDISP_2D")) {
+                extname = "EDISP_2D";
             }
             else if (fits.contains(gammalib::extname_rmf)) {
                 extname = gammalib::extname_rmf;
@@ -2092,10 +2106,6 @@ void GCTAResponseIrf::init_members(void)
     // XML response filenames
     m_xml_caldb.clear();
     m_xml_rspname.clear();
-    m_xml_aeff.clear();
-    m_xml_psf.clear();
-    m_xml_edisp.clear();
-    m_xml_background.clear();
 
     // Initialise Npred cache
     m_npred_names.clear();
@@ -2125,10 +2135,6 @@ void GCTAResponseIrf::copy_members(const GCTAResponseIrf& rsp)
     // Copy response filenames
     m_xml_caldb      = rsp.m_xml_caldb;
     m_xml_rspname    = rsp.m_xml_rspname;
-    m_xml_aeff       = rsp.m_xml_aeff;
-    m_xml_psf        = rsp.m_xml_psf;
-    m_xml_edisp      = rsp.m_xml_edisp;
-    m_xml_background = rsp.m_xml_background;
 
     // Copy cache
     m_npred_names    = rsp.m_npred_names;

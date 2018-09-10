@@ -467,6 +467,11 @@ class Test(gammalib.GPythonTestSuite):
         radgauss  = gammalib.GCTAModelRadialGauss(1.0)
         radacc    = gammalib.GCTAModelRadialAcceptance(radgauss, plaw)
         kingname  = self._caldb + '/prod1_king.fits'
+        hesspsf   = self._data  + '/irf_hess_psf.fits.gz'
+        hessedisp = self._data  + '/irf_hess_edisp.fits.gz'
+        hessirf   = gammalib.GCTAResponseIrf()
+        hessirf.load_psf(hesspsf)
+        hessirf.load_edisp(hessedisp)
 
         # Perform pickeling tests of filled classes
         test_support.pickeling(self, gammalib.GCTAAeff2D(irfname))
@@ -504,11 +509,12 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAPsf2D(irfname))
         test_support.pickeling(self, gammalib.GCTAPsfKing(kingname))
         #test_support.pickeling(self, gammalib.GCTAPsfPerfTable())
-        #test_support.pickeling(self, gammalib.GCTAPsfTable()) # No test data
+        test_support.pickeling(self, gammalib.GCTAPsfTable(hesspsf))
         #test_support.pickeling(self, gammalib.GCTAPsfVector())
         test_support.pickeling(self, gammalib.GCTAResponseCube(rspcube1))
         test_support.pickeling(self, gammalib.GCTAResponseCube(rspcube2))
         test_support.pickeling(self, gammalib.GCTAResponseIrf(rspirf))
+        test_support.pickeling(self, gammalib.GCTAResponseIrf(hessirf))
         #test_support.pickeling(self, gammalib.GCTAResponseTable()) # No constructor
         test_support.pickeling(self, gammalib.GCTARoi(instdir,2.0))
 

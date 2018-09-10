@@ -128,12 +128,14 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.rspname(), self.caldb())
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
         return state
     def __setstate__(self, state):
-        if state[0]:
-            self.__init__(state[0], state[1])
-        else:
+        if state[0].is_empty():
             self.__init__()
+        else:
+            self.__init__(state[0])
 }
 };

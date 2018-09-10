@@ -743,9 +743,21 @@ void GCTAEdisp2D::fetch(void) const
                 // Open FITS file
                 GFits fits(m_filename);
 
-                // Initialise energy dispersion extension name
-                std::string extname =
-                            m_filename.extname(gammalib::extname_cta_edisp2d);
+                // Initialise energy dispersion extension name. Handle the
+                // special case that the energy dispersion extension name is
+                // "EDISP_2D".
+                std::string extname;
+                if (m_filename.has_extname()) {
+                    extname = m_filename.extname();
+                }
+                else {
+                    if (fits.contains(gammalib::extname_cta_edisp2d)) {
+                        extname = gammalib::extname_cta_edisp2d;
+                    }
+                    else if (fits.contains("EDISP_2D")) {
+                        extname = "EDISP_2D";
+                    }
+                }
 
                 // Get energy dispersion table
                 const GFitsTable& table = *fits.table(extname);

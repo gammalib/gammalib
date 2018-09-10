@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponseIrf.hpp - CTA instrument response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -222,10 +222,6 @@ private:
     // XML response filename
     std::string     m_xml_caldb;      //!< Calibration database string in XML file
     std::string     m_xml_rspname;    //!< Response name in XML file
-    std::string     m_xml_aeff;       //!< Aeff file name in XML file
-    std::string     m_xml_psf;        //!< PSF file name in XML file
-    std::string     m_xml_edisp;      //!< Edisp file name in XML file
-    std::string     m_xml_background; //!< Background file name in XML file
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names
