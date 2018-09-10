@@ -161,6 +161,10 @@ caldb_prod2_south3_DATA  = caldb/data/cta/prod2/bcf/South_50h/irf_file.fits.gz
 # Test data to distribute
 testdatacta       = test/data/irf_1dc.xml \
                     test/data/irf_unbinned.xml \
+                    test/data/irf_hess_aeff.fits.gz \
+                    test/data/irf_hess_bkg.fits.gz \
+                    test/data/irf_hess_edisp.fits.gz \
+                    test/data/irf_hess_psf.fits.gz \
                     test/data/crab_irf.xml \
                     test/data/onoff_model.xml \
                     test/data/crab_events.fits.gz \
