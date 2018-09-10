@@ -1,8 +1,10 @@
-2018-09-07
+2018-09-10
 
         * Version 1.6.0 released
         ========================
 
+        Remove setting of effective area energy boundaries from "LO_THRES" and
+          "HI_THRES" keywords (#2674)
         Support "ENERG" column name for CTA energy dispersion FITS file (#2670)
         Add use_irf_bkg argument to GCTAOnOffObservation constructor (#2659)
         Support effective area with theta cut in GCTAOnOffObservation (#2657)

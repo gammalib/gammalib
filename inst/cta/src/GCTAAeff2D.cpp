@@ -318,28 +318,12 @@ void GCTAAeff2D::read(const GFitsTable& table)
     // Set table boundaries
     set_boundaries();
 
-    // Optionally set energy boundaries from header keywords if they exist.
-    // The "LO_THRES" and "HI_THRES" keywords give the energy boundaries in
-    // TeV.
-    if (table.has_card("LO_THRES")) {
-        m_lo_thres = table.real("LO_THRES");
-        m_ebounds.emin(0, GEnergy(m_lo_thres, "TeV"));
-        if (m_lo_thres > 0.0) {
-            m_logE_min = std::log10(m_lo_thres);
-        }
-    }
-    if (table.has_card("HI_THRES")) {
-        m_hi_thres = table.real("HI_THRES");
-        m_ebounds.emax(0, GEnergy(m_hi_thres, "TeV"));
-        if (m_hi_thres > 0.0) {
-            m_logE_max = std::log10(m_hi_thres);
-        }
-    }
+    // Read "LO_THRES" and "HI_THRES" header keywords if they exist
+    m_lo_thres = (table.has_card("LO_THRES")) ? table.real("LO_THRES") : 0.0;
+    m_hi_thres = (table.has_card("HI_THRES")) ? table.real("HI_THRES") : 0.0;
 
-    // Optionally get radius cut value
-    if (table.has_card("RAD_MAX")) {
-        m_rad_max = table.real("RAD_MAX");
-    }
+    // Read radius cut value if it exists
+    m_rad_max = (table.has_card("RAD_MAX")) ? table.real("RAD_MAX") : 0.0;
 
     // Return
     return;

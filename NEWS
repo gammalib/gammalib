@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-7 September 2018
+10 September 2018
 
 
 1. Introduction
@@ -280,6 +280,12 @@ None
 
 20. CTA interface
 -----------------
+Remove setting of effective area energy boundaries in GCTAAeff2D::read() method
+from "LO_THRES" and "HI_THRES" keywords, since the values are reconstructued
+energies but the effective area is given in true energies. The keywords are also
+read in GCTAResponseIrf::load_aeff() and it is not required to apply the values
+in GCTAAeff2D (#2674).
+
 GCTAEdisp2D now supports "ENERG" as column name instead of "ETRUE" in an energy
 dispersion FITS file (#2670).
 

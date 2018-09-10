@@ -19,6 +19,9 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`2674 <https://cta-redmine.irap.omp.eu/issues/2674>`_] -
+  Remove setting of effective area energy boundaries from ``LO_THRES`` and
+  ``HI_THRES`` keywords
 * [`2654 <https://cta-redmine.irap.omp.eu/issues/2654>`_] -
   Apply CTA 2D energy dispersion kludge only to CTA data
 * [`2495 <https://cta-redmine.irap.omp.eu/issues/2495>`_] -
