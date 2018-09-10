@@ -727,7 +727,7 @@ void GCTAAeff2D::set_boundaries(void)
     m_ebounds.clear();
 
     // Get number of energy and theta bins
-    int neng   = m_aeff.axis_bins(m_inx_aeff);
+    int neng   = m_aeff.axis_bins(m_inx_energy);
     int ntheta = m_aeff.axis_bins(m_inx_theta);
 
     // Get energy boundaries

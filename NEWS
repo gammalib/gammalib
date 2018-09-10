@@ -286,6 +286,9 @@ energies but the effective area is given in true energies. The keywords are also
 read in GCTAResponseIrf::load_aeff() and it is not required to apply the values
 in GCTAAeff2D (#2674).
 
+The maximum energy in GCTAAeff2D was not computed correctly due to a bug in the
+indexing. This was corrected now (#2674).
+
 GCTAEdisp2D now supports "ENERG" as column name instead of "ETRUE" in an energy
 dispersion FITS file (#2670).
 
