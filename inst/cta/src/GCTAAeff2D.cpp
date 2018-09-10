@@ -731,10 +731,10 @@ void GCTAAeff2D::set_boundaries(void)
     int ntheta = m_aeff.axis_bins(m_inx_theta);
 
     // Get energy boundaries
-    GEnergy emin(m_aeff.axis_lo(m_inx_aeff, 0),
-                 m_aeff.axis_lo_unit(m_inx_aeff));
-    GEnergy emax(m_aeff.axis_hi(m_inx_aeff, neng-1),
-                 m_aeff.axis_hi_unit(m_inx_aeff));
+    GEnergy emin(m_aeff.axis_lo(m_inx_energy, 0),
+                 m_aeff.axis_lo_unit(m_inx_energy));
+    GEnergy emax(m_aeff.axis_hi(m_inx_energy, neng-1),
+                 m_aeff.axis_hi_unit(m_inx_energy));
 
     // Set energy boundaries
     m_ebounds.append(emin, emax);
