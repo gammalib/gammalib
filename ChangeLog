@@ -3,6 +3,7 @@
         * Version 1.6.0 released
         ========================
 
+        Change PSF table default extension name to "PSF_2D_TABLE" (#2660)
         Remove setting of effective area energy boundaries from "LO_THRES" and
           "HI_THRES" keywords (#2674)
         Support "ENERG" column name for CTA energy dispersion FITS file (#2670)
