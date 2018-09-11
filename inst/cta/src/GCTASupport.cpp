@@ -725,9 +725,9 @@ std::string gammalib::gadf_hduclas4(const GFits&       fits,
 
         // Skip HDU if "HDUCLASS" is not "GADF", "HDUCLAS1" is not response
         // and "HDUCLAS4" is not hduclas4
-        if (!((hdu->string("HDUCLASS") == "GADF") &&
-              (hdu->string("HDUCLAS1") == "RESPONSE") &&
-              (hdu->string("HDUCLAS4") == hduclas4))) {
+        if (!((gammalib::strip_whitespace(hdu->string("HDUCLASS")) == "GADF") &&
+              (gammalib::strip_whitespace(hdu->string("HDUCLAS1")) == "RESPONSE") &&
+              (gammalib::strip_whitespace(hdu->string("HDUCLAS4")) == hduclas4))) {
             continue;
         }
 

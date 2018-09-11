@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAPsfTable.cpp - CTA point spread function table class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAPsfTable.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                              "GCTAPsfTable::read(GFitsTable&)"
@@ -354,17 +355,27 @@ void GCTAPsfTable::write(GFitsBinTable& table) const
  *
  * Loads the point spread function from a FITS file.
  *
- * If no extension name is provided, the point spread function will be loaded
- * from the `POINT SPREAD FUNCTION` extension.
+ * If no extension name is given the method scans the `HDUCLASS` keywords
+ * of all extensions and loads the background from the first extension
+ * for which `HDUCLAS4=PSF_TABLE`.
+ *
+ * Otherwise, the background will be loaded from the `POINT SPREAD FUNCTION`
+ * extension.
  ***************************************************************************/
 void GCTAPsfTable::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
 
+    // Get the default extension name. If no GADF compliant name was found
+    // then set the default extension name to "POINT SPREAD FUNCTION".
+    std::string extname = gammalib::gadf_hduclas4(fits, "PSF_TABLE");
+    if (extname.empty()) {
+        extname = gammalib::extname_cta_psftable;
+    }
+
     // Get PSF table
-    const GFitsTable& table =
-          *fits.table(filename.extname(gammalib::extname_cta_psftable));
+    const GFitsTable& table = *fits.table(filename.extname(extname));
 
     // Read PSF from table
     read(table);
