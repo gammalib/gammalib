@@ -1616,6 +1616,7 @@ void GApplicationPars::synchronise(const std::string& filename)
                  pars[inx].is_learn() &&
                  m_pars[i].m_value != pars[inx].m_value) {
                 m_pars[i].m_value  = pars[inx].m_value;
+                m_pars[i].m_status = pars[inx].m_status;
                 m_pars[i].m_update = true;
             }
 
