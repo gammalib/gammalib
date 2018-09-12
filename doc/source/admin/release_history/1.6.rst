@@ -40,6 +40,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2677 <https://cta-redmine.irap.omp.eu/issues/2677>`_] -
+  Define ``GCTACubeBackground`` for energy boundaries instead of nodes
 * [`2670 <https://cta-redmine.irap.omp.eu/issues/2670>`_] -
   Support ``ENERG`` column name for CTA energy dispersion FITS file
 * [`2660 <https://cta-redmine.irap.omp.eu/issues/2660>`_] -

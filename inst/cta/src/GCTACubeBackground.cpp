@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTACubeBackground.cpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2017 by Michael Mayer                               *
+ *  copyright (C) 2015-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -113,14 +113,14 @@ GCTACubeBackground::GCTACubeBackground(const GCTAEventCube& cube)
     init_members();
 
     // Store energy boundaries
-    m_energies.set(cube.ebounds());
+    m_ebounds = cube.ebounds();
 
     // Set GNodeArray used for interpolation
     set_eng_axis();
 
     // Set background cube to event cube
     m_cube = cube.counts();
-    m_cube.nmaps(m_energies.size());
+    m_cube.nmaps(m_ebounds.size());
 
     // Set all background cube pixels to zero as we want to have a clean map
     // upon construction
@@ -174,19 +174,19 @@ GCTACubeBackground::GCTACubeBackground(const std::string&   wcs,
                                        const double&        dy,
                                        const int&           nx,
                                        const int&           ny,
-                                       const GEnergies&     energies)
+                                       const GEbounds&      ebounds)
 {
     // Initialise class members
     init_members();
 
-    // Store energies
-    m_energies = energies;
+    // Store energy boundaries
+    m_ebounds = ebounds;
 
     // Set GNodeArray used for interpolation
     set_eng_axis();
 
     // Create sky map
-    m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, m_energies.size());
+    m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, m_ebounds.size());
 
     // Return
     return;
@@ -254,16 +254,30 @@ GCTACubeBackground& GCTACubeBackground::operator=(const GCTACubeBackground& bgd)
 double GCTACubeBackground::operator()(const GCTAInstDir& dir,
                                       const GEnergy&     energy) const
 {
+    // Initialise background rate
+    double background = 0.0;
+
     // Set indices and weighting factors for interpolation
     update(energy.log10TeV());
 
-    // Perform logarithmic interpolation
-    double background       = 0.0;
-    double background_left  = m_cube(dir.dir(), m_inx_left);
-    double background_right = m_cube(dir.dir(), m_inx_right);
-    if (background_left > 0.0 && background_right > 0.0) {
-        background = std::exp(m_wgt_left  * std::log(background_left) +
-                              m_wgt_right * std::log(background_right));
+    // If left weight is close to 1, use left node
+    if (std::abs(m_wgt_left-1.0) < 1.0e-6) {
+        background = m_cube(dir.dir(), m_inx_left);
+    }
+
+    // ... otherwise, if right weight is close to 1, use right node
+    else if (std::abs(m_wgt_right-1.0) < 1.0e-6) {
+        background = m_cube(dir.dir(), m_inx_right);
+    }
+
+    // ... otherwise perform interpolation
+    else {
+        double background_left  = m_cube(dir.dir(), m_inx_left);
+        double background_right = m_cube(dir.dir(), m_inx_right);
+        if (background_left > 0.0 && background_right > 0.0) {
+            background = std::exp(m_wgt_left  * std::log(background_left) +
+                                  m_wgt_right * std::log(background_right));
+        }
     }
 
     // Make sure that background rate does not become negative
@@ -326,22 +340,19 @@ GCTACubeBackground* GCTACubeBackground::clone(void) const
  ***************************************************************************/
 void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 {
+    // Set energy margin
+    const GEnergy energy_margin(0.01, "GeV");
+
     // Clear background cube
     m_cube = 0.0;
-
-    // Setup energy boundaries at the energy values of the background cube
-    GEbounds ebounds;
-    for (int i = 0; i < m_energies.size(); ++i) {
-        ebounds.append(m_energies[i], m_energies[i]);
-    }
 
     // Set dummy GTI needed to generate an event cube. It is not important
     // what the actually value is since it will be overwritten later in any
     // case, but it's important that there is one time slice
     GGti gti(GTime(0.0), GTime(1.0));
 
-    // Initialise event cube to evaluate models
-    GCTAEventCube eventcube = GCTAEventCube(m_cube, ebounds, gti);
+    // Initialise event cubes for model evaluate and storage
+    GCTAEventCube eventcube = GCTAEventCube(m_cube, m_ebounds, gti);
 
     // Initialise total livetime
     double total_livetime = 0.0;
@@ -434,35 +445,73 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
         // Set GTI of actual observations as the GTI of the event cube
         eventcube.gti(cta->gti());
 
-        // Loop over all bins in background cube
-        for (int k = 0; k < eventcube.size(); ++k) {
+        // Compute number of pixels and energy layers
+        int npix   = eventcube.npix();
+        int nebins = m_ebounds.size();
 
-            // Get event bin
-            GCTAEventBin* bin = eventcube[k];
+        // Loop over all spatial pixels
+        for (int ipix = 0; ipix < npix; ++ipix) {
 
-            // Skip if energy is not contained within RoI or the energy
-            // boundaries of the observation. Note that the contains() method
-            // tests on bin centre value.
-            if (!roi.contains(*bin) || !obs_ebounds.contains(bin->energy())) {
+            // Get event bin in first layer
+            GCTAEventBin* bin = eventcube[ipix];
+
+            // Skip if bin is not contained in RoI
+            if (!roi.contains(*bin)) {
                 continue;
             }
 
-            // Compute model value for event bin. The model value is
-            // given in counts/MeV/s/sr.
-            double model = obs.models().eval(*bin, *cta);
+            // Initialise values for integration over energy bin
+            double f1 = 0.0;
+            double f2 = 0.0;
 
-            // Multiply by livetime to get the correct weighting for
-            // each observation. We divide by the total livetime later
-            // to get the background model in units of counts/MeV/s/sr.
-            model *= livetime;
+            // Loop over all energy bins of the cube
+            for (int iebin = 0, ibin = ipix; iebin < nebins; ++iebin, ibin += npix) {
 
-            // Add existing number of counts
-            model += bin->counts();
+                // If this is the first bin then compute f1 at the lower bin edge
+                if (iebin == 0) {
+                    GCTAEventBin* bin = eventcube[ibin];
+                    bin->energy(m_ebounds.emin(iebin));
+                    f1 = obs.models().eval(*bin, *cta);
+                }
 
-            // Store cumulated value (units: counts/MeV/sr)
-            bin->counts(model);
+                // Compute f2 at the upper bin edge
+                GCTAEventBin* bin = eventcube[ibin];
+                bin->energy(m_ebounds.emax(iebin));
+                f2 = obs.models().eval(*bin, *cta);
 
-        } // endfor: looped over all bins
+                // Add background model value to cube if the energy bin is
+                // fully container in the observation interval and if both f1
+                // and f2 are positive. Add a small margin here to the energy
+                // bin boundaries to take provision for rounding errors.
+                if (obs_ebounds.contains(m_ebounds.emin(iebin) + energy_margin,
+                                         m_ebounds.emax(iebin) - energy_margin) &&
+                    (f1 > 0.0 && f2 > 0.0)) {
+
+                    // Compute background model value by integrating over the
+                    // bin and deviding the result by the bin width
+                    double x1    = m_ebounds.emin(iebin).MeV();
+                    double x2    = m_ebounds.emax(iebin).MeV();
+                    double model = gammalib::plaw_integral(x1, f1, x2, f2) / (x2 - x1);
+
+                    // Multiply by livetime to get the correct weighting for
+                    // each observation. We divide by the total livetime later
+                    // to get the background model in units of counts/MeV/s/sr.
+                    model *= livetime;
+
+                    // Add existing number of counts
+                    model += bin->counts();
+
+                    // Store cumulated value (units: counts/MeV/sr)
+                    bin->counts(model);
+
+                } // endif: added background model value to cube
+
+                // Set f1 to f2 for next energy layer
+                f1 = f2;
+
+            } // endfor: looped over energy layers
+
+        } // endfor: looped over spatial pixels
 
         // Accumulate livetime
         total_livetime += livetime;
@@ -540,14 +589,14 @@ void GCTACubeBackground::read(const GFits& fits)
     clear();
 
     // Get HDUs
-    const GFitsImage& hdu_bgdcube  = *fits.image("Primary");
-    const GFitsTable& hdu_energies = *fits.table(gammalib::extname_energies);
+    const GFitsImage& hdu_bgdcube = *fits.image("Primary");
+    const GFitsTable& hdu_ebounds = *fits.table(gammalib::extname_ebounds);
 
     // Read cube
     m_cube.read(hdu_bgdcube);
 
-    // Read energies
-    m_energies.read(hdu_energies);
+    // Read energy boundaries
+    m_ebounds.read(hdu_ebounds);
 
     // Set energy node array
     set_eng_axis();
@@ -567,8 +616,8 @@ void GCTACubeBackground::write(GFits& fits) const
     // Write cube
     m_cube.write(fits);
 
-    // Write energies
-    m_energies.write(fits);
+    // Write energy boundaries
+    m_ebounds.write(fits);
 
     // Return
     return;
@@ -666,11 +715,11 @@ std::string GCTACubeBackground::print(const GChatter& chatter) const
          result.append("\n"+gammalib::parformat("Filename")+m_filename);
 
         // Append energies
-        if (m_energies.size() > 0) {
-            result.append("\n"+m_energies.print(chatter));
+        if (m_ebounds.size() > 0) {
+            result.append("\n"+m_ebounds.print(chatter));
         }
         else {
-            result.append("\n"+gammalib::parformat("Energies") +
+            result.append("\n"+gammalib::parformat("Energy boundaries") +
                           "Not defined");
         }
 
@@ -698,7 +747,7 @@ void GCTACubeBackground::init_members(void)
     // Initialise members
     m_filename.clear();
     m_cube.clear();
-    m_energies.clear();
+    m_ebounds.clear();
     m_elogmeans.clear();
 
     // Initialise cache
@@ -722,7 +771,7 @@ void GCTACubeBackground::copy_members(const GCTACubeBackground& bgd)
     // Copy members
     m_filename  = bgd.m_filename;
     m_cube      = bgd.m_cube;
-    m_energies  = bgd.m_energies;
+    m_ebounds   = bgd.m_ebounds;
     m_elogmeans = bgd.m_elogmeans;
 
     // Copy cache
@@ -755,7 +804,7 @@ void GCTACubeBackground::free_members(void)
 void GCTACubeBackground::set_eng_axis(void)
 {
     // Get number of bins
-    int bins = m_energies.size();
+    int bins = m_ebounds.size();
 
     // Clear node array
     m_elogmeans.clear();
@@ -764,7 +813,7 @@ void GCTACubeBackground::set_eng_axis(void)
     for (int i = 0; i < bins; ++i) {
 
         // Get logE/TeV
-        m_elogmeans.append(m_energies[i].log10TeV());
+        m_elogmeans.append(m_ebounds.elogmean(i).log10TeV());
 
     }  // endfor: looped over energy bins
 

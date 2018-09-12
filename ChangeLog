@@ -1,8 +1,9 @@
-2018-09-10
+2018-09-12
 
         * Version 1.6.0 released
         ========================
 
+        Define GCTACubeBackground for energy boundaries instead of nodes (#2677) 
         Remove setting of effective area energy boundaries from "LO_THRES" and
           "HI_THRES" keywords (#2674)
         Correctly compute maximum energy in GCTAAeff2D class (#2674)

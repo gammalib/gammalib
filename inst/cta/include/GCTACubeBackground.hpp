@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTACubeBackground.hpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Michael Mayer                               *
+ *  copyright (C) 2015-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,7 +32,7 @@
 #include "GFilename.hpp"
 #include "GSkyMap.hpp"
 #include "GNodeArray.hpp"
-#include "GEnergies.hpp"
+#include "GEbounds.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
@@ -63,7 +63,7 @@ public:
                        const double&        dy,
                        const int&           nx,
                        const int&           ny,
-                       const GEnergies&     energies);
+                       const GEbounds&      ebounds);
     virtual ~GCTACubeBackground(void);
 
     // Operators
@@ -83,7 +83,7 @@ public:
     void                save(const GFilename& filename,
                              const bool&      clobber = false) const;
     const GSkyMap&      cube(void) const;
-    const GEnergies&    energies(void) const;
+    const GEbounds&     ebounds(void) const;
     const GFilename&    filename(void) const;
     std::string         print(const GChatter& chatter = NORMAL) const;
 
@@ -98,7 +98,7 @@ private:
     // Members
     mutable GFilename m_filename;  //!< Name of background response file
     GSkyMap           m_cube;      //!< Background cube
-    GEnergies         m_energies;  //!< Energy values for the background cube
+    GEbounds          m_ebounds;   //!< Energy boundaries of background cube
     GNodeArray        m_elogmeans; //!< Mean energy for the background cube
 
     // Response table computation cache for 1D access
@@ -138,14 +138,14 @@ const GSkyMap& GCTACubeBackground::cube(void) const
 
 
 /***********************************************************************//**
- * @brief Return energies
+ * @brief Return energy boundaries
  *
- * @return Energies
+ * @return Energy boundaries
  ***************************************************************************/
 inline
-const GEnergies& GCTACubeBackground::energies(void) const
+const GEbounds& GCTACubeBackground::ebounds(void) const
 {
-    return (m_energies);
+    return (m_ebounds);
 }
 
 

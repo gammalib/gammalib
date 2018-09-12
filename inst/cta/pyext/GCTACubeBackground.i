@@ -50,7 +50,7 @@ public:
                        const double&        dy,
                        const int&           nx,
                        const int&           ny,
-                       const GEnergies&     energies);
+                       const GEbounds&      ebounds);
     virtual ~GCTACubeBackground(void);
 
     // Operators
@@ -69,7 +69,7 @@ public:
     void                save(const GFilename& filename,
                              const bool&      clobber = false) const;
     const GSkyMap&      cube(void) const;
-    const GEnergies&    energies(void) const;
+    const GEbounds&     ebounds(void) const;
     const GFilename&    filename(void) const;
 };
 

@@ -2356,15 +2356,15 @@ void TestGCTAOptimize::test_stacked_optimizer(void)
     // Set reference result
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
-                            5.985317e-16, 1.09268e-17,
-                            -2.49903, 0.0145909,
+                            5.98707105445563e-16, 1.09127928921077e-17,
+                            -2.50267020665246, 0.0145532902844396,
                             300000, 0,
                             1, 0,
-                            1.150542, 0.0234168,
-                            -0.000264949, 0.0145699,
+                            1.61294446311705, 0.033167560400167,
+                            -0.218565245795573, 0.0146770868941243,
                             1.0e6, 0,
                             1, 0};
-    
+
     // Load stacked CTA observation
     GObservations obs(cta_stacked_xml);
 
@@ -2401,7 +2401,7 @@ void TestGCTAOptimize::test_onoff_optimizer_cstat(void)
                             -0.044025, 0.055257,
                             1.0e6, 0,
                             1, 0};
-    
+
     // Load On/Off CTA observation
     GObservations obs(cta_onoff_obs);
 
