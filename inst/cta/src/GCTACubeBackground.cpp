@@ -435,10 +435,10 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
         eventcube.gti(cta->gti());
 
         // Loop over all bins in background cube
-        for (int i = 0; i < eventcube.size(); ++i) {
+        for (int k = 0; k < eventcube.size(); ++k) {
 
             // Get event bin
-            GCTAEventBin* bin = eventcube[i];
+            GCTAEventBin* bin = eventcube[k];
 
             // Skip if energy is not contained within RoI or the energy
             // boundaries of the observation. Note that the contains() method
