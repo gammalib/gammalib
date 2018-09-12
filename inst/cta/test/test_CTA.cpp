@@ -2485,10 +2485,10 @@ void TestGCTAOptimize::check_results(const GObservations& obs,
             GModelPar par  = (*model)[k];
             std::string msg = "Verify optimization result for " + par.print();
             test_value(par.value(), results[j],
-                       std::abs(1.0e-4*results[j]), msg);
+                       std::abs(1.0e-3*results[j]), msg);
             j++;
             test_value(par.error(), results[j],
-                       std::abs(1.0e-4*results[j]), msg);
+                       std::abs(1.0e-3*results[j]), msg);
             j++;
         }
     }
