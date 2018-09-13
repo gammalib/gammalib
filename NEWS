@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-12 September 2018
+13 September 2018
 
 
 1. Introduction
@@ -93,7 +93,11 @@ The following methods have been added:
 - GCTAAeff2D::rad_max()
 - GCTAResponseTable::telescope()
 - GCTAModelAeffBackground(GModelSpectral&, GModelTemporal&)
+- GCTAModelAeffBackground::spectral(GModelSpectral*)
+- GCTAModelAeffBackground::spectral(GModelTemporal*)
 - GCTAModelCubeBackground(GModelSpectral&, GModelTemporal&)
+- GCTAModelCubeBackground::spectral(GModelSpectral*)
+- GCTAModelCubeBackground::spectral(GModelTemporal*)
 - GCTAModelRadialAcceptance(GCTAModelRadial&, GModelSpectral&, GModelTemporal&)
 - GCTAModelRadialAcceptance::radial(GCTAModelRadial*)
 - GCTAModelRadialAcceptance::spectral(GModelSpectral*)

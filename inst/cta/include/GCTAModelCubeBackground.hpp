@@ -84,6 +84,8 @@ public:
     // Other methods
     GModelSpectral* spectral(void) const;
     GModelTemporal* temporal(void) const;
+    void            spectral(const GModelSpectral* spectral);
+    void            temporal(const GModelTemporal* temporal);
 
 protected:
     // Methods

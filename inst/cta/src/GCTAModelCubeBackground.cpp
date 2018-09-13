@@ -272,6 +272,60 @@ GCTAModelCubeBackground* GCTAModelCubeBackground::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Set spectral model component
+ *
+ * @param[in] spectral Pointer to spectral model component.
+ *
+ * Sets the spectral model component of the model.
+ ***************************************************************************/
+void GCTAModelCubeBackground::spectral(const GModelSpectral* spectral)
+{
+    // Free spectral model component only if it differs from current
+    // component. This prevents unintential deallocation of the argument
+    if ((m_spectral != NULL) && (m_spectral != spectral)) {
+        delete m_spectral;
+    }
+
+    // Clone spectral model component if it exists, otherwise set pointer
+    // to NULL
+    m_spectral = (spectral != NULL) ? spectral->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set temporal model component
+ *
+ * @param[in] temporal Pointer to temporal model component.
+ *
+ * Sets the temporal model component of the model.
+ ***************************************************************************/
+void GCTAModelCubeBackground::temporal(const GModelTemporal* temporal)
+{
+    // Free temporal model component only if it differs from current
+    // component. This prevents unintential deallocation of the argument
+    if ((m_temporal != NULL) && (m_temporal != temporal)) {
+        delete m_temporal;
+    }
+
+    // Clone temporal model component if it exists, otherwise set pointer
+    // to NULL
+    m_temporal = (temporal != NULL) ? temporal->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Evaluate function
  *
  * @param[in] event Observed event.
