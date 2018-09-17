@@ -282,7 +282,7 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
 
         // Now the computation is finished, update attributes.
         // For each omp section, a thread will be created.
-        #pragma omp sections
+        #pragma omp parallel sections
         {
             #pragma omp section
             {
