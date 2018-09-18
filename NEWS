@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-13 September 2018
+18 September 2018
 
 
 1. Introduction
@@ -211,7 +211,8 @@ power law between two boundaries (#2308).
 
 10. Observation module
 ----------------------
-None
+Add "parallel" to the OpenMP pragma in GObservations::likelihood::eval() to avoid
+freezing of the code (#2678).
 
 
 11. Optimization module

@@ -1,8 +1,9 @@
-2018-09-12
+2018-09-18
 
         * Version 1.6.0 released
         ========================
 
+        Fix OpenMP bug in GObservations::likelihood::eval (#2678)
         Define GCTACubeBackground for energy boundaries instead of nodes (#2677) 
         Remove setting of effective area energy boundaries from "LO_THRES" and
           "HI_THRES" keywords (#2674)

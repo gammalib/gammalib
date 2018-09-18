@@ -19,6 +19,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`2678 <https://cta-redmine.irap.omp.eu/issues/2678>`_] -
+  Fix OpenMP bug in ``GObservations::likelihood::eval``
 * [`2674 <https://cta-redmine.irap.omp.eu/issues/2674>`_] -
   Remove setting of effective area energy boundaries from ``LO_THRES`` and
   ``HI_THRES`` keywords
