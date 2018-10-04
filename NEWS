@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-18 September 2018
+4 October 2018
 
 
 1. Introduction
@@ -285,6 +285,9 @@ None
 
 20. CTA interface
 -----------------
+Correct the handling of stacked On/Off observations in the absence of a
+background IRF template (#2683).
+
 The GCTACubeBackground class is now defined for energy boundaries instead of
 nodes so that the background cube can have the same dimensions as the counts
 cube and no interpolation is needed anymore. The GCTACubeBackground::fill()

@@ -1,8 +1,9 @@
-2018-09-18
+2018-10-04
 
         * Version 1.6.0 released
         ========================
 
+        Correct handling of stacked On/Off observations without background IRF (#2683)
         Fix OpenMP bug in GObservations::likelihood::eval (#2678)
         Define GCTACubeBackground for energy boundaries instead of nodes (#2677) 
         Remove setting of effective area energy boundaries from "LO_THRES" and

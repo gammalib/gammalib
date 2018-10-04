@@ -19,6 +19,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`2683 <https://cta-redmine.irap.omp.eu/issues/2683>`_] -
+  Correct handling of stacked On/Off observations without background IRF
 * [`2678 <https://cta-redmine.irap.omp.eu/issues/2678>`_] -
   Fix OpenMP bug in ``GObservations::likelihood::eval``
 * [`2674 <https://cta-redmine.irap.omp.eu/issues/2674>`_] -

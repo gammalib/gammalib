@@ -344,12 +344,17 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
                 backresp[i] *= onoff->on_spec().exposure();
             }
 
-            // Compute background scaling factor contribution
+            // Compute background scaling factor contribution. Handle the case
+            // where there is no background response, which may happen if no
+            // IRF template exists. In that case we do not weight with the
+            // background response.
             for (int i = 0; i < m_on_spec.size(); ++i) {
                 double  background = onoff->off_spec()["BACKRESP"][i];
                 double  exposure   = onoff->on_spec().exposure();
                 double  alpha      = onoff->on_spec().backscal(i);
-                double  scale      = alpha * background * exposure;
+                double  scale      = (background > 0.0)
+                                     ? alpha * background * exposure
+                                     : alpha * exposure;
                 m_on_spec.backscal(i,scale);
             }
 
@@ -405,12 +410,17 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_on_spec  += onoff->on_spec();
             m_off_spec += onoff->off_spec();
 
-            // Compute background scaling factor contribution
+            // Compute background scaling factor contribution. Handle the case
+            // where there is no background response, which may happen if no
+            // IRF template exists. In that case we do not weight with the
+            // background response.
             for (int i = 0; i < m_on_spec.size(); ++i) {
                 double  background = onoff->off_spec()["BACKRESP"][i];
                 double  alpha      = onoff->on_spec().backscal(i);
                 double  scale      = m_on_spec.backscal(i) +
-                                     alpha * background * onoff->on_spec().exposure();
+                                     ((background > 0.0)
+                                      ? alpha * background * onoff->on_spec().exposure()
+                                      : alpha * onoff->on_spec().exposure());
                 m_on_spec.backscal(i,scale);
             }
 
@@ -451,7 +461,9 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
 
     } // endfor: looped over observations
 
-    // Compute stacked background scaling factor
+    // Compute stacked background scaling factor. Handle the case where there
+    // is no background response, which may happen if no IRF template exists.
+    // In that case we simply have to devide by the exposure.
     for (int i = 0; i < m_on_spec.size(); ++i) {
         double norm = m_off_spec["BACKRESP"][i];
         if (norm > 0.0) {
@@ -459,7 +471,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_on_spec.backscal(i,scale);
         }
         else {
-            m_on_spec.backscal(i,0.0);
+            double scale = m_on_spec.backscal(i) / exposure;
+            m_on_spec.backscal(i,scale);
         }
     }
 
@@ -2767,6 +2780,11 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
                                               GMatrixSparse* curvature,
                                               double*        npred) const
 {
+    // Debug option: dump header
+    #if defined(G_LIKELIHOOD_DEBUG)
+    std::cout << "GCTAOnOffObservation::likelihood_wstat: enter" << std::endl;
+    #endif
+
     // Timing measurement
     #if defined(G_LIKELIHOOD_DEBUG)
     #ifdef _OPENMP
@@ -2780,8 +2798,6 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
     #if defined(G_LIKELIHOOD_DEBUG)
     int    n_bins        = m_on_spec.size();
     int    n_used        = 0;
-    int    n_small_model = 0;
-    int    n_zero_data   = 0;
     double sum_data      = 0.0;
     double sum_model     = 0.0;
     double init_npred    = *npred;
@@ -2878,6 +2894,16 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
 
     } // endfor: looped over energy bins
 
+    // Dump statistics
+    #if defined(G_LIKELIHOOD_DEBUG)
+    std::cout << "Number of parameters: " << npars << std::endl;
+    std::cout << "Number of bins: " << n_bins << std::endl;
+    std::cout << "Number of bins used for computation: " << n_used << std::endl;
+    std::cout << "Sum of data (On): " << sum_data << std::endl;
+    std::cout << "Sum of model (On): " << sum_model << std::endl;
+    std::cout << "Statistic: " << value << std::endl;
+    #endif
+
     // Optionally dump gradient and curvature matrix
     #if defined(G_LIKELIHOOD_DEBUG)
     std::cout << *gradient << std::endl;
@@ -2893,6 +2919,11 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
     #endif
     std::cout << "GCTAOnOffObservation::optimizer::likelihood_wstat: CPU usage = "
               << t_elapse << " sec" << std::endl;
+    #endif
+
+    // Debug option: dump trailer
+    #if defined(G_LIKELIHOOD_DEBUG)
+    std::cout << "GCTAOnOffObservation::likelihood_wstat: exit" << std::endl;
     #endif
 
     // Return
@@ -3105,14 +3136,14 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
  * overestimated if for some bins \f$n_{\rm on}=0\f$ and/or
  * \f$n_{\rm off}=0\f$ (i.e. if the special cases are encountered).
  ***********************************************************************/
-double  GCTAOnOffObservation::wstat_value(const double& non,
-                                          const double& noff,
-                                          const double& alpha,
-                                          const double& ngam,
-                                          double&       nonpred,
-                                          double&       nbgd,
-                                          double&       dlogLdsky,
-                                          double&       d2logLdsky2) const
+double GCTAOnOffObservation::wstat_value(const double& non,
+                                         const double& noff,
+                                         const double& alpha,
+                                         const double& ngam,
+                                         double&       nonpred,
+                                         double&       nbgd,
+                                         double&       dlogLdsky,
+                                         double&       d2logLdsky2) const
 {
     // Initialise log-likelihood value
     double logL;
@@ -3192,6 +3223,25 @@ double  GCTAOnOffObservation::wstat_value(const double& non,
                         dbds * (alpha * f3 + noff / (nbgd*nbgd) * dbds);
 
     } // endelse: general case
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(logL)    || gammalib::is_infinite(logL)    ||
+        gammalib::is_notanumber(nonpred) || gammalib::is_infinite(nonpred) ||
+        gammalib::is_notanumber(nbgd)    || gammalib::is_infinite(nbgd)) {
+        std::cout << "*** ERROR: GCTAOnOffObservation::wstat_value";
+        std::cout << "(noff=" << noff;
+        std::cout << ", alpha=" << alpha;
+        std::cout << ", ngam=" << ngam << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (logL=" << logL;
+        std::cout << ", nonpred=" << nonpred;
+        std::cout << ", nbgd=" << nbgd;
+        std::cout << ", dlogLdsky=" << dlogLdsky;
+        std::cout << ", d2logLdsky2=" << d2logLdsky2;
+        std::cout << " )" << std::endl;
+    }
+    #endif
 
     // Return
     return logL;
