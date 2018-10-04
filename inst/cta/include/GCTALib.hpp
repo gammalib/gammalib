@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTALib.hpp - CTA Support Header files                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,6 +72,9 @@
 #include "GCTACubeSource.hpp"
 #include "GCTACubeSourcePoint.hpp"
 #include "GCTACubeSourceDiffuse.hpp"
+#include "GCTAModelBackground.hpp"
+#include "GCTAModelSpatial.hpp"
+#include "GCTAModelSpatialRegistry.hpp"
 #include "GCTAModelCubeBackground.hpp"
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAModelAeffBackground.hpp"

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialPolynom.cpp - Radial Polynom CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,16 +32,19 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GIntegral.hpp"
 #include "GCTAModelRadialPolynom.hpp"
 #include "GCTAModelRadialRegistry.hpp"
+#include "GCTAModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 const double g_cta_radial_polynom_offset_max = 4.0;
 
 /* __ Globals ____________________________________________________________ */
-const GCTAModelRadialPolynom  g_cta_radial_polynom_seed;
-const GCTAModelRadialRegistry g_cta_radial_polynom_registry(&g_cta_radial_polynom_seed);
+const GCTAModelRadialPolynom   g_cta_radial_polynom_seed;
+const GCTAModelRadialRegistry  g_cta_radial_polynom_registry(&g_cta_radial_polynom_seed);
+const GCTAModelSpatialRegistry g_cta_radial_polynom_spatial_registry(&g_cta_radial_polynom_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                   "GCTAModelRadialPolynom::read(GXmlElement&)"

@@ -47,29 +47,30 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir           = std::getenv("TEST_CTA_DATA");
-const std::string caldbdir          = datadir + "/../caldb";
-const std::string cta_caldb         = datadir + "/../../caldb";
-const std::string cta_irf           = "cta_dummy_irf";
-const std::string cta_events        = datadir+"/crab_events.fits";
-const std::string cta_events_gti    = datadir+"/crab_events_gti.fits[EVENTS2]";
-const std::string cta_cntmap        = datadir+"/crab_cntmap.fits";
-const std::string cta_bin_xml       = datadir+"/obs_binned.xml";
-const std::string cta_unbin_xml     = datadir+"/obs_unbinned.xml";
-const std::string cta_model_xml     = datadir+"/crab.xml";
-const std::string cta_rsp_xml       = datadir+"/rsp_models.xml";
-const std::string cta_cube_bgd_xml  = datadir+"/cta_model_cube_bgd.xml";
-const std::string cta_irf_bgd_xml   = datadir+"/cta_model_irf_bgd.xml";
-const std::string cta_aeff_bgd_xml  = datadir+"/cta_model_aeff_bgd.xml";
-const std::string cta_caldb_king    = cta_caldb+"/data/cta/e/bcf/IFAE20120510_50h_King";
-const std::string cta_irf_king      = "irf_file.fits";
-const std::string cta_psf_table     = caldbdir+"/psf_table.fits[PSF_2D_TABLE]";
-const std::string cta_perf_table    = caldbdir+"/cta_dummy_irf.dat";
-const std::string cta_edisp_rmf     = caldbdir+"/dc1/rmf.fits";
-const std::string cta_edisp_2D      = caldbdir+"/edisp_matrix.fits";
-const std::string cta_bgd_3D        = caldbdir+"/edisp_matrix.fits";
-const std::string cta_modbck_fit    = datadir+"/bg_test.fits";
-const std::string cta_point_table   = datadir+"/crab_pointing.fits";
+const std::string datadir               = std::getenv("TEST_CTA_DATA");
+const std::string caldbdir              = datadir + "/../caldb";
+const std::string cta_caldb             = datadir + "/../../caldb";
+const std::string cta_irf               = "cta_dummy_irf";
+const std::string cta_events            = datadir+"/crab_events.fits";
+const std::string cta_events_gti        = datadir+"/crab_events_gti.fits[EVENTS2]";
+const std::string cta_cntmap            = datadir+"/crab_cntmap.fits";
+const std::string cta_bin_xml           = datadir+"/obs_binned.xml";
+const std::string cta_unbin_xml         = datadir+"/obs_unbinned.xml";
+const std::string cta_model_xml         = datadir+"/crab.xml";
+const std::string cta_rsp_xml           = datadir+"/rsp_models.xml";
+const std::string cta_bgd_rad_gauss_xml = datadir+"/cta_model_bgd_rad_gauss.xml";
+const std::string cta_cube_bgd_xml      = datadir+"/cta_model_cube_bgd.xml";
+const std::string cta_irf_bgd_xml       = datadir+"/cta_model_irf_bgd.xml";
+const std::string cta_aeff_bgd_xml      = datadir+"/cta_model_aeff_bgd.xml";
+const std::string cta_caldb_king        = cta_caldb+"/data/cta/e/bcf/IFAE20120510_50h_King";
+const std::string cta_irf_king          = "irf_file.fits";
+const std::string cta_psf_table         = caldbdir+"/psf_table.fits[PSF_2D_TABLE]";
+const std::string cta_perf_table        = caldbdir+"/cta_dummy_irf.dat";
+const std::string cta_edisp_rmf         = caldbdir+"/dc1/rmf.fits";
+const std::string cta_edisp_2D          = caldbdir+"/edisp_matrix.fits";
+const std::string cta_bgd_3D            = caldbdir+"/edisp_matrix.fits";
+const std::string cta_modbck_fit        = datadir+"/bg_test.fits";
+const std::string cta_point_table       = datadir+"/crab_pointing.fits";
 
 /* __ Test files for stacked analysis (based on Prod2::South_0.5h) _______ */
 const std::string cta_stacked_xml       = datadir+"/stacked_obs.xml";
@@ -172,6 +173,8 @@ void TestGCTAModel::set(void)
     name("Test CTA models");
 
     // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_bgd),
+           "Test CTA background model");
     append(static_cast<pfunction>(&TestGCTAModel::test_model_cube_bgd),
            "Test CTA cube background model");
     append(static_cast<pfunction>(&TestGCTAModel::test_model_irf_bgd),
@@ -1449,6 +1452,78 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA background
+ ***************************************************************************/
+void TestGCTAModel::test_model_bgd(void)
+{
+    // Test void constuctor
+    test_try("Test void constuctor");
+    try {
+        GCTAModelBackground model;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML constuctor
+    test_try("Test XML constuctor");
+    try {
+        GXml xml(cta_bgd_rad_gauss_xml);
+        const GXmlElement& lib = *xml.element("source_library", 0);
+        const GXmlElement& src = *lib.element("source", 0);
+        GCTAModelBackground model(src);
+        test_value(model["Prefactor"].value(), 61.8e-6);
+        test_value(model["Index"].value(), -1.85);
+        test_value(model["PivotEnergy"].value(), 1.0e6);
+        test_assert(model.is_constant(), "Model is expected to be constant.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test spectral constuctor
+    /*
+    test_try("Test spectral constuctor");
+    try {
+        GModelSpectralPlaw plaw(1.0, 0.0, GEnergy(1.0, "TeV"));
+        GCTAModelBackground model(plaw);
+        test_value(model["Prefactor"].value(), 1.0);
+        test_value(model["Index"].value(), 0.0);
+        test_value(model["PivotEnergy"].value(), 1.0e6);
+        test_assert(model.is_constant(), "Model is expected to be constant.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    */
+
+    // Test XML loading of cube background
+    GModels models(cta_bgd_rad_gauss_xml);
+    GModel* model = models["My model"];
+    test_value((*model)["Prefactor"].value(), 61.8e-6);
+    test_value((*model)["Index"].value(), -1.85);
+    test_value((*model)["PivotEnergy"].value(), 1.0e6);
+    test_assert(model->is_constant(), "Model is expected to be constant.");
+
+    // Test XML saving and reloading of cube background
+    models.save("test.xml");
+    models.load("test.xml");
+    model = models["My model"];
+    test_value((*model)["Prefactor"].value(), 61.8e-6);
+    test_value((*model)["Index"].value(), -1.85);
+    test_value((*model)["PivotEnergy"].value(), 1.0e6);
+    test_assert(model->is_constant(), "Model is expected to be constant.");
+
+    // Return
+    return;
+
 }
 
 

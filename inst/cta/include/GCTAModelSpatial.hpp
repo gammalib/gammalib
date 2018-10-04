@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GCTAModelRadial.hpp - Radial model abstract base class         *
+ *         GCTAModelSpatial.hpp - Spatial model abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,71 +19,64 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelRadial.hpp
- * @brief Abstract radial acceptance model class interface definition
+ * @file GCTAModelSpatial.hpp
+ * @brief Abstract spatial model class interface definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCTAMODELRADIAL_HPP
-#define GCTAMODELRADIAL_HPP
+#ifndef GCTAMODELSPATIAL_HPP
+#define GCTAMODELSPATIAL_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GCTAModelSpatial.hpp"
+#include "GBase.hpp"
 #include "GModelPar.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
+class GTime;
 class GXmlElement;
 class GCTAInstDir;
 
 
 /***********************************************************************//**
- * @class GCTAModelRadial
+ * @class GCTAModelSpatial
  *
- * @brief Abstract radial acceptance model class
+ * @brief Abstract spatial model class
  *
- * This class implements the radial component of the CTA radial acceptance
- * model.
+ * This class implements the spatial component of the CTA background model.
  ***************************************************************************/
-class GCTAModelRadial : public GCTAModelSpatial {
+class GCTAModelSpatial : public GBase {
 
 public:
     // Constructors and destructors
-    GCTAModelRadial(void);
-    GCTAModelRadial(const GCTAModelRadial& model);
-    virtual ~GCTAModelRadial(void);
+    GCTAModelSpatial(void);
+    GCTAModelSpatial(const GCTAModelSpatial& model);
+    virtual ~GCTAModelSpatial(void);
 
     // Operators
-    virtual GCTAModelRadial& operator=(const GCTAModelRadial& model);
-    virtual GModelPar&       operator[](const int& index);
-    virtual const GModelPar& operator[](const int& index) const;
-    virtual GModelPar&       operator[](const std::string& name);
-    virtual const GModelPar& operator[](const std::string& name) const;
+    virtual GCTAModelSpatial& operator=(const GCTAModelSpatial& model);
+    virtual GModelPar&        operator[](const int& index);
+    virtual const GModelPar&  operator[](const int& index) const;
+    virtual GModelPar&        operator[](const std::string& name);
+    virtual const GModelPar&  operator[](const std::string& name) const;
 
-    // Implemented virtual methods
+    // Pure virtual methods
+    virtual void              clear(void) = 0;
+    virtual GCTAModelSpatial* clone(void) const = 0;
+    virtual std::string       classname(void) const = 0;
+    virtual std::string       type(void) const = 0;
     virtual double            eval(const GCTAInstDir& dir,
                                    const GEnergy&     energy,
                                    const GTime&       time,
-                                   const bool&        gradients = false) const;
+                                   const bool&        gradients = false) const = 0;
     virtual GCTAInstDir       mc(const GEnergy& energy,
                                  const GTime&   time,
-                                 GRan& ran) const;
-
-    // Pure virtual methods
-    virtual void             clear(void) = 0;
-    virtual GCTAModelRadial* clone(void) const = 0;
-    virtual std::string      classname(void) const = 0;
-    virtual std::string      type(void) const = 0;
-    virtual double           omega(void) const = 0;
-    virtual void             read(const GXmlElement& xml) = 0;
-    virtual void             write(GXmlElement& xml) const = 0;
-    virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
-
-    // Derived class pure virtual methods
-    virtual double           eval(const double& offset,
-                                  const bool&   gradients = false) const = 0;
-    virtual GCTAInstDir      mc(const GCTAInstDir& dir, GRan& ran) const = 0;
+                                 GRan& ran) const = 0;
+    virtual double            omega(void) const = 0;
+    virtual void              read(const GXmlElement& xml) = 0;
+    virtual void              write(GXmlElement& xml) const = 0;
+    virtual std::string       print(const GChatter& chatter = NORMAL) const = 0;
 
     // Methods
     int size(void) const;
@@ -91,7 +84,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GCTAModelRadial& model);
+    void copy_members(const GCTAModelSpatial& model);
     void free_members(void);
 
     // Proteced members
@@ -105,9 +98,9 @@ protected:
  * @return Number of model parameters.
  ***************************************************************************/
 inline
-int GCTAModelRadial::size(void) const
+int GCTAModelSpatial::size(void) const
 {
     return ((int)m_pars.size());
 }
 
-#endif /* GCTAMODELRADIAL_HPP */
+#endif /* GCTAMODELSPATIAL_HPP */

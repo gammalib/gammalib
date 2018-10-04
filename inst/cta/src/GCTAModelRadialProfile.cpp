@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialProfile.cpp - Radial Profile CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,15 +32,18 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GIntegral.hpp"
 #include "GCTAModelRadialProfile.hpp"
 #include "GCTAModelRadialRegistry.hpp"
+#include "GCTAModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GCTAModelRadialProfile  g_cta_radial_profile_seed;
-const GCTAModelRadialRegistry g_cta_radial_profile_registry(&g_cta_radial_profile_seed);
+const GCTAModelRadialProfile   g_cta_radial_profile_seed;
+const GCTAModelRadialRegistry  g_cta_radial_profile_registry(&g_cta_radial_profile_seed);
+const GCTAModelSpatialRegistry g_cta_radial_profile_spatial_registry(&g_cta_radial_profile_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                   "GCTAModelRadialProfile::read(GXmlElement&)"

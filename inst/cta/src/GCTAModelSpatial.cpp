@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCTAModelRadial.cpp  -  Abstract radial model base class        *
+ *         GCTAModelSpatial.cpp - Spatial model abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelRadial.cpp
- * @brief Abstract radial acceptance model class implementation
+ * @file GCTAModelSpatial.cpp
+ * @brief Abstract spatial model class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,8 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GCTAModelRadial.hpp"
-#include "GCTAInstDir.hpp"
+#include "GCTAModelSpatial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                           "GModelSpatial::operator[](int&)"
@@ -53,7 +52,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAModelRadial::GCTAModelRadial(void)
+GCTAModelSpatial::GCTAModelSpatial(void)
 {
     // Initialise members
     init_members();
@@ -66,9 +65,9 @@ GCTAModelRadial::GCTAModelRadial(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Radial acceptance model.
+ * @param[in] model Spatial model.
  ***************************************************************************/
-GCTAModelRadial::GCTAModelRadial(const GCTAModelRadial& model)
+GCTAModelSpatial::GCTAModelSpatial(const GCTAModelSpatial& model)
 {
     // Initialise members
     init_members();
@@ -84,7 +83,7 @@ GCTAModelRadial::GCTAModelRadial(const GCTAModelRadial& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAModelRadial::~GCTAModelRadial(void)
+GCTAModelSpatial::~GCTAModelSpatial(void)
 {
     // Free members
     free_members();
@@ -103,9 +102,9 @@ GCTAModelRadial::~GCTAModelRadial(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Radial acceptance model.
+ * @param[in] model Spatial model.
  ***************************************************************************/
-GCTAModelRadial& GCTAModelRadial::operator= (const GCTAModelRadial& model)
+GCTAModelSpatial& GCTAModelSpatial::operator=(const GCTAModelSpatial& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -134,12 +133,14 @@ GCTAModelRadial& GCTAModelRadial::operator= (const GCTAModelRadial& model)
  * @exception GException::out_of_range
  *            Parameter index is out of range.
  ***************************************************************************/
-GModelPar& GCTAModelRadial::operator[](const int& index)
+GModelPar& GCTAModelSpatial::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_ACCESS1, "Spatial parameter index",
+                                       index, size());
+    }
     #endif
 
     // Return reference
@@ -155,12 +156,14 @@ GModelPar& GCTAModelRadial::operator[](const int& index)
  * @exception GException::out_of_range
  *            Parameter index is out of range.
  ***************************************************************************/
-const GModelPar& GCTAModelRadial::operator[](const int& index) const
+const GModelPar& GCTAModelSpatial::operator[](const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_ACCESS1, "Spatial parameter index",
+                                       index, size());
+    }
     #endif
 
     // Return reference
@@ -173,10 +176,10 @@ const GModelPar& GCTAModelRadial::operator[](const int& index) const
  *
  * @param[in] name Parameter name.
  *
- * @exception GException::par_not_found
+ * @exception GException::invalid_argument
  *            Parameter with specified name not found in container.
  ***************************************************************************/
-GModelPar& GCTAModelRadial::operator[](const std::string& name)
+GModelPar& GCTAModelSpatial::operator[](const std::string& name)
 {
     // Get parameter index
     int index = 0;
@@ -186,8 +189,11 @@ GModelPar& GCTAModelRadial::operator[](const std::string& name)
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS2, name);
+    if (index >= size()) {
+        std::string msg = "Parameter \""+name+"\" not found in spatial "
+                          "component of background model.";
+        throw GException::invalid_argument(G_ACCESS2, msg);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -199,10 +205,10 @@ GModelPar& GCTAModelRadial::operator[](const std::string& name)
  *
  * @param[in] name Parameter name.
  *
- * @exception GException::par_not_found
+ * @exception GException::invalid_argument
  *            Parameter with specified name not found in container.
  ***************************************************************************/
-const GModelPar& GCTAModelRadial::operator[](const std::string& name) const
+const GModelPar& GCTAModelSpatial::operator[](const std::string& name) const
 {
     // Get parameter index
     int index = 0;
@@ -212,8 +218,11 @@ const GModelPar& GCTAModelRadial::operator[](const std::string& name) const
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS2, name);
+    if (index >= size()) {
+        std::string msg = "Parameter \""+name+"\" not found in spatial "
+                          "component of background model.";
+        throw GException::invalid_argument(G_ACCESS2, msg);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -226,46 +235,6 @@ const GModelPar& GCTAModelRadial::operator[](const std::string& name) const
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Evaluate function
- *
- * @param[in] dir Event direction.
- * @param[in] energy Event energy.
- * @param[in] time Event time.
- * @param[in] gradients Compute gradients?
- * @return Function value
- *
- * @todo Implement method
- ***************************************************************************/
-double GCTAModelRadial::eval(const GCTAInstDir& dir,
-                             const GEnergy&     energy,
-                             const GTime&       time,
-                             const bool&        gradients) const
-{
-    // Return
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Returns MC instrument direction
- *
- * @param[in] energy Event energy.
- * @param[in] time Event time.
- * @param[in,out] ran Random number generator.
- * @return Instrument direction
- *
- * @todo Implement method
- ***************************************************************************/
-GCTAInstDir GCTAModelRadial::mc(const GEnergy& energy,
-                                const GTime&   time,
-                                GRan&          ran) const
-{
-    // Return
-    return GCTAInstDir();
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -275,7 +244,7 @@ GCTAInstDir GCTAModelRadial::mc(const GEnergy& energy,
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAModelRadial::init_members(void)
+void GCTAModelSpatial::init_members(void)
 {
     // Initialise members
     m_pars.clear();
@@ -288,9 +257,9 @@ void GCTAModelRadial::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Radial acceptance model.
+ * @param[in] model Spatial acceptance model.
  ***************************************************************************/
-void GCTAModelRadial::copy_members(const GCTAModelRadial& model)
+void GCTAModelSpatial::copy_members(const GCTAModelSpatial& model)
 {
     // Copy members
     m_pars = model.m_pars;
@@ -303,7 +272,7 @@ void GCTAModelRadial::copy_members(const GCTAModelRadial& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAModelRadial::free_members(void)
+void GCTAModelSpatial::free_members(void)
 {
     // Return
     return;

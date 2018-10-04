@@ -74,6 +74,9 @@ sources = src/GCTASupport.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
+          src/GCTAModelBackground.cpp \
+          src/GCTAModelSpatial.cpp \
+          src/GCTAModelSpatialRegistry.cpp \
           src/GCTAModelCubeBackground.cpp \
           src/GCTAModelIrfBackground.cpp \
           src/GCTAModelAeffBackground.cpp \
@@ -124,6 +127,9 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTACubeSource.hpp \
                      include/GCTACubeSourcePoint.hpp \
                      include/GCTACubeSourceDiffuse.hpp \
+                     include/GCTAModelBackground.hpp \
+                     include/GCTAModelSpatial.hpp \
+                     include/GCTAModelSpatialRegistry.hpp \
                      include/GCTAModelCubeBackground.hpp \
                      include/GCTAModelIrfBackground.hpp \
                      include/GCTAModelAeffBackground.hpp \
