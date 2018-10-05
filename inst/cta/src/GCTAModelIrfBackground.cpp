@@ -450,8 +450,8 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
         if (valid_model()) {
 
             // Retrieve CTA background response and event list
-            const GCTABackground& bgd    = gammalib::cta_rsp_bkg(G_MC, obs);
-            const GCTAEventList&  events = gammalib::cta_event_list(G_MC, obs);
+            const GCTABackground& bgd    = gammalib::cta_rsp_bkg(G_NPRED, obs);
+            const GCTAEventList&  events = gammalib::cta_event_list(G_NPRED, obs);
 
             // Get reference to ROI centre
             //const GSkyDir& roi_centre = events.roi().centre().dir();

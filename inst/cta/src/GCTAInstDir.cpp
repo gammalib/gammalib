@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAInstDir.cpp - CTA instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,6 +76,28 @@ GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
 
     // Assign sky direction
     m_dir = dir;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Instrument coordinates constructor
+ *
+ * @param[in] detx Instrument coordinate X (radians).
+ * @param[in] dety Instrument coordinate Y (radians).
+ *
+ * Construct CTA instrument direction from instrument coordinates.
+ ***************************************************************************/
+GCTAInstDir::GCTAInstDir(const double& detx, const double& dety) : GInstDir()
+{
+    // Initialise class members
+    init_members();
+
+    // Assign instrument coordinates
+    m_detx = detx;
+    m_dety = dety;
 
     // Return
     return;

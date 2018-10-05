@@ -77,8 +77,8 @@ public:
     virtual double               eval(const GEvent&       event,
                                       const GObservation& obs,
                                       const bool&         gradients = false) const;
-    virtual double               npred(const GEnergy&      obsEng,
-                                       const GTime&        obsTime,
+    virtual double               npred(const GEnergy&      energy,
+                                       const GTime&        time,
                                        const GObservation& obs) const;
     virtual GCTAEventList*       mc(const GObservation& obs, GRan& ran) const;
     virtual void                 read(const GXmlElement& xml);
@@ -103,26 +103,6 @@ protected:
     GModelSpectral*   xml_spectral(const GXmlElement& spectral) const;
     GModelTemporal*   xml_temporal(const GXmlElement& temporal) const;
     bool              valid_model(void) const;
-
-    // ROI integration kernel
-    class roi_kern : public GFunction {
-    public:
-        roi_kern(const GCTAModelSpatial* parent, const double& roi, const double& dist) :
-                 m_parent(parent),
-                 m_roi(roi),
-                 m_cosroi(std::cos(roi)),
-                 m_dist(dist),
-                 m_cosdist(std::cos(dist)),
-                 m_sindist(std::sin(dist)) { }
-        double eval(const double& r);
-    protected:
-        const GCTAModelSpatial* m_parent;   //!< Pointer to radial model
-        double                  m_roi;      //!< ROI radius in radians
-        double                  m_cosroi;   //!< Cosine of ROI radius
-        double                  m_dist;     //!< Distance between pointing and ROI centre in radians
-        double                  m_cosdist;  //!< Cosine of distance
-        double                  m_sindist;  //!< Sinus of distance
-    };
 
     // Proteced data members
     GCTAModelSpatial* m_spatial;      //!< Spatial model

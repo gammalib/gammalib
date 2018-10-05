@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-4 October 2018
+5 October 2018
 
 
 1. Introduction
@@ -79,6 +79,7 @@ The following methods have been added:
 - GCTAObservation::lo_user_thres(double&)
 - GCTAObservation::hi_user_thres(double&)
 - GCTAOnOffObservation::has_response()
+- GCTAInstDir::GCTAInstDir(double&, double&)
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)

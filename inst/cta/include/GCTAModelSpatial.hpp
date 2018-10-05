@@ -30,11 +30,15 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GFunction.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 #include "GModelPar.hpp"
+#include "GModelSpectralNodes.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
-class GTime;
+class GObservation;
 class GXmlElement;
 class GCTAInstDir;
 
@@ -73,13 +77,15 @@ public:
     virtual GCTAInstDir       mc(const GEnergy& energy,
                                  const GTime&   time,
                                  GRan& ran) const = 0;
-    virtual double            omega(void) const = 0;
     virtual void              read(const GXmlElement& xml) = 0;
     virtual void              write(GXmlElement& xml) const = 0;
     virtual std::string       print(const GChatter& chatter = NORMAL) const = 0;
 
     // Methods
-    int size(void) const;
+    int                       size(void) const;
+    virtual double            npred(const GEnergy&      energy,
+                                    const GTime&        time,
+                                    const GObservation& obs) const;
 
 protected:
     // Protected methods
@@ -87,8 +93,52 @@ protected:
     void copy_members(const GCTAModelSpatial& model);
     void free_members(void);
 
+    // RoI integration kernel over theta
+    class npred_roi_kern_theta : public GFunction {
+    public:
+        npred_roi_kern_theta(const GCTAModelSpatial* spatial,
+                             const GEnergy&          energy,
+                             const GTime&            time,
+                             const int&              iter) :
+                             m_spatial(spatial),
+                             m_energy(energy),
+                             m_time(time),
+                             m_iter(iter) { }
+        double eval(const double& theta);
+    protected:
+        const GCTAModelSpatial* m_spatial;  //!< Pointer to spatial component
+        GEnergy                 m_energy;   //!< Energy
+        GTime                   m_time;     //!< Time
+        int                     m_iter;     //!< Romberg iterations
+    };
+
+    // RoI integration kernel over phi
+    class npred_roi_kern_phi : public GFunction {
+    public:
+        npred_roi_kern_phi(const GCTAModelSpatial* spatial,
+                           const GEnergy&          energy,
+                           const GTime&            time,
+                           const double&           theta) :
+                           m_spatial(spatial),
+                           m_energy(energy),
+                           m_time(time),
+                           m_theta(theta) { }
+        double eval(const double& phi);
+    protected:
+        const GCTAModelSpatial* m_spatial;  //!< Pointer to spatial component
+        GEnergy                 m_energy;   //!< Energy
+        GTime                   m_time;     //!< Time
+        double                  m_theta;    //!< Offset angle (radians)
+    };
+
     // Proteced members
     std::vector<GModelPar*> m_pars;  //!< Parameter pointers
+
+    // Npred cache
+    mutable std::vector<std::string> m_npred_names;    //!< Model names
+    mutable std::vector<GEnergy>     m_npred_energies; //!< Model energy
+    mutable std::vector<GTime>       m_npred_times;    //!< Model time
+    mutable std::vector<double>      m_npred_values;   //!< Model values
 };
 
 
