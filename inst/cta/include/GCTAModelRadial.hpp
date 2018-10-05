@@ -56,19 +56,15 @@ public:
 
     // Operators
     virtual GCTAModelRadial& operator=(const GCTAModelRadial& model);
-    virtual GModelPar&       operator[](const int& index);
-    virtual const GModelPar& operator[](const int& index) const;
-    virtual GModelPar&       operator[](const std::string& name);
-    virtual const GModelPar& operator[](const std::string& name) const;
 
     // Implemented virtual methods
-    virtual double            eval(const GCTAInstDir& dir,
-                                   const GEnergy&     energy,
-                                   const GTime&       time,
-                                   const bool&        gradients = false) const;
-    virtual GCTAInstDir       mc(const GEnergy& energy,
-                                 const GTime&   time,
-                                 GRan& ran) const;
+    virtual double           eval(const GCTAInstDir& dir,
+                                  const GEnergy&     energy,
+                                  const GTime&       time,
+                                  const bool&        gradients = false) const;
+    virtual GCTAInstDir      mc(const GEnergy& energy,
+                                const GTime&   time,
+                                GRan& ran) const;
 
     // Pure virtual methods
     virtual void             clear(void) = 0;
@@ -83,31 +79,13 @@ public:
     // Derived class pure virtual methods
     virtual double           eval(const double& offset,
                                   const bool&   gradients = false) const = 0;
-    virtual GCTAInstDir      mc(const GCTAInstDir& dir, GRan& ran) const = 0;
-
-    // Methods
-    int size(void) const;
+    virtual GCTAInstDir      mc(GRan& ran) const = 0;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAModelRadial& model);
     void free_members(void);
-
-    // Proteced members
-    std::vector<GModelPar*> m_pars;  //!< Parameter pointers
 };
-
-
-/***********************************************************************//**
- * @brief Return number of model parameters
- *
- * @return Number of model parameters.
- ***************************************************************************/
-inline
-int GCTAModelRadial::size(void) const
-{
-    return ((int)m_pars.size());
-}
 
 #endif /* GCTAMODELRADIAL_HPP */

@@ -551,18 +551,26 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
         // TODO: Handle special case of cube spatial model. This will
         // replace the spectral model by a spectral nodes model.
 
+        // Get solid angle of spatial model. This only works for an energy
+        // independent spatial model!!!
+        double solidangle = m_spatial->npred(GEnergy(), GTime(), obs);
+
         // Loop over all energy boundaries
         for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
 
             // Compute the background rate in model within the energy
-            // boundaries from spectral component (units: cts/s).
-            // Note that the time here is ontime. Deadtime correction will
-            // be done later.
-            double rate = spectral->flux(ebounds.emin(ieng), ebounds.emax(ieng));
+            // boundaries from spectral component (units: cts/s/sr).
+            double flux = spectral->flux(ebounds.emin(ieng), ebounds.emax(ieng));
+
+            // Derive expecting rate (units: cts/s). Note that the time here
+            // is good time. Deadtime correction will be done later.
+            double rate = flux * solidangle;
 
             // Debug option: dump rate
             #if defined(G_DUMP_MC)
             std::cout << "GCTAModelBackground::mc(\"" << name() << "\": ";
+            std::cout << "flux=" << flux << " cts/s/sr, ";
+            std::cout << "solidangle=" << solidangle << " sr, ";
             std::cout << "rate=" << rate << " cts/s)" << std::endl;
             #endif
 
@@ -593,8 +601,8 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
                 #if defined(G_DUMP_MC)
                 std::cout << " Interval " << itime;
                 std::cout << " events=" << n_events << std::endl;
-                int n_killed_by_deadtime = 0;
-                int n_killed_by_roi      = 0;
+                int n_removed_by_deadtime = 0;
+                int n_trial_outside_roi   = 0;
                 #endif
 
                 // Loop over events
@@ -605,7 +613,7 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
                     if (deadc < 1.0) {
                         if (ran.uniform() > deadc) {
                             #if defined(G_DUMP_MC)
-                            n_killed_by_deadtime++;
+                            n_removed_by_deadtime++;
                             #endif
                             continue;
                         }
@@ -617,42 +625,53 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
                                                   times[i],
                                                   ran);
 
-                    // Get Monte Carlo event direction from spatial model.
-                    // This only will set the DETX and DETY coordinates.
-                    GCTAInstDir instdir = m_spatial->mc(energy, times[i], ran);
+                    // Get an instrument direction within the RoI. This is
+                    // potentially tried 100 times so that if we really can't
+                    // a valid instrument direction the code is not locked up
+                    for (int k = 0; k < 100; ++k) {
 
-                    // Derive sky direction from instrument coordinates
-                    GSkyDir skydir = pnt.skydir(instdir);
+                        // Get Monte Carlo event direction from spatial model.
+                        // This only will set the DETX and DETY coordinates.
+                        GCTAInstDir instdir = m_spatial->mc(energy, times[i], ran);
 
-                    // Set sky direction in GCTAInstDir object
-                    instdir.dir(skydir);
+                        // Derive sky direction from instrument coordinates
+                        GSkyDir skydir = pnt.skydir(instdir);
 
-                    // Allocate event
-                    GCTAEventAtom event;
+                        // Set sky direction in GCTAInstDir object
+                        instdir.dir(skydir);
 
-                    // Set event attributes
-                    event.dir(instdir);
-                    event.energy(energy);
-                    event.time(times[i]);
+                        // Allocate event
+                        GCTAEventAtom event;
 
-                    // Append event to list if it falls in ROI
-                    if (events.roi().contains(event)) {
-                        list->append(event);
-                    }
-                    #if defined(G_DUMP_MC)
-                    else {
-                        n_killed_by_roi++;
-                    }
-                    #endif
+                        // Set event attributes
+                        event.dir(instdir);
+                        event.energy(energy);
+                        event.time(times[i]);
+
+                        // Append event to list if it falls in RoI and break
+                        // the look
+                        if (events.roi().contains(event)) {
+                            list->append(event);
+                            break;
+                        }
+
+                        // ... otherwise optionally bookkeep the trial
+                        #if defined(G_DUMP_MC)
+                        else {
+                            n_trial_outside_roi++;
+                        }
+                        #endif
+
+                    } // endfor: trial look for instrument direction within RoI
 
                 } // endfor: looped over all events
 
-                // Debug option: provide  statisics
+                // Debug option: provide statisics
                 #if defined(G_DUMP_MC)
-                std::cout << " Killed by deadtime=";
-                std::cout << n_killed_by_deadtime << std::endl;
-                std::cout << " Killed by ROI=";
-                std::cout << n_killed_by_roi << std::endl;
+                std::cout << " Events removed due to deadtime=";
+                std::cout << n_removed_by_deadtime << std::endl;
+                std::cout << " Trials outside RoI=";
+                std::cout << n_trial_outside_roi << std::endl;
                 #endif
 
             } // endfor: looped over all GTIs
@@ -987,7 +1006,7 @@ void GCTAModelBackground::set_pointers(void)
  * @param[in] spatial XML element.
  * @return Pointer to spatial model.
  *
- * Returns pointer to a radial model that is defined in an XML element.
+ * Returns pointer to a spatial model that is defined in an XML element.
  ***************************************************************************/
 GCTAModelSpatial* GCTAModelBackground::xml_spatial(const GXmlElement& spatial) const
 {

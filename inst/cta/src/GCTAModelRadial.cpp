@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadial.cpp
- * @brief Abstract radial acceptance model class implementation
+ * @brief Abstract radial background model class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -66,7 +66,7 @@ GCTAModelRadial::GCTAModelRadial(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Radial acceptance model.
+ * @param[in] model Radial background model.
  ***************************************************************************/
 GCTAModelRadial::GCTAModelRadial(const GCTAModelRadial& model)
 {
@@ -103,9 +103,9 @@ GCTAModelRadial::~GCTAModelRadial(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Radial acceptance model.
+ * @param[in] model Radial background model.
  ***************************************************************************/
-GCTAModelRadial& GCTAModelRadial::operator= (const GCTAModelRadial& model)
+GCTAModelRadial& GCTAModelRadial::operator=(const GCTAModelRadial& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -126,100 +126,6 @@ GCTAModelRadial& GCTAModelRadial::operator= (const GCTAModelRadial& model)
 }
 
 
-/***********************************************************************//**
- * @brief Returns model parameter
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-GModelPar& GCTAModelRadial::operator[](const int& index)
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    #endif
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns model parameter (const version)
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-const GModelPar& GCTAModelRadial::operator[](const int& index) const
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    #endif
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to model parameter
- *
- * @param[in] name Parameter name.
- *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
- ***************************************************************************/
-GModelPar& GCTAModelRadial::operator[](const std::string& name)
-{
-    // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
-            break;
-    }
-
-    // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS2, name);
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to model parameter (const version)
- *
- * @param[in] name Parameter name.
- *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
- ***************************************************************************/
-const GModelPar& GCTAModelRadial::operator[](const std::string& name) const
-{
-    // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
-            break;
-    }
-
-    // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS2, name);
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -230,39 +136,50 @@ const GModelPar& GCTAModelRadial::operator[](const std::string& name) const
  * @brief Evaluate function
  *
  * @param[in] dir Event direction.
- * @param[in] energy Event energy.
- * @param[in] time Event time.
+ * @param[in] energy Event energy (not used).
+ * @param[in] time Event time (not used).
  * @param[in] gradients Compute gradients?
  * @return Function value
  *
- * @todo Implement method
+ * Evaluate radial model for a given event direction. The energy and time of
+ * the event are not used.
  ***************************************************************************/
 double GCTAModelRadial::eval(const GCTAInstDir& dir,
                              const GEnergy&     energy,
                              const GTime&       time,
                              const bool&        gradients) const
 {
-    // Return
-    return 0.0;
+    // Compute offset angle in degrees
+    double offset = dir.theta() * gammalib::rad2deg;
+
+    // Evaluate function
+    double value = eval(offset, gradients);
+
+    // Return value
+    return value;
 }
 
 
 /***********************************************************************//**
  * @brief Returns MC instrument direction
  *
- * @param[in] energy Event energy.
- * @param[in] time Event time.
+ * @param[in] energy Event energy (not used).
+ * @param[in] time Event time (not used).
  * @param[in,out] ran Random number generator.
  * @return Instrument direction
  *
- * @todo Implement method
+ * Return random instrument direction. The energy and time of the event are
+ * not used.
  ***************************************************************************/
 GCTAInstDir GCTAModelRadial::mc(const GEnergy& energy,
                                 const GTime&   time,
                                 GRan&          ran) const
 {
-    // Return
-    return GCTAInstDir();
+    // Get random instrument direction
+    GCTAInstDir dir = mc(ran);
+
+    // Return instrument direction
+    return dir;
 }
 
 
@@ -277,9 +194,6 @@ GCTAInstDir GCTAModelRadial::mc(const GEnergy& energy,
  ***************************************************************************/
 void GCTAModelRadial::init_members(void)
 {
-    // Initialise members
-    m_pars.clear();
-
     // Return
     return;
 }
@@ -292,9 +206,6 @@ void GCTAModelRadial::init_members(void)
  ***************************************************************************/
 void GCTAModelRadial::copy_members(const GCTAModelRadial& model)
 {
-    // Copy members
-    m_pars = model.m_pars;
-
     // Return
     return;
 }
