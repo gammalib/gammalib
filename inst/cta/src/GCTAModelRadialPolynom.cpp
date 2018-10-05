@@ -328,8 +328,8 @@ double GCTAModelRadialPolynom::eval(const double& offset,
 /***********************************************************************//**
  * @brief Returns MC instrument direction
  *
- * @param[in] dir Pointing direction.
- * @param[in] ran Random number generator.
+ * @param[in,out] ran Random number generator.
+ * @return CTA instrument direction.
  *
  * Draws an arbitrary CTA instrument position from
  * \f[f(\theta) = \sin(\theta) \left( \sum_{i=0}^m c_i \theta^i \right)\f]
@@ -348,11 +348,11 @@ double GCTAModelRadialPolynom::eval(const double& offset,
  *       determine the maximum of the polynomial to throw events. This is
  *       a severe limitation and should rapidly be corrected.
  ***************************************************************************/
-GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
+GCTAInstDir GCTAModelRadialPolynom::mc(GRan& ran) const
 {
     // Set constants
-    const double u_max = sin(g_cta_radial_polynom_offset_max *
-                             gammalib::deg2rad);
+    const double u_max = std::sin(g_cta_radial_polynom_offset_max *
+                                  gammalib::deg2rad);
 
     // Debug option: initialise number if samples thrown for one value
     #if defined(G_DEBUG_MC)
@@ -369,7 +369,7 @@ GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
         offset = ran.uniform() * g_cta_radial_polynom_offset_max;
         
         // Compute function value at this offset angle
-        value  = sin(offset * gammalib::deg2rad) * eval(offset);
+        value  = std::sin(offset * gammalib::deg2rad) * eval(offset);
         
         // Throw value for rejection method
         u = ran.uniform() * u_max;
@@ -389,22 +389,23 @@ GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
     // Simulate azimuth angle
     double phi = 360.0 * ran.uniform();
 
-    // Rotate pointing direction by offset and azimuth angle
-    GCTAInstDir mc_dir = dir;
-    mc_dir.dir().rotate_deg(phi, offset);
+    // Convert from degrees to radians
+    offset *= gammalib::deg2rad;
+    phi    *= gammalib::deg2rad;
 
     // Compute DETX and DETY coordinates
     double detx(0.0);
     double dety(0.0);
 	if (offset > 0.0 ) {
-		detx = offset*gammalib::deg2rad * std::cos(phi*gammalib::deg2rad);
-		dety = offset*gammalib::deg2rad * std::sin(phi*gammalib::deg2rad);
+		detx = offset * std::cos(phi);
+		dety = offset * std::sin(phi);
 	}
-	mc_dir.detx(detx);
-	mc_dir.dety(dety);
 
-    // Return MC direction
-    return mc_dir;
+    // Set instrument direction
+    GCTAInstDir dir(detx, dety);
+
+    // Return instrument direction
+    return dir;
 }
 
 

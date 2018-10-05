@@ -219,7 +219,7 @@ GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] offset Offset angle [degrees].
+ * @param[in] offset Offset angle (degrees).
  * @param[in] gradients Compute gradients?
  * @return Function value
  *
@@ -281,8 +281,8 @@ double GCTAModelRadialGauss::eval(const double& offset,
 /***********************************************************************//**
  * @brief Returns MC instrument direction
  *
- * @param[in] dir Pointing direction.
- * @param[in] ran Random number generator.
+ * @param[in,out] ran Random number generator.
+ * @return CTA instrument direction.
  *
  * Draws an arbitrary CTA instrument position from
  * \f[f(\theta) = \sin(\theta)
@@ -296,13 +296,13 @@ double GCTAModelRadialGauss::eval(const double& offset,
  *       of the uniform random deviate which leads to many unnecessary
  *       rejections.
  ***************************************************************************/
-GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
+GCTAInstDir GCTAModelRadialGauss::mc(GRan& ran) const
 {
     // Simulate offset from photon arrival direction
     #if defined(G_DEBUG_MC)
     int    n_samples = 0;
     #endif
-    double sigma_max = 4.0 * sqrt(sigma());
+    double sigma_max = 4.0 * std::sqrt(sigma());
     double u_max     = sin(sigma_max * gammalib::deg2rad);
     double value     = 0.0;
     double u         = 1.0;
@@ -324,22 +324,23 @@ GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
     // Simulate azimuth angle
     double phi = 360.0 * ran.uniform();
 
-    // Rotate pointing direction by offset and azimuth angle
-    GCTAInstDir mc_dir = dir;
-    mc_dir.dir().rotate_deg(phi, offset);
+    // Convert from degrees to radians
+    offset *= gammalib::deg2rad;
+    phi    *= gammalib::deg2rad;
 
     // Compute DETX and DETY coordinates
     double detx(0.0);
     double dety(0.0);
 	if (offset > 0.0 ) {
-		detx = offset*gammalib::deg2rad * std::cos(phi*gammalib::deg2rad);
-		dety = offset*gammalib::deg2rad * std::sin(phi*gammalib::deg2rad);
+		detx = offset * std::cos(phi);
+		dety = offset * std::sin(phi);
 	}
-	mc_dir.detx(detx);
-	mc_dir.dety(dety);
 
-    // Return MC direction
-    return mc_dir;
+    // Set instrument direction
+    GCTAInstDir dir(detx, dety);
+
+    // Return instrument direction
+    return dir;
 }
 
 

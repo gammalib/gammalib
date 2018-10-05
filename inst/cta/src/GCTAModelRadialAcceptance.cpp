@@ -566,7 +566,7 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
     if (valid_model()) {
 
         // Retrieve CTA pointing
-        const GCTAPointing& pnt = gammalib::cta_pnt(G_NPRED, obs);
+        const GCTAPointing& pnt = gammalib::cta_pnt(G_MC, obs);
 
         // Convert CTA pointing direction in instrument system
         GCTAInstDir pnt_dir(pnt.dir());
@@ -622,20 +622,27 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
                         }
                     }
 
-                    // Set event direction
-                    GCTAInstDir dir = radial()->mc(pnt_dir, ran);
-
                     // Set event energy
                     GEnergy energy = spectral()->mc(obs.events()->ebounds().emin(ieng),
                                                     obs.events()->ebounds().emax(ieng),
                                                     times[i],
                                                     ran);
 
+                    // Get Monte Carlo event direction from radial model.
+                    // This only will set the DETX and DETY coordinates.
+                    GCTAInstDir instdir = radial()->mc(ran);
+
+                    // Derive sky direction from instrument coordinates
+                    GSkyDir skydir = pnt.skydir(instdir);
+
+                    // Set sky direction in GCTAInstDir object
+                    instdir.dir(skydir);
+
                     // Allocate event
                     GCTAEventAtom event;
 
                     // Set event attributes
-                    event.dir(dir);
+                    event.dir(instdir);
                     event.energy(energy);
                     event.time(times[i]);
 
