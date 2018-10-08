@@ -401,6 +401,9 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
  * @param[in] obs Observation.
  * @return Spatially integrated model.
  *
+ * @exception GException::invalid_value
+ *            Pointing direction differs from RoI centre.
+ *
  * Spatially integrates the instrumental background model for a given
  * measured event energy and event time. This method also applies a deadtime
  * correction factor, so that the normalization of the model is a real rate
@@ -410,6 +413,27 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
                                      const GTime&        obsTime,
                                      const GObservation& obs) const
 {
+    // Get reference on CTA pointing and event list from observation
+    const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
+    const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
+
+    // Get reference to pointing direction and RoI centre
+    const GSkyDir& pointing   = pnt.dir();
+    const GSkyDir& roi_centre = events.roi().centre().dir();
+
+    // Throw an exception if both differ significantly
+    if (pointing.dist(roi_centre) > 1.0e-4) {
+        std::string msg = "Pointing direction ("+
+                          gammalib::str(pointing.ra_deg())+","+
+                          gammalib::str(pointing.dec_deg())+") differs "
+                          "significantly from RoI centre ("+
+                          gammalib::str(roi_centre.ra_deg())+","+
+                          gammalib::str(roi_centre.dec_deg())+"). "
+                          "Method is only valid for RoI centres that are "
+                          "identical to the pointing direction.";
+        throw GException::invalid_value(G_NPRED, msg);
+    }
+
     // Set number of iterations for Romberg integration.
     static const int iter_theta = 6;
     static const int iter_phi   = 6;
