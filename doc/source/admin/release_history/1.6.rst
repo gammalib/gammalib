@@ -96,6 +96,8 @@ Improvements
 New features
 ------------
 
+* [`2694 <https://cta-redmine.irap.omp.eu/issues/2694>`_] -
+  Implement general CTA background model
 * [`2454 <https://cta-redmine.irap.omp.eu/issues/2454>`_] -
   Add ``GModelSpectralExponential`` class
 * Add ``GCTAModelRadialAcceptance`` model component setter methods

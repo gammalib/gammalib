@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GCTAModelRadialAcceptance.cpp - Radial acceptance model class      *
+ *           GCTAModelBackground.cpp - Background model class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelRadialAcceptance.cpp
- * @brief Radial acceptance model class implementation
+ * @file GCTAModelBackground.cpp
+ * @brief Background model class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -36,8 +36,8 @@
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
 #include "GIntegral.hpp"
-#include "GCTAModelRadialRegistry.hpp"
-#include "GCTAModelRadialAcceptance.hpp"
+#include "GCTAModelSpatialRegistry.hpp"
+#include "GCTAModelBackground.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
@@ -48,19 +48,16 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GCTAModelRadialAcceptance g_cta_radial_acceptance_seed;
-const GModelRegistry            g_cta_radial_acceptance_registry(&g_cta_radial_acceptance_seed);
+const GCTAModelBackground g_cta_background_seed;
+const GModelRegistry      g_cta_background_registry(&g_cta_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                "GCTAModelRadialAcceptance::operator() (int)"
-#define G_EVAL     "GCTAModelRadialAcceptance::eval(GEvent&, GObservation&, "\
-                                                                     "bool&)"
-#define G_NPRED          "GCTAModelRadialAcceptance::npred(GEnergy&, GTime&,"\
-                                                            " GObservation&)"
-#define G_MC            "GCTAModelRadialAcceptance::mc(GObservation&, GRan&)"
-#define G_XML_RADIAL    "GCTAModelRadialAcceptance::xml_radial(GXmlElement&)"
-#define G_XML_SPECTRAL "GCTAModelRadialAcceptance::xml_spectral(GXmlElement&)"
-#define G_XML_TEMPORAL "GCTAModelRadialAcceptance::xml_temporal(GXmlElement&)"
+#define G_EVAL     "GCTAModelBackground::eval(GEvent&, GObservation&, bool&)"
+#define G_NPRED "GCTAModelBackground::npred(GEnergy&, GTime&, GObservation&)"
+#define G_MC                  "GCTAModelBackground::mc(GObservation&, GRan&)"
+#define G_XML_SPATIAL        "GCTAModelBackground::xml_spatial(GXmlElement&)"
+#define G_XML_SPECTRAL      "GCTAModelBackground::xml_spectral(GXmlElement&)"
+#define G_XML_TEMPORAL      "GCTAModelBackground::xml_temporal(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -79,9 +76,9 @@ const GModelRegistry            g_cta_radial_acceptance_registry(&g_cta_radial_a
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Constructs an empty CTA radial acceptance model.
+ * Constructs an empty background model.
  ***************************************************************************/
-GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(void) : GModelData()
+GCTAModelBackground::GCTAModelBackground(void) : GModelData()
 {
     // Initialise members
     init_members();
@@ -96,12 +93,12 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(void) : GModelData()
  *
  * @param[in] xml XML element.
  *
- * Constructs a CTA radial acceptance model from the information that is
- * found in a XML element. Please refer to the read() method to learn about
- * the expected structure of the XML element.
+ * Constructs a background model from the information that is found in a XML
+ * element. Please refer to the read() method to learn about the expected
+ * structure of the XML element.
  ***************************************************************************/
-GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GXmlElement& xml) :
-                           GModelData(xml)
+GCTAModelBackground::GCTAModelBackground(const GXmlElement& xml) :
+                     GModelData(xml)
 {
     // Initialise members
     init_members();
@@ -118,18 +115,17 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GXmlElement& xml) :
 
 
 /***********************************************************************//**
- * @brief Construct from radial and spectral components
+ * @brief Construct from spatial and spectral components
  *
- * @param[in] radial Radial CTA model component.
+ * @param[in] spatial Spatial model component.
  * @param[in] spectral Spectral model component.
  *
- * Constructs a CTA radial acceptance model from a @p radial and a
- * @p spectral model component. The temporal component is assumed to be
- * constant.
+ * Constructs a background model from a @p spatial and a @p spectral model
+ * component. The temporal component is assumed to be constant.
  ***************************************************************************/
-GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
-                                                     const GModelSpectral&  spectral) :
-                           GModelData()
+GCTAModelBackground::GCTAModelBackground(const GCTAModelSpatial& spatial,
+                                         const GModelSpectral&   spectral) :
+                     GModelData()
 {
     // Initialise members
     init_members();
@@ -138,7 +134,7 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radi
     GModelTemporalConst temporal;
 
     // Clone model components
-    m_radial   = radial.clone();
+    m_spatial  = spatial.clone();
     m_spectral = spectral.clone();
     m_temporal = temporal.clone();
 
@@ -153,23 +149,23 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radi
 /***********************************************************************//**
  * @brief Construct from model components
  *
- * @param[in] radial Radial CTA model component.
+ * @param[in] spatial Spatial model component.
  * @param[in] spectral Spectral model component.
  * @param[in] temporal Temporal model component.
  *
- * Constructs a CTA radial acceptance model from a @p radial, a @p spectral
- * and a @p temporal model component.
+ * Constructs a background model from a @p spatial, a @p spectral and a
+ * @p temporal model component.
  ***************************************************************************/
-GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
-                                                     const GModelSpectral&  spectral,
-                                                     const GModelTemporal&  temporal) :
-                           GModelData()
+GCTAModelBackground::GCTAModelBackground(const GCTAModelSpatial& spatial,
+                                         const GModelSpectral&   spectral,
+                                         const GModelTemporal&   temporal) :
+                     GModelData()
 {
     // Initialise members
     init_members();
 
     // Clone model components
-    m_radial   = radial.clone();
+    m_spatial  = spatial.clone();
     m_spectral = spectral.clone();
     m_temporal = temporal.clone();
 
@@ -184,14 +180,14 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radi
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Radial acceptance model.
+ * @param[in] model Background model.
  *
- * Constructs a CTA radial acceptance model by copying information from an
- * existing model. Note that the copy is a deep copy, so the original object
- * can be destroyed after the copy without any loss of information.
+ * Constructs a background model by copying information from an existing
+ * model. Note that the copy is a deep copy, so the original object can be
+ * destroyed after the copy without any loss of information.
  ***************************************************************************/
-GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadialAcceptance& model) :
-                           GModelData(model)
+GCTAModelBackground::GCTAModelBackground(const GCTAModelBackground& model) :
+                     GModelData(model)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -210,9 +206,9 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadialAccept
 /***********************************************************************//**
  * @brief Destructor
  *
- * Destroys a CTA radial acceptance model.
+ * Destroys a background model.
  ***************************************************************************/
-GCTAModelRadialAcceptance::~GCTAModelRadialAcceptance(void)
+GCTAModelBackground::~GCTAModelBackground(void)
 {
     // Free members
     free_members();
@@ -231,14 +227,13 @@ GCTAModelRadialAcceptance::~GCTAModelRadialAcceptance(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Radial acceptance model.
+ * @param[in] model Background model.
  *
- * Assigns the information from a CTA radial acceptance model to the actual
- * object. Note that a deep copy of the information is performed, so the
- * original object can be destroyed after the assignment without any loss of
- * information.
+ * Assigns the information from a background model to instance. Note that a
+ * deep copy of the information is performed, so the original instance can be
+ * destroyed after the assignment without any loss of information.
  ***************************************************************************/
-GCTAModelRadialAcceptance& GCTAModelRadialAcceptance::operator=(const GCTAModelRadialAcceptance& model)
+GCTAModelBackground& GCTAModelBackground::operator=(const GCTAModelBackground& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -271,10 +266,10 @@ GCTAModelRadialAcceptance& GCTAModelRadialAcceptance::operator=(const GCTAModelR
 /***********************************************************************//**
  * @brief Clear instance
  *
- * Resets the object to a clean initial state. All information that resided
+ * Resets the instance to a clean initial state. All information that resided
  * in the object will be lost.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::clear(void)
+void GCTAModelBackground::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -294,32 +289,32 @@ void GCTAModelRadialAcceptance::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  *
- * @return Pointer to deep copy of CTA radial acceptance model.
+ * @return Pointer to deep copy of background model.
  ***************************************************************************/
-GCTAModelRadialAcceptance* GCTAModelRadialAcceptance::clone(void) const
+GCTAModelBackground* GCTAModelBackground::clone(void) const
 {
-    return new GCTAModelRadialAcceptance(*this);
+    return new GCTAModelBackground(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Set radial model component
+ * @brief Set spatial model component
  *
- * @param[in] radial Pointer to radial model component.
+ * @param[in] spatial Pointer to spatial model component.
  *
- * Sets the radial model component of the model.
+ * Sets the spatial model component of the model.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::radial(const GCTAModelRadial* radial)
+void GCTAModelBackground::spatial(const GCTAModelSpatial* spatial)
 {
     // Free spatial model component only if it differs from current
-    // component. This prevents unintential deallocation of the argument
-    if ((m_radial != NULL) && (m_radial != radial)) {
-        delete m_radial;
+    // component. This prevents unintentional deallocation of the argument
+    if ((m_spatial != NULL) && (m_spatial != spatial)) {
+        delete m_spatial;
     }
 
     // Clone spatial model component if it exists, otherwise set pointer
     // to NULL
-    m_radial = (radial != NULL) ? radial->clone() : NULL;
+    m_spatial = (spatial != NULL) ? spatial->clone() : NULL;
 
     // Set parameter pointers
     set_pointers();
@@ -336,7 +331,7 @@ void GCTAModelRadialAcceptance::radial(const GCTAModelRadial* radial)
  *
  * Sets the spectral model component of the model.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::spectral(const GModelSpectral* spectral)
+void GCTAModelBackground::spectral(const GModelSpectral* spectral)
 {
     // Free spectral model component only if it differs from current
     // component. This prevents unintential deallocation of the argument
@@ -363,7 +358,7 @@ void GCTAModelRadialAcceptance::spectral(const GModelSpectral* spectral)
  *
  * Sets the temporal model component of the model.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::temporal(const GModelTemporal* temporal)
+void GCTAModelBackground::temporal(const GModelTemporal* temporal)
 {
     // Free temporal model component only if it differs from current
     // component. This prevents unintential deallocation of the argument
@@ -391,10 +386,10 @@ void GCTAModelRadialAcceptance::temporal(const GModelTemporal* temporal)
  * @param[in] gradients Compute gradients?
  * @return Function value.
  *
- * Evaluates tha CTA radial acceptance model which is a factorization of a
- * spatial, spectral and temporal model component. This method also applies
- * a deadtime correction factor, so that the normalization of the model is
- * a real rate (counts/exposure time).
+ * Evaluates the background model which is a factorization of a spatial,
+ * spectral and temporal model component. This method also applies a deadtime
+ * correction factor, so that the normalization of the model is a real rate
+ * (counts/exposure time).
  *
  * If the @p gradients flag is true the method will also set the parameter
  * gradients of the model parameters.
@@ -408,21 +403,17 @@ void GCTAModelRadialAcceptance::temporal(const GModelTemporal* temporal)
  *       similar to the Fermi/LAT livetime cube that provides the effective
  *       sky exposure as function of offset angle).
  ***************************************************************************/
-double GCTAModelRadialAcceptance::eval(const GEvent&       event,
-                                       const GObservation& obs,
-                                       const bool&         gradients) const
+double GCTAModelBackground::eval(const GEvent&       event,
+                                 const GObservation& obs,
+                                 const bool&         gradients) const
 {
     // Get reference on CTA pointing from observation and reference on CTA
     // instrument direction from event
-    const GCTAPointing& pnt = gammalib::cta_pnt(G_EVAL, obs);
-    const GCTAInstDir&  dir = gammalib::cta_dir(G_EVAL, event);
-
-    // Compute offset angle (in degrees)
-    double offset = dir.dir().dist_deg(pnt.dir());
+    const GCTAInstDir& dir = gammalib::cta_dir(G_EVAL, event);
 
     // Evaluate function and gradients
-    double rad  = (radial()   != NULL)
-                  ? radial()->eval(offset, gradients) : 1.0;
+    double spat = (spatial() != NULL)
+                  ? spatial()->eval(dir, event.energy(), event.time(), gradients) : 1.0;
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time(), gradients)
                   : 1.0;
@@ -430,7 +421,7 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
                   ? temporal()->eval(event.time(), gradients) : 1.0;
 
     // Compute value
-    double value = rad * spec * temp;
+    double value = spat * spec * temp;
 
     // Apply deadtime correction
     double deadc = obs.deadc(event.time());
@@ -440,29 +431,29 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
     if (gradients) {
 
         // Multiply factors to radial gradients
-        if (radial() != NULL) {
+        if (spatial() != NULL) {
             double fact = spec * temp * deadc;
             if (fact != 1.0) {
-                for (int i = 0; i < radial()->size(); ++i)
-                    (*radial())[i].factor_gradient((*radial())[i].factor_gradient() * fact );
+                for (int i = 0; i < spatial()->size(); ++i)
+                    (*spatial())[i].factor_gradient((*spatial())[i].factor_gradient() * fact);
             }
         }
 
         // Multiply factors to spectral gradients
         if (spectral() != NULL) {
-            double fact = rad * temp * deadc;
+            double fact = spat * temp * deadc;
             if (fact != 1.0) {
                 for (int i = 0; i < spectral()->size(); ++i)
-                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact );
+                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact);
             }
         }
 
         // Multiply factors to temporal gradients
         if (temporal() != NULL) {
-            double fact = rad * spec * deadc;
+            double fact = spat * spec * deadc;
             if (fact != 1.0) {
                 for (int i = 0; i < temporal()->size(); ++i)
-                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact );
+                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact);
             }
         }
 
@@ -474,64 +465,57 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatially integrated data model
+ * @brief Return spatially integrated background model
  *
- * @param[in] obsEng Measured event energy.
- * @param[in] obsTime Measured event time.
+ * @param[in] energy Measured event energy.
+ * @param[in] time Measured event time.
  * @param[in] obs Observation.
+ * @return Integral of spatial model component.
  *
- * @exception GException::no_list
- *            No valid CTA event list found in observation
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found in observation
+ * @exception GException::invalid_value
+ *            Pointing direction differs from RoI centre.
  *
- * Spatially integrates the data model for a given measured event energy and
- * event time. This method also applies a deadtime correction factor, so that
- * the normalization of the model is a real rate (counts/exposure time).
+ * Spatially integrates the background model for a given measured event
+ * energy and event time. This method also applies a deadtime correction
+ * factor, so that the normalization of the model is a real rate
+ * (counts/exposure time).
  ***************************************************************************/
-double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
-                                        const GTime&        obsTime,
-                                        const GObservation& obs) const
+double GCTAModelBackground::npred(const GEnergy&      energy,
+                                  const GTime&        time,
+                                  const GObservation& obs) const
 {
-    // Initialise result
-    double npred = 0.0;
+    // Get reference on CTA pointing and event list from observation
+    const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
+    const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
 
-    // Evaluate only if model is valid
-    if (valid_model()) {
+    // Get reference to pointing direction and RoI centre
+    const GSkyDir& pointing   = pnt.dir();
+    const GSkyDir& roi_centre = events.roi().centre().dir();
 
-        // Retrieve CTA pointing and event list
-        const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
-        const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
+    // Throw an exception if both differ significantly
+    if (pointing.dist(roi_centre) > 1.0e-4) {
+        std::string msg = "Pointing direction ("+
+                          gammalib::str(pointing.ra_deg())+","+
+                          gammalib::str(pointing.dec_deg())+") differs "
+                          "significantly from RoI centre ("+
+                          gammalib::str(roi_centre.ra_deg())+","+
+                          gammalib::str(roi_centre.dec_deg())+"). "
+                          "Method is only valid for RoI centres that are "
+                          "identical to the pointing direction.";
+        throw GException::invalid_value(G_NPRED, msg);
+    }
 
-        // Get ROI radius in radians
-        double roi_radius = events.roi().radius() * gammalib::deg2rad;
+    // Get spatially integrated model component
+    double npred = spatial()->npred(energy, time, obs);
 
-        // Get distance from ROI centre in radians
-        double roi_distance = events.roi().centre().dir().dist(pnt.dir());
+    // Multiply in spectral and temporal components
+    npred *= spectral()->eval(energy, time);
+    npred *= temporal()->eval(time);
 
-        // Setup integration function
-        GCTAModelRadialAcceptance::roi_kern integrand(radial(), roi_radius, roi_distance);
+    // Apply deadtime correction
+    npred *= obs.deadc(time);
 
-        // Setup integrator
-        GIntegral integral(&integrand);
-
-        // Setup integration boundaries
-        double rmin = (roi_distance > roi_radius) ? roi_distance-roi_radius : 0.0;
-        double rmax = roi_radius + roi_distance;
-
-        // Spatially integrate radial component
-        npred = integral.romberg(rmin, rmax);
-
-        // Multiply in spectral and temporal components
-        npred *= spectral()->eval(obsEng, obsTime);
-        npred *= temporal()->eval(obsTime);
-
-        // Apply deadtime correction
-        npred *= obs.deadc(obsTime);
-
-    } // endif: model was valid
-
-    // Return
+    // Return Npred
     return npred;
 }
 
@@ -541,12 +525,11 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
  *
  * @param[in] obs Observation.
  * @param[in] ran Random number generator.
+ * @return Pointer to list of simulated events (needs to be de-allocated by
+ *         client)
  *
- * @exception GCTAException::no_pointing
- *            No CTA pointing found in observation.
- *
- * Draws a sample of events from the radial acceptance model using a Monte
- * Carlo simulation. The pointing information, the energy boundaries and the
+ * Draws a sample of events from the background model using a Monte
+ * Carlo simulation. The region of interest, the energy boundaries and the
  * good time interval for the sampling will be extracted from the observation
  * argument that is passed to the method. The method also requires a random
  * number generator of type GRan which is passed by reference, hence the
@@ -555,9 +538,14 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
  * The method also applies a deadtime correction using a Monte Carlo process,
  * taking into account temporal deadtime variations. For this purpose, the
  * method makes use of the time dependent GObservation::deadc method.
+ *
+ * For each event in the returned event list, the sky direction, the nominal
+ * coordinates (DETX and DETY), the energy and the time will be set.
+ *
+ * @todo Handle special case of cube spatial model
  ***************************************************************************/
-GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs, 
-                                             GRan& ran) const
+GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, 
+                                       GRan& ran) const
 {
     // Initialise new event list
     GCTAEventList* list = new GCTAEventList;
@@ -565,42 +553,62 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Retrieve CTA pointing
-        const GCTAPointing& pnt = gammalib::cta_pnt(G_MC, obs);
+        // Get reference on CTA pointing, background response and event list
+        // from observation
+        const GCTAPointing&  pnt    = gammalib::cta_pnt(G_MC, obs);
+        const GCTAEventList& events = gammalib::cta_event_list(G_MC, obs);
 
-        // Convert CTA pointing direction in instrument system
-        GCTAInstDir pnt_dir(pnt.dir());
+        // Get simulation region
+        const GCTARoi&  roi     = events.roi();
+        const GEbounds& ebounds = events.ebounds();
+        const GGti&     gti     = events.gti();
+
+        // Set simulation region for result event list
+        list->roi(roi);
+        list->ebounds(ebounds);
+        list->gti(gti);
+
+        // Set spectral model
+        const GModelSpectral* spectral = m_spectral;
+
+        // TODO: Handle special case of cube spatial model. This will
+        // replace the spectral model by a spectral nodes model.
+
+        // Get solid angle of spatial model. This only works for an energy
+        // independent spatial model!!!
+        double solidangle = m_spatial->npred(GEnergy(), GTime(), obs);
 
         // Loop over all energy boundaries
-        for (int ieng = 0; ieng < obs.events()->ebounds().size(); ++ieng) {
+        for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
 
-            // Compute the on-axis background rate in model within the
-            // energy boundaries from spectral component (units: cts/s/sr)
-            double flux = spectral()->flux(obs.events()->ebounds().emin(ieng),
-                                           obs.events()->ebounds().emax(ieng));
-
-            // Compute solid angle used for normalization
-            double area = radial()->omega();
+            // Compute the background rate in model within the energy
+            // boundaries from spectral component (units: cts/s/sr).
+            double flux = spectral->flux(ebounds.emin(ieng), ebounds.emax(ieng));
 
             // Derive expecting rate (units: cts/s). Note that the time here
             // is good time. Deadtime correction will be done later.
-            double rate = flux * area;
+            double rate = flux * solidangle;
 
             // Debug option: dump rate
             #if defined(G_DUMP_MC)
-            std::cout << "GCTAModelRadialAcceptance::mc(\"" << name() << "\": ";
+            std::cout << "GCTAModelBackground::mc(\"" << name() << "\": ";
             std::cout << "flux=" << flux << " cts/s/sr, ";
-            std::cout << "area=" << area << " sr, ";
+            std::cout << "solidangle=" << solidangle << " sr, ";
             std::cout << "rate=" << rate << " cts/s)" << std::endl;
             #endif
 
-            // Loop over all good time intervals
-            for (int itime = 0; itime < obs.events()->gti().size(); ++itime) {
+            // If the rate is not positive then skip this energy bins
+            if (rate <= 0.0) {
+                continue;
+            }
 
-                // Get event arrival times from temporal model
+            // Loop over all good time intervals
+            for (int itime = 0; itime < gti.size(); ++itime) {
+
+                // Get Monte Carlo event arrival times from temporal model
                 GTimes times = m_temporal->mc(rate,
-                                              obs.events()->gti().tstart(itime),
-                                              obs.events()->gti().tstop(itime),
+                                              gti.tstart(itime),
+                                              gti.tstop(itime),
                                               ran);
 
                 // Get number of events
@@ -611,6 +619,15 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
                     list->reserve(n_events);
                 }
 
+                // Debug option: provide number of times and initialize
+                // statisics
+                #if defined(G_DUMP_MC)
+                std::cout << " Interval " << itime;
+                std::cout << " events=" << n_events << std::endl;
+                int n_removed_by_deadtime = 0;
+                int n_trial_outside_roi   = 0;
+                #endif
+
                 // Loop over events
                 for (int i = 0; i < n_events; ++i) {
 
@@ -618,38 +635,67 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
                     double deadc = obs.deadc(times[i]);
                     if (deadc < 1.0) {
                         if (ran.uniform() > deadc) {
+                            #if defined(G_DUMP_MC)
+                            n_removed_by_deadtime++;
+                            #endif
                             continue;
                         }
                     }
 
-                    // Set event energy
-                    GEnergy energy = spectral()->mc(obs.events()->ebounds().emin(ieng),
-                                                    obs.events()->ebounds().emax(ieng),
-                                                    times[i],
-                                                    ran);
+                    // Get Monte Carlo event energy from spectral model
+                    GEnergy energy = spectral->mc(ebounds.emin(ieng),
+                                                  ebounds.emax(ieng),
+                                                  times[i],
+                                                  ran);
 
-                    // Get Monte Carlo event direction from radial model.
-                    // This only will set the DETX and DETY coordinates.
-                    GCTAInstDir instdir = radial()->mc(ran);
+                    // Get an instrument direction within the RoI. This is
+                    // potentially tried 100 times so that if we really can't
+                    // a valid instrument direction the code is not locked up
+                    for (int k = 0; k < 100; ++k) {
 
-                    // Derive sky direction from instrument coordinates
-                    GSkyDir skydir = pnt.skydir(instdir);
+                        // Get Monte Carlo event direction from spatial model.
+                        // This only will set the DETX and DETY coordinates.
+                        GCTAInstDir instdir = m_spatial->mc(energy, times[i], ran);
 
-                    // Set sky direction in GCTAInstDir object
-                    instdir.dir(skydir);
+                        // Derive sky direction from instrument coordinates
+                        GSkyDir skydir = pnt.skydir(instdir);
 
-                    // Allocate event
-                    GCTAEventAtom event;
+                        // Set sky direction in GCTAInstDir object
+                        instdir.dir(skydir);
 
-                    // Set event attributes
-                    event.dir(instdir);
-                    event.energy(energy);
-                    event.time(times[i]);
+                        // Allocate event
+                        GCTAEventAtom event;
 
-                    // Append event to list
-                    list->append(event);
+                        // Set event attributes
+                        event.dir(instdir);
+                        event.energy(energy);
+                        event.time(times[i]);
+
+                        // Append event to list if it falls in RoI and break
+                        // the look
+                        if (events.roi().contains(event)) {
+                            list->append(event);
+                            break;
+                        }
+
+                        // ... otherwise optionally bookkeep the trial
+                        #if defined(G_DUMP_MC)
+                        else {
+                            n_trial_outside_roi++;
+                        }
+                        #endif
+
+                    } // endfor: trial look for instrument direction within RoI
 
                 } // endfor: looped over all events
+
+                // Debug option: provide statisics
+                #if defined(G_DUMP_MC)
+                std::cout << " Events removed due to deadtime=";
+                std::cout << n_removed_by_deadtime << std::endl;
+                std::cout << " Trials outside RoI=";
+                std::cout << n_trial_outside_roi << std::endl;
+                #endif
 
             } // endfor: looped over all GTIs
 
@@ -667,35 +713,43 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
  *
  * @param[in] xml XML element.
  *
- * The model is composed of a spectrum component ('spectral'), a radial
- * component ('radialModel'), and, optionally, of a temporal component
- * ('lightcurve'). If no temporal component is found a constant model is
- * assumed.
+ * Reads the sky model from an XML element. The XML element is expected to
+ * respect the following format:
+ *
+ *     <source name=".." type=".." instrument=".." id="..">
+ *       <spectrum type="..">
+ *         ..
+ *       </spectrum>
+ *       <spatialModel type="..">
+ *         ..
+ *       </spatialModel>
+ *       <temporal type="..">
+ *         ..
+ *       </temporal>
+ *     </source>
+ *
+ * The temporal element is optional. In no temporal element is specified a
+ * constant component with unity normalization will be assumed.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
+void GCTAModelBackground::read(const GXmlElement& xml)
 {
     // Clear model
     clear();
 
-    // Initialise XML elements
-    const GXmlElement* rad  = NULL;
-    const GXmlElement* spec = NULL;
-    const GXmlElement* temp = NULL;
+    // Get pointers on spatial and spectral model components
+    const GXmlElement* spat = xml.element("spatialModel", 0);
+    const GXmlElement* spec = xml.element("spectrum", 0);
 
-    // Get pointers on spectrum and radial model
-    rad  = xml.element("radialModel", 0);
-    spec = xml.element("spectrum", 0);
-
-    // Clone radial and spectral models
-    m_radial   = xml_radial(*rad);
+    // Set spatial and spectral model components
+    m_spatial  = xml_spatial(*spat);
     m_spectral = xml_spectral(*spec);
 
-    // Optionally get temporal model
-    try {
-        temp = xml.element("lightcurve", 0);
+    // Handle optional temporal model
+    if (xml.elements("temporal") > 0) {
+        const GXmlElement* temp = xml.element("temporal", 0);
         m_temporal = xml_temporal(*temp);
     }
-    catch (GException::xml_name_not_found &e) {
+    else {
         GModelTemporalConst temporal;
         m_temporal = temporal.clone();
     }
@@ -716,9 +770,26 @@ void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @todo Document method.
+ * Writes the sky model into an XML source library. The format written to
+ * the @p xml element is as follows:
+ *
+ *     <source name=".." type=".." instrument=".." id="..">
+ *       <spectrum type="..">
+ *         ..
+ *       </spectrum>
+ *       <spatialModel type="..">
+ *         ..
+ *       </spatialModel>
+ *       <temporal type="..">
+ *         ..
+ *       </temporal>
+ *     </source>
+ *
+ * For compatibility reasons the temporal element will only be written if it
+ * is a non-constant component or a constant component with a normalization
+ * that differs from unity.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
+void GCTAModelBackground::write(GXmlElement& xml) const
 {
     // Initialise pointer on source
     GXmlElement* src = NULL;
@@ -733,27 +804,27 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
         }
     }
 
-    // If we have a temporal model that is either not a constant, or a
-    // constant with a normalization value that differs from 1.0 then
-    // write the temporal component into the XML element. This logic
-    // assures compatibility with the Fermi/LAT format as this format
-    // does not handle temporal components.
-    bool write_temporal = ((m_temporal != NULL) &&
-                           (m_temporal->type() != "Constant" ||
-                            (*m_temporal)[0].value() != 1.0));
+    // If the temporal model is not a constant with unit normalization then
+    // set cons to a NULL pointer
+    GModelTemporalConst* cons = dynamic_cast<GModelTemporalConst*>(temporal());
+    if (cons != NULL) {
+        if (cons->norm() != 1.0) {
+            cons = NULL;
+        }
+    }
 
     // If no source with corresponding name was found then append one
     if (src == NULL) {
         src = xml.append("source");
+        if (spatial()  != NULL) src->append(GXmlElement("spatialModel"));
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
-        if (radial()   != NULL) src->append(GXmlElement("radialModel"));
-        if (write_temporal)     src->append(GXmlElement("temporalModel"));
+        if (temporal() != NULL && cons == NULL) src->append(GXmlElement("temporal"));
     }
 
-    // Write radial model
-    if (radial()) {
-        GXmlElement* rad = src->element("radialModel", 0);
-        radial()->write(*rad);
+    // Write spatial model
+    if (spatial() != NULL) {
+        GXmlElement* spat = src->element("spatialModel", 0);
+        spatial()->write(*spat);
     }
 
     // Write spectral model
@@ -762,12 +833,11 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
         spectral()->write(*spec);
     }
 
-    // Optionally write temporal model
-    if (write_temporal) {
-        if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
-            GXmlElement* temp = src->element("temporalModel", 0);
-            temporal()->write(*temp);
-        }
+    // Write temporal model (only if not a constant with unit normalization
+    // factor)
+    if (temporal() != NULL && cons == NULL) {
+        GXmlElement* temp = src->element("temporal", 0);
+        temporal()->write(*temp);
     }
 
     // Write model attributes
@@ -781,10 +851,10 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
-std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const
+std::string GCTAModelBackground::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -793,10 +863,10 @@ std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTAModelRadialAcceptance ===");
+        result.append("=== GCTAModelBackground ===");
 
         // Determine number of parameters per type
-        int n_radial   = (radial()   != NULL) ? radial()->size()   : 0;
+        int n_spatial  = (spatial()  != NULL) ? spatial()->size()  : 0;
         int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
         int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
 
@@ -804,9 +874,12 @@ std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const
         result.append("\n"+print_attributes());
 
         // Append model type
-        result.append("\n"+gammalib::parformat("Model type"));
-        if (n_radial > 0) {
-            result.append("\""+radial()->type()+"\"");
+        result.append("\n"+gammalib::parformat("Model type")+type());
+
+        // Append model type
+        result.append("\n"+gammalib::parformat("Model components"));
+        if (n_spatial > 0) {
+            result.append("\""+spatial()->type()+"\"");
             if (n_spectral > 0 || n_temporal > 0) {
                 result.append(" * ");
             }
@@ -824,10 +897,10 @@ std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const
         // Append parameters
         result.append("\n"+gammalib::parformat("Number of parameters") +
                       gammalib::str(size()));
-        result.append("\n"+gammalib::parformat("Number of radial par's") +
-                      gammalib::str(n_radial));
-        for (int i = 0; i < n_radial; ++i) {
-            result.append("\n"+(*radial())[i].print());
+        result.append("\n"+gammalib::parformat("Number of spatial par's") +
+                      gammalib::str(n_spatial));
+        for (int i = 0; i < n_spatial; ++i) {
+            result.append("\n"+(*spatial())[i].print());
         }
         result.append("\n"+gammalib::parformat("Number of spectral par's") +
                       gammalib::str(n_spectral));
@@ -855,13 +928,11 @@ std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Document method.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::init_members(void)
+void GCTAModelBackground::init_members(void)
 {
     // Initialise members
-    m_radial   = NULL;
+    m_spatial  = NULL;
     m_spectral = NULL;
     m_temporal = NULL;
 
@@ -873,14 +944,12 @@ void GCTAModelRadialAcceptance::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Model.
- *
- * @todo Document method.
+ * @param[in] model Background model.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::copy_members(const GCTAModelRadialAcceptance& model)
+void GCTAModelBackground::copy_members(const GCTAModelBackground& model)
 {
     // Clone radial, spectral and temporal model components
-    m_radial   = (model.m_radial   != NULL) ? model.m_radial->clone()   : NULL;
+    m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
     m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
     m_temporal = (model.m_temporal != NULL) ? model.m_temporal->clone() : NULL;
 
@@ -894,18 +963,16 @@ void GCTAModelRadialAcceptance::copy_members(const GCTAModelRadialAcceptance& mo
 
 /***********************************************************************//**
  * @brief Delete class members
- *
- * @todo Document method.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::free_members(void)
+void GCTAModelBackground::free_members(void)
 {
     // Free memory
-    if (m_radial   != NULL) delete m_radial;
+    if (m_spatial  != NULL) delete m_spatial;
     if (m_spectral != NULL) delete m_spectral;
     if (m_temporal != NULL) delete m_temporal;
 
     // Signal free pointers
-    m_radial   = NULL;
+    m_spatial  = NULL;
     m_spectral = NULL;
     m_temporal = NULL;
 
@@ -920,23 +987,23 @@ void GCTAModelRadialAcceptance::free_members(void)
  * Set pointers to all model parameters. The pointers are stored in a vector
  * that is member of the GModelData base class.
  ***************************************************************************/
-void GCTAModelRadialAcceptance::set_pointers(void)
+void GCTAModelBackground::set_pointers(void)
 {
     // Clear parameters
     m_pars.clear();
 
     // Determine the number of parameters
-    int n_radial   = (radial()   != NULL) ? radial()->size()   : 0;
+    int n_spatial  = (spatial()  != NULL) ? spatial()->size()  : 0;
     int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
     int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
-    int n_pars     = n_radial + n_spectral + n_temporal;
+    int n_pars     = n_spatial + n_spectral + n_temporal;
 
     // Continue only if there are parameters
     if (n_pars > 0) {
 
-        // Gather radial parameter pointers
-        for (int i = 0; i < n_radial; ++i) {
-            m_pars.push_back(&((*radial())[i]));
+        // Gather spatial parameter pointers
+        for (int i = 0; i < n_spatial; ++i) {
+            m_pars.push_back(&((*spatial())[i]));
         }
 
         // Gather spectral parameters
@@ -957,51 +1024,18 @@ void GCTAModelRadialAcceptance::set_pointers(void)
 
 
 /***********************************************************************//**
- * @brief Verifies if model has all components
+ * @brief Return pointer to spatial model from XML element
  *
- * Returns 'true' if models has a radial, a spectral and a temporal
- * component. Otherwise returns 'false'.
+ * @param[in] spatial XML element.
+ * @return Pointer to spatial model.
+ *
+ * Returns pointer to a spatial model that is defined in an XML element.
  ***************************************************************************/
-bool GCTAModelRadialAcceptance::valid_model(void) const
+GCTAModelSpatial* GCTAModelBackground::xml_spatial(const GXmlElement& spatial) const
 {
-    // Set result
-    bool result = ((radial()   != NULL) &&
-                   (spectral() != NULL) &&
-                   (temporal() != NULL));
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Construct radial model from XML element
- *
- * @param[in] radial XML element containing radial model information.
- *
- * @exception GCTAException::model_invalid_radial
- *            Invalid radial model type encountered.
- *
- * Returns pointer to a radial model that is defined in an XML element.
- ***************************************************************************/
-GCTAModelRadial* GCTAModelRadialAcceptance::xml_radial(const GXmlElement& radial) const
-{
-    // Get radial model type
-    std::string type = radial.attribute("type");
-
     // Get radial model
-    GCTAModelRadialRegistry registry;
-    GCTAModelRadial*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(radial);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GCTAException::model_invalid_radial(G_XML_RADIAL, type);
-    }
+    GCTAModelSpatialRegistry registry;
+    GCTAModelSpatial*        ptr = registry.alloc(spatial);
 
     // Return pointer
     return ptr;
@@ -1016,7 +1050,7 @@ GCTAModelRadial* GCTAModelRadialAcceptance::xml_radial(const GXmlElement& radial
  *
  * Returns pointer to spectral model that is defined in an XML element.
  ***************************************************************************/
-GModelSpectral* GCTAModelRadialAcceptance::xml_spectral(const GXmlElement& spectral) const
+GModelSpectral* GCTAModelBackground::xml_spectral(const GXmlElement& spectral) const
 {
     // Get spectral model
     GModelSpectralRegistry registry;
@@ -1035,7 +1069,7 @@ GModelSpectral* GCTAModelRadialAcceptance::xml_spectral(const GXmlElement& spect
  *
  * Returns pointer to temporal model that is defined in an XML element.
  ***************************************************************************/
-GModelTemporal* GCTAModelRadialAcceptance::xml_temporal(const GXmlElement& temporal) const
+GModelTemporal* GCTAModelBackground::xml_temporal(const GXmlElement& temporal) const
 {
     // Get temporal model
     GModelTemporalRegistry registry;
@@ -1047,47 +1081,18 @@ GModelTemporal* GCTAModelRadialAcceptance::xml_temporal(const GXmlElement& tempo
 
 
 /***********************************************************************//**
- * @brief Integration kernel for the Npred method
+ * @brief Verifies if model has all components
  *
- * @param[in] offset Offset angle (radians).
- *
- * Computes
- * \f[N_{\rm pred} = \int_{\rm ROI} r(\theta) \sin \theta {\rm d}\phi\f]
- * where
- * \f$r(\theta)\f$ is the radial acceptance function,
- * \f$\theta\f$ is the measured offset angle from the pointing direction
- * in radians, and
- * \f$\phi\f$ is the measured azimuth angle. The integration is done over
- * the arc of the azimuth angle that lies within the ROI. This integration
- * is done analytically using the "cta_roi_arclength" support function.
+ * Returns 'true' if models has a spatial, a spectral and a temporal
+ * component. Otherwise returns 'false'.
  ***************************************************************************/
-double GCTAModelRadialAcceptance::roi_kern::eval(const double& offset)
+bool GCTAModelBackground::valid_model(void) const
 {
-    // Circumvent const correctness
-    GCTAModelRadial* radial = const_cast<GCTAModelRadial*>(m_parent);
+    // Set result
+    bool result = ((spatial()  != NULL) &&
+                   (spectral() != NULL) &&
+                   (temporal() != NULL));
 
-    // Initialise Npred value
-    double value = 0.0;
-    
-    // Continue only if offset > 0
-    if (offset > 0.0) {
-
-        // Get arclength for given radius in radians.
-        double phi = gammalib::cta_roi_arclength(offset,
-                                                 m_dist,
-                                                 m_cosdist,
-                                                 m_sindist,
-                                                 m_roi,
-                                                 m_cosroi);
-
-        // Get kernel value if phi > 0
-        if (phi > 0.0) {
-            value = radial->eval(offset*gammalib::rad2deg) * phi *
-                    std::sin(offset);
-        }
-
-    } // endif: offset was positive
-
-    // Return
-    return value;
+    // Return result
+    return result;
 }

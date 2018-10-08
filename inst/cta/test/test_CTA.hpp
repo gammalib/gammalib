@@ -118,6 +118,7 @@ public:
     virtual void           set(void);
     virtual TestGCTAModel* clone(void) const { return new TestGCTAModel(*this); }
     virtual std::string    classname(void) const { return "TestGCTAModel"; }
+    void                   test_model_bgd(void);
     void                   test_model_cube_bgd(void);
     void                   test_model_irf_bgd(void);
     void                   test_model_aeff_bgd(void);

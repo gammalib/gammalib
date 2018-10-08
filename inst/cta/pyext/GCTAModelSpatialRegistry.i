@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GCTAInstDir.i - CTA instrument direction class             *
+ *         GCTAModelSpatialRegistry.i - Spatial model registry class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,63 +19,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAInstDir.i
- * @brief CTA instrument direction class interface definition
+ * @file GCTAModelSpatialRegistry.i
+ * @brief Spatial model registry class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTAInstDir.hpp"
+#include "GCTAModelSpatialRegistry.hpp"
+#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTAInstDir
+ * @class GCTAModelSpatialRegistry
  *
- * @brief CTA instrument direction class
+ * @brief Interface definition for the spatial model registry class
  ***************************************************************************/
-class GCTAInstDir : public GInstDir {
+class GCTAModelSpatialRegistry : public GRegistry {
 
 public:
     // Constructors and destructors
-    GCTAInstDir(void);
-    explicit GCTAInstDir(const GSkyDir& dir);
-    GCTAInstDir(const double& detx, const double& dety);
-    GCTAInstDir(const GCTAInstDir& dir);
-    virtual ~GCTAInstDir(void);
+    GCTAModelSpatialRegistry(void);
+    GCTAModelSpatialRegistry(const GCTAModelSpatial* model);
+    GCTAModelSpatialRegistry(const GCTAModelSpatialRegistry& registry);
+    virtual ~GCTAModelSpatialRegistry(void);
 
-    // Implemented pure virtual base class methods
-    void         clear(void);
-    GCTAInstDir* clone(void) const;
-    std::string  classname(void) const;
+    // Operators
+    GCTAModelSpatialRegistry& operator=(const GCTAModelSpatialRegistry& registry);
 
-    // Other methods
-    void          dir(const GSkyDir& dir);
-    GSkyDir&      dir(void);
-    void          detx(const double &x);
-    void          dety(const double &y);
-    const double& detx(void) const;
-    const double& dety(void) const;
-    double        theta(void) const;
-    double        phi(void) const;
+    // Methods
+    std::string       classname(void) const;
+    int               size(void) const;
+    GCTAModelSpatial* alloc(const GXmlElement& xml) const;
+    std::string       name(const int& index) const;
 };
 
 
 /***********************************************************************//**
- * @brief GCTAInstDir class extension
+ * @brief GCTAModelSpatialRegistry class extension
  ***************************************************************************/
-%extend GCTAInstDir {
-    GCTAInstDir copy() {
-        return (*self);
-    }
-%pythoncode {
-    def __getstate__(self):
-        state = self.dir(), self.detx(), self.dety()
-        return state
-    def __setstate__(self, state):
-        self.__init__()
-        self.dir(state[0])
-        self.detx(state[1])
-        self.dety(state[2])
-}
+%extend GCTAModelSpatialRegistry {
 };

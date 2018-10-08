@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialProfile.cpp - Radial Profile CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,15 +32,18 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GIntegral.hpp"
 #include "GCTAModelRadialProfile.hpp"
 #include "GCTAModelRadialRegistry.hpp"
+#include "GCTAModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GCTAModelRadialProfile  g_cta_radial_profile_seed;
-const GCTAModelRadialRegistry g_cta_radial_profile_registry(&g_cta_radial_profile_seed);
+const GCTAModelRadialProfile   g_cta_radial_profile_seed;
+const GCTAModelRadialRegistry  g_cta_radial_profile_registry(&g_cta_radial_profile_seed);
+const GCTAModelSpatialRegistry g_cta_radial_profile_spatial_registry(&g_cta_radial_profile_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                   "GCTAModelRadialProfile::read(GXmlElement&)"
@@ -267,8 +270,8 @@ double GCTAModelRadialProfile::eval(const double& offset,
 /***********************************************************************//**
  * @brief Returns MC instrument direction
  *
- * @param[in] dir Pointing direction.
- * @param[in] ran Random number generator.
+ * @param[in,out] ran Random number generator.
+ * @return CTA instrument direction.
  *
  * Draws an arbitrary CTA instrument position from
  * \f[f(\theta) = \sin(\theta) (1 + (\theta/c_0)^{c_1})^{-c_2/c_1}\f]
@@ -286,11 +289,11 @@ double GCTAModelRadialProfile::eval(const double& offset,
  *       of the uniform random deviate which leads to many unnecessary
  *       rejections.
  ***************************************************************************/
-GCTAInstDir GCTAModelRadialProfile::mc(const GCTAInstDir& dir, GRan& ran) const
+GCTAInstDir GCTAModelRadialProfile::mc(GRan& ran) const
 {
     // Set constants
     const double offset_max = 10.0;
-    const double u_max      = sin(offset_max * gammalib::deg2rad);
+    const double u_max      = std::sin(offset_max * gammalib::deg2rad);
 
     // Debug option: initialise number if samples thrown for one value
     #if defined(G_DEBUG_MC)
@@ -307,7 +310,7 @@ GCTAInstDir GCTAModelRadialProfile::mc(const GCTAInstDir& dir, GRan& ran) const
         offset = ran.uniform() * offset_max;
         
         // Compute function value at this offset angle
-        value  = sin(offset * gammalib::deg2rad) * eval(offset);
+        value  = std::sin(offset * gammalib::deg2rad) * eval(offset);
         
         // Throw value for rejection method
         u = ran.uniform() * u_max;
@@ -327,22 +330,23 @@ GCTAInstDir GCTAModelRadialProfile::mc(const GCTAInstDir& dir, GRan& ran) const
     // Simulate azimuth angle
     double phi = 360.0 * ran.uniform();
 
-    // Rotate pointing direction by offset and azimuth angle
-    GCTAInstDir mc_dir = dir;
-    mc_dir.dir().rotate_deg(phi, offset);
+    // Convert from degrees to radians
+    offset *= gammalib::deg2rad;
+    phi    *= gammalib::deg2rad;
 
     // Compute DETX and DETY coordinates
     double detx(0.0);
     double dety(0.0);
 	if (offset > 0.0 ) {
-		detx = offset*gammalib::deg2rad * std::cos(phi*gammalib::deg2rad);
-		dety = offset*gammalib::deg2rad * std::sin(phi*gammalib::deg2rad);
+		detx = offset * std::cos(phi);
+		dety = offset * std::sin(phi);
 	}
-	mc_dir.detx(detx);
-	mc_dir.dety(dety);
 
-    // Return MC direction
-    return mc_dir;
+    // Set instrument direction
+    GCTAInstDir dir(detx, dety);
+
+    // Return instrument direction
+    return dir;
 }
 
 

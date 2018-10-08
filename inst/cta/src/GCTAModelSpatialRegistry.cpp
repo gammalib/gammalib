@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GCTAInstDir.cpp - CTA instrument direction class            *
+ *       GCTAModelSpatialRegistry.cpp - Spatial model registry class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAInstDir.cpp
- * @brief CTA instrument direction class implementation
+ * @file GCTAModelSpatialRegistry.cpp
+ * @brief Spatial model registry class implemenation
  * @author Juergen Knoedlseder
  */
 
@@ -28,34 +28,46 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GModelPar.hpp"
+#include "GCTAModelSpatial.hpp"
+#include "GCTAModelSpatialRegistry.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
-#include "GMath.hpp"
-#include "GCTAInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ALLOC               "GCTAModelSpatialRegistry::alloc(GXmlElement&)"
+#define G_NAME                         "GCTAModelSpatialRegistry::name(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-
-/* __ Prototypes _________________________________________________________ */
+//#define G_DEBUG_REGISTRY        //!< Dump registry
 
 
 /*==========================================================================
  =                                                                         =
- =                         Constructors/destructors                        =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAInstDir::GCTAInstDir(void) : GInstDir()
+GCTAModelSpatialRegistry::GCTAModelSpatialRegistry(void)
 {
-    // Initialise class members
+    // Initialise private members for clean destruction
     init_members();
+
+    // Debug option: Show actual registry
+    #if defined(G_DEBUG_REGISTRY)
+    std::cout << "GCTAModelSpatialRegistry(void): ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << models()[i]->type() << "\" ";
+    }
+    std::cout << std::endl;
+    #endif
 
     // Return
     return;
@@ -63,41 +75,49 @@ GCTAInstDir::GCTAInstDir(void) : GInstDir()
 
 
 /***********************************************************************//**
- * @brief GSkyDir constructor
+ * @brief Model constructor
  *
- * @param[in] dir Sky direction.
+ * @param[in] model Model.
  *
- * Construct CTA instrument direction from sky direction.
+ * Construct registry by adding a model to the registry. This is the standard
+ * constructor that is used to register a new model to GammaLib.
  ***************************************************************************/
-GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
+GCTAModelSpatialRegistry::GCTAModelSpatialRegistry(const GCTAModelSpatial* model)
 {
-    // Initialise class members
+    // Initialise private members for clean destruction
     init_members();
 
-    // Assign sky direction
-    m_dir = dir;
+    // Debug option: Notify new registry
+    #if defined(G_DEBUG_REGISTRY)
+    std::cout << "GCTAModelSpatialRegistry(const GCTAModelSpatial*): ";
+    std::cout << "add \"" << model->type() << "\" to registry." << std::endl;
+    #endif
 
-    // Return
-    return;
-}
+    // Allocate new registry
+    const GCTAModelSpatial** new_models = new const GCTAModelSpatial*[size()+1];
 
+    // Save old registry
+    for (int i = 0; i < size(); ++i) {
+        new_models[i] = models()[i];
+    }
 
-/***********************************************************************//**
- * @brief Instrument coordinates constructor
- *
- * @param[in] detx Instrument coordinate X (radians).
- * @param[in] dety Instrument coordinate Y (radians).
- *
- * Construct CTA instrument direction from instrument coordinates.
- ***************************************************************************/
-GCTAInstDir::GCTAInstDir(const double& detx, const double& dety) : GInstDir()
-{
-    // Initialise class members
-    init_members();
+    // Add new model to registry
+    new_models[size()] = model;
 
-    // Assign instrument coordinates
-    m_detx = detx;
-    m_dety = dety;
+    // Set pointers on new registry
+    models().assign(new_models);
+
+    // Increment number of models in registry
+    number()++;
+
+    // Debug option: Show actual registry
+    #if defined(G_DEBUG_REGISTRY)
+    std::cout << "GCTAModelSpatialRegistry(const GCTAModelSpatial*): ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << models()[i]->type() << "\" ";
+    }
+    std::cout << std::endl;
+    #endif
 
     // Return
     return;
@@ -107,15 +127,15 @@ GCTAInstDir::GCTAInstDir(const double& detx, const double& dety) : GInstDir()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] dir CTA instrument direction.
+ * @param[in] registry Registry.
  ***************************************************************************/
-GCTAInstDir::GCTAInstDir(const GCTAInstDir& dir) : GInstDir(dir)
+GCTAModelSpatialRegistry::GCTAModelSpatialRegistry(const GCTAModelSpatialRegistry& registry)
 {
-    // Initialise class members
+    // Initialise private members
     init_members();
 
     // Copy members
-    copy_members(dir);
+    copy_members(registry);
 
     // Return
     return;
@@ -125,7 +145,7 @@ GCTAInstDir::GCTAInstDir(const GCTAInstDir& dir) : GInstDir(dir)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAInstDir::~GCTAInstDir(void)
+GCTAModelSpatialRegistry::~GCTAModelSpatialRegistry(void)
 {
     // Free members
     free_members();
@@ -144,16 +164,13 @@ GCTAInstDir::~GCTAInstDir(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] dir CTA instrument direction.
- * @return CTA instrument direction.
+ * @param[in] registry Registry.
+ * @return Reference to registry.
  ***************************************************************************/
-GCTAInstDir& GCTAInstDir::operator=(const GCTAInstDir& dir)
+GCTAModelSpatialRegistry& GCTAModelSpatialRegistry::operator=(const GCTAModelSpatialRegistry& registry)
 {
     // Execute only if object is not identical
-    if (this != &dir) {
-
-        // Copy base class members
-        this->GInstDir::operator=(dir);
+    if (this != &registry) {
 
         // Free members
         free_members();
@@ -162,57 +179,98 @@ GCTAInstDir& GCTAInstDir::operator=(const GCTAInstDir& dir)
         init_members();
 
         // Copy members
-        copy_members(dir);
+        copy_members(registry);
 
     } // endif: object was not identical
 
-    // Return this object
+    // Return
     return *this;
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                              Public methods                             =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear CTA instrument direction
- ***************************************************************************/
-void GCTAInstDir::clear(void)
-{
-    // Free members
-    free_members();
-    this->GInstDir::free_members();
-
-    // Initialise private members
-    this->GInstDir::init_members();
-    init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief CTA instrument direction
+ * @brief Allocate spatial model that is found in XML element
  *
- * @return Pointer to deep copy of CTA instrument direction.
+ * @param[in] xml XML element.
+ * @return Pointer to spatial model.
+ *
+ * @exception GException::invalid_value
+ *            No appropriate spatial model found in XML element.
+ *
+ * Returns a pointer to a spatial model instance that corresponds to the
+ * type found in an XML element. If no appropriate model is found the method
+ * will throw an exception.
  ***************************************************************************/
-GCTAInstDir* GCTAInstDir::clone(void) const
+GCTAModelSpatial* GCTAModelSpatialRegistry::alloc(const GXmlElement& xml) const
 {
-    return new GCTAInstDir(*this);
+    // Initialise spatial model
+    GCTAModelSpatial* model = NULL;
+
+    // Search for model type in registry
+    for (int i = 0; i < size(); ++i) {
+        if (models()[i]->type() == xml.attribute("type")) {
+            model = models()[i]->clone();
+            break;
+        }
+    }
+
+    // If no model has been found then throw an exception
+    if (model == NULL) {
+        std::string msg = "Spatial model of type \""+xml.attribute("type")+
+                          "\" not found in registry. Possible spatial model "
+                          "types are:";
+        for (int i = 0; i < size(); ++i) {
+            msg += " \""+models()[i]->type()+"\"";
+        }
+        msg += ".";
+        throw GException::invalid_value(G_ALLOC, msg);
+    }
+
+    // Read model from XML element
+    model->read(xml);
+
+    // Return spectral model
+    return model;
 }
 
 
 /***********************************************************************//**
- * @brief Print instrument direction information
+ * @brief Returns model name
+ *
+ * @param[in] index Model index [0,...,size()-1].
+ * @return Model name.
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ ***************************************************************************/
+std::string GCTAModelSpatialRegistry::name(const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_NAME, "Spatial model index", index,
+                                       size());
+    }
+    #endif
+
+    // Return name
+    return (models()[index]->type());
+}
+
+
+/***********************************************************************//**
+ * @brief Print registry information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing instrument direction information.
+ * @return Registry content.
  ***************************************************************************/
-std::string GCTAInstDir::print(const GChatter& chatter) const
+std::string GCTAModelSpatialRegistry::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -220,19 +278,33 @@ std::string GCTAInstDir::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Append instrument direction
-        std::string msg = "RA=" + gammalib::str(m_dir.ra_deg()) +
-                          ", DEC=" + gammalib::str(m_dir.dec_deg()) +
-                          " [" + gammalib::str(m_detx) +
-                          "," + gammalib::str(m_dety) + "]";
-        result.append(msg);
+        // Append header
+        result.append("=== GCTAModelSpatialRegistry ===");
+
+        // Append information
+        result.append("\n"+gammalib::parformat("Number of models"));
+        result.append(gammalib::str(size()));
+
+        // NORMAL: Append models
+        if (chatter >= NORMAL) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+gammalib::parformat(models()[i]->type()));
+                for (int k = 0; k < models()[i]->size(); ++k) {
+                    if (k > 0) {
+                        result.append(", ");
+                    }
+                    result.append("\"");
+                    result.append((*(models()[i]))[k].name());
+                    result.append("\"");
+                }
+            }
+        }
 
     } // endif: chatter was not silent
 
     // Return result
     return result;
 }
-
 
 /*==========================================================================
  =                                                                         =
@@ -243,13 +315,8 @@ std::string GCTAInstDir::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAInstDir::init_members(void)
+void GCTAModelSpatialRegistry::init_members(void)
 {
-    // Initialise members
-    m_dir.clear();
-    m_detx = 0.0;
-    m_dety = 0.0;
-
     // Return
     return;
 }
@@ -258,15 +325,10 @@ void GCTAInstDir::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir CTA instrument direction.
+ * @param[in] registry Registry.
  ***************************************************************************/
-void GCTAInstDir::copy_members(const GCTAInstDir& dir)
+void GCTAModelSpatialRegistry::copy_members(const GCTAModelSpatialRegistry& registry)
 {
-    // Copy attributes
-    m_dir  = dir.m_dir;
-    m_detx = dir.m_detx;
-    m_dety = dir.m_dety;
-
     // Return
     return;
 }
@@ -275,7 +337,7 @@ void GCTAInstDir::copy_members(const GCTAInstDir& dir)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAInstDir::free_members(void)
+void GCTAModelSpatialRegistry::free_members(void)
 {
     // Return
     return;

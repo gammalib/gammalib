@@ -49,6 +49,7 @@ public:
     // Constructors and destructors
     GCTAInstDir(void);
     explicit GCTAInstDir(const GSkyDir& dir);
+    GCTAInstDir(const double& detx, const double& dety);
     GCTAInstDir(const GCTAInstDir& dir);
     virtual ~GCTAInstDir(void);
 

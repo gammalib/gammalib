@@ -14,6 +14,9 @@ made since the last release of GammaLib.
 The following classes have been added:
 - GModelSpectralExponential
 - GWcsARC
+- GCTAModelBackground
+- GCTAModelSpatial
+- GCTAModelSpatialRegistry
 
 The following classes have been removed:
 - none
@@ -79,6 +82,7 @@ The following methods have been added:
 - GCTAObservation::lo_user_thres(double&)
 - GCTAObservation::hi_user_thres(double&)
 - GCTAOnOffObservation::has_response()
+- GCTAInstDir::GCTAInstDir(double&, double&)
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)
@@ -132,6 +136,7 @@ The following methods have been renamed:
 
 The arguments for the following methods have been changed:
 - GCTAOnOffObservation(GCTAObservation&, GModelSpatial&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&, bool&)
+- GCTAModelRadial::mc(GRan&)
 - GLATAeff(GFits&, std::string&)
 - GLATEdisp(GFits&, std::string&)
 - GLATPsf(GFits&, std::string&)
@@ -290,6 +295,13 @@ None
 
 20. CTA interface
 -----------------
+Add the GCTAModelBackground class that implements a general factorised CTA
+background model. The spatial component of the model is implemented by the
+abstract GCTAModelSpatial based class, the GCTAModelSpatialRegistry class
+registers all possible spatial model component. GCTAModelRadial now derives
+from GCTAModelSpatial and is a special instance of the spatial model component
+(#2694).
+
 Correct the handling of stacked On/Off observations in the absence of a
 background IRF template (#2683).
 

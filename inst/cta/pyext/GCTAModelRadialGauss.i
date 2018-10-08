@@ -50,7 +50,7 @@ public:
     virtual std::string           type(void) const;
     virtual double                eval(const double& offset,
                                        const bool& gradients = false) const;
-    virtual GCTAInstDir           mc(const GCTAInstDir& dir, GRan& ran) const;
+    virtual GCTAInstDir           mc(GRan& ran) const;
     virtual double                omega(void) const;
     virtual void                  read(const GXmlElement& xml);
     virtual void                  write(GXmlElement& xml) const;

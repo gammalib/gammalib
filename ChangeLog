@@ -3,6 +3,7 @@
         * Version 1.6.0 released
         ========================
 
+        Implement general CTA background model (#2694)
         Fix bug that potentially wrote the wrong exposure time in a PHA file (#2683)
         Correct handling of stacked On/Off observations without background IRF (#2683)
         Fix OpenMP bug in GObservations::likelihood::eval (#2678)

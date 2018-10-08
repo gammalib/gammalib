@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventList.cpp - CTA event list class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -396,6 +396,13 @@ void GCTAEventList::read(const GFits& fits)
         m_has_mc_id = false;
     }
 
+    // Read pointing direction
+    double ra_pnt  = events.real("RA_PNT");
+    double dec_pnt = events.real("DEC_PNT");
+    GSkyDir dir_pnt;
+    dir_pnt.radec_deg(ra_pnt, dec_pnt);
+    m_pnt.dir(dir_pnt);
+
     // Read GTI extension name from data sub-space keyword
     std::string gti_extname = gammalib::read_ds_gti_extname(events);
 
@@ -516,6 +523,12 @@ void GCTAEventList::write(GFits& fits, const std::string& evtname,
 
     // Set FITS extension name
     table.extname(evtname);
+
+    // Write pointing direction
+    double ra_pnt  = m_pnt.dir().ra_deg();
+    double dec_pnt = m_pnt.dir().dec_deg();
+    table.card("RA_PNT",  ra_pnt,  "[deg] Pointing Right Ascension");
+    table.card("DEC_PNT", dec_pnt, "[deg] Pointing Declination");
 
     // Write data selection keywords
     write_ds_keys(table, gtiname);
@@ -959,6 +972,7 @@ void GCTAEventList::init_members(void)
 {
     // Initialise members
     m_roi.clear();
+    m_pnt.clear();
     m_phases.clear();
     m_events.clear();
     m_columns.clear();
@@ -992,6 +1006,7 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
 {
     // Copy members
     m_roi         = list.m_roi;
+    m_pnt         = list.m_pnt;
     m_phases      = list.m_phases;
     m_events      = list.m_events;
     m_filename    = list.m_filename;
@@ -1109,6 +1124,11 @@ void GCTAEventList::read_events(const GFitsTable& table) const
             if (m_has_detxy) {
                 event.m_dir.detx(ptr_detx->real(i)*gammalib::deg2rad);
                 event.m_dir.dety(ptr_dety->real(i)*gammalib::deg2rad);
+            }
+            else {
+                GCTAInstDir instdir = m_pnt.instdir(event.m_dir.dir());
+                event.m_dir.detx(instdir.detx());
+                event.m_dir.dety(instdir.dety());
             }
 
             // If available, set pulse phase
