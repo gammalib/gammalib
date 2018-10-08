@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventList.hpp - CTA event list class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 #include "GFilename.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTARoi.hpp"
+#include "GCTAPointing.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
@@ -127,6 +128,7 @@ protected:
 
     // Event list meta data
     GCTARoi                  m_roi;         //!< Region of interest
+    GCTAPointing             m_pnt;         //!< Pointing direction for DETX/Y conversion
     GPhases                  m_phases;      //!< Phase intervals
     int                      m_num_events;  //!< Number of events
     std::string              m_gti_extname; //!< GTI extension name
