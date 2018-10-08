@@ -20,7 +20,8 @@ Bug fixes
 ---------
 
 * [`2683 <https://cta-redmine.irap.omp.eu/issues/2683>`_] -
-  Correct handling of stacked On/Off observations without background IRF
+  Correct handling of stacked On/Off observations without background IRF.
+  Fix bug that potentially wrote the wrong exposure time in a PHA file.
 * [`2678 <https://cta-redmine.irap.omp.eu/issues/2678>`_] -
   Fix OpenMP bug in ``GObservations::likelihood::eval``
 * [`2674 <https://cta-redmine.irap.omp.eu/issues/2674>`_] -

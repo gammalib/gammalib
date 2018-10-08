@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-4 October 2018
+8 October 2018
 
 
 1. Introduction
@@ -253,6 +253,11 @@ None
 
 16. Xspec module
 ----------------
+The GPha::write() method wrote the correct header keywords in the PHA files,
+but those were overwritten by the initial header keywords that were actually
+found in the PHA file before. This led to a problem when stacking CTA On/Off
+observations (#2683).
+
 Add setter and getter methods to access the attributes backfile, corrfile,
 respfile and ancrfile that inform about related files, and that are needed
 for OGIP/XSPEC compliance. The attributes are written and read from FITS

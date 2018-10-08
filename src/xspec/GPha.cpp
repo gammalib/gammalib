@@ -1131,7 +1131,7 @@ void GPha::write(GFits& fits) const
         // Write additional header keywords (do not overwrite any existing
         // keywords, except of "TELESCOP", "INSTRUME" and "FILTER")
         for (int i = 0; i < m_header.size(); ++i) {
-            if ((!hdu.contains(m_header[i].keyname())) ||
+            if ((!hdu.has_card(m_header[i].keyname())) ||
                 (m_header[i].keyname() == "TELESCOP")  ||
                 (m_header[i].keyname() == "INSTRUME")  ||
                 (m_header[i].keyname() == "FILTER")) {
@@ -1172,6 +1172,8 @@ std::string GPha::print(const GChatter& chatter) const
         result.append("=== GPha ===");
 
         // Append energy boundary information
+        result.append("\n"+gammalib::parformat("Exposure"));
+        result.append(gammalib::str(exposure())+" s");
         result.append("\n"+gammalib::parformat("Number of bins"));
         result.append(gammalib::str(size()));
         result.append("\n"+gammalib::parformat("Energy range"));
