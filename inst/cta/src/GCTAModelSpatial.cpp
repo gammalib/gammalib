@@ -36,6 +36,7 @@
 #include "GCTAEventList.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAModelSpatial.hpp"
+#include "GCTAResponse_helpers.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                        "GCTAModelSpatial::operator[](int&)"
@@ -45,10 +46,12 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_USE_NPRED_CACHE
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_NPRED                           //!< Dump Npred information
+
+/* __ Constants __________________________________________________________ */
+const double g_npred_resolution = 0.1*gammalib::deg2rad; //!< Scale of bkg.
+                                                         //   variation
 
 
 /*==========================================================================
@@ -258,9 +261,6 @@ const GModelPar& GCTAModelSpatial::operator[](const std::string& name) const
  * The method uses a 2D Romberg integration to numerically integrate the
  * spatial background model component.
  *
- * The method implements an integration cache so that for a given
- * observation, energy and time the values are cached and not recomputed.
- *
  * @todo The method currently assumes that the RoI is centred on DETX=DETY=0
  ***************************************************************************/
 double GCTAModelSpatial::npred(const GEnergy&      energy,
@@ -268,90 +268,54 @@ double GCTAModelSpatial::npred(const GEnergy&      energy,
                                const GObservation& obs) const
 {
     // Set number of iterations for Romberg integration.
-    static const int iter_theta = 6;
-    static const int iter_phi   = 6;
+    static const int min_iter_theta = 5;
+    static const int min_iter_phi   = 5;
+    static const int max_iter_theta = 8;
+    static const int max_iter_phi   = 8;
 
     // Initialise result
     double npred = 0.0;
 
-    // Initialise flag
-    bool has_npred = false;
+    // Retrieve CTA event list
+    const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
 
-    // Build unique identifier
-    std::string id = obs.instrument() + "::" + obs.id();
+    // Get reference to RoI centre
+    //const GSkyDir& roi_centre = events.roi().centre().dir();
 
-    // Check if Npred value is already in cache
-    #if defined(G_USE_NPRED_CACHE)
-    if (!m_npred_names.empty()) {
+    // Get RoI radius in radians
+    double roi_radius = events.roi().radius() * gammalib::deg2rad;
 
-        // Search for unique identifier, and if found, recover Npred
-        // value and break
-        for (int i = 0; i < m_npred_names.size(); ++i) {
-            if ((m_npred_names[i]    == id) &&
-                (m_npred_energies[i] == energy) &&
-                (m_npred_times[i]    == time)) {
-                npred     = m_npred_values[i];
-                has_npred = true;
-                #if defined(G_DEBUG_NPRED)
-                std::cout << "GCTAModelSpatial::npred:";
-                std::cout << " cache=" << i;
-                std::cout << " npred=" << npred << std::endl;
-                #endif
-                break;
-            }
-        }
+    // Set number of radial integration iterations
+    int iter_theta = gammalib::iter_rho(roi_radius, g_npred_resolution,
+                                        min_iter_theta, max_iter_theta);
 
-    } // endif: there were values in the Npred cache
+    // Setup integration function
+    GCTAModelSpatial::npred_roi_kern_theta integrand(this,
+                                                     energy,
+                                                     time,
+                                                     min_iter_phi,
+                                                     max_iter_phi);
+
+    // Setup integration
+    GIntegral integral(&integrand);
+
+    // Set fixed number of iterations
+    integral.fixed_iter(iter_theta);
+
+    // Spatially integrate radial component (assumes that RoI centre is
+    // at DETX=DETY=0)
+    npred = integral.romberg(0.0, roi_radius);
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
+        std::string origin  = "GCTAModelSpatial::npred";
+        std::string message = " NaN/Inf encountered (npred=" +
+                              gammalib::str(npred) + ", roi_radius=" +
+                              gammalib::str(roi_radius) + ")";
+        gammalib::warning(origin, message);
+    }
     #endif
-
-    // Continue only if no Npred cache value has been found
-    if (!has_npred) {
-
-        // Retrieve CTA event list
-        const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
-
-        // Get reference to RoI centre
-        //const GSkyDir& roi_centre = events.roi().centre().dir();
-
-        // Get RoI radius in radians
-        double roi_radius = events.roi().radius() * gammalib::deg2rad;
-
-        // Setup integration function
-        GCTAModelSpatial::npred_roi_kern_theta integrand(this,
-                                                         energy,
-                                                         time,
-                                                         iter_phi);
-
-        // Setup integration
-        GIntegral integral(&integrand);
-
-        // Set fixed number of iterations
-        integral.fixed_iter(iter_theta);
-
-        // Spatially integrate radial component (assumes that RoI centre is
-        // at DETX=DETY=0)
-        npred = integral.romberg(0.0, roi_radius);
-
-        // Store result in Npred cache
-        #if defined(G_USE_NPRED_CACHE)
-        m_npred_names.push_back(id);
-        m_npred_energies.push_back(energy);
-        m_npred_times.push_back(time);
-        m_npred_values.push_back(npred);
-        #endif
-
-        // Debug: Check for NaN
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-            std::string origin  = "GCTAModelSpatial::npred";
-            std::string message = " NaN/Inf encountered (npred=" +
-                                  gammalib::str(npred) + ", roi_radius=" +
-                                  gammalib::str(roi_radius) + ")";
-            gammalib::warning(origin, message);
-        }
-        #endif
-
-    } // endif: Npred computation required
 
     // Return Npred
     return npred;
@@ -372,12 +336,6 @@ void GCTAModelSpatial::init_members(void)
     // Initialise members
     m_pars.clear();
 
-    // Initialise Npred cache
-    m_npred_names.clear();
-    m_npred_energies.clear();
-    m_npred_times.clear();
-    m_npred_values.clear();
-
     // Return
     return;
 }
@@ -392,12 +350,6 @@ void GCTAModelSpatial::copy_members(const GCTAModelSpatial& model)
 {
     // Copy members
     m_pars = model.m_pars;
-
-    // Copy cache
-    m_npred_names    = model.m_npred_names;
-    m_npred_energies = model.m_npred_energies;
-    m_npred_times    = model.m_npred_times;
-    m_npred_values   = model.m_npred_values;
 
     // Return
     return;
@@ -447,8 +399,12 @@ double GCTAModelSpatial::npred_roi_kern_theta::eval(const double& theta)
         // Setup integration
         GIntegral integral(&integrand);
 
+        // Set number of azimuthal integration iterations
+        int iter = gammalib::iter_phi(theta, g_npred_resolution,
+                                      m_min_iter, m_max_iter);
+
         // Set fixed number of iterations
-        integral.fixed_iter(m_iter);
+        integral.fixed_iter(iter);
 
         // Integrate over phi
         value = integral.romberg(0.0, gammalib::twopi) * std::sin(theta);

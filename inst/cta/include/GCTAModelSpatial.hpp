@@ -94,6 +94,7 @@ protected:
     void free_members(void);
 
     // RoI integration kernel over theta
+    /*
     class npred_roi_kern_theta : public GFunction {
     public:
         npred_roi_kern_theta(const GCTAModelSpatial* spatial,
@@ -110,6 +111,27 @@ protected:
         GEnergy                 m_energy;   //!< Energy
         GTime                   m_time;     //!< Time
         int                     m_iter;     //!< Romberg iterations
+    };
+    */
+    class npred_roi_kern_theta : public GFunction {
+    public:
+        npred_roi_kern_theta(const GCTAModelSpatial* spatial,
+                             const GEnergy&          energy,
+                             const GTime&            time,
+                             const int&              min_iter,
+                             const int&              max_iter) :
+                             m_spatial(spatial),
+                             m_energy(energy),
+                             m_time(time),
+                             m_min_iter(min_iter),
+                             m_max_iter(max_iter) { }
+        double eval(const double& theta);
+    protected:
+        const GCTAModelSpatial* m_spatial;  //!< Pointer to spatial component
+        GEnergy                 m_energy;   //!< Energy
+        GTime                   m_time;     //!< Time
+        int                     m_min_iter; //!< Minimum number of Romberg iterations
+        int                     m_max_iter; //!< Maximum number of Romberg iterations
     };
 
     // RoI integration kernel over phi
@@ -133,12 +155,6 @@ protected:
 
     // Proteced members
     std::vector<GModelPar*> m_pars;  //!< Parameter pointers
-
-    // Npred cache
-    mutable std::vector<std::string> m_npred_names;    //!< Model names
-    mutable std::vector<GEnergy>     m_npred_energies; //!< Model energy
-    mutable std::vector<GTime>       m_npred_times;    //!< Model time
-    mutable std::vector<double>      m_npred_values;   //!< Model values
 };
 
 
