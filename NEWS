@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-5 October 2018
+8 October 2018
 
 
 1. Introduction
@@ -14,6 +14,9 @@ made since the last release of GammaLib.
 The following classes have been added:
 - GModelSpectralExponential
 - GWcsARC
+- GCTAModelBackground
+- GCTAModelSpatial
+- GCTAModelSpatialRegistry
 
 The following classes have been removed:
 - none
@@ -287,6 +290,13 @@ None
 
 20. CTA interface
 -----------------
+Add the GCTAModelBackground class that implements a general factorised CTA
+background model. The spatial component of the model is implemented by the
+abstract GCTAModelSpatial based class, the GCTAModelSpatialRegistry class
+registers all possible spatial model component. GCTAModelRadial now derives
+from GCTAModelSpatial and is a special instance of the spatial model component
+(#2694).
+
 Correct the handling of stacked On/Off observations in the absence of a
 background IRF template (#2683).
 

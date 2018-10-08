@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GCTAModelRadial.i - Abstract radial model base class          *
+ *         GCTAModelSpatialRegistry.i - Spatial model registry class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,56 +19,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelRadial.i
- * @brief Abstract radial model class interface definition
+ * @file GCTAModelSpatialRegistry.i
+ * @brief Spatial model registry class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTAModelRadial.hpp"
+#include "GCTAModelSpatialRegistry.hpp"
+#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTAModelRadial
+ * @class GCTAModelSpatialRegistry
  *
- * @brief Abstract radial acceptance model class
+ * @brief Interface definition for the spatial model registry class
  ***************************************************************************/
-class GCTAModelRadial : public GCTAModelSpatial {
+class GCTAModelSpatialRegistry : public GRegistry {
 
 public:
     // Constructors and destructors
-    GCTAModelRadial(void);
-    GCTAModelRadial(const GCTAModelRadial& model);
-    virtual ~GCTAModelRadial(void);
+    GCTAModelSpatialRegistry(void);
+    GCTAModelSpatialRegistry(const GCTAModelSpatial* model);
+    GCTAModelSpatialRegistry(const GCTAModelSpatialRegistry& registry);
+    virtual ~GCTAModelSpatialRegistry(void);
 
-    // Implemented virtual methods
-    virtual double           eval(const GCTAInstDir& dir,
-                                  const GEnergy&     energy,
-                                  const GTime&       time,
-                                  const bool&        gradients = false) const;
-    virtual GCTAInstDir      mc(const GEnergy& energy,
-                                const GTime&   time,
-                                GRan& ran) const;
+    // Operators
+    GCTAModelSpatialRegistry& operator=(const GCTAModelSpatialRegistry& registry);
 
-    // Pure virtual methods
-    virtual void             clear(void) = 0;
-    virtual GCTAModelRadial* clone(void) const = 0;
-    virtual std::string      classname(void) const = 0;
-    virtual std::string      type(void) const = 0;
-    virtual double           omega(void) const = 0;
-    virtual void             read(const GXmlElement& xml) = 0;
-    virtual void             write(GXmlElement& xml) const = 0;
-
-    // Derived class pure virtual methods
-    virtual double           eval(const double& offset,
-                                  const bool&   gradients = false) const = 0;
-    virtual GCTAInstDir      mc(GRan& ran) const = 0;
+    // Methods
+    std::string       classname(void) const;
+    int               size(void) const;
+    GCTAModelSpatial* alloc(const GXmlElement& xml) const;
+    std::string       name(const int& index) const;
 };
 
 
 /***********************************************************************//**
- * @brief GCTAModelRadial class extension
+ * @brief GCTAModelSpatialRegistry class extension
  ***************************************************************************/
-%extend GCTAModelRadial {
+%extend GCTAModelSpatialRegistry {
 };
