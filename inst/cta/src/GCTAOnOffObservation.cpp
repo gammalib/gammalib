@@ -293,8 +293,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     // Signal first On/Off observation
     bool first = true;
 
-    // Initialise exposure
-    double exposure = 0.0;
+    // Initialise total exposure
+    double total_exposure = 0.0;
 
     // Allocate observation energy range
     GEnergy emin_obs;
@@ -323,38 +323,35 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
         GArf arf_stacked = this->arf_stacked(onoff->arf(), emin, emax);
         GRmf rmf_stacked = this->rmf_stacked(onoff->rmf(), emin, emax);
 
+        // Get exposure for observation
+        double exposure = onoff->on_spec().exposure();
+
         // If this is the first On/Off observation then store the data to
         // initialise the data definition
         if (first) {
 
-            // Store PHA, ARF and RMF
-            m_on_spec  = onoff->on_spec();
-            m_off_spec = onoff->off_spec();
-            m_arf      = arf_stacked * onoff->on_spec().exposure();
-            m_rmf      = rmf_stacked;
-            m_ontime   = onoff->ontime();
-            m_livetime = onoff->livetime();
-            exposure   = onoff->on_spec().exposure();
+            // Store PHA, ARF and RMF, set exposure, ontime and livetime
+            m_on_spec      = onoff->on_spec();
+            m_off_spec     = onoff->off_spec();
+            m_arf          = arf_stacked * exposure;
+            m_rmf          = rmf_stacked;
+            total_exposure = exposure;
+            m_ontime       = onoff->ontime();
+            m_livetime     = onoff->livetime();
 
             // Compute number of background events/MeV from BACKRESP column
             // and store result intermediately into BACKRESP column of off
             // spectum
             std::vector<double>& backresp = m_off_spec["BACKRESP"];
             for (int i = 0; i < backresp.size(); ++i) {
-                backresp[i] *= onoff->on_spec().exposure();
+                backresp[i] *= exposure;
             }
 
-            // Compute background scaling factor contribution. Handle the case
-            // where there is no background response, which may happen if no
-            // IRF template exists. In that case we do not weight with the
-            // background response.
+            // Compute background scaling factor contribution
             for (int i = 0; i < m_on_spec.size(); ++i) {
                 double  background = onoff->off_spec()["BACKRESP"][i];
-                double  exposure   = onoff->on_spec().exposure();
                 double  alpha      = onoff->on_spec().backscal(i);
-                double  scale      = (background > 0.0)
-                                     ? alpha * background * exposure
-                                     : alpha * exposure;
+                double  scale      = alpha * background * exposure;
                 m_on_spec.backscal(i,scale);
             }
 
@@ -410,44 +407,36 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_on_spec  += onoff->on_spec();
             m_off_spec += onoff->off_spec();
 
-            // Compute background scaling factor contribution. Handle the case
-            // where there is no background response, which may happen if no
-            // IRF template exists. In that case we do not weight with the
-            // background response.
+            // Compute background scaling factor contribution
             for (int i = 0; i < m_on_spec.size(); ++i) {
                 double  background = onoff->off_spec()["BACKRESP"][i];
                 double  alpha      = onoff->on_spec().backscal(i);
-                double  scale      = m_on_spec.backscal(i) +
-                                     ((background > 0.0)
-                                      ? alpha * background * onoff->on_spec().exposure()
-                                      : alpha * onoff->on_spec().exposure());
-                m_on_spec.backscal(i,scale);
+                double  scale      = alpha * background * exposure;
+                m_on_spec.backscal(i, m_on_spec.backscal(i) + scale);
             }
 
             // Add ARF
-            m_arf += arf_stacked * onoff->on_spec().exposure();
+            m_arf += arf_stacked * exposure;
 
             // Add number of background events/MeV from BACKRESP column
             const std::vector<double>& src = onoff->off_spec()["BACKRESP"];
             std::vector<double>&       dst = m_off_spec["BACKRESP"];
             for (int i = 0; i < dst.size(); ++i) {
-                dst[i] += src[i] * onoff->on_spec().exposure();
+                dst[i] += src[i] * exposure;
             }
 
             // Add RMF
             for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
-                double arf = arf_stacked[itrue] * onoff->on_spec().exposure();
+                double arf = arf_stacked[itrue] * exposure;
                 for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
                     m_rmf(itrue,imeasured) += rmf_stacked(itrue,imeasured) * arf;
                 }
             }
 
-            // Add exposure
-            exposure += onoff->on_spec().exposure();
-
-            // Add ontime and livetime
-            m_ontime   += onoff->ontime();
-            m_livetime += onoff->livetime();
+            // Add exposure, ontime and livetime
+            total_exposure += exposure;
+            m_ontime       += onoff->ontime();
+            m_livetime     += onoff->livetime();
 
             // Update observation energy range
             if (emin < emin_obs) {
@@ -461,9 +450,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
 
     } // endfor: looped over observations
 
-    // Compute stacked background scaling factor. Handle the case where there
-    // is no background response, which may happen if no IRF template exists.
-    // In that case we simply have to devide by the exposure.
+    // Compute stacked background scaling factor
     for (int i = 0; i < m_on_spec.size(); ++i) {
         double norm = m_off_spec["BACKRESP"][i];
         if (norm > 0.0) {
@@ -471,8 +458,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_on_spec.backscal(i,scale);
         }
         else {
-            double scale = m_on_spec.backscal(i) / exposure;
-            m_on_spec.backscal(i,scale);
+            m_on_spec.backscal(i,0.0);
         }
     }
 
@@ -487,15 +473,15 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     }
 
     // Compute ARF
-    if (exposure > 0.0) {
-        m_arf /= exposure;
+    if (total_exposure > 0.0) {
+        m_arf /= total_exposure;
     }
 
     // Compute background events/MeV/sec and store them in BACKRESP column
-    if (exposure > 0.0) {
+    if (total_exposure > 0.0) {
         std::vector<double>& backresp = m_off_spec["BACKRESP"];
         for (int i = 0; i < backresp.size(); ++i) {
-            backresp[i] /= exposure;
+            backresp[i] /= total_exposure;
         }
     }
 
@@ -831,6 +817,122 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     // Return likelihood
     return value;
 
+}
+
+
+/***********************************************************************
+ * @brief Compute predicted gamma-ray counts for given model
+ *
+ * @param[in] models Model container.
+ * @return Model PHA with predicted gamma-ray counts.
+ *
+ * Returns spectrum of predicted number of source events in the On
+ * regions.
+ ***********************************************************************/
+GPha GCTAOnOffObservation::model_gamma(const GModels& models) const
+{
+    // Get number of model parameters in model container
+    int npars = models.npars();
+
+    // Create dummy gradient vectors to provide required argument to N_gamma
+    GVector dummy_grad(npars);
+
+    // Initialise output spectrum
+    GEbounds ereco  = m_on_spec.ebounds();
+    GPha     gammas = GPha(ereco);
+
+    // Loop over all energy bins
+    for (int i = 0; i < m_on_spec.size(); ++i) {
+        gammas.fill(ereco.emean(i), N_gamma(models, i, &dummy_grad));
+    }
+
+    // Return predicted gamma-ray counts spectrum
+    return gammas;
+}
+
+
+/***********************************************************************
+ * @brief Compute predicted background counts PHA for given model
+ *
+ * @param[in] models Model container.
+ * @return Model background PHA.
+ *
+ * Returns spectrum of predicted number of background events in the Off
+ * regions. The computation method changed depending on the statistic used
+ * to match the spectrum used for likelihood fitting. 
+ * To be noted: for the WSTAT statistic the model background depends on
+ * on the model adopted for gamma rays, that therefore need to be passed
+ * to this function.
+ ***********************************************************************/
+GPha GCTAOnOffObservation::model_background(const GModels& models) const
+{
+    // Get number of model parameters in model container
+    int npars = models.npars();
+
+    // Create dummy gradient vectors to provide required argument to N_gamma
+    GVector dummy_grad(npars);
+
+    // Initialise output spectrum
+    GEbounds ereco = m_on_spec.ebounds();
+    GPha     bgds  = GPha(ereco);
+
+    // Extract statistic for this observation
+    std::string statistic = gammalib::toupper(this->statistic());
+
+    // Loop over all energy bins
+    for (int i = 0; i < m_on_spec.size(); ++i) {
+
+        // Initialise variable to store number of background counts
+        double nbgd = 0.0;
+
+        // Choose background evaluation method based on fit statistics
+
+        // CSTAT
+        if ((statistic == "POISSON") || (statistic == "CSTAT")) {
+            nbgd = N_bgd(models, i, &dummy_grad);
+        }
+
+        // ... or Poisson statistic with measured background
+        else if (statistic == "WSTAT") {
+
+            // Get number of On and Off counts
+            double non  = m_on_spec[i];
+            double noff = m_off_spec[i];
+
+            // Get background scaling
+            double alpha = m_on_spec.backscal(i);
+
+            // Get number of gamma and background events (and corresponding
+            // spectral model gradients)
+            double ngam = N_gamma(models, i,  &dummy_grad);
+
+            // Initialise variables for likelihood computation
+            double nonpred     = 0.0;
+            double dlogLdsky   = 0.0;
+            double d2logLdsky2 = 0.0;
+
+            // Perform likelihood profiling and derive likelihood value
+            // The number of background counts is updated to the profile value
+            double logL = wstat_value(non, noff, alpha,  ngam, nonpred, nbgd,
+                                      dlogLdsky,d2logLdsky2);
+
+        } // endelse: WSTAT
+
+        // ... or unsupported
+        else {
+            std::string msg = "Invalid statistic \""+statistic+"\" encountered. "
+                              "Either specify \"POISSON\", \"CSTAT\" or "
+                              "\"WSTAT\".";
+            throw GException::invalid_value(G_MODEL_BACKGROUND, msg);
+        }
+
+        // Fill background spectrum
+        bgds.fill(ereco.emean(i), nbgd);
+
+    } // endfor: looped over energy bins
+
+    // Return model count spectrum
+    return bgds;
 }
 
 
@@ -1470,12 +1572,14 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
  * \f$\Omega_{{\rm off},p}\f$ is the solid angle in units of \f${\rm sr}\f$
  * of the pixel index \f$p\f$ in the Off region \f${\rm off}\f$.
  *
- * If @p use_irf_bkg is @c false, all `BACKRESP` elements will be set to
- * zero, i.e.
+ * If @p use_irf_bkg is @c false, `BACKRESP` will be computed using
  *
  * \f[
- *    {\tt BACKRESP}(E_{\rm reco}) = 0
+ *    {\tt BACKRESP}(E_{\rm reco}) = \sum_{\rm off} \sum_p \Omega_{{\rm off},p}
  * \f]
+ *
+ * which actually assumes that the background rate is constant over the
+ * field of view.
  *
  * @todo Integrate background rate over energy bin instead of computing the
  *       rate at the energy bin centre.
@@ -1494,11 +1598,11 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
 		// Initialise background rates to zero
         std::vector<double> background(nreco, 0.0);
 
+        // Get CTA observation pointing direction
+        GCTAPointing obspnt = obs.pointing();
+
         // Continue only if the IRF background template should be used
         if (use_irf_bkg) {
-
-            // Get CTA observation pointing direction
-            GCTAPointing obspnt = obs.pointing();
 
             // Get CTA background
             const GCTABackground& bgd = gammalib::cta_rsp_bkg(G_COMPUTE_BGD, obs);
@@ -1544,6 +1648,46 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
             } // endfor: looped over all regions
 
         } // endif: IRF background template was used
+
+        // ... otherwise
+        else {
+
+            // Loop over regions
+            for (int k = 0; k < off.size(); ++k) {
+
+                // Get pointer on sky region map
+                const GSkyRegionMap* off_map =
+                      static_cast<const GSkyRegionMap*>(off[k]);
+
+                // Loop over pixels in Off region map and integrate
+                // background rate
+                for (int j = 0; j < off_map->nonzero_indices().size(); ++j) {
+
+                    // Get pixel index
+                    int pixidx = off_map->nonzero_indices()[j];
+
+                    // Get direction to pixel center
+                    GSkyDir pixdir = off_map->map().inx2dir(pixidx);
+
+                    // Translate sky direction into instrument direction
+                    GCTAInstDir pixinstdir = obspnt.instdir(pixdir);
+
+                    // Get solid angle subtended by this pixel
+                    double pixsolid = off_map->map().solidangle(pixidx);
+
+                    // Loop over energy bins
+                    for (int i = 0; i < nreco; ++i) {
+
+                        // Get background rate in events/s/MeV
+                        background[i] += pixsolid;
+
+                    } // endfor: looped over energy bins
+
+                } // endfor: looped over all pixels in map
+
+            } // endfor: looped over all regions
+
+        } // endelse: no IRF background template was used
 
         // Append background vector to Off spectrum
         m_off_spec.append("BACKRESP", background);
@@ -2315,122 +2459,6 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 
 	// Return
 	return value;
-}
-
-
-/***********************************************************************
- * @brief Compute predicted gamma-ray counts for given model
- *
- * @param[in] models Model container.
- * @return Model PHA with predicted gamma-ray counts.
- *
- * Returns spectrum of predicted number of source events in the On
- * regions.
- ***********************************************************************/
-GPha GCTAOnOffObservation::model_gamma(const GModels& models) const
-{
-    // Get number of model parameters in model container
-    int npars = models.npars();
-
-    // Create dummy gradient vectors to provide required argument to N_gamma
-    GVector dummy_grad(npars);
-
-    // Initialise output spectrum
-    GEbounds ereco  = m_on_spec.ebounds();
-    GPha     gammas = GPha(ereco);
-
-    // Loop over all energy bins
-    for (int i = 0; i < m_on_spec.size(); ++i) {
-        gammas.fill(ereco.emean(i), N_gamma(models, i, &dummy_grad));
-    }
-
-    // Return predicted gamma-ray counts spectrum
-    return gammas;
-}
-
-
-/***********************************************************************
- * @brief Compute predicted background counts PHA for given model
- *
- * @param[in] models Model container.
- * @return Model background PHA.
- *
- * Returns spectrum of predicted number of background events in the Off
- * regions. The computation method changed depending on the statistic used
- * to match the spectrum used for likelihood fitting. 
- * To be noted: for the WSTAT statistic the model background depends on
- * on the model adopted for gamma rays, that therefore need to be passed
- * to this function.
- ***********************************************************************/
-GPha GCTAOnOffObservation::model_background(const GModels& models) const
-{
-    // Get number of model parameters in model container
-    int npars = models.npars();
-
-    // Create dummy gradient vectors to provide required argument to N_gamma
-    GVector dummy_grad(npars);
-
-    // Initialise output spectrum
-    GEbounds ereco = m_on_spec.ebounds();
-    GPha     bgds  = GPha(ereco);
-
-    // Extract statistic for this observation
-    std::string statistic = gammalib::toupper(this->statistic());
-
-    // Loop over all energy bins
-    for (int i = 0; i < m_on_spec.size(); ++i) {
-
-        // Initialise variable to store number of background counts
-        double nbgd = 0.0;
-
-        // Choose background evaluation method based on fit statistics
-
-        // CSTAT
-        if ((statistic == "POISSON") || (statistic == "CSTAT")) {
-            nbgd = N_bgd(models, i, &dummy_grad);
-        }
-
-        // ... or Poisson statistic with measured background
-        else if (statistic == "WSTAT") {
-
-            // Get number of On and Off counts
-            double non  = m_on_spec[i];
-            double noff = m_off_spec[i];
-
-            // Get background scaling
-            double alpha = m_on_spec.backscal(i);
-
-            // Get number of gamma and background events (and corresponding
-            // spectral model gradients)
-            double ngam = N_gamma(models, i,  &dummy_grad);
-
-            // Initialise variables for likelihood computation
-            double nonpred     = 0.0;
-            double dlogLdsky   = 0.0;
-            double d2logLdsky2 = 0.0;
-
-            // Perform likelihood profiling and derive likelihood value
-            // The number of background counts is updated to the profile value
-            double logL = wstat_value(non, noff, alpha,  ngam, nonpred, nbgd,
-                                      dlogLdsky,d2logLdsky2);
-
-        } // endelse: WSTAT
-
-        // ... or unsupported
-        else {
-            std::string msg = "Invalid statistic \""+statistic+"\" encountered. "
-                              "Either specify \"POISSON\", \"CSTAT\" or "
-                              "\"WSTAT\".";
-            throw GException::invalid_value(G_MODEL_BACKGROUND, msg);
-        }
-
-        // Fill background spectrum
-        bgds.fill(ereco.emean(i), nbgd);
-
-    } // endfor: looped over energy bins
-
-    // Return model count spectrum
-    return bgds;
 }
 
 
