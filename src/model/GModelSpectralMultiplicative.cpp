@@ -736,7 +736,7 @@ void GModelSpectralMultiplicative::copy_members(const GModelSpectralMultiplicati
 
     // Copy pointer(s) of spectral component
     m_spectral.clear();
-    for(int i = 0; i < model.components(); ++i) {
+    for (int i = 0; i < model.components(); ++i) {
     	m_spectral.push_back(model.m_spectral[i]->clone());
     }
 

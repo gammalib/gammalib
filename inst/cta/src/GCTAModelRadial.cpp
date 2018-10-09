@@ -34,8 +34,6 @@
 #include "GCTAInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                           "GModelSpatial::operator[](int&)"
-#define G_ACCESS2                   "GModelSpatial::operator[](std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
