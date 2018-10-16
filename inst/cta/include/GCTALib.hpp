@@ -74,6 +74,8 @@
 #include "GCTACubeSourceDiffuse.hpp"
 #include "GCTAModelBackground.hpp"
 #include "GCTAModelSpatial.hpp"
+#include "GCTAModelSpatialGradient.hpp"
+#include "GCTAModelSpatialMultiplicative.hpp"
 #include "GCTAModelSpatialRegistry.hpp"
 #include "GCTAModelCubeBackground.hpp"
 #include "GCTAModelIrfBackground.hpp"
