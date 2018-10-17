@@ -1113,9 +1113,13 @@ void GCTAEventList::read_events(const GFitsTable& table) const
             // Allocate event
             GCTAEventAtom event;
 
+            // Set sky direction
+            GSkyDir dir;
+            dir.radec_deg(ptr_ra->real(i), ptr_dec->real(i));
+
             // Set mandatory information
             event.m_time.set(ptr_time->real(i), m_gti.reference());
-            event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
+            event.m_dir.dir(dir);
             event.m_energy.TeV(ptr_energy->real(i));
             event.m_event_id = ptr_eid->integer(i);
             event.m_index    = i;
@@ -1405,10 +1409,16 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
  ***************************************************************************/
 void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) const
 {
-    // Set ROI parameters
-    double ra  = roi().centre().dir().ra_deg();
-    double dec = roi().centre().dir().dec_deg();
-    double rad = roi().radius();
+    // Set RoI parameters
+    bool   has_roi = (roi().centre().has_dir() && roi().is_valid());
+    double ra      = 0.0;
+    double dec     = 0.0;
+    double rad     = 0.0;
+    if (has_roi) {
+        ra  = roi().centre().dir().ra_deg();
+        dec = roi().centre().dir().dec_deg();
+        rad = roi().radius();
+    }
 
     // Set energy range parameters
     double e_min = emin().TeV();
@@ -1436,7 +1446,7 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) con
     int ndskeys = 2;
 
     // Add acceptance cone only if RoI information is valid
-    if (m_roi.is_valid()) {
+    if (has_roi) {
 
         // Set cone selection string
         std::string dsval3 = "CIRCLE(" +

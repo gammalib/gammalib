@@ -778,6 +778,22 @@ void GCTAEventCube::read_cntmap(const GFitsImage& hdu)
     // Set sky directions
     set_directions();
 
+    // If header contains pointing direction then also set DETX and DETY
+    // coordinates
+    if (hdu.has_card("RA_PNT") && hdu.has_card("DEC_PNT")) {
+
+        // Read pointing direction
+        double ra_pnt  = hdu.real("RA_PNT");
+        double dec_pnt = hdu.real("DEC_PNT");
+        GSkyDir dir_pnt;
+        dir_pnt.radec_deg(ra_pnt, dec_pnt);
+        GCTAPointing pnt(dir_pnt);
+
+        // Set DETX and DETY coordinates of instrument direction
+        set_detxy(pnt);
+
+    } // endif: header contained pointing direction
+
     // Return
     return;
 }
@@ -870,6 +886,34 @@ void GCTAEventCube::set_directions(void)
             }
         }
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set DETX and DETY coordinates
+ *
+ * @param[in] pnt CTA pointing.
+ *
+ * Computes DETX and DETY coordinates for a given pointing direction.
+ ***************************************************************************/
+void GCTAEventCube::set_detxy(const GCTAPointing& pnt)
+{
+    // Get number of instrument directions
+    int size = m_dirs.size();
+
+    // Loop over all intstrument directions
+    for (int i = 0; i < size; ++i) {
+
+        // Get sky direction
+        GSkyDir skydir = m_dirs[i].dir();
+
+        // Set instrument direction from sky direction
+        m_dirs[i] = pnt.instdir(skydir);
+
+    } // endfor: looped over all instrument directions
 
     // Return
     return;

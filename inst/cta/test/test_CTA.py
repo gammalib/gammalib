@@ -57,9 +57,11 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Setup event list container
         list = gammalib.GCTAEventList()
-        atom = gammalib.GCTAEventAtom()
         for i in range(10):
-            atom.energy().MeV(float(i))
+            dir    = gammalib.GCTAInstDir(gammalib.GSkyDir(),float(i),float(i))
+            energy = gammalib.GEnergy(float(i),'MeV')
+            time   = gammalib.GTime(float(i),'sec')
+            atom   = gammalib.GCTAEventAtom(dir, energy, time)
             list.append(atom)
 
         # Return event list container
@@ -238,11 +240,11 @@ class Test(gammalib.GPythonTestSuite):
         # Test GCTAEdispRmf file constructor
         filename = self._caldb + '/dc1/rmf.fits'
         edisp    = gammalib.GCTAEdispRmf(filename)
-        
+
         # Test energy dispersion values
         self.test_value(edisp(math.log10(30),math.log10(1)), 0.0, 1.0e-9)
         self.test_value(edisp(math.log10(1),math.log10(30)), 0.0, 1.0e-9)
-        
+
         # Test GCTAEdispPerfTable file constructor
         filename = self._caldb + '/cta_dummy_irf.dat'
         edisp    = gammalib.GCTAEdispPerfTable(filename)
@@ -363,7 +365,7 @@ class Test(gammalib.GPythonTestSuite):
 
         # Save On/Off observations
         outobs.save('test_cta_onoff.xml')
-        
+
         # Return
         return
 
@@ -420,11 +422,9 @@ class Test(gammalib.GPythonTestSuite):
         cube    = self._setup_eventcube()
         atom    = list[0]
         dir     = gammalib.GSkyDir()
-        instdir = gammalib.GCTAInstDir(dir)
+        instdir = gammalib.GCTAInstDir(dir, 2.0, -3.0)
         pivot   = gammalib.GEnergy(1.0,'TeV')
         plaw    = gammalib.GModelSpectralPlaw(1.0,-2.0,pivot)
-        instdir.detx(2.0)
-        instdir.dety(-3.0)
         irfname = os.environ['TEST_DATA']+'/caldb/data/cta/prod2/bcf/North_0.5h/irf_file.fits.gz'
         bin     = gammalib.GCTAEventBin()
         bin.dir(instdir)
@@ -451,6 +451,7 @@ class Test(gammalib.GPythonTestSuite):
         rspirf    = gammalib.GCTAResponseIrf('North_0.5h', caldb)
         rspcube1  = gammalib.GCTAResponseCube(expcube, psfcube, bgdcube)
         rspcube2  = gammalib.GCTAResponseCube(expcube, psfcube, edispcube, bgdcube)
+        bin.energy(pivot)
         obs1      = gammalib.GCTAObservation()
         obs1.events(list)
         obs1.response(rspirf)

@@ -474,8 +474,9 @@ GCTARoi gammalib::read_ds_roi(const GFitsHDU& hdu)
                 double ra  = gammalib::todouble(args[0]);
                 double dec = gammalib::todouble(args[1]);
                 double rad = gammalib::todouble(args[2]);
-                GCTAInstDir dir;
-                dir.dir().radec_deg(ra, dec);
+                GSkyDir     skydir;
+                skydir.radec_deg(ra, dec);
+                GCTAInstDir dir(skydir);
                 roi.centre(dir);
                 roi.radius(rad);
             }

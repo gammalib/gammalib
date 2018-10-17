@@ -44,6 +44,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2694 <https://cta-redmine.irap.omp.eu/issues/2694>`_] -
+  Protect ``GCTAInstDir`` from access to invalid information
 * [`2677 <https://cta-redmine.irap.omp.eu/issues/2677>`_] -
   Define ``GCTACubeBackground`` for energy boundaries instead of nodes
 * [`2670 <https://cta-redmine.irap.omp.eu/issues/2670>`_] -

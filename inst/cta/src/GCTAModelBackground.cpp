@@ -407,8 +407,7 @@ double GCTAModelBackground::eval(const GEvent&       event,
                                  const GObservation& obs,
                                  const bool&         gradients) const
 {
-    // Get reference on CTA pointing from observation and reference on CTA
-    // instrument direction from event
+    // Get reference on CTA instrument direction from event
     const GCTAInstDir& dir = gammalib::cta_dir(G_EVAL, event);
 
     // Evaluate function and gradients
