@@ -191,7 +191,7 @@ GCTAModelRadialGauss& GCTAModelRadialGauss::operator=(const GCTAModelRadialGauss
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
+ ***************************************************************************/
 void GCTAModelRadialGauss::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
@@ -209,7 +209,7 @@ void GCTAModelRadialGauss::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
 {
     return new GCTAModelRadialGauss(*this);

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-8 October 2018
+17 October 2018
 
 
 1. Introduction
@@ -16,6 +16,7 @@ The following classes have been added:
 - GWcsARC
 - GCTAModelBackground
 - GCTAModelSpatial
+- GCTAModelSpatialMultiplicative
 - GCTAModelSpatialRegistry
 
 The following classes have been removed:
@@ -83,8 +84,12 @@ The following methods have been added:
 - GCTAObservation::hi_user_thres(double&)
 - GCTAOnOffObservation::has_response()
 - GCTAInstDir::GCTAInstDir(double&, double&)
+- GCTAInstDir::GCTAInstDir(GSkyDir&, double&, double&)
 - GCTAInstDir::theta()
 - GCTAInstDir::phi()
+- GCTAInstDir::has_dir()
+- GCTAInstDir::has_detx()
+- GCTAInstDir::has_dety()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)
 - GCTAEventAtom::index(int&)
 - GCTABackground::rate_ebin()
@@ -295,12 +300,18 @@ None
 
 20. CTA interface
 -----------------
+The GCTAInstDir class now assures that only valid information can be accessed.
+Since the class can hold a sky direction and detector coordinates, flags were
+added that signal what information actually exists in the class. If a non-
+existing information is accessed an exception is thrown (#2694).
+
 Add the GCTAModelBackground class that implements a general factorised CTA
 background model. The spatial component of the model is implemented by the
 abstract GCTAModelSpatial based class, the GCTAModelSpatialRegistry class
 registers all possible spatial model component. GCTAModelRadial now derives
-from GCTAModelSpatial and is a special instance of the spatial model component
-(#2694).
+from GCTAModelSpatial and is a special instance of the spatial model component.
+The GCTAModelSpatialMultiplicative class was added to implement an arbitrary
+multiplicative spatial model (#2694).
 
 Correct the handling of stacked On/Off observations in the absence of a
 background IRF template (#2683).

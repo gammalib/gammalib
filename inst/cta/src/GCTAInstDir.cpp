@@ -63,7 +63,7 @@ GCTAInstDir::GCTAInstDir(void) : GInstDir()
 
 
 /***********************************************************************//**
- * @brief GSkyDir constructor
+ * @brief Sky direction constructor
  *
  * @param[in] dir Sky direction.
  *
@@ -75,7 +75,7 @@ GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
     init_members();
 
     // Assign sky direction
-    m_dir = dir;
+    this->dir(dir);
 
     // Return
     return;
@@ -96,8 +96,35 @@ GCTAInstDir::GCTAInstDir(const double& detx, const double& dety) : GInstDir()
     init_members();
 
     // Assign instrument coordinates
-    m_detx = detx;
-    m_dety = dety;
+    this->detx(detx);
+    this->dety(dety);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Instrument direction constructor
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] detx Instrument coordinate X (radians).
+ * @param[in] dety Instrument coordinate Y (radians).
+ *
+ * Construct CTA instrument direction from sky direction and instrument
+ * coordinates.
+ ***************************************************************************/
+GCTAInstDir::GCTAInstDir(const GSkyDir& dir,
+                         const double&  detx,
+                         const double&  dety) : GInstDir()
+{
+    // Initialise class members
+    init_members();
+
+    // Assign instrument coordinates
+    this->dir(dir);
+    this->detx(detx);
+    this->dety(dety);
 
     // Return
     return;
@@ -209,7 +236,7 @@ GCTAInstDir* GCTAInstDir::clone(void) const
 /***********************************************************************//**
  * @brief Print instrument direction information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing instrument direction information.
  ***************************************************************************/
 std::string GCTAInstDir::print(const GChatter& chatter) const
@@ -247,8 +274,11 @@ void GCTAInstDir::init_members(void)
 {
     // Initialise members
     m_dir.clear();
-    m_detx = 0.0;
-    m_dety = 0.0;
+    m_detx     = 0.0;
+    m_dety     = 0.0;
+    m_has_dir  = false;
+    m_has_detx = false;
+    m_has_dety = false;
 
     // Return
     return;
@@ -263,9 +293,12 @@ void GCTAInstDir::init_members(void)
 void GCTAInstDir::copy_members(const GCTAInstDir& dir)
 {
     // Copy attributes
-    m_dir  = dir.m_dir;
-    m_detx = dir.m_detx;
-    m_dety = dir.m_dety;
+    m_dir      = dir.m_dir;
+    m_detx     = dir.m_detx;
+    m_dety     = dir.m_dety;
+    m_has_dir  = dir.m_has_dir;
+    m_has_detx = dir.m_has_detx;
+    m_has_dety = dir.m_has_dety;
 
     // Return
     return;

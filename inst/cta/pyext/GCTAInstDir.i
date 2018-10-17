@@ -41,6 +41,7 @@ public:
     GCTAInstDir(void);
     explicit GCTAInstDir(const GSkyDir& dir);
     GCTAInstDir(const double& detx, const double& dety);
+    GCTAInstDir(const GSkyDir& dir, const double& detx, const double& dety);
     GCTAInstDir(const GCTAInstDir& dir);
     virtual ~GCTAInstDir(void);
 
@@ -50,14 +51,17 @@ public:
     std::string  classname(void) const;
 
     // Other methods
-    void          dir(const GSkyDir& dir);
-    GSkyDir&      dir(void);
-    void          detx(const double &x);
-    void          dety(const double &y);
-    const double& detx(void) const;
-    const double& dety(void) const;
-    double        theta(void) const;
-    double        phi(void) const;
+    void           dir(const GSkyDir& dir);
+    const GSkyDir& dir(void);
+    void           detx(const double &x);
+    void           dety(const double &y);
+    const double&  detx(void) const;
+    const double&  dety(void) const;
+    double         theta(void) const;
+    double         phi(void) const;
+    const bool&    has_dir(void) const;
+    const bool&    has_detx(void) const;
+    const bool&    has_dety(void) const;
 };
 
 
@@ -70,12 +74,27 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = self.dir(), self.detx(), self.dety()
+        if self.has_dir():
+            dir = self.dir()
+        else:
+            dir = None
+        if self.has_detx():
+            detx = self.detx()
+        else:
+            detx = None
+        if self.has_dety():
+            dety = self.dety()
+        else:
+            dety = None
+        state = (dir, detx, dety)
         return state
     def __setstate__(self, state):
         self.__init__()
-        self.dir(state[0])
-        self.detx(state[1])
-        self.dety(state[2])
+        if state[0] is not None:
+            self.dir(state[0])
+        if state[1] is not None:
+            self.detx(state[1])
+        if state[2] is not None:
+            self.dety(state[2])
 }
 };

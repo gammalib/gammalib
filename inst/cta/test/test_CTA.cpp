@@ -246,12 +246,74 @@ void TestGCTA::test_instdir(void)
 {
     // Check content of empty instance
     GCTAInstDir instdir1;
-    test_value(instdir1.dir().ra(), 0.0, "Right Ascension of empty instance");
-    test_value(instdir1.dir().dec(), 0.0, "Declination of empty instance");
-    test_value(instdir1.detx(), 0.0, "DETX of empty instance");
-    test_value(instdir1.dety(), 0.0, "DETY of empty instance");
-    test_value(instdir1.theta(), 0.0, "Theta of empty instance");
-    test_value(instdir1.phi(), 0.0, "Phi of empty instance");
+
+    // Test dir() method
+    test_assert(!instdir1.has_dir(), "Test has_dir() method for empty instance");
+    test_try("Test dir() method exception");
+    try {
+        GSkyDir dir = instdir1.dir();
+        test_try_failure();
+    }
+    catch (GException::runtime_error &exc) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test detx() method
+    test_assert(!instdir1.has_detx(), "Test has_detx() method for empty instance");
+    test_try("Test has_detx() method exception");
+    try {
+        double detx = instdir1.detx();
+        test_try_failure();
+    }
+    catch (GException::runtime_error &exc) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test dety() method
+    test_assert(!instdir1.has_dety(), "Test has_dety() method for empty instance");
+    test_try("Test has_dety() method exception");
+    try {
+        double dety = instdir1.dety();
+        test_try_failure();
+    }
+    catch (GException::runtime_error &exc) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test theta() method
+    test_try("Test theta() method exception");
+    try {
+        double dety = instdir1.theta();
+        test_try_failure();
+    }
+    catch (GException::runtime_error &exc) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test phi() method
+    test_try("Test phi() method exception");
+    try {
+        double dety = instdir1.phi();
+        test_try_failure();
+    }
+    catch (GException::runtime_error &exc) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Set content
     double ra   = 83.6331 * gammalib::deg2rad;
@@ -265,6 +327,9 @@ void TestGCTA::test_instdir(void)
     instdir1.dety(dety);
 
     // Check content of filled instance
+    test_assert(instdir1.has_dir(), "Test has_dir() method for filled instance");
+    test_assert(instdir1.has_detx(), "Test has_detx() method for filled instance");
+    test_assert(instdir1.has_dety(), "Test has_dety() method for filled instance");
     test_value(instdir1.dir().ra(), ra, "Right Ascension of filled instance");
     test_value(instdir1.dir().dec(), dec, "Declination of filled instance");
     test_value(instdir1.detx(), detx, "DETX of filled instance");
@@ -274,6 +339,9 @@ void TestGCTA::test_instdir(void)
 
     // Check copying of instance
     GCTAInstDir instdir2(instdir1);
+    test_assert(instdir2.has_dir(), "Test has_dir() method for copied instance");
+    test_assert(instdir2.has_detx(), "Test has_detx() method for copied instance");
+    test_assert(instdir2.has_dety(), "Test has_dety() method for copied instance");
     test_value(instdir2.dir().ra(), ra, "Right Ascension of copied instance");
     test_value(instdir2.dir().dec(), dec, "Declination of copied instance");
     test_value(instdir2.detx(), detx, "DETX of copied instance");
@@ -551,7 +619,7 @@ void TestGCTAResponse::test_response_psf_table(void)
             sum += psf(r * gammalib::deg2rad, eng.log10TeV()) *
                    gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
                    gammalib::deg2rad;
-            
+
             // since 'sum' already totals to 1.0, its also a 'fraction',
             // which we can plug back into containment_radius(), to compare
             // with the origial radius 'r'
@@ -565,7 +633,7 @@ void TestGCTAResponse::test_response_psf_table(void)
             }
         }
         test_value(sum, 1.0, 0.01, "PSF integration for "+eng.print());
-        
+
     }
 
     // Return
@@ -589,8 +657,7 @@ void TestGCTAResponse::test_response_npsf(void)
     GTime        srcTime;
     GCTAPointing pnt;
     GCTARoi      roi;
-    GCTAInstDir  instDir;
-    instDir.dir().radec_deg(0.0, 0.0);
+    GCTAInstDir  instDir(srcDir);
     roi.centre(instDir);
     roi.radius(2.0);
     srcEng.TeV(0.1);
@@ -729,18 +796,17 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     double src_dec = -43.0191;
     double roi_rad =   4.0;
 
-    // Setup ROI centred on Cen A with a radius of 4 deg
-    GCTARoi     roi;
-    GCTAInstDir instDir;
-    instDir.dir().radec_deg(src_ra, src_dec);
-    roi.centre(instDir);
-    roi.radius(roi_rad);
-
     // Setup pointing on Cen A
     GSkyDir skyDir;
     skyDir.radec_deg(src_ra, src_dec);
     GCTAPointing pnt;
     pnt.dir(skyDir);
+
+    // Setup ROI centred on Cen A with a radius of 4 deg
+    GCTARoi     roi;
+    GCTAInstDir instDir(skyDir);
+    roi.centre(instDir);
+    roi.radius(roi_rad);
 
     // Setup dummy event list
     GGti     gti;
@@ -1002,6 +1068,10 @@ void TestGCTAResponse::test_response_bgd_PerfTable(void)
         test_try_failure(e);
     }
 
+    // Set instrument direction
+    GSkyDir     dir;
+    GCTAInstDir instdir(dir, 0.0, 0.0);
+
     // Check content of empty instance
     GCTABackgroundPerfTable bgd1;
     test_value(bgd1.size(), 0, "Nodes of empty instance");
@@ -1011,9 +1081,9 @@ void TestGCTAResponse::test_response_bgd_PerfTable(void)
         "Onaxis operator value of empty instance");
     test_value(bgd1(0.0, 0.01, 0.02), 0.0,
         "Offaxis operator value of empty instance");
-    test_value(bgd1.rate_ebin(GCTAInstDir(), emin, emax), 0.0,
+    test_value(bgd1.rate_ebin(instdir, emin, emax), 0.0,
         "Integrated rate value of empty instance");
-   
+
     // Check content of filled instance
     GCTABackgroundPerfTable bgd2(cta_perf_table);
     test_value(bgd2.size(), 20, "Nodes of filled instance");
@@ -1027,13 +1097,13 @@ void TestGCTAResponse::test_response_bgd_PerfTable(void)
         "Onaxis operator value of filled instance");
     test_value(bgd2(0.0, 0.01, 0.02), ref_rate_offaxis,
         "Offaxis operator value of filled instance");
-    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, emax), ref_rate_ebin_within,
+    test_value(bgd2.rate_ebin(instdir, emin, emax), ref_rate_ebin_within,
         "Integrated rate value of filled instance (within covered energies)");
-    test_value(bgd2.rate_ebin(GCTAInstDir(), ebelow, emax), ref_rate_ebin_below,
+    test_value(bgd2.rate_ebin(instdir, ebelow, emax), ref_rate_ebin_below,
         "Integrated rate value of filled instance (extrapolate below lowest energy)");
-    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, eabove), ref_rate_ebin_above,
+    test_value(bgd2.rate_ebin(instdir, emin, eabove), ref_rate_ebin_above,
         "Integrated rate value of filled instance (extrapolate above highest energy)");
-    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, emin), 0.0,
+    test_value(bgd2.rate_ebin(instdir, emin, emin), 0.0,
         "Integrated rate value of filled instance for zero interval");
 
     // Check content of copied instance
@@ -1049,9 +1119,9 @@ void TestGCTAResponse::test_response_bgd_PerfTable(void)
         "Onaxis operator value of copied instance");
     test_value(bgd3(0.0, 0.01, 0.02), ref_rate_offaxis,
         "Offaxis operator value of copied instance");
-    test_value(bgd3.rate_ebin(GCTAInstDir(), emin, emax), ref_rate_ebin_within,
+    test_value(bgd3.rate_ebin(instdir, emin, emax), ref_rate_ebin_within,
         "Integrated rate value of copied instance");
-    test_value(bgd3.rate_ebin(GCTAInstDir(), emin, emin), 0.0,
+    test_value(bgd3.rate_ebin(instdir, emin, emin), 0.0,
         "Integrated rate value of copied instance for zero interval");
 
     // Compute reference rate
@@ -1092,6 +1162,10 @@ void TestGCTAResponse::test_response_bgd_3D(void)
     const GEnergy emax(10.0, "TeV");
     const GEnergy eabove(200.0, "TeV");
 
+    // Set instrument direction
+    GSkyDir     dir;
+    GCTAInstDir instdir(dir, 0.0, 0.0);
+
     // Test GCTABackground3D constructor
     test_try("GCTABackground3D constructor");
     try {
@@ -1110,7 +1184,7 @@ void TestGCTAResponse::test_response_bgd_3D(void)
         "Onaxis operator value of empty instance");
     test_value(bgd1(0.0, 0.01, 0.02), 0.0,
         "Offaxis operator value of empty instance");
-    test_value(bgd1.rate_ebin(GCTAInstDir(), emin, emax), 0.0,
+    test_value(bgd1.rate_ebin(instdir, emin, emax), 0.0,
         "Integrated rate value of empty instance");
 
     // Check content of filled instance
@@ -1125,13 +1199,13 @@ void TestGCTAResponse::test_response_bgd_3D(void)
         "Onaxis operator value of filled instance");
     test_value(bgd2(0.0, 0.01, 0.02), ref_rate_offaxis,
         "Offaxis operator value of filled instance");
-    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, emax), ref_rate_ebin_within,
+    test_value(bgd2.rate_ebin(instdir, emin, emax), ref_rate_ebin_within,
         "Integrated rate value of filled instance");
-    test_value(bgd2.rate_ebin(GCTAInstDir(), ebelow, emax), ref_rate_ebin_below,
+    test_value(bgd2.rate_ebin(instdir, ebelow, emax), ref_rate_ebin_below,
         "Integrated rate value of filled instance (extrapolate below lowest energy)");
-    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, eabove), ref_rate_ebin_above,
+    test_value(bgd2.rate_ebin(instdir, emin, eabove), ref_rate_ebin_above,
         "Integrated rate value of filled instance (extrapolate above highest energy)");
-    test_value(bgd2.rate_ebin(GCTAInstDir(), emin, emin), 0.0,
+    test_value(bgd2.rate_ebin(instdir, emin, emin), 0.0,
         "Integrated rate value of filled instance for zero interval");
 
     // Check content of copied instance
@@ -1146,9 +1220,9 @@ void TestGCTAResponse::test_response_bgd_3D(void)
         "Onaxis operator value of copied instance");
     test_value(bgd3(0.0, 0.01, 0.02), ref_rate_offaxis,
         "Offaxis operator value of copied instance");
-    test_value(bgd3.rate_ebin(GCTAInstDir(), emin, emax), ref_rate_ebin_within,
+    test_value(bgd3.rate_ebin(instdir, emin, emax), ref_rate_ebin_within,
         "Integrated rate value of copied instance");
-    test_value(bgd3.rate_ebin(GCTAInstDir(), emin, emin), 0.0,
+    test_value(bgd3.rate_ebin(instdir, emin, emin), 0.0,
         "Integrated rate value of copied instance for zero interval");
 
     // Compute reference rate
@@ -1745,10 +1819,9 @@ void TestGCTAObservation::test_event_bin(void)
     test_value(bin.classname(), "GCTAEventBin",
                "Check classname() for empty bin");
     test_value(bin.size(), 0.0, 1.0e-10, "Check size() for empty bin");
-    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
-               "Check dir().dir().ra_deg() for empty bin");
-    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
-               "Check dir().dir().dec_deg() for empty bin");
+    test_assert(!bin.dir().has_dir(), "Check dir().has_dir() for empty bin");
+    test_assert(!bin.dir().has_detx(), "Check dir().has_detx() for empty bin");
+    test_assert(!bin.dir().has_dety(), "Check dir().has_dety() for empty bin");
     test_value(bin.energy().MeV(), 0.0, 1.0e-10,
                "Check energy() for empty bin");
     test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for empty bin");
@@ -1786,6 +1859,9 @@ void TestGCTAObservation::test_event_bin(void)
 
     // Test bin attributes
     test_value(bin.size(), ref_size, 1.0e-10, "Check size() for filled bin");
+    test_assert(bin.dir().has_dir(), "Check dir().has_dir() for filled bin");
+    test_assert(bin.dir().has_detx(), "Check dir().has_detx() for filled bin");
+    test_assert(bin.dir().has_dety(), "Check dir().has_dety() for filled bin");
     test_value(bin.dir().dir().ra_deg(), 37.2, 1.0e-10,
                "Check dir().dir().ra_deg() for filled bin");
     test_value(bin.dir().dir().dec_deg(), -67.3, 1.0e-10,
@@ -1894,10 +1970,9 @@ void TestGCTAObservation::test_event_bin(void)
     test_value(bin.classname(), "GCTAEventBin",
                "Check classname() for cleared bin");
     test_value(bin.size(), 0.0, 1.0e-10, "Check size() for cleared bin");
-    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
-               "Check dir().dir().ra_deg() for cleared bin");
-    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
-               "Check dir().dir().dec_deg() for cleared bin");
+    test_assert(!bin.dir().has_dir(), "Check dir().has_dir() for cleared bin");
+    test_assert(!bin.dir().has_detx(), "Check dir().has_detx() for cleared bin");
+    test_assert(!bin.dir().has_dety(), "Check dir().has_dety() for cleared bin");
     test_value(bin.energy().MeV(), 0.0, 1.0e-10,
                "Check energy() for cleared bin");
     test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for cleared bin");
@@ -1983,7 +2058,7 @@ void TestGCTAObservation::test_event_cube(void)
 
     // Construct counts cube from FITS file
     GCTAEventCube cube3("test_cta_event_cube.fits");
-    
+
     // Test loaded event cube
     test_value(cube3.size(), 60, "Check that loaded event cube has size()=60");
     test_value(cube3.dim(), 3, "Check that loaded event cube has dim()=3");
@@ -2518,7 +2593,7 @@ void TestGCTAOptimize::test_onoff_optimizer_wstat(void)
                             0., 0.,
                             1.0e6, 0,
                             1, 0};
-    
+
     // Load On/Off CTA observation
     GObservations obs(cta_onoff_obs);
 

@@ -34,7 +34,6 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GModelPar.hpp"
-#include "GModelSpectralNodes.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;

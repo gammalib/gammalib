@@ -719,7 +719,7 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
 
                         // Compute acceptance fraction
                         acceptance_fraction = value / max_aeff;
-			
+
                     } while ((ran.uniform() > acceptance_fraction) &&
                              (zeros < 1000));
 
@@ -729,24 +729,13 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
                         continue;
                     }
 
-                    // Convert CTA pointing direction in instrument system
-                    GCTAInstDir mc_dir(pnt.dir());
-
                     // Rotate pointing direction by offset and azimuth angle
-                    mc_dir.dir().rotate_deg(phi    * gammalib::rad2deg,
-                                            offset * gammalib::rad2deg);
+                    GSkyDir skydir = pnt.dir();
+                    skydir.rotate_deg(phi    * gammalib::rad2deg,
+                                      offset * gammalib::rad2deg);
 
-                    // Compute DETX and DETY coordinates
-                    double detx(0.0);
-                    double dety(0.0);
-                    if (offset > 0.0 ) {
-                        detx = offset * std::cos(phi);
-                        dety = offset * std::sin(phi);
-                    }
-
-                    // Set DETX and DETY coordinates
-                    mc_dir.detx(detx);
-                    mc_dir.dety(dety);
+                    // Convert rotated pointing direction in instrument system
+                    GCTAInstDir mc_dir = pnt.instdir(skydir);
 
                     // Allocate event
                     GCTAEventAtom event;

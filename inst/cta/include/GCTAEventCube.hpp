@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEventCube.hpp - CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
+class GCTAPointing;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -111,6 +112,7 @@ protected:
     void         read_ebds(const GFitsTable& hdu);
     void         read_gti(const GFitsTable& hdu);
     void         set_directions(void);
+    void         set_detxy(const GCTAPointing& pnt);
     virtual void set_energies(void);
     virtual void set_times(void);
     void         init_bin(void);
