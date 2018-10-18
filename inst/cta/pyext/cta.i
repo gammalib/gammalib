@@ -307,6 +307,8 @@
 %include "GCTAModelIrfBackground.i"
 %include "GCTAModelAeffBackground.i"
 %include "GCTAModelSpatial.i"
+%include "GCTAModelSpatialGradient.i"
+%include "GCTAModelSpatialMultiplicative.i"
 %include "GCTAModelSpatialRegistry.i"
 %include "GCTAModelRadial.i"
 %include "GCTAModelRadialRegistry.i"
