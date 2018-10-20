@@ -84,9 +84,6 @@ public:
         state = (xml,)
         return state
     def __setstate__(self, state):
-        if state[0].elements('parameter') == 0:
-            self.__init__()
-        else:
-            self.__init__(state[0])
+        self.__init__(state[0])
 }
 };

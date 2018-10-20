@@ -397,6 +397,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAEventCube())
         test_support.pickeling(self, gammalib.GCTAEventList())
         test_support.pickeling(self, gammalib.GCTAInstDir())
+        test_support.pickeling(self, gammalib.GCTAModelBackground())
         test_support.pickeling(self, gammalib.GCTAModelAeffBackground())
         test_support.pickeling(self, gammalib.GCTAModelCubeBackground())
         test_support.pickeling(self, gammalib.GCTAModelIrfBackground())
@@ -404,6 +405,8 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAModelRadialGauss())
         test_support.pickeling(self, gammalib.GCTAModelRadialPolynom())
         test_support.pickeling(self, gammalib.GCTAModelRadialProfile())
+        test_support.pickeling(self, gammalib.GCTAModelSpatialGradient())
+        test_support.pickeling(self, gammalib.GCTAModelSpatialMultiplicative())
         test_support.pickeling(self, gammalib.GCTAObservation())
         test_support.pickeling(self, gammalib.GCTAOnOffObservation())
         test_support.pickeling(self, gammalib.GCTAPointing())
@@ -467,6 +470,9 @@ class Test(gammalib.GPythonTestSuite):
         obs5      = gammalib.GCTAOnOffObservation(obs1, ptsrc, ebds, ebds, regs, regs)
         radgauss  = gammalib.GCTAModelRadialGauss(1.0)
         radacc    = gammalib.GCTAModelRadialAcceptance(radgauss, plaw)
+        multi     = gammalib.GCTAModelSpatialMultiplicative()
+        multi.append(radgauss, 'Src1')
+        multi.append(radgauss, 'Src2')
         kingname  = self._caldb + '/prod1_king.fits'
         hessaeff  = self._data  + '/irf_hess_aeff.fits.gz'
         hesspsf   = self._data  + '/irf_hess_psf.fits.gz'
@@ -498,6 +504,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAEventCube(cube))
         test_support.pickeling(self, gammalib.GCTAEventList(list))
         test_support.pickeling(self, gammalib.GCTAInstDir(instdir))
+        test_support.pickeling(self, gammalib.GCTAModelBackground(radgauss,plaw))
         test_support.pickeling(self, gammalib.GCTAModelAeffBackground(plaw))
         test_support.pickeling(self, gammalib.GCTAModelCubeBackground(plaw))
         test_support.pickeling(self, gammalib.GCTAModelIrfBackground(plaw))
@@ -505,6 +512,8 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAModelRadialGauss(1.0))
         test_support.pickeling(self, gammalib.GCTAModelRadialPolynom([1.0,2.0]))
         test_support.pickeling(self, gammalib.GCTAModelRadialProfile(1.0,2.0,3.0))
+        test_support.pickeling(self, gammalib.GCTAModelSpatialGradient(1.0,2.0))
+        test_support.pickeling(self, gammalib.GCTAModelSpatialMultiplicative(multi))
         test_support.pickeling(self, gammalib.GCTAObservation(obs1))
         test_support.pickeling(self, gammalib.GCTAObservation(obs2))
         test_support.pickeling(self, gammalib.GCTAObservation(obs3))
