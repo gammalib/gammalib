@@ -50,6 +50,8 @@ class GCTAModelSpatialGradient  : public GCTAModelSpatial {
 public:
     // Constructors and destructors
     GCTAModelSpatialGradient(void);
+    GCTAModelSpatialGradient(const double& detx_gradient,
+                             const double& dety_gradient);
     explicit GCTAModelSpatialGradient(const GXmlElement& xml);
     GCTAModelSpatialGradient(const GCTAModelSpatialGradient& model);
     virtual ~GCTAModelSpatialGradient(void);
