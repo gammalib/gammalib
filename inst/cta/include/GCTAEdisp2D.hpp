@@ -135,8 +135,8 @@ private:
     void   set_table(void);
     void   set_boundaries(void);
     void   set_max_edisp(void) const;
+    void   convert_dm2dlogE(void);
     void   normalize_table(void);
-    void   hess_renormalization(void);
     int    table_index(const int& ietrue,
                        const int& imigra,
                        const int& itheta) const;

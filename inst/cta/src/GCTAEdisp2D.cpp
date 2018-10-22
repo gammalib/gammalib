@@ -1367,10 +1367,8 @@ void GCTAEdisp2D::set_table(void)
     // Set table boundaries
     set_boundaries();
 
-    // Renormalize energy dispersion table for H.E.S.S.
-    if (gammalib::strip_whitespace(m_edisp.telescope()) == "HESS") {
-        hess_renormalization();
-    }
+    // Convert table from dP/dm to dP/dlogE
+    convert_dm2dlogE();
 
     // Smooth energy dispersion table (kludge only for CTA)
     #if defined(G_SMOOTH_EDISP_KLUDGE)
@@ -1379,11 +1377,8 @@ void GCTAEdisp2D::set_table(void)
     }
     #endif
 
-    // Normalize energy dispersion table (not for H.E.S.S. normalization
-    // since we renormalized the H.E.S.S. data before)
-    if (gammalib::strip_whitespace(m_edisp.telescope()) != "HESS") {
-        normalize_table();
-    }
+    // Normalize energy dispersion table
+    normalize_table();
 
     // Set maximum energy dispersion value
     set_max_edisp();
@@ -1566,9 +1561,9 @@ void GCTAEdisp2D::normalize_table(void)
 
 
 /***********************************************************************//**
- * @brief Renormalize H.E.S.S. energy dispersion table
+ * @brief Convert table from dP/dm to dP/dlog10E
  *
- * The H.E.S.S. energy dispersion table is normalized so that
+ * The energy dispersion table when read-in is normalized so that
  *
  * \f[
  *    \int_{{\rm migra}_{\rm min}}^{{\rm migra}_{\rm max}}
@@ -1595,7 +1590,7 @@ void GCTAEdisp2D::normalize_table(void)
  * \f$E_{\rm reco}^{\rm min}\f$ and \f$E_{\rm reco}^{\rm max}\f$ are the
  * minimum and maximum reconstructed energy values for the same bin.
  ***************************************************************************/
-void GCTAEdisp2D::hess_renormalization(void)
+void GCTAEdisp2D::convert_dm2dlogE(void)
 {
     // Optional dump header
     #if defined(G_DEBUG_HESS_RENORMALIZATION)
