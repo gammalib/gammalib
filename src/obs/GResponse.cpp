@@ -187,10 +187,10 @@ double GResponse::convolve(const GModelSky&    model,
 
         // Case A: Integration
         if (use_edisp()) {
-    
+
             // Retrieve true energy boundaries
             GEbounds ebounds = this->ebounds(event.energy());
-    
+
             // Loop over all boundaries
             for (int i = 0; i < ebounds.size(); ++i) {
 

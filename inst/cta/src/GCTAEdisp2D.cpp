@@ -57,6 +57,7 @@
 //#define G_SMOOTH_EDISP_SAVE_TEST //!< Save test matrix
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_HESS_RENORMALIZATION
 
 /* __ Constants __________________________________________________________ */
 
@@ -1366,6 +1367,11 @@ void GCTAEdisp2D::set_table(void)
     // Set table boundaries
     set_boundaries();
 
+    // Renormalize energy dispersion table for H.E.S.S.
+    if (gammalib::strip_whitespace(m_edisp.telescope()) == "HESS") {
+        hess_renormalization();
+    }
+
     // Smooth energy dispersion table (kludge only for CTA)
     #if defined(G_SMOOTH_EDISP_KLUDGE)
     if (gammalib::strip_whitespace(m_edisp.telescope()) == "CTA") {
@@ -1373,8 +1379,11 @@ void GCTAEdisp2D::set_table(void)
     }
     #endif
 
-    // Normalize energy dispersion table
-    normalize_table();
+    // Normalize energy dispersion table (not for H.E.S.S. normalization
+    // since we renormalized the H.E.S.S. data before)
+    if (gammalib::strip_whitespace(m_edisp.telescope()) != "HESS") {
+        normalize_table();
+    }
 
     // Set maximum energy dispersion value
     set_max_edisp();
@@ -1550,6 +1559,106 @@ void GCTAEdisp2D::normalize_table(void)
         }
 
     } // endfor: made 2 passes
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Renormalize H.E.S.S. energy dispersion table
+ *
+ * The H.E.S.S. energy dispersion table is normalized so that
+ *
+ * \f[
+ *    \int_{{\rm migra}_{\rm min}}^{{\rm migra}_{\rm max}}
+ *    E_{\rm disp}({\rm migra}) \, d{\rm migra} = 1
+ * \f]
+ *
+ * while the class needs values that are normalize according to
+ *
+ * \f[
+ *    \int_{\log_{10} E_{\rm reco}^{\rm min}}^{\log_{10} E_{\rm reco}^{\rm max}}
+ *    E_{\rm disp}(\log_{10} E_{\rm reco}) \, d(\log_{10} E_{\rm reco}) = 1
+ * \f]
+ *
+ * The method thus multiplies each matrix element with
+ *
+ * \f[
+ *    \frac{{\rm migra}_{\rm max} - {\rm migra}_{\rm min}}
+ *         {\log_{10} E_{\rm reco}^{\rm max} - \log_{10} E_{\rm reco}^{\rm min}}
+ * \f]
+ *
+ * where
+ * \f${\rm migra}_{\rm min}\f$ and \f${\rm migra}_{\rm max}\f$ are the
+ * minimum and maximum migration values of a given bin and
+ * \f$E_{\rm reco}^{\rm min}\f$ and \f$E_{\rm reco}^{\rm max}\f$ are the
+ * minimum and maximum reconstructed energy values for the same bin.
+ ***************************************************************************/
+void GCTAEdisp2D::hess_renormalization(void)
+{
+    // Optional dump header
+    #if defined(G_DEBUG_HESS_RENORMALIZATION)
+    std::cout << "GCTAEdisp2D::hess_renormalization:" << std::endl;
+    #endif
+
+    // Get axes dimensions
+    int etrue_size = m_edisp.axis_bins(m_inx_etrue);
+    int migra_size = m_edisp.axis_bins(m_inx_migra);
+    int theta_size = m_edisp.axis_bins(m_inx_theta);
+
+    // Perform renormalization
+    for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
+
+        // Get true energy in TeV
+        double etrue = std::sqrt(m_edisp.axis_lo(m_inx_etrue, i_etrue) *
+                                 m_edisp.axis_hi(m_inx_etrue, i_etrue));
+
+        // Get offset angle
+        for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
+
+            // Intialize control sum
+            #if defined(G_DEBUG_HESS_RENORMALIZATION)
+            double sum = 0.0;
+            #endif
+
+            // Loop over all migration bins
+            int offset = table_index(i_etrue, 0, i_theta);
+            int stride = table_stride(m_inx_migra);
+            for (int i_migra = 0, i = offset; i_migra < migra_size; ++i_migra, i += stride) {
+            
+                // Get migration bin size
+                double migra_bin = m_edisp.axis_hi(m_inx_migra, i_migra) -
+                                   m_edisp.axis_lo(m_inx_migra, i_migra);
+
+                // Get dlog10(E_reco) bin size
+                double ereco_min = m_edisp.axis_lo(m_inx_migra, i_migra) * etrue;
+                double ereco_max = m_edisp.axis_hi(m_inx_migra, i_migra) * etrue;
+                double dlogE_bin = std::log10(ereco_max) - std::log10(ereco_min);
+
+                // Compute normalization factor
+                double norm = migra_bin / dlogE_bin;
+
+                // Multiply matrix element
+                m_edisp(m_inx_matrix, i) *= norm;
+
+                // Update test sum
+                #if defined(G_DEBUG_HESS_RENORMALIZATION)
+                sum += m_edisp(m_inx_matrix, i) * dlogE_bin;
+                #endif
+
+            } // endfor: looped over migration bins
+
+            // Optional test dump
+            #if defined(G_DEBUG_HESS_RENORMALIZATION)
+            std::cout << "etrue=" << etrue << " TeV ";
+            std::cout << "i_theta=" << i_theta << ": ";
+            std::cout << sum << std::endl;
+            #endif
+
+        } // endfor: looped over offset angle
+
+    } // endfor: looped over true energies
 
     // Return
     return;
