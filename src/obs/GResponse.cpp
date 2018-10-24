@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.cpp - Abstract response base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_CONVOLVE_EDISP    //!< Debug convolve for energy dispersion
 
 
 /*==========================================================================
@@ -194,12 +195,12 @@ double GResponse::convolve(const GModelSky&    model,
             // Loop over all boundaries
             for (int i = 0; i < ebounds.size(); ++i) {
 
-                // Get boundaries in MeV
-                double emin = ebounds.emin(i).MeV();
-                double emax = ebounds.emax(i).MeV();
+                // Get true energy boundaries in log10 MeV
+                double log10_etrue_min = ebounds.emin(i).log10MeV();
+                double log10_etrue_max = ebounds.emax(i).log10MeV();
 
                 // Continue only if valid
-                if (emax > emin) {
+                if (log10_etrue_max > log10_etrue_min) {
 
                     // Setup integration function
                     edisp_kern integrand(this, &obs, &model, &event, srcTime, grad);
@@ -209,10 +210,8 @@ double GResponse::convolve(const GModelSky&    model,
                     integral.fixed_iter(iter);
 
                     // Do Romberg integration
-                    emin  = std::log(emin);
-                    emax  = std::log(emax);
-                    prob += integral.romberg(emin, emax);
-    
+                    prob += integral.romberg(log10_etrue_min, log10_etrue_max);
+
                 } // endif: interval was valid
 
             } // endfor: looped over intervals
@@ -221,7 +220,7 @@ double GResponse::convolve(const GModelSky&    model,
 
         // Case B: No integration (assume no energy dispersion)
         else {
-    
+
             // Get source energy (no dispersion)
             GEnergy srcEng  = event.energy();
 
@@ -410,39 +409,34 @@ double GResponse::eval_prob(const GModelSky&    model,
 
 
 /***********************************************************************//**
- * @brief Integration kernel for edisp_kern() method
+ * @brief Integration kernel for GResponse::edisp_kern() class
  *
- * @param[in] x Function value.
+ * @param[in] logEsrc Base 10 logarithm of true photon energy in MeV.
  *
- * This method implements the integration kernel needed for the edisp_kern()
- * method.
+ * This method implements the integration kernel needed for the
+ * GResponse::edisp_kern() class.
  ***************************************************************************/
-double GResponse::edisp_kern::eval(const double& x)
+double GResponse::edisp_kern::eval(const double& logEsrc)
 {
-    // Set energy
-    GEnergy eng;
-    double expx = std::exp(x);
-    eng.MeV(expx);
+    // Set true energy
+    GEnergy srcEng;
+    srcEng.log10MeV(logEsrc);
 
     // Get function value
-    double value = m_parent->eval_prob(*m_model, *m_event, eng, m_srcTime, *m_obs, m_grad);
+    double value = m_parent->eval_prob(*m_model, *m_event,
+                                       srcEng, m_srcTime, *m_obs, m_grad);
 
-    // Save value if needed
-    #if defined(G_NAN_CHECK)
-    double value_out = value;
-    #endif
-
-    // Correct for variable substitution
-    value *= expx;
+    // Account for the fact that integration is done in log10 MeV and
+    // not in MeV
+    value *= gammalib::ln10 * m_event->energy().MeV();
 
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GResponse::edisp_kern::eval";
-        std::cout << "(x=" << x << "): ";
+        std::cout << "(logEsrc=" << logEsrc << "): ";
         std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value_out;
-        std::cout << " exp(x)=" << expx;
+        std::cout << " (value=" << value;
         std::cout << ")" << std::endl;
     }
     #endif
