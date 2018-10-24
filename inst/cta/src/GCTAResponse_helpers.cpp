@@ -133,7 +133,7 @@ cta_omega_intervals gammalib::limit_omega(const double& min,
             }
             intervals.push_back(std::make_pair(interval_min,interval_max));
         }
- 
+
         // If the [min,max] interval overlaps with the [-domega,domega]
         // interval shifted by -2pi then constrain the interval using the
         // shifted interval
@@ -339,7 +339,7 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
 {
     // Initialise PSF value
     double value = 0.0;
-    
+
     // Get arclength for given radius in radians
     double phi = gammalib::cta_roi_arclength(delta,
                                              m_psf,
@@ -350,7 +350,7 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
 
     // If arclength is positive then compute the PSF value
     if (phi > 0) {
-    
+
         // Compute PSF value
         value = m_rsp->psf(delta, m_theta, m_phi, m_zenith, m_azimuth, m_logE) * 
                            phi * std::sin(delta);
@@ -366,7 +366,7 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
             std::cout << std::endl;
         }
         #endif
-        
+
     } // endif: arclength was positive
 
     // Return
@@ -375,25 +375,25 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
 
 
 /***********************************************************************//**
- * @brief Integration kernel for nedisp() method
+ * @brief Integration kernel for GCTAResponseIrf::nroi method
  *
- * @param[in] logEsrc Logarithm of true photon energy.
+ * @param[in] logEsrc Base 10 logarithm of true photon energy in MeV.
  * @return Nroi.
  ***************************************************************************/
 double cta_nroi_kern::eval(const double& logEsrc)
 {
     // Set true energy
     GEnergy srcEng;
-    double expx = std::exp(logEsrc);
-    srcEng.MeV(expx);
+    srcEng.log10MeV(logEsrc);
 
     // Compute response components
     double nroi_spatial  = m_rsp->nroi(*m_model, srcEng, m_srcTime, m_obsEng, m_obsTime, *m_obs);
     double nroi_spectral = m_model->spectral()->eval(srcEng, m_srcTime);
     double nroi_temporal = m_model->temporal()->eval(m_srcTime);
-    
+
     // Compute response
-    double nroi = nroi_spatial * nroi_spectral * nroi_temporal * expx;
+    double nroi = nroi_spatial * nroi_spectral * nroi_temporal *
+                  gammalib::ln10 * m_obsEng.MeV();
 
     // Return response
     return nroi;
@@ -567,10 +567,10 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
 {
     // Compute PSF offset angle [radians]
     double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
-    
+
     // Compute true photon offset angle in camera system [radians]
     double offset = std::acos(m_cos_ph + m_sin_ph * std::cos(m_omega0 - omega));
-    
+
     //TODO: Compute true photon azimuth angle in camera system [radians]
     double azimuth = 0.0;
 
@@ -582,7 +582,7 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
     if (m_rsp->use_edisp() && irf > 0.0) {
         irf *= m_rsp->edisp(m_obsEng, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
     }
-    
+
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
@@ -944,7 +944,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
             #endif
 
         } // endif: arc length was positive
-    
+
     } // endif: rho was positive
 
     // Return result
@@ -1035,7 +1035,7 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
 
         // Compute Psf offset angle [radians]
         double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
-    
+
         // Compute true photon offset and azimuth angle in camera system
         // [radians]
         double theta = std::acos(m_cos_ph + m_sin_ph * std::cos(m_omega_pnt - omega));
@@ -1242,7 +1242,7 @@ double cta_nroi_elliptical_kern_rho::eval(const double& rho)
             #endif
 
         } // endif: arc length was positive
-    
+
     } // endif: rho was positive
 
     // Return Nroi
@@ -1302,10 +1302,10 @@ double cta_nroi_elliptical_kern_omega::eval(const double& omega)
         std::cout << std::endl;
     }
     #endif
-    
+
     // Continue only if model is positive
     if (model > 0.0) {
-    
+
         // Compute sky direction vector in native coordinates
         double  cos_omega = std::cos(omega_model);
         double  sin_omega = std::sin(omega_model);
@@ -1339,7 +1339,7 @@ double cta_nroi_elliptical_kern_omega::eval(const double& omega)
         #endif
 
     } // endif: sky intensity was positive
-    
+
     // Return Nroi
     return nroi;
 }
@@ -2210,7 +2210,7 @@ double cta_psf_elliptical_kern_rho::eval(const double& rho)
             #endif
 
         } // endif: arc length was positive
-    
+
     } // endif: rho was positive
 
     // Return result
