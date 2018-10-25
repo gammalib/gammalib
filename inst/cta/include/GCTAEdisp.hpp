@@ -77,16 +77,16 @@ public:
                            const double&  phi = 0.0,
                            const double&  zenith = 0.0,
                            const double&  azimuth = 0.0) const = 0;
-    virtual GEbounds    ebounds_obs(const double& logEsrc,
-                                    const double& theta = 0.0,
-                                    const double& phi = 0.0,
-                                    const double& zenith = 0.0,
-                                    const double& azimuth = 0.0) const = 0;
-    virtual GEbounds    ebounds_src(const double& logEobs,
-                                    const double& theta = 0.0,
-                                    const double& phi = 0.0,
-                                    const double& zenith = 0.0,
-                                    const double& azimuth = 0.0) const = 0;
+    virtual GEbounds    ereco_bounds(const GEnergy& etrue,
+                                     const double&  theta = 0.0,
+                                     const double&  phi = 0.0,
+                                     const double&  zenith = 0.0,
+                                     const double&  azimuth = 0.0) const = 0;
+    virtual GEbounds    etrue_bounds(const GEnergy& ereco,
+                                     const double&  theta = 0.0,
+                                     const double&  phi = 0.0,
+                                     const double&  zenith = 0.0,
+                                     const double&  azimuth = 0.0) const = 0;
     virtual double      prob_erecobin(const GEnergy& ereco_min,
                                       const GEnergy& ereco_max,
                                       const GEnergy& etrue,

@@ -496,7 +496,7 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
     GEnergy ereco;
 
     // Get boundaries for observed energy
-    GEbounds ebounds = ebounds_obs(etrue.log10TeV(), theta, phi, zenith, azimuth);
+    GEbounds ebounds = ereco_bounds(etrue, theta, phi, zenith, azimuth);
     double   emin    = ebounds.emin().log10TeV();
     double   emax    = ebounds.emax().log10TeV();
 
@@ -576,7 +576,7 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
 /***********************************************************************//**
  * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] etrue True photon energy.
  * @param[in] theta Offset angle in camera system (radians).
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -587,11 +587,11 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
  * dispersion becomes negligible for a given true energy @p logEsrc and
  * offset angle @p theta.
  ***************************************************************************/
-GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
-                                  const double& theta,
-                                  const double& phi,
-                                  const double& zenith,
-                                  const double& azimuth) const
+GEbounds GCTAEdisp2D::ereco_bounds(const GEnergy& etrue,
+                                   const double&  theta,
+                                   const double&  phi,
+                                   const double&  zenith,
+                                   const double&  azimuth) const
 {
     // Make sure that energy dispersion is online
     fetch();
@@ -602,18 +602,21 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
         // Set computation flag
         m_ebounds_obs_computed = true;
         m_last_theta_obs       = theta;
-        m_last_logEsrc         = -30.0; // force update
+        m_last_etrue.log10TeV(-30.0); // force update
 
         // Compute ebounds_obs
         compute_ebounds_obs(theta, phi, zenith, azimuth);
 
     }
 
-    // Search index only if logEsrc has changed
-    if (logEsrc != m_last_logEsrc) {
+    // Search index only if true photon energy has changed
+    if (etrue != m_last_etrue) {
 
-        // Store last log(Esrc)
-        m_last_logEsrc = logEsrc;
+        // Store last true photon energy
+        m_last_etrue = etrue;
+
+        // Get true energy in TeV
+        double etrue_TeV = etrue.TeV();
 
         // Find right index with bisection
         int low  = 0;
@@ -621,7 +624,7 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_edisp.axis_lo(m_inx_etrue, mid);
-            if (logEsrc < std::log10(e)) {
+            if (etrue_TeV < e) {
                 high = mid;
             }
             else {
@@ -642,7 +645,7 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
  *
- * @param[in] logEobs Log10 of the observed event energy (\f$\log_{10}\f$ TeV).
+ * @param[in] ereco Reconstructed event energy.
  * @param[in] theta Offset angle in camera system (radians).
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -653,11 +656,11 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
  * dispersion becomes negligible for a given observed energy @p logEobs and
  * offset angle @p theta.
  ***************************************************************************/
-GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
-                                  const double& theta,
-                                  const double& phi,
-                                  const double& zenith,
-                                  const double& azimuth) const
+GEbounds GCTAEdisp2D::etrue_bounds(const GEnergy& ereco,
+                                   const double&  theta,
+                                   const double&  phi,
+                                   const double&  zenith,
+                                   const double&  azimuth) const
 {
     // Make sure that energy dispersion is online
     fetch();
@@ -668,18 +671,21 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
         // Set computation flag
         m_ebounds_src_computed = true;
         m_last_theta_src       = theta;
-        m_last_logEobs         = -30.0; // force update
+        m_last_ereco.log10TeV(-30.0); // force update
 
         // Compute ebounds_src
         compute_ebounds_src(theta, phi, zenith, azimuth);
 
     }
 
-    // Search index only if logEobs has changed
-    if (logEobs != m_last_logEobs) {
+    // Search index only if reconstructed event energy has changed
+    if (ereco != m_last_ereco) {
 
-        // Store observed energy
-        m_last_logEobs = logEobs;
+        // Store reconstructed event energy
+        m_last_ereco = ereco;
+
+        // Get reconstructed event energy in TeV
+        double ereco_TeV = ereco.TeV();
 
         // Find right index with bisection
         int low  = 0;
@@ -687,7 +693,7 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_edisp.axis_lo(m_inx_etrue, mid);
-            if (logEobs < std::log10(e)) {
+            if (ereco_TeV < e) {
                 high = mid;
             }
             else {
@@ -1046,8 +1052,8 @@ void GCTAEdisp2D::init_members(void)
     m_ebounds_src_computed = false;
     m_last_theta_obs       =  -1.0;
     m_last_theta_src       =  -1.0;
-    m_last_logEsrc         = -30.0;
-    m_last_logEobs         = -30.0;
+    m_last_etrue.log10TeV(-30.0);
+    m_last_ereco.log10TeV(-30.0);
     m_index_obs            =     0;
     m_index_src            =     0;
     m_max_edisp            =   0.0;
@@ -1086,8 +1092,8 @@ void GCTAEdisp2D::copy_members(const GCTAEdisp2D& edisp)
     m_ebounds_src_computed = edisp.m_ebounds_src_computed;
     m_last_theta_obs       = edisp.m_last_theta_obs;
     m_last_theta_src       = edisp.m_last_theta_src;
-    m_last_logEsrc         = edisp.m_last_logEsrc;
-    m_last_logEobs         = edisp.m_last_logEobs;
+    m_last_etrue           = edisp.m_last_etrue;
+    m_last_ereco           = edisp.m_last_ereco;
     m_index_obs            = edisp.m_index_obs;
     m_index_src            = edisp.m_index_src;
     m_max_edisp            = edisp.m_max_edisp;
@@ -1532,7 +1538,7 @@ void GCTAEdisp2D::normalize_table(void)
                 double sum = 0.0;
 
                 // Get integration boundaries
-                GEbounds ebounds = ebounds_obs(logEsrc, theta);
+                GEbounds ebounds = ereco_bounds(etrue, theta);
 
                 // Loop over all energy intervals
                 for (int i = 0; i < ebounds.size(); ++i) {

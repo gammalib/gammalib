@@ -360,7 +360,7 @@ GEnergy GCTAEdispPerfTable::mc(GRan&          ran,
 /***********************************************************************//**
  * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] etrue True photon energy.
  * @param[in] theta Offset angle in camera system (radians). Not used.
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -372,23 +372,26 @@ GEnergy GCTAEdispPerfTable::mc(GRan&          ran,
  * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
  * Gaussian width of the energy dispersion.
  ***************************************************************************/
-GEbounds GCTAEdispPerfTable::ebounds_obs(const double& logEsrc,
-                                         const double& theta,
-                                         const double& phi,
-                                         const double& zenith,
-                                         const double& azimuth) const
+GEbounds GCTAEdispPerfTable::ereco_bounds(const GEnergy& etrue,
+                                          const double&  theta,
+                                          const double&  phi,
+                                          const double&  zenith,
+                                          const double&  azimuth) const
 {
     // Set energy band constant
     const double number_of_sigmas = 5.0;
 
+    // Get log10 of true photon energy in TeV
+    double etrue_log10TeV = etrue.log10TeV();
+
     // Get energy dispersion sigma
-    double sigma = m_logE.interpolate(logEsrc, m_sigma);
+    double sigma = m_logE.interpolate(etrue_log10TeV, m_sigma);
 
     // Compute energy boundaries
     GEnergy emin;
     GEnergy emax;
-    emin.log10TeV(logEsrc - number_of_sigmas * sigma);
-    emax.log10TeV(logEsrc + number_of_sigmas * sigma);
+    emin.log10TeV(etrue_log10TeV - number_of_sigmas * sigma);
+    emax.log10TeV(etrue_log10TeV + number_of_sigmas * sigma);
 
     // Return energy boundaries
     return (GEbounds(emin, emax));
@@ -398,7 +401,7 @@ GEbounds GCTAEdispPerfTable::ebounds_obs(const double& logEsrc,
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
  *
- * @param[in] logEobs Log10 of the observed event energy (\f$\log_{10}\f$ TeV).
+ * @param[in] ereco Reconstructed event energy.
  * @param[in] theta Offset angle in camera system (radians). Not used.
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -410,23 +413,26 @@ GEbounds GCTAEdispPerfTable::ebounds_obs(const double& logEsrc,
  * This band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
  * Gaussian width of the energy dispersion.
  ***************************************************************************/
-GEbounds GCTAEdispPerfTable::ebounds_src(const double& logEobs,
-                                         const double& theta,
-                                         const double& phi,
-                                         const double& zenith,
-                                         const double& azimuth) const
+GEbounds GCTAEdispPerfTable::etrue_bounds(const GEnergy& ereco,
+                                          const double&  theta,
+                                          const double&  phi,
+                                          const double&  zenith,
+                                          const double&  azimuth) const
 {
     // Set energy band constant
     const double number_of_sigmas = 5.0;
 
+    // Get log10 of reconstructed event energy in TeV
+    double ereco_log10TeV = ereco.log10TeV();
+
     // Get energy dispersion sigma
-    double sigma = m_logE.interpolate(logEobs, m_sigma);
+    double sigma = m_logE.interpolate(ereco_log10TeV, m_sigma);
 
     // Compute energy boundaries
     GEnergy emin;
     GEnergy emax;
-    emin.log10TeV(logEobs - number_of_sigmas * sigma);
-    emax.log10TeV(logEobs + number_of_sigmas * sigma);
+    emin.log10TeV(ereco_log10TeV - number_of_sigmas * sigma);
+    emax.log10TeV(ereco_log10TeV + number_of_sigmas * sigma);
 
     // Return energy boundaries
     return (GEbounds(emin, emax));

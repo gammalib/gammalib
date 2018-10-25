@@ -450,8 +450,7 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
     if (use_edisp()) {
 
         // Retrieve true energy boundaries
-        double   obsLogEng = obsEng.log10TeV();
-        GEbounds ebounds   = edisp()->ebounds_src(obsLogEng);
+        GEbounds ebounds = edisp()->etrue_bounds(obsEng);
 
         // Loop over all boundaries
         for (int i = 0; i < ebounds.size(); ++i) {
@@ -550,8 +549,7 @@ GEbounds GCTAResponseIrf::ebounds(const GEnergy& obsEnergy) const
 
     // If energy dispersion is available then set the energy boundaries
     if (edisp() != NULL) {
-        double obsLogEng = obsEnergy.log10TeV();
-        ebounds          = edisp()->ebounds_src(obsLogEng); // Requires TeV
+        ebounds = edisp()->etrue_bounds(obsEnergy);
     }
 
     // Return energy boundaries

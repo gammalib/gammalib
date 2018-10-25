@@ -138,6 +138,8 @@ The following methods have been removed:
 
 The following methods have been renamed:
 - GPhoton::mc_id() from GPhoton::mcid()
+- GCTAEdisp::ereco_bounds() from GCTAEdisp::ebounds_obs()
+- GCTAEdisp::etrue_bounds() from GCTAEdisp::ebounds_src()
 
 The arguments for the following methods have been changed:
 - GCTAOnOffObservation(GCTAObservation&, GModelSpatial&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&, bool&)
@@ -309,6 +311,10 @@ units are now consistent with the expectation in GResponse, and this changes
 assurance the coherence between the various classes. In particular, no re-
 normalization is needed anymore to digest the H.E.S.S. energy dispersion, and
 also the CTA energy dispersion is handled correctly (#2704).
+
+The GCTAEdisp class now uses GEnergy objects instead of log10(E) to deal with
+true and reconstructed energies. This avoids computational overhead when going
+from one unit to another (#2704).
 
 The GCTAInstDir class now assures that only valid information can be accessed.
 Since the class can hold a sky direction and detector coordinates, flags were

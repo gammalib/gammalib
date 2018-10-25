@@ -890,12 +890,12 @@ void TestGCTAResponse::test_response_edisp_PerfTable(void)
                "Test filename after loading perfromance table");
 
     // Test ebounds_obs method
-    test_value(edisp2.ebounds_obs(-1.0).emin().GeV(),  31.6795127349936);
-    test_value(edisp2.ebounds_obs(-1.0).emax().GeV(), 315.661420794325);
+    test_value(edisp2.ereco_bounds(GEnergy(0.1,"TeV")).emin().GeV(),  31.6795127349936);
+    test_value(edisp2.ereco_bounds(GEnergy(0.1,"TeV")).emax().GeV(), 315.661420794325);
 
     // Test ebounds_src method
-    test_value(edisp2.ebounds_src(-1.0).emin().GeV(),  31.6795127349936);
-    test_value(edisp2.ebounds_src(-1.0).emax().GeV(), 315.661420794325);
+    test_value(edisp2.etrue_bounds(GEnergy(0.1,"TeV")).emin().GeV(),  31.6795127349936);
+    test_value(edisp2.etrue_bounds(GEnergy(0.1,"TeV")).emax().GeV(), 315.661420794325);
 
     // Test if non-diagonal element (below diagonal) is zero
     test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(10.0,"TeV")), 0.0);
@@ -947,12 +947,12 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
                "Test filename after loading RMF file");
 
     // Test ebounds_obs method
-    test_value(edisp2.ebounds_obs(1.0).emin().TeV(),  5.75439929962158);
-    test_value(edisp2.ebounds_obs(1.0).emax().TeV(), 15.8489322662354);
+    test_value(edisp2.ereco_bounds(GEnergy(10.0,"TeV")).emin().TeV(),  5.75439929962158);
+    test_value(edisp2.ereco_bounds(GEnergy(10.0,"TeV")).emax().TeV(), 15.8489322662354);
 
     // Test ebounds_src method
-    test_value(edisp2.ebounds_src(1.0).emin().TeV(),  5.75439929962158);
-    test_value(edisp2.ebounds_src(1.0).emax().TeV(), 15.8489322662354);
+    test_value(edisp2.etrue_bounds(GEnergy(10.0,"TeV")).emin().TeV(),  5.75439929962158);
+    test_value(edisp2.etrue_bounds(GEnergy(10.0,"TeV")).emax().TeV(), 15.8489322662354);
 
     // Test if non-diagonal element (below diagonal) is zero
     test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(1.0,"TeV")), 0.0);
@@ -1002,12 +1002,12 @@ void TestGCTAResponse::test_response_edisp_2D(void)
                "Test filename after loading response table file");
 
     // Test ebounds_obs method
-    test_value(edisp2.ebounds_obs(1.0).emin().TeV(),  6.82816152379073);
-    test_value(edisp2.ebounds_obs(1.0).emax().TeV(), 13.2011115155942);
+    test_value(edisp2.ereco_bounds(GEnergy(10.0,"TeV")).emin().TeV(),  6.82816152379073);
+    test_value(edisp2.ereco_bounds(GEnergy(10.0,"TeV")).emax().TeV(), 13.2011115155942);
 
     // Test ebounds_src method
-    test_value(edisp2.ebounds_src(1.0).emin().TeV(),  7.7813808018878);
-    test_value(edisp2.ebounds_src(1.0).emax().TeV(), 15.8059295273666);
+    test_value(edisp2.etrue_bounds(GEnergy(10.0,"TeV")).emin().TeV(),  7.7813808018878);
+    test_value(edisp2.etrue_bounds(GEnergy(10.0,"TeV")).emax().TeV(), 15.8059295273666);
 
     // Test if non-diagonal element (below diagonal) is zero
     test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(1.0,"TeV")), 0.0);
@@ -1427,10 +1427,9 @@ void TestGCTAResponse::test_response_edisp_integration(const GCTAResponseIrf& rs
 
 	        // Compute log10 of true energy
             GEnergy etrue(e_src,"TeV");
-	        double  log10_e_src = etrue.log10TeV();
 
-	        // Retrieve boundaries in observed energy
-	        GEbounds ebounds = rsp.edisp()->ebounds_obs(log10_e_src);
+	        // Retrieve observed energy boundaries
+	        GEbounds ebounds = rsp.edisp()->ereco_bounds(etrue);
 	        double   emin    = ebounds.emin().MeV();
 	        double   emax    = ebounds.emax().MeV();
 
@@ -1480,10 +1479,9 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp&   edisp,
 
         // Compute log10 of true energy
         GEnergy etrue(e_src,"TeV");
-        double  log10_e_src = etrue.log10TeV();
 
-        // Retrieve boundaries in observed energy
-        GEbounds ebounds  = edisp.ebounds_obs(log10_e_src);
+        // Retrieve observed energy boundaries
+        GEbounds ebounds = edisp.ereco_bounds(etrue);
 
         // Skip this energy if the boundaries are empty
         if (ebounds.is_empty()) {

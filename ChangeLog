@@ -3,6 +3,7 @@
         * Version 1.6.0 released
         ========================
 
+        Revise GCTAEdisp class interface (#2704) 
         GCTAEdisp returns now energy dispersion values per MeV (#2704) 
         Protect GCTAInstDir from access to invalid information (#2694)
         Implement general CTA background model (#2694)

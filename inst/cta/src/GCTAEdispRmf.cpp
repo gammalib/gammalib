@@ -307,7 +307,7 @@ GEnergy GCTAEdispRmf::mc(GRan&          ran,
     GEnergy ereco;
 
     // Get boundaries for rejection method
-    GEbounds ebounds = ebounds_obs(etrue.log10TeV(), theta, phi, zenith, azimuth);
+    GEbounds ebounds = ereco_bounds(etrue, theta, phi, zenith, azimuth);
     double   emin    = ebounds.emin().log10TeV();
     double   emax    = ebounds.emax().log10TeV();
 
@@ -333,7 +333,7 @@ GEnergy GCTAEdispRmf::mc(GRan&          ran,
 /***********************************************************************//**
  * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] etrue True photon energy.
  * @param[in] theta Offset angle in camera system (radians). Not used.
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -341,13 +341,13 @@ GEnergy GCTAEdispRmf::mc(GRan&          ran,
  * @return Reconstructed energy boundaries.
  *
  * Returns the band of observed energies outside of which the energy
- * dispersion becomes negligible for a given true energy @p logEsrc.
+ * dispersion becomes negligible for a given true energy @p etrue.
  ***************************************************************************/
-GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
-                                   const double& theta,
-                                   const double& phi,
-                                   const double& zenith,
-                                   const double& azimuth) const
+GEbounds GCTAEdispRmf::ereco_bounds(const GEnergy& etrue,
+                                    const double&  theta,
+                                    const double&  phi,
+                                    const double&  zenith,
+                                    const double&  azimuth) const
 {
     // Compute only if parameters changed
     if (!m_ebounds_obs_computed || theta != m_last_theta_obs) {
@@ -355,6 +355,7 @@ GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
         // Store last theta value
         m_ebounds_obs_computed = true;
         m_last_theta_obs       = theta;
+        m_last_etrue_ereco_bounds.log10TeV(-30.0); // force update
 
         // Compute ebounds_obs
         compute_ebounds_obs(theta, phi, zenith, azimuth);
@@ -362,18 +363,21 @@ GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
     }
 
     // Search index only if logEsrc has changed
-    if (logEsrc != m_last_logEsrc) {
+    if (etrue != m_last_etrue_ereco_bounds) {
 
         // Store last photon energy
-        m_last_logEsrc = logEsrc;
+        m_last_etrue_ereco_bounds = etrue;
+
+        // Get true photon energy in TeV
+        double etrue_TeV = etrue.TeV();
 
         // Find right index with bisection
         int low  = 0;
         int high = m_ebounds_obs.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
-            double e = m_rmf.etrue().emin(mid).log10TeV();
-            if (logEsrc < e) {
+            double e = m_rmf.etrue().emin(mid).TeV();
+            if (etrue_TeV < e) {
                 high = mid;
             }
             else {
@@ -394,7 +398,7 @@ GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
  *
- * @param[in] logEobs Log10 of the observed event energy (\f$\log_{10}\f$ TeV).
+ * @param[in] ereco Reconstructed event energy.
  * @param[in] theta Offset angle in camera system (radians). Not used.
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -404,11 +408,11 @@ GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
  * Returns the band of true photon energies outside of which the energy
  * dispersion becomes negligible for a given observed energy @p logEobs.
  ***************************************************************************/
-GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
-                                   const double& theta,
-                                   const double& phi,
-                                   const double& zenith,
-                                   const double& azimuth) const
+GEbounds GCTAEdispRmf::etrue_bounds(const GEnergy& ereco,
+                                    const double&  theta,
+                                    const double&  phi,
+                                    const double&  zenith,
+                                    const double&  azimuth) const
 {
     // Compute only if parameters changed
     if (!m_ebounds_src_computed || theta != m_last_theta_src) {
@@ -416,25 +420,29 @@ GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
         // Store last value
         m_ebounds_src_computed = true;
         m_last_theta_src       = theta;
+        m_last_ereco_etrue_bounds.log10TeV(-30.0); // force update
 
         // Compute ebounds_obs
         compute_ebounds_src(theta, phi, zenith, azimuth);
 
     }
 
-    // Search index only if logEobs has changed
-    if (logEobs != m_last_logEobs) {
+    // Search index only if ereco has changed
+    if (ereco != m_last_ereco_etrue_bounds) {
 
         // Store last value
-        m_last_logEobs = logEobs;
+        m_last_ereco_etrue_bounds = ereco;
+
+        // Get reconstructed energy in TeV
+        double ereco_TeV = ereco.TeV();
 
         // Find right index with bisection
         int low  = 0;
         int high = m_ebounds_src.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
-            double e = m_rmf.emeasured().emin(mid).log10TeV();
-            if (logEobs < e) {
+            double e = m_rmf.emeasured().emin(mid).TeV();
+            if (ereco_TeV < e) {
                 high = mid;
             }
             else {
@@ -627,8 +635,8 @@ void GCTAEdispRmf::init_members(void)
     m_max_edisp            = 0.0;
     m_last_theta_obs       = -1.0;
     m_last_theta_src       = -1.0;
-    m_last_logEsrc         = -30.0;
-    m_last_logEobs         = -30.0;
+    m_last_etrue_ereco_bounds.log10TeV(-30.0);
+    m_last_ereco_etrue_bounds.log10TeV(-30.0);
     m_index_obs            = 0;
     m_index_src            = 0;
     m_ebounds_obs_computed = false;
@@ -668,17 +676,17 @@ void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
     m_wgt4           = edisp.m_wgt4;
 
     // Copy Monte Carlo cache
-    m_max_edisp            = edisp.m_max_edisp;
-    m_last_theta_obs       = edisp.m_last_theta_obs;
-    m_last_theta_src       = edisp.m_last_theta_src;
-    m_last_logEsrc         = edisp.m_last_logEsrc;
-    m_last_logEobs         = edisp.m_last_logEobs;
-    m_index_obs            = edisp.m_index_obs;
-    m_index_src            = edisp.m_index_src;
-    m_ebounds_obs_computed = edisp.m_ebounds_obs_computed;
-    m_ebounds_src_computed = edisp.m_ebounds_src_computed;
-    m_ebounds_obs          = edisp.m_ebounds_obs;
-    m_ebounds_src          = edisp.m_ebounds_src;
+    m_max_edisp               = edisp.m_max_edisp;
+    m_last_theta_obs          = edisp.m_last_theta_obs;
+    m_last_theta_src          = edisp.m_last_theta_src;
+    m_last_etrue_ereco_bounds = edisp.m_last_etrue_ereco_bounds;
+    m_last_ereco_etrue_bounds = edisp.m_last_ereco_etrue_bounds;
+    m_index_obs               = edisp.m_index_obs;
+    m_index_src               = edisp.m_index_src;
+    m_ebounds_obs_computed    = edisp.m_ebounds_obs_computed;
+    m_ebounds_src_computed    = edisp.m_ebounds_src_computed;
+    m_ebounds_obs             = edisp.m_ebounds_obs;
+    m_ebounds_src             = edisp.m_ebounds_src;
 
     // Return
     return;
@@ -721,11 +729,8 @@ void GCTAEdispRmf::set_matrix(void)
     // Normalize matrix elements
     for (int itrue = 0; itrue < rows; ++itrue) {
 
-        // Get true photon energy
-        double logEsrc = m_rmf.etrue().elogmean(itrue).log10TeV();
-
         // Get integration boundaries
-        GEbounds ebounds = ebounds_obs(logEsrc, 0.0);
+        GEbounds ebounds = ereco_bounds(m_rmf.etrue().elogmean(itrue), 0.0);
 
         // Integrate contributions over energy boundaries
         double sum = 0.0;
