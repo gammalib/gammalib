@@ -56,12 +56,12 @@ public:
     virtual std::string classname(void) const = 0;
     virtual void        load(const GFilename& filename) = 0;
     virtual GFilename   filename(void) const = 0;
-    virtual GEnergy     mc(GRan&         ran,
-                           const double& logE,
-                           const double& theta = 0.0,
-                           const double& phi = 0.0,
-                           const double& zenith = 0.0,
-                           const double& azimuth = 0.0) const = 0;
+    virtual GEnergy     mc(GRan&          ran,
+                           const GEnergy& etrue,
+                           const double&  theta = 0.0,
+                           const double&  phi = 0.0,
+                           const double&  zenith = 0.0,
+                           const double&  azimuth = 0.0) const = 0;
     virtual GEbounds    ebounds_obs(const double& logEsrc,
                                     const double& theta = 0.0,
                                     const double& phi = 0.0,

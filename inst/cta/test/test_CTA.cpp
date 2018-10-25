@@ -917,7 +917,7 @@ void TestGCTAResponse::test_response_edisp_PerfTable(void)
 
     // Test mc method
     GRan ran;
-    test_value(edisp2.mc(ran, 0.0).TeV(), 0.88667418590027);
+    test_value(edisp2.mc(ran, etrue).TeV(), 0.88667418590027);
 
     // Test normalisation
     test_edisp_integration(edisp2);
@@ -973,7 +973,7 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
 
     // Test mc method
     GRan ran;
-    test_value(edisp2.mc(ran, 0.0).TeV(), 0.930126476703161);
+    test_value(edisp2.mc(ran, etrue).TeV(), 0.930126476703161);
 
     // Test normalisation
     test_edisp_integration(edisp2, 0.5, 10.0);
@@ -1028,7 +1028,7 @@ void TestGCTAResponse::test_response_edisp_2D(void)
 
     // Test mc method
     GRan ran;
-    test_value(edisp2.mc(ran, 0.0).TeV(), 0.872387491302767);
+    test_value(edisp2.mc(ran, etrue).TeV(), 0.872387491302767);
 
     // Test normalisation
     test_edisp_integration(edisp2);

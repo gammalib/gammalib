@@ -467,7 +467,7 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] etrue True photon energy.
  * @param[in] theta Offset angle in camera system (radians).
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -482,23 +482,21 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  * angle @p theta. If no energy dispersion information is available the
  * method will return the true photon energy.
  ***************************************************************************/
-GEnergy GCTAEdisp2D::mc(GRan&         ran,
-                        const double& logEsrc,
-                        const double& theta,
-                        const double& phi,
-                        const double& zenith,
-                        const double& azimuth) const
+GEnergy GCTAEdisp2D::mc(GRan&          ran,
+                        const GEnergy& etrue,
+                        const double&  theta,
+                        const double&  phi,
+                        const double&  zenith,
+                        const double&  azimuth) const
 {
     // Make sure that energy dispersion is online
     fetch();
 
-    // Initialise energies
-    GEnergy etrue;
+    // Initialise reconstructed photon energy
     GEnergy ereco;
-    etrue.log10TeV(logEsrc);
 
     // Get boundaries for observed energy
-    GEbounds ebounds = ebounds_obs(logEsrc, theta, phi, zenith, azimuth);
+    GEbounds ebounds = ebounds_obs(etrue.log10TeV(), theta, phi, zenith, azimuth);
     double   emin    = ebounds.emin().log10TeV();
     double   emax    = ebounds.emax().log10TeV();
 
@@ -506,9 +504,8 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
     // energy (this means that no energy dispersion information is available
     // for that energy)
     if (emin >= emax) {
-        double      eng = std::pow(10.0, logEsrc);
         std::string msg = "No valid energy dispersion information available "
-                          "for true photon energy "+gammalib::str(eng)+" TeV,"
+                          "for true photon energy "+etrue.print()+","
                           "offset angle "+
                           gammalib::str(theta*gammalib::rad2deg)+" deg "
                           "and azimuth angle "+
@@ -527,7 +524,7 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
 
     // Initialise rejection method
     double    ewidth               = emax - emin;
-    double    logEobs              = logEsrc;
+    double    logEobs              = etrue.log10TeV();
     double    f                    = 0.0;
     double    ftest                = 1.0;
     int       zeros                = 0;
@@ -549,10 +546,9 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
             if (f == 0.0) {
                 zeros++;
                 if (zeros > max_subsequent_zeros) {
-                    double      eng = std::pow(10.0, logEsrc);
                     std::string msg = "No valid energy dispersion information "
                                       "available  for true photon energy "+
-                                      gammalib::str(eng)+" TeV, offset angle "+
+                                      etrue.print()+", offset angle "+
                                       gammalib::str(theta*gammalib::rad2deg)+
                                       " deg and azimuth angle "+
                                       gammalib::str(phi*gammalib::rad2deg)+

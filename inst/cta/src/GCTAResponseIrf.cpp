@@ -578,8 +578,10 @@ GEbounds GCTAResponseIrf::ebounds(const GEnergy& obsEnergy) const
  * @todo Set polar angle phi of photon in camera system
  * @todo Implement energy dispersion
  ***************************************************************************/
-GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
-                                   const GObservation& obs, GRan& ran) const
+GCTAEventAtom* GCTAResponseIrf::mc(const double&       area,
+                                   const GPhoton&      photon,
+                                   const GObservation& obs,
+                                   GRan&               ran) const
 {
     // Initialise event
     GCTAEventAtom* event = NULL;
@@ -639,7 +641,8 @@ GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
                 // Set measured photon energy
                 GEnergy energy = photon.energy();
                 if (use_edisp()) {
-                    energy = edisp()->mc(ran, srcLogEng, theta, phi, zenith, azimuth);
+                    energy = edisp()->mc(ran, photon.energy(), theta, phi,
+                                         zenith, azimuth);
                 }
 
                 // Allocate event

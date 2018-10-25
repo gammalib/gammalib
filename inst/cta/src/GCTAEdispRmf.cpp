@@ -287,7 +287,7 @@ void GCTAEdispRmf::load(const GFilename& filename)
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] etrue True photon energy.
  * @param[in] theta Offset angle in camera system (radians). Not used.
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -296,20 +296,18 @@ void GCTAEdispRmf::load(const GFilename& filename)
  *
  * Draws observed energy value from RMF matrix.
  ***************************************************************************/
-GEnergy GCTAEdispRmf::mc(GRan&         ran,
-                         const double& logEsrc,
-                         const double& theta,
-                         const double& phi,
-                         const double& zenith,
-                         const double& azimuth) const
+GEnergy GCTAEdispRmf::mc(GRan&          ran,
+                         const GEnergy& etrue,
+                         const double&  theta,
+                         const double&  phi,
+                         const double&  zenith,
+                         const double&  azimuth) const
 {
     // Initialise energies
-    GEnergy etrue;
     GEnergy ereco;
-    etrue.log10TeV(logEsrc);
 
     // Get boundaries for rejection method
-    GEbounds ebounds = ebounds_obs(logEsrc, theta, phi, zenith, azimuth);
+    GEbounds ebounds = ebounds_obs(etrue.log10TeV(), theta, phi, zenith, azimuth);
     double   emin    = ebounds.emin().log10TeV();
     double   emax    = ebounds.emax().log10TeV();
 

@@ -322,7 +322,7 @@ void GCTAEdispPerfTable::load(const GFilename& filename)
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] etrue True photon energy.
  * @param[in] theta Offset angle in camera system (radians). Not used.
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -332,13 +332,16 @@ void GCTAEdispPerfTable::load(const GFilename& filename)
  * Draws observed energy value from a normal distribution of width
  * m_par_sigma around @p logE.
  ***************************************************************************/
-GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
-                               const double& logEsrc,
-                               const double& theta,
-                               const double& phi,
-                               const double& zenith,
-                               const double& azimuth) const
+GEnergy GCTAEdispPerfTable::mc(GRan&          ran,
+                               const GEnergy& etrue,
+                               const double&  theta,
+                               const double&  phi,
+                               const double&  zenith,
+                               const double&  azimuth) const
 {
+    // Get log10 TeV of true photon energy
+    double logEsrc = etrue.log10TeV();
+
     // Update the parameter cache
     update(logEsrc);
 

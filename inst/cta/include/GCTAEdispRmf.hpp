@@ -84,11 +84,11 @@ public:
     void          load(const GFilename& filename);
     GFilename     filename(void) const;
     GEnergy       mc(GRan& ran,
-                     const double& logEsrc,
-                     const double& theta = 0.0,
-                     const double& phi = 0.0,
-                     const double& zenith = 0.0,
-                     const double& azimuth = 0.0) const;
+                     const GEnergy& etrue,
+                     const double&  theta = 0.0,
+                     const double&  phi = 0.0,
+                     const double&  zenith = 0.0,
+                     const double&  azimuth = 0.0) const;
     GEbounds      ebounds_obs(const double& logEsrc,
                               const double& theta = 0.0,
                               const double& phi = 0.0,
