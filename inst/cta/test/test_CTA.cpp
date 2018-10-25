@@ -898,13 +898,13 @@ void TestGCTAResponse::test_response_edisp_PerfTable(void)
     test_value(edisp2.ebounds_src(-1.0).emax().GeV(), 315.661420794325);
 
     // Test if non-diagonal element (below diagonal) is zero
-    test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
+    test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(10.0,"TeV")), 0.0);
 
     // Test that diagonal element is non-zero
-    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 2.12840930049511e-07);
+    test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(30.0,"TeV")), 2.12840930049511e-07);
 
     // Test if non-diagonal element (above diagonal) is zero
-    test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
+    test_value(edisp2(GEnergy(10.0,"TeV"), GEnergy(30.0,"TeV")), 0.0);
 
 
     // Test prob_erecobin method
@@ -955,13 +955,13 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
     test_value(edisp2.ebounds_src(1.0).emax().TeV(), 15.8489322662354);
 
     // Test if non-diagonal element (below diagonal) is zero
-    test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
+    test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(1.0,"TeV")), 0.0);
 
     // Test that diagonal element is non-zero
-    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 1.0785985662216e-07);
+    test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(30.0,"TeV")), 1.0785985662216e-07);
 
     // Test if non-diagonal element (above diagonal) is zero
-    test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
+    test_value(edisp2(GEnergy(1.0,"TeV"), GEnergy(30.0,"TeV")), 0.0);
 
     // Test prob_erecobin method
     GEnergy etrue(1.0, "TeV");
@@ -1010,13 +1010,13 @@ void TestGCTAResponse::test_response_edisp_2D(void)
     test_value(edisp2.ebounds_src(1.0).emax().TeV(), 15.8059295273666);
 
     // Test if non-diagonal element (below diagonal) is zero
-    test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
+    test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(1.0,"TeV")), 0.0);
 
     // Test that diagonal element is non-zero
-    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 1.74200329848547e-07);
+    test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(30.0,"TeV")), 1.74200329848547e-07);
 
     // Test if non-diagonal element (above diagonal) is zero
-    test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
+    test_value(edisp2(GEnergy(1.0,"TeV"), GEnergy(30.0,"TeV")), 0.0);
 
     // Test prob_erecobin method
     GEnergy etrue(1.0, "TeV");
@@ -1426,7 +1426,8 @@ void TestGCTAResponse::test_response_edisp_integration(const GCTAResponseIrf& rs
         for (double e_src = e_src_min; e_src < e_src_max; e_src *= 2.0) {
 
 	        // Compute log10 of true energy
-	        double log10_e_src = std::log10(e_src);
+            GEnergy etrue(e_src,"TeV");
+	        double  log10_e_src = etrue.log10TeV();
 
 	        // Retrieve boundaries in observed energy
 	        GEbounds ebounds = rsp.edisp()->ebounds_obs(log10_e_src);
@@ -1441,17 +1442,16 @@ void TestGCTAResponse::test_response_edisp_integration(const GCTAResponseIrf& rs
 	        double E_obs = emin;
 	        for (int i = 0; i < nE; ++i, E_obs += dE) {
                 GEnergy ereco(E_obs,"MeV");
-	            double dp1  = (*rsp.edisp())(ereco.log10TeV(), log10_e_src);
-	            double dp2  = rsp.edisp(ereco, 0.0, 0.0, 0.0, 0.0, log10_e_src);
+	            double dp1  = (*rsp.edisp())(ereco, etrue);
+	            double dp2  = rsp.edisp(ereco, etrue, 0.0, 0.0, 0.0, 0.0);
 	            sum1       += dp1 * dE;
 	            sum2       += dp2 * dE;
 	        }
-	        GEnergy eng(e_src, "TeV");
 	        test_value(sum1, 1.0, 0.001, "Energy dispersion integration using "+
                                          rsp.edisp()->classname()+"::operator() "
-                                         "for "+eng.print());
+                                         "for "+etrue.print());
 	        test_value(sum2, 1.0, 0.001, "Energy dispersion integration using "
-                                         "GCTAResponseIrf::edisp() for "+eng.print());
+                                         "GCTAResponseIrf::edisp() for "+etrue.print());
 	    }
 
 	} // endif: energy dispersion was available
@@ -1479,7 +1479,8 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp&   edisp,
     for (double e_src = e_src_min; e_src <= e_src_max; e_src *= 2.0) {
 
         // Compute log10 of true energy
-        double log10_e_src = std::log10(e_src);
+        GEnergy etrue(e_src,"TeV");
+        double  log10_e_src = etrue.log10TeV();
 
         // Retrieve boundaries in observed energy
         GEbounds ebounds  = edisp.ebounds_obs(log10_e_src);
@@ -1498,13 +1499,12 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp&   edisp,
         double E_obs = emin;
         for (int i = 0; i < nE; ++i, E_obs += dE) {
             GEnergy ereco(E_obs,"MeV");
-            double dp  = edisp(ereco.log10TeV(), log10_e_src);
+            double dp  = edisp(ereco, etrue);
             sum       += dp * dE;
         }
-        GEnergy eng(e_src, "TeV");
         test_value(sum, 1.0, 0.001, "Energy dispersion integration using "+
                                     edisp.classname()+"::operator() for "+
-                                    eng.print());
+                                    etrue.print());
     }
 
     // Return

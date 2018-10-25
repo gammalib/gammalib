@@ -44,12 +44,12 @@ public:
     virtual ~GCTAEdisp2D(void);
 
     // Operators
-    double operator()(const double& logEobs, 
-                      const double& logEsrc, 
-                      const double& theta = 0.0, 
-                      const double& phi = 0.0,
-                      const double& zenith = 0.0,
-                      const double& azimuth = 0.0) const;
+    double operator()(const GEnergy& ereco,
+                      const GEnergy& etrue,
+                      const double&  theta = 0.0,
+                      const double&  phi = 0.0,
+                      const double&  zenith = 0.0,
+                      const double&  azimuth = 0.0) const;
 
     // Implemented methods
     void         clear(void);

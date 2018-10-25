@@ -160,8 +160,8 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
 /***********************************************************************//**
  * @brief Return energy dispersion in units of MeV\f$^{-1}\f$
  *
- * @param[in] logEobs Log10 of the observed photon energy (\f$\log_{10}\f$ TeV).
- * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] ereco Reconstructed photon energy.
+ * @param[in] etrue True photon energy.
  * @param[in] theta Offset angle in camera system (radians). Not used.
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -184,13 +184,17 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
  * \f$\sigma(E_{\rm true})\f$ is the standard deviation of the energy
  * dispersion that depends on the true photon energy.
  ***************************************************************************/
-double GCTAEdispPerfTable::operator()(const double& logEobs,
-                                      const double& logEsrc,
-                                      const double& theta,
-                                      const double& phi,
-                                      const double& zenith,
-                                      const double& azimuth) const
+double GCTAEdispPerfTable::operator()(const GEnergy& ereco,
+                                      const GEnergy& etrue,
+                                      const double&  theta,
+                                      const double&  phi,
+                                      const double&  zenith,
+                                      const double&  azimuth) const
 {
+    // Get log10 of true and reconstructed photon energies
+    double logEsrc = etrue.log10TeV();
+    double logEobs = ereco.log10TeV();
+
     // Update the parameter cache
     update(logEsrc);
 
@@ -198,11 +202,8 @@ double GCTAEdispPerfTable::operator()(const double& logEobs,
     double delta = logEobs - logEsrc;
     double edisp = m_par_scale * std::exp(m_par_width * delta * delta);
 
-    // Compute reconstructed energy in MeV
-    double ereco = std::pow(10.0, logEobs+6.0);
-
     // Compute energy dispersion per MeV
-    edisp /= (gammalib::ln10 * ereco);
+    edisp /= (gammalib::ln10 * ereco.MeV());
 
     // Return energy dispersion
     return edisp;

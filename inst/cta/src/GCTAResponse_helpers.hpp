@@ -189,7 +189,6 @@ public:
                             const double&              azimuth,
                             const GEnergy&             srcEng,
                             const GTime&               srcTime,
-                            const double&              srcLogEng,
                             const GEnergy&             obsEng,
                             const double&              zeta,
                             const double&              lambda,
@@ -202,7 +201,6 @@ public:
                             m_azimuth(azimuth),
                             m_srcEng(srcEng),
                             m_srcTime(srcTime),
-                            m_srcLogEng(srcLogEng),
                             m_obsEng(obsEng),
                             m_zeta(zeta),
                             m_cos_zeta(std::cos(zeta)),
@@ -222,7 +220,6 @@ protected:
     double                     m_azimuth;       //!< Azimuth angle
     GEnergy                    m_srcEng;        //!< True photon energy
     GTime                      m_srcTime;       //!< True photon time
-    double                     m_srcLogEng;     //!< True photon log10 energy
     GEnergy                    m_obsEng;        //!< Measured event energy
     double                     m_zeta;          //!< Distance model centre - measured photon
     double                     m_cos_zeta;      //!< Cosine of zeta
@@ -260,7 +257,7 @@ public:
     cta_irf_radial_kern_omega(const GCTAResponseIrf* rsp,
                               const double&          zenith,
                               const double&          azimuth,
-                              const double&          srcLogEng,
+                              const GEnergy&         srcEng,
                               const GEnergy&         obsEng,
                               const double&          zeta,
                               const double&          lambda,
@@ -273,7 +270,7 @@ public:
                               m_rsp(rsp),
                               m_zenith(zenith),
                               m_azimuth(azimuth),
-                              m_srcLogEng(srcLogEng),
+                              m_srcEng(srcEng),
                               m_obsEng(obsEng),
                               m_zeta(zeta),
                               m_lambda(lambda),
@@ -288,7 +285,7 @@ protected:
     const GCTAResponseIrf* m_rsp;       //!< CTA response
     double                 m_zenith;    //!< Zenith angle
     double                 m_azimuth;   //!< Azimuth angle
-    double                 m_srcLogEng; //!< True photon energy
+    GEnergy                m_srcEng;    //!< True photon energy
     GEnergy                m_obsEng;    //!< Measured event energy
     double                 m_zeta;      //!< Distance model centre - measured photon
     double                 m_lambda;    //!< Distance model centre - pointing
@@ -474,7 +471,6 @@ public:
                                 const double&                  azimuth,
                                 const GEnergy&                 srcEng,
                                 const GTime&                   srcTime,
-                                const double&                  srcLogEng,
                                 const GEnergy&                 obsEng,
                                 const double&                  rho_obs,
                                 const double&                  posangle_obs,
@@ -491,7 +487,6 @@ public:
                                 m_azimuth(azimuth),
                                 m_srcEng(srcEng),
                                 m_srcTime(srcTime),
-                                m_srcLogEng(srcLogEng),
                                 m_obsEng(obsEng),
                                 m_rho_obs(rho_obs),
                                 m_cos_rho_obs(std::cos(rho_obs)),
@@ -515,7 +510,6 @@ public:
     double                         m_azimuth;       //!< Azimuth angle
     GEnergy                        m_srcEng;        //!< True photon energy
     GTime                          m_srcTime;       //!< True photon time
-    double                         m_srcLogEng;     //!< True photon log energy
     GEnergy                        m_obsEng;        //!< Measured event energy
     double                         m_rho_obs;       //!< Distance of model centre from measured photon
     double                         m_cos_rho_obs;   //!< Cosine of m_rho_obs
@@ -558,7 +552,6 @@ public:
                                   const double&                  azimuth,
                                   const GEnergy&                 srcEng,
                                   const GTime&                   srcTime,
-                                  const double&                  srcLogEng,
                                   const GEnergy&                 obsEng,
                                   const double&                  posangle_obs,
                                   const double&                  omega_pnt,
@@ -573,7 +566,6 @@ public:
                                   m_azimuth(azimuth),
                                   m_srcEng(srcEng),
                                   m_srcTime(srcTime),
-                                  m_srcLogEng(srcLogEng),
                                   m_obsEng(obsEng),
                                   m_posangle_obs(posangle_obs),
                                   m_omega_pnt(omega_pnt),
@@ -590,7 +582,6 @@ public:
     double                         m_azimuth;      //!< Azimuth angle
     GEnergy                        m_srcEng;       //!< True photon energy
     GTime                          m_srcTime;      //!< True photon time
-    double                         m_srcLogEng;    //!< True photon log energy
     GEnergy                        m_obsEng;       //!< Measured event energy
     double                         m_posangle_obs; //!< Measured photon position angle from model centre
     double                         m_omega_pnt;    //!< Azimuth of pointing in model system
@@ -1102,7 +1093,7 @@ public:
 
 
 /***********************************************************************//**
- * @class cta_irf_radial_kern_omega
+ * @class cta_psf_radial_kern_omega
  *
  * @brief Kernel for radial model azimuth angle integration
  *

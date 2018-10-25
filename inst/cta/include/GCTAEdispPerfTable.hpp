@@ -75,12 +75,12 @@ public:
 
     // Operators
     GCTAEdispPerfTable& operator=(const GCTAEdispPerfTable& psf);
-    double operator()(const double& logEobs,
-                      const double& logEsrc,
-                      const double& theta = 0.0,
-                      const double& phi = 0.0,
-                      const double& zenith = 0.0,
-                      const double& azimuth = 0.0) const;
+    double operator()(const GEnergy& ereco,
+                      const GEnergy& etrue,
+                      const double&  theta = 0.0,
+                      const double&  phi = 0.0,
+                      const double&  zenith = 0.0,
+                      const double&  azimuth = 0.0) const;
 
     // Implemented pure virtual methods
     void                clear(void);

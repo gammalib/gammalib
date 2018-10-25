@@ -55,12 +55,12 @@ public:
     virtual ~GCTAEdisp(void);
 
     // Pure virtual operators
-    virtual double operator()(const double& logEobs, 
-                              const double& logEsrc, 
-                              const double& theta = 0.0, 
-                              const double& phi = 0.0,
-                              const double& zenith = 0.0,
-                              const double& azimuth = 0.0) const = 0;
+    virtual double operator()(const GEnergy& ereco,
+                              const GEnergy& etrue,
+                              const double&  theta = 0.0,
+                              const double&  phi = 0.0,
+                              const double&  zenith = 0.0,
+                              const double&  azimuth = 0.0) const = 0;
 
     // Operators
     GCTAEdisp& operator=(const GCTAEdisp& edisp);

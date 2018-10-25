@@ -162,8 +162,8 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
 /***********************************************************************//**
  * @brief Return energy dispersion in units of MeV\f$^{-1}\f$
  *
- * @param[in] logEobs Log10 of the observed photon energy (\f$\log_{10}\f$ TeV).
- * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] ereco Reconstructed photon energy.
+ * @param[in] etrue True photon energy.
  * @param[in] theta Offset angle in camera system (radians). Not used.
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
@@ -182,13 +182,17 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * \f$E_{\rm reco}\f$ is the reconstructed energy in units of MeV, and
  * \f$E_{\rm true}\f$ is the true energy in units of MeV.
  ***************************************************************************/
-double GCTAEdispRmf::operator()(const double& logEobs,
-                                const double& logEsrc,
-                                const double& theta,
-                                const double& phi,
-                                const double& zenith,
-                                const double& azimuth) const
+double GCTAEdispRmf::operator()(const GEnergy& ereco,
+                                const GEnergy& etrue,
+                                const double&  theta,
+                                const double&  phi,
+                                const double&  zenith,
+                                const double&  azimuth) const
 {
+    // Get log10 of true and reconstructed photon energies
+    double logEsrc = etrue.log10TeV();
+    double logEobs = ereco.log10TeV();
+
     // Update indexes and weighting factors for interpolation
     update(logEobs, logEsrc);
 
@@ -205,7 +209,7 @@ double GCTAEdispRmf::operator()(const double& logEobs,
 
     // If the energy dispersion is positive, return it per MeV
     else {
-        edisp /= (gammalib::ln10 * std::pow(10.0, logEobs+6.0));
+        edisp /= (gammalib::ln10 * ereco.MeV());
     }
 
     // Return energy dispersion
@@ -299,6 +303,11 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& zenith,
                          const double& azimuth) const
 {
+    // Initialise energies
+    GEnergy etrue;
+    GEnergy ereco;
+    etrue.log10TeV(logEsrc);
+
     // Get boundaries for rejection method
     GEbounds ebounds = ebounds_obs(logEsrc, theta, phi, zenith, azimuth);
     double   emin    = ebounds.emin().log10TeV();
@@ -312,17 +321,14 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
         double ftest  = 1.0;
         while (ftest > f) {
             logEobs = emin + ewidth * ran.uniform();
-            f       = operator()(logEobs, logEsrc, theta, phi, zenith, azimuth);
+            ereco.log10TeV(logEobs);
+            f       = operator()(ereco, etrue, theta, phi, zenith, azimuth);
             ftest   = ran.uniform() * m_max_edisp;
         }
     }
 
-    // Set observed energy
-    GEnergy energy;
-    energy.log10TeV(logEobs);
-
-    // Return energy
-    return energy;
+    // Return reconstructed photon energy
+    return ereco;
 }
 
 
@@ -492,10 +498,10 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
     double wgt_right = m_etrue.wgt_right();
 
     // Initialise first and second node
-    double x1 = logEobs_min;
-    double f1 = this->operator()(x1, logEsrc);
-    double x2 = 0.0;
-    double f2 = 0.0;
+    GEnergy x1 = ereco_min;
+    double  f1 = this->operator()(x1, etrue);
+    GEnergy x2;
+    double  f2 = 0.0;
 
     // Loop over all measured energy nodes
     for (int i = 0; i < m_emeasured.size(); ++i) {
@@ -508,13 +514,13 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
         // If measured energy is above maximum migration value then use
         // logEobs_max as measured energy
         if (m_emeasured[i] > logEobs_max) {
-            x2 = logEobs_max;
-            f2 = this->operator()(x2, logEsrc);
+            x2 = ereco_max;
+            f2 = this->operator()(x2, etrue);
         }
 
         // ... otherwise use measured energy
         else {
-            x2 = m_emeasured[i];
+            x2.log10TeV(m_emeasured[i]);
             f2 = wgt_left  * m_matrix(inx_left,  i) +
                  wgt_right * m_matrix(inx_right, i);
             if (f2 < 0.0) {
@@ -523,7 +529,7 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
         }
 
         // Compute integral
-        prob += 0.5 * (f1 + f2) * (x2 - x1);
+        prob += 0.5 * (f1 + f2) * (x2.log10TeV() - x1.log10TeV());
 
         // Set second node as first node
         x1 = x2;
@@ -538,10 +544,10 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
 
     // If last node energy is below migra_max then compute last part of
     // integral up to emax
-    if (x1 < logEobs_max) {
-        x2    = logEobs_max;
-        f2    = this->operator()(x2, logEsrc);
-        prob += 0.5 * (f1 + f2) * (x2 - x1);
+    if (x1 < ereco_max) {
+        x2    = ereco_max;
+        f2    = this->operator()(x2, etrue);
+        prob += 0.5 * (f1 + f2) * (x2.log10TeV() - x1.log10TeV());
     }
 
     // Return probability

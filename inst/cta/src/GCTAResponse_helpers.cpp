@@ -483,7 +483,7 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
                 cta_irf_radial_kern_omega integrand(m_rsp,
                                                     m_zenith,
                                                     m_azimuth,
-                                                    m_srcLogEng,
+                                                    m_srcEng,
                                                     m_obsEng,
                                                     m_zeta,
                                                     m_lambda,
@@ -565,6 +565,9 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
  ***************************************************************************/
 double cta_irf_radial_kern_omega::eval(const double& omega)
 {
+    // Get log10(E/TeV) of true photon energy
+    double srcLogEng = m_srcEng.log10TeV();
+
     // Compute PSF offset angle [radians]
     double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
 
@@ -575,12 +578,12 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
     double azimuth = 0.0;
 
     // Evaluate IRF
-    double irf = m_rsp->aeff(offset, azimuth, m_zenith, m_azimuth, m_srcLogEng) *
-                 m_rsp->psf(delta, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
+    double irf = m_rsp->aeff(offset, azimuth, m_zenith, m_azimuth, srcLogEng) *
+                 m_rsp->psf(delta, offset, azimuth, m_zenith, m_azimuth, srcLogEng);
 
     // Optionally take energy dispersion into account
     if (m_rsp->use_edisp() && irf > 0.0) {
-        irf *= m_rsp->edisp(m_obsEng, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
+        irf *= m_rsp->edisp(m_obsEng, m_srcEng, offset, azimuth, m_zenith, m_azimuth);
     }
 
     // Compile option: Check for NaN/Inf
@@ -840,7 +843,6 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
                                                     m_azimuth,
                                                     m_srcEng,
                                                     m_srcTime,
-                                                    m_srcLogEng,
                                                     m_obsEng,
                                                     m_posangle_obs,
                                                     m_omega_pnt,
@@ -1033,6 +1035,9 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
     // Continue only if model is positive
     if (model > 0.0) {
 
+        // Get log10(E/TeV) of true photon energy
+        double srcLogEng = m_srcEng.log10TeV();
+
         // Compute Psf offset angle [radians]
         double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
 
@@ -1042,14 +1047,13 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
         double phi   = 0.0; //TODO: Implement IRF Phi dependence
 
         // Evaluate IRF * model
-        irf = m_rsp->aeff(theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
-              m_rsp->psf(delta, theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
+        irf = m_rsp->aeff(theta, phi, m_zenith, m_azimuth, srcLogEng) *
+              m_rsp->psf(delta, theta, phi, m_zenith, m_azimuth, srcLogEng) *
               model;
 
         // Optionally take energy dispersion into account
         if (m_rsp->use_edisp() && irf > 0.0) {
-            irf *= m_rsp->edisp(m_obsEng, theta, phi, 
-                                m_zenith, m_azimuth, m_srcLogEng);
+            irf *= m_rsp->edisp(m_obsEng, m_srcEng, theta, phi, m_zenith, m_azimuth);
         }
 
         // Compile option: Check for NaN/Inf
@@ -1530,8 +1534,8 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
 
         // Optionally take energy dispersion into account
         if (m_rsp->use_edisp() && irf > 0.0) {
-            irf *= m_rsp->edisp(m_obsEng, offset, azimuth,
-                                m_zenith, m_azimuth, m_srcLogEng);
+            irf *= m_rsp->edisp(m_obsEng, m_srcEng, offset, azimuth,
+                                m_zenith, m_azimuth);
         }
 
         // Compile option: Check for NaN/Inf

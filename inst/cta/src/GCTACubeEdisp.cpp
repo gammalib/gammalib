@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTACubeEdisp.cpp - CTA cube analysis energy dispersion class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Michael Mayer                               *
+ *  copyright (C) 2016-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -994,9 +994,9 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
 
                         // Add energy dispersion cube value
                         m_cube(pixel, imap) += rsp->edisp(Eobs,
+                                                          m_energies[iebin],
                                                           theta, 0.0,
-                                                          0.0, 0.0,
-                                                          logEsrc) * weight;
+                                                          0.0, 0.0) * weight;
 
                     } // endfor: looped over migration bins
 

@@ -237,25 +237,34 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test GCTAEdisp classes
         """
+        # Set some energies
+        eng0    = gammalib.GEnergy(1.0, 'TeV')
+        eng01   = gammalib.GEnergy(1.2589254, 'TeV')
+        eng001  = gammalib.GEnergy(1.023293, 'TeV')
+        eng0001 = gammalib.GEnergy(1.0023052, 'TeV')
+        eng1001 = gammalib.GEnergy(10.023052, 'TeV')
+        eng1    = gammalib.GEnergy(10.0, 'TeV')
+        eng30   = gammalib.GEnergy(30.0, 'TeV')
+
         # Test GCTAEdispRmf file constructor
         filename = self._caldb + '/dc1/rmf.fits'
         edisp    = gammalib.GCTAEdispRmf(filename)
 
         # Test energy dispersion values
-        self.test_value(edisp(math.log10(30),math.log10(1)), 0.0, 1.0e-9)
-        self.test_value(edisp(math.log10(1),math.log10(30)), 0.0, 1.0e-9)
+        self.test_value(edisp(eng30, eng0), 0.0, 1.0e-9)
+        self.test_value(edisp(eng0, eng30), 0.0, 1.0e-9)
 
         # Test GCTAEdispPerfTable file constructor
         filename = self._caldb + '/cta_dummy_irf.dat'
         edisp    = gammalib.GCTAEdispPerfTable(filename)
 
         # Test energy dispersion values
-        self.test_value(edisp(0.0, 0.0),        4.3386871e-06, 1.0e-6)
-        self.test_value(edisp(0.001, 0.0),      4.3273514e-06, 1.0e-6)
-        self.test_value(edisp(0.01, 0.0),       4.1090489e-06, 1.0e-6)
-        self.test_value(edisp(0.1, 0.0),        1.4984969e-07, 1.0e-6)
-        self.test_value(edisp(1.0, 1.0),        7.8454726e-07, 1.0e-6)
-        self.test_value(edisp(1.001, 1.0, 0.0), 7.8194077e-07, 1.0e-6)
+        self.test_value(edisp(eng0,    eng0),      4.3386871e-06, 1.0e-6)
+        self.test_value(edisp(eng0001, eng0),      4.3273514e-06, 1.0e-6)
+        self.test_value(edisp(eng001,  eng0),      4.1090489e-06, 1.0e-6)
+        self.test_value(edisp(eng01,   eng0),      1.4984969e-07, 1.0e-6)
+        self.test_value(edisp(eng1,    eng1),      7.8454726e-07, 1.0e-6)
+        self.test_value(edisp(eng1001, eng1, 0.0), 7.8194077e-07, 1.0e-6)
 
         # Test GCTAResponseIrf file constructor
         db  = gammalib.GCaldb(self._caldb)

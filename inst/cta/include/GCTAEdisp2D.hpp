@@ -31,6 +31,7 @@
 #include <string>
 #include "GFilename.hpp"
 #include "GFunction.hpp"
+#include "GEnergy.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAResponseTable.hpp"
 
@@ -105,12 +106,12 @@ public:
 
     // Operators
     GCTAEdisp2D& operator=(const GCTAEdisp2D& edisp);
-    double operator()(const double& logEobs, 
-                      const double& logEsrc, 
-                      const double& theta = 0.0, 
-                      const double& phi = 0.0,
-                      const double& zenith = 0.0,
-                      const double& azimuth = 0.0) const;
+    double operator()(const GEnergy& ereco,
+                      const GEnergy& etrue,
+                      const double&  theta = 0.0,
+                      const double&  phi = 0.0,
+                      const double&  zenith = 0.0,
+                      const double&  azimuth = 0.0) const;
 
     // Implemented methods
     void         clear(void);
@@ -215,15 +216,15 @@ private:
     class edisp_kern : public GFunction {
     public:
         edisp_kern(const GCTAEdisp2D* parent,
-                   const double&      logEsrc,
+                   const GEnergy&     etrue,
                    const double&      theta) :
                    m_parent(parent),
-                   m_logEsrc(logEsrc),
+                   m_etrue(etrue),
                    m_theta(theta) { }
         double eval(const double& logEobs);
     protected:
         const GCTAEdisp2D* m_parent;  //!< Pointer to parent class
-        double             m_logEsrc; //!< True photon energy
+        GEnergy            m_etrue;   //!< True photon energy
         double             m_theta;   //!< Offset angle
     };
 

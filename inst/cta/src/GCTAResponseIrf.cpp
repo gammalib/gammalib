@@ -375,7 +375,7 @@ double GCTAResponseIrf::irf(const GEvent&       event,
             if (use_edisp() && irf > 0.0) {
 
                 // Multiply-in energy dispersion
-                irf *= edisp(obsEng, theta, phi, zenith, azimuth, srcLogEng);
+                irf *= edisp(obsEng, srcEng, theta, phi, zenith, azimuth);
 
             } // endif: energy dispersion was available and PSF was non-zero
 
@@ -1804,26 +1804,23 @@ double GCTAResponseIrf::psf_delta_max(const double& theta,
 /***********************************************************************//**
  * @brief Return energy dispersion (in units of MeV\f$^{-1}\f$)
  *
- * @param[in] obsEng Measured event energy.
+ * @param[in] ereco Reconstructed event energy.
+ * @param[in] etrue True photon energy.
  * @param[in] theta Radial offset angle in camera (radians).
  * @param[in] phi Polar angle in camera (radians).
  * @param[in] zenith Zenith angle of telescope pointing (radians).
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
- * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  * @return Energy dispersion (MeV\f$^{-1}\f$).
  ***************************************************************************/
-double GCTAResponseIrf::edisp(const GEnergy& obsEng,
+double GCTAResponseIrf::edisp(const GEnergy& ereco,
+                              const GEnergy& etrue,
                               const double&  theta,
                               const double&  phi,
                               const double&  zenith,
-                              const double&  azimuth,
-                              const double&  srcLogEng) const
+                              const double&  azimuth) const
 {
-    // Compute log10 energy in TeV
-    double obsLogEng = obsEng.log10TeV();
-
     // Compute energy dispersion
-    double edisp = (*m_edisp)(obsLogEng, srcLogEng, theta, phi, zenith, azimuth);
+    double edisp = (*m_edisp)(ereco, etrue, theta, phi, zenith, azimuth);
 
     // Return energy dispersion
     return edisp;
@@ -1946,7 +1943,7 @@ double GCTAResponseIrf::nirf(const GPhoton&      photon,
         if (use_edisp() && nroi > 0.0) {
 
             // Multiply-in energy dispersion
-            nroi *= edisp(obsEng, theta, phi, zenith, azimuth, srcLogEng);
+            nroi *= edisp(obsEng, srcEng, theta, phi, zenith, azimuth);
 
         } // endif: had energy dispersion
 
@@ -2396,7 +2393,6 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
                                           azimuth,
                                           srcEng,
                                           srcTime,
-                                          srcLogEng,
                                           obsEng,
                                           zeta,
                                           lambda,
@@ -2614,7 +2610,6 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
                                               azimuth,
                                               srcEng,
                                               srcTime,
-                                              srcLogEng,
                                               obsEng,
                                               rho_obs,
                                               posangle_obs,
