@@ -901,7 +901,7 @@ void TestGCTAResponse::test_response_edisp_PerfTable(void)
     test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
 
     // Test that diagonal element is non-zero
-    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 14.7025305813298);
+    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 2.12840930049511e-07);
 
     // Test if non-diagonal element (above diagonal) is zero
     test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
@@ -911,7 +911,7 @@ void TestGCTAResponse::test_response_edisp_PerfTable(void)
     GEnergy etrue(1.0, "TeV");
     GEnergy emin(0.1, "TeV");
     GEnergy emax(10.0, "TeV");
-    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0), 1.0);
+    test_value(edisp2.prob_erecobin(emin, emax, etrue,  0.0), 1.0);
     test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.5);
     test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.5);
 
@@ -958,7 +958,7 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
     test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
 
     // Test that diagonal element is non-zero
-    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 7.4480009344395);
+    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 1.0785985662216e-07);
 
     // Test if non-diagonal element (above diagonal) is zero
     test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
@@ -967,13 +967,13 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
     GEnergy etrue(1.0, "TeV");
     GEnergy emin(0.1, "TeV");
     GEnergy emax(10.0, "TeV");
-    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0),  0.999664174482241);
-    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.494679101633454);
-    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.504985072848788);
+    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0),  1.00002576227557);
+    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.42065218271377);
+    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.43096191010834);
 
     // Test mc method
     GRan ran;
-    test_value(edisp2.mc(ran, 0.0).TeV(), 0.942937281664539);
+    test_value(edisp2.mc(ran, 0.0).TeV(), 0.930126476703161);
 
     // Test normalisation
     test_edisp_integration(edisp2, 0.5, 10.0);
@@ -1006,14 +1006,14 @@ void TestGCTAResponse::test_response_edisp_2D(void)
     test_value(edisp2.ebounds_obs(1.0).emax().TeV(), 13.2011115155942);
 
     // Test ebounds_src method
-    test_value(edisp2.ebounds_src(1.0).emin().TeV(),  7.72198100249182);
-    test_value(edisp2.ebounds_src(1.0).emax().TeV(), 19.8348918834691);
+    test_value(edisp2.ebounds_src(1.0).emin().TeV(),  7.7813808018878);
+    test_value(edisp2.ebounds_src(1.0).emax().TeV(), 15.8059295273666);
 
     // Test if non-diagonal element (below diagonal) is zero
     test_value(edisp2(std::log10(30.0), std::log10(1.0)), 0.0);
 
     // Test that diagonal element is non-zero
-    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 11.7884028286084);
+    test_value(edisp2(std::log10(30.0),std::log10(30.0)), 1.74200329848547e-07);
 
     // Test if non-diagonal element (above diagonal) is zero
     test_value(edisp2(std::log10(1.0), std::log10(30.0)), 0.0);
@@ -1022,13 +1022,13 @@ void TestGCTAResponse::test_response_edisp_2D(void)
     GEnergy etrue(1.0, "TeV");
     GEnergy emin(0.1, "TeV");
     GEnergy emax(10.0, "TeV");
-    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0),  1.00008878464952);
-    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.448839360815326);
-    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.551249618415791);
+    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0),  1.00002101900895);
+    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.480451962185927);
+    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.519569056823021);
 
     // Test mc method
     GRan ran;
-    test_value(edisp2.mc(ran, 0.0).TeV(), 0.97532927330811);
+    test_value(edisp2.mc(ran, 0.0).TeV(), 0.872387491302767);
 
     // Test normalisation
     test_edisp_integration(edisp2);
@@ -1411,9 +1411,9 @@ void TestGCTAResponse::test_response_edispcube(void)
 /***********************************************************************//**
  * @brief Utility function for energy dispersion tests
  *
- * @param[in] rsp Response
- * @param[in] e_src_min Minimum true energy (TeV) (default: 0.1)
- * @param[in] e_src_max Maximum true energy (TeV) (default: 10.0)
+ * @param[in] rsp Response.
+ * @param[in] e_src_min Minimum true energy (TeV).
+ * @param[in] e_src_max Maximum true energy (TeV).
  ***************************************************************************/
 void TestGCTAResponse::test_response_edisp_integration(const GCTAResponseIrf& rsp,
                                                        const double&          e_src_min,
@@ -1429,40 +1429,29 @@ void TestGCTAResponse::test_response_edisp_integration(const GCTAResponseIrf& rs
 	        double log10_e_src = std::log10(e_src);
 
 	        // Retrieve boundaries in observed energy
-	        GEbounds ebounds  = rsp.edisp()->ebounds_obs(log10_e_src);
-	        GEnergy  emin     = ebounds.emin();
-	        GEnergy  emax     = ebounds.emax();
-	        double   logE_min = std::log10(emin.TeV());
-	        double   logE_max = std::log10(emax.TeV());
-
-	        // Compute step size for numerical integration
-	        const int steps = 1000;
-	        double    dlogE = (logE_max-logE_min)/steps;
+	        GEbounds ebounds = rsp.edisp()->ebounds_obs(log10_e_src);
+	        double   emin    = ebounds.emin().MeV();
+	        double   emax    = ebounds.emax().MeV();
 
 	        // Perform numerical integration by summing
-	        double sum      = 0.0;
-	        double logE_obs = logE_min;
-	        for (int i = 0; i < steps; ++i) {
-	            double dp_dlogE = (*rsp.edisp())(logE_obs, log10_e_src);
-	            sum            += dp_dlogE * dlogE;
-	            logE_obs       += dlogE;
+	        const int nE = 10000;
+	        double dE    = (emax-emin)/nE;
+	        double sum1  = 0.0;
+	        double sum2  = 0.0;
+	        double E_obs = emin;
+	        for (int i = 0; i < nE; ++i, E_obs += dE) {
+                GEnergy ereco(E_obs,"MeV");
+	            double dp1  = (*rsp.edisp())(ereco.log10TeV(), log10_e_src);
+	            double dp2  = rsp.edisp(ereco, 0.0, 0.0, 0.0, 0.0, log10_e_src);
+	            sum1       += dp1 * dE;
+	            sum2       += dp2 * dE;
 	        }
 	        GEnergy eng(e_src, "TeV");
-	        test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
-
-	        // And now in linear energies, test GCTAResponse::edisp() method
-	        const int nE = 10000;
-	        double E_min = emin.MeV();
-	        double E_max = emax.MeV();
-	        double dE    = (E_max-E_min)/nE;
-	        double sum2  = 0.0;
-	        double E_obs = E_min;
-	        for (int i = 0; i < nE; ++i) {
-	            double dp_dE = rsp.edisp(GEnergy(E_obs,"MeV"), 0.0, 0.0, 0.0, 0.0, log10_e_src);
-	            sum2        += dp_dE * dE;
-	            E_obs       += dE;
-	        }
-	        test_value(sum2, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
+	        test_value(sum1, 1.0, 0.001, "Energy dispersion integration using "+
+                                         rsp.edisp()->classname()+"::operator() "
+                                         "for "+eng.print());
+	        test_value(sum2, 1.0, 0.001, "Energy dispersion integration using "
+                                         "GCTAResponseIrf::edisp() for "+eng.print());
 	    }
 
 	} // endif: energy dispersion was available
@@ -1475,15 +1464,17 @@ void TestGCTAResponse::test_response_edisp_integration(const GCTAResponseIrf& rs
 /***********************************************************************//**
  * @brief Utility function for energy dispersion integration tests
  *
- * @param[in] edisp Energy dispersion
- * @param[in] e_src_min Minimum true energy (TeV) (default: 0.1)
- * @param[in] e_src_max Maximum true energy (TeV) (default: 10.0)
+ * @param[in] edisp Energy dispersion instance.
+ * @param[in] e_src_min Minimum true energy (TeV).
+ * @param[in] e_src_max Maximum true energy (TeV).
+ *
+ * Tests whether the energy dispersion integrated over observed energies
+ * gives unity.
  ***************************************************************************/
-void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
-                                              const double&    e_src_min,
-                                              const double&    e_src_max)
+void TestGCTAResponse::test_edisp_integration(const GCTAEdisp&   edisp,
+                                              const double&      e_src_min,
+                                              const double&      e_src_max)
 {
-
     // Loop over source energies
     for (double e_src = e_src_min; e_src <= e_src_max; e_src *= 2.0) {
 
@@ -1498,30 +1489,22 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
             continue;
         }
 
-        // Set measured energy range
-        GEnergy  emin     = ebounds.emin();
-        GEnergy  emax     = ebounds.emax();
-        double   logE_min = std::log10(emin.TeV());
-        double   logE_max = std::log10(emax.TeV());
-
-        // Compute step size for numerical integration
-        const int steps = 1000;
-        double    dlogE = (logE_max-logE_min)/steps;
-
         // Perform numerical integration by summing
-        double sum      = 0.0;
-        double logE_obs = logE_min;
-        for (int i = 0; i <= steps; ++i) {
-            double dp_dlogE = edisp(logE_obs, log10_e_src);
-            sum            += dp_dlogE * dlogE;
-            logE_obs       += dlogE;
+        const int nE = 10000;
+        double emin  = ebounds.emin().MeV();
+        double emax  = ebounds.emax().MeV();
+        double dE    = (emax-emin)/nE;
+        double sum   = 0.0;
+        double E_obs = emin;
+        for (int i = 0; i < nE; ++i, E_obs += dE) {
+            GEnergy ereco(E_obs,"MeV");
+            double dp  = edisp(ereco.log10TeV(), log10_e_src);
+            sum       += dp * dE;
         }
-
-        // Set message string
-        GEnergy     eng(e_src, "TeV");
-        std::string msg = edisp.classname()+" integration for "+eng.print();
-        test_value(sum, 1.0, 0.01, msg);
-
+        GEnergy eng(e_src, "TeV");
+        test_value(sum, 1.0, 0.001, "Energy dispersion integration using "+
+                                    edisp.classname()+"::operator() for "+
+                                    eng.print());
     }
 
     // Return

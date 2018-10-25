@@ -250,12 +250,12 @@ class Test(gammalib.GPythonTestSuite):
         edisp    = gammalib.GCTAEdispPerfTable(filename)
 
         # Test energy dispersion values
-        self.test_value(edisp(0.0, 0.0), 9.99019627861, 1.0e-6)
-        self.test_value(edisp(0.001, 0.0), 9.9870644077, 1.0e-6)
-        self.test_value(edisp(0.01, 0.0), 9.68182, 1.0e-6)
-        self.test_value(edisp(0.1, 0.0), 0.434382, 1.0e-6)
-        self.test_value(edisp(1.0, 1.0), 18.064868197, 1.0e-6)
-        self.test_value(edisp(1.001, 1.0, 0.0), 18.0463571212, 1.0e-6)
+        self.test_value(edisp(0.0, 0.0),        4.3386871e-06, 1.0e-6)
+        self.test_value(edisp(0.001, 0.0),      4.3273514e-06, 1.0e-6)
+        self.test_value(edisp(0.01, 0.0),       4.1090489e-06, 1.0e-6)
+        self.test_value(edisp(0.1, 0.0),        1.4984969e-07, 1.0e-6)
+        self.test_value(edisp(1.0, 1.0),        7.8454726e-07, 1.0e-6)
+        self.test_value(edisp(1.001, 1.0, 0.0), 7.8194077e-07, 1.0e-6)
 
         # Test GCTAResponseIrf file constructor
         db  = gammalib.GCaldb(self._caldb)
