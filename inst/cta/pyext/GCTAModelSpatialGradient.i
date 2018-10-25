@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GCTAModelSpatialGradient.hpp - Spatial gradient CTA model class    *
+ *       GCTAModelSpatialGradient.i - Spatial gradient CTA model class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2018 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,25 +19,14 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelSpatialGradient.hpp
+ * @file GCTAModelSpatialGradient.i
  * @brief Spatial gradient CTA interface definition
  * @author Juergen Knoedlseder
  */
-
-#ifndef GCTAMODELSPATIALGRADIENT_HPP
-#define GCTAMODELSPATIALGRADIENT_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include <string>
-#include "GModelPar.hpp"
-#include "GCTAModelSpatial.hpp"
-
-/* __ Forward declarations _______________________________________________ */
-class GRan;
-class GXmlElement;
-class GCTAInstDir;
-class GEnergy;
-class GTime;
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GCTAModelSpatialGradient.hpp"
+%}
 
 
 /***********************************************************************//**
@@ -73,97 +62,32 @@ public:
                                          GRan& ran) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
-    virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     double detx_gradient(void) const;
     double dety_gradient(void) const;
     void   detx_gradient(const double& detx_gradient);
     void   dety_gradient(const double& dety_gradient);
-
-protected:
-    // Protected methods
-    void init_members(void);
-    void copy_members(const GCTAModelSpatialGradient& model);
-    void free_members(void);
-
-    // Protected members
-    GModelPar m_detx_gradient;        //!< DETX gradient
-    GModelPar m_dety_gradient;        //!< DETY gradient
 };
 
 
 /***********************************************************************//**
- * @brief Return class name
- *
- * @return String containing the class name ("GCTAModelSpatialGradient").
+ * @brief GCTAModelSpatialGradient class extension
  ***************************************************************************/
-inline
-std::string GCTAModelSpatialGradient::classname(void) const
-{
-    return ("GCTAModelSpatialGradient");
+%extend GCTAModelSpatialGradient {
+    GCTAModelSpatialGradient copy() {
+        return (*self);
+    }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
+        return state
+    def __setstate__(self, state):
+        if state[0].elements('parameter') == 0:
+            self.__init__()
+        else:
+            self.__init__(state[0])
 }
-
-
-/***********************************************************************//**
- * @brief Return model type
- *
- * @return Model type "Gradient".
- ***************************************************************************/
-inline
-std::string GCTAModelSpatialGradient::type(void) const
-{
-    return ("Gradient");
-}
-
-
-/***********************************************************************//**
- * @brief Return DETX gradient
- *
- * @return DETX gradient.
- ***************************************************************************/
-inline
-double GCTAModelSpatialGradient::detx_gradient(void) const
-{
-    return (m_detx_gradient.value());
-}
-
-
-/***********************************************************************//**
- * @brief Return DETY gradient
- *
- * @return DETY gradient.
- ***************************************************************************/
-inline
-double GCTAModelSpatialGradient::dety_gradient(void) const
-{
-    return (m_dety_gradient.value());
-}
-
-
-/***********************************************************************//**
- * @brief Set DETX gradient
- *
- * @param[in] detx_gradient DETX gradient.
- ***************************************************************************/
-inline
-void GCTAModelSpatialGradient::detx_gradient(const double& detx_gradient)
-{
-    m_detx_gradient.value(detx_gradient);
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set DETY gradient
- *
- * @param[in] dety_gradient DETY gradient.
- ***************************************************************************/
-inline
-void GCTAModelSpatialGradient::dety_gradient(const double& dety_gradient)
-{
-    m_dety_gradient.value(dety_gradient);
-    return;
-}
-
-#endif /* GCTAMODELSPATIALGRADIENT_HPP */
+};

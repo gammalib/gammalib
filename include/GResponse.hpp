@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GResponse.hpp - Abstract response base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -127,7 +127,7 @@ protected:
                    m_event(event),
                    m_srcTime(srcTime),
                    m_grad(grad) { }
-        double eval(const double& x);
+        double eval(const double& logEsrc);
     protected:
         const GResponse*    m_parent;  //!< Response
         const GObservation* m_obs;     //!< Observation

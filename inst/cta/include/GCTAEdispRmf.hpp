@@ -50,11 +50,14 @@ class GEbounds;
  * The energy dispersion is defined as
  *
  * \f[
- *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}) =
- *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) =
+ *    \frac{E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta)}
+ *         {\log_{10} E_{\rm reco}}
  * \f]
  *
- * and given in units of \f$(\log_{10} MeV)^{-1}\f$.
+ * in units of MeV\f$^{-1}\f$ where
+ * \f$E_{\rm reco}\f$ is the reconstructed energy in units of MeV, and
+ * \f$E_{\rm true}\f$ is the true energy in units of MeV.
  ***************************************************************************/
 class GCTAEdispRmf : public GCTAEdisp {
 
@@ -113,7 +116,7 @@ private:
     void set_matrix(void);
     void set_cache(void) const;
     void set_max_edisp(void) const;
-    void update(const double& arg1, const double& arg2) const;
+    void update(const double& logEsrc, const double& logEobs) const;
     void compute_ebounds_obs(const double& theta = 0.0,
                              const double& phi = 0.0,
                              const double& zenith = 0.0,

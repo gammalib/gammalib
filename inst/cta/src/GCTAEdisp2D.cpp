@@ -57,6 +57,7 @@
 //#define G_SMOOTH_EDISP_SAVE_TEST //!< Save test matrix
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_HESS_RENORMALIZATION
 
 /* __ Constants __________________________________________________________ */
 
@@ -177,27 +178,28 @@ GCTAEdisp2D& GCTAEdisp2D::operator=(const GCTAEdisp2D& edisp)
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion in units of \f$(\log_{10} MeV)^{-1}\f$
+ * @brief Return energy dispersion in units of MeV\f$^{-1}\f$
  *
- * @param[in] logEobs Log10 of the measured energy (TeV).
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
+ * @param[in] logEobs Log10 of the observed energy (\f$\log_{10}\f$ TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return Energy dispersion (MeV\f$^{-1}\f$)
  *
  * Returns the energy dispersion
  *
  * \f[
- *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}, \theta) =
- *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) =
+ *    \frac{E_{\rm disp}(E_{\rm true}, m, \theta)}{E_{\rm true}}
  * \f]
  *
- * in units of \f$(\log_{10} MeV)^{-1}\f$ where
- * \f$\log_{10} E_{\rm reco}\f$ is the logarithm of the reconstructed energy
- * in TeV,
- * \f$\log_{10} E_{\rm true}\f$ is the logarithm of the true energy in TeV and
- * \f$\theta\f$ is the offset angle in radians.
+ * in units of MeV\f$^{-1}\f$ where
+ * \f$\log_{10} E_{\rm reco}\f$ is the base 10 logarithm of the reconstructed
+ * energy in TeV,
+ * \f$\log_{10} E_{\rm true}\f$ is the base 10 logarithm of the true energy
+ * in TeV and \f$\theta\f$ is the offset angle in radians.
  ***************************************************************************/
 double GCTAEdisp2D::operator()(const double& logEobs, 
                                const double& logEsrc, 
@@ -234,6 +236,19 @@ double GCTAEdisp2D::operator()(const double& logEobs,
             // Make sure that energy dispersion is non-negative
             if (edisp < 0.0) {
                 edisp = 0.0;
+            }
+
+            // If energy dispersion is positive then compute true energy
+            // in MeV and divide the energy dispersion value by this
+            // quantity to get the energy dispersion per MeV
+            else {
+
+                // Compute true energy
+                double etrue = std::pow(10.0, logEsrc+6.0);
+
+                // Compute energy dispersion per MeV
+                edisp /= etrue;
+
             }
 
         } // endif: migration was in valid range
@@ -324,7 +339,7 @@ void GCTAEdisp2D::table(const GCTAResponseTable& table)
  *     MATRIX   - Migration matrix
  *
  * The data are stored in the m_edisp member. The energy axis will be set to
- * log10, the offset angle axis to radians.
+ * \f$log_{10} E_{\rm true}\f$, the offset angle axis to radians.
  *
  * The method assures that the energy dispersion is properly normalised.
  ***************************************************************************/
@@ -404,7 +419,7 @@ void GCTAEdisp2D::load(const GFilename& filename)
  * @brief Save energy dispersion table into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Saves energy dispersion into a FITS file. If a file with the given
  * @p filename does not yet exist it will be created, otherwise the method
@@ -454,11 +469,11 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad).
- * @param[in] zenith Zenith angle in Earth system (rad).
- * @param[in] azimuth Azimuth angle in Earth system (rad).
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  * @return Observed energy.
  *
  * @exception GException::invalid_return_value
@@ -565,17 +580,16 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
 /***********************************************************************//**
  * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  * @return Observed energy boundaries.
  *
  * Returns the band of observed energies outside of which the energy
  * dispersion becomes negligible for a given true energy @p logEsrc and
- * offset angle @p theta. An energy is considered negligible if inferior
- * to 1e-6.
+ * offset angle @p theta.
  ***************************************************************************/
 GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
                                   const double& theta,
@@ -632,17 +646,16 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
  *
- * @param[in] logEobs Log10 of the observed event energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEobs Log10 of the observed event energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  * @return True energy boundaries.
  *
  * Returns the band of true photon energies outside of which the energy
  * dispersion becomes negligible for a given observed energy @p logEobs and
- * offset angle @p theta. An energy in considered negligible if inferior to
- * 1e-6.
+ * offset angle @p theta.
  ***************************************************************************/
 GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
                                   const double& theta,
@@ -799,12 +812,20 @@ void GCTAEdisp2D::fetch(void) const
  * @param[in] ereco_min Minimum of reconstructed energy interval.
  * @param[in] ereco_max Maximum of reconstructed energy interval.
  * @param[in] etrue True energy.
- * @param[in] theta Offset angle (rad).
+ * @param[in] theta Offset angle (radians).
  * @return Integrated energy dispersion probability.
  *
- * Integrates the energy dispersion probability over an interval in
- * reconstructed energy, defined by @p ereco_min and @p ereco_max, for a
- * given true energy @p etrue and offset angle @p theta.
+ * Computes
+ *
+ * \f[
+ *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) \, dE_{\rm reco}
+ * \f]
+ *
+ * where
+ * \f$E_{\rm reco}\f$ is the reconstructed energy,
+ * \f$E_{\rm true}\f$ is the true energy and
+ * \f$\theta\f$ is the offset angle.
  *
  * The method takes into account that the energy dispersion data are stored
  * in a matrix and uses the trapezoidal rule for integration of the tabulated
@@ -900,7 +921,7 @@ double GCTAEdisp2D::prob_erecobin(const GEnergy& ereco_min,
             }
 
             // Compute integral
-            prob += 0.5 * (f1 + f2) * std::log10(x2/x1);
+            prob += 0.5 * (f1 + f2) * (x2 - x1);
 
             // Set second node as first node
             x1 = x2;
@@ -922,7 +943,7 @@ double GCTAEdisp2D::prob_erecobin(const GEnergy& ereco_min,
                                 etrue_nodes.wgt_right(),
                                 theta_nodes.wgt_left(),
                                 theta_nodes.wgt_right(), x2);
-            prob += 0.5 * (f1 + f2) * std::log10(x2/x1);
+            prob += 0.5 * (f1 + f2) * (x2 - x1);
         }
 
     } // endif: logEsrc, theta and migration range were valid
@@ -1095,10 +1116,10 @@ void GCTAEdisp2D::free_members(void)
 /***********************************************************************//**
  * @brief Compute ebounds_obs vector
  *
- * @param[in] theta Offset angle (rad).
- * @param[in] phi Azimuth angle (rad).
- * @param[in] zenith Zenith angle (rad).
- * @param[in] azimuth Azimuth angle (rad).
+ * @param[in] theta Offset angle (radians).
+ * @param[in] phi Azimuth angle (radians).
+ * @param[in] zenith Zenith angle (radians).
+ * @param[in] azimuth Azimuth angle (radians).
  *
  * Computes for all true energies the energy boundaries of the observed
  * energies covered by valid migration matrix elements. Only matrix elements
@@ -1207,10 +1228,10 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
 /***********************************************************************//**
  * @brief Compute ebounds_src vector
  *
- * @param[in] theta Offset angle (rad).
- * @param[in] phi Azimuth angle (rad).
- * @param[in] zenith Zenith angle (rad).
- * @param[in] azimuth Azimuth angle (rad).
+ * @param[in] theta Offset angle (radians).
+ * @param[in] phi Azimuth angle (radians).
+ * @param[in] zenith Zenith angle (radians).
+ * @param[in] azimuth Azimuth angle (radians).
  *
  * Computes for all observed energies the energy boundaries of the true
  * energies covered by valid migration matrix elements. Only matrix elements
@@ -1328,8 +1349,18 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
  * @brief Set table
  *
  * After assigning or loading a response table, performs all necessary steps
- * to set the table. The method also smoothes the table get rid of numerical
- * fluctuations and normalises the table properly.
+ * to set the table. Specifically, the method normalizes the energy
+ * dispersion for each offset angle and true energy so that
+ *
+ * \f[
+ *    \int_{m_{\rm min}}^{m_{\rm max}}
+ *    E_{\rm disp}(E_{\rm true}, m, \theta) \, dm = 1
+ * \f]
+ *
+ * where \f$m=E_{\rm reco}/E_{\rm true}\f$.
+ *
+ * For CTA, the method applies a kludge that smoothes the energy dispersion
+ * table to get rid of numerical fluctuations.
  *
  * Sets the data members
  *      m_inx_etrue
@@ -1447,21 +1478,17 @@ void GCTAEdisp2D::set_max_edisp(void) const
  * Normalize the energy dispersion table using
  *
  * \f[
- *    \int_{\log_{10} E_{\rm reco}^{\rm min}}^{\log_{10} E_{\rm reco}^{\rm max}}
- *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}, \theta)
- *    \, d(\log_{10} E_{\rm reco}) = 1
+ *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) \, dE_{\rm reco} = 1
  * \f]
  *
  * where
- * \f$E_{\rm reco}^{\rm min}\f$ is the minimum and
- * \f$E_{\rm reco}^{\rm max}\f$ the maximum reconstructed energy for a given
- * true energy, returned by the method ebounds_obs(),
- * \f$E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}, \theta)\f$
- * is the energy dispersion returned by the GCTAEdisp2D::operator(), given in
- * units of \f$(\log_{10} MeV)^{-1}\f$,
- * \f$\log_{10} E_{\rm reco}\f$ is the logarithm of the reconstructued energy
- * in TeV, and
- * \f$\log_{10} E_{\rm true}\f$ is the logarithm of the true energy in TeV.
+ * \f$E_{\rm reco}_{\rm min}\f$ and \f$E_{\rm reco}_{\rm max}\f$ is the
+ * minimum and maximum migration value for a given true energy as returned
+ * by the ebounds_obs() method, and
+ * \f$E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta)\f$ is the energy
+ * dispersion returned by the GCTAEdisp2D::operator(), given in units of
+ * \f$MeV^{-1}\f$.
  *
  * The normalisation is performed for each \f$E_{\rm true}\f$ and
  * \f$\theta\f$ bin using a Romberg integration method. Since the
@@ -1498,7 +1525,7 @@ void GCTAEdisp2D::normalize_table(void)
             // Loop over true photon energy
             for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
 
-                // Get energy
+                // Get the base 10 logarithm of the true energy
                 double emin    = std::log10(m_edisp.axis_lo(m_inx_etrue,i_etrue));
                 double emax    = std::log10(m_edisp.axis_hi(m_inx_etrue,i_etrue));
                 double logEsrc = 0.5*(emin+emax);
@@ -1512,9 +1539,9 @@ void GCTAEdisp2D::normalize_table(void)
                 // Loop over all energy intervals
                 for (int i = 0; i < ebounds.size(); ++i) {
 
-                    // Get energy boundaries
-                    emin = ebounds.emin(i).log10TeV();
-                    emax = ebounds.emax(i).log10TeV();
+                    // Get energy boundaries in log10 of energy in MeV
+                    emin = ebounds.emin(i).log10MeV();
+                    emax = ebounds.emax(i).log10MeV();
 
                     // Setup integration function
                     edisp_kern integrand(this, logEsrc, theta);
@@ -1707,6 +1734,9 @@ double GCTAEdisp2D::table_value(const int&    base_ll,
 
 /***********************************************************************//**
  * @brief Smoothed energy dispersion table
+ *
+ * This method implements the kludge for CTA that reduces the statistical
+ * noise in the energy dispersion matrix.
  ***************************************************************************/
 void GCTAEdisp2D::smooth_table(void)
 {
@@ -2074,23 +2104,47 @@ GNdarray GCTAEdisp2D::gaussian_array(const double& mean,
 
 
 /***********************************************************************//**
- * @brief Integration kernel for edisp_kern() class
+ * @brief Integration kernel for GCTAEdisp2D::edisp_kern class
  *
- * @param[in] x Function value.
+ * @param[in] logEobs Log10 of observation energy (\f$\log_{10}\f$ MeV).
+ * @return Energy dispersion (\f$(\log_{10}\f$ MeV\f$)^{-1}\f$).
  *
- * This method implements the integration kernel needed for the edisp_kern()
- * class.
+ * This method implements the function
+ *
+ * \f[
+ *    E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta) =
+ *    E_{\rm disp}(E_{\rm true}, m, \theta) \times
+ *    \frac{\log 10 \times E_{\rm reco}}{E_{\rm true}}
+ * \f]
+ *
+ * which is the integration kernel needed for the GCTAEdisp2D::edisp_kern
+ * class. The class is used by GCTAEdisp2D::normalize_table to integrate the
+ * energy dispersion information using
+ *
+ * \f[
+ *    \int_{\log_{10} E_{\rm reco}^{\rm min}}^{\log_{10} E_{\rm reco}^{\rm max}}
+ *    E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta) \,
+ *    d(\log_{10} E_{\rm reco})
+ * \f]
  ***************************************************************************/
-double GCTAEdisp2D::edisp_kern::eval(const double& x)
+double GCTAEdisp2D::edisp_kern::eval(const double& logEobs)
 {
-    // Get function value
-    double value = m_parent->operator()(x, m_logEsrc, m_theta);
+    // Get function value. Note that logEobs is in log10 MeV, while we need
+    // the value in log10 TeV.
+    double value = m_parent->operator()(logEobs-6.0, m_logEsrc, m_theta);
+
+    // Compute reconstructed energy in MeV. Note that logEobs is in
+    // log10 MeV!
+    double ereco = std::pow(10.0, logEobs);
+
+    // Normalize energy dispersion so that the units are per log10 MeV
+    value *= gammalib::ln10 * ereco;
 
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GCTAEdisp2D::edisp_kern::eval";
-        std::cout << "(x=" << x << "): ";
+        std::cout << "(logEobs=" << logEobs << "): ";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ")" << std::endl;

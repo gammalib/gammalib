@@ -115,6 +115,7 @@
 //#define G_DEBUG_IRF_RADIAL                     //!< Debug irf_radial method
 //#define G_DEBUG_IRF_DIFFUSE                   //!< Debug irf_diffuse method
 //#define G_DEBUG_IRF_ELLIPTICAL             //!< Debug irf_elliptical method
+//#define G_DEBUG_NROI_EDISP    //!< Debug nroi energy dispersion computation
 //#define G_DEBUG_NROI_RADIAL                  //!< Debug npred_radial method
 //#define G_DEBUG_NROI_ELLIPTICAL          //!< Debug npred_elliptical method
 //#define G_DEBUG_NROI_DIFFUSE                //!< Debug npred_diffuse method
@@ -455,12 +456,12 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
         // Loop over all boundaries
         for (int i = 0; i < ebounds.size(); ++i) {
 
-            // Get boundaries in MeV
-            double emin = ebounds.emin(i).MeV();
-            double emax = ebounds.emax(i).MeV();
+            // Get true energy boundaries in log10 MeV
+            double log10_etrue_min = ebounds.emin(i).log10MeV();
+            double log10_etrue_max = ebounds.emax(i).log10MeV();
 
             // Continue only if valid
-            if (emax > emin) {
+            if (log10_etrue_max > log10_etrue_min) {
 
                 // Setup integration function
                 cta_nroi_kern integrand(this, &obs, &model, srcTime, obsEng, obsTime);
@@ -470,13 +471,31 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
                 integral.fixed_iter(iter);
 
                 // Do Romberg integration
-                emin  = std::log(emin);
-                emax  = std::log(emax);
-                nroi += integral.romberg(emin, emax);
+                nroi += integral.romberg(log10_etrue_min, log10_etrue_max);
 
             } // endif: interval was valid
 
         } // endfor: looped over energy intervals
+
+        // Debug energy dispersion computation
+        #if defined(G_DEBUG_NROI_EDISP)
+        apply_edisp(false);
+        const GEnergy& srcEng = obsEng;
+        double nroi_spatial   = this->nroi(model, srcEng, srcTime, obsEng, obsTime, obs);
+        double nroi_spectral  = model.spectral()->eval(srcEng, srcTime);
+        double nroi_temporal  = model.temporal()->eval(srcTime);
+        double nroi_noedisp   = nroi_spatial * nroi_spectral * nroi_temporal;
+        apply_edisp(true);
+        std::cout << "GCTAResponseIrf::nroi:";
+        std::cout << " obs_id=" << obs.id();
+        std::cout << " ereco=" << obsEng;
+        std::cout << " nroi(noedisp)=" << nroi_noedisp;
+        std::cout << " nroi(edisp)=" << nroi;
+        if (nroi_noedisp > 0.0) {
+            std::cout << " ratio(edisp/noedisp)=" << nroi/nroi_noedisp;
+        }
+        std::cout << std::endl;
+        #endif
 
     } // endif: energy dispersion requested
 
@@ -487,12 +506,12 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
         const GEnergy& srcEng = obsEng;
 
         // Compute response components
-        double npred_spatial  = this->nroi(model, srcEng, srcTime, obsEng, obsTime, obs);
-        double npred_spectral = model.spectral()->eval(srcEng, srcTime);
-        double npred_temporal = model.temporal()->eval(srcTime);
+        double nroi_spatial  = this->nroi(model, srcEng, srcTime, obsEng, obsTime, obs);
+        double nroi_spectral = model.spectral()->eval(srcEng, srcTime);
+        double nroi_temporal = model.temporal()->eval(srcTime);
 
         // Compute response
-        nroi = npred_spatial * npred_spectral * npred_temporal;
+        nroi = nroi_spatial * nroi_spectral * nroi_temporal;
 
     } // endelse: no energy dispersion requested
 
@@ -1783,7 +1802,7 @@ double GCTAResponseIrf::psf_delta_max(const double& theta,
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion (in units of MeV^-1)
+ * @brief Return energy dispersion (in units of MeV\f$^{-1}\f$)
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] theta Radial offset angle in camera (radians).
@@ -1791,6 +1810,7 @@ double GCTAResponseIrf::psf_delta_max(const double& theta,
  * @param[in] zenith Zenith angle of telescope pointing (radians).
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
+ * @return Energy dispersion (MeV\f$^{-1}\f$).
  ***************************************************************************/
 double GCTAResponseIrf::edisp(const GEnergy& obsEng,
                               const double&  theta,
@@ -1799,13 +1819,11 @@ double GCTAResponseIrf::edisp(const GEnergy& obsEng,
                               const double&  azimuth,
                               const double&  srcLogEng) const
 {
-    // Compute log10 energy in TeV and linear energy in MeV
+    // Compute log10 energy in TeV
     double obsLogEng = obsEng.log10TeV();
-    double energy    = obsEng.MeV();
 
     // Compute energy dispersion
-    double edisp = (*m_edisp)(obsLogEng, srcLogEng, theta, phi, zenith, azimuth) /
-                   (gammalib::ln10 * energy);
+    double edisp = (*m_edisp)(obsLogEng, srcLogEng, theta, phi, zenith, azimuth);
 
     // Return energy dispersion
     return edisp;
@@ -2707,11 +2725,12 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
     // Retrieve CTA pointing
     const GCTAPointing& pnt = gammalib::cta_pnt(G_IRF_DIFFUSE, obs);
 
-    // Try getting the IRF value from cache
+    // Try getting the IRF value from cache. Do not do this for energy
+    // dispersion since the the spectral model will change the IRF values
     #if defined(G_USE_IRF_CACHE)
     const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
     const GCTAEventAtom* atom = dynamic_cast<const GCTAEventAtom*>(&event);
-    if (list != NULL && atom != NULL) {
+    if (list != NULL && atom != NULL && !use_edisp()) {
         irf = list->irf_cache(source.name(), atom->index());
         if (irf >= 0.0) {
             has_irf = true;
@@ -2826,9 +2845,11 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
         // Apply deadtime correction
         irf *= obs.deadc(srcTime);
 
-        // Put IRF value in cache
+        // Put IRF value in cache. Only do this in no energy dispersion is
+        // requested, since for energy dispersion the IRF values will
+        // depend on the spectrum
         #if defined(G_USE_IRF_CACHE)
-        if (list != NULL && atom != NULL) {
+        if (list != NULL && atom != NULL && !use_edisp()) {
             list->irf_cache(source.name(), atom->index(), irf);
         }
         #endif
@@ -3315,9 +3336,11 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
     // Build unique identifier
     std::string id = model.name() + "::" + obs.id();
 
-    // Check if Nroi value is already in cache
+    // Check if Nroi value is already in cache. Do not use the Npred cache
+    // for energy dispersion since the actual value will depend on the
+    // spectral model
     #if defined(G_USE_NPRED_CACHE)
-    if (!m_npred_names.empty()) {
+    if (!m_npred_names.empty() && !use_edisp()) {
 
          // Search for unique identifier, and if found, recover Npred value
          // and break
@@ -3407,18 +3430,23 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
             #if defined(G_DEBUG_NROI_DIFFUSE)
             std::cout << "GCTAResponseIrf::nroi_diffuse:";
             std::cout << " roi_psf_radius=" << roi_psf_radius;
-            std::cout << " nroi=" << npred;
+            std::cout << " nroi=" << nroi;
+            std::cout << " Etrue=" << srcEng;
+            std::cout << " Ereco=" << obsEng;
             std::cout << " id=" << id << std::endl;
             #endif
 
         } // endif: offset angle range was valid
 
-        // Store result in Npred cache
+        // Store result in Npred cache in case that no energy dispersion
+        // is requested
         #if defined(G_USE_NPRED_CACHE)
-        m_npred_names.push_back(id);
-        m_npred_energies.push_back(srcEng);
-        m_npred_times.push_back(srcTime);
-        m_npred_values.push_back(nroi);
+        if (!use_edisp()) {
+            m_npred_names.push_back(id);
+            m_npred_energies.push_back(srcEng);
+            m_npred_times.push_back(srcTime);
+            m_npred_values.push_back(nroi);
+        }
         #endif
 
         // Debug: Check for NaN

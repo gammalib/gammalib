@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-17 October 2018
+25 October 2018
 
 
 1. Introduction
@@ -300,6 +300,12 @@ None
 
 20. CTA interface
 -----------------
+The GCTAEdisp::operator() now returns energy dispersion values per MeV. The
+units are now consistent with the expectation in GResponse, and this changes
+assurance the coherence between the various classes. In particular, no re-
+normalization is needed anymore to digest the H.E.S.S. energy dispersion, and
+also the CTA energy dispersion is handled correctly (#2704).
+
 The GCTAInstDir class now assures that only valid information can be accessed.
 Since the class can hold a sky direction and detector coordinates, flags were
 added that signal what information actually exists in the class. If a non-

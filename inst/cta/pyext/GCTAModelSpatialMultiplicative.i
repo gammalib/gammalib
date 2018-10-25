@@ -1,5 +1,5 @@
 /***************************************************************************
- * GCTAModelSpatialMultiplicative.hpp - Multiplicative spatial model class *
+ *  GCTAModelSpatialMultiplicative.i - Multiplicative spatial model class  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2018 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,34 +19,20 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelSpatialMultiplicative.hpp
+ * @file GCTAModelSpatialMultiplicative.i
  * @brief Multiplicative spatial model class interface definition
  * @author Juergen Knoedlseder
  */
-
-#ifndef GCTAMODELSPATIALMULTIPLICATIVE_HPP
-#define GCTAMODELSPATIALMULTIPLICATIVE_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include <string>
-#include <vector>
-#include "GCTAModelSpatial.hpp"
-
-/* __ Forward declarations _______________________________________________ */
-class GRan;
-class GXmlElement;
-class GCTAInstDir;
-class GEnergy;
-class GTime;
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GCTAModelSpatialMultiplicative.hpp"
+%}
 
 
 /***********************************************************************//**
  * @class GCTAModelSpatialMultiplicative
  *
  * @brief Multiplicative spatial model class
- *
- * This class implements a multiplicative spatial component of the CTA
- * background model.
  ***************************************************************************/
 class GCTAModelSpatialMultiplicative : public GCTAModelSpatial {
 
@@ -74,7 +60,6 @@ public:
                                                GRan& ran) const;
     virtual void                            read(const GXmlElement& xml);
     virtual void                            write(GXmlElement& xml) const;
-    virtual std::string                     print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void                    append(const GCTAModelSpatial& spatial,
@@ -82,57 +67,23 @@ public:
     int                     components(void) const;
     const GCTAModelSpatial* component(const int& index) const;
     const GCTAModelSpatial* component(const std::string& name) const;
-
-protected:
-    // Protected methods
-    void init_members(void);
-    void copy_members(const GCTAModelSpatialMultiplicative& model);
-    void free_members(void);
-
-    // Protected members
-    std::string                    m_type;       //!< Model type
-    std::vector<GCTAModelSpatial*> m_spatial;    //!< Container of spatial models
-    std::vector<std::string>       m_components; //!< Names of components
 };
 
 
 /***********************************************************************//**
- * @brief Return class name
- *
- * @return String containing the class name ("GCTAModelSpatialMultiplicative").
+ * @brief GCTAModelSpatialMultiplicative class extension
  ***************************************************************************/
-inline
-std::string GCTAModelSpatialMultiplicative::classname(void) const
-{
-    return ("GCTAModelSpatialMultiplicative");
+%extend GCTAModelSpatialMultiplicative {
+    GCTAModelSpatialMultiplicative copy() {
+        return (*self);
+    }
+%pythoncode {
+    def __getstate__(self):
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
+        return state
+    def __setstate__(self, state):
+        self.__init__(state[0])
 }
-
-
-/***********************************************************************//**
- * @brief Return model type
- *
- * @return Model type.
- *
- * Returns the type of the spatial multiplicative model.
- ***************************************************************************/
-inline
-std::string GCTAModelSpatialMultiplicative::type(void) const
-{
-    return (m_type);
-}
-
-
-/***********************************************************************//**
- * @brief Return number of spatial components
- *
- * @return Number of model components.
- *
- * Returns the number of spatial components.
- ***************************************************************************/
-inline
-int GCTAModelSpatialMultiplicative::components(void) const
-{
-    return (m_spatial.size());
-}
-
-#endif /* GCTAMODELSPATIALMULTIPLICATIVE_HPP */
+};

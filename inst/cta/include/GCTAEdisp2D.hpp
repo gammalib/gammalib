@@ -52,14 +52,47 @@ namespace gammalib {
  * @brief CTA 2D energy dispersion class
  *
  * This class implements the energy dispersion for the CTA 2D response. The
- * energy dispersion is defined as
+ * CTA 2D energy dispersion is in fact a 3-dimensional function, where the
+ * energy dispersion is given as function of true energy \f$E_{\rm true}\f$,
+ * migration value \f$m = E_{\rm reco}/E_{\rm true}\f$ and offset angle
+ * \f$\theta\f$
  *
  * \f[
- *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}, \theta) =
- *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ *    E_{\rm disp}(E_{\rm true}, m, \theta)
  * \f]
  *
- * and given in units of \f$(\log_{10} MeV)^{-1}\f$.
+ * with
+ *
+ * \f[
+ *    \int_{m_{\rm min}}^{m_{\rm max}}
+ *    E_{\rm disp}(E_{\rm true}, m, \theta) \, dm = 1
+ * \f]
+ *
+ * The energy dispersion as function of reconstructed energy
+ * \f$E_{\rm reco}\f$ is given by
+ *
+ * \f[
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) =
+ *    \frac{E_{\rm disp}(E_{\rm true}, m, \theta)}{E_{\rm true}}
+ * \f]
+ *
+ * the energy dispersion as function of the natural logarithm of
+ * reconstructed energy \f$\log E_{\rm reco}\f$ is given by
+ *
+ * \f[
+ *    E_{\rm disp}(E_{\rm true}, \log E_{\rm reco}, \theta) =
+ *    E_{\rm disp}(E_{\rm true}, m, \theta) \times
+ *    \frac{E_{\rm reco}}{E_{\rm true}}
+ * \f]
+ *
+ * and the energy dispersion as function of the base 10 logarithm of
+ * reconstructed energy \f$\log_{10} E_{\rm reco}\f$ is given by
+ *
+ * \f[
+ *    E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta) =
+ *    E_{\rm disp}(E_{\rm true}, m, \theta) \times
+ *    \frac{\log 10 \times E_{\rm reco}}{E_{\rm true}}
+ * \f]
  ***************************************************************************/
 class GCTAEdisp2D : public GCTAEdisp {
 
@@ -187,7 +220,7 @@ private:
                    m_parent(parent),
                    m_logEsrc(logEsrc),
                    m_theta(theta) { }
-        double eval(const double& x);
+        double eval(const double& logEobs);
     protected:
         const GCTAEdisp2D* m_parent;  //!< Pointer to parent class
         double             m_logEsrc; //!< True photon energy

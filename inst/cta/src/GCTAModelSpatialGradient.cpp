@@ -75,6 +75,28 @@ GCTAModelSpatialGradient::GCTAModelSpatialGradient(void) : GCTAModelSpatial()
 
 
 /***********************************************************************//**
+ * @brief Gradient constructor
+ *
+ * @param[in] detx_gradient DETX gradient (degrees\f$^{-1}\f$).
+ * @param[in] dety_gradient DETY gradient (degrees\f$^{-1}\f$).
+ ***************************************************************************/
+GCTAModelSpatialGradient::GCTAModelSpatialGradient(const double& detx_gradient,
+                                                   const double& dety_gradient) :
+                          GCTAModelSpatial()
+{
+    // Initialise members
+    init_members();
+
+    // Assign gradients
+    this->detx_gradient(detx_gradient);
+    this->dety_gradient(dety_gradient);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief XML constructor
  *
  * @param[in] xml XML element.
@@ -318,7 +340,7 @@ void GCTAModelSpatialGradient::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exceptino GException::invalid_value
+ * @exception GException::invalid_value
  *            Spatial model is not of valid type.
  *
  * Write the gradient spatial model information into an XML element.

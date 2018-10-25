@@ -44,18 +44,25 @@ class GRan;
  * @brief CTA performance table energy dispersion class
  *
  * This class implements the CTA energy dispersion response as function
- * of energy as determined from a performance table. The performance table is
- * an ASCII file that specifies the CTA performance parameters in a simple
- * way.
+ * of true energy as determined from a performance table. A performance
+ * table is an ASCII file that represent a table, specifying the CTA
+ * performance parameters as function of true photon energy.
  *
  * The energy dispersion is defined as
  *
  * \f[
- *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}) =
- *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) =
+ *    \frac{1}{\sqrt{2\pi}\sigma(E_{\rm true})}
+ *    \exp \left(\frac{-(\log_{10} E_{\rm reco} - \log_{10} E_{\rm true})^2}
+ *                    {2 \sigma(E_{\rm true})^2} \right) \times
+ *    \frac{1}{\log_{10} E_{\rm reco}}
  * \f]
  *
- * and given in units of \f$(\log_{10} MeV)^{-1}\f$.
+ * and given in units of MeV\f$^{-1}\f$, where
+ * \f$E_{\rm reco}\f$ is the reconstructed energy in units of MeV,
+ * \f$E_{\rm true}\f$ is the true energy in units of MeV, and
+ * \f$\sigma(E_{\rm true})\f$ is the standard deviation of the energy
+ * dispersion that depends on the true photon energy.
  ***************************************************************************/
 class GCTAEdispPerfTable : public GCTAEdisp {
 
