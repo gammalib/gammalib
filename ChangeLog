@@ -1,8 +1,9 @@
-2018-10-17
+2018-10-25
 
         * Version 1.6.0 released
         ========================
 
+        GCTAEdisp returns now energy dispersion values per MeV (#2704) 
         Protect GCTAInstDir from access to invalid information (#2694)
         Implement general CTA background model (#2694)
         Correct handling of stacked On/Off observations without background IRF (#2683)

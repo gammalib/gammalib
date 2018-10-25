@@ -44,6 +44,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2704 <https://cta-redmine.irap.omp.eu/issues/2704>`_] -
+  ``GCTAEdisp`` returns now energy dispersion values per MeV
 * [`2694 <https://cta-redmine.irap.omp.eu/issues/2694>`_] -
   Protect ``GCTAInstDir`` from access to invalid information
 * [`2677 <https://cta-redmine.irap.omp.eu/issues/2677>`_] -
