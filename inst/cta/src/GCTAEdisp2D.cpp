@@ -180,12 +180,12 @@ GCTAEdisp2D& GCTAEdisp2D::operator=(const GCTAEdisp2D& edisp)
 /***********************************************************************//**
  * @brief Return energy dispersion in units of MeV\f$^{-1}\f$
  *
- * @param[in] logEobs Log10 of the measured energy (TeV).
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
+ * @param[in] logEobs Log10 of the observed energy (\f$\log_{10}\f$ TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  * @return Energy dispersion (MeV\f$^{-1}\f$)
  *
  * Returns the energy dispersion
@@ -469,11 +469,11 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad).
- * @param[in] zenith Zenith angle in Earth system (rad).
- * @param[in] azimuth Azimuth angle in Earth system (rad).
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  * @return Observed energy.
  *
  * @exception GException::invalid_return_value
@@ -580,17 +580,16 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
 /***********************************************************************//**
  * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  * @return Observed energy boundaries.
  *
  * Returns the band of observed energies outside of which the energy
  * dispersion becomes negligible for a given true energy @p logEsrc and
- * offset angle @p theta. An energy is considered negligible if inferior
- * to 1e-6.
+ * offset angle @p theta.
  ***************************************************************************/
 GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
                                   const double& theta,
@@ -647,17 +646,16 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
  *
- * @param[in] logEobs Log10 of the observed event energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEobs Log10 of the observed event energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians).
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  * @return True energy boundaries.
  *
  * Returns the band of true photon energies outside of which the energy
  * dispersion becomes negligible for a given observed energy @p logEobs and
- * offset angle @p theta. An energy in considered negligible if inferior to
- * 1e-6.
+ * offset angle @p theta.
  ***************************************************************************/
 GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
                                   const double& theta,
@@ -814,12 +812,20 @@ void GCTAEdisp2D::fetch(void) const
  * @param[in] ereco_min Minimum of reconstructed energy interval.
  * @param[in] ereco_max Maximum of reconstructed energy interval.
  * @param[in] etrue True energy.
- * @param[in] theta Offset angle (rad).
+ * @param[in] theta Offset angle (radians).
  * @return Integrated energy dispersion probability.
  *
- * Integrates the energy dispersion probability over an interval in
- * reconstructed energy, defined by @p ereco_min and @p ereco_max, for a
- * given true energy @p etrue and offset angle @p theta.
+ * Computes
+ *
+ * \f[
+ *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) \, dE_{\rm reco}
+ * \f]
+ *
+ * where
+ * \f$E_{\rm reco}\f$ is the reconstructed energy,
+ * \f$E_{\rm true}\f$ is the true energy and
+ * \f$\theta\f$ is the offset angle.
  *
  * The method takes into account that the energy dispersion data are stored
  * in a matrix and uses the trapezoidal rule for integration of the tabulated
@@ -1110,10 +1116,10 @@ void GCTAEdisp2D::free_members(void)
 /***********************************************************************//**
  * @brief Compute ebounds_obs vector
  *
- * @param[in] theta Offset angle (rad).
- * @param[in] phi Azimuth angle (rad).
- * @param[in] zenith Zenith angle (rad).
- * @param[in] azimuth Azimuth angle (rad).
+ * @param[in] theta Offset angle (radians).
+ * @param[in] phi Azimuth angle (radians).
+ * @param[in] zenith Zenith angle (radians).
+ * @param[in] azimuth Azimuth angle (radians).
  *
  * Computes for all true energies the energy boundaries of the observed
  * energies covered by valid migration matrix elements. Only matrix elements
@@ -1222,10 +1228,10 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
 /***********************************************************************//**
  * @brief Compute ebounds_src vector
  *
- * @param[in] theta Offset angle (rad).
- * @param[in] phi Azimuth angle (rad).
- * @param[in] zenith Zenith angle (rad).
- * @param[in] azimuth Azimuth angle (rad).
+ * @param[in] theta Offset angle (radians).
+ * @param[in] phi Azimuth angle (radians).
+ * @param[in] zenith Zenith angle (radians).
+ * @param[in] azimuth Azimuth angle (radians).
  *
  * Computes for all observed energies the energy boundaries of the true
  * energies covered by valid migration matrix elements. Only matrix elements
@@ -2100,7 +2106,7 @@ GNdarray GCTAEdisp2D::gaussian_array(const double& mean,
 /***********************************************************************//**
  * @brief Integration kernel for GCTAEdisp2D::edisp_kern class
  *
- * @param[in] logEobs Base 10 logarithm of observation energy (\f$\log_{10}\f$ MeV).
+ * @param[in] logEobs Log10 of observation energy (\f$\log_{10}\f$ MeV).
  * @return Energy dispersion (\f$(\log_{10}\f$ MeV\f$)^{-1}\f$).
  *
  * This method implements the function

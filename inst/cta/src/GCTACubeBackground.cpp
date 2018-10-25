@@ -153,15 +153,15 @@ GCTACubeBackground::GCTACubeBackground(const GCTACubeBackground& bgd)
 /***********************************************************************//**
  * @brief Background cube constructor
  *
- * @param[in] wcs      World Coordinate System.
- * @param[in] coords   Coordinate System (CEL or GAL).
- * @param[in] x        X coordinate of sky map centre (deg).
- * @param[in] y        Y coordinate of sky map centre (deg).
- * @param[in] dx       Pixel size in x direction at centre (deg/pixel).
- * @param[in] dy       Pixel size in y direction at centre (deg/pixel).
- * @param[in] nx       Number of pixels in x direction.
- * @param[in] ny       Number of pixels in y direction.
- * @param[in] energies Energies.
+ * @param[in] wcs     World Coordinate System.
+ * @param[in] coords  Coordinate System (CEL or GAL).
+ * @param[in] x       X coordinate of sky map centre (deg).
+ * @param[in] y       Y coordinate of sky map centre (deg).
+ * @param[in] dx      Pixel size in x direction at centre (deg/pixel).
+ * @param[in] dy      Pixel size in y direction at centre (deg/pixel).
+ * @param[in] nx      Number of pixels in x direction.
+ * @param[in] ny      Number of pixels in y direction.
+ * @param[in] ebounds Energy boundaries.
  *
  * Constructs a background cube by specifying the sky map grid and the
  * energies.

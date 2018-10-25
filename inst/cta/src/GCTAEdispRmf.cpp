@@ -160,27 +160,27 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion in units of \f$(\log_{10} MeV)^{-1}\f$
+ * @brief Return energy dispersion in units of MeV\f$^{-1}\f$
  *
- * @param[in] logEobs log10 of the observed photon energy (TeV).
- * @param[in] logEsrc log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
- * @return Energy dispersion
+ * @param[in] logEobs Log10 of the observed photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return Energy dispersion (MeV\f$^{-1}\f$)
  *
  * Returns the energy dispersion
  *
  * \f[
- *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}) =
- *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) =
+ *    \frac{E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta)}
+ *         {\log_{10} E_{\rm reco}}
  * \f]
  *
- * in units of \f$(\log_{10} MeV)^{-1}\f$ where
- * \f$\log_{10} E_{\rm reco}\f$ is the logarithm of the reconstructed energy
- * in TeV, and
- * \f$\log_{10} E_{\rm true}\f$ is the logarithm of the true energy in TeV.
+ * in units of MeV\f$^{-1}\f$ where
+ * \f$E_{\rm reco}\f$ is the reconstructed energy in units of MeV, and
+ * \f$E_{\rm true}\f$ is the true energy in units of MeV.
  ***************************************************************************/
 double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& logEsrc,
@@ -201,6 +201,11 @@ double GCTAEdispRmf::operator()(const double& logEobs,
     // Make sure that energy dispersion is not negative
     if (edisp < 0.0) {
         edisp = 0.0;
+    }
+
+    // If the energy dispersion is positive, return it per MeV
+    else {
+        edisp /= (gammalib::ln10 * std::pow(10.0, logEobs+6.0));
     }
 
     // Return energy dispersion
@@ -278,11 +283,12 @@ void GCTAEdispRmf::load(const GFilename& filename)
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return Energy.
  *
  * Draws observed energy value from RMF matrix.
  ***************************************************************************/
@@ -323,11 +329,12 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
 /***********************************************************************//**
  * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return Reconstructed energy boundaries.
  *
  * Returns the band of observed energies outside of which the energy
  * dispersion becomes negligible for a given true energy @p logEsrc.
@@ -383,11 +390,12 @@ GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
  *
- * @param[in] logEobs Log10 of the observed event energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEobs Log10 of the observed event energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return True energy boundaries.
  *
  * Returns the band of true photon energies outside of which the energy
  * dispersion becomes negligible for a given observed energy @p logEobs.
@@ -447,8 +455,19 @@ GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
  * @param[in] ereco_min Minimum of reconstructed energy interval.
  * @param[in] ereco_max Maximum of reconstructed energy interval.
  * @param[in] etrue True energy.
- * @param[in] theta Offset angle (not used).
+ * @param[in] theta Offset angle. Not used.
  * @return Integrated energy dispersion probability.
+ *
+ * Computes
+ *
+ * \f[
+ *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) \, dE_{\rm reco}
+ * \f]
+ *
+ * where
+ * \f$E_{\rm reco}\f$ is the reconstructed energy and
+ * \f$E_{\rm true}\f$ is the true energy.
  ***************************************************************************/
 double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
                                    const GEnergy& ereco_max,
@@ -783,25 +802,25 @@ void GCTAEdispRmf::set_max_edisp(void) const
 /***********************************************************************//**
  * @brief Update cache
  *
- * @param[in] etrue Log10 of true energy in TeV.
- * @param[in] emeasured Log10 of measured energy in TeV.
+ * @param[in] logEsrc Log10 of true energy (\f$\log_{10}\f$ TeV).
+ * @param[in] logEobs Log10 of reconstructed energy (\f$\log_{10}\f$ TeV).
  *
  * Updates the interpolation cache. The interpolation cache is composed
  * of four indices and weights that define 4 data values of the RMF matrix
  * that are used for bilinear interpolation.
  ***************************************************************************/
-void GCTAEdispRmf::update(const double& etrue, const double& emeasured) const
+void GCTAEdispRmf::update(const double& logEsrc, const double& logEobs) const
 {
     // Update cache only of arguments have changed
-    if (etrue != m_last_etrue || emeasured != m_last_emeasured) {
+    if (logEsrc != m_last_etrue || logEobs != m_last_emeasured) {
 
         // Store actual values
-        m_last_etrue     = etrue;
-        m_last_emeasured = emeasured;
+        m_last_etrue     = logEsrc;
+        m_last_emeasured = logEobs;
 
         // Set values for node arrays
-        m_etrue.set_value(etrue);
-        m_emeasured.set_value(emeasured);
+        m_etrue.set_value(logEsrc);
+        m_emeasured.set_value(logEobs);
 
         // Set indices for bi-linear interpolation
         m_itrue1 = m_etrue.inx_left();
@@ -825,10 +844,10 @@ void GCTAEdispRmf::update(const double& etrue, const double& emeasured) const
 /***********************************************************************//**
  * @brief Compute ebounds_obs vector
  *
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  ***************************************************************************/
 void GCTAEdispRmf::compute_ebounds_obs(const double& theta,
                                        const double& phi,
@@ -861,10 +880,10 @@ void GCTAEdispRmf::compute_ebounds_obs(const double& theta,
 /***********************************************************************//**
  * @brief Compute ebounds_src vector
  *
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
  ***************************************************************************/
 void GCTAEdispRmf::compute_ebounds_src(const double& theta,
                                        const double& phi,

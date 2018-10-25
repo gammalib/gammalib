@@ -158,34 +158,31 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion in units of \f$(\log_{10} MeV)^{-1}\f$
+ * @brief Return energy dispersion in units of MeV\f$^{-1}\f$
  *
- * @param[in] logEobs log10 of the observed photon energy (TeV).
- * @param[in] logEsrc log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEobs Log10 of the observed photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return Energy dispersion (MeV\f$^{-1}\f$)
  *
  * Returns the energy dispersion
  *
  * \f[
- *    E_{\rm disp}(\log_{10} E_{\rm reco} | \log_{10} E_{\rm true}) =
- *    \frac{dP}{d\log_{10} E_{\rm reco}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) =
+ *    \frac{1}{\sqrt{2\pi}\sigma(E_{\rm true})}
+ *    \exp \left(\frac{-(\log_{10} E_{\rm reco} - \log_{10} E_{\rm true})^2}
+ *                    {2 \sigma(E_{\rm true})^2} \right) \times
+ *    \frac{1}{\log_{10} E_{\rm reco}}
  * \f]
  *
- * in units of \f$(\log_{10} MeV)^{-1}\f$ where
- * \f$\log_{10} E_{\rm reco}\f$ is the logarithm of the reconstructed energy
- * in TeV, and
- * \f$\log_{10} E_{\rm true}\f$ is the logarithm of the true energy in TeV.
- *
- * The operator evaluates
- *
- * \f[
- *    E_{\rm disp} = \frac{1}{\sqrt{2\pi}m\_sigma}
- *                   \exp(\frac{-(\log_{10} E_{\rm reco} -
- *                                \log_{10} E_{\rm true})^2}{2 m\_sigma^2})
- * \f]
+ * in units of MeV\f$^{-1}\f$ where
+ * \f$E_{\rm reco}\f$ is the reconstructed energy in units of MeV,
+ * \f$E_{\rm true}\f$ is the true energy in units of MeV, and
+ * \f$\sigma(E_{\rm true})\f$ is the standard deviation of the energy
+ * dispersion that depends on the true photon energy.
  ***************************************************************************/
 double GCTAEdispPerfTable::operator()(const double& logEobs,
                                       const double& logEsrc,
@@ -200,6 +197,12 @@ double GCTAEdispPerfTable::operator()(const double& logEobs,
     // Compute energy dispersion value
     double delta = logEobs - logEsrc;
     double edisp = m_par_scale * std::exp(m_par_width * delta * delta);
+
+    // Compute reconstructed energy in MeV
+    double ereco = std::pow(10.0, logEobs+6.0);
+
+    // Compute energy dispersion per MeV
+    edisp /= (gammalib::ln10 * ereco);
 
     // Return energy dispersion
     return edisp;
@@ -318,11 +321,12 @@ void GCTAEdispPerfTable::load(const GFilename& filename)
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return Energy.
  *
  * Draws observed energy value from a normal distribution of width
  * m_par_sigma around @p logE.
@@ -352,11 +356,12 @@ GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
 /***********************************************************************//**
  * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logEsrc Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEsrc Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return Boundaries of reconstruced energies.
  *
  * Returns the band of observed energies outside of which the energy
  * dispersion becomes negligible for a given true energy @p logEsrc. This
@@ -389,15 +394,16 @@ GEbounds GCTAEdispPerfTable::ebounds_obs(const double& logEsrc,
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
  *
- * @param[in] logEobs Log10 of the observed event energy (TeV).
- * @param[in] theta Offset angle in camera system (rad). Not used.
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] logEobs Log10 of the observed event energy (\f$\log_{10}\f$ TeV).
+ * @param[in] theta Offset angle in camera system (radians). Not used.
+ * @param[in] phi Azimuth angle in camera system (radians). Not used.
+ * @param[in] zenith Zenith angle in Earth system (radians). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @return Boundaries of true energies.
  *
  * Returns the band of true photon energies outside of which the energy
- * dispersion becomes negligible for a given observed energy @p logEobs. This
- * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
+ * dispersion becomes negligible for a given observed energy @p logEobs.
+ * This band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
  * Gaussian width of the energy dispersion.
  ***************************************************************************/
 GEbounds GCTAEdispPerfTable::ebounds_src(const double& logEobs,
@@ -430,8 +436,19 @@ GEbounds GCTAEdispPerfTable::ebounds_src(const double& logEobs,
  * @param[in] ereco_min Minimum of reconstructed energy interval.
  * @param[in] ereco_max Maximum of reconstructed energy interval.
  * @param[in] etrue True energy.
- * @param[in] theta Offset angle (not used).
+ * @param[in] theta Offset angle (radians). Not used.
  * @return Integrated energy dispersion probability.
+ *
+ * Computes
+ *
+ * \f[
+ *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
+ *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) \, dE_{\rm reco}
+ * \f]
+ *
+ * where
+ * \f$E_{\rm reco}\f$ is the reconstructed energy and
+ * \f$E_{\rm true}\f$ is the true energy.
  ***************************************************************************/
 double GCTAEdispPerfTable::prob_erecobin(const GEnergy& ereco_min,
                                          const GEnergy& ereco_max,
@@ -556,11 +573,12 @@ void GCTAEdispPerfTable::free_members(void)
 /***********************************************************************//**
  * @brief Update energy dispersion parameter cache
  *
- * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] logE Log10 of the true photon energy (\f$\log_{10}\f$ TeV).
  *
- * This method updates the energy dispersion parameter cache.
- * As the performance table energy dispersion only depends on energy,
- * the only parameter on which the cache values depend is the energy.
+ * This method updates the energy dispersion parameter cache. As the
+ * performance table energy dispersion only depends on true photon energy,
+ * the only parameter on which the cache values depend is the true photon
+ * energy.
  ***************************************************************************/
 void GCTAEdispPerfTable::update(const double& logE) const
 {

@@ -340,7 +340,7 @@ void GCTAModelSpatialGradient::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exceptino GException::invalid_value
+ * @exception GException::invalid_value
  *            Spatial model is not of valid type.
  *
  * Write the gradient spatial model information into an XML element.

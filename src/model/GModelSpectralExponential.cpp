@@ -423,11 +423,11 @@ GEnergy GModelSpectralExponential::mc(const GEnergy& emin,
  * Reads the spectral information from an XML element. The XML element shall
  * have the following format
  *
- *    <spectrum type="Exponential">
- *      <spectrum type="Constant">
- *        <parameter name="Normalization" scale="1" value="1" min="0" max="2" free="1"/>
- *	    </spectrum>
- *    </spectrum>
+ *     <spectrum type="Exponential">
+ *       <spectrum type="Constant">
+ *         <parameter name="Normalization" scale="1" value="1" min="0" max="2" free="1"/>
+ *	     </spectrum>
+ *     </spectrum>
  *
  ***************************************************************************/
 void GModelSpectralExponential::read(const GXmlElement& xml)
@@ -469,17 +469,17 @@ void GModelSpectralExponential::read(const GXmlElement& xml)
  * Writes the spectral information into an XML element. The XML element
  * will have the following format:
  *
- *    <spectrum type="Exponential">
- *      <spectrum type="Constant">
- *        <parameter name="Normalization" scale="1" value="1" min="0" max="2" free="1"/>
- *	    </spectrum>
- *    </spectrum>
+ *     <spectrum type="Exponential">
+ *       <spectrum type="Constant">
+ *         <parameter name="Normalization" scale="1" value="1" min="0" max="2" free="1"/>
+ *	     </spectrum>
+ *     </spectrum>
  *
  * If no exponential model component is defined the method writes the
  * following XML structure
  *
- *    <spectrum type="Exponential">
- *    </spectrum>
+ *     <spectrum type="Exponential">
+ *     </spectrum>
  *
  ***************************************************************************/
 void GModelSpectralExponential::write(GXmlElement& xml) const
