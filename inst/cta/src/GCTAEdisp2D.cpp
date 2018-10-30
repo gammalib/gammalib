@@ -191,15 +191,14 @@ GCTAEdisp2D& GCTAEdisp2D::operator=(const GCTAEdisp2D& edisp)
  * Returns the energy dispersion
  *
  * \f[
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) =
- *    \frac{E_{\rm disp}(E_{\rm true}, m, \theta)}{E_{\rm true}}
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true}, \theta) =
+ *    \frac{E_{\rm disp}(m | E_{\rm true}, \theta)}{E_{\rm true}}
  * \f]
  *
  * in units of MeV\f$^{-1}\f$ where
- * \f$\log_{10} E_{\rm reco}\f$ is the base 10 logarithm of the reconstructed
- * energy in TeV,
- * \f$\log_{10} E_{\rm true}\f$ is the base 10 logarithm of the true energy
- * in TeV and \f$\theta\f$ is the offset angle in radians.
+ * \f$E_{\rm reco}\f$ is the reconstructed energy,
+ * \f$E_{\rm true}\f$ is the true energy, and
+ * \f$\theta\f$ is the offset angle.
  ***************************************************************************/
 double GCTAEdisp2D::operator()(const GEnergy& ereco,
                                const GEnergy& etrue,
@@ -222,7 +221,6 @@ double GCTAEdisp2D::operator()(const GEnergy& ereco,
         (theta   >= m_theta_min)    && (theta   <= m_theta_max)) {
 
         // Compute migration (migra=Ereco/Etrue
-        //double EobsOverEsrc = std::exp((logEobs-logEsrc) * gammalib::ln10);
         double migra = ereco.MeV() / etrue.MeV();
 
         // Continue only if migration is in validity range
@@ -478,7 +476,7 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  *            No energy dispersion information found for parameters or
  *            energy dispersion matrix is invalid.
  *
- * Draws observed energy value given a true energy @p logEsrc and offset
+ * Draws observed energy value given a true energy @p etrue and offset
  * angle @p theta. If no energy dispersion information is available the
  * method will return the true photon energy.
  ***************************************************************************/
@@ -492,20 +490,20 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
     // Make sure that energy dispersion is online
     fetch();
 
-    // Initialise reconstructed photon energy
-    GEnergy ereco;
+    // Initialise reconstructed event energy with true photon energy
+    GEnergy ereco = etrue;
 
-    // Get boundaries for observed energy
+    // Get boundaries for reconstructed energy
     GEbounds ebounds = ereco_bounds(etrue, theta, phi, zenith, azimuth);
-    double   emin    = ebounds.emin().log10TeV();
-    double   emax    = ebounds.emax().log10TeV();
+    double   emin    = ebounds.emin().TeV();
+    double   emax    = ebounds.emax().TeV();
 
     // Throw an exception if minimum energy is equal or larger than maximum
     // energy (this means that no energy dispersion information is available
     // for that energy)
     if (emin >= emax) {
         std::string msg = "No valid energy dispersion information available "
-                          "for true photon energy "+etrue.print()+","
+                          "for true photon energy "+etrue.print()+", "
                           "offset angle "+
                           gammalib::str(theta*gammalib::rad2deg)+" deg "
                           "and azimuth angle "+
@@ -515,8 +513,11 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
         throw GException::invalid_return_value(G_MC, msg);
     }
 
+    // Get maximum energy dispersion value (including some margin)
+    double max_edisp = 1.5 * get_max_edisp(etrue, theta);
+
     // Throw an exception if maximum energy dispersion is zero
-    if (m_max_edisp <= 0.0) {
+    if (max_edisp <= 0.0) {
         std::string msg = "Energy dispersion matrix is empty. Please provide "
                           "a valid energy dispersion matrix.";
         throw GException::invalid_return_value(G_MC, msg);
@@ -524,7 +525,6 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
 
     // Initialise rejection method
     double    ewidth               = emax - emin;
-    double    logEobs              = etrue.log10TeV();
     double    f                    = 0.0;
     double    ftest                = 1.0;
     int       zeros                = 0;
@@ -540,14 +540,13 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
         // subsequent zeros the loop is terminated with an exception
         int zeros = 0;
         do {
-            logEobs = emin + ewidth * ran.uniform();
-            ereco.log10TeV(logEobs);
-            f       = operator()(ereco, etrue, theta, phi, zenith, azimuth);
+            ereco.TeV(emin + ewidth * ran.uniform());
+            f = operator()(ereco, etrue, theta, phi, zenith, azimuth);
             if (f == 0.0) {
                 zeros++;
                 if (zeros > max_subsequent_zeros) {
                     std::string msg = "No valid energy dispersion information "
-                                      "available  for true photon energy "+
+                                      "available for true photon energy "+
                                       etrue.print()+", offset angle "+
                                       gammalib::str(theta*gammalib::rad2deg)+
                                       " deg and azimuth angle "+
@@ -564,7 +563,7 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
         // Get uniform random value between zero and the maximum energy
         // dispersion value. The loop is quite if the random number is smaller
         // than the energy dispersion value
-        ftest = ran.uniform() * m_max_edisp;
+        ftest = ran.uniform() * max_edisp;
 
     } // endwhile:
 
@@ -584,7 +583,7 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
  * @return Observed energy boundaries.
  *
  * Returns the band of observed energies outside of which the energy
- * dispersion becomes negligible for a given true energy @p logEsrc and
+ * dispersion becomes negligible for a given true energy @p etrue and
  * offset angle @p theta.
  ***************************************************************************/
 GEbounds GCTAEdisp2D::ereco_bounds(const GEnergy& etrue,
@@ -597,15 +596,15 @@ GEbounds GCTAEdisp2D::ereco_bounds(const GEnergy& etrue,
     fetch();
 
     // Compute only if parameters changed
-    if (!m_ebounds_obs_computed || theta != m_last_theta_obs) {
+    if (!m_ereco_bounds_computed || theta != m_last_theta_ereco) {
 
         // Set computation flag
-        m_ebounds_obs_computed = true;
-        m_last_theta_obs       = theta;
-        m_last_etrue.log10TeV(-30.0); // force update
+        m_ereco_bounds_computed = true;
+        m_last_theta_ereco      = theta;
+        m_last_etrue.TeV(0.0); // force update
 
-        // Compute ebounds_obs
-        compute_ebounds_obs(theta, phi, zenith, azimuth);
+        // Compute reconstructed energy bounds
+        compute_ereco_bounds(theta, phi, zenith, azimuth);
 
     }
 
@@ -620,7 +619,7 @@ GEbounds GCTAEdisp2D::ereco_bounds(const GEnergy& etrue,
 
         // Find right index with bisection
         int low  = 0;
-        int high = m_ebounds_obs.size() - 1;
+        int high = m_ereco_bounds.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_edisp.axis_lo(m_inx_etrue, mid);
@@ -633,12 +632,12 @@ GEbounds GCTAEdisp2D::ereco_bounds(const GEnergy& etrue,
         }
 
         // Index found
-        m_index_obs = low;
+        m_index_ereco = low;
 
     }
 
     // Return energy boundaries
-    return m_ebounds_obs[m_index_obs];
+    return m_ereco_bounds[m_index_ereco];
 }
 
 
@@ -653,7 +652,7 @@ GEbounds GCTAEdisp2D::ereco_bounds(const GEnergy& etrue,
  * @return True energy boundaries.
  *
  * Returns the band of true photon energies outside of which the energy
- * dispersion becomes negligible for a given observed energy @p logEobs and
+ * dispersion becomes negligible for a given observed energy @p ereco and
  * offset angle @p theta.
  ***************************************************************************/
 GEbounds GCTAEdisp2D::etrue_bounds(const GEnergy& ereco,
@@ -666,15 +665,15 @@ GEbounds GCTAEdisp2D::etrue_bounds(const GEnergy& ereco,
     fetch();
 
     // Compute true energy boundaries only if parameters changed
-    if (!m_ebounds_src_computed || theta != m_last_theta_src) {
+    if (!m_etrue_bounds_computed || theta != m_last_theta_etrue) {
 
         // Set computation flag
-        m_ebounds_src_computed = true;
-        m_last_theta_src       = theta;
-        m_last_ereco.log10TeV(-30.0); // force update
+        m_etrue_bounds_computed = true;
+        m_last_theta_etrue        = theta;
+        m_last_ereco.TeV(0.0); // force update
 
-        // Compute ebounds_src
-        compute_ebounds_src(theta, phi, zenith, azimuth);
+        // Compute true energy boundaries
+        compute_etrue_bounds(theta, phi, zenith, azimuth);
 
     }
 
@@ -689,7 +688,7 @@ GEbounds GCTAEdisp2D::etrue_bounds(const GEnergy& ereco,
 
         // Find right index with bisection
         int low  = 0;
-        int high = m_ebounds_src.size() - 1;
+        int high = m_etrue_bounds.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_edisp.axis_lo(m_inx_etrue, mid);
@@ -702,12 +701,12 @@ GEbounds GCTAEdisp2D::etrue_bounds(const GEnergy& ereco,
         }
 
         // Index found
-        m_index_src = low;
+        m_index_etrue = low;
 
     }
 
     // Return energy boundaries
-    return m_ebounds_src[m_index_src];
+    return m_etrue_bounds[m_index_etrue];
 }
 
 
@@ -821,7 +820,7 @@ void GCTAEdisp2D::fetch(void) const
  *
  * \f[
  *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) \, dE_{\rm reco}
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true}, \theta) \, dE_{\rm reco}
  * \f]
  *
  * where
@@ -1046,19 +1045,19 @@ void GCTAEdisp2D::init_members(void)
     m_migra_max   = 0.0;
     m_theta_min   = 0.0;
     m_theta_max   = 0.0;
+    m_max_edisp.clear();
 
     // Initialise computation cache
-    m_ebounds_obs_computed = false;
-    m_ebounds_src_computed = false;
-    m_last_theta_obs       =  -1.0;
-    m_last_theta_src       =  -1.0;
-    m_last_etrue.log10TeV(-30.0);
-    m_last_ereco.log10TeV(-30.0);
-    m_index_obs            =     0;
-    m_index_src            =     0;
-    m_max_edisp            =   0.0;
-    m_ebounds_obs.clear();
-    m_ebounds_src.clear();
+    m_ereco_bounds_computed = false;
+    m_etrue_bounds_computed = false;
+    m_index_ereco           =     0;
+    m_index_etrue           =     0;
+    m_last_theta_ereco      =  -1.0;
+    m_last_theta_etrue      =  -1.0;
+    m_last_etrue.TeV(0.0);
+    m_last_ereco.TeV(0.0);
+    m_ereco_bounds.clear();
+    m_etrue_bounds.clear();
 
     // Return
     return;
@@ -1086,19 +1085,19 @@ void GCTAEdisp2D::copy_members(const GCTAEdisp2D& edisp)
     m_migra_max   = edisp.m_migra_max;
     m_theta_min   = edisp.m_theta_min;
     m_theta_max   = edisp.m_theta_max;
+    m_max_edisp   = edisp.m_max_edisp;
 
     // Copy computation cache
-    m_ebounds_obs_computed = edisp.m_ebounds_obs_computed;
-    m_ebounds_src_computed = edisp.m_ebounds_src_computed;
-    m_last_theta_obs       = edisp.m_last_theta_obs;
-    m_last_theta_src       = edisp.m_last_theta_src;
-    m_last_etrue           = edisp.m_last_etrue;
-    m_last_ereco           = edisp.m_last_ereco;
-    m_index_obs            = edisp.m_index_obs;
-    m_index_src            = edisp.m_index_src;
-    m_max_edisp            = edisp.m_max_edisp;
-    m_ebounds_obs          = edisp.m_ebounds_obs;
-    m_ebounds_src          = edisp.m_ebounds_src;
+    m_ereco_bounds_computed = edisp.m_ereco_bounds_computed;
+    m_etrue_bounds_computed = edisp.m_etrue_bounds_computed;
+    m_index_ereco           = edisp.m_index_ereco;
+    m_index_etrue           = edisp.m_index_etrue;
+    m_last_theta_ereco      = edisp.m_last_theta_ereco;
+    m_last_theta_etrue      = edisp.m_last_theta_etrue;
+    m_last_etrue            = edisp.m_last_etrue;
+    m_last_ereco            = edisp.m_last_ereco;
+    m_ereco_bounds          = edisp.m_ereco_bounds;
+    m_etrue_bounds          = edisp.m_etrue_bounds;
 
     // Return
     return;
@@ -1116,89 +1115,141 @@ void GCTAEdisp2D::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Compute ebounds_obs vector
+ * @brief Get true energy
+ *
+ * @param[in] ietrue True energy index.
+ * @return True energy.
+ ***************************************************************************/
+GEnergy GCTAEdisp2D::etrue(const int& ietrue) const
+{
+    // Compute true energy in TeV
+    double etrue_TeV = std::sqrt(m_edisp.axis_lo(m_inx_etrue, ietrue) *
+                                 m_edisp.axis_hi(m_inx_etrue, ietrue));
+
+    // Set true energy
+    GEnergy etrue;
+    etrue.TeV(etrue_TeV);
+
+    // Return true energy
+    return etrue;
+}
+
+
+/***********************************************************************//**
+ * @brief Get migration
+ *
+ * @param[in] imigra Migration index.
+ * @return Migration.
+ ***************************************************************************/
+double GCTAEdisp2D::migra(const int& imigra) const
+{
+    // Compute migration
+    double migra = 0.5 * (m_edisp.axis_hi(m_inx_migra, imigra) +
+                          m_edisp.axis_lo(m_inx_migra, imigra));
+
+    // Return migration
+    return migra;
+}
+
+
+/***********************************************************************//**
+ * @brief Get offset angle in radiaus
+ *
+ * @param[in] itheta Offset angle index.
+ * @return Offset angle (radians).
+ ***************************************************************************/
+double GCTAEdisp2D::theta(const int& itheta) const
+{
+    // Compute offset angle in radians
+    double theta = 0.5 * (m_edisp.axis_lo(m_inx_theta, itheta) +
+                          m_edisp.axis_hi(m_inx_theta, itheta)) *
+                         gammalib::deg2rad;
+
+    // Return offset angle
+    return theta;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute vector of reconstructed energy bounds
  *
  * @param[in] theta Offset angle (radians).
  * @param[in] phi Azimuth angle (radians).
  * @param[in] zenith Zenith angle (radians).
  * @param[in] azimuth Azimuth angle (radians).
  *
- * Computes for all true energies the energy boundaries of the observed
+ * Computes for all true energies the energy boundaries of the reconstructed
  * energies covered by valid migration matrix elements. Only matrix elements
  * with values >= 1.0e-12 are considered as valid elements. In case that no
  * matrix elements are found of a given true energy, the interval of observed
- * energies will be set to [1 TeV, 1 TeV] (i.e. an empty interval).
+ * energies will be set to [0,0] (i.e. an empty interval).
  ***************************************************************************/
-void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
-                                      const double& phi,
-                                      const double& zenith,
-                                      const double& azimuth) const
+void GCTAEdisp2D::compute_ereco_bounds(const double& theta,
+                                       const double& phi,
+                                       const double& zenith,
+                                       const double& azimuth) const
 {
     // Clear ebounds_obs vector
-    m_ebounds_obs.clear();
+    m_ereco_bounds.clear();
 
     // Set epsilon
     const double eps = 1.0e-12;
 
     // Determine number of true energy and migration bins
-    int n_bins  = m_edisp.axis_bins(m_inx_etrue);
-    int n_migra = m_edisp.axis_bins(m_inx_migra);
+    int netrue = m_edisp.axis_bins(m_inx_etrue);
+    int nmigra = m_edisp.axis_bins(m_inx_migra);
 
-    // Loop over Esrc
-    for (int isrc = 0; isrc < n_bins; ++isrc) {
+    // Loop over true photon energy
+    for (int ietrue = 0; ietrue < netrue; ++ietrue) {
 
-        // Set Esrc
-        double Esrc    = std::sqrt(m_edisp.axis_hi(m_inx_etrue,isrc) *
-                                   m_edisp.axis_lo(m_inx_etrue,isrc));
-        double logEsrc = std::log10(Esrc);
+        // Compute true photon energy
+        GEnergy etrue = this->etrue(ietrue);
 
         // Initialise results
-        double logEobsMin = 0.0;
-        double logEobsMax = 0.0;
-        bool   minFound   = false;
-        bool   maxFound   = false;
+        double ereco_min = 0.0;
+        double ereco_max = 0.0;
+        bool   found_min = false;
+        bool   found_max = false;
 
         // Find minimum boundary
-        for (int i = 0; i < n_migra; ++i) {
+        for (int imigra = 0; imigra < nmigra; ++imigra) {
 
-            // Compute EobsOverEsrc value
-            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(m_inx_migra,i) +
-                                         m_edisp.axis_lo(m_inx_migra,i));
+            // Compute migra value
+            double migra = this->migra(imigra);
 
             // Get matrix term
             double arg[3];
-            arg[m_inx_etrue] = logEsrc;
-            arg[m_inx_migra] = EobsOverEsrc;
+            arg[m_inx_etrue] = etrue.log10TeV();
+            arg[m_inx_migra] = migra;
             arg[m_inx_theta] = theta;
             double edisp     = m_edisp(m_inx_matrix, arg[0], arg[1], arg[2]);
 
             // Find first non-negligible matrix term
             if (edisp >= eps) {
-                minFound   = true;
-                logEobsMin = std::log10(EobsOverEsrc * Esrc);
+                found_min = true;
+                ereco_min = migra * etrue.TeV();
                 break;
             }
 
         } // endfor: find minimum boundary
 
         // Find maximum boundary
-        for (int i = n_migra-1; i >= 0; i--) {
+        for (int imigra = nmigra-1; imigra >= 0; imigra--) {
 
-            // Compute EobsOverEsrc value
-            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(m_inx_migra,i) +
-                                         m_edisp.axis_lo(m_inx_migra,i));
+            // Compute migra value
+            double migra = this->migra(imigra);
 
             // Get matrix term
             double arg[3];
-            arg[m_inx_etrue] = logEsrc;
-            arg[m_inx_migra] = EobsOverEsrc;
+            arg[m_inx_etrue] = etrue.log10TeV();
+            arg[m_inx_migra] = migra;
             arg[m_inx_theta] = theta;
             double edisp     = m_edisp(m_inx_matrix, arg[0], arg[1], arg[2]);
 
             // Find first non-negligible matrix term
             if (edisp >= eps) {
-                maxFound   = true;
-                logEobsMax = std::log10(EobsOverEsrc * Esrc);
+                found_max = true;
+                ereco_max = migra * etrue.TeV();
                 break;
             }
 
@@ -1206,19 +1257,19 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
 
         // If we did not find boundaries then set the interval to
         // a zero interval for safety
-        if (!minFound || !maxFound) {
-            logEobsMin = 0.0;
-            logEobsMax = 0.0;
+        if (!found_min || !found_max) {
+            ereco_min = 0.0;
+            ereco_max = 0.0;
         }
 
         // Set energy boundaries
         GEnergy emin;
         GEnergy emax;
-        emin.log10TeV(logEobsMin);
-        emax.log10TeV(logEobsMax);
+        emin.TeV(ereco_min);
+        emax.TeV(ereco_max);
 
         // Add energy boundaries to vector
-        m_ebounds_obs.push_back(GEbounds(emin, emax));
+        m_ereco_bounds.push_back(GEbounds(emin, emax));
 
     } // endfor: looped over logEsrc
 
@@ -1228,7 +1279,7 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
 
 
 /***********************************************************************//**
- * @brief Compute ebounds_src vector
+ * @brief Compute vector of true energy boundaries
  *
  * @param[in] theta Offset angle (radians).
  * @param[in] phi Azimuth angle (radians).
@@ -1239,62 +1290,59 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
  * energies covered by valid migration matrix elements. Only matrix elements
  * with values >= 1.0e-12 are considered as valid elements. In case that no
  * matrix elements are found of a given observed energy, the interval of true
- * energies will be set to [1 TeV, 1 TeV] (i.e. an empty interval).
+ * energies will be set to [0,0] (i.e. an empty interval).
  ***************************************************************************/
-void GCTAEdisp2D::compute_ebounds_src(const double& theta,
-                                      const double& phi,
-                                      const double& zenith,
-                                      const double& azimuth) const
+void GCTAEdisp2D::compute_etrue_bounds(const double& theta,
+                                       const double& phi,
+                                       const double& zenith,
+                                       const double& azimuth) const
 {
     // Initialise energies
     GEnergy etrue;
     GEnergy ereco;
 
     // Clear ebounds_src vector
-    m_ebounds_src.clear();
+    m_etrue_bounds.clear();
 
     // Set epsilon
     const double eps = 1.0e-12;
 
     // Determine number of true energy bins
-    int n_bins   = m_edisp.axis_bins(m_inx_etrue);
-    int n_migras = m_edisp.axis_bins(m_inx_migra);
+    int nereco  = m_edisp.axis_bins(m_inx_etrue);
+    int nmigras = m_edisp.axis_bins(m_inx_migra);
 
-    // Loop over Eobs
-    for (int iobs = 0; iobs < n_bins; ++iobs) {
+    // Loop over reconstructed energy
+    for (int iereco = 0; iereco < nereco; ++iereco) {
 
-        // Set Eobs
-        double Eobs    = std::sqrt(m_edisp.axis_hi(m_inx_etrue,iobs) *
-                                   m_edisp.axis_lo(m_inx_etrue,iobs));
-        ereco.TeV(Eobs);
+        // Set ereco (we use the true energy axis for the computation)
+        GEnergy ereco = this->etrue(iereco);
 
         // Initialise results
         GEnergy etrue_min;
         GEnergy etrue_max;
-        bool    minFound   = false;
-        bool    maxFound   = false;
+        bool    found_min   = false;
+        bool    found_max   = false;
 
         // Find minimum boundary
-        for (int imigra = 0; imigra < n_migras; ++imigra) {
+        for (int imigra = 0; imigra < nmigras; ++imigra) {
 
-            // Get mean migra
-            double migra = 0.5 * (m_edisp.axis_lo(m_inx_migra,imigra) +
-                                  m_edisp.axis_lo(m_inx_migra,imigra));
+            // Compute migra value
+            double migra = this->migra(imigra);
 
             // Fall through if migration is zero
             if (migra == 0.0) {
                 continue;
             }
 
-            // Compute log10 of true energy
+            // Compute true energy
             etrue = ereco / migra;
 
-            // Get matrix term
+            // Get energy dispersion
             double edisp = operator()(ereco, etrue, theta);
 
             // Find first non-negligible matrix term
             if (edisp >= eps) {
-                maxFound   = true;
+                found_max = true;
                 etrue_max = etrue;
                 break;
             }
@@ -1302,41 +1350,40 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
         } // endfor: find minimum boundary
 
         // Find maximum boundary
-        for (int imigra = n_migras-1; imigra >= 0; imigra--) {
+        for (int imigra = nmigras-1; imigra >= 0; imigra--) {
 
-            // Get mean migra
-            double migra = 0.5 * (m_edisp.axis_lo(m_inx_migra,imigra) +
-                                  m_edisp.axis_lo(m_inx_migra,imigra));
+            // Compute migra value
+            double migra = this->migra(imigra);
 
             // Fall through if migration is zero
             if (migra == 0.0) {
                 continue;
             }
 
-            // Compute log10 of true energy
+            // Compute true energy
             etrue = ereco / migra;
 
-            // Get matrix term
+            // Get energy dispersion
             double edisp = operator()(ereco, etrue, theta);
 
             // Find first non-negligible matrix term
             if (edisp >= eps) {
-                minFound   = true;
+                found_min = true;
                 etrue_min = etrue;
                 break;
             }
 
         } // endfor: find maximum boundary
 
-        // If we did not find boundaries then set the interval to
-        // a zero interval for safety
-        if (!minFound || !maxFound) {
+        // If we did not find boundaries then set the interval to a zero
+        // interval for safety
+        if (!found_min || !found_max) {
             etrue_min.clear();
             etrue_max.clear();
         }
 
         // Add energy boundaries to vector
-        m_ebounds_src.push_back(GEbounds(etrue_min, etrue_max));
+        m_etrue_bounds.push_back(GEbounds(etrue_min, etrue_max));
 
     } // endfor : loopend over observed energy
 
@@ -1349,15 +1396,7 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
  * @brief Set table
  *
  * After assigning or loading a response table, performs all necessary steps
- * to set the table. Specifically, the method normalizes the energy
- * dispersion for each offset angle and true energy so that
- *
- * \f[
- *    \int_{m_{\rm min}}^{m_{\rm max}}
- *    E_{\rm disp}(E_{\rm true}, m, \theta) \, dm = 1
- * \f]
- *
- * where \f$m=E_{\rm reco}/E_{\rm true}\f$.
+ * to set the table.
  *
  * For CTA, the method applies a kludge that smoothes the energy dispersion
  * table to get rid of numerical fluctuations.
@@ -1407,7 +1446,7 @@ void GCTAEdisp2D::set_table(void)
     // Normalize energy dispersion table
     normalize_table();
 
-    // Set maximum energy dispersion value
+    // Set maximum energy dispersion value array
     set_max_edisp();
 
     // Save test
@@ -1452,23 +1491,116 @@ void GCTAEdisp2D::set_boundaries(void)
 
 
 /***********************************************************************//**
- * @brief Set maximum energy dispersion value
+ * @brief Set array of maximum energy dispersion values
+ *
+ * Sets an internal array of maximum energy dispersion values for each given
+ * true photon energy and offset angle in the response table. This array will
+ * be used for Monte Carlo simulations.
  ***************************************************************************/
-void GCTAEdisp2D::set_max_edisp(void) const
+void GCTAEdisp2D::set_max_edisp(void)
 {
-    // Initialise maximum
-    m_max_edisp = 0.0;
+    // Get number of bins
+    int netrue = m_edisp.axis_bins(m_inx_etrue);
+    int nmigra = m_edisp.axis_bins(m_inx_migra);
+    int ntheta = m_edisp.axis_bins(m_inx_theta);
 
-    // Loop over all response table elements
-    for (int i = 0; i < m_edisp.elements(); ++i) {
-        double value = m_edisp(m_inx_matrix,i);
-        if (value > m_max_edisp) {
-            m_max_edisp = value;
-        }
-    }
+    // Initialise maximum energy dispersion
+    m_max_edisp.assign(netrue*ntheta, 0.0);
+
+    // Loop over offset angle
+    for (int itheta = 0, index = 0; itheta < ntheta; ++itheta) {
+
+        // Loop over true photon energy
+        for (int ietrue = 0; ietrue < netrue; ++ietrue, ++index) {
+
+            // Get true photon energy
+            GEnergy etrue = this->etrue(ietrue);
+
+            // Get offset and stride
+            int offset = table_index(ietrue, 0, itheta);
+            int stride = table_stride(m_inx_migra);
+
+            // Find maximum
+            double maximum = 0.0;
+            for (int imigra = 0, i = offset; imigra < nmigra; ++imigra, i += stride) {
+                double value = m_edisp(m_inx_matrix, i);
+                if (value > maximum) {
+                    maximum = value;
+                }
+            }
+
+            // Set maximum
+            m_max_edisp[index] = maximum / etrue.MeV();
+
+        } // endfor: looped over true photon energy
+
+    } // endfor: looped over offset angle
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get maximum energy dispersion value
+ *
+ * @param[in] etrue True photon energy.
+ * @param[in] theta Offset angle (radians).
+ * @return Maximum energy dispersion value.
+ *
+ * For a given true energy @p etrue and offset angle @p theta, returns the
+ * maximum energy dispersion value that may occur. This method makes use
+ * of the internal array pre-computed by set_max_edisp().
+ *
+ * If set_max_edisp() was not called, the method returns 0.
+ ***************************************************************************/
+double GCTAEdisp2D::get_max_edisp(const GEnergy& etrue,
+                                  const double&  theta) const
+{
+    // Initialise maximum energy dispersion
+    double max_edisp = 0.0;
+
+    // Continue only if maximum energy dispersion array is set
+    if (m_max_edisp.size() > 0) {
+
+        // Get number of true energy bins
+        int netrue = m_edisp.axis_bins(m_inx_etrue);
+
+        // Get references to axis nodes
+        const GNodeArray& etrue_nodes = m_edisp.axis_nodes(m_inx_etrue);
+        const GNodeArray& theta_nodes = m_edisp.axis_nodes(m_inx_theta);
+
+        // Set values
+        etrue_nodes.set_value(etrue.log10TeV());
+        theta_nodes.set_value(theta);
+
+        // Get indices that bound the true energy and offset angle
+        int inx_left  = theta_nodes.inx_left()  * netrue;
+        int inx_right = theta_nodes.inx_right() * netrue;
+        int index_1   = inx_left  + etrue_nodes.inx_left();
+        int index_2   = inx_left  + etrue_nodes.inx_right();
+        int index_3   = inx_right + etrue_nodes.inx_left();
+        int index_4   = inx_right + etrue_nodes.inx_right();
+
+        // Get maximum energy dispersion
+        max_edisp          = m_max_edisp[index_1];
+        double max_edisp_2 = m_max_edisp[index_2];
+        double max_edisp_3 = m_max_edisp[index_3];
+        double max_edisp_4 = m_max_edisp[index_4];
+        if (max_edisp_2 > max_edisp) {
+            max_edisp = max_edisp_2;
+        }
+        if (max_edisp_3 > max_edisp) {
+            max_edisp = max_edisp_3;
+        }
+        if (max_edisp_4 > max_edisp) {
+            max_edisp = max_edisp_4;
+        }
+
+    } // endif: Maximum energy dispersion array was set
+
+    // Return maximum energy dispersion
+    return max_edisp;
 }
 
 
@@ -1479,7 +1611,7 @@ void GCTAEdisp2D::set_max_edisp(void) const
  *
  * \f[
  *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) \, dE_{\rm reco} = 1
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true}, \theta) \, dE_{\rm reco} = 1
  * \f]
  *
  * where
@@ -1487,8 +1619,7 @@ void GCTAEdisp2D::set_max_edisp(void) const
  * minimum and maximum migration value for a given true energy as returned
  * by the ebounds_obs() method, and
  * \f$E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta)\f$ is the energy
- * dispersion returned by the GCTAEdisp2D::operator(), given in units of
- * \f$MeV^{-1}\f$.
+ * dispersion returned by the operator(), given in units of \f$MeV^{-1}\f$.
  *
  * The normalisation is performed for each \f$E_{\rm true}\f$ and
  * \f$\theta\f$ bin using a Romberg integration method. Since the
@@ -1518,21 +1649,13 @@ void GCTAEdisp2D::normalize_table(void)
         for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
 
             // Get offset angle (in radians)
-            double theta = 0.5 * (m_edisp.axis_lo(m_inx_theta,i_theta) +
-                                  m_edisp.axis_hi(m_inx_theta,i_theta)) *
-                           gammalib::deg2rad;
+            double theta = this->theta(i_theta);
 
             // Loop over true photon energy
             for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
 
-                // Get the base 10 logarithm of the true energy
-                double emin    = std::log10(m_edisp.axis_lo(m_inx_etrue,i_etrue));
-                double emax    = std::log10(m_edisp.axis_hi(m_inx_etrue,i_etrue));
-                double logEsrc = 0.5*(emin+emax);
-
-                // Set true energy
-                GEnergy etrue;
-                etrue.log10TeV(logEsrc);
+                // Get true photon energy
+                GEnergy etrue = this->etrue(i_etrue);
 
                 // Initialise integration
                 double sum = 0.0;
@@ -1544,12 +1667,12 @@ void GCTAEdisp2D::normalize_table(void)
                 for (int i = 0; i < ebounds.size(); ++i) {
 
                     // Get energy boundaries in log10 of energy in MeV
-                    emin = ebounds.emin(i).log10MeV();
-                    emax = ebounds.emax(i).log10MeV();
+                    double emin = ebounds.emin(i).log10MeV();
+                    double emax = ebounds.emax(i).log10MeV();
 
                     // Setup integration function
-                    edisp_kern integrand(this, etrue, theta);
-                    GIntegral  integral(&integrand);
+                    edisp_ereco_kern integrand(this, etrue, theta);
+                    GIntegral        integral(&integrand);
 
                     // Set integration precision
                     integral.eps(1.0e-6);
@@ -2108,37 +2231,37 @@ GNdarray GCTAEdisp2D::gaussian_array(const double& mean,
 
 
 /***********************************************************************//**
- * @brief Integration kernel for GCTAEdisp2D::edisp_kern class
+ * @brief Integration kernel for GCTAEdisp2D::edisp_ereco_kern class
  *
- * @param[in] logEobs Log10 of observation energy (\f$\log_{10}\f$ MeV).
+ * @param[in] log10Ereco Log10 of reconstructed energy (\f$\log_{10}\f$ MeV).
  * @return Energy dispersion (\f$(\log_{10}\f$ MeV\f$)^{-1}\f$).
  *
  * This method implements the function
  *
  * \f[
- *    E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta) =
- *    E_{\rm disp}(E_{\rm true}, m, \theta) \times
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | E_{\rm true}, \theta) =
+ *    E_{\rm disp}(m | E_{\rm true}, \theta) \times
  *    \frac{\log 10 \times E_{\rm reco}}{E_{\rm true}}
  * \f]
  *
- * which is the integration kernel needed for the GCTAEdisp2D::edisp_kern
- * class. The class is used by GCTAEdisp2D::normalize_table to integrate the
- * energy dispersion information using
+ * which is the integration kernel needed for the
+ * GCTAEdisp2D::edisp_ereco_kern class. The class is used by
+ * GCTAEdisp2D::normalize_table() to integrate the energy dispersion
+ * information using
  *
  * \f[
  *    \int_{\log_{10} E_{\rm reco}^{\rm min}}^{\log_{10} E_{\rm reco}^{\rm max}}
- *    E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta) \,
+ *    E_{\rm disp}(\log_{10} E_{\rm reco} | E_{\rm true}, \theta) \,
  *    d(\log_{10} E_{\rm reco})
  * \f]
  ***************************************************************************/
-double GCTAEdisp2D::edisp_kern::eval(const double& logEobs)
+double GCTAEdisp2D::edisp_ereco_kern::eval(const double& log10Ereco)
 {
-    // Set reconstructued energy
+    // Set reconstructued event energy
     GEnergy ereco;
-    ereco.log10MeV(logEobs);
+    ereco.log10MeV(log10Ereco);
 
-    // Get function value. Note that logEobs is in log10 MeV, while we need
-    // the value in log10 TeV.
+    // Get function value
     double value = m_parent->operator()(ereco, m_etrue, m_theta);
 
     // Normalize energy dispersion so that the units are per log10 MeV
@@ -2147,8 +2270,8 @@ double GCTAEdisp2D::edisp_kern::eval(const double& logEobs)
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GCTAEdisp2D::edisp_kern::eval";
-        std::cout << "(logEobs=" << logEobs << "): ";
+        std::cout << "*** ERROR: GCTAEdisp2D::edisp_ereco_kern::eval";
+        std::cout << "(log10Ereco=" << log10Ereco << "): ";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ")" << std::endl;

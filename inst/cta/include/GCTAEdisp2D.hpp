@@ -54,45 +54,37 @@ namespace gammalib {
  *
  * This class implements the energy dispersion for the CTA 2D response. The
  * CTA 2D energy dispersion is in fact a 3-dimensional function, where the
- * energy dispersion is given as function of true energy \f$E_{\rm true}\f$,
- * migration value \f$m = E_{\rm reco}/E_{\rm true}\f$ and offset angle
- * \f$\theta\f$
+ * energy dispersion
  *
  * \f[
- *    E_{\rm disp}(E_{\rm true}, m, \theta)
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true}, \theta)
  * \f]
  *
- * with
+ * is given as function of true energy \f$E_{\rm true}\f$, reconstructed
+ * energy \f$E_{\rm reco}\f$ and offset angle \f$\theta\f$. The
+ * GCTAEdisp2D::operator() returns the value of the function
+ * \f$E_{\rm disp}(E_{\rm reco} | E_{\rm true}, \theta)\f$ in units of
+ * MeV\f$^{-1}\f$ with
+ *
+ * \f[
+ *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
+ *      E_{\rm disp}(E_{\rm reco} | E_{\rm true}, \theta) \, dE_{\rm reco} = 1
+ * \f]
+ *
+ * The energy dispersion is stored internally as a 3-dimensional response
+ * table, spanned by true energy \f$E_{\rm true}\f$, migration
+ * \f$m=E_{\rm reco}/E_{\rm true}\f$ and offset angle \f$\theta\f$, with
+ *
+ * \f[
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true}, \theta) =
+ *    \frac{E_{\rm disp}(m | E_{\rm true}, \theta)}{E_{\rm true}}
+ * \f]
+ *
+ * and
  *
  * \f[
  *    \int_{m_{\rm min}}^{m_{\rm max}}
- *    E_{\rm disp}(E_{\rm true}, m, \theta) \, dm = 1
- * \f]
- *
- * The energy dispersion as function of reconstructed energy
- * \f$E_{\rm reco}\f$ is given by
- *
- * \f[
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}, \theta) =
- *    \frac{E_{\rm disp}(E_{\rm true}, m, \theta)}{E_{\rm true}}
- * \f]
- *
- * the energy dispersion as function of the natural logarithm of
- * reconstructed energy \f$\log E_{\rm reco}\f$ is given by
- *
- * \f[
- *    E_{\rm disp}(E_{\rm true}, \log E_{\rm reco}, \theta) =
- *    E_{\rm disp}(E_{\rm true}, m, \theta) \times
- *    \frac{E_{\rm reco}}{E_{\rm true}}
- * \f]
- *
- * and the energy dispersion as function of the base 10 logarithm of
- * reconstructed energy \f$\log_{10} E_{\rm reco}\f$ is given by
- *
- * \f[
- *    E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta) =
- *    E_{\rm disp}(E_{\rm true}, m, \theta) \times
- *    \frac{\log 10 \times E_{\rm reco}}{E_{\rm true}}
+ *      E_{\rm disp}(m | E_{\rm true}, \theta) \, dm = 1
  * \f]
  ***************************************************************************/
 class GCTAEdisp2D : public GCTAEdisp {
@@ -152,46 +144,47 @@ public:
 
 private:
     // Methods
-    void   init_members(void);
-    void   copy_members(const GCTAEdisp2D& edisp);
-    void   free_members(void);
-    void   update(const double& logEobs,
-                  const double& logEsrc,
-                  const double& theta) const;
-    void   compute_ebounds_obs(const double& theta = 0.0,
-                               const double& phi = 0.0,
-                               const double& zenith = 0.0,
-                               const double& azimuth = 0.0) const;
-    void   compute_ebounds_src(const double& theta = 0.0,
-                               const double& phi = 0.0,
-                               const double& zenith = 0.0,
-                               const double& azimuth = 0.0) const;
-    void   set_table(void);
-    void   set_boundaries(void);
-    void   set_max_edisp(void) const;
-    void   normalize_table(void);
-    int    table_index(const int& ietrue,
-                       const int& imigra,
-                       const int& itheta) const;
-    int    table_stride(const int& axis) const;
-    double table_value(const int& base_ll,
-                                const int& base_lr,
-                                const int& base_rl,
-                                const int& base_rr,
-                                const double& wgt_el,
-                                const double& wgt_er,
-                                const double& wgt_tl,
-                                const double& wgt_tr,
-                                const int& offset) const;
-    double table_value(const int& base_ll,
-                                const int& base_lr,
-                                const int& base_rl,
-                                const int& base_rr,
-                                const double& wgt_el,
-                                const double& wgt_er,
-                                const double& wgt_tl,
-                                const double& wgt_tr,
-                                const double& migra) const;
+    void    init_members(void);
+    void    copy_members(const GCTAEdisp2D& edisp);
+    void    free_members(void);
+    GEnergy etrue(const int& ietrue) const;
+    double  migra(const int& imigra) const;
+    double  theta(const int& itheta) const;
+    void    compute_ereco_bounds(const double& theta = 0.0,
+                                 const double& phi = 0.0,
+                                 const double& zenith = 0.0,
+                                 const double& azimuth = 0.0) const;
+    void    compute_etrue_bounds(const double& theta = 0.0,
+                                 const double& phi = 0.0,
+                                 const double& zenith = 0.0,
+                                 const double& azimuth = 0.0) const;
+    void    set_table(void);
+    void    set_boundaries(void);
+    void    set_max_edisp(void);
+    double  get_max_edisp(const GEnergy& etrue, const double&  theta) const;
+    void    normalize_table(void);
+    int     table_index(const int& ietrue,
+                        const int& imigra,
+                        const int& itheta) const;
+    int     table_stride(const int& axis) const;
+    double  table_value(const int& base_ll,
+                        const int& base_lr,
+                        const int& base_rl,
+                        const int& base_rr,
+                        const double& wgt_el,
+                        const double& wgt_er,
+                        const double& wgt_tl,
+                        const double& wgt_tr,
+                        const int& offset) const;
+    double  table_value(const int& base_ll,
+                        const int& base_lr,
+                        const int& base_rl,
+                        const int& base_rr,
+                        const double& wgt_el,
+                        const double& wgt_er,
+                        const double& wgt_tl,
+                        const double& wgt_tr,
+                        const double& migra) const;
 
     // Kludge
     void     smooth_table(void);
@@ -213,15 +206,15 @@ private:
                             const double& total) const;
 
     // Protected classes
-    class edisp_kern : public GFunction {
+    class edisp_ereco_kern : public GFunction {
     public:
-        edisp_kern(const GCTAEdisp2D* parent,
-                   const GEnergy&     etrue,
-                   const double&      theta) :
-                   m_parent(parent),
-                   m_etrue(etrue),
-                   m_theta(theta) { }
-        double eval(const double& logEobs);
+        edisp_ereco_kern(const GCTAEdisp2D* parent,
+                         const GEnergy&     etrue,
+                         const double&      theta) :
+                         m_parent(parent),
+                         m_etrue(etrue),
+                         m_theta(theta) { }
+        double eval(const double& log10Ereco);
     protected:
         const GCTAEdisp2D* m_parent;  //!< Pointer to parent class
         GEnergy            m_etrue;   //!< True photon energy
@@ -229,32 +222,32 @@ private:
     };
 
     // Members
-    mutable GFilename m_filename;    //!< Name of Edisp response file
-    GCTAResponseTable m_edisp;       //!< Edisp response table
-    mutable bool      m_fetched;     //!< Signals that Edisp has been fetched
-    int               m_inx_etrue;   //!< True energy index
-    int               m_inx_migra;   //!< Migration index
-    int               m_inx_theta;   //!< Theta index
-    int               m_inx_matrix;  //!< Matrix
-    double            m_logEsrc_min; //!< Minimum logE (log10(E/TeV))
-    double            m_logEsrc_max; //!< Maximum logE (log10(E/TeV))
-    double            m_migra_min;   //!< Minimum migration
-    double            m_migra_max;   //!< Maximum migration
-    double            m_theta_min;   //!< Minimum theta (radians)
-    double            m_theta_max;   //!< Maximum theta (radians)
+    mutable GFilename   m_filename;    //!< Name of Edisp response file
+    GCTAResponseTable   m_edisp;       //!< Edisp response table
+    mutable bool        m_fetched;     //!< Signals that Edisp has been fetched
+    int                 m_inx_etrue;   //!< True energy index
+    int                 m_inx_migra;   //!< Migration index
+    int                 m_inx_theta;   //!< Theta index
+    int                 m_inx_matrix;  //!< Matrix
+    double              m_logEsrc_min; //!< Minimum logE (log10(E/TeV))
+    double              m_logEsrc_max; //!< Maximum logE (log10(E/TeV))
+    double              m_migra_min;   //!< Minimum migration
+    double              m_migra_max;   //!< Maximum migration
+    double              m_theta_min;   //!< Minimum theta (radians)
+    double              m_theta_max;   //!< Maximum theta (radians)
+    std::vector<double> m_max_edisp;   //!< Maximum Edisp
 
     // Computation cache
-    mutable bool                  m_ebounds_obs_computed;
-    mutable bool                  m_ebounds_src_computed;
-    mutable double                m_last_theta_obs;
-    mutable double                m_last_theta_src;
+    mutable bool                  m_ereco_bounds_computed;
+    mutable bool                  m_etrue_bounds_computed;
+    mutable double                m_last_theta_ereco;
+    mutable double                m_last_theta_etrue;
     mutable GEnergy               m_last_etrue;
     mutable GEnergy               m_last_ereco;
-    mutable int                   m_index_obs;
-    mutable int                   m_index_src;
-    mutable double                m_max_edisp;
-    mutable std::vector<GEbounds> m_ebounds_obs;
-    mutable std::vector<GEbounds> m_ebounds_src;
+    mutable int                   m_index_ereco;
+    mutable int                   m_index_etrue;
+    mutable std::vector<GEbounds> m_ereco_bounds;
+    mutable std::vector<GEbounds> m_etrue_bounds;
 };
 
 
