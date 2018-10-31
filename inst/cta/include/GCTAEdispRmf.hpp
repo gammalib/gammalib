@@ -50,14 +50,12 @@ class GEbounds;
  * The energy dispersion is defined as
  *
  * \f[
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) =
- *    \frac{E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta)}
- *         {\log_{10} E_{\rm reco}}
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true})
  * \f]
  *
  * in units of MeV\f$^{-1}\f$ where
- * \f$E_{\rm reco}\f$ is the reconstructed energy in units of MeV, and
- * \f$E_{\rm true}\f$ is the true energy in units of MeV.
+ * \f$E_{\rm reco}\f$ is the reconstructed energy, and
+ * \f$E_{\rm true}\f$ is the true energy.
  ***************************************************************************/
 class GCTAEdispRmf : public GCTAEdisp {
 
@@ -114,49 +112,41 @@ private:
     void copy_members(const GCTAEdispRmf& psf);
     void free_members(void);
     void set_matrix(void);
+    void set_max_edisp(void);
     void set_cache(void) const;
-    void set_max_edisp(void) const;
-    void update(const double& logEsrc, const double& logEobs) const;
-    void compute_ebounds_obs(const double& theta = 0.0,
-                             const double& phi = 0.0,
-                             const double& zenith = 0.0,
-                             const double& azimuth = 0.0) const;
-    void compute_ebounds_src(const double& theta = 0.0,
-                             const double& phi = 0.0,
-                             const double& zenith = 0.0,
-                             const double& azimuth = 0.0) const;
+    void update(const GEnergy& ereco, const GEnergy& etrue) const;
+    void compute_ereco_bounds(void) const;
+    void compute_etrue_bounds(void) const;
 
     // Members
     GFilename     m_filename;  //!< Name of response file
     GRmf          m_rmf;       //!< Redistribution matrix file
     GMatrixSparse m_matrix;    //!< Normalised redistribution matrix
+    double        m_max_edisp; //!< Maximum energy dispersion value for MC
 
     // Interpolation cache
-    mutable GNodeArray m_etrue;          //!< Array of log10(Etrue)
-    mutable GNodeArray m_emeasured;      //!< Array of log10(Emeasured)
-    mutable double     m_last_etrue;     //!< Last log10(Etrue)
-    mutable double     m_last_emeasured; //!< Last log10(Emeasured)
-    mutable int        m_itrue1;         //!< Index of left Etrue
-    mutable int        m_itrue2;         //!< Index of right Etrue
-    mutable int        m_imeas1;         //!< Index of left Emeasured
-    mutable int        m_imeas2;         //!< Index of right Emeasured
-    mutable double     m_wgt1;           //!< Weight of lower left node
-    mutable double     m_wgt2;           //!< Weight of upper left node
-    mutable double     m_wgt3;           //!< Weight of lower right node
-    mutable double     m_wgt4;           //!< Weight of upper right node
+    mutable GNodeArray m_etrue;      //!< Array of log10(Etrue)
+    mutable GNodeArray m_ereco;      //!< Array of log10(Ereco)
+    mutable GEnergy    m_last_etrue; //!< Last true energy
+    mutable GEnergy    m_last_ereco; //!< Last reconstructed energy
+    mutable int        m_itrue1;     //!< Index of left Etrue
+    mutable int        m_itrue2;     //!< Index of right Etrue
+    mutable int        m_ireco1;     //!< Index of left Ereco
+    mutable int        m_ireco2;     //!< Index of right Ereco
+    mutable double     m_wgt1;       //!< Weight of lower left node
+    mutable double     m_wgt2;       //!< Weight of upper left node
+    mutable double     m_wgt3;       //!< Weight of lower right node
+    mutable double     m_wgt4;       //!< Weight of upper right node
 
-    // Monte Carlo cache
-    mutable double                m_max_edisp;
-    mutable double                m_last_theta_obs;
-    mutable double                m_last_theta_src;
-    mutable GEnergy               m_last_etrue_ereco_bounds;
-    mutable GEnergy               m_last_ereco_etrue_bounds;
-    mutable int                   m_index_obs;
-    mutable int                   m_index_src;
-    mutable bool                  m_ebounds_obs_computed;
-    mutable bool                  m_ebounds_src_computed;
-    mutable std::vector<GEbounds> m_ebounds_obs;
-    mutable std::vector<GEbounds> m_ebounds_src;
+    // Computation cache
+    mutable bool                  m_ereco_bounds_computed;
+    mutable bool                  m_etrue_bounds_computed;
+    mutable GEnergy               m_last_etrue_bounds;
+    mutable GEnergy               m_last_ereco_bounds;
+    mutable int                   m_index_ereco;
+    mutable int                   m_index_etrue;
+    mutable std::vector<GEbounds> m_ereco_bounds;
+    mutable std::vector<GEbounds> m_etrue_bounds;
 };
 
 

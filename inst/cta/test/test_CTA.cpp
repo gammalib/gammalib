@@ -958,7 +958,7 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
     test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(1.0,"TeV")), 0.0);
 
     // Test that diagonal element is non-zero
-    test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(30.0,"TeV")), 1.0785985662216e-07);
+    test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(30.0,"TeV")), 1.07978131144085e-07);
 
     // Test if non-diagonal element (above diagonal) is zero
     test_value(edisp2(GEnergy(1.0,"TeV"), GEnergy(30.0,"TeV")), 0.0);
@@ -967,13 +967,13 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
     GEnergy etrue(1.0, "TeV");
     GEnergy emin(0.1, "TeV");
     GEnergy emax(10.0, "TeV");
-    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0),  1.00002576227557);
-    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.42065218271377);
-    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.43096191010834);
+    test_value(edisp2.prob_erecobin(emin, emax, etrue, 0.0),  1.00105708071354);
+    test_value(edisp2.prob_erecobin(etrue, emax, etrue, 0.0), 0.50215659368534);
+    test_value(edisp2.prob_erecobin(emin, etrue, etrue, 0.0), 0.498805373808917);
 
     // Test mc method
     GRan ran;
-    test_value(edisp2.mc(ran, etrue).TeV(), 0.930126476703161);
+    test_value(edisp2.mc(ran, etrue).TeV(), 0.923744959981026);
 
     // Test normalisation
     test_edisp_integration(edisp2, 0.5, 10.0);
@@ -1006,8 +1006,8 @@ void TestGCTAResponse::test_response_edisp_2D(void)
     test_value(edisp2.ereco_bounds(GEnergy(10.0,"TeV")).emax().TeV(), 13.2011115155942);
 
     // Test ebounds_src method
-    test_value(edisp2.etrue_bounds(GEnergy(10.0,"TeV")).emin().TeV(),  7.7813808018878);
-    test_value(edisp2.etrue_bounds(GEnergy(10.0,"TeV")).emax().TeV(), 15.8059295273666);
+    test_value(edisp2.etrue_bounds(GEnergy(10.0,"TeV")).emin().TeV(),  7.75156710957461);
+    test_value(edisp2.etrue_bounds(GEnergy(10.0,"TeV")).emax().TeV(), 15.6834030551103);
 
     // Test if non-diagonal element (below diagonal) is zero
     test_value(edisp2(GEnergy(30.0,"TeV"), GEnergy(1.0,"TeV")), 0.0);
@@ -1028,7 +1028,7 @@ void TestGCTAResponse::test_response_edisp_2D(void)
 
     // Test mc method
     GRan ran;
-    test_value(edisp2.mc(ran, etrue).TeV(), 0.872387491302767);
+    test_value(edisp2.mc(ran, etrue).TeV(), 0.991300452406315);
 
     // Test normalisation
     test_edisp_integration(edisp2);

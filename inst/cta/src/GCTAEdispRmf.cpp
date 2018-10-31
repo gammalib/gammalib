@@ -43,10 +43,13 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                               "GCTAEdispRmf::load(GFilename&)"
+#define G_MC  "GCTAEdispRmf::mc(GRan&, GEnergy&, double&, double&, double&, "\
+                                                                   "double&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_LINEAR_ERECO_INTERPOLATION    //!< Linear interpolation for Ereco
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -173,14 +176,12 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * Returns the energy dispersion
  *
  * \f[
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) =
- *    \frac{E_{\rm disp}(E_{\rm true}, \log_{10} E_{\rm reco}, \theta)}
- *         {\log_{10} E_{\rm reco}}
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true})
  * \f]
  *
  * in units of MeV\f$^{-1}\f$ where
- * \f$E_{\rm reco}\f$ is the reconstructed energy in units of MeV, and
- * \f$E_{\rm true}\f$ is the true energy in units of MeV.
+ * \f$E_{\rm reco}\f$ is the reconstructed energy, and
+ * \f$E_{\rm true}\f$ is the true energy.
  ***************************************************************************/
 double GCTAEdispRmf::operator()(const GEnergy& ereco,
                                 const GEnergy& etrue,
@@ -189,27 +190,18 @@ double GCTAEdispRmf::operator()(const GEnergy& ereco,
                                 const double&  zenith,
                                 const double&  azimuth) const
 {
-    // Get log10 of true and reconstructed photon energies
-    double logEsrc = etrue.log10TeV();
-    double logEobs = ereco.log10TeV();
-
     // Update indexes and weighting factors for interpolation
-    update(logEobs, logEsrc);
+    update(ereco, etrue);
 
     // Perform interpolation
-    double edisp =  m_wgt1 * m_matrix(m_itrue1, m_imeas1) +
-                    m_wgt2 * m_matrix(m_itrue1, m_imeas2) +
-                    m_wgt3 * m_matrix(m_itrue2, m_imeas1) +
-                    m_wgt4 * m_matrix(m_itrue2, m_imeas2);
+    double edisp =  m_wgt1 * m_matrix(m_itrue1, m_ireco1) +
+                    m_wgt2 * m_matrix(m_itrue1, m_ireco2) +
+                    m_wgt3 * m_matrix(m_itrue2, m_ireco1) +
+                    m_wgt4 * m_matrix(m_itrue2, m_ireco2);
 
     // Make sure that energy dispersion is not negative
     if (edisp < 0.0) {
         edisp = 0.0;
-    }
-
-    // If the energy dispersion is positive, return it per MeV
-    else {
-        edisp /= (gammalib::ln10 * ereco.MeV());
     }
 
     // Return energy dispersion
@@ -292,9 +284,14 @@ void GCTAEdispRmf::load(const GFilename& filename)
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
- * @return Energy.
+ * @return Reconstructed energy.
  *
- * Draws observed energy value from RMF matrix.
+ * @exception GException::invalid_return_value
+ *            Energy dispersion matrix is empty.
+ *
+ * Draws reconstructed energy value from RMF matrix given a true energy
+ * @p etrue. If no energy dispersion information is available the method
+ * will return the true photon energy.
  ***************************************************************************/
 GEnergy GCTAEdispRmf::mc(GRan&          ran,
                          const GEnergy& etrue,
@@ -303,25 +300,33 @@ GEnergy GCTAEdispRmf::mc(GRan&          ran,
                          const double&  zenith,
                          const double&  azimuth) const
 {
-    // Initialise energies
-    GEnergy ereco;
+    // Initialise reconstructed event energy with true photon energy
+    GEnergy ereco = etrue;
 
-    // Get boundaries for rejection method
+    // Get boundaries for reconstructed energy
     GEbounds ebounds = ereco_bounds(etrue, theta, phi, zenith, azimuth);
-    double   emin    = ebounds.emin().log10TeV();
-    double   emax    = ebounds.emax().log10TeV();
+    double   emin    = ebounds.emin().TeV();
+    double   emax    = ebounds.emax().TeV();
+
+    // Get maximum energy dispersion value (including some margin)
+    double max_edisp = 1.5 * m_max_edisp;
+
+    // Throw an exception if maximum energy dispersion is zero
+    if (max_edisp <= 0.0) {
+        std::string msg = "Energy dispersion matrix is empty. Please provide "
+                          "a valid energy dispersion matrix.";
+        throw GException::invalid_return_value(G_MC, msg);
+    }
 
     // Find energy by rejection method
     double ewidth  = emax - emin;
-    double logEobs = 0.5*(emin+emax);
-    if (m_max_edisp > 0.0) {
+    if (max_edisp > 0.0) {
         double f      = 0.0;
         double ftest  = 1.0;
         while (ftest > f) {
-            logEobs = emin + ewidth * ran.uniform();
-            ereco.log10TeV(logEobs);
-            f       = operator()(ereco, etrue, theta, phi, zenith, azimuth);
-            ftest   = ran.uniform() * m_max_edisp;
+            ereco.TeV(emin + ewidth * ran.uniform());
+            f     = operator()(ereco, etrue, theta, phi, zenith, azimuth);
+            ftest = ran.uniform() * max_edisp;
         }
     }
 
@@ -350,30 +355,29 @@ GEbounds GCTAEdispRmf::ereco_bounds(const GEnergy& etrue,
                                     const double&  azimuth) const
 {
     // Compute only if parameters changed
-    if (!m_ebounds_obs_computed || theta != m_last_theta_obs) {
+    if (!m_ereco_bounds_computed) {
 
         // Store last theta value
-        m_ebounds_obs_computed = true;
-        m_last_theta_obs       = theta;
-        m_last_etrue_ereco_bounds.log10TeV(-30.0); // force update
+        m_ereco_bounds_computed = true;
+        m_last_etrue_bounds.TeV(0.0); // force update
 
-        // Compute ebounds_obs
-        compute_ebounds_obs(theta, phi, zenith, azimuth);
+        // Compute m_ereco_bounds
+        compute_ereco_bounds();
 
     }
 
     // Search index only if logEsrc has changed
-    if (etrue != m_last_etrue_ereco_bounds) {
+    if (etrue != m_last_etrue_bounds) {
 
         // Store last photon energy
-        m_last_etrue_ereco_bounds = etrue;
+        m_last_etrue_bounds = etrue;
 
         // Get true photon energy in TeV
         double etrue_TeV = etrue.TeV();
 
         // Find right index with bisection
         int low  = 0;
-        int high = m_ebounds_obs.size() - 1;
+        int high = m_ereco_bounds.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_rmf.etrue().emin(mid).TeV();
@@ -386,12 +390,12 @@ GEbounds GCTAEdispRmf::ereco_bounds(const GEnergy& etrue,
         }
 
         // Index found
-        m_index_obs = low;
+        m_index_ereco = low;
 
     }
 
     // Return energy boundaries
-    return (m_ebounds_obs[m_index_obs]);
+    return (m_ereco_bounds[m_index_ereco]);
 }
 
 
@@ -415,30 +419,29 @@ GEbounds GCTAEdispRmf::etrue_bounds(const GEnergy& ereco,
                                     const double&  azimuth) const
 {
     // Compute only if parameters changed
-    if (!m_ebounds_src_computed || theta != m_last_theta_src) {
+    if (!m_etrue_bounds_computed) {
 
-        // Store last value
-        m_ebounds_src_computed = true;
-        m_last_theta_src       = theta;
-        m_last_ereco_etrue_bounds.log10TeV(-30.0); // force update
+        // Set computation flag
+        m_etrue_bounds_computed = true;
+        m_last_ereco_bounds.TeV(0.0); // force update
 
-        // Compute ebounds_obs
-        compute_ebounds_src(theta, phi, zenith, azimuth);
+        // Compute m_etrue_bounds
+        compute_etrue_bounds();
 
     }
 
     // Search index only if ereco has changed
-    if (ereco != m_last_ereco_etrue_bounds) {
+    if (ereco != m_last_ereco_bounds) {
 
         // Store last value
-        m_last_ereco_etrue_bounds = ereco;
+        m_last_ereco_bounds = ereco;
 
         // Get reconstructed energy in TeV
         double ereco_TeV = ereco.TeV();
 
         // Find right index with bisection
         int low  = 0;
-        int high = m_ebounds_src.size() - 1;
+        int high = m_etrue_bounds.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_rmf.emeasured().emin(mid).TeV();
@@ -451,12 +454,12 @@ GEbounds GCTAEdispRmf::etrue_bounds(const GEnergy& ereco,
         }
 
         // Index found
-        m_index_src = low;
+        m_index_etrue = low;
 
     }
 
     // Return energy boundaries
-    return (m_ebounds_src[m_index_src]);
+    return (m_etrue_bounds[m_index_etrue]);
 }
 
 
@@ -474,7 +477,7 @@ GEbounds GCTAEdispRmf::etrue_bounds(const GEnergy& ereco,
  *
  * \f[
  *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) \, dE_{\rm reco}
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true}) \, dE_{\rm reco}
  * \f]
  *
  * where
@@ -491,8 +494,13 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
 
     // Get log10 of energies
     double logEsrc     = etrue.log10TeV();
+    #if defined(G_LINEAR_ERECO_INTERPOLATION)
+    double logEobs_min = ereco_min.TeV();
+    double logEobs_max = ereco_max.TeV();
+    #else
     double logEobs_min = ereco_min.log10TeV();
     double logEobs_max = ereco_max.log10TeV();
+    #endif
 
     // Set logEsrc for node array interpolation
     m_etrue.set_value(logEsrc);
@@ -510,23 +518,27 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
     double  f2 = 0.0;
 
     // Loop over all measured energy nodes
-    for (int i = 0; i < m_emeasured.size(); ++i) {
+    for (int i = 0; i < m_ereco.size(); ++i) {
 
         // If measured energy is below logEobs_min then skip node
-        if (m_emeasured[i] <= logEobs_min) {
+        if (m_ereco[i] <= logEobs_min) {
             continue;
         }
 
         // If measured energy is above maximum migration value then use
         // logEobs_max as measured energy
-        if (m_emeasured[i] > logEobs_max) {
+        if (m_ereco[i] > logEobs_max) {
             x2 = ereco_max;
             f2 = this->operator()(x2, etrue);
         }
 
         // ... otherwise use measured energy
         else {
-            x2.log10TeV(m_emeasured[i]);
+            #if defined(G_LINEAR_ERECO_INTERPOLATION)
+            x2.TeV(m_ereco[i]);
+            #else
+            x2.log10TeV(m_ereco[i]);
+            #endif
             f2 = wgt_left  * m_matrix(inx_left,  i) +
                  wgt_right * m_matrix(inx_right, i);
             if (f2 < 0.0) {
@@ -535,14 +547,14 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
         }
 
         // Compute integral
-        prob += 0.5 * (f1 + f2) * (x2.log10TeV() - x1.log10TeV());
+        prob += 0.5 * (f1 + f2) * (x2.MeV() - x1.MeV());
 
         // Set second node as first node
         x1 = x2;
         f1 = f2;
 
         // If node energy is above migra_max then break now
-        if (m_emeasured[i] > logEobs_max) {
+        if (m_ereco[i] > logEobs_max) {
             break;
         }
 
@@ -553,7 +565,7 @@ double GCTAEdispRmf::prob_erecobin(const GEnergy& ereco_min,
     if (x1 < ereco_max) {
         x2    = ereco_max;
         f2    = this->operator()(x2, etrue);
-        prob += 0.5 * (f1 + f2) * (x2.log10TeV() - x1.log10TeV());
+        prob += 0.5 * (f1 + f2) * (x2.MeV() - x1.MeV());
     }
 
     // Return probability
@@ -616,33 +628,31 @@ void GCTAEdispRmf::init_members(void)
     m_filename.clear();
     m_rmf.clear();
     m_matrix.clear();
+    m_max_edisp = 0.0;
 
     // Initialise interpolation cache
     m_etrue.clear();
-    m_emeasured.clear();
-    m_last_etrue     = 9999.0;
-    m_last_emeasured = 9999.0;
-    m_itrue1         = 0;
-    m_itrue2         = 0;
-    m_imeas1         = 0;
-    m_imeas2         = 0;
-    m_wgt1           = 0.0;
-    m_wgt2           = 0.0;
-    m_wgt3           = 0.0;
-    m_wgt4           = 0.0;
+    m_ereco.clear();
+    m_last_etrue.clear();
+    m_last_ereco.clear();
+    m_itrue1     = 0;
+    m_itrue2     = 0;
+    m_ireco1     = 0;
+    m_ireco2     = 0;
+    m_wgt1       = 0.0;
+    m_wgt2       = 0.0;
+    m_wgt3       = 0.0;
+    m_wgt4       = 0.0;
 
-    // Initialise Monte Carlo cache
-    m_max_edisp            = 0.0;
-    m_last_theta_obs       = -1.0;
-    m_last_theta_src       = -1.0;
-    m_last_etrue_ereco_bounds.log10TeV(-30.0);
-    m_last_ereco_etrue_bounds.log10TeV(-30.0);
-    m_index_obs            = 0;
-    m_index_src            = 0;
-    m_ebounds_obs_computed = false;
-    m_ebounds_src_computed = false;
-    m_ebounds_obs.clear();
-    m_ebounds_src.clear();
+    // Initialise computation cache
+    m_ereco_bounds_computed = false;
+    m_etrue_bounds_computed = false;
+    m_index_ereco           = 0;
+    m_index_etrue           = 0;
+    m_last_etrue_bounds.clear();
+    m_last_ereco_bounds.clear();
+    m_ereco_bounds.clear();
+    m_etrue_bounds.clear();
 
     // Return
     return;
@@ -657,36 +667,34 @@ void GCTAEdispRmf::init_members(void)
 void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
 {
     // Copy members
-    m_filename = edisp.m_filename;
-    m_rmf      = edisp.m_rmf;
-    m_matrix   = edisp.m_matrix;
+    m_filename  = edisp.m_filename;
+    m_rmf       = edisp.m_rmf;
+    m_matrix    = edisp.m_matrix;
+    m_max_edisp = edisp.m_max_edisp;
 
     // Copy interpolation cache
-    m_etrue          = edisp.m_etrue;
-    m_emeasured      = edisp.m_emeasured;
-    m_last_etrue     = edisp.m_last_etrue;
-    m_last_emeasured = edisp.m_last_emeasured;
-    m_itrue1         = edisp.m_itrue1;
-    m_itrue2         = edisp.m_itrue2;
-    m_imeas1         = edisp.m_imeas1;
-    m_imeas2         = edisp.m_imeas2;
-    m_wgt1           = edisp.m_wgt1;
-    m_wgt2           = edisp.m_wgt2;
-    m_wgt3           = edisp.m_wgt3;
-    m_wgt4           = edisp.m_wgt4;
+    m_etrue      = edisp.m_etrue;
+    m_ereco      = edisp.m_ereco;
+    m_last_etrue = edisp.m_last_etrue;
+    m_last_ereco = edisp.m_last_ereco;
+    m_itrue1     = edisp.m_itrue1;
+    m_itrue2     = edisp.m_itrue2;
+    m_ireco1     = edisp.m_ireco1;
+    m_ireco2     = edisp.m_ireco2;
+    m_wgt1       = edisp.m_wgt1;
+    m_wgt2       = edisp.m_wgt2;
+    m_wgt3       = edisp.m_wgt3;
+    m_wgt4       = edisp.m_wgt4;
 
-    // Copy Monte Carlo cache
-    m_max_edisp               = edisp.m_max_edisp;
-    m_last_theta_obs          = edisp.m_last_theta_obs;
-    m_last_theta_src          = edisp.m_last_theta_src;
-    m_last_etrue_ereco_bounds = edisp.m_last_etrue_ereco_bounds;
-    m_last_ereco_etrue_bounds = edisp.m_last_ereco_etrue_bounds;
-    m_index_obs               = edisp.m_index_obs;
-    m_index_src               = edisp.m_index_src;
-    m_ebounds_obs_computed    = edisp.m_ebounds_obs_computed;
-    m_ebounds_src_computed    = edisp.m_ebounds_src_computed;
-    m_ebounds_obs             = edisp.m_ebounds_obs;
-    m_ebounds_src             = edisp.m_ebounds_src;
+    // Copy computation cache
+    m_ereco_bounds_computed = edisp.m_ereco_bounds_computed;
+    m_etrue_bounds_computed = edisp.m_etrue_bounds_computed;
+    m_index_ereco           = edisp.m_index_ereco;
+    m_index_etrue           = edisp.m_index_etrue;
+    m_last_etrue_bounds     = edisp.m_last_etrue_bounds;
+    m_last_ereco_bounds     = edisp.m_last_ereco_bounds;
+    m_ereco_bounds          = edisp.m_ereco_bounds;
+    m_etrue_bounds          = edisp.m_etrue_bounds;
 
     // Return
     return;
@@ -715,28 +723,42 @@ void GCTAEdispRmf::set_matrix(void)
     // Initialize matrix
     m_matrix = GMatrixSparse(rows, columns);
 
+    // Get reconstructued energy bin boundaries
+    GEbounds ebounds = m_rmf.emeasured();
+
     // Fill matrix elements
-    for (int itrue = 0; itrue < rows; ++itrue) {
-        for (int imeasured = 0; imeasured < columns; ++imeasured) {
-            m_matrix(itrue, imeasured) = m_rmf(itrue, imeasured);
+    for (int ireco = 0; ireco < columns; ++ireco) {
+
+        // Compute reconstructued energy bin width in MeV
+        double ewidth = ebounds.emax(ireco).MeV() - ebounds.emin(ireco).MeV();
+
+        // If bin width is positive then fill all matrix bins by deviding
+        // the RMF values by the bin width. This assures that the stored
+        // values are per MeV of reconstructed energy.
+        if (ewidth > 0.0) {
+            for (int itrue = 0; itrue < rows; ++itrue) {
+                m_matrix(itrue, ireco) = m_rmf(itrue, ireco) / ewidth;
+            }
         }
-    }
+
+    } // endfor: looped over all reconstructed energies
 
     // Initialise row sums
-    std::vector<double> row_sums;
-    row_sums.reserve(rows);
+    std::vector<double> row_sums(rows, 0.0);
 
     // Normalize matrix elements
     for (int itrue = 0; itrue < rows; ++itrue) {
 
+        // Get true energy
+        GEnergy etrue = m_rmf.etrue().elogmean(itrue);
+
         // Get integration boundaries
-        GEbounds ebounds = ereco_bounds(m_rmf.etrue().elogmean(itrue), 0.0);
+        GEbounds ebounds = ereco_bounds(etrue);
 
         // Integrate contributions over energy boundaries
         double sum = 0.0;
         for (int i = 0; i < ebounds.size(); ++i) {
-            sum += prob_erecobin(ebounds.emin(i), ebounds.emax(i),
-                                 m_rmf.etrue().elogmean(itrue), 0.0);
+            sum += prob_erecobin(ebounds.emin(i), ebounds.emax(i), etrue, 0.0);
         }
 
         // Store matrix sum
@@ -748,8 +770,8 @@ void GCTAEdispRmf::set_matrix(void)
     for (int itrue = 0; itrue < rows; ++itrue) {
         double sum = row_sums[itrue];
         if (sum > 0.0) {
-            for (int imeasured = 0; imeasured < columns; ++imeasured) {
-                m_matrix(itrue, imeasured) /= sum;
+            for (int ireco = 0; ireco < columns; ++ireco) {
+                m_matrix(itrue, ireco) /= sum;
             }
         }
     }
@@ -768,7 +790,7 @@ void GCTAEdispRmf::set_cache(void) const
 {
     // Clear node arrays
     m_etrue.clear();
-    m_emeasured.clear();
+    m_ereco.clear();
 
     // Set log10(Etrue) nodes
     for (int i = 0; i < m_rmf.ntrue(); ++i) {
@@ -777,7 +799,11 @@ void GCTAEdispRmf::set_cache(void) const
 
     // Set log10(Emeasured) nodes
     for (int i = 0; i < m_rmf.nmeasured(); ++i) {
-        m_emeasured.append(m_rmf.emeasured().elogmean(i).log10TeV());
+        #if defined(G_LINEAR_ERECO_INTERPOLATION)
+        m_ereco.append(m_rmf.emeasured().elogmean(i).TeV());
+        #else
+        m_ereco.append(m_rmf.emeasured().elogmean(i).log10TeV());
+        #endif
     }
 
     // Return
@@ -788,15 +814,15 @@ void GCTAEdispRmf::set_cache(void) const
 /***********************************************************************//**
  * @brief Set maximum energy dispersion value
  ***************************************************************************/
-void GCTAEdispRmf::set_max_edisp(void) const
+void GCTAEdispRmf::set_max_edisp(void)
 {
     // Initialise maximum
     m_max_edisp = 0.0;
 
     // Loop over all response table elements
-    for (int i = 0; i < m_matrix.rows(); ++i) {
-        for (int k = 0; k < m_matrix.columns(); ++k) {
-            double value = m_matrix(i,k);
+    for (int itrue = 0; itrue < m_matrix.rows(); ++itrue) {
+        for (int ireco = 0; ireco < m_matrix.columns(); ++ireco) {
+            double value = m_matrix(itrue, ireco);
             if (value > m_max_edisp) {
                 m_max_edisp = value;
             }
@@ -811,37 +837,45 @@ void GCTAEdispRmf::set_max_edisp(void) const
 /***********************************************************************//**
  * @brief Update cache
  *
- * @param[in] logEsrc Log10 of true energy (\f$\log_{10}\f$ TeV).
- * @param[in] logEobs Log10 of reconstructed energy (\f$\log_{10}\f$ TeV).
+ * @param[in] ereco Reconstructed energy.
+ * @param[in] etrue True energy.
  *
  * Updates the interpolation cache. The interpolation cache is composed
  * of four indices and weights that define 4 data values of the RMF matrix
  * that are used for bilinear interpolation.
  ***************************************************************************/
-void GCTAEdispRmf::update(const double& logEsrc, const double& logEobs) const
+void GCTAEdispRmf::update(const GEnergy& ereco, const GEnergy& etrue) const
 {
     // Update cache only of arguments have changed
-    if (logEsrc != m_last_etrue || logEobs != m_last_emeasured) {
+    if (ereco != m_last_etrue || etrue != m_last_ereco) {
 
         // Store actual values
-        m_last_etrue     = logEsrc;
-        m_last_emeasured = logEobs;
+        m_last_ereco = ereco;
+        m_last_etrue = etrue;
+
+        // Get log10 of true and reconstructed photon energies
+        double logEsrc = etrue.log10TeV();
+        #if defined(G_LINEAR_ERECO_INTERPOLATION)
+        double logEobs = ereco.TeV();
+        #else
+        double logEobs = ereco.log10TeV();
+        #endif
 
         // Set values for node arrays
         m_etrue.set_value(logEsrc);
-        m_emeasured.set_value(logEobs);
+        m_ereco.set_value(logEobs);
 
         // Set indices for bi-linear interpolation
         m_itrue1 = m_etrue.inx_left();
         m_itrue2 = m_etrue.inx_right();
-        m_imeas1 = m_emeasured.inx_left();
-        m_imeas2 = m_emeasured.inx_right();
+        m_ireco1 = m_ereco.inx_left();
+        m_ireco2 = m_ereco.inx_right();
 
         // Set weighting factors for bi-linear interpolation
-        m_wgt1 = m_etrue.wgt_left()  * m_emeasured.wgt_left();
-        m_wgt2 = m_etrue.wgt_left()  * m_emeasured.wgt_right();
-        m_wgt3 = m_etrue.wgt_right() * m_emeasured.wgt_left();
-        m_wgt4 = m_etrue.wgt_right() * m_emeasured.wgt_right();
+        m_wgt1 = m_etrue.wgt_left()  * m_ereco.wgt_left();
+        m_wgt2 = m_etrue.wgt_left()  * m_ereco.wgt_right();
+        m_wgt3 = m_etrue.wgt_right() * m_ereco.wgt_left();
+        m_wgt4 = m_etrue.wgt_right() * m_ereco.wgt_right();
 
     } // endif: update requested
 
@@ -851,33 +885,21 @@ void GCTAEdispRmf::update(const double& logEsrc, const double& logEobs) const
 
 
 /***********************************************************************//**
- * @brief Compute ebounds_obs vector
- *
- * @param[in] theta Offset angle in camera system (radians). Not used.
- * @param[in] phi Azimuth angle in camera system (radians). Not used.
- * @param[in] zenith Zenith angle in Earth system (radians). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @brief Compute m_ereco_bounds vector
  ***************************************************************************/
-void GCTAEdispRmf::compute_ebounds_obs(const double& theta,
-                                       const double& phi,
-                                       const double& zenith,
-                                       const double& azimuth) const
+void GCTAEdispRmf::compute_ereco_bounds(void) const
 {
     // Clear boundaries
-    m_ebounds_obs.clear();
+    m_ereco_bounds.clear();
 
     // Loop over Etrue
     for (int i = 0; i < m_rmf.ntrue(); ++i) {
 
         // Get true photon energy
-        double logEsrc = m_rmf.etrue().elogmean(i).log10TeV();
-
-        // Set true energy
-        GEnergy etrue;
-        etrue.log10TeV(logEsrc);
+        GEnergy etrue = m_rmf.etrue().elogmean(i);
 
         // Add ebounds to vector
-        m_ebounds_obs.push_back(m_rmf.emeasured(etrue));
+        m_ereco_bounds.push_back(m_rmf.emeasured(etrue));
 
     } // endfor: looped over true photon energies
 
@@ -887,33 +909,21 @@ void GCTAEdispRmf::compute_ebounds_obs(const double& theta,
 
 
 /***********************************************************************//**
- * @brief Compute ebounds_src vector
- *
- * @param[in] theta Offset angle in camera system (radians). Not used.
- * @param[in] phi Azimuth angle in camera system (radians). Not used.
- * @param[in] zenith Zenith angle in Earth system (radians). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
+ * @brief Compute m_etrue_bounds vector
  ***************************************************************************/
-void GCTAEdispRmf::compute_ebounds_src(const double& theta,
-                                       const double& phi,
-                                       const double& zenith,
-                                       const double& azimuth) const
+void GCTAEdispRmf::compute_etrue_bounds(void) const
 {
     // Clear boundaries
-    m_ebounds_src.clear();
+    m_etrue_bounds.clear();
 
     // Loop over Eobs
     for (int i = 0; i < m_rmf.nmeasured(); ++i) {
 
-        // Get observed photon energy
-        double logEobs = m_rmf.emeasured().elogmean(i).log10TeV();
-
-        // Set measured energy
-        GEnergy emeasured;
-        emeasured.log10TeV(logEobs);
+        // Get reconstructed energy
+        GEnergy ereco = m_rmf.emeasured().elogmean(i);
 
         // Add ebounds to vector
-        m_ebounds_src.push_back(m_rmf.emeasured(emeasured));
+        m_etrue_bounds.push_back(m_rmf.emeasured(ereco));
 
     } // endfor: looped over measured photon energies
 

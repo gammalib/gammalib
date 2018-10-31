@@ -46,7 +46,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                               "GCTAEdisp2D::read(GFitsTable&)"
-#define G_MC    "GCTAEdisp2D::mc(GRan&, double&, double&, double&, double&, "\
+#define G_MC   "GCTAEdisp2D::mc(GRan&, GEnergy&, double&, double&, double&, "\
                                                                    "double&)"
 #define G_FETCH                                        "GCTAEdisp2D::fetch()"
 
@@ -220,7 +220,7 @@ double GCTAEdisp2D::operator()(const GEnergy& ereco,
     if ((logEsrc >= m_logEsrc_min)  && (logEsrc <= m_logEsrc_max) &&
         (theta   >= m_theta_min)    && (theta   <= m_theta_max)) {
 
-        // Compute migration (migra=Ereco/Etrue
+        // Compute migration (migra=Ereco/Etrue)
         double migra = ereco.MeV() / etrue.MeV();
 
         // Continue only if migration is in validity range
@@ -470,13 +470,13 @@ void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
  * @param[in] phi Azimuth angle in camera system (radians). Not used.
  * @param[in] zenith Zenith angle in Earth system (radians). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (radians). Not used.
- * @return Observed energy.
+ * @return Reconstructed energy.
  *
  * @exception GException::invalid_return_value
  *            No energy dispersion information found for parameters or
- *            energy dispersion matrix is invalid.
+ *            energy dispersion matrix is empty.
  *
- * Draws observed energy value given a true energy @p etrue and offset
+ * Draws reconstructed energy value given a true energy @p etrue and offset
  * angle @p theta. If no energy dispersion information is available the
  * method will return the true photon energy.
  ***************************************************************************/
