@@ -30,8 +30,9 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GCTAModelRadial.hpp"
+#include "GCTAObservation.hpp"
 #include "GCTAInstDir.hpp"
+#include "GCTAModelRadial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -163,18 +164,28 @@ double GCTAModelRadial::eval(const GCTAInstDir& dir,
  *
  * @param[in] energy Event energy (not used).
  * @param[in] time Event time (not used).
+ * @param[in] obs CTA observation.
  * @param[in,out] ran Random number generator.
  * @return Instrument direction
  *
- * Return random instrument direction. The energy and time of the event are
- * not used.
+ * Return random instrument direction. The method sets the sky direction and
+ * the instrument coordinates of the instrument direction.
+ *
+ * The energy and time of the event are not used.
  ***************************************************************************/
-GCTAInstDir GCTAModelRadial::mc(const GEnergy& energy,
-                                const GTime&   time,
-                                GRan&          ran) const
+GCTAInstDir GCTAModelRadial::mc(const GEnergy&         energy,
+                                const GTime&           time,
+                                const GCTAObservation& obs,
+                                GRan&                  ran) const
 {
     // Get random instrument direction
     GCTAInstDir dir = mc(ran);
+
+    // Derive sky direction from instrument coordinates
+    GSkyDir skydir = obs.pointing().skydir(dir);
+
+    // Set sky direction in GCTAInstDir object
+    dir.dir(skydir);
 
     // Return instrument direction
     return dir;

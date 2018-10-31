@@ -34,6 +34,8 @@
 #include "GMath.hpp"
 #include "GRan.hpp"
 #include "GIntegral.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAInstDir.hpp"
 #include "GCTAModelRadialPolynom.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelSpatialRegistry.hpp"
@@ -406,6 +408,23 @@ GCTAInstDir GCTAModelRadialPolynom::mc(GRan& ran) const
 
     // Return instrument direction
     return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum function value for Monte Carlo simulations
+ *
+ * @param[in] obs CTA Observation (not used).
+ * @return Maximum function value for Monte Carlo simulations.
+ ***************************************************************************/
+double GCTAModelRadialPolynom::mc_max_value(const GCTAObservation& obs) const
+{
+    // Set constants
+    const double u_max = std::sin(g_cta_radial_polynom_offset_max *
+                                  gammalib::deg2rad);
+
+    // Return maximum value
+    return u_max;
 }
 
 

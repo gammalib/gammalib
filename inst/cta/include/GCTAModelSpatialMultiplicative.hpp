@@ -38,6 +38,8 @@ class GXmlElement;
 class GCTAInstDir;
 class GEnergy;
 class GTime;
+class GCTAInstDir;
+class GCTAObservation;
 
 
 /***********************************************************************//**
@@ -69,9 +71,7 @@ public:
                                                  const GEnergy&     energy,
                                                  const GTime&       time,
                                                  const bool&        gradients = false) const;
-    virtual GCTAInstDir                     mc(const GEnergy& energy,
-                                               const GTime&   time,
-                                               GRan& ran) const;
+    virtual double                          mc_max_value(const GCTAObservation& obs) const;
     virtual void                            read(const GXmlElement& xml);
     virtual void                            write(GXmlElement& xml) const;
     virtual std::string                     print(const GChatter& chatter = NORMAL) const;

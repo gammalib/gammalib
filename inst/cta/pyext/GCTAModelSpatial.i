@@ -56,11 +56,15 @@ public:
                                    const GEnergy&     energy,
                                    const GTime&       time,
                                    const bool&        gradients = false) const = 0;
-    virtual GCTAInstDir       mc(const GEnergy& energy,
-                                 const GTime&   time,
-                                 GRan& ran) const = 0;
+    virtual double            mc_max_value(const GCTAObservation& obs) const = 0;
     virtual void              read(const GXmlElement& xml) = 0;
     virtual void              write(GXmlElement& xml) const = 0;
+
+    // Implemented virtual methods
+    virtual GCTAInstDir       mc(const GEnergy&         energy,
+                                 const GTime&           time,
+                                 const GCTAObservation& obs,
+                                 GRan&                  ran) const;
 
     // Methods
     int                       size(void) const;

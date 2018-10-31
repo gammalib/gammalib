@@ -51,6 +51,7 @@ public:
     virtual double                eval(const double& offset,
                                        const bool& gradients = false) const;
     virtual GCTAInstDir           mc(GRan& ran) const;
+    virtual double                mc_max_value(const GCTAObservation& obs) const;
     virtual double                omega(void) const;
     virtual void                  read(const GXmlElement& xml);
     virtual void                  write(GXmlElement& xml) const;

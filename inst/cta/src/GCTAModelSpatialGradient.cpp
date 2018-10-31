@@ -33,9 +33,10 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GRan.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAInstDir.hpp"
 #include "GCTAModelSpatialGradient.hpp"
 #include "GCTAModelSpatialRegistry.hpp"
-#include "GCTAInstDir.hpp"
 
 /* __ Constants __________________________________________________________ */
 
@@ -292,24 +293,36 @@ double GCTAModelSpatialGradient::eval(const GCTAInstDir& dir,
 
 
 /***********************************************************************//**
- * @brief Returns MC instrument direction
+ * @brief Return maximum function value for Monte Carlo simulations
  *
- * @param[in] energy Event energy (not used).
- * @param[in] time Event time (not used).
- * @param[in,out] ran Random number generator.
- * @return CTA instrument direction.
- *
- * @todo Implement method
+ * @param[in] obs CTA Observation.
+ * @return Maximum function value for Monte Carlo simulations.
  ***************************************************************************/
-GCTAInstDir GCTAModelSpatialGradient::mc(const GEnergy& energy,
-                                         const GTime&   time,
-                                         GRan& ran) const
+double GCTAModelSpatialGradient::mc_max_value(const GCTAObservation& obs) const
 {
-    // Set instrument direction
-    GCTAInstDir dir;
+    // Get DETX and DETY value of RoI centre in degrees
+    GCTAInstDir roi_centre  = obs.roi().centre();
+    double      detx_centre = roi_centre.detx() * gammalib::rad2deg;
+    double      dety_centre = roi_centre.dety() * gammalib::rad2deg;
 
-    // Return instrument direction
-    return dir;
+    // Get DETX and DETY minima and maximum in degrees
+    double radius   = obs.roi().radius();
+    double detx_min = detx_centre - radius;
+    double detx_max = detx_centre + radius;
+    double dety_min = dety_centre - radius;
+    double dety_max = dety_centre + radius;
+
+    // Get maximum value
+    double value_min = m_detx_gradient.value() * detx_min;
+    double value_max = m_detx_gradient.value() * detx_max;
+    double valuex    = (value_min > value_max) ? value_min : value_max;
+    value_min        = m_dety_gradient.value() * dety_min;
+    value_max        = m_dety_gradient.value() * dety_max;
+    double valuey    = (value_min > value_max) ? value_min : value_max;
+    double value     = 1.0 + valuex + valuey;
+
+    // Return maximum value
+    return value;
 }
 
 

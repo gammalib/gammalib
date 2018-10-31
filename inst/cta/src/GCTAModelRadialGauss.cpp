@@ -34,6 +34,8 @@
 #include "GMath.hpp"
 #include "GRan.hpp"
 #include "GIntegral.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAInstDir.hpp"
 #include "GCTAModelRadialGauss.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelSpatialRegistry.hpp"
@@ -341,6 +343,19 @@ GCTAInstDir GCTAModelRadialGauss::mc(GRan& ran) const
 
     // Return instrument direction
     return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum function value for Monte Carlo simulations
+ *
+ * @param[in] obs CTA Observation.
+ * @return Maximum function value for Monte Carlo simulations.
+ ***************************************************************************/
+double GCTAModelRadialGauss::mc_max_value(const GCTAObservation& obs) const
+{
+    // Return maximum value
+    return 1.0;
 }
 
 

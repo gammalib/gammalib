@@ -57,9 +57,7 @@ public:
                                            const GEnergy&     energy,
                                            const GTime&       time,
                                            const bool&        gradients = false) const;
-    virtual GCTAInstDir               mc(const GEnergy& energy,
-                                         const GTime&   time,
-                                         GRan& ran) const;
+    virtual double                    mc_max_value(const GCTAObservation& obs) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
 

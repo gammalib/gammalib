@@ -31,10 +31,14 @@
 #include <string>
 #include <cmath>
 #include "GModelPar.hpp"
-#include "GXmlElement.hpp"
 #include "GCTAModelRadial.hpp"
-#include "GCTAInstDir.hpp"
 #include "GFunction.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GXmlElement;
+class GCTAObservation;
+class GCTAInstDir;
 
 
 /***********************************************************************//**
@@ -72,6 +76,7 @@ public:
     virtual double                eval(const double& offset,
                                        const bool& gradients = false) const;
     virtual GCTAInstDir           mc(GRan& ran) const;
+    virtual double                mc_max_value(const GCTAObservation& obs) const;
     virtual double                omega(void) const;
     virtual void                  read(const GXmlElement& xml);
     virtual void                  write(GXmlElement& xml) const;

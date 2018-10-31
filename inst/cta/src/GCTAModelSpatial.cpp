@@ -41,6 +41,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                        "GCTAModelSpatial::operator[](int&)"
 #define G_ACCESS2                "GCTAModelSpatial::operator[](std::string&)"
+#define G_MC      "GCTAModelSpatial::mc(GEnergy&, GTime&, GCTAObservation&, "\
+                                                                     "GRan&)"
 #define G_NPRED    "GCTAModelSpatial::npred(GEnergy&, GTime&, GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -245,6 +247,118 @@ const GModelPar& GCTAModelSpatial::operator[](const std::string& name) const
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Returns MC instrument direction
+ *
+ * @param[in] energy Event energy.
+ * @param[in] time Event time.
+ * @param[in] obs CTA Observation.
+ * @param[in,out] ran Random number generator.
+ * @return Instrument direction
+ *
+ * @exception GException::invalid_return_value
+ *            Spatial background model is empty, or method repeatedly
+ *            encounters zero model values.
+ *
+ * Return random instrument direction.
+ ***************************************************************************/
+GCTAInstDir GCTAModelSpatial::mc(const GEnergy&         energy,
+                                 const GTime&           time,
+                                 const GCTAObservation& obs,
+                                 GRan&                  ran) const
+{
+    // Initialise instrument direction
+    GCTAInstDir dir;
+
+    // Get maximum value for Monte Carlo simulations (include some margin)
+    double mc_max_value = 1.5 * this->mc_max_value(obs);
+
+    // Throw an exception if maximum value is zero
+    if (mc_max_value <= 0.0) {
+        std::string msg = "Spatial background model is empty. Please provide "
+                          "a valid spatial background model.";
+        throw GException::invalid_return_value(G_MC, msg);
+    }
+
+    // Get DETX and DETY value of RoI centre in radians
+    GCTARoi     roi         = obs.roi();
+    GCTAInstDir roi_centre  = roi.centre();
+    double      detx_centre = roi_centre.detx();
+    double      dety_centre = roi_centre.dety();
+
+    // Get DETX and DETY minima and maximum in radians
+    double radius     = obs.roi().radius() * gammalib::deg2rad;
+    double detx_min   = detx_centre - radius;
+    double detx_max   = detx_centre + radius;
+    double dety_min   = dety_centre - radius;
+    double dety_max   = dety_centre + radius;
+    double detx_width = detx_max - detx_min;
+    double dety_width = dety_max - dety_min;
+
+    // Initialise rejection method
+    double    f                    = 0.0;
+    double    ftest                = 1.0;
+    int       zeros                = 0;
+    const int max_subsequent_zeros = 10;
+
+    // Find instrument direction by rejection method
+    while (ftest > f) {
+
+        // Draw random DETX/DETY until a non-zero function value is found.
+        // Subsequent zero values may indicate that there is an issue with
+        // the model. After a limited number of subsequent zeros the loop
+        // is terminated with an exception
+        int zeros = 0;
+        do {
+
+            // Draw random DETX and DETY coordinates
+            double detx = detx_min + detx_width * ran.uniform();
+            double dety = dety_min + dety_width * ran.uniform();
+
+            // Set instrument direction
+            dir.detx(detx);
+            dir.dety(dety);
+
+            // Derive sky direction from instrument coordinates
+            GSkyDir skydir = obs.pointing().skydir(dir);
+
+            // Set sky direction in GCTAInstDir object
+            dir.dir(skydir);
+
+            // Compute function value if the coordinate is comprised in
+            // the RoI
+            if (roi.contains(dir)) {
+                f = eval(dir, energy, time, false);
+            }
+            else {
+                f = 0.0;
+            }
+
+            // Handle zero function value
+            if (f == 0.0) {
+                zeros++;
+                if (zeros > max_subsequent_zeros) {
+                    std::string msg = "Method repeatedly encounters zero values "
+                                      "of spatial background model. Make sure "
+                                      "that the background model is correct.";
+                    throw GException::invalid_return_value(G_MC, msg);
+                }
+            }
+
+        } while (f == 0);
+
+        // Get uniform random value between zero and the maximum model value.
+        // The loop is quit if the random number is smaller than the function
+        // value.
+        ftest = ran.uniform() * mc_max_value;
+
+    } // endwhile
+
+    // Return instrument direction
+    return dir;
+}
+
 
 /***********************************************************************//**
  * @brief Return integral of spatial model component

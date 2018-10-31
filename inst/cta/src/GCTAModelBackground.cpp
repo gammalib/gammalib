@@ -554,8 +554,9 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
 
         // Get reference on CTA pointing, background response and event list
         // from observation
-        const GCTAPointing&  pnt    = gammalib::cta_pnt(G_MC, obs);
-        const GCTAEventList& events = gammalib::cta_event_list(G_MC, obs);
+        const GCTAObservation& cta    = gammalib::cta_obs(G_MC, obs);
+        const GCTAPointing&    pnt    = gammalib::cta_pnt(G_MC, obs);
+        const GCTAEventList&   events = gammalib::cta_event_list(G_MC, obs);
 
         // Get simulation region
         const GCTARoi&  roi     = events.roi();
@@ -653,20 +654,13 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
                     for (int k = 0; k < 100; ++k) {
 
                         // Get Monte Carlo event direction from spatial model.
-                        // This only will set the DETX and DETY coordinates.
-                        GCTAInstDir instdir = m_spatial->mc(energy, times[i], ran);
-
-                        // Derive sky direction from instrument coordinates
-                        GSkyDir skydir = pnt.skydir(instdir);
-
-                        // Set sky direction in GCTAInstDir object
-                        instdir.dir(skydir);
+                        GCTAInstDir dir = m_spatial->mc(energy, times[i], cta, ran);
 
                         // Allocate event
                         GCTAEventAtom event;
 
                         // Set event attributes
-                        event.dir(instdir);
+                        event.dir(dir);
                         event.energy(energy);
                         event.time(times[i]);
 

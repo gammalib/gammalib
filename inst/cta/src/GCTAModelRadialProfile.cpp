@@ -34,6 +34,8 @@
 #include "GMath.hpp"
 #include "GRan.hpp"
 #include "GIntegral.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAInstDir.hpp"
 #include "GCTAModelRadialProfile.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelSpatialRegistry.hpp"
@@ -347,6 +349,23 @@ GCTAInstDir GCTAModelRadialProfile::mc(GRan& ran) const
 
     // Return instrument direction
     return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum function value for Monte Carlo simulations
+ *
+ * @param[in] obs CTA Observation (not used).
+ * @return Maximum function value for Monte Carlo simulations.
+ ***************************************************************************/
+double GCTAModelRadialProfile::mc_max_value(const GCTAObservation& obs) const
+{
+    // Set constants
+    const double offset_max = 10.0;
+    const double u_max      = std::sin(offset_max * gammalib::deg2rad);
+
+    // Return maximum value
+    return u_max;
 }
 
 

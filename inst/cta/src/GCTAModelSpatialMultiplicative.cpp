@@ -33,10 +33,12 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GRan.hpp"
-#include "GCTAInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GXmlElement.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAInstDir.hpp"
+#include "GCTARoi.hpp"
 #include "GCTAModelSpatialMultiplicative.hpp"
 #include "GCTAModelSpatialRegistry.hpp"
 
@@ -294,26 +296,23 @@ double GCTAModelSpatialMultiplicative::eval(const GCTAInstDir& dir,
 
 
 /***********************************************************************//**
- * @brief Returns MC instrument direction
+ * @brief Return maximum function value for Monte Carlo simulations
  *
- * @param[in] energy Event energy.
- * @param[in] time Event time.
- * @param[in,out] ran Random number generator.
- * @return Instrument direction
- *
- * Return random instrument direction.
- *
- * @todo Implement method
+ * @param[in] obs CTA Observation.
+ * @return Maximum function value for Monte Carlo simulations.
  ***************************************************************************/
-GCTAInstDir GCTAModelSpatialMultiplicative::mc(const GEnergy& energy,
-                                               const GTime&   time,
-                                               GRan&          ran) const
+double GCTAModelSpatialMultiplicative::mc_max_value(const GCTAObservation& obs) const
 {
-    // Get random instrument direction
-    GCTAInstDir dir;
+    // Initialise maximum value
+    double value = 1.0;
 
-    // Return instrument direction
-    return dir;
+    // Compute maximum value from components
+    for (int i = 0; i < m_spatial.size(); ++i) {
+        value *= m_spatial[i]->mc_max_value(obs);
+    }
+
+    // Return maximum value
+    return value;
 }
 
 

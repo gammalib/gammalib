@@ -912,8 +912,9 @@ else
       AC_SUBST([PYTHON_CPPFLAGS])
 
       # If we have Mavericks then get the MACOSX_DEPLOYMENT_TARGET from Python
-      # If the target is older then Mavericks then set the MACOSX_DEPLOYMENT_TARGET
-      # to this value as otherwise we get trouble with name mangling (that changed)
+      # If the target is older than Mavericks then set the MACOSX_DEPLOYMENT_TARGET
+      # to this value as otherwise we get trouble with name mangling, which has
+      # changed from Mac OS X 10.9 on.
       if [test "x$osx_mavericks" = "xyes"]; then
         AC_MSG_CHECKING([Python MACOSX_DEPLOYMENT_TARGET])
         python_target=`$PYTHON -c "from distutils import sysconfig; \

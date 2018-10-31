@@ -47,9 +47,10 @@ public:
                                   const GEnergy&     energy,
                                   const GTime&       time,
                                   const bool&        gradients = false) const;
-    virtual GCTAInstDir      mc(const GEnergy& energy,
-                                const GTime&   time,
-                                GRan& ran) const;
+    virtual GCTAInstDir      mc(const GEnergy&         energy,
+                                const GTime&           time,
+                                const GCTAObservation& roi,
+                                GRan&                  ran) const;
 
     // Pure virtual methods
     virtual void             clear(void) = 0;
@@ -57,6 +58,7 @@ public:
     virtual std::string      classname(void) const = 0;
     virtual std::string      type(void) const = 0;
     virtual double           omega(void) const = 0;
+    virtual double           mc_max_value(const GCTAObservation& obs) const = 0;
     virtual void             read(const GXmlElement& xml) = 0;
     virtual void             write(GXmlElement& xml) const = 0;
 
