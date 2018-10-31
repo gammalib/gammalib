@@ -171,7 +171,7 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
  * Returns the energy dispersion
  *
  * \f[
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) =
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true}) =
  *    \frac{1}{\sqrt{2\pi}\sigma(E_{\rm true})}
  *    \exp \left(\frac{-(\log_{10} E_{\rm reco} - \log_{10} E_{\rm true})^2}
  *                    {2 \sigma(E_{\rm true})^2} \right) \times
@@ -179,8 +179,8 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
  * \f]
  *
  * in units of MeV\f$^{-1}\f$ where
- * \f$E_{\rm reco}\f$ is the reconstructed energy in units of MeV,
- * \f$E_{\rm true}\f$ is the true energy in units of MeV, and
+ * \f$E_{\rm reco}\f$ is the reconstructed energy,
+ * \f$E_{\rm true}\f$ is the true energy, and
  * \f$\sigma(E_{\rm true})\f$ is the standard deviation of the energy
  * dispersion that depends on the true photon energy.
  ***************************************************************************/
@@ -453,7 +453,7 @@ GEbounds GCTAEdispPerfTable::etrue_bounds(const GEnergy& ereco,
  *
  * \f[
  *    \int_{E_{\rm reco}^{\rm min}}^{E_{\rm reco}^{\rm max}}
- *    E_{\rm disp}(E_{\rm true}, E_{\rm reco}) \, dE_{\rm reco}
+ *    E_{\rm disp}(E_{\rm reco} | E_{\rm true}) \, dE_{\rm reco}
  * \f]
  *
  * where
@@ -509,13 +509,15 @@ std::string GCTAEdispPerfTable::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
 
-        /*
-        for(int i=0; i < num; ++i) {
-            double sigma = m_sigma[i];
-            double logE=m_logE[i];
-            result.append("\n"+gammalib::str(logE)+"    "+gammalib::str(sigma));
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
+            for(int i=0; i < num; ++i) {
+                double sigma = m_sigma[i];
+                double logE=m_logE[i];
+                result.append("\n"+gammalib::str(logE)+"    "+gammalib::str(sigma));
+            }
         }
-        */
 
     } // endif: chatter was not silent
 

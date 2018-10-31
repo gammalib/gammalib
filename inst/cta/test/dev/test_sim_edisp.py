@@ -75,6 +75,7 @@ def sim_edisp(edisp, etrue, theta=0.0, ebins=1000, nmc=1000000):
         # Simulate observed energies
         tstart = time.clock()
         for i in range(nmc):
+            #print(i)
             eobs = edisp.mc(ran, etrue, theta).TeV()
             index = int((eobs-ereco_min)/dE-0.5)
             if (index < ebins):
@@ -169,28 +170,34 @@ if __name__ == '__main__':
     print('* Simulate Energy dispersion *')
     print('******************************')
 
-    # Load edisp
-    #edisp = gammalib.GCTAEdispRmf('./caldb/dc1/rmf.fits')
-    #edisp = gammalib.GCTAEdispPerfTable('./caldb/cta_dummy_irf.dat')
+    # Simulate performance table energy dispersion matrix
+    #edisp = gammalib.GCTAEdispPerfTable('../caldb/cta_dummy_irf.dat')
+    #sim_edisp(edisp, gammalib.GEnergy(0.4, 'TeV'))
+    #sim_edisp(edisp, gammalib.GEnergy(1.0, 'TeV'))
+    #sim_edisp(edisp, gammalib.GEnergy(10.0, 'TeV'))
+
+    # Simulate RMF energy dispersion matrix
+    #edisp = gammalib.GCTAEdispRmf('../caldb/dc1/rmf.fits')
+    #sim_edisp(edisp, gammalib.GEnergy(0.4, 'TeV'))
+    #sim_edisp(edisp, gammalib.GEnergy(1.0, 'TeV'))
+    #sim_edisp(edisp, gammalib.GEnergy(10.0, 'TeV'))
 
     # Simulate 2D energy dispersion matrix
     #edisp = gammalib.GCTAEdisp2D('../caldb/edisp_matrix.fits')
     #sim_edisp(edisp, gammalib.GEnergy(0.1, 'TeV'))
     #sim_edisp(edisp, gammalib.GEnergy(1.0, 'TeV'))
-    #sim_edisp(edisp, gammalib.GEnergy(10.0, 'TeV'))
     #sim_edisp(edisp, gammalib.GEnergy(1.0, 'TeV'), theta=5.0*gammalib.deg2rad)
+    #sim_edisp(edisp, gammalib.GEnergy(10.0, 'TeV'))
 
     # Test H.E.S.S. energy dispersion
     edisp = gammalib.GCTAEdisp2D('/project-data/hess/hess_dl3_dr1/data/hess_dl3_dr1_obs_id_023523.fits')
     #sim_edisp(edisp, gammalib.GEnergy(0.2, 'TeV'))
-    #sim_edisp(edisp, gammalib.GEnergy(0.3, 'TeV'))
+    #sim_edisp(edisp, gammalib.GEnergy(0.4, 'TeV'))
     #sim_edisp(edisp, gammalib.GEnergy(0.4, 'TeV'), theta=2.0*gammalib.deg2rad)
-    #sim_edisp(edisp, gammalib.GEnergy(0.5, 'TeV'), theta=2.5*gammalib.deg2rad)
     #sim_edisp(edisp, gammalib.GEnergy(0.7, 'TeV'))
     #sim_edisp(edisp, gammalib.GEnergy(1.0, 'TeV'))
-    #sim_edisp(edisp, gammalib.GEnergy(0.7, 'TeV'))
-    sim_edisp(edisp, gammalib.GEnergy(5.0, 'TeV'))
+    #sim_edisp(edisp, gammalib.GEnergy(5.0, 'TeV'))
+    sim_edisp(edisp, gammalib.GEnergy(10.0, 'TeV'))
     #sim_edisp(edisp, gammalib.GEnergy(50.0, 'TeV'))
-    #sim_edisp(edisp, gammalib.GEnergy(1.0, 'TeV'), theta=2.5*gammalib.deg2rad)
 
 
