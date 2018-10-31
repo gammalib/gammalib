@@ -471,13 +471,34 @@ GCTARoi gammalib::read_ds_roi(const GFitsHDU& hdu)
             value_proc                    = gammalib::strip_chars(value_proc, ")");
             std::vector<std::string> args = gammalib::split(value_proc, ",");
             if (args.size() == 3) {
+
+                // Extract sky direction and radius
                 double ra  = gammalib::todouble(args[0]);
                 double dec = gammalib::todouble(args[1]);
                 double rad = gammalib::todouble(args[2]);
                 GSkyDir     skydir;
                 skydir.radec_deg(ra, dec);
-                GCTAInstDir dir(skydir);
-                roi.centre(dir);
+
+                // If the header contains pointing information then set a
+                // full instrument direction, including DETX and DETY
+                // coordinates.
+                if (hdu.has_card("RA_PNT") && hdu.has_card("DEC_PNT")) {
+                    double ra_pnt  = hdu.real("RA_PNT");
+                    double dec_pnt = hdu.real("DEC_PNT");
+                    GSkyDir dir_pnt;
+                    dir_pnt.radec_deg(ra_pnt, dec_pnt);
+                    GCTAPointing pnt(dir_pnt);
+                    GCTAInstDir  dir = pnt.instdir(skydir);
+                    roi.centre(dir);
+                }
+
+                // ... otherwise just set the sky direction
+                else {
+                    GCTAInstDir dir(skydir);
+                    roi.centre(dir);
+                }
+
+                // Set RoI radius
                 roi.radius(rad);
             }
             else {
