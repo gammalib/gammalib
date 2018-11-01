@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-31 October 2018
+1 November 2018
 
 
 1. Introduction
@@ -306,6 +306,12 @@ None
 
 20. CTA interface
 -----------------
+GCTABackground3D::init_mc_cache now pre-computes the Monte Carlo cache at energy
+nodes of the background cube, and in addition, inserts 8 logarithmically spaced
+nodes between each pair of nodes. This assures that the energy variations of the
+background rate are precisely captured and reproduced in the Monte Carlo
+simulations (#2708).
+
 The GCTAEdisp::operator() now returns energy dispersion values per MeV. The
 units are now consistent with the expectation in GResponse, and this changes
 assurance the coherence between the various classes. In particular, no re-

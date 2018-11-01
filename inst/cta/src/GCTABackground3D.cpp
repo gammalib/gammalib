@@ -912,6 +912,9 @@ int GCTABackground3D::index(const int& idetx,
  ***************************************************************************/
 void GCTABackground3D::init_mc_cache(void) const
 {
+    // Set number of subbins per energy bin of response cube
+    const int nsubbins = 10;
+
     // Initialise cache
     m_mc_max.clear();
     m_mc_spectrum.clear();
@@ -936,23 +939,50 @@ void GCTABackground3D::init_mc_cache(void) const
     }
     m_mc_one_minus_costheta = 1.0 - std::cos(theta);
 
-    // Set number of energy bins. Make sure that we compute at least 100 energy
-    // bins
-    int nbins = m_num_energy * 10;
-    if (nbins < 100) {
-        nbins = 100;
-    }
-
-    // Compute DETX and DETY binsize in radians and energy binsize in log10(TeV)
+    // Compute DETX and DETY binsize in radians
     double detx_bin = (m_detx_max - m_detx_min) / m_num_detx;
     double dety_bin = (m_dety_max - m_dety_min) / m_num_dety;
-    double logE_bin = (m_logE_max - m_logE_min) / (nbins-1);
+
+    // Set energy bins for Monte Carlo cache spectrum. Make sure that the
+    // actual energy nodes are part of the energy bins to avoid that sharp
+    // structures in the background rate variations are missed.
+    GEnergies energies;
+    for (int i = 0; i < m_num_energy; ++i) {
+
+        // If this is the first node then add energies below the first node
+        // down to the lower energy limit of the background response
+        if (i == 0) {
+            GEnergy   emin(m_background.axis_lo(m_inx_energy, i),
+                           m_background.axis_lo_unit(m_inx_energy));
+            GEnergies enodes(nsubbins/2, emin, m_energy[i]);
+            enodes.remove(enodes.size()-1); // avoids duplication of energy
+            energies.extend(enodes);
+        }
+
+        // If this is not the last node then append nodes between current
+        // node and next node
+        if (i < m_num_energy-1) {
+            GEnergies enodes(nsubbins, m_energy[i], m_energy[i+1]);
+            enodes.remove(enodes.size()-1); // avoids duplication of energy
+            energies.extend(enodes);
+        }
+
+        // ... otherwise this is the last node. Add energies above the last
+        // node up to the upper energy limit of the background response
+        else {
+            GEnergy   emax(m_background.axis_hi(m_inx_energy, i),
+                           m_background.axis_hi_unit(m_inx_energy));
+            GEnergies enodes(nsubbins/2, m_energy[i], emax);
+            energies.extend(enodes);
+        }
+
+    } // endfor: looped over energy bins of background response
 
     // Loop over all energy bins
-    for (int i = 0; i < nbins; ++i) {
+    for (int i = 0; i < energies.size(); ++i) {
 
         // Get logE of energy bin
-        double logE = m_logE_min + i * logE_bin;
+        double logE = energies[i].log10TeV();
 
         // Initialise cache with cumulative pixel fluxes and compute total flux
         // in response table for normalization. Negative pixels are excluded
@@ -1007,18 +1037,14 @@ void GCTABackground3D::init_mc_cache(void) const
 
         } // endfor: loop over DETX
 
-        // Set energy value (unit independent)
-        GEnergy energy;
-        energy.log10(logE, m_background.axis_lo_unit(m_inx_energy));
-
-        // Only append node if flux is positive
+        // Append node if flux is positive
         if (total_flux > 0.0) {
-            m_mc_spectrum.append(energy, total_flux);
+            m_mc_spectrum.append(energies[i], total_flux);
         }
 
         // Dump spectrum for debugging
         #if defined(G_DEBUG_MC_INIT)
-        std::cout << "Energy=" << energy;
+        std::cout << "Energy=" << energies[i];
         std::cout << " Rate_total=" << total_flux;
         std::cout << " events/s/MeV" << std::endl;
         #endif
