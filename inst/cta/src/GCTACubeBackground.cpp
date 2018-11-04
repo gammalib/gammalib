@@ -460,6 +460,10 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
                 continue;
             }
 
+            // Get CTA direction for this bin, including sky direction and
+            // DETX/DETY coordinates
+            GCTAInstDir dir = cta->pointing().instdir(bin->dir().dir());
+
             // Initialise values for integration over energy bin
             double f1 = 0.0;
             double f2 = 0.0;
@@ -470,12 +474,14 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
                 // If this is the first bin then compute f1 at the lower bin edge
                 if (iebin == 0) {
                     GCTAEventBin* bin = eventcube[ibin];
+                    bin->dir(dir); // Set instrument direction
                     bin->energy(m_ebounds.emin(iebin));
                     f1 = obs.models().eval(*bin, *cta);
                 }
 
                 // Compute f2 at the upper bin edge
                 GCTAEventBin* bin = eventcube[ibin];
+                bin->dir(dir); // Set instrument direction
                 bin->energy(m_ebounds.emax(iebin));
                 f2 = obs.models().eval(*bin, *cta);
 
