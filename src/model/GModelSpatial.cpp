@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatial.cpp - Abstract spatial model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -263,6 +263,29 @@ bool GModelSpatial::has_par(const std::string& name) const
 
     // Return
     return found;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks if the spatial model has free parameters
+ *
+ * @return True if spatial model has free parameters.
+ ***************************************************************************/
+bool GModelSpatial::has_free_pars(void) const
+{
+    // Initialise result flag
+    bool has_free_pars = false;
+
+    // Search for free parameters
+    for (int i = 0; i < size(); ++i) {
+        if (m_pars[i]->is_free()) {
+            has_free_pars = true;
+            break;
+        }
+    }
+
+    // Return result
+    return has_free_pars;
 }
 
 

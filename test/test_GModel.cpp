@@ -659,6 +659,31 @@ void TestGModel::test_point_source(void)
         test_value(model4[keyname].gradient(), 0.8);
     }
 
+    // Test size() method
+    GModelSpatialPointSource model5;
+    test_value(model5.size(), 2, "Test size() method.");
+
+    // Test has_par() method
+    test_assert(model5.has_par("RA"), "Test has_par() method for \"RA\"");
+    test_assert(model5.has_par("DEC"), "Test has_par() method for \"DEC\"");
+    test_assert(!model5.has_par("XXX"), "Test has_par() method for \"XXX\"");
+
+    // Test has_free_pars() method
+    model5["RA"].fix();
+    model5["DEC"].fix();
+    test_assert(!model5.has_free_pars(), "Test has_free_pars() method for fixed parameters");
+    model5["DEC"].free();
+    test_assert(model5.has_free_pars(), "Test has_free_pars() method for free parameters");
+
+    // Test autoscale() method
+    model5["RA"].value(180.0);
+    model5["DEC"].value(-30.0);
+    model5.autoscale();
+    test_value(model5["RA"].scale(), 180.0, "Test autoscale() method (\"RA\" scale).");
+    test_value(model5["DEC"].scale(), -30.0, "Test autoscale() method (\"DEC\" scale).");
+    test_value(model5["RA"].factor_value(), 1.0, "Test autoscale() method (\"RA\" factor).");
+    test_value(model5["DEC"].factor_value(), 1.0, "Test autoscale() method (\"DEC\" factor).");
+
     // Exit test
     return;
 }

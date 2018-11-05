@@ -61,6 +61,7 @@ public:
 
     // Methods
     bool       has_par(const std::string& name) const;
+    bool       has_free_pars(void) const;
     int        size(void) const;
     void       autoscale(void);
 };

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-1 November 2018
+6 November 2018
 
 
 1. Introduction
@@ -70,6 +70,7 @@ The following methods have been added:
 - GObservation::has_events()
 - GModelSpatialPointSource::type(std::string&)
 - GModelSpectralPlaw::type(std::string&)
+- GModelSpatial::has_free_pars()
 - GModelSpatialRadialProfileGauss(GSkyDir&, double&)
 - GModelSpatialRadialProfileGauss::sigma()
 - GSkyDir::cos_dist()
@@ -205,6 +206,9 @@ None
 
 8. Model module
 ---------------
+Add GModelSpatial::has_free_pars() method that checks whether a spatial
+model component has free model parameters or not (#2715).
+
 The GModelSpectralExponential class was added that implements an exponential
 function that can be used for EBL studies (#2454).
 
