@@ -149,7 +149,7 @@ GXmlNode::NodeType GXmlElement::type(void) const
 inline
 int GXmlElement::attributes(void) const
 {
-    return (m_attr.size());
+    return (int)(m_attr.size());
 }
 
 #endif /* GXMLELEMENT_HPP */
