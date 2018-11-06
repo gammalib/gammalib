@@ -905,17 +905,20 @@ std::string GObservations::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Number of predicted events"));
         result.append(gammalib::str(npred()));
 
-        // EXPLICIT: Append observations
+        // Get reduced chatter level for detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+
+        // Append observations for chatter >= EXPLICIT
         if (chatter >= EXPLICIT) {
             for (int i = 0; i < size(); ++i) {
                 result.append("\n");
-                result.append((*this)[i]->print());
+                result.append((*this)[i]->print(reduced_chatter));
             }
         }
 
-        // VERBOSE: Append models
-        if (chatter == VERBOSE) {
-            result.append("\n"+m_models.print());
+        // Append models for chatter >= VERBOSE
+        if (chatter >= VERBOSE) {
+            result.append("\n"+m_models.print(reduced_chatter));
         }
 
     } // endif: chatter was not silent
