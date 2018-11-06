@@ -162,9 +162,11 @@ int GCTAResponseCache::size(void) const
     // Compute size
     for (GCTAResponseCacheName::const_iterator it_name = m_cache.begin();
          it_name != m_cache.end(); ++it_name) {
-        for (GCTAResponseCacheRA::const_iterator it_ra = it_name->second.begin();
+        for (GCTAResponseCacheRA::const_iterator it_ra =
+             it_name->second.begin();
              it_ra != it_name->second.end(); ++it_ra) {
-            for (GCTAResponseCacheDEC::const_iterator it_dec = it_ra->second.begin();
+            for (GCTAResponseCacheDEC::const_iterator it_dec =
+                 it_ra->second.begin();
                  it_dec != it_ra->second.end(); ++it_dec) {
                 for (GCTAResponseCacheEreco::const_iterator it_ereco =
                      it_dec->second.begin();
@@ -499,7 +501,7 @@ std::string GCTAResponseCache::print(const GChatter& chatter) const
 
         // Append total cache size
         result.append("\n"+gammalib::parformat("Number of cached values"));
-        result.append(gammalib::str(m_cache.size()));
+        result.append(gammalib::str(size()));
 
         // Append information
         for (GCTAResponseCacheName::const_iterator it_name = m_cache.begin();
@@ -529,7 +531,7 @@ std::string GCTAResponseCache::print(const GChatter& chatter) const
             }
 
             // Append number of reconstructed and true energies
-            result.append("\n"+gammalib::parformat("Sky directions"));
+            result.append("\n"+gammalib::parformat("Instrument directions"));
             result.append(gammalib::str(ndir));
             result.append("\n"+gammalib::parformat("Reconstructed energies"));
             result.append(gammalib::str(nereco));
