@@ -34,6 +34,7 @@
 #include "GModelSpatial.hpp"
 #include "GModelSpatialComposite.hpp"
 #include "GCTAResponse.hpp"
+#include "GCTAResponse.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -166,25 +167,48 @@ double GCTAResponse::irf(const GEvent&       event,
     // Initialise IRF value
     double irf = 0.0;
 
-    // Select IRF depending on the spatial model type
-    switch (source.model()->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            irf = irf_ptsrc(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_RADIAL:
-            irf = irf_radial(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_ELLIPTICAL:
-            irf = irf_elliptical(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_DIFFUSE:
-            irf = irf_diffuse(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_COMPOSITE:
-            irf = irf_composite(event, source, obs);
-            break;
-        default:
-            break;
+    // Set IRF value attributes
+    std::string    name  = obs.id() + "::" + source.name();
+    const GEnergy& ereco = event.energy();
+    const GEnergy& etrue = source.energy();
+
+    // Signal if spatial model has free parameters
+    bool has_free_pars = source.model()->has_free_pars();
+
+    // If the spatial model component has free parameters, or the response
+    // cache should not be used, or the cache does not contain the requested
+    // IRF value then compute the IRF value for the spatial model.
+    if (has_free_pars    ||
+        !m_use_irf_cache ||
+        !m_irf_cache.contains(name, ereco, etrue, &irf)) {
+
+        // Compute IRF for spatial model
+        switch (source.model()->code()) {
+            case GMODEL_SPATIAL_POINT_SOURCE:
+                irf = irf_ptsrc(event, source, obs);
+                break;
+            case GMODEL_SPATIAL_RADIAL:
+                irf = irf_radial(event, source, obs);
+                break;
+            case GMODEL_SPATIAL_ELLIPTICAL:
+                irf = irf_elliptical(event, source, obs);
+                break;
+            case GMODEL_SPATIAL_DIFFUSE:
+                irf = irf_diffuse(event, source, obs);
+                break;
+            case GMODEL_SPATIAL_COMPOSITE:
+                irf = irf_composite(event, source, obs);
+                break;
+            default:
+                break;
+        }
+
+    } // endif: computed spatial model
+
+    // If the spatial model has no free parameters and the response cache
+    // should be used then put the IRF value in the response cache.
+    if (!has_free_pars && m_use_irf_cache) {
+        m_irf_cache.set(name, ereco, etrue, irf);
     }
 
     // Return IRF value
@@ -203,6 +227,10 @@ double GCTAResponse::irf(const GEvent&       event,
  ***************************************************************************/
 void GCTAResponse::init_members(void)
 {
+    // Initialize members
+    m_use_irf_cache = true;
+    m_irf_cache.clear();
+
     // Return
     return;
 }
@@ -215,6 +243,10 @@ void GCTAResponse::init_members(void)
  ***************************************************************************/
 void GCTAResponse::copy_members(const GCTAResponse& rsp)
 {
+    // Copy members
+    m_use_irf_cache = rsp.m_use_irf_cache;
+    m_irf_cache     = rsp.m_irf_cache;
+
     // Return
     return;
 }

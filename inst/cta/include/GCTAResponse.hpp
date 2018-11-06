@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GResponse.hpp"
+#include "GCTAResponseCache.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -113,6 +114,12 @@ protected:
     virtual double irf_composite(const GEvent&       event,
                                  const GSource&      source,
                                  const GObservation& obs) const;
+
+    // Protected members
+    bool m_use_irf_cache; //!< Control usage of IRF cache
+
+    // Cache for irf(GEvent&, GSource&, GObservation&) computation
+    mutable GCTAResponseCache m_irf_cache;
 };
 
 #endif /* GCTARESPONSE_HPP */

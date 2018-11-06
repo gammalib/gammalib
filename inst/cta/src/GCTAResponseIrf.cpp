@@ -107,8 +107,6 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_USE_IRF_CACHE            //!< Use IRF cache in irf_diffuse method
-#define G_USE_NPRED_CACHE      //!< Use Npred cache in npred_diffuse method
 //#define G_USE_PSF_SYSTEM      //!< Do radial Irf integrations in Psf system
 
 /* __ Debug definitions __________________________________________________ */
@@ -1604,8 +1602,8 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
             }
         }
 
-        // Append save energy threshold information
-        result.append("\n"+gammalib::parformat("Save energy range"));
+        // Append safe energy threshold information
+        result.append("\n"+gammalib::parformat("Safe energy range"));
         if (m_lo_save_thres > 0.0 && m_hi_save_thres) {
             result.append(gammalib::str(m_lo_save_thres));
             result.append(" - ");
@@ -1626,9 +1624,11 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
             result.append("undefined");
         }
 
-        // Append detailed information
+        // Get reduced chatter level
         GChatter reduced_chatter = gammalib::reduce(chatter);
-        if (reduced_chatter > SILENT) {
+
+        // Append detailed information
+        if (chatter >= NORMAL) {
 
             // Append calibration database
             result.append("\n"+m_caldb.print(reduced_chatter));
@@ -1655,19 +1655,11 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
 
         }
 
-        // EXPLICIT: Append Npred cache information
+        // Append cache information
         if (chatter >= EXPLICIT) {
-            if (!m_npred_names.empty()) {
-                for (int i = 0; i < m_npred_names.size(); ++i) {
-                    result.append("\n"+gammalib::parformat("Npred cache " +
-                                  gammalib::str(i)));
-                    result.append(m_npred_names[i]+", ");
-                    result.append(m_npred_energies[i].print()+", ");
-                    result.append(m_npred_times[i].print()+" = ");
-                    result.append(gammalib::str(m_npred_values[i]));
-                }
-            }
-        } // endif: chatter was explicit
+            result.append("\n"+m_irf_cache.print(reduced_chatter));
+            result.append("\n"+m_nroi_cache.print(reduced_chatter));
+        }
 
     } // endif: chatter was not silent
 
@@ -1864,25 +1856,46 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
     // Initialise response value
     double nroi = 0.0;
 
-    // Select method depending on the spatial model type
-    switch (model.spatial()->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            nroi = nroi_ptsrc(model, srcEng, srcTime, obsEng, obsTime, obs);
-            break;
-        case GMODEL_SPATIAL_RADIAL:
-            nroi = nroi_radial(model, srcEng, srcTime, obsEng, obsTime, obs);
-            break;
-        case GMODEL_SPATIAL_ELLIPTICAL:
-            nroi = nroi_elliptical(model, srcEng, srcTime, obsEng, obsTime, obs);
-            break;
-        case GMODEL_SPATIAL_DIFFUSE:
-            nroi = nroi_diffuse(model, srcEng, srcTime, obsEng, obsTime, obs);
-            break;
-        case GMODEL_SPATIAL_COMPOSITE:
-            nroi = nroi_composite(model, srcEng, srcTime, obsEng, obsTime, obs);
-            break;
-        default:
-            break;
+    // Set response value attributes
+    std::string name = obs.id() + "::" + model.name();
+
+    // Signal if spatial model has free parameters
+    bool has_free_pars = model.spatial()->has_free_pars();
+
+    // If the spatial model component has free parameters, or the response
+    // cache should not be used, or the cache does not contain the requested
+    // IRF value then compute the IRF value for the spatial model.
+    if (has_free_pars    ||
+        !m_use_nroi_cache ||
+        !m_nroi_cache.contains(name, obsEng, srcEng, &nroi)) {
+
+        // Select method depending on the spatial model type
+        switch (model.spatial()->code()) {
+            case GMODEL_SPATIAL_POINT_SOURCE:
+                nroi = nroi_ptsrc(model, srcEng, srcTime, obsEng, obsTime, obs);
+                break;
+            case GMODEL_SPATIAL_RADIAL:
+                nroi = nroi_radial(model, srcEng, srcTime, obsEng, obsTime, obs);
+                break;
+            case GMODEL_SPATIAL_ELLIPTICAL:
+                nroi = nroi_elliptical(model, srcEng, srcTime, obsEng, obsTime, obs);
+                break;
+            case GMODEL_SPATIAL_DIFFUSE:
+                nroi = nroi_diffuse(model, srcEng, srcTime, obsEng, obsTime, obs);
+                break;
+            case GMODEL_SPATIAL_COMPOSITE:
+                nroi = nroi_composite(model, srcEng, srcTime, obsEng, obsTime, obs);
+                break;
+            default:
+                break;
+        }
+
+    } // endif: computed spatial model
+
+    // If the spatial model has no free parameters and the response cache
+    // should be used then put the IRF value in the response cache.
+    if (!has_free_pars && m_use_nroi_cache) {
+        m_nroi_cache.set(name, obsEng, srcEng, nroi);
     }
 
     // Return response value
@@ -2105,23 +2118,21 @@ void GCTAResponseIrf::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_aeff          = NULL;
-    m_psf           = NULL;
-    m_edisp         = NULL;
-    m_background    = NULL;
-    m_apply_edisp   = false;  //!< Switched off by default
-    m_lo_save_thres = 0.0;
-    m_hi_save_thres = 0.0;
+    m_aeff           = NULL;
+    m_psf            = NULL;
+    m_edisp          = NULL;
+    m_background     = NULL;
+    m_apply_edisp    = false;  //!< Switched off by default
+    m_lo_save_thres  = 0.0;
+    m_hi_save_thres  = 0.0;
+    m_use_nroi_cache = true;   //!< Switched on by default
 
     // XML response filenames
     m_xml_caldb.clear();
     m_xml_rspname.clear();
 
-    // Initialise Npred cache
-    m_npred_names.clear();
-    m_npred_energies.clear();
-    m_npred_times.clear();
-    m_npred_values.clear();
+    // Initialise nroi cache
+    m_nroi_cache.clear();
 
     // Return
     return;
@@ -2136,21 +2147,19 @@ void GCTAResponseIrf::init_members(void)
 void GCTAResponseIrf::copy_members(const GCTAResponseIrf& rsp)
 {
     // Copy members
-    m_caldb         = rsp.m_caldb;
-    m_rspname       = rsp.m_rspname;
-    m_apply_edisp   = rsp.m_apply_edisp;
-    m_lo_save_thres = rsp.m_lo_save_thres;
-    m_hi_save_thres = rsp.m_hi_save_thres;
+    m_caldb          = rsp.m_caldb;
+    m_rspname        = rsp.m_rspname;
+    m_apply_edisp    = rsp.m_apply_edisp;
+    m_lo_save_thres  = rsp.m_lo_save_thres;
+    m_hi_save_thres  = rsp.m_hi_save_thres;
+    m_use_nroi_cache = rsp.m_use_nroi_cache;
 
     // Copy response filenames
     m_xml_caldb      = rsp.m_xml_caldb;
     m_xml_rspname    = rsp.m_xml_rspname;
 
-    // Copy cache
-    m_npred_names    = rsp.m_npred_names;
-    m_npred_energies = rsp.m_npred_energies;
-    m_npred_times    = rsp.m_npred_times;
-    m_npred_values   = rsp.m_npred_values;
+    // Copy nroi cache
+    m_nroi_cache     = rsp.m_nroi_cache;
 
     // Clone members
     m_aeff       = (rsp.m_aeff       != NULL) ? rsp.m_aeff->clone()  : NULL;
@@ -2715,152 +2724,117 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
     static const int max_iter_phi = 8;
 
     // Initialise IRF value
-    bool   has_irf = false;
-    double irf     = 0.0;
+    double irf = 0.0;
 
     // Retrieve CTA pointing
     const GCTAPointing& pnt = gammalib::cta_pnt(G_IRF_DIFFUSE, obs);
 
-    // Try getting the IRF value from cache. Do not do this for energy
-    // dispersion since the the spectral model will change the IRF values
-    #if defined(G_USE_IRF_CACHE)
-    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
-    const GCTAEventAtom* atom = dynamic_cast<const GCTAEventAtom*>(&event);
-    if (list != NULL && atom != NULL && !use_edisp()) {
-        irf = list->irf_cache(source.name(), atom->index());
-        if (irf >= 0.0) {
-            has_irf = true;
-            #if defined(G_DEBUG_IRF_DIFFUSE)
-            std::cout << "GCTAResponseIrf::irf_diffuse:";
-            std::cout << " cached irf=" << irf << std::endl;
-            #endif
-        }
-        else {
-            irf = 0.0;
-        }
+    // Get CTA instrument direction
+    const GCTAInstDir& dir = gammalib::cta_dir(G_IRF_ELLIPTICAL, event);
+
+    // Get pointer on spatial model
+    const GModelSpatial* model =
+        dynamic_cast<const GModelSpatial*>(source.model());
+    if (model == NULL) {
+        throw GCTAException::bad_model_type(G_IRF_DIFFUSE);
     }
+
+    // Get resolution of spatial model
+    double resolution = gammalib::resolution(model);
+
+    // Get event attributes
+    const GEnergy& obsEng = event.energy();
+
+    // Get source attributes
+    const GEnergy& srcEng  = source.energy();
+    const GTime&   srcTime = source.time();
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
+
+    // Determine angular distance between measured photon direction and
+    // pointing direction [radians]
+    double eta = pnt.dir().dist(dir.dir());
+
+    // Get log10(E/TeV) of true photon energy
+    double srcLogEng = srcEng.log10TeV();
+
+    // Assign the observed theta angle (eta) as the true theta angle
+    // between the source and the pointing directions. This is a (not
+    // too bad) approximation which helps to speed up computations.
+    // If we want to do this correctly, however, we would need to move
+    // the psf_dummy_sigma down to the integration kernel, and we would
+    // need to make sure that psf_delta_max really gives the absolute
+    // maximum (this is certainly less critical)
+    double theta = eta;
+    double phi   = 0.0; //TODO: Implement Phi dependence
+
+    // Get maximum PSF radius in radians
+    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
+
+    // Perform zenith angle integration if interval is valid
+    if (delta_max > 0.0) {
+
+        // Compute rotation matrix to convert from coordinates (theta,phi)
+        // in the reference frame of the observed arrival direction into
+        // celestial coordinates
+        GMatrix ry;
+        GMatrix rz;
+        ry.eulery(dir.dir().dec_deg() - 90.0);
+        rz.eulerz(-dir.dir().ra_deg());
+        GMatrix rot = (ry * rz).transpose();
+
+        // Setup integration kernel
+        cta_irf_diffuse_kern_theta integrand(this,
+                                             model,
+                                             &rot,
+                                             theta,
+                                             phi,
+                                             zenith,
+                                             azimuth,
+                                             srcEng,
+                                             srcTime,
+                                             srcLogEng,
+                                             obsEng,
+                                             eta,
+                                             min_iter_phi,
+                                             max_iter_phi,
+                                             resolution);
+
+        // Set number of radial integration iterations
+        int iter  = gammalib::iter_rho(delta_max, resolution,
+                                       min_iter_rho, max_iter_rho);
+
+        // Integrate over Psf delta angle
+        GIntegral integral(&integrand);
+        integral.fixed_iter(iter);
+        irf = integral.romberg(0.0, delta_max);
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+            std::cout << "*** ERROR: GCTAResponseIrf::irf_diffuse:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", delta_max=" << delta_max << ")";
+            std::cout << std::endl;
+        }
+        #endif
+    }
+
+    // Apply deadtime correction
+    irf *= obs.deadc(srcTime);
+
+    // Compile option: Show integration results
+    #if defined(G_DEBUG_IRF_DIFFUSE)
+    std::cout << "GCTAResponseIrf::irf_diffuse:";
+    std::cout << " srcLogEng=" << srcLogEng;
+    std::cout << " obsLogEng=" << obsLogEng;
+    std::cout << " eta=" << eta;
+    std::cout << " delta_max=" << delta_max;
+    std::cout << " irf=" << irf << std::endl;
     #endif
-
-    // Continue only if we have no IRF value
-    if (!has_irf) {
-
-        // Get CTA instrument direction
-        const GCTAInstDir& dir = gammalib::cta_dir(G_IRF_ELLIPTICAL, event);
-
-        // Get pointer on spatial model
-        const GModelSpatial* model =
-            dynamic_cast<const GModelSpatial*>(source.model());
-        if (model == NULL) {
-            throw GCTAException::bad_model_type(G_IRF_DIFFUSE);
-        }
-
-        // Get resolution of spatial model
-        double resolution = gammalib::resolution(model);
-
-        // Get event attributes
-        const GEnergy& obsEng = event.energy();
-
-        // Get source attributes
-        const GEnergy& srcEng  = source.energy();
-        const GTime&   srcTime = source.time();
-
-        // Get pointing direction zenith angle and azimuth [radians]
-        double zenith  = pnt.zenith();
-        double azimuth = pnt.azimuth();
-
-        // Determine angular distance between measured photon direction and
-        // pointing direction [radians]
-        double eta = pnt.dir().dist(dir.dir());
-
-        // Get log10(E/TeV) of true photon energy
-        double srcLogEng = srcEng.log10TeV();
-
-        // Assign the observed theta angle (eta) as the true theta angle
-        // between the source and the pointing directions. This is a (not
-        // too bad) approximation which helps to speed up computations.
-        // If we want to do this correctly, however, we would need to move
-        // the psf_dummy_sigma down to the integration kernel, and we would
-        // need to make sure that psf_delta_max really gives the absolute
-        // maximum (this is certainly less critical)
-        double theta = eta;
-        double phi   = 0.0; //TODO: Implement Phi dependence
-
-        // Get maximum PSF radius in radians
-        double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
-
-        // Perform zenith angle integration if interval is valid
-        if (delta_max > 0.0) {
-
-            // Compute rotation matrix to convert from coordinates (theta,phi)
-            // in the reference frame of the observed arrival direction into
-            // celestial coordinates
-            GMatrix ry;
-            GMatrix rz;
-            ry.eulery(dir.dir().dec_deg() - 90.0);
-            rz.eulerz(-dir.dir().ra_deg());
-            GMatrix rot = (ry * rz).transpose();
-
-            // Setup integration kernel
-            cta_irf_diffuse_kern_theta integrand(this,
-                                                 model,
-                                                 &rot,
-                                                 theta,
-                                                 phi,
-                                                 zenith,
-                                                 azimuth,
-                                                 srcEng,
-                                                 srcTime,
-                                                 srcLogEng,
-                                                 obsEng,
-                                                 eta,
-                                                 min_iter_phi,
-                                                 max_iter_phi,
-                                                 resolution);
-
-            // Set number of radial integration iterations
-            int iter  = gammalib::iter_rho(delta_max, resolution,
-                                           min_iter_rho, max_iter_rho);
-
-            // Integrate over Psf delta angle
-            GIntegral integral(&integrand);
-            integral.fixed_iter(iter);
-            irf = integral.romberg(0.0, delta_max);
-
-            // Compile option: Check for NaN/Inf
-            #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-                std::cout << "*** ERROR: GCTAResponseIrf::irf_diffuse:";
-                std::cout << " NaN/Inf encountered";
-                std::cout << " (irf=" << irf;
-                std::cout << ", delta_max=" << delta_max << ")";
-                std::cout << std::endl;
-            }
-            #endif
-        }
-
-        // Apply deadtime correction
-        irf *= obs.deadc(srcTime);
-
-        // Put IRF value in cache. Only do this in no energy dispersion is
-        // requested, since for energy dispersion the IRF values will
-        // depend on the spectrum
-        #if defined(G_USE_IRF_CACHE)
-        if (list != NULL && atom != NULL && !use_edisp()) {
-            list->irf_cache(source.name(), atom->index(), irf);
-        }
-        #endif
-
-        // Compile option: Show integration results
-        #if defined(G_DEBUG_IRF_DIFFUSE)
-        std::cout << "GCTAResponseIrf::irf_diffuse:";
-        std::cout << " srcLogEng=" << srcLogEng;
-        std::cout << " obsLogEng=" << obsLogEng;
-        std::cout << " eta=" << eta;
-        std::cout << " delta_max=" << delta_max;
-        std::cout << " irf=" << irf << std::endl;
-        #endif
-
-    } // endif: has no IRF
 
     // Return IRF value
     return irf;
@@ -3326,137 +3300,91 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
     static const int iter_phi = 9;
 
     // Initialise Nroi value
-    double nroi     = 0.0;
-    bool   has_nroi = false;
+    double nroi = 0.0;
 
-    // Build unique identifier
-    std::string id = model.name() + "::" + obs.id();
+    // Retrieve CTA observation, ROI and pointing
+    const GCTAObservation& cta = gammalib::cta_obs(G_NROI_DIFFUSE, obs);
+    const GCTARoi&         roi = gammalib::cta_event_list(G_NROI_DIFFUSE, obs).roi();
+    const GCTAPointing&    pnt = cta.pointing();
 
-    // Check if Nroi value is already in cache. Do not use the Npred cache
-    // for energy dispersion since the actual value will depend on the
-    // spectral model
-    #if defined(G_USE_NPRED_CACHE)
-    if (!m_npred_names.empty() && !use_edisp()) {
+    // Get pointer on spatial model
+    const GModelSpatial* spatial =
+        dynamic_cast<const GModelSpatial*>(model.spatial());
+    if (spatial == NULL) {
+        throw GCTAException::bad_model_type(G_NROI_DIFFUSE);
+    }
 
-         // Search for unique identifier, and if found, recover Npred value
-         // and break
-         for (int i = 0; i < m_npred_names.size(); ++i) {
-             if (m_npred_names[i]    == id &&
-                 m_npred_energies[i] == srcEng &&
-                 m_npred_times[i]    == srcTime) {
-                 nroi     = m_npred_values[i];
-                 has_nroi = true;
-                 #if defined(G_DEBUG_NROI_DIFFUSE)
-                 std::cout << "GCTAResponseIrf::nroi_diffuse:";
-                 std::cout << " cache=" << i;
-                 std::cout << " nroi=" << nroi << std::endl;
-                 #endif
-                 break;
-             }
-         }
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
 
-    } // endif: there were values in the Npred cache
+    // Get log10(E/TeV) of true photon energy
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
+    // as this allows us doing this computation in the outer loop. This
+    // should be sufficient here, unless the offaxis PSF becomes much worse
+    // than the onaxis PSF. In this case, we may add a safety factor here
+    // to make sure we encompass the entire PSF.
+    double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
+
+    // Extract ROI radius (radians)
+    double roi_radius = roi.radius() * gammalib::deg2rad;
+
+    // Compute the ROI radius plus maximum PSF radius (radians). Any photon
+    // coming from beyond this radius will not make it in the dataspace and
+    // thus can be neglected.
+    double roi_psf_radius = roi_radius + psf_max_radius;
+
+    // Perform offset angle integration only if interval is valid
+    if (roi_psf_radius > 0.0) {
+
+        // Compute rotation matrix to convert from native ROI coordinates,
+        // given by (theta,phi), into celestial coordinates.
+        GMatrix ry;
+        GMatrix rz;
+        ry.eulery(roi.centre().dir().dec_deg() - 90.0);
+        rz.eulerz(-roi.centre().dir().ra_deg());
+        GMatrix rot = (ry * rz).transpose();
+
+        // Setup integration kernel
+        cta_nroi_diffuse_kern_theta integrand(this,
+                                              &cta,
+                                              spatial,
+                                              &rot,
+                                              srcEng,
+                                              srcTime,
+                                              obsEng,
+                                              obsTime,
+                                              iter_phi);
+
+        // Integrate over model's zenith angle
+        GIntegral integral(&integrand);
+        integral.fixed_iter(iter_rho);
+        nroi = integral.romberg(0.0, roi_psf_radius);
+
+        // Compile option: Show integration results
+        #if defined(G_DEBUG_NROI_DIFFUSE)
+        std::cout << "GCTAResponseIrf::nroi_diffuse:";
+        std::cout << " roi_psf_radius=" << roi_psf_radius;
+        std::cout << " nroi=" << nroi;
+        std::cout << " Etrue=" << srcEng;
+        std::cout << " Ereco=" << obsEng;
+        std::cout << " id=" << id << std::endl;
+        #endif
+
+    } // endif: offset angle range was valid
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+        std::cout << "*** ERROR: GCTAResponseIrf::nroi_diffuse:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (nroi=" << nroi;
+        std::cout << ", roi_psf_radius=" << roi_psf_radius;
+        std::cout << ")" << std::endl;
+    }
     #endif
-
-    // Continue only if no Npred cache value was found
-    if (!has_nroi) {
-
-        // Retrieve CTA observation, ROI and pointing
-        const GCTAObservation& cta = gammalib::cta_obs(G_NROI_DIFFUSE, obs);
-        const GCTARoi&         roi = gammalib::cta_event_list(G_NROI_DIFFUSE, obs).roi();
-        const GCTAPointing&    pnt = cta.pointing();
-
-        // Get pointer on spatial model
-        const GModelSpatial* spatial =
-            dynamic_cast<const GModelSpatial*>(model.spatial());
-        if (spatial == NULL) {
-            throw GCTAException::bad_model_type(G_NROI_DIFFUSE);
-        }
-
-        // Get pointing direction zenith angle and azimuth [radians]
-        double zenith  = pnt.zenith();
-        double azimuth = pnt.azimuth();
-
-        // Get log10(E/TeV) of true photon energy
-        double srcLogEng = srcEng.log10TeV();
-
-        // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
-        // as this allows us doing this computation in the outer loop. This
-        // should be sufficient here, unless the offaxis PSF becomes much worse
-        // than the onaxis PSF. In this case, we may add a safety factor here
-        // to make sure we encompass the entire PSF.
-        double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
-
-        // Extract ROI radius (radians)
-        double roi_radius = roi.radius() * gammalib::deg2rad;
-
-        // Compute the ROI radius plus maximum PSF radius (radians). Any photon
-        // coming from beyond this radius will not make it in the dataspace and
-        // thus can be neglected.
-        double roi_psf_radius = roi_radius + psf_max_radius;
-
-        // Perform offset angle integration only if interval is valid
-        if (roi_psf_radius > 0.0) {
-
-            // Compute rotation matrix to convert from native ROI coordinates,
-            // given by (theta,phi), into celestial coordinates.
-            GMatrix ry;
-            GMatrix rz;
-            ry.eulery(roi.centre().dir().dec_deg() - 90.0);
-            rz.eulerz(-roi.centre().dir().ra_deg());
-            GMatrix rot = (ry * rz).transpose();
-
-            // Setup integration kernel
-            cta_nroi_diffuse_kern_theta integrand(this,
-                                                  &cta,
-                                                  spatial,
-                                                  &rot,
-                                                  srcEng,
-                                                  srcTime,
-                                                  obsEng,
-                                                  obsTime,
-                                                  iter_phi);
-
-            // Integrate over model's zenith angle
-            GIntegral integral(&integrand);
-            integral.fixed_iter(iter_rho);
-            nroi = integral.romberg(0.0, roi_psf_radius);
-
-            // Compile option: Show integration results
-            #if defined(G_DEBUG_NROI_DIFFUSE)
-            std::cout << "GCTAResponseIrf::nroi_diffuse:";
-            std::cout << " roi_psf_radius=" << roi_psf_radius;
-            std::cout << " nroi=" << nroi;
-            std::cout << " Etrue=" << srcEng;
-            std::cout << " Ereco=" << obsEng;
-            std::cout << " id=" << id << std::endl;
-            #endif
-
-        } // endif: offset angle range was valid
-
-        // Store result in Npred cache in case that no energy dispersion
-        // is requested
-        #if defined(G_USE_NPRED_CACHE)
-        if (!use_edisp()) {
-            m_npred_names.push_back(id);
-            m_npred_energies.push_back(srcEng);
-            m_npred_times.push_back(srcTime);
-            m_npred_values.push_back(nroi);
-        }
-        #endif
-
-        // Debug: Check for NaN
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
-            std::cout << "*** ERROR: GCTAResponseIrf::nroi_diffuse:";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (nroi=" << nroi;
-            std::cout << ", roi_psf_radius=" << roi_psf_radius;
-            std::cout << ")" << std::endl;
-        }
-        #endif
-
-    } // endif: Nroi computation required
 
     // Return Nroi
     return nroi;

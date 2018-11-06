@@ -34,6 +34,7 @@
 #include "GTime.hpp"
 #include "GCaldb.hpp"
 #include "GCTAResponse.hpp"
+#include "GCTAResponseCache.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAEdisp.hpp"
@@ -218,16 +219,15 @@ private:
     mutable bool    m_apply_edisp;    //!< Apply energy dispersion
     double          m_lo_save_thres;  //!< Save low energy threshold
     double          m_hi_save_thres;  //!< Save high energy threshold
+    bool            m_use_nroi_cache; //!< Control usage of nroi cache
 
     // XML response filename
     std::string     m_xml_caldb;      //!< Calibration database string in XML file
     std::string     m_xml_rspname;    //!< Response name in XML file
 
-    // Npred cache
-    mutable std::vector<std::string> m_npred_names;    //!< Model names
-    mutable std::vector<GEnergy>     m_npred_energies; //!< Model energy
-    mutable std::vector<GTime>       m_npred_times;    //!< Model time
-    mutable std::vector<double>      m_npred_values;   //!< Model values
+    // Cache for nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)
+    // computation
+    mutable GCTAResponseCache m_nroi_cache;
 };
 
 

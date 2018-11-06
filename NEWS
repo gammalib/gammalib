@@ -312,7 +312,12 @@ None
 20. CTA interface
 -----------------
 The GCTAResponseCache class was added to implement a general response cache for
-CTA (#2715).
+CTA. The response cache is now used in GCTAResponse::irf(GEvent&, GSource&,
+GObservation&) and in GCTAResponseIrf::nroi(GModelSky&, GEnergy&, GTime&,
+GEnergy&, GTime&, GObservation&) in case that the spatial model has no free
+parameters. This means that now all other spatial models with frozen parameters
+will be cached. The use of the cache can be toggled by internal data members
+(#2715).
 
 GCTABackground3D::init_mc_cache now pre-computes the Monte Carlo cache at energy
 nodes of the background cube, and in addition, inserts 8 logarithmically spaced
