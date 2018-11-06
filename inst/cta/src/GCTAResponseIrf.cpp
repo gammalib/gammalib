@@ -1102,7 +1102,7 @@ void GCTAResponseIrf::load(const std::string& rspname)
  * corresponding FITS table. If a column named `SPECRESP` is found in the
  * table, a GCTAAeffArf object will be allocated. Otherwise, a GCTAAeff2D
  * object will be allocated. In both cases, the method will extract the
- * optional `LO_THRES` and `HI_THRES` save energy thresholds from the FITS
+ * optional `LO_THRES` and `HI_THRES` safe energy thresholds from the FITS
  * file header.
  *
  * If the file is not a FITS file, it will be interpreted as a
@@ -1150,12 +1150,12 @@ void GCTAResponseIrf::load_aeff(const GFilename& filename)
             // Get FITS table
             const GFitsTable& table = *fits.table(extname);
 
-            // Read save energy thresholds if available
+            // Read safe energy thresholds if available
             if (table.has_card("LO_THRES")) {
-                m_lo_save_thres = table.real("LO_THRES");
+                m_lo_safe_thres = table.real("LO_THRES");
             }
             if (table.has_card("HI_THRES")) {
-                m_hi_save_thres = table.real("HI_THRES");
+                m_hi_safe_thres = table.real("HI_THRES");
             }
 
             // Check for specific table column
@@ -1604,20 +1604,20 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
 
         // Append safe energy threshold information
         result.append("\n"+gammalib::parformat("Safe energy range"));
-        if (m_lo_save_thres > 0.0 && m_hi_save_thres) {
-            result.append(gammalib::str(m_lo_save_thres));
+        if (m_lo_safe_thres > 0.0 && m_hi_safe_thres) {
+            result.append(gammalib::str(m_lo_safe_thres));
             result.append(" - ");
-            result.append(gammalib::str(m_hi_save_thres));
+            result.append(gammalib::str(m_hi_safe_thres));
             result.append(" TeV");
         }
-        else if (m_lo_save_thres > 0.0) {
+        else if (m_lo_safe_thres > 0.0) {
             result.append("> ");
-            result.append(gammalib::str(m_lo_save_thres));
+            result.append(gammalib::str(m_lo_safe_thres));
             result.append(" TeV");
         }
-        else if (m_hi_save_thres > 0.0) {
+        else if (m_hi_safe_thres > 0.0) {
             result.append("< ");
-            result.append(gammalib::str(m_hi_save_thres));
+            result.append(gammalib::str(m_hi_safe_thres));
             result.append(" TeV");
         }
         else {
@@ -2121,8 +2121,8 @@ void GCTAResponseIrf::init_members(void)
     m_edisp          = NULL;
     m_background     = NULL;
     m_apply_edisp    = false;  //!< Switched off by default
-    m_lo_save_thres  = 0.0;
-    m_hi_save_thres  = 0.0;
+    m_lo_safe_thres  = 0.0;
+    m_hi_safe_thres  = 0.0;
     m_use_nroi_cache = true;   //!< Switched on by default
 
     // XML response filenames
@@ -2148,8 +2148,8 @@ void GCTAResponseIrf::copy_members(const GCTAResponseIrf& rsp)
     m_caldb          = rsp.m_caldb;
     m_rspname        = rsp.m_rspname;
     m_apply_edisp    = rsp.m_apply_edisp;
-    m_lo_save_thres  = rsp.m_lo_save_thres;
-    m_hi_save_thres  = rsp.m_hi_save_thres;
+    m_lo_safe_thres  = rsp.m_lo_safe_thres;
+    m_hi_safe_thres  = rsp.m_hi_safe_thres;
     m_use_nroi_cache = rsp.m_use_nroi_cache;
 
     // Copy response filenames
@@ -2728,7 +2728,7 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
     const GCTAPointing& pnt = gammalib::cta_pnt(G_IRF_DIFFUSE, obs);
 
     // Get CTA instrument direction
-    const GCTAInstDir& dir = gammalib::cta_dir(G_IRF_ELLIPTICAL, event);
+    const GCTAInstDir& dir = gammalib::cta_dir(G_IRF_DIFFUSE, event);
 
     // Get pointer on spatial model
     const GModelSpatial* model =

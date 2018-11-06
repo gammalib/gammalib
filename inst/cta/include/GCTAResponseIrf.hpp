@@ -118,8 +118,8 @@ public:
     void                  edisp(GCTAEdisp* edisp);
     const GCTABackground* background(void) const;
     void                  background(GCTABackground* background);
-    const double&         lo_save_thres(void) const;
-    const double&         hi_save_thres(void) const;
+    const double&         lo_safe_thres(void) const;
+    const double&         hi_safe_thres(void) const;
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -217,8 +217,8 @@ private:
     GCTAEdisp*      m_edisp;          //!< Energy dispersion
     GCTABackground* m_background;     //!< Background
     mutable bool    m_apply_edisp;    //!< Apply energy dispersion
-    double          m_lo_save_thres;  //!< Save low energy threshold
-    double          m_hi_save_thres;  //!< Save high energy threshold
+    double          m_lo_safe_thres;  //!< Safe low energy threshold
+    double          m_hi_safe_thres;  //!< Safe high energy threshold
     bool            m_use_nroi_cache; //!< Control usage of nroi cache
 
     // XML response filename
@@ -453,9 +453,9 @@ void GCTAResponseIrf::background(GCTABackground* background)
  * @return Low energy threshold from IRF.
  ***************************************************************************/
 inline
-const double& GCTAResponseIrf::lo_save_thres(void) const
+const double& GCTAResponseIrf::lo_safe_thres(void) const
 {
-    return m_lo_save_thres;
+    return m_lo_safe_thres;
 }
 
 /***********************************************************************//**
@@ -464,9 +464,9 @@ const double& GCTAResponseIrf::lo_save_thres(void) const
  * @return High energy threshold from IRF.
  ***************************************************************************/
 inline
-const double& GCTAResponseIrf::hi_save_thres(void) const
+const double& GCTAResponseIrf::hi_safe_thres(void) const
 {
-    return m_hi_save_thres;
+    return m_hi_safe_thres;
 }
 
 #endif /* GCTARESPONSEIRF_HPP */

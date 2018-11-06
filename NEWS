@@ -143,6 +143,8 @@ The following methods have been renamed:
 - GPhoton::mc_id() from GPhoton::mcid()
 - GCTAEdisp::ereco_bounds() from GCTAEdisp::ebounds_obs()
 - GCTAEdisp::etrue_bounds() from GCTAEdisp::ebounds_src()
+- GCTAResponseIrf::lo_safe_thres() from GCTAResponseIrf::lo_save_thres()
+- GCTAResponseIrf::hi_safe_thres() from GCTAResponseIrf::hi_save_thres()
 
 The arguments for the following methods have been changed:
 - GCTAOnOffObservation(GCTAObservation&, GModelSpatial&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&, bool&)
@@ -312,6 +314,10 @@ None
 
 20. CTA interface
 -----------------
+Rename GCTAResponseIrf::lo_save_thres() and GCTAResponseIrf::hi_save_thres()
+to GCTAResponseIrf::lo_safe_thres() and GCTAResponseIrf::hi_safe_thres()
+(#2716).
+
 The GCTAResponseCache class was added to implement a general response cache for
 CTA. The response cache is now used in GCTAResponse::irf(GEvent&, GSource&,
 GObservation&) and in GCTAResponseIrf::nroi(GModelSky&, GEnergy&, GTime&,

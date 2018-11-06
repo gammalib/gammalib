@@ -117,5 +117,9 @@ New features
 Clean up
 --------
 
+* [`2716 <https://cta-redmine.irap.omp.eu/issues/2716>`_] -
+  Rename ``GCTAResponseIrf::lo_save_thres()`` and
+  ``GCTAResponseIrf::hi_save_thres()`` to ``GCTAResponseIrf::lo_safe_thres()``
+  and ``GCTAResponseIrf::hi_safe_thres()``
 * [`2515 <https://cta-redmine.irap.omp.eu/issues/2515>`_] -
   Remove ``at()`` methods from Python interface
