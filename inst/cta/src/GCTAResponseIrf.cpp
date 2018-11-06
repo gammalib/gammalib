@@ -1653,12 +1653,10 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
                 result.append("\n"+m_background->print(reduced_chatter));
             }
 
-        }
-
-        // Append cache information
-        if (chatter >= EXPLICIT) {
+            // Append cache information
             result.append("\n"+m_irf_cache.print(reduced_chatter));
             result.append("\n"+m_nroi_cache.print(reduced_chatter));
+
         }
 
     } // endif: chatter was not silent
@@ -1865,7 +1863,7 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
     // If the spatial model component has free parameters, or the response
     // cache should not be used, or the cache does not contain the requested
     // IRF value then compute the IRF value for the spatial model.
-    if (has_free_pars    ||
+    if (has_free_pars     ||
         !m_use_nroi_cache ||
         !m_nroi_cache.contains(name, obsEng, srcEng, &nroi)) {
 
