@@ -34,13 +34,16 @@
 #include "GEnergy.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GCTAInstDir;
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Typedefs ___________________________________________________________ */
-typedef std::map<GEnergy,double>                     GCTAResponseCacheEtrue;
-typedef std::map<GEnergy,GCTAResponseCacheEtrue>     GCTAResponseCacheEreco;
-typedef std::map<std::string,GCTAResponseCacheEreco> GCTAResponseCacheName;
+typedef std::map<GEnergy,double>                  GCTAResponseCacheEtrue;
+typedef std::map<GEnergy,GCTAResponseCacheEtrue>  GCTAResponseCacheEreco;
+typedef std::map<double,GCTAResponseCacheEreco>   GCTAResponseCacheDEC;
+typedef std::map<double,GCTAResponseCacheDEC>     GCTAResponseCacheRA;
+typedef std::map<std::string,GCTAResponseCacheRA> GCTAResponseCacheName;
 
 
 /***********************************************************************//**
@@ -67,13 +70,24 @@ public:
     std::string        classname(void) const;
     int                size(void) const;
     bool               is_empty(void) const;
+    int                ndirs(void) const;
     int                nerecos(void) const;
     int                netrues(void) const;
     void               set(const std::string& name,
                            const GEnergy&     ereco,
                            const GEnergy&     etrue,
                            const double&      value);
+    void               set(const std::string& name,
+                           const GCTAInstDir& dir,
+                           const GEnergy&     ereco,
+                           const GEnergy&     etrue,
+                           const double&      value);
     bool               contains(const std::string& name,
+                                const GEnergy&     ereco,
+                                const GEnergy&     etrue,
+                                double*            value = NULL) const;
+    bool               contains(const std::string& name,
+                                const GCTAInstDir& dir,
                                 const GEnergy&     ereco,
                                 const GEnergy&     etrue,
                                 double*            value = NULL) const;
@@ -84,7 +98,7 @@ protected:
     void init_members(void);
     void copy_members(const GCTAResponseCache& cache);
     void free_members(void);
-    
+
     // Protected members
     GCTAResponseCacheName m_cache;
 };

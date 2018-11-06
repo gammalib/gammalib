@@ -1418,6 +1418,14 @@ void TestGCTAResponse::test_response_cache(void)
     const GEnergy eng2(2.0, "TeV");
     const GEnergy eng3(3.0, "TeV");
 
+    // Set some instrument directions
+    GSkyDir skydir1;
+    GSkyDir skydir2;
+    skydir1.radec_deg(1.0,10.0);
+    skydir2.radec_deg(2.0,20.0);
+    const GCTAInstDir dir1(skydir1, 0.0, 0.0);
+    const GCTAInstDir dir2(skydir2, 0.0, 0.0);
+
     // Initialise results
     double value = 0.0;
     bool   flag  = false;
@@ -1426,6 +1434,7 @@ void TestGCTAResponse::test_response_cache(void)
     GCTAResponseCache cache1;
     test_assert(cache1.is_empty(), "Test is_empty() method for empty cache");
 	test_value(cache1.size(), 0, "Test size() method for empty cache");
+	test_value(cache1.ndirs(), 0, "Test ndirs() method for empty cache");
 	test_value(cache1.nerecos(), 0, "Test nerecos() method for empty cache");
 	test_value(cache1.netrues(), 0, "Test netrues() method for empty cache");
     flag = cache1.contains("Crab", eng1, eng1, &value);
@@ -1437,6 +1446,7 @@ void TestGCTAResponse::test_response_cache(void)
     cache2.set("Crab", eng2, eng2, 2.0);
     test_assert(!cache2.is_empty(), "Test is_empty() method for filled cache");
 	test_value(cache2.size(), 2, "Test size() method for filled cache");
+	test_value(cache2.ndirs(), 1, "Test ndirs() method for filled cache");
 	test_value(cache2.nerecos(), 2, "Test nerecos() method for filled cache");
 	test_value(cache2.netrues(), 2, "Test netrues() method for filled cache");
     flag = cache2.contains("Crab", eng1, eng1, &value);
@@ -1456,6 +1466,7 @@ void TestGCTAResponse::test_response_cache(void)
     cache2.clear();
     test_assert(cache2.is_empty(), "Test is_empty() method for cleared cache");
 	test_value(cache2.size(), 0, "Test size() method for cleared cache");
+	test_value(cache2.ndirs(), 0, "Test ndirs() method for empty cache");
 	test_value(cache2.nerecos(), 0, "Test nerecos() method for cleared cache");
 	test_value(cache2.netrues(), 0, "Test netrues() method for cleared cache");
     flag = cache2.contains("Crab", eng1, eng1, &value);
@@ -1473,6 +1484,7 @@ void TestGCTAResponse::test_response_cache(void)
     cache3.set("Vela", eng2, eng2, 13.0);
     test_assert(!cache3.is_empty(), "Test is_empty() method for filled cache");
 	test_value(cache3.size(), 8, "Test size() method for filled cache");
+	test_value(cache3.ndirs(), 1, "Test ndirs() method for filled cache");
 	test_value(cache3.nerecos(), 4, "Test nerecos() method for filled cache");
 	test_value(cache3.netrues(), 8, "Test netrues() method for filled cache");
 
@@ -1515,6 +1527,58 @@ void TestGCTAResponse::test_response_cache(void)
     // Test non-existing name
     flag = cache3.contains("Orion", eng1, eng1, &value);
     test_assert(!flag, "Test contains() method flag for non-existing name");
+
+    // Test filled response cube (two models, two dir, two ereco, two etrue per ereco)
+    GCTAResponseCache cache4;
+    cache4.set("Crab", dir1, eng1, eng1, 1.0);
+    cache4.set("Crab", dir1, eng1, eng2, 2.0);
+    cache4.set("Crab", dir1, eng2, eng1, 3.0);
+    cache4.set("Crab", dir1, eng2, eng2, 4.0);
+    cache4.set("Crab", dir2, eng1, eng1, 5.0);
+    cache4.set("Crab", dir2, eng1, eng2, 6.0);
+    cache4.set("Crab", dir2, eng2, eng1, 7.0);
+    cache4.set("Crab", dir2, eng2, eng2, 8.0);
+    test_assert(!cache4.is_empty(), "Test is_empty() method for filled cache");
+	test_value(cache4.size(), 8, "Test size() method for filled cache");
+	test_value(cache4.ndirs(), 2, "Test ndirs() method for filled cache");
+	test_value(cache4.nerecos(), 4, "Test nerecos() method for filled cache");
+	test_value(cache4.netrues(), 8, "Test netrues() method for filled cache");
+
+    // Test Crab cache for dir1
+    flag = cache4.contains("Crab", dir1, eng1, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 1.0, "Test contains() method value for filled cache");
+    flag = cache4.contains("Crab", dir1, eng1, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 2.0, "Test contains() method value for filled cache");
+    flag = cache4.contains("Crab", dir1, eng2, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 3.0, "Test contains() method value for filled cache");
+    flag = cache4.contains("Crab", dir1, eng2, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 4.0, "Test contains() method value for filled cache");
+    flag = cache4.contains("Crab", dir1, eng3, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing true energy");
+    flag = cache4.contains("Crab", dir1, eng1, eng3, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing reco. energy");
+
+    // Test Crab cache for dir2
+    flag = cache4.contains("Crab", dir2, eng1, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 5.0, "Test contains() method value for filled cache");
+    flag = cache4.contains("Crab", dir2, eng1, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 6.0, "Test contains() method value for filled cache");
+    flag = cache4.contains("Crab", dir2, eng2, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 7.0, "Test contains() method value for filled cache");
+    flag = cache4.contains("Crab", dir2, eng2, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 8.0, "Test contains() method value for filled cache");
+    flag = cache4.contains("Crab", dir2, eng3, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing true energy");
+    flag = cache4.contains("Crab", dir2, eng1, eng3, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing reco. energy");
 
     // Return
     return;

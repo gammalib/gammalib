@@ -60,13 +60,24 @@ public:
     std::string        classname(void) const;
     int                size(void) const;
     bool               is_empty(void) const;
+    int                ndirs(void) const;
     int                nerecos(void) const;
     int                netrues(void) const;
     void               set(const std::string& name,
                            const GEnergy&     ereco,
                            const GEnergy&     etrue,
                            const double&      value);
+    void               set(const std::string& name,
+                           const GCTAInstDir& dir,
+                           const GEnergy&     ereco,
+                           const GEnergy&     etrue,
+                           const double&      value);
     bool               contains(const std::string& name,
+                                const GEnergy&     ereco,
+                                const GEnergy&     etrue,
+                                double*            value) const;
+    bool               contains(const std::string& name,
+                                const GCTAInstDir& dir,
                                 const GEnergy&     ereco,
                                 const GEnergy&     etrue,
                                 double*            value) const;

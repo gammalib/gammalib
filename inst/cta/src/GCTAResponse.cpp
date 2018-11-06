@@ -34,9 +34,10 @@
 #include "GModelSpatial.hpp"
 #include "GModelSpatialComposite.hpp"
 #include "GCTAResponse.hpp"
-#include "GCTAResponse.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_IRF           "GCTAResponse::irf(GEvent&, GSource&, GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -168,9 +169,10 @@ double GCTAResponse::irf(const GEvent&       event,
     double irf = 0.0;
 
     // Set IRF value attributes
-    std::string    name  = obs.id() + "::" + source.name();
-    const GEnergy& ereco = event.energy();
-    const GEnergy& etrue = source.energy();
+    std::string        name  = obs.id() + "::" + source.name();
+    const GCTAInstDir& dir   = gammalib::cta_dir(G_IRF, event);
+    const GEnergy&     ereco = event.energy();
+    const GEnergy&     etrue = source.energy();
 
     // Signal if spatial model has free parameters
     bool has_free_pars = source.model()->has_free_pars();
@@ -180,7 +182,7 @@ double GCTAResponse::irf(const GEvent&       event,
     // IRF value then compute the IRF value for the spatial model.
     if (has_free_pars    ||
         !m_use_irf_cache ||
-        !m_irf_cache.contains(name, ereco, etrue, &irf)) {
+        !m_irf_cache.contains(name, dir, ereco, etrue, &irf)) {
 
         // Compute IRF for spatial model
         switch (source.model()->code()) {
@@ -208,7 +210,7 @@ double GCTAResponse::irf(const GEvent&       event,
     // If the spatial model has no free parameters and the response cache
     // should be used then put the IRF value in the response cache.
     if (!has_free_pars && m_use_irf_cache) {
-        m_irf_cache.set(name, ereco, etrue, irf);
+        m_irf_cache.set(name, dir, ereco, etrue, irf);
     }
 
     // Return IRF value
