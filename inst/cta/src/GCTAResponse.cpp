@@ -230,7 +230,7 @@ double GCTAResponse::irf(const GEvent&       event,
 void GCTAResponse::init_members(void)
 {
     // Initialize members
-    m_use_irf_cache = true;
+    m_use_irf_cache = true;   //!< Switched on by default
     m_irf_cache.clear();
 
     // Return
