@@ -95,9 +95,6 @@ public:
                                           const std::string& gtiname) const;
     void               fetch(void) const;
     void               dispose(void) const;
-    double             irf_cache(const std::string& name, const int& index) const;
-    void               irf_cache(const std::string& name, const int& index,
-                                 const double& irf) const;
     const GPhases&     phases(void) const;
     void               phases(const GPhases& phases);
     const std::string& gtiname(void) const;
@@ -123,8 +120,6 @@ protected:
     void         write_ds_keys(GFitsHDU& hdu,
                                const std::string& gtiname = gammalib::extname_gti) const;
     void         write_mc_ids(GFitsHDU& hdu) const;
-    int          irf_cache_init(const std::string& name) const;
-    int          irf_cache_index(const std::string& name) const;
 
     // Event list meta data
     GCTARoi                  m_roi;         //!< Region of interest
@@ -142,10 +137,6 @@ protected:
     mutable std::vector<GCTAEventAtom>  m_events;   //!< Events
     mutable std::vector<GFitsTableCol*> m_columns;  //!< Pointers to optional columns
     mutable GFilename                   m_filename; //!< Event list file name
-
-    // IRF cache for diffuse models
-    mutable std::vector<std::string>          m_irf_names;  //!< Model names
-    mutable std::vector<std::vector<double> > m_irf_values; //!< IRF values
 };
 
 

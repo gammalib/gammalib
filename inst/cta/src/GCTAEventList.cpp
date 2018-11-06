@@ -935,23 +935,6 @@ std::string GCTAEventList::print(const GChatter& chatter) const
             }
         }
 
-
-        // EXPLICIT: Append IRF cache
-        if (chatter >= EXPLICIT) {
-            for (int i = 0; i < m_irf_names.size(); ++i) {
-                result.append("\n"+gammalib::parformat("IRF cache " +
-                              gammalib::str(i)));
-                result.append(m_irf_names[i]+" = ");
-                int num   = 0;
-                for (int k = 0; k < size(); ++k) {
-                    if ((m_irf_values[i])[k] != -1.0) {
-                        num++;
-                    }
-                }
-                result.append(gammalib::str(num)+" values");
-            }
-        } // endif: chatter was explicit
-
     } // endif: chatter was not silent
 
     // Return result
@@ -985,10 +968,6 @@ void GCTAEventList::init_members(void)
     m_mc_ids.clear();
     m_mc_id_names.clear();
 
-    // Initialise cache
-    m_irf_names.clear();
-    m_irf_values.clear();
-
     // Set CTA time reference for GTIs
     m_gti.reference(GTimeReference(G_CTA_MJDREF, "s", "TT", "LOCAL"));
 
@@ -1017,10 +996,6 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
     m_has_mc_id   = list.m_has_mc_id;
     m_mc_ids      = list.m_mc_ids;
     m_mc_id_names = list.m_mc_id_names;
-
-    // Copy cache
-    m_irf_names  = list.m_irf_names;
-    m_irf_values = list.m_irf_values;
 
     // Copy GTIs
     m_gti = list.m_gti;
@@ -1541,108 +1516,6 @@ void GCTAEventList::write_mc_ids(GFitsHDU& hdu) const
         } // endfor: looped over Monte Carlo identifiers
 
     } // endif: there were Monte Carlo identifiers
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Initialize IRF cache for a given model
- *
- * @param[in] name Model name.
- * @return Cache index (-1 if invalid).
- ***************************************************************************/
-int GCTAEventList::irf_cache_init(const std::string& name) const
-{
-    // Initialise cache index
-    int index = irf_cache_index(name);
-
-    // Continue only if model does not yet exist
-    if (index == -1) {
-
-        // Add model name and vector to cache. The vector is initialized
-        // to -1, which signals that no cache values exist
-        m_irf_names.push_back(name);
-        m_irf_values.push_back(std::vector<double>(size(), -1.0));
-
-        // Set index
-        index = m_irf_names.size()-1;
-
-    } // endif: model cache did not yet exist
-
-    // Return index
-    return index;
-}
-
-
-/***********************************************************************//**
- * @brief Determines the cache index for a given model name
- *
- * @param[in] name Model name.
- * @return Cache index (-1 if model has not been found).
- ***************************************************************************/
-int GCTAEventList::irf_cache_index(const std::string& name) const
-{
-    // Initialise index
-    int index = -1;
-
-    // Continue only if there are models in cache
-    if (!m_irf_names.empty()) {
-
-         // Search for model name
-         for (int i = 0; i < m_irf_names.size(); ++i) {
-             if (m_irf_names[i] == name) {
-                 index = i;
-                 break;
-             }
-         }
-
-    } // endif: there were models in cache
-
-    // Return index
-    return index;
-}
-
-
-/***********************************************************************//**
- * @brief Get cache IRF value
- *
- * @param[in] name Model name.
- * @param[in] index Event index [0,...,size()-1].
- * @return IRF value (-1 if no cache value found).
- ***************************************************************************/
-double GCTAEventList::irf_cache(const std::string& name, const int& index) const
-{
-    // Initialise IRF value to invalid value
-    double irf = -1.0;
-
-    // Get cache index. Continue only if index is valid
-    int icache = irf_cache_index(name);
-    if (icache != -1) {
-        irf = (m_irf_values[icache])[index];
-    }
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Set cache IRF value
- *
- * @param[in] name Model name.
- * @param[in] index Event index [0,...,size()-1].
- * @param[in] irf IRF value.
- ***************************************************************************/
-void GCTAEventList::irf_cache(const std::string& name, const int& index,
-                              const double& irf) const
-{
-    // Initialize cache index. Continue only if index is valid
-    int icache = irf_cache_init(name);
-    if (icache != -1) {
-        (m_irf_values[icache])[index] = irf;
-    }
 
     // Return
     return;

@@ -67,11 +67,6 @@ public:
                              const std::string& gtiname) const;
     void               fetch(void) const;
     void               dispose(void) const;
-    double             irf_cache(const std::string& name,
-                                 const int& index) const;
-    void               irf_cache(const std::string& name,
-                                 const int& index,
-                                 const double& irf) const;
     const GPhases&     phases(void) const;
     void               phases(const GPhases& phases);
     const std::string& gtiname(void) const;
