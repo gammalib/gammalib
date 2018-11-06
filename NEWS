@@ -14,6 +14,7 @@ made since the last release of GammaLib.
 The following classes have been added:
 - GModelSpectralExponential
 - GWcsARC
+- GCTAResponseCache
 - GCTAModelBackground
 - GCTAModelSpatial
 - GCTAModelSpatialMultiplicative
@@ -310,6 +311,9 @@ None
 
 20. CTA interface
 -----------------
+The GCTAResponseCache class was added to implement a general response cache for
+CTA (#2715).
+
 GCTABackground3D::init_mc_cache now pre-computes the Monte Carlo cache at energy
 nodes of the background cube, and in addition, inserts 8 logarithmically spaced
 nodes between each pair of nodes. This assures that the energy variations of the

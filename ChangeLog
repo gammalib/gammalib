@@ -1,8 +1,9 @@
-2018-11-01
+2018-11-06
 
         * Version 1.6.0 released
         ========================
 
+        Add generic CTA response cache (#2715)
         Fix precision issue with GCTABackground3D Monte-Carlo simulations (#2708)
         Revise GCTAEdisp class interface (#2704) 
         GCTAEdisp returns now energy dispersion values per MeV (#2704) 

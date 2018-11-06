@@ -47,6 +47,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2715 <https://cta-redmine.irap.omp.eu/issues/2715>`_] -
+  Add generic CTA response cache
 * [`2704 <https://cta-redmine.irap.omp.eu/issues/2704>`_] -
   ``GCTAEdisp`` returns now energy dispersion values per MeV.
   The ``GCTAEdisp`` interface was revised.

@@ -1409,6 +1409,119 @@ void TestGCTAResponse::test_response_edispcube(void)
 
 
 /***********************************************************************//**
+ * @brief Test response cache handling
+ ***************************************************************************/
+void TestGCTAResponse::test_response_cache(void)
+{
+    // Set some energies
+    const GEnergy eng1(1.0, "TeV");
+    const GEnergy eng2(2.0, "TeV");
+    const GEnergy eng3(3.0, "TeV");
+
+    // Initialise results
+    double value = 0.0;
+    bool   flag  = false;
+
+    // Test empty response cache
+    GCTAResponseCache cache1;
+    test_assert(cache1.is_empty(), "Test is_empty() method for empty cache");
+	test_value(cache1.size(), 0, "Test size() method for empty cache");
+	test_value(cache1.nerecos(), 0, "Test nerecos() method for empty cache");
+	test_value(cache1.netrues(), 0, "Test netrues() method for empty cache");
+    flag = cache1.contains("Crab", eng1, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for empty cache");
+
+    // Test filled response cube (one model, two ereco=etrue)
+    GCTAResponseCache cache2;
+    cache2.set("Crab", eng1, eng1, 1.0);
+    cache2.set("Crab", eng2, eng2, 2.0);
+    test_assert(!cache2.is_empty(), "Test is_empty() method for filled cache");
+	test_value(cache2.size(), 2, "Test size() method for filled cache");
+	test_value(cache2.nerecos(), 2, "Test nerecos() method for filled cache");
+	test_value(cache2.netrues(), 2, "Test netrues() method for filled cache");
+    flag = cache2.contains("Crab", eng1, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 1.0, "Test contains() method value for filled cache");
+    flag = cache2.contains("Crab", eng2, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 2.0, "Test contains() method value for filled cache");
+    flag = cache2.contains("Crab", eng2, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing true energy");
+    flag = cache2.contains("Crab", eng1, eng2, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing reco. energy");
+    flag = cache2.contains("Vela", eng2, eng2, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing name");
+
+    // Test clearing of cache
+    cache2.clear();
+    test_assert(cache2.is_empty(), "Test is_empty() method for cleared cache");
+	test_value(cache2.size(), 0, "Test size() method for cleared cache");
+	test_value(cache2.nerecos(), 0, "Test nerecos() method for cleared cache");
+	test_value(cache2.netrues(), 0, "Test netrues() method for cleared cache");
+    flag = cache2.contains("Crab", eng1, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for cleared cache");
+
+    // Test filled response cube (two models, two ereco, two etrue per ereco)
+    GCTAResponseCache cache3;
+    cache3.set("Crab", eng1, eng1, 1.0);
+    cache3.set("Crab", eng1, eng2, 2.0);
+    cache3.set("Crab", eng2, eng1, 3.0);
+    cache3.set("Crab", eng2, eng2, 4.0);
+    cache3.set("Vela", eng1, eng1, 10.0);
+    cache3.set("Vela", eng1, eng2, 11.0);
+    cache3.set("Vela", eng2, eng1, 12.0);
+    cache3.set("Vela", eng2, eng2, 13.0);
+    test_assert(!cache3.is_empty(), "Test is_empty() method for filled cache");
+	test_value(cache3.size(), 8, "Test size() method for filled cache");
+	test_value(cache3.nerecos(), 4, "Test nerecos() method for filled cache");
+	test_value(cache3.netrues(), 8, "Test netrues() method for filled cache");
+
+    // Test Crab cache
+    flag = cache3.contains("Crab", eng1, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 1.0, "Test contains() method value for filled cache");
+    flag = cache3.contains("Crab", eng1, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 2.0, "Test contains() method value for filled cache");
+    flag = cache3.contains("Crab", eng2, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 3.0, "Test contains() method value for filled cache");
+    flag = cache3.contains("Crab", eng2, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 4.0, "Test contains() method value for filled cache");
+    flag = cache3.contains("Crab", eng3, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing true energy");
+    flag = cache3.contains("Crab", eng1, eng3, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing reco. energy");
+
+    // Test Vela cache
+    flag = cache3.contains("Vela", eng1, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 10.0, "Test contains() method value for filled cache");
+    flag = cache3.contains("Vela", eng1, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 11.0, "Test contains() method value for filled cache");
+    flag = cache3.contains("Vela", eng2, eng1, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 12.0, "Test contains() method value for filled cache");
+    flag = cache3.contains("Vela", eng2, eng2, &value);
+    test_assert(flag, "Test contains() method flag for filled cache");
+	test_value(value, 13.0, "Test contains() method value for filled cache");
+    flag = cache3.contains("Vela", eng3, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing true energy");
+    flag = cache3.contains("Vela", eng1, eng3, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing reco. energy");
+
+    // Test non-existing name
+    flag = cache3.contains("Orion", eng1, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for non-existing name");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Utility function for energy dispersion tests
  *
  * @param[in] rsp Response.

@@ -47,6 +47,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAResponseCube.cpp \
           src/GCTAResponse_helpers.cpp \
           src/GCTAResponseTable.cpp \
+          src/GCTAResponseCache.cpp \
           src/GCTAAeff.cpp \
           src/GCTAAeffPerfTable.cpp \
           src/GCTAAeffArf.cpp \
@@ -105,6 +106,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAResponseIrf.hpp \
                      include/GCTAResponseCube.hpp \
                      include/GCTAResponseTable.hpp \
+                     include/GCTAResponseCache.hpp \
                      include/GCTAAeff.hpp \
                      include/GCTAAeffPerfTable.hpp \
                      include/GCTAAeffArf.hpp \

@@ -281,6 +281,7 @@
 %include "GCTAResponseIrf.i"
 %include "GCTAResponseCube.i"
 %include "GCTAResponseTable.i"
+%include "GCTAResponseCache.i"
 %include "GCTAAeff.i"
 %include "GCTAAeffPerfTable.i"
 %include "GCTAAeffArf.i"
@@ -316,4 +317,3 @@
 %include "GCTAModelRadialPolynom.i"
 %include "GCTAModelRadialProfile.i"
 %include "GCTAModelRadialAcceptance.i"
-

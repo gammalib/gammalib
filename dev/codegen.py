@@ -225,7 +225,7 @@ def set_container_tokens(classname, author, what, object):
 
     # Set tokens
     tokens = [{'pattern': 'GTPLContainer', 'string': classname},
-              {'pattern': 'GTPLContainer', 'string': classname.upper()},
+              {'pattern': 'GTPLCONTAINER', 'string': classname.upper()},
               {'pattern': '[WHAT]', 'string': what},
               {'pattern': '[AUTHOR]', 'string': author},
               {'pattern': 'TPL_CONTAINER', 'string': object.lower()},

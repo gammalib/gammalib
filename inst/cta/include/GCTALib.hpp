@@ -48,6 +48,7 @@
 #include "GCTAResponseIrf.hpp"
 #include "GCTAResponseCube.hpp"
 #include "GCTAResponseTable.hpp"
+#include "GCTAResponseCache.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAAeffPerfTable.hpp"
 #include "GCTAAeffArf.hpp"

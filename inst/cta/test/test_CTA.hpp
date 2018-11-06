@@ -90,6 +90,7 @@ public:
     void                      test_response_psfcube(void);
     void                      test_response_bkgcube(void);
     void                      test_response_edispcube(void);
+    void                      test_response_cache(void);
 
     // Utility methods
     void test_response_edisp_integration(const GCTAResponseIrf& rsp,
