@@ -1199,6 +1199,9 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
  * @return Instrument response to radial source.
  *
  * Returns the instrument response to a specified radial source.
+ *
+ * @todo Correct assumptions in exposure computation, PSF computation and
+ *       energy dispersion computation.
  ***************************************************************************/
 double GCTAResponseCube::irf_radial(const GEvent&       event,
                                     const GSource&      source,
@@ -1249,7 +1252,7 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
         // true event direction does not vary significantly. In other words,
         // the code assumes that the exposure is constant over the size of
         // the PSF.
-        irf = exposure()(obsDir, obsEng);
+        irf = exposure()(obsDir, srcEng);
 
         // Continue only if exposure is positive
         if (irf > 0.0) {
@@ -1258,7 +1261,7 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
             irf /= livetime;
 
             // Get PSF component
-            irf *= psf_radial(model, rho_obs, obsDir, obsEng, obsTime);
+            irf *= psf_radial(model, rho_obs, obsDir, srcEng, obsTime);
 
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
@@ -1304,6 +1307,9 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
  * @return Instrument response to elliptical source.
  *
  * Returns the instrument response to a specified elliptical source.
+ *
+ * @todo Correct assumptions in exposure computation, PSF computation and
+ *       energy dispersion computation.
  ***************************************************************************/
 double GCTAResponseCube::irf_elliptical(const GEvent&       event,
                                         const GSource&      source,
@@ -1354,7 +1360,7 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
         // true event direction does not vary significantly. In other words,
         // the code assumes that the exposure is constant over the size of
         // the PSF.
-        irf = exposure()(obsDir, obsEng);
+        irf = exposure()(obsDir, srcEng);
 
         // Continue only if exposure is positive
         if (irf > 0.0) {
@@ -1363,7 +1369,7 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
             irf /= livetime;
 
             // Get PSF component
-            irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, obsEng, obsTime);
+            irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, srcEng, obsTime);
 
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
