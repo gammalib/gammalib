@@ -1657,7 +1657,7 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
             result.append("\n"+m_irf_cache.print(reduced_chatter));
             result.append("\n"+m_nroi_cache.print(reduced_chatter));
 
-        }
+        } // endif: appended detailed information
 
     } // endif: chatter was not silent
 

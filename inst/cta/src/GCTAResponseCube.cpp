@@ -592,19 +592,30 @@ std::string GCTAResponseCube::print(const GChatter& chatter) const
             }
         }
 
-        // Append exposure cube information
-        result.append("\n"+m_exposure.print(chatter));
+        // Get reduced chatter level
+        GChatter reduced_chatter = gammalib::reduce(chatter);
 
-        // Append point spread function information
-        result.append("\n"+m_psf.print(chatter));
+        // Append detailed information
+        if (chatter >= NORMAL) {
 
-        // Optionally append energy dispersion information
-        if (m_has_edisp) {
-			result.append("\n"+m_edisp.print(chatter));
-        }
+            // Append exposure cube information
+            result.append("\n"+m_exposure.print(reduced_chatter));
 
-        // Append background information
-        result.append("\n"+m_background.print(chatter));
+            // Append point spread function information
+            result.append("\n"+m_psf.print(reduced_chatter));
+
+            // Optionally append energy dispersion information
+            if (m_has_edisp) {
+                result.append("\n"+m_edisp.print(reduced_chatter));
+            }
+
+            // Append background information
+            result.append("\n"+m_background.print(reduced_chatter));
+
+            // Append cache information
+            result.append("\n"+m_irf_cache.print(reduced_chatter));
+
+        } // endif: appended detailed information
 
     } // endif: chatter was not silent
 
