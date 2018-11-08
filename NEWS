@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-6 November 2018
+8 November 2018
 
 
 1. Introduction
@@ -151,11 +151,11 @@ The arguments for the following methods have been changed:
 - GCTAModelRadial::mc(GRan&)
 - GCTAEdisp::operator(GEnergy&, GEnergy&, double&, double&, double&, double&)
 - GCTAEdisp::mc(GRan&, GEnergy&, double&, double&, double&, double&)
+- GCTACubeEdisp::operator()(GEnergy&, GEnergy&, GSkyDir&)
 - GCTAResponseIrf::edisp(GEnergy&, GEnergy&, double&, double&, double&, double&)
 - GLATAeff(GFits&, std::string&)
 - GLATEdisp(GFits&, std::string&)
 - GLATPsf(GFits&, std::string&)
-
 
 The return value of the following methods has been changed:
 - none
@@ -314,6 +314,10 @@ None
 
 20. CTA interface
 -----------------
+The arguments of the GCTACubeEdisp::operator() were changed from, passing
+now reconstructed and true energy objects, followed by a true sky direction.
+This is more consistent with the GCTAEdisp interface (#2721).
+
 Rename GCTAResponseIrf::lo_save_thres() and GCTAResponseIrf::hi_save_thres()
 to GCTAResponseIrf::lo_safe_thres() and GCTAResponseIrf::hi_safe_thres()
 (#2716).

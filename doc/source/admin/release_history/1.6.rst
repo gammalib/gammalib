@@ -47,6 +47,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2721 <https://cta-redmine.irap.omp.eu/issues/2721>`_] -
+  Revise ``GCTAEdispCube::operator()`` interface
 * [`2715 <https://cta-redmine.irap.omp.eu/issues/2715>`_] -
   Add generic CTA response cache
 * [`2704 <https://cta-redmine.irap.omp.eu/issues/2704>`_] -

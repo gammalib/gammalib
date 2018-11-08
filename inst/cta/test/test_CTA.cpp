@@ -1364,8 +1364,8 @@ void TestGCTAResponse::test_response_bkgcube(void)
  ***************************************************************************/
 void TestGCTAResponse::test_response_edispcube(void)
 {
-    // Test PSF cube constructors
-    test_try("CTA Edisp cube void constructor");
+    // Test energy dispersion cube constructors
+    test_try("CTA energy dispersion cube void constructor");
     try {
     	GCTACubeEdisp cube;
         test_try_success();
@@ -1373,7 +1373,7 @@ void TestGCTAResponse::test_response_edispcube(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-    test_try("CTA Edisp cube map constructor");
+    test_try("CTA energy dispersion cube map constructor");
     try {
         GEnergies     energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
         GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10,
@@ -1384,24 +1384,41 @@ void TestGCTAResponse::test_response_edispcube(void)
         test_try_failure(e);
     }
 
-    // Test set method
+    // Load IRF for energy dispersion computation
     GCTAObservation obs_cta;
     obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
-    GEnergies     energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-    GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10,
-                       energies, 2.0, 20);
-    cube.set(obs_cta);
-    cube.save("test_cta_edispcube_one.fits", true);
 
-    // Test fill method
+    // Initialise energy dispersion cube
+    GEnergies     energies(100, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10,
+                       energies, 3.0, 100);
+
+    // Test setting of observation
+    cube.set(obs_cta);
+
+    // Test energy dispersion integration
+    test_edispcube_integration(cube, 0.1, 10.0);
+
+    // Test filling of single observation
     GObservations obs;
     obs_cta.id("000001");
     obs.append(obs_cta);
+    cube.fill(obs);
+
+    // Test energy dispersion integration
+    test_edispcube_integration(cube, 0.1, 10.0);
+
+    // Test fill of two observations
     obs_cta.id("000002");
     obs.append(obs_cta);
     cube.fill(obs);
-    cube.save("test_cta_edispcube_two.fits", true);
+
+    // Test energy dispersion integration
+    test_edispcube_integration(cube, 0.1, 10.0);
+
+    // Test saving
+    cube.save("test_cta_edispcube.fits", true);
 
     // Return
     return;
@@ -1680,6 +1697,51 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp&   edisp,
         test_value(sum, 1.0, 0.001, "Energy dispersion integration using "+
                                     edisp.classname()+"::operator() for "+
                                     etrue.print());
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Utility function for energy dispersion cube integration tests
+ *
+ * @param[in] edisp Energy dispersion cube instance.
+ * @param[in] e_src_min Minimum true energy (TeV).
+ * @param[in] e_src_max Maximum true energy (TeV).
+ *
+ * Tests whether the energy dispersion cube integrated over observed
+ * energies gives unity.
+ ***************************************************************************/
+void TestGCTAResponse::test_edispcube_integration(const GCTACubeEdisp& edisp,
+                                                  const double&        e_src_min,
+                                                  const double&        e_src_max)
+{
+    // Set sky direction
+    GSkyDir dir;
+    dir.radec_deg(83.63, 22.01);
+
+    // Test energy dispersion cube integration
+    for (double e_src = e_src_min; e_src <= e_src_max; e_src *= 2.0) {
+
+        // Compute log10 of true energy
+        GEnergy etrue(e_src, "TeV");
+
+        // Perform numerical integration by summing
+        const int nE = 10000;
+        double emin  = 1000.0;            //!< 1 GeV
+        double emax  = 3.0 * etrue.MeV(); //!< Migra_max = 3.0
+        double dE    = (emax-emin)/nE;
+        double sum   = 0.0;
+        double E_obs = emin;
+        for (int i = 0; i < nE; ++i, E_obs += dE) {
+            GEnergy ereco(E_obs,"MeV");
+            double dp  = edisp(ereco, etrue, dir);
+            sum       += dp * dE;
+        }
+        test_value(sum, 1.0, 0.001, "Response cube energy dispersion integration "
+                                    " for "+etrue.print());
     }
 
     // Return

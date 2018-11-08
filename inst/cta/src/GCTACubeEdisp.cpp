@@ -323,23 +323,23 @@ GCTACubeEdisp& GCTACubeEdisp::operator=(const GCTACubeEdisp& cube)
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion (in units of MeV^-1)
+ * @brief Return energy dispersion in units of MeV\f$^{-1}\f$
  *
+ * @param[in] ereco Reconstructed event energy.
+ * @param[in] etrue True photon energy.
  * @param[in] dir Coordinate of the true photon position.
- * @param[in] migra Energy migration (reconstructed over true energy).
- * @param[in] srcEng True photon energy.
- * @return Energy dispersion (in units of MeV^-1)
+ * @return Energy dispersion (MeV\f$^{-1}\f$)
  *
  * Returns the energy dispersion for a given energy migration (reconstructed
  * over true energy), true photon energy, and sky direction in units of
- * MeV^-1.
+ * MeV\f$^{-1}\f$.
  ***************************************************************************/
-double GCTACubeEdisp::operator()(const GSkyDir& dir,
-                                 const double&  migra,
-                                 const GEnergy& srcEng) const
+double GCTACubeEdisp::operator()(const GEnergy& ereco,
+                                 const GEnergy& etrue,
+                                 const GSkyDir& dir) const
 {
     // Update indices and weighting factors for interpolation
-    update(migra, srcEng.log10TeV());
+    update(ereco, etrue);
 
     // Perform bi-linear interpolation
     double edisp = m_wgt1 * m_cube(dir, m_inx1) +
@@ -837,12 +837,21 @@ void GCTACubeEdisp::clear_cube(void)
 /***********************************************************************//**
  * @brief Fill energy dispersion cube from observation container
  *
- * @param[in] obs Observation.
+ * @param[in] obs CTA observation.
  * @param[in] exposure Pointer towards exposure map.
  * @param[in] log Pointer towards logger.
  *
  * @exception GException::invalid_value
  *            No RoI or response found in CTA observation.
+ *
+ * Fills the energy dispersion cube from the observation container.
+ *
+ * If the @p exposure argument is not NULL, the energy dispersion is weighted
+ * by the exposure, and the exposure weighting is added to the exposure map.
+ *
+ * If the @p log argument is not NULL, the method puts information about
+ * exclusion and inclusion of a CTA observation into the energy dispersion
+ * cube.
  ***************************************************************************/
 void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                               GSkyMap*               exposure,
@@ -965,12 +974,14 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                     // Get log10 of true energy in TeV
                     double logEsrc = m_energies[iebin].log10TeV();
 
-                    // Compute exposure weight
-                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
-                                    obs.livetime();
-
-                    // If available, accumulate weights
+                    // Compute exposure weight. If no exposure map is
+                    // specified, the weight is one. Otherwise, the weight
+                    // is the effective area for this offset angle and
+                    // source energy times the livetime of the observation.
+                    double weight = 1.0;
                     if (exposure != NULL) {
+                        weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
+                                 obs.livetime();
                         (*exposure)(pixel, iebin) += weight;
                     }
 
@@ -985,9 +996,8 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                             continue;
                         }
 
-                        // Compute log10 of reconstructed energy in TeV
-                        double  logEobs = std::log10(migra) + logEsrc;
-                        GEnergy Eobs(std::pow(10.0, logEobs), "TeV");
+                        // Compute reconstructed energy
+                        GEnergy Eobs = migra * m_energies[iebin];
 
                         // Set map index
                         int imap = offset(imigra, iebin);
@@ -1016,19 +1026,22 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
 /***********************************************************************//**
  * @brief Update energy dispersion cube indices and weights cache
  *
- * @param[in] migra Reconstructed over true energy.
- * @param[in] logEsrc Log10 of true photon energy in TeV. 
+ * @param[in] ereco Reconstructed event energy.
+ * @param[in] etrue True photon energy.
  *
  * Updates the energy dispersion cube indices, stored in the members m_inx1,
  * m_inx2, m_inx3, and m_inx4, and weights cache, stored in m_wgt1, m_wgt2,
  * m_wgt3, and m_wgt4.
  ***************************************************************************/
-void GCTACubeEdisp::update(const double& migra, const double& logEsrc) const
+void GCTACubeEdisp::update(const GEnergy& ereco, const GEnergy& etrue) const
 {
     // Set node array for energy interpolation
-    m_elogmeans.set_value(logEsrc);
+    m_elogmeans.set_value(etrue.log10TeV());
 
-    // Set node array for delta interpolation
+    // Compute migration value
+    double migra = ereco/etrue;
+
+    // Set node array for migra interpolation
     m_migras.set_value(migra);
 
     // Set indices for bi-linear interpolation

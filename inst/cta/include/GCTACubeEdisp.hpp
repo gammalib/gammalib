@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTACubeEdisp.hpp - CTA cube analysis energy dispersion class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Michael Mayer                               *
+ *  copyright (C) 2016-2018 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,9 +84,9 @@ public:
 
     // Operators
     GCTACubeEdisp& operator=(const GCTACubeEdisp& cube);
-    double         operator()(const GSkyDir& dir,
-                              const double&  migra,
-                              const GEnergy& energy) const;
+    double         operator()(const GEnergy& ereco,
+                              const GEnergy& etrue,
+                              const GSkyDir& dir) const;
 
     // Methods
     void              clear(void);
@@ -116,7 +116,7 @@ protected:
     void clear_cube(void);
     void fill_cube(const GCTAObservation& obs, GSkyMap* exposure = NULL,
                    GLog* log = NULL);
-    void update(const double& migra, const double& logEsrc) const;
+    void update(const GEnergy& ereco, const GEnergy& etrue) const;
     void set_eng_axis(void);
     void compute_ebounds(void) const;
 

@@ -99,6 +99,9 @@ public:
     void test_edisp_integration(const GCTAEdisp&   edisp,
                                 const double&      e_src_min = 0.1,
                                 const double&      e_src_max = 10.0);
+    void test_edispcube_integration(const GCTACubeEdisp& edisp,
+                                    const double&        e_src_min = 0.1,
+                                    const double&        e_src_max = 10.0);
 };
 
 

@@ -64,9 +64,9 @@ public:
     virtual ~GCTACubeEdisp(void);
 
     // Interpolation operator
-    double operator()(const GSkyDir& dir, 
-                      const double&  migra,
-				      const GEnergy& energy) const;
+    double operator()(const GEnergy& ereco,
+                      const GEnergy& etrue,
+                      const GSkyDir& dir) const;
 
     // Methods
     void              clear(void);

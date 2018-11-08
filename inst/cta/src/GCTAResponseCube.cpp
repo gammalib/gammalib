@@ -354,14 +354,8 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
-
-                // Determine fraction of reconstructed and true energy
-                double migra = obsEng.TeV() / srcEng.TeV();
-
-				// Multiply-in energy dispersion
-				irf *= edisp()(srcDir, migra, srcEng);
-
-            } // endif: energy dispersion was available and psf was non-zero
+				irf *= edisp()(obsEng, srcEng, srcDir);
+            }
 
             // Divide by livetime
             irf /= livetime;
@@ -1135,9 +1129,6 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     // direction in radians
     double delta = bin->dir().dir().dist(srcDir);
 
-    // Determine fraction of reconstructed and true energy
-    double migra = bin->energy().TeV() / srcEng.TeV();
-
     // Get maximum angular separation for PSF (in radians)
     double delta_max = psf().delta_max();
 
@@ -1162,11 +1153,8 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
 
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
-
-                // Multiply-in energy dispersion
-                irf *= edisp()(srcDir, migra, srcEng);
-
-            } // endif: energy dispersion was available and psf was non-zero
+                irf *= edisp()(bin->energy(), srcEng, srcDir);
+            }
 
             // Apply deadtime correction
             irf *= exposure().deadc();
@@ -1236,9 +1224,6 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     // (radians)
     double rho_obs = model->dir().dist(obsDir);
 
-    // Determine fraction of reconstructed and true energy
-    double migra = bin->energy().TeV() / srcEng.TeV();
-
     // Get livetime (in seconds)
     double livetime = exposure().livetime();
 
@@ -1264,17 +1249,14 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
             irf *= psf_radial(model, rho_obs, obsDir, srcEng, obsTime);
 
             // Multiply-in energy dispersion
+            //
+            // The current code assumes that the energy dispersion at the
+            // observed and true event direction does not vary
+            // significantly. In other words, the code assumes that the
+            // energy dispersion is constant over the size of the PSF.
             if (use_edisp() && irf > 0.0) {
-
-                // Multiply-in energy dispersion
-                //
-                // The current code assumes that the energy dispersion at the
-                // observed and true event direction does not vary
-                // significantly. In other words, the code assumes that the
-                // energy dispersion is constant over the size of the PSF.
-                irf *= edisp()(obsDir, migra, srcEng);
-
-            } // endif: energy dispersion was available and psf was non-zero
+                irf *= edisp()(bin->energy(), srcEng, obsDir);
+            }
 
             // Apply deadtime correction
             irf *= exposure().deadc();
@@ -1344,9 +1326,6 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
     double rho_obs      = model->dir().dist(obsDir);
     double posangle_obs = model->dir().posang(obsDir);
 
-    // Determine fraction of reconstructed and true energy
-    double migra = bin->energy().TeV() / srcEng.TeV();
-
     // Get livetime (in seconds)
     double livetime = exposure().livetime();
 
@@ -1372,23 +1351,20 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
             irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, srcEng, obsTime);
 
             // Multiply-in energy dispersion
+            //
+            // The current code assumes that the energy dispersion at the
+            // observed and true event direction does not vary
+            // significantly. In other words, the code assumes that the
+            // energy dispersion is constant over the size of the PSF.
             if (use_edisp() && irf > 0.0) {
-
-                // Multiply-in energy dispersion
-                //
-                // The current code assumes that the energy dispersion at the
-                // observed and true event direction does not vary
-                // significantly. In other words, the code assumes that the
-                // energy dispersion is constant over the size of the PSF.
-                irf *= edisp()(obsDir, migra, srcEng);
-
-            } // endif: energy dispersion was available and psf was non-zero
+                irf *= edisp()(bin->energy(), srcEng, obsDir);
+            }
 
             // Apply deadtime correction
             irf *= exposure().deadc();
 
         } // endif: exposure was positive
-        
+
     } // endif: we were sufficiently close and livetime >0
 
     // Compile option: Check for NaN/Inf
@@ -1471,8 +1447,7 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     if (use_edisp()) {
     	irf = cache->irf(bin->ipix(), source.energy());
 		if (irf > 0.0) {
-			irf *= edisp()(bin->dir().dir(), bin->energy()/source.energy(),
-                           source.energy());
+            irf *= edisp()(bin->energy(), source.energy(), bin->dir().dir());
 		}
     }
 

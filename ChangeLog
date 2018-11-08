@@ -1,8 +1,9 @@
-2018-11-06
+2018-11-08
 
         * Version 1.6.0 released
         ========================
 
+        Revise GCTAEdispCube::operator() interface (#2721)
         Rename GCTAResponseIrf::lo_save_thres() and GCTAResponseIrf::hi_save_thres()
           to GCTAResponseIrf::lo_safe_thres() and GCTAResponseIrf::hi_safe_thres()
           (#2716)
