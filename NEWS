@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-8 November 2018
+9 November 2018
 
 
 1. Introduction
@@ -316,7 +316,11 @@ None
 -----------------
 The arguments of the GCTACubeEdisp::operator() were changed from, passing
 now reconstructed and true energy objects, followed by a true sky direction.
-This is more consistent with the GCTAEdisp interface (#2721).
+This is more consistent with the GCTAEdisp interface. The stacked response
+is no longer cut in true energy. Before the information outside the
+reconstructed energy bounds were reset to zero due to spill over effects,
+but this lead a big bias in the H.E.S.S. analysis where energy dispersion is
+important. The cutting was therefore disabled (#2721).
 
 Rename GCTAResponseIrf::lo_save_thres() and GCTAResponseIrf::hi_save_thres()
 to GCTAResponseIrf::lo_safe_thres() and GCTAResponseIrf::hi_safe_thres()

@@ -118,6 +118,7 @@ protected:
                    GLog* log = NULL);
     void update(const GEnergy& ereco, const GEnergy& etrue) const;
     void set_eng_axis(void);
+    void set_migras(const double& mmax, const int& nmbins);
     void compute_ebounds(void) const;
 
     // Members

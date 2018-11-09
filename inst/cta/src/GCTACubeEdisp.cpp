@@ -54,6 +54,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_CLIP_ETRUES         //!< Clip true energies to reconstructed ones
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -128,7 +129,7 @@ GCTACubeEdisp::GCTACubeEdisp(const GFilename& filename)
  * @brief Event cube constructor
  *
  * @param[in] cube Event cube.
- * @param[in] mmax Maximum energy migration (degrees, >0.0).
+ * @param[in] mmax Maximum energy migration.
  * @param[in] nmbins Number of migration bins (2 ...).
  *
  * @exception GException::invalid_argument
@@ -164,13 +165,8 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
     // Set energy node array used for interpolation
     set_eng_axis();
 
-    // Set the migration nodes
-    m_migras.clear();
-    double binsize = mmax / double(nmbins);
-    for (int i = 0; i < nmbins; ++i) {
-        double migra = binsize * (double(i) + 0.5); // avoid central singularity
-        m_migras.append(migra);
-    }
+    // Set migration axis used for interpolation
+    set_migras(mmax, nmbins);
 
     // Compute number of sky maps
     int nmaps = m_energies.size() * m_migras.size();
@@ -205,7 +201,7 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
  * @param[in] nx       Number of pixels in x direction.
  * @param[in] ny       Number of pixels in y direction.
  * @param[in] energies True energies.
- * @param[in] mmax     Maximum energy migration (degrees, >0.0).
+ * @param[in] mmax     Maximum energy migration.
  * @param[in] nmbins   Number of migration bins (2 ...).
  *
  * @exception GException::invalid_argument
@@ -250,13 +246,8 @@ GCTACubeEdisp::GCTACubeEdisp(const std::string&   wcs,
     // Set energy node array used for interpolation
     set_eng_axis();
 
-    // Set migration node array
-    m_migras.clear();
-    double binsize = mmax / double(nmbins);
-    for (int i = 0; i < nmbins; ++i) {
-        double migra = binsize * (double(i) + 0.5); // avoid central singularity
-        m_migras.append(migra);
-    }
+    // Set migration axis used for interpolation
+    set_migras(mmax, nmbins);
 
     // Compute number of sky maps
     int nmaps = m_energies.size() * m_migras.size();
@@ -965,11 +956,13 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                     // we can really do.
                     // We allow here for a small margin in case of rounding
                     // errors in the energy boundaries.
+                    #if defined(G_CLIP_ETRUES)
                     if (!(obs_ebounds.contains(m_energies[iebin])        ||
                           obs_ebounds.contains(m_energies[iebin]-margin) ||
                           obs_ebounds.contains(m_energies[iebin]+margin))) {
                         continue;
                     }
+                    #endif
 
                     // Get log10 of true energy in TeV
                     double logEsrc = m_energies[iebin].log10TeV();
@@ -985,7 +978,7 @@ void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
                         (*exposure)(pixel, iebin) += weight;
                     }
 
-                    // Loop over delta values
+                    // Loop over migration values
                     for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
 
                         // Compute energy migration fraction
@@ -1080,23 +1073,45 @@ void GCTACubeEdisp::set_eng_axis(void)
 
 
 /***********************************************************************//**
+ * @brief Set nodes for interpolation in migration
+ *
+ * @param[in] mmax Maximum energy migration (>0).
+ * @param[in] nmbins Number of migration bins (2 ...).
+ *
+ * Sets the nodes for interpolation in migration. None of the nodes will
+ * have a value of zero unless mmax is zero.
+ ***************************************************************************/
+void GCTACubeEdisp::set_migras(const double& mmax, const int& nmbins)
+{
+    // Clear migration axis
+    m_migras.clear();
+
+    // Set the migration nodes
+    double binsize = mmax / double(nmbins);
+    for (int i = 0; i < nmbins; ++i) {
+        double migra = binsize * double(i+1); // avoid central singularity
+        m_migras.append(migra);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Compute true energy boundary vector
  *
  * Computes for all energies of the energy dispersion cube the boundaries in
- * true energy that encompass non-negligible migration matrix elements.
- * Values >= 1.0e-12 are considered as non-negligible. In case that no matrix
- * elements are found for a given energy, the interval of true energies will
- * be set to [1 TeV, 1 TeV] (i.e. an empty interval).
+ * true energy that encompass non-zero migration matrix elements. In case
+ * that no matrix elements are found for a given energy, the interval of true
+ * energies will be set to [0,0] (i.e. an empty interval).
  ***************************************************************************/
 void GCTACubeEdisp::compute_ebounds() const
 {
-    // Set epsilon
-    const double eps = 1.0e-12;
-
     // Clear energy boundary vector
     m_ebounds.clear();
 
-    // Loop over all energies
+    // Loop over all reconstructed energies
     for (int i = 0; i < m_energies.size(); i++) {
 
         // Initialise results
@@ -1121,8 +1136,8 @@ void GCTACubeEdisp::compute_ebounds() const
                 }
             }
 
-            // Find first non-negligible energy dispersion term
-            if (edisp >= eps) {
+            // Find first non-zero energy dispersion term
+            if (edisp > 0.0) {
                 minFound  = true;
                 migra_min = m_migras[imap - mapmin];
                 break;
@@ -1142,8 +1157,8 @@ void GCTACubeEdisp::compute_ebounds() const
                 }
             }
 
-            // Find first non-negligible energy dispersion term
-            if (edisp >= eps) {
+            // Find first non-zero energy dispersion term
+            if (edisp > 0.0) {
                 maxFound  = true;
                 migra_max = m_migras[imap - mapmin];
                 break;
@@ -1165,14 +1180,14 @@ void GCTACubeEdisp::compute_ebounds() const
 
         // ... otherwise we set the interval to a zero interval for safety
         else {
-            emin.log10TeV(0.0);
-            emax.log10TeV(0.0);
+            emin.clear();
+            emax.clear();
         }
 
         // Append energy boundaries
         m_ebounds.push_back(GEbounds(emin, emax));
 
-    } // endfor: looped over all energies
+    } // endfor: looped over all reconstruced energies
 
     // Return
     return;

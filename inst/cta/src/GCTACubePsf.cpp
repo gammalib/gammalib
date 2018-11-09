@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTACubePsf.cpp - CTA cube analysis point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2017 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2018 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_CLIP_ETRUES         //!< Clip true energies to reconstructed ones
 #define G_SMOOTH_PSF                        //!< Guarantee no singularities
 #define G_QUADRATIC_BINNING                //!< Use quadratic delta spacing
 
@@ -864,21 +865,25 @@ void GCTACubePsf::fill_cube(const GCTAObservation& obs,
                     // approximation, but probably the only we can really do.
                     // We allow here for a small margin in case of rounding
                     // errors in the energy boundaries.
+                    #if defined(G_CLIP_ETRUES)
                     if (!(obs_ebounds.contains(m_energies[iebin])        ||
                           obs_ebounds.contains(m_energies[iebin]-margin) ||
                           obs_ebounds.contains(m_energies[iebin]+margin))) {
                         continue;
                     }
+                    #endif
 
                     // Get logE/TeV
                     double logE = m_energies[iebin].log10TeV();
 
-                    // Compute exposure weight
-                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                    obs.livetime();
-
-                    // If available, accumulate weights
+                    // Compute exposure weight. If no exposure map is
+                    // specified, the weight is one. Otherwise, the weight
+                    // is the effective area for this offset angle and
+                    // source energy times the livetime of the observation.
+                    double weight = 1.0;
                     if (exposure != NULL) {
+                        weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                 obs.livetime();
                         (*exposure)(pixel, iebin) += weight;
                     }
 

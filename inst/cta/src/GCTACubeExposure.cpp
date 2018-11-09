@@ -41,6 +41,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_CLIP_ETRUES         //!< Clip true energies to reconstructed ones
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -734,11 +735,13 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
                     // approximation, but probably the only we can really do.
                     // We allow here for a small margin in case of rounding
                     // errors in the energy boundaries.
+                    #if defined(G_CLIP_ETRUES)
                     if (!(obs_ebounds.contains(m_energies[iebin])        ||
                           obs_ebounds.contains(m_energies[iebin]-margin) ||
                           obs_ebounds.contains(m_energies[iebin]+margin))) {
                         continue;
                     }
+                    #endif
 
                     // Get logE/TeV
                     double logE = m_energies[iebin].log10TeV();
