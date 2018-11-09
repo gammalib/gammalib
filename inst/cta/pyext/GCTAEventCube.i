@@ -60,6 +60,8 @@ public:
     virtual int            number(void) const;
 
     // Other methods
+    const GTime&           time(void) const;
+    const GEnergy&         energy(const int& index) const;
     void                   counts(const GSkyMap& counts);
     const GSkyMap&         counts(void) const;
     void                   weights(const GSkyMap& weights);
