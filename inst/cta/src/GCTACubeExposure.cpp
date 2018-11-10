@@ -41,7 +41,6 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-//#define G_CLIP_ETRUES         //!< Clip true energies to reconstructed ones
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -639,9 +638,6 @@ void GCTACubeExposure::free_members(void)
  ***************************************************************************/
 void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
 {
-    // Set energy margin
-    static const GEnergy margin(1.0, "MeV");
-
     // Only continue if we have an event list
     if (obs.eventtype() == "EventList") {
 
@@ -727,21 +723,6 @@ void GCTACubeExposure::fill_cube(const GCTAObservation& obs, GLog* log)
 
                 // Loop over all exposure cube energies
                 for (int iebin = 0; iebin < m_energies.size(); ++iebin){
-
-                    // Skip exposure cube energy if the energy is outside the
-                    // observation energy. The exposure cube energies are true
-                    // energies while the observation energy boundaries are
-                    // reconstructed energies, hence this is only an
-                    // approximation, but probably the only we can really do.
-                    // We allow here for a small margin in case of rounding
-                    // errors in the energy boundaries.
-                    #if defined(G_CLIP_ETRUES)
-                    if (!(obs_ebounds.contains(m_energies[iebin])        ||
-                          obs_ebounds.contains(m_energies[iebin]-margin) ||
-                          obs_ebounds.contains(m_energies[iebin]+margin))) {
-                        continue;
-                    }
-                    #endif
 
                     // Get logE/TeV
                     double logE = m_energies[iebin].log10TeV();
