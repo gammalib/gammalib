@@ -579,6 +579,12 @@ void GCTAEventCube::counts(const GSkyMap& counts)
     // Compute sky directions
     set_directions();
 
+    // If event cube has pointing then set DETX and DETY coordinates of
+    // instrument direction
+    if (m_has_pnt) {
+        set_detxy(m_pnt);
+    }
+
     // Set all weights to unity
     m_weights = m_map;
     m_weights = 1.0;
@@ -649,6 +655,15 @@ std::string GCTAEventCube::print(const GChatter& chatter) const
         else {
             result.append("not defined");
         }
+
+        // Append pointing
+        result.append("\n"+gammalib::parformat("Pointing"));
+        if (m_has_pnt) {
+            result.append(m_pnt.dir().print());
+        }
+        else {
+            result.append("not defined");
+        }
     
         // Append energy intervals
         if (gammalib::reduce(chatter) > SILENT) {
@@ -700,6 +715,8 @@ void GCTAEventCube::init_members(void)
     m_weights.clear();
     m_bin.clear();
     m_time.clear();
+    m_pnt.clear();
+    m_has_pnt = false;
     m_dirs.clear();
     m_solidangle.clear();
     m_energies.clear();
@@ -735,6 +752,8 @@ void GCTAEventCube::copy_members(const GCTAEventCube& cube)
     m_map        = cube.m_map;
     m_weights    = cube.m_weights;
     m_time       = cube.m_time;
+    m_pnt        = cube.m_pnt;
+    m_has_pnt    = cube.m_has_pnt;
     m_dirs       = cube.m_dirs;
     m_solidangle = cube.m_solidangle;
     m_energies   = cube.m_energies;
@@ -785,12 +804,13 @@ void GCTAEventCube::read_cntmap(const GFitsImage& hdu)
         // Read pointing direction
         double ra_pnt  = hdu.real("RA_PNT");
         double dec_pnt = hdu.real("DEC_PNT");
-        GSkyDir dir_pnt;
-        dir_pnt.radec_deg(ra_pnt, dec_pnt);
-        GCTAPointing pnt(dir_pnt);
+        GSkyDir pnt;
+        pnt.radec_deg(ra_pnt, dec_pnt);
+        m_pnt.dir(pnt);
+        m_has_pnt = true;
 
         // Set DETX and DETY coordinates of instrument direction
-        set_detxy(pnt);
+        set_detxy(m_pnt);
 
     } // endif: header contained pointing direction
 

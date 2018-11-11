@@ -37,13 +37,13 @@
 #include "GGti.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsImage.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
-class GCTAPointing;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -123,6 +123,8 @@ protected:
     GSkyMap                  m_weights;    //!< Cube weights stored as sky map
     GCTAEventBin             m_bin;        //!< Actual event bin
     GTime                    m_time;       //!< Event cube mean time
+    GCTAPointing             m_pnt;        //!< Event cube pointing
+    bool                     m_has_pnt;    //!< Event cube has pointing
     std::vector<GCTAInstDir> m_dirs;       //!< Array of event directions
     std::vector<double>      m_solidangle; //!< Array of solid angles (sr)
     std::vector<GEnergy>     m_energies;   //!< Array of log mean energies
