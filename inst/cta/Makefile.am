@@ -70,8 +70,6 @@ sources = src/GCTASupport.cpp \
           src/GCTACubePsf.cpp \
           src/GCTACubeEdisp.cpp \
           src/GCTACubeSource.cpp \
-          src/GCTACubeSourcePoint.cpp \
-          src/GCTACubeSourceDiffuse.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
@@ -129,8 +127,6 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTACubeEdisp.hpp \
                      include/GCTACubeBackground.hpp \
                      include/GCTACubeSource.hpp \
-                     include/GCTACubeSourcePoint.hpp \
-                     include/GCTACubeSourceDiffuse.hpp \
                      include/GCTAModelBackground.hpp \
                      include/GCTAModelSpatial.hpp \
                      include/GCTAModelSpatialGradient.hpp \

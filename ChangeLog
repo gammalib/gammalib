@@ -1,8 +1,9 @@
-2018-11-09
+2018-11-12
 
         * Version 1.6.0 released
         ========================
 
+        Remove diffuse response cube caching (#2722)
         Revise GCTAEdispCube::operator() interface and disable stacked response
           cutting in true energy (#2721)
         Rename GCTAResponseIrf::lo_save_thres() and GCTAResponseIrf::hi_save_thres()

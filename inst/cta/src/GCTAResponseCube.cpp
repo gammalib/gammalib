@@ -33,7 +33,6 @@
 #include "GTools.hpp"
 #include "GCTAResponseCube.hpp"
 #include "GCTAResponse_helpers.hpp"
-#include "GCTACubeSourceDiffuse.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAEventBin.hpp"
 #include "GCTASupport.hpp"
@@ -1089,6 +1088,89 @@ double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
 
 
 /***********************************************************************//**
+ * @brief Integrate PSF over diffuse model
+ *
+ * @param[in] model Diffuse spatial model.
+ * @param[in] obsDir Observed event direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * Computes the integral
+ * 
+ * \f[
+ *    \int_0^{\delta_{\rm max}}
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm Map}(\delta, \phi) \sin \delta
+ *    {\rm d}\phi {\rm d}\delta
+ * \f]
+ *
+ * where \f${\rm Map}(\delta, \phi)\f$ is the diffuse map in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
+ * function.
+ ***************************************************************************/
+double GCTAResponseCube::psf_diffuse(const GModelSpatial* model,
+                                     const GSkyDir&       obsDir,
+                                     const GEnergy&       srcEng,
+                                     const GTime&         srcTime) const
+{
+    // Set minimum and maximum number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/2458
+    static const int min_iter_delta = 5;
+    static const int min_iter_phi   = 5;
+    static const int max_iter_delta = 8;
+    static const int max_iter_phi   = 8;
+
+    // Initialise PSF
+    double psf = 0.0;
+
+    // Compute rotation matrix to convert from PSF centred coordinate system
+    // spanned by delta and phi into the reference frame of the observed
+    // arrival direction given in Right Ascension and Declination.
+    GMatrix ry;
+    GMatrix rz;
+    ry.eulery(obsDir.dec_deg() - 90.0);
+    rz.eulerz(-obsDir.ra_deg());
+    GMatrix rot = (ry * rz).transpose();
+
+    // Get offset angle integration interval in radians
+    double delta_min = 0.0;
+    double delta_max = 1.1 * this->psf().delta_max();
+
+    // Get resolution of spatial model
+    double resolution = gammalib::resolution(model);
+
+
+    // Setup integration kernel. We take here the observed photon arrival
+    // direction as the true photon arrival direction because the PSF does
+    // not vary significantly over a small region.
+    cta_psf_diffuse_kern_delta integrand(this, model, &rot,
+                                         obsDir, srcEng, srcTime,
+                                         min_iter_phi, max_iter_phi,
+                                         resolution);
+
+    // Set number of radial integration iterations
+    int iter  = gammalib::iter_rho(delta_max, resolution,
+                                   min_iter_delta, max_iter_delta);
+
+    // Setup integration
+    GIntegral integral(&integrand);
+
+    // Set fixed number of iterations
+    integral.fixed_iter(iter);
+
+    // Integrate over PSF delta angle
+    psf = integral.romberg(delta_min, delta_max);
+
+    // Return PSF
+    return psf;
+}
+
+
+/***********************************************************************//**
  * @brief Return instrument response to point source
  *
  * @param[in] event Observed event.
@@ -1319,7 +1401,8 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
     GEnergy srcEng = source.energy();
 
     // Get pointer to elliptical model
-    const GModelSpatialElliptical* model = static_cast<const GModelSpatialElliptical*>(source.model());
+    const GModelSpatialElliptical* model =
+          static_cast<const GModelSpatialElliptical*>(source.model());
 
     // Compute angle between model centre and measured photon direction and
     // position angle (radians)
@@ -1415,46 +1498,67 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     }
     const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
 
-    // Get pointer to source cache. We first search the cache for a model
-    // with the source name. If no model was found we initialise a new
-    // cache entry for that model. Otherwise, we simply return the actual
-    // cache entry.
-    GCTACubeSourceDiffuse* cache(NULL);
-    int index = cache_index(source.name());
-    if (index == -1) {
+    // Get event attribute references
+    const GSkyDir& obsDir  = bin->dir().dir();
+    const GEnergy& obsEng  = bin->energy();
+    const GTime&   obsTime = bin->time();
 
-        // No cache entry was found, thus allocate and initialise a new one
-        cache = new GCTACubeSourceDiffuse;
-        cache->set(source.name(), *source.model(), obs);
-        m_cache.push_back(cache);
+    // Get energy of source model
+    GEnergy srcEng = source.energy();
 
-    } // endif: no cache entry was found
-    else {
+    // Get pointer to elliptical model
+    const GModelSpatialDiffuse* model =
+          static_cast<const GModelSpatialDiffuse*>(source.model());
 
-        // Check that the cache entry is of the expected type
-        if (m_cache[index]->code() != GCTA_CUBE_SOURCE_DIFFUSE) {
-            std::string msg = "Cached model \""+source.name()+"\" is not "
-                              "an extended source model. This method only "
-                              "applies to extended source models.";
-            throw GException::invalid_value(G_IRF_DIFFUSE, msg);
-        }
-        cache = static_cast<GCTACubeSourceDiffuse*>(m_cache[index]);
+    // Get pointer on CTA response cube
+    //const GCTAResponseCube* rsp = gammalib::cta_rsp_cube(G_IRF_DIFFUSE, obs);
 
-    } // endelse: there was a cache entry for this model
+    // Get livetime (in seconds) and deadtime correction factor
+    double livetime = exposure().livetime();
+    double deadc    = exposure().deadc();
 
-    // If energy dispersion is available then compute IRF using the true
-    // photon energy and multiply in the energy dispersion ...
-    if (use_edisp()) {
-    	irf = cache->irf(bin->ipix(), source.energy());
-		if (irf > 0.0) {
-            irf *= edisp()(bin->energy(), source.energy(), bin->dir().dir());
-		}
-    }
+    // Get Psf radius (in degrees)
+    double delta_max = psf().delta_max() * gammalib::rad2deg;
 
-    // ... otherwise compute the IRF at the observed energy
-    else {
-    	irf = cache->irf(bin->ipix(), bin->ieng());
-    }
+    // Continue only if livetime is >0 and model contains reconstructed
+    // sky direction
+    if (livetime > 0.0 && model->contains(obsDir, delta_max))  {
+
+        // Get exposure
+        //
+        // The current code assumes that the exposure at the observed and
+        // true event direction does not vary significantly. In other words,
+        // the code assumes that the exposure is constant over the size of
+        // the PSF.
+        irf = exposure()(obsDir, srcEng);
+
+        // Continue only if exposure is positive
+        if (irf > 0.0) {
+
+            // Recover effective area from exposure
+            irf /= livetime;
+
+            // Compute product of PSF and diffuse map, integrated over the
+            // relevant PSF area. We assume no energy dispersion and thus
+            // compute the product using the observed energy.
+            irf *= psf_diffuse(model, obsDir, srcEng, obsTime);
+
+            // Multiply-in energy dispersion
+            //
+            // The current code assumes that the energy dispersion at the
+            // observed and true event direction does not vary
+            // significantly. In other words, the code assumes that the
+            // energy dispersion is constant over the size of the PSF.
+            if (use_edisp() && irf > 0.0) {
+                irf *= edisp()(bin->energy(), srcEng, obsDir);
+            }
+
+            // Apply deadtime correction
+            irf *= exposure().deadc();
+
+        } // endif: exposure was positive
+        
+    } // endif: livetime was positive
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)

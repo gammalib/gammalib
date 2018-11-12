@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-9 November 2018
+12 November 2018
 
 
 1. Introduction
@@ -21,7 +21,8 @@ The following classes have been added:
 - GCTAModelSpatialRegistry
 
 The following classes have been removed:
-- none
+- GCTACubeSourceDiffuse
+- GCTACubeSourcePoint
 
 The following classes have been renamed:
 - none
@@ -314,6 +315,10 @@ None
 
 20. CTA interface
 -----------------
+The classes GCTACubeSourcePoint and GCTACubeSourceDiffuse were removed since
+the response caching is now performed at the GCTAResponse level, hence no
+dedicated response cache classes are needed anymore (#2722).
+
 The arguments of the GCTACubeEdisp::operator() were changed from, passing
 now reconstructed and true energy objects, followed by a true sky direction.
 This is more consistent with the GCTAEdisp interface. The stacked response

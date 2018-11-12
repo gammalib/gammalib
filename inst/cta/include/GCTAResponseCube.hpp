@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -124,6 +124,10 @@ private:
                           const GSkyDir&                 obsDir,
                           const GEnergy&                 srcEng,
                           const GTime&                   srcTime) const;
+    double psf_diffuse(const GModelSpatial* model,
+                       const GSkyDir&       obsDir,
+                       const GEnergy&       srcEng,
+                       const GTime&         srcTime) const;
     double irf_ptsrc(const GEvent&       event,
                      const GSource&      source,
                      const GObservation& obs) const;
