@@ -71,8 +71,6 @@
 #include "GCTACubePsf.hpp"
 #include "GCTACubeEdisp.hpp"
 #include "GCTACubeSource.hpp"
-#include "GCTACubeSourcePoint.hpp"
-#include "GCTACubeSourceDiffuse.hpp"
 #include "GCTAModelBackground.hpp"
 #include "GCTAModelSpatial.hpp"
 #include "GCTAModelSpatialGradient.hpp"
