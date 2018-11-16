@@ -172,15 +172,17 @@ GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
 
 
 /***********************************************************************//**
- * @brief Return background rate in units of events/s/MeV/sr
+ * @brief Return background rate in units of events MeV\f$^{-1}\f$
+ *        s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] detx Tangential X coordinate in nominal system (radians).
  * @param[in] dety Tangential Y coordinate in nominal system (radians).
+ * @return Background rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
- * Returns the background rate in units of events/s/MeV/sr for a given energy
- * and detector coordinates. The operator interpolates linearly in DETX and
- * DETY, and logarithmically in energy.
+ * Returns the background rate for a given energy and detector coordinates.
+ * The rate is given per ontime. The operator interpolates linearly in
+ * ``DETX`` and ``DETY``, and logarithmically in energy.
  *
  * The operator assures that the background rate never becomes negative. For
  * invalid background models or detector coordinates outside the range
@@ -285,8 +287,10 @@ GCTABackground3D* GCTABackground3D::clone(void) const
  *     ENERG_HI - Energy upper bin boundaries
  *     BKG      - Background template (or BGD as legacy column name)
  *
- * The data are stored in the m_background member. The DETX and DETY axes
- * will be set to radians, the energy axis will be set to log10.
+ * The data are stored in the m_background member. The ``DETX`` and ``DETY``
+ * axes will be set to radians, the energy axis will be set to log10. The
+ * data are expected to be given in unit of events per MeV, second and
+ * steradian, where the time is the real ontime.
  *
  * This method ignores all column names that are not the mandatory column
  * names in the FITS @p table.
@@ -310,7 +314,9 @@ void GCTABackground3D::read(const GFitsTable& table)
         }
     }
 
-    // Read background table from reduced FITS table
+    // Read background table from reduced FITS table. The background table
+    // is expected to provide the number of events per MeV, second and
+    // steradian, where the time is the real ontime.
     m_background.read(*ptr);
 
     // Delete reduced FITS table
@@ -539,15 +545,17 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
 
 
 /***********************************************************************//**
- * @brief Returns background count rate integrated over energy interval
+ * @brief Returns background rate integrated over energy interval in units
+ *        of events s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] dir Instrument direction.
  * @param[in] emin Minimum energy of energy interval.
  * @param[in] emax Maximum energy of energy interval.
- * @return Integrated background count rate (counts/src/sr).
+ * @return Integrated background count rate (events s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
  * Returns the background count rate for a given instrument direction that
- * is integrated over a specified energy interval.
+ * is integrated over a specified energy interval. The rate is given per
+ * ontime.
  *
  * If the energy interval is not positive, a zero background rate is
  * returned.
@@ -567,10 +575,6 @@ double GCTABackground3D::rate_ebin(const GCTAInstDir& dir,
                       (dir.dety() >= m_dety_min) &&
                       (dir.dety() <= m_dety_max) &&
                       (emax > emin)) {
-
-        // Retrieve references to node arrays
-        //const GNodeArray& detxs = m_background.axis_nodes(m_inx_detx);
-        //const GNodeArray& detys = m_background.axis_nodes(m_inx_dety);
 
         // Initialise first and second node
         double x1 = emin.MeV();
@@ -1046,7 +1050,7 @@ void GCTABackground3D::init_mc_cache(void) const
         #if defined(G_DEBUG_MC_INIT)
         std::cout << "Energy=" << energies[i];
         std::cout << " Rate_total=" << total_flux;
-        std::cout << " events/s/MeV" << std::endl;
+        std::cout << " events/(s MeV)" << std::endl;
         #endif
 
     } // endfor: looped over energy bins

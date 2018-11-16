@@ -379,17 +379,17 @@ void GCTAModelBackground::temporal(const GModelTemporal* temporal)
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Return background rate in units of events MeV\f$^{-1}\f$
+ *        s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
  * @param[in] gradients Compute gradients?
- * @return Function value.
+ * @return Background rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
  * Evaluates the background model which is a factorization of a spatial,
- * spectral and temporal model component. This method also applies a deadtime
- * correction factor, so that the normalization of the model is a real rate
- * (counts/exposure time).
+ * spectral and temporal model component. The method returns a real rate,
+ * defined as the number of counts per MeV, steradian and ontime.
  *
  * If the @p gradients flag is true the method will also set the parameter
  * gradients of the model parameters.
@@ -422,16 +422,12 @@ double GCTAModelBackground::eval(const GEvent&       event,
     // Compute value
     double value = spat * spec * temp;
 
-    // Apply deadtime correction
-    double deadc = obs.deadc(event.time());
-    value       *= deadc;
-
     // Optionally compute partial derivatives
     if (gradients) {
 
         // Multiply factors to radial gradients
         if (spatial() != NULL) {
-            double fact = spec * temp * deadc;
+            double fact = spec * temp;
             if (fact != 1.0) {
                 for (int i = 0; i < spatial()->size(); ++i)
                     (*spatial())[i].factor_gradient((*spatial())[i].factor_gradient() * fact);
@@ -440,7 +436,7 @@ double GCTAModelBackground::eval(const GEvent&       event,
 
         // Multiply factors to spectral gradients
         if (spectral() != NULL) {
-            double fact = spat * temp * deadc;
+            double fact = spat * temp;
             if (fact != 1.0) {
                 for (int i = 0; i < spectral()->size(); ++i)
                     (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact);
@@ -449,7 +445,7 @@ double GCTAModelBackground::eval(const GEvent&       event,
 
         // Multiply factors to temporal gradients
         if (temporal() != NULL) {
-            double fact = spat * spec * deadc;
+            double fact = spat * spec;
             if (fact != 1.0) {
                 for (int i = 0; i < temporal()->size(); ++i)
                     (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact);
@@ -464,20 +460,21 @@ double GCTAModelBackground::eval(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatially integrated background model
+ * @brief Return spatially integrated background rate in units of
+ *        events MeV\f$^{-1}\f$ s\f$^{-1}\f$
  *
  * @param[in] energy Measured event energy.
  * @param[in] time Measured event time.
  * @param[in] obs Observation.
- * @return Integral of spatial model component.
+ * @return Spatially integrated background rate
+ *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
  * @exception GException::invalid_value
  *            Pointing direction differs from RoI centre.
  *
  * Spatially integrates the background model for a given measured event
- * energy and event time. This method also applies a deadtime correction
- * factor, so that the normalization of the model is a real rate
- * (counts/exposure time).
+ * energy and event time. The method returns a real rate, defined as the
+ * number of counts per MeV and ontime.
  ***************************************************************************/
 double GCTAModelBackground::npred(const GEnergy&      energy,
                                   const GTime&        time,
@@ -511,9 +508,6 @@ double GCTAModelBackground::npred(const GEnergy&      energy,
     npred *= spectral()->eval(energy, time);
     npred *= temporal()->eval(time);
 
-    // Apply deadtime correction
-    npred *= obs.deadc(time);
-
     // Return Npred
     return npred;
 }
@@ -533,10 +527,6 @@ double GCTAModelBackground::npred(const GEnergy&      energy,
  * argument that is passed to the method. The method also requires a random
  * number generator of type GRan which is passed by reference, hence the
  * state of the random number generator will be changed by the method.
- *
- * The method also applies a deadtime correction using a Monte Carlo process,
- * taking into account temporal deadtime variations. For this purpose, the
- * method makes use of the time dependent GObservation::deadc method.
  *
  * For each event in the returned event list, the sky direction, the nominal
  * coordinates (DETX and DETY), the energy and the time will be set.
@@ -624,23 +614,11 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
                 #if defined(G_DUMP_MC)
                 std::cout << " Interval " << itime;
                 std::cout << " events=" << n_events << std::endl;
-                int n_removed_by_deadtime = 0;
-                int n_trial_outside_roi   = 0;
+                int n_trial_outside_roi = 0;
                 #endif
 
                 // Loop over events
                 for (int i = 0; i < n_events; ++i) {
-
-                    // Apply deadtime correction
-                    double deadc = obs.deadc(times[i]);
-                    if (deadc < 1.0) {
-                        if (ran.uniform() > deadc) {
-                            #if defined(G_DUMP_MC)
-                            n_removed_by_deadtime++;
-                            #endif
-                            continue;
-                        }
-                    }
 
                     // Get Monte Carlo event energy from spectral model
                     GEnergy energy = spectral->mc(ebounds.emin(ieng),
@@ -684,8 +662,6 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
 
                 // Debug option: provide statisics
                 #if defined(G_DUMP_MC)
-                std::cout << " Events removed due to deadtime=";
-                std::cout << n_removed_by_deadtime << std::endl;
                 std::cout << " Trials outside RoI=";
                 std::cout << n_trial_outside_roi << std::endl;
                 #endif

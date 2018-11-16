@@ -161,15 +161,16 @@ GCTABackgroundPerfTable& GCTABackgroundPerfTable::operator=(const GCTABackground
 
 
 /***********************************************************************//**
- * @brief Return background rate in units of events/s/MeV/sr
+ * @brief Return background rate in units of events MeV\f$^{-1}\f$
+ *        s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] detx Tangential coordinate in nominal system (rad).
  * @param[in] dety Tangential coordinate in nominal system (rad).
- * @return Background rate (events/s/MeV/sr)
+ * @return Background rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
- * Returns the background rate in units of events/s/MeV/sr for a given energy
- * and detector coordinates. The method assures that the background rate
+ * Returns the background rate for a given energy and detector coordinates.
+ * The rate is given per ontime. The method assures that the background rate
  * never becomes negative.
  *
  * If the performance table contains less than 2 nodes an empty value is
@@ -377,15 +378,17 @@ GCTAInstDir GCTABackgroundPerfTable::mc(const GEnergy& energy,
 
 
 /***********************************************************************//**
- * @brief Returns background count rate integrated over energy interval
+ * @brief Returns background rate integrated over energy interval in units
+ *        of events s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] dir Instrument direction.
  * @param[in] emin Minimum energy of energy interval.
  * @param[in] emax Maximum energy of energy interval.
- * @return Integrated background count rate (counts/src/sr).
+ * @return Integrated background count rate (events s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
  * Returns the background count rate for a given instrument direction that
- * is integrated over a specified energy interval.
+ * is integrated over a specified energy interval. The rate is given per
+ * ontime.
  *
  * If the energy interval is not positive, a zero background rate is
  * returned.

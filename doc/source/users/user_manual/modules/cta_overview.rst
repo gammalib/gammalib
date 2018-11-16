@@ -70,7 +70,7 @@ Function by :doxy:`GCTAResponseIrf` or as a precomputed response for
 stacked analysis by :doxy:`GCTAResponseCube`.
 For stacked analysis the response is composed of the exposure
 (implemented by :doxy:`GCTACubeExposure`), the livetime averaged point
-spread function (implemented by :doxy:`GCTACubePsf`) and the livetime
+spread function (implemented by :doxy:`GCTACubePsf`) and the ontime
 averaged background rate (implemented by :doxy:`GCTACubeBackground`).
 For all other analysis, the factorized IRFs are used directly.
 Dependent on the response format, the components of the factorization

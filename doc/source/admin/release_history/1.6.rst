@@ -123,6 +123,8 @@ New features
 Clean up
 --------
 
+* [`2758 <https://cta-redmine.irap.omp.eu/issues/2758>`_] -
+  CTA background rates are now per ontime
 * [`2716 <https://cta-redmine.irap.omp.eu/issues/2716>`_] -
   Rename ``GCTAResponseIrf::lo_save_thres()`` and
   ``GCTAResponseIrf::hi_save_thres()`` to ``GCTAResponseIrf::lo_safe_thres()``

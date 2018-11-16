@@ -240,13 +240,15 @@ GCTACubeBackground& GCTACubeBackground::operator=(const GCTACubeBackground& bgd)
 
 
 /***********************************************************************//**
- * @brief Return background rate in units of events/s/MeV/sr
+ * @brief Return background rate in units of events MeV\f$^{-1}\f$
+ *        s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] dir Reconstructed event position where rate should be computed
  * @param[in] energy Energy at which the rate should be computed
+ * @return Background rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
- * Returns the background rate in units of events/s/MeV/sr for a given energy
- * and sky coordinate. The method assures that the background rate
+ * Returns the background rate for a giben instrument direction and energy.
+ * The rate is given per ontime. The method assures that the background rate
  * never becomes negative.
  *
  * The method interpolates logarithmically in the energy direction.
@@ -334,7 +336,7 @@ GCTACubeBackground* GCTACubeBackground::clone(void) const
  * @exception GException::invalid_value
  *            No event list found in CTA observations.
  *
- * Set the background cube by computing the livetime weighted background rate
+ * Set the background cube by computing the ontime weighted background rate
  * for all CTA observations in an observation container. The cube pixel
  * values are computed as the sum over the background rates.
  ***************************************************************************/
@@ -354,8 +356,8 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
     // Initialise event cubes for model evaluate and storage
     GCTAEventCube eventcube = GCTAEventCube(m_cube, m_ebounds, gti);
 
-    // Initialise total livetime
-    double total_livetime = 0.0;
+    // Initialise total ontime
+    double total_ontime = 0.0;
 
     // Loop over all observations in container
     for (int i = 0; i < obs.size(); ++i) {
@@ -388,17 +390,17 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Get observation livetime
-        double livetime = cta->livetime();
+        // Get observation ontime
+        double ontime = cta->ontime();
 
-        // Skip observation if livetime is zero
-        if (livetime == 0.0) {
+        // Skip observation if ontime is zero
+        if (ontime == 0.0) {
             if (log != NULL) {
                 *log << "Skipping unbinned ";
                 *log << cta->instrument();
                 *log << " observation ";
                 *log << "\"" << cta->name() << "\"";
-                *log << " (id=" << cta->id() << ") due to zero livetime";
+                *log << " (id=" << cta->id() << ") due to zero ontime";
                 *log << std::endl;
             }
             continue;
@@ -499,15 +501,15 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
                     double x2    = m_ebounds.emax(iebin).MeV();
                     double model = gammalib::plaw_integral(x1, f1, x2, f2) / (x2 - x1);
 
-                    // Multiply by livetime to get the correct weighting for
-                    // each observation. We divide by the total livetime later
-                    // to get the background model in units of counts/MeV/s/sr.
-                    model *= livetime;
+                    // Multiply by ontime to get the correct weighting for each
+                    // observation. We divide by the total ontime later to get
+                    // the background model in units of counts/(MeV s sr).
+                    model *= ontime;
 
                     // Add existing number of counts
                     model += bin->counts();
 
-                    // Store cumulated value (units: counts/MeV/sr)
+                    // Store cumulated value (units: counts/(MeV sr))
                     bin->counts(model);
 
                 } // endif: added background model value to cube
@@ -519,26 +521,26 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
         } // endfor: looped over spatial pixels
 
-        // Accumulate livetime
-        total_livetime += livetime;
+        // Accumulate ontime
+        total_ontime += ontime;
 
     } // endfor: looped over all observations
 
-    // Re-normalize cube to get units of counts/MeV/s/sr
-    if (total_livetime > 0.0) {
+    // Re-normalize cube to get units of counts/(MeV s sr)
+    if (total_ontime > 0.0) {
 
         // Loop over all bins in background cube and divide the content
-        // by the total livetime.
+        // by the total ontime.
         for (int i = 0; i < eventcube.size(); ++i) {
             GCTAEventBin* bin  = eventcube[i];
-            double        rate = bin->counts() / total_livetime;
+            double        rate = bin->counts() / total_ontime;
             bin->counts(rate);
         }
 
         // Set background cube values from event cube
         m_cube = eventcube.counts();
 
-    } // endif: livetime was positive
+    } // endif: ontime was positive
 
     // Return
     return;
@@ -547,10 +549,12 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
 
 /***********************************************************************//**
- * @brief Compute spatially integrated background rate for a given energy
+ * @brief Return spatially integrated background rate in units of
+ *        events MeV\f$^{-1}\f$ s\f$^{-1}\f$
  *
  * @param[in] logE Logarithm (base 10) of energy in TeV
- * @return Spatially integrated background rate in units of counts/MeV/s
+ * @return Spatially integrated background rate
+ *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
  * Spatially integrates the background cube at a given energy. This method
  * performs an interpolation between the energy maps. The integration is

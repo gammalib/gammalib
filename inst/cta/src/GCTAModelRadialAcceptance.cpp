@@ -384,17 +384,17 @@ void GCTAModelRadialAcceptance::temporal(const GModelTemporal* temporal)
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Return background rate in units of events MeV\f$^{-1}\f$
+ *        s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
  * @param[in] gradients Compute gradients?
- * @return Function value.
+ * @return Background rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
  * Evaluates tha CTA radial acceptance model which is a factorization of a
- * spatial, spectral and temporal model component. This method also applies
- * a deadtime correction factor, so that the normalization of the model is
- * a real rate (counts/exposure time).
+ * spatial, spectral and temporal model component. The method returns a
+ * real rate, defined by the number of counts per MeV, steradian and ontime.
  *
  * If the @p gradients flag is true the method will also set the parameter
  * gradients of the model parameters.
@@ -432,37 +432,33 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
     // Compute value
     double value = rad * spec * temp;
 
-    // Apply deadtime correction
-    double deadc = obs.deadc(event.time());
-    value       *= deadc;
-
     // Optionally compute partial derivatives
     if (gradients) {
 
         // Multiply factors to radial gradients
         if (radial() != NULL) {
-            double fact = spec * temp * deadc;
+            double fact = spec * temp;
             if (fact != 1.0) {
                 for (int i = 0; i < radial()->size(); ++i)
-                    (*radial())[i].factor_gradient((*radial())[i].factor_gradient() * fact );
+                    (*radial())[i].factor_gradient((*radial())[i].factor_gradient() * fact);
             }
         }
 
         // Multiply factors to spectral gradients
         if (spectral() != NULL) {
-            double fact = rad * temp * deadc;
+            double fact = rad * temp;
             if (fact != 1.0) {
                 for (int i = 0; i < spectral()->size(); ++i)
-                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact );
+                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact);
             }
         }
 
         // Multiply factors to temporal gradients
         if (temporal() != NULL) {
-            double fact = rad * spec * deadc;
+            double fact = rad * spec;
             if (fact != 1.0) {
                 for (int i = 0; i < temporal()->size(); ++i)
-                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact );
+                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact);
             }
         }
 
@@ -474,11 +470,14 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatially integrated data model
+ * @brief Return spatially integrated background rate in units of
+ *        events MeV\f$^{-1}\f$ s\f$^{-1}\f$
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
  * @param[in] obs Observation.
+ * @return Spatially integrated background rate
+ *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
  * @exception GException::no_list
  *            No valid CTA event list found in observation
@@ -486,8 +485,8 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
  *            No valid CTA pointing found in observation
  *
  * Spatially integrates the data model for a given measured event energy and
- * event time. This method also applies a deadtime correction factor, so that
- * the normalization of the model is a real rate (counts/exposure time).
+ * event time. The method returns a real rate, defined as the number of
+ * counts per MeV and ontime.
  ***************************************************************************/
 double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
                                         const GTime&        obsTime,
@@ -526,9 +525,6 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
         npred *= spectral()->eval(obsEng, obsTime);
         npred *= temporal()->eval(obsTime);
 
-        // Apply deadtime correction
-        npred *= obs.deadc(obsTime);
-
     } // endif: model was valid
 
     // Return
@@ -551,10 +547,6 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
  * argument that is passed to the method. The method also requires a random
  * number generator of type GRan which is passed by reference, hence the
  * state of the random number generator will be changed by the method.
- *
- * The method also applies a deadtime correction using a Monte Carlo process,
- * taking into account temporal deadtime variations. For this purpose, the
- * method makes use of the time dependent GObservation::deadc method.
  ***************************************************************************/
 GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs, 
                                              GRan& ran) const
@@ -613,14 +605,6 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
 
                 // Loop over events
                 for (int i = 0; i < n_events; ++i) {
-
-                    // Apply deadtime correction
-                    double deadc = obs.deadc(times[i]);
-                    if (deadc < 1.0) {
-                        if (ran.uniform() > deadc) {
-                            continue;
-                        }
-                    }
 
                     // Set event energy
                     GEnergy energy = spectral()->mc(obs.events()->ebounds().emin(ieng),
@@ -781,7 +765,7 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const

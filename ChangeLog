@@ -3,6 +3,7 @@
         * Version 1.6.0 released
         ========================
 
+        CTA background rates are now per ontime (#2758)
         Remove diffuse response cube caching (#2722)
         Revise GCTAEdispCube::operator() interface and disable stacked response
           cutting in true energy (#2721)

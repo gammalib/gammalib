@@ -326,12 +326,16 @@ void GCTAModelCubeBackground::temporal(const GModelTemporal* temporal)
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Return background rate in units of events MeV\f$^{-1}\f$
+ *        s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
  * @param[in] gradients Compute gradients?
- * @return Function value.
+ * @return Background rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
+ *
+ * Evaluates the background model. The method returns a real rate, defined
+ * as the number of counts per MeV, steradian and ontime.
  *
  * If the @p gradients flag is true the method will also set the parameter
  * gradients of the model parameters.
@@ -369,7 +373,7 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
             double fact = spat * temp;
             if (fact != 1.0) {
                 for (int i = 0; i < spectral()->size(); ++i)
-                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact );
+                    (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact);
             }
         }
 
@@ -378,7 +382,7 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
             double fact = spat * spec;
             if (fact != 1.0) {
                 for (int i = 0; i < temporal()->size(); ++i)
-                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact );
+                    (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact);
             }
         }
 
@@ -390,17 +394,18 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatially integrated background model
+ * @brief Return spatially integrated background rate in units of
+ *        events MeV\f$^{-1}\f$ s\f$^{-1}\f$
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
  * @param[in] obs Observation.
- * @return Spatially integrated model.
+ * @return Spatially integrated background rate
+ *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
  * Spatially integrates the cube background model for a given measured event
- * energy and event time. This method also applies a deadtime correction
- * factor, so that the normalization of the model is a real rate
- * (counts/MeV/s).
+ * energy and event time. The method returns a real rate,
+ * defined as the number of counts per MeV and ontime.
  ***************************************************************************/
 double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
                                       const GTime&        obsTime,
@@ -478,9 +483,6 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
     // Multiply in spectral and temporal components
     npred *= spectral()->eval(obsEng, obsTime);
     npred *= temporal()->eval(obsTime);
-
-    // Apply deadtime correction
-    npred *= obs.deadc(obsTime);
 
     // Return Npred
     return npred;

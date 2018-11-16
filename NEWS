@@ -315,6 +315,10 @@ None
 
 20. CTA interface
 -----------------
+CTA background rates are now per ontime and not livetime. This makes the IRF
+background consistent with the cube background, and is also consistent with
+the open gamma data format (#2758).
+
 The classes GCTACubeSourcePoint and GCTACubeSourceDiffuse were removed since
 the response caching is now performed at the GCTAResponse level, hence no
 dedicated response cache classes are needed anymore (#2722).
