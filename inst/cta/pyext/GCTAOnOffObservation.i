@@ -82,12 +82,13 @@ public:
                          const GArf& arf,
                          const GRmf& rmf);
     GCTAOnOffObservation(const GCTAObservation& obs,
-                         const GModelSpatial&   spatial,
+                         const GModels&         models,
+                         const std::string&     srcname,
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
                          const GSkyRegions&     on,
                          const GSkyRegions&     off,
-                         const bool&            use_irf_bkg = true);
+                         const bool&            use_bkg_model = true);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
  

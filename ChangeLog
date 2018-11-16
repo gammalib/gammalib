@@ -1,4 +1,4 @@
-2018-11-12
+2018-11-16
 
         * Version 1.6.0 released
         ========================
@@ -10,6 +10,7 @@
           to GCTAResponseIrf::lo_safe_thres() and GCTAResponseIrf::hi_safe_thres()
           (#2716)
         Add generic CTA response cache (#2715)
+        GCTAOnOffObservation now supports any kind of background model (#2710)
         Fix precision issue with GCTABackground3D Monte-Carlo simulations (#2708)
         Revise GCTAEdisp class interface (#2704) 
         GCTAEdisp returns now energy dispersion values per MeV (#2704) 

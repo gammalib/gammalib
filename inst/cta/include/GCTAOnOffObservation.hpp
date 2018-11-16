@@ -75,12 +75,13 @@ public:
                          const GArf& arf,
                          const GRmf& rmf);
     GCTAOnOffObservation(const GCTAObservation& obs,
-                         const GModelSpatial&   spatial,
+                         const GModels&         models,
+                         const std::string&     srcname,
                          const GEbounds&        etrue,
                          const GEbounds&        ereco,
                          const GSkyRegions&     on,
                          const GSkyRegions&     off,
-                         const bool&            use_irf_bkg = true);
+                         const bool&            use_model_bkg = true);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
 
@@ -128,10 +129,11 @@ protected:
     GArf   arf_stacked(const GArf& arf, const GEnergy& emin, const GEnergy& emax) const;
     GRmf   rmf_stacked(const GRmf& rmf, const GEnergy& emin, const GEnergy& emax) const;
     void   set(const GCTAObservation& obs,
-               const GModelSpatial&   spatial,
+               const GModels&         models,
+               const std::string&     srcname,
                const GSkyRegions&     on,
                const GSkyRegions&     off,
-               const bool&            use_irf_bkg);
+               const bool&            use_model_bkg);
     void   compute_arf(const GCTAObservation& obs,
                        const GModelSpatial&   spatial,
                        const GSkyRegions&     on);
@@ -140,11 +142,13 @@ protected:
                            const GSkyRegions&     on);
     void   compute_bgd(const GCTAObservation& obs,
                        const GSkyRegions&     off,
-                       const bool&            use_irf_bkg);
+                       const GModels&         models,
+                       const bool&            use_model_bkg);
     void   compute_alpha(const GCTAObservation& obs,
                          const GSkyRegions&     on,
                          const GSkyRegions&     off,
-                         const bool&            use_irf_bkg);
+                         const GModels&         models,
+                         const bool&            use_model_bkg);
     void   compute_rmf(const GCTAObservation& obs,
                        const GSkyRegions&     on);
     void   apply_ebounds(const GCTAObservation& obs);

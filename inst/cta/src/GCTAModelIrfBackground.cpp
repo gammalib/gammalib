@@ -360,9 +360,13 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
     // Compute value
     double value = spat * spec * temp;
 
-    // Apply deadtime correction
+    // Apply deadtime correction. This assumes that the IRF background rates
+    // are stored per livetime, and by multiplying these rates with the
+    // deadtime correction factor thay are given per ontime.
+    /*
     double deadc = obs.deadc(event.time());
     value       *= deadc;
+    */
 
     // If gradients were requested then multiply factors to spectral and
     // temporal gradients
@@ -370,7 +374,7 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
 
         // Multiply factors to spectral gradients
         if (spectral() != NULL) {
-            double fact = spat * temp * deadc;
+            double fact = spat * temp; // * deadc;
             if (fact != 1.0) {
                 for (int i = 0; i < spectral()->size(); ++i)
                     (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact );
@@ -379,7 +383,7 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
 
         // Multiply factors to temporal gradients
         if (temporal() != NULL) {
-            double fact = spat * spec * deadc;
+            double fact = spat * spec; // * deadc;
             if (fact != 1.0) {
                 for (int i = 0; i < temporal()->size(); ++i)
                     (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact );

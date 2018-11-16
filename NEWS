@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-12 November 2018
+16 November 2018
 
 
 1. Introduction
@@ -148,7 +148,7 @@ The following methods have been renamed:
 - GCTAResponseIrf::hi_safe_thres() from GCTAResponseIrf::hi_save_thres()
 
 The arguments for the following methods have been changed:
-- GCTAOnOffObservation(GCTAObservation&, GModelSpatial&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&, bool&)
+- GCTAOnOffObservation(GCTAObservation&, GModels&, std::string&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&, bool&)
 - GCTAModelRadial::mc(GRan&)
 - GCTAEdisp::operator(GEnergy&, GEnergy&, double&, double&, double&, double&)
 - GCTAEdisp::mc(GRan&, GEnergy&, double&, double&, double&, double&)
@@ -339,6 +339,14 @@ parameters. This means that now all other spatial models with frozen parameters
 will be cached. The use of the cache can be toggled by internal data members.
 The IRF cache was removed from GCTAEventList since it is no longer used (#2715).
 
+The GCTAOnOffObservation observation constructor now takes a model container
+as argument and the name of a sky model component. The ARF computation is
+performed by computing the IRF for the spatial model of the named sky model
+component over the On region. In that way also extended sources can be properly
+handled (#2292). The background model is now also extracted from the model
+container and used for the computation of the alpha factors and the background
+response, if the use_model_bkg argument is true (#2710).
+
 GCTABackground3D::init_mc_cache now pre-computes the Monte Carlo cache at energy
 nodes of the background cube, and in addition, inserts 8 logarithmically spaced
 nodes between each pair of nodes. This assures that the energy variations of the
@@ -424,11 +432,6 @@ CTAOnOffObservation::likelihood_wstat() and CTAOnOffObservation::likelihood_csta
 for the case that the model has no parameters. This is particularily needed for
 the TS computation with the "wstat" statistic which is meaningful without any
 model (#2312).
-
-The GCTAOnOffObservation observation constructor now takes a spatial model
-component of type GModelSpatial instead of a sky direction as argument, and the
-ARF computation is performed by computing the IRF for the spatial model over the
-On region. In that way also extended source can be properly handled (#2292).
 
 The energy bounds of a CTA observations are now taken into account when setting
 up a GCTAOnOffObservation so that observation-specific energy thresholds are

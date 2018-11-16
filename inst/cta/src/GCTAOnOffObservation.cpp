@@ -183,12 +183,13 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
  * @brief CTA observation constructor
  *
  * @param[in] obs CTA observation.
- * @param[in] spatial Spatial source model.
+ * @param[in] models Models including source and background model.
+ * @param[in] srcname Name of source in models.
  * @param[in] etrue True energy boundaries.
  * @param[in] ereco Reconstructed energy boundaries.
  * @param[in] on On regions.
  * @param[in] off Off regions.
- * @param[in] use_irf_bkg Use IRF background template.
+ * @param[in] use_model_bkg Use model background.
  *
  * Constructs On/Off observation by filling the On and Off spectra and
  * computing the Auxiliary Response File (ARF) and Redistribution Matrix
@@ -196,19 +197,20 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
  * reconstructed energy boundaries, as well as the definition of On and Off
  * regions.
  *
- * The @p use_irf_bkg flags controls whether the IRF background template
- * should be used for computations or not. This impacts the computations of
- * the @c BACKSCAL column in the On spectrum and the @c BACKRESP column in
+ * The @p use_model_bkg flag controls whether a background model should be
+ * used for the computations or not. This impacts the computations of the
+ * @c BACKSCAL column in the On spectrum and the @c BACKRESP column in
  * the Off spectrum. See the compute_alpha() and compute_bgd() methods for
  * more information on the applied formulae.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
-                                           const GModelSpatial&   spatial,
+                                           const GModels&         models,
+                                           const std::string&     srcname,
                                            const GEbounds&        etrue,
                                            const GEbounds&        ereco,
                                            const GSkyRegions&     on,
                                            const GSkyRegions&     off,
-                                           const bool&            use_irf_bkg)
+                                           const bool&            use_model_bkg)
 {
     // Initialise private
     init_members();
@@ -222,7 +224,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     m_rmf = GRmf(etrue, ereco);
 
     // Set On/Off observation from CTA observation
-    set(obs, spatial, on, off, use_irf_bkg);
+    set(obs, models, srcname, on, off, use_model_bkg);
 
     // Return
     return;
@@ -320,8 +322,10 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
         GEnergy emax = onoff->on_spec().emax_obs();
 
         // Get stacked ARF and RMF
-        GArf arf_stacked = this->arf_stacked(onoff->arf(), emin, emax);
-        GRmf rmf_stacked = this->rmf_stacked(onoff->rmf(), emin, emax);
+        //GArf arf_stacked = this->arf_stacked(onoff->arf(), emin, emax);
+        //GRmf rmf_stacked = this->rmf_stacked(onoff->rmf(), emin, emax);
+        GArf arf_stacked = onoff->arf();
+        GRmf rmf_stacked = onoff->rmf();
 
         // Get exposure for observation
         double exposure = onoff->on_spec().exposure();
@@ -1195,10 +1199,11 @@ GRmf GCTAOnOffObservation::rmf_stacked(const GRmf&    rmf,
  * @brief Set On/Off observation from a CTA observation
  *
  * @param[in] obs CTA observation.
- * @param[in] spatial Spatial source model.
+ * @param[in] models Models including source and background model.
+ * @param[in] srcname Name of soucre in models.
  * @param[in] on On regions.
  * @param[in] off Off regions.
- * @param[in] use_irf_bkg Use IRF background template.
+ * @param[in] use_model_bkg Use model background.
  *
  * @exception GException::invalid_value
  *            No CTA event list found in CTA observation.
@@ -1207,17 +1212,18 @@ GRmf GCTAOnOffObservation::rmf_stacked(const GRmf&    rmf,
  * that fall in the On and Off regions into the PHA spectra and by computing
  * the corresponding ARF and RMF response functions.
  *
- * The @p use_irf_bkg flags controls whether the IRF background template
- * should be used for computations or not. This impacts the computations of
- * the `BACKSCAL` column in the On spectrum and the `BACKRESP` column in
- * the Off spectrum. See the compute_alpha() and compute_bgd() methods for
- * more information on the applied formulae.
+ * The @p use_model_bkg flags controls whether the background model should
+ * be used for computations or not. This impacts the computations of the
+ * `BACKSCAL` column in the On spectrum and the `BACKRESP` column in the Off
+ * spectrum. See the compute_alpha() and compute_bgd() methods for more
+ * information on the applied formulae.
  ***************************************************************************/
 void GCTAOnOffObservation::set(const GCTAObservation& obs,
-                               const GModelSpatial&   spatial,
+                               const GModels&         models,
+                               const std::string&     srcname,
                                const GSkyRegions&     on,
                                const GSkyRegions&     off,
-                               const bool&            use_irf_bkg)
+                               const bool&            use_model_bkg)
 {
     // Get CTA event list pointer
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
@@ -1226,6 +1232,27 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
                           obs.name()+"\" (ID="+obs.id()+"). ON/OFF observation "
                           "can only be filled from event list.";
         throw GException::invalid_value(G_SET, msg);
+    }
+
+    // Get spatial component of source model
+    const GModelSky* model = dynamic_cast<const GModelSky*>(models[srcname]);
+    if (model == NULL) {
+        std::string msg = "Model \""+srcname+"\" is not a sky model. Please "
+                          "specify the name of a sky model.";
+        throw GException::invalid_value(G_SET, msg);
+    }
+    const GModelSpatial& spatial = *(model->spatial());
+
+    // If background model is needed then extract background model components
+    // from model container
+    GModels bkg_models;
+    if (use_model_bkg) {
+        for (int i = 0; i < models.size(); ++i) {
+            if ((dynamic_cast<const GModelData*>(models[i]) != NULL) &&
+                (models[i]->classname().substr(0,4) == "GCTA")) {
+                bkg_models.append(*models[i]);
+            }
+        }
     }
 
     // Loop over all events
@@ -1274,8 +1301,8 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
     else {
         compute_arf(obs, spatial, reg_on);
     }
-	compute_bgd(obs, reg_off, use_irf_bkg);
-	compute_alpha(obs, reg_on, reg_off, use_irf_bkg);
+	compute_bgd(obs, reg_off, bkg_models, use_model_bkg);
+	compute_alpha(obs, reg_on, reg_off, bkg_models, use_model_bkg);
 	compute_rmf(obs, reg_on);
 
     // Apply reconstructed energy boundaries
@@ -1538,11 +1565,8 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
  *
  * @param[in] obs CTA observation.
  * @param[in] off Off regions.
- * @param[in] use_irf_bkg Use IRF background template.
- *
- * @exception GException::invalid_argument
- *            Observation does not contain relevant response or background
- *            information
+ * @param[in] models Models including background model.
+ * @param[in] use_model_bkg Use model background.
  *
  * Computes the background rate in units of
  *           \f${\rm events} \, {\rm MeV}^{-1} \, {\rm s}^{-1}\f$
@@ -1552,7 +1576,7 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
  * All Off regions contained in @p off are expected to be sky region maps,
  * i.e. of type GSkyRegionMap.
  *
- * If @p use_irf_bkg is @c true, the IRF background template will be used
+ * If @p use_model_bkg is @c true, the IRF background template will be used
  * for the computation, and `BACKRESP` will be computed using
  *
  * \f[
@@ -1572,7 +1596,7 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
  * \f$\Omega_{{\rm off},p}\f$ is the solid angle in units of \f${\rm sr}\f$
  * of the pixel index \f$p\f$ in the Off region \f${\rm off}\f$.
  *
- * If @p use_irf_bkg is @c false, `BACKRESP` will be computed using
+ * If @p use_model_bkg is @c false, `BACKRESP` will be computed using
  *
  * \f[
  *    {\tt BACKRESP}(E_{\rm reco}) = \sum_{\rm off} \sum_p \Omega_{{\rm off},p}
@@ -1586,7 +1610,8 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
  ***************************************************************************/
 void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
                                        const GSkyRegions&     off,
-                                       const bool&            use_irf_bkg)
+                                       const GModels&         models,
+                                       const bool&            use_model_bkg)
 {
     // Get reconstructed energies for the background rates
 	const GEbounds& ereco = m_off_spec.ebounds();
@@ -1602,10 +1627,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
         GCTAPointing obspnt = obs.pointing();
 
         // Continue only if the IRF background template should be used
-        if (use_irf_bkg) {
-
-            // Get CTA background
-            const GCTABackground& bgd = gammalib::cta_rsp_bkg(G_COMPUTE_BGD, obs);
+        if (use_model_bkg) {
 
             // Loop over regions
             for (int k = 0; k < off.size(); ++k) {
@@ -1633,13 +1655,11 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
                     // Loop over energy bins
                     for (int i = 0; i < nreco; ++i) {
 
-                        // Get log10(E/TeV) of mean reconstructed bin energy
-                        double logEreco = ereco.elogmean(i).log10TeV();
+                        // Set event
+                        GCTAEventAtom event(pixinstdir, ereco.elogmean(i), GTime());
 
                         // Get background rate in events/s/MeV
-                        background[i] += bgd(logEreco,
-                                             pixinstdir.detx(),
-                                             pixinstdir.dety()) * pixsolid;
+                        background[i] += models.eval(event, obs) * pixsolid;
 
                     } // endfor: looped over energy bins
 
@@ -1705,7 +1725,8 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  * @param[in] obs CTA observation.
  * @param[in] on On regions.
  * @param[in] off Off regions.
- * @param[in] use_irf_bkg Use IRF background template.
+ * @param[in] models Models including background model.
+ * @param[in] use_model_bkg Use model background.
  *
  * @exception GException::invalid_argument
  *            Observation does not contain relevant response or background
@@ -1715,7 +1736,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  * The \f$\alpha\f$ parameter gives the ratio between the On and Off region
  * background acceptance multiplied by the On and Off region solid angles.
  *
- * If @p use_irf_bkg is @c true, the IRF background template will be used
+ * If @p use_model_bkg is @c true, the IRF background template will be used
  * for the computation, and \f$\alpha(E_{\rm reco})\f$ is given by
  *
  * \f[
@@ -1740,7 +1761,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  * \f${\rm sr}\f$ of the pixel index \f$p\f$ in the On or Off region
  * \f${\rm on/off}\f$.
  *
- * If @p use_irf_bkg is @c false, the background acceptance is assumed
+ * If @p use_model_bkg is @c false, the background acceptance is assumed
  * constant and hence cancels out, which makes the \f$\alpha\f$ parameter
  * independent of reconstructed energy \f$E_{\rm reco}\f$.
  * The \f$\alpha\f$ parameter is then given by
@@ -1756,7 +1777,8 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                                          const GSkyRegions&     on,
                                          const GSkyRegions&     off,
-                                         const bool&            use_irf_bkg)
+                                         const GModels&         models,
+                                         const bool&            use_model_bkg)
 {
     // Get reconstructed energy boundaries from RMF
 	const GEbounds& ereco = m_rmf.emeasured();
@@ -1770,16 +1792,13 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
 
         // If IRF background templates shall be used then compute the
         // energy dependent alpha factors
-        if (use_irf_bkg) {
-
-            // Get CTA background
-            const GCTABackground& bgd = gammalib::cta_rsp_bkg(G_COMPUTE_ALPHA, obs);
+        if (use_model_bkg) {
 
             // Loop over reconstructed energies
             for (int i = 0; i < nreco; ++i) {
 
                 // Get mean log10 energy in TeV of bin
-                double logEreco = ereco.elogmean(i).log10TeV();
+                //double logEreco = ereco.elogmean(i).log10TeV();
 
                 // Initialise background rate totals
                 double aon  = 0.0;
@@ -1807,11 +1826,11 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                         // Get solid angle subtended by this pixel
                         double pixsolid = on_map->map().solidangle(pixidx);
 
+                        // Set event
+                        GCTAEventAtom event(pixinstdir, ereco.elogmean(i), GTime());
+
                         // Add up acceptance
-                        aon += bgd(logEreco,
-                                   pixinstdir.detx(),
-                                   pixinstdir.dety()) *
-                                   pixsolid;
+                        aon += models.eval(event, obs) * pixsolid;
 
                     } // endfor: looped over all pixels in map
 
@@ -1839,11 +1858,11 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs,
                         // Get solid angle subtended by this pixel
                         double pixsolid = off_map->map().solidangle(pixidx);
 
+                        // Set event
+                        GCTAEventAtom event(pixinstdir, ereco.elogmean(i), GTime());
+
                         // Add up acceptance
-                        aoff += bgd(logEreco,
-                                    pixinstdir.detx(),
-                                    pixinstdir.dety()) *
-                                    pixsolid;
+                        aoff += models.eval(event, obs) * pixsolid;
 
                     } // endfor: looped over all pixels in map
 

@@ -305,16 +305,14 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test On/Off analysis
         """
-        # Set Crab position
-        crab = gammalib.GSkyDir()
-        crab.radec_deg(83.6331, 22.0145)
-
-        # Set point-source spatial model based on Crab position
-        spatial = gammalib.GModelSpatialPointSource(crab)
+        # Load model container
+        models = gammalib.GModels(self._data + '/crab_irf.xml')
 
         # Create On region
+        ondir = gammalib.GSkyDir()
+        ondir.radec_deg(83.6331, 22.0145)
         on = gammalib.GSkyRegions()
-        on.append(gammalib.GSkyRegionCircle(crab, 0.2))
+        on.append(gammalib.GSkyRegionCircle(ondir, 0.2))
 
         # Create Off region
         offdir = gammalib.GSkyDir()
@@ -333,10 +331,11 @@ class Test(gammalib.GPythonTestSuite):
         inobs    = gammalib.GObservations(filename)
         outobs   = gammalib.GObservations()
         for run in inobs:
-            onoff = gammalib.GCTAOnOffObservation(run, spatial, etrue, ereco, on, off)
+            onoff = gammalib.GCTAOnOffObservation(run, models, 'Crab',
+                                                  etrue, ereco, on, off)
             outobs.append(onoff)
 
-        # Load model container and attach it to the observations
+        # Load On/Off models and attach them to the observations
         models = gammalib.GModels(self._data + '/onoff_model.xml')
         outobs.models(models)
 
@@ -454,7 +453,7 @@ class Test(gammalib.GPythonTestSuite):
         region    = gammalib.GSkyRegionCircle(dir, 0.2)
         regs      = gammalib.GSkyRegions()
         regs.append(region)
-        ptsrc     = gammalib.GModelSpatialPointSource()
+        models    = gammalib.GModels(self._data + '/crab_irf.xml')
         expcube   = gammalib.GCTACubeExposure('CAR','CEL',0.,0.,0.1,0.1,10,10,engs)
         psfcube   = gammalib.GCTACubePsf('CAR','CEL',0.,0.,0.1,0.1,10,10,engs,1.0,10)
         bgdcube   = gammalib.GCTACubeBackground('CAR','CEL',0.,0.,0.1,0.1,10,10,ebds)
@@ -476,7 +475,7 @@ class Test(gammalib.GPythonTestSuite):
         obs4      = gammalib.GCTAObservation()
         obs4.events(cube)
         obs4.response(rspcube2)
-        obs5      = gammalib.GCTAOnOffObservation(obs1, ptsrc, ebds, ebds, regs, regs)
+        obs5      = gammalib.GCTAOnOffObservation(obs1, models, 'Crab', ebds, ebds, regs, regs)
         radgauss  = gammalib.GCTAModelRadialGauss(1.0)
         radacc    = gammalib.GCTAModelRadialAcceptance(radgauss, plaw)
         multi     = gammalib.GCTAModelSpatialMultiplicative()
