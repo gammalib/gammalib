@@ -479,7 +479,7 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
     // Allocate instrument direction
     GCTAInstDir dir;
 
-    // Continue only if are maps
+    // Continue only if there is a background model
     if (!m_mc_max.empty()) {
 
         // Get reference to node array for the energy axis
@@ -496,33 +496,44 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
         int inx_right = energy_nodes.inx_right();
 
         // Get maximum background rate as the maximum of the left and the right
-        // energy node
+        // energy node. Add some margin.
         double max_rate = m_mc_max[inx_left];
         if (m_mc_max[inx_right] > max_rate) {
             max_rate = m_mc_max[inx_right];
         }
+        max_rate *= 1.5;
+
+        // Get detx and dety widths
+        double detx_width = m_detx_max - m_detx_min;
+        double dety_width = m_dety_max - m_dety_min;
 
         // Get instrument direction using a rejection method. This assures
         // that the Monte Carlo sample follows the model distribution
         while (true) {
 
-            // Get randomized detx and dety in radians. If the direction falls
-            // outside the validity range then get another pair of detx and
-            // dety values.
-            double theta = std::acos(1.0 - ran.uniform() * m_mc_one_minus_costheta);
-            double phi   = gammalib::twopi * ran.uniform();
-            double detx  = theta * std::cos(phi);
-            double dety  = theta * std::sin(phi);
-            if ((detx < m_detx_min) || (detx > m_detx_max) ||
-                (dety < m_dety_min) || (dety > m_dety_max)) {
-                continue;
-            }
+            // Get randomized detx and dety in radians
+            double detx = ran.uniform() * detx_width + m_detx_min;
+            double dety = ran.uniform() * dety_width + m_dety_min;
 
             // Get background rate for these coordinates. If the background
             // rate is zero then get other coordinates.
             double value = this->operator()(logE, detx, dety);
             if (value <= 0.0) {
                 continue;
+            }
+
+            // Dump a warning if value is larger than the maximum rate. This
+            // should never happen!
+            if (value > max_rate) {
+                std::string msg = "Background rate "+gammalib::str(value)+" "
+                                  "for "+energy.print()+" at "
+                                  "DETXY=["+
+                                  gammalib::str(detx*gammalib::rad2deg)+","+
+                                  gammalib::str(dety*gammalib::rad2deg)+"] "
+                                  "is larger than the maximum expected rate "+
+                                  gammalib::str(max_rate)+". Something is "
+                                  "wrong with the code.";
+                gammalib::warning(G_MC, msg);
             }
 
             // Get uniform random number
@@ -1095,7 +1106,7 @@ void GCTABackground3D::init_mc_max_rate(void) const
 
                 // Get background rate
                 double rate = m_background(m_inx_bgd, inx);
-                
+
                 // If background rate is larger than maximum then store the
                 // background rate as new maximum
                 if (rate > max_rate) {
