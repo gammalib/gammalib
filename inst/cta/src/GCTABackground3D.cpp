@@ -749,7 +749,6 @@ void GCTABackground3D::init_members(void)
     // Initialise MC cache
     m_mc_max.clear();
     m_mc_spectrum.clear();
-    m_mc_one_minus_costheta = 0.0;
 
     // Return
     return;
@@ -785,9 +784,8 @@ void GCTABackground3D::copy_members(const GCTABackground3D& bgd)
     m_logE_max   = bgd.m_logE_max;
 
     // Copy MC cache
-    m_mc_max                = bgd.m_mc_max;
-    m_mc_spectrum           = bgd.m_mc_spectrum;
-    m_mc_one_minus_costheta = bgd.m_mc_one_minus_costheta;
+    m_mc_max       = bgd.m_mc_max;
+    m_mc_spectrum  = bgd.m_mc_spectrum;
 
     // Return
     return;
@@ -936,23 +934,6 @@ void GCTABackground3D::init_mc_cache(void) const
 
     // Initialise maximum rate array
     init_mc_max_rate();
-
-    // Compute 1-cos(theta_max)
-    double theta1 = std::sqrt(m_detx_min * m_detx_min + m_dety_min * m_dety_min);
-    double theta2 = std::sqrt(m_detx_min * m_detx_min + m_dety_max * m_dety_max);
-    double theta3 = std::sqrt(m_detx_max * m_detx_max + m_dety_min * m_dety_min);
-    double theta4 = std::sqrt(m_detx_max * m_detx_max + m_dety_max * m_dety_max);
-    double theta = theta1;
-    if (theta2 > theta) {
-        theta = theta2;
-    }
-    if (theta3 > theta) {
-        theta = theta3;
-    }
-    if (theta4 > theta) {
-        theta = theta4;
-    }
-    m_mc_one_minus_costheta = 1.0 - std::cos(theta);
 
     // Compute DETX and DETY binsize in radians
     double detx_bin = (m_detx_max - m_detx_min) / m_num_detx;

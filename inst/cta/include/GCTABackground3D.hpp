@@ -125,9 +125,8 @@ private:
     double            m_logE_max;    //!< Log10(E/TeV) maximum
 
     // Monte Carlo cache
-    mutable std::vector<double> m_mc_max;                //!< Maximum background rate
-    mutable GModelSpectralNodes m_mc_spectrum;           //!< Response cube spectrum
-    mutable double              m_mc_one_minus_costheta; //!< 1-cos(theta_max)
+    mutable std::vector<double> m_mc_max;      //!< Maximum background rate
+    mutable GModelSpectralNodes m_mc_spectrum; //!< Response cube spectrum
 };
 
 
