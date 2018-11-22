@@ -561,7 +561,7 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
         } while (f == 0);
 
         // Get uniform random value between zero and the maximum energy
-        // dispersion value. The loop is quite if the random number is smaller
+        // dispersion value. The loop is quit if the random number is smaller
         // than the energy dispersion value
         ftest = ran.uniform() * max_edisp;
 
