@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-16 November 2018
+22 November 2018
 
 
 1. Introduction
@@ -356,6 +356,10 @@ nodes of the background cube, and in addition, inserts 8 logarithmically spaced
 nodes between each pair of nodes. This assures that the energy variations of the
 background rate are precisely captured and reproduced in the Monte Carlo
 simulations (#2708).
+
+To accomodate the new GCTAEdisp::operator(), the energy dispersion integration
+is now done in linear true energy instead of logarithmic true energy. This was
+needed to make the simulated and model event distributions compatible (#2706).
 
 The GCTAEdisp::operator() now returns energy dispersion values per MeV. The
 units are now consistent with the expectation in GResponse, and this changes

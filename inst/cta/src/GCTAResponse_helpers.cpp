@@ -377,14 +377,14 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
 /***********************************************************************//**
  * @brief Integration kernel for GCTAResponseIrf::nroi method
  *
- * @param[in] logEsrc Base 10 logarithm of true photon energy in MeV.
+ * @param[in] etrue True photon energy in MeV.
  * @return Nroi.
  ***************************************************************************/
-double cta_nroi_kern::eval(const double& logEsrc)
+double cta_nroi_kern::eval(const double& etrue)
 {
     // Set true energy
     GEnergy srcEng;
-    srcEng.log10MeV(logEsrc);
+    srcEng.MeV(etrue);
 
     // Compute response components
     double nroi_spatial  = m_rsp->nroi(*m_model, srcEng, m_srcTime, m_obsEng, m_obsTime, *m_obs);
@@ -392,8 +392,7 @@ double cta_nroi_kern::eval(const double& logEsrc)
     double nroi_temporal = m_model->temporal()->eval(m_srcTime);
 
     // Compute response
-    double nroi = nroi_spatial * nroi_spectral * nroi_temporal *
-                  gammalib::ln10 * m_obsEng.MeV();
+    double nroi = nroi_spatial * nroi_spectral * nroi_temporal;
 
     // Return response
     return nroi;

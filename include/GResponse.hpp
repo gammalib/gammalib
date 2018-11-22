@@ -127,7 +127,7 @@ protected:
                    m_event(event),
                    m_srcTime(srcTime),
                    m_grad(grad) { }
-        double eval(const double& logEsrc);
+        double eval(const double& etrue);
     protected:
         const GResponse*    m_parent;  //!< Response
         const GObservation* m_obs;     //!< Observation

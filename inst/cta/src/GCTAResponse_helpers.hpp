@@ -125,8 +125,7 @@ protected:
  *
  * This class implements the integration kernel for the nedisp() method.
  * The cta_nedisp_kern::eval method evaluates the energy dispersion for a
- * given log10 of true photon energy as function of the log10 of observed
- * event energy.
+ * given true photon energy as function of the reconstructed event energy.
  ***************************************************************************/
 class cta_nroi_kern : public GFunction {
 public:
@@ -142,7 +141,7 @@ public:
                   m_srcTime(srcTime),
                   m_obsEng(obsEng),
                   m_obsTime(obsTime) {}
-    double eval(const double& logEsrc);
+    double eval(const double& etrue);
 protected:
     const GCTAResponseIrf* m_rsp;     //!< CTA response function
     const GObservation*    m_obs;     //!< Observation

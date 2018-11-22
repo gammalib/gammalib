@@ -21,6 +21,8 @@ Bug fixes
 
 * [`2708 <https://cta-redmine.irap.omp.eu/issues/2708>`_] -
   Fix precision issue with ``GCTABackground3D`` Monte-Carlo simulations
+* [`2706 <https://cta-redmine.irap.omp.eu/issues/2706>`_] -
+  Integrate energy dispersion linearly instead of logarithmically
 * [`2683 <https://cta-redmine.irap.omp.eu/issues/2683>`_] -
   Correct handling of stacked On/Off observations without background IRF.
   Fix bug that potentially wrote the wrong exposure time in a PHA file.

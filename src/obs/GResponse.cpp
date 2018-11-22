@@ -195,12 +195,12 @@ double GResponse::convolve(const GModelSky&    model,
             // Loop over all boundaries
             for (int i = 0; i < ebounds.size(); ++i) {
 
-                // Get true energy boundaries in log10 MeV
-                double log10_etrue_min = ebounds.emin(i).log10MeV();
-                double log10_etrue_max = ebounds.emax(i).log10MeV();
+                // Get true energy boundaries in MeV
+                double etrue_min = ebounds.emin(i).MeV();
+                double etrue_max = ebounds.emax(i).MeV();
 
                 // Continue only if valid
-                if (log10_etrue_max > log10_etrue_min) {
+                if (etrue_max > etrue_min) {
 
                     // Setup integration function
                     edisp_kern integrand(this, &obs, &model, &event, srcTime, grad);
@@ -210,7 +210,7 @@ double GResponse::convolve(const GModelSky&    model,
                     integral.fixed_iter(iter);
 
                     // Do Romberg integration
-                    prob += integral.romberg(log10_etrue_min, log10_etrue_max);
+                    prob += integral.romberg(etrue_min, etrue_max);
 
                 } // endif: interval was valid
 
@@ -411,30 +411,26 @@ double GResponse::eval_prob(const GModelSky&    model,
 /***********************************************************************//**
  * @brief Integration kernel for GResponse::edisp_kern() class
  *
- * @param[in] logEsrc Base 10 logarithm of true photon energy in MeV.
+ * @param[in] etrue True photon energy in MeV.
  *
  * This method implements the integration kernel needed for the
  * GResponse::edisp_kern() class.
  ***************************************************************************/
-double GResponse::edisp_kern::eval(const double& logEsrc)
+double GResponse::edisp_kern::eval(const double& etrue)
 {
     // Set true energy
     GEnergy srcEng;
-    srcEng.log10MeV(logEsrc);
+    srcEng.MeV(etrue);
 
     // Get function value
     double value = m_parent->eval_prob(*m_model, *m_event,
                                        srcEng, m_srcTime, *m_obs, m_grad);
 
-    // Account for the fact that integration is done in log10 MeV and
-    // not in MeV
-    value *= gammalib::ln10 * m_event->energy().MeV();
-
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GResponse::edisp_kern::eval";
-        std::cout << "(logEsrc=" << logEsrc << "): ";
+        std::cout << "(etrue=" << etrue << "): ";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ")" << std::endl;

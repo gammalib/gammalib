@@ -1,4 +1,4 @@
-2018-11-16
+2018-11-22
 
         * Version 1.6.0 released
         ========================
@@ -13,6 +13,7 @@
         Add generic CTA response cache (#2715)
         GCTAOnOffObservation now supports any kind of background model (#2710)
         Fix precision issue with GCTABackground3D Monte-Carlo simulations (#2708)
+        Integrate energy dispersion linearly instead of logarithmically (#2706)
         Revise GCTAEdisp class interface (#2704) 
         GCTAEdisp returns now energy dispersion values per MeV (#2704) 
         Protect GCTAInstDir from access to invalid information (#2694)

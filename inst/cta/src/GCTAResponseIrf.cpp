@@ -113,7 +113,6 @@
 //#define G_DEBUG_IRF_RADIAL                     //!< Debug irf_radial method
 //#define G_DEBUG_IRF_DIFFUSE                   //!< Debug irf_diffuse method
 //#define G_DEBUG_IRF_ELLIPTICAL             //!< Debug irf_elliptical method
-//#define G_DEBUG_NROI_EDISP    //!< Debug nroi energy dispersion computation
 //#define G_DEBUG_NROI_RADIAL                  //!< Debug npred_radial method
 //#define G_DEBUG_NROI_ELLIPTICAL          //!< Debug npred_elliptical method
 //#define G_DEBUG_NROI_DIFFUSE                //!< Debug npred_diffuse method
@@ -453,12 +452,12 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
         // Loop over all boundaries
         for (int i = 0; i < ebounds.size(); ++i) {
 
-            // Get true energy boundaries in log10 MeV
-            double log10_etrue_min = ebounds.emin(i).log10MeV();
-            double log10_etrue_max = ebounds.emax(i).log10MeV();
+            // Get true energy boundaries in MeV
+            double etrue_min = ebounds.emin(i).MeV();
+            double etrue_max = ebounds.emax(i).MeV();
 
             // Continue only if valid
-            if (log10_etrue_max > log10_etrue_min) {
+            if (etrue_max > etrue_min) {
 
                 // Setup integration function
                 cta_nroi_kern integrand(this, &obs, &model, srcTime, obsEng, obsTime);
@@ -468,31 +467,11 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
                 integral.fixed_iter(iter);
 
                 // Do Romberg integration
-                nroi += integral.romberg(log10_etrue_min, log10_etrue_max);
+                nroi += integral.romberg(etrue_min, etrue_max);
 
             } // endif: interval was valid
 
         } // endfor: looped over energy intervals
-
-        // Debug energy dispersion computation
-        #if defined(G_DEBUG_NROI_EDISP)
-        apply_edisp(false);
-        const GEnergy& srcEng = obsEng;
-        double nroi_spatial   = this->nroi(model, srcEng, srcTime, obsEng, obsTime, obs);
-        double nroi_spectral  = model.spectral()->eval(srcEng, srcTime);
-        double nroi_temporal  = model.temporal()->eval(srcTime);
-        double nroi_noedisp   = nroi_spatial * nroi_spectral * nroi_temporal;
-        apply_edisp(true);
-        std::cout << "GCTAResponseIrf::nroi:";
-        std::cout << " obs_id=" << obs.id();
-        std::cout << " ereco=" << obsEng;
-        std::cout << " nroi(noedisp)=" << nroi_noedisp;
-        std::cout << " nroi(edisp)=" << nroi;
-        if (nroi_noedisp > 0.0) {
-            std::cout << " ratio(edisp/noedisp)=" << nroi/nroi_noedisp;
-        }
-        std::cout << std::endl;
-        #endif
 
     } // endif: energy dispersion requested
 
