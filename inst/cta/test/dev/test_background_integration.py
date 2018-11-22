@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # ==========================================================================
-# This energy integration of GCTABackground3D
+# Test energy integration of GCTABackground3D
 #
 # Copyright (C) 2017 Juergen Knoedlseder
 #

@@ -32,15 +32,37 @@ if needed.
 >  matplotlib is installed, the simulated photons are shown as
 >  a spectrum.
 
+`show_model_mc.py`
+>  For a given model, compares Monte Carlo simulation to model
+>  ecaluation.
+
+`test_background_integration.py`
+>  Test the event simulation using GCTAModelBackground.
+
+`test_cta_bkgcube.py`
+>  Test energy integration of GCTABackground3D.
+
 `test_gauss.py`
 >  Test Gaussian.
+
+`test_irf_elliptical.py`
+>  Test the response computation for elliptical models.
 
 `test_irf_offset.py`
 >  Creates images of source models for various offset angles. This
 >  tests the IRF variation with offset angle.
 
+`test_irf_radial.py`
+>  Test the response computation for radial models.
+
 `test_irf_trafo.py`
 >  Test coordinate transformations for IRF computation.
+
+`test_likelihood_profile.py`
+>  Performs likelihood profile computation.
+
+`test_ml_fitting.py`
+>  Performs a binned maximum likelihood analysis.
 
 `test_model.py`
 >  Creates images of sources models convolved with the CTA instrument
@@ -49,14 +71,26 @@ if needed.
 `test_npred_computation.py`
 >  Test the Npred computation of the CTA response.
 
+`test_npred_elliptical.py`
+>  Test the Npred computation of the CTA response for elliptical models.
+
 `test_npred_integration.py`
 >  Compare numerical to analytical Npred computation for CTA response.
+
+`test_psf_radial.py`
+>  Tests the radial response computation.
+
+`test_psf_shape.py`
+>  Simulates the PSF distribution.
 
 `test_radial_acceptance.py`
 >  Displays the various radial acceptance models.
 
 `test_response_table.py`
 >  Display CTA response table.
+
+`test_shell.py`
+>  Shows the shell model radial distribution.
 
 `test_sim_edisp.py`
 >  Compares energy dispersion simulation to energy dispersion
