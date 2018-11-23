@@ -69,6 +69,7 @@ class GCTAOnOffObservation : public GObservation {
 public:
     // Constructors and destructors
     GCTAOnOffObservation(void);
+    GCTAOnOffObservation(const bool& dummy, const std::string& instrument);
     GCTAOnOffObservation(const GObservations& obs);
     GCTAOnOffObservation(const GPha& pha_on,
                          const GPha& pha_off,

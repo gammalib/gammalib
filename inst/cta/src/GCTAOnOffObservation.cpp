@@ -35,6 +35,7 @@
 #include "GMatrixSparse.hpp"
 #include "GModels.hpp"
 #include "GModelSky.hpp"
+#include "GModelData.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
@@ -50,7 +51,6 @@
 #include "GCTAResponseIrf.hpp"
 #include "GCTAAeff2D.hpp"
 #include "GCTACubeBackground.hpp"
-#include "GCTAModelIrfBackground.hpp"
 #include "GCTAOnOffObservation.hpp"
 #include "GCTASupport.hpp"
 
@@ -60,8 +60,14 @@
 #endif
 
 /* __ Globals ____________________________________________________________ */
-const GCTAOnOffObservation g_onoff_obs_cta_seed;
+const GCTAOnOffObservation g_onoff_obs_cta_seed(true, "CTAOnOff");
+const GCTAOnOffObservation g_onoff_obs_hess_seed(true, "HESSOnOff");
+const GCTAOnOffObservation g_onoff_obs_magic_seed(true, "MAGICOnOff");
+const GCTAOnOffObservation g_onoff_obs_veritas_seed(true, "VERITASOnOff");
 const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
+const GObservationRegistry g_onoff_obs_hess_registry(&g_onoff_obs_hess_seed);
+const GObservationRegistry g_onoff_obs_magic_registry(&g_onoff_obs_magic_seed);
+const GObservationRegistry g_onoff_obs_veritas_registry(&g_onoff_obs_veritas_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCTOR1   "GCTAOnOffObservation::GCTAOnOffObservation(GPha&, "\
@@ -118,6 +124,35 @@ GCTAOnOffObservation::GCTAOnOffObservation(void) : GObservation()
 {
     // Initialise private members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Instrument constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] instrument Instrument name.
+ *
+ * Constructs an empty CTA On/Off observation for a given instrument.
+ *
+ * This method is specifically used allocation of global class instances for
+ * observation registry. By specifying explicit instrument names it is
+ * possible to use the "CTA" module are for other Imaging Air Cherenkov
+ * Telescopes. So far, the following instrument codes are supported:
+ * "CTAOnOff", "HESSOnOff", "VERITASOnOff", "MAGICOnOff".
+ ***************************************************************************/
+GCTAOnOffObservation::GCTAOnOffObservation(const bool&        dummy,
+                                           const std::string& instrument) :
+                      GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Set instrument
+    m_instrument = instrument;
 
     // Return
     return;
@@ -285,6 +320,10 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
  * \f$RMF_i(E_{\rm true}, E_{\rm reco})\f$ is the Redistribution Matrix File
  * of observation \f$i\f$, and
  * \f$\tau_i\f$ is the livetime of observation \f$i\f$.
+ *
+ * The method extracts the instrument name from the first On/Off observation
+ * in the observation container and only stacks subsequent On/Off
+ * observations with the same instrument name.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
                       GObservation()
@@ -302,6 +341,9 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     GEnergy emin_obs;
     GEnergy emax_obs;
 
+    // Allocate instrument
+    std::string instrument;
+
     // Loop over all observation in container
     for (int i = 0; i < obs.size(); ++i) {
 
@@ -314,6 +356,16 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             continue;
         }
 
+        // If the instrument name is empty then set the instrument now.
+        // Otherwise, skip the observation if it does not correspond
+        // to the same instrument.
+        if (instrument.empty()) {
+            instrument = onoff->instrument();
+        }
+        else if (instrument != onoff->instrument()) {
+            continue;
+        }
+
         // Check consistency of On/Off observation
         onoff->check_consistency(G_CONSTRUCTOR2);
 
@@ -322,8 +374,6 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
         GEnergy emax = onoff->on_spec().emax_obs();
 
         // Get stacked ARF and RMF
-        //GArf arf_stacked = this->arf_stacked(onoff->arf(), emin, emax);
-        //GRmf rmf_stacked = this->rmf_stacked(onoff->rmf(), emin, emax);
         GArf arf_stacked = onoff->arf();
         GRmf rmf_stacked = onoff->rmf();
 
@@ -347,23 +397,23 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             // and store result intermediately into BACKRESP column of off
             // spectum
             std::vector<double>& backresp = m_off_spec["BACKRESP"];
-            for (int i = 0; i < backresp.size(); ++i) {
-                backresp[i] *= exposure;
+            for (int k = 0; k < backresp.size(); ++k) {
+                backresp[k] *= exposure;
             }
 
             // Compute background scaling factor contribution
-            for (int i = 0; i < m_on_spec.size(); ++i) {
-                double  background = onoff->off_spec()["BACKRESP"][i];
-                double  alpha      = onoff->on_spec().backscal(i);
+            for (int k = 0; k < m_on_spec.size(); ++k) {
+                double  background = onoff->off_spec()["BACKRESP"][k];
+                double  alpha      = onoff->on_spec().backscal(k);
                 double  scale      = alpha * background * exposure;
-                m_on_spec.backscal(i,scale);
+                m_on_spec.backscal(k,scale);
             }
 
             // Compute RMF contribution
             for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
                 double arf = m_arf[itrue];
-                for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
-                    m_rmf(itrue,imeasured) *= arf;
+                for (int ireco = 0; ireco < m_rmf.nmeasured(); ++ireco) {
+                    m_rmf(itrue,ireco) *= arf;
                 }
             }
 
@@ -412,11 +462,11 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_off_spec += onoff->off_spec();
 
             // Compute background scaling factor contribution
-            for (int i = 0; i < m_on_spec.size(); ++i) {
-                double  background = onoff->off_spec()["BACKRESP"][i];
-                double  alpha      = onoff->on_spec().backscal(i);
+            for (int k = 0; k < m_on_spec.size(); ++k) {
+                double  background = onoff->off_spec()["BACKRESP"][k];
+                double  alpha      = onoff->on_spec().backscal(k);
                 double  scale      = alpha * background * exposure;
-                m_on_spec.backscal(i, m_on_spec.backscal(i) + scale);
+                m_on_spec.backscal(k, m_on_spec.backscal(k) + scale);
             }
 
             // Add ARF
@@ -425,15 +475,15 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             // Add number of background events/MeV from BACKRESP column
             const std::vector<double>& src = onoff->off_spec()["BACKRESP"];
             std::vector<double>&       dst = m_off_spec["BACKRESP"];
-            for (int i = 0; i < dst.size(); ++i) {
-                dst[i] += src[i] * exposure;
+            for (int k = 0; k < dst.size(); ++k) {
+                dst[k] += src[k] * exposure;
             }
 
             // Add RMF
             for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
                 double arf = arf_stacked[itrue] * exposure;
-                for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
-                    m_rmf(itrue,imeasured) += rmf_stacked(itrue,imeasured) * arf;
+                for (int ireco = 0; ireco < m_rmf.nmeasured(); ++ireco) {
+                    m_rmf(itrue,ireco) += rmf_stacked(itrue,ireco) * arf;
                 }
             }
 
@@ -455,14 +505,14 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     } // endfor: looped over observations
 
     // Compute stacked background scaling factor
-    for (int i = 0; i < m_on_spec.size(); ++i) {
-        double norm = m_off_spec["BACKRESP"][i];
+    for (int k = 0; k < m_on_spec.size(); ++k) {
+        double norm = m_off_spec["BACKRESP"][k];
         if (norm > 0.0) {
-            double scale = m_on_spec.backscal(i) / norm;
-            m_on_spec.backscal(i,scale);
+            double scale = m_on_spec.backscal(k) / norm;
+            m_on_spec.backscal(k,scale);
         }
         else {
-            m_on_spec.backscal(i,0.0);
+            m_on_spec.backscal(k,0.0);
         }
     }
 
@@ -470,8 +520,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
         double arf = m_arf[itrue];
         if (arf > 0.0) {
-            for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
-                m_rmf(itrue,imeasured) /= arf;
+            for (int ireco = 0; ireco < m_rmf.nmeasured(); ++ireco) {
+                m_rmf(itrue,ireco) /= arf;
             }
         }
     }
@@ -484,8 +534,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     // Compute background events/MeV/sec and store them in BACKRESP column
     if (total_exposure > 0.0) {
         std::vector<double>& backresp = m_off_spec["BACKRESP"];
-        for (int i = 0; i < backresp.size(); ++i) {
-            backresp[i] /= total_exposure;
+        for (int k = 0; k < backresp.size(); ++k) {
+            backresp[k] /= total_exposure;
         }
     }
 
@@ -494,6 +544,9 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     m_on_spec.emax_obs(emax_obs);
     m_off_spec.emin_obs(emin_obs);
     m_off_spec.emax_obs(emax_obs);
+
+    // Set instrument name
+    m_instrument = instrument;
 
     // Return
     return;
@@ -1353,6 +1406,9 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs,
     m_off_spec.header(pha_header);
     m_arf.header(arf_header);
     m_rmf.header(rmf_header);
+
+    // Set instrument name
+    m_instrument = obs.instrument() + "OnOff";
 
 	// Return
 	return;
@@ -2379,9 +2435,6 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
  *
  * which are the gradients in the predicted number of background events
  * with respect to all model parameters.
- *
- * The method assumes that the model parameters are stored in the order
- * spectral-temporal.
  ***********************************************************************/
 double GCTAOnOffObservation::N_bgd(const GModels& models,
                                    const int&     ibin,
@@ -2433,16 +2486,17 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                     continue;
                 }
 
-                // Fall through if model is not an IRF background component
-                const GCTAModelIrfBackground* bgd =
-                      dynamic_cast<const GCTAModelIrfBackground*>(mptr);
+                // Fall through if model is not a background component
+                const GModelData* bgd = dynamic_cast<const GModelData*>(mptr);
                 if (bgd == NULL) {
                     ipar += mptr->size();
                     continue;
                 }
 
-                // Get spectral component
-                GModelSpectral* spectral = bgd->spectral();
+                // Extract model dependent spectral component
+                const GModelSpectral* spectral = gammalib::cta_model_spectral(*bgd);
+
+                // Get value from spectral component
                 if (spectral != NULL)  {
 
                     // Determine the number of background events in model by
@@ -2453,22 +2507,18 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                     // dependence. We simply use a dummy time here.
                     value += spectral->eval(emean, GTime(), true) * norm;
 
-                    // Compute the parameter gradients for all spectral model
-                    // parameters
-                    for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
-                        GModelPar& par = (*spectral)[k];
+                    // Compute the parameter gradients for all model parameters
+                    for (int k = 0; k < mptr->size(); ++k)  {
+                        const GModelPar& par = (*mptr)[k];
                         if (par.is_free() && ipar < npars)  {
-                            (*grad)[ipar] += par.factor_gradient() * norm;
+                            (*grad)[ipar+k] += par.factor_gradient() * norm;
                         }
                     }
 
                 } // endif: pointer to spectral component was not NULL
 
-                // Increase parameter counter for temporal parameter
-                GModelTemporal* temporal = bgd->temporal();
-                if (temporal != NULL)  {
-                    ipar += temporal->size();
-                }
+                // Increment the parameter index
+                ipar += mptr->size();
 
             } // endfor: looped over model components
 
