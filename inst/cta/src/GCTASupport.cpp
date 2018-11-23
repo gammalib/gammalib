@@ -39,6 +39,9 @@
 #include "GEbounds.hpp"
 #include "GPhases.hpp"
 #include "GResponse.hpp"
+#include "GModelData.hpp"
+#include "GModelSpectral.hpp"
+#include "GModelTemporal.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
@@ -49,6 +52,11 @@
 #include "GCTAEventList.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAInstDir.hpp"
+#include "GCTAModelBackground.hpp"
+#include "GCTAModelAeffBackground.hpp"
+#include "GCTAModelIrfBackground.hpp"
+#include "GCTAModelCubeBackground.hpp"
+#include "GCTAModelRadialAcceptance.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_DS_ROI                      "gammalib::read_ds_roi(GFitsHDU&)"
@@ -346,6 +354,94 @@ const GCTAInstDir& gammalib::cta_dir(const std::string& origin,
 
     // Return reference
     return (*dir);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve spectral component from CTA background model
+ *
+ * @param[in] model Data model.
+ * @return Pointer to spectral component.
+ *
+ * Retrieves the spectral component from a CTA background model. If the
+ * background model has no spectral component, a NULL pointer will be
+ * returned.
+ ***************************************************************************/
+const GModelSpectral* gammalib::cta_model_spectral(const GModelData& model)
+{
+    // Initialise pointer on spectral component
+    GModelSpectral* spectral = NULL;
+
+    // Cast pointer to possible CTA background models
+    const GCTAModelBackground*       cta  = dynamic_cast<const GCTAModelBackground*>(&model);
+    const GCTAModelAeffBackground*   aeff = dynamic_cast<const GCTAModelAeffBackground*>(&model);
+    const GCTAModelIrfBackground*    irf  = dynamic_cast<const GCTAModelIrfBackground*>(&model);
+    const GCTAModelCubeBackground*   cube = dynamic_cast<const GCTAModelCubeBackground*>(&model);
+    const GCTAModelRadialAcceptance* rad  = dynamic_cast<const GCTAModelRadialAcceptance*>(&model);
+
+    // Extract spectral component
+    if (cta != NULL) {
+        spectral = cta->spectral();
+    }
+    else if (aeff != NULL) {
+        spectral = aeff->spectral();
+    }
+    else if (irf != NULL) {
+        spectral = irf->spectral();
+    }
+    else if (cube != NULL) {
+        spectral = cube->spectral();
+    }
+    else if (rad != NULL) {
+        spectral = rad->spectral();
+    }
+
+    // Return pointer to spectral component
+    return spectral;
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve temporal component from CTA background model
+ *
+ * @param[in] model Data model.
+ * @return Pointer to temporal component.
+ *
+ * Retrieves the temporal component from a CTA background model. If the
+ * background model has no temporal component, a NULL pointer will be
+ * returned.
+ ***************************************************************************/
+const GModelTemporal* gammalib::cta_model_temporal(const GModelData& model)
+{
+    // Initialise pointer on temporal component
+    GModelTemporal* temporal = NULL;
+
+    // Cast pointer to possible CTA background models
+    const GCTAModelBackground*       cta  = dynamic_cast<const GCTAModelBackground*>(&model);
+    const GCTAModelAeffBackground*   aeff = dynamic_cast<const GCTAModelAeffBackground*>(&model);
+    const GCTAModelIrfBackground*    irf  = dynamic_cast<const GCTAModelIrfBackground*>(&model);
+    const GCTAModelCubeBackground*   cube = dynamic_cast<const GCTAModelCubeBackground*>(&model);
+    const GCTAModelRadialAcceptance* rad  = dynamic_cast<const GCTAModelRadialAcceptance*>(&model);
+
+    // Extract temporal component
+    if (cta != NULL) {
+        temporal = cta->temporal();
+    }
+    else if (aeff != NULL) {
+        temporal = aeff->temporal();
+    }
+    else if (irf != NULL) {
+        temporal = irf->temporal();
+    }
+    else if (cube != NULL) {
+        temporal = cube->temporal();
+    }
+    else if (rad != NULL) {
+        temporal = rad->temporal();
+    }
+
+    // Return pointer to temporal component
+    return temporal;
 }
 
 

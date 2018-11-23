@@ -53,6 +53,9 @@ class GCTAAeff;
 class GCTABackground;
 class GCTAEventList;
 class GCTAInstDir;
+class GModelData;
+class GModelSpectral;
+class GModelTemporal;
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
@@ -74,6 +77,8 @@ namespace gammalib {
                                            const GObservation& obs);
     const GCTAInstDir&      cta_dir(const std::string&  origin,
                                     const GEvent&       event);
+    const GModelSpectral*   cta_model_spectral(const GModelData& model);
+    const GModelTemporal*   cta_model_temporal(const GModelData& model);
     double                  cta_roi_arclength(const double& rad,
                                               const double& dist,
                                               const double& cosdist,
