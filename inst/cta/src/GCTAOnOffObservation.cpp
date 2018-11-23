@@ -2279,9 +2279,6 @@ double GCTAOnOffObservation::arf_rad_max(const GCTAObservation& obs,
  *
  * which are the gradients in the predicted number of source events with
  * respect to all model parameters.
- *
- * The method assumes that parameters are stored in the order
- * spatial-spectral-temporal.
  ***********************************************************************/
 double GCTAOnOffObservation::N_gamma(const GModels& models,
                                      const int&     ibin,
@@ -2323,12 +2320,6 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
             if (sky == NULL) {
                 ipar += mptr->size();
                 continue;
-            }
-
-            // Increase parameter counter for spatial parameter
-            GModelSpatial* spatial = sky->spatial();
-            if (spatial != NULL)  {
-                ipar += spatial->size();
             }
 
             // Spectral component (the useful one)
@@ -2383,13 +2374,13 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                     // dummy time here.
                     spectral->eval(etruemean, GTime(), true);
 
-                    // Loop over spectral model parameters
-                    for (int k = 0; k < spectral->size(); ++k) {
-                        GModelPar& par = (*spectral)[k];
-                        if (par.is_free() && (k+ipar) < npars)  {
-                            (*grad)[k+ipar] += par.factor_gradient() * norm_grad;
+                    // Compute the parameter gradients for all model parameters
+                    for (int k = 0; k < mptr->size(); ++k)  {
+                        const GModelPar& par = (*mptr)[k];
+                        if (par.is_free() && ipar+k < npars)  {
+                            (*grad)[ipar+k] += par.factor_gradient() * norm_grad;
                         }
-                    } // endfor: looped over model parameters
+                    }
 
                 } // endfor: looped over true energy bins
 
@@ -2398,16 +2389,10 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                 std::cout << "sum(RMF) = " << rmf_sum << std::endl;
                 #endif
 
-                // Increment parameter counter for spectral parameter
-                ipar += spectral->size();
+            } // endif: pointer to spectral component was not NULL
 
-            } // endif: spectral component
-
-            // Increase parameter counter for temporal parameter
-            GModelTemporal* temporal = sky->temporal();
-            if (temporal != NULL)  {
-                ipar += temporal->size();
-            }
+            // Increment the parameter index
+            ipar += mptr->size();
 
         } // endfor: looped over model components
 
@@ -2510,7 +2495,7 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                     // Compute the parameter gradients for all model parameters
                     for (int k = 0; k < mptr->size(); ++k)  {
                         const GModelPar& par = (*mptr)[k];
-                        if (par.is_free() && ipar < npars)  {
+                        if (par.is_free() && ipar+k < npars)  {
                             (*grad)[ipar+k] += par.factor_gradient() * norm;
                         }
                     }
