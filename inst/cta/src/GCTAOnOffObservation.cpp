@@ -1485,9 +1485,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
                     // Get solid angle subtended by this pixel
                     double pixsolid = on_map->map().solidangle(pixidx);
 
-                    // Set event. Use an event bin and not an event atom for
-                    // this to avoid IRF caching. That's a dirty kludge, but
-                    // it works for now.
+                    // Set event
                     GCTAEventBin event;
                     event.dir(pixdir);
                     event.energy(energy);
