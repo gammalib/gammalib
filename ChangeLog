@@ -1,8 +1,9 @@
-2018-11-22
+2018-11-27
 
         * Version 1.6.0 released
         ========================
 
+        Add support for Fermi/LAT P8V3 response functions
         CTA background rates are now per ontime (#2758)
         Remove diffuse response cube caching (#2722)
         Revise GCTAEdispCube::operator() interface and disable stacked response

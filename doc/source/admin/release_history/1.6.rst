@@ -49,7 +49,7 @@ Bug fixes
 Improvements
 ------------
 
-
+* Add support for Fermi/LAT P8V3 response functions
 * [`2721 <https://cta-redmine.irap.omp.eu/issues/2721>`_] -
   Revise ``GCTAEdispCube::operator()`` interface and disable stacked response
   cutting in true energy

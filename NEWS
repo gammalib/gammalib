@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-22 November 2018
+23 November 2018
 
 
 1. Introduction
@@ -310,7 +310,8 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-None
+The P8V3 Fermi/LAT response functions are now included in the package and
+unit tests for that response functions were added.
 
 
 20. CTA interface

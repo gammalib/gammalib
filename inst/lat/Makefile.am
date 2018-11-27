@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for lat module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -133,7 +133,46 @@ caldb_ea    = caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_front.fits.gz \
               caldb/data/glast/lat/bcf/ea/aeff_P8R2_ULTRACLEANVETO_V6_PSF.fits.gz \
               caldb/data/glast/lat/bcf/ea/aeff_P8R2_ULTRACLEAN_V6_EDISP.fits.gz \
               caldb/data/glast/lat/bcf/ea/aeff_P8R2_ULTRACLEAN_V6_FB.fits.gz \
-              caldb/data/glast/lat/bcf/ea/aeff_P8R2_ULTRACLEAN_V6_PSF.fits.gz
+              caldb/data/glast/lat/bcf/ea/aeff_P8R2_ULTRACLEAN_V6_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_CLEAN_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_CLEAN_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_CLEAN_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCEVETO_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCEVETO_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCEVETO_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT010E_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT010E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT010E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT010_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT010_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT010_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT015S_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT015S_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT015S_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT020E_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT020E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT020E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT020_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT020_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT020_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100E_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100S_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100S_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100S_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_TRANSIENT100_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_ULTRACLEANVETO_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_ULTRACLEANVETO_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_ULTRACLEANVETO_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_ULTRACLEAN_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_ULTRACLEAN_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/ea/aeff_P8R3_ULTRACLEAN_V2_PSF.fits.gz
 caldb_edisp = caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_back.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P7CLEAN_V6_front.fits.gz \
@@ -187,7 +226,53 @@ caldb_edisp = caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEANVETO_V6_PSF.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEAN_V6_EDISP.fits.gz \
               caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEAN_V6_FB.fits.gz \
-              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEAN_V6_PSF.fits.gz
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEAN_V6_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_TRANSIENT100_V6_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEANVETO_V6_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEANVETO_V6_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEANVETO_V6_PSF.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEAN_V6_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEAN_V6_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R2_ULTRACLEAN_V6_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_CLEAN_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_CLEAN_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_CLEAN_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCEVETO_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCEVETO_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCEVETO_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT010E_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT010E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT010E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT010_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT010_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT010_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT015S_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT015S_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT015S_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT020E_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT020E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT020E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT020_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT020_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT020_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100E_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100S_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100S_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100S_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_TRANSIENT100_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_ULTRACLEANVETO_V2_EDISP.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_ULTRACLEANVETO_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_ULTRACLEANVETO_V2_PSF.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_ULTRACLEAN_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_ULTRACLEAN_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/edisp/edisp_P8R3_ULTRACLEAN_V2_PSF.fits.gz
 caldb_psf   = caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_front.fits.gz \
               caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_back.fits.gz \
               caldb/data/glast/lat/bcf/psf/psf_P7CLEAN_V6_front.fits.gz \
@@ -241,7 +326,46 @@ caldb_psf   = caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_front.fits.gz \
               caldb/data/glast/lat/bcf/psf/psf_P8R2_ULTRACLEANVETO_V6_PSF.fits.gz \
               caldb/data/glast/lat/bcf/psf/psf_P8R2_ULTRACLEAN_V6_EDISP.fits.gz \
               caldb/data/glast/lat/bcf/psf/psf_P8R2_ULTRACLEAN_V6_FB.fits.gz \
-              caldb/data/glast/lat/bcf/psf/psf_P8R2_ULTRACLEAN_V6_PSF.fits.gz
+              caldb/data/glast/lat/bcf/psf/psf_P8R2_ULTRACLEAN_V6_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_CLEAN_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_CLEAN_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_CLEAN_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCEVETO_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCEVETO_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCEVETO_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT010E_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT010E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT010E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT010_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT010_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT010_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT015S_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT015S_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT015S_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT020E_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT020E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT020E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT020_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT020_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT020_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100E_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100E_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100E_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100S_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100S_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100S_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_TRANSIENT100_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_ULTRACLEANVETO_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_ULTRACLEANVETO_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_ULTRACLEANVETO_V2_PSF.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_ULTRACLEAN_V2_EDISP.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_ULTRACLEAN_V2_FB.fits.gz \
+              caldb/data/glast/lat/bcf/psf/psf_P8R3_ULTRACLEAN_V2_PSF.fits.gz
 
 # Distribute calibration database files
 caldbindxdir    = $(datadir)/caldb/data/glast/lat
@@ -288,7 +412,10 @@ testealat         = test/caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_front.fits.
                     test/caldb/data/glast/lat/bcf/ea/aeff_P7REP_SOURCE_V15_front.fits.gz \
                     test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_EDISP.fits.gz \
                     test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_FB.fits.gz \
-                    test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_PSF.fits.gz
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_PSF.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_EDISP.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_FB.fits.gz \
+                    test/caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_PSF.fits.gz
 testealatdir      = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf/ea
 testealat_DATA    = $(testealat)
 #
@@ -300,7 +427,10 @@ testedisplat      = test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.f
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_front.fits \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_EDISP.fits.gz \
                     test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_FB.fits.gz \
-                    test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_PSF.fits.gz
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_PSF.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_EDISP.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_FB.fits.gz \
+                    test/caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_PSF.fits.gz
 testedisplatdir   = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf/edisp
 testedisplat_DATA = $(testedisplat)
 #
@@ -312,7 +442,10 @@ testpsflat        = test/caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_front.fits.
                     test/caldb/data/glast/lat/bcf/psf/psf_P7REP_SOURCE_V15_front.fits.gz \
                     test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_EDISP.fits.gz \
                     test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_FB.fits.gz \
-                    test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_PSF.fits.gz
+                    test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_PSF.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_EDISP.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_FB.fits.gz \
+                    test/caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_PSF.fits.gz
 testpsflatdir     = $(pyexecdir)/gammalib/tests/lat/caldb/data/glast/lat/bcf/psf
 testpsflat_DATA   = $(testpsflat)
 
