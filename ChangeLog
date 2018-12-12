@@ -1,10 +1,11 @@
-2018-11-27
+2018-12-12
 
         * Version 1.6.0 released
         ========================
 
         Add support for Fermi/LAT P8V3 response functions
         CTA background rates are now per ontime (#2758)
+        Add GPythonOptimizerFunction class (#2733)
         Remove diffuse response cube caching (#2722)
         Revise GCTAEdispCube::operator() interface and disable stacked response
           cutting in true energy (#2721)
