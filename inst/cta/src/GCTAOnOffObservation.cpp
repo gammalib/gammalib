@@ -2675,8 +2675,11 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
         double ngam = N_gamma(models, i, &sky_grad);
         double nbgd = N_bgd(models, i, &bgd_grad);
 
-        // Skip bin if model is too small (avoids -Inf or NaN gradients)
+        // Compute and updated predicted number of events
         double nonpred = ngam + alpha * nbgd;
+        *npred        += nonpred;
+
+        // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if ((nbgd <= minmod) || (nonpred <= minmod)) {
             #if defined(G_LIKELIHOOD_DEBUG)
             n_small_model++;
@@ -2685,10 +2688,8 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
         }
 
         // Now we have all predicted gamma and background events for
-        // current energy bin. Update the log(likelihood) and predicted
-        // number of events
-        value  += -non * log(nonpred) + nonpred - noff * log(nbgd) + nbgd;
-        *npred += nonpred;
+        // current energy bin. Update the log(likelihood)
+        value += -non * std::log(nonpred) + nonpred - noff * std::log(nbgd) + nbgd;
 
         // Update statistics
         #if defined(G_LIKELIHOOD_DEBUG)
