@@ -800,51 +800,52 @@ bool operator==(const GSkyDir &a, const GSkyDir &b)
 
     // Compute dependent on coordinate system availability. This speeds
     // up things by avoiding unnecessary coordinate transformations.
-    if (a.m_has_lb) {
-        if (b.m_has_lb) {
-            if (std::abs(a.m_b) == 90.0) {
-                equal = (a.m_b == b.m_b);
-            }
-            else {
-                equal = (a.m_b == b.m_b && a.m_l == b.m_l);
-            }
+
+    // Check if both have equatorial coordinates
+    if (a.m_has_radec && b.m_has_radec) {
+        if (std::abs(a.m_dec) == 90.0) {
+            equal = (a.m_dec == b.m_dec);
         }
         else {
+            equal = (a.m_dec == b.m_dec && a.m_ra == b.m_ra);
+        }
+    }
+    // ... check if both have Galactic coordinates
+    else if (a.m_has_lb && b.m_has_lb) {
+        if (std::abs(a.m_b) == 90.0) {
+            equal = (a.m_b == b.m_b);
+        }
+        else {
+            equal = (a.m_b == b.m_b && a.m_l == b.m_l);
+        }
+    }
+    // ... otherwise the coordinate systems are different
+    else {
+        if (a.m_has_lb) {
             if (std::abs(a.m_b) == 90.0) {
                 equal = (a.m_b == b.b());
             }
             else {
                 equal = (a.m_b == b.b() && a.m_l == b.l());
             }
-        }
-    }
-    else if (a.m_has_radec) {
-        if (b.m_has_radec) {
+        } 
+        else if (a.m_has_radec) {
             if (std::abs(a.m_dec) == 90.0) {
-                equal = (a.m_dec == b.m_dec);
-            }
-            else {
-            equal = (a.m_dec == b.m_dec && a.m_ra == b.m_ra);
-            }
-        }
-        else {
-            if (std::abs(a.m_dec) == 90.0) {
-            equal = (a.m_dec == b.dec());
+                equal = (a.m_dec == b.dec());
             }
             else {
                 equal = (a.m_dec == b.dec() && a.m_ra == b.ra());
             }
         }
-    }
-    else {
-        if (std::abs(b.dec()) == 90.0) {
-            equal = (b.dec() == a.dec());
-        }
         else {
-            equal = (b.dec() == a.dec() && b.ra() == a.ra());
+            if (std::abs(b.dec()) == 90.0) {
+                equal = (b.dec() == a.dec());
+            }
+            else {
+                equal = (b.dec() == a.dec() && b.ra() == a.ra());
+            }
         }
     }
-
     // Return equality
     return equal;
 }
