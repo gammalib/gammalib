@@ -953,10 +953,8 @@ void GWcs::init_members(void)
     m_last_dir2pix_pix.clear();
 
     // Initialize the locks
-    #ifdef _OPENMP
     init_lock(1);
     init_lock(2);
-    #endif
 
     // Return
     return;
