@@ -678,13 +678,16 @@ GSkyDir GWcs::pix2dir(const GSkyPixel& pixel) const
     // the one used for the cache, then get the cached sky direction. We need
     // to put this in a OMP critical zone so that no other thread will change
     // the cache in the meantime
-    #pragma omp critical(GWcs_pix2dir_1)
+    bool update_cache = true;
+    set_lock(2);
     if (m_has_pix2dir_cache && (m_last_pix2dir_pix == pixel)) {
         dir = m_last_pix2dir_dir;
+        update_cache = false;
     }
+    unset_lock(2);
 
     // ... otherwise the computation of the sky direction is needed
-    else {
+    if (update_cache) {
 
         // Allocate memory for transformation
         double pixcrd[2];
@@ -712,12 +715,13 @@ GSkyDir GWcs::pix2dir(const GSkyPixel& pixel) const
 
         // Store result in cache. We need to put this in a OMP critical zone
         // to make sure that no other thread is fiddeling with the cache
-        #pragma omp critical(GWcs_pix2dir_2)
+        set_lock(2);
         {
             m_has_pix2dir_cache = true;
             m_last_pix2dir_pix  = pixel;
             m_last_pix2dir_dir  = dir;
         }
+        unset_lock(2);
 
         // Debug: Dump transformation steps
         #if defined(G_XY2DIR_DEBUG)
@@ -758,13 +762,16 @@ GSkyPixel GWcs::dir2pix(const GSkyDir& dir) const
     // to the one used for the cache, then get the cached sky pixel. We need
     // to put this in a OMP critical zone so that no other thread will change
     // the cache in the meantime
-    #pragma omp critical(GWcs_dir2pix_1)
+    bool update_cache = true;
+    set_lock(1);
     if (m_has_dir2pix_cache && (m_last_dir2pix_dir == dir)) {
         pixel = m_last_dir2pix_pix;
+        update_cache = false;
     }
+    unset_lock(1);
 
     // ... otherwise the computation of the sky pixel is needed
-    else {
+    if (update_cache) {
 
         // Allocate memory for transformation
         double pixcrd[2];
@@ -793,12 +800,13 @@ GSkyPixel GWcs::dir2pix(const GSkyDir& dir) const
 
         // Store result in cache. We need to put this in a OMP critical zone
         // to make sure that no other thread is fiddeling with the cache
-        #pragma omp critical(GWcs_dir2pix_2)
+        set_lock(1);
         {
             m_has_dir2pix_cache = true;
             m_last_dir2pix_dir  = dir;
             m_last_dir2pix_pix  = pixel;
         }
+        unset_lock(1);
 
         // Debug: Dump transformation steps
         #if defined(G_DIR2XY_DEBUG)
@@ -943,6 +951,12 @@ void GWcs::init_members(void)
     m_last_dir2pix_dir.clear();
     m_last_pix2dir_pix.clear();
     m_last_dir2pix_pix.clear();
+
+    // Initialize the locks
+    #ifdef _OPENMP
+    init_lock(1);
+    init_lock(2);
+    #endif
 
     // Return
     return;

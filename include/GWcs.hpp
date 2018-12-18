@@ -30,12 +30,17 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
+#include <map>
 #include <iostream>
 #include "GSkyProjection.hpp"
 #include "GLog.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 
 /***********************************************************************//**
@@ -220,6 +225,15 @@ protected:
     mutable GSkyDir   m_last_dir2pix_dir;  //!< Last sky direction for dir2pix
     mutable GSkyPixel m_last_pix2dir_pix;  //!< Last pixel for pix2dir
     mutable GSkyPixel m_last_dir2pix_pix;  //!< Last pixel for dir2pix
+    
+    // Thread locking
+    void init_lock(const int& lock_id=0) const;
+    void set_lock(const int& lock_id=0) const;
+    void unset_lock(const int& lock_id=0) const;
+
+    #ifdef _OPENMP
+    mutable std::map<int, omp_lock_t> m_locks;
+    #endif
 };
 
 
@@ -234,6 +248,51 @@ inline
 int GWcs::size(void) const
 {
     return 2;
+}
+
+
+/***********************************************************************//**
+ * @brief Initializes an OpenMP lock with a specific name
+ *
+ * @param[in] lock_name     Name of the lock that should be initialized
+ ***************************************************************************/
+inline
+void GWcs::init_lock(const int& lock_id) const
+{
+    #ifdef _OPENMP
+    if (m_locks.count(lock_id) == 0) {
+        m_locks[lock_id] = omp_lock_t();
+        omp_init_lock(&m_locks[lock_id]);
+    }
+    #endif
+}
+
+
+/***********************************************************************//**
+ * @brief Sets an OpenMP lock with a specific name
+ *
+ * @param[in] lock_name     Name of the lock that should be set
+ ***************************************************************************/
+inline
+void GWcs::set_lock(const int& lock_id) const
+{
+    #ifdef _OPENMP
+    omp_set_lock(&m_locks[lock_id]);
+    #endif
+}
+
+
+/***********************************************************************//**
+ * @brief Releases a previously set OpenMP lock 
+ * 
+ * @param[in] lock_name     Name of the lock to be released
+ ***************************************************************************/
+inline
+void GWcs::unset_lock(const int& lock_id) const
+{
+    #ifdef _OPENMP
+    omp_unset_lock(&m_locks[lock_id]);
+    #endif
 }
 
 #endif /* GWCS_HPP */
