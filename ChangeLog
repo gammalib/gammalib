@@ -1,8 +1,9 @@
-2018-12-12
+2019-01-09
 
         * Version 1.6.0 released
         ========================
 
+        Improve OpenMP handling in GWcs::dir2pix (#2770)
         Add support for Fermi/LAT P8V3 response functions
         CTA background rates are now per ontime (#2758)
         Add GPythonOptimizerFunction class (#2733)

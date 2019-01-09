@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-12 December 2018
+9 January 2019
 
 
 1. Introduction
@@ -248,6 +248,9 @@ None
 
 12. Sky module
 --------------
+An OpenMP locking mechanism was added to GWcs::dir2pix that improves the speed of
+the code parallelization by avoiding mutual lockups of the threads (#2770).
+
 The class GWcsARC was added to handle ARC WCS projections (#2541). In addition
 the private GWcs::prj_bchk() method was added to implement boundary checking
 similar to the checking done in WCS.

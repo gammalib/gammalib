@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.cpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *

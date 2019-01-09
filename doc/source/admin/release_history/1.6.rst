@@ -49,6 +49,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2770 <https://cta-redmine.irap.omp.eu/issues/2770>`_] -
+  Improve OpenMP handling in ``GWcs::dir2pix``
 * Add support for Fermi/LAT P8V3 response functions
 * [`2733 <https://cta-redmine.irap.omp.eu/issues/2733>`_] -
   Add ``GPythonOptimizerFunction`` class

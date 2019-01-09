@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.hpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -254,7 +254,7 @@ int GWcs::size(void) const
 /***********************************************************************//**
  * @brief Initializes an OpenMP lock with a specific name
  *
- * @param[in] lock_name     Name of the lock that should be initialized
+ * @param[in] lock_id Identifier of the lock that should be initialized
  ***************************************************************************/
 inline
 void GWcs::init_lock(const int& lock_id) const
@@ -271,7 +271,7 @@ void GWcs::init_lock(const int& lock_id) const
 /***********************************************************************//**
  * @brief Sets an OpenMP lock with a specific name
  *
- * @param[in] lock_name     Name of the lock that should be set
+ * @param[in] lock_id Identifier of the lock that should be set
  ***************************************************************************/
 inline
 void GWcs::set_lock(const int& lock_id) const
@@ -285,7 +285,7 @@ void GWcs::set_lock(const int& lock_id) const
 /***********************************************************************//**
  * @brief Releases a previously set OpenMP lock 
  * 
- * @param[in] lock_name     Name of the lock to be released
+ * @param[in] lock_id Identifier of the lock to be released
  ***************************************************************************/
 inline
 void GWcs::unset_lock(const int& lock_id) const
