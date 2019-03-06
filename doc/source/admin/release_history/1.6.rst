@@ -19,6 +19,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`2838 <https://cta-redmine.irap.omp.eu/issues/2838>`_] -
+  Correct Nbgd computation in ``GCTAOnOffObservation`` for Non=0
 * [`2708 <https://cta-redmine.irap.omp.eu/issues/2708>`_] -
   Fix precision issue with ``GCTABackground3D`` Monte-Carlo simulations
 * [`2706 <https://cta-redmine.irap.omp.eu/issues/2706>`_] -

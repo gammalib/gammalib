@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.cpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2019 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -3269,7 +3269,7 @@ double GCTAOnOffObservation::wstat_value(const double& non,
 
     // Special case non = 0
     else if (non == 0.0) {
-        nbgd        = 0;
+        nbgd        = noff / alphap1;
         nonpred     = ngam + alpharat * noff;
         logL        = ngam + noff * std::log(alphap1);
         dlogLdsky   = 1.0;

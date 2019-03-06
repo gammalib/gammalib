@@ -1,8 +1,9 @@
-2019-01-09
+2019-03-06
 
         * Version 1.6.0 released
         ========================
 
+        Correct Nbgd computation in GCTAOnOffObservation for Non=0 (#2838)
         Improve OpenMP handling in GWcs::dir2pix (#2770)
         Add support for Fermi/LAT P8V3 response functions
         CTA background rates are now per ontime (#2758)

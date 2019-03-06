@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-9 January 2019
+6 March 2019
 
 
 1. Introduction
@@ -320,6 +320,9 @@ unit tests for that response functions were added.
 
 20. CTA interface
 -----------------
+A missing term was added in GCTAOnOffObservation::wstat_value for computation
+of the number of background counts in case that Non=0 (#2838).
+
 CTA background rates are now per ontime and not livetime. This makes the IRF
 background consistent with the cube background, and is also consistent with
 the open gamma data format (#2758).
