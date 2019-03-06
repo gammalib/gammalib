@@ -5,11 +5,95 @@ Known issues
 
 Below you will find a list of known issues.
 
+**Compilation issues**
+
+- :ref:`GammaLib does not compile against conda Python <conda_python>`
+- :ref:`GammaLib does not compile on Mac OS X <issue_macosx>`
+- :ref:`GammaLib does not compile on Solaris <issue_solaris>`
+- :ref:`GammaLib does not compile on OpenSolaris <issue_opensolaris>`
+
+**Unit testing issues**
+
 - :ref:`Many (but not all) unit tests fail <issue_test_fail>`
+
+**Other issues**
+
 - :ref:`Python module does not work <issue_python>`
-- :ref:`Mac OS X <issue_macosx>`
-- :ref:`Solaris <issue_solaris>`
-- :ref:`OpenSolaris <issue_opensolaris>`
+
+Compilation issues
+^^^^^^^^^^^^^^^^^^
+
+.. _conda_python:
+
+.. topic:: GammaLib does not compile against conda Python
+
+   Trying to compile GammaLib against conda Python may fail due to
+   incompatibility issues. If you'd like to compile GammaLib against conda
+   Python, make sure that gcc, swig, and cfitsio are all installed via
+   anaconda
+
+   .. code-block:: bash
+
+      $ conda install gcc swig
+      $ conda install -c conda-forge cfitsio
+
+.. _issue_macosx:
+
+.. topic:: GammaLib does not compile on Mac OS X
+
+   Dependent on the Mac OS X version you are using, not everything that
+   is needed to install GammaLib may be available (e.g. automake, libtool, 
+   etc...). The easiest way to get the needed software is using a package 
+   management system such as `MacPorts <https://www.macports.org/>`_ or 
+   `Homebrew <http://brew.sh/>`_. On a fresh El Capitan install you need 
+   for example the following from `Homebrew <http://brew.sh/>`_:
+
+   .. code-block:: bash
+
+      $ brew install automake
+      $ brew install libtool
+      $ brew install cfitsio
+      $ brew install swig
+
+   `swig <http://www.swig.org/>`_ is only necessary if you installed the 
+   code from git. Dependening on your system, you also may need to install
+   the Python development package.
+
+.. _issue_solaris:
+
+.. topic:: GammaLib does not compile on Solaris
+
+   Although GammaLib builds on Solaris using the Sun compiler, there are
+   problems with global symbols in shared libraries and exception catching,
+   which prevents the FITS interface to work correctly. GammaLib has
+   however been built and tested successfully using the GNU compiler, and
+   this is the only build method that is currently supported. Problems have
+   also been encountered when compiling cfitsio versions more recent than
+   3.250. The problems have been reported to the cfitsio developer team,
+   and are likely to be solved in the future. For the time being, it is
+   recommended to use cfitsio version 3.250 on Solaris.
+
+.. _issue_opensolaris:
+
+.. topic:: GammaLib does not compile on OpenSolaris
+
+   On OpenSolaris, the same problems concerning the SunStudio compiler
+   occur as for Solaris, and also here, the GNU compiler is the recommended
+   tool to build GammaLib. Also here, cfitsio version 3.250 is the
+   recommended library as more recent version feature relocation
+   problems. GammaLib has been tested using gcc 4.3.2 on OpenSolaris
+   2009.06. Make sure to create the following symbolic links if they do
+   not yet exist on your system:
+
+   .. code-block:: bash
+
+      $ ln -s /usr/bin/gcc4.3.2 /usr/bin/gcc
+      $ ln -s /usr/bin/g++4.3.2 /usr/bin/g++
+
+   They avoid excess warnings during compilation.
+
+Unit testing issues
+^^^^^^^^^^^^^^^^^^^
 
 .. _issue_test_fail:
 
@@ -48,6 +132,10 @@ Below you will find a list of known issues.
    on Mac OS X (``/directory/to/lib`` should be replaced by the correct
    library path on your system).
 
+
+Other issues
+^^^^^^^^^^^^
+
 .. _issue_python:
 
 .. topic:: Python module does not work
@@ -71,58 +159,3 @@ Below you will find a list of known issues.
    but if the wrappers don't exist you need `swig <http://www.swig.org/>`_.
    If the ``Python.h`` header file does not exist then install the Python
    development package.
-
-.. _issue_macosx:
-
-.. topic:: Mac OS X
-
-   Dependent on the Mac OS X version you are using, not everything that
-   is needed to install GammaLib may be available (e.g. automake, libtool, 
-   etc...). The easiest way to get the needed software is using a package 
-   management system such as `MacPorts <https://www.macports.org/>`_ or 
-   `Homebrew <http://brew.sh/>`_. On a fresh El Capitan install you need 
-   for example the following from `Homebrew <http://brew.sh/>`_:
-
-   .. code-block:: bash
-
-     $ brew install automake
-     $ brew install libtool
-     $ brew install cfitsio
-     $ brew install swig
-
-   `swig <http://www.swig.org/>`_ is only necessary if you installed the 
-   code from git. Dependening on your system, you also may need to install
-   the Python development package.
-
-.. _issue_solaris:
-
-.. topic:: Solaris
-
-   Although GammaLib builds on Solaris using the Sun compiler, there are
-   problems with global symbols in shared libraries and exception catching,
-   which prevents the FITS interface to work correctly. GammaLib has
-   however been built and tested successfully using the GNU compiler, and
-   this is the only build method that is currently supported. Problems have
-   also been encountered when compiling cfitsio versions more recent than
-   3.250. The problems have been reported to the cfitsio developer team,
-   and are likely to be solved in the future. For the time being, it is
-   recommended to use cfitsio version 3.250 on Solaris.
-
-.. _issue_opensolaris:
-
-.. topic:: OpenSolaris
-
-   On OpenSolaris, the same problems concerning the SunStudio compiler
-   occur as for Solaris, and also here, the GNU compiler is the recommended
-   tool to build GammaLib. Also here, cfitsio version 3.250 is the
-   recommended library as more recent version feature relocation
-   problems. GammaLib has been tested using gcc 4.3.2 on OpenSolaris
-   2009.06. Make sure to create the following symbolic links if they do
-   not yet exist on your system:
-
-   .. code-block:: bash
-
-      $ ln -s /usr/bin/gcc4.3.2 /usr/bin/gcc
-      $ ln -s /usr/bin/g++4.3.2 /usr/bin/g++
-
-   They avoid excess warnings during compilation.
