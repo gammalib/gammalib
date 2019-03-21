@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-6 March 2019
+21 March 2019
 
 
 1. Introduction
@@ -313,7 +313,11 @@ None
 
 
 19. Fermi-LAT interface
-----------------------
+-----------------------
+Add kludge that allows handling of source maps that do not have WCS information
+in the diffuse model maps. Such source maps are produced by the fermitools
+version 1.0 (#2850).
+
 The P8V3 Fermi/LAT response functions are now included in the package and
 unit tests for that response functions were added.
 

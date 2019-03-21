@@ -1,8 +1,9 @@
-2019-03-06
+2019-03-21
 
         * Version 1.6.0 released
         ========================
 
+        Add kludge to handle incomplete Fermi-LAT source maps (#2850)
         Correct Nbgd computation in GCTAOnOffObservation for Non=0 (#2838)
         Improve OpenMP handling in GWcs::dir2pix (#2770)
         Add support for Fermi/LAT P8V3 response functions

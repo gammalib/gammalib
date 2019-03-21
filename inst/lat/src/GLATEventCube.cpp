@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_MISSING_WCS_KLUDGE         //!< Handle source maps with missing WCS
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -380,11 +381,35 @@ void GLATEventCube::read(const GFits& fits)
 
     // Load additional source maps
     for (int i = 1; i < fits.size(); ++i) {
+
+        // Only consider image extensions
         if (fits.at(i)->exttype() == GFitsHDU::HT_IMAGE) {
+
+            // Get FITS image
             const GFitsImage& hdu_srcmap = *fits.image(i);
+
+            // Handle files that do not have WCS in their additional
+            // source map extensions
+            #if defined(G_MISSING_WCS_KLUDGE)
+            std::string keys[] = {"CTYPE1", "CTYPE2", "CTYPE3",
+                                  "CRPIX1", "CRPIX2", "CRPIX3",
+                                  "CRVAL1", "CRVAL2", "CRVAL3",
+                                  "CDELT1", "CDELT2", "CDELT3",
+                                  "CUNIT1", "CUNIT2", "CUNIT3",
+                                  "CROTA2"};
+            for (int i = 0; i < 16; ++i) {
+                if (!hdu_srcmap.has_card(keys[i])) {
+                    const_cast<GFitsImage&>(hdu_srcmap).card(hdu_cntmap.card(keys[i]));
+                }
+            }
+            #endif
+
+            // Read source map
             read_srcmap(hdu_srcmap);
-        }
-    }
+
+        } // endif: extension is an image
+
+    } // endfor: looped over additional source maps
 
     // Return
     return;
