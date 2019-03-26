@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -683,11 +683,9 @@ double GObservation::model_grad(const GModel&    model,
  * and the spatial model may eventually be noisy due to numerical integration
  * limits.
  *
- * The step size for the simple method has been fixed to 0.0002, which
- * corresponds to about 1 arcsec for parameters that are given in degrees.
- * The reasoning behind this value is that parameters that use numerical
- * gradients are typically angles, such as for example the position, and
- * we want to achieve arcsec precision with this method.
+ * The step size for the simple method has been fixed to 0.0002 times the
+ * parameter factor value (or 0.0002 in case that the parameter factor
+ * value is zero).
  ***************************************************************************/
 double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
 {
@@ -706,10 +704,9 @@ double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
         // Get actual parameter value
         double x = par.factor_value();
 
-        // Set fixed step size for computation of derivative.
-        // By default, the step size is fixed to 0.0002.
-        const double step_size = 0.0002; // ~1 arcsec
-        double       h         = step_size;
+        // Set fixed step size for computation of derivative
+        const double step_size = 0.0002;
+        double       h         = (x != 0.0) ? step_size*std::abs(x) : step_size;
 
         // Re-adjust the step-size h in case that the initial step size is
         // larger than the allowed parameter range 
