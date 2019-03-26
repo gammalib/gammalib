@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-21 March 2019
+26 March 2019
 
 
 1. Introduction
@@ -324,6 +324,10 @@ unit tests for that response functions were added.
 
 20. CTA interface
 -----------------
+The IRF integration precision in GCTAResponseIrf::irf_radial,
+GCTAResponseIrf::irf_elliptical and GCTAResponseIrf::irf_diffuse was set to
+6 to cope with the tabulated H.E.S.S. PSF (#2860).
+
 A missing term was added in GCTAOnOffObservation::wstat_value for computation
 of the number of background counts in case that Non=0 (#2838).
 

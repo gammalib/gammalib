@@ -19,6 +19,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`2860 <https://cta-redmine.irap.omp.eu/issues/2860>`_] -
+  Set CTA IRF integration iterations to 6 to cope with H.E.S.S. PSF
 * [`2838 <https://cta-redmine.irap.omp.eu/issues/2838>`_] -
   Correct Nbgd computation in ``GCTAOnOffObservation`` for Non=0
 * [`2708 <https://cta-redmine.irap.omp.eu/issues/2708>`_] -

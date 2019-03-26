@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2298,16 +2298,9 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
     // These values have been determined after careful testing, see
     // https://cta-redmine.irap.omp.eu/issues/1299
     // https://cta-redmine.irap.omp.eu/issues/1521
-    // Unless we have a shell model the number of iterations is set
-    // to 5. Only for a shell model we used an increased number of
-    // iterations to cover the case of a shell that has a width
-    // comparable to the angular resolution of CTA.
-    int iter_rho = 5;
-    int iter_phi = 5;
-    if (shell != NULL) {
-        iter_rho = 6;
-        iter_phi = 6;
-    }
+    // https://cta-redmine.irap.omp.eu/issues/2860
+    static const int iter_rho = 6;
+    static const int iter_phi = 6;
 
     // Get event attributes
     const GSkyDir& obsDir = dir.dir();
@@ -2500,8 +2493,9 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     // These values have been determined after careful testing, see
     // https://cta-redmine.irap.omp.eu/issues/1299
     // https://cta-redmine.irap.omp.eu/issues/1521
-    static const int iter_rho = 5;
-    static const int iter_phi = 5;
+    // https://cta-redmine.irap.omp.eu/issues/2860
+    static const int iter_rho = 6;
+    static const int iter_phi = 6;
 
     // Retrieve CTA pointing
     const GCTAPointing& pnt = gammalib::cta_pnt(G_IRF_ELLIPTICAL, obs);
@@ -2695,8 +2689,9 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
     // These values have been determined after careful testing, see
     // https://cta-redmine.irap.omp.eu/issues/1248
     // https://cta-redmine.irap.omp.eu/issues/2458
-    static const int min_iter_rho = 5;
-    static const int min_iter_phi = 5;
+    // https://cta-redmine.irap.omp.eu/issues/2860
+    static const int min_iter_rho = 6;
+    static const int min_iter_phi = 6;
     static const int max_iter_rho = 8;
     static const int max_iter_phi = 8;
 
