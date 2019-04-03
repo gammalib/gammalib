@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.hpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,10 +35,6 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
-class GTime;
-class GTimeReference;
-class GHorizDir;
-class GFitsTable;
 class GXmlElement;
 class GCTAInstDir;
 
@@ -62,7 +58,6 @@ public:
     GCTAPointing(void);
     explicit GCTAPointing(const GSkyDir& dir);
     explicit GCTAPointing(const GXmlElement& xml);
-    explicit GCTAPointing(const GFilename& filename);
     GCTAPointing(const GCTAPointing& pnt);
     virtual ~GCTAPointing(void);
 
@@ -73,6 +68,7 @@ public:
     void           clear(void);
     GCTAPointing*  clone(void) const;
     std::string    classname(void) const;
+    const bool&    is_valid(void) const;
     const GSkyDir& dir(void) const;
     void           dir(const GSkyDir& dir);
     GCTAInstDir    instdir(const GSkyDir& skydir) const;
@@ -82,9 +78,6 @@ public:
     const double&  azimuth(void) const;
     void           zenith(const double& zenith);  
     void           azimuth(const double& azimuth); 
-    GHorizDir      dir_horiz(const GTime& time) const;
-    void           load(const GFilename& filename);
-    void           read(const GFitsTable& table);
     void           read(const GXmlElement& xml);
     void           write(GXmlElement& xml) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
@@ -97,20 +90,14 @@ protected:
     void update(void) const;
 
     // Protected members
-    GSkyDir             m_dir;         //!< Pointing direction in sky coordinates
-    double              m_zenith;      //!< Pointing zenith angle
-    double              m_azimuth;     //!< Pointing azimuth angle
-    bool                m_has_table;   //!< Table is loaded
-    GNodeArray          m_table_nodes; //!< Pointing nodes
-    std::vector<double> m_table_az;    //!< Table of azimuths (rad)
-    std::vector<double> m_table_alt;   //!< Table of altitudes (rad)
-    GTime               m_table_tmin;  //!< Min time bound in table
-    GTime               m_table_tmax;  //!< Max time bound in table
-    GTimeReference      m_reference;   //!< Time reference
+    GSkyDir         m_dir;         //!< Pointing direction in sky coordinates
+    bool            m_valid;       //!< Validity flag
+    double          m_zenith;      //!< Pointing zenith angle (deg)
+    double          m_azimuth;     //!< Pointing azimuth angle (deg)
 
     // Cached members
-    mutable bool    m_has_cache;  //!< Has transformation cache
-    mutable GMatrix m_Rback;      //!< Rotation matrix
+    mutable bool    m_has_cache;   //!< Has transformation cache
+    mutable GMatrix m_Rback;       //!< Rotation matrix
 };
 
 
@@ -141,7 +128,7 @@ const GSkyDir& GCTAPointing::dir(void) const
 /***********************************************************************//**
  * @brief Return pointing zenith angle
  *
- * @return Pointing zenith angle.
+ * @return Pointing zenith angle (deg).
  ***************************************************************************/
 inline
 const double& GCTAPointing::zenith(void) const
@@ -153,7 +140,7 @@ const double& GCTAPointing::zenith(void) const
 /***********************************************************************//**
  * @brief Return pointing azimuth angle
  *
- * @return Pointing zenith angle.
+ * @return Pointing azimuth angle (deg).
  ***************************************************************************/
 inline
 const double& GCTAPointing::azimuth(void) const
@@ -164,7 +151,7 @@ const double& GCTAPointing::azimuth(void) const
 /***********************************************************************//**
  * @brief assign zenith angle
  *
- * @param[in] zenith The zenith angle. (deg)
+ * @param[in] zenith The zenith angle (deg).
  ***************************************************************************/
 inline
 void GCTAPointing::zenith(const double& zenith)
@@ -176,11 +163,24 @@ void GCTAPointing::zenith(const double& zenith)
 /***********************************************************************//**
  * @brief assign azimuth angle
  *
- * @param[in] azimuth The azimuth angle. (deg)
+ * @param[in] azimuth The azimuth angle (deg).
  ***************************************************************************/
 inline
 void GCTAPointing::azimuth(const double& azimuth)
 {
     m_azimuth = azimuth;
 }
+
+
+/***********************************************************************//**
+ * @brief Checks if pointing is valid
+ *
+ * @return True if pointing information is valid.
+ ***************************************************************************/
+inline
+const bool& GCTAPointing::is_valid(void) const
+{
+    return m_valid;
+}
+
 #endif /* GCTAPOINTING_HPP */

@@ -135,6 +135,7 @@ New features
 Clean up
 --------
 
+* Add ``GCTAPointing::is_valid()`` method and remove table methods
 * [`2758 <https://cta-redmine.irap.omp.eu/issues/2758>`_] -
   CTA background rates are now per ontime
 * [`2716 <https://cta-redmine.irap.omp.eu/issues/2716>`_] -

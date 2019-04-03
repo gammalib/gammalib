@@ -1,8 +1,9 @@
-2019-03-26
+2019-04-03
 
         * Version 1.6.0 released
         ========================
 
+        Add GCTAPointing::is_valid() method and remove table methods
         Set CTA IRF integration iterations to 6 to cope with H.E.S.S. PSF (#2860)
         Add kludge to handle incomplete Fermi-LAT source maps (#2850)
         Correct Nbgd computation in GCTAOnOffObservation for Non=0 (#2838)

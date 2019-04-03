@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,8 +50,7 @@ public:
     virtual TestGCTA*   clone(void) const { return new TestGCTA(*this); }
     virtual std::string classname(void) const { return "TestGCTA"; }
     void                test_instdir(void);
-    void                test_pointing_load_table(void);
-    void                test_pointing_interpolate_altaz(void);
+    void                test_pointing(void);
 };
 
 

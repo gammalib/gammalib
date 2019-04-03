@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-26 March 2019
+3 April 2019
 
 
 1. Introduction
@@ -94,6 +94,7 @@ The following methods have been added:
 - GCTAInstDir::has_dir()
 - GCTAInstDir::has_detx()
 - GCTAInstDir::has_dety()
+- GCTAPointing::is_valid()
 - GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)
 - GCTAEventAtom::index(int&)
 - GCTABackground::rate_ebin()
@@ -140,6 +141,8 @@ The following methods have been added:
 The following methods have been removed:
 - GSkyRegionMap::filename()
 - GCTAEventList::irf_cache()
+- GCTAPointing::dir_horiz()
+- GCTAPointing::read(const GFitsTable& table)
 
 The following methods have been renamed:
 - GPhoton::mc_id() from GPhoton::mcid()

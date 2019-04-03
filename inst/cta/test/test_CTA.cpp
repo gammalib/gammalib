@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,7 +70,6 @@ const std::string cta_edisp_rmf         = caldbdir+"/dc1/rmf.fits";
 const std::string cta_edisp_2D          = caldbdir+"/edisp_matrix.fits";
 const std::string cta_bgd_3D            = caldbdir+"/edisp_matrix.fits";
 const std::string cta_modbck_fit        = datadir+"/bg_test.fits";
-const std::string cta_point_table       = datadir+"/crab_pointing.fits";
 
 /* __ Test files for stacked analysis (based on Prod2::South_0.5h) _______ */
 const std::string cta_stacked_xml       = datadir+"/stacked_obs.xml";
@@ -98,15 +97,11 @@ void TestGCTA::set(void)
     // Set test name
     name("Miscellaneous CTA classes");
 
-    // Append GCTAInstDir tests to test suite
+    // Append tests to test suite
     append(static_cast<pfunction>(&TestGCTA::test_instdir),
            "Test GCTAInstDir class");
-
-    // Append GCTAPointing tests to test suite
-    append(static_cast<pfunction>(&TestGCTA::test_pointing_load_table),
-           "Test loading of table into GCTAPointing instance");
-    append(static_cast<pfunction>(&TestGCTA::test_pointing_interpolate_altaz),
-           "Test alt/az interpolation given a time");
+    append(static_cast<pfunction>(&TestGCTA::test_pointing),
+           "Test GCTAPointing class");
 
     // Return
     return;
@@ -355,50 +350,53 @@ void TestGCTA::test_instdir(void)
 
 
 /***********************************************************************//**
- * @brief Test ability to load a CTA pointing table
+ * @brief Test GCTAPointing class
  ***************************************************************************/
-void TestGCTA::test_pointing_load_table(void)
+void TestGCTA::test_pointing(void)
 {
-    // Allocate classes
-    GCTAPointing pnt;
+    // Test empty instance
+    GCTAPointing pnt1;
+    test_assert(!pnt1.is_valid(), "Test is_valid() method for empty instance");
+    test_value(pnt1.dir().ra_deg(), 0.0, "Test dir() method for empty instance");
+    test_value(pnt1.dir().dec_deg(), 0.0, "Test dir() method for empty instance");
+    test_value(pnt1.zenith(), 0.0, "Test zenith() method for empty instance");
+    test_value(pnt1.azimuth(), 0.0, "Test azimuth() method for empty instance");
 
-    // Load pointing table
-    pnt.load(cta_point_table);
+    // Test set instance
+    GSkyDir dir1;
+    dir1.radec_deg(83.6331, 22.0145);
+    GCTAPointing pnt2(dir1);
+    test_assert(pnt2.is_valid(), "Test is_valid() method for filled instance");
+    test_value(pnt2.dir().ra_deg(), 83.6331, "Test dir() method for filled instance");
+    test_value(pnt2.dir().dec_deg(), 22.0145, "Test dir() method for filled instance");
+    test_value(pnt2.zenith(), 0.0, "Test zenith() method for filled instance");
+    test_value(pnt2.azimuth(), 0.0, "Test azimuth() method for filled instance");
 
-    // Return
-    return;
-}
+    // Set and test azimuth and zenith angle
+    pnt2.zenith(10.0);
+    pnt2.azimuth(20.0);
+    test_value(pnt2.zenith(), 10.0, "Test zenith() method for filled instance");
+    test_value(pnt2.azimuth(), 20.0, "Test azimuth() method for filled instance");
 
+    // Check copying of instance
+    GCTAPointing pnt3(pnt2);
+    test_assert(pnt3.is_valid(), "Test is_valid() method for copied instance");
+    test_value(pnt3.dir().ra_deg(), 83.6331, "Test dir() method for copied instance");
+    test_value(pnt3.dir().dec_deg(), 22.0145, "Test dir() method for copied instance");
+    test_value(pnt3.zenith(), 10.0, "Test zenith() method for copied instance");
+    test_value(pnt3.azimuth(), 20.0, "Test azimuth() method for copied instance");
 
-/***********************************************************************//**
- * @brief Test interpolation of alt/az pointing dir as a function of time
- ***************************************************************************/
-void TestGCTA::test_pointing_interpolate_altaz(void)
-{
-    // Allocate classes
-    GCTAObservation run;
-    GCTAPointing    pnt;
-
-    // Load pointing table
-    pnt.load(cta_point_table);
-
-    // Test an out-of bounds time
-    test_try("Test an out-of bounds time");
-    try {
-        GTime time(155470378.7, "sec"); 
-        GHorizDir dir = pnt.dir_horiz(time);
-        test_try_failure();
-    }
-    catch (GException::out_of_range &exc) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Get a time that is somewhere in the run:
-    GTime time(-128526000.0, "sec"); 
-    GHorizDir dir = pnt.dir_horiz( time );
+    // Check coordinate transformation
+    GSkyDir dir2;
+    dir2.radec_deg(84.0, 23.0);
+    GCTAInstDir instdir = pnt3.instdir(dir2);
+    test_value(instdir.dir().ra_deg(),  84.0, "Test instdir() method");
+    test_value(instdir.dir().dec_deg(), 23.0, "Test instdir() method");
+    test_value(instdir.detx(), 0.0172073949348689, "Test instdir() method");
+    test_value(instdir.dety(), 0.00589484162385083, "Test instdir() method");
+    GSkyDir     skydir  = pnt3.skydir(instdir);
+    test_value(skydir.ra_deg(),  84.0, "Test skydir() method");
+    test_value(skydir.dec_deg(), 23.0, "Test skydir() method");
 
     // Return
     return;

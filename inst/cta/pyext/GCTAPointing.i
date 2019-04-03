@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAPointing.i  -  CTA pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2019 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -25,7 +25,6 @@
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GHorizDir.hpp"
 #include "GCTAPointing.hpp"
 %}
 
@@ -41,7 +40,6 @@ public:
     GCTAPointing(void);
     explicit GCTAPointing(const GSkyDir& dir);
     explicit GCTAPointing(const GXmlElement& xml);
-    explicit GCTAPointing(const GFilename& filename);
     GCTAPointing(const GCTAPointing& pnt);
     virtual ~GCTAPointing(void);
 
@@ -49,6 +47,7 @@ public:
     void           clear(void);
     GCTAPointing*  clone(void) const;
     std::string    classname(void) const;
+    const bool&    is_valid(void) const;
     const GSkyDir& dir(void) const;
     void           dir(const GSkyDir& dir);
     GCTAInstDir    instdir(const GSkyDir& skydir) const;
@@ -58,9 +57,6 @@ public:
     const double&  azimuth(void) const;
     void           zenith(const double& zenith);  
     void           azimuth(const double& azimuth); 
-    GHorizDir      dir_horiz(const GTime& time) const;
-    void           load(const GFilename& filename);
-    void           read(const GFitsTable& table);
     void           read(const GXmlElement& xml);
     void           write(GXmlElement& xml) const;
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.cpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,18 +31,11 @@
 #include "GTools.hpp"
 #include "GFilename.hpp"
 #include "GMatrix.hpp"
-#include "GNodeArray.hpp"
-#include "GHorizDir.hpp"
 #include "GSkyDir.hpp"
-#include "GTime.hpp"
-#include "GTimeReference.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_DIR_HORIZ                         "GCTAPointing::dir_horiz(GTime&)"
 #define G_READ_XML                         "GCTAPointing::read(GXmlElement&)"
 #define G_WRITE_XML                       "GCTAPointing::write(GXmlElement&)"
 
@@ -108,26 +101,6 @@ GCTAPointing::GCTAPointing(const GXmlElement& xml)
 
     // Read information from XML element
     read(xml);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief FITS file constructor
- *
- * @param[in] filename FITS file.
- *
- * Construct CTA pointing from a pointing table FITS file.
- ***************************************************************************/
-GCTAPointing::GCTAPointing(const GFilename& filename)
-{
-    // Initialise members
-    init_members();
-
-    // Load pointing table
-    load(filename);
 
     // Return
     return;
@@ -246,9 +219,13 @@ void GCTAPointing::dir(const GSkyDir& dir)
     // Invalidate cache
     m_has_cache = false;
 
+    // Signal that pointing is valid
+    m_valid = true;
+
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Get instrument direction from sky direction
@@ -358,154 +335,6 @@ const GMatrix& GCTAPointing::rot(void) const
 }
 
 
-/************************************************************************
- * @brief Return horizontal direction as function of time
- *
- * @param[in] time Time.
- * @return Horizontal direction.
- *
- * @exception GException::out_of_range
- *            Specified time is not in valid range.
- *
- * Returns the horizontal direction for the specified @p time.
- ************************************************************************/
-GHorizDir GCTAPointing::dir_horiz(const GTime& time) const
-{
-    // Initialize horizontal direction
-    GHorizDir dir;
-
-    // If no table has been loaded then ... TBD
-    if (m_has_table == false) {
-        // no pointing table, so either throw exception or return the
-        // average direction...
-    }
-
-    // ... otherwise interpolate the position
-    else {
-
-        // First check if time is inside table bounds
-
-        if (time < m_table_tmin || time > m_table_tmax) {
-            throw GException::out_of_range(G_DIR_HORIZ, time.secs(), 
-                                           m_table_tmin.secs(),
-                                           m_table_tmax.secs());
-        }
-
-        // Get interpolated alt and az for the given time using the
-        // pointing table
-        double alt = m_table_nodes.interpolate(time.secs(), m_table_alt);
-        double az  = m_table_nodes.interpolate(time.secs(), m_table_az);
-  
-        // Set direction
-        dir.altaz(alt,az);
-    }
-
-    // Return direction
-    return dir;
-}
-
-
-/************************************************************************
- * @brief Load pointings from a FITS file
- *
- * @param[in] filename FITS file name.
- *
- * Loads pointings from a pointing table FITS file.
- *
- * If no extension name is provided, the pointing is are loaded from the
- * "POINTING" extension.
- ************************************************************************/
-void GCTAPointing::load(const GFilename& filename)
-{
-    // Open FITS file
-    GFits fits(filename);
-
-    // Get pointing table
-    const GFitsTable& table = *fits.table(filename.extname("POINTING"));
-
-    // Read pointing from table
-    read(table);
-
-    // Close FITS file
-    fits.close();
-
-    // Return
-    return;
-}
-
-
-/************************************************************************
- * @brief Read pointings from a FITS table
- *
- * @param[in] filename Pointing table filename.
- * @param[in] extname Pointing extension name (defaults to "POINTING")
- *
- * Opens a FITS table with columns: START, STOP, ALT_PNT, AZ_PNT,
- * describing the pointing direction as a function of time in
- * horizontal coordinates, and creates an interpolation function for
- * getting the pointing alt/az for an arbitrary time.
- * 
- * The advantage of this method is that ctools does not need to
- * implement ra/dec to alt/az coordinate conversions, since the values
- * are pre-calculated.
- ************************************************************************/
-void GCTAPointing::read(const GFitsTable& table)
-{
-    // Read time reference
-    m_reference.read(table);
-
-    // Get number of elements in table
-    int nrows = table.nrows();
-
-    // Clear lookup table
-    m_table_nodes.clear();
-    m_table_az.clear();
-    m_table_alt.clear();
-    m_table_nodes.reserve(nrows);
-    m_table_az.reserve(nrows);
-    m_table_alt.reserve(nrows);
-
-    // Get relevant columns
-    const GFitsTableCol *start = table["START"];
-    const GFitsTableCol *stop  = table["STOP"];
-    const GFitsTableCol *alt   = table["ALT_PNT"];
-    const GFitsTableCol *az    = table["AZ_PNT"];
-
-    // later on, may also interpolate RA/Dec, in the case of a drift
-    //  scan or other tracking mode:
-    //     GFitsTableCol *ra     = (*table)["RA_PNT"];
-    //     GFitsTableCol *dec    = (*table)["DEC_PNT"];
-
-    // Loop over the elements and build a lookup table
-    for (int i = 0; i < nrows; ++i) {
-
-        // Set time
-        double midtime = 0.5*(stop->real(i) + start->real(i));
-        GTime  time(midtime, m_reference);
-        
-        // Append to lookup table
-        m_table_nodes.append(time.secs());
-        m_table_az.push_back(az->real(i)  * gammalib::deg2rad);
-        m_table_alt.push_back(alt->real(i) * gammalib::deg2rad);
-
-        // Set minimum and maximum time
-        if (i == 0) {
-            m_table_tmin = time;
-        }
-        else if (i == nrows-1) {
-            m_table_tmax = time;
-        }
-
-    } // endfor: looped over table
-
-    // Signal that table is available
-    m_has_table = true;
-
-    // Return
-    return;
-}
-
-
 /***********************************************************************//**
  * @brief Read pointing from XML element
  *
@@ -546,6 +375,9 @@ void GCTAPointing::read(const GXmlElement& xml)
         throw GException::invalid_value(G_READ_XML, msg);
     }
 
+    // Signal that pointing is valid
+    m_valid = true;
+
     // Return
     return;
 }
@@ -579,7 +411,7 @@ void GCTAPointing::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print CTA pointing information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing pointing information.
  ***************************************************************************/
 std::string GCTAPointing::print(const GChatter& chatter) const
@@ -617,15 +449,9 @@ void GCTAPointing::init_members(void)
 {
     // Initialise members
     m_dir.clear();
-    m_zenith    = 0.0;
-    m_azimuth   = 0.0;
-    m_has_table = false;
-    m_table_nodes.clear();
-    m_table_az.clear();
-    m_table_alt.clear();
-    m_table_tmin.clear();
-    m_table_tmax.clear();
-    m_reference.clear();
+    m_valid   = false;
+    m_zenith  = 0.0;
+    m_azimuth = 0.0;
 
     // Initialise cache
     m_has_cache = false;
@@ -644,16 +470,10 @@ void GCTAPointing::init_members(void)
 void GCTAPointing::copy_members(const GCTAPointing& pnt)
 {
     // Copy members
-    m_dir         = pnt.m_dir;
-    m_zenith      = pnt.m_zenith;
-    m_azimuth     = pnt.m_azimuth;
-    m_has_table   = pnt.m_has_table;
-    m_table_nodes = pnt.m_table_nodes;
-    m_table_az    = pnt.m_table_az;
-    m_table_alt   = pnt.m_table_alt;
-    m_table_tmin  = pnt.m_table_tmin;
-    m_table_tmax  = pnt.m_table_tmax;
-    m_reference   = pnt.m_reference;
+    m_dir       = pnt.m_dir;
+    m_valid     = pnt.m_valid;
+    m_zenith    = pnt.m_zenith;
+    m_azimuth   = pnt.m_azimuth;
 
     // Copy cache
     m_has_cache = pnt.m_has_cache;
