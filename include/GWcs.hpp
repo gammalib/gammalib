@@ -62,7 +62,7 @@ public:
     virtual ~GWcs(void);
 
     // Operators
-    virtual GWcs& operator= (const GWcs& wcs);
+    virtual GWcs& operator=(const GWcs& wcs);
 
     // Pure virtual base class methods
     virtual void        clear(void) = 0;
@@ -104,11 +104,12 @@ protected:
                              const double& crpix1, const double& crpix2,
                              const double& cdelt1, const double& cdelt2);
     virtual bool compare(const GSkyProjection& proj) const;
-    bool         undefined(const double& value) const { return (value==UNDEFINED); }
+    bool         undefined(const double& value) const;
 
     // Methods adapted from wcslib::wcs.c 
     void        wcs_ini(int naxis);
     void        wcs_set(void) const;
+    void        wcs_set_radesys(void) const;
     void        wcs_set_ctype(void) const;
     void        wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
                         double* phi, double* theta, double* world, int* stat) const;
@@ -177,8 +178,8 @@ protected:
     mutable double                   m_latpole; //!< LATPOLEa keyvalue
     double                           m_restfrq; //!< RESTFRQa keyvalue
     double                           m_restwav; //!< RESTWAVa keyvalue
-    std::string                      m_radesys; //!< RADESYS keyvalue
-    double                           m_equinox; //!< EQUINOX keyvalue
+    mutable std::string              m_radesys; //!< RADESYS keyvalue
+    mutable double                   m_equinox; //!< EQUINOX keyvalue
     std::vector<double>              m_cd;      //!< CDi_ja linear transformation matrix
     std::vector<double>              m_crota;   //!< CROTAia keyvalues for each coord axis
     int                              m_lng;     //!< Longitude axis
@@ -248,6 +249,19 @@ inline
 int GWcs::size(void) const
 {
     return 2;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if value is undefined
+ * 
+ * @param[in] value Value to check
+ * @return True if @p value is undefined, false otherwise
+ ***************************************************************************/
+inline
+bool GWcs::undefined(const double& value) const
+{
+    return (value==UNDEFINED);
 }
 
 

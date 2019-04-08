@@ -299,6 +299,16 @@ void GWcs::read(const GFitsHDU& hdu)
         // Set standard parameters
         set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
 
+        // Optionally read "RADESYS" and "EQUINOX" keywords (needs to come
+        // before wcs_set() since the method will eventually complement
+        // missing keywords)
+        if (hdu.has_card("RADESYS")) {
+            m_radesys = hdu.string("RADESYS");
+        }
+        if (hdu.has_card("EQUINOX")) {
+            m_equinox = hdu.real("EQUINOX");
+        }
+
         // Setup WCS derived parameters
         wcs_set();
 
@@ -1282,8 +1292,73 @@ void GWcs::wcs_set(void) const
     // Initialize the linear transformation
     lin_set();
 
+    // Set defaults for radesys and equinox
+    wcs_set_radesys();
+
     // Signal that WCS is set
     m_wcsset = true;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set radesys and equinox members
+ *
+ * Set default values for radesys and equinox for equatorial, ecliptic or
+ * helioecliptic coordinates. For other coordinates the radesys and equinox
+ * members are set to empty/undefined values.
+ *
+ * This method has been inspired by code from wcs.c::wcsset.
+ ***************************************************************************/
+void GWcs::wcs_set_radesys(void) const
+{
+    // Set defaults for radesys and equinox for equatorial, ecliptic or
+    // helioecliptic coordinates
+    if ((m_coordsys == 0) || (m_coordsys == 2) || (m_coordsys == 3)) {
+
+        // If radesys is undefined then set it dependend on the equinox.
+        // If equinox is undefined then use "ICRS", otherwise use "FK4" if
+        // equinox is smaller than 1984 and "FK5" for later equinoxes
+        if (m_radesys.empty()) {
+            if (undefined(m_equinox)) {
+                m_radesys = "ICRS";
+            }
+            else if (m_equinox < 1984.0) {
+                m_radesys = "FK4";
+            }
+            else {
+                m_radesys = "FK5";
+            }
+        }
+
+        // ... otherwise, if radesys is "ICRS" or "GAPPT" then set the equinox
+        // to undefined since the equinox is not applicable for these coordinate
+        // systems
+        else if ((m_radesys == "ICRS") || (m_radesys == "GAPPT")) {
+            m_equinox = UNDEFINED;
+        }
+
+        // ... otherwise, if equinox is undefined and radesys is "FK5" then
+        // set equinox to 2000.0 and if RADESYS is "FK4" or "FK4-NO-E" then
+        // set equinox to 1950.0
+        else if (undefined(m_equinox)) {
+            if (m_radesys == "FK5") {
+                m_equinox = 2000.0;
+            }
+            else if ((m_radesys == "FK4") || (m_radesys == "FK4-NO-E")) {
+                m_equinox = 1950.0;
+            }
+        }
+
+    } // endif: coordinate system requires RADESYS
+
+    // ... otherwise reset radesys and set equinox to undefined
+    else {
+        m_radesys.clear();
+        m_equinox = UNDEFINED;
+    }
 
     // Return
     return;

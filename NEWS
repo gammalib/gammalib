@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-3 April 2019
+8 April 2019
 
 
 1. Introduction
@@ -251,6 +251,10 @@ None
 
 12. Sky module
 --------------
+The GWcs::wcs_set() method now sets m_radesys and m_equinox members through the
+new protected GWcs::wcs_set_radesys() method. By default, sky maps now have
+a RADECSYS=ICRS keyword (#2866).
+
 An OpenMP locking mechanism was added to GWcs::dir2pix that improves the speed of
 the code parallelization by avoiding mutual lockups of the threads (#2770).
 
