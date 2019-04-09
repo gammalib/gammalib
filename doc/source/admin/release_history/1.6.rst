@@ -55,6 +55,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2867 <https://cta-redmine.irap.omp.eu/issues/2867>`_] -
+  Take instrument scale factors in On/Off analysis into account
 * [`2850 <https://cta-redmine.irap.omp.eu/issues/2850>`_] -
   Add kludge to handle incomplete Fermi-LAT source maps
 * [`2770 <https://cta-redmine.irap.omp.eu/issues/2770>`_] -

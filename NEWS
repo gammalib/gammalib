@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-8 April 2019
+9 April 2019
 
 
 1. Introduction
@@ -331,6 +331,10 @@ unit tests for that response functions were added.
 
 20. CTA interface
 -----------------
+Instrument scale factors are now also taken in an On/Off analysis into account.
+The scale factors were added to the computation in GCTAOnOffObservation::N_gamma()
+(#2867).
+
 The IRF integration precision in GCTAResponseIrf::irf_radial,
 GCTAResponseIrf::irf_elliptical and GCTAResponseIrf::irf_diffuse was set to
 6 to cope with the tabulated H.E.S.S. PSF (#2860).

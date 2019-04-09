@@ -1,8 +1,9 @@
-2019-04-08
+2019-04-09
 
         * Version 1.6.0 released
         ========================
 
+        Take instrument scale factors in On/Off analysis into account (#2867)
         GWcs::wcs_set() method now sets radesys and equinox members (#2866)
         Add GCTAPointing::is_valid() method and remove table methods
         Set CTA IRF integration iterations to 6 to cope with H.E.S.S. PSF (#2860)

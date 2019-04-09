@@ -2329,6 +2329,9 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                 double rmf_sum = 0.0;
                 #endif
 
+                // Set instrument scale factor
+                double scale = (sky->has_scales()) ? sky->scale(instrument()).value() : 1.0;
+
                 // Loop over true energy bins
                 for (int itrue = 0; itrue < m_arf.size(); ++itrue) {
 
@@ -2357,7 +2360,7 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
 
                     // Compute normalisation factors
                     double exposure  = m_on_spec.exposure();
-                    double norm_flux = arf * exposure * rmf;
+                    double norm_flux = arf * exposure * rmf * scale;
                     double norm_grad = norm_flux * etruewidth;
 
                     // Determine number of gamma-ray events in model by
