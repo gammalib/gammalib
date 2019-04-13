@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-9 April 2019
+13 April 2019
 
 
 1. Introduction
@@ -20,6 +20,7 @@ The following classes have been added:
 - GCTAModelSpatial
 - GCTAModelSpatialMultiplicative
 - GCTAModelSpatialRegistry
+- GCTAModelSpatialGaussSpectrum
 
 The following classes have been removed:
 - GCTACubeSourceDiffuse
@@ -331,6 +332,9 @@ unit tests for that response functions were added.
 
 20. CTA interface
 -----------------
+Add the GCTAModelSpatialGaussSpectrum class that implements an energy-dependent
+Gaussian spatial background model (#2868).
+
 Instrument scale factors are now also taken in an On/Off analysis into account.
 The scale factors were added to the computation in GCTAOnOffObservation::N_gamma()
 (#2867).

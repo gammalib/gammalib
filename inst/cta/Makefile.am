@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for cta module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2019 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -75,6 +75,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAPointing.cpp \
           src/GCTAModelBackground.cpp \
           src/GCTAModelSpatial.cpp \
+          src/GCTAModelSpatialGaussSpectrum.cpp \
           src/GCTAModelSpatialGradient.cpp \
           src/GCTAModelSpatialMultiplicative.cpp \
           src/GCTAModelSpatialRegistry.cpp \
@@ -129,6 +130,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTACubeSource.hpp \
                      include/GCTAModelBackground.hpp \
                      include/GCTAModelSpatial.hpp \
+                     include/GCTAModelSpatialGaussSpectrum.hpp \
                      include/GCTAModelSpatialGradient.hpp \
                      include/GCTAModelSpatialMultiplicative.hpp \
                      include/GCTAModelSpatialRegistry.hpp \

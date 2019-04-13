@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="My model" type="CTABackground" instrument="CTA">
+    <spectrum type="PowerLaw">
+      <parameter name="Prefactor"   scale="1e-6" value="61.8" min="0.0"  max="1000.0" free="1"/>
+      <parameter name="Index"       scale="-1"   value="1.85" min="0.0"  max="+5.0"   free="1"/>
+      <parameter name="PivotEnergy" scale="1e6"  value="1.0"  min="0.01" max="1000.0" free="0"/>
+    </spectrum>
+    <spatialModel type="EnergyDependentGaussian">
+      <sigma type="NodeFunction">
+        <node>
+          <parameter name="Energy"    value="1"   scale="300000" free="0" />
+          <parameter name="Intensity" value="3.0" scale="1.0"    min="1.5" max="100.0" free="1" />
+        </node>
+        <node>
+          <parameter name="Energy"    value="1"   scale="10000000" free="0" />
+          <parameter name="Intensity" value="4.0" scale="1.0"      min="1.5" max="100.0"  free="1" />
+        </node>
+      </sigma>
+    </spatialModel>
+  </source>
+</source_library>

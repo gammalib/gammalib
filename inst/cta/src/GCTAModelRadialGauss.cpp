@@ -533,7 +533,7 @@ void GCTAModelRadialGauss::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print point source information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing point source information.
  ***************************************************************************/
 std::string GCTAModelRadialGauss::print(const GChatter& chatter) const

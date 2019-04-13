@@ -1,7 +1,7 @@
 /***************************************************************************
  *                cta.i - Cherenkov Telescope Array module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -308,6 +308,7 @@
 %include "GCTAModelIrfBackground.i"
 %include "GCTAModelAeffBackground.i"
 %include "GCTAModelSpatial.i"
+%include "GCTAModelSpatialGaussSpectrum.i"
 %include "GCTAModelSpatialGradient.i"
 %include "GCTAModelSpatialMultiplicative.i"
 %include "GCTAModelSpatialRegistry.i"

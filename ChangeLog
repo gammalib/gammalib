@@ -1,8 +1,9 @@
-2019-04-09
+2019-04-13
 
         * Version 1.6.0 released
         ========================
 
+        Implement energy-dependent Gaussian CTA spatial background model (#2868)
         Take instrument scale factors in On/Off analysis into account (#2867)
         GWcs::wcs_set() method now sets radesys and equinox members (#2866)
         Add GCTAPointing::is_valid() method and remove table methods

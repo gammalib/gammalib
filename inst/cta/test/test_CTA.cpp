@@ -59,6 +59,7 @@ const std::string cta_unbin_xml         = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml         = datadir+"/crab.xml";
 const std::string cta_rsp_xml           = datadir+"/rsp_models.xml";
 const std::string cta_bgd_rad_gauss_xml = datadir+"/cta_model_bgd_rad_gauss.xml";
+const std::string cta_bgd_gauss_e_xml   = datadir+"/cta_model_bgd_gauss_e.xml";
 const std::string cta_cube_bgd_xml      = datadir+"/cta_model_cube_bgd.xml";
 const std::string cta_irf_bgd_xml       = datadir+"/cta_model_irf_bgd.xml";
 const std::string cta_aeff_bgd_xml      = datadir+"/cta_model_aeff_bgd.xml";
@@ -176,6 +177,8 @@ void TestGCTAModel::set(void)
            "Test CTA IRF background model");
     append(static_cast<pfunction>(&TestGCTAModel::test_model_aeff_bgd),
            "Test CTA Aeff background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_spatial_gauss_spectrum),
+           "Test GCTAModelSpatialGaussSpectrum class");
 
     // Return
     return;
@@ -2022,6 +2025,57 @@ void TestGCTAModel::test_model_aeff_bgd(void)
     test_value((*model)["Index"].value(), -2.4);
     test_value((*model)["PivotEnergy"].value(), 1.0e6);
     test_assert(model->is_constant(), "Model is expected to be constant.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCTAModelSpatialGaussSpectrum class
+ ***************************************************************************/
+void TestGCTAModel::test_spatial_gauss_spectrum(void)
+{
+    // Set instrument direction, energy and time
+    GCTAInstDir dir(0.0, 0.0);
+    GEnergy     energy(1.0, "TeV");
+    GTime       time;
+
+    // Test void constructor
+    GCTAModelSpatialGaussSpectrum model1;
+    test_assert(model1.sigma() == NULL, "Test sigma() for void constructor");
+    test_value(model1.eval(dir, energy, time), 0.0, "Test eval() for void constructor");
+
+    // Test value constructor
+    GCTAModelSpatialGaussSpectrum model2(3.0);
+    test_assert(model2.sigma() != NULL, "Test sigma() for value constructor");
+    test_value(model2.eval(dir, energy, time), 1.0, "Test eval() for value constructor");
+
+    // Test spectrum constructor
+    GModelSpectralConst spectrum(3.0);
+    GCTAModelSpatialGaussSpectrum model3(spectrum);
+    test_assert(model3.sigma() != NULL, "Test sigma() for spectrum constructor");
+    test_value(model3.eval(dir, energy, time), 1.0, "Test eval() for spectrum constructor");
+
+    // Test XML constructor
+    GXml         xml(cta_bgd_gauss_e_xml);
+    GXmlElement* element = xml.element("source_library > source[0] > spatialModel");
+    GCTAModelSpatialGaussSpectrum model4(*element);
+    test_assert(model4.sigma() != NULL, "Test sigma() for XML constructor");
+    test_value(model4.eval(dir, energy, time), 1.0, "Test eval() for XML constructor");
+
+    // Test copy constructor
+    GCTAModelSpatialGaussSpectrum model5(model4);
+    test_assert(model5.sigma() != NULL, "Test sigma() for copy constructor");
+    test_value(model5.eval(dir, energy, time), 1.0, "Test eval() for copy constructor");
+
+    // Test sigma() setter
+    GCTAModelSpatialGaussSpectrum model6;
+    test_assert(model6.sigma() == NULL, "Test sigma() setter");
+    test_value(model6.eval(dir, energy, time), 0.0, "Test sigma() setter");
+    model6.sigma(spectrum);
+    test_assert(model6.sigma() != NULL, "Test sigma() setter");
+    test_value(model6.eval(dir, energy, time), 1.0, "Test sigma() setter");
 
     // Return
     return;
