@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.5.2
+New Features and Important Changes in GammaLib 1.5.3
 
-26 April 2018
+23 April 2019
 
 
 1. Introduction
@@ -123,9 +123,7 @@ None
 
 20. CTA interface
 -----------------
-The number of internal spectral nodes was not computed correctly in
-GCTABackground3D::init_mc_cache(), and hence energies could be simulated by the
-Monte Carlo method that fell outside the valid energy interval (#2462).
+Use "BKG" instead of "BGD" for CTA background column (#2343).
 
 
 21. COMPTEL interface

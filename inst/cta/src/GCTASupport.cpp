@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.cpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,7 @@
 #include "GCTASupport.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GEbounds.hpp"
 #include "GPhases.hpp"
@@ -390,6 +391,53 @@ std::string gammalib::read_ds_gti_extname(const GFitsHDU& hdu)
         extname = gammalib::strip_whitespace(gammalib::strip_chars(hdu.string(ref_key), ":"));
 
     } // endfor: looped over data sub-space keywords
+
+    // Return
+    return extname;
+}
+
+
+/***********************************************************************//**
+ * @brief Return extension name for GADF response table of given HDU class 4
+ *
+ * @param[in] fits FITS file.
+ * @param[in] hduclas4 HDU class 4.
+ * @return Extension name.
+ *
+ * Returns the extension name for GADF response table of given HDU class 4.
+ * If the response table is not found, an empty extension name is returned.
+ ***************************************************************************/
+std::string gammalib::gadf_hduclas4(const GFits&       fits,
+                                    const std::string& hduclas4)
+{
+    // Initialise extension name
+    std::string extname;
+
+    // Loop over all FITS HDUs
+    for (int i = 0; i < fits.size(); ++i) {
+
+        // Get FITS HDU
+        const GFitsHDU* hdu = fits[i];
+
+        // Skip HDU if it has no "HDUCLASS", "HDUCLAS1" and "HDUCLAS4" keywords
+        if (!(hdu->has_card("HDUCLASS") &&
+              hdu->has_card("HDUCLAS1") &&
+              hdu->has_card("HDUCLAS4"))) {
+            continue;
+        }
+
+        // Skip HDU if "HDUCLASS" is not "GADF", "HDUCLAS1" is not response
+        // and "HDUCLAS4" is not hduclas4
+        if (!((gammalib::strip_whitespace(hdu->string("HDUCLASS")) == "GADF") &&
+              (gammalib::strip_whitespace(hdu->string("HDUCLAS1")) == "RESPONSE") &&
+              (gammalib::strip_whitespace(hdu->string("HDUCLAS4")) == hduclas4))) {
+            continue;
+        }
+
+        // Extract extension name and break
+        extname = hdu->extname();
+
+    } // endfor: loop over headers
 
     // Return
     return extname;

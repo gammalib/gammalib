@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.hpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,7 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Forward declarations _______________________________________________ */
+class GFits;
 class GFitsHDU;
 class GCTARoi;
 class GEbounds;
@@ -50,6 +51,8 @@ namespace gammalib {
     GEbounds    read_ds_ebounds(const GFitsHDU& hdu);
     GPhases     read_ds_phase(const GFitsHDU& hdu);
     std::string read_ds_gti_extname(const GFitsHDU& hdu);
+    std::string gadf_hduclas4(const GFits&       fits,
+                              const std::string& hduclas4);
 }
 
 #endif /* GCTASUPPORT_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.cpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,7 @@
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTABackground3D.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                          "GCTABackground3D::read(GFitsTable&)"
@@ -321,7 +322,7 @@ GCTABackground3D* GCTABackground3D::clone(void) const
  *     DETY_HI  - DETY upper bin boundaries
  *     ENERG_LO - Energy lower bin boundaries
  *     ENERG_HI - Energy upper bin boundaries
- *     BGD      - Background template
+ *     BKG      - Background template (or BGD as legacy column name)
  *
  * The data are stored in the m_background member. The DETX and DETY axes
  * will be set to radians, the energy axis will be set to log10.
@@ -348,7 +349,12 @@ void GCTABackground3D::read(const GFitsTable& table)
     m_inx_detx   = m_background.axis("DETX");
     m_inx_dety   = m_background.axis("DETY");
     m_inx_energy = m_background.axis("ENERG");
-    m_inx_bgd    = m_background.table("BGD");
+    if (m_background.has_table("BKG")) {
+        m_inx_bgd = m_background.table("BKG");
+    }
+    else {
+        m_inx_bgd = m_background.table("BGD"); // Old name, should not be used
+    }
 
     // Get axes dimensions
     m_num_detx   = m_background.axis_bins(m_inx_detx);
@@ -408,9 +414,15 @@ void GCTABackground3D::load(const GFilename& filename)
     // Open FITS file
     GFits fits(filename);
 
+    // Get the default extension name. If no GADF compliant name was found
+    // then set the default extension name to "BACKGROUND".
+    std::string extname = gammalib::gadf_hduclas4(fits, "BKG_3D");
+    if (extname.empty()) {
+        extname = gammalib::extname_cta_background3d;
+    }
+
     // Get background table
-    const GFitsTable& table =
-          *fits.table(filename.extname(gammalib::extname_cta_background3d));
+    const GFitsTable& table = *fits.table(filename.extname(extname));
 
     // Read effective area from table
     read(table);
