@@ -75,6 +75,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAPointing.cpp \
           src/GCTAModelBackground.cpp \
           src/GCTAModelSpatial.cpp \
+          src/GCTAModelSpatialLookup.cpp \
           src/GCTAModelSpatialGaussSpectrum.cpp \
           src/GCTAModelSpatialGradient.cpp \
           src/GCTAModelSpatialMultiplicative.cpp \
@@ -130,6 +131,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTACubeSource.hpp \
                      include/GCTAModelBackground.hpp \
                      include/GCTAModelSpatial.hpp \
+                     include/GCTAModelSpatialLookup.hpp \
                      include/GCTAModelSpatialGaussSpectrum.hpp \
                      include/GCTAModelSpatialGradient.hpp \
                      include/GCTAModelSpatialMultiplicative.hpp \

@@ -125,6 +125,7 @@ public:
     void                   test_model_cube_bgd(void);
     void                   test_model_irf_bgd(void);
     void                   test_model_aeff_bgd(void);
+    void                   test_spatial_lookup(void);
     void                   test_spatial_gauss_spectrum(void);
 };
 

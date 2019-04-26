@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-13 April 2019
+26 April 2019
 
 
 1. Introduction
@@ -21,6 +21,7 @@ The following classes have been added:
 - GCTAModelSpatialMultiplicative
 - GCTAModelSpatialRegistry
 - GCTAModelSpatialGaussSpectrum
+- GCTAModelSpatialLookup
 
 The following classes have been removed:
 - GCTACubeSourceDiffuse
@@ -332,6 +333,9 @@ unit tests for that response functions were added.
 
 20. CTA interface
 -----------------
+Add the GCTAModelSpatialLookup class that implements a lookup table for the
+energy-dependent spatial modelling of the background (#2878).
+
 Add the GCTAModelSpatialGaussSpectrum class that implements an energy-dependent
 Gaussian spatial background model (#2868).
 

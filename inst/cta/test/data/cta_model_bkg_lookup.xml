@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="My model" type="CTABackground" instrument="CTA">
+    <spectrum type="PowerLaw">
+      <parameter name="Prefactor"   scale="1e-6" value="61.8" min="0.0"  max="1000.0" free="1"/>
+      <parameter name="Index"       scale="-1"   value="1.85" min="0.0"  max="+5.0"   free="1"/>
+      <parameter name="PivotEnergy" scale="1e6"  value="1.0"  min="0.01" max="1000.0" free="0"/>
+    </spectrum>
+    <spatialModel type="LookupTable" file="bkg_lookup.fits">
+      <parameter name="Normalization" scale="1" value="1" min="0.01" max="10.0" free="0"/>
+    </spatialModel>
+  </source>
+</source_library>

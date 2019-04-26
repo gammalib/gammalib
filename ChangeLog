@@ -1,8 +1,9 @@
-2019-04-13
+2019-04-26
 
         * Version 1.6.0 released
         ========================
 
+        Add GCTAModelSpatialLookup class to handle CTA background lookups (#2878)
         Implement energy-dependent Gaussian CTA spatial background model (#2868)
         Take instrument scale factors in On/Off analysis into account (#2867)
         GWcs::wcs_set() method now sets radesys and equinox members (#2866)

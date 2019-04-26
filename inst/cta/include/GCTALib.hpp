@@ -73,6 +73,7 @@
 #include "GCTACubeSource.hpp"
 #include "GCTAModelBackground.hpp"
 #include "GCTAModelSpatial.hpp"
+#include "GCTAModelSpatialLookup.hpp"
 #include "GCTAModelSpatialGaussSpectrum.hpp"
 #include "GCTAModelSpatialGradient.hpp"
 #include "GCTAModelSpatialMultiplicative.hpp"

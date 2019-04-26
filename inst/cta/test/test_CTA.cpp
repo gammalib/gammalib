@@ -63,6 +63,8 @@ const std::string cta_bgd_gauss_e_xml   = datadir+"/cta_model_bgd_gauss_e.xml";
 const std::string cta_cube_bgd_xml      = datadir+"/cta_model_cube_bgd.xml";
 const std::string cta_irf_bgd_xml       = datadir+"/cta_model_irf_bgd.xml";
 const std::string cta_aeff_bgd_xml      = datadir+"/cta_model_aeff_bgd.xml";
+const std::string cta_bkg_lookup        = datadir+"/bkg_lookup.fits";
+const std::string cta_bkg_lookup_xml    = datadir+"/cta_model_bkg_lookup.xml";
 const std::string cta_caldb_king        = cta_caldb+"/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king          = "irf_file.fits";
 const std::string cta_psf_table         = caldbdir+"/psf_table.fits[PSF_2D_TABLE]";
@@ -70,7 +72,7 @@ const std::string cta_perf_table        = caldbdir+"/cta_dummy_irf.dat";
 const std::string cta_edisp_rmf         = caldbdir+"/dc1/rmf.fits";
 const std::string cta_edisp_2D          = caldbdir+"/edisp_matrix.fits";
 const std::string cta_bgd_3D            = caldbdir+"/edisp_matrix.fits";
-const std::string cta_modbck_fit        = datadir+"/bg_test.fits";
+//const std::string cta_modbck_fit        = datadir+"/bg_test.fits";
 
 /* __ Test files for stacked analysis (based on Prod2::South_0.5h) _______ */
 const std::string cta_stacked_xml       = datadir+"/stacked_obs.xml";
@@ -177,6 +179,8 @@ void TestGCTAModel::set(void)
            "Test CTA IRF background model");
     append(static_cast<pfunction>(&TestGCTAModel::test_model_aeff_bgd),
            "Test CTA Aeff background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_spatial_lookup),
+           "Test GCTAModelSpatialLookup class");
     append(static_cast<pfunction>(&TestGCTAModel::test_spatial_gauss_spectrum),
            "Test GCTAModelSpatialGaussSpectrum class");
 
@@ -2025,6 +2029,73 @@ void TestGCTAModel::test_model_aeff_bgd(void)
     test_value((*model)["Index"].value(), -2.4);
     test_value((*model)["PivotEnergy"].value(), 1.0e6);
     test_assert(model->is_constant(), "Model is expected to be constant.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCTAModelSpatialLookup class
+ ***************************************************************************/
+void TestGCTAModel::test_spatial_lookup(void)
+{
+    // Set instrument direction, energy and time
+    GCTAInstDir dir(0.0, 0.0);
+    GEnergy     energy(1.0, "TeV");
+    GTime       time;
+
+    // Test void constructor
+    GCTAModelSpatialLookup model1;
+    test_assert(!model1.table().has_table("BKG"), "Test table() for void constructor");
+    test_value(model1.table().elements(), 0, "Test table() for void constructor");
+    test_value(model1.eval(dir, energy, time), 0.0, "Test eval() for void constructor");
+    test_value(model1.norm(), 1.0, "Test norm() for void constructor");
+
+    // Test filename constructor
+    GCTAModelSpatialLookup model2(cta_bkg_lookup);
+    test_assert(model2.table().has_table("BKG"), "Test table() for filename constructor");
+    test_value(model2.table().elements(), 100, "Test table() for filename constructor");
+    test_value(model2.eval(dir, energy, time), 1.0140199, "Test eval() for filename constructor");
+    test_value(model2.norm(), 1.0, "Test norm() for filename constructor");
+
+    // Test response table constructor
+    GFits             fits(cta_bkg_lookup);
+    const GFitsTable& hdu = *fits.table(1);
+    GCTAResponseTable table(hdu);
+    GCTAModelSpatialLookup model3(table);
+    test_assert(model3.table().has_table("BKG"), "Test table() for response table constructor");
+    test_value(model3.table().elements(), 100, "Test table() for response table constructor");
+    test_value(model3.eval(dir, energy, time), 1.0140199, "Test eval() for response table constructor");
+    test_value(model3.norm(), 1.0, "Test norm() for response table constructor");
+
+    // Test XML constructor
+    GXml         xml(cta_bkg_lookup_xml);
+    GXmlElement* element = xml.element("source_library > source[0] > spatialModel");
+    GCTAModelSpatialLookup model4(*element);
+    test_assert(model4.table().has_table("BKG"), "Test table() for XML constructor");
+    test_value(model4.table().elements(), 100, "Test table() for XML constructor");
+    test_value(model4.eval(dir, energy, time), 1.0140199, "Test eval() for XML constructor");
+    test_value(model4.norm(), 1.0, "Test norm() for XML constructor");
+
+    // Test lookup constructor
+    GEbounds ebds(10, GEnergy(0.2,"TeV"), GEnergy(50.0,"TeV"));
+    GCTAModelSpatialLookup model5(2.0, 0.2, ebds);
+    test_assert(model5.table().has_table("BKG"), "Test table() for lookup constructor");
+    test_value(model5.table().elements(), 100, "Test table() for lookup constructor");
+    test_value(model5.eval(dir, energy, time), 0.0, "Test eval() for lookup constructor");
+    test_value(model5.norm(), 1.0, "Test norm() for lookup constructor");
+
+    // Test copy constructor
+    GCTAModelSpatialLookup model6(model4);
+    test_assert(model6.table().has_table("BKG"), "Test table() for copy constructor");
+    test_value(model6.table().elements(), 100, "Test table() for copy constructor");
+    test_value(model6.eval(dir, energy, time), 1.0140199, "Test eval() for copy constructor");
+    test_value(model6.norm(), 1.0, "Test norm() for copy constructor");
+
+    // Test norm() setter and getter
+    model6.norm(0.5);
+    test_value(model6.norm(), 0.5, "Test norm() setter and getter");
 
     // Return
     return;

@@ -55,6 +55,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2878 <https://cta-redmine.irap.omp.eu/issues/2878>`_] -
+  Add ``GCTAModelSpatialLookup`` class to handle CTA background lookups
 * [`2868 <https://cta-redmine.irap.omp.eu/issues/2868>`_] -
   Implement energy-dependent Gaussian CTA spatial background model
 * [`2867 <https://cta-redmine.irap.omp.eu/issues/2867>`_] -
