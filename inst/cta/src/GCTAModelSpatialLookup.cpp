@@ -194,7 +194,7 @@ GCTAModelSpatialLookup::GCTAModelSpatialLookup(const double&   maxrad,
     }
 
     // Setup radial axis vector
-    int nrad = maxrad/radbin;
+    int nrad = int(maxrad/radbin+0.5);
     std::vector<double> rad_lo(nrad);
     std::vector<double> rad_hi(nrad);
     for (int i = 0; i < nrad; ++i) {
