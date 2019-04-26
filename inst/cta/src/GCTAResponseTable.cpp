@@ -1235,6 +1235,14 @@ void GCTAResponseTable::append_axis(const std::vector<double>& axis_lo,
     m_units_lo.push_back(unit);
     m_units_hi.push_back(unit);
 
+
+    // Set node array
+    std::vector<double> axis_nodes(axis_lo.size());
+    for (int k = 0; k < axis_lo.size(); ++k) {
+        axis_nodes[k] = 0.5*(axis_lo[k] + axis_hi[k]);
+    }
+    m_axis_nodes.push_back(GNodeArray(axis_nodes));
+
     // Increment number of axes
     m_naxes++;
 
