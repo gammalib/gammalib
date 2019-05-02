@@ -469,11 +469,11 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
             m_tail.read(*par);
             if (m_tail.value() <= 0.0) {
                 throw GException::model_invalid_parvalue(G_READ, xml,
-                      "\"Core\" parameter is required to be positive.");
+                      "\"Tail\" parameter is required to be positive.");
             }
             if (!m_tail.has_min() || m_tail.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
-                      "\"Core\" parameter requires positive minimum boundary.");
+                      "\"Tail\" parameter requires positive minimum boundary.");
             }
             npar[2]++;
         }
