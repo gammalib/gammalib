@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GVOHub.hpp - VO SAMP Hub class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Thierry Louge                               *
+ *  copyright (C) 2014-2019 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -100,9 +100,6 @@ protected:
     int                      get_client_index(const std::string& reference) const;
     std::string              get_response_value(const GXmlNode*    node,
                                                 const std::string& name) const;
-    void                     get_name_value_pair(const GXmlNode* node,
-                                                 std::string&    name,
-                                                 std::string&    value) const;
     std::vector<std::string> get_subscriptions(const GXml& xml) const;
     std::string              get_callback_url(const GXml& xml) const;
     std::string              get_hub_lockfile(void) const;
@@ -146,6 +143,7 @@ protected:
                                const GXml&           xml);
     std::string	random_string(const size_t& length) const;
     std::string hub_url(void) const;
+    std::string get_client_name(const GXml& xml) const;
 
     // Protected members
     std::string         m_secret;    //!< Secret Hub key

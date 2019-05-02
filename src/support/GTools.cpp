@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,8 @@
 #include "GEnergy.hpp"
 #include "GFilename.hpp"
 #include "GXmlElement.hpp"
+#include "GXmlNode.hpp"
+#include "GXmlText.hpp"
 
 /* __ Compile options ____________________________________________________ */
 
@@ -1721,6 +1723,51 @@ GFilename gammalib::xml_file_reduce(const GXmlElement& xml,
 
     // Return file name
     return fname;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract name / value pair from XML node
+ *
+ * @param[in] node Pointer to XML node.
+ * @param[out] name Name string.
+ * @param[out] value Value string.
+ *
+ * Extracts a name / value pair from a XML node. If the XML node pointer is
+ * NULL, the name and value strings will be empty.
+ ***************************************************************************/
+void gammalib::xml_get_name_value_pair(const GXmlNode* node,
+                                       std::string&    name,
+                                       std::string&    value)
+{
+    // Clear name and value strings
+    name.clear();
+    value.clear();
+
+    // Continue only if node is valid
+    if (node != NULL) {
+
+        // Get name node and extract text content
+        const GXmlNode* ptr = node->element("name", 0);
+        if (ptr != NULL) {
+            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
+            if (text != NULL) {
+                name = text->text();
+            }
+        }
+
+        // Get value node and extract text content
+        ptr = node->element("value", 0);
+        if (ptr != NULL) {
+            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
+            if (text != NULL) {
+                value = text->text();
+            }
+        }
+    }
+
+    // Return
+    return;
 }
 
 

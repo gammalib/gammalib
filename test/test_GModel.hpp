@@ -101,6 +101,7 @@ public:
 private:        
     // Private methods
     void test_xml_model(const std::string& name, const std::string& filename);
+    void test_sky_model_content(const GModelSky& model);
     
     // Test files
     std::string m_map_file;

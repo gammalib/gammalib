@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.hpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,7 +81,7 @@ public:
     void        publish(const GFitsHDU& hdu);
     void        publish(const GVOTable& votable);
     std::string print(const GChatter& chatter = NORMAL) const;
-    
+
 protected:
     // Protected methods
     void        init_members(void);
@@ -92,18 +92,17 @@ protected:
     void        register_to_hub(void);
     void        unregister_from_hub(void);
     void        send_metadata(void) const;
-    
+
     // Low-level methods
     void        connect_to_hub(void) const;
     void        post_string(const std::string& string) const;
     std::string receive_string(void) const;
     std::string get_response_value(const GXml& xml, const std::string& name) const;
-    void        get_name_value_pair(const GXmlNode* node, std::string& name, std::string& value) const;
     std::string get_hub_lockfile(void) const;
     bool        response_is_valid(const GXml& xml) const;
     int         response_error_code(const GXml& xml) const;
     std::string response_error_message(const GXml& xml) const;
-    
+
     // Protected data area
     std::string m_name;        //!< Client name
     std::string m_secret;      //!< Secret Hub key

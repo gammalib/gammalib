@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOHub.cpp - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Thierry Louge                               *
+ *  copyright (C) 2014-2019 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -89,7 +89,7 @@ GVOHub::GVOHub(const GVOHub& hub)
 {
     // Initialise members
     init_members();
-    
+
     // Copy members
     copy_members(hub);
 
@@ -246,7 +246,7 @@ void GVOHub::init_members(void)
     m_socket        = -1;        // Signals no socket
     m_shutdown      = false;
     m_clients.clear();
-    
+
     // Return
     return;
 }
@@ -285,7 +285,7 @@ void GVOHub::free_members(void)
         close(m_socket);
         m_socket = -1;
     }
-    
+
     // Remove lockfile
     delete_samp_file();
 
@@ -387,7 +387,7 @@ void GVOHub::handle_request(const socklen_t& sock)
         }
         timeout = 10; // The timeout now is 0.01 sec 
     } while (n > 0);
-    
+
     // Dump the buffer
     #if defined(G_SHOW_MESSAGE)
     std::cout << std::endl;
@@ -395,7 +395,7 @@ void GVOHub::handle_request(const socklen_t& sock)
     std::cout << "==========================================" << std::endl;
     std::cout << message << std::endl;
     #endif
-    
+
     // Extract response into an XML object
     GXml xml;
     size_t start = message.find("<?xml");
@@ -490,7 +490,7 @@ void GVOHub::request_ping(const socklen_t& sock)
     #if defined(G_CONSOLE_DUMP)
     std::cout << "GVOHub::request_ping" << std::endl;
     #endif
-    
+
     // Post void message
     post_samp_void(sock);
 
@@ -535,7 +535,7 @@ void GVOHub::request_register(const GXml& xml, const socklen_t& sock)
     struct client voclient;
     voclient.reference   = reference;
     voclient.private_key = random_string(15);
-    
+
     // Attached client
     m_clients.push_back(voclient);
 
@@ -626,7 +626,7 @@ void GVOHub::request_unregister(const GXml& xml, const socklen_t& sock)
 
         // Remove client
         m_clients.erase(m_clients.begin()+i);
-        
+
     } // endif: valid client found
 
     // Signal if the client was unknown
@@ -637,7 +637,7 @@ void GVOHub::request_unregister(const GXml& xml, const socklen_t& sock)
         std::cout << "\"" << std::endl;
     }
     #endif
-    
+
     // Return
     return;
 }
@@ -679,7 +679,7 @@ void GVOHub::request_declare_metadata(const GXml& xml, const socklen_t& sock)
 
         // Post void message
         post_samp_void(sock);
-        
+
         // Notify all clients about the registering
         for (int k = 0; k < m_clients.size(); ++k) {
             if (i != k) {
@@ -692,7 +692,7 @@ void GVOHub::request_declare_metadata(const GXml& xml, const socklen_t& sock)
         }
 
     } // endif: client found
-        
+
     // Signal if the client was unknown
     #if defined(G_CONSOLE_ERRORS)
     else {
@@ -701,7 +701,7 @@ void GVOHub::request_declare_metadata(const GXml& xml, const socklen_t& sock)
         std::cout << "\"" << std::endl;
     }
     #endif
-    
+
     // Return
     return;
 }
@@ -738,7 +738,7 @@ void GVOHub::request_declare_subscriptions(const GXml& xml,const socklen_t& sock
 
         // Post SAMP ok
         post_samp_ok(sock);
-        
+
     } // endif: valid client found
 
     // Signal if the client was unknown
@@ -749,8 +749,8 @@ void GVOHub::request_declare_subscriptions(const GXml& xml,const socklen_t& sock
         std::cout << "\"" << std::endl;
     }
     #endif
-    
-    //Return
+
+    // Return
     return;
 }
 
@@ -814,17 +814,8 @@ void GVOHub::request_get_subscriptions(const GXml& xml, const socklen_t& sock)
     std::cout << "GVOHub::request_get_subscriptions" << std::endl;
     #endif
 
-    // Initialise client name
-    std::string client_name = "";
-
     // Get the client name
-    const GXmlNode* node = xml.element("methodCall > params > param[1] > value");
-    if (node != NULL) {
-        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
-        if (text != NULL) {
-            client_name = text->text();
-        }
-    }
+    std::string client_name = get_client_name(xml);
 
     // Declare response
     std::string response = "";
@@ -839,7 +830,7 @@ void GVOHub::request_get_subscriptions(const GXml& xml, const socklen_t& sock)
     if (client_name == "gammalib_hub") {
         // Do nothing
     }
-    
+
     // ... handle all other clients
     else {
 
@@ -858,7 +849,7 @@ void GVOHub::request_get_subscriptions(const GXml& xml, const socklen_t& sock)
                 response.append("      <value></value>\n");
                 response.append("    </member>\n");
             }
-            
+
         }
 
         // Signal if the client was unknown
@@ -869,17 +860,17 @@ void GVOHub::request_get_subscriptions(const GXml& xml, const socklen_t& sock)
             std::cout << "\"" << std::endl;
         }
         #endif
-        
+
     }
 
     // Finish response
     response.append("  </struct></value></param>\n");
     response.append("</params>\n");
     response.append("</methodResponse>\n");
-        
+
     // Post response
     post_string(response, sock);
-   
+
     // Return
     return;
 }
@@ -921,7 +912,7 @@ void GVOHub::request_get_registered_clients(const GXml& xml, const socklen_t& so
             msg.append("</value>\n");
         }
     }
-    
+
     // Finish response
     msg.append("  </data></array></value></param>\n");
     msg.append("</params>\n");
@@ -929,7 +920,7 @@ void GVOHub::request_get_registered_clients(const GXml& xml, const socklen_t& so
 
     // Post response
     post_string(msg, sock);
-    
+
     // Return
     return;
 }
@@ -971,7 +962,7 @@ void GVOHub::request_get_subscribed_clients(const GXml& xml, const socklen_t& so
 
     // Post response
     post_string(msg, sock);
-    
+
     // Return
     return;
 }
@@ -992,17 +983,8 @@ void GVOHub::request_get_metadata(const GXml& xml, const socklen_t& sock)
     std::cout << "GVOHub::request_get_metadata" << std::endl;
     #endif
 
-    // Initialise client name
-    std::string client_name = "";
-
     // Get the client name
-    const GXmlNode* node = xml.element("methodCall > params > param[1] > value");
-    if (node != NULL) {
-        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
-        if (text != NULL) {
-            client_name = text->text();
-        }
-    }
+    std::string client_name = get_client_name(xml);
 
     // Declare response
     std::string response = "";
@@ -1055,7 +1037,7 @@ void GVOHub::request_get_metadata(const GXml& xml, const socklen_t& sock)
 
     // ... otherwise get the index
     else {
- 
+
         // Get client index
         int i = get_client_index(client_name);
 
@@ -1106,17 +1088,17 @@ void GVOHub::request_get_metadata(const GXml& xml, const socklen_t& sock)
             std::cout << "\"" << std::endl;
         }
         #endif
-        
+
     } // endelse: client was not the hub
 
     // Finish response
     response.append("  </struct></value></param>\n");
     response.append("</params>\n");
     response.append("</methodResponse>\n");
-    
+
     // Post response
     post_string(response, sock);
-   
+
     // Return
     return;
 }
@@ -1151,13 +1133,13 @@ void GVOHub::request_notify_all(const GXml& xml, const socklen_t& sock)
 
     // Loop over all clients
     for (int i = 0; i < m_clients.size(); ++i) {
-    
+
         // Loop over all subscriptions
         for (int j = 0; j < m_clients[i].subscriptions.size(); ++j) {
 
             // Continue only if message type matches client's subscription
             if (mtype == m_clients[i].subscriptions[j]) {
-    
+
                 // Image loading?
                 if (mtype == "image.load.fits") {
                     notify_image_load(m_clients[i], xml);
@@ -1176,7 +1158,7 @@ void GVOHub::request_notify_all(const GXml& xml, const socklen_t& sock)
 
     // Return
     return;
-  
+
 }
 
 
@@ -1196,7 +1178,7 @@ void GVOHub::request_shutdown(const socklen_t& sock)
 
     // Set shutdown flag
     m_shutdown = true;
-    
+
     // Post SAMP ok
     post_samp_ok(sock);
 
@@ -1342,7 +1324,7 @@ std::string GVOHub::get_response_value(const GXmlNode*    node,
             const GXmlNode* member = node->element("member", i);
             std::string one_name;
             std::string one_value;
-            get_name_value_pair(member, one_name, one_value);
+            gammalib::xml_get_name_value_pair(member, one_name, one_value);
             #if defined(G_CONSOLE_DUMP)
             std::cout << "GVOHub::get_response_value parsing "+one_name+ " " + one_value << std::endl;
             #endif
@@ -1351,7 +1333,7 @@ std::string GVOHub::get_response_value(const GXmlNode*    node,
                 break;
             }
         }
-        
+
     } else {
         #if defined(G_CONSOLE_DUMP)
         std::cout << "GVOHub::get_response_value parsing NULL node" << std::endl;
@@ -1359,51 +1341,6 @@ std::string GVOHub::get_response_value(const GXmlNode*    node,
     }
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Extract name / value pair from XML node
- *
- * @param[in] node Pointer to XML node.
- * @param[out] name Name string.
- * @param[out] value Value string.
- *
- * Extracts a name / value pair from a XML node. If the XML node pointer is
- * NULL, the name and value strings will be empty.
- ***************************************************************************/
-void GVOHub::get_name_value_pair(const GXmlNode* node,
-                                 std::string&    name,
-                                 std::string&    value) const
-{
-    // Clear name and value strings
-    name.clear();
-    value.clear();
-
-    // Continue only if node is valid
-    if (node != NULL) {
-
-        // Get name node and extract text content
-        const GXmlNode* ptr = node->element("name", 0);
-        if (ptr != NULL) {
-            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
-            if (text != NULL) {
-                name = text->text();
-            }
-        }
-
-        // Get value node and extract text content
-        ptr = node->element("value", 0);
-        if (ptr != NULL) {
-            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
-            if (text != NULL) {
-                value = text->text();
-            }
-        }
-    }
-
-    // Return
-    return;
 }
 
 
@@ -1448,7 +1385,7 @@ std::vector<std::string> GVOHub::get_subscriptions(const GXml& xml) const
  * @param[in] xml client query XML document.
  * @return Callback URL of client.
  ***************************************************************************/
-std::string GVOHub::get_callback_url(const GXml& xml) const                                         
+std::string GVOHub::get_callback_url(const GXml& xml) const
 {
     // Declare URL
     std::string url;
@@ -1493,7 +1430,7 @@ std::string GVOHub::get_hub_lockfile(void) const
             url = lockurl.substr(12, std::string::npos);
 
         } // endif: std-lockurl: prefix found
-  
+
     }
 
     // ... otherwise the lockfile should be $HOME/.samp
@@ -1544,7 +1481,7 @@ void GVOHub::create_samp_file(void) const
         fprintf(fptr, "samp.profile.version=%s\n", m_version.c_str());
         fprintf(fptr, "# Info stored by hub for some private reason:\n");
         fprintf(fptr, "gammalib.hubid=%s\n", m_hub_id.c_str());
-        
+
         // Close lockfile
         fclose(fptr);
 
@@ -1590,7 +1527,7 @@ int GVOHub::get_socket(void)
 
     // Loop over 100 ports at most
     for (int i = 0; i < 100; ++i) {
-    
+
         // Clean TCP/IP structure
         std::memset(&serv_addr, 0, sizeof(serv_addr));
 
@@ -1598,10 +1535,10 @@ int GVOHub::get_socket(void)
         serv_addr.sin_family      = AF_INET;
         serv_addr.sin_addr.s_addr = inet_addr(m_hub_host.c_str());
         serv_addr.sin_port        = htons(port);
-    
+
         // Create Hub socket
         sock = socket(AF_INET, SOCK_STREAM, 0);
-    
+
         // Creation of hub main socket
         if (sock < 0) {
             std::string msg = "Unable to create Hub socket. Errno="+
@@ -1682,7 +1619,7 @@ void GVOHub::post_string(const std::string& content, const socklen_t& sock) cons
                 done = true;
             }
         } while (!done);
-	
+
     } // endif: socket was valid
 
     // Return
@@ -1714,7 +1651,7 @@ void GVOHub::post_samp_ok(const socklen_t& sock) const
     response.append("  </struct></value></param>\n");
     response.append("</params>\n");
     response.append("</methodResponse>\n");
-    
+
     // Post string
     post_string(response, sock);
 
@@ -1745,7 +1682,7 @@ void GVOHub::post_samp_void(const socklen_t& sock) const
     response.append("    </param>\n");
     response.append("  </params>\n");
     response.append("</methodResponse>\n");
-    
+
     // Post string
     post_string(response, sock);
 
@@ -1927,7 +1864,7 @@ void GVOHub::notify_register(const GVOHub::client& client,
 
     // Post notification
     notify(client.url, msg);
-		  
+
     // Return
     return;
 }
@@ -1975,7 +1912,7 @@ void GVOHub::notify_unregister(const GVOHub::client& client,
 
     // Post notification
     notify(client.url, msg);
-		  
+
     // Return
     return;
 }
@@ -2067,12 +2004,12 @@ void GVOHub::notify_metadata(const GVOHub::client& client,
         msg.append("  </struct></value></param>\n");
         msg.append("</params>\n");
         msg.append("</methodCall>\n");
-            
+
         // Post notification
         notify(client.url, msg);
 
     } // endif: reference client was valid
-		  
+
     // Return
     return;
 }
@@ -2139,7 +2076,7 @@ void GVOHub::notify_image_load(const GVOHub::client& client,
 
     // Post notification
     notify(client.url, msg);
-		  
+
     // Return
     return;
 }
@@ -2205,7 +2142,7 @@ void GVOHub::notify_table_load(const GVOHub::client& client,
 
     // Post notification
     notify(client.url, msg);
-		  
+
     // Return
     return;
 }
@@ -2226,7 +2163,7 @@ std::string GVOHub::random_string(const size_t& length) const
         pos = ((rand() % (str.size() - 1)));
         str.erase(pos, 1);
     }
-   
+
     // Return string
     return str;
 }
@@ -2275,4 +2212,30 @@ std::string GVOHub::hub_url(void) const
 
     // Return Hub URL
     return (hub_url);
+}
+
+
+/***********************************************************************//**
+ * @brief Return client name from XML message
+ *
+ * @param[in] xml XML message sent by client.
+ *
+ * Returns client name from XML message.
+ ***************************************************************************/
+std::string GVOHub::get_client_name(const GXml& xml) const
+{
+    // Initialise client name
+    std::string client_name = "";
+
+    // Get the client name
+    const GXmlNode* node = xml.element("methodCall > params > param[1] > value");
+    if (node != NULL) {
+        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
+        if (text != NULL) {
+            client_name = text->text();
+        }
+    }
+
+    // Return client name
+    return client_name;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2244,7 +2244,7 @@ GFitsHDU* GSkyMap::write(GFits& file, const std::string& extname) const
             hdu_appended = file.append(*hdu);
 
             // Delete HDU
-            if (hdu != NULL) delete hdu;
+            delete hdu;
 
         } // endif: there was a valid HDU
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.cpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,7 +73,7 @@ GVOClient::GVOClient(void)
 
     // Find Hub
     find_hub();
-    
+
     // Return
     return;
 }
@@ -191,7 +191,7 @@ void GVOClient::connect(void)
 
     // Continue only if we have a Hub
     if (has_hub()) {
-    
+
         // Register to Hub
         register_to_hub();
 
@@ -271,7 +271,7 @@ bool GVOClient::ping_hub(void) const
 
     // Declare request
     std::string request = "";
-    
+
     // Set request
     request.append("<?xml version=\"1.0\"?>\n");
     request.append("<methodCall>\n");
@@ -300,7 +300,7 @@ void GVOClient::shutdown_hub(void) const
 {
     // Declare request
     std::string request = "";
-    
+
     // Set request
     request.append("<?xml version=\"1.0\"?>\n");
     request.append("<methodCall>\n");
@@ -668,7 +668,7 @@ bool GVOClient::find_hub(void)
         if (lockurl.compare(0, 7, "file://") == 0) {
             lockurl = lockurl.substr(7, std::string::npos);
         }
-    
+
         // Open SAMP lockfile. Continue only if opening was successful
         FILE* fptr = fopen(lockurl.c_str(), "r");
         if (fptr != NULL) {
@@ -1070,7 +1070,7 @@ void GVOClient::post_string(const std::string& content) const
         } while (!done);
 
     } // endif: Hub connection had been established
-    
+
     // Return
     return;
 }
@@ -1145,7 +1145,7 @@ std::string GVOClient::get_response_value(const GXml&        xml,
             const GXmlNode* member = node->element("member", i);
             std::string one_name;
             std::string one_value;
-            get_name_value_pair(member, one_name, one_value);
+            gammalib::xml_get_name_value_pair(member, one_name, one_value);
             if (one_name == name) {
                 value = one_value;
                 break;
@@ -1155,51 +1155,6 @@ std::string GVOClient::get_response_value(const GXml&        xml,
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Extract name / value pair from XML node
- *
- * @param[in] node Pointer to XML node.
- * @param[out] name Name string.
- * @param[out] value Value string.
- *
- * Extracts a name / value pair from a XML node. If the XML node pointer is
- * NULL, the name and value strings will be empty.
- ***************************************************************************/
-void GVOClient::get_name_value_pair(const GXmlNode* node,
-                                    std::string&    name,
-                                    std::string&    value) const
-{
-    // Clear name and value strings
-    name.clear();
-    value.clear();
-
-    // Continue only if node is valid
-    if (node != NULL) {
-
-        // Get name node and extract text content
-        const GXmlNode* ptr = node->element("name", 0);
-        if (ptr != NULL) {
-            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
-            if (text != NULL) {
-                name = text->text();
-            }
-        }
-
-        // Get value node and extract text content
-        ptr = node->element("value", 0);
-        if (ptr != NULL) {
-            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
-            if (text != NULL) {
-                value = text->text();
-            }
-        }
-    }
-
-    // Return
-    return;
 }
 
 
@@ -1228,7 +1183,7 @@ std::string GVOClient::get_hub_lockfile(void) const
             url = lockurl.substr(12, std::string::npos);
 
         } // endif: std-lockurl: prefix found
-  
+
     }
 
     // ... otherwise the lockfile should be $HOME/.samp

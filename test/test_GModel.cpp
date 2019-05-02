@@ -506,38 +506,12 @@ void TestGModel::test_sky_model(void)
     GXml         xml1(m_xml_file);
     GXmlElement* element1 = xml1.element(0)->element(0);
     GModelSky    sky5(*element1);
-    test_value(sky5.size(), 6, "Check number of model parameters");
-    test_value(sky5.name(), "1FGL J0005.7+3815", "Check source name");
-    test_value(sky5.instruments(), "LAT,CTA", "Check instruments");
-    test_value(sky5.ids(), "000001", "Check observation identifier");
-    test_value(sky5.ts(), 100.1, 1.0e-6, "Check TS value");
-    test_assert(sky5.tscalc(), "Check whether TS computation is requested");
-    test_assert(sky5.has_scales(), "Check whether sky model has scales");
-    test_assert(sky5.has_ts(), "Check whether sky model has TS value");
-    test_value(sky5.scale("LAT").value(), 1.1, 1.0e-6, "Check LAT scale factor");
-    test_value(sky5.scale("CTA").value(), 0.5, 1.0e-6, "Check CTA scale factor");
-    test_value(sky5.type(), "PointSource", "Check source type");
-    test_assert(sky5.spatial()  != NULL, "Check whether sky model has spatial component");
-    test_assert(sky5.spectral() != NULL, "Check whether sky model has spectral component");
-    test_assert(sky5.temporal() != NULL, "Check whether sky model has temporal component");
+    test_sky_model_content(sky5);
 
     // Test read method
     sky5.clear();
     sky5.read(*element1);
-    test_value(sky5.size(), 6, "Check number of model parameters");
-    test_value(sky5.name(), "1FGL J0005.7+3815", "Check source name");
-    test_value(sky5.instruments(), "LAT,CTA", "Check instruments");
-    test_value(sky5.ids(), "000001", "Check observation identifier");
-    test_value(sky5.ts(), 100.1, 1.0e-6, "Check TS value");
-    test_assert(sky5.tscalc(), "Check whether TS computation is requested");
-    test_assert(sky5.has_scales(), "Check whether sky model has scales");
-    test_assert(sky5.has_ts(), "Check whether sky model has TS value");
-    test_value(sky5.scale("LAT").value(), 1.1, 1.0e-6, "Check LAT scale factor");
-    test_value(sky5.scale("CTA").value(), 0.5, 1.0e-6, "Check CTA scale factor");
-    test_value(sky5.type(), "PointSource", "Check source type");
-    test_assert(sky5.spatial()  != NULL, "Check whether sky model has spatial component");
-    test_assert(sky5.spectral() != NULL, "Check whether sky model has spectral component");
-    test_assert(sky5.temporal() != NULL, "Check whether sky model has temporal component");
+    test_sky_model_content(sky5);
 
     // Test model writing and back reading
     GModels models;
@@ -547,20 +521,7 @@ void TestGModel::test_sky_model(void)
     models.load("test_sky_model.xml");
     sky5.clear();
     sky5 = *(static_cast<GModelSky*>(models[0]));
-    test_value(sky5.size(), 6, "Check number of model parameters");
-    test_value(sky5.name(), "1FGL J0005.7+3815", "Check source name");
-    test_value(sky5.instruments(), "LAT,CTA", "Check instruments");
-    test_value(sky5.ids(), "000001", "Check observation identifier");
-    test_value(sky5.ts(), 100.1, 1.0e-6, "Check TS value");
-    test_assert(sky5.tscalc(), "Check whether TS computation is requested");
-    test_assert(sky5.has_scales(), "Check whether sky model has scales");
-    test_assert(sky5.has_ts(), "Check whether sky model has TS value");
-    test_value(sky5.scale("LAT").value(), 1.1, 1.0e-6, "Check LAT scale factor");
-    test_value(sky5.scale("CTA").value(), 0.5, 1.0e-6, "Check CTA scale factor");
-    test_value(sky5.type(), "PointSource", "Check source type");
-    test_assert(sky5.spatial()  != NULL, "Check whether sky model has spatial component");
-    test_assert(sky5.spectral() != NULL, "Check whether sky model has spectral component");
-    test_assert(sky5.temporal() != NULL, "Check whether sky model has temporal component");
+    test_sky_model_content(sky5);
 
     // Test value method
     GSkyDir dir;
@@ -2501,6 +2462,32 @@ void TestGModel::test_xml_model(const std::string& name,
     models.load(fname);
     models.save(fname);
     models.load(fname);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test content of GModelSky instance
+ ***************************************************************************/
+void TestGModel::test_sky_model_content(const GModelSky& model)
+{
+    // Test content of sky model
+    test_value(model.size(), 6, "Check number of model parameters");
+    test_value(model.name(), "1FGL J0005.7+3815", "Check source name");
+    test_value(model.instruments(), "LAT,CTA", "Check instruments");
+    test_value(model.ids(), "000001", "Check observation identifier");
+    test_value(model.ts(), 100.1, 1.0e-6, "Check TS value");
+    test_assert(model.tscalc(), "Check whether TS computation is requested");
+    test_assert(model.has_scales(), "Check whether sky model has scales");
+    test_assert(model.has_ts(), "Check whether sky model has TS value");
+    test_value(model.scale("LAT").value(), 1.1, 1.0e-6, "Check LAT scale factor");
+    test_value(model.scale("CTA").value(), 0.5, 1.0e-6, "Check CTA scale factor");
+    test_value(model.type(), "PointSource", "Check source type");
+    test_assert(model.spatial()  != NULL, "Check whether sky model has spatial component");
+    test_assert(model.spectral() != NULL, "Check whether sky model has spectral component");
+    test_assert(model.temporal() != NULL, "Check whether sky model has temporal component");
 
     // Return
     return;

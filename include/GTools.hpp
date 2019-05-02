@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@
 class GEnergy;
 class GFilename;
 class GXmlElement;
+class GXmlNode;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -138,6 +139,9 @@ namespace gammalib {
                                              const std::string& filename);
     GFilename                xml_file_reduce(const GXmlElement& xml,
                                              const std::string& filename);
+    void                     xml_get_name_value_pair(const GXmlNode* node,
+                                                     std::string&    name,
+                                                     std::string&    value);
     int                      recv(int fd, char *buffer, int len, int flags,
                                   int timeout);
 }
