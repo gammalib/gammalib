@@ -206,6 +206,7 @@ GLog& GLog::operator<<(GLog& log)
     // If log object has an open file then append the log buffer to this
     // buffer
     if (log.m_file == NULL) {
+        #pragma omp critical(GLog_insert_logger)
         m_buffer.append(log.m_buffer);
     }
 
@@ -229,7 +230,8 @@ GLog& GLog::operator<<(GLog& log)
 
             // Append all lines from file to this buffer
             std::string line;
-            while(std::getline(file,line)){
+            while(std::getline(file,line)) {
+                #pragma omp critical(GLog_insert_logger)
                 m_buffer.append(line+"\n");
             }
 
@@ -471,11 +473,20 @@ void GLog::clear(void)
  ***************************************************************************/
 long int GLog::size(void) const
 {
-    // Determine the number of characters written to disk
-    long int size = (m_file != NULL) ? std::ftell(m_file) : 0;
+    // Initialise size
+    long int size = 0;
 
-    // Add in buffer size
-    size += m_buffer.size();
+    // Put size determination in OpenMP critical zone
+    #pragma omp critical(GLog_flush)
+    {
+
+        // Determine the number of characters written to disk
+        size = (m_file != NULL) ? std::ftell(m_file) : 0;
+
+        // Add in buffer size
+        size += m_buffer.size();
+
+    } // end of OpenMP critical zone
 
     // Return total size
     return size;
@@ -653,15 +664,15 @@ void GLog::free_members(void)
  ***************************************************************************/
 void GLog::flush(const bool& force)
 {
-    // Check if buffer should be flushed
-    bool flush = (force || m_buffer.size() > m_max_length);
+    // Put flushing in OpenMP critical zone
+    #pragma omp critical(GLog_flush)
+    {
+        // Check if buffer should be flushed
+        bool flush = (force || m_buffer.size() > m_max_length);
 
-    // Flush buffer
-    if (flush) {
+        // Flush buffer
+        if (flush) {
 
-        // Put flushing in OpenMP critical zone
-        #pragma omp critical(GLog_flush)
-        {
 
             // Flush buffer until it is empty
             while (m_buffer.size() > 0) {
@@ -690,9 +701,9 @@ void GLog::flush(const bool& force)
             // And now flush the kernel buffer
             std::fflush(m_file);
 
-        } // end of OpenMP critical zone
+        } // endif: flush was required
 
-    } // endif: flush was required
+    } // end of OpenMP critical zone
 
     // Return
     return;
