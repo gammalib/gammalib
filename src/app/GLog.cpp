@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.cpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,11 @@
 #include <unistd.h>     // dup
 #include "GLog.hpp"
 #include "GTools.hpp"
+
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -131,7 +136,7 @@ GLog::~GLog(void)
  *
  * @param[in] log Object which should be assigned.
  ***************************************************************************/
-GLog& GLog::operator= (const GLog& log)
+GLog& GLog::operator=(const GLog& log)
 { 
     // Execute only if object is not identical
     if (this != &log) {
@@ -201,6 +206,7 @@ GLog& GLog::operator<<(GLog& log)
     // If log object has an open file then append the log buffer to this
     // buffer
     if (log.m_file == NULL) {
+        #pragma omp critical(GLog_insert_logger)
         m_buffer.append(log.m_buffer);
     }
 
@@ -224,7 +230,8 @@ GLog& GLog::operator<<(GLog& log)
 
             // Append all lines from file to this buffer
             std::string line;
-            while(std::getline(file,line)){
+            while(std::getline(file,line)) {
+                #pragma omp critical(GLog_insert_logger)
                 m_buffer.append(line+"\n");
             }
 
@@ -466,11 +473,20 @@ void GLog::clear(void)
  ***************************************************************************/
 long int GLog::size(void) const
 {
-    // Determine the number of characters written to disk
-    long int size = (m_file != NULL) ? std::ftell(m_file) : 0;
+    // Initialise size
+    long int size = 0;
 
-    // Add in buffer size
-    size += m_buffer.size();
+    // Put size determination in OpenMP critical zone
+    #pragma omp critical(GLog_flush)
+    {
+
+        // Determine the number of characters written to disk
+        size = (m_file != NULL) ? std::ftell(m_file) : 0;
+
+        // Add in buffer size
+        size += m_buffer.size();
+
+    } // end of OpenMP critical zone
 
     // Return total size
     return size;
@@ -494,13 +510,19 @@ void GLog::open(const GFilename& filename, const bool& clobber)
     // Close any existing file
     close();
 
-    // Open file
-    if (clobber) {
-        m_file = std::fopen(filename.url().c_str(), "w");
-    }
-    else {
-        m_file = std::fopen(filename.url().c_str(), "a");
-    }
+    // Put opening in OpenMP critical zone
+    #pragma omp critical(GLog_open)
+    {
+
+        // Open file
+        if (clobber) {
+            m_file = std::fopen(filename.url().c_str(), "w");
+        }
+        else {
+            m_file = std::fopen(filename.url().c_str(), "a");
+        }
+
+    } // end of OpenMP critical zone
 
     // Return
     return;
@@ -515,14 +537,20 @@ void GLog::open(const GFilename& filename, const bool& clobber)
  ***************************************************************************/
 void GLog::close(void)
 {
-    // Flush buffer
-    flush(true);
+    // Put closing in OpenMP critical zone
+    #pragma omp critical(GLog_open)
+    {
 
-    // Close any open file
-    if (m_file != NULL) {
-        std::fclose(m_file);
-        m_file = NULL;
-    }
+        // Flush buffer
+        flush(true);
+
+        // Close any open file
+        if (m_file != NULL) {
+            std::fclose(m_file);
+            m_file = NULL;
+        }
+
+    } // end of OpenMP critical zone
 
     // Return
     return;
@@ -592,6 +620,7 @@ void GLog::copy_members(const GLog& log)
     // Copy file pointer by duplicating the file descriptor and opening
     // the duplicated file descriptor
     if (log.m_file != NULL) {
+        #pragma omp critical(GLog_copy_members)
         m_file = fdopen(dup(fileno(log.m_file)), "a");
     }
     else {
@@ -635,40 +664,46 @@ void GLog::free_members(void)
  ***************************************************************************/
 void GLog::flush(const bool& force)
 {
-    // Check if buffer should be flushed
-    bool flush = (force || m_buffer.size() > m_max_length);
+    // Put flushing in OpenMP critical zone
+    #pragma omp critical(GLog_flush)
+    {
+        // Check if buffer should be flushed
+        bool flush = (force || m_buffer.size() > m_max_length);
 
-    // Flush buffer
-    if (flush) {
+        // Flush buffer
+        if (flush) {
 
-        // Flush buffer until it is empty
-        while (m_buffer.size() > 0) {
 
-            // Find next CR
-            std::string line;
-            std::size_t pos = m_buffer.find_first_of("\n", 0);
-            if (pos == std::string::npos) {
-                line        = m_buffer;
-                m_linestart = false;
-                m_buffer.clear();
-            }
-            else {
-                line        = m_buffer.substr(0, pos) + "\n";
-                m_buffer    = m_buffer.substr(pos+1, m_buffer.size()-pos);
-                m_linestart = true;
-            }
+            // Flush buffer until it is empty
+            while (m_buffer.size() > 0) {
 
-            // Put line into file
-            if (m_file != NULL) {
-                std::fprintf(m_file, "%s", line.c_str());
-            }
+                // Find next CR
+                std::string line;
+                std::size_t pos = m_buffer.find_first_of("\n", 0);
+                if (pos == std::string::npos) {
+                    line        = m_buffer;
+                    m_linestart = false;
+                    m_buffer.clear();
+                }
+                else {
+                    line        = m_buffer.substr(0, pos) + "\n";
+                    m_buffer    = m_buffer.substr(pos+1, m_buffer.size()-pos);
+                    m_linestart = true;
+                }
 
-        } // endwhile: flush until empty
+                // Put line into file
+                if (m_file != NULL) {
+                    std::fprintf(m_file, "%s", line.c_str());
+                }
 
-        // And now flush the kernel buffer
-        std::fflush(m_file);
+            } // endwhile: flush until empty
 
-    } // endif: flush was required
+            // And now flush the kernel buffer
+            std::fflush(m_file);
+
+        } // endif: flush was required
+
+    } // end of OpenMP critical zone
 
     // Return
     return;
@@ -809,52 +844,57 @@ std::string GLog::prefix(void) const
  ***************************************************************************/
 void GLog::append(const std::string& string)
 {
-    // Copy string to append
-    std::string arg = string;
+    // Put everything in OpenMP critical zone
+    #pragma omp critical(GLog_append)
+    {
+        // Copy string to append
+        std::string arg = string;
 
-    // If the buffer is empty and at the beginning of a line or if the last
-    // character is a \n then prepend a prefix at the beginning of the string
-    // to be inserted.
-    if ((m_buffer.size() == 0 && m_linestart) ||
-        (m_buffer.size() >  0 && m_buffer[m_buffer.size()-1] == '\n')) {
+        // If the buffer is empty and at the beginning of a line or if the
+        // last character is a \n then prepend a prefix at the beginning of
+        // the string to be inserted.
+        if ((m_buffer.size() == 0 && m_linestart) ||
+            (m_buffer.size() >  0 && m_buffer[m_buffer.size()-1] == '\n')) {
 
-        // Prepend prefix
-        arg.insert(0, prefix());
+            // Prepend prefix
+            arg.insert(0, prefix());
 
-    }
+        }
 
-    // Search the first CR (\n)
-    std::size_t pos = arg.find_first_of("\n",0);
+        // Search the first CR (\n)
+        std::size_t pos = arg.find_first_of("\n",0);
 
-    // Search all \n characters. Ignore the last CR.
-    while (pos != std::string::npos && pos < arg.size()-1) {
+        // Search all \n characters. Ignore the last CR.
+        while (pos != std::string::npos && pos < arg.size()-1) {
 
-        // Prepend prefix
-        std::string pre = prefix();
-        arg.insert(pos+1, pre);
+            // Prepend prefix
+            std::string pre = prefix();
+            arg.insert(pos+1, pre);
 
-        // Search next CR
-        pos = arg.find_first_of("\n",pos+1+pre.size());
+            // Search next CR
+            pos = arg.find_first_of("\n",pos+1+pre.size());
 
-    } // endwhile
+        } // endwhile
 
-    // Add string to buffer
-    m_buffer.append(arg);
+        // Add string to buffer
+        m_buffer.append(arg);
 
-    // Increment written number of characters
-    m_written_size += arg.size();
+        // Increment written number of characters
+        m_written_size += arg.size();
 
-    // Flush Buffer
-    flush();
+        // Flush Buffer
+        flush();
 
-    // Append string to stdout and/or stderr without any buffering
-    // if requested
-    if (m_stdout) {
-        std::cout << arg;
-    }
-    if (m_stderr) {
-        std::cerr << arg;
-    }
+        // Append string to stdout and/or stderr without any buffering
+        // if requested
+        if (m_stdout) {
+            std::cout << arg;
+        }
+        if (m_stderr) {
+            std::cerr << arg;
+        }
+
+    } // end of OpenMP critical zone
 
     // Return
     return;
