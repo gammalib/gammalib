@@ -29,7 +29,7 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [1.5.2], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [1.5.3], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.])
