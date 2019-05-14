@@ -1,0 +1,14 @@
+.. _1.5.3:
+
+GammaLib 1.5.3 release (11 May 2019)
+====================================
+
+Overview
+--------
+
+GammaLib 1.5.3 is a bug fix release for GammaLib release 1.5.
+
+The following bugs were fixed:
+
+* [`2343 <https://cta-redmine.irap.omp.eu/issues/2343>`_] -
+  Use ``BKG`` instead of ``BGD`` for CTA background column

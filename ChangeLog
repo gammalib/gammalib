@@ -75,6 +75,14 @@
         Implement Python pickeling support (#1938)
 
 
+2019-05-11
+
+        * Bug fix version 1.5.3 released
+        ================================
+
+        Use "BKG" instead of "BGD" for CTA background column (#2343)
+
+
 2018-04-26
 
         * Bug fix version 1.5.2 released
