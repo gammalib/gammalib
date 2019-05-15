@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdisp2D.cpp - CTA 2D energy dispersion class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2018 by Florent Forest                              *
+ *  copyright (C) 2015-2019 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,6 +42,7 @@
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAEdisp2D.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                               "GCTAEdisp2D::read(GFitsTable&)"
@@ -305,8 +306,8 @@ void GCTAEdisp2D::table(const GCTAResponseTable& table)
  * Reads the energy dispersion form the FITS @p table. The following column
  * names are mandatory:
  *
- *     ETRUE_LO - True energy lower bin boundaries
- *     ETRUE_HI - True energy upper bin boundaries
+ *     ENERG_LO - True energy lower bin boundaries (alternative name: ETRUE_LO)
+ *     ENERG_HI - True energy upper bin boundaries (alternative name: ETRUE_HI)
  *     MIGRA_LO - Migration lower bin boundaries
  *     MIGRA_HI - Migration upper bin boundaries
  *     THETA_LO - Offset angle lower bin boundaries
@@ -373,8 +374,9 @@ void GCTAEdisp2D::write(GFitsBinTable& table) const
  *
  * Loads the energy dispersion from a FITS file.
  *
- * If no extension name is provided, the energy dispersion will be loaded
- * from the `ENERGY DISPERSION` extension.
+ * The method does not actually load the FITS file, which will only be loaded
+ * on request. Only the filename is stored. See the fetch() method for the
+ * actually loading of the energy dispersion.
  ***************************************************************************/
 void GCTAEdisp2D::load(const GFilename& filename)
 {
@@ -694,9 +696,17 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
  * @exception GException::invalid_value
  *            No file name has been specified.
  *
- * Fetches the energy dispersion by reading it from a FITS file. This method
- * does nothing if the energy dispersion is already loaded, if there is
- * nothing to fetch, or if the m_filename member is empty.
+ * Fetches the energy dispersion by reading it from a FITS file.
+ *
+ * If the filename contains no extension name the method scans the `HDUCLASS`
+ * keywords of all extensions and loads the energy dispersion from the first
+ * extension for which `HDUCLAS4=EDISP_2D`.
+ *
+ * Otherwise, the background will be loaded from the `ENERGY DISPERSION`
+ * extension.
+ *
+ * This method does nothing if the energy dispersion is already loaded, if
+ * there is nothing to fetch, or if the m_filename member is empty.
  *
  * The method is thread save. The method checks whether the file from which
  * the energy dispersion should be loaded actually exists.
@@ -736,12 +746,16 @@ void GCTAEdisp2D::fetch(void) const
                 // Open FITS file
                 GFits fits(m_filename);
 
-                // Initialise energy dispersion extension name
-                std::string extname =
-                            m_filename.extname(gammalib::extname_cta_edisp2d);
+                // Get the default extension name. If no GADF compliant name
+                // was found then set the default extension name to
+                // "ENERGY DISPERSION".
+                std::string extname = gammalib::gadf_hduclas4(fits, "EDISP_2D");
+                if (extname.empty()) {
+                    extname = gammalib::extname_cta_edisp2d;
+                }
 
                 // Get energy dispersion table
-                const GFitsTable& table = *fits.table(extname);
+                const GFitsTable& table = *fits.table(m_filename.extname(extname));
 
                 // Read energy dispersion from table
                 const_cast<GCTAEdisp2D*>(this)->read(table);
@@ -1184,7 +1198,12 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
 void GCTAEdisp2D::set_table(void)
 {
     // Set table indices
-    m_inx_etrue  = m_edisp.axis("ETRUE");
+    if (m_edisp.has_axis("ENERG")) {
+        m_inx_etrue = m_edisp.axis("ENERG");
+    }
+    else {
+        m_inx_etrue = m_edisp.axis("ETRUE"); // Old name, should not be used
+    }
     m_inx_migra  = m_edisp.axis("MIGRA");
     m_inx_theta  = m_edisp.axis("THETA");
     m_inx_matrix = m_edisp.table("MATRIX");
