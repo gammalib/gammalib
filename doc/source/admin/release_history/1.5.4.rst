@@ -1,0 +1,13 @@
+.. _1.5.4:
+
+GammaLib 1.5.4 release (15 May 2019)
+====================================
+
+Overview
+--------
+
+GammaLib 1.5.4 is a bug fix release for GammaLib release 1.5.
+
+The following bugs were fixed:
+
+* Handle new CTA energy dispersion format
