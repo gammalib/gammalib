@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1074,6 +1074,11 @@ std::string GModelSky::print(const GChatter& chatter) const
         for (int i = 0; i < n_temporal; ++i) {
             result.append("\n"+(*temporal())[i].print());
         }
+        result.append("\n"+gammalib::parformat("Number of scale par's"));
+        result.append(gammalib::str(scales()));
+        for (int i = 0; i < scales(); ++i) {
+            result.append("\n"+scale(i).print());
+        }
 
     } // endif: chatter was not silent
 
@@ -1163,6 +1168,7 @@ void GModelSky::set_pointers(void)
     int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
     int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
     int n_pars     = n_spatial + n_spectral + n_temporal;
+    int n_scales   = m_scales.size();
 
     // Continue only if there are parameters
     if (n_pars > 0) {
@@ -1182,6 +1188,13 @@ void GModelSky::set_pointers(void)
             m_pars.push_back(&((*temporal())[i]));
         }
 
+    }
+
+    // Append scales if they exist
+    if (n_scales > 0) {
+        for (int i = 0; i < n_scales; ++i) {
+            m_pars.push_back(&m_scales[i]);
+        }
     }
 
     // Return

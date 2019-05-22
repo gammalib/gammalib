@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.cpp - Abstract response base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -327,10 +327,9 @@ double GResponse::eval_prob(const GModelSky&    model,
         // Continue only if IRF value is positive
         if (irf > 0.0) {
 
-            // If required, apply instrument specific model scaling
-            if (model.has_scales()) {
-                irf *= model.scale(obs.instrument()).value();
-            }
+            // Optionally get scaling
+            double scale = (model.has_scales())
+                           ? model.scale(obs.instrument()).value() : 1.0;
 
             // Evaluate spectral and temporal components
             double spec = (model.spectral() != NULL)
@@ -339,14 +338,14 @@ double GResponse::eval_prob(const GModelSky&    model,
                           ? model.temporal()->eval(srcTime, grad) : 1.0;
 
             // Compute probability
-            prob = spec * temp * irf;
+            prob = spec * temp * irf * scale;
 
             // Optionally compute partial derivatives
             if (grad) {
 
                 // Multiply factors to spectral gradients
                 if (model.spectral() != NULL) {
-                    double fact = temp * irf;
+                    double fact = temp * irf * scale;
                     if (fact != 1.0) {
                         for (int i = 0; i < model.spectral()->size(); ++i) {
                             (*model.spectral())[i].factor_gradient((*model.spectral())[i].factor_gradient() * fact);
@@ -356,11 +355,24 @@ double GResponse::eval_prob(const GModelSky&    model,
 
                 // Multiply factors to temporal gradients
                 if (model.temporal() != NULL) {
-                    double fact = spec * irf;
+                    double fact = spec * irf * scale;
                     if (fact != 1.0) {
                         for (int i = 0; i < model.temporal()->size(); ++i) {
                             (*model.temporal())[i].factor_gradient((*model.temporal())[i].factor_gradient() * fact);
                         }
+                    }
+                }
+
+                // Optionally compute scale gradient for instrument
+                if (model.has_scales()) {
+                    for (int i = 0; i < model.scales(); ++i) {
+                        double g_scale = 0.0;
+                        if (model.scale(i).name() == obs.instrument()) {
+                            if (model.scale(i).is_free()) {
+                                g_scale = model.scale(i).scale() * spec * temp * irf;
+                            }
+                        }
+                        model.scale(i).factor_gradient(g_scale);
                     }
                 }
 
@@ -396,6 +408,13 @@ double GResponse::eval_prob(const GModelSky&    model,
             if (model.temporal() != NULL) {
                 for (int i = 0; i < model.temporal()->size(); ++i) {
                     (*model.temporal())[i].factor_gradient(0.0);
+                }
+            }
+
+            // Optionally reset scale gradients
+            if (model.has_scales()) {
+                for (int i = 0; i < model.scales(); ++i) {
+                    model.scale(i).factor_gradient(0.0);
                 }
             }
 

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.0
 
-26 April 2019
+22 May 2019
 
 
 1. Introduction
@@ -73,6 +73,8 @@ The following methods have been added:
 - GFitsTable::remove(int&)
 - GFitsTable::remove(std::string&)
 - GObservation::has_events()
+- GModel::scales()
+- GModel::scale(int&)
 - GModelSpatialPointSource::type(std::string&)
 - GModelSpectralPlaw::type(std::string&)
 - GModelSpatial::has_free_pars()
@@ -217,6 +219,9 @@ None
 
 8. Model module
 ---------------
+Add GModel::scales() method to return number of scales for this model and
+add GModel::scale() parameter access methods (#2892).
+
 Add GModelSpatial::has_free_pars() method that checks whether a spatial
 model component has free model parameters or not (#2715).
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.hpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -127,6 +127,7 @@ public:
 
     // Implemented methods
     int                 size(void) const;
+    int                 scales(void) const;
     GModelPar&          at(const int& index);
     const GModelPar&    at(const int& index) const;
     bool                has_par(const std::string& name) const;
@@ -140,6 +141,8 @@ public:
     const bool&         has_ts(void) const;
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
+    GModelPar&          scale(const int& index);
+    const GModelPar&    scale(const int& index) const;
     GModelPar           scale(const std::string& instrument) const;
     void                scale(const GModelPar& par);
     std::string         ids(void) const;
@@ -214,6 +217,20 @@ inline
 int GModel::size(void) const
 {
     return (int)m_pars.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of scale parameters in model
+ *
+ * @return Number of scale parameters in model.
+ *
+ * Returns the number of scale parameters in the model.
+ ***************************************************************************/
+inline
+int GModel::scales(void) const
+{
+    return (int)m_scales.size();
 }
 
 

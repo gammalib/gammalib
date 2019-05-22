@@ -397,7 +397,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     #if defined(G_RANGE_CHECK)
     if (gradient != NULL) {
         if (models.npars() != gradient->size()) {
-            throw GException::gradient_par_mismatch(G_MODEL, 
+            throw GException::gradient_par_mismatch(G_NPRED,
                                                     gradient->size(),
                                                     models.npars());
         }

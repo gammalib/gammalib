@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2474,7 +2474,7 @@ void TestGModel::test_xml_model(const std::string& name,
 void TestGModel::test_sky_model_content(const GModelSky& model)
 {
     // Test content of sky model
-    test_value(model.size(), 6, "Check number of model parameters");
+    test_value(model.size(), 8, "Check number of model parameters");
     test_value(model.name(), "1FGL J0005.7+3815", "Check source name");
     test_value(model.instruments(), "LAT,CTA", "Check instruments");
     test_value(model.ids(), "000001", "Check observation identifier");
@@ -2482,6 +2482,9 @@ void TestGModel::test_sky_model_content(const GModelSky& model)
     test_assert(model.tscalc(), "Check whether TS computation is requested");
     test_assert(model.has_scales(), "Check whether sky model has scales");
     test_assert(model.has_ts(), "Check whether sky model has TS value");
+    test_value(model.scales(), 2, "Check number of instrument parameters");
+    test_value(model.scale(0).value(), 1.1, 1.0e-6, "Check first scale factor");
+    test_value(model.scale(1).value(), 0.5, 1.0e-6, "Check second scale factor");
     test_value(model.scale("LAT").value(), 1.1, 1.0e-6, "Check LAT scale factor");
     test_value(model.scale("CTA").value(), 0.5, 1.0e-6, "Check CTA scale factor");
     test_value(model.type(), "PointSource", "Check source type");

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.cpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                           "GModel::operator[](std::string&)"
 #define G_AT                                               "GModel::at(int&)"
+#define G_SCALE                              "GModelPar& GModel::scale(int&)"
 #define G_WRITE_SCALES                   "GModel::write_scales(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -344,6 +345,54 @@ void GModel::instruments(const std::string& instruments)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to scale parameter by index
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Reference to scale parameter.
+ *
+ * @exception GException::out_of_range
+ *            Scale parameter index is out of range.
+ *
+ * Returns a reference to the scale parameter of the specified @p index.
+ * Throws an exception if @p index is not valid.
+ ***************************************************************************/
+GModelPar& GModel::scale(const int& index)
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= scales()) {
+        throw GException::out_of_range(G_SCALE, index, scales());
+    }
+
+    // Return reference
+    return (m_scales[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to scale parameter by index (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Reference to scale parameter.
+ *
+ * @exception GException::out_of_range
+ *            Scale parameter index is out of range.
+ *
+ * Returns a reference to the scale parameter of the specified @p index.
+ * Throws an exception if @p index is not valid.
+ ***************************************************************************/
+const GModelPar& GModel::scale(const int& index) const
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= scales()) {
+        throw GException::out_of_range(G_SCALE, index, scales());
+    }
+
+    // Return reference
+    return (m_scales[index]);
 }
 
 
@@ -715,23 +764,6 @@ std::string GModel::print_attributes(void) const
         result.append("Computation requested");
     }
 
-    // Append instrument scale factors
-    result.append("\n"+gammalib::parformat("Instrument scale factors"));
-    if (!m_scales.empty()) {
-        for (int i = 0; i < m_scales.size(); ++i) {
-            if (i > 0) {
-                result.append(", ");
-            }
-            result.append(m_scales[i].name());
-            result.append("=");
-            result.append(gammalib::str(m_scales[i].value()));
-        }
-        result.append(", others unity");
-    }
-    else {
-        result.append("unity");
-    }
-
     // Append observation identifiers
     result.append("\n"+gammalib::parformat("Observation identifiers"));
     if (!m_ids.empty()) {
@@ -788,6 +820,7 @@ void GModel::read_scales(const GXmlElement& xml)
             GModelPar scale;
             scale.read(*par);
             scale.name(gammalib::strip_whitespace(par->attribute("name")));
+            scale.has_grad(true);
             m_scales.push_back(scale);
         }
 

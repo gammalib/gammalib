@@ -55,6 +55,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2892 <https://cta-redmine.irap.omp.eu/issues/2892>`_] -
+  Allow fitting of instrument scale factors
 * [`2878 <https://cta-redmine.irap.omp.eu/issues/2878>`_] -
   Add ``GCTAModelSpatialLookup`` class to handle CTA background lookups
 * [`2868 <https://cta-redmine.irap.omp.eu/issues/2868>`_] -

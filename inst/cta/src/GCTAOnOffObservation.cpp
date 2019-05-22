@@ -2329,6 +2329,16 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                 double rmf_sum = 0.0;
                 #endif
 
+                // Get indices of spectral gradients. We need this to update
+                // only the spectral parameter gradients later.
+                std::vector<int> inx_spec;
+                for (int k = 0; k < mptr->size(); ++k) {
+                    const GModelPar& par = (*mptr)[k];
+                    if (spectral->has_par(par.name())) {
+                        inx_spec.push_back(k);
+                    }
+                }
+
                 // Set instrument scale factor
                 double scale = (sky->has_scales()) ? sky->scale(instrument()).value() : 1.0;
 
@@ -2358,16 +2368,20 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                     GEnergy etruemean  = m_arf.ebounds().elogmean(itrue);
                     double  etruewidth = m_arf.ebounds().ewidth(itrue).MeV();
 
-                    // Compute normalisation factors
-                    double exposure  = m_on_spec.exposure();
-                    double norm_flux = arf * exposure * rmf * scale;
-                    double norm_grad = norm_flux * etruewidth;
+                    // Compute normalisation factors. The gradient normalisation
+                    // factor uses the energy bin width, since the eval() method
+                    // returns a differential flux
+                    double exposure   = m_on_spec.exposure();
+                    double norm_scale = arf * exposure * rmf;
+                    double norm_flux  = norm_scale * scale;
+                    double norm_grad  = norm_flux * etruewidth;
 
                     // Determine number of gamma-ray events in model by
                     // computing the flux over the true energy bin in
                     // ph/cm2/s and multiplying this by effective area (cm2),
-                    // livetime (s) and redistribution probability
-                    value += spectral->flux(etruemin, etruemax) * norm_flux;
+                    // livetime (s), redistribution probability and scale
+                    double flux = spectral->flux(etruemin, etruemax);
+                    value      += flux * norm_flux;
 
                     // Determine the model gradients at the current true
                     // energy. The eval() method needs a time in case that the
@@ -2375,11 +2389,22 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
                     // dummy time here.
                     spectral->eval(etruemean, GTime(), true);
 
-                    // Compute the parameter gradients for all model parameters
-                    for (int k = 0; k < mptr->size(); ++k)  {
-                        const GModelPar& par = (*mptr)[k];
-                        if (par.is_free() && ipar+k < npars)  {
-                            (*grad)[ipar+k] += par.factor_gradient() * norm_grad;
+                    // Compute the parameter gradients for spectral parameters
+                    for (int k = 0; k < inx_spec.size(); ++k) {
+                        const GModelPar& par = (*mptr)[inx_spec[k]];
+                        if (par.is_free() && ipar+k < npars) {
+                            (*grad)[ipar+inx_spec[k]] += par.factor_gradient() * norm_grad;
+                        }
+                    }
+
+                    // Optionally compute scaling parameter gradient
+                    if (sky->has_scales()) {
+                        for (int k = 0; k < mptr->size(); ++k) {
+                            const GModelPar& par = (*mptr)[k];
+                            if ((par.name() == instrument()) && par.is_free() &&
+                                (ipar+k < npars)) {
+                                (*grad)[ipar+k] += par.scale() * flux * norm_scale;
+                            }
                         }
                     }
 
