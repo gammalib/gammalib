@@ -453,6 +453,7 @@ void GModel::scale(const GModelPar& par)
             found       = true;
             m_scales[i] = par;
             m_scales[i].name(instrument);
+            m_scales[i].has_grad(true);
             break;
         }
     }
@@ -460,9 +461,21 @@ void GModel::scale(const GModelPar& par)
     // If instrument has not been found then append it now to the list
     // of instruments.
     if (!found) {
+
+        // Push scale parameter in list
         m_scales.push_back(par);
-        m_scales[m_scales.size()-1].name(instrument);
-    }
+
+        // Get index of last scale parameter
+        int i = m_scales.size()-1;
+
+        // Set instrument name and signal availability of gradient
+        m_scales[i].name(instrument);
+        m_scales[i].has_grad(true);
+
+        // Push scale parameter on parameter stack
+        m_pars.push_back(&m_scales[i]);
+
+    } // endif: new scale parameter
 
     // Return
     return;
@@ -822,6 +835,7 @@ void GModel::read_scales(const GXmlElement& xml)
             scale.name(gammalib::strip_whitespace(par->attribute("name")));
             scale.has_grad(true);
             m_scales.push_back(scale);
+            m_pars.push_back(&m_scales[m_scales.size()-1]);
         }
 
     }
