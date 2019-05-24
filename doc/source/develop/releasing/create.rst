@@ -22,7 +22,7 @@ The GammaLib release is created by invoking the release manager:
 
 To create a new release type ``1``. You will then be guided through a number
 of questions. In the example below we show how you go from the development
-version ``1.2.0.dev1`` to the release ``1.2.0``. The first step is to create
+version ``1.2.0.dev`` to the release ``1.2.0``. The first step is to create
 a ``release`` branch.
 
 .. code-block:: bash
@@ -37,8 +37,8 @@ Then you have to set the version number of the release.
 
 .. code-block:: bash
 
-   Step 2: Current GammaLib version is '1.2.0.dev1'. Do you want to change the package version? (y/n): y
-   Current GammaLib version is '1.2.0.dev1'. Please enter new GammaLib version: 1.2.0
+   Step 2: Current GammaLib version is '1.2.0.dev'. Do you want to change the package version? (y/n): y
+   Current GammaLib version is '1.2.0.dev'. Please enter new GammaLib version: 1.2.0
    Change version to '1.2.0'? (y/n): y
    GammaLib version changed to '1.2.0'
 

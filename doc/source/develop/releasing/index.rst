@@ -17,6 +17,8 @@ To create a new GammaLib release you have to go through the following steps:
 
 
 .. important::
-   Before releasing the software please make sure that you have **added unit
-   tests for all new code** and that you have **updated the User documentation**
-   if necessary.
+   Before releasing the software please make sure that you have
+
+   * added unit tests for all new code
+   * added a page about the software changes to the release history
+   * updated the User documentation if necessary
