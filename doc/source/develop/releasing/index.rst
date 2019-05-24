@@ -9,7 +9,8 @@ To create a new GammaLib release you have to go through the following steps:
    :maxdepth: 1
 
    create
-   pipeline
+   check
+   release
    tag
    merge
    devel
