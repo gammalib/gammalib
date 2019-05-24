@@ -1,5 +1,5 @@
-What is in this section?
-------------------------
+Introduction
+------------
 
 This section provides an overview over all GammaLib modules and their C++
 classes, with particular emphasis on the relation between the classes
@@ -9,10 +9,10 @@ arithmetics. However, we do not provide a detailed description of the
 interface and the inner workings of each C++ class. This information is
 provided in the reference documentation, which can be found online at
 http://cta.irap.omp.eu/gammalib/doxygen/, or which can be installed
-locally on your machine (see :ref:`sec_doxygen`).
+locally on your machine.
 
 Each GammaLib module is presented in a dedicated section, following the overview
-shown in :ref:`fig_structure` from the top-left to the bottom right.
+shown in :ref:`this figure <fig_structure>` from the top-left to the bottom right.
 Instrument specific modules are described in a dedicated chapter (see 
 :ref:`sec_inst`). All C++ classes of a module and their relations are
 illustrated using a UML diagram.

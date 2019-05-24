@@ -5,7 +5,7 @@ GammaLib modules
    :maxdepth: 2
 
    intro
-   obs
+   obs/index
    model
    sky
    app
