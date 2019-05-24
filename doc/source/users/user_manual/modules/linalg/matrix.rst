@@ -1,39 +1,5 @@
-.. _sec_linalg:
-
-Linear algebra
---------------
-
-Overview
-~~~~~~~~
-
-The following figure presents an overview over the C++ classes of
-the linear algebra module and their relations.
-
-.. _fig_uml_linalg:
-
-.. figure:: uml_linalg.png
-   :width: 55%
-   :align: center
-
-   *Linear algebra module*
-
-The linear algebra module provides classes for vector and matrix 
-manipulation. The :doxy:`GVector` class implements a double precision
-floating point vector, the classes :doxy:`GMatrix`, :doxy:`GMatrixSymmetric`
-and :doxy:`GMatrixSparse` implement a matrix of double precision
-floating point values for a generic matrix, a symmetric matrix and
-a sparse matrix, respectively. All matrix classes derive from the
-abstract :doxy:`GMatrixBase` base class that provides common functionalities
-to all matrix classes.
-
-The classes :doxy:`GSparseNumeric` and :doxy:`GSparseSymbolic` are classes
-that are used by :doxy:`GMatrixSparse` but these classes are not
-exposed to the outside world (i.e. the class definitions are not
-part of the GammaLib interface).
-
-
 Matrix Storage classes
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 Three matrix storage classes are implemented:
 
@@ -48,12 +14,23 @@ Three matrix storage classes are implemented:
 Storage class conversion constructors exist for all three classes
 to transform one storage class into another:
 
+**Python**
+
+.. code-block:: python
+   :linenos:
+
+   plain     = gammalib.GMatrix(10,10)
+   symmetric = gammalib.GMatrixSymmetric(plain)
+   sparse    = gammalib.GMatrixSparse(symmetric)
+
+**C++**
+
 .. code-block:: cpp
    :linenos:
 
-    GMatrix          plain(10,10);
-    GMatrixSymmetric symmetric(plain);
-    GMatrixSparse    sparse(symmetric);
+   GMatrix          plain(10,10);
+   GMatrixSymmetric symmetric(plain);
+   GMatrixSparse    sparse(symmetric);
 
 In the above example, a plain matrix is instantiated in line 1, the
 plain matrix is converted into a symmetric matrix in line 2, and the
@@ -72,16 +49,31 @@ To reduce the memory management overhead in the filling of a sparse
 matrix, methods have been implemented that allow to fill a
 matrix column wise:
 
+**Python**
+
 .. code-block:: cpp
    :linenos:
 
-    GMatrixSparse sparse(10,5);
-    GVector       column(10);
-    column[0] = 1.0;
-    column[1] = 2.0;
-    column[5] = 8.0;
-    sparse.column(0, column);
-    sparse.add_to_column(0, column);
+   sparse    = gammalib.GMatrixSparse(10,5)
+   column    = gammalib.GVector(10)
+   column[0] = 1.0
+   column[1] = 2.0
+   column[5] = 8.0
+   sparse.column(0, column)
+   sparse.add_to_column(0, column)
+
+**C++**
+
+.. code-block:: cpp
+   :linenos:
+
+   GMatrixSparse sparse(10,5);
+   GVector       column(10);
+   column[0] = 1.0;
+   column[1] = 2.0;
+   column[5] = 8.0;
+   sparse.column(0, column);
+   sparse.add_to_column(0, column);
 
 Line 1 allocates a sparse matrix with 10 rows and 5 columns, line 2
 instantiates a vector with 10 elements. In lines 3-5, 3 elements of
@@ -99,15 +91,18 @@ to be set or added to the matrix. The columns will be stored in this
 "fill-stack" is full, or upon request, the "fill-stack" will be flushed
 into memory. The "fill-stack" is used as follows:
 
-.. code-block:: cpp
+**C++**
 
-    sparse.stack_init(size, entries);
-    ...
-    sparse.column(0, column);
-    ...
-    sparse.stack_flush();
-    ...
-    sparse.stack_destroy();
+.. code-block:: cpp
+   :linenos:
+
+   sparse.stack_init(size, entries);
+   ...
+   sparse.column(0, column);
+   ...
+   sparse.stack_flush();
+   ...
+   sparse.stack_destroy();
 
 The ``stack_init(size, entries)`` method initialises the "fill-stack",
 where ``size`` is the size of the allocated memory buffer and ``entries``

@@ -13,9 +13,10 @@ verify that the Python interface works correctly. You do this by
 typing:
 
 .. code-block:: python
+   :linenos:
 
-   >>> import gammalib
-   >>> gammalib.test()
+   import gammalib
+   gammalib.test()
 
 The first command loads the GammaLib Python module, the second command 
 executes the Python unit tests. If all tests are ok the GammaLib Python
@@ -31,9 +32,10 @@ described :ref:`here <setup>`.
 Now try:
 
 .. code-block:: python
+   :linenos:
 
-   >>> models = gammalib.GModels()
-   >>> print(models)
+   models = gammalib.GModels()
+   print(models)
    === GModels ===
    Number of models ..........: 0
    Number of parameters ......: 0
@@ -44,14 +46,15 @@ container.
 Now let's append a model to this container. For this, type:
 
 .. code-block:: python
+   :linenos:
 
-   >>> pos = gammalib.GSkyDir()
-   >>> pos.radec_deg(83.6331, 22.0145)
-   >>> spatial = gammalib.GModelSpatialPointSource(pos)
-   >>> spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100, 'MeV'))
-   >>> model = gammalib.GModelSky(spatial, spectral)
-   >>> models.append(model)
-   >>> print(models)
+   pos = gammalib.GSkyDir()
+   pos.radec_deg(83.6331, 22.0145)
+   spatial = gammalib.GModelSpatialPointSource(pos)
+   spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100, 'MeV'))
+   model = gammalib.GModelSky(spatial, spectral)
+   models.append(model)
+   print(models)
    === GModels ===
     Number of models ..........: 1
     Number of parameters ......: 6
@@ -94,9 +97,10 @@ Suppose you want to change one of these parameters, such as the
 ``PivotEnergy`` that you want to set to 1 TeV. This can be done using:
 
 .. code-block:: python
+   :linenos:
 
-   >>> models[0]['PivotEnergy'].value(1e6)
-   >>> print(models)
+   models[0]['PivotEnergy'].value(1e6)
+   print(models)
    ...
    PivotEnergy ..............: 1000000 MeV (fixed,scale=100,gradient)
    ...
@@ -112,15 +116,17 @@ After all this hard work, you may save your model into a XML file by
 typing:
 
 .. code-block:: python
+   :linenos:
 
-   >>> models.save('test.xml')
+   models.save('test.xml')
 
 and you can load it from an XML file in memory using:
 
 .. code-block:: python
+   :linenos:
 
-   >>> new_models = gammalib.GModels('test.xml')
-   >>> print(new_models)
+   new_models = gammalib.GModels('test.xml')
+   print(new_models)
 
 The last print command is to convince yourself that the models have been
 loaded properly.

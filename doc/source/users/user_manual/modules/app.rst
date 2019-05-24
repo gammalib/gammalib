@@ -1,10 +1,5 @@
-.. _sec_app:
-
-Creation of ftools applications
--------------------------------
-
-Overview
-~~~~~~~~
+Creation of applications
+------------------------
 
 The following figure presents an overview over the C++ classes of the 
 application module and their relations.
@@ -26,4 +21,3 @@ implemented by the :doxy:`GApplicationPars` class that contains application
 parameter implemented by the :doxy:`GApplicationPar` class. In addition, an
 application contains a logger, implemented by the :doxy:`GLog` class, which 
 allows message passing to the console and/or a dedicated log file.
-

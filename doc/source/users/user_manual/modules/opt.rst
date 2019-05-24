@@ -45,7 +45,9 @@ The source code is in ``examples/cpp/optimize/optimize.cpp``.
 First, the function to be optimized has to be implemented as a class derived from
 :doxy:`GOptimizerFunction`:
 
-.. literalinclude:: ../../../../examples/cpp/optimize/optimize.cpp
+**C++**
+
+.. literalinclude:: ../../../../../examples/cpp/optimize.cpp
    :language: cpp
    :linenos:
    :lines: 36-57
@@ -56,6 +58,8 @@ method, implement in lines 13-22, performs the computation of the
 function value, the gradient and the products of the gradients.
 
 The optimization is then done using the following code:
+
+**C++**
 
 .. code-block:: cpp
    :linenos:

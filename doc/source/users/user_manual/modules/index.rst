@@ -10,10 +10,10 @@ GammaLib modules
    sky
    app
    numerics
-   linalg
+   linalg/index
    opt
-   support
-   fits
+   support/index
+   fits/index
    xml
    xspec
    vo

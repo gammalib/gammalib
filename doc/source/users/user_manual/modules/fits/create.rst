@@ -1,55 +1,33 @@
-.. _sec_fits:
-
-FITS file interface
--------------------
-
-Overview
-~~~~~~~~
-
-The following figure presents an overview over the C++ classes of the FITS
-module and their relations.
-
-.. _fig_uml_fits:
-
-.. figure:: uml_fits.png
-   :width: 75%
-   :align: center
-
-   *FITS module*
-
-The FITS module provides a high-level interface to FITS files. The module
-is based on the cfitsio library for file access. The C++ classes of the
-module implement a logical representation of the FITS file in memory that
-can be handled independently of the file representation on disk.
-
-The central class of the FITS module is the :doxy:`GFits` class that represents
-a FITS file. The class is a container for classes derived from the abstract
-:doxy:`GFitsHDU` base class which represents a FITS extension (also called 
-Header-Data Unit, HDU). Each extension is composed of one header,
-implemented by the :doxy:`GFitsHeader` class and one data unit.
-The header is composed of cards representing the meta-data of the fits
-file. The cards are implemented by the :doxy:`GFitsHeaderCard` class.
-The data unit is either an image, represented by the abstract
-:doxy:`GFitsImage` base class, or a table, represented by the abstract
-:doxy:`GFitsTable` base class. The image can be stored in various data
-types, each of which is implemented by a specific class derived from
-:doxy:`GFitsImage`. The table can be either an ASCII table,
-implemented by the :doxy:`GFitsAsciiTable` class or a binary table,
-implemented by the :doxy:`GFitsBinTable` class.
-Each table is comprised of columns, represented by the abstract
-:doxy:`GFitsTableCol` base class. This class is the same for ASCII and binary
-tables. Similar to images, table column data can be stored in a variety
-of data types, each of which is implemented by a specific class derived
-from :doxy:`GFitsTableCol`.
-
-
 Creating a FITS file
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 The following example illustrates the creation of a FITS file comprising
 one image and one table (see ``examples/cpp/createfits/createfits.cpp`` for the
 source code; the line numbers are for reference and are not part of
-the source code):
+the source code)
+
+**Python**
+
+.. code-block:: python
+   :linenos:
+
+   fits  = gammalib.GFits()
+   image = gammalib.GFitsImageDouble(20,10)
+   for x in range(20):
+       for y in range(10):
+           image[x,y] = x+100.0*y
+   fits.append(image)
+   table  = gammalib.GFitsBinTable()
+   column = gammalib.GFitsTableDoubleCol('ENERGY', 10, 3)
+   for row in range(10):
+       for index in range(3):
+           column[row, index] = row*100.0+index
+   table.append(column)
+   fits.append(table)
+   fits.saveto('my_fits_file.fits', True)
+   fits.close()
+
+**C++**
 
 .. code-block:: cpp
    :linenos:
@@ -101,11 +79,16 @@ destruction of the object.
 
 Note also that up to line 17, the FITS object only exists in memory.
 The FITS file on disk is only created in line 18.
-Alternatively, one could have written::
+Alternatively, one could have written
 
-    1  GFits fits("my_fits_file.fits", true);
-       ...
-   18  fits.save(true);
+**C++**
+
+.. code-block:: cpp
+   :linenos:
+
+   GFits fits("my_fits_file.fits", true);
+   ...
+   fits.save(true);
 
 Here, the FITS file on disk is created in line 1. The (optional) ``true``
 argument specifies that the FITS file should be created if it does not
@@ -113,12 +96,15 @@ yet exist. By default, this argument is set to ``false``, and an exception
 is raised when creating the :doxy:`GFits` object. If a file exists already,
 line 1 will in fact open the file, and lines 2-17 will add an image and
 a table *in addition* to the image and table that exists already in the
-file. Line 1 is in fact identical to:
+file. Line 1 is in fact identical to
+
+**C++**
 
 .. code-block:: cpp
+   :linenos:
 
-    GFits fits;
-    fits.open("my_fits_file.fits", true);
+   GFits fits;
+   fits.open("my_fits_file.fits", true);
 
 hence it creates an instance of the :doxy:`GFits` object and then opens the
 file ``my_fits_file.fits``. Line 18 then saves the FITS file taking into
@@ -130,11 +116,16 @@ be overwritten or not (as for the :doxy:`GFits::saveto` method this flag is set 
 ``false`` by default).
 
 Note that one can also combine file opening with the :doxy:`GFits::saveto` method
-to create a copy of the FITS file. Specifying::
+to create a copy of the FITS file. Specifying
 
-    1  GFits fits("my_fits_file.fits", true);
-       ...
-   18  fits.saveto("my_fits_file2.fits", true);
+**C++**
+
+.. code-block:: cpp
+   :linenos:
+
+   GFits fits("my_fits_file.fits", true);
+   ...
+   fits.saveto("my_fits_file2.fits", true);
 
 will open the file ``my_fits_file.fits`` and save the FITS object after
 the manipulations of line 2-17 into the file ``my_fits_file2.fits``.
@@ -145,13 +136,16 @@ and the column to the binary table. These methods will append a *copy*
 of the object to the FITS object, hence after appending, any manipulations
 on the original object will not be reflected in the FITS object. If an
 object should be manipulated after it has been appended, a pointer to
-the object has to be retrieved from the FITS object using:
+the object has to be retrieved from the FITS object using
+
+**C++**
 
 .. code-block:: cpp
+   :linenos:
 
-    GFitsImage*    image  = fits.image(0);
-    GFitsTable*    table  = fits.table(1);
-    GFitsTableCol* column = (*table)["ENERGY"];
+   GFitsImage*    image  = fits.image(0);
+   GFitsTable*    table  = fits.table(1);
+   GFitsTableCol* column = (*table)["ENERGY"];
     
 For reference, a screen capture of the FITS file that is created by the
 above example is shown below.
