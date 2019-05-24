@@ -1,5 +1,3 @@
-.. _sec_sky:
-
 Sky maps, sky coordinates and sky regions
 -----------------------------------------
 
@@ -30,8 +28,18 @@ defined by the coordinate projection, represented by the abstract
 implements the relation for the HEALPix pixelisation scheme, the 
 abstract :doxy:`GWcs` base class represents the relation for World
 Coordinate Systems. Specific World Coordinate System projections
-are implemented by the :doxy:`GWcsAIT`, :doxy:`GWcsAZP`, :doxy:`GWcsCAR`,
-:doxy:`GWcsMER`, :doxy:`GWcsMOL`, :doxy:`GWcsSTG` and :doxy:`GWcsTAN` 
+are implemented by the
+:doxy:`GWcsAIT`,
+:doxy:`GWcsARC`,
+:doxy:`GWcsAZP`,
+:doxy:`GWcsCAR`,
+:doxy:`GWcsGLS`,
+:doxy:`GWcsMER`,
+:doxy:`GWcsMOL`,
+:doxy:`GWcsSFL`,
+:doxy:`GWcsSIN`,
+:doxy:`GWcsSTG` and
+:doxy:`GWcsTAN`
 classes. Instances of all specific World Coordinate System classes 
 are collected in the :doxy:`GWcsRegistry` registry class.
 
@@ -43,9 +51,11 @@ Transformation between both systems is handled transparently by
 Sky map pixels are implemented by the :doxy:`GSkyPixel` class.
 
 Sky regions are represented by the abstract :doxy:`GSkyRegion` base class.
-So far, only a simple circular sky region is implemented by the
-:doxy:`GSkyRegionCircle` class. Sky regions are collected in the 
-:doxy:`GSkyRegions` container class.
+So far, a simple circular sky region and an arbitrary sky map region
+is implemented by the :doxy:`GSkyRegionCircle` and :doxy:`GSkyRegionMap`
+classes. In the latter, map pixels that different from zero define the
+sky region.
+Sky regions are collected in the :doxy:`GSkyRegions` container class.
 
 Coordinates in the horizon system (altitude and azimuth) are implemented
 by the :doxy:`GHorizDir` class.
