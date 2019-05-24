@@ -1,8 +1,6 @@
 Under the hood
 ==============
 
-.. _sec_registry:
-
 Registry classes
 ----------------
 

@@ -1,8 +1,8 @@
-Users manual
-============
+Tutorials
+=========
 
 .. toctree::
    :maxdepth: 2
 
-   intro
+   sky/index
    linalg

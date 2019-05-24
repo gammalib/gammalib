@@ -1,4 +1,4 @@
-.. _sec_users:
+.. _users:
 
 User Documentation
 ==================
@@ -8,4 +8,4 @@ User Documentation
 
    quickstart
    user_manual/index
-   howto/index
+   tutorial/index

@@ -1,5 +1,3 @@
-.. _sec_sky_convert_coordinates:
-
 How to convert a sky coordinate from celestial to Galactic?
 ===========================================================
 

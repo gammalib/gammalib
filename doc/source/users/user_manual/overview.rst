@@ -1,17 +1,5 @@
-.. _um_intro:
-
-Introduction
-============
-
-Scope
------
-
-This User Manual provides a complete description of the GammaLib C++ library
-and its Python module. It is equally well suited for beginners as for
-experienced users.
-
 Overview
---------
+========
 
 GammaLib is a self-contained, instrument independent, open source,
 multi-platform C++ library and Python module that implements all code
@@ -43,7 +31,7 @@ are:
 * Issue tracker: https://cta-redmine.irap.omp.eu/projects/gammalib/issues
 * Documentation: http://cta.irap.omp.eu/gammalib/
 
-The present document applies to GammaLib version 1.4.
+The present document applies to GammaLib version 1.6.
 
 GammaLib is designed to compile on any POSIX compliant platform. So far, 
 GammaLib has been successfully compiled and tested on Mac OS X, OpenBSD, OpenSolaris

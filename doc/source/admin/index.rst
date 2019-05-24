@@ -1,4 +1,4 @@
-.. _sec_admin:
+.. _admin:
 
 Getting GammaLib
 ================

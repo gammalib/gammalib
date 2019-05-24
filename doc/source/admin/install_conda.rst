@@ -1,4 +1,4 @@
-.. _sec_install_conda:
+.. _install_conda:
 
 Installing via Anaconda
 =======================

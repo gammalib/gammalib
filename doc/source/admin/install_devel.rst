@@ -1,4 +1,4 @@
-.. _sec_install_devel:
+.. _install_devel:
 
 Installing the development version
 ==================================
@@ -16,7 +16,7 @@ Download the source tarball from the following link
 
 - `GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.7.0.dev.tar.gz>`_
 
-and follow the instructions on :ref:`sec_install_source`.
+and follow the instructions on :ref:`install_source`.
 
 
 Git repository
@@ -62,7 +62,7 @@ the following command sequence (the code will be installed into the
    $ export GAMMALIB=/usr/local/gamma
    $ source $GAMMALIB/bin/gammalib-init.sh
 
-Please read the :ref:`sec_install_source` section if you need more information
+Please read the :ref:`install_source` section if you need more information
 on how to install GammaLib.
 
 .. note::

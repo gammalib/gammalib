@@ -1,11 +1,11 @@
-.. _sec_install_source:
+.. _install_source:
 
 Installation from source code
 =============================
 
 Compiling GammaLib from source is the recommended method to install the package
 in case that you do not use Anaconda (if you use Anaconda, please follow
-the instructions at :ref:`sec_install_conda`, and better do not try to compile
+the instructions at :ref:`install_conda`, and better do not try to compile
 the source code against your Anaconda Python installation). You also need to
 compile from source if you want to use the development version of GammaLib.
 

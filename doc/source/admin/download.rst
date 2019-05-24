@@ -1,4 +1,4 @@
-.. _sec_download:
+.. _download:
 
 Download
 ========
@@ -7,7 +7,7 @@ The latest GammaLib release is
 `gammalib-1.6.0 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.6.0.tar.gz>`_
 (29 May 2019).
 
-Below a list of older GammaLib releases. Please read the :ref:`sec_release` to
+Below a list of older GammaLib releases. Please read the :ref:`release` to
 learn more about new features and corrected bugs in a given release.
 
 To download an older release, click on the corresponding release number:

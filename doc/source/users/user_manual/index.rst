@@ -1,4 +1,4 @@
-.. _sec_user_manual:
+.. _user_manual:
 
 ===========
 User Manual
@@ -7,11 +7,10 @@ User Manual
 .. toctree::
    :maxdepth: 1
 
-   introduction
-   getting
+   scope
+   overview
    modules/index
    internals
-   manual/index
    glossary
 
 

@@ -177,7 +177,7 @@ The class definition is structured in several sections:
 
 Note that most classes will derive from the abstract interface class
 :doxy:`GBase` which imposes the implementation of the :doxy:`GBase::clear`, the
-:doxy`GBase::clone` and the :doxy:`GBase::print` methods.
+:doxy:`GBase::clone` and the :doxy:`GBase::print` methods.
 
 The definition of pure virtual methods should be done in a section that
 is separate from the methods that are implemented.

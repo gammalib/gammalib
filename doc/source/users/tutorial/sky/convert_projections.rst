@@ -1,5 +1,3 @@
-.. _sec_sky_convert_projections:
-
 How to convert sky map projections?
 ===================================
 

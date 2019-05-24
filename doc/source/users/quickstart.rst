@@ -58,7 +58,6 @@ Now let's append a model to this container. For this, type:
    === GModelSky ===
     Name ......................:
     Instruments ...............: all
-    Instrument scale factors ..: unity
     Observation identifiers ...: all
     Model type ................: PointSource
     Model components ..........: "PointSource" * "PowerLaw" * "Constant"
@@ -74,13 +73,13 @@ Now let's append a model to this container. For this, type:
      Normalization ............: 1 (relative value) (fixed,scale=1,gradient)
 
 With this sequence of commands you first defined a sky direction in
-celestial coordinates using ``GSkyDir``. You may recognise that this
+celestial coordinates using :doxy:`GSkyDir`. You may recognise that this
 is the position of the Crab. You then used this position to define the
-spatial component of a sky model using ``GModelSpatialPointSource``. As the name
+spatial component of a sky model using :doxy:`GModelSpatialPointSource`. As the name
 suggests, the spatial component is a point source. Next, you defined the
-spectral component using ``GModelSpactralPlaw``: a power law with
+spectral component using :doxy:`GModelSpactralPlaw`: a power law with
 normalisation of 1 and a spectral index of -2. Then, you combined the spatial
-and spectral components in a sky model using ``GModelSky``. And
+and spectral components in a sky model using :doxy:`GModelSky`. And
 finally you appended the sky model to the model container allocated
 previously using the append method. When you then print the model
 container you see that is contains now one model with 6 parameters.
@@ -99,7 +98,7 @@ Suppose you want to change one of these parameters, such as the
    >>> models[0]['PivotEnergy'].value(1e6)
    >>> print(models)
    ...
-   PivotEnergy ..............: 1e+06 MeV (fixed,scale=100,gradient)
+   PivotEnergy ..............: 1000000 MeV (fixed,scale=100,gradient)
    ...
 
 As the units are MeV, we had to specify a value of 1e6 to set the

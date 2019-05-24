@@ -1,5 +1,3 @@
-.. _sec_howto_sky:
-
 Sky coordinates, sky maps and sky regions
 -----------------------------------------
 

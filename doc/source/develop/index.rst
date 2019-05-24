@@ -1,4 +1,4 @@
-.. _sec_develop:
+.. _develop:
 
 Developer documentation
 =======================
