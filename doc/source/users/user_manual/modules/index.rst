@@ -6,7 +6,7 @@ GammaLib modules
 
    intro
    obs/index
-   model
+   model/index
    sky
    app
    numerics
