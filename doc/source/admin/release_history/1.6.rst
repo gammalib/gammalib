@@ -1,7 +1,7 @@
 .. _1.6:
 
-GammaLib 1.6 release
-====================
+GammaLib 1.6 release (29 May 2019)
+==================================
 
 Overview
 --------
@@ -10,9 +10,13 @@ GammaLib 1.6 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* Various computational speed ups
+* Support for analysis of H.E.S.S. data and in particular the data from the
+  public release
+* Improved handling of CTA energy dispersion
+* General CTA response caching for sources with fixed spatial parameters
 * Handling of observation-specific energy thresholds and extended models in
   CTA On/Off analyses
+* Various computational speed ups
 * Support for Python pickeling
 
 
