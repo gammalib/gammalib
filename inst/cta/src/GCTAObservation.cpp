@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1732,6 +1732,26 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     hdu.card("EUNIT",    "TeV",    "Energy unit");
     hdu.card("EVTVER",   "draft1", "Event list version number");
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Likelihood pre evaluation hook
+ *
+ * @param[in] models Models.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] curvature Curvature matrix.
+ * @param[in,out] npred Number of predicted events.
+ *
+ * The likelihood pre evaluation hook .
+ ***************************************************************************/
+void GCTAObservation::likelihood_pre_evaluation_hook(const GModels& models,
+                                                     GVector*       gradient,
+                                                     GMatrixSparse* curvature,
+                                                     double*        npred) const
+{
     // Return
     return;
 }

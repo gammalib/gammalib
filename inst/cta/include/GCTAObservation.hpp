@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.hpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -160,6 +160,12 @@ protected:
     void free_members(void);
     void read_attributes(const GFitsHDU& hdu);
     void write_attributes(GFitsHDU& hdu) const;
+
+    // Hooks
+    void likelihood_pre_evaluation_hook(const GModels& models,
+                                        GVector*       gradient,
+                                        GMatrixSparse* curvature,
+                                        double*        npred) const;
 
     // Protected members
     std::string   m_instrument;    //!< Instrument name

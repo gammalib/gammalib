@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -126,6 +126,12 @@ protected:
     void init_members(void);
     void copy_members(const GObservation& obs);
     void free_members(void);
+
+    // Hooks
+    virtual void likelihood_pre_evaluation_hook(const GModels& models,
+                                                GVector*       gradient,
+                                                GMatrixSparse* curvature,
+                                                double*        npred) const;
 
     // Likelihood methods
     virtual double likelihood_poisson_unbinned(const GModels& models,

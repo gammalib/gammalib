@@ -184,6 +184,9 @@ double GObservation::likelihood(const GModels& models,
     // Extract statistic for this observation
     std::string statistic = gammalib::toupper(this->statistic());
 
+    // Call likelihood pre evaluation hook
+    likelihood_pre_evaluation_hook(models, gradient, curvature, npred);
+
     // Unbinned analysis
     if (dynamic_cast<const GEventList*>(events()) != NULL) {
 
@@ -885,6 +888,27 @@ void GObservation::free_members(void)
  =                           Likelihood methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Likelihood pre evaluation hook
+ *
+ * @param[in] models Models.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] curvature Curvature matrix.
+ * @param[in,out] npred Number of predicted events.
+ *
+ * This method implements a likelihood pre evaluation hook that will be
+ * called before the likelihood computation.
+ ***************************************************************************/
+void GObservation::likelihood_pre_evaluation_hook(const GModels& models,
+                                                  GVector*       gradient,
+                                                  GMatrixSparse* curvature,
+                                                  double*        npred) const
+{
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for Poisson statistic and
