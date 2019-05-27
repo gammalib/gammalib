@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseCache.hpp - CTA response cache class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,6 +70,7 @@ public:
     std::string        classname(void) const;
     int                size(void) const;
     bool               is_empty(void) const;
+    int                nnames(void) const;
     int                ndirs(void) const;
     int                nerecos(void) const;
     int                netrues(void) const;
@@ -91,6 +92,8 @@ public:
                                 const GEnergy&     ereco,
                                 const GEnergy&     etrue,
                                 double*            value = NULL) const;
+    std::string        name(const int& index) const;
+    void               remove(const std::string& name);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -127,6 +130,21 @@ inline
 bool GCTAResponseCache::is_empty(void) const
 {
     return (m_cache.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of names in cache
+ *
+ * @return Number of names in cache
+ *
+ * Returns the number of names in the response cache.
+ ***************************************************************************/
+inline
+int GCTAResponseCache::nnames(void) const
+{
+    // Return number of names
+    return m_cache.size();
 }
 
 #endif /* GCTARESPONSECACHE_HPP */

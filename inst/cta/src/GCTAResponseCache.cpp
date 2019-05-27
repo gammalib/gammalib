@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseCache.cpp - CTA response cache class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GCTAInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_NAME                                "GCTAResponseCache::name(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -466,6 +467,62 @@ bool GCTAResponseCache::contains(const std::string& name,
 
     // Return containment flag
     return contains;
+}
+
+
+/***********************************************************************//**
+ * @brief Return name of cache element
+ *
+ * @param[in] index Cache element number (0,...,nnames()-1).
+ * @return Name of cache element.
+ *
+ * Returns name of cache element with specified @p index.
+ ***************************************************************************/
+std::string GCTAResponseCache::name(const int& index) const
+{
+    // Raise an exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_NAME, index, size());
+    }
+
+    // Initialise name
+    std::string name;
+
+    // Initialise counter
+    int counter = 0;
+
+    // Loop over names and extract the name that corresponds to the index
+    for (GCTAResponseCacheName::const_iterator it_name = m_cache.begin();
+         it_name != m_cache.end(); ++it_name, ++counter) {
+        if (counter == index) {
+            name = it_name->first;
+            break;
+        }
+    }
+
+    // Return name
+    return name;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove cache values for a given name
+ *
+ * @param[in] name Cache name.
+ *
+ * Removes the cache values for a given @p name. If the @p name does not
+ * exist in the cache the method does nothing.
+ ***************************************************************************/
+void GCTAResponseCache::remove(const std::string& name)
+{
+    // Search for name in cache
+    GCTAResponseCacheName::const_iterator it_name = m_cache.find(name);
+    if (it_name != m_cache.end()) {
+        m_cache.erase(it_name);
+    }
+
+    // Return
+    return;
 }
 
 
