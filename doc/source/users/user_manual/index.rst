@@ -10,6 +10,7 @@ User Manual
    scope
    overview
    modules/index
+   inst/index
    internals
    glossary
 

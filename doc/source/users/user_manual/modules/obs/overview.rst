@@ -25,14 +25,14 @@ which is composed of a list of :doxy:`GObservation` elements (the list is of
 arbitrary length; an empty list is a valid state of the :doxy:`GObservations`
 class). The observation container is furthermore composed of a :doxy:`GModels`
 model container class that holds a list of models used to describe the
-event distributions of the observations (see :ref:`sec_model`). The
+event distributions of the observations (see :ref:`um_model`). The
 :doxy:`GObservations` class presents the central element of all scientific data
 analyses, as it combines all data and all models in a single entity.
 
 Instrument specific implementations of :doxy:`GObservation` objects are
 registered in the C++ registry class :doxy:`GObservationRegistry` which
 statically collects one instance of each instrument-specific observation
-class that is available in GammaLib (see :ref:`sec_registry` for a general
+class that is available in GammaLib (see :ref:`um_registry` for a general
 description of registry classes).
 
 The instrument response for a given observation is defined by the
@@ -41,16 +41,16 @@ abstract base class :doxy:`GResponse`. This class is composed of the C++ class
 compute the response function for a given instrument and observation.
 :doxy:`GCaldb` supports the HEASARC CALDB format
 (http://heasarc.nasa.gov/docs/heasarc/caldb/), but is sufficiently
-general to support also other formats (see :ref:`sec_caldb` to learn
+general to support also other formats (see :ref:`um_obs_caldb` to learn
 how to setup and to use a calibration database).
 
 The events for a given observation are defined by the abstract base
 class :doxy:`GEvents`. This class is composed of the C++ classes :doxy:`GGti` and
 :doxy:`GEbounds`. :doxy:`GGti` implements so called *Good Time Intervals*, which defines
-the time period(s) during which the data were taken (see :ref:`sec_time`).
+the time period(s) during which the data were taken (see :ref:`um_obs_time`).
 :doxy:`GEbounds` implements so called *Energy Boundaries*, which
 define the energy intervals that are covered by the data (see 
-:ref:`sec_energy`).
+:ref:`um_obs_energy`).
 
 :doxy:`GEvents` is also a container for the individual events, implemented by the
 abstract :doxy:`GEvent` base class. 

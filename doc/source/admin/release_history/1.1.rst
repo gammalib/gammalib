@@ -16,7 +16,6 @@ In particular, this release provides:
 * Energy dispersion for stacked CTA analysis
 * Publication of sky maps to the Virtual Observatory hub
 * New names for spatial and spectral model and their parameters
-  (see :ref:`sec_model`)
 
 Bug fixes
 ---------

@@ -1,5 +1,5 @@
-Sky maps, sky coordinates and sky regions
------------------------------------------
+Overview
+========
 
 The following figure presents an overview over the C++ classes of the sky
 module and their relations.

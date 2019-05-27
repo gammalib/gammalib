@@ -1,7 +1,7 @@
-.. _sec_cta_background:
+.. _um_cta_background:
 
 Modelling CTA background
-~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 The standard method for modelling the CTA instrumental background makes 
 use of background rate information that is included in the instrument 

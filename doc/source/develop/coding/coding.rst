@@ -281,9 +281,8 @@ example of the start of a source code file.
     /* __ Constants __________________________________________________________ */
     const double pi = 3.14;
 
-The include section starts with a conditional include of the code
-configuration header file (see :ref:`sec_configure`). This makes
-GammaLib compile options available to the source code.
+The include section starts with a conditional include of the code configuration
+header file. This makes GammaLib compile options available to the source code.
 
 The include section is followed by the declaration of method names.
 These method names will be used in exceptions 

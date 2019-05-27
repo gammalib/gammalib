@@ -27,7 +27,7 @@ have to make sure that GammaLib and any dependent library (cfitsio,
 readline, ncurses) is in the library load path (eventually you may need
 to adjust ``LD_LIBRARY_PATH``, or ``DYLD_LIBRARY_PATH`` if you are on Mac 
 OS X). This is all done automatically if you set up the environment as 
-described :ref:`here <setup>`.
+described :ref:`here <setup_env>`.
 
 Now try:
 

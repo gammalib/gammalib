@@ -195,6 +195,8 @@ directory. If you do not have such privileges, chose an install directory
 that you can access using the ``--prefix`` option.
 
 
+.. _setup_env:
+
 Setting up your environment
 ---------------------------
 

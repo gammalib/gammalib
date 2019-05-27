@@ -1,3 +1,5 @@
+.. _um_obs_caldb:
+
 Setting up and using a calibration database
 ===========================================
 

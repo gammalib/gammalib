@@ -1,6 +1,5 @@
-
 Overview
-~~~~~~~~
+========
 
 The following figure presents an overview over the C++ classes of the CTA
 module and their relations.
@@ -52,7 +51,7 @@ storage of event bin information (without storing for example the
 instrument direction or the energy for each bin), while preserving
 the abstract data model where an event cube of abstract type
 :doxy:`GEventCube` is composed of event bins of abstract type 
-:doxy:`GEventBin` (see :ref:`sec_obs`).
+:doxy:`GEventBin` (see :ref:`um_obs`).
 
 The data of unbinned observations are stored by the :doxy:`GCTAEventList`
 class. The :doxy:`GCTAEventList` class is a container of :doxy:`GCTAEventAtom`
@@ -76,7 +75,7 @@ For all other analysis, the factorized IRFs are used directly.
 Dependent on the response format, the components of the factorization
 are stored in classes that derive from the abstract :doxy:`GCTAAeff`, 
 :doxy:`GCTAPsf`, :doxy:`GCTAEdisp`, and :doxy:`GCTABackground` classes
-(see :ref:`sec_cta_response` for more details on the response
+(see :ref:`um_cta_response` for more details on the response
 implementation).
 
 Different models of the instrumental background are provided by the
@@ -90,5 +89,5 @@ response function for background modelling.
 Specifically, :doxy:`GCTAModelIrfBackground` will use information
 provided by :doxy:`GCTABackground` and :doxy:`GCTAModelCubeBackground`
 will use information provided by :doxy:`GCTACubeBackground`
-(see :ref:`sec_cta_background` for details on the background
+(see :ref:`um_cta_background` for details on the background
 model implementation).

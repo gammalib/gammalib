@@ -1,10 +1,5 @@
-.. _sec_xspec:
-
-Xspec interface
----------------
-
 Overview
-~~~~~~~~
+========
 
 The following figure presents an overview over the C++ classes of the Xspec
 module and their relations.

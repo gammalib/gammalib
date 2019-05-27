@@ -1,33 +1,33 @@
-.. _sec_cta_xml:
+.. _um_cta_xml:
 
 Describing CTA observations using XML
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=====================================
 
 CTA observations can be described in GammaLib using an ASCII file in XML
-format (see :ref:`sec_obsxml`). The CTA specific section of this file has
+format (see :ref:`um_obs_xml`). The CTA specific section of this file has
 the format:
 
 .. code-block:: xml
 
-    <observation name="..." id="..." instrument="...">
-        <parameter name="EventList"           file="..."/>
-        <parameter name="EffectiveArea"       file="..."/>
-        <parameter name="PointSpreadFunction" file="..."/>
-        <parameter name="EnergyDispersion"    file="..."/>
-        <parameter name="Background"          file="..."/>
-    </observation>
+   <observation name="..." id="..." instrument="...">
+       <parameter name="EventList"           file="..."/>
+       <parameter name="EffectiveArea"       file="..."/>
+       <parameter name="PointSpreadFunction" file="..."/>
+       <parameter name="EnergyDispersion"    file="..."/>
+       <parameter name="Background"          file="..."/>
+   </observation>
 
 for an unbinned observation and
 
 .. code-block:: xml
 
-    <observation name="..." id="..." instrument="...">
-        <parameter name="CountsCube"          file="..."/>
-        <parameter name="EffectiveArea"       file="..."/>
-        <parameter name="PointSpreadFunction" file="..."/>
-        <parameter name="EnergyDispersion"    file="..."/>
-        <parameter name="Background"          file="..."/>
-    </observation>
+   <observation name="..." id="..." instrument="...">
+       <parameter name="CountsCube"          file="..."/>
+       <parameter name="EffectiveArea"       file="..."/>
+       <parameter name="PointSpreadFunction" file="..."/>
+       <parameter name="EnergyDispersion"    file="..."/>
+       <parameter name="Background"          file="..."/>
+   </observation>
  
 for a binned observation.
 Each parameter within the ``<observation>`` tag specifies the filename
@@ -39,16 +39,16 @@ while the latter uses an event cube  (requiring a parameter with name
 The ``EffectiveArea``, ``PointSpreadFunction``, ``EnergyDispersion`` and
 ``Background`` parameters provide the filenames of the instrument
 specific response function components for each observation 
-(see :ref:`sec_cta_response`).
+(see :ref:`um_cta_response`).
 Alternatively, the calibration database and response name can be
 specified, e.g.
 
 .. code-block:: xml
 
-    <observation name="..." id="..." instrument="...">
-        <parameter name="EventList" file="..."/>
-        <parameter name="Calibration" database="..." response="..."/>
-    </observation>
+   <observation name="..." id="..." instrument="...">
+       <parameter name="EventList" file="..."/>
+       <parameter name="Calibration" database="..." response="..."/>
+   </observation>
 
 A variant of the binned analysis is the stacked analysis.
 While in a binned analysis an event cube is generated for each 
@@ -61,12 +61,12 @@ following format:
 
 .. code-block:: xml
 
-    <observation name="..." id="..." instrument="...">
-        <parameter name="CountsCube"   file="..."/>
-        <parameter name="ExposureCube" file="..."/>
-        <parameter name="PsfCube"      file="..."/>
-        <parameter name="BkgCube"      file="..."/>
-    </observation>
+   <observation name="..." id="..." instrument="...">
+       <parameter name="CountsCube"   file="..."/>
+       <parameter name="ExposureCube" file="..."/>
+       <parameter name="PsfCube"      file="..."/>
+       <parameter name="BkgCube"      file="..."/>
+   </observation>
 
 The stacked analysis uses also an event cube but now requires the
 pre-computed response cubes.
@@ -92,12 +92,11 @@ These boundaries are specified as optional attributes in the XML file, e.g.
 
 .. code-block:: xml
 
-    <observation name="..." id="..." instrument="..." emin="0.1" emax="100.0">
-        ...
-    </observation>
+   <observation name="..." id="..." instrument="..." emin="0.1" emax="100.0">
+       ...
+   </observation>
 
 .. note::
-
    Energy boundaries in the observation XML file are specified in units
    of TeV.
 
@@ -119,6 +118,5 @@ Here an example of the expected XML format:
    </observation>
 
 .. note::
-
    The time reference for the Good Time Intervals is specified 
    using the ``TimeReference`` parameter.

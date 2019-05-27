@@ -1,20 +1,21 @@
-GammaLib modules
-================
+.. _um_generic:
+
+Generic modules
+===============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    intro
    obs/index
    model/index
-   sky
-   app
-   numerics
+   sky/index
+   app/index
+   numerics/index
    linalg/index
-   opt
+   opt/index
    support/index
    fits/index
-   xml
-   xspec
-   vo
-   inst
+   xml/index
+   xspec/index
+   vo/index

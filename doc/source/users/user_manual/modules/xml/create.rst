@@ -1,43 +1,11 @@
-.. _sec_xml:
-
-XML file interface
-------------------
-
-Overview
-~~~~~~~~
-
-The followinf figure presents an overview over the C++ classes of the XML
-module and their relations.
-
-.. _fig_uml_xml:
-
-.. figure:: uml_xml.png
-   :width: 80%
-   :align: center
-
-   *XML module*
-
-The XML module provides classes that allow creation, writing and reading of
-files in the Extensible Markup Language (XML) format.
-The central class of the XML module is the abstract :doxy:`GXmlNode` base
-class which represent a node of the XML document. The essential property
-of :doxy:`GXmlNode` is that it may contain a list of :doxy:`GXmlNode` objects,
-allowing creating a complex tree of data structures. Nodes in a XML
-document may be either elements, comments, some text of a processing
-instruction. These different node types are implemented by the
-:doxy:`GXmlElement`, :doxy:`GXmlComment`, :doxy:`GXmlText` and :doxy:`GXmlPI` classes,
-respectively. A special node if the :doxy:`GXmlDocument` node which provides
-the root node of a XML document. This node must exist only once in a XML
-tree. The XML file is implement by the :doxy:`GXml` class which contains one
-instance of :doxy:`GXmlDocument`.
-
-
 Creating a XML file
-~~~~~~~~~~~~~~~~~~~
+===================
 
 The following example illustrates the creation of a XML file
 (see ``examples/cpp/createxml/createxml.cpp`` for the source code; the line numbers are
-for reference and are not part of the source code):
+for reference and are not part of the source code)
+
+**C++**
 
 .. code-block:: cpp
    :linenos:
@@ -96,13 +64,16 @@ before the nodes were appended to the document root. The reason behind
 this approach is that the :doxy:`GXml::append` method creates deep copies of the
 nodes provided in the argument, hence manipulation of the node once 
 appended requires to retrieve the pointers to the deep copies in the XML
-document. The following example illustrates how this can be done:
+document. The following example illustrates how this can be done
+
+**C++**
 
 .. code-block:: cpp
+   :linenos:
 
-    xml.append(GXmlElement("source type=\"PointSource\""));
-    xml.element("spatial", 0)->append(GXmlElement("parameter ra=\"83.0\""));
-    xml.element("spatial", 0)->append(GXmlElement("parameter dec=\"22.0\""));
+   xml.append(GXmlElement("source type=\"PointSource\""));
+   xml.element("spatial", 0)->append(GXmlElement("parameter ra=\"83.0\""));
+   xml.element("spatial", 0)->append(GXmlElement("parameter dec=\"22.0\""));
 
 The ``xml.element("spatial", 0)`` method returns a pointer to the first
 :doxy:`GXmlElement` node with tag ``spatial`` in the XML document. Now that
@@ -110,13 +81,16 @@ we have a pointer to the nodes, elements can be appended to the XML
 document using the :doxy:`GXml::append` method.
 
 Alternatively, one can also retrieve the node pointer when the node is 
-appended to the XML document:
+appended to the XML document
+
+**C++**
 
 .. code-block:: cpp
+   :linenos:
 
-    GXmlNode* node = xml.append(GXmlElement("source type=\"PointSource\""));
-    node->append(GXmlElement("parameter ra=\"83.0\""));
-    node->append(GXmlElement("parameter dec=\"22.0\""));
+   GXmlNode* node = xml.append(GXmlElement("source type=\"PointSource\""));
+   node->append(GXmlElement("parameter ra=\"83.0\""));
+   node->append(GXmlElement("parameter dec=\"22.0\""));
  
 The :doxy:`GXml::append` method returns in fact the pointer to the deep copy of the
 element that has been appended. This pointer can then be used to manipulate

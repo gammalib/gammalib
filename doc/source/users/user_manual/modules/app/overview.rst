@@ -1,5 +1,5 @@
-Creation of applications
-------------------------
+Overview
+========
 
 The following figure presents an overview over the C++ classes of the 
 application module and their relations.

@@ -1,4 +1,4 @@
-.. _sec_lat:
+.. _um_lat:
 
 *Fermi*-LAT interface
 ---------------------

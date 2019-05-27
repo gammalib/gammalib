@@ -1,10 +1,5 @@
-.. _sec_vo:
-
-Virtual Observatory interface
------------------------------
-
 Overview
-~~~~~~~~
+========
 
 The following figure presents an overview over the C++ classes of the VO
 module and their relations.

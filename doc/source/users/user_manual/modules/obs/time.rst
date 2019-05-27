@@ -1,3 +1,5 @@
+.. _um_obs_time:
+
 Times in GammaLib
 =================
 

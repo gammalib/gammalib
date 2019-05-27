@@ -14,7 +14,7 @@ locally on your machine.
 Each GammaLib module is presented in a dedicated section, following the overview
 shown in :ref:`this figure <fig_structure>` from the top-left to the bottom right.
 Instrument specific modules are described in a dedicated chapter (see 
-:ref:`sec_inst`). All C++ classes of a module and their relations are
+:ref:`um_inst`). All C++ classes of a module and their relations are
 illustrated using a UML diagram.
 
 To explain how to read such a diagram, we show an example for five

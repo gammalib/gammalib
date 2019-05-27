@@ -1,3 +1,5 @@
+.. _response:
+
 Handling the instrument response
 ================================
 

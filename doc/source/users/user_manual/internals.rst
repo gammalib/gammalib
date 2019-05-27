@@ -1,6 +1,8 @@
 Under the hood
 ==============
 
+.. _um_registry:
+
 Registry classes
 ----------------
 

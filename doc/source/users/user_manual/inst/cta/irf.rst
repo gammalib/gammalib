@@ -1,13 +1,13 @@
-.. _sec_cta_response:
+.. _um_cta_response:
 
 Handling the instrument response
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+================================
 
 Overview
 ^^^^^^^^
 
 The CTA specific instrument response is described by the 
-:doxy:`GCTAResponseIrf` class (see :ref:`sec_response` for a general
+:doxy:`GCTAResponseIrf` class (see :ref:`response` for a general
 description of response handling in GammaLib).
 The CTA response is factorised into 
 the effective area :math:`A_{\rm eff}(d, p, E, t)` (units :math:`cm^2`),
@@ -29,15 +29,15 @@ Xspec response files, and
 Performance tables.
 
 
-.. _sec_cta_response_formats:
+.. _um_cta_response_formats:
 
 Response formats
 ^^^^^^^^^^^^^^^^
 
-.. _sec_cta_rsptable:
+.. _um_cta_rsptable:
 
 Response tables
-===============
+---------------
 
 The CTA response table class :doxy:`GCTAResponseTable` provides a generic 
 handle for multi-dimensional response information. It is based on the 
@@ -74,10 +74,10 @@ An example of a CTA response file is shown below:
    :width: 100%
 
 
-.. _sec_cta_xspec:
+.. _um_cta_xspec:
 
 Xspec response format
-=====================
+---------------------
 
 For the first CTA Consortium Data Challenge (1DC) the response information
 was provided in a format that was inspired from the one use for Xspec.
@@ -91,10 +91,10 @@ the sake of the 1DC, a simple one-dimensional vector had been implemented.
 GammaLib still supports handling of the 1DC files, but there are no plans 
 to use this format in the future.
 
-.. _sec_cta_perftable:
+.. _um_cta_perftable:
 
 Performance table
-=================
+-----------------
 
 Performance tables specify the CTA on-axis performance as function
 of energy and have been provided by the Monte Carlo group of the
@@ -139,7 +139,7 @@ Response components
 ^^^^^^^^^^^^^^^^^^^
 
 Effective area
-==============
+--------------
 
 The :math:`A_{\rm eff}(d, p, E, t)` term is described by the abstract
 :doxy:`GCTAAeff` base class. The effective area is determined using
@@ -178,7 +178,7 @@ GCTAAeff2D
 
 :doxy:`GCTAAeff2D` reads the full effective area as function of energies
 and off-axis angle from a FITS table. The FITS table is expected to be
-in the :ref:`sec_cta_rsptable` format. From this two-dimensional table,
+in the :ref:`um_cta_rsptable` format. From this two-dimensional table,
 the effective area values are determine by bi-linear interpolation in
 the base 10 logarithm of photon energy and the offset angle.
 
@@ -221,7 +221,7 @@ events. This type of cut can be accomodated by specifying a scaling factor
 using the :doxy:`GCTAAeffArf::scale` method prior to loading the ARF data. For
 example, if the containment fraction was fixed to 80%, a scaling of 1.25
 should be applied to recover the full effective detection area.
-When response information is specified by an XML file (see :ref:`sec_cta_xml`),
+When response information is specified by an XML file (see :ref:`um_cta_xml`),
 the ``thetacut`` and ``scale`` parameters can be defined using optional 
 attributes to the ``EffectiveArea`` parameter.
 
@@ -243,7 +243,7 @@ GCTAAeffPerfTable
 
 :doxy:`GCTAAeffPerfTable` reads the effective area information from an ASCII
 file that has been defined by the CTA Monte Carlo workpackage
-(see :ref:`sec_cta_perftable`). This file provides the full effective detection
+(see :ref:`um_cta_perftable`). This file provides the full effective detection
 area in units of :math:`m^2` after the background cut as function of
 the base 10 logarithm of the true photon energy. No theta cut is
 applied. For a given energy, the effective area is computed by 
@@ -261,14 +261,14 @@ distribution follows a Gaussian distribution in offset angle squared:
 where :math:`\sigma` characterises the size of the field of view. The
 :math:`\sigma` parameter is set and retrieved using the 
 :doxy:`GCTAAeffPerfTable::sigma` methods. When response information is
-specified by an XML file (see :ref:`sec_cta_xml`), the :math:`\sigma`
+specified by an XML file (see :ref:`um_cta_xml`), the :math:`\sigma`
 parameter can be set using the optional ``sigma`` attribute.
 If the :math:`\sigma` parameter is not explicitly set,
 :math:`\sigma=3 \, {\rm deg}^2` is assumed as default.
 
 
 Point spread function
-=====================
+---------------------
 
 The :math:`PSF(p' | d, p, E, t)` term is described by the abstract
 :doxy:`GCTAPsf` base class. The point spread function is determined using
@@ -308,7 +308,7 @@ GCTAPsfPerfTable
 
 
 Energy dispersion
-=================
+-----------------
 
 The :math:`E_{\rm disp}(E' | d, p, E, t)` term is described by the abstract
 :doxy:`GCTAEdisp` base class. The energy dispersion is determined using
@@ -343,7 +343,7 @@ GCTAEdispPerfTable
 
 
 Background template
-===================
+-------------------
 
 The background is described by the abstract :doxy:`GCTABackground` base
 class. The background is determined using the:

@@ -1,3 +1,5 @@
+.. _um_obs_xml:
+
 Describing observations using XML
 =================================
 

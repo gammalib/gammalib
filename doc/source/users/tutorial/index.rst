@@ -6,3 +6,4 @@ Tutorials
 
    sky/index
    linalg
+   opt/index

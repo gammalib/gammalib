@@ -1,4 +1,4 @@
-.. _sec_mwl:
+.. _um_mwl:
 
 Multi-wavelength interface
 --------------------------
