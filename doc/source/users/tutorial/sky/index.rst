@@ -1,5 +1,5 @@
-Sky coordinates, sky maps and sky regions
------------------------------------------
+Sky handling
+------------
 
 .. toctree::
    :maxdepth: 1

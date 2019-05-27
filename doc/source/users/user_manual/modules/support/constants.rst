@@ -9,18 +9,18 @@ Constants
 
 The following constants are available:
 
-========================== =====
-Constant                   Value
-========================== =====
-``gammalib::MeV2erg``      :math:`1.6021765 \times 10^{-6}` (converts MeV to erg)
-``gammalib::erg2MeV``      :math:`624150.96` (converts erg to MeV)
-``gammalib::MeV2Angstrom`` :math:`1.239841875e-2` (converts MeV to Angstrom)
-``gammalib::pc2cm``        :math:`3.08568025 \times 10^{18}` (converts pc to cm)
-``gammalib::sec_in_day``   :math:`86400.0` (number of seconds in one day)
-``gammalib::sec2day``      :math:`1/86400` (converts seconds to days)
-``gammalib::tai2tt``       :math:`32.184` (converts TAI to TT system)
-``gammalib::mec2``         :math:`0.5109989461` (electron rest mass in MeV)
-========================== =====
+========================== ================================= =======
+Constant                   Value                             Purpose
+========================== ================================= =======
+``gammalib::MeV2erg``      :math:`1.6021765 \times 10^{-6}`  Converts MeV to erg
+``gammalib::erg2MeV``      :math:`624150.96`                 Converts erg to MeV
+``gammalib::MeV2Angstrom`` :math:`1.239841875\times 10^{-2}` Converts MeV to Angstrom
+``gammalib::pc2cm``        :math:`3.08568025 \times 10^{18}` Converts pc to cm
+``gammalib::sec_in_day``   :math:`86400.0`                   Number of seconds in one day
+``gammalib::sec2day``      :math:`1/86400`                   Converts seconds to days
+``gammalib::tai2tt``       :math:`32.184`                    Converts TAI to TT system
+``gammalib::mec2``         :math:`0.5109989461`              Electron rest mass in MeV
+========================== ================================= =======
 
 
 Functions
