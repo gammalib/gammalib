@@ -6,27 +6,6 @@ one image and one table (see ``examples/cpp/createfits/createfits.cpp`` for the
 source code; the line numbers are for reference and are not part of
 the source code)
 
-**Python**
-
-.. code-block:: python
-   :linenos:
-
-   fits  = gammalib.GFits()
-   image = gammalib.GFitsImageDouble(20,10)
-   for x in range(20):
-       for y in range(10):
-           image[x,y] = x+100.0*y
-   fits.append(image)
-   table  = gammalib.GFitsBinTable()
-   column = gammalib.GFitsTableDoubleCol('ENERGY', 10, 3)
-   for row in range(10):
-       for index in range(3):
-           column[row, index] = row*100.0+index
-   table.append(column)
-   fits.append(table)
-   fits.saveto('my_fits_file.fits', True)
-   fits.close()
-
 **C++**
 
 .. code-block:: cpp
@@ -51,6 +30,27 @@ the source code)
    fits.append(table);
    fits.saveto("my_fits_file.fits", true);
    fits.close();
+
+**Python**
+
+.. code-block:: python
+   :linenos:
+
+   fits  = gammalib.GFits()
+   image = gammalib.GFitsImageDouble(20,10)
+   for x in range(20):
+       for y in range(10):
+           image[x,y] = x+100.0*y
+   fits.append(image)
+   table  = gammalib.GFitsBinTable()
+   column = gammalib.GFitsTableDoubleCol('ENERGY', 10, 3)
+   for row in range(10):
+       for index in range(3):
+           column[row, index] = row*100.0+index
+   table.append(column)
+   fits.append(table)
+   fits.saveto('my_fits_file.fits', True)
+   fits.close()
 
 In line 1, a FITS object is allocated in memory.
 An image is created in line 2, comprising 20 pixels in the x-direction

@@ -58,47 +58,17 @@ Similar definitions exist for the other instruments.
 The code threads below show different variants of how observations can be
 loaded from or saved into an XML file.
 
-**Python**
-
-.. code-block:: python
-   :linenos:
-
-   import gammalib                                      # Make GammaLib available
-   obs = gammalib.GObservations('my_observations.xml')  # Construct observations from XML file
-   obs.save('my_copied_observations.xml')               # Save observations into XML file
-
-.. code-block:: python
-   :linenos:
-
-   import gammalib                                      # Make GammaLib available
-   obs = gammalib.GObservations()                       # Construct empty observations
-   obs.load('my_observations.xml')                      # Load observations from XML file
-   obs.save('my_copied_observations.xml')               # Save observations into XML file
-
-.. code-block:: python
-   :linenos:
-
-   import gammalib                                      # Make GammaLib available
-   obs    = gammalib.GObservations()                    # Construct empty observations
-   xmlin  = gammalib.GXml('my_observations.xml')        # Construct GXml instance from XML file
-   xmlout = gammalib.GXml()                             # Construct empty GXml instance
-   obs.read(xmlin)                                      # Read observations from GXml instance
-   obs.write(xmlout)                                    # Write observations into GXml instance
-   xmlout.save('my_copied_observations.xml')            # Save GXml instance in XML file
-
 **C++**
 
 .. code-block:: cpp
    :linenos:
 
-   #include "GammaLib.hpp"                                  // Make GammaLib available
    GObservations obs("my_observations.xml");                // Construct observations from XML file
    obs.save("my_copied_observations.xml");                  // Save observations into XML file
 
 .. code-block:: cpp
    :linenos:
 
-   #include "GammaLib.hpp"                                  // Make GammaLib available
    GObservations obs;                                       // Construct empty observations
    obs.load("my_observations.xml");                         // Load observations from XML file
    obs.save("my_copied_observations.xml");                  // Save observations into XML file
@@ -106,10 +76,34 @@ loaded from or saved into an XML file.
 .. code-block:: cpp
    :linenos:
 
-   #include "GammaLib.hpp"                                  // Make GammaLib available
    GObservations obs;                                       // Construct empty observations
    GXml          xmlin("my_observations.xml");              // Construct GXml instance from XML file
    GXml          xmlout;                                    // Construct empty GXml instance
    obs.read(xmlin);                                         // Read observations from GXml instance
    obs.write(xmlout);                                       // Write observations into GXml instance
    xmlout.save("my_copied_observations.xml");               // Save GXml instance in XML file
+
+**Python**
+
+.. code-block:: python
+   :linenos:
+
+   obs = gammalib.GObservations('my_observations.xml')  # Construct observations from XML file
+   obs.save('my_copied_observations.xml')               # Save observations into XML file
+
+.. code-block:: python
+   :linenos:
+
+   obs = gammalib.GObservations()                       # Construct empty observations
+   obs.load('my_observations.xml')                      # Load observations from XML file
+   obs.save('my_copied_observations.xml')               # Save observations into XML file
+
+.. code-block:: python
+   :linenos:
+
+   obs    = gammalib.GObservations()                    # Construct empty observations
+   xmlin  = gammalib.GXml('my_observations.xml')        # Construct GXml instance from XML file
+   xmlout = gammalib.GXml()                             # Construct empty GXml instance
+   obs.read(xmlin)                                      # Read observations from GXml instance
+   obs.write(xmlout)                                    # Write observations into GXml instance
+   xmlout.save('my_copied_observations.xml')            # Save GXml instance in XML file

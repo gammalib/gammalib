@@ -7,19 +7,6 @@ used to describe a functional relation :math:`y_i=f(x_i)`. The following
 code illustrates how the :doxy:`GNodeArray` class is used
 (see ``examples/cpp/interpolate/interpolate.cpp`` for the source code):
 
-**Python**
-
-.. code-block:: python
-   :linenos:
-
-   x_i   = [1.0, 4.0, 6.0]
-   y_i   = [8.0, 7.0, 2.0]
-   nodes = gammalib.GNodeArray(x_i)
-   for x in range(20):
-       nodes.set_value(x*0.5)
-       y = y_i[nodes.inx_left()]  * nodes.wgt_left() + y_i[nodes.inx_right()] * nodes.wgt_right()
-       print('x=%f : y=%f' % (x, y))
-
 **C++**
 
 .. code-block:: cpp
@@ -33,6 +20,20 @@ code illustrates how the :doxy:`GNodeArray` class is used
        double y = y_i[nodes.inx_left()]  * nodes.wgt_left() + y_i[nodes.inx_right()] * nodes.wgt_right();
        std::cout << "x=" << x << " : y=" << y << std::endl;
    }
+
+**Python**
+
+.. code-block:: python
+   :linenos:
+
+   x_i   = [1.0, 4.0, 6.0]
+   y_i   = [8.0, 7.0, 2.0]
+   nodes = gammalib.GNodeArray(x_i)
+   for x in range(20):
+       nodes.set_value(x*0.5)
+       y = y_i[nodes.inx_left()]  * nodes.wgt_left() + y_i[nodes.inx_right()] * nodes.wgt_right()
+       print('x=%f : y=%f' % (x, y))
+
 
 In line 1, the nodes :math:`x_i` at which the function values :math:`y_i`
 are given are declared, the actual function values :math:`y_i` are

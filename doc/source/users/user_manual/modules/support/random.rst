@@ -4,17 +4,6 @@ Random number generation
 Random number generation is widely used within GammaLib for drawing event 
 distributions from functions.
 
-**Python**
-
-.. code-block:: python
-   :linenos:
-
-   ran         = gammalib.GRan()          # Construct random number generate instance
-   uniform     = ran.uniform()            # Uniform random number
-   exponential = ran.exp(3.7)             # Exponential random number
-   poisson     = ran.poisson(2.4)         # Poisson random number
-   chi2        = ran.chisq2()             # Chi2 random number
-
 **C++**
 
 .. code-block:: cpp
@@ -26,17 +15,20 @@ distributions from functions.
    double poisson     = ran.poisson(2.4); // Poisson random number
    double chi2        = ran.chisq2();     // Chi2 random number
 
-In line 1 a random number generator is allocated. If control over the
-seed value of the random number generator is needed (for example to draw
-different samples), you may specify the seed value upon construction:
-
 **Python**
 
 .. code-block:: python
    :linenos:
 
-   seed = 123456
-   ran  = gammalib.GRan(seed)
+   ran         = gammalib.GRan()          # Construct random number generate instance
+   uniform     = ran.uniform()            # Uniform random number
+   exponential = ran.exp(3.7)             # Exponential random number
+   poisson     = ran.poisson(2.4)         # Poisson random number
+   chi2        = ran.chisq2()             # Chi2 random number
+
+In line 1 a random number generator is allocated. If control over the
+seed value of the random number generator is needed (for example to draw
+different samples), you may specify the seed value upon construction:
 
 **C++**
 
@@ -45,6 +37,14 @@ different samples), you may specify the seed value upon construction:
 
    unsigned long long int seed = 123456;
    GRan ran(seed);
+
+**Python**
+
+.. code-block:: python
+   :linenos:
+
+   seed = 123456
+   ran  = gammalib.GRan(seed)
 
 The :doxy:`GRan::uniform` method returns a random number between 0 and 1. The
 :doxy:`GRan::exp` method returns a random number of the exponential law

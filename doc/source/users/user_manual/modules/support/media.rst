@@ -14,18 +14,6 @@ media is implemented by the :doxy:`GUrlString` class.
 An example of a class making using of :doxy:`GUrl` is the :doxy:`GXml` class. Look
 at the following code:
 
-**Python**
-
-.. code-block:: python
-   :linenos:
-
-   xml = gammalib.GXml()
-   xml.append(gammalib.GXmlElement('dummy'))
-   file  = gammalib.GUrlFile('my_file.xml', 'w')
-   chain = gammalib.GUrlString()
-   xml.write(file)
-   xml.write(chain)
-
 **C++**
 
 .. code-block:: cpp
@@ -37,6 +25,18 @@ at the following code:
    GUrlString chain;
    xml.write(file);
    xml.write(chain);
+
+**Python**
+
+.. code-block:: python
+   :linenos:
+
+   xml = gammalib.GXml()
+   xml.append(gammalib.GXmlElement('dummy'))
+   file  = gammalib.GUrlFile('my_file.xml', 'w')
+   chain = gammalib.GUrlString()
+   xml.write(file)
+   xml.write(chain)
 
 Line 1 declares a XML object and in line 2 we append a dummy element
 to it. In line 3 we now create a file named ``my_file.xml`` for which
