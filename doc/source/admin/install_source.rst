@@ -42,10 +42,10 @@ to compiling GammaLib.
 
 If cfitsio is not available as a prebuilt package, or if you encounter
 some problems with the prebuilt package, cfitsio can be downloaded from
-`http://heasarc.gsfc.nasa.gov/fitsio <http://heasarc.gsfc.nasa.gov/fitsio>`_
+`http://heasarc.gsfc.nasa.gov/fitsio <https://heasarc.gsfc.nasa.gov/fitsio/>`_
 and installed from the source files (for details, please refer to the
 installation instructions on the
-`HEASARC <http://heasarc.gsfc.nasa.gov/fitsio>`_ site). We recommend
+`HEASARC <https://heasarc.gsfc.nasa.gov/fitsio/>`_ site). We recommend
 installation of cfitsio in the default GammaLib install directory as a
 shared library by typing
 
@@ -67,7 +67,7 @@ so that the header files become available.
 If readline and ncurses are not available as a prebuilt package, or if
 you encounter some problems with the prebuilt packages, both libraries
 can be downloaded from
-`http://ftp.gnu.org/gnu/ <http://ftp.gnu.org/gnu/>`_
+`https://ftp.gnu.org/gnu/ <https://ftp.gnu.org/gnu/>`_
 and installed from the source files. We recommend to put also those in the
 default GammaLib install directory ``/usr/local/gamma``.
 

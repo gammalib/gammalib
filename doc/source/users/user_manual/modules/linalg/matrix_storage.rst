@@ -51,12 +51,14 @@ This divides the storage requirements to hold the matrix elements by
 almost a factor of two.
 
 Finally, quite often one has to deal with matrixes that contain a large
-number of zeros. Such matrixes are called *sparse matrixes*. If only the
-non-zero elements of a sparse matrix are stored the memory requirements
-are considerably reduced. This goes however at the expense of matrix
-element access, which has become now more complex. In particular,
-filling efficiently a sparse matrix is a non-trivial problem (see
-:ref:`sec_matrix_filling`). Sparse matrix storage is implemented by
+number of zeros.
+Such matrixes are called *sparse matrixes*.
+If only the non-zero elements of a sparse matrix are stored the memory
+requirements are considerably reduced.
+This goes however at the expense of matrix element access, which has become
+now more complex.
+In particular, filling efficiently a sparse matrix is a non-trivial problem.
+Sparse matrix storage is implemented by
 the :doxy:`GMatrixSparse` class. A :doxy:`GMatrixSparse` object contains
 three one-dimensional arrays to store the matrix elements: a double type
 array that contains in continuous column-major order all non-zero
@@ -90,7 +92,7 @@ methods in an identical way. So from the semantics the user has not to worry
 about the storage class. However, matrix element access speeds are not
 identical for all storage types, and if performance is an issue (as it
 certainly always will be), the user has to consider matrix access more
-carefully (see :ref:`sec_matrix_filling`).
+carefully.
 
 You allocate a matrix using the constructors
 
