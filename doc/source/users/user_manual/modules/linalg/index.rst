@@ -7,4 +7,6 @@ Linear algebra
    :maxdepth: 1
 
    overview
-   matrix
+   vector
+   matrix_storage
+   matrix_arithmetics
