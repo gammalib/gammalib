@@ -2,7 +2,7 @@
 # ==========================================================================
 # GammaLib release manager
 #
-# Copyright (C) 2016 Juergen Knoedlseder
+# Copyright (C) 2016-2019 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -189,6 +189,8 @@ def check_version(version):
             # is an integer number
             elif split[3][0:3] == 'dev':
                 if split[3][3:].isdigit():
+                    check = True
+                else:
                     check = True
 
     # Return check
