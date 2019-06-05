@@ -81,36 +81,6 @@ if [ -d $prefix/syspfiles/. ]; then
 fi
 
 #
-# Set LD_LIBRARY_PATH
-# ===================
-if [ -z "${LD_LIBRARY_PATH}" ]; then
-  LD_LIBRARY_PATH=$gammalib_lib
-else
-  LD_LIBRARY_PATH=$gammalib_lib:$LD_LIBRARY_PATH
-fi
-
-
-#
-# Set DYLD_LIBRARY_PATH if required
-# =================================
-case $uname_system in
-  Darwin*)
-    if [ -z "${DYLD_LIBRARY_PATH}" ]; then
-      DYLD_LIBRARY_PATH=$gammalib_lib
-    else
-      DYLD_LIBRARY_PATH=$gammalib_lib:$DYLD_LIBRARY_PATH
-    fi
-    ;;
-  CYGWIN*)
-    if [ -z "${PATH}" ]; then
-      PATH=$gammalib_lib
-    else
-      PATH=$gammalib_lib:$PATH
-    fi
-    ;;
-esac
-
-#
 # Set PYTHONPATH
 # ==============
 if [ -z "${PYTHONPATH}" ]; then
@@ -163,7 +133,7 @@ fi
 #
 # List of variables needed in initialization script
 # =================================================
-varlist="LD_LIBRARY_PATH DYLD_LIBRARY_PATH PATH"
+varlist="PATH"
 varlist="$varlist PYTHONPATH PKG_CONFIG_PATH MANPATH"
 varlist="$varlist PFILES PFCLOBBER CALDB"
 
