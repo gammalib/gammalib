@@ -138,6 +138,22 @@ varlist="$varlist PYTHONPATH PKG_CONFIG_PATH MANPATH"
 varlist="$varlist PFILES PFCLOBBER CALDB"
 
 #
+# Set LD_LIBRARY_PATH
+# ===================
+case $uname_system in
+  Darwin*)
+    ;;
+  *)
+    if [ -z "${LD_LIBRARY_PATH}" ]; then
+      LD_LIBRARY_PATH=$gammalib_lib
+    else
+      LD_LIBRARY_PATH=$gammalib_lib:$LD_LIBRARY_PATH
+    fi
+    varlist="$varlist LD_LIBRARY_PATH"
+    ;;
+esac
+
+#
 # Save values in output initialization shell scripts
 # ==================================================
 # Name of temporary config script
