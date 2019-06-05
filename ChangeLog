@@ -1,3 +1,11 @@
+2019-06-05
+
+        * Bug fix version 1.6.1 released
+        ================================
+
+        Fix initialisation script for c-shell (#2724)
+
+
 2019-05-29
 
         * Version 1.6.0 released

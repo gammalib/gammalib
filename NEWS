@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.6.0
+New Features and Important Changes in GammaLib 1.6.1
 
-29 May 2019
+5 June 2019
 
 
 1. Introduction
@@ -12,190 +12,38 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- GModelSpectralExponential
-- GWcsARC
-- GPythonOptimizerFunction
-- GCTAResponseCache
-- GCTAModelBackground
-- GCTAModelSpatial
-- GCTAModelSpatialMultiplicative
-- GCTAModelSpatialRegistry
-- GCTAModelSpatialGaussSpectrum
-- GCTAModelSpatialLookup
+- none
 
 The following classes have been removed:
-- GCTACubeSourceDiffuse
-- GCTACubeSourcePoint
+- none
 
 The following classes have been renamed:
 - none
 
 The following methods have been added:
-- gammalib::atan2()
-- gammalib::plaw_integral()
-- gammalib::gauss_integral()
-- GApplication(std::string&, std::string&, GApplicationPars&)
-- GApplicationPar::pickle()
-- GApplicationPar::query()
-- GApplicationPar::was_queried()
-- GApplicationPars::pickle()
-- GApplicationPars::syspfiles()
-- GLog::buffer()
-- operator==(GSkyPixel&, GSkyPixel&)
-- operator!=(GSkyPixel&, GSkyPixel&)
-- GArf::read(GFits&)
-- GArf::header()
-- GPha::read(GFits&)
-- GPha::header()
-- GPha::operator(int&, int&)
-- GPha::operator[](std::string&)
-- GPha::columns()
-- GPha::at(int&, int&)
-- GPha::append(std::string&, std::vector<double>&)
-- GPha::emin_obs(GEnergy&)
-- GPha::emin_obs()
-- GPha::emax_obs(GEnergy&)
-- GPha::emax_obs()
-- GPha::backfile(std::string&)
-- GPha::backfile()
-- GPha::corrfile(std::string&)
-- GPha::corrfile()
-- GPha::respfile(std::string&)
-- GPha::respfile()
-- GPha::ancrfile(std::string&)
-- GPha::ancrfile()
-- GRmf::read(GFits&)
-- GRmf::header()
-- GFitsHDU::header(GFitsHeader&)
-- GFitsHDU::card(std::string&, bool&, std::string&)
-- GFitsHeaderCard(std::string&, std::string&, std::string&, std::string&)
-- GFitsHeaderCard(std::string&, bool&, std::string&)
-- GFitsTable::remove(int&)
-- GFitsTable::remove(std::string&)
-- GObservation::has_events()
-- GModel::scales()
-- GModel::scale(int&)
-- GModelSpatialPointSource::type(std::string&)
-- GModelSpectralPlaw::type(std::string&)
-- GModelSpatial::has_free_pars()
-- GModelSpatialRadialProfileGauss(GSkyDir&, double&)
-- GModelSpatialRadialProfileGauss::sigma()
-- GSkyDir::cos_dist()
-- GSkyRegions::filename(GFilename&)
-- GXml::GXml(GXmlDocument&)
-- GXml::root()
-- GXmlElement::attributes()
-- GXmlElement::attribute(int&)
-- GXmlDocument::GXmlDocument(GFilename&, std::string&, std::string&, std::string&)
-- GCTAObservation::instrument(std::string&)
-- GCTAObservation::lo_user_thres(double&)
-- GCTAObservation::hi_user_thres(double&)
-- GCTAOnOffObservation::has_response()
-- GCTAInstDir::GCTAInstDir(double&, double&)
-- GCTAInstDir::GCTAInstDir(GSkyDir&, double&, double&)
-- GCTAInstDir::theta()
-- GCTAInstDir::phi()
-- GCTAInstDir::has_dir()
-- GCTAInstDir::has_detx()
-- GCTAInstDir::has_dety()
-- GCTAPointing::is_valid()
-- GCTAEventAtom(GCTAInstDir&, GEnergy&, GTime&)
-- GCTAEventAtom::index(int&)
-- GCTABackground::rate_ebin()
-- GCTABackgroundPerfTable::rate_ebin()
-- GCTABackground3D::rate_ebin()
-- GCTAEdisp::prob_erecobin()
-- GCTAEdispPerfTable::prob_erecobin()
-- GCTAEdispRmf::prob_erecobin()
-- GCTAEdisp2D::prob_erecobin()
-- GCTAAeff2D::rad_max()
-- GCTAResponseTable::telescope()
-- GCTAModelAeffBackground(GModelSpectral&, GModelTemporal&)
-- GCTAModelAeffBackground::spectral(GModelSpectral*)
-- GCTAModelAeffBackground::spectral(GModelTemporal*)
-- GCTAModelCubeBackground(GModelSpectral&, GModelTemporal&)
-- GCTAModelCubeBackground::spectral(GModelSpectral*)
-- GCTAModelCubeBackground::spectral(GModelTemporal*)
-- GCTAModelRadialAcceptance(GCTAModelRadial&, GModelSpectral&, GModelTemporal&)
-- GCTAModelRadialAcceptance::radial(GCTAModelRadial*)
-- GCTAModelRadialAcceptance::spectral(GModelSpectral*)
-- GCTAModelRadialAcceptance::temporal(GModelTemporal*)
-- GCTAModelIrfBackground::spectral(GModelSpectral*)
-- GCTAModelIrfBackground::temporal(GModelTemporal*)
-- GCOMD1Response::write(GFitsBinTable&)
-- GCOMD2Response::write(GFitsBinTable&)
-- GCOMEventBin::index(int&)
-- GCOMEventBin::dir(GCOMInstDir&)
-- GCOMEventBin::energy(GEnergy&)
-- GCOMEventBin::time(GTime&)
-- GCOMEventBin::counts(double&)
-- GCOMEventBin::solidangle(double&)
-- GCOMEventBin::ewidth(GEnergy&)
-- GCOMEventBin::ontime(double&)
-- GCOMResponse::write(GFitsImageFloat&)
-- GCOMTim(GGti&)
-- GLATObservation(GXmlElement&)
-- GLATLtCube::read(GFits&)
-- GLATLtCube::write(GFits&)
-- GLATEfficiency::pars()
-- GMWLDatum(GEnergy&, GEnergy&, double&, double&)
-- GMWLDatum::energy(GEnergy&)
-- GMWLDatum::energy_err(GEnergy&)
+- none
 
 The following methods have been removed:
-- GSkyRegionMap::filename()
-- GCTAEventList::irf_cache()
-- GCTAPointing::dir_horiz()
-- GCTAPointing::read(const GFitsTable& table)
+- none
 
 The following methods have been renamed:
-- GPhoton::mc_id() from GPhoton::mcid()
-- GCTAEdisp::ereco_bounds() from GCTAEdisp::ebounds_obs()
-- GCTAEdisp::etrue_bounds() from GCTAEdisp::ebounds_src()
-- GCTAResponseIrf::lo_safe_thres() from GCTAResponseIrf::lo_save_thres()
-- GCTAResponseIrf::hi_safe_thres() from GCTAResponseIrf::hi_save_thres()
+- none
 
 The arguments for the following methods have been changed:
-- GCTAOnOffObservation(GCTAObservation&, GModels&, std::string&, GEbounds&, GEbounds&, GSkyRegions&, GSkyRegions&, bool&)
-- GCTAModelRadial::mc(GRan&)
-- GCTAEdisp::operator(GEnergy&, GEnergy&, double&, double&, double&, double&)
-- GCTAEdisp::mc(GRan&, GEnergy&, double&, double&, double&, double&)
-- GCTACubeEdisp::operator()(GEnergy&, GEnergy&, GSkyDir&)
-- GCTAResponseIrf::edisp(GEnergy&, GEnergy&, double&, double&, double&, double&)
-- GLATAeff(GFits&, std::string&)
-- GLATEdisp(GFits&, std::string&)
-- GLATPsf(GFits&, std::string&)
+- none
 
 The return value of the following methods has been changed:
 - none
 
-All at() methods were removed from the Python interface.
-
 
 3. Configuration
 -----------------
-Keep existing library path in installation script on Mac OS X (#2420).
-
-GammaLib classes can now be pickled from Python (#1938).
+Fix initialisation script for c-shell (#2724).
 
 
 4. Application module
 ---------------------
-Add GLog::buffer() method that returns the content of the logger buffer.
-
-A GApplicationPars::syspfiles() setter and getter method was added to allow the
-specification of an application specific system parameter file path. If such a
-file path is specified, the loading of the application parameters needs to be
-redone by the client. The GApplicationPars::load() methods now gives priority
-to a parameter file found in the syspfiles folder and updates parameter values
-using the parameter file found in the user's pfiles folder. In that way, any
-changes in the parameter file structure should be handled transparently (#2513).
-
-The GApplicationPar::query() method was made public.
-
-Add GApplicationPar::was_queried() method and do no longer change the mode
-of queried parameters to hidden. This makes sure that the correct mode will
-be written to the parfile, also for q-mode parameters (#2495).
+None
 
 
 5. Base module
@@ -205,10 +53,6 @@ None
 
 6. FITS I/O Interface
 ---------------------
-Add GFitsTable::remove() methods that allow the removal of table columns from
-a GFitsTable object. A protected GFitsTable::update_header() method was also
-added to update the header after FITS table row or column manipulations (#2339).
-
 None
 
 
@@ -219,36 +63,17 @@ None
 
 8. Model module
 ---------------
-Add GModel::scales() method to return number of scales for this model and
-add GModel::scale() parameter access methods (#2892).
-
-Add GModelSpatial::has_free_pars() method that checks whether a spatial
-model component has free model parameters or not (#2715).
-
-The GModelSpectralExponential class was added that implements an exponential
-function that can be used for EBL studies (#2454).
-
-Add a GModelSpatialRadialProfileGauss() position and width constructor, add
-GModelSpatialRadialProfileGauss::sigma() getter and setter methods, and avoid
-recomputations if the position of the Gaussian changed (#2463). 
+None
 
 
 9. Numerics module
 ------------------
-The gammalib::gauss_integral() function was added to compute the area under a
-Gaussian between two boundaries (#2422).
-
-The gammalib::atan2() function was added to compute the arc tangens of a ratio
-in radians (#2308).
-
-The gammalib::plaw_integral() function was added to compute the area under a
-power law between two boundaries (#2308).
+None
 
 
 10. Observation module
 ----------------------
-Add "parallel" to the OpenMP pragma in GObservations::likelihood::eval() to avoid
-freezing of the code (#2678).
+None
 
 
 11. Optimization module
@@ -258,30 +83,12 @@ None
 
 12. Sky module
 --------------
-The GWcs::wcs_set() method now sets m_radesys and m_equinox members through the
-new protected GWcs::wcs_set_radesys() method. By default, sky maps now have
-a RADECSYS=ICRS keyword (#2866).
-
-An OpenMP locking mechanism was added to GWcs::dir2pix that improves the speed of
-the code parallelization by avoiding mutual lockups of the threads (#2770).
-
-The class GWcsARC was added to handle ARC WCS projections (#2541). In addition
-the private GWcs::prj_bchk() method was added to implement boundary checking
-similar to the checking done in WCS.
-
-A precomputation cache was added to the GWcs::dir2pix() and GWcs::pix2dir()
-methods so that results are not recomputed for the same arguments. This should
-provide some speed-up as it avoids unnecessary coordinate transformations.
-
-Add GSkyDir::cos_dist() method that computes the cosine of the angular distance
-between two sky directions. Using this method avoids computation of the arc
-cosine (#2309).
+None
 
 
 13. Support module
 ------------------
-The gammalib::replace_segment() function was added that replaces string segments
-by replacement strings.
+None
 
 
 14. XML module
@@ -296,24 +103,7 @@ None
 
 16. Xspec module
 ----------------
-The GPha::write() method wrote the correct header keywords in the PHA files,
-but those were overwritten by the initial header keywords that were actually
-found in the PHA file before. This led to a problem when stacking CTA On/Off
-observations (#2683).
-
-Add setter and getter methods to access the attributes backfile, corrfile,
-respfile and ancrfile that inform about related files, and that are needed
-for OGIP/XSPEC compliance. The attributes are written and read from FITS
-files (#2404).
-
-Add methods and operators to GPha to store additional columns in the data
-structure, similar to what exists for GArf. In addition, GPha::emin_obs()
-and GPha::emax_obs() setter and getter methods were added that allow storing
-and retrieving the minimum and maximum energy of the observation that was
-used to fill the spectrum. This allows to define an ROI for On/Off analysis. 
-
-The output files of the GPha, GArf and GRmf files are now compliant with the
-OGIP format that is needed for a XSPEC analysis (#2404).
+None
 
 
 17. Test module
@@ -328,187 +118,12 @@ None
 
 19. Fermi-LAT interface
 -----------------------
-Add kludge that allows handling of source maps that do not have WCS information
-in the diffuse model maps. Such source maps are produced by the fermitools
-version 1.0 (#2850).
-
-The P8V3 Fermi/LAT response functions are now included in the package and
-unit tests for that response functions were added.
+None
 
 
 20. CTA interface
 -----------------
-Add the GCTAModelSpatialLookup class that implements a lookup table for the
-energy-dependent spatial modelling of the background (#2878).
-
-Add the GCTAModelSpatialGaussSpectrum class that implements an energy-dependent
-Gaussian spatial background model (#2868).
-
-Instrument scale factors are now also taken in an On/Off analysis into account.
-The scale factors were added to the computation in GCTAOnOffObservation::N_gamma()
-(#2867).
-
-The IRF integration precision in GCTAResponseIrf::irf_radial,
-GCTAResponseIrf::irf_elliptical and GCTAResponseIrf::irf_diffuse was set to
-6 to cope with the tabulated H.E.S.S. PSF (#2860).
-
-A missing term was added in GCTAOnOffObservation::wstat_value for computation
-of the number of background counts in case that Non=0 (#2838).
-
-CTA background rates are now per ontime and not livetime. This makes the IRF
-background consistent with the cube background, and is also consistent with
-the open gamma data format (#2758).
-
-The classes GCTACubeSourcePoint and GCTACubeSourceDiffuse were removed since
-the response caching is now performed at the GCTAResponse level, hence no
-dedicated response cache classes are needed anymore (#2722).
-
-The arguments of the GCTACubeEdisp::operator() were changed from, passing
-now reconstructed and true energy objects, followed by a true sky direction.
-This is more consistent with the GCTAEdisp interface. The stacked response
-is no longer cut in true energy. Before the information outside the
-reconstructed energy bounds were reset to zero due to spill over effects,
-but this lead a big bias in the H.E.S.S. analysis where energy dispersion is
-important. The cutting was therefore disabled (#2721).
-
-Rename GCTAResponseIrf::lo_save_thres() and GCTAResponseIrf::hi_save_thres()
-to GCTAResponseIrf::lo_safe_thres() and GCTAResponseIrf::hi_safe_thres()
-(#2716).
-
-The GCTAResponseCache class was added to implement a general response cache for
-CTA. The response cache is now used in GCTAResponse::irf(GEvent&, GSource&,
-GObservation&) and in GCTAResponseIrf::nroi(GModelSky&, GEnergy&, GTime&,
-GEnergy&, GTime&, GObservation&) in case that the spatial model has no free
-parameters. This means that now all other spatial models with frozen parameters
-will be cached. The use of the cache can be toggled by internal data members.
-The IRF cache was removed from GCTAEventList since it is no longer used (#2715).
-
-The GCTAOnOffObservation observation constructor now takes a model container
-as argument and the name of a sky model component. The ARF computation is
-performed by computing the IRF for the spatial model of the named sky model
-component over the On region. In that way also extended sources can be properly
-handled (#2292). The background model is now also extracted from the model
-container and used for the computation of the alpha factors and the background
-response, if the use_model_bkg argument is true (#2710).
-
-GCTABackground3D::init_mc_cache now pre-computes the Monte Carlo cache at energy
-nodes of the background cube, and in addition, inserts 8 logarithmically spaced
-nodes between each pair of nodes. This assures that the energy variations of the
-background rate are precisely captured and reproduced in the Monte Carlo
-simulations (#2708).
-
-To accomodate the new GCTAEdisp::operator(), the energy dispersion integration
-is now done in linear true energy instead of logarithmic true energy. This was
-needed to make the simulated and model event distributions compatible (#2706).
-
-The GCTAEdisp::operator() now returns energy dispersion values per MeV. The
-units are now consistent with the expectation in GResponse, and this changes
-assurance the coherence between the various classes. In particular, no re-
-normalization is needed anymore to digest the H.E.S.S. energy dispersion, and
-also the CTA energy dispersion is handled correctly (#2704).
-
-The GCTAEdisp class now uses GEnergy objects instead of log10(E) to deal with
-true and reconstructed energies. This avoids computational overhead when going
-from one unit to another (#2704).
-
-The GCTAInstDir class now assures that only valid information can be accessed.
-Since the class can hold a sky direction and detector coordinates, flags were
-added that signal what information actually exists in the class. If a non-
-existing information is accessed an exception is thrown (#2694).
-
-Add the GCTAModelBackground class that implements a general factorised CTA
-background model. The spatial component of the model is implemented by the
-abstract GCTAModelSpatial based class, the GCTAModelSpatialRegistry class
-registers all possible spatial model component. GCTAModelRadial now derives
-from GCTAModelSpatial and is a special instance of the spatial model component.
-The GCTAModelSpatialMultiplicative class was added to implement an arbitrary
-multiplicative spatial model (#2694).
-
-Correct the handling of stacked On/Off observations in the absence of a
-background IRF template (#2683).
-
-The GCTACubeBackground class is now defined for energy boundaries instead of
-nodes so that the background cube can have the same dimensions as the counts
-cube and no interpolation is needed anymore. The GCTACubeBackground::fill()
-method now computes the integral of the background rate over a energy bin
-assuming a power law dependence throughout the bin (#2677).
-
-Remove setting of effective area energy boundaries in GCTAAeff2D::read() method
-from "LO_THRES" and "HI_THRES" keywords, since the values are reconstructued
-energies but the effective area is given in true energies. The keywords are also
-read in GCTAResponseIrf::load_aeff() and it is not required to apply the values
-in GCTAAeff2D (#2674).
-
-The maximum energy in GCTAAeff2D was not computed correctly due to a bug in the
-indexing. This was corrected now (#2674).
-
-GCTAEdisp2D now supports "ENERG" as column name instead of "ETRUE" in an energy
-dispersion FITS file (#2670).
-
-Change PSF table default extension name in GCTAPsfTable.hpp to "PSF_2D_TABLE".
-Allow also "EDISP_2D" as extension name for the energy dispersion and pickle
-GCTAResponseIrf class via XML interface. Drop the storing of component filenames
-and use instead directly the filenames stored with the IRF components (#2660).
-
-The GCTAOnOffObservation now supports IRFs where the effective area is given
-for an applied theta-cut. In that case, the "RAD_MAX" keyword is set, and
-GCTAOnOffObservation will detect this and will not compute the PSF containment
-since it is already included in the IRF. The class will check whether the radial
-cut is consistent with the size of the On region, so that inconsistent computations
-are avoided (#2657).
-
-The optional argument "use_irf_bkg" was assed to the GCTAOnOffObservation
-constructor to turn off the usage of the IRF background template in the
-computation of the On/Off observation and to assume an identical background
-rate in the On and Off regions instead. This is the classical analysis method
-for IACT data using reflected regions. If use_irf_bkg=false the alpha parameter
-that is stored in the "BACKSCAL" column of the On spectrum will become energy
-independent, and reflect the solid angle between On and Off regions. The
-"BACKRESP" column, stored in the Off spectrum, will be set to zero. Fitting
-using the "cstat" statistic will not be possible, the usage of the "wstat"
-statistic is mandatory (#2659).
-
-Non-mandatory column names are now ignored in GCTABackground3D::read() to
-make the code compatible with the current H.E.S.S. data structure (#2339).
-
-The 3D background model now supports "BKG" column names instead of the "BGD"
-column names. Since "BKG" should be the default, all "BGD" keywords in the
-calibration files were changed to "BKG" (#2343). 
-
-The likelihood value is now also computed in GObservations::likelihood::eval(),
-CTAOnOffObservation::likelihood_wstat() and CTAOnOffObservation::likelihood_cstat()
-for the case that the model has no parameters. This is particularily needed for
-the TS computation with the "wstat" statistic which is meaningful without any
-model (#2312).
-
-The energy bounds of a CTA observations are now taken into account when setting
-up a GCTAOnOffObservation so that observation-specific energy thresholds are
-correctly handled (#2429).
-
-The computation of diffuse map models was sped-up by including some value caching
-and avoiding allocation and de-allocation of variables during response computation
-(#2466).
-
-The integration precision of the diffuse model response was increase to cope with
-sky maps that have a higher spatial resolution than the size of the PSF (#2458).
-
-A GCTAEdisp::prob_erecobin() method has been defined and implemented in the
-derived energy dispersion classes that returns the probability that a photon with
-a given true energy is reconstructed with a energy comprised in a given energy
-interval. The method makes use of the internal structure of the response information
-and avoids a numerical integration over reconstructed energy (#2422).
-
-A GCTAInstDir::theta() and GCTAInstDir::phi() methods were added that return the
-distance to the camera centre in radians and the azimuth angle, respectively (#2308).
-
-A rate_ebin() method was added to the interface of the GCTABackground class and
-implemented for the GCTABackgroundPerfTable and GCTABackground3D classes. The method
-computes for a given instrument direction the background rate integrated over an
-energy bin (#2308).
-
-The GTIs a preserved when copying a GCTAEventList or GCTAEventCube object. In addition,
-the MJD reference of the first observation is used when building an exposure cube
-(#2054).
+None
 
 
 21. COMPTEL interface

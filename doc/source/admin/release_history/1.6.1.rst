@@ -1,0 +1,14 @@
+.. _1.6.1:
+
+GammaLib 1.6.1 release (5 June 2019)
+====================================
+
+Overview
+--------
+
+GammaLib 1.6.1 is a bug fix release for GammaLib release 1.6.
+
+The following bugs were fixed:
+
+* [`2724 <https://cta-redmine.irap.omp.eu/issues/2724>`_] -
+  Fix initialisation script for c-shell
