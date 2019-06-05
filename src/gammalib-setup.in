@@ -1,3 +1,4 @@
+#! /bin/sh
 # Filename:    gammalib-setup(.in)
 # Description: Writes an initialization script for GammaLib software
 #              which is custom fit to the user and the particular
