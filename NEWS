@@ -1,4 +1,4 @@
-New Features and Important Changes in GammaLib 1.6.1
+New Features and Important Changes in GammaLib 1.7.0
 
 5 June 2019
 
@@ -38,7 +38,7 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-Fix initialisation script for c-shell (#2724).
+None
 
 
 4. Application module
