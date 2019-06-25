@@ -130,4 +130,27 @@ public:
         self.__init__()
         self.secs(state[0])
 }
+
+/* datetime() : convert the GTime into a python datetime.datetime object.
+   
+   Note: 
+     self.utc() can spit out seconds=60, which can do wonky 
+     things to a simple datetime.datetime object (which 
+     requires seconds to be 0-59 inclusive).  This code 
+     seems to get around this problem, from:
+     http://stackoverflow.com/a/21029510/2500768
+*/
+%pythoncode {
+    def datetime(self):
+        """Convert the GTime data into a datetime.datetime object.
+        
+        **Returns:**
+          datetime.datetime object
+        """
+        import time, datetime, calendar
+        f = '%Y-%m-%dT%H:%M:%S %Z'
+        utc_time_tuple = time.strptime( self.utc() + ' UTC', f )
+        dt = datetime.datetime(1970,1,1) + datetime.timedelta( seconds= calendar.timegm( utc_time_tuple ) )
+        return dt
+}
 };
