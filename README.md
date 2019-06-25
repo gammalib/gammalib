@@ -1,7 +1,6 @@
 GammaLib information
 ====================
-* Version: 1.6.1 (5 June 2019)
-* Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
+* Version: 1.6.2 (25 June 2019)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
 
@@ -184,7 +183,7 @@ If everything works successfully you should see
 or
 
     ============================================================================
-    Testsuite summary for gammalib 1.6.1
+    Testsuite summary for gammalib 1.6.2
     ============================================================================
     # TOTAL: 21
     # PASS:  21

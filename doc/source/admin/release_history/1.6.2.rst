@@ -1,0 +1,13 @@
+.. _1.6.2:
+
+GammaLib 1.6.2 release (25 June 2019)
+=====================================
+
+Overview
+--------
+
+GammaLib 1.6.2 is a bug fix release for GammaLib release 1.6.
+
+The following bugs were fixed:
+
+* ...
