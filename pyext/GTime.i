@@ -141,16 +141,53 @@ public:
      http://stackoverflow.com/a/21029510/2500768
 */
 %pythoncode {
-    def datetime(self):
+    def datetime(*args):
         """Convert the GTime data into a datetime.datetime object.
         
+        Usage 1:
+        import gammalib, datetime
+        t = gammalib.GTime()
+        d = t.datetime() # returns a datetime.datetime object
+        
+        Usage 2:
+        d = datetime.datetime.now()
+        t = gammalib.GTime()
+        t.datetime( d ) # set the gtime to the datetime's time.
+        
+        **Args:**
+          arg[0] : self (ignore)
+          arg[1] : datetime.datetime object, if present, sets gtime to 
+                   this time.
+        
         **Returns:**
-          datetime.datetime object
+          if no input arguments, returns datetime.datetime object
+          otherwise returns nothing.
         """
         import time, datetime, calendar
-        f = '%Y-%m-%dT%H:%M:%S %Z'
-        utc_time_tuple = time.strptime( self.utc() + ' UTC', f )
-        dt = datetime.datetime(1970,1,1) + datetime.timedelta( seconds= calendar.timegm( utc_time_tuple ) )
-        return dt
+        
+        self = 0
+        if len(args) > 0 : 
+          self = args[0]
+        
+        if len(args) == 1 :
+            """If no arguments (aside from the implicit 'self'), return a datetime object"""
+            f = '%Y-%m-%dT%H:%M:%S %Z'
+            utc_time_tuple = time.strptime( self.utc() + ' UTC', f )
+            s = calendar.timegm( utc_time_tuple )
+            dt = datetime.datetime(1970,1,1) + datetime.timedelta( seconds=s )
+            return dt
+        
+        elif len(args) == 2 :
+            """If an argument is given, set the gtime to the datetime argument"""
+            dt = args[1]
+            if type(dt) is datetime.datetime :
+                s = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                self.utc( s )
+            else :
+                raise TypeError('Argument must be a datetime.datetime object, is currently '+str(dt.__class__))
+          
+        else :
+            raise ValueError('GTime.datetime() needs 0 or 1 arguments.  It was given %d.' % len(args) )
+        
 }
 };
