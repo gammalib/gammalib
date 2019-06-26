@@ -495,7 +495,7 @@ std::string GTime::utc(void) const
 
     // Create string
     char utc[32];
-    sprintf(utc, "%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%02.0f",
+    sprintf(utc, "%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%02.06f",
             year, month, day, hour, minute, second);
 
     // Return

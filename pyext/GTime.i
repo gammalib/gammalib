@@ -171,11 +171,17 @@ public:
         
         if len(args) == 1 :
             """If no arguments (aside from the implicit 'self'), return a datetime object"""
-            f = '%Y-%m-%dT%H:%M:%S %Z'
+            """
+            f = '%Y-%m-%dT%H:%M:%S.%f %Z'
             utc_time_tuple = time.strptime( self.utc() + ' UTC', f )
             s = calendar.timegm( utc_time_tuple )
             dt = datetime.datetime(1970,1,1) + datetime.timedelta( seconds=s )
             return dt
+            """
+            f = '%Y-%m-%dT%H:%M:%S.%f %Z'
+            d = datetime.datetime.strptime( self.utc() + ' UTC', f )
+            return d
+            
         
         elif len(args) == 2 :
             """If an argument is given, set the gtime to the datetime argument"""
