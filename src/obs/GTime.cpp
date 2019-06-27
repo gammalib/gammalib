@@ -46,6 +46,7 @@ const double jd_ref  = mjd_ref + 2400000.5;               //!< JD of time=0
 #define G_SECS_GET                                "GTime::secs(std::string&)"
 #define G_SECS_SET                       "GTime::secs(double&, std::string&)"
 #define G_UTC                                      "GTime::utc(std::string&)"
+#define G_UTC_GET                                          "GTime::utc(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -418,6 +419,7 @@ double GTime::days(const std::string& timesys) const
 /***********************************************************************//**
  * @brief Return time as string in UTC time system
  *
+ * @param[in] precision Digits of precision to show in the seconds field
  * @return Time as string in UTC time system.
  *
  * Returns time in the format YYYY-MM-DDThh:mm:ss, where YYYY is a four-digit
@@ -427,8 +429,16 @@ double GTime::days(const std::string& timesys) const
  *
  * The method is only valid for dates from year 1972 on.
  ***************************************************************************/
-std::string GTime::utc(void) const
+std::string GTime::utc( const int& precision ) const
 {
+    
+    // Check argument
+    if ( precision < 0 ) {
+      std::string msg = "Invalid precision \"" + gammalib::str(precision) + "\""
+                        " encountered. Please specify a precision >= 0.";
+      throw GException::invalid_argument(G_UTC_GET, msg);
+    }
+    
     // Define number of days per month
     static int daymonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
@@ -492,10 +502,22 @@ std::string GTime::utc(void) const
         month++;
     }
     month++;
+    
+    // Calculate the width of the seconds' pattern,
+    //   plus two for the integer seconds,
+    //   plus one if a decimal is needed 
+    int sec_width = precision + 2 ;
+    if ( precision > 0 ) {
+      sec_width += 1 ;
+    }
+    
+    // Format pattern for variable seconds precision
+    char utc_pattern[50];
+    sprintf( utc_pattern, "%%4.4d-%%2.2d-%%2.2dT%%2.2d:%%2.2d:%%0%d.0%df", sec_width, precision ) ;
 
     // Create string
     char utc[32];
-    sprintf(utc, "%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%02.06f",
+    sprintf(utc, utc_pattern,
             year, month, day, hour, minute, second);
 
     // Return
