@@ -429,14 +429,14 @@ double GTime::days(const std::string& timesys) const
  *
  * The method is only valid for dates from year 1972 on.
  ***************************************************************************/
-std::string GTime::utc( const int& precision ) const
+std::string GTime::utc(const int& precision) const
 {
     
     // Check argument
-    if ( precision < 0 ) {
-      std::string msg = "Invalid precision \"" + gammalib::str(precision) + "\""
-                        " encountered. Please specify a precision >= 0.";
-      throw GException::invalid_argument(G_UTC_GET, msg);
+    if (precision < 0) {
+        std::string msg = "Invalid precision \"" + gammalib::str(precision) + "\""
+                          " encountered. Please specify a precision >= 0.";
+        throw GException::invalid_argument(G_UTC_GET, msg);
     }
     
     // Define number of days per month
@@ -506,14 +506,15 @@ std::string GTime::utc( const int& precision ) const
     // Calculate the width of the seconds' pattern,
     //   plus two for the integer seconds,
     //   plus one if a decimal is needed 
-    int sec_width = precision + 2 ;
+    int sec_width = precision + 2;
     if ( precision > 0 ) {
-      sec_width += 1 ;
+        sec_width += 1 ;
     }
     
     // Format pattern for variable seconds precision
     char utc_pattern[50];
-    sprintf( utc_pattern, "%%4.4d-%%2.2d-%%2.2dT%%2.2d:%%2.2d:%%0%d.0%df", sec_width, precision ) ;
+    sprintf(utc_pattern, "%%4.4d-%%2.2d-%%2.2dT%%2.2d:%%2.2d:%%0%d.0%df", 
+            sec_width, precision);
 
     // Create string
     char utc[32];

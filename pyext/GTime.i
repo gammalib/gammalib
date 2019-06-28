@@ -140,7 +140,7 @@ public:
      seems to get around this problem, from:
      http://stackoverflow.com/a/21029510/2500768
 */
-%pythoncode {
+%pythoncode %{
     def datetime(*args):
         """Convert the GTime data into a datetime.datetime object.
         
@@ -169,31 +169,29 @@ public:
         if len(args) > 0 : 
           self = args[0]
         
+        # If no arguments (aside from the implicit 'self'), return a 
+        # datetime object
         if len(args) == 1 :
-            """If no arguments (aside from the implicit 'self'), return a datetime object"""
-            """
             f = '%Y-%m-%dT%H:%M:%S.%f %Z'
-            utc_time_tuple = time.strptime( self.utc() + ' UTC', f )
-            s = calendar.timegm( utc_time_tuple )
-            dt = datetime.datetime(1970,1,1) + datetime.timedelta( seconds=s )
-            return dt
-            """
-            f = '%Y-%m-%dT%H:%M:%S.%f %Z'
-            d = datetime.datetime.strptime( self.utc(6) + ' UTC', f )
+            d = datetime.datetime.strptime(self.utc(6) + ' UTC', f)
             return d
             
-        
+        # If an argument is given, set the gtime to the datetime argument
         elif len(args) == 2 :
-            """If an argument is given, set the gtime to the datetime argument"""
+            
             dt = args[1]
             if type(dt) is datetime.datetime :
                 s = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')
-                self.utc( s )
+                self.utc(s)
             else :
-                raise TypeError('Argument must be a datetime.datetime object, is currently '+str(dt.__class__))
+                msg  = 'Argument must be a datetime.datetime object, is '
+                msg += 'currently ' + str(dt.__class__)
+                raise TypeError(msg)
           
         else :
-            raise ValueError('GTime.datetime() needs 0 or 1 arguments.  It was given %d.' % len(args) )
+            msg  = 'GTime.datetime() needs 0 or 1 arguments.  It was given '
+            msg += '%d.' % len(args)
+            raise ValueError(msg)
         
-}
+%}
 };
