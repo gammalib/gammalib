@@ -162,8 +162,11 @@ public:
 
         # If no datetime argument then return a datetime object
         if len(args) == 0:
-            f = '%Y-%m-%dT%H:%M:%S.%f %Z'
-            d = datetime.datetime.strptime(self.utc(6) + ' UTC', f)
+            #f = '%Y-%m-%dT%H:%M:%S.%f %Z'
+            #d = datetime.datetime.strptime(self.utc(6) + ' UTC', f)
+            (t, msecs) = self.utc(6).strip().split('.')
+            d = datetime.datetime.strptime(t + ' UTC', '%Y-%m-%dT%H:%M:%S %Z')
+            d = d.replace(microsecond=int(msecs))
             return d
 
         # ... otherwise, if an argument is given, set the gtime to the datetime
@@ -171,7 +174,8 @@ public:
         elif len(args) == 1:
             dt = args[0]
             if type(dt) is datetime.datetime:
-                s = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                #s = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                s = dt.strftime('%Y-%m-%dT%H:%M:%S')+'.%6.6d' % (dt.microsecond)
                 self.utc(s)
             else:
                 msg  = 'Argument must be a datetime.datetime object, is '
