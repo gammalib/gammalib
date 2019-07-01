@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2019 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -827,9 +827,8 @@ void TestGObservation::test_time(void)
     test_value(time.days("TT"), 1.4288979);
     test_value(time.days("TAI"), 1.4285254);        // TAI=TT-0.0003725
     test_value(time.days("UTC"), 1.42813188);       // UTC=TT-0.00076602
-    test_assert(time.utc() == "2010-01-02T10:17:37",
-                "GTime::utc(): 2010-01-02T10:17:37 expected, "+
-                time.utc()+" found.");
+    test_value(time.utc(), "2010-01-02T10:17:37");
+    test_value(time.utc(2), "2010-01-02T10:17:36.79");
 
     // Test set method. The UTC conversion to MJD (TT) was done using xTime.
     // Note that xTime missed a second for the "2006-01-01T00:00:00"

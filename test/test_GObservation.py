@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012-2018 Juergen Knoedlseder
+# Copyright (C) 2012-2019 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -473,6 +473,16 @@ class Test(gammalib.GPythonTestSuite):
              'Check larger or equal than operator')
         self.test_assert(time_a >= time_b,
              'Check larger or equal than operator')
+
+        # Get datetime
+        self.test_value(str(time_a.datetime()), '2010-01-01 00:00:09.000001',
+                        'Check datetime getter method')
+
+        # Set datetime
+        time_dt = gammalib.GTime()
+        time_dt.datetime(time_a.datetime())
+        self.test_value(time_dt.secs(), 9.0, 1.0e-6,
+                        'Check datetime setter method')
 
         # Return
         return
