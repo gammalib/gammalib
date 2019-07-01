@@ -1,7 +1,9 @@
-2019-05-29
+2019-07-01
 
         * Version 1.7.0 released
         ========================
+
+        Add GTime.datetime() method and add optional precision to GTime.utc() (#2909)
 
 
 2019-06-25

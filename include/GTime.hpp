@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.hpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,7 +74,7 @@ public:
     GTime(const std::string& time, const GTimeReference& ref);
     explicit GTime(const std::string& time);
     virtual ~GTime(void);
- 
+
     // Operators
     GTime& operator=(const GTime& time);
     GTime& operator+=(const double& seconds);
@@ -92,7 +92,7 @@ public:
     double         secs(const std::string& timesys) const;
     double         days(void) const;
     double         days(const std::string& timesys) const;
-    std::string    utc(void) const;
+    std::string    utc(const int& precision = 0) const;
     double         gmst(void) const;
     double         gast(void) const;
     double         lmst(const double& geolon) const;
