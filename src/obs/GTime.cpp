@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,7 +68,7 @@ GTime::GTime(void)
 {
     // Initialise private members
     init_members();
-  
+
     // Return
     return;
 }
@@ -80,7 +80,7 @@ GTime::GTime(void)
  * @param[in] time Time.
  ***************************************************************************/
 GTime::GTime(const GTime& time)
-{ 
+{
     // Initialise private members
     init_members();
 
@@ -219,7 +219,7 @@ GTime::~GTime(void)
  * @return Time.
  ***************************************************************************/
 GTime& GTime::operator=(const GTime& time)
-{ 
+{
     // Execute only if object is not identical
     if (this != &time) {
 
@@ -233,7 +233,7 @@ GTime& GTime::operator=(const GTime& time)
         copy_members(time);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -284,7 +284,7 @@ double GTime::jd(void) const
 {
     // Convert time from MET to JD
     double jd = m_time * gammalib::sec2day + jd_ref;
-    
+
     // Return Julian Days
     return jd;
 }
@@ -302,7 +302,7 @@ double GTime::jd(const std::string& timesys) const
 {
     // Convert time to Julian Days
     double jd = secs(timesys) * gammalib::sec2day + jd_ref;
-    
+
     // Return Julian Days
     return jd;
 }
@@ -320,7 +320,7 @@ double GTime::mjd(void) const
 {
     // Convert time to Modified Julian Days
     double mjd = m_time * gammalib::sec2day + mjd_ref;
-    
+
     // Return Modified Julian Days
     return mjd;
 }
@@ -339,7 +339,7 @@ double GTime::mjd(const std::string& timesys) const
 {
     // Convert time to Modified Julian Days
     double mjd = secs(timesys) * gammalib::sec2day + mjd_ref;
-    
+
     // Return Modified Julian Days
     return mjd;
 }
@@ -360,7 +360,7 @@ double GTime::secs(const std::string& timesys) const
     if (timesys == "TT") {
         time = m_time;
     }
-    
+
     // ... otherwise if the system if TAI then subtract an offset ...
     else if (timesys == "TAI") {
         time = m_time - gammalib::tai2tt;
@@ -425,26 +425,26 @@ double GTime::days(const std::string& timesys) const
  * Returns time in the format YYYY-MM-DDThh:mm:ss, where YYYY is a four-digit
  * year, MM a two-digit month, DD a two-digit day of month, hh two digits of
  * hour (0 through 23), mm two digits of minutes, and ss two digits of
- * second (ISO 8601 time standard).
+ * second (ISO 8601 time standard). In case that @p precision > 0 digits
+ * in the second after the comma will be returned.
  *
  * The method is only valid for dates from year 1972 on.
  ***************************************************************************/
 std::string GTime::utc(const int& precision) const
 {
-    
     // Check argument
     if (precision < 0) {
-        std::string msg = "Invalid precision \"" + gammalib::str(precision) + "\""
+        std::string msg = "Invalid precision \""+gammalib::str(precision)+"\""
                           " encountered. Please specify a precision >= 0.";
         throw GException::invalid_argument(G_UTC_GET, msg);
     }
-    
+
     // Define number of days per month
     static int daymonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     // Get MJD in TAI time system
     double mjd = this->mjd() - gammalib::tai2tt * gammalib::sec2day;
-    
+
     // Correct for leap seconds (repeat is a kluge to converge as the
     // argument is given in the UTC system but upon start we're in the TAI
     // system
@@ -502,18 +502,17 @@ std::string GTime::utc(const int& precision) const
         month++;
     }
     month++;
-    
-    // Calculate the width of the seconds' pattern,
-    //   plus two for the integer seconds,
-    //   plus one if a decimal is needed 
+
+    // Calculate the width of the seconds' pattern, plus two for the integer
+    // seconds, plus one if a decimal is needed
     int sec_width = precision + 2;
-    if ( precision > 0 ) {
-        sec_width += 1 ;
+    if (precision > 0) {
+        sec_width += 1;
     }
-    
+
     // Format pattern for variable seconds precision
     char utc_pattern[50];
-    sprintf(utc_pattern, "%%4.4d-%%2.2d-%%2.2dT%%2.2d:%%2.2d:%%0%d.0%df", 
+    sprintf(utc_pattern, "%%4.4d-%%2.2d-%%2.2dT%%2.2d:%%2.2d:%%0%d.0%df",
             sec_width, precision);
 
     // Create string
@@ -642,10 +641,10 @@ double GTime::convert(const GTimeReference& ref) const
 {
     // Retrieve time in native reference (TT in seconds)
     double time = m_time;
-    
+
     // Compute time offset in seconds
     double offset = (mjd_ref - ref.mjdref()) * gammalib::sec_in_day;
-        
+
     // Add time offset in seconds
     time += offset;
 
@@ -655,7 +654,7 @@ double GTime::convert(const GTimeReference& ref) const
 
         // Get MJD in TAI time system
         double mjd = this->mjd() - gammalib::tai2tt * gammalib::sec2day;
-    
+
         // Get leap seconds (repeat is a kluge to converge as the
         // argument is given in the UTC system but upon start we're in the TAI
         // system
@@ -694,7 +693,7 @@ void GTime::jd(const double& time)
 {
     // Convert time from Julian Days to seconds in native reference
     m_time = (time - jd_ref) * gammalib::sec_in_day;
-    
+
     // Return
     return;
 }
@@ -728,7 +727,7 @@ void GTime::mjd(const double& time)
 {
     // Convert time from Modified Julian Days to native (seconds)
     m_time = (time - mjd_ref) * gammalib::sec_in_day;
-    
+
     // Return
     return;
 }
@@ -766,7 +765,7 @@ void GTime::secs(const double& seconds, const std::string& timesys)
     if (timesys == "TT") {
         m_time = seconds;
     }
-    
+
     // ... otherwise if the system if TAI then add an offset ...
     else if (timesys == "TAI") {
         m_time = seconds + gammalib::tai2tt;
@@ -801,7 +800,7 @@ void GTime::days(const double& days)
 {
     // Set time
     m_time = days * gammalib::sec_in_day;
-    
+
     // Return
     return;
 }
@@ -931,7 +930,7 @@ void GTime::utc(const std::string& time)
 
     // Set time
     this->mjd(mjd);
-    
+
     // Return
     return;
 }
@@ -949,10 +948,10 @@ void GTime::set(const double& time, const GTimeReference& ref)
 {
     // Convert time to specified time unit
     m_time = time * ref.unitseconds();
-    
+
     // Compute time offset in seconds
     double offset = (mjd_ref - ref.mjdref()) * gammalib::sec_in_day;
-        
+
     // Subtract time offset in seconds
     m_time -= offset;
 
@@ -1159,7 +1158,7 @@ void GTime::init_members(void)
 {
     // Initialise members
     m_time = 0.0;
-  
+
     // Return
     return;
 }
@@ -1174,7 +1173,7 @@ void GTime::copy_members(const GTime& time)
 {
     // Copy time
     m_time = time.m_time;
-    
+
     // Return
     return;
 }
@@ -1234,8 +1233,8 @@ double GTime::leap_seconds(const double& mjd) const
                                53735,  // 2005-12-31
                                54831,  // 2008-12-31
                                56108,  // 2012-06-30
-                               57204,  // 2015-07-01
-                               57754}; // 2017-01-01
+                               57203,  // 2015-06-30
+                               57753}; // 2016-12-31
     const double leapsecs[] = {10.0, 11.0, 12.0, 13.0, 14.0,
                                15.0, 16.0, 17.0, 18.0, 19.0,
                                20.0, 21.0, 22.0, 23.0, 24.0,

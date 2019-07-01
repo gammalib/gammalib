@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GTime.i - Time class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,7 @@ public:
     double         secs(const std::string& timesys) const;
     double         days(void) const;
     double         days(const std::string& timesys) const;
-    std::string    utc(const int& precision = 0 ) const;
+    std::string    utc(const int& precision = 0) const;
     double         gmst(void) const;
     double         gast(void) const;
     double         lmst(const double& geolon) const;
@@ -131,67 +131,60 @@ public:
         self.secs(state[0])
 }
 
-/* datetime() : convert the GTime into a python datetime.datetime object.
-   
-   Note: 
-     self.utc() can spit out seconds=60, which can do wonky 
-     things to a simple datetime.datetime object (which 
-     requires seconds to be 0-59 inclusive).  This code 
-     seems to get around this problem, from:
-     http://stackoverflow.com/a/21029510/2500768
-*/
 %pythoncode %{
-    def datetime(*args):
-        """Convert the GTime data into a datetime.datetime object.
-        
+    def datetime(self, *args):
+        """
+        Convert the GTime data into a datetime.datetime object.
+
         Usage 1:
-        import gammalib, datetime
+        import gammalib
         t = gammalib.GTime()
-        d = t.datetime() # returns a datetime.datetime object
-        
+        d = t.datetime()   # returns a datetime.datetime object
+
         Usage 2:
+        import gammalib, datetime
         d = datetime.datetime.now()
         t = gammalib.GTime()
-        t.datetime( d ) # set the gtime to the datetime's time.
-        
-        **Args:**
-          arg[0] : self (ignore)
-          arg[1] : datetime.datetime object, if present, sets gtime to 
+        t.datetime(d)      # set the GTime to the datetime's time.
+
+        Parameters
+        ----------
+        args[0] : datetime.datetime object, if present, sets gtime to 
                    this time.
-        
-        **Returns:**
-          if no input arguments, returns datetime.datetime object
-          otherwise returns nothing.
+
+        Returns
+        -------
+        datetime : datetime.datetime object if no input argument,
+                   otherwise returns nothing
         """
+        # Import modules
         import time, datetime, calendar
-        
-        self = 0
-        if len(args) > 0 : 
-          self = args[0]
-        
-        # If no arguments (aside from the implicit 'self'), return a 
-        # datetime object
-        if len(args) == 1 :
+
+        # If no datetime argument then return a datetime object
+        if len(args) == 0:
             f = '%Y-%m-%dT%H:%M:%S.%f %Z'
             d = datetime.datetime.strptime(self.utc(6) + ' UTC', f)
             return d
-            
-        # If an argument is given, set the gtime to the datetime argument
-        elif len(args) == 2 :
-            
-            dt = args[1]
-            if type(dt) is datetime.datetime :
+
+        # ... otherwise, if an argument is given, set the gtime to the datetime
+        # argument
+        elif len(args) == 1:
+            dt = args[0]
+            if type(dt) is datetime.datetime:
                 s = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')
                 self.utc(s)
-            else :
+            else:
                 msg  = 'Argument must be a datetime.datetime object, is '
                 msg += 'currently ' + str(dt.__class__)
                 raise TypeError(msg)
-          
-        else :
+
+        # ... otherwise raise an exception
+        else:
             msg  = 'GTime.datetime() needs 0 or 1 arguments.  It was given '
             msg += '%d.' % len(args)
             raise ValueError(msg)
-        
+
+        # Return
+        return
 %}
 };
