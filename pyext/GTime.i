@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GTime.i - Time class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,7 @@ public:
     double         secs(const std::string& timesys) const;
     double         days(void) const;
     double         days(const std::string& timesys) const;
-    std::string    utc(void) const;
+    std::string    utc(const int& precision = 0) const;
     double         gmst(void) const;
     double         gast(void) const;
     double         lmst(const double& geolon) const;
@@ -130,4 +130,61 @@ public:
         self.__init__()
         self.secs(state[0])
 }
+
+%pythoncode %{
+    def datetime(self, *args):
+        """
+        Convert the GTime data into a datetime.datetime object.
+
+        Usage 1:
+        import gammalib
+        t = gammalib.GTime()
+        d = t.datetime()   # returns a datetime.datetime object
+
+        Usage 2:
+        import gammalib, datetime
+        d = datetime.datetime.now()
+        t = gammalib.GTime()
+        t.datetime(d)      # set the GTime to the datetime's time.
+
+        Parameters
+        ----------
+        args[0] : datetime.datetime object, if present, sets gtime to 
+                   this time.
+
+        Returns
+        -------
+        datetime : datetime.datetime object if no input argument,
+                   otherwise returns nothing
+        """
+        # Import modules
+        import time, datetime, calendar
+
+        # If no datetime argument then return a datetime object
+        if len(args) == 0:
+            f = '%Y-%m-%dT%H:%M:%S.%f %Z'
+            d = datetime.datetime.strptime(self.utc(6) + ' UTC', f)
+            return d
+
+        # ... otherwise, if an argument is given, set the gtime to the datetime
+        # argument
+        elif len(args) == 1:
+            dt = args[0]
+            if type(dt) is datetime.datetime:
+                s = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                self.utc(s)
+            else:
+                msg  = 'Argument must be a datetime.datetime object, is '
+                msg += 'currently ' + str(dt.__class__)
+                raise TypeError(msg)
+
+        # ... otherwise raise an exception
+        else:
+            msg  = 'GTime.datetime() needs 0 or 1 arguments.  It was given '
+            msg += '%d.' % len(args)
+            raise ValueError(msg)
+
+        # Return
+        return
+%}
 };
