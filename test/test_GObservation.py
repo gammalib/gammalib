@@ -475,7 +475,7 @@ class Test(gammalib.GPythonTestSuite):
              'Check larger or equal than operator')
 
         # Get datetime
-        self.test_value(str(time_a.datetime()), '2010-01-01 00:00:09.000001',
+        self.test_value(str(time_a.datetime())[:19], '2010-01-01 00:00:09',
                         'Check datetime getter method')
 
         # Set datetime
