@@ -41,6 +41,11 @@ to include the formal reference
 in your paper as well as the identifier
 `ascl:1110.007 <http://ascl.net/1110.007>`_
 of the code in the Astrophysics Source Code Library (ASCL).
+You can also reference GammaLib via
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3265404.svg
+   :target: https://doi.org/10.5281/zenodo.3265404
+
 In addition please add the following acknowledgment:
 
    *This research made use of GammaLib, a community-developed toolbox for
