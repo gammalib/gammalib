@@ -158,14 +158,15 @@ public:
                    otherwise returns nothing
         """
         # Import modules
-        import time, datetime, calendar
+        #import time, datetime, calendar
+        import time, datetime
 
         # If no datetime argument then return a datetime object
         if len(args) == 0:
             #f = '%Y-%m-%dT%H:%M:%S.%f %Z'
             #d = datetime.datetime.strptime(self.utc(6) + ' UTC', f)
             (t, msecs) = self.utc(6).strip().split('.')
-            d = datetime.datetime.strptime(t + ' UTC', '%Y-%m-%dT%H:%M:%S %Z')
+            d = datetime.datetime(*(time.strptime(t, '%Y-%m-%dT%H:%M:%S')[0:6]))
             d = d.replace(microsecond=int(msecs))
             return d
 
