@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.6.2
 
-25 June 2019
+15 July 2019
 
 
 1. Introduction
@@ -38,7 +38,9 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-None
+Set the following dependency library versions for conda build:
+- cfitsio  3.430
+- readline 7.0
 
 
 4. Application module
