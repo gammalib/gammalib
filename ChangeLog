@@ -6,11 +6,12 @@
         Add GTime.datetime() method and add optional precision to GTime.utc() (#2909)
 
 
-2019-06-25
+2019-07-15
 
         * Bug fix version 1.6.2 released
         ================================
 
+        Set dependency library versions for conda build (#2958)
 
 
 2019-06-05

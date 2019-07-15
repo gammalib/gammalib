@@ -1,6 +1,6 @@
 .. _1.6.2:
 
-GammaLib 1.6.2 release (25 June 2019)
+GammaLib 1.6.2 release (15 July 2019)
 =====================================
 
 Overview
@@ -10,4 +10,5 @@ GammaLib 1.6.2 is a bug fix release for GammaLib release 1.6.
 
 The following bugs were fixed:
 
-* ...
+* [`2958 <https://cta-redmine.irap.omp.eu/issues/2958>`_] -
+  Set dependency library versions for conda build
