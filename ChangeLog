@@ -1,8 +1,9 @@
-2019-07-01
+2019-07-19
 
         * Version 1.7.0 released
         ========================
 
+        Correctly write model attributes in GCOMModelDRBFitting class
         Add GTime.datetime() method and add optional precision to GTime.utc() (#2909)
 
 

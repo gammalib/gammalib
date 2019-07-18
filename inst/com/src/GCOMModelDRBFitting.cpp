@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCOMModelDRBFitting.cpp - COMPTEL DRB model fitting class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -493,20 +493,8 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
 
     } // endfor: looped over nodes
 
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Set observation identifiers
-    ids(xml.attribute("id"));
-
-    // Check flag if TS value should be computed
-    bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
-
-    // Set flag if TS value should be computed
-    this->tscalc(tscalc);
+    // Read model attributes
+    read_attributes(xml);
 
     // Set pointers
     set_pointers();
@@ -621,12 +609,12 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
 
     } // endfor: looped over nodes
 
+    // Write model attributes
+    write_attributes(*src);
+
     // Return
     return;
 }
-        // Allocate node parameters
-        GModelPar phibar;
-        GModelPar normalization;
 
 
 /***********************************************************************//**

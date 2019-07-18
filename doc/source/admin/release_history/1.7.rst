@@ -17,13 +17,14 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* Correctly write model attributes in ``GCOMModelDRBFitting`` class.
 
 
 Improvements
 ------------
 
 * [`2909 <https://cta-redmine.irap.omp.eu/issues/2909>`_] -
-  Add GTime.datetime() method and add optional precision to GTime.utc() method.
+  Add ``GTime.datetime()`` method and add optional precision to ``GTime.utc()`` method.
 
 
 New features
