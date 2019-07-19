@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralGauss.cpp - Spectral Gaussian model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2019 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -625,7 +625,7 @@ void GModelSpectralGauss::init_members(void)
     m_mean.unit("MeV");
     m_mean.scale(1.0);
     m_mean.value(1000.0);       // default: 1000.0
-    m_mean.min(0.1);            // min:     0.1
+    m_mean.min(0.001);          // min:     0.001  MeV
     m_mean.free();
     m_mean.gradient(0.0);
     m_mean.has_grad(false);
@@ -635,8 +635,8 @@ void GModelSpectralGauss::init_members(void)
     m_sigma.name("Sigma");
     m_sigma.unit("MeV");
     m_sigma.scale(1.0);
-    m_sigma.value(1000.0);       // default: 1000.0
-    m_sigma.min(0.1);            // min:     0.1
+    m_sigma.value(100.0);       // default: 100.0 MeV
+    m_sigma.min(0.001);         // min:     0.001 MeV
     m_sigma.free();
     m_sigma.gradient(0.0);
     m_sigma.has_grad(false);
