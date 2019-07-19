@@ -630,8 +630,10 @@ void TestGObservation::test_gti(void)
     test3.save("test_gti.fits[GOOD TIME INTERVALS]", true);
     GGti load2("test_gti.fits[GOOD TIME INTERVALS]");
     test_value(load2.size(), 1, "GGti should have 1 interval.");
-    test_value(load2.tstart().convert(GTimeReference(51544.5, "s")), 0.0, 1.0e-7, "Start time should be 0.");
-    test_value(load2.tstop().convert(GTimeReference(51544.5, "s")), 100.0, 1.0e-7, "Stop time should be 100.");
+    test_value(load2.tstart().convert(GTimeReference(51544.5, "s")), 0.0, 1.0e-7,
+               "Start time should be 0.");
+    test_value(load2.tstop().convert(GTimeReference(51544.5, "s")), 100.0, 1.0e-7,
+               "Stop time should be 100.");
 
     // Check contains() method
     GGti test6;
@@ -649,6 +651,29 @@ void TestGObservation::test_gti(void)
     test_assert(test6.contains(GTime(6.0)), "Check GGti::contains(): 6 is contained");
     test_assert(!test6.contains(GTime(8.0)), "Check GGti::contains(): 8 is not contained");
     test_assert(!test6.contains(GTime(4.0)), "Check GGti::contains(): 4 is not contained");
+
+    // Check overlap() method
+    GGti test7;
+    test7.append(GTime(5.0), GTime(6.0));
+    test7.append(GTime(9.0), GTime(10.0));
+    test_value(test7.overlap(GTime(0.0), GTime(5.0)), 0.0, 1.0e-7,
+               "Check GGti::overlap(): interval before GTIs");
+    test_value(test7.overlap(GTime(10.0), GTime(15.0)), 0.0, 1.0e-7,
+               "Check GGti::overlap(): interval after GTIs");
+    test_value(test7.overlap(GTime(4.0), GTime(5.5)), 0.5, 1.0e-7,
+               "Check GGti::overlap(): interval ends in GTI");
+    test_value(test7.overlap(GTime(9.5), GTime(11.0)), 0.5, 1.0e-7,
+               "Check GGti::overlap(): interval starts in GTI");
+    test_value(test7.overlap(GTime(4.0), GTime(7.0)), 1.0, 1.0e-7,
+               "Check GGti::overlap(): interval starts before and ends after GTI");
+    test_value(test7.overlap(GTime(5.1), GTime(5.9)), 0.8, 1.0e-7,
+               "Check GGti::overlap(): interval within GTI");
+    test_value(test7.overlap(GTime(5.0), GTime(10.0)), 2.0, 1.0e-7,
+               "Check GGti::overlap(): interval comprises exactly GTIs");
+    test_value(test7.overlap(GTime(4.0), GTime(11.0)), 2.0, 1.0e-7,
+               "Check GGti::overlap(): interval comprises GTIs");
+    test_value(test7.overlap(GTime(5.5), GTime(9.5)), 1.0, 1.0e-7,
+               "Check GGti::overlap(): interval partly overlaps GTIs");
 
     // Return
     return;

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-15 July 2019
+19 July 2019
 
 
 1. Introduction
@@ -22,6 +22,7 @@ The following classes have been renamed:
 
 The following methods have been added:
 - GTime.datetime() - Datetime conversion in Python interface
+- GGti::overlap(GTime&, GTime&) - Compute overlap with time interval
 
 The following methods have been removed:
 - none
@@ -30,7 +31,7 @@ The following methods have been renamed:
 - none
 
 The arguments for the following methods have been changed:
-- GTime::utc(const int& precision=0) - Add optional precision value
+- GTime::utc(int&) - Add optional precision value
 
 The return value of the following methods has been changed:
 - none
@@ -73,6 +74,9 @@ None
 
 10. Observation module
 ----------------------
+Add GGti::overlap() method to compute the temporal overlap in seconds with
+a specified time interval.
+
 Add GTime.datetime() method to the Python interface to convert times from and
 to datetime.datetime objects. Add an optional precision argument to the GTime.utc()
 to set the number of digits after the comma for the seconds (#2909).

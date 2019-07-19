@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.hpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -102,6 +102,7 @@ public:
     const GTime&          tstop(const int& index) const;
     const double&         telapse(void) const;
     const double&         ontime(void) const;
+    double                overlap(const GTime& tstart, const GTime& tstop) const;
     void                  reference(const GTimeReference& ref);
     const GTimeReference& reference(void) const;
     bool                  contains(const GTime& time) const;
@@ -164,6 +165,116 @@ inline
 bool GGti::is_empty(void) const
 {
     return (m_num == 0);
+}
+
+
+/***********************************************************************//**
+ * @brief Reserve space for Good Time Intervals
+ *
+ * @param[in] num Number of elements.
+ *
+ * This method does nothing (it is needed to satisfy the GContainer
+ * interface).
+ ***************************************************************************/
+inline
+void GGti::reserve(const int& num)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns earliest start time in Good Time Intervals
+ *
+ * @return Earliest start time in Good Time Intervals.
+ ***************************************************************************/
+inline
+const GTime& GGti::tstart(void) const
+{
+    // Return
+    return m_tstart;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns latest stop time in Good Time Intervals
+ *
+ * @return Latest stop time in Good Time Intervals.
+ ***************************************************************************/
+inline
+const GTime& GGti::tstop(void) const
+{
+    // Return
+    return m_tstop;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns elapsed time
+ *
+ * @return Elapsed time (seconds).
+ *
+ * Returns the elapsed time in seconds. The elapsed time is defined as the
+ * time difference between the latest stop time and the earliest start time
+ * in the Good Time Intervals.
+ ***************************************************************************/
+inline
+const double& GGti::telapse(void) const
+{
+    // Return
+    return m_telapse;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns ontime
+ *
+ * @return Ontime (seconds).
+ *
+ * Returns the ontime in seconds. The ontime is defined as the sum of all
+ * Good Time Intervals.
+ ***************************************************************************/
+inline
+const double& GGti::ontime(void) const
+{
+    // Return
+    return m_ontime;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time reference for Good Time Intervals
+ *
+ * @param[in] ref Time reference.
+ *
+ * Sets the time reference of the Good Time Intervals. This defines the
+ * reference time which will be writted into the FITS file upon saving of
+ * the Good Time Intervals.
+ ***************************************************************************/
+inline
+void GGti::reference(const GTimeReference& ref)
+{
+    // Set time reference
+    m_reference = ref;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time reference for Good Time Intervals
+ *
+ * @return Time reference.
+ *
+ * Returns the time reference of the Good Time Intervals.
+ ***************************************************************************/
+inline
+const GTimeReference& GGti::reference(void) const
+{
+    // Return time reference
+    return m_reference;
 }
 
 #endif /* GGTI_HPP */

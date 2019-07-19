@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GGti.i - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,6 +75,7 @@ public:
     const GTime&          tstop(const int& index) const;
     const double&         telapse(void) const;
     const double&         ontime(void) const;
+    double                overlap(const GTime& tstart, const GTime& tstop) const;
     void                  reference(const GTimeReference& ref);
     const GTimeReference& reference(void) const;
     bool                  contains(const GTime& time) const;

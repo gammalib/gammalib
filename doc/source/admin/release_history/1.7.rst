@@ -23,6 +23,7 @@ Bug fixes
 Improvements
 ------------
 
+* Add ``GGti::overlap()`` method.
 * [`2909 <https://cta-redmine.irap.omp.eu/issues/2909>`_] -
   Add ``GTime.datetime()`` method and add optional precision to ``GTime.utc()`` method.
 

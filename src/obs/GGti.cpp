@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.cpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -499,21 +499,6 @@ void GGti::remove(const int& index)
 
 
 /***********************************************************************//**
- * @brief Reserve space for Good Time Intervals
- *
- * @param[in] num Number of elements.
- *
- * This method does nothing (it is needed to satisfy the GContainer
- * interface).
- ***************************************************************************/
-void GGti::reserve(const int& num)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Append Good Time Intervals
  *
  * @param[in] gti Good Time Intervals.
@@ -867,30 +852,6 @@ void GGti::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Returns earliest start time in Good Time Intervals
- *
- * @return Earliest start time in Good Time Intervals.
- ***************************************************************************/
-const GTime& GGti::tstart(void) const
-{
-    // Return
-    return m_tstart;
-}
-
-
-/***********************************************************************//**
- * @brief Returns latest stop time in Good Time Intervals
- *
- * @return Latest stop time in Good Time Intervals.
- ***************************************************************************/
-const GTime& GGti::tstop(void) const
-{
-    // Return
-    return m_tstop;
-}
-
-
-/***********************************************************************//**
  * @brief Returns start time for a given Good Time Interval
  *
  * @param[in] index Good Time Interval index (0,...,size()-1).
@@ -935,71 +896,48 @@ const GTime& GGti::tstop(const int& index) const
 
 
 /***********************************************************************//**
- * @brief Returns elapsed time
+ * @brief Computes overlap of time interval with GTIs
  *
- * @return Elapsed time [seconds].
+ * @param[in] tstart Start time of interval.
+ * @param[in] tstop Stop time of interval.
+ * @return Overlap (seconds).
  *
- * Returns the elapsed time in seconds. The elapsed time is defined as the
- * time difference between the latest stop time and the earliest start time
- * in the Good Time Intervals.
+ * Returns the overlap of time interval with GTIs in seconds.
  ***************************************************************************/
-const double& GGti::telapse(void) const
+double GGti::overlap(const GTime& tstart, const GTime& tstop) const
 {
+    // Initialise overlap
+    double overlap = 0.0;
+
+    // Compute the overlap
+    for (int i = 0; i < m_num; ++i) {
+        if (m_start[i] < tstart) {
+            if (m_stop[i] > tstart) {
+                if (m_stop[i] > tstop) {
+                    overlap += tstop - tstart;
+                }
+                else {
+                    overlap += m_stop[i] - tstart;
+                }
+            }
+        }
+        else if (m_stop[i] > tstop) {
+            if (m_start[i] < tstop) {
+                overlap += tstop - m_start[i];
+            }
+        }
+        else {
+            overlap += m_stop[i] - m_start[i];
+        }
+    }
+
     // Return
-    return m_telapse;
+    return overlap;
 }
 
 
 /***********************************************************************//**
- * @brief Returns ontime
- *
- * @return Ontime [seconds].
- *
- * Returns the ontime in seconds. The ontime is defined as the sum of all
- * Good Time Intervals.
- ***************************************************************************/
-const double& GGti::ontime(void) const
-{
-    // Return
-    return m_ontime;
-}
-
-
-/***********************************************************************//**
- * @brief Set time reference for Good Time Intervals
- *
- * @param[in] ref Time reference.
- *
- * Sets the time reference of the Good Time Intervals. This defines the
- * reference time which will be writted into the FITS file upon saving of
- * the Good Time Intervals.
- ***************************************************************************/
-void GGti::reference(const GTimeReference& ref)
-{
-    // Set time reference
-    m_reference = ref;
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return time reference for Good Time Intervals
- *
- * @return Time reference.
- *
- * Returns the time reference of the Good Time Intervals.
- ***************************************************************************/
-const GTimeReference& GGti::reference(void) const
-{
-    // Return time reference
-    return m_reference;
-}
-
-
-/***********************************************************************//**
- * @brief Checks whether Good Time Intervals contain time
+ * @brief Checks whether Good Time Intervals contains time
  *
  * @param[in] time Time to be checked.
  *
