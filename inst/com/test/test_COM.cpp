@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,18 +105,18 @@ TestGCOM* TestGCOM::clone(void) const
 void TestGCOM::test_com_time(void)
 {
     // Verify time conversion given in COM-RP-UNH-DRG-037
-    GTime time1(com_time(8393, 0));
+    GTime time1(gammalib::com_time(8393, 0));
     test_value(time1.utc(), "1991-05-17T00:00:00", "Test 8393:0");
-    GTime time2(com_time(8406, 691199999));
+    GTime time2(gammalib::com_time(8406, 691199999));
     test_value(time2.utc(), "1991-05-31T00:00:00", "Test 8406:691199999");
 
     // Verify back conversion
-    int tjd1  = com_tjd(time1);
-    int tics1 = com_tics(time1);
+    int tjd1  = gammalib::com_tjd(time1);
+    int tics1 = gammalib::com_tics(time1);
     test_value(tjd1, 8393, "Test TJD 8393");
     test_value(tics1, 0, "Test tics 0");
-    int tjd2  = com_tjd(time2);
-    int tics2 = com_tics(time2);
+    int tjd2  = gammalib::com_tjd(time2);
+    int tics2 = gammalib::com_tics(time2);
     test_value(tjd2, 8406, "Test TJD 8406");
     test_value(tics2, 691199999, "Test tics 691199999");
 
@@ -135,27 +135,31 @@ void TestGCOM::test_tim_class(void)
 
     // Check Good Time interval content
     test_value(tim.gti().size(), 194, "Check that TIM contains 194 rows");
-    test_value(tim.gti().tstart().secs(), com_time(8392, 624010000).secs(),
+    test_value(tim.gti().tstart().secs(),
+               gammalib::com_time(8392, 624010000).secs(),
                "Check TIM start time");
-    test_value(tim.gti().tstop().secs(), com_time(8406, 542890000).secs(),
+    test_value(tim.gti().tstop().secs(),
+               gammalib::com_time(8406, 542890000).secs(),
                "Check TIM stop time");
-    test_value(tim.gti().tstart(14).secs(), com_time(8393, 684868096).secs(),
+    test_value(tim.gti().tstart(14).secs(),
+               gammalib::com_time(8393, 684868096).secs(),
                "Check TIM row 15 start time");
-    test_value(tim.gti().tstop(129).secs(), com_time(8402, 451392320).secs(),
+    test_value(tim.gti().tstop(129).secs(),
+               gammalib::com_time(8402, 451392320).secs(),
                "Check TIM row 130 stop time");
 
     // Check Good Time interval contains() method
-    test_assert(tim.contains(com_time(8392, 624010000)),
+    test_assert(tim.contains(gammalib::com_time(8392, 624010000)),
                 "Check that TIM contains start time");
-    test_assert(tim.contains(com_time(8406, 542890000)),
+    test_assert(tim.contains(gammalib::com_time(8406, 542890000)),
                 "Check that TIM contains stop time");
-    test_assert(tim.contains(com_time(8403, 3637760)),
+    test_assert(tim.contains(gammalib::com_time(8403, 3637760)),
                 "Check that TIM contains 8403:3637760");
-    test_assert(!tim.contains(com_time(8403, 3637759)),
+    test_assert(!tim.contains(gammalib::com_time(8403, 3637759)),
                 "Check that TIM does not contain 8403:3637759");
-    test_assert(tim.contains(com_time(8399, 388780672)),
+    test_assert(tim.contains(gammalib::com_time(8399, 388780672)),
                 "Check that TIM contains 8399:388780672");
-    test_assert(!tim.contains(com_time(8399, 388780673)),
+    test_assert(!tim.contains(gammalib::com_time(8399, 388780673)),
                 "Check that TIM does not contain 8399:388780673");
 
     // Return
@@ -172,8 +176,8 @@ void TestGCOM::test_oad_class(void)
     GCOMOad oad;
 
     // Setup object
-    oad.tstart(com_time(8392, 624010000));
-    oad.tstop(com_time(8406, 542890000));
+    oad.tstart(gammalib::com_time(8392, 624010000));
+    oad.tstop(gammalib::com_time(8406, 542890000));
     oad.tjd(8403);
     oad.tics(3637760);
     oad.gcaz(123.45);
@@ -181,9 +185,9 @@ void TestGCOM::test_oad_class(void)
     oad.georad(76.54);
 
     // Check object
-    test_value(oad.tstart().secs(), com_time(8392, 624010000).secs(),
+    test_value(oad.tstart().secs(), gammalib::com_time(8392, 624010000).secs(),
                "Check start time");
-    test_value(oad.tstop().secs(), com_time(8406, 542890000).secs(),
+    test_value(oad.tstop().secs(), gammalib::com_time(8406, 542890000).secs(),
                "Check stop time");
     test_value(oad.tjd(), 8403, "Check TJD");
     test_value(oad.tics(), 3637760, "Check tics");
@@ -206,9 +210,11 @@ void TestGCOM::test_oads_class(void)
 
     // Check Orbit Aspect Data content
     test_value(oads.size(), 5273, "Check that OAD contains 5273 rows");
-    test_value(oads[0].tstart().secs(), com_time(8393, 96000).secs(),
+    test_value(oads[0].tstart().secs(),
+               gammalib::com_time(8393, 96000).secs(),
                "Check OAD start time of row 1");
-    test_value(oads[0].tstop().secs(), com_time(8393, 227071).secs(),
+    test_value(oads[0].tstop().secs(),
+               gammalib::com_time(8393, 227071).secs(),
                "Check OAD stop time of row 1");
     test_value(oads[0].tjd(), 8393, "Check OAD TJD of row 1");
     test_value(oads[0].tics(), 96000, "Check OAD tics of row 1");
@@ -216,9 +222,11 @@ void TestGCOM::test_oads_class(void)
                "Check OAD gcaz of row 1");
     test_value(oads[0].gcel(), 1.743999*gammalib::rad2deg, 1.0e-4,
                "Check OAD gecl of row 1");
-    test_value(oads[2919].tstart().secs(), com_time(8393, 382702208).secs(),
+    test_value(oads[2919].tstart().secs(),
+               gammalib::com_time(8393, 382702208).secs(),
                "Check OAD start time of row 2920");
-    test_value(oads[2919].tstop().secs(), com_time(8393, 382833279).secs(),
+    test_value(oads[2919].tstop().secs(),
+               gammalib::com_time(8393, 382833279).secs(),
                "Check OAD stop time of row 2920");
     test_value(oads[2919].tjd(), 8393, "Check OAD TJD of row 2920");
     test_value(oads[2919].tics(), 382702208, "Check OAD tics of row 2920");
