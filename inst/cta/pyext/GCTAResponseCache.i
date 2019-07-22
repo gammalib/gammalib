@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAResponseCache.i - CTA response cache class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,6 +72,7 @@ public:
                            const GEnergy&     ereco,
                            const GEnergy&     etrue,
                            const double&      value);
+    void               remove(const std::string& name);
     bool               contains(const std::string& name,
                                 const GEnergy&     ereco,
                                 const GEnergy&     etrue,

@@ -1551,6 +1551,12 @@ void TestGCTAResponse::test_response_cache(void)
     flag = cache3.contains("Orion", eng1, eng1, &value);
     test_assert(!flag, "Test contains() method flag for non-existing name");
 
+    // Test removal of source
+    cache3.remove("Vela");
+    flag = cache3.contains("Vela", eng1, eng1, &value);
+    test_assert(!flag, "Test contains() method flag for removed source");
+    cache3.remove("Vela");
+
     // Test filled response cube (two models, two dir, two ereco, two etrue per ereco)
     GCTAResponseCache cache4;
     cache4.set("Crab", dir1, eng1, eng1, 1.0);

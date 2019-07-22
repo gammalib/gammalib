@@ -23,6 +23,7 @@ The following classes have been renamed:
 The following methods have been added:
 - GTime.datetime() - Datetime conversion in Python interface
 - GGti::overlap(GTime&, GTime&) - Compute overlap with time interval
+- GCTAResponseCache::remove(string&) - Remove response cache for model
 - GCOMTim::save(GFilename&, bool&) - Save TIM into FITS file
 - GCOMTim::write(GFitsBinTable&) - Write TIM into FITS binary table
 

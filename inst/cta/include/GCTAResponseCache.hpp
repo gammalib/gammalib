@@ -82,6 +82,7 @@ public:
                            const GEnergy&     ereco,
                            const GEnergy&     etrue,
                            const double&      value);
+    void               remove(const std::string& name);
     bool               contains(const std::string& name,
                                 const GEnergy&     ereco,
                                 const GEnergy&     etrue,
@@ -127,6 +128,21 @@ inline
 bool GCTAResponseCache::is_empty(void) const
 {
     return (m_cache.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Remove cache for source
+ *
+ * @param[in] name Source name.
+ *
+ * Remove cache for source with @p name.
+ ***************************************************************************/
+inline
+void GCTAResponseCache::remove(const std::string& name)
+{
+    m_cache.erase(name);
+    return;
 }
 
 #endif /* GCTARESPONSECACHE_HPP */
