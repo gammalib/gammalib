@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMSupport.cpp - COMPTEL support functions              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,7 +55,7 @@
  * Nothing is done for all other sky map. This method can thus be
  * transparently be applied to the sky maps read from COMPTEL data files.
  ***************************************************************************/
-void com_wcs_mer2car(GSkyMap& map)
+void gammalib::com_wcs_mer2car(GSkyMap& map)
 {
     // Get WCS poiunter
     const GWcs* wcs = dynamic_cast<const GWcs*>(map.projection());
@@ -105,7 +105,7 @@ void com_wcs_mer2car(GSkyMap& map)
  * @param[in] phigeo Geometrical scatter angle (deg).
  * @return D1 energy deposit in MeV.
  ***************************************************************************/
-double com_energy1(const double& energy, const double& phigeo)
+double gammalib::com_energy1(const double& energy, const double& phigeo)
 {
     // Compute D2 energy deposit
     double e2 = com_energy2(energy, phigeo);
@@ -122,7 +122,7 @@ double com_energy1(const double& energy, const double& phigeo)
  * @param[in] phigeo Geometrical scatter angle (deg).
  * @return D2 energy deposit in MeV.
  ***************************************************************************/
-double com_energy2(const double& energy, const double& phigeo)
+double gammalib::com_energy2(const double& energy, const double& phigeo)
 {
     // Compute 1-cos(phigeo)
     double one_minus_cos  = 1.0 - std::cos(phigeo * gammalib::deg2rad);
@@ -146,7 +146,7 @@ double com_energy2(const double& energy, const double& phigeo)
  * given in UTC, i.e. 8393:0 converts into 1991-05-17T00:00:00 UT
  * (see COM-RP-UNH-DRG-037).
  ***************************************************************************/
-GTime com_time(const int& tjd, const int& tics)
+GTime gammalib::com_time(const int& tjd, const int& tics)
 {
     // Compute MJD
     double mjd = double(tjd) + 40000.0;
@@ -175,7 +175,7 @@ GTime com_time(const int& tjd, const int& tics)
  *
  * Converts GTime object in TJD.
  ***************************************************************************/
-int com_tjd(const GTime& time)
+int gammalib::com_tjd(const GTime& time)
 {
     // Compute TJD
     int tjd = int(time.mjd("UTC") - 40000.0);
@@ -193,7 +193,7 @@ int com_tjd(const GTime& time)
  *
  * Converts GTime object in COMPTEL ticks (1/8 ms).
  ***************************************************************************/
-int com_tics(const GTime& time)
+int gammalib::com_tics(const GTime& time)
 {
     // Compute COMPTEL time at 0 tics
     GTime tjd = com_time(com_tjd(time), 0);

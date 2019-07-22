@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMEventList.cpp - COMPTEL event list class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -302,8 +302,6 @@ void GCOMEventList::save(const GFilename& filename,
  * @param[in] file FITS file.
  *
  * Read the COMPTEL event list from a FITS file object.
- *
- * @todo Implement method.
  ***************************************************************************/
 void GCOMEventList::read(const GFits& file)
 {
@@ -316,12 +314,13 @@ void GCOMEventList::read(const GFits& file)
     // Read event data
     read_events(hdu);
 
-    // Read start and stop time
-    GTime start(com_time(hdu.integer("VISDAY"), hdu.integer("VISTIM")));
-    GTime stop(com_time(hdu.integer("VIEDAY"), hdu.integer("VIETIM")));
-    
-    // Append start and stop time as single time interval to GTI
-    m_gti.append(start, stop);
+    // If there are events then get start and stop time from the first
+    // and last event and append them as single time interval to the GTI
+    if (size() > 0) {
+        GTime start = m_events[0].time();
+        GTime stop  = m_events[size()-1].time();
+        m_gti.append(start, stop);
+    }
 
     // Return
     return;
@@ -448,10 +447,10 @@ std::string GCOMEventList::print(const GChatter& chatter) const
         // Append time information
         if (gti().size() > 0) {
             result.append("\n"+gammalib::parformat("TJD interval"));
-            result.append(gammalib::str(com_tjd(tstart()))+":");
-            result.append(gammalib::str(com_tics(tstart()))+" - ");
-            result.append(gammalib::str(com_tjd(tstop()))+":");
-            result.append(gammalib::str(com_tics(tstop())));
+            result.append(gammalib::str(gammalib::com_tjd(tstart()))+":");
+            result.append(gammalib::str(gammalib::com_tics(tstart()))+" - ");
+            result.append(gammalib::str(gammalib::com_tjd(tstop()))+":");
+            result.append(gammalib::str(gammalib::com_tics(tstop())));
             result.append("\n"+gammalib::parformat("MJD interval"));
             result.append(gammalib::str(tstart().mjd())+" - ");
             result.append(gammalib::str(tstop().mjd())+" days");

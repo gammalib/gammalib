@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMOads.cpp - COMPTEL Orbit Aspect Data container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knodlseder                               *
+ *  copyright (C) 2017-2019 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_GEORAD_WARNING
+//#define G_GEORAD_WARNING
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -436,8 +436,8 @@ void GCOMOads::read(const GFitsTable& table)
             // 16.384 secs, i.e. 16.384 * 8000 = 131072 ticks
             oad.tjd(tjd);
             oad.tics(tics);
-            oad.tstart(com_time(tjd, tics));
-            oad.tstop(com_time(tjd, tics + 131071));
+            oad.tstart(gammalib::com_time(tjd, tics));
+            oad.tstop(gammalib::com_time(tjd, tics + 131071));
 
             // Set geocentre azimuth and zenith angle in deg
             oad.gcaz(ptr_gcaz->real(i) * gammalib::rad2deg);
@@ -501,7 +501,7 @@ std::string GCOMOads::print(const GChatter& chatter) const
         result.append("=== GCOMOads ===");
 
         // Append container information
-        result.append("\n"+gammalib::parformat("Number of records"));
+        result.append("\n"+gammalib::parformat("Superpackets"));
         result.append(gammalib::str(size()));
         if (size() > 0) {
 
@@ -524,26 +524,32 @@ std::string GCOMOads::print(const GChatter& chatter) const
             result.append(" - ");
             result.append(m_oads[size()-1].tstop().utc());
 
-            // Append TJDs
-            int tjd = 0;
-            int num = 0;
-            for (int i = 0; i < size(); ++i) {
-                if (m_oads[i].tjd() != tjd) {
-                    if (num > 0) {
-                        std::string key = "TJD "+gammalib::str(tjd);
-                        result.append("\n"+gammalib::parformat(key));
-                        result.append(gammalib::str(num)+" superpackets");
+            // Append detailed information
+            GChatter reduced_chatter = gammalib::reduce(chatter);
+            if (reduced_chatter > SILENT) {
+
+                // Append TJDs
+                int tjd = 0;
+                int num = 0;
+                for (int i = 0; i < size(); ++i) {
+                    if (m_oads[i].tjd() != tjd) {
+                        if (num > 0) {
+                            std::string key = "TJD "+gammalib::str(tjd);
+                            result.append("\n"+gammalib::parformat(key));
+                            result.append(gammalib::str(num)+" superpackets");
+                        }
+                        tjd = m_oads[i].tjd();
+                        num = 1;
                     }
-                    tjd = m_oads[i].tjd();
-                    num = 1;
-                }
-                else {
+                    else {
                     num++;
+                    }
                 }
-            }
-            std::string key = "TJD "+gammalib::str(tjd);
-            result.append("\n"+gammalib::parformat(key));
-            result.append(gammalib::str(num)+" superpackets");
+                std::string key = "TJD "+gammalib::str(tjd);
+                result.append("\n"+gammalib::parformat(key));
+                result.append(gammalib::str(num)+" superpackets");
+
+            } // endif: detailed information requested
 
         } // endif: there were records
 

@@ -35,6 +35,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
 class GFitsTable;
+class GFitsBinTable;
 
 /* __ Constants __________________________________________________________ */
 
@@ -53,8 +54,8 @@ public:
     GCOMTim(void);
     explicit GCOMTim(const GGti& gti);
     GCOMTim(const GCOMTim& tim);
-    GCOMTim(const GFilename& filename, const std::string& usage = "",
-                                       const std::string& mode  = "");
+    GCOMTim(const GFilename& filename, const std::string& usage = "YES",
+                                       const std::string& mode  = "NORMAL");
     virtual ~GCOMTim(void);
 
     // Operators
@@ -70,17 +71,19 @@ public:
     bool        contains(const GTime& time) const;
     const GGti& gti(void) const;
     void        gti(const GGti& gti);
-    void        load(const GFilename& filename, const std::string& usage = "",
-                                                const std::string& mode  = "");
-    void        read(const GFitsTable& table, const std::string& usage = "",
-                                              const std::string& mode  = "");
+    void        load(const GFilename& filename, const std::string& usage = "YES",
+                                                const std::string& mode  = "NORMAL");
+    void        save(const GFilename& filename, const bool&        clobber = false) const;
+    void        read(const GFitsTable& table, const std::string& usage = "YES",
+                                              const std::string& mode  = "NORMAL");
+    void        write(GFitsBinTable& table) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCOMTim& tim);
     void free_members(void);
-    
+
     // Protected members
     GGti m_gti;     //!< Good Time intervals
 };

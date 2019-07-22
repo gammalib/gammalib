@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMIaq.cpp - COMPTEL instrument response representation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -702,7 +702,7 @@ void GCOMIaq::compton_kinematics(const double& energy)
 
         // Compute the true D1 and D2 energy deposits based on the
         // geometrical scatter angle
-        double etrue2 = com_energy2(energy, phigeo);
+        double etrue2 = gammalib::com_energy2(energy, phigeo);
         double etrue1 = energy - etrue2;
 
         // Debug

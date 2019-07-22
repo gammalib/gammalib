@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -569,23 +569,22 @@ void GCOMObservation::load(const GFilename&              evpname,
     // Clear object
     clear();
 
+    // Extract observation information from event list
+    GFits fits(evpname);
+    read_attributes(fits[1]);
+    fits.close();
+
     // Allocate event list
     GCOMEventList *evp = new GCOMEventList(evpname);
     m_events           = evp;
 
-    // Extract observation information from event list
-    // m_obs_id = ;
-    // m_name   = ;
-
-    // Extract time information from event list
-    double tstart = m_events->gti().tstart().mjd();
-    double tstop  = m_events->gti().tstop().mjd();
-    m_ontime      = (tstop - tstart) * 86400.0;
-    m_deadc       = 0.85;
-    m_livetime    = m_deadc * m_ontime;
-
     // Load TIM data
     m_tim.load(timname);
+
+    // Extract ontime from TIM and compute livetime assuming 15% deadtime
+    m_ontime   = m_tim.gti().ontime();
+    m_deadc    = 0.85;
+    m_livetime = m_deadc * m_ontime;
 
     // Initialise intermediate vector for OADs
     std::vector<GCOMOads> oads;
@@ -736,6 +735,22 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         }
         else {
             result.append("\n"+gammalib::parformat("Events")+"undefined");
+        }
+
+        // Append TIM (if available)
+        if (m_tim.gti().size() > 0) {
+            result.append("\n"+m_tim.print(gammalib::reduce(chatter)));
+        }
+        else {
+            result.append("\n"+gammalib::parformat("TIM")+"undefined");
+        }
+
+        // Append OADs (if available)
+        if (!m_oads.is_empty()) {
+            result.append("\n"+m_oads.print(gammalib::reduce(chatter)));
+        }
+        else {
+            result.append("\n"+gammalib::parformat("OADs")+"undefined");
         }
 
         // Append DRB, DRG and DRX
@@ -923,7 +938,7 @@ void GCOMObservation::load_drb(const GFilename& drbname)
     m_drb.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
-    com_wcs_mer2car(m_drb);
+    gammalib::com_wcs_mer2car(m_drb);
 
     // Close FITS file
     fits.close();
@@ -966,7 +981,7 @@ void GCOMObservation::load_drg(const GFilename& drgname)
     m_drg.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
-    com_wcs_mer2car(m_drg);
+    gammalib::com_wcs_mer2car(m_drg);
 
     // Close FITS file
     fits.close();
@@ -1005,7 +1020,7 @@ void GCOMObservation::load_drx(const GFilename& drxname)
     m_drx.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
-    com_wcs_mer2car(m_drx);
+    gammalib::com_wcs_mer2car(m_drx);
 
     // Close FITS file
     fits.close();
@@ -1115,7 +1130,6 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
         // Read observation information
         m_obs_id = (hdu->has_card("OBS_ID")) ? hdu->real("OBS_ID") : 0;
         m_name   = (hdu->has_card("OBJECT")) ? hdu->string("OBJECT") : "unknown";
-
 
     } // endif: HDU was valid
 

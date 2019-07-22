@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.cpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -470,10 +470,10 @@ std::string GCOMEventCube::print(const GChatter& chatter) const
         result.append(tstart().utc()+" - ");
         result.append(tstop().utc());
         result.append("\n"+gammalib::parformat("TJD interval"));
-        result.append(gammalib::str(com_tjd(tstart()))+":");
-        result.append(gammalib::str(com_tics(tstart()))+" - ");
-        result.append(gammalib::str(com_tjd(tstop()))+":");
-        result.append(gammalib::str(com_tics(tstop())));
+        result.append(gammalib::str(gammalib::com_tjd(tstart()))+":");
+        result.append(gammalib::str(gammalib::com_tics(tstart()))+" - ");
+        result.append(gammalib::str(gammalib::com_tjd(tstop()))+":");
+        result.append(gammalib::str(gammalib::com_tics(tstop())));
         result.append("\n"+gammalib::parformat("Mean time"));
         result.append(m_time.print(chatter));
         result.append("\n"+gammalib::parformat("Ontime"));

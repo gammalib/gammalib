@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCOMInstChars.cpp - COMPTEL Instrument Characteristics class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -492,7 +492,7 @@ double GCOMInstChars::prob_D2inter(const double& energy, const double& phigeo) c
     if (m_d2inter_energies.size() > 0) {
 
         // Compute log of D2 energy deposit
-        double logE2 = std::log(com_energy2(energy, phigeo));
+        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
 
         // Get interaction coefficient
         double logc   = m_d2inter_energies.interpolate(logE2, m_d2inter_coeffs);
@@ -540,7 +540,7 @@ double GCOMInstChars::trans_D2(const double& energy, const double& phigeo) const
     if (m_alu_energies.size() > 0) {
 
         // Compute log of D2 energy deposit
-        double logE2 = std::log(com_energy2(energy, phigeo));
+        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
 
         // Get attenuation coefficient
         double logc   = m_alu_energies.interpolate(logE2, m_alu_coeffs);
@@ -588,7 +588,7 @@ double GCOMInstChars::trans_V23(const double& energy, const double& phigeo) cons
     if (m_veto_energies.size() > 0) {
 
         // Compute log of D2 energy deposit
-        double logE2 = std::log(com_energy2(energy, phigeo));
+        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
 
         // Get attenuation coefficient
         double logc   = m_veto_energies.interpolate(logE2, m_veto_coeffs);
@@ -874,7 +874,7 @@ double GCOMInstChars::psd_correction(const double& energy, const double& phigeo)
     const double a2 = 2.530;
 
     // Compute D1 energy deposit
-    double e1 = com_energy1(energy, phigeo);
+    double e1 = gammalib::com_energy1(energy, phigeo);
 
     // Original COMPASS code
     double psdacp = 1.0 - (1.0 / (a1 * std::pow(e1, a2) + 1.0));

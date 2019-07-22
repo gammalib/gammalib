@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.cpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -839,7 +839,7 @@ void GCOMDri::read(const GFitsImage& image)
     m_dri.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
-    com_wcs_mer2car(m_dri);
+    gammalib::com_wcs_mer2car(m_dri);
 
     // Read attributes
     read_attributes(&image);
@@ -1122,8 +1122,8 @@ bool GCOMDri::use_superpacket(const GCOMOad &oad, const GCOMTim& tim)
 void GCOMDri::read_attributes(const GFitsHDU* hdu)
 {
     // Get time attributes
-    GTime tstart = com_time(hdu->integer("VISDAY"), hdu->integer("VISTIM"));
-    GTime tstop  = com_time(hdu->integer("VIEDAY"), hdu->integer("VIETIM"));
+    GTime tstart = gammalib::com_time(hdu->integer("VISDAY"), hdu->integer("VISTIM"));
+    GTime tstop  = gammalib::com_time(hdu->integer("VIEDAY"), hdu->integer("VIETIM"));
 
     // Set Good Time Intervals
     if (tstop > tstart) {
@@ -1204,10 +1204,10 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
     hdu->card("DATE-END", m_gti.tstop().utc(), "Stop of observation in UTC");
 
     // Set time keywords
-    int visday = com_tjd(m_gti.tstart());
-    int vistim = com_tics(m_gti.tstart());
-    int vieday = com_tjd(m_gti.tstop());
-    int vietim = com_tics(m_gti.tstop());
+    int visday = gammalib::com_tjd(m_gti.tstart());
+    int vistim = gammalib::com_tics(m_gti.tstart());
+    int vieday = gammalib::com_tjd(m_gti.tstop());
+    int vietim = gammalib::com_tics(m_gti.tstop());
 
     // Write COMPTEL time keywords
     hdu->card("VISDAY", visday, "[TJD] Data validity interval start day");

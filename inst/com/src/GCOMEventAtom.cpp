@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMEventAtom.cpp - COMPTEL event atom class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -180,7 +180,7 @@ GCOMEventAtom* GCOMEventAtom::clone(void) const
 void GCOMEventAtom::time(const int& tjd, const int& tics)
 {
     // Set event time by converting from the native COMPTEL time format
-    m_time = com_time(tjd, tics);
+    m_time = gammalib::com_time(tjd, tics);
 
     // Return
     return;

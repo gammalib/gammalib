@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-19 July 2019
+22 July 2019
 
 
 1. Introduction
@@ -23,6 +23,8 @@ The following classes have been renamed:
 The following methods have been added:
 - GTime.datetime() - Datetime conversion in Python interface
 - GGti::overlap(GTime&, GTime&) - Compute overlap with time interval
+- GCOMTim::save(GFilename&, bool&) - Save TIM into FITS file
+- GCOMTim::write(GFitsBinTable&) - Write TIM into FITS binary table
 
 The following methods have been removed:
 - none
@@ -134,6 +136,7 @@ None
 
 21. COMPTEL interface
 ---------------------
+Add GCOMTim::write() and GCOMTim::save() methods for writing and saving TIM
+datasets (#2973).
+
 Correctly write model attributes in GCOMModelDRBFitting class.
-
-

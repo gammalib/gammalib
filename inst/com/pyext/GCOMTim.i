@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMTim.i - COMPTEL Good Time Intervals class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2019 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,8 +41,8 @@ public:
     GCOMTim(void);
     explicit GCOMTim(const GGti& gti);
     GCOMTim(const GCOMTim& tim);
-    GCOMTim(const GFilename& filename, const std::string& usage = "",
-                                       const std::string& mode  = "");
+    GCOMTim(const GFilename& filename, const std::string& usage = "YES",
+                                       const std::string& mode  = "NORMAL");
     virtual ~GCOMTim(void);
 
     // Implemented pure virtual base class methods
@@ -54,10 +54,12 @@ public:
     bool        contains(const GTime& time) const;
     const GGti& gti(void) const;
     void        gti(const GGti& gti);
-    void        load(const GFilename& filename, const std::string& usage = "",
-                                                const std::string& mode  = "");
-    void        read(const GFitsTable& table, const std::string& usage = "",
-                                              const std::string& mode  = "");
+    void        load(const GFilename& filename, const std::string& usage = "YES",
+                                                const std::string& mode  = "NORMAL");
+    void        save(const GFilename& filename, const bool&        clobber = false) const;
+    void        read(const GFitsTable& table, const std::string& usage = "YES",
+                                              const std::string& mode  = "NORMAL");
+    void        write(GFitsBinTable& table) const;
 };
 
 

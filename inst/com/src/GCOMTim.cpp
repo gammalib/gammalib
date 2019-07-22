@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMTim.cpp - COMPTEL Good Time Intervals class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2019 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,9 @@
 #endif
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableULongCol.hpp"
+#include "GFitsTableStringCol.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMSupport.hpp"
 
@@ -233,6 +236,37 @@ void GCOMTim::load(const GFilename&   filename,
 
 
 /***********************************************************************//**
+ * @brief Save Good Time Intervals into FITS file.
+ *
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite existing FITS file.
+ *
+ * Saves the event list into a FITS file. See the write() method for details.
+ ***************************************************************************/
+void GCOMTim::save(const GFilename& filename,
+                   const bool&      clobber) const
+{
+    // Allocate empty FITS file
+    GFits fits;
+
+    // Allocate empty FITS binary table
+    GFitsBinTable table;
+
+    // Write GTIs into binary table
+    write(table);
+
+    // Append TIM to FITS file
+    fits.append(table);
+
+    // Save FITS file
+    fits.saveto(filename.url(), clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Read COMPTEL Good Time Intervals from FITS table
  *
  * @param[in] table TIM FITS table.
@@ -262,7 +296,7 @@ void GCOMTim::read(const GFitsTable&  table,
         const GFitsTableCol* ptr_tic_end   = table["END_TIC"];
         const GFitsTableCol* ptr_usage     = table["USAGE"];
         const GFitsTableCol* ptr_mode      = table["MODE"];
- 
+
         // Convert data into GTI
         for (int i = 0; i < num; ++i) {
 
@@ -277,10 +311,10 @@ void GCOMTim::read(const GFitsTable&  table,
             }
 
             // Convert times
-            GTime tstart = com_time(ptr_tjd_start->integer(i),
-                                    ptr_tic_start->integer(i));
-            GTime tstop  = com_time(ptr_tjd_end->integer(i),
-                                    ptr_tic_end->integer(i));
+            GTime tstart = gammalib::com_time(ptr_tjd_start->integer(i),
+                                              ptr_tic_start->integer(i));
+            GTime tstop  = gammalib::com_time(ptr_tjd_end->integer(i),
+                                              ptr_tic_end->integer(i));
 
             // Append GTI
             m_gti.append(tstart, tstop);
@@ -288,6 +322,73 @@ void GCOMTim::read(const GFitsTable&  table,
         } // endfor: Looped over GTIs
 
     } // endif: there was TIM information
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write COMPTEL Good Time Intervals into FITS binary table
+ *
+ * @param[in] table TIM FITS table.
+ *
+ * Writes COMPTEL Good Time Intervals from the information in a TIM FITS
+ * binary table.
+ ***************************************************************************/
+void GCOMTim::write(GFitsBinTable& table) const
+{
+    // Extract number of GTIs
+    int size = m_gti.size();
+
+    // If there are GTIs then write them now
+    if (size > 0) {
+
+        // Allocate columns
+        GFitsTableULongCol  col_start_tjd("START_TJD", size);
+        GFitsTableULongCol  col_start_tic("START_TIC", size);
+        GFitsTableULongCol  col_end_tjd("END_TJD",     size);
+        GFitsTableULongCol  col_end_tic("END_TIC",     size);
+        GFitsTableStringCol col_usage("USAGE",         size, 8);
+        GFitsTableStringCol col_mode("MODE",           size, 8);
+        GFitsTableStringCol col_subkey("SUBKEY",       size, 8);
+        GFitsTableStringCol col_descrip("DESCRIP",     size, 64);
+
+        // Set units of columns
+        // (see http://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf)
+        col_start_tjd.unit("d");
+        col_end_tjd.unit("d");
+
+        // Fill columns
+        for (int i = 0; i <size; ++i) {
+            col_start_tjd(i) = gammalib::com_tjd(m_gti.tstart(i));
+            col_start_tic(i) = gammalib::com_tics(m_gti.tstart(i));
+            col_end_tjd(i)   = gammalib::com_tjd(m_gti.tstop(i));
+            col_end_tic(i)   = gammalib::com_tics(m_gti.tstop(i));
+            col_end_tic(i)   = gammalib::com_tics(m_gti.tstop(i));
+            col_usage(i)     = "YES";
+            col_mode(i)      = "NORMAL";
+            col_subkey(i)    = "";
+            col_descrip(i)   = "";
+        }
+
+        // Append columns to table
+        table.append(col_start_tjd);
+        table.append(col_start_tic);
+        table.append(col_end_tjd);
+        table.append(col_end_tic);
+        table.append(col_usage);
+        table.append(col_mode);
+        table.append(col_subkey);
+        table.append(col_descrip);
+
+    } // endif: there were GTIs
+
+    // Set extension name
+    table.extname("COMPTEL_TIM");
+
+    // Set some keywords
+    //TODO
 
     // Return
     return;
@@ -321,13 +422,13 @@ std::string GCOMTim::print(const GChatter& chatter) const
 
         // Append time range
         result.append("\n"+gammalib::parformat("TJD range"));
-        result.append(gammalib::str(com_tjd(m_gti.tstart())));
+        result.append(gammalib::str(gammalib::com_tjd(m_gti.tstart())));
         result.append(":");
-        result.append(gammalib::str(com_tics(m_gti.tstart())));
+        result.append(gammalib::str(gammalib::com_tics(m_gti.tstart())));
         result.append(" - ");
-        result.append(gammalib::str(com_tjd(m_gti.tstop())));
+        result.append(gammalib::str(gammalib::com_tjd(m_gti.tstop())));
         result.append(":");
-        result.append(gammalib::str(com_tics(m_gti.tstop())));
+        result.append(gammalib::str(gammalib::com_tics(m_gti.tstop())));
         result.append("\n"+gammalib::parformat("MJD range"));
         result.append(gammalib::str(m_gti.tstart().mjd()));
         result.append(" - ");
