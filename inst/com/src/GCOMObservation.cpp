@@ -656,42 +656,35 @@ const GCOMDri& GCOMObservation::drm(const GSource& source) const
         index = m_drms.size() - 1;
     }
 
-    // ... otherwise, if the spatial source model has changed then update
-    // the DRM cache
-    else {
-
-        // Check if one of the source parameters has changed
-        bool changed = (m_pars[index].size() != source.model()->size());
-        if (!changed) {
-            for (int i = 0; i < source.model()->size(); ++i) {
-                if (m_pars[index][i] != (*(source.model()))[i].value()) {
-                    changed = true;
-                    break;
-                }
-            }
-        }
-
-        // If model has changed then recompute it
-        if (changed) {
-
-            // Setup sky model for DRM computation
-            GModelSky model(*(source.model()), GModelSpectralConst());
-
-            // Compute DRM
-            const_cast<GCOMObservation*>(this)->m_drms[index].compute_drm((*this), model);
-
-            // Store new model parameters in cache
-            for (int i = 0; i < source.model()->size(); ++i) {
-                const_cast<GCOMObservation*>(this)->m_pars[index][i] =
-                    (*(source.model()))[i].value();
-            }
-
-        } // endif: source parameter(s) changed
-
-    } // endelse: spatial source model has changed
-
     // Return reference to DRM cube
     return (m_drms[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Remove response cache for model
+ *
+ * @param[in] name Model name.
+ *
+ * Remove response cache for model @p name from response cache.
+ ***************************************************************************/
+void GCOMObservation::remove_response_cache(const std::string& name)
+{
+    // Search source in DRM cache
+    int index = 0;
+    for (; index < m_drms.size(); ++index) {
+        if (name == m_drms[index].name()) {
+            break;
+        }
+    }
+
+    // If source was found then remove cache entry for source
+    if (index < m_drms.size()) {
+        m_drms.erase(m_drms.begin()+index);
+    }
+
+    // Return
+    return;
 }
 
 
@@ -802,7 +795,6 @@ void GCOMObservation::init_members(void)
     m_oads.clear();
 
     // Initialise members for response cache
-    m_pars.clear();
     m_drms.clear();
 
     // Return
@@ -843,7 +835,6 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_oads     = obs.m_oads;
 
     // Copy members for response cache
-    m_pars = obs.m_pars;
     m_drms = obs.m_drms;
 
     // Return
@@ -1070,13 +1061,6 @@ void GCOMObservation::add_drm(const GSource& source)
 
     // Push model on stack
     m_drms.push_back(drm);
-
-    // Push model parameters on stack
-    std::vector<double> pars;
-    for (int i = 0; i < source.model()->size(); ++i) {
-        pars.push_back((*(source.model()))[i].value());
-    }
-    m_pars.push_back(pars);
 
     // Return
     return;

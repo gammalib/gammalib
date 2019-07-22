@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAResponse.cpp - CTA Response class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -218,6 +218,24 @@ double GCTAResponse::irf(const GEvent&       event,
 }
 
 
+/***********************************************************************//**
+ * @brief Remove response cache for model
+ *
+ * @param[in] name Model name.
+ *
+ * Remove response cache for model @p name from response cache.
+ ***************************************************************************/
+void GCTAResponse::remove_response_cache(const std::string& name)
+{
+    // Remove model from response caches
+    m_irf_cache.remove(name);
+    m_nroi_cache.remove(name);
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -230,8 +248,10 @@ double GCTAResponse::irf(const GEvent&       event,
 void GCTAResponse::init_members(void)
 {
     // Initialize members
-    m_use_irf_cache = true;   //!< Switched on by default
+    m_use_irf_cache  = true;   //!< Switched on by default
+    m_use_nroi_cache = true;   //!< Switched on by default
     m_irf_cache.clear();
+    m_nroi_cache.clear();
 
     // Return
     return;
@@ -246,8 +266,10 @@ void GCTAResponse::init_members(void)
 void GCTAResponse::copy_members(const GCTAResponse& rsp)
 {
     // Copy members
-    m_use_irf_cache = rsp.m_use_irf_cache;
-    m_irf_cache     = rsp.m_irf_cache;
+    m_use_irf_cache  = rsp.m_use_irf_cache;
+    m_use_nroi_cache = rsp.m_use_nroi_cache;
+    m_irf_cache      = rsp.m_irf_cache;
+    m_nroi_cache     = rsp.m_nroi_cache;
 
     // Return
     return;

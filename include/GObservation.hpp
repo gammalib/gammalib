@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -111,6 +111,7 @@ public:
                                         const GEvent&    event) const;
     virtual double           npred_grad(const GModel&    model,
                                         const GModelPar& par) const;
+    virtual void             remove_response_cache(const std::string& name);
 
     // Implemented methods
     bool               has_events(void) const;

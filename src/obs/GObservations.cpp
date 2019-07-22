@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GObservations.cpp - Observation container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -875,6 +875,43 @@ int GObservations::nobserved(void) const
 
     // Return number of observed events
     return nobserved;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove response cache for all models
+ *
+ * Remove response cache for all models in the container.
+ ***************************************************************************/
+void GObservations::remove_response_cache(void)
+{
+    // Loop over all models and remove response cache for each model
+    for (int i = 0; i < m_models.size(); ++i) {
+        remove_response_cache(m_models[i]->name());
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove response cache for model
+ *
+ * @param[in] name Model name.
+ *
+ * Remove response cache for model @p name in the container.
+ ***************************************************************************/
+void GObservations::remove_response_cache(const std::string& name)
+{
+    // Loop over all observations and remove response cache for the
+    // specified source
+    for (int i = 0; i < size(); ++i) {
+        (*this)[i]->remove_response_cache(name);
+    }
+
+    // Return
+    return;
 }
 
 

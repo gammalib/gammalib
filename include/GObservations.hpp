@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.hpp - Observation container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -133,6 +133,8 @@ public:
     double              logL(void) const;
     int                 nobserved(void) const;
     double              npred(void) const;
+    void                remove_response_cache(void);
+    void                remove_response_cache(const std::string& name);
     std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Likelihood function

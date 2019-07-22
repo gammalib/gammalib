@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponse.i - CTA response abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,7 @@ public:
     virtual double irf(const GEvent&       event,
                        const GSource&      source,
                        const GObservation& obs) const;
+    virtual void   remove_response_cache(const std::string& name);
 };
 
 

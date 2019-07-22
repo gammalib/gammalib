@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.i - Observations container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,6 +70,8 @@ public:
     double         logL(void) const;
     int            nobserved(void) const;
     double         npred(void) const;
+    void           remove_response_cache(void);
+    void           remove_response_cache(const std::string& name);
 
     // Optimizer function access method
     const GObservations::likelihood& function(void) const;

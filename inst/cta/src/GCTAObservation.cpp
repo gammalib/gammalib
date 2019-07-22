@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1412,6 +1412,26 @@ void GCTAObservation::dispose_events(void)
     if (list != NULL) {
         list->dispose();
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove response cache for model
+ *
+ * @param[in] name Model name.
+ *
+ * Remove response cache for model @p name from response cache.
+ ***************************************************************************/
+void GCTAObservation::remove_response_cache(const std::string& name)
+{
+    // Build model name
+    std::string model_name  = id() + "::" + name;
+
+    // Remove response cache
+    const_cast<GCTAResponse*>(this->response())->remove_response_cache(model_name);
 
     // Return
     return;

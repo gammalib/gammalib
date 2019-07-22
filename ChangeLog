@@ -3,6 +3,7 @@
         * Version 1.7.0 released
         ========================
 
+        Implement methods to remove models from a response cache (#2973)
         Improve COMPTEL classes (#2973)
         Add GGti::overlap() method
         Correctly write model attributes in GCOMModelDRBFitting class

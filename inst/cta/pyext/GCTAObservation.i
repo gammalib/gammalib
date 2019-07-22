@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAObservation.i - CTA Observation class interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,9 @@ public:
     virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
+
+    // Implement virtual methods
+    virtual void                remove_response_cache(const std::string& name);
 
     // Other methods
     void                instrument(const std::string& instrument);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAResponse.hpp - CTA response abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -89,6 +89,7 @@ public:
     virtual double irf(const GEvent&       event,
                        const GSource&      source,
                        const GObservation& obs) const;
+    virtual void   remove_response_cache(const std::string& name);
 
 protected:
     // Protected methods
@@ -116,10 +117,14 @@ protected:
                                  const GObservation& obs) const;
 
     // Protected members
-    bool m_use_irf_cache; //!< Control usage of IRF cache
+    bool m_use_irf_cache;   //!< Control usage of irf cache
+    bool m_use_nroi_cache;  //!< Control usage of nroi cache
 
-    // Cache for irf(GEvent&, GSource&, GObservation&) computation
+    // Cache for irf(GEvent&, GSource&, GObservation&) and
+    // nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)
+    // computations
     mutable GCTAResponseCache m_irf_cache;
+    mutable GCTAResponseCache m_nroi_cache;
 };
 
 #endif /* GCTARESPONSE_HPP */

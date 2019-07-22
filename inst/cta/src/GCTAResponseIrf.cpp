@@ -2102,14 +2102,10 @@ void GCTAResponseIrf::init_members(void)
     m_apply_edisp    = false;  //!< Switched off by default
     m_lo_safe_thres  = 0.0;
     m_hi_safe_thres  = 0.0;
-    m_use_nroi_cache = true;   //!< Switched on by default
 
     // XML response filenames
     m_xml_caldb.clear();
     m_xml_rspname.clear();
-
-    // Initialise nroi cache
-    m_nroi_cache.clear();
 
     // Return
     return;
@@ -2129,14 +2125,12 @@ void GCTAResponseIrf::copy_members(const GCTAResponseIrf& rsp)
     m_apply_edisp    = rsp.m_apply_edisp;
     m_lo_safe_thres  = rsp.m_lo_safe_thres;
     m_hi_safe_thres  = rsp.m_hi_safe_thres;
-    m_use_nroi_cache = rsp.m_use_nroi_cache;
 
     // Copy response filenames
     m_xml_caldb      = rsp.m_xml_caldb;
     m_xml_rspname    = rsp.m_xml_rspname;
 
     // Copy nroi cache
-    m_nroi_cache     = rsp.m_nroi_cache;
 
     // Clone members
     m_aeff       = (rsp.m_aeff       != NULL) ? rsp.m_aeff->clone()  : NULL;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCOMObservation.hpp - COMPTEL observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -94,6 +94,9 @@ public:
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
+    // Implement virtual methods
+    virtual void                remove_response_cache(const std::string& name);
+
     // Other methods
     bool            is_unbinned(void) const;
     bool            is_binned(void) const;
@@ -159,8 +162,7 @@ protected:
     GCOMOads               m_oads;       //!< Orbit Aspect Data
 
     // Protected members for response cache
-    std::vector<std::vector<double> > m_pars; //!< Parameters for model cubes
-    std::vector<GCOMDri>              m_drms; //!< Convolved model cubes
+    std::vector<GCOMDri>   m_drms;       //!< Convolved model cubes
 };
 
 

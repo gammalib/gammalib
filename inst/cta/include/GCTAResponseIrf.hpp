@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponseIrf.hpp - CTA instrument response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -219,15 +219,10 @@ private:
     mutable bool    m_apply_edisp;    //!< Apply energy dispersion
     double          m_lo_safe_thres;  //!< Safe low energy threshold
     double          m_hi_safe_thres;  //!< Safe high energy threshold
-    bool            m_use_nroi_cache; //!< Control usage of nroi cache
 
     // XML response filename
     std::string     m_xml_caldb;      //!< Calibration database string in XML file
     std::string     m_xml_rspname;    //!< Response name in XML file
-
-    // Cache for nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)
-    // computation
-    mutable GCTAResponseCache m_nroi_cache;
 };
 
 

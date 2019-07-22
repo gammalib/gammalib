@@ -23,7 +23,13 @@ The following classes have been renamed:
 The following methods have been added:
 - GTime.datetime() - Datetime conversion in Python interface
 - GGti::overlap(GTime&, GTime&) - Compute overlap with time interval
+- GObservations::remove_response_cache() - Remove response cache for all models
+- GObservations::remove_response_cache(string&) - Remove response cache for model
+- GObservation::remove_response_cache(string&) - Remove response cache for model
+- GCTAObservation::remove_response_cache(string&) - Remove response cache for model
+- GCTAResponse::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponseCache::remove(string&) - Remove response cache for model
+- GCOMObservation::remove_response_cache(string&) - Remove response cache for model
 - GCOMTim::save(GFilename&, bool&) - Save TIM into FITS file
 - GCOMTim::write(GFitsBinTable&) - Write TIM into FITS binary table
 
@@ -77,6 +83,11 @@ None
 
 10. Observation module
 ----------------------
+Implement remove_response_cache() methods for GObservations and GObservation
+classes that serve as a hook to remove all models or one model from a response
+cache. The actual cache deallocation needs to be implemented at the level of the
+derived classes (#2973).
+
 Add GGti::overlap() method to compute the temporal overlap in seconds with
 a specified time interval.
 
@@ -132,11 +143,15 @@ None
 
 20. CTA interface
 -----------------
-None
+Implement remove_response_cache() methods for GCTAObservation and
+GCTAReponse, allowing de-allocation of models in the response cache (#2973).
 
 
 21. COMPTEL interface
 ---------------------
+Implement GCOMObservation::remove_response_cache() allowing de-allocation of
+models in the response cache (#2973).
+
 Add GCOMTim::write() and GCOMTim::save() methods for writing and saving TIM
 datasets (#2973).
 

@@ -755,6 +755,23 @@ double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
 
 
 /***********************************************************************//**
+ * @brief Response cache removal hook
+ *
+ * @param[in] name Model name.
+ *
+ * This is a response cache removal hook that is called by the
+ * GObservations::remove_response_cache() methods and that can be used to
+ * remove the model @p name from a response cache, if implemented in the
+ * derived class.
+ ***************************************************************************/
+void GObservation::remove_response_cache(const std::string& name)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set event container
  *
  * @param[in] events Event container.
