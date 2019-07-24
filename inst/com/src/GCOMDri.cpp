@@ -777,6 +777,63 @@ void GCOMDri::compute_drm(const GCOMObservation& obs,
 
 
 /***********************************************************************//**
+ * @brief Compute content in cone
+ *
+ * @param[in] dir Sky direction of cone apex.
+ * @param[in] armmin Minimum Angular Resolution Measure (deg).
+ * @param[in] armmax Maximum Angular Resolution Measure (deg).
+ * @return Content in cone.
+ *
+ * Compute the sum of the DRI bins within an event cone with apex at a given
+ * sky direction. All bins with an Angular Resolution Measure comprised
+ * between @p armmin (inclusive) and @p armmax (exclusive) will be
+ * considered. The bin centres will be used for the computation of the
+ * Angular Resolution Measure. The Angular Resolution Measure is defined as
+ * phibar - phigeo.
+ ***************************************************************************/
+double GCOMDri::cone_content(const GSkyDir& dir,
+                             const double&  armmin,
+                             const double&  armmax) const
+{
+    // Initialise content
+    double content = 0.0;
+
+    // Create Phigeo map in degrees
+    GSkyMap phigeo = m_dri.extract(0);
+    for (int i = 0; i < phigeo.npix(); ++i) {
+        phigeo(i) = dir.dist_deg(phigeo.inx2dir(i));
+    }
+
+    // Loop over phibar layers
+    for (int iphibar = 0; iphibar < this->nphibar(); ++iphibar) {
+
+        // Compute phibar
+        double phibar = this->phimin() + (iphibar+0.5) * this->phibin();
+
+        // Compute index offset
+        int offset = iphibar * phigeo.npix();
+
+        // Loop over bins in phibar layer
+        for (int i = 0; i < phigeo.npix(); ++i) {
+
+            // Compute ARM
+            double arm = phibar - phigeo(i);
+
+            // If ARM is within specified interval then add bin content
+            if (arm >= armmin && arm < armmax) {
+                content += (*this)[i + offset];
+            }
+
+        } // endfor: looped over bins in phibar layers
+
+    } // endfor: looped over phibar layers
+
+    // Return content
+    return content;
+}
+
+
+/***********************************************************************//**
  * @brief Load COMPTEL Data Space from DRI FITS file
  *
  * @param[in] filename DRI FITS file name.

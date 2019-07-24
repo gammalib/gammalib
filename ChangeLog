@@ -1,8 +1,10 @@
-2019-07-22
+2019-07-24
 
         * Version 1.7.0 released
         ========================
 
+        Add GCOMDri::cone_content() method (#2973)
+        Add GCOMObservation::drm(GModels&) method (#2973)
         Implement methods to remove models from a response cache (#2973)
         Improve COMPTEL classes (#2973)
         Add GGti::overlap() method

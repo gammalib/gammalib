@@ -32,19 +32,19 @@
 #include "GObservation.hpp"
 #include "GTime.hpp"
 #include "GFilename.hpp"
-#include "GSource.hpp"
-#include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
 #include "GCOMResponse.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMOads.hpp"
 #include "GCOMDri.hpp"
-#include "GCOMEventCube.hpp"
 #include "GCOMEventList.hpp"
+#include "GCOMEventCube.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GCaldb;
 class GResponse;
+class GSource;
+class GModels;
 class GXmlElement;
 class GFitsHDU;
 class GCOMStatus;
@@ -119,6 +119,7 @@ public:
     const GSkyMap&  drg(void) const;
     const GSkyMap&  drx(void) const;
     const GCOMDri&  drm(const GSource& source) const;
+    GCOMDri         drm(const GModels& models) const;
     const GCOMTim&  tim(void) const;
     const GCOMOads& oads(void) const;
 

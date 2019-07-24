@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCOMDri.i - COMPTEL Data Space class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,6 +74,9 @@ public:
     void               compute_drx(const GCOMObservation& obs);
     void               compute_drm(const GCOMObservation& obs,
                                    const GModel&          model);
+    double             cone_content(const GSkyDir& dir,
+                                    const double&  armmin,
+                                    const double&  armmax) const;
     void               load(const GFilename& filename);
     void               save(const GFilename& filename,
                             const bool&      clobber = false) const;

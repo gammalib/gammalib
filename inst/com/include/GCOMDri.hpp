@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.hpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -103,6 +103,9 @@ public:
     void               compute_drx(const GCOMObservation& obs);
     void               compute_drm(const GCOMObservation& obs,
                                    const GModel&          model);
+    double             cone_content(const GSkyDir& dir,
+                                    const double&  armmin,
+                                    const double&  armmax) const;
     void               load(const GFilename& filename);
     void               save(const GFilename& filename,
                             const bool&      clobber = false) const;
@@ -329,7 +332,7 @@ void GCOMDri::gti(const GGti& gti)
 /***********************************************************************//**
  * @brief Return minimum Compton scatter angle of DRI cube
  *
- * @return Minimum Compton scatter angle of DRI cube.
+ * @return Minimum Compton scatter angle of DRI cube (deg).
  ***************************************************************************/
 inline
 const double& GCOMDri::phimin(void) const
@@ -341,7 +344,7 @@ const double& GCOMDri::phimin(void) const
 /***********************************************************************//**
  * @brief Return Compton scatter angle bin of DRI cube
  *
- * @return Compton scatter angle bin of DRI cube.
+ * @return Compton scatter angle bin of DRI cube (deg).
  ***************************************************************************/
 inline
 const double& GCOMDri::phibin(void) const

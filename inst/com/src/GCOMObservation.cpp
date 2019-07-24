@@ -34,13 +34,15 @@
 #include "GMath.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
+#include "GFitsHDU.hpp"
 #include "GCaldb.hpp"
 #include "GSource.hpp"
+#include "GModels.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpectralConst.hpp"
+#include "GXmlElement.hpp"
 #include "GCOMObservation.hpp"
-#include "GCOMEventCube.hpp"
-#include "GCOMEventList.hpp"
+#include "GCOMEventBin.hpp"
 #include "GCOMStatus.hpp"
 #include "GCOMSupport.hpp"
 
@@ -54,6 +56,7 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 #define G_WRITE                        "GCOMObservation::write(GXmlElement&)"
 #define G_LOAD_DRB                    "GCOMObservation::load_drb(GFilename&)"
 #define G_LOAD_DRG                    "GCOMObservation::load_drg(GFilename&)"
+#define G_DRM                                "GCOMObservation::drm(GModels&)"
 #define G_ADD_DRM                        "GCOMObservation::add_drm(GSource&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -662,6 +665,54 @@ const GCOMDri& GCOMObservation::drm(const GSource& source) const
 
 
 /***********************************************************************//**
+ * @brief Compute DRM cube
+ *
+ * @param[in] models Model container.
+ *
+ * @exception GException::invalid_value
+ *            Observation does not contain an event cube.
+ *
+ * Computes a COMPTEL DRM cube from the information provided in a model
+ * container.
+ ***************************************************************************/
+GCOMDri GCOMObservation::drm(const GModels& models) const
+{
+    // Get pointer on COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(m_events);
+    if (cube == NULL) {
+        std::string cls = std::string(typeid(m_events).name());
+        std::string msg = "Events of type \""+cls+"\" is not a COMPTEL event "
+                          "cube. Please specify a COMPTEL event cube when "
+                          "using this method.";
+        throw GException::invalid_value(G_DRM, msg);
+    }
+
+    // Create DRM cube as copy of DRE cube
+    GCOMEventCube drm_cube = *cube;
+
+    // Loop over all cube bins
+    for (int i = 0; i < drm_cube.size(); ++i) {
+
+        // Get pointer to cube bin
+        GCOMEventBin* bin = drm_cube[i];
+
+        // Compute model value for cube bin
+        double model = models.eval(*bin, *this) * bin->size();
+
+        // Store model value in cube bin
+        bin->counts(model);
+
+    } // endfor: looped over DRM cube bins
+
+    // Get a copy of the DRM
+    GCOMDri drm = drm_cube.dre();
+
+    // Return DRM
+    return drm;
+}
+
+
+/***********************************************************************//**
  * @brief Remove response cache for model
  *
  * @param[in] name Model name.
@@ -1029,8 +1080,8 @@ void GCOMObservation::load_drx(const GFilename& drxname)
  *
  * @param[in] source Source.
  *
- * @exception GCOMObservation::add_drm
- *            No event cube specified.
+ * @exception GException::invalid_value
+ *            Observation does not contain an event cube.
  *
  * Adds a DRM cube based on the given source to the observation response
  * cache.
@@ -1044,7 +1095,7 @@ void GCOMObservation::add_drm(const GSource& source)
         std::string msg = "Events of type \""+cls+"\" is not a COMPTEL event "
                           "cube. Please specify a COMPTEL event cube when "
                           "using this method.";
-        throw GException::invalid_argument(G_ADD_DRM, msg);
+        throw GException::invalid_value(G_ADD_DRM, msg);
     }
 
     // Initialise DRM cube based on DRE cube

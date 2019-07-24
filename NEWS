@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-22 July 2019
+24 July 2019
 
 
 1. Introduction
@@ -29,9 +29,11 @@ The following methods have been added:
 - GCTAObservation::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponse::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponseCache::remove(string&) - Remove response cache for model
+- GCOMObservation::drm(GModels&) - Compute model cube
 - GCOMObservation::remove_response_cache(string&) - Remove response cache for model
 - GCOMTim::save(GFilename&, bool&) - Save TIM into FITS file
 - GCOMTim::write(GFitsBinTable&) - Write TIM into FITS binary table
+- GCOMDri::cone_content() - Get DRI content within event cone 
 
 The following methods have been removed:
 - none
@@ -149,6 +151,9 @@ GCTAReponse, allowing de-allocation of models in the response cache (#2973).
 
 21. COMPTEL interface
 ---------------------
+Add the method GCOMObservation::drm(GModels&) that computes a DRM model cube
+using the models that are in a model container (#2973).
+
 Implement GCOMObservation::remove_response_cache() allowing de-allocation of
 models in the response cache (#2973).
 
