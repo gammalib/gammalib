@@ -1194,6 +1194,59 @@ void TestGSky::test_GSkyMap(void)
     }
 	test_value(sum_smooth2, ref_smooth, "Check GAUSSIAN smoothing");
 
+    // Trim the skymap based on pixels
+    int startx = 2;
+    int stopx  = 5;
+    int starty = 2;
+    int stopy  = 5;
+    test_map   = map_src.extract(startx, stopx, starty, stopy);
+    test_value(test_map.npix(), 16, "Check trimmed map pixel count (index)");
+    test_value(test_map.nmaps(), map_src.nmaps(), "Check total maps in trimmed map (index)");
+
+    // Check the pixel values
+    total_test = 0.0;
+    total_src  = 0.0;
+    for (int inx = 0; inx < test_map.npix(); ++inx) {
+        // Update pixel for source map
+        GSkyPixel pix = test_map.inx2pix(inx);
+        pix.x(startx + pix.x());
+        pix.y(starty + pix.y());
+
+        // Sum over maps
+        for (int k = 0; k < test_map.nmaps(); ++k) {
+            total_test += test_map(inx,k);
+            total_src  += map_src(pix,k);
+        }
+    }
+    test_value(total_test, total_src, "Check Trimmed Map sum (index)");
+
+    // Create a regions map
+    GSkyRegionMap exclmap(test_map.extract(1));
+    GSkyRegions inclusions;
+    inclusions.append(exclmap);
+
+    // Trim the skymap based on the inclusion regions
+    test_map = map_src.extract(inclusions);
+    test_value(test_map.npix(), 36, "Check trimmed map pixel count (region)");
+    test_value(test_map.nmaps(), map_src.nmaps(), "Check total maps in trimmed map (region)");
+    
+    // Check the pixel values
+    total_test = 0.0;
+    total_src  = 0.0;
+    for (int inx = 0; inx < test_map.npix(); ++inx) {
+        // Update pixel for source map
+        GSkyPixel pix = test_map.inx2pix(inx);
+        pix.x(startx - 1 + pix.x());
+        pix.y(starty - 1 + pix.y());
+
+        // Sum over maps
+        for (int k = 0; k < test_map.nmaps(); ++k) {
+            total_test += test_map(inx,k);
+            total_src  += map_src(pix,k);
+        }
+    }
+    test_value(total_test, total_src, "Check Trimmed Map sum (region)");
+
     // Exit test
     return;
 }

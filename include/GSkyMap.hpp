@@ -49,6 +49,7 @@ class GMatrix;
 class GVector;
 class GSkyRegion;
 class GSkyRegionCircle;
+class GSkyRegions;
 
 
 /***********************************************************************//**
@@ -172,6 +173,9 @@ public:
     void                    projection(const GSkyProjection& proj);
     const double*           pixels(void) const;
     GSkyMap                 extract(const int& map, const int& nmaps = 1) const;
+    GSkyMap                 extract(const int& startx, const int& stopx,
+                                    const int& starty, const int& stopy) const;
+    GSkyMap                 extract(const GSkyRegions& inclusions) const;
     void                    stack_maps(void);
     void                    load(const GFilename& filename);
     void                    save(const GFilename& filename,

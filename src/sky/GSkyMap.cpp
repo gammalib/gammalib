@@ -47,6 +47,7 @@
 #include "GVOClient.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
+#include "GSkyRegions.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT_HPX                "GSkyMap::GSkyMap(std::string&, int&,"\
@@ -73,6 +74,8 @@
 #define G_SOLIDANGLE2                       "GSkyMap::solidangle(GSkyPixel&)"
 #define G_OVERLAPS                           "GSkyMap::overlaps(GSkyRegion&)"
 #define G_EXTRACT                              "GSkyMap::extract(int&, int&)"
+#define G_EXTRACT_INT              "GSkyMap::extract(int&, int&, int&, int&)"
+#define G_EXTRACT_REG                        "GSkyMap::extract(GSkyRegions&)"
 #define G_READ                                     "GSkyMap::read(GFitsHDU&)"
 #define G_SET_WCS     "GSkyMap::set_wcs(std::string&, std::string&, double&,"\
                               " double&, double&, double&, double&, double&,"\
@@ -1966,6 +1969,131 @@ GSkyMap GSkyMap::extract(const int& map, const int& nmaps) const
 
     // Return map
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract a sub-range of pixels in the map in x,y
+ *
+ * @param[in] startx    Starting bin in X (inclusive)
+ * @param[in] stopx     Last bin in X (inclusive)
+ * @param[in] starty    Starting bin in Y (inclusive)
+ * @param[in] stopy     Last bin in Y (inclusive)
+ *
+ * This method creates a new skymap consisting of all pixels in the map in the 
+ * range [startx,stopx] and [starty,stopy]. The boundary values provided are 
+ * inclusive and the actual projection is unchanged. The number of maps in the 
+ * skymap is also unchanged.
+ * 
+ * NOTE: The pixel ranges are indexed from 0, as in
+ ***************************************************************************/
+GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
+                         const int& starty, const int& stopy) const
+{
+    // Make sure this isn't a 'HealPix' map
+    if (m_proj->code() == "HPX") {
+        throw GException::wcs_invalid("G_EXTRACT_INT", m_proj->code(),
+                                      "Method not valid for HPX projection.");
+    }
+    
+    // Define the actual range of pixels
+    int first_x = (startx < 0)       ? 0         : startx;
+    int last_x  = (stopx >= m_num_x) ? m_num_x-1 : stopx;
+    int first_y = (starty < 0)       ? 0         : starty;
+    int last_y  = (stopy >= m_num_y) ? m_num_y-1 : stopy;
+    int nxpix   = last_x - first_x + 1;
+    int nypix   = last_y - first_y + 1;
+    int npixels = nxpix * nypix;    
+
+    // Create an array of values to be plotted
+    GNdarray new_pixels(nxpix, nypix, m_num_maps);
+    
+    // Get new pixel values
+    for (int i=0; i<npixels; i++) {
+        // Get the appropriate x,y pixel
+        int xpix = i % nxpix;
+        int ypix = i / nxpix;
+        // Loop over all maps
+        for (int m=0; m<m_num_maps; m++) {
+            new_pixels(xpix, ypix, m) = m_pixels(xpix+first_x, ypix+first_y, m);
+        }
+    }
+
+    // Create a copy of this map
+    GSkyMap result = *this;
+
+    // Update the projection
+    GWcs* proj = static_cast<GWcs*>(result.m_proj);
+    proj->set(proj->coordsys(),
+              proj->crval(0), proj->crval(1),
+              proj->crpix(0) - first_x,             // Offset reference pixel
+              proj->crpix(1) - first_y,             // Offset reference pixel
+              proj->cdelt(0), proj->cdelt(1));
+    
+    // Update the pixel information
+    result.m_pixels     = new_pixels;
+    result.m_num_x      = nxpix;
+    result.m_num_y      = nypix;
+    result.m_num_pixels = npixels;
+    
+    // Re-initialise computation cache
+    result.m_hascache  = false;
+    result.m_contained = false;
+    result.m_last_dir.clear();
+    result.m_interpol.clear();
+
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract the spatial portion of the maps that overlap @p inclusions
+ *
+ * @param[in] inclusions    List of GSkyRegion objects
+ *
+ * This method computes the x,y range that covers the regions in @p inclusions, 
+ * then returns that range as a new GSkyMap.
+ * 
+ * NOTE: A 1-pixel border is added to the returned map to provide better
+ * coverage in the returned map.
+ ***************************************************************************/
+GSkyMap GSkyMap::extract(const GSkyRegions& inclusions) const
+{
+    // Make sure this isn't a 'HealPix' map
+    if (m_proj->code() == "HPX") {
+        throw GException::wcs_invalid("G_EXTRACT_REG", m_proj->code(),
+                                      "Method not valid for HPX projection.");
+    }
+
+    // Preliminary variables
+    int startx = nx()+1;
+    int stopx  = 0;
+    int starty = ny()+1;
+    int stopy  = 0;
+
+    // Loop on pixels
+    for (int i=0; i<npix(); i++) {
+        
+        // Get the pixel and direction
+        GSkyPixel pixel  = inx2pix(i);
+        GSkyDir   pixdir = pix2dir(pixel);
+
+        // Check if the pixel is covered by 'inclusions'
+        if (inclusions.contains(pixdir)) {
+            // Get the x,y pixel
+            int pix_x = pixel.x();
+            int pix_y = pixel.y();
+
+            // Update x,y pixel ranges
+            startx = (pix_x < startx) ? pix_x : startx;
+            stopx  = (pix_x > stopx)  ? pix_x : stopx;
+            starty = (pix_y < starty) ? pix_y : starty;
+            stopy  = (pix_y > stopy)  ? pix_y : stopy;
+        }
+    }
+
+    // Trim the skymap with 1 pixel buffer all around.
+    return this->extract(startx-1, stopx+1, starty-1, stopy+1);
 }
 
 
