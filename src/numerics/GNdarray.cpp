@@ -788,6 +788,9 @@ void GNdarray::init_members(void)
     m_strides.clear();
     m_data.clear();
 
+    // Actually reallocate the memory of m_data
+    std::vector<double>(m_data).swap(m_data);
+
     // Return
     return;
 }
