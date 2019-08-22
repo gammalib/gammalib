@@ -1979,6 +1979,7 @@ GSkyMap GSkyMap::extract(const int& map, const int& nmaps) const
  * @param[in] stopx     Last bin in X (inclusive)
  * @param[in] starty    Starting bin in Y (inclusive)
  * @param[in] stopy     Last bin in Y (inclusive)
+ * @return Skymap that overlaps with supplied exclusions
  *
  * This method creates a new skymap consisting of all pixels in the map in the 
  * range [startx,stopx] and [starty,stopy]. The boundary values provided are 
@@ -1992,8 +1993,11 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
 {
     // Make sure this isn't a 'HealPix' map
     if (m_proj->code() == "HPX") {
-        throw GException::wcs_invalid("G_EXTRACT_INT", m_proj->code(),
+        throw GException::wcs_invalid(G_EXTRACT_INT, m_proj->code(),
                                       "Method not valid for HPX projection.");
+    } else if ((startx > stopx) || (starty > stopy)) {
+        throw GException::invalid_argument(G_EXTRACT_INT,
+                                      "Invalid x,y range provided");
     }
     
     // Define the actual range of pixels
@@ -2050,6 +2054,7 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
  * @brief Extract the spatial portion of the maps that overlap @p inclusions
  *
  * @param[in] inclusions    List of GSkyRegion objects
+ * @return Skymap that overlaps with supplied exclusions
  *
  * This method computes the x,y range that covers the regions in @p inclusions, 
  * then returns that range as a new GSkyMap.
