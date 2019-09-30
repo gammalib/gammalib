@@ -1995,11 +1995,12 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
     if (m_proj->code() == "HPX") {
         throw GException::wcs_invalid(G_EXTRACT_INT, m_proj->code(),
                                       "Method not valid for HPX projection.");
-    } else if ((startx > stopx) || (starty > stopy)) {
-        throw GException::invalid_argument(G_EXTRACT_INT,
-                                      "Invalid x,y range provided");
     }
-    
+    else if ((startx > stopx) || (starty > stopy)) {
+        throw GException::invalid_argument(G_EXTRACT_INT,
+                                           "Invalid x,y range provided");
+    }
+
     // Define the actual range of pixels
     int first_x = (startx < 0)       ? 0         : startx;
     int last_x  = (stopx >= m_num_x) ? m_num_x-1 : stopx;
@@ -2011,17 +2012,20 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
 
     // Create an array of values to be plotted
     GNdarray new_pixels(nxpix, nypix, m_num_maps);
-    
+
     // Get new pixel values
-    for (int i=0; i<npixels; i++) {
+    for (int i = 0; i < npixels; ++i) {
+
         // Get the appropriate x,y pixel
         int xpix = i % nxpix;
         int ypix = i / nxpix;
+
         // Loop over all maps
-        for (int m=0; m<m_num_maps; m++) {
+        for (int m = 0; m < m_num_maps; ++m) {
             new_pixels(xpix, ypix, m) = m_pixels(xpix+first_x, ypix+first_y, m);
         }
-    }
+
+    } // endfor: looped over pixels
 
     // Create a copy of this map
     GSkyMap result = *this;
@@ -2033,19 +2037,20 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
               proj->crpix(0) - first_x,             // Offset reference pixel
               proj->crpix(1) - first_y,             // Offset reference pixel
               proj->cdelt(0), proj->cdelt(1));
-    
+
     // Update the pixel information
     result.m_pixels     = new_pixels;
     result.m_num_x      = nxpix;
     result.m_num_y      = nypix;
     result.m_num_pixels = npixels;
-    
+
     // Re-initialise computation cache
     result.m_hascache  = false;
     result.m_contained = false;
     result.m_last_dir.clear();
     result.m_interpol.clear();
 
+    // Return map
     return result;
 }
 
@@ -2053,7 +2058,7 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
 /***********************************************************************//**
  * @brief Extract the spatial portion of the maps that overlap @p inclusions
  *
- * @param[in] inclusions    List of GSkyRegion objects
+ * @param[in] inclusions List of GSkyRegion objects
  * @return Skymap that overlaps with supplied exclusions
  *
  * This method computes the x,y range that covers the regions in @p inclusions, 
@@ -2066,7 +2071,7 @@ GSkyMap GSkyMap::extract(const GSkyRegions& inclusions) const
 {
     // Make sure this isn't a 'HealPix' map
     if (m_proj->code() == "HPX") {
-        throw GException::wcs_invalid("G_EXTRACT_REG", m_proj->code(),
+        throw GException::wcs_invalid(G_EXTRACT_REG, m_proj->code(),
                                       "Method not valid for HPX projection.");
     }
 
@@ -2077,14 +2082,15 @@ GSkyMap GSkyMap::extract(const GSkyRegions& inclusions) const
     int stopy  = 0;
 
     // Loop on pixels
-    for (int i=0; i<npix(); i++) {
-        
+    for (int i = 0; i < npix(); ++i) {
+
         // Get the pixel and direction
         GSkyPixel pixel  = inx2pix(i);
         GSkyDir   pixdir = pix2dir(pixel);
 
         // Check if the pixel is covered by 'inclusions'
         if (inclusions.contains(pixdir)) {
+
             // Get the x,y pixel
             int pix_x = pixel.x();
             int pix_y = pixel.y();
@@ -2094,11 +2100,13 @@ GSkyMap GSkyMap::extract(const GSkyRegions& inclusions) const
             stopx  = (pix_x > stopx)  ? pix_x : stopx;
             starty = (pix_y < starty) ? pix_y : starty;
             stopy  = (pix_y > stopy)  ? pix_y : stopy;
-        }
-    }
+
+        } // endif: pixel was covered by inclusions
+
+    } // endfor: looped over all pixels
 
     // Trim the skymap with 1 pixel buffer all around.
-    return this->extract(startx-1, stopx+1, starty-1, stopy+1);
+    return (this->extract(startx-1, stopx+1, starty-1, stopy+1));
 }
 
 
