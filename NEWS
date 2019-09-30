@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-24 July 2019
+30 September 2019
 
 
 1. Introduction
@@ -26,6 +26,7 @@ The following methods have been added:
 - GObservations::remove_response_cache() - Remove response cache for all models
 - GObservations::remove_response_cache(string&) - Remove response cache for model
 - GObservation::remove_response_cache(string&) - Remove response cache for model
+- GSkyMap::extract() - Extract section of sky map
 - GCTAObservation::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponse::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponseCache::remove(string&) - Remove response cache for model
@@ -105,7 +106,9 @@ None
 
 12. Sky module
 --------------
-None
+Two GSkyMap::extract() methods were added. The first method extracts a patch of
+pixels, defined by the start and stop pixel indices in X and Y direction. The second
+method extracts all patch of pixels that is defined by inclusion sky regions (#2990). 
 
 
 13. Support module

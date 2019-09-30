@@ -1,8 +1,9 @@
-2019-07-24
+2019-09-30
 
         * Version 1.7.0 released
         ========================
 
+        Add GSkyMap::extract() methods (#2990)
         Add GCOMDri::cone_content() method (#2973)
         Add GCOMObservation::drm(GModels&) method (#2973)
         Implement methods to remove models from a response cache (#2973)

@@ -23,6 +23,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`2990 <https://cta-redmine.irap.omp.eu/issues/2990>`_] -
+  Add ``GSkyMap::extract()`` methods.
 * [`2973 <https://cta-redmine.irap.omp.eu/issues/2973>`_] -
   Improve COMPTEL classes.
   Implement methods to remove models from a response cache.
