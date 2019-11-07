@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.6.2
+New Features and Important Changes in GammaLib 1.6.3
 
-15 July 2019
+7 November 2019
 
 
 1. Introduction
@@ -38,9 +38,7 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-Set the following dependency library versions for conda build:
-- cfitsio  3.430
-- readline 7.0
+None
 
 
 4. Application module
@@ -125,7 +123,9 @@ None
 
 20. CTA interface
 -----------------
-None
+The nested levels of the CTA response cache have been collapsed into a
+single level to reduce the memory requirements for the response cache
+(#2893).
 
 
 21. COMPTEL interface
