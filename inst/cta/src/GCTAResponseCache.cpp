@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseCache.cpp - CTA response cache class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,6 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-
 
 
 /*==========================================================================
@@ -162,19 +161,7 @@ int GCTAResponseCache::size(void) const
     // Compute size
     for (GCTAResponseCacheName::const_iterator it_name = m_cache.begin();
          it_name != m_cache.end(); ++it_name) {
-        for (GCTAResponseCacheRA::const_iterator it_ra =
-             it_name->second.begin();
-             it_ra != it_name->second.end(); ++it_ra) {
-            for (GCTAResponseCacheDEC::const_iterator it_dec =
-                 it_ra->second.begin();
-                 it_dec != it_ra->second.end(); ++it_dec) {
-                for (GCTAResponseCacheEreco::const_iterator it_ereco =
-                     it_dec->second.begin();
-                     it_ereco != it_dec->second.end(); ++it_ereco) {
-                    size += it_ereco->second.size();
-                }
-            }
-        }
+        size += it_name->second.size();
     }
 
     // Return size
@@ -187,24 +174,12 @@ int GCTAResponseCache::size(void) const
  *
  * @return Number of sky directions in cache
  *
- * Returns the number of sky directions in the response cache.
+ * Obsolete method, to be removed in next release.
  ***************************************************************************/
 int GCTAResponseCache::ndirs(void) const
 {
     // Initialize number of reconstructed energies
     int ndirs = 0;
-
-    // Compute number of elements
-    for (GCTAResponseCacheName::const_iterator it_name = m_cache.begin();
-         it_name != m_cache.end(); ++it_name) {
-        for (GCTAResponseCacheRA::const_iterator it_ra = it_name->second.begin();
-             it_ra != it_name->second.end(); ++it_ra) {
-            for (GCTAResponseCacheDEC::const_iterator it_dec = it_ra->second.begin();
-                 it_dec != it_ra->second.end(); ++it_dec) {
-                ndirs += it_dec->second.size();
-            }
-        }
-    }
 
     // Return number of sky directions
     return ndirs;
@@ -216,28 +191,12 @@ int GCTAResponseCache::ndirs(void) const
  *
  * @return Number of reconstructed energies in cache
  *
- * Returns the number of reconstructed energies in the response cache.
+ * Obsolete method, to be removed in next release.
  ***************************************************************************/
 int GCTAResponseCache::nerecos(void) const
 {
     // Initialize number of reconstructed energies
     int nerecos = 0;
-
-    // Compute number of elements
-    for (GCTAResponseCacheName::const_iterator it_name = m_cache.begin();
-         it_name != m_cache.end(); ++it_name) {
-        for (GCTAResponseCacheRA::const_iterator it_ra = it_name->second.begin();
-             it_ra != it_name->second.end(); ++it_ra) {
-            for (GCTAResponseCacheDEC::const_iterator it_dec = it_ra->second.begin();
-                 it_dec != it_ra->second.end(); ++it_dec) {
-                for (GCTAResponseCacheEreco::const_iterator it_ereco =
-                     it_dec->second.begin();
-                     it_ereco != it_dec->second.end(); ++it_ereco) {
-                    nerecos++;
-                }
-            }
-        }
-    }
 
     // Return number of reconstructed energies
     return nerecos;
@@ -249,28 +208,12 @@ int GCTAResponseCache::nerecos(void) const
  *
  * @return Number of true energies in cache
  *
- * Returns the number of true energies in the response cache.
+ * Obsolete method, to be removed in next release.
  ***************************************************************************/
 int GCTAResponseCache::netrues(void) const
 {
     // Initialize number of true energies
     int netrues = 0;
-
-    // Compute number of elements
-    for (GCTAResponseCacheName::const_iterator it_name = m_cache.begin();
-         it_name != m_cache.end(); ++it_name) {
-        for (GCTAResponseCacheRA::const_iterator it_ra = it_name->second.begin();
-             it_ra != it_name->second.end(); ++it_ra) {
-            for (GCTAResponseCacheDEC::const_iterator it_dec = it_ra->second.begin();
-                 it_dec != it_ra->second.end(); ++it_dec) {
-                for (GCTAResponseCacheEreco::const_iterator it_ereco =
-                     it_dec->second.begin();
-                     it_ereco != it_dec->second.end(); ++it_ereco) {
-                    netrues += it_ereco->second.size();
-                }
-            }
-        }
-    }
 
     // Return number of true energies
     return netrues;
@@ -287,17 +230,17 @@ int GCTAResponseCache::netrues(void) const
  *
  * Set cache value for a given @p name, reconstructed energy @p ereco, and
  * true energy @p etrue.
- *
- * The method will set the Right Ascension and Declination of the cached
- * value to zero.
  ***************************************************************************/
 void GCTAResponseCache::set(const std::string& name,
                             const GEnergy&     ereco,
                             const GEnergy&     etrue,
                             const double&      value)
 {
+    // Get element identifier
+    double element = encode(ereco, etrue);
+
     // Set cache value
-    m_cache[name][0.0][0.0][ereco][etrue] = value;
+    m_cache[name][element] = value;
 
     // Return
     return;
@@ -322,12 +265,11 @@ void GCTAResponseCache::set(const std::string& name,
                             const GEnergy&     etrue,
                             const double&      value)
 {
-    // Get Right Ascension and Declination of instrument direction
-    const double& ra  = dir.dir().ra_deg();
-    const double& dec = dir.dir().dec_deg();
+    // Get element identifier
+    double element = encode(dir, ereco, etrue);
 
     // Set cache value
-    m_cache[name][ra][dec][ereco][etrue] = value;
+    m_cache[name][element] = value;
 
     // Return
     return;
@@ -346,9 +288,6 @@ void GCTAResponseCache::set(const std::string& name,
  * Check if the cache contains a value for a given @p name, reconstructed
  * energy @p ereco, and true energy @p etrue.
  *
- * The method assumes that the Right Ascension and Declination of the cached
- * value is zero.
- *
  * If the @p value pointer argument is not NULL, the method will return the
  * cached value through this argument in case that the value exists.
  ***************************************************************************/
@@ -360,38 +299,22 @@ bool GCTAResponseCache::contains(const std::string& name,
     // Initialise containment flag
     bool contains = false;
 
+    // Get element identifier
+    double element = encode(ereco, etrue);
+
     // Search for name in cache
     GCTAResponseCacheName::const_iterator it_name = m_cache.find(name);
     if (it_name != m_cache.end()) {
 
-        // Search for Right Ascension in cache
-        GCTAResponseCacheRA::const_iterator it_ra = it_name->second.find(0.0);
-        if (it_ra != it_name->second.end()) {
-
-            // Search for Declination in cache
-            GCTAResponseCacheDEC::const_iterator it_dec = it_ra->second.find(0.0);
-            if (it_dec != it_ra->second.end()) {
-
-                // Search for reconstructed energy in cache
-                GCTAResponseCacheEreco::const_iterator it_ereco =
-                                        it_dec->second.find(ereco);
-                if (it_ereco != it_dec->second.end()) {
-
-                    // Search for true energy in cache
-                    GCTAResponseCacheEtrue::const_iterator it_etrue =
-                                            it_ereco->second.find(etrue);
-                    if (it_etrue != it_ereco->second.end()) {
-                        contains = true;
-                        if (value != NULL) {
-                            *value = it_etrue->second;
-                        }
-                    } // endif: true energy found
-
-                } // endif: reconstructed energy found
-
-            } // endif: Declination found
-
-        } // endif: Right Ascension found
+        // Search for element in cache
+        GCTAResponseCacheElement::const_iterator it_element =
+                                  it_name->second.find(element);
+        if (it_element != it_name->second.end()) {
+            contains = true;
+            if (value != NULL) {
+                *value = it_element->second;
+            }
+        } // endif: element found
 
     } // endif: name found
 
@@ -425,42 +348,22 @@ bool GCTAResponseCache::contains(const std::string& name,
     // Initialise containment flag
     bool contains = false;
 
-    // Get Right Ascension and Declination of instrument direction
-    const double& ra  = dir.dir().ra_deg();
-    const double& dec = dir.dir().dec_deg();
+    // Get element identifier
+    double element = encode(dir, ereco, etrue);
 
     // Search for name in cache
     GCTAResponseCacheName::const_iterator it_name = m_cache.find(name);
     if (it_name != m_cache.end()) {
 
-        // Search for Right Ascension in cache
-        GCTAResponseCacheRA::const_iterator it_ra = it_name->second.find(ra);
-        if (it_ra != it_name->second.end()) {
-
-            // Search for Declination in cache
-            GCTAResponseCacheDEC::const_iterator it_dec = it_ra->second.find(dec);
-            if (it_dec != it_ra->second.end()) {
-
-                // Search for reconstructed energy in cache
-                GCTAResponseCacheEreco::const_iterator it_ereco =
-                                        it_dec->second.find(ereco);
-                if (it_ereco != it_dec->second.end()) {
-
-                    // Search for true energy in cache
-                    GCTAResponseCacheEtrue::const_iterator it_etrue =
-                                            it_ereco->second.find(etrue);
-                    if (it_etrue != it_ereco->second.end()) {
-                        contains = true;
-                        if (value != NULL) {
-                            *value = it_etrue->second;
-                        }
-                    } // endif: true energy found
-
-                } // endif: reconstructed energy found
-
-            } // endif: Declination found
-
-        } // endif: Right Ascension found
+        // Search for element in cache
+        GCTAResponseCacheElement::const_iterator it_element =
+                                  it_name->second.find(element);
+        if (it_element != it_name->second.end()) {
+            contains = true;
+            if (value != NULL) {
+                *value = it_element->second;
+            }
+        } // endif: element found
 
     } // endif: name found
 
@@ -510,33 +413,12 @@ std::string GCTAResponseCache::print(const GChatter& chatter) const
             // Append name
             result.append("\n"+gammalib::parformat("Name")+it_name->first);
 
-            // Compute number of sky directions, reconstructed and true energies
-            int ndir   = 0;
-            int nereco = 0;
-            int netrue = 0;
-            for (GCTAResponseCacheRA::const_iterator it_ra =
-                 it_name->second.begin();
-                 it_ra != it_name->second.end(); ++it_ra) {
-                for (GCTAResponseCacheDEC::const_iterator it_dec =
-                     it_ra->second.begin();
-                     it_dec != it_ra->second.end(); ++it_dec) {
-                    ndir++;
-                    for (GCTAResponseCacheEreco::const_iterator it_ereco =
-                         it_dec->second.begin();
-                         it_ereco != it_dec->second.end(); ++it_ereco) {
-                        nereco++;
-                        netrue += it_ereco->second.size();
-                    }
-                }
-            }
+            // Compute number of elements
+            int nelement = it_name->second.size();
 
-            // Append number of reconstructed and true energies
-            result.append("\n"+gammalib::parformat("Instrument directions"));
-            result.append(gammalib::str(ndir));
-            result.append("\n"+gammalib::parformat("Reconstructed energies"));
-            result.append(gammalib::str(nereco));
-            result.append("\n"+gammalib::parformat("True energies"));
-            result.append(gammalib::str(netrue));
+            // Append number of elements
+            result.append("\n"+gammalib::parformat("Elements"));
+            result.append(gammalib::str(nelement));
 
         } // endfor: looped over names
 
@@ -560,7 +442,7 @@ void GCTAResponseCache::init_members(void)
 {
     // Initialise members
     m_cache.clear();
-    
+
     // Return
     return;
 }
@@ -588,4 +470,72 @@ void GCTAResponseCache::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Encode reconstructued and true energy
+ *
+ * @param[in] ereco Reconstructed energy.
+ * @param[in] etrue True energy.
+ * @return Encoded reconstructued and true energy
+ *
+ * Encodes the reconstructued and true energy in a single double precision
+ * value. The encoding is done using the following formula:
+ *
+ * \f[
+ *    {\\ encode} = E_{\rm reco} \times 10^2 + E_{\rm true}
+ * \f]
+ *
+ * where
+ * - \f$E_{\rm reco}\f$ is the reconstructued energy in TeV, and
+ * - \f$E_{\rm true}\f$ is the true energy in TeV.
+ ***************************************************************************/
+double GCTAResponseCache::encode(const GEnergy& ereco,
+                                 const GEnergy& etrue) const
+{
+    // Construct encoded instrument direction and reconstructued energy
+    double encoded = ereco.TeV() * 1.0e2 + etrue.TeV();
+
+    // Return encoded value
+    return encoded;
+}
+
+
+/***********************************************************************//**
+ * @brief Encode instrument direction, reconstructued and true energy
+ *
+ * @param[in] dir Instrument direction.
+ * @param[in] ereco Reconstructed energy.
+ * @param[in] etrue True energy.
+ * @return Encoded instrument direction, reconstructued and true energy
+ *
+ * Encodes the instrument direction, reconstructued and true energy in a
+ * single double precision value. The encoding is done using the following
+ * formula:
+ *
+ * \f[
+ *    {\\ encode} = \alpha \times 10^8 + \delta \times 10^5 +
+ *                  E_{\rm reco} \times 10^2 + E_{\rm true}
+ * \f]
+ *
+ * where
+ * - \f$\alpha\f$ is the Right Ascension of the instrument direction in
+ *   degrees,
+ * - \f$\delta\f$ is the Declination of the instrument direction in degrees,
+ * - \f$E_{\rm reco}\f$ is the reconstructued energy in TeV, and
+ * - \f$E_{\rm true}\f$ is the true energy in TeV.
+ ***************************************************************************/
+double GCTAResponseCache::encode(const GCTAInstDir& dir,
+                                 const GEnergy&     ereco,
+                                 const GEnergy&     etrue) const
+{
+    // Construct encoded instrument direction and reconstructued energy
+    double encoded = dir.dir().ra_deg()  * 1.0e8 +
+                     dir.dir().dec_deg() * 1.0e5 +
+                     ereco.TeV()         * 1.0e2 +
+                     etrue.TeV();
+
+    // Return encoded value
+    return encoded;
 }

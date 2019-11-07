@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseCache.hpp - CTA response cache class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,11 +39,8 @@ class GCTAInstDir;
 /* __ Constants __________________________________________________________ */
 
 /* __ Typedefs ___________________________________________________________ */
-typedef std::map<GEnergy,double>                  GCTAResponseCacheEtrue;
-typedef std::map<GEnergy,GCTAResponseCacheEtrue>  GCTAResponseCacheEreco;
-typedef std::map<double,GCTAResponseCacheEreco>   GCTAResponseCacheDEC;
-typedef std::map<double,GCTAResponseCacheDEC>     GCTAResponseCacheRA;
-typedef std::map<std::string,GCTAResponseCacheRA> GCTAResponseCacheName;
+typedef std::map<double,double>                        GCTAResponseCacheElement;
+typedef std::map<std::string,GCTAResponseCacheElement> GCTAResponseCacheName;
 
 
 /***********************************************************************//**
@@ -51,7 +48,9 @@ typedef std::map<std::string,GCTAResponseCacheRA> GCTAResponseCacheName;
  *
  * @brief CTA response cache class
  *
- * @todo Add class description.
+ * The class implements a cache for the Instrument Response Function values
+ * so that the values do not need to be recomputed each time but can be
+ * fetched from the cache.
  ***************************************************************************/
 class GCTAResponseCache : public GBase {
 
@@ -96,9 +95,14 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCTAResponseCache& cache);
-    void free_members(void);
+    void   init_members(void);
+    void   copy_members(const GCTAResponseCache& cache);
+    void   free_members(void);
+    double encode(const GEnergy&     ereco,
+                  const GEnergy&     etrue) const;
+    double encode(const GCTAInstDir& dir,
+                  const GEnergy&     ereco,
+                  const GEnergy&     etrue) const;
 
     // Protected members
     GCTAResponseCacheName m_cache;
