@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-* Version: 1.6.2 (15 July 2019)
+* Version: 1.6.3 (15 July 2019)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
 
@@ -183,7 +183,7 @@ If everything works successfully you should see
 or
 
     ============================================================================
-    Testsuite summary for gammalib 1.6.2
+    Testsuite summary for gammalib 1.6.3
     ============================================================================
     # TOTAL: 21
     # PASS:  21
