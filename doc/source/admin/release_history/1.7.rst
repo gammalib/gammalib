@@ -17,6 +17,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`3012 <https://cta-redmine.irap.omp.eu/issues/3012>`_] -
+  Exclude upper edge boundary in ``GSkyMap::contains()`` method.
 * Correctly write model attributes in ``GCOMModelDRBFitting`` class.
 
 

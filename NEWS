@@ -115,6 +115,12 @@ None
 
 12. Sky module
 --------------
+Exclude the upper sky map boundary in GSkyMap::contains() method. Originally the
+boundary was excluded, but this was changed in commit 0ecb6a07 when the
+GSkyMap::flux() method was added since the flux method evaluates intensities at
+the upper pixel boundaries. Now the GSkyMap::flux() method evaluates intensities
+just below the upper pixel boundaries (#3012).
+
 Two GSkyMap::extract() methods were added. The first method extracts a patch of
 pixels, defined by the start and stop pixel indices in X and Y direction. The second
 method extracts all patch of pixels that is defined by inclusion sky regions (#2990). 

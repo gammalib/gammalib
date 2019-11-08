@@ -1567,14 +1567,18 @@ double GSkyMap::flux(const GSkyPixel& pixel, const int& map) const
         // Get centre
         GSkyDir centre = pix2dir(pixel);
 
+        // Set upper pixel edge just beyond the upper boundary since the
+        // upper boundary is excluded
+        const double up = 0.4999999;
+
         // Get boundaries
         GSkyDir boundary1 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5));
         GSkyDir boundary2 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5));
-        GSkyDir boundary3 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()-0.5));
-        GSkyDir boundary4 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()));
-        GSkyDir boundary5 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5));
-        GSkyDir boundary6 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5));
-        GSkyDir boundary7 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5));
+        GSkyDir boundary3 = pix2dir(GSkyPixel(pixel.x()+up,  pixel.y()-0.5));
+        GSkyDir boundary4 = pix2dir(GSkyPixel(pixel.x()+up,  pixel.y()));
+        GSkyDir boundary5 = pix2dir(GSkyPixel(pixel.x()+up,  pixel.y()+up));
+        GSkyDir boundary6 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()+up));
+        GSkyDir boundary7 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+up));
         GSkyDir boundary8 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()));
 
         // Compute intensities
@@ -1789,7 +1793,15 @@ bool GSkyMap::contains(const GSkyDir& dir) const
  * @return Trus if pixels is within map, false otherwise.
  *
  * Checks whether the specified sky map @p pixel falls within the skymap
- * or not.
+ * or not. A pixel is considered to fall in the sky may if the value is
+ * contained in the interval
+ *
+ * \f[
+ *    [-0.5, n-0.5[
+ * \f]
+ *
+ * where \f$n\f$ is the number of sky map pixels. Note that the upper bound
+ * is excluded from the interval.
  ***************************************************************************/
 bool GSkyMap::contains(const GSkyPixel& pixel) const
 {
@@ -1799,7 +1811,7 @@ bool GSkyMap::contains(const GSkyPixel& pixel) const
     // Test 1D pixels
     if (pixel.is_1D()) {
         if (pixel.index() >= -0.5 &&
-            pixel.index() <= double(m_num_pixels)-0.5) {
+            pixel.index() <  double(m_num_pixels)-0.5) {
             inmap = true;
         }
     }
@@ -1808,8 +1820,8 @@ bool GSkyMap::contains(const GSkyPixel& pixel) const
     else if (pixel.is_2D()) {
 
         // If pixel is in range then set containment flag to true
-        if ((pixel.x() >= -0.5 && pixel.x() <= double(m_num_x)-0.5) &&
-            (pixel.y() >= -0.5 && pixel.y() <= double(m_num_y)-0.5)) {
+        if ((pixel.x() >= -0.5 && pixel.x() < double(m_num_x)-0.5) &&
+            (pixel.y() >= -0.5 && pixel.y() < double(m_num_y)-0.5)) {
             inmap = true;
         }
 

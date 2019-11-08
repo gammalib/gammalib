@@ -4,6 +4,7 @@
         ========================
 
         Add GObservations::npred() methods (#3062)
+        Exclude upper edge boundary in GSkyMap::contains() method (#3012)
         Add GSkyMap::extract() methods (#2990)
         Add GCOMDri::cone_content() method (#2973)
         Add GCOMObservation::drm(GModels&) method (#2973)
