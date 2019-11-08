@@ -170,57 +170,6 @@ int GCTAResponseCache::size(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of sky directions in cache
- *
- * @return Number of sky directions in cache
- *
- * Obsolete method, to be removed in next release.
- ***************************************************************************/
-int GCTAResponseCache::ndirs(void) const
-{
-    // Initialize number of reconstructed energies
-    int ndirs = 0;
-
-    // Return number of sky directions
-    return ndirs;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of reconstructed energies in cache
- *
- * @return Number of reconstructed energies in cache
- *
- * Obsolete method, to be removed in next release.
- ***************************************************************************/
-int GCTAResponseCache::nerecos(void) const
-{
-    // Initialize number of reconstructed energies
-    int nerecos = 0;
-
-    // Return number of reconstructed energies
-    return nerecos;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of true energies in cache
- *
- * @return Number of true energies in cache
- *
- * Obsolete method, to be removed in next release.
- ***************************************************************************/
-int GCTAResponseCache::netrues(void) const
-{
-    // Initialize number of true energies
-    int netrues = 0;
-
-    // Return number of true energies
-    return netrues;
-}
-
-
-/***********************************************************************//**
  * @brief Set cache value
  *
  * @param[in] name Cache name.

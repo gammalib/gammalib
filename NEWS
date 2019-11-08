@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-30 September 2019
+8 November 2019
 
 
 1. Introduction
@@ -15,7 +15,9 @@ The following classes have been added:
 - none
 
 The following classes have been removed:
-- none
+- GCTAResponseCache::ndirs()
+- GCTAResponseCache::nerecos()
+- GCTAResponseCache::netrues()
 
 The following classes have been renamed:
 - none
@@ -148,6 +150,9 @@ None
 
 20. CTA interface
 -----------------
+Remove obsolete ndirs(), nerecos() and netrues() methods for GCTAResponseCache
+class (#2893).
+
 Implement remove_response_cache() methods for GCTAObservation and
 GCTAReponse, allowing de-allocation of models in the response cache (#2973).
 

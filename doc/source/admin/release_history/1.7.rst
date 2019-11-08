@@ -39,7 +39,8 @@ New features
 ------------
 
 
-
 Clean up
 --------
 
+* [`2893 <https://cta-redmine.irap.omp.eu/issues/2893>`_] -
+  Remove ``GCTAResponseCache::ndirs()``, ``GCTAResponseCache::nerecos()`` and ``GCTAResponseCache::netrues()`` methods.

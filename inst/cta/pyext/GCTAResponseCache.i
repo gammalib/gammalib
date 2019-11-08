@@ -60,9 +60,6 @@ public:
     std::string        classname(void) const;
     int                size(void) const;
     bool               is_empty(void) const;
-    int                ndirs(void) const;
-    int                nerecos(void) const;
-    int                netrues(void) const;
     void               set(const std::string& name,
                            const GEnergy&     ereco,
                            const GEnergy&     etrue,

@@ -1,4 +1,4 @@
-2019-09-30
+2019-11-08
 
         * Version 1.7.0 released
         ========================
@@ -11,6 +11,7 @@
         Add GGti::overlap() method
         Correctly write model attributes in GCOMModelDRBFitting class
         Add GTime.datetime() method and add optional precision to GTime.utc() (#2909)
+        Remove obsolete methods from GCTAResponseCache class (#2893)
 
 
 2019-07-15
