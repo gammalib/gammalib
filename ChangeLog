@@ -15,6 +15,14 @@
         Remove obsolete methods from GCTAResponseCache class (#2893)
 
 
+2019-11-07
+
+        * Bug fix version 1.6.3 released
+        ================================
+
+        Remove nested levels from CTA response cache to reduce memory requirements (#2893)
+
+
 2019-07-15
 
         * Bug fix version 1.6.2 released

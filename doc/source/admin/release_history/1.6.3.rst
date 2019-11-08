@@ -1,0 +1,14 @@
+.. _1.6.3:
+
+GammaLib 1.6.3 release (7 November 2019)
+========================================
+
+Overview
+--------
+
+GammaLib 1.6.3 is a bug fix release for GammaLib release 1.6.
+
+The following bugs were fixed:
+
+* [`2893 <https://cta-redmine.irap.omp.eu/issues/2893>`_] -
+  Remove nested levels from CTA response cache to reduce memory requirements
