@@ -1,8 +1,9 @@
-2019-09-30
+2019-11-08
 
         * Version 1.7.0 released
         ========================
 
+        Add GObservations::npred() methods (#3062)
         Add GSkyMap::extract() methods (#2990)
         Add GCOMDri::cone_content() method (#2973)
         Add GCOMObservation::drm(GModels&) method (#2973)

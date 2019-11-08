@@ -1586,6 +1586,11 @@ void TestGObservation::test_observations_optimizer(void)
     // Check if value is correct
     test_value(result.factor_value(), RATE, result.factor_error()*3.0);
 
+    // Check results
+    test_value(obs.nobserved(),   140415,   "Check number of observed events");
+    test_value(obs.npred(),       140415.0, "Check number of predicted events");
+    test_value(obs.npred("Test"), 140415.0, "Check number of predicted events for model");
+
     // Save covariance matrix as FITS file
     obs.function().save("test_observations_optimizer.fits");
 

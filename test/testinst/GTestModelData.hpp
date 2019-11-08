@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GTestModelData.hpp - Test data model class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2019 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -224,9 +224,11 @@ public:
 protected:
     // Protected methods
     void init_members(void) {
+        m_name     = "Test";
         m_modelTps = new GModelTemporalConst();
     }
     void copy_members(const GTestModelData& model){
+        m_name     = model.m_name;
         m_modelTps = model.temporal()->clone();
     }
     void free_members(void) {

@@ -44,6 +44,7 @@
 #define G_REMOVE                                "GObservations::remove(int&)"
 #define G_EXTEND                      "GObservations::extend(GObservations&)"
 #define G_READ                                   "GObservations::read(GXml&)"
+#define G_NPRED            "GObservations::npred(std::string&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -875,6 +876,87 @@ int GObservations::nobserved(void) const
 
     // Return number of observed events
     return nobserved;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of predicted events for model with a given @p name
+ *
+ * @param[in] name Model name.
+ * @param[in] instrument Instrument name.
+ * @return Total number of predicted events for model.
+ *
+ * @exception GException::invalid_argument
+ *            Model with @p name not found.
+ *
+ * Returns the total number of predicted events for the model with a given
+ * @p name.
+ ***************************************************************************/
+double GObservations::npred(const std::string& name,
+                            const std::string& instrument) const
+{
+    // Initialise number of predicted events
+    double npred = 0.0;
+
+    // Throw an exception if model does not exist
+    if (!m_models.contains(name)) {
+        std::string msg = "Model \""+name+"\" not found in observation "
+                          "container. Please specify a valid model name.";
+        throw GException::invalid_argument(G_NPRED, msg);
+    }
+
+    // Get pointer to model
+    const GModel* model = m_models[name];
+
+    // Continue only if pointer is valid
+    if (model != NULL) {
+        npred = this->npred(*model, instrument);
+    }
+
+    // Return number of predicted events
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of predicted events for a given model
+ *
+ * @param[in] model Model.
+ * @param[in] instrument Instrument name.
+ * @return Total number of predicted events for model.
+ *
+ * @exception GException::invalid_argument
+ *            Model with @p name not found.
+ *
+ * Returns the total number of predicted events for the model with a given
+ * @p name.
+ ***************************************************************************/
+double GObservations::npred(const GModel&      model,
+                            const std::string& instrument) const
+{
+    // Initialise number of predicted events
+    double npred = 0.0;
+
+    // Compute number of predicted events
+    for (int i = 0; i < size(); ++i) {
+
+        // Skip observation if it does not correspond to the specified
+        // instrument
+        if (!instrument.empty()) {
+            if ((*this)[i]->instrument() != instrument) {
+                continue;
+            }
+        }
+
+        // Add only relevant events
+        if (model.is_valid(instrument, "")) {
+            npred += (*this)[i]->npred(model);
+        }
+
+    } // endfor: looped over observations
+
+    // Return number of predicted events
+    return npred;
 }
 
 

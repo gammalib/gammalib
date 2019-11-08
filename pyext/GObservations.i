@@ -70,6 +70,10 @@ public:
     double         logL(void) const;
     int            nobserved(void) const;
     double         npred(void) const;
+    double         npred(const std::string& name,
+                         const std::string& instrument = "") const;
+    double         npred(const GModel&      model,
+                         const std::string& instrument = "") const;
     void           remove_response_cache(void);
     void           remove_response_cache(const std::string& name);
 
