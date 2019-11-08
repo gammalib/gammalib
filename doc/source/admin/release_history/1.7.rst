@@ -23,6 +23,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3062 <https://cta-redmine.irap.omp.eu/issues/3062>`_] -
+  Add ``GObservations::npred()`` methods.
 * [`2990 <https://cta-redmine.irap.omp.eu/issues/2990>`_] -
   Add ``GSkyMap::extract()`` methods.
 * [`2973 <https://cta-redmine.irap.omp.eu/issues/2973>`_] -

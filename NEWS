@@ -25,6 +25,8 @@ The following classes have been renamed:
 The following methods have been added:
 - GTime.datetime() - Datetime conversion in Python interface
 - GGti::overlap(GTime&, GTime&) - Compute overlap with time interval
+- GObservations::npred(string&, string&) - Compute predicted number of events
+- GObservations::npred(GModel&, string&) - Compute predicted number of events 
 - GObservations::remove_response_cache() - Remove response cache for all models
 - GObservations::remove_response_cache(string&) - Remove response cache for model
 - GObservation::remove_response_cache(string&) - Remove response cache for model
@@ -88,6 +90,11 @@ None
 
 10. Observation module
 ----------------------
+Add GObservations::npred() methods that compute the number of predicted events
+for a model with a given name or for a given reference to a model. Optionally
+an instrument string can be passed so that the number of predicted events are
+only computed for that instrument (#3062).
+
 Implement remove_response_cache() methods for GObservations and GObservation
 classes that serve as a hook to remove all models or one model from a response
 cache. The actual cache deallocation needs to be implemented at the level of the
