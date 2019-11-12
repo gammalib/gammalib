@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.cpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GSkyDir.hpp"
+#include "GTime.hpp"
 #include "GMatrix.hpp"
 #include "GVector.hpp"
 
@@ -347,6 +348,145 @@ void GSkyDir::rotate_deg(const double& phi, const double& theta)
 
     // Convert vector into sky position
     celvector(dir);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Precess sky direction
+ *
+ * @param[in] from_epoch Epoch of the current coordinate.
+ * @param[in] to_epoch Epoch of the returned precessed coordinate.
+ *
+ * Precesses the sky direction from one epoch to another.
+ *
+ * The method is adapted from a set of fortran subroutines based on
+ * (a) pages 30-34 of the Explanatory Supplement to the AE,
+ * (b) Lieske, et al. (1977) A&A 58, 1-16, and
+ * (c) Lieske (1979) A&A 73, 282-284.
+ ***************************************************************************/
+void GSkyDir::precess(const double& from_epoch, const double& to_epoch)
+{
+    // Set constants
+    const double arcsec = gammalib::pi / 180.0 / 3600.0;
+
+    // Continue only if epochs differ
+    if (from_epoch != to_epoch) {
+
+        // t0, t below correspond to Lieske's big T and little T
+        double t0  = (from_epoch - 2000.0)     / 100.0;
+        double t   = (to_epoch   - from_epoch) / 100.0;
+        double t02 = t0*t0;
+        double t2  = t*t;
+        double t3  = t2*t;
+
+        // a,b,c below correspond to Lieske's zeta_A, z_A and theta_A
+        double a = ((2306.2181 + 1.39656  * t0 - 0.000139 * t02) * t +
+                    (0.30188   - 0.000344 * t0) * t2 + 0.017998 * t3) * arcsec;
+        double b = ((2306.2181 + 1.39656  * t0 - 0.000139 * t02) * t +
+                    (1.09468   + 0.000066 * t0) * t2 + 0.018203 * t3) * arcsec;
+        double c = ((2004.3109 - 0.85330  * t0 - 0.000217 * t02) * t +
+                    (-0.42665  - 0.000217 * t0) * t2 - 0.041833 * t3) * arcsec;
+
+        // Compute sines and cosines
+        double sina = std::sin(a);
+        double cosa = std::cos(a);
+        double sinb = std::sin(b);
+        double cosb = std::cos(b);
+        double sinc = std::sin(c);
+        double cosc = std::cos(c);
+
+        // Setup precession rotation matrix
+        double xx =  cosa*cosc*cosb - sina*sinb;
+        double yx = -sina*cosc*cosb - cosa*sinb;
+        double zx = -sinc*cosb;
+        double xy =  cosa*cosc*sinb + sina*cosb;
+        double yy = -sina*cosc*sinb + cosa*cosb;
+        double zy = -sinc*sinb;
+        double xz =  cosa*sinc;
+        double yz = -sina*sinc;
+        double zz =  cosc;
+
+        // Get vector of sky position
+        GVector vector = celvector();
+
+        // Perform the rotation:
+        double x2 = xx*vector[0] + yx*vector[1] + zx*vector[2];
+        double y2 = xy*vector[0] + yy*vector[1] + zy*vector[2];
+        double z2 = xz*vector[0] + yz*vector[1] + zz*vector[2];
+
+        // Setup rotated vector
+        GVector rotated_vector(x2, y2, z2);
+
+        // Transform vector to sky direction
+        celvector(rotated_vector);
+
+    } // endif: epochs differed
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set sky direction to direction of Sun
+ *
+ * @param[in] time Time.
+ * @param[in] epoch Julian epoch.
+ *
+ * Sets the sky direction to the direction of the Sun at a given @p time.
+ *
+ * The equations were taken from the Astronomical Almanac. They calculate the
+ * apparent coordinates of the Sun to a precision of about 0.01 degrees
+ * (36 arcsec), for dates between 1950 and 2050.
+ *
+ * See https://en.wikipedia.org/wiki/Position_of_the_Sun
+ ***************************************************************************/
+void GSkyDir::sun(const GTime& time, const double& epoch)
+{
+    // Compute number of days since Greenwich noon, Terrestrial Time, on
+    // 1 January 2000
+    double n = time.jd() - 2451545.0;
+
+    // Compute obliquity of the ecliptic in radians
+    double eps_rad = (23.439 - 0.0000004 * n) * gammalib::deg2rad;
+
+    // Compute mean longitude of the Sun in degrees, corrected for the
+    // aberration of light. Put the mean longitude in the interval [0,360[
+    double mean_longitude = 280.460 + 0.9856474 * n;
+    while (mean_longitude < 0.0) {
+        mean_longitude += 360.0;
+    }
+    while (mean_longitude >= 360.0) {
+        mean_longitude -= 360.0;
+    }
+    
+    // Compute the mean anomaly of the Sun in radians
+    double mean_anomaly = (357.528 + 0.9856003 * n) * gammalib::deg2rad;
+
+    // Compute the ecliptic longitude of the Sun in degrees
+    double ecliptic_longitude = mean_longitude +
+                                1.915 * std::sin(mean_anomaly) +
+                                0.020 * std::sin(2.0*mean_anomaly);
+
+    // Compute sine and cosine
+    double ecliptic_longitude_rad = ecliptic_longitude * gammalib::deg2rad;
+    double sin_ecliptic_longitude = std::sin(ecliptic_longitude_rad);
+    double cos_ecliptic_longitude = std::cos(ecliptic_longitude_rad);
+
+    // Compute Right Ascension and Declination of the Sun in degrees
+    double ra  = std::atan2(std::cos(eps_rad) * sin_ecliptic_longitude,
+                            cos_ecliptic_longitude) * gammalib::rad2deg;
+    double dec = std::asin(std::sin(eps_rad) * sin_ecliptic_longitude) *
+                           gammalib::rad2deg;
+
+    // Set position
+    radec_deg(ra, dec);
+
+    // Precess sky position to requested epoch
+    precess(time.julian_epoch(), epoch);
 
     // Return
     return;

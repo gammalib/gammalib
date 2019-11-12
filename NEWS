@@ -31,6 +31,8 @@ The following methods have been added:
 - GObservations::remove_response_cache() - Remove response cache for all models
 - GObservations::remove_response_cache(string&) - Remove response cache for model
 - GObservation::remove_response_cache(string&) - Remove response cache for model
+- GSkyDir::precess() - Precess sky position to epoch
+- GSkyDir::sun() - Get sky position of Sun
 - GSkyMap::extract() - Extract section of sky map
 - GCTAObservation::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponse::remove_response_cache(string&) - Remove response cache for model
@@ -128,6 +130,11 @@ just below the upper pixel boundaries (#3012).
 Two GSkyMap::extract() methods were added. The first method extracts a patch of
 pixels, defined by the start and stop pixel indices in X and Y direction. The second
 method extracts all patch of pixels that is defined by inclusion sky regions (#2990). 
+
+A GSkyDir::sun() method was added that sets the sky direction to the position of
+the Sun for a given date and a specific epoch. To support the method, a
+GSkyDir::precess() method was added that allows precessing a sky direction to
+a specific epoch (#1854).
 
 
 13. Support module

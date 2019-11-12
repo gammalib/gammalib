@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.hpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2019 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,6 +42,7 @@ public:
     virtual TestGSky*   clone(void) const;
     virtual std::string classname(void) const { return "TestGSky"; }
     void                test_GWcs(void);
+    void                test_GSkyDir(void);
     void                test_GSkyPixel(void);
     void                test_GSkyMap_healpix_construct(void);
     void                test_GSkyMap_healpix_io(void);

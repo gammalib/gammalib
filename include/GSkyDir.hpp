@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.hpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,9 @@
 #include "GBase.hpp"
 #include "GVector.hpp"
 #include "GMath.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GTime;
 
 /* __ Compile options ____________________________________________________ */
 #define G_SINCOS_CACHE
@@ -64,7 +67,7 @@ public:
     virtual ~GSkyDir(void);
 
     // Operators
-    GSkyDir& operator= (const GSkyDir& dir);
+    GSkyDir& operator=(const GSkyDir& dir);
 
     // Methods
     void          clear(void);
@@ -76,6 +79,8 @@ public:
     void          lb_deg(const double& l, const double& b);
     void          celvector(const GVector& vector);
     void          rotate_deg(const double& phi, const double& theta);
+    void          precess(const double& from_epoch, const double& to_epoch);
+    void          sun(const GTime& time, const double& epoch = 2000.0);
     const double& l(void) const;
     const double& b(void) const;
     const double& ra(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,8 @@ void TestGSky::set(void){
     // Append tests
     append(static_cast<pfunction>(&TestGSky::test_GWcs),
            "Test GWcs");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyDir),
+           "Test GSkyDir");
     append(static_cast<pfunction>(&TestGSky::test_GSkyPixel),
            "Test GSkyPixel");
     append(static_cast<pfunction>(&TestGSky::test_GSkyMap_healpix_construct),
@@ -291,6 +293,39 @@ double TestGSky::wcs_copy(GWcs*   wcs,
     // Return
     return ((dist_max > angle_max) ? dist_max : angle_max);
 }
+
+
+/***************************************************************************
+ * @brief Test GSkyDir class
+ ***************************************************************************/
+void TestGSky::test_GSkyDir(void)
+{
+    // Test void constructor
+    GSkyDir dir1;
+    test_value(dir1.ra_deg(),  0.0, "Right Ascension of empty sky direction");
+    test_value(dir1.dec_deg(), 0.0, "Declination of empty sky direction");
+    test_value(dir1.l_deg(),   0.0, "Longitude of empty sky direction");
+    test_value(dir1.b_deg(),   0.0, "Latitude of empty sky direction");
+
+    // Test Crab sky direction
+    GSkyDir dir2;
+    dir2.radec_deg(83.633083, 22.0145);
+    test_value(dir2.ra_deg(),  83.633083, "Right Ascension of Crab");
+    test_value(dir2.dec_deg(), 22.0145,   "Declination of Crab");
+    test_value(dir2.l_deg(),   184.55745, "Longitude of Crab");
+    test_value(dir2.b_deg(),    -5.78436, "Latitude of Crab");
+
+    // Test precess method
+    dir2.precess(2000.0, 1950.0);
+    test_value(dir2.ra_deg(),  82.88086799, "Right Ascension of Crab (epoch 1950)");
+    test_value(dir2.dec_deg(), 21.98181049, "Declination of Crab (epoch 1950)");
+    dir2.precess(1950.0, 2000.0);
+    test_value(dir2.ra_deg(),  83.633083, "Right Ascension of Crab");
+    test_value(dir2.dec_deg(), 22.0145,   "Declination of Crab");
+
+    // Return
+    return;
+}          
 
 
 /***********************************************************************//**
@@ -1594,7 +1629,8 @@ void TestGSky::test_GSkyRegionMap_logic(void)
 /***************************************************************************
  * @brief Test GHorizDir class
  ***************************************************************************/
-void TestGSky::test_GHorizDir(void){
+void TestGSky::test_GHorizDir(void)
+{
 
     // Empty horizontal direction
     GHorizDir nulldir;
