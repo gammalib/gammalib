@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-8 November 2019
+12 November 2019
 
 
 1. Introduction
@@ -24,6 +24,7 @@ The following classes have been renamed:
 
 The following methods have been added:
 - GTime.datetime() - Datetime conversion in Python interface
+- GTime.julian_epoch() - Returns Julian epoch for time
 - GGti::overlap(GTime&, GTime&) - Compute overlap with time interval
 - GObservations::npred(string&, string&) - Compute predicted number of events
 - GObservations::npred(GModel&, string&) - Compute predicted number of events 
@@ -106,6 +107,9 @@ a specified time interval.
 Add GTime.datetime() method to the Python interface to convert times from and
 to datetime.datetime objects. Add an optional precision argument to the GTime.utc()
 to set the number of digits after the comma for the seconds (#2909).
+
+Add GTime.julian_epoch() methods that return the Julian epoch for a given time
+(#1854).
 
 
 11. Optimization module

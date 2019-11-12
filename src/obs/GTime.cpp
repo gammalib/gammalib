@@ -291,7 +291,7 @@ double GTime::jd(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in Julian Days for various time system
+ * @brief Return time in Julian Days for time system
  *
  * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
  * @return Time in Julian Days (days).
@@ -327,7 +327,7 @@ double GTime::mjd(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in Modified Julian Days for various time system
+ * @brief Return time in Modified Julian Days for time system
  *
  * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
  * @return Time in Modified Julian Days (days).
@@ -346,7 +346,7 @@ double GTime::mjd(const std::string& timesys) const
 
 
 /***********************************************************************//**
- * @brief Return time in seconds in native reference for various time systems
+ * @brief Return time in seconds in native reference for time system
  *
  * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
  * @return Time (seconds).
@@ -404,7 +404,7 @@ double GTime::days(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in days in native reference for various time system
+ * @brief Return time in days in native reference for time system
  *
  * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
  * @return Time in native reference (days).
@@ -413,6 +413,37 @@ double GTime::days(const std::string& timesys) const
 {
     // Return time
     return (secs(timesys) * gammalib::sec2day);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Julian epoch in native reference (TT)
+ *
+ * @return Julian epoch (years).
+ ***************************************************************************/
+double GTime::julian_epoch(void) const
+{
+    // Compute Julian epoch
+    double julian_epoch = 2000.0 + (jd() - 2451545.0) / 365.25;
+
+    // Return Julian epoch
+    return (julian_epoch);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Julian epoch in native reference for time system
+ *
+ * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
+ * @return Julian epoch (years).
+ ***************************************************************************/
+double GTime::julian_epoch(const std::string& timesys) const
+{
+    // Compute Julian epoch
+    double julian_epoch = 2000.0 + (jd(timesys) - 2451545.0) / 365.25;
+
+    // Return Julian epoch
+    return (julian_epoch);
 }
 
 
@@ -700,7 +731,7 @@ void GTime::jd(const double& time)
 
 
 /***********************************************************************//**
- * @brief Set time in Julian Days in native reference for various time systems
+ * @brief Set time in Julian Days in native reference for time system
  *
  * @param[in] time Time in Julian Days (days).
  * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
@@ -734,8 +765,8 @@ void GTime::mjd(const double& time)
 
 
 /***********************************************************************//**
- * @brief Set time in Modified Julian Days in native reference for various
- *        time systems
+ * @brief Set time in Modified Julian Days in native reference for time
+ *        system
  *
  * @param[in] time Time in Modified Julian Days (days).
  * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
@@ -754,7 +785,7 @@ void GTime::mjd(const double& time, const std::string& timesys)
 
 
 /***********************************************************************//**
- * @brief Set time in seconds in native reference for various time systems
+ * @brief Set time in seconds in native reference for time system
  *
  * @param[in] seconds Time in native reference (seconds).
  * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
@@ -807,7 +838,7 @@ void GTime::days(const double& days)
 
 
 /***********************************************************************//**
- * @brief Set time in days in native reference for various time systems
+ * @brief Set time in days in native reference for time system
  *
  * @param[in] days Time (TT) (days).
  * @param[in] timesys Time system (one of "TT", "TAI", "UTC")
@@ -1122,7 +1153,7 @@ GTimeReference GTime::reference(void) const
 /***********************************************************************//**
  * @brief Print time
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing time in seconds in native reference.
  *
  * Prints time in seconds in the native reference.

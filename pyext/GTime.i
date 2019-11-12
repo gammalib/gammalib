@@ -62,6 +62,8 @@ public:
     double         secs(const std::string& timesys) const;
     double         days(void) const;
     double         days(const std::string& timesys) const;
+    double         julian_epoch(void) const;
+    double         julian_epoch(const std::string& timesys) const;
     std::string    utc(const int& precision = 0) const;
     double         gmst(void) const;
     double         gast(void) const;
