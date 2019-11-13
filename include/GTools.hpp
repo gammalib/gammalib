@@ -50,6 +50,7 @@ namespace gammalib {
     const double sec2day      = 1.0 / sec_in_day; // seconds => days
     const double tai2tt       = 32.184;           // TAI => TT time system
     const double mec2         = 0.5109989461;     // Electron rest mass (MeV)
+    const double epoch2000    = 2000.0;           // Epoch 2000.0
 }
 
 /* __ Prototypes ________________________________________________________ */
