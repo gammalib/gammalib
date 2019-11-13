@@ -494,6 +494,381 @@ void GSkyDir::sun(const GTime& time, const double& epoch)
 
 
 /***********************************************************************//**
+ * @brief Set sky direction to direction of Moon
+ *
+ * @param[in] time Time.
+ * @param[in] epoch Julian epoch.
+ *
+ * Sets the sky direction to the direction of the Moon at a given @p time.
+ *
+ * The equations are derived from the Chapront ELP2000/82 Lunar Theory
+ * (Chapront-Touze' and Chapront, 1983, 124, 50), as described by Jean Meeus
+ * in Chapter 47 of ``Astronomical Algorithms'' (Willmann-Bell, Richmond),
+ * 2nd edition, 1998. Meeus quotes an approximate accuracy of 10 arcsec in
+ * longitude and 4 arcsec in latitude, but he does not give the time range
+ * for this accuracy.
+ *
+ * The method was compared to the results obtained using PyEphem for the
+ * period 2000 - 2050. Differences in Right Ascension and Declination are
+ * always smaller than 0.015 degrees, corresponding to about 1 arcmin.
+ * The differences increase over time, meaning that the largest distances
+ * are reached by the end of the period.
+ ***************************************************************************/
+void GSkyDir::moon(const GTime& time, const double& epoch)
+{
+    // Set longitude constants. Note that the cos_lng contants are commented
+    // out since they are actually not used. They could be useful in case
+    // that the distance to the Moon should be computed, therefore we leave
+    // them in comments in the code.
+    const int d_lng[]   = { 0, 2, 2, 0, 0, 0, 2, 2, 2, 2,
+                            0, 1, 0, 2, 0, 0, 4, 0, 4, 2,
+                            2, 1, 1, 2, 2, 4, 2, 0, 2, 2,
+                            1, 2, 0, 0, 2, 2, 2, 4, 0, 3,
+                            2, 4, 0, 2, 2, 2, 4, 0, 4, 1,
+                            2, 0, 1, 3, 4, 2, 0, 1, 2, 2};
+    const int m_lng[]   = { 0, 0, 0, 0, 1, 0, 0,-1, 0,-1,
+                            1, 0, 1, 0, 0, 0, 0, 0, 0, 1,
+                            1, 0, 1,-1, 0, 0, 0, 1, 0,-1,
+                            0,-2, 1, 2,-2, 0, 0,-1, 0, 0,
+                            1,-1, 2, 2, 1,-1, 0, 0,-1, 0,
+                            1, 0, 1, 0, 0,-1, 2, 1, 0,0};
+    const int mp_lng[]  = { 1,-1, 0, 2, 0, 0,-2,-1, 1, 0,
+                           -1, 0, 1, 0, 1, 1,-1, 3,-2,-1,
+                            0,-1, 0, 1, 2, 0,-3,-2,-1,-2,
+                            1, 0, 2, 0,-1, 1, 0,-1, 2,-1,
+                            1,-2,-1,-1,-2, 0, 1, 4, 0,-2,
+                            0, 2, 1,-2,-3, 2, 1,-1, 3,-1};
+    const int f_lng[]   = { 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+                            0, 0, 0,-2, 2,-2, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 2, 0,
+                            0, 0, 0, 0, 0,-2, 2, 0, 2, 0,
+                            0, 0, 0, 0, 0,-2, 0, 0, 0, 0,
+                           -2,-2, 0, 0, 0, 0, 0, 0, 0,-2};
+    const int sin_lng[] = {  6288774, 1274027,  658314, 213618,-185116,
+                             -114332,   58793,   57066,  53322,  45758,
+                              -40923,  -34720,  -30383,  15327, -12528,
+                               10980,   10675,   10034,   8548,  -7888,
+                               -6766,   -5163,    4987,   4036,   3994,
+                                3861,    3665,   -2689,  -2602,   2390,
+                               -2348,    2236,   -2120,  -2069,   2048,
+                               -1773,   -1595,    1215,  -1110,   -892,
+                                -810,     759,    -713,   -700,    691,
+                                 596,     549,     537,    520,   -487,
+                                -399,    -381,     351,   -340,    330,
+                                 327,    -323,     299,    294,      0};
+    /*
+    const int cos_lng[] = {-20905355,-3699111,-2955968,-569925,  48888,
+                               -3149,  246158, -152138,-170733,-204586,
+                             -129620,  108743,  104755,  10321,      0,
+                               79661,  -34782,  -23210, -21636,  24208,
+                               30824,   -8379,  -16675, -12831, -10445,
+                              -11650,   14403,   -7003,      0,  10056,
+                                6322,   -9884,    5751,      0,  -4950,
+                                4130,       0,   -3958,      0,   3258,
+                                2616,   -1897,   -2117,   2354,      0,
+                                   0,   -1423,   -1117,  -1571,  -1739,
+                                   0,   -4421,       0,      0,      0,
+                                   0,    1165,       0,      0,   8752};
+    */
+
+    // Set latitude constants
+    const int d_lat[]   = { 0, 0, 0, 2, 2, 2, 2, 0, 2, 0,
+                            2, 2, 2, 2, 2, 2, 2, 0, 4, 0,
+                            0, 0, 1, 0, 0, 0, 1, 0, 4, 4,
+                            0, 4, 2, 2, 2, 2, 0, 2, 2, 2,
+                            2, 4, 2, 2, 0, 2, 1, 1, 0, 2,
+                            1, 2, 0, 4, 4, 1, 4, 1, 4, 2};
+    const int m_lat[]   = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                           -1, 0, 0, 1,-1,-1,-1, 1, 0, 1,
+                            0, 1, 0, 1, 1, 1, 0, 0, 0, 0,
+                            0, 0, 0, 0,-1, 0, 0, 0, 0, 1,
+                            1, 0,-1,-2, 0, 1, 1, 1, 1, 1,
+                            0,-1, 1, 0,-1, 0, 0, 0,-1,-2};
+    const int mp_lat[]  = { 0, 1, 1, 0,-1,-1, 0, 2, 1, 2,
+                            0,-2, 1, 0,-1, 0,-1,-1,-1, 0,
+                            0,-1, 0, 1, 1, 0, 0, 3, 0,-1,
+                            1,-2, 0, 2, 1,-2, 3, 2,-3,-1,
+                            0, 0, 1, 0, 1, 1, 0, 0,-2,-1,
+                            1,-2, 2,-2,-1, 1, 1,-1, 0, 0};
+    const int f_lat[]   = { 1, 1,-1,-1, 1,-1, 1, 1,-1,-1,
+                           -1,-1, 1,-1, 1, 1,-1,-1,-1, 1,
+                            3, 1, 1, 1,-1,-1,-1, 1,-1, 1,
+                           -3, 1,-3,-1,-1, 1,-1, 1,-1, 1,
+                            1, 1, 1,-1, 3,-1,-1, 1,-1,-1,
+                            1,-1, 1,-1,-1,-1,-1,-1,-1, 1};
+    const int sin_lat[] = {5128122, 280602, 277693, 173237, 55413,
+                             46271,  32573,  17198,   9266,  8822,
+                              8216,   4324,   4200,  -3359,  2463,
+                              2211,   2065,  -1870,   1828, -1794,
+                             -1749,  -1565,  -1491,  -1475, -1410,
+                             -1344,  -1335,   1107,   1021,   833,
+                               777,    671,    607,    596,   491,
+                              -451,    439,    422,    421,  -366,
+                              -351,    331,    315,    302,  -283,
+                              -229,    223,    223,   -220,  -220,
+                              -185,    181,   -177,    176,   166,
+                              -164,    132,   -119,    115,   107};
+
+    // Set constants for computation of nutation. The constants have been
+    // taken from https://idlastro.gsfc.nasa.gov/ftp/pro/astro/nutate.pro
+    // which is based on Chapter 22 of "Astronomical Algorithms" by Jean
+    // Meeus (1998, 2nd ed.) which is based on the 1980 IAU Theory of
+    // Nutation and includes all terms larger than 0.0003 arcsec.
+    const int nutate_d_lng[]    = { 0,-2, 0, 0, 0, 0,-2, 0, 0,-2,
+                                   -2,-2, 0, 2, 0, 2, 0, 0,-2, 0,
+                                    2, 0, 0,-2, 0,-2, 0, 0, 2,-2,
+                                    0,-2, 0, 0, 2, 2, 0,-2, 0, 2,
+                                    2,-2,-2, 2, 2, 0,-2,-2, 0,-2,
+                                   -2, 0,-1,-2, 1, 0, 0,-1, 0, 0,
+                                    2, 0, 2};
+    const int nutate_m_lng[]    = { 0, 0, 0, 0, 1, 0, 1, 0, 0,-1,
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                    0, 0, 0, 0, 0, 0, 0, 2, 0, 2,
+                                    1, 0,-1, 0, 0, 0, 1, 1,-1, 0,
+                                    0, 0, 0, 0, 0,-1,-1, 0, 0, 0,
+                                    1, 0, 0, 1, 0, 0, 0,-1, 1,-1,
+                                   -1, 0,-1};
+    const int nutate_mp_lng[]   = { 0, 0, 0, 0, 0, 1, 0, 0, 1, 0,
+                                    1, 0,-1, 0, 1,-1,-1, 1, 2,-2,
+                                    0, 2, 2, 1, 0, 0,-1, 0,-1, 0,
+                                    0, 1, 0, 2,-1, 1, 0, 1, 0, 0,
+                                    1, 2, 1,-2, 0, 1, 0, 0, 2, 2,
+                                    0, 1, 1, 0, 0, 1,-2, 1, 1, 1,
+                                   -1, 3, 0};
+    const int nutate_f_lng[]    = { 0, 2, 2, 0, 0, 0, 2, 2, 2, 2,
+                                    0, 2, 2, 0, 0, 2, 0, 2, 0, 2,
+                                    2, 2, 0, 2, 2, 2, 2, 0, 0, 2,
+                                    0, 0, 0,-2, 2, 2, 2, 0, 2, 2,
+                                    0, 2, 2, 0, 0, 0, 2, 0, 2, 0,
+                                    2,-2, 0, 0, 0, 2, 2, 0, 0, 2,
+                                    2, 2, 2};
+    const int nutate_om_lng[]   = { 1, 2, 2, 2, 0, 0, 2, 1, 2, 2,
+                                    0, 1, 2, 0, 1, 2, 1, 1, 0, 1,
+                                    2, 2, 0, 2, 0, 0, 1, 0, 1, 2,
+                                    1, 1, 1, 0, 1, 2, 2, 0, 2, 1,
+                                    0, 2, 1, 1, 1, 0, 1, 1, 1, 1,
+                                    1, 0, 0, 0, 0, 0, 2, 0, 0, 2,
+                                    2, 2, 2};
+    const int nutate_sin_lng[] = {-171996, -13187, -2274, 2062, 1426,
+                                      712,   -517,  -386, -301,  217,
+                                     -158,    129,   123,   63,   63,
+                                      -59,    -58,   -51,   48,   46,
+                                      -38,    -31,    29,   29,   26,
+                                      -22,     21,    17,   16,  -16,
+                                      -15,    -13,   -12,   11,  -10,
+                                       -8,      7,    -7,   -7,   -7,
+                                        6,      6,     6,   -6,   -6,
+                                        5,     -5,    -5,   -5,    4,
+                                        4,      4,    -4,   -4,   -4,
+                                        3,     -3,    -3,   -3,   -3,
+                                       -3,     -3,    -3};
+    const int nutate_cos_lng[] = {  92025,   5736,   977, -895,   54,
+                                       -7,    224,   200,  129,  -95,
+                                        0,    -70,   -53,    0,  -33,
+                                       26,     32,    27,    0,  -24,
+                                       16,     13,     0,  -12,    0,
+                                        0,    -10,     0,   -8,    7,
+                                        9,      7,     6,    0,    5,
+                                        3,     -3,     0,    3,    3,
+                                        0,     -3,    -3,    3,    3,
+                                        0,      3,     3,    3,    0,
+                                        0,      0,     0,    0,    0,
+                                        0,      0,     0,    0,    0,
+                                        0,      0,     0};
+    const double nutate_sdelt[] = {-174.2, -1.6, -0.2,  0.2, -3.4,
+                                      0.1,  1.2, -0.4,  0.0, -0.5,
+                                      0.0,  0.1,  0.0,  0.0,  0.1,
+                                      0.0, -0.1,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0, -0.1,  0.0,  0.1,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0};
+    const double nutate_cdelt[] =    {8.9, -3.1, -0.5,  0.5, -0.1,
+                                      0.0, -0.6,  0.0, -0.1,  0.3,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0,  0.0,  0.0,
+                                      0.0,  0.0,  0.0};
+
+    // Compute Julian centuries from 1900.0
+    double t = (time.jd() - 2451545.0) / 36525.0;
+
+    // Compute Moon's mean longitude referred to mean equinox of the date
+    // in degrees and radians
+    double Lprimed = 218.3164477 +
+                     (481267.88123421 +
+                     (-0.0015786 +
+                     (1.0/538841.0 - 1.0/65194000.0 * t) * t) * t) * t;
+    double Lprime = Lprimed * gammalib::deg2rad;
+
+    // Compute Moon's mean elongation in degrees
+    double D = (297.8501921 +
+               (445267.1114034 +
+               (-0.0018819 +
+               (1.0/545868.0 - 1.0/113065000.0 * t) * t) * t) * t) *
+               gammalib::deg2rad;
+
+    // Compute Sun's mean anomaly in radians
+    double M = (357.5291092 +
+               (35999.0502909 +
+               (-0.0001536 + 1.0/24490000.0 * t) * t) * t) *
+               gammalib::deg2rad;
+
+    // Compute Moon's mean anomaly in radians
+    double Mprime = (134.9633964 +
+                    (477198.8675055 +
+                    (0.0087414 +
+                    (1.0/69699.0 - 1.0/14712000.0 * t) * t) * t) * t) *
+                    gammalib::deg2rad;
+
+    // Compute Moon's argument of latitude in radians
+    double F = (93.2720950 +
+               (483202.0175233 +
+               (-0.0036539 +
+               (-1.0/35260000 + 1.0/863310000 * t) * t) * t) * t) *
+               gammalib::deg2rad;
+
+    // Compute longitude of the ascending node of the Moon's mean orbit on
+    // the ecliptic, measured from the mean equinox of the date in radians
+    double Omega = (125.04452 +
+                   (-1934.136261 +
+                   (0.0020708 + 1.0/4.5e5 * t) * t) * t) *
+                   gammalib::deg2rad;
+
+    // Compute actions of Venus and Jupiter in radians
+    double A1 = (119.75 +    131.849 * t) * gammalib::deg2rad;
+    double A2 = ( 53.09 + 479264.290 * t) * gammalib::deg2rad;
+    double A3 = (313.45 + 481266.484 * t) * gammalib::deg2rad;
+
+    // Compute sum quantities
+    double Al =  3958.0 * std::sin(A1) +
+                 1962.0 * std::sin(Lprime - F) +
+                  318.0 * std::sin(A2);
+    double Ab = -2235.0 * std::sin(Lprime) +
+                  382.0 * std::sin(A3) +
+                  175.0 * std::sin(A1 - F) +
+                  175.0 * std::sin(A1 + F) +
+                  127.0 * std::sin(Lprime - Mprime) -
+                  115.0 * std::sin(Lprime + Mprime);
+
+    // Compute eccentricity of Earth's orbit around the Sun
+    double E  = 1.0 - (0.002516 + 7.4e-6 * t) * t;
+    double E2 = E * E;
+
+    // Sum the periodic terms
+    double sum_l = Al;
+    double sum_b = Ab;
+    double sum_r = 0.0; // A_r = 0
+    for (int i = 0; i < 60; ++i) {
+
+        // Compute sine and cosine of longitude and sine of latitude
+        double sinlng = sin_lng[i];
+        //double coslng = cos_lng[i];
+        double sinlat = sin_lat[i];
+        if (std::abs(m_lng[i]) == 1) {
+            sinlng *= E;
+        //    coslng *= E;
+        }
+        else if (std::abs(m_lng[i]) == 2) {
+            sinlng *= E2;
+        //    coslng *= E2;
+        }
+        if (std::abs(m_lat[i]) == 1) {
+            sinlat *= E;
+        }
+        else if (std::abs(m_lat[i]) == 2) {
+            sinlat *= E2;
+        }
+
+        // Compute coefficient
+        double s_l = d_lng[i] * D + m_lng[i] * M + mp_lng[i] * Mprime +
+                     f_lng[i] * F;
+        double s_b = d_lat[i] * D + m_lat[i] * M + mp_lat[i] * Mprime +
+                     f_lat[i] * F;
+
+        // Compute longitude
+        sum_l += sinlng * std::sin(s_l);
+        sum_b += sinlat * std::sin(s_b);
+        //sum_r += coslng * std::sin(s_l);
+
+    } // endfor: looped over sum terms
+
+    // Compute Moon's ecliptic coordinates in degrees and distance in km
+    double geolong  = Lprimed + 1.0e-6 * sum_l;
+    double geolat   = 1.0e-6 * sum_b;
+    //double distance = 385000.56 + 1.0e-3 * sum_r;
+
+    // Compute nutation in arcsec, based on Chapter 22 of "Astronomical
+    // Algorithms" by Jean Meeus (1998, 2nd ed.) which is based on the 1980
+    // IAU Theory of Nutation and includes all terms larger than 0.0003 arcsec.
+    double nut_long  = 0.0;
+    double nut_obliq = 0.0;
+    for (int i = 0; i < 63; ++i) {
+        double arg = nutate_d_lng[i]  * D      + nutate_m_lng[i]  * M +
+                     nutate_mp_lng[i] * Mprime + nutate_f_lng[i]  * F +
+                     nutate_om_lng[i] * Omega;
+        nut_long  += (nutate_sdelt[i] * t + nutate_sin_lng[i]) * std::sin(arg);
+        nut_obliq += (nutate_cdelt[i] * t + nutate_cos_lng[i]) * std::cos(arg);
+    }
+    nut_long  *= 0.0001;
+    nut_obliq *= 0.0001;
+
+    // Add nutation in longitude
+    geolong += nut_long / 3600.0;
+    
+    // nutate, jd, nlong, elong
+    // geolong= geolong + nlong/3.6d3
+    // cirrange,geolong
+    double lambda = geolong * gammalib::deg2rad;
+    double beta   = geolat  * gammalib::deg2rad;
+
+    // Find mean obliquity using J. Laskar's formula. For the formula, see
+    // http://www.neoprogrammics.com/obliquity_of_the_ecliptic/
+    double y       = t / 100.0;    // Time in years
+    double epsilon = (84381.448 +  // In degrees
+                     (4680.93 +
+                     (-1.55   +
+                     (1999.25 +
+                     (-51.38  +
+                     (-249.67 +
+                     (-39.05  +
+                     (7.12    +
+                     (27.87   +
+                     (5.79 + 2.45 * y)*y)*y)*y)*y)*y)*y)*y)*y)*y)/3600.0;
+    double eps     = (epsilon + nut_obliq/3600.0) * gammalib::deg2rad;
+
+    // Convert (lambda,beta) in radians to (RA,Dec) in degrees
+    double ra  = std::atan2(std::sin(lambda) * std::cos(eps) -
+                            std::tan(beta)   * std::sin(eps), std::cos(lambda)) *
+                 gammalib::rad2deg;
+    double dec = std::asin(std::sin(beta)    * std::cos(eps) +
+                           std::cos(beta)    * std::sin(eps) * std::sin(lambda)) *
+                 gammalib::rad2deg;
+
+    // Set position
+    radec_deg(ra, dec);
+
+    // Precess sky position to requested epoch
+    precess(time.julian_epoch(), epoch);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return sky direction as 3D vector in celestial coordinates
  *
  * @return Sky direction as 3D vector in celestial coordinates.

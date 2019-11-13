@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-12 November 2019
+13 November 2019
 
 
 1. Introduction
@@ -32,7 +32,8 @@ The following methods have been added:
 - GObservations::remove_response_cache(string&) - Remove response cache for model
 - GObservation::remove_response_cache(string&) - Remove response cache for model
 - GSkyDir::precess() - Precess sky position to epoch
-- GSkyDir::sun() - Get sky position of Sun
+- GSkyDir::sun() - Set sky position of Sun
+- GSkyDir::moon() - Set sky position of Moon
 - GSkyMap::extract() - Extract section of sky map
 - GCTAObservation::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponse::remove_response_cache(string&) - Remove response cache for model
@@ -130,6 +131,9 @@ just below the upper pixel boundaries (#3012).
 Two GSkyMap::extract() methods were added. The first method extracts a patch of
 pixels, defined by the start and stop pixel indices in X and Y direction. The second
 method extracts all patch of pixels that is defined by inclusion sky regions (#2990). 
+
+A GSkyDir::moon() method was added that sets the sky direction to the position of
+the Moon for a given date and a specific epoch (#1855).
 
 A GSkyDir::sun() method was added that sets the sky direction to the position of
 the Sun for a given date and a specific epoch. To support the method, a
