@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -777,18 +778,18 @@ void GSkyDir::moon(const GTime& time, const double& epoch)
         double sinlng = sin_lng[i];
         //double coslng = cos_lng[i];
         double sinlat = sin_lat[i];
-        if (abs(m_lng[i]) == 1) {
+        if (std::abs(m_lng[i]) == 1) {
             sinlng *= E;
         //    coslng *= E;
         }
-        else if (abs(m_lng[i]) == 2) {
+        else if (std::abs(m_lng[i]) == 2) {
             sinlng *= E2;
         //    coslng *= E2;
         }
-        if (abs(m_lat[i]) == 1) {
+        if (std::abs(m_lat[i]) == 1) {
             sinlat *= E;
         }
-        else if (abs(m_lat[i]) == 2) {
+        else if (std::abs(m_lat[i]) == 2) {
             sinlat *= E2;
         }
 
