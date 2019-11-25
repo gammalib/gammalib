@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GOptimizerPar.cpp - Optimizer parameter class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2019 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,7 +60,7 @@ GOptimizerPar::GOptimizerPar(void)
 {
     // Initialise members
     init_members();
-  
+
     // Return
     return;
 }
@@ -184,7 +184,7 @@ GOptimizerPar::~GOptimizerPar(void)
  * @return Function parameter.
  ***************************************************************************/
 GOptimizerPar& GOptimizerPar::operator=(const GOptimizerPar& par)
-{ 
+{
     // Execute only if object is not identical
     if (this != &par) {
 
@@ -198,7 +198,7 @@ GOptimizerPar& GOptimizerPar::operator=(const GOptimizerPar& par)
         copy_members(par);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -256,7 +256,7 @@ void GOptimizerPar::value(const double& value)
     // Set value factor. The GOptimizerPar class makes sure that m_scale is
     // never 0, so no test is needed here
     factor_value(value / m_scale);
-	
+
     // Return
     return;
 }
@@ -275,7 +275,7 @@ void GOptimizerPar::error(const double& error)
     // Set error factor. The GOptimizerPar class makes sure that m_scale is
     // never 0, so no test is needed here
     factor_error(error / m_scale);
-	
+
     // Return
     return;
 }
@@ -293,7 +293,7 @@ void GOptimizerPar::gradient(const double& gradient)
 {
     // Set gradient factor.
     factor_gradient(gradient * m_scale);
-	
+
     // Return
     return;
 }
@@ -312,7 +312,7 @@ void GOptimizerPar::min(const double& min)
     // Set minimum boundary factor. The GOptimizerPar class makes sure that
     // m_scale is never 0, so no test is needed here
     factor_min(min / m_scale);
-	
+
     // Return
     return;
 }
@@ -331,7 +331,7 @@ void GOptimizerPar::max(const double& max)
     // Set maximum boundary factor. The GOptimizerPar class makes sure that
     // m_scale is never 0, so no test is needed here
     factor_max(max / m_scale);
-	
+
     // Return
     return;
 }
@@ -351,7 +351,7 @@ void GOptimizerPar::range(const double& min, const double& max)
     // Set minimum and maximum
     this->min(min);
     this->max(max);
-	
+
     // Return
     return;
 }
@@ -390,7 +390,7 @@ void GOptimizerPar::factor_value(const double& value)
 
     // Assign value
     m_factor_value = value;
-	
+
     // Return
     return;
 }
@@ -420,10 +420,10 @@ void GOptimizerPar::factor_min(const double& min)
 
     // Assign minimum factor
     m_factor_min = min;
-    
+
     // Flag that minimum was set
     m_has_min = true;
-    
+
     // Return
     return;
 }
@@ -453,10 +453,10 @@ void GOptimizerPar::factor_max(const double& max)
 
     // Assign maximum
     m_factor_max = max;
-    
+
     // Flag that maximum was set
     m_has_max = true;
-    
+
     // Return
     return;
 }
@@ -477,7 +477,7 @@ void GOptimizerPar::factor_range(const double& min, const double& max)
     // Set minimum and maximum
     factor_min(min);
     factor_max(max);
-    
+
     // Return
     return;
 }
@@ -548,7 +548,7 @@ void GOptimizerPar::scale(const double& scale)
             m_has_max     = false;
         }
     }
-    
+
     // Return
     return;
 }
@@ -626,7 +626,7 @@ void GOptimizerPar::autoscale(void)
 /***********************************************************************//**
  * @brief Print parameter information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String with parameter information.
  ***************************************************************************/
 std::string GOptimizerPar::print(const GChatter& chatter) const
@@ -712,7 +712,7 @@ void GOptimizerPar::init_members(void)
     m_has_min         = false;
     m_has_max         = false;
     m_has_grad        = false;
-  
+
     // Return
     return;
 }
@@ -748,7 +748,7 @@ void GOptimizerPar::copy_members(const GOptimizerPar& par)
  * @brief Delete class members
  ***************************************************************************/
 void GOptimizerPar::free_members(void)
-{  
+{
     // Return
     return;
 }

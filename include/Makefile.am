@@ -183,6 +183,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralRegistry.hpp \
                      GModelSpectralBrokenPlaw.hpp \
                      GModelSpectralSmoothBrokenPlaw.hpp \
+                     GModelSpectralComposite.hpp \
                      GModelSpectralConst.hpp \
                      GModelSpectralExpInvPlaw.hpp \
                      GModelSpectralExpPlaw.hpp \
@@ -196,7 +197,9 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlawPhotonFlux.hpp \
                      GModelSpectralPlawEnergyFlux.hpp \
-                     GModelSpectralComposite.hpp \
+                     GModelSpectralTable.hpp \
+                     GModelSpectralTablePar.hpp \
+                     GModelSpectralTablePars.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalRegistry.hpp \
                      GModelTemporalConst.hpp \

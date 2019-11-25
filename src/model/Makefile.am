@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for model module                                              #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2019 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -56,6 +56,7 @@ sources = GModelPar.cpp \
           GModelSpectralRegistry.cpp \
           GModelSpectralBrokenPlaw.cpp \
           GModelSpectralConst.cpp \
+          GModelSpectralComposite.cpp \
           GModelSpectralExpInvPlaw.cpp \
           GModelSpectralExpPlaw.cpp \
           GModelSpectralExponential.cpp \
@@ -69,7 +70,9 @@ sources = GModelPar.cpp \
           GModelSpectralPlawPhotonFlux.cpp \
           GModelSpectralPlawEnergyFlux.cpp \
           GModelSpectralSmoothBrokenPlaw.cpp \
-          GModelSpectralComposite.cpp \
+          GModelSpectralTable.cpp \
+          GModelSpectralTablePar.cpp \
+          GModelSpectralTablePars.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \

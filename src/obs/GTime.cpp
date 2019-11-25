@@ -649,7 +649,7 @@ double GTime::lmst(const double& geolon) const
  ***************************************************************************/
 double GTime::last(const double& geolon) const
 {
-    // Compute local mean siderial time
+    // Compute local apparent siderial time
     double last = gast() - geolon/15.0;
 
     // Put into [0,24]
