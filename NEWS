@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-13 November 2019
+12 December 2019
 
 
 1. Introduction
@@ -122,6 +122,13 @@ None
 
 12. Sky module
 --------------
+The GSkyMap operators used the sky map value access operator that bi-linearly
+interpolates sky map values even for maps with identical definition. This could
+lead to rounding errors. For maps with identical definition the operators now
+directly act on the pixel values, avoid thus the bi-linear interpolation. This
+has also the side effect to speed up the computation for maps with identical
+definition (#3126).
+
 Exclude the upper sky map boundary in GSkyMap::contains() method. Originally the
 boundary was excluded, but this was changed in commit 0ecb6a07 when the
 GSkyMap::flux() method was added since the flux method evaluates intensities at

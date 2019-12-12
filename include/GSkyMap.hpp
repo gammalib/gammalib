@@ -208,6 +208,7 @@ private:
     bool              overlaps_circle(const GSkyRegionCircle& region) const;
     bool              is_healpix(const GFitsHDU& hdu) const;
     bool              is_wcs(const GFitsHDU& hdu) const;
+    bool              is_same(const GSkyMap& map) const;
     GNdarray          smooth_kernel(const std::string& kernel,
                                     const double&      par) const;
 

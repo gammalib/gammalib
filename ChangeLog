@@ -1,8 +1,9 @@
-2019-11-13
+2019-12-12
 
         * Version 1.7.0 released
         ========================
 
+        Avoid rounding errors in GSkyMap operators (#3126)
         Add GObservations::npred() methods (#3062)
         Exclude upper edge boundary in GSkyMap::contains() method (#3012)
         Add GSkyMap::extract() methods (#2990)

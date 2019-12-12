@@ -382,14 +382,12 @@ GSkyMap& GSkyMap::operator=(const double& value)
  *            Mismatch between number of maps in skymap object.
  *
  * Adds the content of @p map to the skymap. The operator only works on sky
- * maps with an identical number of maps. The content is added by
+ * maps with an identical number of maps.
+ *
+ * If the sky maps have the same definitions, the operator will add the
+ * values of the sky map pixels. Otherwise, the map values are added by
  * bi-linearily interpolating the values in the source sky map, allowing thus
  * for a reprojection of sky map values.
- *
- * @todo The method is not optimized for speed as the transformation is done
- * for each layer separately. A private method should be introduced that
- * does the transformation, allowing the to loop more effectively over the
- * layers.
  ***************************************************************************/
 GSkyMap& GSkyMap::operator+=(const GSkyMap& map)
 {
@@ -402,21 +400,44 @@ GSkyMap& GSkyMap::operator+=(const GSkyMap& map)
         throw GException::invalid_value(G_OP_UNARY_ADD, msg);
     }
 
-    // Loop over all pixels of sky map
-    for (int index = 0; index < npix(); ++index) {
+    // If maps are identical then add the pixels
+    if (is_same(map)) {
 
-        // Get sky direction of actual pixel
-        GSkyDir dir = inx2dir(index);
+        // Loop over all pixels of sky map
+        for (int index = 0; index < npix(); ++index) {
 
-        // Loop over all layers
-        for (int layer = 0; layer < nmaps(); ++layer) {
+            // Loop over all layers
+            for (int layer = 0; layer < nmaps(); ++layer) {
 
-            // Add value
-            (*this)(index, layer) += map(dir, layer);
+                // Add pixel
+                (*this)(index, layer) += map(index, layer);
 
-        } // endfor: looped over all layers
+            } // endfor: looped over all layers
 
-    } // endfor: looped over all pixels
+        } // endfor: looped over all pixels
+    
+    }
+
+    // ... otherwise use interpolation method and add map
+    else {
+
+        // Loop over all pixels of sky map
+        for (int index = 0; index < npix(); ++index) {
+
+            // Get sky direction of actual pixel
+            GSkyDir dir = inx2dir(index);
+
+            // Loop over all layers
+            for (int layer = 0; layer < nmaps(); ++layer) {
+
+                // Add value
+                (*this)(index, layer) += map(dir, layer);
+
+            } // endfor: looped over all layers
+
+        } // endfor: looped over all pixels
+
+    } // endelse: interpolation method
 
     // Return this object
     return *this;
@@ -451,14 +472,12 @@ GSkyMap& GSkyMap::operator+=(const double& value)
  *            Mismatch between number of maps in skymap object.
  *
  * Subtracts the content of @p map from the skymap. The operator only works
- * on sky maps with an identical number of layers. The content is subtracted
- * by bi-linearily interpolating the values in the source sky map, allowing
- * thus for a reprojection of sky map values.
+ * on sky maps with an identical number of layers.
  *
- * @todo The method is not optimized for speed as the transformation is done
- * for each layer separately. A private method should be introduced that
- * does the transformation, allowing the to loop more effectively over the
- * layers.
+ * If the sky maps have the same definitions, the operator will subtract the
+ * values of the sky map pixels. Otherwise, the map values are subtracted by
+ * bi-linearily interpolating the values in the source sky map, allowing thus
+ * for a reprojection of sky map values.
  ***************************************************************************/
 GSkyMap& GSkyMap::operator-=(const GSkyMap& map)
 {
@@ -471,21 +490,44 @@ GSkyMap& GSkyMap::operator-=(const GSkyMap& map)
         throw GException::invalid_value(G_OP_UNARY_SUB, msg);
     }
 
-    // Loop over all pixels of sky map
-    for (int index = 0; index < npix(); ++index) {
+    // If maps are identical then subtract the pixels
+    if (is_same(map)) {
 
-        // Get sky direction of actual pixel
-        GSkyDir dir = inx2dir(index);
+        // Loop over all pixels of sky map
+        for (int index = 0; index < npix(); ++index) {
 
-        // Loop over all layers
-        for (int layer = 0; layer < nmaps(); ++layer) {
+            // Loop over all layers
+            for (int layer = 0; layer < nmaps(); ++layer) {
 
-            // Subtract value
-            (*this)(index, layer) -= map(dir, layer);
+                // Subtract pixel
+                (*this)(index, layer) -= map(index, layer);
 
-        } // endfor: looped over all layers
+            } // endfor: looped over all layers
 
-    } // endfor: looped over all pixels
+        } // endfor: looped over all pixels
+    
+    }
+
+    // ... otherwise use interpolation method and subtract map
+    else {
+
+        // Loop over all pixels of sky map
+        for (int index = 0; index < npix(); ++index) {
+
+            // Get sky direction of actual pixel
+            GSkyDir dir = inx2dir(index);
+
+            // Loop over all layers
+            for (int layer = 0; layer < nmaps(); ++layer) {
+
+                // Subtract value
+                (*this)(index, layer) -= map(dir, layer);
+
+            } // endfor: looped over all layers
+
+        } // endfor: looped over all pixels
+
+    } // endelse: interpolation method
 
     // Return this object
     return *this;
@@ -520,14 +562,12 @@ GSkyMap& GSkyMap::operator-=(const double& value)
  *            Mismatch between number of maps in skymap object.
  *
  * Multiplies the content of @p map from the skymap. The operator only works
- * on sky maps with an identical number of layers. The content is multiplied
- * by bi-linearily interpolating the values in the source sky map, allowing
- * thus for a reprojection of sky map values.
+ * on sky maps with an identical number of layers.
  *
- * @todo The method is not optimized for speed as the transformation is done
- * for each layer separately. A private method should be introduced that
- * does the transformation, allowing to loop more effectively over the
- * layers.
+ * If the sky maps have the same definitions, the operator will multiply the
+ * values of the sky map pixels. Otherwise, the map values are multiplied by
+ * bi-linearily interpolating the values in the source sky map, allowing thus
+ * for a reprojection of sky map values.
  ***************************************************************************/
 GSkyMap& GSkyMap::operator*=(const GSkyMap& map)
 {
@@ -540,21 +580,44 @@ GSkyMap& GSkyMap::operator*=(const GSkyMap& map)
         throw GException::invalid_value(G_OP_UNARY_MUL, msg);
     }
 
-    // Loop over all pixels of sky map
-    for (int index = 0; index < npix(); ++index) {
+    // If maps are identical then multiply the pixels
+    if (is_same(map)) {
 
-        // Get sky direction of actual pixel
-        GSkyDir dir = inx2dir(index);
+        // Loop over all pixels of sky map
+        for (int index = 0; index < npix(); ++index) {
 
-        // Loop over all layers
-        for (int layer = 0; layer < nmaps(); ++layer) {
+            // Loop over all layers
+            for (int layer = 0; layer < nmaps(); ++layer) {
 
-            // Multiply value
-            (*this)(index, layer) *= map(dir, layer);
+                // Multiply pixel
+                (*this)(index, layer) *= map(index, layer);
 
-        } // endfor: looped over all layers
+            } // endfor: looped over all layers
 
-    } // endfor: looped over all pixels
+        } // endfor: looped over all pixels
+    
+    }
+
+    // ... otherwise use interpolation method and multiply map
+    else {
+
+        // Loop over all pixels of sky map
+        for (int index = 0; index < npix(); ++index) {
+
+            // Get sky direction of actual pixel
+            GSkyDir dir = inx2dir(index);
+
+            // Loop over all layers
+            for (int layer = 0; layer < nmaps(); ++layer) {
+
+                // Multiply value
+                (*this)(index, layer) *= map(dir, layer);
+
+            } // endfor: looped over all layers
+
+        } // endfor: looped over all pixels
+
+    } // endelse: interpolation method
 
     // Return this object
     return *this;
@@ -589,12 +652,16 @@ GSkyMap& GSkyMap::operator*=(const double& factor)
  *            Mismatch between number of maps in skymap object.
  *
  * Divides the content of the actual skymap by the skymap @p map. The operator
- * only works on sky maps with an identical number of layers. The content is
- * divided by bi-linearily interpolating the values in the skymap @p map,
- * allowing thus for a reprojection of sky map values.
+ * only works on sky maps with an identical number of layers.
+ *
+ * If the sky maps have the same definitions, the operator will divide the
+ * values of the sky map pixels. Otherwise, the map values are divided by
+ * bi-linearily interpolating the values in the source sky map, allowing thus
+ * for a reprojection of sky map values.
  *
  * On return, all pixels in @p map that are zero are silently set to zero in
- * the skymap.
+ * the skymap, hence no division by zero exception will be raised in case
+ * that zero values are encountered.
  ***************************************************************************/
 GSkyMap& GSkyMap::operator/=(const GSkyMap& map)
 {
@@ -607,33 +674,66 @@ GSkyMap& GSkyMap::operator/=(const GSkyMap& map)
         throw GException::invalid_value(G_OP_UNARY_DIV, msg);
     }
 
-    // Loop over all pixels of destination sky map
-    for (int index = 0; index < npix(); ++index) {
+    // If maps are identical then divide the pixels
+    if (is_same(map)) {
 
-        // Get sky direction of actual pixel
-        GSkyDir dir = inx2dir(index);
+        // Loop over all pixels of sky map
+        for (int index = 0; index < npix(); ++index) {
 
-        // Loop over all layers
-        for (int layer = 0; layer < nmaps(); ++layer) {
+            // Loop over all layers
+            for (int layer = 0; layer < nmaps(); ++layer) {
 
-            // Get map value if the map by which the division will be done.
-            // The map is accessed using the sky direction, hence inter-
-            // polating properly the map. If we're outside the map, zero
-            // is returned.
-            double value = map(dir, layer);
+                // Get pixel value of the map by which the division will be
+                // done.
+                double value = map(index, layer);
 
-            // Divide destination pixel by value. In case of a division by
-            // zero set the destination pixel also to zero.
-            if (value == 0.0) {
-                (*this)(index, layer) = 0.0;
-            }
-            else {
-                (*this)(index, layer) /= value;
-            }
+                // Divide destination pixel by value. In case of a division
+                // by zero set the destination pixel also to zero.
+                if (value == 0.0) {
+                    (*this)(index, layer) = 0.0;
+                }
+                else {
+                    (*this)(index, layer) /= value;
+                }
 
-        } // endfor: looped over all layers
+            } // endfor: looped over all layers
 
-    } // endfor: looped over all pixels
+        } // endfor: looped over all pixels
+    
+    }
+
+    // ... otherwise use interpolation method and divide map
+    else {
+
+        // Loop over all pixels of destination sky map
+        for (int index = 0; index < npix(); ++index) {
+
+            // Get sky direction of actual pixel
+            GSkyDir dir = inx2dir(index);
+
+            // Loop over all layers
+            for (int layer = 0; layer < nmaps(); ++layer) {
+
+                // Get map value of the map by which the division will be
+                // done. The map is accessed using the sky direction, hence
+                // interpolating properly the map. If we're outside the map,
+                // zero is returned.
+                double value = map(dir, layer);
+
+                // Divide destination pixel by value. In case of a division
+                // by zero set the destination pixel also to zero.
+                if (value == 0.0) {
+                    (*this)(index, layer) = 0.0;
+                }
+                else {
+                    (*this)(index, layer) /= value;
+                }
+
+            } // endfor: looped over all layers
+
+        } // endfor: looped over all pixels
+
+    } // endelse: interpolation method
 
     // Return this object
     return *this;
@@ -3323,6 +3423,78 @@ bool GSkyMap::is_wcs(const GFitsHDU& hdu) const
         (hdu.has_card("NAXIS") && (hdu.integer("NAXIS") >= 2))) {
         flag = true;
     }
+
+    // Return flag
+    return (flag);
+}
+
+
+/***********************************************************************//**
+ * @brief Check if map is the same
+ *
+ * @param[in] map Sky map.
+ * @return True is sky map definition is identical.
+ *
+ * Returns true if the sky map definition is identical to the one of the
+ * current map.
+ ***************************************************************************/
+bool GSkyMap::is_same(const GSkyMap& map) const
+{
+    // Initialise flag
+    bool flag = true;
+
+    // Single loop that can be exited any time
+    do {
+
+        // If sky projection differs then set flag to false and break
+        if (m_proj->code() != map.m_proj->code()) {
+            flag = false;
+            break;
+        }
+
+        // If sky projection has different coordinate system then set flag
+        // to false and break
+        if (m_proj->coordsys() != map.m_proj->coordsys()) {
+            flag = false;
+            break;
+        }
+
+        // If sky map dimension differs then set flag to false and break
+        if ((m_num_x != map.m_num_x) || (m_num_y != map.m_num_y)) {
+            flag = false;
+            break;
+        }
+
+        // For WCS projections, if sky maps have different reference values,
+        // pixels or pixel sizes then set flag to false and break
+        const GWcs* wcs1 = dynamic_cast<const GWcs*>(m_proj);
+        const GWcs* wcs2 = dynamic_cast<const GWcs*>(map.m_proj);
+        if ((wcs1 != NULL) && (wcs2 != NULL)) {
+            if ((wcs1->crval(0) != wcs2->crval(0)) ||
+                (wcs1->crval(1) != wcs2->crval(1)) ||
+                (wcs1->crpix(0) != wcs2->crpix(0)) ||
+                (wcs1->crpix(1) != wcs2->crpix(1)) ||
+                (wcs1->cdelt(0) != wcs2->cdelt(0)) ||
+                (wcs1->cdelt(1) != wcs2->cdelt(1))) {
+                flag = false;
+                break;
+            }
+        }
+
+        // For Healpix projections, if sky maps have different number of pixels,
+        // nside or ordering then set flag to false and break
+        const GHealpix* healpix1 = dynamic_cast<const GHealpix*>(m_proj);
+        const GHealpix* healpix2 = dynamic_cast<const GHealpix*>(map.m_proj);
+        if ((healpix1 != NULL) && (healpix2 != NULL)) {
+            if ((healpix1->npix()     != healpix2->npix()) ||
+                (healpix1->nside()    != healpix2->nside()) ||
+                (healpix1->ordering() != healpix2->ordering())) {
+                flag = false;
+                break;
+            }
+        }
+
+    } while(false);
 
     // Return flag
     return (flag);

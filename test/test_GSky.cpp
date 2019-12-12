@@ -1282,6 +1282,51 @@ void TestGSky::test_GSkyMap(void)
     }
     test_value(total_test, total_src, "Check Trimmed Map sum (region)");
 
+    // Define maps for operator testing
+    GSkyMap map_op1("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 2);
+    GSkyMap map_op2("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 2);
+    GSkyMap map_op3("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 12, 12, 2);
+    for (int layer = 0; layer < map_op1.nmaps(); ++layer) {
+        for (int inx = 0; inx < map_op1.npix(); ++inx) {
+            map_op1(inx,layer) = double(inx+map_op1.npix()*layer);
+        }
+    }
+    for (int layer = 0; layer < map_op2.nmaps(); ++layer) {
+        for (int inx = 0; inx < map_op2.npix(); ++inx) {
+            map_op2(inx,layer) = double(inx+map_op2.npix()*layer);
+        }
+    }
+    for (int layer = 0; layer < map_op3.nmaps(); ++layer) {
+        for (int inx = 0; inx < map_op3.npix(); ++inx) {
+            map_op3(inx,layer) = double(inx+map_op3.npix()*layer);
+        }
+    }
+
+    // Test addition
+    test_map = map_op1 + map_op2;
+    test_value(test_map(45,1), 290.0, "Check addition of identical maps");
+    test_map = map_op1 + map_op3;
+    test_value(test_map(45,1), 355.0, "Check addition of different maps");
+
+    // Test subtraction
+    test_map = map_op1 - map_op2;
+    test_value(test_map(45,1), 0.0, "Check subtraction of identical maps");
+    test_map = map_op1 - map_op3;
+    test_value(test_map(45,1), -65.0, "Check subtraction of different maps");
+
+    // Test multiplication
+    test_map = map_op1 * map_op2;
+    test_value(test_map(45,1), 21025.0, "Check multiplication of identical maps");
+    test_map = map_op1 * map_op3;
+    test_value(test_map(45,1), 30450.0, "Check multiplication of different maps");
+
+
+    // Test division
+    test_map = map_op1 / map_op2;
+    test_value(test_map(45,1), 1.0, "Check division of identical maps");
+    test_map = map_op1 / map_op3;
+    test_value(test_map(45,1), 0.6904761905, "Check division of different maps");
+
     // Exit test
     return;
 }
