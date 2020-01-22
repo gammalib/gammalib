@@ -307,6 +307,57 @@ void GModelSpatial::autoscale(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Returns model flux integrated in circular sky region
+ *
+ * @param[in] reg Sky region.
+ * @param[in] srcEng Energy.
+ * @param[in] srcTime Time.
+ * @return flux (adimensional or or ph/cm2/s).
+ *
+ * Computes
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}  \sin \rho \times
+ *                     \int_{\omega} M(\rho, \omega | E, t) d\omega d\rho
+ * \f]
+ *
+ * where
+ * \f$M(\rho, \omega | E, t)\f$ is the spatial model,
+ * \f$\rho\f$ is the distance from the region centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the region centre and the direction on the sky.
+ ***************************************************************************/
+double GModelSpatial::flux(const GSkyRegionCircle& reg,
+  			   const GEnergy& srcEng,
+  			   const GTime&   srcTime) const
+{
+    // Set number of iterations for Romberg integration.
+    // Need to test!!!!
+    static const int iter_rho = 5;
+    
+    // Initialise flux
+    double flux = 0.0;
+
+    // Define radial integration boundaries from 0 to ROI radius (in radians)
+    double rho_min = 0.;
+    double rho_max = reg.radius() * gammalib::deg2rad;
+
+    // Setup integration kernel
+    GModelSpatial::circle_int_kern_rho integrand(this,
+                                                 reg,
+    				                 srcEng,
+    				                 srcTime);
+    GIntegral integral(&integrand);
+
+    // Perform integration
+    flux = integral.romberg(rho_min, rho_max);
+
+    // Return
+    return flux;
+
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -349,4 +400,103 @@ void GModelSpatial::free_members(void)
 {
     // Return
     return;
+}
+
+/***********************************************************************//**
+ * @brief Kernel for circular sky region radial integration
+ *
+ * @param[in] rho Radial distance from region centre (radians).
+ * @return Integration kernel defined as
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
+ * \f]
+ *
+ * of a spatial model over a circular region. The eval() method computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     \int_{\omega} M(\rho, \omega | E, t) d\omega
+ * \f]
+ *
+ * where
+ * \f$M(\rho, \omega | E, t)\f$ is the spatial model,
+ * \f$\rho\f$ is the distance from the region centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the region centre and the direction on the sky.
+ ***************************************************************************/
+double GModelSpatial::circle_int_kern_rho::eval(const double& rho)
+{
+    // Initialise model value
+    double flux = 0.0;
+
+     // Continue only if rho is positive
+    if (rho > 0.0) {
+      
+      // Integrate over entire circular region
+      // omega between 0 and 2pi
+      double omega_min = 0.;
+      double omega_max = 2 * gammalib::pi;
+
+      // Setup integration kernel for azimuth integration
+      GModelSpatial::circle_int_kern_omega integrand(m_model,
+					             m_reg,
+						     rho,
+					             m_srcEng,
+					             m_srcTime);
+
+     // Setup integrator
+     GIntegral integral(&integrand);
+
+     // Compute sine term for radial integration
+     double sin_rho = std::sin(rho);
+
+     // Integrate over omega
+     flux = integral.romberg(omega_min, omega_max) * sin_rho;
+
+    } // endif: rho was positive
+
+      
+     // Return
+    return flux;
+}
+
+/***********************************************************************//**
+ * @brief Kernel for circular sky region azimuth angle integration
+ *
+ * @param[in] omega Azimuth angle (radians).
+* Computes
+ *
+ * \f[
+ *    K(\omega | \rho, E, t) = M(\omega | \rho)
+ * \f]
+ *
+ * where
+ * \fM(\omega | \rho)\f$ is the spatial model,
+ * \f$\rho\f$ is the distance from the region centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the region centre and the direction on the sky.
+ ***************************************************************************/
+double GModelSpatial::circle_int_kern_omega::eval(const double& omega)
+{
+    // Initialise model value
+    double flux = 0.0;
+
+    // Precompute rho and omega in degrees
+    double omega_deg = omega * gammalib::rad2deg;
+    double rho_deg = m_rho * gammalib::rad2deg;
+
+    // Compute sky direction corresponding to given rho, omega
+    // Deep copy of region centre
+    GSkyDir dir = GSkyDir(m_reg.centre());
+    // Rotate to otain requested sky direction
+    dir.rotate_deg(omega_deg,rho_deg);
+
+    // Evaluate model for this sky direction
+    GPhoton photon = GPhoton(dir,m_srcEng,m_srcTime);
+    flux = m_model->eval(photon);
+
+     // Return
+    return flux;
+  
 }

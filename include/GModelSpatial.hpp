@@ -34,10 +34,13 @@
 #include "GModelPar.hpp"
 #include "GPhoton.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GXmlElement.hpp"
 #include "GRan.hpp"
+#include "GFunction.hpp"
+#include "GIntegral.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GSkyRegion;
@@ -102,6 +105,7 @@ public:
     virtual void           write(GXmlElement& xml) const = 0;
     virtual GSkyRegion*    region(void) const = 0;
     virtual std::string    print(const GChatter& chatter = NORMAL) const = 0;
+				      
 
     // Methods
     GModelPar&       at(const int& index);
@@ -110,12 +114,96 @@ public:
     bool             has_free_pars(void) const;
     int              size(void) const;
     void             autoscale(void);
+    double           flux(const GSkyRegionCircle& reg,
+  			  const GEnergy& srcEng = GEnergy(),
+                          const GTime&   srcTime = GTime()) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GModelSpatial& model);
     void free_members(void);
+
+    /***********************************************************************//**
+ * @class circle_int_kern_rho
+ *
+ * @brief Kernel for circular sky region radial integration
+ *
+ * This class implements the integration kernel \f$K(\rho)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
+ * \f]
+ *
+ * of a spatial model over a circular region. The eval() method computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     \int_{\omega} M(\rho, \omega | E, t) d\omega
+ * \f]
+ *
+ * where
+ * \f$M(\rho, \omega | E, t)\f$ is the spatial model,
+ * \f$\rho\f$ is the distance from the region centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the region centre and the direction on the sky.
+ ***************************************************************************/
+  class circle_int_kern_rho : public GFunction {
+  public:
+    circle_int_kern_rho(const GModelSpatial*      model,
+			  const GSkyRegionCircle& reg,
+			  const GEnergy&          srcEng,
+			  const GTime&            srcTime) :
+      m_model(model),
+      m_reg(reg),
+      m_srcEng(srcEng),
+      m_srcTime(srcTime) { }
+    double eval(const double& rho);
+  public:
+    const GModelSpatial*       m_model;   //!< Model
+    GSkyRegionCircle    m_reg;     //!< Region
+    GEnergy                    m_srcEng;  //!< Photon energy
+    GTime                      m_srcTime; //!< Photon time
+  };
+
+  /***********************************************************************//**
+ * @class circle_int_kern_omega
+ *
+ * @brief Kernel for circular sky region azimuth angle integration
+ *
+ * This class implements the computation of
+ *
+ * \f[
+ *    K(\omega | \rho, E, t) = M(\omega | \rho)
+ * \f]
+ *
+ * where
+ * \fM(\omega | \rho)\f$ is the spatial model,
+ * \f$\rho\f$ is the distance from the region centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the region centre and the direction on the sky.
+ ***************************************************************************/
+  class circle_int_kern_omega : public GFunction {
+  public:
+    circle_int_kern_omega(const GModelSpatial*    model,
+			  const GSkyRegionCircle& reg,
+			  const double&           rho,
+			  const GEnergy&          srcEng,
+			  const GTime&            srcTime) :
+      m_model(model),
+      m_reg(reg),
+      m_rho(rho),
+      m_srcEng(srcEng),
+      m_srcTime(srcTime) { }
+    double eval(const double& omega);
+  public:
+    const GModelSpatial*       m_model;   //!< Model
+    GSkyRegionCircle     m_reg;     //!< Region
+    double                     m_rho;     //!< Offset from center of the region
+    GEnergy                    m_srcEng;  //!< Photon energy
+    GTime                      m_srcTime; //!< Photon time
+  };
 
     // Proteced members
     std::vector<GModelPar*> m_pars;   //!< Parameter pointers
