@@ -331,27 +331,30 @@ void GModelSpatial::autoscale(void)
 double GModelSpatial::flux(const GSkyRegionCircle& reg,
   			   const GEnergy& srcEng,
   			   const GTime&   srcTime) const
-{
-    // Set number of iterations for Romberg integration.
-    // Need to test!!!!
-    static const int iter_rho = 5;
-    
+{   
     // Initialise flux
     double flux = 0.0;
 
-    // Define radial integration boundaries from 0 to ROI radius (in radians)
-    double rho_min = 0.;
-    double rho_max = reg.radius() * gammalib::deg2rad;
+    // Check if region overlaps with model
+    GSkyRegion* model_reg = this -> region();
+    if (model_reg -> overlaps(reg)) {
+    
+      // Define radial integration boundaries from 0 to ROI radius (in radians)
+      double rho_min = 0.;
+      double rho_max = reg.radius() * gammalib::deg2rad;
 
-    // Setup integration kernel
-    GModelSpatial::circle_int_kern_rho integrand(this,
-                                                 reg,
-    				                 srcEng,
-    				                 srcTime);
-    GIntegral integral(&integrand);
+      // Setup integration kernel
+      GModelSpatial::circle_int_kern_rho integrand(this,
+						   reg,
+						   srcEng,
+						   srcTime);
+      GIntegral integral(&integrand);
 
-    // Perform integration
-    flux = integral.romberg(rho_min, rho_max);
+      // Perform integration
+      flux = integral.romberg(rho_min, rho_max);
+    
+    }
+    
 
     // Return
     return flux;
