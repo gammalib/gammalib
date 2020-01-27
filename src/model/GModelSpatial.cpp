@@ -34,6 +34,11 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                    "GModelSpatial::operator[](std::string&)"
 #define G_AT                             "GModelPar& GModelSpatial::at(int&)"
+#define G_FLUX     "double GModelSpatial::flux(const GSkyRegionCircle& reg, "\
+                                         "const GEnergy& srcEng = GEnergy(),"\
+                                         " const GTime&   srcTime = GTime())"
+/* __ Constants __________________________________________________________ */
+const double g_kludge_radius = 1.0e-12;            //!< Tiny angle (radians)
 
 /* __ Macros _____________________________________________________________ */
 
@@ -338,22 +343,68 @@ double GModelSpatial::flux(const GSkyRegionCircle& reg,
     // Check if region overlaps with model
     GSkyRegion* model_reg = this -> region();
     if (model_reg -> overlaps(reg)) {
-    
-      // Define radial integration boundaries from 0 to ROI radius (in radians)
-      double rho_min = 0.;
-      double rho_max = reg.radius() * gammalib::deg2rad;
 
-      // Setup integration kernel
-      GModelSpatial::circle_int_kern_rho integrand(this,
-						   reg,
-						   srcEng,
-						   srcTime);
-      GIntegral integral(&integrand);
+      // Extract the model region circle
+      // This only works for a model that results a GSkyRegionCircle
+      GSkyRegionCircle* model_circle  = dynamic_cast<GSkyRegionCircle*>(model_reg);
 
-      // Perform integration
-      flux = integral.romberg(rho_min, rho_max);
+      // If model region circle is valid then
+      // estimate flux in the overlap region between model circle
+      // and region of interest
+      if (model_circle != NULL) {
+
+	// Model centre and radius (in rad)
+	GSkyDir model_centre = model_circle -> centre();
+	double model_radius = model_circle -> radius();
+	model_radius *= gammalib::deg2rad;
+
+	// Distance between region and model centres
+	double distance = model_centre.dist(reg.centre());
     
-    }
+	// Minimum radial integration boundary (in radians)
+	// Distance between centers minus radius of model region
+	double rho_min = distance - model_radius;
+
+	// If rho_min is < 0 set it to 0
+	if (rho_min < 0.) {
+	  rho_min = 0;
+	}
+
+	// Maximum radial integration boundary corresponds to region radius  (in radians)
+	double rho_max = reg.radius() * gammalib::deg2rad;
+
+	// Pre-compute some quantities for arclength
+	double cosdist = std::cos(distance);
+	double sindist = std::sin(distance);
+	double cosmodrad = std::cos(model_radius * gammalib::deg2rad);
+
+	// Setup integration kernel
+	GModelSpatial::circle_int_kern_rho integrand(this,
+						     reg,
+						     srcEng,
+						     srcTime,
+						     distance,
+						     cosdist,
+						     sindist,
+						     model_radius,
+						     cosmodrad);
+	GIntegral integral(&integrand);
+
+	// Perform integration
+	flux = integral.romberg(rho_min, rho_max);
+
+      }
+
+      // Otherwise, if model region circle is not valid throw exception
+      else {
+	
+	std::string msg = "Flux can only be computed for spatial model"
+                          " with region defined as circle.";
+    	throw GException::runtime_error(G_FLUX, msg);
+	
+      }// endif model has a valid region circle 
+    
+    }// endif model overlaps with region
     
 
     // Return
@@ -435,27 +486,49 @@ double GModelSpatial::circle_int_kern_rho::eval(const double& rho)
 
      // Continue only if rho is positive
     if (rho > 0.0) {
+
+      // Compute half length of the arc (in radians) from a circle with
+      // radius rho that intersects with the point spread function, defined
+      // as a circle with maximum radius m_delta_max
+      // double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+      // 							m_dist,
+      // 							m_cosdist,
+      // 							m_sindist,
+      // 							m_modrad,
+      // 							m_cosmodrad);
+      double domega = gammalib::pi;
+
+      // Continue only if arc length is positive
+      if (domega > 0.0) {
+
+	// Reduce rho by an infinite amount to avoid rounding errors
+	// at the boundary of a sharp edged model
+	double rho_kludge = rho - g_kludge_radius;
+	if (rho_kludge < 0.0) {
+	  rho_kludge = 0.0;
+	}
       
-      // Integrate over entire circular region
-      // omega between 0 and 2pi
-      double omega_min = 0.;
-      double omega_max = 2 * gammalib::pi;
+	// Compute omega integration range
+	double omega_min = -domega;
+	double omega_max = +domega;
 
-      // Setup integration kernel for azimuth integration
-      GModelSpatial::circle_int_kern_omega integrand(m_model,
-					             m_reg,
-						     rho,
-					             m_srcEng,
-					             m_srcTime);
+	// Setup integration kernel for azimuth integration
+	GModelSpatial::circle_int_kern_omega integrand(m_model,
+						       m_reg,
+						       rho_kludge,
+						       m_srcEng,
+						       m_srcTime);
 
-     // Setup integrator
-     GIntegral integral(&integrand);
+	// Setup integrator
+	GIntegral integral(&integrand);
 
-     // Compute sine term for radial integration
-     double sin_rho = std::sin(rho);
+	// Compute sine term for radial integration
+	double sin_rho = std::sin(rho);
 
-     // Integrate over omega
-     flux = integral.romberg(omega_min, omega_max) * sin_rho;
+	// Integrate over omega
+	flux = integral.romberg(omega_min, omega_max) * sin_rho;
+
+      } //endif: domega was positive
 
     } // endif: rho was positive
 
