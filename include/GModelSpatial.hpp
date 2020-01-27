@@ -151,20 +151,35 @@ protected:
  ***************************************************************************/
   class circle_int_kern_rho : public GFunction {
   public:
-    circle_int_kern_rho(const GModelSpatial*      model,
-			  const GSkyRegionCircle& reg,
-			  const GEnergy&          srcEng,
-			  const GTime&            srcTime) :
+    circle_int_kern_rho(const GModelSpatial*    model,
+			const GSkyRegionCircle& reg,
+			const GEnergy&          srcEng,
+			const GTime&            srcTime,
+			const double            distance,
+			const double            cosdist,
+			const double            sindist,
+			const double            modrad,
+			const double            cosmodrad) :
       m_model(model),
       m_reg(reg),
       m_srcEng(srcEng),
-      m_srcTime(srcTime) { }
+      m_srcTime(srcTime),
+      m_dist(distance),
+      m_cosdist(cosdist),
+      m_sindist(sindist),
+      m_modrad(modrad),
+      m_cosmodrad(cosmodrad) { }
     double eval(const double& rho);
   public:
-    const GModelSpatial*       m_model;   //!< Model
-    GSkyRegionCircle    m_reg;     //!< Region
-    GEnergy                    m_srcEng;  //!< Photon energy
-    GTime                      m_srcTime; //!< Photon time
+    const GModelSpatial*       m_model;     //!< Model
+    GSkyRegionCircle           m_reg;       //!< Region
+    GEnergy                    m_srcEng;    //!< Photon energy
+    GTime                      m_srcTime;   //!< Photon time
+    double                     m_dist;      //!< Distance model-region (rad)
+    double                     m_cosdist;   //!< Cos of distance model-region
+    double                     m_sindist;   //!< Sin of distance model-region
+    double                     m_modrad;       //!< Model radius (rad)
+    double                     m_cosmodrad; //!< Cos of model radius
   };
 
   /***********************************************************************//**
