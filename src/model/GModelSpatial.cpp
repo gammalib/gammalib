@@ -376,7 +376,7 @@ double GModelSpatial::flux(const GSkyRegionCircle& reg,
 	// Pre-compute some quantities for arclength
 	double cosdist = std::cos(distance);
 	double sindist = std::sin(distance);
-	double cosmodrad = std::cos(model_radius * gammalib::deg2rad);
+	double cosmodrad = std::cos(model_radius);
 
 	// Setup integration kernel
 	GModelSpatial::circle_int_kern_rho integrand(this,
@@ -488,15 +488,13 @@ double GModelSpatial::circle_int_kern_rho::eval(const double& rho)
     if (rho > 0.0) {
 
       // Compute half length of the arc (in radians) from a circle with
-      // radius rho that intersects with the point spread function, defined
-      // as a circle with maximum radius m_delta_max
-      // double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-      // 							m_dist,
-      // 							m_cosdist,
-      // 							m_sindist,
-      // 							m_modrad,
-      // 							m_cosmodrad);
-      double domega = gammalib::pi;
+      // radius rho that intersects with model circle
+      double domega = 0.5 * gammalib::roi_arclength(rho,
+      						    m_dist,
+      						    m_cosdist,
+      						    m_sindist,
+      						    m_modrad,
+      						    m_cosmodrad);
 
       // Continue only if arc length is positive
       if (domega > 0.0) {
