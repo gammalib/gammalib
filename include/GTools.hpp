@@ -144,6 +144,12 @@ namespace gammalib {
                                                      std::string&    value);
     int                      recv(int fd, char *buffer, int len, int flags,
                                   int timeout);
+    double                   roi_arclength(const double& rad,
+                                           const double& dist,
+                                           const double& cosdist,
+                                           const double& sindist,
+                                           const double& roi,
+                                           const double& cosroi);
 }
 
 

@@ -341,12 +341,12 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
     double value = 0.0;
 
     // Get arclength for given radius in radians
-    double phi = gammalib::cta_roi_arclength(delta,
-                                             m_psf,
-                                             m_cospsf,
-                                             m_sinpsf,
-                                             m_roi,
-                                             m_cosroi);
+    double phi = gammalib::roi_arclength(delta,
+                                         m_psf,
+                                         m_cospsf,
+                                         m_sinpsf,
+                                         m_roi,
+                                         m_cosroi);
 
     // If arclength is positive then compute the PSF value
     if (phi > 0) {
@@ -431,12 +431,12 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
 
         // Compute half length of arc that lies within PSF validity circle
         // (in radians)
-        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-                                                          m_zeta,
-                                                          m_cos_zeta,
-                                                          m_sin_zeta,
-                                                          m_delta_max,
-                                                          m_cos_delta_max);
+        double domega = 0.5 * gammalib::roi_arclength(rho,
+                                                      m_zeta,
+                                                      m_cos_zeta,
+                                                      m_sin_zeta,
+                                                      m_delta_max,
+                                                      m_cos_delta_max);
 
         // Continue only if arc length is positive
         if (domega > 0.0) {
@@ -632,7 +632,7 @@ double cta_nroi_radial_kern_rho::eval(const double& rho)
     if (rho > 0.0) {
 
         // Compute half length of arc that lies within ROI+PSF radius (radians)
-        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+        double domega = 0.5 * gammalib::roi_arclength(rho,
                                                           m_dist,
                                                           m_cos_dist,
                                                           m_sin_dist,
@@ -809,7 +809,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
         // Compute half length of the arc (in radians) from a circle with
         // radius rho that intersects with the point spread function, defined
         // as a circle with maximum radius m_delta_max
-        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+        double domega = 0.5 * gammalib::roi_arclength(rho,
                                                           m_rho_obs,
                                                           m_cos_rho_obs,
                                                           m_sin_rho_obs,
@@ -1115,7 +1115,7 @@ double cta_nroi_elliptical_kern_rho::eval(const double& rho)
     if (rho > 0.0) {
 
         // Compute half length of arc that lies within ROI+PSF radius (radians)
-        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+        double domega = 0.5 * gammalib::roi_arclength(rho,
                                                           m_rho_roi,
                                                           m_cos_rho_roi,
                                                           m_sin_rho_roi,
@@ -1744,12 +1744,12 @@ double cta_psf_radial_kern_rho::eval(const double& rho)
         // Compute half length of the arc (in radians) from a circle with
         // radius rho that intersects with the point spread function, defined
         // as a circle with maximum radius m_delta_max
-        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-                                                          m_rho_obs,
-                                                          m_cos_rho_obs,
-                                                          m_sin_rho_obs,
-                                                          m_delta_max,
-                                                          m_cos_delta_max);
+        double domega = 0.5 * gammalib::roi_arclength(rho,
+                                                      m_rho_obs,
+                                                      m_cos_rho_obs,
+                                                      m_sin_rho_obs,
+						      m_delta_max,
+                                                      m_cos_delta_max);
 
         // Continue only if arc length is positive
         if (domega > 0.0) {
@@ -1927,7 +1927,7 @@ double cta_psf_radial_kern_delta::eval(const double& delta)
             // Compute half length of the arc (in radians) from a circle with
             // radius delta that intersects with the model, defined as a circle
             // with maximum radius m_theta_max
-            double dphi = 0.5 * gammalib::cta_roi_arclength(delta,
+            double dphi = 0.5 * gammalib::roi_arclength(delta,
                                                             m_delta_mod,
                                                             m_cos_delta_mod,
                                                             m_sin_delta_mod,
@@ -2084,7 +2084,7 @@ double cta_psf_elliptical_kern_rho::eval(const double& rho)
         // Compute half length of the arc (in radians) from a circle with
         // radius rho that intersects with the point spread function, defined
         // as a circle with maximum radius m_delta_max
-        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+        double domega = 0.5 * gammalib::roi_arclength(rho,
                                                           m_rho_obs,
                                                           m_cos_rho_obs,
                                                           m_sin_rho_obs,

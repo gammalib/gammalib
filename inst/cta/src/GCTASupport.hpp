@@ -79,12 +79,6 @@ namespace gammalib {
                                     const GEvent&       event);
     const GModelSpectral*   cta_model_spectral(const GModelData& model);
     const GModelTemporal*   cta_model_temporal(const GModelData& model);
-    double                  cta_roi_arclength(const double& rad,
-                                              const double& dist,
-                                              const double& cosdist,
-                                              const double& sindist,
-                                              const double& roi,
-                                              const double& cosroi);
     GCTARoi                 read_ds_roi(const GFitsHDU& hdu);
     GEbounds                read_ds_ebounds(const GFitsHDU& hdu);
     GPhases                 read_ds_phase(const GFitsHDU& hdu);
