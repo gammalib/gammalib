@@ -1,4 +1,4 @@
-2019-12-12
+2020-01-29
 
         * Version 1.7.0 released
         ========================
@@ -11,6 +11,7 @@
         Add GCOMObservation::drm(GModels&) method (#2973)
         Implement methods to remove models from a response cache (#2973)
         Improve COMPTEL classes (#2973)
+        Change order of Python module import (#2961)
         Add GGti::overlap() method
         Correctly write model attributes in GCOMModelDRBFitting class
         Add GTime.datetime() method and add optional precision to GTime.utc() (#2909)
