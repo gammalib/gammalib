@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-12 December 2019
+29 January 2020
 
 
 1. Introduction
@@ -59,7 +59,9 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-None
+The order of the Python module imports was changed since there were some issues
+with type casting with the present order. This is some side effect of how SWIG
+handles type casting among multiple modules.
 
 
 4. Application module
