@@ -1,7 +1,7 @@
 # ==========================================================================
 # GammaLib Python module
 #
-# Copyright (C) 2016-2018 Juergen Knoedlseder
+# Copyright (C) 2016-2019 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,14 +22,14 @@ from gammalib.app import *
 from gammalib.base import *
 from gammalib.fits import *
 from gammalib.linalg import *
-from gammalib.model import *
-from gammalib.numerics import *
-from gammalib.obs import *
-from gammalib.opt import *
 from gammalib.sky import *
+from gammalib.numerics import *
+from gammalib.opt import *
 from gammalib.support import *
-from gammalib.test import *
 from gammalib.xml import *
+from gammalib.model import *
+from gammalib.obs import *
+from gammalib.test import *
 from gammalib.xspec import *
 from gammalib.vo import *
 from gammalib.mwl import *
