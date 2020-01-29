@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GSkyRegionCircle.i - Sky region class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Michael Mayer                               *
+ *  copyright (C) 2013-2019 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,9 +72,10 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.centre(), self.radius())
+        state = (self.centre(), self.radius(), self.name())
         return state
     def __setstate__(self, state):
         self.__init__(state[0], state[1])
+        self.name(state[2])
 }
 };

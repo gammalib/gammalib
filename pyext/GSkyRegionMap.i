@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegionMap.i - Sky region map class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Pierrick Martin                             *
+ *  copyright (C) 2017-2019 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,9 +71,10 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.map(),)
+        state = (self.map(), self.name())
         return state
     def __setstate__(self, state):
         self.__init__(state[0])
+        self.name(state[1])
 }
 };
