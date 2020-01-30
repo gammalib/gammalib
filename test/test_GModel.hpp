@@ -97,6 +97,7 @@ public:
     void                test_legacy_model_point_eplaw(void);
     void                test_legacy_model_point_supeplaw(void);
     void                test_legacy_model_point_logparabola(void);
+    void                test_flux(void);
 
 private:        
     // Private methods

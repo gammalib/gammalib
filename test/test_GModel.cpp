@@ -132,6 +132,10 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_spatial_model),
            "Test spatial model XML I/O");
 
+    // Append test of spatial model flux integration
+    append(static_cast<pfunction>(&TestGModel::test_flux),
+           "Test spatial model flux integration");
+
     // Append spectral model tests
     append(static_cast<pfunction>(&TestGModel::test_const),
            "Test GModelSpectralConst");
@@ -3453,6 +3457,40 @@ void TestGModel::test_legacy_model_point_logparabola(void)
     test_value(spectral->index(), -2.32473, 1.0e-7, "Check index");
     test_value(spectral->pivot().TeV(), 1.0, 1.0e-7, "Check pivot energy");
     test_value(spectral->curvature(), -0.074, 1.0e-7, "Check curvature)");
+
+    // Exit test
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Test flux integration
+ ***************************************************************************/
+void TestGModel::test_flux(void)
+{
+
+    // Define model for test
+    GSkyDir centre1;
+    centre1.radec_deg(0.,0.5);
+    GModelSpatialRadialDisk model = GModelSpatialRadialDisk(centre1,0.25);
+
+    // Define entre of test ROI
+    GSkyDir centre2;
+    centre2.radec_deg(0.,0.);
+
+    // Test non overlapping region 
+    GSkyRegionCircle circle1 = GSkyRegionCircle(centre2,0.1);
+    GSkyRegion* roi1 = &circle1;
+    test_value(model.flux(roi1), 0, 1.e-4, "Check model not overlapping with region");
+
+    // Test fully contained model
+    GSkyRegionCircle circle2 = GSkyRegionCircle(centre2,1.);
+    GSkyRegion* roi2 = &circle2;
+    test_value(model.flux(roi2), 1., 1.e-4, "Check model fully contained in region");
+
+    // Test partially contained model
+    GSkyRegionCircle circle3 = GSkyRegionCircle(centre2,0.5);
+    GSkyRegion* roi3 = &circle3;
+    test_value(model.flux(roi3), 0.44654, 1.e-4, "Check model partially contained in region");
 
     // Exit test
     return;
