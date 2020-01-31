@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GModelSpatial.i - Spatial model abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,6 +64,9 @@ public:
     bool       has_free_pars(void) const;
     int        size(void) const;
     void       autoscale(void);
+    double     flux(const GSkyRegion* reg,
+                    const GEnergy&    srcEng = GEnergy(),
+                    const GTime&      srcTime = GTime()) const;
 };
 
 

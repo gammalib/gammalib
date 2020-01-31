@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GModel.hpp - Test model module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2020 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,12 +97,13 @@ public:
     void                test_legacy_model_point_eplaw(void);
     void                test_legacy_model_point_supeplaw(void);
     void                test_legacy_model_point_logparabola(void);
+    void                test_flux(void);
 
-private:        
+private:
     // Private methods
     void test_xml_model(const std::string& name, const std::string& filename);
     void test_sky_model_content(const GModelSky& model);
-    
+
     // Test files
     std::string m_map_file;
     std::string m_cube_file;

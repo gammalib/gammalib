@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-29 January 2020
+31 January 2020
 
 
 1. Introduction
@@ -35,6 +35,7 @@ The following methods have been added:
 - GSkyDir::sun() - Set sky position of Sun
 - GSkyDir::moon() - Set sky position of Moon
 - GSkyMap::extract() - Extract section of sky map
+- GModelSpatial::flux() - Extract flux from sky region
 - GCTAObservation::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponse::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponseCache::remove(string&) - Remove response cache for model
@@ -86,7 +87,9 @@ None
 
 8. Model module
 ---------------
-None
+The method GModelSpatial::flux() was added that extracts the flux by integrating
+over a specific sky region. For the moment only circular sky regions are
+implemented (#2961).
 
 
 9. Numerics module

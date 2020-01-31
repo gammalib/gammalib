@@ -36,6 +36,8 @@ Improvements
   Implement methods to remove models from a response cache.
   Add ``GCOMObservation::drm(GModels&)`` method.
   Add ``GCOMDri::cone_content()`` method.
+* [`2961 <https://cta-redmine.irap.omp.eu/issues/2961>`_] -
+  Add ``GModelSpatial::flux()`` method.
 * Add ``GGti::overlap()`` method.
 * [`2909 <https://cta-redmine.irap.omp.eu/issues/2909>`_] -
   Add ``GTime.datetime()`` method and add optional precision to ``GTime.utc()`` method.
@@ -47,6 +49,9 @@ Improvements
 
 New features
 ------------
+
+* [`2961 <https://cta-redmine.irap.omp.eu/issues/2961>`_] -
+  Change order of Python module import.
 
 
 Clean up

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialAcceptance.cpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1043,7 +1043,7 @@ GModelTemporal* GCTAModelRadialAcceptance::xml_temporal(const GXmlElement& tempo
  * in radians, and
  * \f$\phi\f$ is the measured azimuth angle. The integration is done over
  * the arc of the azimuth angle that lies within the ROI. This integration
- * is done analytically using the "cta_roi_arclength" support function.
+ * is done analytically using the "roi_arclength" support function.
  ***************************************************************************/
 double GCTAModelRadialAcceptance::roi_kern::eval(const double& offset)
 {
@@ -1052,17 +1052,17 @@ double GCTAModelRadialAcceptance::roi_kern::eval(const double& offset)
 
     // Initialise Npred value
     double value = 0.0;
-    
+
     // Continue only if offset > 0
     if (offset > 0.0) {
 
         // Get arclength for given radius in radians.
-        double phi = gammalib::cta_roi_arclength(offset,
-                                                 m_dist,
-                                                 m_cosdist,
-                                                 m_sindist,
-                                                 m_roi,
-                                                 m_cosroi);
+        double phi = gammalib::roi_arclength(offset,
+                                             m_dist,
+                                             m_cosdist,
+                                             m_sindist,
+                                             m_roi,
+                                             m_cosroi);
 
         // Get kernel value if phi > 0
         if (phi > 0.0) {

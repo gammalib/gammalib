@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -144,6 +144,12 @@ namespace gammalib {
                                                      std::string&    value);
     int                      recv(int fd, char *buffer, int len, int flags,
                                   int timeout);
+    double                   roi_arclength(const double& rad,
+                                           const double& dist,
+                                           const double& cosdist,
+                                           const double& sindist,
+                                           const double& roi,
+                                           const double& cosroi);
 }
 
 
