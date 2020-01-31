@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse_helpers.cpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -633,11 +633,11 @@ double cta_nroi_radial_kern_rho::eval(const double& rho)
 
         // Compute half length of arc that lies within ROI+PSF radius (radians)
         double domega = 0.5 * gammalib::roi_arclength(rho,
-                                                          m_dist,
-                                                          m_cos_dist,
-                                                          m_sin_dist,
-                                                          m_radius,
-                                                          m_cos_radius);
+                                                      m_dist,
+                                                      m_cos_dist,
+                                                      m_sin_dist,
+                                                      m_radius,
+                                                      m_cos_radius);
 
         // Continue only if arc length is positive
         if (domega > 0.0) {
@@ -810,11 +810,11 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
         // radius rho that intersects with the point spread function, defined
         // as a circle with maximum radius m_delta_max
         double domega = 0.5 * gammalib::roi_arclength(rho,
-                                                          m_rho_obs,
-                                                          m_cos_rho_obs,
-                                                          m_sin_rho_obs,
-                                                          m_delta_max,
-                                                          m_cos_delta_max);
+                                                      m_rho_obs,
+                                                      m_cos_rho_obs,
+                                                      m_sin_rho_obs,
+                                                      m_delta_max,
+                                                      m_cos_delta_max);
 
         // Continue only if arc length is positive
         if (domega > 0.0) {
@@ -1116,11 +1116,11 @@ double cta_nroi_elliptical_kern_rho::eval(const double& rho)
 
         // Compute half length of arc that lies within ROI+PSF radius (radians)
         double domega = 0.5 * gammalib::roi_arclength(rho,
-                                                          m_rho_roi,
-                                                          m_cos_rho_roi,
-                                                          m_sin_rho_roi,
-                                                          m_radius_roi,
-                                                          m_cos_radius_roi);
+                                                      m_rho_roi,
+                                                      m_cos_rho_roi,
+                                                      m_sin_rho_roi,
+                                                      m_radius_roi,
+                                                      m_cos_radius_roi);
 
         // Continue only if arc length is positive
         if (domega > 0.0) {
@@ -1748,7 +1748,7 @@ double cta_psf_radial_kern_rho::eval(const double& rho)
                                                       m_rho_obs,
                                                       m_cos_rho_obs,
                                                       m_sin_rho_obs,
-						      m_delta_max,
+                                                      m_delta_max,
                                                       m_cos_delta_max);
 
         // Continue only if arc length is positive
@@ -1928,11 +1928,11 @@ double cta_psf_radial_kern_delta::eval(const double& delta)
             // radius delta that intersects with the model, defined as a circle
             // with maximum radius m_theta_max
             double dphi = 0.5 * gammalib::roi_arclength(delta,
-                                                            m_delta_mod,
-                                                            m_cos_delta_mod,
-                                                            m_sin_delta_mod,
-                                                            m_theta_max,
-                                                            m_cos_theta_max);
+                                                        m_delta_mod,
+                                                        m_cos_delta_mod,
+                                                        m_sin_delta_mod,
+                                                        m_theta_max,
+                                                        m_cos_theta_max);
 
             // Continue only if arc length is positive
             if (dphi > 0.0) {
@@ -2085,11 +2085,11 @@ double cta_psf_elliptical_kern_rho::eval(const double& rho)
         // radius rho that intersects with the point spread function, defined
         // as a circle with maximum radius m_delta_max
         double domega = 0.5 * gammalib::roi_arclength(rho,
-                                                          m_rho_obs,
-                                                          m_cos_rho_obs,
-                                                          m_sin_rho_obs,
-                                                          m_delta_max,
-                                                          m_cos_delta_max);
+                                                      m_rho_obs,
+                                                      m_cos_rho_obs,
+                                                      m_sin_rho_obs,
+                                                      m_delta_max,
+                                                      m_cos_delta_max);
 
         // Continue only if arc length is positive
         if (domega > 0.0) {

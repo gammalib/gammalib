@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -3467,29 +3467,28 @@ void TestGModel::test_legacy_model_point_logparabola(void)
  ***************************************************************************/
 void TestGModel::test_flux(void)
 {
-
     // Define model for test
     GSkyDir centre1;
-    centre1.radec_deg(0.,0.5);
-    GModelSpatialRadialDisk model = GModelSpatialRadialDisk(centre1,0.25);
+    centre1.radec_deg(0.0, 0.5);
+    GModelSpatialRadialDisk model = GModelSpatialRadialDisk(centre1, 0.25);
 
     // Define entre of test ROI
     GSkyDir centre2;
-    centre2.radec_deg(0.,0.);
+    centre2.radec_deg(0.0, 0.0);
 
     // Test non overlapping region 
-    GSkyRegionCircle circle1 = GSkyRegionCircle(centre2,0.1);
-    GSkyRegion* roi1 = &circle1;
-    test_value(model.flux(roi1), 0, 1.e-4, "Check model not overlapping with region");
+    GSkyRegionCircle circle1 = GSkyRegionCircle(centre2, 0.1);
+    GSkyRegion*      roi1    = &circle1;
+    test_value(model.flux(roi1), 0.0, 1.e-4, "Check model not overlapping with region");
 
     // Test fully contained model
-    GSkyRegionCircle circle2 = GSkyRegionCircle(centre2,1.);
-    GSkyRegion* roi2 = &circle2;
-    test_value(model.flux(roi2), 1., 1.e-4, "Check model fully contained in region");
+    GSkyRegionCircle circle2 = GSkyRegionCircle(centre2, 1.0);
+    GSkyRegion*      roi2    = &circle2;
+    test_value(model.flux(roi2), 1.0, 1.e-4, "Check model fully contained in region");
 
     // Test partially contained model
-    GSkyRegionCircle circle3 = GSkyRegionCircle(centre2,0.5);
-    GSkyRegion* roi3 = &circle3;
+    GSkyRegionCircle circle3 = GSkyRegionCircle(centre2, 0.5);
+    GSkyRegion*      roi3    = &circle3;
     test_value(model.flux(roi3), 0.44654, 1.e-4, "Check model partially contained in region");
 
     // Exit test

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,7 @@
 #include "GXmlText.hpp"
 
 /* __ Compile options ____________________________________________________ */
+//#define G_CHECK_FOR_NAN
 
 /* __ Function name definitions __________________________________________ */
 #define G_XML2STRING                     "gammalib::xml2string(std::string&)"
@@ -1789,12 +1790,12 @@ int gammalib::recv(int fd, char *buffer, int len, int flags, int timeout)
 {
     // Initialise error code with time out
     int error = -2;
-    
+
     // Initialize the set
     fd_set readset;
     FD_ZERO(&readset);
     FD_SET(fd, &readset);
-   
+
     // Initialize time out struct
     struct timeval tv;
     if (timeout >= 1000) {
@@ -1805,7 +1806,7 @@ int gammalib::recv(int fd, char *buffer, int len, int flags, int timeout)
         tv.tv_sec  = 0;
         tv.tv_usec = timeout*1000;
     }
-    
+
     // select()
     int result = select(fd+1, &readset, NULL, NULL, &tv);
 
@@ -1822,22 +1823,23 @@ int gammalib::recv(int fd, char *buffer, int len, int flags, int timeout)
         if ((iof = fcntl(fd, F_GETFL, 0)) != -1) {
             fcntl(fd, F_SETFL, iof | O_NONBLOCK);
         }
-        
+
         // Receive data
         result = ::recv(fd, buffer, len, flags);
-        
+
         // Set as before
         if (iof != -1) {
             fcntl(fd, F_SETFL, iof);
         }
-        
+
         // Set error
         error = result;
     }
-    
+
     // Return error
     return error;
 }
+
 
 /***********************************************************************//**
  * @brief Returns length of circular arc within circular ROI
@@ -1894,7 +1896,7 @@ double gammalib::roi_arclength(const double& rad,     const double& dist,
                 double sinrad = std::sin(rad);
                 double cosang = (cosroi - cosdist*cosrad) / (sindist*sinrad);
                 arclength     = 2.0 * gammalib::acos(cosang);
-                #if G_CHECK_FOR_NAN
+                #if defined(G_CHECK_FOR_NAN)
                 if (gammalib::is_infinite(arclength) ||
                     gammalib::is_notanumber(arclength)) {
                     std::cout << "roi_arclength: NaN occured";

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatial.hpp - Spatial model abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,7 +105,6 @@ public:
     virtual void           write(GXmlElement& xml) const = 0;
     virtual GSkyRegion*    region(void) const = 0;
     virtual std::string    print(const GChatter& chatter = NORMAL) const = 0;
-				      
 
     // Methods
     GModelPar&       at(const int& index);
@@ -114,9 +113,9 @@ public:
     bool             has_free_pars(void) const;
     int              size(void) const;
     void             autoscale(void);
-    double           flux(GSkyRegion* reg,
-  			  const GEnergy& srcEng = GEnergy(),
-                          const GTime&   srcTime = GTime()) const;
+    double           flux(const GSkyRegion* reg,
+                          const GEnergy&    srcEng = GEnergy(),
+                          const GTime&      srcTime = GTime()) const;
 
 protected:
     // Protected methods
@@ -124,101 +123,61 @@ protected:
     void copy_members(const GModelSpatial& model);
     void free_members(void);
 
-    /***********************************************************************//**
- * @class circle_int_kern_rho
- *
- * @brief Kernel for circular sky region radial integration
- *
- * This class implements the integration kernel \f$K(\rho)\f$ for the
- * integration
- *
- * \f[
- *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
- * \f]
- *
- * of a spatial model over a circular region. The eval() method computes
- *
- * \f[
- *    K(\rho | E, t) = \sin \rho \times
- *                     \int_{\omega} M(\rho, \omega | E, t) d\omega
- * \f]
- *
- * where
- * \f$M(\rho, \omega | E, t)\f$ is the spatial model,
- * \f$\rho\f$ is the distance from the region centre, and
- * \f$\omega\f$ is the position angle with respect to the connecting line
- * between the region centre and the direction on the sky.
- ***************************************************************************/
-  class circle_int_kern_rho : public GFunction {
-  public:
-    circle_int_kern_rho(const GModelSpatial*    model,
-			const GSkyRegionCircle& reg,
-			const GEnergy&          srcEng,
-			const GTime&            srcTime,
-			const double            distance,
-			const double            cosdist,
-			const double            sindist,
-			const double            modrad,
-			const double            cosmodrad) :
-      m_model(model),
-      m_reg(reg),
-      m_srcEng(srcEng),
-      m_srcTime(srcTime),
-      m_dist(distance),
-      m_cosdist(cosdist),
-      m_sindist(sindist),
-      m_modrad(modrad),
-      m_cosmodrad(cosmodrad) { }
-    double eval(const double& rho);
-  public:
-    const GModelSpatial*       m_model;     //!< Model
-    GSkyRegionCircle           m_reg;       //!< Region
-    GEnergy                    m_srcEng;    //!< Photon energy
-    GTime                      m_srcTime;   //!< Photon time
-    double                     m_dist;      //!< Distance model-region (rad)
-    double                     m_cosdist;   //!< Cos of distance model-region
-    double                     m_sindist;   //!< Sin of distance model-region
-    double                     m_modrad;       //!< Model radius (rad)
-    double                     m_cosmodrad; //!< Cos of model radius
-  };
+    // Kernel for circular sky region radial integration
+    class circle_int_kern_rho : public GFunction {
+    public:
+        circle_int_kern_rho(const GModelSpatial*    model,
+                            const GSkyRegionCircle* reg,
+                            const GEnergy&          srcEng,
+                            const GTime&            srcTime,
+                            const double            distance,
+                            const double            cosdist,
+                            const double            sindist,
+                            const double            modrad,
+                            const double            cosmodrad) :
+                           m_model(model),
+                           m_reg(reg),
+                           m_srcEng(srcEng),
+                           m_srcTime(srcTime),
+                           m_dist(distance),
+                           m_cosdist(cosdist),
+                           m_sindist(sindist),
+                           m_modrad(modrad),
+                           m_cosmodrad(cosmodrad) { }
+        double eval(const double& rho);
+    public:
+        const GModelSpatial*    m_model;     //!< Spatial model
+        const GSkyRegionCircle* m_reg;       //!< Interation region
+        GEnergy                 m_srcEng;    //!< Photon energy
+        GTime                   m_srcTime;   //!< Photon time
+        double                  m_dist;      //!< Distance model-region (rad)
+        double                  m_cosdist;   //!< Cos of distance model-region
+        double                  m_sindist;   //!< Sin of distance model-region
+        double                  m_modrad;    //!< Model radius (rad)
+        double                  m_cosmodrad; //!< Cos of model radius
+    };
 
-  /***********************************************************************//**
- * @class circle_int_kern_omega
- *
- * @brief Kernel for circular sky region azimuth angle integration
- *
- * This class implements the computation of
- *
- * \f[
- *    K(\omega | \rho, E, t) = M(\omega | \rho)
- * \f]
- *
- * where
- * \fM(\omega | \rho)\f$ is the spatial model,
- * \f$\rho\f$ is the distance from the region centre, and
- * \f$\omega\f$ is the position angle with respect to the connecting line
- * between the region centre and the direction on the sky.
- ***************************************************************************/
-  class circle_int_kern_omega : public GFunction {
-  public:
-    circle_int_kern_omega(const GModelSpatial*    model,
-			  const GSkyRegionCircle& reg,
-			  const double&           rho,
-			  const GEnergy&          srcEng,
-			  const GTime&            srcTime) :
-      m_model(model),
-      m_reg(reg),
-      m_rho(rho),
-      m_srcEng(srcEng),
-      m_srcTime(srcTime) { }
-    double eval(const double& omega);
-  public:
-    const GModelSpatial*       m_model;   //!< Model
-    GSkyRegionCircle     m_reg;     //!< Region
-    double                     m_rho;     //!< Offset from center of the region
-    GEnergy                    m_srcEng;  //!< Photon energy
-    GTime                      m_srcTime; //!< Photon time
-  };
+    // Kernel for circular sky region azimuth angle integration
+    class circle_int_kern_omega : public GFunction {
+    public:
+        circle_int_kern_omega(const GModelSpatial*    model,
+                              const GSkyRegionCircle* reg,
+                              const double&           rho,
+                              const GEnergy&          srcEng,
+                              const GTime&            srcTime) :
+                             m_model(model),
+                             m_reg(reg),
+                             m_rho(rho),
+                             m_srcEng(srcEng),
+                             m_srcTime(srcTime) { }
+        double eval(const double& omega);
+    public:
+        const GModelSpatial*    m_model;   //!< Spatial model
+        const GSkyRegionCircle* m_reg;     //!< Interation region
+        double                  m_rho;     //!< Offset from center of the region
+        GEnergy                 m_srcEng;  //!< Photon energy
+        GTime                   m_srcTime; //!< Photon time
+    };
 
     // Proteced members
     std::vector<GModelPar*> m_pars;   //!< Parameter pointers
