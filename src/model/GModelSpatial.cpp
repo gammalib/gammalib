@@ -417,7 +417,7 @@ double GModelSpatial::flux(GSkyRegion* reg,
       else {
 	  std::string msg = "Flux can only be computed for a"
 	  " circular region.";
-	  throw GException::runtime_error(G_FLUX, msg);
+	  throw GException::feature_not_implemented(G_FLUX,msg);
 
       }// endif region is a circle
     
