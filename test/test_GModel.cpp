@@ -3472,14 +3472,14 @@ void TestGModel::test_flux(void)
     centre1.radec_deg(0.0, 0.5);
     GModelSpatialRadialDisk model = GModelSpatialRadialDisk(centre1, 0.25);
 
-    // Define entre of test ROI
+    // Define centre of test ROI
     GSkyDir centre2;
     centre2.radec_deg(0.0, 0.0);
 
     // Test non overlapping region 
     GSkyRegionCircle circle1 = GSkyRegionCircle(centre2, 0.1);
     GSkyRegion*      roi1    = &circle1;
-    test_value(model.flux(roi1), 0.0, 1.e-4, "Check model not overlapping with region");
+    test_value(model.flux(roi1), 0.0, 1.e-7, "Check model not overlapping with region");
 
     // Test fully contained model
     GSkyRegionCircle circle2 = GSkyRegionCircle(centre2, 1.0);
@@ -3490,6 +3490,14 @@ void TestGModel::test_flux(void)
     GSkyRegionCircle circle3 = GSkyRegionCircle(centre2, 0.5);
     GSkyRegion*      roi3    = &circle3;
     test_value(model.flux(roi3), 0.44654, 1.e-4, "Check model partially contained in region");
+
+    // Test point source in ROI
+    GModelSpatialPointSource ps = GModelSpatialPointSource(centre1);
+    test_value(ps.flux(roi2), 1.0, 1.e-7, "Check point source contained in region");
+
+    // Test point source outside ROI
+    test_value(ps.flux(roi1), 0.0, 1.e-7, "Check point source not contained in region");
+    
 
     // Exit test
     return;
