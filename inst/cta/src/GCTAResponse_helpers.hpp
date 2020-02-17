@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse_helpers.hpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,14 +55,6 @@ namespace gammalib {
     cta_omega_intervals limit_omega(const double& min,
                                     const double& max,
                                     const double& domega);
-    int                 iter_rho(const double& rho_max,
-                                 const double& resolution,
-                                 const int&    iter_min,
-                                 const int&    iter_max);
-    int                 iter_phi(const double& rho,
-                                 const double& resolution,
-                                 const int&    iter_min,
-                                 const int&    iter_max);
     double              resolution(const GModelSpatial* model);
 }
 

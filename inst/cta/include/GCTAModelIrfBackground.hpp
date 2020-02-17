@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.hpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -95,15 +95,18 @@ private:
     public:
         npred_roi_kern_theta(const GCTABackground* bgd,
                              const double&         logE,
+                             const GCTAInstDir&    roi_centre,
                              const int&            iter) :
                              m_bgd(bgd),
                              m_logE(logE),
+                             m_roi_centre(roi_centre),
                              m_iter(iter) { }
         double eval(const double& theta);
     protected:
-        const GCTABackground* m_bgd;  //!< Pointer to background
-        double                m_logE; //!< Log10 of energy
-        int                   m_iter; //!< Romberg iterations
+        const GCTABackground* m_bgd;        //!< Pointer to background
+        double                m_logE;       //!< Log10 of energy
+        GCTAInstDir           m_roi_centre; //!< RoI centre
+        int                   m_iter;       //!< Romberg iterations
     };
 
     // ROI integration kernel over phi
@@ -111,15 +114,18 @@ private:
     public:
         npred_roi_kern_phi(const GCTABackground* bgd,
                            const double&         logE,
+                           const GCTAInstDir&    roi_centre,
                            const double&         theta) :
                            m_bgd(bgd),
                            m_logE(logE),
+                           m_roi_centre(roi_centre),
                            m_theta(theta) { }
         double eval(const double& phi);
     protected:
-        const GCTABackground* m_bgd;   //!< Pointer to background
-        double                m_logE;  //!< Log10 of energy
-        double                m_theta; //!< Offset angle (radians)
+        const GCTABackground* m_bgd;        //!< Pointer to background
+        double                m_logE;       //!< Log10 of energy
+        GCTAInstDir           m_roi_centre; //!< RoI centre
+        double                m_theta;      //!< Offset angle (radians)
     };
 
     // Members

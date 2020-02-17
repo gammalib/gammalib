@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1797,7 +1797,7 @@ void TestGCTAModel::test_model_bgd(void)
     }
     */
 
-    // Test XML loading of cube background
+    // Test XML loading of radial Gauss background
     GModels models(cta_bgd_rad_gauss_xml);
     GModel* model = models["My model"];
     test_value((*model)["Prefactor"].value(), 61.8e-6);
@@ -1805,7 +1805,7 @@ void TestGCTAModel::test_model_bgd(void)
     test_value((*model)["PivotEnergy"].value(), 1.0e6);
     test_assert(model->is_constant(), "Model is expected to be constant.");
 
-    // Test XML saving and reloading of cube background
+    // Test XML saving and reloading of radial Gauss background
     models.save("test.xml");
     models.load("test.xml");
     model = models["My model"];
@@ -1813,6 +1813,20 @@ void TestGCTAModel::test_model_bgd(void)
     test_value((*model)["Index"].value(), -1.85);
     test_value((*model)["PivotEnergy"].value(), 1.0e6);
     test_assert(model->is_constant(), "Model is expected to be constant.");
+
+    // Setup observation
+    GCTAObservation obs(cta_events);
+    obs.response(cta_irf, GCaldb(cta_caldb));
+
+    // Test eval method
+    test_value(model->eval(*((*obs.events())[0]), obs), 7.042390e-06, 1.0e-6,
+               "Test eval() method.");
+
+    // Test npred method
+    GEnergy energy(1.0, "TeV");
+    GTime   time;
+    test_value(model->npred(energy, time, obs), 2.223435e-07, 1.0e-6,
+               "Test npred() method.");
 
     // Return
     return;

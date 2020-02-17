@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAModelBackground.cpp - Background model class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -469,9 +469,6 @@ double GCTAModelBackground::eval(const GEvent&       event,
  * @return Spatially integrated background rate
  *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
- * @exception GException::invalid_value
- *            Pointing direction differs from RoI centre.
- *
  * Spatially integrates the background model for a given measured event
  * energy and event time. The method returns a real rate, defined as the
  * number of counts per MeV and ontime.
@@ -480,27 +477,6 @@ double GCTAModelBackground::npred(const GEnergy&      energy,
                                   const GTime&        time,
                                   const GObservation& obs) const
 {
-    // Get reference on CTA pointing and event list from observation
-    const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
-    const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
-
-    // Get reference to pointing direction and RoI centre
-    const GSkyDir& pointing   = pnt.dir();
-    const GSkyDir& roi_centre = events.roi().centre().dir();
-
-    // Throw an exception if both differ significantly
-    if (pointing.dist(roi_centre) > 1.0e-4) {
-        std::string msg = "Pointing direction ("+
-                          gammalib::str(pointing.ra_deg())+","+
-                          gammalib::str(pointing.dec_deg())+") differs "
-                          "significantly from RoI centre ("+
-                          gammalib::str(roi_centre.ra_deg())+","+
-                          gammalib::str(roi_centre.dec_deg())+"). "
-                          "Method is only valid for RoI centres that are "
-                          "identical to the pointing direction.";
-        throw GException::invalid_value(G_NPRED, msg);
-    }
-
     // Get spatially integrated model component
     double npred = spatial()->npred(energy, time, obs);
 

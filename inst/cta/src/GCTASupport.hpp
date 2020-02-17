@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.hpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,9 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GFunction.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -59,6 +62,24 @@ class GModelTemporal;
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
+
+    // General support functions
+    GCTARoi                 read_ds_roi(const GFitsHDU& hdu);
+    GEbounds                read_ds_ebounds(const GFitsHDU& hdu);
+    GPhases                 read_ds_phase(const GFitsHDU& hdu);
+    std::string             read_ds_gti_extname(const GFitsHDU& hdu);
+    std::string             gadf_hduclas4(const GFits&       fits,
+                                          const std::string& hduclas4);
+    int                     iter_rho(const double& rho_max,
+                                     const double& resolution,
+                                     const int&    iter_min,
+                                     const int&    iter_max);
+    int                     iter_phi(const double& rho,
+                                     const double& resolution,
+                                     const int&    iter_min,
+                                     const int&    iter_max);
+
+    // CTA support functions
     const GCTAObservation&  cta_obs(const std::string&  origin,
                                     const GObservation& obs);
     const GCTAPointing&     cta_pnt(const std::string&  origin,
@@ -79,12 +100,7 @@ namespace gammalib {
                                     const GEvent&       event);
     const GModelSpectral*   cta_model_spectral(const GModelData& model);
     const GModelTemporal*   cta_model_temporal(const GModelData& model);
-    GCTARoi                 read_ds_roi(const GFitsHDU& hdu);
-    GEbounds                read_ds_ebounds(const GFitsHDU& hdu);
-    GPhases                 read_ds_phase(const GFitsHDU& hdu);
-    std::string             read_ds_gti_extname(const GFitsHDU& hdu);
-    std::string             gadf_hduclas4(const GFits&       fits,
-                                          const std::string& hduclas4);
+
 }
 
 #endif /* GCTASUPPORT_HPP */

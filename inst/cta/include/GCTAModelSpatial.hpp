@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAModelSpatial.hpp - Spatial model abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,12 +34,12 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GModelPar.hpp"
+#include "GCTAInstDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
 class GObservation;
 class GXmlElement;
-class GCTAInstDir;
 class GCTAObservation;
 
 
@@ -103,20 +103,23 @@ protected:
         npred_roi_kern_theta(const GCTAModelSpatial* spatial,
                              const GEnergy&          energy,
                              const GTime&            time,
+                             const GCTAInstDir&      roi_centre,
                              const int&              min_iter,
                              const int&              max_iter) :
                              m_spatial(spatial),
                              m_energy(energy),
                              m_time(time),
+                             m_roi_centre(roi_centre),
                              m_min_iter(min_iter),
                              m_max_iter(max_iter) { }
         double eval(const double& theta);
     protected:
-        const GCTAModelSpatial* m_spatial;  //!< Pointer to spatial component
-        GEnergy                 m_energy;   //!< Energy
-        GTime                   m_time;     //!< Time
-        int                     m_min_iter; //!< Minimum number of Romberg iterations
-        int                     m_max_iter; //!< Maximum number of Romberg iterations
+        const GCTAModelSpatial* m_spatial;    //!< Pointer to spatial component
+        GEnergy                 m_energy;     //!< Energy
+        GTime                   m_time;       //!< Time
+        GCTAInstDir             m_roi_centre; //!< RoI centre
+        int                     m_min_iter;   //!< Minimum number of Romberg iterations
+        int                     m_max_iter;   //!< Maximum number of Romberg iterations
     };
 
     // RoI integration kernel over phi
@@ -125,17 +128,20 @@ protected:
         npred_roi_kern_phi(const GCTAModelSpatial* spatial,
                            const GEnergy&          energy,
                            const GTime&            time,
+                           const GCTAInstDir&      roi_centre,
                            const double&           theta) :
                            m_spatial(spatial),
                            m_energy(energy),
                            m_time(time),
+                           m_roi_centre(roi_centre),
                            m_theta(theta) { }
         double eval(const double& phi);
     protected:
-        const GCTAModelSpatial* m_spatial;  //!< Pointer to spatial component
-        GEnergy                 m_energy;   //!< Energy
-        GTime                   m_time;     //!< Time
-        double                  m_theta;    //!< Offset angle (radians)
+        const GCTAModelSpatial* m_spatial;    //!< Pointer to spatial component
+        GEnergy                 m_energy;     //!< Energy
+        GTime                   m_time;       //!< Time
+        GCTAInstDir             m_roi_centre; //!< RoI centre
+        double                  m_theta;      //!< Offset angle (radians)
     };
 
     // Proteced members

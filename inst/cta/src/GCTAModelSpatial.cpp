@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAModelSpatial.cpp - Spatial model abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Jurgen Knodlseder                                *
+ *  copyright (C) 2018-2020 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -374,8 +374,6 @@ GCTAInstDir GCTAModelSpatial::mc(const GEnergy&         energy,
  *
  * The method uses a 2D Romberg integration to numerically integrate the
  * spatial background model component.
- *
- * @todo The method currently assumes that the RoI is centred on DETX=DETY=0
  ***************************************************************************/
 double GCTAModelSpatial::npred(const GEnergy&      energy,
                                const GTime&        time,
@@ -390,11 +388,12 @@ double GCTAModelSpatial::npred(const GEnergy&      energy,
     // Initialise result
     double npred = 0.0;
 
-    // Retrieve CTA event list
+    // Get reference on CTA pointing and event list from observation
+    const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
     const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
 
-    // Get reference to RoI centre
-    //const GSkyDir& roi_centre = events.roi().centre().dir();
+    // Get instrument direction of RoI centre
+    GCTAInstDir roi_centre = pnt.instdir(events.roi().centre().dir());
 
     // Get RoI radius in radians
     double roi_radius = events.roi().radius() * gammalib::deg2rad;
@@ -407,6 +406,7 @@ double GCTAModelSpatial::npred(const GEnergy&      energy,
     GCTAModelSpatial::npred_roi_kern_theta integrand(this,
                                                      energy,
                                                      time,
+                                                     roi_centre,
                                                      min_iter_phi,
                                                      max_iter_phi);
 
@@ -508,6 +508,7 @@ double GCTAModelSpatial::npred_roi_kern_theta::eval(const double& theta)
         GCTAModelSpatial::npred_roi_kern_phi integrand(m_spatial,
                                                        m_energy,
                                                        m_time,
+                                                       m_roi_centre,
                                                        theta);
 
         // Setup integration
@@ -562,11 +563,11 @@ double GCTAModelSpatial::npred_roi_kern_theta::eval(const double& theta)
 double GCTAModelSpatial::npred_roi_kern_phi::eval(const double& phi)
 {
     // Compute detx and dety in radians
-    double detx(0.0);
-    double dety(0.0);
+    double detx = m_roi_centre.detx();
+    double dety = m_roi_centre.dety();
     if (m_theta > 0.0 ) {
-        detx = m_theta * std::cos(phi);
-        dety = m_theta * std::sin(phi);
+        detx += m_theta * std::cos(phi);
+        dety += m_theta * std::sin(phi);
     }
 
     // Setup CTA instrument direction

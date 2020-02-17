@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelAeffBackground.hpp - CTA Aeff background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2018 by Michael Mayer                               *
+ *  copyright (C) 2015-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -96,33 +96,39 @@ private:
     // ROI integration kernel over theta
     class npred_roi_kern_theta : public GFunction {
     public:
-        npred_roi_kern_theta(const GCTAAeff* aeff,
-                             const double&   logE,
-                             const int&      iter) :
+        npred_roi_kern_theta(const GCTAAeff*    aeff,
+                             const double&      logE,
+                             const GCTAInstDir& roi_centre,
+                             const int&         iter) :
                              m_aeff(aeff),
                              m_logE(logE),
+                             m_roi_centre(roi_centre),
                              m_iter(iter) { }
         double eval(const double& theta);
     protected:
-        const GCTAAeff* m_aeff;  //!< Pointer to effectve area
-        double          m_logE;  //!< Log10 of energy
-        int             m_iter;  //!< Romberg iterations
+        const GCTAAeff* m_aeff;       //!< Pointer to effectve area
+        double          m_logE;       //!< Log10 of energy
+        GCTAInstDir     m_roi_centre; //!< RoI centre
+        int             m_iter;       //!< Romberg iterations
     };
 
     // ROI integration kernel over phi
     class npred_roi_kern_phi : public GFunction {
     public:
-        npred_roi_kern_phi(const GCTAAeff* aeff,
-                           const double&   logE,
-                           const double&   theta) :
+        npred_roi_kern_phi(const GCTAAeff*    aeff,
+                           const double&      logE,
+                           const GCTAInstDir& roi_centre,
+                           const double&      theta) :
                            m_aeff(aeff),
                            m_logE(logE),
+                           m_roi_centre(roi_centre),
                            m_theta(theta) { }
         double eval(const double& phi);
     protected:
-        const GCTAAeff* m_aeff;   //!< Pointer to effective area
-        double          m_logE;   //!< Log10 of energy
-        double          m_theta;  //!< Offset angle (radians)
+        const GCTAAeff* m_aeff;       //!< Pointer to effective area
+        double          m_logE;       //!< Log10 of energy
+        GCTAInstDir     m_roi_centre; //!< RoI centre
+        double          m_theta;      //!< Offset angle (radians)
     };
 
     // Members

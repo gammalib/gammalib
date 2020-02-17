@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelAeffBackground.cpp - CTA Aeff background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2018 by Michael Mayer                               *
+ *  copyright (C) 2015-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -432,9 +432,6 @@ double GCTAModelAeffBackground::eval(const GEvent&       event,
  * @return Spatially integrated background rate
  *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
- * @exception GException::invalid_value
- *            Pointing direction differs from RoI centre.
- *
  * Spatially integrates the effective area background model for a given
  * measured event energy and event time. The method returns a real rate,
  * defined as the number of counts per MeV and ontime.
@@ -443,27 +440,6 @@ double GCTAModelAeffBackground::npred(const GEnergy&      obsEng,
                                       const GTime&        obsTime,
                                       const GObservation& obs) const
 {
-    // Get reference on CTA pointing and event list from observation
-    const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
-    const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
-
-    // Get reference to pointing direction and RoI centre
-    const GSkyDir& pointing   = pnt.dir();
-    const GSkyDir& roi_centre = events.roi().centre().dir();
-
-    // Throw an exception if both differ significantly
-    if (pointing.dist(roi_centre) > 1.0e-4) {
-        std::string msg = "Pointing direction ("+
-                          gammalib::str(pointing.ra_deg())+","+
-                          gammalib::str(pointing.dec_deg())+") differs "
-                          "significantly from RoI centre ("+
-                          gammalib::str(roi_centre.ra_deg())+","+
-                          gammalib::str(roi_centre.dec_deg())+"). "
-                          "Method is only valid for RoI centres that are "
-                          "identical to the pointing direction.";
-        throw GException::invalid_value(G_NPRED, msg);
-    }
-
     // Initialise result
     double npred     = 0.0;
     bool   has_npred = false;
@@ -1127,8 +1103,6 @@ GModelTemporal* GCTAModelAeffBackground::xml_temporal(const GXmlElement& tempora
  *
  * Spatially integrates the effective area for a given reference energy
  * over the region of interest.
- *
- * @todo Method is only valid for RoI centres identical to pointing direction
  ***************************************************************************/
 double GCTAModelAeffBackground::aeff_integral(const GObservation& obs,
                                               const double&       logE) const
@@ -1140,10 +1114,14 @@ double GCTAModelAeffBackground::aeff_integral(const GObservation& obs,
     static const int iter_theta = 6;
     static const int iter_phi   = 6;
 
-    // Get reference on CTA effective area response and event list from
-    // observation
+    // Get reference on CTA pointing, effective area response and event list
+    // from observation
+    const GCTAPointing&  pnt    = gammalib::cta_pnt(G_AEFF_INTEGRAL, obs);
     const GCTAAeff&      aeff   = gammalib::cta_rsp_aeff(G_AEFF_INTEGRAL, obs);
     const GCTAEventList& events = gammalib::cta_event_list(G_AEFF_INTEGRAL, obs);
+
+    // Get instrument direction of RoI centre
+    GCTAInstDir roi_centre = pnt.instdir(events.roi().centre().dir());
 
     // Get ROI radius in radians
     double roi_radius = events.roi().radius() * gammalib::deg2rad;
@@ -1151,6 +1129,7 @@ double GCTAModelAeffBackground::aeff_integral(const GObservation& obs,
     // Setup integration function
     GCTAModelAeffBackground::npred_roi_kern_theta integrand(&aeff,
                                                             logE,
+                                                            roi_centre,
                                                             iter_phi);
 
     // Setup integration
@@ -1207,6 +1186,7 @@ double GCTAModelAeffBackground::npred_roi_kern_theta::eval(const double& theta)
         // Setup phi integration kernel
         GCTAModelAeffBackground::npred_roi_kern_phi integrand(m_aeff,
                                                               m_logE,
+                                                              m_roi_centre,
                                                               theta);
 
         // Setup integration
@@ -1237,7 +1217,8 @@ double GCTAModelAeffBackground::npred_roi_kern_theta::eval(const double& theta)
 
 
 /***********************************************************************//**
- * @brief Kernel for azimuth angle integration of effective area background model
+ * @brief Kernel for azimuth angle integration of effective area background
+ *        model
  *
  * @param[in] phi Azimuth angle around ROI centre (radians).
  * @return Integration kernel value.
@@ -1250,8 +1231,21 @@ double GCTAModelAeffBackground::npred_roi_kern_theta::eval(const double& theta)
  ***************************************************************************/
 double GCTAModelAeffBackground::npred_roi_kern_phi::eval(const double& phi)
 {
+    // Compute detx and dety in radians
+    double detx = m_roi_centre.detx();
+    double dety = m_roi_centre.dety();
+    if (m_theta > 0.0 ) {
+        detx += m_theta * std::cos(phi);
+        dety += m_theta * std::sin(phi);
+    }
+
+    // Convert into theta and phi
+    GCTAInstDir dir(detx, dety);
+    double theta_prime = dir.theta();
+    double phi_prime   = dir.phi();
+
     // Get background value
-    double value = (*m_aeff)(m_logE, m_theta, phi);
+    double value = (*m_aeff)(m_logE, theta_prime, phi_prime);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)

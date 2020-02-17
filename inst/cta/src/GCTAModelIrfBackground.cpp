@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.cpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -401,9 +401,6 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
  * @return Spatially integrated background rate
  *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
- * @exception GException::invalid_value
- *            Pointing direction differs from RoI centre.
- *
  * Spatially integrates the instrumental background model for a given
  * measured event energy and event time. The method returns a real rate,
  * defined as the number of counts per MeV and ontime.
@@ -412,27 +409,6 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
                                      const GTime&        obsTime,
                                      const GObservation& obs) const
 {
-    // Get reference on CTA pointing and event list from observation
-    const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
-    const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
-
-    // Get reference to pointing direction and RoI centre
-    const GSkyDir& pointing   = pnt.dir();
-    const GSkyDir& roi_centre = events.roi().centre().dir();
-
-    // Throw an exception if both differ significantly
-    if (pointing.dist(roi_centre) > 1.0e-4) {
-        std::string msg = "Pointing direction ("+
-                          gammalib::str(pointing.ra_deg())+","+
-                          gammalib::str(pointing.dec_deg())+") differs "
-                          "significantly from RoI centre ("+
-                          gammalib::str(roi_centre.ra_deg())+","+
-                          gammalib::str(roi_centre.dec_deg())+"). "
-                          "Method is only valid for RoI centres that are "
-                          "identical to the pointing direction.";
-        throw GException::invalid_value(G_NPRED, msg);
-    }
-
     // Set number of iterations for Romberg integration.
     static const int iter_theta = 6;
     static const int iter_phi   = 6;
@@ -472,12 +448,14 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
         // Evaluate only if model is valid
         if (valid_model()) {
 
-            // Retrieve CTA background response and event list
+            // Get reference on CTA pointing, background response and event
+            // list from observation
+            const GCTAPointing&   pnt    = gammalib::cta_pnt(G_NPRED, obs);
             const GCTABackground& bgd    = gammalib::cta_rsp_bkg(G_NPRED, obs);
             const GCTAEventList&  events = gammalib::cta_event_list(G_NPRED, obs);
 
-            // Get reference to ROI centre
-            //const GSkyDir& roi_centre = events.roi().centre().dir();
+            // Get instrument direction of RoI centre
+            GCTAInstDir roi_centre = pnt.instdir(events.roi().centre().dir());
 
             // Get ROI radius in radians
             double roi_radius = events.roi().radius() * gammalib::deg2rad;
@@ -488,6 +466,7 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
             // Setup integration function
             GCTAModelIrfBackground::npred_roi_kern_theta integrand(&bgd,
                                                                    logE,
+                                                                   roi_centre,
                                                                    iter_phi);
 
             // Setup integration
@@ -1072,8 +1051,9 @@ double GCTAModelIrfBackground::npred_roi_kern_theta::eval(const double& theta)
 
         // Setup phi integration kernel
         GCTAModelIrfBackground::npred_roi_kern_phi integrand(m_bgd,
-                                                              m_logE,
-                                                              theta);
+                                                             m_logE,
+                                                             m_roi_centre,
+                                                             theta);
 
         // Setup integration
         GIntegral integral(&integrand);
@@ -1122,12 +1102,12 @@ double GCTAModelIrfBackground::npred_roi_kern_theta::eval(const double& theta)
  ***************************************************************************/
 double GCTAModelIrfBackground::npred_roi_kern_phi::eval(const double& phi)
 {
-    // Compute detx and dety
-    double detx(0.0);
-    double dety(0.0);
+    // Compute detx and dety in radians
+    double detx = m_roi_centre.detx();
+    double dety = m_roi_centre.dety();
     if (m_theta > 0.0 ) {
-        detx = m_theta * std::cos(phi);
-        dety = m_theta * std::sin(phi);
+        detx += m_theta * std::cos(phi);
+        dety += m_theta * std::sin(phi);
     }
 
     // Get background value
