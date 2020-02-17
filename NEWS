@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-31 January 2020
+17 February 2020
 
 
 1. Introduction
@@ -195,6 +195,12 @@ class (#2893).
 
 Implement remove_response_cache() methods for GCTAObservation and
 GCTAReponse, allowing de-allocation of models in the response cache (#2973).
+
+The GCTAModelAeffBackground, GCTAModelIrfBackground and GCTAModelBackground
+classes were adapted so that the npred() method now also works for RoI centres
+that differ from the pointing direction. This now allows using the corresponding
+models in an unbinned analysis where the RoI centres differ from the pointing
+directions (#2695).
 
 
 21. COMPTEL interface

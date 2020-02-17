@@ -1,4 +1,4 @@
-2020-01-31
+2020-02-17
 
         * Version 1.7.0 released
         ========================
@@ -17,6 +17,8 @@
         Correctly write model attributes in GCOMModelDRBFitting class
         Add GTime.datetime() method and add optional precision to GTime.utc() (#2909)
         Remove obsolete methods from GCTAResponseCache class (#2893)
+        Allow RoI centres different from pointing direction in unbinned analysis
+          (#2695)
         Add GSkyDir::moon() method (#1855)
         Add GSkyDir::sun(), GSkyDir::precess() and GTime::julian_epoch() methods
           (#1854)

@@ -41,6 +41,8 @@ Improvements
 * Add ``GGti::overlap()`` method.
 * [`2909 <https://cta-redmine.irap.omp.eu/issues/2909>`_] -
   Add ``GTime.datetime()`` method and add optional precision to ``GTime.utc()`` method.
+* [`2695 <https://cta-redmine.irap.omp.eu/issues/2695>`_] -
+  Allow RoI centres different from pointing direction in unbinned analysis.
 * [`1855 <https://cta-redmine.irap.omp.eu/issues/1855>`_] -
   Add ``GSkyDir::moon()`` method.
 * [`1854 <https://cta-redmine.irap.omp.eu/issues/1854>`_] -
