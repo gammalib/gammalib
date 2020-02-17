@@ -350,85 +350,81 @@ double GModelSpatial::flux(const GSkyRegion* reg,
 
         // Check if the model is a point source
         const GModelSpatialPointSource* ps_model =
-             dynamic_cast<const GModelSpatialPointSource*>(this);
+              dynamic_cast<const GModelSpatialPointSource*>(this);
 
-	// If the model is not a point source integrate over circular regions overlap
-	if (ps_model == NULL) {
+        // If the model is not a point source integrate over circular regions overlap
+        if (ps_model == NULL) {
 
-	  // Thrown an exception if region is not a sky circle
-	  const GSkyRegionCircle* reg_circle =
-	    dynamic_cast<const GSkyRegionCircle*>(reg);
-	  if (reg_circle == NULL) {
-            std::string msg = "Flux can only be computed for a circular "
-	      "region.";
-            throw GException::feature_not_implemented(G_FLUX,msg);
-	  }
+            // Thrown an exception if region is not a sky circle
+            const GSkyRegionCircle* reg_circle =
+                  dynamic_cast<const GSkyRegionCircle*>(reg);
+            if (reg_circle == NULL) {
+                std::string msg = "Flux can only be computed for a circular "
+                                  "region.";
+                throw GException::feature_not_implemented(G_FLUX,msg);
+            }
 
-	  // Thrown an exception if model region is not a sky circle
-	  const GSkyRegionCircle* model_circle =
-	    dynamic_cast<const GSkyRegionCircle*>(model_reg);
-	  if (model_circle == NULL) {
-            std::string msg = "Flux can only be computed for spatial model "
-	      "with region defined as circle.";
-            throw GException::feature_not_implemented(G_FLUX,msg);
-	  }
+            // Thrown an exception if model region is not a sky circle
+            const GSkyRegionCircle* model_circle =
+                  dynamic_cast<const GSkyRegionCircle*>(model_reg);
+            if (model_circle == NULL) {
+                std::string msg = "Flux can only be computed for spatial model "
+                                  "with region defined as circle.";
+                throw GException::feature_not_implemented(G_FLUX,msg);
+            }
 
-	  // Model centre and radius in radians
-	  GSkyDir model_centre = model_circle->centre();
-	  double  model_radius = model_circle->radius() * gammalib::deg2rad;
+            // Model centre and radius in radians
+            GSkyDir model_centre = model_circle->centre();
+            double  model_radius = model_circle->radius() * gammalib::deg2rad;
 
-	  // Distance between region and model centres in radians
-	  double distance = model_centre.dist(reg_circle->centre());
-    
-	  // Take the distance between centers minus radius of model region as
-	  // the minimum radial integration boundary (in radians)
-	  double rho_min = distance - model_radius;
+            // Distance between region and model centres in radians
+            double distance = model_centre.dist(reg_circle->centre());
 
-	  // Make sure that rho_min does not become negative
-	  if (rho_min < 0.0) {
-            rho_min = 0.0;
-	  }
+            // Take the distance between centers minus radius of model region as
+            // the minimum radial integration boundary (in radians)
+            double rho_min = distance - model_radius;
 
-	  // Take the region radius as the maximum radial integration boundary
-	  // (in radians)
-	  double rho_max = reg_circle->radius() * gammalib::deg2rad;
+            // Make sure that rho_min does not become negative
+            if (rho_min < 0.0) {
+                rho_min = 0.0;
+            }
 
-	  // Pre-compute some quantities for arclength
-	  double cosdist   = std::cos(distance);
-	  double sindist   = std::sin(distance);
-	  double cosmodrad = std::cos(model_radius);
+            // Take the region radius as the maximum radial integration boundary
+            // (in radians)
+            double rho_max = reg_circle->radius() * gammalib::deg2rad;
 
-	  // Setup integration kernel
-	  GModelSpatial::circle_int_kern_rho integrand(this,
-						       reg_circle,
-						       srcEng,
-						       srcTime,
-						       distance,
-						       cosdist,
-						       sindist,
-						       model_radius,
-						       cosmodrad);
-	  GIntegral integral(&integrand);
+            // Pre-compute some quantities for arclength
+            double cosdist   = std::cos(distance);
+            double sindist   = std::sin(distance);
+            double cosmodrad = std::cos(model_radius);
 
-	  // Perform integration
-	  flux = integral.romberg(rho_min, rho_max);
+            // Setup integration kernel
+            GModelSpatial::circle_int_kern_rho integrand(this,
+                                                         reg_circle,
+                                                         srcEng,
+                                                         srcTime,
+                                                         distance,
+                                                         cosdist,
+                                                         sindist,
+                                                         model_radius,
+                                                         cosmodrad);
+            GIntegral integral(&integrand);
 
-	}
+            // Perform integration
+            flux = integral.romberg(rho_min, rho_max);
 
-	// Otherwise, if model is point source since it overlaps
-	// with region set flux to 1
-	else {
+        } // endif: source model was not a point source
 
-	  flux = 1.0;
-	  
-	} // endif, model is point source
-	
+        // ... otherwise, if model is point source since it overlaps
+        // with region set flux to 1
+        else {
+            flux = 1.0;
+        }
 
     } // endif: model overlaps with region
 
     // Return
     return flux;
-
 }
 
 
