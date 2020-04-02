@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialRadialProfile.i - Radial profile source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2002 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,5 +84,8 @@ public:
 %extend GModelSpatialRadialProfile {
     double eval(const GPhoton& photon) const {
         return self->GModelSpatialRadial::eval(photon);
+    }
+    double eval(const GPhoton& photon, const bool& gradients) const {
+        return self->GModelSpatialRadial::eval(photon, gradients);
     }
 };

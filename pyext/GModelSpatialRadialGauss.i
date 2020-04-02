@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialRadialGauss.i - Radial Gaussian source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,6 +81,9 @@ public:
 %extend GModelSpatialRadialGauss {
     GModelSpatialRadialGauss copy() {
         return (*self);
+    }
+    double eval(const GPhoton& photon) const {
+        return self->GModelSpatialRadial::eval(photon);
     }
     double eval(const GPhoton& photon, const bool& gradients) const {
         return self->GModelSpatialRadial::eval(photon, gradients);
