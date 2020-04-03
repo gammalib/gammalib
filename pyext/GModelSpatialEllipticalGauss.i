@@ -76,6 +76,9 @@ public:
     GModelSpatialEllipticalGauss copy() {
         return (*self);
     }
+    double eval(const GPhoton& photon) const {
+        return self->GModelSpatialElliptical::eval(photon);
+    }
     double eval(const GPhoton& photon, const bool& gradients) const {
         return self->GModelSpatialElliptical::eval(photon, gradients);
     }
