@@ -2,7 +2,7 @@
 # Configuration for GammaLib - a versatile toolbox for high-level analysis  #
 #                              of astronomical gamma-ray data               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2006-2019 Juergen Knoedlseder                               #
+# Copyright (C) 2006-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -209,7 +209,7 @@ AC_ARG_ENABLE(universalsdk,
 		fi
 		;;
 	esac
-	
+
 ],[
    	UNIVERSALSDK=
 	enable_universalsdk=
@@ -413,7 +413,7 @@ yes)
 		    fi
 	    fi
 	    CONFIGURE_MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET-${cur_target}}
-        
+
         # Make sure that deployment target is >= SDK
         case "${UNIVERSALSDK}" in
         */MacOSX10.4u.sdk)
@@ -432,7 +432,7 @@ yes)
             fi
             ;;
         esac
-	    
+
         # Set compile, link and pre-processor flags dependent on architecture
 	    if test "${enable_universalsdk}"; then
 
@@ -611,6 +611,19 @@ if test "x$with_com" = "xyes"; then
                 [with_com=no])
 fi
 AM_CONDITIONAL(WITH_INST_COM, test "x$with_com" = "xyes")
+
+# Checks for SPI interface
+AC_ARG_WITH([spi],
+            [AS_HELP_STRING([--with-spi],
+                            [compile in SPI specific interface [default=yes]])],
+            [],
+            [with_spi=yes])
+if test "x$with_spi" = "xyes"; then
+  AC_CHECK_FILE([$srcdir/inst/spi/README.md],
+                [with_spi=yes],
+                [with_spi=no])
+fi
+AM_CONDITIONAL(WITH_INST_SPI, test "x$with_spi" = "xyes")
 
 # Insert new checks here
 
@@ -939,18 +952,18 @@ else
       fi
 
     # ... otherwise check for includes relative to exectuable (obsolete?)
-    else                             
-                             
+    else
+
       # Determine include path for python
       AC_PATH_PROG(PY_INCLUDE, python)  
       PY_INCLUDE=`echo $PY_INCLUDE | sed -e "s/bin/include/"`
       PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
-  
+
       # Check if we have Python.h
       AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
-  
+
     fi
-  
+
   fi
 
   # Do we have swig?
@@ -1008,6 +1021,11 @@ else
   if test "x$with_com" = "xyes"; then
     AC_CHECK_FILES([$srcdir/pyext/gammalib/com_wrap.cpp
                     $srcdir/pyext/gammalib/com.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_spi" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/spi_wrap.cpp
+                    $srcdir/pyext/gammalib/spi.py],,
                    [has_wrappers="no"])
   fi
   # Insert new wrappers here
@@ -1148,7 +1166,7 @@ if [test "x$with_readline" = "xyes";] then
                     ;;
             esac
         fi
-    
+
     fi
 
 fi
@@ -1365,7 +1383,7 @@ if [test "x$with_cfitsio" = "xyes"]; then
                     ;;
             esac
         fi
-    
+
     fi
 
     # Break if cfitsio library is not found
@@ -1480,6 +1498,10 @@ if test "x$with_com" = "xyes"; then
   AC_CONFIG_FILES([inst/com/Makefile])
   AC_CONFIG_FILES([inst/com/test/Makefile])
 fi
+if test "x$with_spi" = "xyes"; then
+  AC_CONFIG_FILES([inst/spi/Makefile])
+  AC_CONFIG_FILES([inst/spi/test/Makefile])
+fi
 # Inset new Makefiles here
 AC_OUTPUT
 
@@ -1588,6 +1610,11 @@ if test "x$with_com" = "xyes"; then
   echo "  * COMPTEL interface            (yes)"
 else
   echo "  - COMPTEL interface            (no)"
+fi
+if test "x$with_spi" = "xyes"; then
+  echo "  * SPI interface                (yes)"
+else
+  echo "  - SPI interface                (no)"
 fi
 # Insert new interface informations here
 

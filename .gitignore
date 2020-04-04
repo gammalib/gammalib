@@ -10,11 +10,11 @@ inst/cta/test/*.xml
 inst/cta/test/*.fits
 inst/cta/test/*.fits.gz
 inst/cta/test/dev/*.fits
-inst/spi/test/data/*.xml
 inst/com/test/*.trs
 inst/cta/test/*.trs
 inst/lat/test/*.trs
 inst/mwl/test/*.trs
+inst/spi/test/*.trs
 
 # Generated files
 pyext/gammalib/*.py
@@ -107,6 +107,7 @@ inst/lat/test/test_LAT
 inst/mwl/test/test_MWL
 inst/cta/test/test_CTA
 inst/com/test/test_COM
+inst/spi/test/test_SPI
 test/region.reg
 test/.samp
 test/test_python.sh

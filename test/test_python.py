@@ -66,6 +66,13 @@ try:
 except:
     has_com = False
 
+# Try importing INTEGRAL/SPI tests
+try:
+    import test_SPI
+    has_spi = True
+except:
+    has_spi = False
+
 # Insert new test here
 
 # ================== #
@@ -82,6 +89,7 @@ def test(installed=False):
         os.environ['TEST_CTA_DATA'] = 'cta/data'
         os.environ['TEST_LAT_DATA'] = 'lat/data'
         os.environ['TEST_MWL_DATA'] = 'mwl/data'
+        os.environ['TEST_SPI_DATA'] = 'spi/data'
         # Insert new environment here
 
     # Allocate test suites
@@ -156,6 +164,12 @@ def test(installed=False):
         suite_com.set()
         suites.append(suite_com)
 
+    # Optionally handle INTEGRAL/SPI suite
+    if has_spi:
+        suite_spi = test_SPI.Test()
+        suite_spi.set()
+        suites.append(suite_spi)
+
     # Insert new suite here
 
     # If we have an installed version then create a temporary
@@ -172,6 +186,7 @@ def test(installed=False):
         testdir = inspect.getfile(gammalib.tests)
         head, tail = os.path.split(testdir)
 
+        os.system('cp -r %s %s' % (head+'/spi',  'spi'))
         # Copy over test data
         os.system('cp -r %s %s' % (head+'/data', 'data'))
         os.system('cp -r %s %s' % (head+'/com',  'com'))

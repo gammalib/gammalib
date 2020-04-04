@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for source module                                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -48,6 +48,9 @@ MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
 @EXPORT_MACOSX_DEPLOYMENT_TARGET@export MACOSX_DEPLOYMENT_TARGET
 
 # Optional instrument specific libraries
+if WITH_INST_SPI
+  INST_SPI = $(top_builddir)/inst/spi/libspi.la
+endif
 if WITH_INST_MWL
   INST_MWL = $(top_builddir)/inst/mwl/libmwl.la
 endif
@@ -83,6 +86,7 @@ libgamma_la_LIBADD = $(top_builddir)/src/base/libbase.la \
                      $(top_builddir)/src/model/libmodel.la \
                      $(top_builddir)/src/app/libapp.la \
                      $(top_builddir)/src/test/libtest.la \
+                     $(INST_SPI) \
                      $(INST_MWL) \
                      $(INST_CTA) \
                      $(INST_LAT) \

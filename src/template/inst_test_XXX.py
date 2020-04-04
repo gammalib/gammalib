@@ -53,14 +53,14 @@ class Test(gammalib.GPythonTestSuite):
         Test class pickeling
         """
         # Perform pickeling tests of empty classes
-        test_support._pickeling(self, gammalib.GXXXEventAtom())
-        test_support._pickeling(self, gammalib.GXXXEventBin())
-        test_support._pickeling(self, gammalib.GXXXEventCube())
-        test_support._pickeling(self, gammalib.GXXXEventList())
-        test_support._pickeling(self, gammalib.GXXXInstDir())
-        test_support._pickeling(self, gammalib.GXXXObservation())
-        test_support._pickeling(self, gammalib.GXXXResponse())
-        test_support._pickeling(self, gammalib.GXXXRoi())
+        test_support.pickeling(self, gammalib.GXXXEventAtom())
+        test_support.pickeling(self, gammalib.GXXXEventBin())
+        test_support.pickeling(self, gammalib.GXXXEventCube())
+        test_support.pickeling(self, gammalib.GXXXEventList())
+        test_support.pickeling(self, gammalib.GXXXInstDir())
+        test_support.pickeling(self, gammalib.GXXXObservation())
+        test_support.pickeling(self, gammalib.GXXXResponse())
+        test_support.pickeling(self, gammalib.GXXXRoi())
 
         # Setup test (TODO: to be filled with meaningful values)
         atom = gammalib.GXXXEventAtom()
@@ -73,14 +73,14 @@ class Test(gammalib.GPythonTestSuite):
         roi  = gammalib.GXXXRoi()
 
         # Perform pickeling tests of filled classes
-        test_support._pickeling(self, gammalib.GXXXEventAtom(atom))
-        test_support._pickeling(self, gammalib.GXXXEventBin(bin))
-        test_support._pickeling(self, gammalib.GXXXEventCube(cube))
-        test_support._pickeling(self, gammalib.GXXXEventList(list))
-        test_support._pickeling(self, gammalib.GXXXInstDir(dir))
-        test_support._pickeling(self, gammalib.GXXXObservation(obs))
-        test_support._pickeling(self, gammalib.GXXXResponse(rsp))
-        test_support._pickeling(self, gammalib.GXXXRoi(roi))
+        test_support.pickeling(self, gammalib.GXXXEventAtom(atom))
+        test_support.pickeling(self, gammalib.GXXXEventBin(bin))
+        test_support.pickeling(self, gammalib.GXXXEventCube(cube))
+        test_support.pickeling(self, gammalib.GXXXEventList(list))
+        test_support.pickeling(self, gammalib.GXXXInstDir(dir))
+        test_support.pickeling(self, gammalib.GXXXObservation(obs))
+        test_support.pickeling(self, gammalib.GXXXResponse(rsp))
+        test_support.pickeling(self, gammalib.GXXXRoi(roi))
 
         # Return
         return

@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for unit test module                                          #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -44,12 +44,17 @@ if WITH_INST_COM
   TEST_COM     = :$(top_srcdir)/inst/com/test
   TEST_COM_ENV = TEST_COM_DATA=$(top_srcdir)/inst/com/test/data
 endif
+if WITH_INST_SPI
+  INST_SPI     = $(top_builddir)/inst/spi/test/test_SPI
+  TEST_SPI     = :$(top_srcdir)/inst/spi/test
+  TEST_SPI_ENV = TEST_SPI_DATA=$(top_srcdir)/inst/spi/test/data
+endif
 # Insert new test here
 
 # Optional python bindings
 if WITH_PYTHON
   TEST_PYTHON_SCRIPT = test_python.sh test_examples.sh
-  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT)$(TEST_COM):$(PYTHONPATH)
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT)$(TEST_COM):$(PYTHONPATH)$(TEST_SPI)
 endif
 
 # Include directories
@@ -80,6 +85,7 @@ TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNS
                     TEST_SRCDIR=$(top_srcdir) \
                     TEST_BUILDDIR=$(top_builddir) \
                     TEST_DATA=$(top_srcdir)/test/data \
+                    $(TEST_SPI_ENV) \
                     $(TEST_MWL_ENV) \
                     $(TEST_CTA_ENV) \
                     $(TEST_LAT_ENV) \
@@ -102,6 +108,7 @@ TESTS = test_GSupport \
         test_GOptimizer \
         test_GObservation \
         $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) \
+        $(INST_SPI) \
         $(TEST_PYTHON_SCRIPT)
 
 # Extra files to be distributed in the tar file

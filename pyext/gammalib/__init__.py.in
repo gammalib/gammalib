@@ -1,7 +1,7 @@
 # ==========================================================================
 # GammaLib Python module
 #
-# Copyright (C) 2016-2019 Juergen Knoedlseder
+# Copyright (C) 2016-2020 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ from gammalib.mwl import *
 from gammalib.cta import *
 from gammalib.lat import *
 from gammalib.com import *
+from gammalib.spi import *
 # Insert new module here
 
 # Remove swig register stuff

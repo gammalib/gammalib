@@ -1,0 +1,189 @@
+/***************************************************************************
+ *             GSPIEventBin.hpp - INTEGRAL/SPI event bin class             *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GSPIEventBin.hpp
+ * @brief INTEGRAL/SPI event bin class definition
+ * @author Juergen Knoedlseder
+ */
+
+#ifndef GSPIEVENTBIN_HPP
+#define GSPIEVENTBIN_HPP
+
+/* __ Includes ___________________________________________________________ */
+#include "GEventBin.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GSPIInstDir.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+
+/* __ Constants __________________________________________________________ */
+
+
+/***********************************************************************//**
+ * @class GSPIEventBin
+ *
+ * @brief INTEGRAL/SPI event bin class
+ *
+ * This class defines an event bin of the INTEGRAL/SPI event cube.
+ *
+ * Since many event bins share the same attributes (for example many bins
+ * will actually have the same energy), it would be a waste of memory to
+ * store all bin attributes together with the bin. Therefore, the
+ * GSPIEventBin class implement it's own memory management. Either the 
+ * class allocates memory for all attributes, or it takes pointers to
+ * GSPIEventCube class member that store the information in an efficient
+ * way.
+ *
+ * The data member m_alloc signals in which mode the bin operates. I true,
+ * GSPIEventBin has allocated itself the memory for all attributes, and
+ * hence has to take care about the memory allocation upon destruction.
+ * Otherwise the pointers are just released.
+ ***************************************************************************/
+class GSPIEventBin : public GEventBin {
+
+    // Friend classes
+    friend class GSPIEventCube;
+
+public:
+    // Constructors and destructors
+    GSPIEventBin(void);
+    GSPIEventBin(const GSPIEventBin& bin);
+    virtual ~GSPIEventBin(void);
+
+    // Operators
+    virtual GSPIEventBin& operator=(const GSPIEventBin& bin);
+
+    // Implemented pure virtual base class methods
+    virtual void               clear(void);
+    virtual GSPIEventBin*      clone(void) const;
+    virtual std::string        classname(void) const;
+    virtual double             size(void) const;
+    virtual const GSPIInstDir& dir(void) const;
+    virtual const GEnergy&     energy(void) const;
+    virtual const GTime&       time(void) const;
+    virtual double             counts(void) const;
+    virtual double             error(void) const;
+    virtual void               counts(const double& counts);
+    virtual std::string        print(const GChatter& chatter = NORMAL) const;
+
+    // Other methods
+    // TODO: Add any further methods that are needed
+
+protected:
+    // Protected methods
+    void init_members(void);
+    void copy_members(const GSPIEventBin& bin);
+    void free_members(void);
+
+    // Protected members
+    bool         m_alloc;  //!< Signals proper memory allocation
+    int          m_index;  //!< Dataspace index
+    double*      m_counts; //!< Pointer to number of counts
+    GSPIInstDir* m_dir;    //!< Pointer to bin direction
+    GTime*       m_time;   //!< Pointer to bin time
+    GEnergy*     m_energy; //!< Pointer to bin energy
+};
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GSPIEventBin").
+ ***************************************************************************/
+inline
+std::string GSPIEventBin::classname(void) const
+{
+    return ("GSPIEventBin");
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction
+ *
+ * @return Instrument direction.
+ *
+ * Returns the instrument direction of the event bin.
+ ***************************************************************************/
+inline
+const GSPIInstDir& GSPIEventBin::dir(void) const
+{
+    return (*m_dir);
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy
+ *
+ * @return Energy.
+ *
+ * Returns the energy of the event bin.
+ ***************************************************************************/
+inline
+const GEnergy& GSPIEventBin::energy(void) const
+{
+    return (*m_energy);
+}
+
+
+/***********************************************************************//**
+ * @brief Return time
+ *
+ * @return Time.
+ *
+ * Returns the time of the event bin.
+ ***************************************************************************/
+inline
+const GTime& GSPIEventBin::time(void) const
+{
+    return (*m_time);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of counts
+ *
+ * @return Number of counts.
+ *
+ * Returns the number of counts in the event bin.
+ ***************************************************************************/
+inline
+double GSPIEventBin::counts(void) const
+{
+    return (*m_counts);
+}
+
+
+/***********************************************************************//**
+ * @brief Set number of counts
+ *
+ * @param[in] counts Number of counts.
+ *
+ * Set the number of counts in the event bin.
+ ***************************************************************************/
+inline
+void GSPIEventBin::counts(const double& counts)
+{
+    *m_counts = counts;
+    return;
+}
+
+#endif /* GSPIEVENTBIN_HPP */

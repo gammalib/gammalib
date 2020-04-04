@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile for gammalib Python extension module                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2018 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -59,8 +59,14 @@ if WITH_INST_COM
                      $(wrapperdir)/gammalib/com.py
   COM_TESTS        = $(top_srcdir)/inst/com/test/test_COM.py
 endif
+if WITH_INST_SPI
+  SPI_SWIG_TARGETS = $(wrapperdir)/gammalib/spi_wrap.cpp \
+                     $(wrapperdir)/gammalib/spi.py
+  SPI_TESTS        = $(top_srcdir)/inst/spi/test/test_SPI.py
+endif
 # Insert new target here
 INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
+                    $(SPI_SWIG_TARGETS) \
                     $(CTA_SWIG_TARGETS) \
                     $(LAT_SWIG_TARGETS) \
                     $(COM_SWIG_TARGETS)
@@ -113,7 +119,7 @@ testscripts = gammalib/tests/__init__.py \
               $(top_srcdir)/test/test_GVO.py \
               $(top_srcdir)/test/test_GXml.py \
               $(top_srcdir)/test/test_GXspec.py \
-              $(MWL_TESTS) $(CTA_TESTS) $(LAT_TESTS) $(COM_TESTS)
+              $(MWL_TESTS) $(CTA_TESTS) $(LAT_TESTS) $(COM_TESTS) $(SPI_TESTS)
 
 # Test data to be distributed in $(pyexecdir)/gammalib/tests/data
 testdata = $(top_srcdir)/test/data/initial_coords.txt \
@@ -196,6 +202,14 @@ $(wrapperdir)/gammalib/com.py: $(wrapperdir)/gammalib/com_wrap.cpp
 $(wrapperdir)/gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -I$(top_srcdir)/pyext -o gammalib/com_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/com.Tpi" "gammalib/com.Pi"; else rm -f "gammalib/com.Tpi"; exit 1; fi
+endif
+
+# Rule for SPI module
+if WITH_INST_SPI
+$(wrapperdir)/gammalib/spi.py: $(wrapperdir)/gammalib/spi_wrap.cpp
+$(wrapperdir)/gammalib/spi_wrap.cpp: $(top_srcdir)/inst/spi/pyext/spi.i
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/spi.Tpi" -I$(top_srcdir)/pyext -o gammalib/spi_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/spi.Tpi" "gammalib/spi.Pi"; else rm -f "gammalib/spi.Tpi"; exit 1; fi
 endif
 
 # Insert new rule here

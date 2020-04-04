@@ -1,7 +1,7 @@
 #############################################################################
-# Makefile.am for inst module                                               #
+# Makefile.am for spi/test module                                           #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2020 by Juergen Knoedlseder                                 #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -19,25 +19,11 @@
 #                                                                           #
 #############################################################################
 
-# Detect configuration
-if WITH_INST_SPI
-INST_SPI = spi
-endif
-if WITH_INST_CTA
-INST_CTA = cta
-endif
-if WITH_INST_LAT
-INST_LAT = lat
-endif
-if WITH_INST_MWL
-INST_MWL = mwl
-endif
-if WITH_INST_COM
-INST_COM = com
-endif
+# Test sources
+test_SPI_SOURCES = test_SPI.cpp test_SPI.hpp
+test_SPI_LDFLAGS = @LDFLAGS@
+test_SPI_CPPFLAGS = @CPPFLAGS@ -I$(srcdir)/../include -I$(top_srcdir)/include
+test_SPI_LDADD = $(top_builddir)/src/libgamma.la
 
-# Set sub directories
-SUBDIRS = $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) $(INST_SPI)
-
-# Extra files to be distributed in the tar file
-EXTRA_DIST = README.md
+# Test programs (list of executables that will be compiled)
+check_PROGRAMS = test_SPI
