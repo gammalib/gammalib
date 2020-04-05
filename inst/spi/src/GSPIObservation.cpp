@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <typeinfo>
+#include <typeinfo>
 #include "GException.hpp"
 #include "GObservationRegistry.hpp"
 #include "GSPIObservation.hpp"
