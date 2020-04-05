@@ -55,7 +55,7 @@ public:
     virtual void               counts(const double& counts);
 
     // Other methods
-    // TODO: Copy methods from GSPIEventBin.hpp file
+    const double& ontime(void) const;
 };
 
 

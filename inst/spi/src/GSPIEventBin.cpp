@@ -32,6 +32,8 @@
 #include <string>
 #include "GTools.hpp"
 #include "GSPIEventBin.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -171,25 +173,6 @@ GSPIEventBin* GSPIEventBin::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return size of event bin
- *
- * @return Size of event bin (sr MeV s)
- *
- * @todo Implement method.
- ***************************************************************************/
-double GSPIEventBin::size(void) const
-{
-    // Initialise size
-    double size = 0.0;
-
-    // TODO: Compute here the bin size of the event bin.
-
-    // Return bin size
-    return size;
-}
-
-
-/***********************************************************************//**
  * @brief Return error in number of counts
  *
  * @return Error in number of counts in event bin.
@@ -254,17 +237,23 @@ void GSPIEventBin::init_members(void)
 {
     // Allocate members
     m_alloc      = true;
-    m_index      = -1;   // Signals that event bin does not correspond to cube
+    m_index      = -1;  // Signals that event bin does not correspond to cube
+    m_idir       = -1;  // Signals that event bin does not correspond to cube
+    m_iebin      = -1;  // Signals that event bin does not correspond to cube
     m_dir        = new GSPIInstDir;
     m_time       = new GTime;
     m_energy     = new GEnergy;
     m_counts     = new double;
+    m_ontime     = new double;
+    m_size       = new double;
 
     // Initialise members
     m_dir->clear();
     m_time->clear();
     m_energy->clear();
     *m_counts = 0.0;
+    *m_ontime = 0.0;
+    *m_size   = 0.0;
 
     // Return
     return;
@@ -286,9 +275,13 @@ void GSPIEventBin::copy_members(const GSPIEventBin& bin)
     m_time   = new GTime(*bin.m_time);
     m_energy = new GEnergy(*bin.m_energy);
     m_counts = new double(*bin.m_counts);
+    m_ontime = new double(*bin.m_ontime);
+    m_size   = new double(*bin.m_size);
 
     // Copy non-pointer members
     m_index = bin.m_index;
+    m_idir  = bin.m_idir;
+    m_iebin = bin.m_iebin;
 
     // Signal memory allocation
     m_alloc = true;
@@ -319,6 +312,8 @@ void GSPIEventBin::free_members(void)
         if (m_time   != NULL) delete m_time;
         if (m_energy != NULL) delete m_energy;
         if (m_counts != NULL) delete m_counts;
+        if (m_ontime != NULL) delete m_ontime;
+        if (m_size   != NULL) delete m_size;
     }
 
     // Signal member pointers as free
@@ -326,6 +321,8 @@ void GSPIEventBin::free_members(void)
     m_time   = NULL;
     m_energy = NULL;
     m_counts = NULL;
+    m_ontime = NULL;
+    m_size   = NULL;
 
     // Signal memory de-allocation
     m_alloc = false;

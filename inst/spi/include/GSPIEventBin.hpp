@@ -29,11 +29,11 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEventBin.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
 #include "GSPIInstDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GTime;
+class GEnergy;
 
 /* __ Constants __________________________________________________________ */
 
@@ -86,7 +86,7 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    // TODO: Add any further methods that are needed
+    const double& ontime(void) const;
 
 protected:
     // Protected methods
@@ -97,10 +97,14 @@ protected:
     // Protected members
     bool         m_alloc;  //!< Signals proper memory allocation
     int          m_index;  //!< Dataspace index
+    int          m_idir;   //!< Direction index
+    int          m_iebin;  //!< Energy bin index
+    GSPIInstDir* m_dir;    //!< Pointer to direction of bin
+    GTime*       m_time;   //!< Pointer to time of bin
+    GEnergy*     m_energy; //!< Pointer to energy of bin
     double*      m_counts; //!< Pointer to number of counts
-    GSPIInstDir* m_dir;    //!< Pointer to bin direction
-    GTime*       m_time;   //!< Pointer to bin time
-    GEnergy*     m_energy; //!< Pointer to bin energy
+    double*      m_ontime; //!< Pointer to ontime of bin
+    double*      m_size;   //!< Pointer to size of bin
 };
 
 
@@ -184,6 +188,33 @@ void GSPIEventBin::counts(const double& counts)
 {
     *m_counts = counts;
     return;
+}
+
+/***********************************************************************//**
+ * @brief Return size of event bin
+ *
+ * @return Size of event bin (MeV s)
+ *
+ * Returns the size of the event bin.
+ ***************************************************************************/
+inline
+double GSPIEventBin::size(void) const
+{
+    return (*m_size);
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime of event bin
+ *
+ * @return Size of ontime of bin (s)
+ *
+ * Returns the ontime of the event bin.
+ ***************************************************************************/
+inline
+const double& GSPIEventBin::ontime(void) const
+{
+    return (*m_ontime);
 }
 
 #endif /* GSPIEVENTBIN_HPP */
