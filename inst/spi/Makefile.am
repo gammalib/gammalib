@@ -67,7 +67,25 @@ libspi_la_LDFLAGS =
 #caldbirfs_DATA = $(caldb_irfs)
 
 # Test data to distribute
-# TODO: Add all test data to distribute
+testdata            = test/data/obs.xml
+testdatadir         = $(pyexecdir)/gammalib/tests/spi/data
+testdata_DATA       = $(testdata)
+#
+testdataobs         = test/data/obs/og_spi.fits.gz \
+                      test/data/obs/spi_bvar_gedsat_se.fits.gz \
+                      test/data/obs/spi_pnt_filter.fits.gz
+testdataobsdir      = $(pyexecdir)/gammalib/tests/spi/data/obs
+testdataobs_DATA    = $(testdataobs)
+#
+testdataobsspi      = test/data/obs/spi/back_model.fits.gz \
+                      test/data/obs/spi/back_model_idx.fits.gz \
+                      test/data/obs/spi/dead_time.fits.gz \
+                      test/data/obs/spi/energy_boundaries.fits.gz \
+                      test/data/obs/spi/evts_det_spec.fits.gz \
+                      test/data/obs/spi/gti.fits.gz \
+                      test/data/obs/spi/pointing.fits.gz
+testdataobsspidir   = $(pyexecdir)/gammalib/tests/spi/data/obs/spi
+testdataobsspi_DATA = $(testdataobsspi)
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md caldb pyext \

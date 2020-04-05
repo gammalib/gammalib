@@ -54,7 +54,7 @@ endif
 # Optional python bindings
 if WITH_PYTHON
   TEST_PYTHON_SCRIPT = test_python.sh test_examples.sh
-  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT)$(TEST_COM):$(PYTHONPATH)$(TEST_SPI)
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT)$(TEST_COM)$(TEST_SPI):$(PYTHONPATH)
 endif
 
 # Include directories
@@ -107,8 +107,7 @@ TESTS = test_GSupport \
         test_GSky \
         test_GOptimizer \
         test_GObservation \
-        $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) \
-        $(INST_SPI) \
+        $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) $(INST_SPI) \
         $(TEST_PYTHON_SCRIPT)
 
 # Extra files to be distributed in the tar file
