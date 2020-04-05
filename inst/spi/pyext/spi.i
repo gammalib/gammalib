@@ -99,6 +99,7 @@
 }
 
 /* __ INTEGRAL/SPI _______________________________________________________ */
+%include "GSPITools.i"
 %include "GSPIObservation.i"
 %include "GSPIResponse.i"
 %include "GSPIInstDir.i"

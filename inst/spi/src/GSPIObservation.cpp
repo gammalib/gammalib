@@ -28,11 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <typeinfo> 
+//#include <typeinfo>
 #include "GException.hpp"
 #include "GObservationRegistry.hpp"
 #include "GSPIObservation.hpp"
-#include "GSPISupport.hpp"
+#include "GSPITools.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GSPIObservation      g_obs_spi_seed;
@@ -77,7 +77,7 @@ GSPIObservation::GSPIObservation(void) : GObservation()
  *
  * @param[in] filename Observation Group FITS file name.
  *
- * Constructs a SPI observation from on Observation Group.
+ * Constructs an INTEGRAL/SPI observation from an Observation Group.
  ***************************************************************************/
 GSPIObservation::GSPIObservation(const GFilename& filename) : GObservation()
 {
@@ -388,9 +388,10 @@ void GSPIObservation::read(const GFits& fits)
 /***********************************************************************//**
  * @brief Load Observation Group
  *
- * @param[in] filename Event list or counts cube FITS file name.
+ * @param[in] filename Observation Group FITS file name.
  *
- * Loads either an event list or a counts cube from a FITS file.
+ * Loads data from an Observation Group FITS file into an INTEGRAL/SPI
+ * observation.
  ***************************************************************************/
 void GSPIObservation::load(const GFilename& filename)
 {

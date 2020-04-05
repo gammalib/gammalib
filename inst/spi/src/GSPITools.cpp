@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GSPISupport.cpp - INTEGRAL/SPI support functions            *
+ *                   GSPITools.cpp - INTEGRAL/SPI tools                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSPISupport.cpp
- * @brief Implementation of support function for INTEGRAL/SPI
+ * @file GSPITools.cpp
+ * @brief Implementation of INTEGRAL/SPI tools
  * @author Juergen Knoedlseder
  */
 
@@ -28,13 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <typeinfo>
-//#include <cmath>
-//#include <iostream>
-//#include <string>
-#include "GSPISupport.hpp"
-//#include "GTools.hpp"
-//#include "GMath.hpp"
+#include "GSPITools.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GSPILib.hpp - INTEGRAL/SPI header files                 *
+ *                   GSPITools.i - INTEGRAL/SPI tools                      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,23 +19,22 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSPILib.hpp
- * @brief Collection of INTEGRAL/SPI header files
+ * @file GSPITools.i
+ * @brief Definition of INTEGRAL/SPI tools
  * @author Juergen Knoedlseder
  */
-
-#ifndef GSPILIB_HPP
-#define GSPILIB_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-
-/* __ INTEGRAL/SPI specific headers ___________________________________________ */
+%{
+/* Put headers and other declarations here that are needed for compilation */
 #include "GSPITools.hpp"
-#include "GSPIObservation.hpp"
-#include "GSPIEventBin.hpp"
-#include "GSPIEventCube.hpp"
-#include "GSPIInstDir.hpp"
-#include "GSPIResponse.hpp"
+%}
 
-#endif /* GSPILIB_HPP */
+/* __ Constants __________________________________________________________ */
+
+/* __ Prototypes _________________________________________________________ */
+namespace gammalib {
+    const GFitsTable* spi_hdu(const GFits&       fits,
+                              const std::string& extname,
+                              const int&         extver = 1);
+    int               spi_num_hdus(const GFits&       fits,
+                                   const std::string& extname);
+}

@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GSPISupport.hpp - INTEGRAL/SPI support functions            *
+ *                   GSPITools.hpp - INTEGRAL/SPI tools                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSPISupport.hpp
- * @brief Definition of support function for INTEGRAL/SPI
+ * @file GSPITools.hpp
+ * @brief Definition of INTEGRAL/SPI tools
  * @author Juergen Knoedlseder
  */
 
-#ifndef GSPISUPPORT_HPP
-#define GSPISUPPORT_HPP
+#ifndef GSPITOOLS_HPP
+#define GSPITOOLS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -41,8 +41,6 @@ class GFitsTable;
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
-
-    // SPI support functions
     const GFitsTable* spi_hdu(const GFits&       fits,
                               const std::string& extname,
                               const int&         extver = 1);
@@ -50,4 +48,4 @@ namespace gammalib {
                                    const std::string& extname);
 }
 
-#endif /* GSPISUPPORT_HPP */
+#endif /* GSPITOOLS_HPP */
