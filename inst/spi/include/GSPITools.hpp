@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GTime.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -46,6 +47,7 @@ namespace gammalib {
                               const int&         extver = 1);
     int               spi_num_hdus(const GFits&       fits,
                                    const std::string& extname);
+    GTime             spi_ijd2time(const double& ijd);
 }
 
 #endif /* GSPITOOLS_HPP */

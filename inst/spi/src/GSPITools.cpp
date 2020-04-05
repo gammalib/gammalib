@@ -203,3 +203,25 @@ int gammalib::spi_num_hdus(const GFits& fits, const std::string& extname)
     // Return number of versions
     return extvers;
 }
+
+
+/***********************************************************************//**
+ * @brief Convert IJD to GTime
+ *
+ * @param[in] ijd INTEGRAL Julian Days (days).
+ * @return time.
+ *
+ * Converts time given in INTEGRAL Julian Days into a GTime object.
+ ***************************************************************************/
+GTime gammalib::spi_ijd2time(const double& ijd)
+{
+    // Convert IJD to MJD
+    double mjd = ijd + 51544.0;
+
+    // Set GTime
+    GTime time;
+    time.mjd(mjd);
+
+    // Return time
+    return time;
+}

@@ -29,12 +29,20 @@
 #include <config.h>
 #endif
 #include "GSPIEventCube.hpp"
+#include "GSPITools.hpp"
+#include "GSPIInstDir.hpp"
+#include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GSPIEventCube::naxis(int)"
 #define G_SET_ENERGIES                        "GSPIEventCube::set_energies()"
 #define G_SET_TIMES                              "GSPIEventCube::set_times()"
 #define G_SET_BIN                              "GSPIEventCube::set_bin(int&)"
+#define G_READ_FITS                             "GSPIEventCube::read(GFits&)"
+#define G_READ_EBDS                   "GSPIEventCube::read_ebds(GFitsTable*)"
+#define G_READ_PNT        "GSPIEventCube::read_pnt(GFitsTable*, GFitsTable*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -66,11 +74,11 @@ GSPIEventCube::GSPIEventCube(void) : GEventCube()
 
 
 /***********************************************************************//**
- * @brief Load constructor
+ * @brief Observation Group constructor
  *
- * @param[in] filename INTEGRAL/SPI event cube FITS filename.
+ * @param[in] filename Observation Group FITS file name.
  *
- * Construct a INTEGRAL/SPI event cube by loading it from a FITS file.
+ * Construct an INTEGRAL/SPI event cube from an Observation Group.
  ***************************************************************************/
 GSPIEventCube::GSPIEventCube(const GFilename& filename) : GEventCube()
 {
@@ -233,42 +241,6 @@ GSPIEventCube* GSPIEventCube::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of bins in event cube
- *
- * @return Number of bins in event cube.
- *
- * @todo Implement method.
- ***************************************************************************/
-int GSPIEventCube::size(void) const
-{
-    // Compute number of bins
-    // TODO: Implement computation
-    int nbins = 0;
-
-    // Return number of bins
-    return nbins;
-}
-
-
-/***********************************************************************//**
- * @brief Return dimension of event cube
- *
- * @return Number of dimensions in event cube.
- *
- * @todo Implement method.
- ***************************************************************************/
-int GSPIEventCube::dim(void) const
-{
-    // Compute dimension
-    // TODO: Implement computation
-    int dim = 0;
-
-    // Return dimension
-    return dim;
-}
-
-
-/***********************************************************************//**
  * @brief Return number of bins in axis
  *
  * @param[in] axis Axis [0,...,dim()-1].
@@ -289,9 +261,11 @@ int GSPIEventCube::naxis(const int& axis) const
     }
     #endif
 
-    // Set result
-    // TODO: Implement computation
-    int naxis = 0;
+    // Setup const pointer array that points to relevant axis size
+    const int* ptr[3] = {&m_num_pt, &m_num_det, &m_num_ebin};
+
+    // Set number of bins dependent on axis
+    int naxis = *ptr[axis];
 
     // Return result
     return naxis;
@@ -299,23 +273,29 @@ int GSPIEventCube::naxis(const int& axis) const
 
 
 /***********************************************************************//**
- * @brief Load INTEGRAL/SPI event cube from FITS file
+ * @brief Load INTEGRAL/SPI event cube from Observation Group
  *
- * @param[in] filename FITS file name.
+ * @param[in] filename Observation Group FITS file name.
  *
- * The method clears the object before loading, thus any events residing in
- * the object before loading will be lost.
+ * Loads data from an Observation Group FITS file into an INTEGRAL/SPI
+ * event cube.
  ***************************************************************************/
 void GSPIEventCube::load(const GFilename& filename)
 {
-    // Open FITS file
-    GFits fits(filename);
+    #pragma omp critical(GSPIEventCube_load)
+    {
+        // Clear object
+        clear();
 
-    // Read event cube from FITS file
-    read(fits);
+        // Open FITS file
+        GFits fits(filename);
 
-    // Close FITS file
-    fits.close();
+        // Read event cube from FITS file
+        read(fits);
+
+        // Close FITS file
+        fits.close();
+    }
 
     // Return
     return;
@@ -350,21 +330,110 @@ void GSPIEventCube::save(const GFilename& filename, const bool& clobber) const
 
 
 /***********************************************************************//**
- * @brief Read INTEGRAL/SPI event cube from FITS file
+ * @brief Read INTEGRAL/SPI event cube from Observation Group FITS file
  *
- * @param[in] fits FITS file.
+ * @param[in] fits Observation Group FITS file.
  *
- * Reads a INTEGRAL/SPI event cube from a FITS file.
+ * @exception GException::invalid_value
+ *            Observation Group FITS file invalid.
  *
- * @todo Implement method.
+ * Reads an INTEGRAL/SPI event cube from an Observation Group FITS file.
+ * The following extension are mandatory
+ *
+ *     "SPI.-EBDS-SET"
+ *     "SPI.-OBS.-PNT"
+ *     "SPI.-OBS.-GTI"
+ *     "SPI.-OBS.-DSP"
+ *     "SPI.-OBS.-DTI"
+ *
+ * Optional extensions are
+ *
+ *     "SPI.-SDET-SPE"
+ *     "SPI.-BMOD-DSP"
+ *
  ***************************************************************************/
 void GSPIEventCube::read(const GFits& fits)
 {
     // Clear object
     clear();
 
-    // TODO: Here you have to implement the interface between the class and
-    // the event cube FITS file.
+    // Get table pointers
+    const GFitsTable* ebds = gammalib::spi_hdu(fits, "SPI.-EBDS-SET");
+    const GFitsTable* pnt  = gammalib::spi_hdu(fits, "SPI.-OBS.-PNT");
+    const GFitsTable* gti  = gammalib::spi_hdu(fits, "SPI.-OBS.-GTI");
+    const GFitsTable* dsp  = gammalib::spi_hdu(fits, "SPI.-OBS.-DSP");
+    const GFitsTable* dti  = gammalib::spi_hdu(fits, "SPI.-OBS.-DTI");
+
+    // Throw an exception if one of the mandatory HDUs is missing
+    if (ebds == NULL) {
+        std::string msg = "Extension \"SPI.-EBDS-SET\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group.";
+        throw GException::invalid_value(G_READ_FITS, msg);
+    }
+    if (pnt == NULL) {
+        std::string msg = "Extension \"SPI.-OBS.-PNT\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group.";
+        throw GException::invalid_value(G_READ_FITS, msg);
+    }
+    if (gti == NULL) {
+        std::string msg = "Extension \"SPI.-OBS.-GTI\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group.";
+        throw GException::invalid_value(G_READ_FITS, msg);
+    }
+    if (dsp == NULL) {
+        std::string msg = "Extension \"SPI.-OBS.-DSP\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group.";
+        throw GException::invalid_value(G_READ_FITS, msg);
+    }
+    if (dti == NULL) {
+        std::string msg = "Extension \"SPI.-OBS.-DTI\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group.";
+        throw GException::invalid_value(G_READ_FITS, msg);
+    }
+
+    // Determine dataspace dimensions from FITS tables
+    m_num_pt   = dsp->integer("PT_NUM");
+    m_num_det  = dsp->integer("DET_NUM");
+    m_num_ebin = dsp->integer("EBIN_NUM");
+
+    // Get number of sky and background models
+    m_num_sky = gammalib::spi_num_hdus(fits, "SPI.-SDET-SPE");
+    m_num_bgm = gammalib::spi_num_hdus(fits, "SPI.-BMOD-DSP");
+
+    // Allocate data
+    alloc_data();
+
+    // Read energy boundaries
+    read_ebds(ebds);
+
+    // Read pointing information
+    read_pnt(pnt, gti);
+
+    // Read Good Time Intervals
+    read_gti(gti);
+
+    // Read dead time information
+    read_dti(gti);
+
+    // Read detector spectra
+    read_dsp(dsp);
+
+    // Free HDU pointers
+    if (ebds != NULL) delete ebds;
+    if (pnt  != NULL) delete pnt;
+    if (gti  != NULL) delete gti;
+    if (dsp  != NULL) delete dsp;
+    if (dti  != NULL) delete dti;
 
     // Return
     return;
@@ -395,19 +464,132 @@ void GSPIEventCube::write(GFits& file) const
  *
  * This method returns the number of events in the event cube rounded to the
  * nearest integer.
- *
- * @todo Implement method.
  ***************************************************************************/
 int GSPIEventCube::number(void) const
 {
     // Initialise result
     double number = 0.0;
 
-    // TODO: Here you have to implement the computation of the number of
-    // events in the cube.
+    // Compute sum of all events
+    int dsp_size = size();
+    if (dsp_size > 0) {
+        for (int i = 0; i < dsp_size; ++i) {
+            number += m_counts[i];
+        }
+    }
 
     // Return
     return int(number+0.5);
+}
+
+
+/***********************************************************************//**
+ * @brief Return total ontime
+ *
+ * @return Total ontime.
+ *
+ * Returns the total ontime in the event cube. The total ontime is the sum
+ * of the ontime of all pointings and detectors, divided by the number of
+ * detectors that were active (determine by positive ontime values).
+ ***************************************************************************/
+double GSPIEventCube::ontime(void) const
+{
+    // Initialise result
+    double ontime = 0.0;
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+        // Initialise mean ontime and number of active detectors for this
+        // pointing
+        double mean_ontime    = 0.0;
+        double num_active_det = 0.0;
+
+        // Loop over all detectors
+        for (int idet = 0; idet < m_num_det; ++idet) {
+
+            // Get row index in table
+            int irow = ipt * m_num_det + idet;
+
+            // If detector has positive ontime then count it for the mean
+            // ontime
+            if (m_ontime[irow] > 0.0) {
+                mean_ontime    += m_ontime[irow];
+                num_active_det += 1.0;
+            }
+
+        } // endfor: looped over all detectors
+
+        // Compute mean ontime for this pointing
+        if (num_active_det > 0.0) {
+            mean_ontime /= num_active_det;
+        }
+        else {
+            mean_ontime = 0.0;
+        }
+
+        // Add mean ontime to total sum
+        ontime += mean_ontime;
+
+    } // endfor: looped over all pointings
+
+    // Return ontime
+    return ontime;
+}
+
+
+/***********************************************************************//**
+ * @brief Return total livetime
+ *
+ * @return Total livetime.
+ *
+ * Returns the total livetime in the event cube. The total livetime is the
+ * sum of the livetime of all pointings and detectors, divided by the number
+ * of detectors that were active (determine by positive livetime values).
+ ***************************************************************************/
+double GSPIEventCube::livetime(void) const
+{
+    // Initialise result
+    double livetime = 0.0;
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+        // Initialise mean livetime and number of active detectors for this
+        // pointing
+        double mean_livetime  = 0.0;
+        double num_active_det = 0.0;
+
+        // Loop over all detectors
+        for (int idet = 0; idet < m_num_det; ++idet) {
+
+            // Get row index in table
+            int irow = ipt * m_num_det + idet;
+
+            // If detector has positive livetime then count it for the mean
+            // livetime
+            if (m_livetime[irow] > 0.0) {
+                mean_livetime  += m_livetime[irow];
+                num_active_det += 1.0;
+            }
+
+        } // endfor: looped over all detectors
+
+        // Compute mean livetime for this pointing
+        if (num_active_det > 0.0) {
+            mean_livetime /= num_active_det;
+        }
+        else {
+            mean_livetime = 0.0;
+        }
+
+        // Add mean livetime to total sum
+        livetime += mean_livetime;
+
+    } // endfor: looped over all pointings
+
+    // Return livetime
+    return livetime;
 }
 
 
@@ -433,24 +615,26 @@ std::string GSPIEventCube::print(const GChatter& chatter) const
         result.append(gammalib::str(number()));
         result.append("\n"+gammalib::parformat("Number of elements"));
         result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Pointings"));
+        result.append(gammalib::str(m_num_pt));
+        result.append("\n"+gammalib::parformat("Detectors"));
+        result.append(gammalib::str(m_num_det));
+        result.append("\n"+gammalib::parformat("Energy bins"));
+        result.append(gammalib::str(m_num_ebin));
+        result.append("\n"+gammalib::parformat("Sky models"));
+        result.append(gammalib::str(m_num_sky));
+        result.append("\n"+gammalib::parformat("Background models"));
+        result.append(gammalib::str(m_num_bgm));
         result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin().MeV())+" - ");
         result.append(gammalib::str(emax().MeV())+" MeV");
-        result.append("\n"+gammalib::parformat("Mean energy"));
-        result.append(m_energy.print(chatter));
-        result.append("\n"+gammalib::parformat("Energy bin width"));
-        result.append(m_ewidth.print(chatter));
         result.append("\n"+gammalib::parformat("Ontime"));
-        result.append(gammalib::str(m_ontime)+" s");
+        result.append(gammalib::str(ontime())+" s");
+        result.append("\n"+gammalib::parformat("Livetime"));
+        result.append(gammalib::str(livetime())+" s");
         result.append("\n"+gammalib::parformat("Time interval"));
-        result.append(gammalib::str(tstart().jd())+" - ");
-        result.append(gammalib::str(tstop().jd())+" Julian days");
-        result.append("\n"+gammalib::parformat("Mean time"));
-        result.append(m_time.print(chatter));
-
-        // Append additional information
-        // TODO: Add code to append any additional information that might
-        // be relevant.
+        result.append(tstart().utc()+" - ");
+        result.append(tstop().utc());
 
     } // endif: chatter was not silent
 
@@ -472,10 +656,24 @@ void GSPIEventCube::init_members(void)
 {
     // Initialise members
     m_bin.clear();
-    m_time.clear();
-    m_ontime = 0.0;
-    m_energy.clear();
-    m_ewidth.clear();
+    m_num_pt     = 0;
+    m_num_det    = 0;
+    m_num_ebin   = 0;
+    m_num_sky    = 0;
+    m_num_bgm    = 0;
+    m_gti_size   = 0;
+    m_dsp_size   = 0;
+    m_model_size = 0;
+    m_ontime     = NULL;
+    m_livetime   = NULL;
+    m_counts     = NULL;
+    m_stat_err   = NULL;
+    m_models     = NULL;
+    m_size       = NULL;
+    m_dir        = NULL;
+    m_time       = NULL;
+    m_energy     = NULL;
+    m_ewidth     = NULL;
 
     // Prepare event bin
     init_bin();
@@ -500,10 +698,52 @@ void GSPIEventCube::copy_members(const GSPIEventCube& cube)
     // be initialised later. The event bin serves just as a container of
     // pointers, hence we do not want to copy over the pointers from the
     // original class.
-    m_time   = cube.m_time;
-    m_ontime = cube.m_ontime;
-    m_energy = cube.m_energy;
-    m_ewidth = cube.m_ewidth;
+    m_num_pt     = cube.m_num_pt;
+    m_num_det    = cube.m_num_det;
+    m_num_ebin   = cube.m_num_ebin;
+    m_num_sky    = cube.m_num_sky;
+    m_num_bgm    = cube.m_num_bgm;
+    m_gti_size   = cube.m_gti_size;
+    m_dsp_size   = cube.m_dsp_size;
+    m_model_size = cube.m_model_size;
+
+    // Copy data
+    if (m_num_ebin > 0) {
+        m_energy = new GEnergy[m_num_ebin];
+        m_ewidth = new GEnergy[m_num_ebin];
+        for (int i = 0; i < m_num_ebin; ++i) {
+            m_energy[i] = cube.m_energy[i];
+            m_ewidth[i] = cube.m_ewidth[i];
+        }
+    }
+    if (m_gti_size > 0) {
+        m_ontime   = new double[m_gti_size];
+        m_livetime = new double[m_gti_size];
+        m_time     = new GTime[m_gti_size];
+        m_dir      = new GSPIInstDir[m_gti_size];
+        for (int i = 0; i < m_gti_size; ++i) {
+            m_ontime[i]   = cube.m_ontime[i];
+            m_livetime[i] = cube.m_livetime[i];
+            m_time[i]     = cube.m_time[i];
+            m_dir[i]      = cube.m_dir[i];
+        }
+    }
+    if (m_dsp_size > 0) {
+        m_counts   = new double[m_dsp_size];
+        m_stat_err = new double[m_dsp_size];
+        m_size     = new double[m_dsp_size];
+        for (int i = 0; i < m_dsp_size; ++i) {
+            m_counts[i]   = cube.m_counts[i];
+            m_stat_err[i] = cube.m_stat_err[i];
+            m_size[i]     = cube.m_size[i];
+        }
+    }
+    if (m_model_size > 0) {
+        m_models = new double[m_model_size];
+        for (int i = 0; i < m_model_size; ++i) {
+            m_models[i] = cube.m_models[i];
+        }
+    }
 
     // Prepare event bin
     init_bin();
@@ -518,6 +758,332 @@ void GSPIEventCube::copy_members(const GSPIEventCube& cube)
  ***************************************************************************/
 void GSPIEventCube::free_members(void)
 {
+    // Delete memory
+    if (m_ontime   != NULL) delete [] m_ontime;
+    if (m_livetime != NULL) delete [] m_livetime;
+    if (m_counts   != NULL) delete [] m_counts;
+    if (m_stat_err != NULL) delete [] m_stat_err;
+    if (m_models   != NULL) delete [] m_models;
+    if (m_size     != NULL) delete [] m_size;
+    if (m_dir      != NULL) delete [] m_dir;
+    if (m_time     != NULL) delete [] m_time;
+    if (m_energy   != NULL) delete [] m_energy;
+    if (m_ewidth   != NULL) delete [] m_ewidth;
+
+    // Set pointers to free
+    m_ontime   = NULL;
+    m_livetime = NULL;
+    m_counts   = NULL;
+    m_stat_err = NULL;
+    m_models   = NULL;
+    m_size     = NULL;
+    m_dir      = NULL;
+    m_time     = NULL;
+    m_energy   = NULL;
+    m_ewidth   = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocate data
+ ***************************************************************************/
+void GSPIEventCube::alloc_data(void)
+{
+    // Make sure that data is free
+    free_members();
+
+    // Compute array sizes
+    m_gti_size   = m_num_pt * m_num_det;
+    m_dsp_size   = m_gti_size * m_num_ebin;
+    m_model_size = m_dsp_size * (m_num_sky + m_num_bgm);
+
+    // Allocate and initialise EBDS data
+    if (m_num_ebin > 0) {
+        m_energy = new GEnergy[m_num_ebin];
+        m_ewidth = new GEnergy[m_num_ebin];
+        for (int i = 0; i < m_num_ebin; ++i) {
+            m_energy[i].clear();
+            m_ewidth[i].clear();
+        }
+    }
+
+    // Allocate and initialise GTI data
+    if (m_gti_size > 0) {
+        m_ontime   = new double[m_gti_size];
+        m_livetime = new double[m_gti_size];
+        m_time     = new GTime[m_gti_size];
+        m_dir      = new GSPIInstDir[m_gti_size];
+        for (int i = 0; i < m_gti_size; ++i) {
+            m_ontime[i]   = 0.0;
+            m_livetime[i] = 0.0;
+            m_time[i].clear();
+            m_dir[i].clear();
+        }
+    }
+
+    // Allocate and initialise DSP data
+    if (m_dsp_size > 0) {
+        m_counts   = new double[m_dsp_size];
+        m_stat_err = new double[m_dsp_size];
+        m_size     = new double[m_dsp_size];
+        for (int i = 0; i < m_dsp_size; ++i) {
+            m_counts[i]   = 0.0;
+            m_stat_err[i] = 0.0;
+            m_size[i]     = 0.0;
+        }
+    }
+
+    // Allocate and initialise model data
+    if (m_model_size > 0) {
+        m_models = new double[m_model_size];
+        for (int i = 0; i < m_model_size; ++i) {
+            m_models[i] = 0.0;
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read data from INTEGRAL/SPI "SPI.-EBDS-SET" extension
+ *
+ * @param[in] ebds Energy boundaries FITS table.
+ *
+ * @exception GException::invalid_value
+ *            Incompatible number of energy bins encountered
+ *
+ * Reads data from an INTEGRAL/SPI "SPI.-EBDS-SET" extension. The method
+ * sets up the m_energy array and the m_ebounds member.
+ ***************************************************************************/
+void GSPIEventCube::read_ebds(const GFitsTable* ebds)
+{
+    // Read energy boundaries
+    m_ebounds.read(*ebds);
+
+    // Throw an exception if the number of energy boundaries is not
+    // consistent with DSP keyword
+    if (m_ebounds.size() != m_num_ebin) {
+        std::string msg = "Number of energy bins "+
+                          gammalib::str(m_ebounds.size())+" found in "
+                          "\"SPI.-EBDS-SET\" extension differes from value "+
+                          gammalib::str(m_num_det)+" of \"DET_NUM\" keyword "
+                          "in \"SPI.-OBS.-DSP\" extension. Please specify a "
+                          "valid Observation Group.";
+        throw GException::invalid_value(G_READ_EBDS, msg);
+    }
+
+    // Loop over all energy bins
+    for (int iebin = 0; iebin < m_num_ebin; ++iebin) {
+
+        // Store linear mean energy and bin width
+        m_energy[iebin] = m_ebounds.emean(iebin);
+        m_ewidth[iebin] = m_ebounds.ewidth(iebin);
+        
+    } // endfor: looped over all energy bins
+
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read pointing information
+ *
+ * @param[in] pnt Pointing FITS table.
+ * @param[in] gti GTI FITS table.
+ *
+ * @exception GException::invalid_value
+ *            Incompatible PTID_SPI pointing identifiers encountered
+ *
+ * Reads pointing information from "SPI.-OBS.-PNT" and "SPI.-OBS.-GTI"
+ * extensions. The method sets up the m_dir array.
+ ***************************************************************************/
+void GSPIEventCube::read_pnt(const GFitsTable* pnt, const GFitsTable* gti)
+{
+    // Get relevant columns
+    const GFitsTableCol* pnt_ptid = (*pnt)["PTID_SPI"];
+    const GFitsTableCol* ra_spix  = (*pnt)["RA_SPIX"];
+    const GFitsTableCol* dec_spix = (*pnt)["DEC_SPIX"];
+    const GFitsTableCol* gti_ptid = (*gti)["PTID_SPI"];
+    const GFitsTableCol* det_id   = (*gti)["DET_ID"];
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+        // Set pointing direction
+        GSkyDir pnt_dir;
+        pnt_dir.radec_deg(ra_spix->real(ipt), dec_spix->real(ipt));
+
+        // Loop over all detectors
+        for (int idet = 0; idet < m_num_det; ++idet) {
+
+            // Get row index in table
+            int irow = ipt * m_num_det + idet;
+
+            // Throw an exception if the pointing identifier in the pointing
+            // and the GTI extension is not the same
+            if (pnt_ptid->string(ipt) != gti_ptid->string(irow)) {
+                std::string msg = "PITD_SPI \""+pnt_ptid->string(ipt)+"\" in "
+                                  "\"SPI.-OBS.-PNT\" differs from \""+
+                                  gti_ptid->string(irow)+"\" in "
+                                  "\"SPI.-OBS.-GTI\" extension for detector "+
+                                  gammalib::str(det_id->real(irow))+". Please "
+                                  "specify a valid Observation Group.";
+                throw GException::invalid_value(G_READ_PNT, msg);
+            }
+
+            // Store pointing direction and detector identifier
+            m_dir[irow].dir(pnt_dir);
+            m_dir[irow].detid(det_id->real(irow));
+
+        } // endfor: looped over all detectors
+
+    } // endfor: looped over all pointings
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read data from INTEGRAL/SPI "SPI.-OBS.-GTI" extension
+ *
+ * @param[in] gti GTI FITS table.
+ *
+ * Reads data from an INTEGRAL/SPI "SPI.-OBS.-GTI" extension. The method
+ * sets up the m_ontime array and the m_gti member.
+ ***************************************************************************/
+void GSPIEventCube::read_gti(const GFitsTable* gti)
+{
+    // Get relevant columns
+    const GFitsTableCol* ontime = (*gti)["ONTIME"];
+    const GFitsTableCol* tstart = (*gti)["TSTART"];
+    const GFitsTableCol* tstop  = (*gti)["TSTOP"];
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+        // Initialise minimum TSTART and maximum TSTOP for GTI (they should
+        // all be identical and are anyways not used, but we want to have a
+        // reasonable GTI object
+        double t_start = 0.0;
+        double t_stop  = 0.0;
+
+        // Loop over all detectors
+        for (int idet = 0; idet < m_num_det; ++idet) {
+
+            // Get row index in table
+            int irow = ipt * m_num_det + idet;
+
+            // Store ontime
+            m_ontime[irow] = ontime->real(irow);
+
+            // Compute and store mean time
+            double ijd   = 0.5 * (tstart->real(irow) + tstop->real(irow));
+            m_time[irow] = gammalib::spi_ijd2time(ijd);
+
+            // Update TSTART and TSTOP
+            if (t_start == 0.0 || (tstart->real(irow) < t_start)) {
+                t_start = tstart->real(irow);
+            }
+            if (t_stop == 0.0 || (tstop->real(irow) > t_stop)) {
+                t_stop = tstop->real(irow);
+            }
+
+        } // endfor: looped over all detectors
+
+        // Append GTI
+        m_gti.append(gammalib::spi_ijd2time(t_start),
+                     gammalib::spi_ijd2time(t_stop));
+
+    } // endfor: looped over all pointings
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read data from INTEGRAL/SPI "SPI.-OBS.-DTI" extension
+ *
+ * @param[in] dti Dead time information FITS table.
+ *
+ * Reads data from an INTEGRAL/SPI "SPI.-OBS.-DTI" extension. The method
+ * sets up the m_ontime array and the m_gti member.
+ ***************************************************************************/
+void GSPIEventCube::read_dti(const GFitsTable* dti)
+{
+    // Get relevant columns
+    const GFitsTableCol* livetime = (*dti)["LIVETIME"];
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+        // Loop over all detectors
+        for (int idet = 0; idet < m_num_det; ++idet) {
+
+            // Get row index in table
+            int irow = ipt * m_num_det + idet;
+
+            // Store livetime
+            m_livetime[irow] = livetime->real(irow);
+
+        } // endfor: looped over all detectors
+
+    } // endfor: looped over all pointings
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read data from INTEGRAL/SPI "SPI.-OBS.-DSP" extension
+ *
+ * @param[in] dsp DSP FITS table.
+ *
+ * Reads data from an INTEGRAL/SPI "SPI.-OBS.-DSP" extension. The method
+ * sets up the m_counts, m_stat_err and m_size arrays.
+ *
+ * Note that the computation of the m_size arrays needs ontime and energy
+ * width information that has been previously setup in the read_ebds() and
+ * read_gti() methods.
+ ***************************************************************************/
+void GSPIEventCube::read_dsp(const GFitsTable* dsp)
+{
+    // Get relevant columns
+    const GFitsTableCol* counts   = (*dsp)["COUNTS"];
+    const GFitsTableCol* stat_err = (*dsp)["STAT_ERR"];
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+        // Loop over all detectors
+        for (int idet = 0; idet < m_num_det; ++idet) {
+
+            // Get row index in table
+            int irow  = ipt * m_num_det + idet;
+
+            // Set start index in destination arrays
+            int index = irow * m_num_ebin;
+
+            // Copy energy bins
+            for (int iebin = 0; iebin < m_num_ebin; ++iebin, ++index) {
+                m_counts[index]   = counts->real(irow, iebin);
+                m_stat_err[index] = stat_err->real(irow, iebin);
+                m_size[index]     = m_ontime[irow] * m_ewidth[iebin].MeV();
+            }
+
+        } // endfor: looped over all detectors
+
+    } // endfor: looped over all pointings
+
     // Return
     return;
 }
@@ -535,10 +1101,12 @@ void GSPIEventCube::init_bin(void)
 {
     // Prepare event bin
     m_bin.free_members();
-    m_bin.m_counts = NULL;      //!< Will be set by set_bin method
-    m_bin.m_dir    = &m_dir;    //!< Content will be set by set_bin method
-    m_bin.m_time   = &m_time;   //!< Fixed content
-    m_bin.m_energy = &m_energy; //!< Fixed content
+    m_bin.m_dir    = NULL;   //!< Will be set by set_bin method
+    m_bin.m_time   = NULL;   //!< Will be set by set_bin method
+    m_bin.m_energy = NULL;   //!< Will be set by set_bin method
+    m_bin.m_counts = NULL;   //!< Will be set by set_bin method
+    m_bin.m_ontime = NULL;   //!< Will be set by set_bin method
+    m_bin.m_size   = NULL;   //!< Will be set by set_bin method
 
     // Return
     return;
@@ -566,15 +1134,23 @@ void GSPIEventCube::set_bin(const int& index)
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SET_BIN, index, 0, size()-1);
+        throw GException::out_of_range(G_SET_BIN, index, size());
     }
     #endif
 
     // Set bin index
     m_bin.m_index = index;
+    m_bin.m_idir  = index / m_num_ebin;
+    m_bin.m_iebin = index % m_num_ebin;
 
-    // TODO: Set here the pointers of the GSPIEventBin to the event cube
-    // cell that corresponds to the specified index.
+    // Set GSPIEventBin pointers
+    m_bin.m_dir    = m_dir    + m_bin.m_idir;
+    m_bin.m_time   = m_time   + m_bin.m_idir;
+    m_bin.m_energy = m_energy + m_bin.m_iebin;
+    m_bin.m_counts = m_counts + m_bin.m_index;
+    //m_bin.m_ontime = m_ontime + m_bin.m_idir;
+    m_bin.m_ontime = m_livetime + m_bin.m_idir; // Use livetime instead of ontime?
+    m_bin.m_size   = m_size   + m_bin.m_index;
 
     // Return
     return;

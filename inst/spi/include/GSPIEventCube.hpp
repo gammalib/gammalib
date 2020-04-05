@@ -32,17 +32,20 @@
 #include <vector>
 #include "GEventCube.hpp"
 #include "GSPIEventBin.hpp"
-#include "GSPIInstDir.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyMap.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+//#include "GSPIInstDir.hpp"
+//#include "GSkyDir.hpp"
+//#include "GEnergy.hpp"
+//#include "GTime.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
 class GEbounds;
 class GGti;
 class GFits;
+class GSkyDir;
+class GEnergy;
+class GTime;
+class GSPIInstDir;
 
 /* __ Constants __________________________________________________________ */
 
@@ -84,13 +87,20 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    // TODO: Add any further methods that are needed
+    double ontime(void) const;
+    double livetime(void) const;
 
 protected:
     // Protected methods
     void         init_members(void);
     void         copy_members(const GSPIEventCube& cube);
     void         free_members(void);
+    void         alloc_data(void);
+    void         read_ebds(const GFitsTable* ebds);
+    void         read_pnt(const GFitsTable* pnt, const GFitsTable* gti);
+    void         read_gti(const GFitsTable* gti);
+    void         read_dti(const GFitsTable* dti);
+    void         read_dsp(const GFitsTable* dsp);
     virtual void set_energies(void);
     virtual void set_times(void);
     void         init_bin(void);
@@ -98,11 +108,24 @@ protected:
 
     // Protected members
     GSPIEventBin m_bin;        //!< Actual event bin
-    GSPIInstDir  m_dir;        //!< Actual event direction
-    GTime        m_time;       //!< Event cube mean time
-    double       m_ontime;     //!< Event cube ontime (sec)
-    GEnergy      m_energy;     //!< Event cube mean energy
-    GEnergy      m_ewidth;     //!< Event cube energy bin width
+    int          m_num_pt;     //!< Number of pointings
+    int          m_num_det;    //!< Number of detectors
+    int          m_num_ebin;   //!< Number of energy bins
+    int          m_num_sky;    //!< Number of sky models
+    int          m_num_bgm;    //!< Number of background models
+    int          m_gti_size;   //!< Size of GTI arrays
+    int          m_dsp_size;   //!< Size of DSP arrays
+    int          m_model_size; //!< Size of model arrays
+    double*      m_ontime;     //!< Ontime array
+    double*      m_livetime;   //!< Livetime array
+    double*      m_counts;     //!< Counts array
+    double*      m_stat_err;   //!< Statistical error array
+    double*      m_models;     //!< Models array
+    double*      m_size;       //!< Event bin size array
+    GSPIInstDir* m_dir;        //!< Event direction array
+    GTime*       m_time;       //!< Time array
+    GEnergy*     m_energy;     //!< Energy array
+    GEnergy*     m_ewidth;     //!< Energy bin width array
 };
 
 
@@ -115,6 +138,34 @@ inline
 std::string GSPIEventCube::classname(void) const
 {
     return ("GSPIEventCube");
+}
+
+
+/***********************************************************************//**
+ * @brief Return event cube size
+ *
+ * @return Number of bins in event cube.
+ *
+ * Returns number of bins in event cube.
+ ***************************************************************************/
+inline
+int GSPIEventCube::size(void) const
+{
+    return (m_num_pt*m_num_det*m_num_ebin);
+}
+
+
+/***********************************************************************//**
+ * @brief Return event cube dimension
+ *
+ * @return Number of dimensions in event cube.
+ *
+ * Returns the dimension of the event cube which is always 3.
+ ***************************************************************************/
+inline
+int GSPIEventCube::dim(void) const
+{
+    return (3);
 }
 
 

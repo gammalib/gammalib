@@ -58,7 +58,8 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    // TODO: Copy methods from GSPIEventCube.hpp file
+    double ontime(void) const;
+    double livetime(void) const;
 };
 
 
