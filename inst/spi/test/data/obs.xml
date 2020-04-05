@@ -1,0 +1,6 @@
+<?xml version="1.0" standalone="no"?>
+<observation_list title="observation library">
+  <observation name="Crab" id="0044" instrument="SPI">
+    <parameter name="ObservationGroup" file="$TEST_SPI_DATA/obs/og_spi.fits"/>
+  </observation>
+</observation_list>

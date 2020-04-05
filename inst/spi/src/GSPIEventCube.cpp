@@ -1046,19 +1046,24 @@ void GSPIEventCube::read_gti(const GFitsTable* gti)
             double ijd   = 0.5 * (tstart->real(irow) + tstop->real(irow));
             m_time[irow] = gammalib::spi_ijd2time(ijd);
 
-            // Update TSTART and TSTOP
-            if (t_start == 0.0 || (tstart->real(irow) < t_start)) {
-                t_start = tstart->real(irow);
-            }
-            if (t_stop == 0.0 || (tstop->real(irow) > t_stop)) {
-                t_stop = tstop->real(irow);
+            // Update TSTART and TSTOP (only if ontime is > 0.0 since TSTART
+            // and TSTOP may be zero for zero ontime)
+            if (ontime->real(irow) > 0.0) {
+                if (t_start == 0.0 || (tstart->real(irow) < t_start)) {
+                    t_start = tstart->real(irow);
+                }
+                if (t_stop == 0.0 || (tstop->real(irow) > t_stop)) {
+                    t_stop = tstop->real(irow);
+                }
             }
 
         } // endfor: looped over all detectors
 
-        // Append GTI
-        m_gti.append(gammalib::spi_ijd2time(t_start),
-                     gammalib::spi_ijd2time(t_stop));
+        // Append GTI (only if TSTART and TSTOP are not zero)
+        if (t_start != 0.0 && t_stop != 0.0) {
+            m_gti.append(gammalib::spi_ijd2time(t_start),
+                         gammalib::spi_ijd2time(t_stop));
+        }
 
     } // endfor: looped over all pointings
 

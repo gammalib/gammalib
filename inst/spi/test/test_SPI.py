@@ -73,6 +73,35 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GSPIObservation class
+    def _observation_test(self):
+        """
+        Test GSPIObservation class
+        """
+        # Set Observation Group file name
+        og_dol = self._data + '/obs/og_spi.fits'
+
+        # Load event cube
+        obs = gammalib.GSPIObservation(og_dol)
+        self.test_value(obs.ontime(), 193966.8178673, 1.0e-6, 'Check ontime')
+        self.test_value(obs.livetime(), 170657.5371606, 1.0e-6, 'Check livetime')
+        self.test_value(obs.deadc(), 0.8798285, 1.0e-6, 'Check deadtime correction')
+
+        # Set XML file name
+        xml = self._data + '/obs.xml'
+
+        # Load observation from XML file
+        obs = gammalib.GObservations(xml)
+        self.test_value(obs[0].name(), 'Crab', 'Check observation name')
+        self.test_value(obs[0].id(), '0044', 'Check observation identifier')
+        self.test_value(obs[0].instrument(), 'SPI', 'Check instrument name')
+        self.test_value(obs[0].ontime(), 193966.8178673, 1.0e-6, 'Check ontime')
+        self.test_value(obs[0].livetime(), 170657.5371606, 1.0e-6, 'Check livetime')
+        self.test_value(obs[0].deadc(), 0.8798285, 1.0e-6, 'Check deadtime correction')
+
+        # Return
+        return
+
     # Test class pickeling
     def _test_pickeling(self):
         """
@@ -112,6 +141,7 @@ class Test(gammalib.GPythonTestSuite):
 
         # Append tests
         self.append(self._event_cube_test, 'Test GSPIEventCube class')
+        self.append(self._observation_test, 'Test GSPIObservation class')
         self.append(self._test_pickeling, 'Test INTEGRAL/SPI class pickeling')
 
         # Return

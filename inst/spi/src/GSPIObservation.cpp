@@ -33,6 +33,7 @@
 #include "GObservationRegistry.hpp"
 #include "GSPIObservation.hpp"
 #include "GSPITools.hpp"
+#include "GSPIEventCube.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GSPIObservation      g_obs_spi_seed;
@@ -66,6 +67,27 @@ GSPIObservation::GSPIObservation(void) : GObservation()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs an INTEGRAL/SPI observation from the information that is found
+ * in the XML element.
+ ***************************************************************************/
+GSPIObservation::GSPIObservation(const GXmlElement& xml) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Read XML
+    read(xml);
 
     // Return
     return;
@@ -243,10 +265,8 @@ void GSPIObservation::response(const GResponse& rsp)
  * Reads information for a INTEGRAL/SPI observation from an XML element.
  * The expected format of the XML element is
  *
- *     <observation name="Crab" id="00001" instrument="SPI">
- *       ...
- *       @todo Define XML format for a INTEGRAL/SPI observation
- *       ...
+ *     <observation name="Crab" id="0044" instrument="SPI">
+ *       <parameter name="ObservationGroup" file="og_spi.fits"/>
  *     </observation>
  *
  ***************************************************************************/
@@ -255,21 +275,17 @@ void GSPIObservation::read(const GXmlElement& xml)
     // Clear observation
     clear();
 
+    // Extract instrument name
+    m_instrument = xml.attribute("instrument");
+
     // Get parameters
-    // TODO: add relevant parameters. An example is given below
-    //std::string drename = gammalib::xml_get_attr(G_READ, xml, "DRE", "file");
+    std::string filename = gammalib::xml_get_attr(G_READ, xml, "ObservationGroup", "file");
 
     // Expand file names
-    // TODO: the following example shows how to expand environment variables
-    //drename = gammalib::xml_file_expand(xml, drename);
+    filename = gammalib::xml_file_expand(xml, filename);
 
     // Load observation
-    // TODO: you may load the observation here. An example below.
-    //load(drename, drbname, drgname, drxname);
-
-    // Load IAQ
-    // TODO: you may load the response here.  An example below.
-    //response(GCaldb("cgro", "comptel"), iaqname);
+    load(filename);
 
     // Return
     return;
@@ -284,10 +300,8 @@ void GSPIObservation::read(const GXmlElement& xml)
  * Writes information for a INTEGRAL/SPI observation into an XML element. The
  * format of the XML element is
  *
- *     <observation name="Crab" id="00001" instrument="SPI">
- *       ...
- *       @todo Define XML format for a INTEGRAL/SPI observation
- *       ...
+ *     <observation name="Crab" id="0044" instrument="SPI">
+ *       <parameter name="ObservationGroup" file="og_spi.fits"/>
  *     </observation>
  *
  ***************************************************************************/
@@ -297,8 +311,8 @@ void GSPIObservation::write(GXmlElement& xml) const
     GXmlElement* par;
 
     // TODO: Write out all parameters. An example is shown below.
-    //par = gammalib::xml_need_par(G_WRITE, xml, "DRE");
-    //par->attribute("file", gammalib::xml_file_reduce(xml, m_drename));
+    par = gammalib::xml_need_par(G_WRITE, xml, "ObservationGroup");
+    par->attribute("ObservationGroup", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return
     return;
@@ -316,69 +330,21 @@ void GSPIObservation::read(const GFits& fits)
 {
     // Delete any existing event container (do not call clear() as we do not
     // want to delete the response function)
-    //if (m_events != NULL) delete m_events;
-    //m_events = NULL;
+    if (m_events != NULL) delete m_events;
 
-    // Get table pointers
-    const GFitsTable* ebds = gammalib::spi_hdu(fits, "SPI.-EBDS-SET");
-    const GFitsTable* pnt  = gammalib::spi_hdu(fits, "SPI.-OBS.-PNT");
-    const GFitsTable* gti  = gammalib::spi_hdu(fits, "SPI.-OBS.-GTI");
-    const GFitsTable* dsp  = gammalib::spi_hdu(fits, "SPI.-OBS.-DSP");
-    const GFitsTable* dti  = gammalib::spi_hdu(fits, "SPI.-OBS.-DTI");
+    // Allocate new event cube
+    GSPIEventCube* events = new GSPIEventCube;
 
-    // Throw an exception if one of the mandatory HDUs is missing
-    if (ebds == NULL) {
-        std::string msg = "Extension \"SPI.-EBDS-SET\" not found in "
-                          "Observation Group FITS file \""+
-                          fits.filename().url()+"\". Please specify a "
-                          "valid Observation Group FITS file.";
-        throw GException::invalid_argument(G_READ_FITS, msg);
-    }
-    if (pnt == NULL) {
-        std::string msg = "Extension \"SPI.-OBS.-PNT\" not found in "
-                          "Observation Group FITS file \""+
-                          fits.filename().url()+"\". Please specify a "
-                          "valid Observation Group FITS file.";
-        throw GException::invalid_argument(G_READ_FITS, msg);
-    }
-    if (gti == NULL) {
-        std::string msg = "Extension \"SPI.-OBS.-GTI\" not found in "
-                          "Observation Group FITS file \""+
-                          fits.filename().url()+"\". Please specify a "
-                          "valid Observation Group FITS file.";
-        throw GException::invalid_argument(G_READ_FITS, msg);
-    }
-    if (dsp == NULL) {
-        std::string msg = "Extension \"SPI.-OBS.-DSP\" not found in "
-                          "Observation Group FITS file \""+
-                          fits.filename().url()+"\". Please specify a "
-                          "valid Observation Group FITS file.";
-        throw GException::invalid_argument(G_READ_FITS, msg);
-    }
-    if (dti == NULL) {
-        std::string msg = "Extension \"SPI.-OBS.-DTI\" not found in "
-                          "Observation Group FITS file \""+
-                          fits.filename().url()+"\". Please specify a "
-                          "valid Observation Group FITS file.";
-        throw GException::invalid_argument(G_READ_FITS, msg);
-    }
+    // Assign event cube as the observation's event container
+    m_events = events;
 
-    // Determine dataspace dimensions from FITS tables
-    m_num_pnt  = dsp->integer("PT_NUM");
-    m_num_det  = dsp->integer("DET_NUM");
-    m_num_ebds = dsp->integer("EBIN_NUM");
+    // Read in Observation Group
+    events->read(fits);
 
-    // Get number of sky and background models
-    m_num_sky = gammalib::spi_num_hdus(fits, "SPI.-SDET-SPE");
-    m_num_bgm = gammalib::spi_num_hdus(fits, "SPI.-BMOD-DSP");
-
-
-    // Free HDU pointers
-    if (ebds != NULL) delete ebds;
-    if (pnt  != NULL) delete pnt;
-    if (gti  != NULL) delete gti;
-    if (dsp  != NULL) delete dsp;
-    if (dti  != NULL) delete dti;
+    // Store ontime and livetime and compute deadtime correction
+    m_ontime   = events->ontime();
+    m_livetime = events->livetime();
+    m_deadc    = (m_ontime > 0.0) ? m_livetime/m_ontime : 1.0;
 
     // Return
     return;
@@ -443,20 +409,20 @@ std::string GSPIObservation::print(const GChatter& chatter) const
         result.append(gammalib::str(livetime())+" sec");
         result.append("\n"+gammalib::parformat("Deadtime correction"));
         result.append(gammalib::str(m_deadc));
-        result.append("\n"+gammalib::parformat("Pointings"));
-        result.append(gammalib::str(m_num_pnt));
-        result.append("\n"+gammalib::parformat("Detectors"));
-        result.append(gammalib::str(m_num_det));
-        result.append("\n"+gammalib::parformat("Energy bins"));
-        result.append(gammalib::str(m_num_ebds));
-        result.append("\n"+gammalib::parformat("Sky models"));
-        result.append(gammalib::str(m_num_sky));
-        result.append("\n"+gammalib::parformat("Background models"));
-        result.append(gammalib::str(m_num_bgm));
 
-        // Append additional information
-        // TODO: Add code to append any additional information that might
-        // be relevant.
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
+
+            // Append response
+            //result.append("\n"+m_response.print(reduced_chatter));
+
+            // Append events
+            if (m_events != NULL) {
+                result.append("\n"+m_events->print(reduced_chatter));
+            }
+
+        } // endif: appended detailed information
 
     } // endif: chatter was not silent
 
@@ -477,16 +443,12 @@ std::string GSPIObservation::print(const GChatter& chatter) const
 void GSPIObservation::init_members(void)
 {
     // Initialise members
+    m_instrument = "SPI";
     m_filename.clear();
     m_response.clear();
     m_ontime   = 0.0;
     m_livetime = 0.0;
     m_deadc    = 0.0;
-    m_num_ebds = 0;
-    m_num_pnt  = 0;
-    m_num_det  = 0;
-    m_num_sky  = 0;
-    m_num_bgm  = 0;
 
     // Return
     return;
@@ -501,16 +463,12 @@ void GSPIObservation::init_members(void)
 void GSPIObservation::copy_members(const GSPIObservation& obs)
 {
     // Copy members
-    m_filename = obs.m_filename;
-    m_response = obs.m_response;
-    m_ontime   = obs.m_ontime;
-    m_livetime = obs.m_livetime;
-    m_deadc    = obs.m_deadc;
-    m_num_ebds = obs.m_num_ebds;
-    m_num_pnt  = obs.m_num_pnt;
-    m_num_det  = obs.m_num_det;
-    m_num_sky  = obs.m_num_sky;
-    m_num_bgm  = obs.m_num_bgm;
+    m_instrument = obs.m_instrument;
+    m_filename   = obs.m_filename;
+    m_response   = obs.m_response;
+    m_ontime     = obs.m_ontime;
+    m_livetime   = obs.m_livetime;
+    m_deadc      = obs.m_deadc;
 
     // Return
     return;
