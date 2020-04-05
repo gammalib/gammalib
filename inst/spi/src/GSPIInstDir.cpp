@@ -62,6 +62,26 @@ GSPIInstDir::GSPIInstDir(void) : GInstDir()
 
 
 /***********************************************************************//**
+ * @brief SPI instrument direction constructor
+ *
+ * @param[in] dir Pointing direction.
+ * @param[in] detid Detector identifier.
+ ***************************************************************************/
+GSPIInstDir::GSPIInstDir(const GSkyDir& dir, const int& detid) : GInstDir()
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    m_dir   = dir;
+    m_detid = detid;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] dir INTEGRAL/SPI instrument direction.
@@ -181,9 +201,10 @@ std::string GSPIInstDir::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append instrument direction
-        // TODO: Add code to append any information that might be relevant.
-        // Keep the information short, and don't print a header, since you
-        // may have many events
+        std::string msg = "RA=" + gammalib::str(m_dir.ra_deg()) +
+                          ", DEC=" + gammalib::str(m_dir.dec_deg()) +
+                          ", DETID=" + gammalib::str(m_detid);
+        result.append(msg);
 
     } // endif: chatter was not silent
 
@@ -204,7 +225,8 @@ std::string GSPIInstDir::print(const GChatter& chatter) const
 void GSPIInstDir::init_members(void)
 {
     // Initialise members
-    // TODO: Initialise all data members
+    m_dir.clear();
+    m_detid = 0;
 
     // Return
     return;
@@ -219,7 +241,8 @@ void GSPIInstDir::init_members(void)
 void GSPIInstDir::copy_members(const GSPIInstDir& dir)
 {
     // Copy members
-    // TODO: Copy all data members
+    m_dir   = dir.m_dir;
+    m_detid = dir.m_detid;
 
     // Return
     return;

@@ -39,6 +39,7 @@ class GSPIInstDir : public GInstDir {
 public:
     // Constructors and destructors
     GSPIInstDir(void);
+    GSPIInstDir(const GSkyDir& dir, const int& detid);
     GSPIInstDir(const GSPIInstDir& dir);
     virtual ~GSPIInstDir(void);
 
@@ -48,7 +49,10 @@ public:
     virtual std::string  classname(void) const;
 
     // Other methods
-    // TODO: Copy methods from GSPIInstDir.hpp file
+    void           dir(const GSkyDir& dir);
+    const GSkyDir& dir(void) const;
+    void           detid(const int& detid);
+    const int&     detid(void) const;
 };
 
 
@@ -61,9 +65,9 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.classname()) # TODO: Replace by appropriate class members
+        state = (self.dir(), self.detid())
         return state
     def __setstate__(self, state):
-        self.__init__()
+        self.__init__(state[0], state[1])
 }
 };

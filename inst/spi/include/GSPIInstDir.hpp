@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GInstDir.hpp"
+#include "GSkyDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -49,6 +50,7 @@ class GSPIInstDir : public GInstDir {
 public:
     // Constructors and destructors
     GSPIInstDir(void);
+    GSPIInstDir(const GSkyDir& dir, const int& detid);
     GSPIInstDir(const GSPIInstDir& dir);
     virtual ~GSPIInstDir(void);
 
@@ -62,13 +64,20 @@ public:
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    // TODO: Add any further methods that are needed
+    void           dir(const GSkyDir& dir);
+    const GSkyDir& dir(void) const;
+    void           detid(const int& detid);
+    const int&     detid(void) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GSPIInstDir& dir);
     void free_members(void);
+
+    // Protected members
+    GSkyDir m_dir;
+    int     m_detid;
 };
 
 
@@ -81,6 +90,63 @@ inline
 std::string GSPIInstDir::classname(void) const
 {
     return ("GSPIInstDir");
+}
+
+/***********************************************************************//**
+ * @brief Set pointing direction
+ *
+ * @param[in] dir Pointing direction.
+ *
+ * Set the pointing direction.
+ ***************************************************************************/
+inline
+void GSPIInstDir::dir(const GSkyDir& dir)
+{
+    m_dir = dir;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointing direction
+ *
+ * @return Pointing direction.
+ *
+ * Returns the pointing direction.
+ ***************************************************************************/
+inline
+const GSkyDir& GSPIInstDir::dir(void) const
+{
+    return (m_dir);
+}
+
+
+/***********************************************************************//**
+ * @brief Set detector identifier
+ *
+ * @param[in] detid Detector identifier.
+ *
+ * Set the detector identifier.
+ ***************************************************************************/
+inline
+void GSPIInstDir::detid(const int& detid)
+{
+    m_detid = detid;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return detector identifier
+ *
+ * @return Detector identifier.
+ *
+ * Returns the detector identifier.
+ ***************************************************************************/
+inline
+const int& GSPIInstDir::detid(void) const
+{
+    return (m_detid);
 }
 
 #endif /* GSPIINSTDIR_HPP */
