@@ -86,6 +86,7 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    const double& model(const int& index) const;
     const double& ontime(void) const;
 
 protected:
@@ -95,16 +96,18 @@ protected:
     void free_members(void);
 
     // Protected members
-    bool         m_alloc;  //!< Signals proper memory allocation
-    int          m_index;  //!< Dataspace index
-    int          m_idir;   //!< Direction index
-    int          m_iebin;  //!< Energy bin index
-    GSPIInstDir* m_dir;    //!< Pointer to direction of bin
-    GTime*       m_time;   //!< Pointer to time of bin
-    GEnergy*     m_energy; //!< Pointer to energy of bin
-    double*      m_counts; //!< Pointer to number of counts
-    double*      m_ontime; //!< Pointer to ontime of bin
-    double*      m_size;   //!< Pointer to size of bin
+    bool         m_alloc;      //!< Signals proper memory allocation
+    int          m_index;      //!< Dataspace index
+    int          m_idir;       //!< Direction index
+    int          m_iebin;      //!< Energy bin index
+    int          m_num_models; //!< Number of models in bin
+    GSPIInstDir* m_dir;        //!< Pointer to direction of bin
+    GTime*       m_time;       //!< Pointer to time of bin
+    GEnergy*     m_energy;     //!< Pointer to energy of bin
+    double*      m_counts;     //!< Pointer to number of counts
+    double*      m_ontime;     //!< Pointer to ontime of bin
+    double*      m_size;       //!< Pointer to size of bin
+    double*      m_models;     //!< Pointer to models of bin
 };
 
 

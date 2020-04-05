@@ -37,12 +37,14 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GSPIEventCube::naxis(int)"
+#define G_MODEL_COUNTS                    "GSPIEventCube::model_counts(int&)"
 #define G_SET_ENERGIES                        "GSPIEventCube::set_energies()"
 #define G_SET_TIMES                              "GSPIEventCube::set_times()"
 #define G_SET_BIN                              "GSPIEventCube::set_bin(int&)"
 #define G_READ_FITS                             "GSPIEventCube::read(GFits&)"
 #define G_READ_EBDS                   "GSPIEventCube::read_ebds(GFitsTable*)"
 #define G_READ_PNT        "GSPIEventCube::read_pnt(GFitsTable*, GFitsTable*)"
+#define G_READ_MODELS                    "GSPIEventCube::read_models(GFits&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -423,10 +425,13 @@ void GSPIEventCube::read(const GFits& fits)
     read_gti(gti);
 
     // Read dead time information
-    read_dti(gti);
+    read_dti(dti);
 
     // Read detector spectra
     read_dsp(dsp);
+
+    // Read models
+    read_models(fits);
 
     // Free HDU pointers
     if (ebds != NULL) delete ebds;
@@ -434,6 +439,9 @@ void GSPIEventCube::read(const GFits& fits)
     if (gti  != NULL) delete gti;
     if (dsp  != NULL) delete dsp;
     if (dti  != NULL) delete dti;
+
+    // Prepare event bin
+    init_bin();
 
     // Return
     return;
@@ -471,15 +479,53 @@ int GSPIEventCube::number(void) const
     double number = 0.0;
 
     // Compute sum of all events
-    int dsp_size = size();
-    if (dsp_size > 0) {
-        for (int i = 0; i < dsp_size; ++i) {
+    if (m_dsp_size > 0) {
+        for (int i = 0; i < m_dsp_size; ++i) {
             number += m_counts[i];
         }
     }
 
     // Return
     return int(number+0.5);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of events in model
+ *
+ * @param[in] index Model index.
+ * @return Number of events in event cube.
+ *
+ * @exception GException::out_of_range
+ *            Invalid model index
+ *
+ * Returns the total number of counts in model.
+ ***************************************************************************/
+double GSPIEventCube::model_counts(const int& index) const
+{
+    // Initialise result
+    double counts = 0.0;
+
+    // Compute total number of models
+    int num_models = m_num_sky + m_num_bgm;
+
+    // Optionally check if the model index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= num_models) {
+        throw GException::out_of_range(G_MODEL_COUNTS, "Invalid model index",
+                                       index, num_models);
+    }
+    #endif
+
+    // Compute sum of all events in model
+    if (m_dsp_size > 0) {
+        for (int i = 0; i < m_dsp_size; ++i) {
+            counts += m_models[i*num_models + index];
+        }
+    }
+
+    // Return
+    return counts;
 }
 
 
@@ -623,8 +669,20 @@ std::string GSPIEventCube::print(const GChatter& chatter) const
         result.append(gammalib::str(m_num_ebin));
         result.append("\n"+gammalib::parformat("Sky models"));
         result.append(gammalib::str(m_num_sky));
+        for (int i = 0; i < m_num_sky; ++i) {
+            result.append("\n"+gammalib::parformat(" Model name "+gammalib::str(i+1)));
+            result.append(m_modnames[i]);
+            result.append("\n"+gammalib::parformat(" Number of events"));
+            result.append(gammalib::str(model_counts(i)));
+        }
         result.append("\n"+gammalib::parformat("Background models"));
         result.append(gammalib::str(m_num_bgm));
+        for (int i = 0; i < m_num_bgm; ++i) {
+            result.append("\n"+gammalib::parformat(" Model name "+gammalib::str(i+1)));
+            result.append(m_modnames[i+m_num_sky]);
+            result.append("\n"+gammalib::parformat(" Number of events"));
+            result.append(gammalib::str(model_counts(i+m_num_sky)));
+        }
         result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin().MeV())+" - ");
         result.append(gammalib::str(emax().MeV())+" MeV");
@@ -1090,23 +1148,144 @@ void GSPIEventCube::read_dsp(const GFitsTable* dsp)
 
 
 /***********************************************************************//**
+ * @brief Read models from INTEGRAL/SPI Observation Group
+ *
+ * @param[in] fits Observation Group FITS file.
+ ***************************************************************************/
+void GSPIEventCube::read_models(const GFits& fits)
+{
+    // Clear model names
+    m_modnames.clear();
+
+    // Initialise model index
+    int imodel = 0;
+
+    // Compute total number of models
+    int num_models = m_num_sky + m_num_bgm;
+
+    // Loop over all sky models
+    for (int i = 0; i < m_num_sky; ++i, ++imodel) {
+
+        // Get FITS table
+        const GFitsTable* model = gammalib::spi_hdu(fits, "SPI.-SDET-SPE", i+1);
+
+        // Throw an exception if the FITS table is missing
+        if (model == NULL) {
+            std::string msg = "Extension \"SPI.-SDET-SPE\" version "+
+                              gammalib::str(i+1)+" not found in Observation "
+                              "Group FITS file \""+fits.filename().url()+
+                              "\". Please specify a valid Observation Group.";
+            throw GException::invalid_value(G_READ_MODELS, msg);
+        }
+
+        // Get model name
+        std::string name = "MODEL" + gammalib::str(imodel+1);
+        if (model->has_card("SOURCEID")) {
+            name = model->string("SOURCEID");
+        }
+        m_modnames.push_back(name);
+
+        // Get relevant columns
+        const GFitsTableCol* counts = (*model)["COUNTS"];
+
+        // Loop over all pointings
+        for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+            // Loop over all detectors
+            for (int idet = 0; idet < m_num_det; ++idet) {
+
+                // Get row index in model table
+                int irow  = ipt * m_num_det + idet;
+
+                // Set start index in destination array
+                int index = irow * m_num_ebin;
+
+                // Copy energy bins
+                for (int iebin = 0; iebin < m_num_ebin; ++iebin, ++index) {
+                    m_models[index*num_models + imodel] = counts->real(irow, iebin);
+                }
+
+            } // endfor: looped over all detectors
+
+        } // endfor: looped over all pointings
+
+    } // endfor: looped over all sky models
+
+    // Loop over all background models
+    for (int i = 0; i < m_num_bgm; ++i, ++imodel) {
+
+        // Get FITS table
+        const GFitsTable* model = gammalib::spi_hdu(fits, "SPI.-BMOD-DSP", i+1);
+
+        // Throw an exception if the FITS table is missing
+        if (model == NULL) {
+            std::string msg = "Extension \"SPI.-BMOD-DSP\" version "+
+                              gammalib::str(i+1)+" not found in Observation "
+                              "Group FITS file \""+fits.filename().url()+
+                              "\". Please specify a valid Observation Group.";
+            throw GException::invalid_value(G_READ_MODELS, msg);
+        }
+
+        // Get model name
+        std::string name = "MODEL" + gammalib::str(imodel+1);
+        if (model->has_card("BKGNAME")) {
+            name = model->string("BKGNAME");
+        }
+        m_modnames.push_back(name);
+
+        // Get relevant columns
+        const GFitsTableCol* counts = (*model)["COUNTS"];
+
+        // Loop over all pointings
+        for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+            // Loop over all detectors
+            for (int idet = 0; idet < m_num_det; ++idet) {
+
+                // Get row index in model table
+                int irow  = ipt * m_num_det + idet;
+
+                // Set start index in destination array
+                int index = irow * m_num_ebin;
+
+                // Copy energy bins
+                for (int iebin = 0; iebin < m_num_ebin; ++iebin, ++index) {
+                    m_models[index*num_models + imodel] = counts->real(irow, iebin);
+                }
+
+            } // endfor: looped over all detectors
+
+        } // endfor: looped over all pointings
+
+    } // endfor: looped over all background models
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Initialise event bin
  *
- * Initialises the event bin. The event bin is cleared and all fixed pointers
- * are set. Only the m_counts and the m_solidangle member of the event bin
- * will be set to NULL, but these will be set by the set_bin() method
- * which is called before any event bin access.
+ * Initialises the event bin. All fixed content is set here, the content
+ * that depends on the bin index is set by the set_bin() method which is
+ * called before any event bin access.
  ***************************************************************************/
 void GSPIEventCube::init_bin(void)
 {
     // Prepare event bin
     m_bin.free_members();
-    m_bin.m_dir    = NULL;   //!< Will be set by set_bin method
-    m_bin.m_time   = NULL;   //!< Will be set by set_bin method
-    m_bin.m_energy = NULL;   //!< Will be set by set_bin method
-    m_bin.m_counts = NULL;   //!< Will be set by set_bin method
-    m_bin.m_ontime = NULL;   //!< Will be set by set_bin method
-    m_bin.m_size   = NULL;   //!< Will be set by set_bin method
+    m_bin.m_index      = 0;
+    m_bin.m_idir       = 0;
+    m_bin.m_iebin      = 0;
+    m_bin.m_num_models = m_num_sky + m_num_bgm;
+    m_bin.m_dir        = NULL;                   //!< Set by set_bin method
+    m_bin.m_time       = NULL;                   //!< Set by set_bin method
+    m_bin.m_energy     = NULL;                   //!< Set by set_bin method
+    m_bin.m_counts     = NULL;                   //!< Set by set_bin method
+    m_bin.m_ontime     = NULL;                   //!< Set by set_bin method
+    m_bin.m_size       = NULL;                   //!< Set by set_bin method
+    m_bin.m_models     = NULL;                   //!< Set by set_bin method
 
     // Return
     return;
@@ -1138,7 +1317,7 @@ void GSPIEventCube::set_bin(const int& index)
     }
     #endif
 
-    // Set bin index
+    // Set indices
     m_bin.m_index = index;
     m_bin.m_idir  = index / m_num_ebin;
     m_bin.m_iebin = index % m_num_ebin;
@@ -1151,6 +1330,7 @@ void GSPIEventCube::set_bin(const int& index)
     //m_bin.m_ontime = m_ontime + m_bin.m_idir;
     m_bin.m_ontime = m_livetime + m_bin.m_idir; // Use livetime instead of ontime?
     m_bin.m_size   = m_size   + m_bin.m_index;
+    m_bin.m_models = m_models + m_bin.m_index * m_bin.m_num_models;
 
     // Return
     return;

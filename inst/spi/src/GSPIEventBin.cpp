@@ -36,6 +36,7 @@
 #include "GTime.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_MODEL                                   "GSPIEventBin::model(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -196,6 +197,30 @@ double GSPIEventBin::error(void) const
 
 
 /***********************************************************************//**
+ * @brief Return model value
+ *
+ * @param[in] index Model index.
+ * @return Model value.
+ *
+ * @exception GException::out_of_range
+ *            Invalid model index
+ ***************************************************************************/
+const double& GSPIEventBin::model(const int& index) const
+{
+    // Optionally check if the model index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num_models) {
+        throw GException::out_of_range(G_MODEL, "Invalid model index",
+                                       index, m_num_models);
+    }
+    #endif
+
+    // Return reference to model
+    return (m_models[index]);
+}
+
+
+/***********************************************************************//**
  * @brief Print event information
  *
  * @param[in] chatter Chattiness.
@@ -240,12 +265,14 @@ void GSPIEventBin::init_members(void)
     m_index      = -1;  // Signals that event bin does not correspond to cube
     m_idir       = -1;  // Signals that event bin does not correspond to cube
     m_iebin      = -1;  // Signals that event bin does not correspond to cube
+    m_num_models =  0;  // No models in event bin
     m_dir        = new GSPIInstDir;
     m_time       = new GTime;
     m_energy     = new GEnergy;
     m_counts     = new double;
     m_ontime     = new double;
     m_size       = new double;
+    m_models     = NULL;
 
     // Initialise members
     m_dir->clear();
@@ -270,6 +297,12 @@ void GSPIEventBin::copy_members(const GSPIEventBin& bin)
     // First de-allocate existing memory if needed
     free_members();
 
+    // Copy non-pointer members
+    m_index      = bin.m_index;
+    m_idir       = bin.m_idir;
+    m_iebin      = bin.m_iebin;
+    m_num_models = bin.m_num_models;
+
     // Copy members by cloning
     m_dir    = new GSPIInstDir(*bin.m_dir);
     m_time   = new GTime(*bin.m_time);
@@ -277,11 +310,14 @@ void GSPIEventBin::copy_members(const GSPIEventBin& bin)
     m_counts = new double(*bin.m_counts);
     m_ontime = new double(*bin.m_ontime);
     m_size   = new double(*bin.m_size);
-
-    // Copy non-pointer members
-    m_index = bin.m_index;
-    m_idir  = bin.m_idir;
-    m_iebin = bin.m_iebin;
+    
+    // Copy models
+    if (m_num_models > 0) {
+        m_models = new double[m_num_models];
+        for (int i = 0; i < m_num_models; ++i) {
+            m_models[i] = bin.m_models[i];
+        }
+    }
 
     // Signal memory allocation
     m_alloc = true;
@@ -314,6 +350,7 @@ void GSPIEventBin::free_members(void)
         if (m_counts != NULL) delete m_counts;
         if (m_ontime != NULL) delete m_ontime;
         if (m_size   != NULL) delete m_size;
+        if (m_models != NULL) delete [] m_models;
     }
 
     // Signal member pointers as free
@@ -323,6 +360,7 @@ void GSPIEventBin::free_members(void)
     m_counts = NULL;
     m_ontime = NULL;
     m_size   = NULL;
+    m_models = NULL;
 
     // Signal memory de-allocation
     m_alloc = false;

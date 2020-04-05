@@ -55,6 +55,7 @@ public:
     virtual void               counts(const double& counts);
 
     // Other methods
+    const double& model(const int& index) const;
     const double& ontime(void) const;
 };
 
