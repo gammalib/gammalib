@@ -38,6 +38,7 @@
 /* __ Constants __________________________________________________________ */
 const std::string datadir   = std::getenv("TEST_SPI_DATA");
 const std::string spi_caldb = datadir + "/../../caldb";
+const std::string og_dol    = datadir+"/obs/og_spi.fits";
 
 
 /***********************************************************************//**
@@ -76,6 +77,12 @@ TestGSPI* TestGSPI::clone(void) const
  ***************************************************************************/
 void TestGSPI::test_obs(void)
 {
+    // Test empty GSPIObservation instance
+    GSPIObservation obs1;
+
+    // Construct GSPIObservation instance from Observation group
+    GSPIObservation obs2(og_dol);
+
     // Return
     return;
 }

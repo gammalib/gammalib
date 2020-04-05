@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GObservationRegistry.hpp"
 #include "GSPIObservation.hpp"
+#include "GSPISupport.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GSPIObservation      g_obs_spi_seed;
@@ -40,6 +41,7 @@ const GObservationRegistry g_obs_spi_registry(&g_obs_spi_seed);
 /* __ Method name definitions ____________________________________________ */
 #define G_RESPONSE                    "GSPIObservation::response(GResponse&)"
 #define G_READ                          "GSPIObservation::read(GXmlElement&)"
+#define G_READ_FITS                           "GSPIObservation::read(GFits&)"
 #define G_WRITE                        "GSPIObservation::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -64,6 +66,26 @@ GSPIObservation::GSPIObservation(void) : GObservation()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Observation Group constructor
+ *
+ * @param[in] filename Observation Group FITS file name.
+ *
+ * Constructs a SPI observation from on Observation Group.
+ ***************************************************************************/
+GSPIObservation::GSPIObservation(const GFilename& filename) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Load data
+    load(filename);
 
     // Return
     return;
@@ -284,6 +306,115 @@ void GSPIObservation::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
+ * @brief Read Observation Group from FITS file
+ *
+ * @param[in] fits FITS file.
+ *
+ * Reads Observation Group from a FITS file.
+ ***************************************************************************/
+void GSPIObservation::read(const GFits& fits)
+{
+    // Delete any existing event container (do not call clear() as we do not
+    // want to delete the response function)
+    //if (m_events != NULL) delete m_events;
+    //m_events = NULL;
+
+    // Get table pointers
+    const GFitsTable* ebds = gammalib::spi_hdu(fits, "SPI.-EBDS-SET");
+    const GFitsTable* pnt  = gammalib::spi_hdu(fits, "SPI.-OBS.-PNT");
+    const GFitsTable* gti  = gammalib::spi_hdu(fits, "SPI.-OBS.-GTI");
+    const GFitsTable* dsp  = gammalib::spi_hdu(fits, "SPI.-OBS.-DSP");
+    const GFitsTable* dti  = gammalib::spi_hdu(fits, "SPI.-OBS.-DTI");
+
+    // Throw an exception if one of the mandatory HDUs is missing
+    if (ebds == NULL) {
+        std::string msg = "Extension \"SPI.-EBDS-SET\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group FITS file.";
+        throw GException::invalid_argument(G_READ_FITS, msg);
+    }
+    if (pnt == NULL) {
+        std::string msg = "Extension \"SPI.-OBS.-PNT\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group FITS file.";
+        throw GException::invalid_argument(G_READ_FITS, msg);
+    }
+    if (gti == NULL) {
+        std::string msg = "Extension \"SPI.-OBS.-GTI\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group FITS file.";
+        throw GException::invalid_argument(G_READ_FITS, msg);
+    }
+    if (dsp == NULL) {
+        std::string msg = "Extension \"SPI.-OBS.-DSP\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group FITS file.";
+        throw GException::invalid_argument(G_READ_FITS, msg);
+    }
+    if (dti == NULL) {
+        std::string msg = "Extension \"SPI.-OBS.-DTI\" not found in "
+                          "Observation Group FITS file \""+
+                          fits.filename().url()+"\". Please specify a "
+                          "valid Observation Group FITS file.";
+        throw GException::invalid_argument(G_READ_FITS, msg);
+    }
+
+    // Determine dataspace dimensions from FITS tables
+    m_num_pnt  = dsp->integer("PT_NUM");
+    m_num_det  = dsp->integer("DET_NUM");
+    m_num_ebds = dsp->integer("EBIN_NUM");
+
+    // Get number of sky and background models
+    m_num_sky = gammalib::spi_num_hdus(fits, "SPI.-SDET-SPE");
+    m_num_bgm = gammalib::spi_num_hdus(fits, "SPI.-BMOD-DSP");
+
+
+    // Free HDU pointers
+    if (ebds != NULL) delete ebds;
+    if (pnt  != NULL) delete pnt;
+    if (gti  != NULL) delete gti;
+    if (dsp  != NULL) delete dsp;
+    if (dti  != NULL) delete dti;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load Observation Group
+ *
+ * @param[in] filename Event list or counts cube FITS file name.
+ *
+ * Loads either an event list or a counts cube from a FITS file.
+ ***************************************************************************/
+void GSPIObservation::load(const GFilename& filename)
+{
+    #pragma omp critical(GSPIObservation_load)
+    {
+        // Store event filename
+        m_filename = filename;
+
+        // Open FITS file
+        GFits fits(filename);
+
+        // Read data
+        read(fits);
+
+        // Close FITS file
+        fits.close();
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print observation information
  *
  * @param[in] chatter Chattiness.
@@ -311,6 +442,16 @@ std::string GSPIObservation::print(const GChatter& chatter) const
         result.append(gammalib::str(livetime())+" sec");
         result.append("\n"+gammalib::parformat("Deadtime correction"));
         result.append(gammalib::str(m_deadc));
+        result.append("\n"+gammalib::parformat("Pointings"));
+        result.append(gammalib::str(m_num_pnt));
+        result.append("\n"+gammalib::parformat("Detectors"));
+        result.append(gammalib::str(m_num_det));
+        result.append("\n"+gammalib::parformat("Energy bins"));
+        result.append(gammalib::str(m_num_ebds));
+        result.append("\n"+gammalib::parformat("Sky models"));
+        result.append(gammalib::str(m_num_sky));
+        result.append("\n"+gammalib::parformat("Background models"));
+        result.append(gammalib::str(m_num_bgm));
 
         // Append additional information
         // TODO: Add code to append any additional information that might
@@ -335,10 +476,16 @@ std::string GSPIObservation::print(const GChatter& chatter) const
 void GSPIObservation::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_response.clear();
     m_ontime   = 0.0;
     m_livetime = 0.0;
     m_deadc    = 0.0;
+    m_num_ebds = 0;
+    m_num_pnt  = 0;
+    m_num_det  = 0;
+    m_num_sky  = 0;
+    m_num_bgm  = 0;
 
     // Return
     return;
@@ -353,10 +500,16 @@ void GSPIObservation::init_members(void)
 void GSPIObservation::copy_members(const GSPIObservation& obs)
 {
     // Copy members
+    m_filename = obs.m_filename;
     m_response = obs.m_response;
     m_ontime   = obs.m_ontime;
     m_livetime = obs.m_livetime;
     m_deadc    = obs.m_deadc;
+    m_num_ebds = obs.m_num_ebds;
+    m_num_pnt  = obs.m_num_pnt;
+    m_num_det  = obs.m_num_det;
+    m_num_sky  = obs.m_num_sky;
+    m_num_bgm  = obs.m_num_bgm;
 
     // Return
     return;

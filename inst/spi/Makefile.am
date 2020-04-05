@@ -34,14 +34,16 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/inst/spi/src
 
 # Define sources for this directory
-sources = src/GSPIObservation.cpp \
+sources = src/GSPISupport.cpp \
+          src/GSPIObservation.cpp \
           src/GSPIEventBin.cpp \
           src/GSPIEventCube.cpp \
           src/GSPIInstDir.cpp \
           src/GSPIResponse.cpp
 
 # Define headers to be installed
-pkginclude_HEADERS = include/GSPIObservation.hpp \
+pkginclude_HEADERS = include/GSPISupport.hpp \
+                     include/GSPIObservation.hpp \
                      include/GSPIEventBin.hpp \
                      include/GSPIEventCube.hpp \
                      include/GSPIInstDir.hpp \

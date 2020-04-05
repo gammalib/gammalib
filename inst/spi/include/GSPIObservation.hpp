@@ -53,6 +53,7 @@ class GSPIObservation : public GObservation {
 public:
     // Constructors and destructors
     GSPIObservation(void);
+    explicit GSPIObservation(const GFilename& filename);
     GSPIObservation(const GSPIObservation& obs);
     virtual ~GSPIObservation(void);
 
@@ -74,10 +75,11 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void read(const GFits& fits);
+    void load(const GFilename& filename);
     void ontime(const double& ontime);
     void livetime(const double& livetime);
     void deadc(const double& deadc);
-    // TODO: Add any further methods that are needed
 
 protected:
     // Protected methods
@@ -86,10 +88,17 @@ protected:
     void free_members(void);
 
     // Protected members
-    GSPIResponse m_response; //!< Response functions
-    double       m_ontime;   //!< Ontime (sec)
-    double       m_livetime; //!< Livetime (sec)
-    double       m_deadc;    //!< Deadtime correction
+    std::string  m_filename;    //!< OG FITS filename
+    GSPIResponse m_response;    //!< Response functions
+    double       m_ontime;      //!< Ontime (sec)
+    double       m_livetime;    //!< Livetime (sec)
+    double       m_deadc;       //!< Deadtime correction
+    int          m_num_ebds;    //!< Number of energy boundaries
+    int          m_num_pnt;     //!< Number of pointings
+    int          m_num_det;     //!< Number of detectors
+    int          m_num_sky;     //!< Number of sky models
+    int          m_num_bgm;     //!< Number of background models
+    
     // TODO: Add any data members that are necessary. Note that the event
     // list or cubes (type GEvents) are stored in the GObservation base
     // class

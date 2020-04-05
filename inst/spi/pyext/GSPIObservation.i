@@ -41,6 +41,7 @@ class GSPIObservation : public GObservation {
 public:
     // Constructors and destructors
     GSPIObservation(void);
+    explicit GSPIObservation(const GFilename& filename);
     GSPIObservation(const GSPIObservation& obs);
     virtual ~GSPIObservation(void);
 
@@ -58,6 +59,8 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    void read(const GFits& fits);
+    void load(const GFilename& filename);
     void ontime(const double& ontime);
     void livetime(const double& livetime);
     void deadc(const double& deadc);

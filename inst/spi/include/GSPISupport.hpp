@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GSPILib.hpp - INTEGRAL/SPI header files                 *
+ *             GSPISupport.hpp - INTEGRAL/SPI support functions            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,23 +19,35 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSPILib.hpp
- * @brief Collection of INTEGRAL/SPI header files
+ * @file GSPISupport.hpp
+ * @brief Definition of support function for INTEGRAL/SPI
  * @author Juergen Knoedlseder
  */
 
-#ifndef GSPILIB_HPP
-#define GSPILIB_HPP
+#ifndef GSPISUPPORT_HPP
+#define GSPISUPPORT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
+#include <string>
+#include <vector>
 
-/* __ INTEGRAL/SPI specific headers ___________________________________________ */
-#include "GSPISupport.hpp"
-#include "GSPIObservation.hpp"
-#include "GSPIEventBin.hpp"
-#include "GSPIEventCube.hpp"
-#include "GSPIInstDir.hpp"
-#include "GSPIResponse.hpp"
+/* __ Namespaces _________________________________________________________ */
 
-#endif /* GSPILIB_HPP */
+/* __ Constants __________________________________________________________ */
+
+/* __ Forward declarations _______________________________________________ */
+class GFits;
+class GFitsTable;
+
+/* __ Prototypes _________________________________________________________ */
+namespace gammalib {
+
+    // SPI support functions
+    const GFitsTable* spi_hdu(const GFits&       fits,
+                              const std::string& extname,
+                              const int&         extver = 1);
+    int               spi_num_hdus(const GFits&       fits,
+                                   const std::string& extname);
+}
+
+#endif /* GSPISUPPORT_HPP */
