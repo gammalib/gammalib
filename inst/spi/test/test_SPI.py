@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import os
 import gammalib
 import test_support
 
@@ -36,14 +37,39 @@ class Test(gammalib.GPythonTestSuite):
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
 
+        # Set test directories
+        self._data  = os.environ['TEST_SPI_DATA']
+        self._caldb = self._data + '/../caldb'
+
         # Return
         return
 
-    # Dummy test function
-    def _dummy_test(self):
+    # Test GSPIEventCube class
+    def _event_cube_test(self):
         """
-        Dummy test function
+        Test GSPIEventCube class
         """
+        # Set Observation Group file name
+        og_dol = self._data + '/obs/og_spi.fits'
+
+        # Load event cube
+        cube = gammalib.GSPIEventCube(og_dol)
+        self.test_value(cube.size(), 16720, 'Check cube size')
+        self.test_value(cube.dim(), 3, 'Check cube dimension')
+        self.test_value(cube.naxis(0), 88, 'Check number of pointings')
+        self.test_value(cube.naxis(1), 19, 'Check number of detectors')
+        self.test_value(cube.naxis(2), 10, 'Check number of energy bins')
+        self.test_value(cube.number(), 101269457, 'Check number of events')
+
+        # Determine total number of counts and model events
+        counts = 0.0
+        model  = 0.0
+        for event in cube:
+            counts += event.counts()
+            model  += event.model(0)
+        self.test_value(counts, 101269457.0,      1.0e-6, 'Check number of counts')
+        self.test_value(model,  101269456.964783, 1.0e-6, 'Check model counts')
+
         # Return
         return
 
@@ -85,7 +111,7 @@ class Test(gammalib.GPythonTestSuite):
         self.name('INTEGRAL/SPI')
 
         # Append tests
-        self.append(self._dummy_test, 'INTEGRAL/SPI dummy test')
+        self.append(self._event_cube_test, 'Test GSPIEventCube class')
         self.append(self._test_pickeling, 'Test INTEGRAL/SPI class pickeling')
 
         # Return
