@@ -88,6 +88,9 @@ testdataobsspidir   = $(pyexecdir)/gammalib/tests/spi/data/obs/spi
 testdataobsspi_DATA = $(testdataobsspi)
 
 # Extra files to be distributed in the tar file
-EXTRA_DIST = README.md caldb pyext \
+#EXTRA_DIST = README.md caldb pyext \
+#             include/GSPILib.hpp \
+#             test/test_SPI.hpp test/test_SPI.py test/data
+EXTRA_DIST = README.md pyext \
              include/GSPILib.hpp \
              test/test_SPI.hpp test/test_SPI.py test/data
