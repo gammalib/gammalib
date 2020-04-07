@@ -49,6 +49,7 @@ const GModelRegistry     g_spi_data_space_registry(&g_spi_data_space_seed);
 #define G_EVAL      "GSPIModelDataSpace::eval(GEvent&, GObservation&, bool&)"
 #define G_READ                       "GSPIModelDataSpace::read(GXmlElement&)"
 #define G_WRITE                     "GSPIModelDataSpace::write(GXmlElement&)"
+#define G_SETUP_MODEL         "GSPIModelDataSpace::setup_model(Observation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -113,7 +114,7 @@ GSPIModelDataSpace::GSPIModelDataSpace(const GSPIObservation& obs,
     m_index  = index;
 
     // Setup model
-    setup_model(&obs);
+    setup_model(obs);
 
     // Check whether the index is valid. We can only do this if the
     // observation contains an event cube
@@ -296,15 +297,9 @@ double GSPIModelDataSpace::eval(const GEvent&       event,
                                 const GObservation& obs,
                                 const bool&         gradients) const
 {
-    // Extract INTEGRAL/SPI observation
-    const GSPIObservation* observation = dynamic_cast<const GSPIObservation*>(&obs);
-    if (observation == NULL) {
-        std::string cls = std::string(typeid(&obs).name());
-        std::string msg = "Observation of type \""+cls+"\" is not an "
-                          "INTEGRAL/SPI observation. Please specify an "
-                          "INTEGRAL/SPI observation as argument.";
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
+    // Reset parameter indices
+    m_has_eval_inx = false;
+    m_eval_inx.clear();
 
     // Extract INTEGRAL/SPI event bin
     const GSPIEventBin* bin = dynamic_cast<const GSPIEventBin*>(&event);
@@ -317,32 +312,28 @@ double GSPIModelDataSpace::eval(const GEvent&       event,
     }
 
     // Setup model
-    setup_model(observation);
+    setup_model(obs);
 
     // Initialise value
     double value = 0.0;
-
-    // If gradients are requested then initialise all gradients
-    if (gradients) {
-        for (int i = 0; i < m_parameters.size(); ++i) {
-            m_parameters[i].factor_gradient(0.0);
-        }
-    }
 
     // Continue only if model was initialised
     if (m_index >= 0 && m_parameters.size() > 0) {
 
         // Get bin size
         double size = bin->size();
-    
+
         // Continue only if bin size is positive
         if (size > 0.0) {
 
             // Get bin index in data space
             int index = bin->index();
 
+            // Get parameter index
+            int ipar = m_map[index];
+
             // Get relevant model parameter
-            const GModelPar* par = &(m_parameters[m_map[index]]);
+            const GModelPar* par = &(m_parameters[ipar]);
 
             // Get model value divided by size (note that the size will be
             // multiplied-in later, hence here we need the model value divided
@@ -360,6 +351,10 @@ double GSPIModelDataSpace::eval(const GEvent&       event,
 
                 // Set gradient
                 par->factor_gradient(grad);
+
+                // Signal that gradient for this parameter was set
+                m_has_eval_inx = true;
+                m_eval_inx.push_back(ipar);
 
             } // endif: gradient computation was requested
 
@@ -465,7 +460,7 @@ void GSPIModelDataSpace::read(const GXmlElement& xml)
 
         // Allocate parameter
         GModelPar parameter;
-        
+
         // Get XML element
         const GXmlElement* par = xml.element("parameter", i);
 
@@ -641,7 +636,7 @@ void GSPIModelDataSpace::init_members(void)
     m_map_size =  0;
     m_map      = NULL;
     m_parameters.clear();
-    
+
     // Return
     return;
 }
@@ -720,14 +715,14 @@ void GSPIModelDataSpace::set_pointers(void)
 /***********************************************************************//**
  * @brief Setup model
  *
- * @param[in] obs INTEGRAL/SPI observation
+ * @param[in] obs Observation.
  *
  * Setup the model for a given observation.
  ***************************************************************************/
-void GSPIModelDataSpace::setup_model(const GSPIObservation* obs) const
+void GSPIModelDataSpace::setup_model(const GObservation& obs) const
 {
     // Continue only if observation pointer differs
-    if (obs != m_obs) {
+    if (&obs != m_obs) {
 
         // Debug: signal that pointer differs
         #if defined(G_DEBUG_SETUP_MODEL)
@@ -736,8 +731,18 @@ void GSPIModelDataSpace::setup_model(const GSPIObservation* obs) const
         std::cout << std::endl;
         #endif
 
+        // Extract INTEGRAL/SPI observation
+        const GSPIObservation* spi_obs = dynamic_cast<const GSPIObservation*>(&obs);
+        if (spi_obs == NULL) {
+            std::string cls = std::string(typeid(&obs).name());
+            std::string msg = "Observation of type \""+cls+"\" is not an "
+                              "INTEGRAL/SPI observation. Please specify an "
+                              "INTEGRAL/SPI observation as argument.";
+            throw GException::invalid_argument(G_SETUP_MODEL, msg);
+        }
+
         // Store observation pointer
-        m_obs = const_cast<GSPIObservation*>(obs);
+        m_obs = const_cast<GSPIObservation*>(spi_obs);
 
         // Extract INTEGRAL/SPI event cube. Continue only if the cube is
         // valid
@@ -772,7 +777,7 @@ void GSPIModelDataSpace::setup_model(const GSPIObservation* obs) const
                 std::cout << std::endl;
             }
             #endif
-        
+
         } // endif: cube was valid
 
         // Debug: signal that event cube was invalid
@@ -805,7 +810,7 @@ void GSPIModelDataSpace::setup_pars(GSPIEventCube* cube)
 {
     // Free parameter map
     free_members();
-    
+
     // Get cube dimensions
     int n_pt  = cube->naxis(0);
     int n_det = cube->naxis(1);
@@ -902,7 +907,6 @@ void GSPIModelDataSpace::setup_pars(GSPIEventCube* cube)
                             break;
                         }
                     }
-                    
 
                     // ... otherwise allocate new model parameter
                     if (!has_par) {

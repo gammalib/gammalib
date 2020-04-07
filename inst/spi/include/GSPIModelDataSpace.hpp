@@ -94,7 +94,7 @@ protected:
     void copy_members(const GSPIModelDataSpace& model);
     void free_members(void);
     void set_pointers(void);
-    void setup_model(const GSPIObservation* obs) const;
+    void setup_model(const GObservation& obs) const;
     void setup_pars(GSPIEventCube* cube);
     void setup_pointing_indices(GSPIEventCube*            cube,
                                 std::vector<int>*         indices,
