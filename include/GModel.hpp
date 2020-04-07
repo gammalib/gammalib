@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.hpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -126,29 +126,31 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented methods
-    int                 size(void) const;
-    int                 scales(void) const;
-    GModelPar&          at(const int& index);
-    const GModelPar&    at(const int& index) const;
-    bool                has_par(const std::string& name) const;
-    bool                has_scales(void) const;
-    const std::string&  name(void) const;
-    void                name(const std::string& name);
-    const double&       ts(void) const;
-    void                ts(const double& ts);
-    const bool&         tscalc(void) const;
-    void                tscalc(const bool& tscalc);
-    const bool&         has_ts(void) const;
-    std::string         instruments(void) const;
-    void                instruments(const std::string& instruments);
-    GModelPar&          scale(const int& index);
-    const GModelPar&    scale(const int& index) const;
-    GModelPar           scale(const std::string& instrument) const;
-    void                scale(const GModelPar& par);
-    std::string         ids(void) const;
-    void                ids(const std::string& ids);
-    bool                is_valid(const std::string& instruments,
-                                 const std::string& ids) const;
+    int                     size(void) const;
+    int                     scales(void) const;
+    GModelPar&              at(const int& index);
+    const GModelPar&        at(const int& index) const;
+    bool                    has_par(const std::string& name) const;
+    bool                    has_scales(void) const;
+    const std::string&      name(void) const;
+    void                    name(const std::string& name);
+    const double&           ts(void) const;
+    void                    ts(const double& ts);
+    const bool&             tscalc(void) const;
+    void                    tscalc(const bool& tscalc);
+    const bool&             has_ts(void) const;
+    std::string             instruments(void) const;
+    void                    instruments(const std::string& instruments);
+    GModelPar&              scale(const int& index);
+    const GModelPar&        scale(const int& index) const;
+    GModelPar               scale(const std::string& instrument) const;
+    void                    scale(const GModelPar& par);
+    std::string             ids(void) const;
+    void                    ids(const std::string& ids);
+    bool                    is_valid(const std::string& instruments,
+                                     const std::string& ids) const;
+    const bool&             has_eval_indices(void) const;
+    const std::vector<int>& eval_indices(void) const;
 
 protected:
     // Protected methods
@@ -171,6 +173,12 @@ protected:
     bool                     m_has_tscalc;   //!< Signals if tscalc attribute is available
     bool                     m_tscalc;       //!< Signals if TS should be computed
     double                   m_ts;           //!< Test Statistic of the model
+
+    // Protected members for efficient gradient access
+    mutable bool             m_has_eval_inx; //!< Signal that parameter indices
+                                             //!< updated by eval() method exist
+    mutable std::vector<int> m_eval_inx;     //!< List of parameter indices updated
+                                             //!< by eval() method
 };
 
 
@@ -350,6 +358,30 @@ inline
 const bool& GModel::has_ts(void) const
 {
     return m_has_ts;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals that parameter indices updated by eval() method were set
+ *
+ * @return True if parameter indices updated by eval() method were set.
+ ***************************************************************************/
+inline
+const bool& GModel::has_eval_indices(void) const
+{
+    return m_has_eval_inx;
+}
+
+
+/***********************************************************************//**
+ * @brief Return vector of parameter indices updated by eval() method
+ *
+ * @return Vector of parameter indices updated by eval() method.
+ ***************************************************************************/
+inline
+const std::vector<int>& GModel::eval_indices(void) const
+{
+    return m_eval_inx;
 }
 
 #endif /* GMODEL_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.cpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -617,11 +617,13 @@ void GModel::init_members(void)
     m_scales.clear();
     m_ids.clear();
     m_pars.clear();
-    m_ts         = 0.0;
-    m_has_ts     = false;
-    m_has_tscalc = false;
-    m_tscalc     = false;
-    
+    m_ts           = 0.0;
+    m_has_ts       = false;
+    m_has_tscalc   = false;
+    m_tscalc       = false;
+    m_has_eval_inx = false;
+    m_eval_inx.clear();
+
     // Return
     return;
 }
@@ -635,15 +637,17 @@ void GModel::init_members(void)
 void GModel::copy_members(const GModel& model)
 {
     // Copy members
-    m_name        = model.m_name;
-    m_instruments = model.m_instruments;
-    m_scales      = model.m_scales;
-    m_ids         = model.m_ids;
-    m_pars        = model.m_pars;
-    m_ts          = model.m_ts;
-    m_has_ts      = model.m_has_ts;
-    m_has_tscalc  = model.m_has_tscalc;
-    m_tscalc      = model.m_tscalc;
+    m_name         = model.m_name;
+    m_instruments  = model.m_instruments;
+    m_scales       = model.m_scales;
+    m_ids          = model.m_ids;
+    m_pars         = model.m_pars;
+    m_ts           = model.m_ts;
+    m_has_ts       = model.m_has_ts;
+    m_has_tscalc   = model.m_has_tscalc;
+    m_tscalc       = model.m_tscalc;
+    m_has_eval_inx = model.m_has_eval_inx;
+    m_eval_inx     = model.m_eval_inx;
 
     // Return
     return;

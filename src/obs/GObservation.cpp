@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -302,39 +302,80 @@ double GObservation::model(const GModels& models,
                 // over the energy dispersion. Here it's simpler to just use
                 // numerical gradients.
                 if (gradient != NULL) {
-                    for (int ipar = 0; ipar < mptr->size(); ++ipar) {
 
-                        // Get reference to model parameter
-                        const GModelPar& par = (*mptr)[ipar];
+                    // Make sure that we have a slot for the gradient
+                    #if defined(G_RANGE_CHECK)
+                    if (igrad+mptr->size() > grad_size) {
+                        std::string msg = "Vector has not enough elements to "
+                            "store the model parameter gradients. "+
+                            gammalib::str(models.npars())+" elements "
+                            "requested while vector only contains "+
+                            gammalib::str(gradient->size())+" elements.";
+                        throw GException::invalid_value(G_MODEL, msg);
+                    }
+                    #endif
 
-                        // Make sure that we have a slot for the gradient
-                        #if defined(G_RANGE_CHECK)
-                        if (igrad >= grad_size) {
-                            std::string msg = "Vector has not enough elements "
-                                              "to store the model parameter "
-                                              "gradients. "+
-                                              gammalib::str(models.npars())+
-                                              " elements requested while vector "
-                                              "only contains "+
-                                              gammalib::str(gradient->size())+
-                                              " elements.";
-                            throw GException::invalid_value(G_MODEL, msg);
-                        }
-                        #endif
+                    // If model provides the parameter indices that were
+                    // updated by the eval() method then use them as this is
+                    // less time consuming than looping over all indices
+                    if (mptr->has_eval_indices()) {
 
-                        if (par.is_free()) {
-                            if (par.has_grad() && !response()->use_edisp()) {
-                                (*gradient)[igrad+ipar] = par.factor_gradient();
+                        // Get number of relevant parameters
+                        int npars = mptr->eval_indices().size();
+
+                        // Loop over all relevant parameters
+                        for (int index = 0; index < npars; ++index) {
+
+                            // Retrieve parameter index
+                            int ipar = mptr->eval_indices()[index];
+
+                            // Get reference to model parameter
+                            const GModelPar& par = (*mptr)[ipar];
+
+                            // Set gradient
+                            if (par.is_free()) {
+                                if (par.has_grad() && !response()->use_edisp()) {
+                                    (*gradient)[igrad+ipar] = par.factor_gradient();
+                                }
+                                else {
+                                    (*gradient)[igrad+ipar] = model_grad(*mptr, par, event);
+                                }
                             }
                             else {
-                                (*gradient)[igrad+ipar] = model_grad(*mptr, par, event);
+                                (*gradient)[igrad+ipar] = 0.0;
                             }
-                        }
-                        else {
-                            (*gradient)[igrad+ipar] = 0.0;
-                        }
-                    }
-                }
+
+                        } // endfor: looped over all parameter indices
+
+                    } // endif: parameter indices were available
+
+                    // ... otherwise loop over all parameter indices
+                    else {
+
+                        // Loop over all parameters
+                        for (int ipar = 0; ipar < mptr->size(); ++ipar) {
+
+                            // Get reference to model parameter
+                            const GModelPar& par = (*mptr)[ipar];
+
+                            // Set gradient
+                            if (par.is_free()) {
+                                if (par.has_grad() && !response()->use_edisp()) {
+                                    (*gradient)[igrad+ipar] = par.factor_gradient();
+                                }
+                                else {
+                                    (*gradient)[igrad+ipar] = model_grad(*mptr, par, event);
+                                }
+                            }
+                            else {
+                                (*gradient)[igrad+ipar] = 0.0;
+                            }
+
+                        } // endfor: looped over all parameter indices
+
+                    } // endelse: no parameter indices were available
+
+                } // endif: use model gradients
 
             } // endif: model component was valid for instrument
 
