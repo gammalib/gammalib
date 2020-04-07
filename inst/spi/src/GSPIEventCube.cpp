@@ -792,6 +792,7 @@ void GSPIEventCube::copy_members(const GSPIEventCube& cube)
     m_gti_size   = cube.m_gti_size;
     m_dsp_size   = cube.m_dsp_size;
     m_model_size = cube.m_model_size;
+    m_modnames   = cube.m_modnames;
 
     // Copy data
     if (m_num_ebin > 0) {
