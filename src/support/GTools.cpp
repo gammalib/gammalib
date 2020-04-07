@@ -44,6 +44,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cstdio>          // sprintf
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
@@ -62,6 +63,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 #define G_PARFORMAT_LENGTH 29
+#define G_CHAR_BUFFER      256
 
 
 /***********************************************************************//**
@@ -478,13 +480,22 @@ std::string gammalib::str(const short int& value)
  * @brief Convert integer value into string
  *
  * @param[in] value Integer to be converted into string.
+ * @param[in] format Format string.
  * @return String with integer value.
  ***************************************************************************/
-std::string gammalib::str(const int& value)
+std::string gammalib::str(const int& value, const std::string& fmt)
 {
-    std::ostringstream s_value;
-    s_value << value;
-    return s_value.str();
+    // Allocate character buffer
+    char buffer[G_CHAR_BUFFER];
+
+    // Put integer into buffer
+    sprintf(buffer, fmt.c_str(), value);
+
+    // Convert buffer into string
+    std::string str_buffer(buffer);
+
+    // Return string buffer
+    return str_buffer;
 }
 
 

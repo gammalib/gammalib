@@ -58,8 +58,11 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    double ontime(void) const;
-    double livetime(void) const;
+    double             ontime(void) const;
+    double             livetime(void) const;
+    double             model_counts(const int& index) const;
+    int                models(void) const;
+    const std::string& ptid(const int& ipt) const;
 };
 
 

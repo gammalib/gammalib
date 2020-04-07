@@ -83,10 +83,11 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double ontime(void) const;
-    double livetime(void) const;
-    double model_counts(const int& index) const;
-    int    models(void) const;
+    double             ontime(void) const;
+    double             livetime(void) const;
+    double             model_counts(const int& index) const;
+    int                models(void) const;
+    const std::string& ptid(const int& ipt) const;
 
 protected:
     // Protected methods
@@ -125,6 +126,7 @@ protected:
     GTime*                   m_time;       //!< Time array
     GEnergy*                 m_energy;     //!< Energy array
     GEnergy*                 m_ewidth;     //!< Energy bin width array
+    std::string*             m_ptid;       //!< Pointing identifiers
     std::vector<std::string> m_modnames;   //!< Model names
 };
 

@@ -805,20 +805,30 @@ void GSPIModelDataSpace::setup_pars(GSPIEventCube* cube)
 {
     // Free parameter map
     free_members();
+    
+    // Get cube dimensions
+    int n_pt  = cube->naxis(0);
+    int n_det = cube->naxis(1);
+    int n_eng = cube->naxis(2);
 
-    // Initialise parameter names
-    std::string pt_name;
-    std::string det_name;
-    std::string eng_name;
+    // Initialise index vectors for all three dimensions
+    std::vector<int> pt_indices(n_pt,   0);
+    std::vector<int> det_indices(n_det, 0);
+    std::vector<int> eng_indices(n_eng, 0);
+
+    // Initialise name vectors for all three dimensions
+    std::vector<std::string> pt_names;
+    std::vector<std::string> det_names;
+    std::vector<std::string> eng_names;
 
     // Determine pointing indices
-    std::vector<int> pt_indices = setup_pointing_indices(cube, &pt_name);
+    setup_pointing_indices(cube, &pt_indices, &pt_names);
 
     // Determine detector indices
-    std::vector<int> det_indices = setup_detector_indices(cube, &det_name);
+    setup_detector_indices(cube, &det_indices, &det_names);
 
     // Determine energy indices
-    std::vector<int> eng_indices = setup_energy_indices(cube, &eng_name);
+    setup_energy_indices(cube, &eng_indices, &eng_names);
 
     // Determine number of parameters in each dimension. The number of
     // parameters is given by the last index in the vector + 1. The check
@@ -854,22 +864,25 @@ void GSPIModelDataSpace::setup_pars(GSPIEventCube* cube)
             for (int idet = 0; idet < ndet; ++idet) {
                 for (int ieng = 0; ieng < neng; ++ieng) {
 
+                    // Set energy name
+                    std::string eng_name = (eng_names.size()  > 0) ? eng_names[ieng] : "";
+
                     // Build parameter name
                     std::string par_name;
                     if (m_name.empty()) {
                         par_name = "Scale";
                     }
                     else {
-                        par_name = m_name+ " scale";
+                        par_name = m_name;
                     }
-                    if (!eng_name.empty()) {
-                        par_name += " " + eng_name + gammalib::str(ieng);
+                    if (eng_names.size() > 0) {
+                        par_name += " " + eng_names[ieng];
                     }
-                    if (!det_name.empty()) {
-                        par_name += " " + det_name + gammalib::str(idet);
+                    if (det_names.size() > 0) {
+                        par_name += " " + det_names[idet];
                     }
-                    if (!pt_name.empty()) {
-                        par_name += " " + pt_name + gammalib::str(ipt);
+                    if (pt_names.size() > 0) {
+                        par_name += " " + pt_names[ipt];
                     }
 
                     // If parameter name exists already in this class instance
@@ -914,9 +927,6 @@ void GSPIModelDataSpace::setup_pars(GSPIEventCube* cube)
         } // endfor: looped over pointing parameters
 
         // Allocate parameter map
-        int n_pt   = cube->naxis(0);
-        int n_det  = cube->naxis(1);
-        int n_eng  = cube->naxis(2);
         m_map_size = n_pt * n_det * n_eng;
         if (m_map_size > 0) {
             m_map = new int[m_map_size];
@@ -978,54 +988,46 @@ void GSPIModelDataSpace::setup_pars(GSPIEventCube* cube)
  * @brief Setup pointing indices
  *
  * @param[in] cube Event cube.
- * @param[out] pt_name Pointing name.
- * @return indices Vector of pointing indices.
+ * @param[in,out] indices Vector of pointing indices.
+ * @param[in,out] names Vector of pointing names.
  *
- * Setup a vector of pointing indices. The length of the vector corresponds
- * to the number of pointings in the observation.
+ * Setup vectors of pointing indices and pointing names. The length of the
+ * vectors correspond to the number of pointings in the observation.
  ***************************************************************************/
-std::vector<int> GSPIModelDataSpace::setup_pointing_indices(GSPIEventCube* cube,
-                                                            std::string*   pt_name)
+void GSPIModelDataSpace::setup_pointing_indices(GSPIEventCube*            cube,
+                                                std::vector<int>*         indices,
+                                                std::vector<std::string>* names)
 {
-    // Get number of pointings
-    int npt = cube->naxis(0);
-
-    // Initialise pointing indices
-    std::vector<int> indices(npt, 0);
-
     // Convert method to lower case
     std::string method = gammalib::tolower(m_method);
 
     // Search for "point"
     if (gammalib::contains(method, "point")) {
-        *pt_name = "Point";
-        setup_point(cube, &indices);
+        setup_point(cube, indices, names);
     }
 
     // Search for "orbit"
     else if (gammalib::contains(method, "orbit")) {
-        *pt_name = "Orbit";
-        setup_orbit(cube, &indices);
+        setup_orbit(cube, indices, names);
     }
 
     // Search for "date"
     else if (gammalib::contains(method, "date")) {
-        *pt_name = "Date";
-        setup_date(cube, &indices);
+        setup_date(cube, indices, names);
     }
 
     // Handle "gedfail"
     if (gammalib::contains(method, "gedfail")) {
-        add_gedfail(cube, &indices);
+        add_gedfail(cube, indices, names);
     }
 
     // Handle "gedanneal"
     if (gammalib::contains(method, "gedanneal")) {
-        add_gedanneal(cube, &indices);
+        add_gedanneal(cube, indices, names);
     }
 
-    // Return indices
-    return indices;
+    // Return
+    return;
 }
 
 
@@ -1033,38 +1035,31 @@ std::vector<int> GSPIModelDataSpace::setup_pointing_indices(GSPIEventCube* cube,
  * @brief Setup detector indices
  *
  * @param[in] cube Event cube.
- * @param[out] det_name Detector name.
- * @return indices Vector of detector indices.
+ * @param[in,out] indices Vector of detector indices.
+ * @param[in,out] names Vector of detector names.
  *
- * Setup a vector of detector indices. The length of the vector corresponds
- * to the number of detectors in the observation.
+ * Setup vectors of detector indices and detector names. The length of the
+ * vectors correspond to the number of detectors in the observation.
  ***************************************************************************/
-std::vector<int> GSPIModelDataSpace::setup_detector_indices(GSPIEventCube* cube,
-                                                            std::string*   det_name)
+void GSPIModelDataSpace::setup_detector_indices(GSPIEventCube*            cube,
+                                                std::vector<int>*         indices,
+                                                std::vector<std::string>* names)
 {
-    // Get number of detectors
-    int ndet = cube->naxis(1);
-
-    // Initialise detector indices
-    std::vector<int> indices(ndet, 0);
-
     // Convert method to lower case
     std::string method = gammalib::tolower(m_method);
 
     // Search for "dete"
     if (gammalib::contains(method, "dete")) {
-        *det_name = "Det";
-        setup_dete(cube, &indices);
+        setup_dete(cube, indices, names);
     }
 
     // Search for "evtclass"
     else if (gammalib::contains(method, "evtclass")) {
-        *det_name = "EvClass";
-        setup_evtclass(cube, &indices);
+        setup_evtclass(cube, indices, names);
     }
 
-    // Return indices
-    return indices;
+    // Return
+    return;
 }
 
 
@@ -1072,43 +1067,41 @@ std::vector<int> GSPIModelDataSpace::setup_detector_indices(GSPIEventCube* cube,
  * @brief Setup energy indices
  *
  * @param[in] cube Event cube.
- * @param[out] eng_name Detector name.
- * @return indices Vector of energy indices.
+ * @param[in,out] indices Vector of energy indices.
+ * @param[in,out] names Vector of energy names.
  *
- * Setup a vector of energy indices. The length of the vector corresponds to
- * the number of energies in the observation.
+ * Setup vectors of energy indices and energy names. The length of the
+ * vectors correspond to the number of energies in the observation.
  ***************************************************************************/
-std::vector<int> GSPIModelDataSpace::setup_energy_indices(GSPIEventCube* cube,
-                                                          std::string*   eng_name)
+void GSPIModelDataSpace::setup_energy_indices(GSPIEventCube*            cube,
+                                              std::vector<int>*         indices,
+                                              std::vector<std::string>* names)
 {
-    // Get number of energies
-    int neng = cube->naxis(2);
-
-    // Initialise energy indices
-    std::vector<int> indices(neng, 0);
-
     // Convert method to lower case
     std::string method = gammalib::tolower(m_method);
 
     // Search for "ebin"
     if (gammalib::contains(method, "ebin")) {
-        *eng_name = "Eng";
-        setup_ebin(cube, &indices);
+        setup_ebin(cube, indices, names);
     }
 
-    // Return indices
-    return indices;
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Setup pointing indices for "point" method
+ * @brief Setup pointing indices and names for "point" method
  *
- * @param[in,out] indices Vector of pointing indices for "point" method
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of pointing indices.
+ * @param[in,out] names Vector of pointing names.
  *
- * Setup a vector of pointing indices for "point" method.
+ * Setup vectors of pointing indices and names for "point" method.
  ***************************************************************************/
-void GSPIModelDataSpace::setup_point(GSPIEventCube* cube, std::vector<int>* indices)
+void GSPIModelDataSpace::setup_point(GSPIEventCube*            cube,
+                                     std::vector<int>*         indices,
+                                     std::vector<std::string>* names)
 {
     // TODO: implement "point" method
 
@@ -1118,15 +1111,53 @@ void GSPIModelDataSpace::setup_point(GSPIEventCube* cube, std::vector<int>* indi
 
 
 /***********************************************************************//**
- * @brief Setup pointing indices for "orbit" method
+ * @brief Setup pointing indices and names for "orbit" method
  *
- * @param[in,out] indices Vector of pointing indices for "orbit" method
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of pointing indices.
+ * @param[in,out] names Vector of pointing names.
  *
- * Setup a vector of pointing indices for "orbit" method.
+ * Setup vectors of pointing indices and names for "orbit" method.
  ***************************************************************************/
-void GSPIModelDataSpace::setup_orbit(GSPIEventCube* cube, std::vector<int>* indices)
+void GSPIModelDataSpace::setup_orbit(GSPIEventCube*            cube,
+                                     std::vector<int>*         indices,
+                                     std::vector<std::string>* names)
 {
-    // TODO: implement "orbit" method
+    // Allocate orbit strings
+    std::vector<std::string> orbits;
+
+    // Get number of pointings
+    int npt = indices->size();
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < npt; ++ipt) {
+
+        // Initialise index
+        int index = -1;
+
+        // Get orbit
+        std::string orbit = cube->ptid(ipt).substr(0,4);
+
+        // If orbit is in orbits then store the location of the string
+        // in the vector as parameter index.
+        for (int i = 0; i < orbits.size(); ++i) {
+            if (orbit == orbits[i]) {
+                index = i;
+                break;
+            }
+        }
+
+        // If orbit is not yet in vector then
+        if (index == -1) {
+            index = orbits.size();
+            orbits.push_back(orbit);
+            names->push_back("Rev" + orbit);
+        }
+
+        // Store index
+        (*indices)[ipt] = index;
+
+    } // endfor: looped over pointings
 
     // Return
     return;
@@ -1134,13 +1165,17 @@ void GSPIModelDataSpace::setup_orbit(GSPIEventCube* cube, std::vector<int>* indi
 
 
 /***********************************************************************//**
- * @brief Setup pointing indices for "date" method
+ * @brief Setup pointing indices and names for "date" method
  *
- * @param[in,out] Vector of pointing indices for "date" method
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of pointing indices.
+ * @param[in,out] names Vector of pointing names.
  *
- * Setup a vector of pointing indices for "date" method.
+ * Setup vectors of pointing indices and names for "date" method.
  ***************************************************************************/
-void GSPIModelDataSpace::setup_date(GSPIEventCube* cube, std::vector<int>* indices)
+void GSPIModelDataSpace::setup_date(GSPIEventCube*            cube,
+                                    std::vector<int>*         indices,
+                                    std::vector<std::string>* names)
 {
     // TODO: implement "date" method
 
@@ -1150,14 +1185,18 @@ void GSPIModelDataSpace::setup_date(GSPIEventCube* cube, std::vector<int>* indic
 
 
 /***********************************************************************//**
- * @brief Modify pointing indices for "gedfail" method
+ * @brief Modify pointing indices and names for "gedfail" method
  *
- * @param[in,out] Vector of pointing indices for "gedfail" method
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of pointing indices.
+ * @param[in,out] names Vector of pointing names.
  *
- * Inserts an additional model parameter for each pointing where a detector
+ * Inserts additional model parameters for each pointing where a detector
  * failure occured.
  ***************************************************************************/
-void GSPIModelDataSpace::add_gedfail(GSPIEventCube* cube, std::vector<int>* indices)
+void GSPIModelDataSpace::add_gedfail(GSPIEventCube*            cube,
+                                     std::vector<int>*         indices,
+                                     std::vector<std::string>* names)
 {
     // TODO: implement "gedfail" method
 
@@ -1167,14 +1206,18 @@ void GSPIModelDataSpace::add_gedfail(GSPIEventCube* cube, std::vector<int>* indi
 
 
 /***********************************************************************//**
- * @brief Modify pointing indices for "gedanneal" method
+ * @brief Modify pointing indices and names for "gedanneal" method
  *
- * @param[in,out] Vector of pointing indices for "gedanneal" method
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of pointing indices.
+ * @param[in,out] names Vector of pointing names.
  *
- * Inserts an additional model parameter for each pointing where a detector
+ * Inserts additional model parameters for each pointing where a detector
  * annealing occured.
  ***************************************************************************/
-void GSPIModelDataSpace::add_gedanneal(GSPIEventCube* cube, std::vector<int>* indices)
+void GSPIModelDataSpace::add_gedanneal(GSPIEventCube*            cube,
+                                       std::vector<int>*         indices,
+                                       std::vector<std::string>* names)
 {
     // TODO: implement "gedanneal" method
 
@@ -1184,15 +1227,26 @@ void GSPIModelDataSpace::add_gedanneal(GSPIEventCube* cube, std::vector<int>* in
 
 
 /***********************************************************************//**
- * @brief Setup detector indices for "dete" method
+ * @brief Setup detector indices and names for "dete" method
  *
- * @param[in,out] Vector of detector indices for "dete" method
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of detector indices.
+ * @param[in,out] names Vector of detector names.
  *
- * Setup a vector of detector indices for "dete" method.
+ * Setup vectors of detector indices and names for "dete" method.
  ***************************************************************************/
-void GSPIModelDataSpace::setup_dete(GSPIEventCube* cube, std::vector<int>* indices)
+void GSPIModelDataSpace::setup_dete(GSPIEventCube*            cube,
+                                    std::vector<int>*         indices,
+                                    std::vector<std::string>* names)
 {
-    // TODO: implement "dete" method
+    // Get number of detectors
+    int ndet = indices->size();
+
+    // Setup index vector
+    for (int idet = 0; idet < ndet; ++idet) {
+        (*indices)[idet] = idet;
+        names->push_back("D" + gammalib::str(idet, "%3.3d"));
+    }
 
     // Return
     return;
@@ -1200,13 +1254,17 @@ void GSPIModelDataSpace::setup_dete(GSPIEventCube* cube, std::vector<int>* indic
 
 
 /***********************************************************************//**
- * @brief Setup detector indices for "evtclass" method
+ * @brief Setup detector indices and names for "evtclass" method
  *
- * @param[in,out] indices Vector of detector indices for "evtclass" method
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of detector indices.
+ * @param[in,out] names Vector of detector names.
  *
- * Setup a vector of detector indices for "evtclass" method.
+ * Setup vectors of detector indices and names for "evtclass" method.
  ***************************************************************************/
-void GSPIModelDataSpace::setup_evtclass(GSPIEventCube* cube, std::vector<int>* indices)
+void GSPIModelDataSpace::setup_evtclass(GSPIEventCube*            cube,
+                                        std::vector<int>*         indices,
+                                        std::vector<std::string>* names)
 {
     // TODO: implement "evtclass" method
 
@@ -1216,13 +1274,17 @@ void GSPIModelDataSpace::setup_evtclass(GSPIEventCube* cube, std::vector<int>* i
 
 
 /***********************************************************************//**
- * @brief Setup energy indices for "ebin" method
+ * @brief Setup energy indices and names for "ebin" method
  *
- * @param[in,out] indices Vector of energy indices for "ebin" method
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of energy indices.
+ * @param[in,out] names Vector of energy names.
  *
- * Setup a vector of energy indices for "ebin" method.
+ * Setup vectors of energy indices and names for "ebin" method.
  ***************************************************************************/
-void GSPIModelDataSpace::setup_ebin(GSPIEventCube* cube, std::vector<int>* indices)
+void GSPIModelDataSpace::setup_ebin(GSPIEventCube*            cube,
+                                    std::vector<int>*         indices,
+                                    std::vector<std::string>* names)
 {
     // TODO: implement "ebin" method
 

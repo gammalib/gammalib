@@ -70,7 +70,7 @@ namespace gammalib {
     std::string              str(const unsigned long int& value);
     std::string              str(const unsigned long long int& value);
     std::string              str(const short int& value);
-    std::string              str(const int& value);
+    std::string              str(const int& value, const std::string& fmt = "%d");
     std::string              str(const long int& value);
     std::string              str(const long long int& value);
     std::string              str(const float& value, const int& precision = 0);

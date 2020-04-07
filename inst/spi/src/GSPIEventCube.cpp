@@ -45,6 +45,7 @@
 #define G_READ_EBDS                   "GSPIEventCube::read_ebds(GFitsTable*)"
 #define G_READ_PNT        "GSPIEventCube::read_pnt(GFitsTable*, GFitsTable*)"
 #define G_READ_MODELS                    "GSPIEventCube::read_models(GFits&)"
+#define G_PTID                                    "GSPIEventCube::ptid(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -491,45 +492,6 @@ int GSPIEventCube::number(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of events in model
- *
- * @param[in] index Model index.
- * @return Number of events in event cube.
- *
- * @exception GException::out_of_range
- *            Invalid model index
- *
- * Returns the total number of counts in model.
- ***************************************************************************/
-double GSPIEventCube::model_counts(const int& index) const
-{
-    // Initialise result
-    double counts = 0.0;
-
-    // Compute total number of models
-    int num_models = m_num_sky + m_num_bgm;
-
-    // Optionally check if the model index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= num_models) {
-        throw GException::out_of_range(G_MODEL_COUNTS, "Invalid model index",
-                                       index, num_models);
-    }
-    #endif
-
-    // Compute sum of all events in model
-    if (m_dsp_size > 0) {
-        for (int i = 0; i < m_dsp_size; ++i) {
-            counts += m_models[i*num_models + index];
-        }
-    }
-
-    // Return
-    return counts;
-}
-
-
-/***********************************************************************//**
  * @brief Return total ontime
  *
  * @return Total ontime.
@@ -640,6 +602,71 @@ double GSPIEventCube::livetime(void) const
 
 
 /***********************************************************************//**
+ * @brief Return number of events in model
+ *
+ * @param[in] index Model index.
+ * @return Number of events in event cube.
+ *
+ * @exception GException::out_of_range
+ *            Invalid model index
+ *
+ * Returns the total number of counts in model.
+ ***************************************************************************/
+double GSPIEventCube::model_counts(const int& index) const
+{
+    // Initialise result
+    double counts = 0.0;
+
+    // Compute total number of models
+    int num_models = m_num_sky + m_num_bgm;
+
+    // Optionally check if the model index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= num_models) {
+        throw GException::out_of_range(G_MODEL_COUNTS, "Invalid model index",
+                                       index, num_models);
+    }
+    #endif
+
+    // Compute sum of all events in model
+    if (m_dsp_size > 0) {
+        for (int i = 0; i < m_dsp_size; ++i) {
+            counts += m_models[i*num_models + index];
+        }
+    }
+
+    // Return
+    return counts;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointing identifier
+ *
+ * @param[in] ipt Pointing index.
+ * @return Pointing identifier.
+ *
+ * @exception GException::out_of_range
+ *            Invalid pointing index
+ *
+ * Returns the pointing identifier for the specified index.
+ ***************************************************************************/
+const std::string& GSPIEventCube::ptid(const int& ipt) const
+{
+    // Optionally check if the pointing index is valid
+    #if defined(G_RANGE_CHECK)
+    if (ipt < 0 || ipt >= m_num_pt) {
+        throw GException::out_of_range(G_PTID, "Invalid pointing index",
+                                       ipt, m_num_pt);
+    }
+    #endif
+
+    // Return
+    return (m_ptid[ipt]);
+}
+
+
+/***********************************************************************//**
  * @brief Print INTEGRAL/SPI event cube information
  *
  * @param[in] chatter Chattiness.
@@ -732,6 +759,7 @@ void GSPIEventCube::init_members(void)
     m_time       = NULL;
     m_energy     = NULL;
     m_ewidth     = NULL;
+    m_ptid       = NULL;
 
     // Prepare event bin
     init_bin();
@@ -772,6 +800,12 @@ void GSPIEventCube::copy_members(const GSPIEventCube& cube)
         for (int i = 0; i < m_num_ebin; ++i) {
             m_energy[i] = cube.m_energy[i];
             m_ewidth[i] = cube.m_ewidth[i];
+        }
+    }
+    if (m_num_pt > 0) {
+        m_ptid = new std::string[m_num_pt];
+        for (int i = 0; i < m_num_pt; ++i) {
+            m_ptid[i] = cube.m_ptid[i];
         }
     }
     if (m_gti_size > 0) {
@@ -827,6 +861,7 @@ void GSPIEventCube::free_members(void)
     if (m_time     != NULL) delete [] m_time;
     if (m_energy   != NULL) delete [] m_energy;
     if (m_ewidth   != NULL) delete [] m_ewidth;
+    if (m_ptid     != NULL) delete [] m_ptid;
 
     // Set pointers to free
     m_ontime   = NULL;
@@ -839,6 +874,7 @@ void GSPIEventCube::free_members(void)
     m_time     = NULL;
     m_energy   = NULL;
     m_ewidth   = NULL;
+    m_ptid     = NULL;
 
     // Return
     return;
@@ -865,6 +901,14 @@ void GSPIEventCube::alloc_data(void)
         for (int i = 0; i < m_num_ebin; ++i) {
             m_energy[i].clear();
             m_ewidth[i].clear();
+        }
+    }
+
+    // Allocate and initialise pointing data
+    if (m_num_pt > 0) {
+        m_ptid = new std::string[m_num_pt];
+        for (int i = 0; i < m_num_pt; ++i) {
+            m_ptid[i].clear();
         }
     }
 
@@ -973,6 +1017,9 @@ void GSPIEventCube::read_pnt(const GFitsTable* pnt, const GFitsTable* gti)
 
     // Loop over all pointings
     for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+
+        // Store pointing identifier
+        m_ptid[ipt] = pnt_ptid->string(ipt);
 
         // Set pointing direction
         GSkyDir pnt_dir;
