@@ -86,6 +86,7 @@ public:
     double ontime(void) const;
     double livetime(void) const;
     double model_counts(const int& index) const;
+    int    models(void) const;
 
 protected:
     // Protected methods
@@ -189,6 +190,20 @@ inline
 void GSPIEventCube::set_times(void)
 {
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of models
+ *
+ * @return Number of models.
+ *
+ * Returns the number of models in the event cube.
+ ***************************************************************************/
+inline
+int GSPIEventCube::models(void) const
+{
+    return (m_num_sky+m_num_bgm);
 }
 
 #endif /* GSPIEVENTCUBE_HPP */

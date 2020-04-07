@@ -34,6 +34,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GTime;
 class GEnergy;
+class GSPIEventCube;
 
 /* __ Constants __________________________________________________________ */
 
@@ -88,6 +89,7 @@ public:
     // Other methods
     const double& model(const int& index) const;
     const double& ontime(void) const;
+    const int&    index(void) const;
 
 protected:
     // Protected methods
@@ -96,18 +98,18 @@ protected:
     void free_members(void);
 
     // Protected members
-    bool         m_alloc;      //!< Signals proper memory allocation
-    int          m_index;      //!< Dataspace index
-    int          m_idir;       //!< Direction index
-    int          m_iebin;      //!< Energy bin index
-    int          m_num_models; //!< Number of models in bin
-    GSPIInstDir* m_dir;        //!< Pointer to direction of bin
-    GTime*       m_time;       //!< Pointer to time of bin
-    GEnergy*     m_energy;     //!< Pointer to energy of bin
-    double*      m_counts;     //!< Pointer to number of counts
-    double*      m_ontime;     //!< Pointer to ontime of bin
-    double*      m_size;       //!< Pointer to size of bin
-    double*      m_models;     //!< Pointer to models of bin
+    bool           m_alloc;      //!< Signals proper memory allocation
+    int            m_index;      //!< Dataspace index
+    int            m_idir;       //!< Direction index
+    int            m_iebin;      //!< Energy bin index
+    int            m_num_models; //!< Number of models in bin
+    GSPIInstDir*   m_dir;        //!< Pointer to direction of bin
+    GTime*         m_time;       //!< Pointer to time of bin
+    GEnergy*       m_energy;     //!< Pointer to energy of bin
+    double*        m_counts;     //!< Pointer to number of counts
+    double*        m_ontime;     //!< Pointer to ontime of bin
+    double*        m_size;       //!< Pointer to size of bin
+    double*        m_models;     //!< Pointer to models of bin
 };
 
 
@@ -218,6 +220,20 @@ inline
 const double& GSPIEventBin::ontime(void) const
 {
     return (*m_ontime);
+}
+
+
+/***********************************************************************//**
+ * @brief Return event bin index
+ *
+ * @return Event bin index
+ *
+ * Returns the event bin index in the event cube.
+ ***************************************************************************/
+inline
+const int& GSPIEventBin::index(void) const
+{
+    return (m_index);
 }
 
 #endif /* GSPIEVENTBIN_HPP */

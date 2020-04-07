@@ -319,7 +319,7 @@ void GSPIEventCube::save(const GFilename& filename, const bool& clobber) const
 
     // Write event cube into FITS file
     write(fits);
-    
+
     // Save FITS file
     fits.saveto(filename, clobber);
 
@@ -941,7 +941,7 @@ void GSPIEventCube::read_ebds(const GFitsTable* ebds)
         // Store linear mean energy and bin width
         m_energy[iebin] = m_ebounds.emean(iebin);
         m_ewidth[iebin] = m_ebounds.ewidth(iebin);
-        
+
     } // endfor: looped over all energy bins
 
 
@@ -1280,17 +1280,17 @@ void GSPIEventCube::init_bin(void)
 {
     // Prepare event bin
     m_bin.free_members();
-    m_bin.m_index      = 0;
-    m_bin.m_idir       = 0;
-    m_bin.m_iebin      = 0;
+    m_bin.m_index      = 0;     //!< Set by set_bin method
+    m_bin.m_idir       = 0;     //!< Set by set_bin method
+    m_bin.m_iebin      = 0;     //!< Set by set_bin method
     m_bin.m_num_models = m_num_sky + m_num_bgm;
-    m_bin.m_dir        = NULL;                   //!< Set by set_bin method
-    m_bin.m_time       = NULL;                   //!< Set by set_bin method
-    m_bin.m_energy     = NULL;                   //!< Set by set_bin method
-    m_bin.m_counts     = NULL;                   //!< Set by set_bin method
-    m_bin.m_ontime     = NULL;                   //!< Set by set_bin method
-    m_bin.m_size       = NULL;                   //!< Set by set_bin method
-    m_bin.m_models     = NULL;                   //!< Set by set_bin method
+    m_bin.m_dir        = NULL;  //!< Set by set_bin method
+    m_bin.m_time       = NULL;  //!< Set by set_bin method
+    m_bin.m_energy     = NULL;  //!< Set by set_bin method
+    m_bin.m_counts     = NULL;  //!< Set by set_bin method
+    m_bin.m_ontime     = NULL;  //!< Set by set_bin method
+    m_bin.m_size       = NULL;  //!< Set by set_bin method
+    m_bin.m_models     = NULL;  //!< Set by set_bin method
 
     // Return
     return;

@@ -105,3 +105,4 @@
 %include "GSPIInstDir.i"
 %include "GSPIEventCube.i"
 %include "GSPIEventBin.i"
+%include "GSPIModelDataSpace.i"

@@ -39,7 +39,8 @@ sources = src/GSPITools.cpp \
           src/GSPIEventBin.cpp \
           src/GSPIEventCube.cpp \
           src/GSPIInstDir.cpp \
-          src/GSPIResponse.cpp
+          src/GSPIResponse.cpp \
+          src/GSPIModelDataSpace.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GSPITools.hpp \
@@ -47,7 +48,8 @@ pkginclude_HEADERS = include/GSPITools.hpp \
                      include/GSPIEventBin.hpp \
                      include/GSPIEventCube.hpp \
                      include/GSPIInstDir.hpp \
-                     include/GSPIResponse.hpp
+                     include/GSPIResponse.hpp \
+                     include/GSPIModelDataSpace.hpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libspi.la
