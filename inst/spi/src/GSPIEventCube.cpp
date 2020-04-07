@@ -1380,8 +1380,7 @@ void GSPIEventCube::set_bin(const int& index)
     m_bin.m_time   = m_time   + m_bin.m_idir;
     m_bin.m_energy = m_energy + m_bin.m_iebin;
     m_bin.m_counts = m_counts + m_bin.m_index;
-    //m_bin.m_ontime = m_ontime + m_bin.m_idir;
-    m_bin.m_ontime = m_livetime + m_bin.m_idir; // Use livetime instead of ontime?
+    m_bin.m_ontime = m_ontime + m_bin.m_idir;
     m_bin.m_size   = m_size   + m_bin.m_index;
     m_bin.m_models = m_models + m_bin.m_index * m_bin.m_num_models;
 
