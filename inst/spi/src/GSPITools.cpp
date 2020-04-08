@@ -93,6 +93,15 @@ const GFitsTable* gammalib::spi_hdu(const GFits&       fits,
         // the grouping table
         else if (ext->extname() == "GROUPING") {
 
+            // If the extension has a GRPNAME then check if the requested
+            // extension name if that grouping name
+            if (ext->has_card("GRPNAME")) {
+                if (ext->string("GRPNAME") == extname) {
+                    hdu = ext->clone();
+                    break;
+                }
+            }
+
             // Loop over grouping table and search for a member with the
             // requested extension name and version. In case of success
             // get the URL, open the FITS file and search for the extension
