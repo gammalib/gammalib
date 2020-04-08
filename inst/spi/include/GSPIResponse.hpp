@@ -29,6 +29,10 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GResponse.hpp"
+#include "GSkyMap.hpp"
+#include "GNodeArray.hpp"
+#include "GEbounds.hpp"
+#include "GFilename.hpp"
 
 /* __ Forward declaration ________________________________________________ */
 class GEvent;
@@ -39,6 +43,8 @@ class GSource;
 class GObservation;
 class GModelSky;
 class GEbounds;
+class GSPIObservation;
+class GSPIEventCube;
 
 /* __ Constants __________________________________________________________ */
 
@@ -59,6 +65,7 @@ public:
     // Constructors and destructors
     GSPIResponse(void);
     GSPIResponse(const GSPIResponse& rsp);
+    explicit GSPIResponse(const GFilename& rspname);
     virtual ~GSPIResponse(void);
 
     // Operators
@@ -84,17 +91,40 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other Methods
-    // TODO: Add any further methods that are needed
+    void set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
+    void rspname(const GFilename& rspname);
+    bool is_precomputed(void) const;
+    void read(const GFits& fits);
+    void write(GFits& fits) const;
+    void load(const GFilename& filename);
+    void save(const GFilename& filename, const bool& clobber = false) const;
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GSPIResponse& rsp);
-    void free_members(void);
+    void    init_members(void);
+    void    copy_members(const GSPIResponse& rsp);
+    void    free_members(void);
+    void    write_detids(GFits& fits) const;
+    void    write_energies(GFits& fits) const;
+    void    load_irfs(const int& region);
+    GSkyMap load_irf(const GFilename& rspname) const;
+    GSkyMap compute_irf(const double& emin, const double& emax) const;
+    void    set_detids(const GSPIEventCube* cube);
+    int     irf_detid(const int& detid) const;
+    double  irf_weight(const double& beta,
+                       const double& emin,
+                       const double& emax) const;
 
     // Private data members
-    // TODO: Add any data members that are necessary. Note that the events
-    // are stored in the GObservation base class
+    GFilename        m_rspname;    //!< File name of response group
+    std::vector<int> m_detids;     //!< Vector of detector IDs
+    GNodeArray       m_energies;   //!< Node array of IRF energies
+    GEbounds         m_ebounds;    //!< Energy bounaries of IRF
+    GSkyMap          m_irfs;       //!< IRFs stored as sky map
+    double           m_dlogE;      //!< Logarithmic energy step for IRF band
+    double           m_gamma;      //!< Power-law spectral index for IRF band
+    double           m_max_zenith; //!< Maximum zenith angle (radians)
+    double           m_exp;        //!< Non-linear IRF
 };
 
 
@@ -135,6 +165,35 @@ inline
 bool GSPIResponse::use_tdisp(void) const
 {
     return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Set response name
+ *
+ * @param[in] rspname Response group file name.
+ *
+ * Sets the response group file name.
+ ***************************************************************************/
+inline
+void GSPIResponse::rspname(const GFilename& rspname)
+{
+    m_rspname = rspname;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if response is precomputed
+ *
+ * @return True if response is precomputed.
+ *
+ * Signals if the response was precomputed.
+ ***************************************************************************/
+inline
+bool GSPIResponse::is_precomputed(void) const
+{
+    return (!m_ebounds.is_empty());
 }
 
 #endif /* GSPIRESPONSE_HPP */

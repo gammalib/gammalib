@@ -40,6 +40,7 @@ public:
     // Constructors and destructors
     GSPIResponse(void);
     GSPIResponse(const GSPIResponse& rsp);
+    explicit GSPIResponse(const GFilename& rspname);
     virtual ~GSPIResponse(void);
 
     // Implement pure virtual base class methods
@@ -61,7 +62,13 @@ public:
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
 
     // Other Methods
-    // TODO: Copy methods from GSPIObservation.hpp file
+    void set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
+    void rspname(const GFilename& rspname);
+    void save(const GFilename& filename);
+    void read(const GFits& fits);
+    void write(GFits& fits) const;
+    void load(const GFilename& filename);
+    void save(const GFilename& filename, const bool& clobber = false) const;
 };
 
 
