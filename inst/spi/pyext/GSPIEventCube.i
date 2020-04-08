@@ -64,6 +64,8 @@ public:
     int                models(void) const;
     const std::string& ptid(const int& ipt) const;
     const GSPIInstDir& dir(const int& ipt, const int& idet) const;
+    const GSkyDir&     spi_x(const int& ipt) const;
+    const GSkyDir&     spi_z(const int& ipt) const;
 };
 
 

@@ -89,6 +89,8 @@ public:
     int                models(void) const;
     const std::string& ptid(const int& ipt) const;
     const GSPIInstDir& dir(const int& ipt, const int& idet) const;
+    const GSkyDir&     spi_x(const int& ipt) const;
+    const GSkyDir&     spi_z(const int& ipt) const;
 
 protected:
     // Protected methods
@@ -127,6 +129,8 @@ protected:
     GTime*                   m_time;       //!< Time array
     GEnergy*                 m_energy;     //!< Energy array
     GEnergy*                 m_ewidth;     //!< Energy bin width array
+    GSkyDir*                 m_spix;       //!< SPI X axis array
+    GSkyDir*                 m_spiz;       //!< SPI Z axis array
     std::string*             m_ptid;       //!< Pointing identifiers
     std::vector<std::string> m_modnames;   //!< Model names
 };

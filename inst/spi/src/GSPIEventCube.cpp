@@ -46,6 +46,9 @@
 #define G_READ_PNT        "GSPIEventCube::read_pnt(GFitsTable*, GFitsTable*)"
 #define G_READ_MODELS                    "GSPIEventCube::read_models(GFits&)"
 #define G_PTID                                    "GSPIEventCube::ptid(int&)"
+#define G_DIR                                "GSPIEventCube::dir(int&, int&)"
+#define G_SPI_X                                  "GSPIEventCube::spi_x(int&)"
+#define G_SPI_Z                                  "GSPIEventCube::spi_z(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -684,17 +687,70 @@ const GSPIInstDir& GSPIEventCube::dir(const int& ipt, const int& idet) const
     // Optionally check if the pointing index is valid
     #if defined(G_RANGE_CHECK)
     if (ipt < 0 || ipt >= m_num_pt) {
-        throw GException::out_of_range(G_PTID, "Invalid pointing index",
+        throw GException::out_of_range(G_DIR, "Invalid pointing index",
                                        ipt, m_num_pt);
     }
     if (idet < 0 || idet >= m_num_det) {
-        throw GException::out_of_range(G_PTID, "Invalid detector index",
+        throw GException::out_of_range(G_DIR, "Invalid detector index",
                                        idet, m_num_det);
     }
     #endif
 
     // Return
     return (m_dir[ipt*m_num_det+idet]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return SPI X direction (pointing direction)
+ *
+ * @param[in] ipt Pointing index.
+ * @return SPI X direction.
+ *
+ * @exception GException::out_of_range
+ *            Invalid pointing index
+ *
+ * Returns the SPI X direction for the specified index. The SPI X direction
+ * is the SPI pointing direction.
+ ***************************************************************************/
+const GSkyDir& GSPIEventCube::spi_x(const int& ipt) const
+{
+    // Optionally check if the pointing index is valid
+    #if defined(G_RANGE_CHECK)
+    if (ipt < 0 || ipt >= m_num_pt) {
+        throw GException::out_of_range(G_SPI_X, "Invalid pointing index",
+                                       ipt, m_num_pt);
+    }
+    #endif
+
+    // Return
+    return (m_spix[ipt]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return SPI Z direction
+ *
+ * @param[in] ipt Pointing index.
+ * @return SPI Z direction.
+ *
+ * @exception GException::out_of_range
+ *            Invalid pointing index
+ *
+ * Returns the SPI Z direction for the specified index.
+ ***************************************************************************/
+const GSkyDir& GSPIEventCube::spi_z(const int& ipt) const
+{
+    // Optionally check if the pointing index is valid
+    #if defined(G_RANGE_CHECK)
+    if (ipt < 0 || ipt >= m_num_pt) {
+        throw GException::out_of_range(G_SPI_Z, "Invalid pointing index",
+                                       ipt, m_num_pt);
+    }
+    #endif
+
+    // Return
+    return (m_spiz[ipt]);
 }
 
 
@@ -791,6 +847,8 @@ void GSPIEventCube::init_members(void)
     m_time       = NULL;
     m_energy     = NULL;
     m_ewidth     = NULL;
+    m_spix       = NULL;
+    m_spiz       = NULL;
     m_ptid       = NULL;
 
     // Prepare event bin
@@ -837,8 +895,12 @@ void GSPIEventCube::copy_members(const GSPIEventCube& cube)
     }
     if (m_num_pt > 0) {
         m_ptid = new std::string[m_num_pt];
+        m_spix = new GSkyDir[m_num_pt];
+        m_spiz = new GSkyDir[m_num_pt];
         for (int i = 0; i < m_num_pt; ++i) {
             m_ptid[i] = cube.m_ptid[i];
+            m_spix[i] = cube.m_spix[i];
+            m_spiz[i] = cube.m_spiz[i];
         }
     }
     if (m_gti_size > 0) {
@@ -894,6 +956,8 @@ void GSPIEventCube::free_members(void)
     if (m_time     != NULL) delete [] m_time;
     if (m_energy   != NULL) delete [] m_energy;
     if (m_ewidth   != NULL) delete [] m_ewidth;
+    if (m_spix     != NULL) delete [] m_spix;
+    if (m_spiz     != NULL) delete [] m_spiz;
     if (m_ptid     != NULL) delete [] m_ptid;
 
     // Set pointers to free
@@ -907,6 +971,8 @@ void GSPIEventCube::free_members(void)
     m_time     = NULL;
     m_energy   = NULL;
     m_ewidth   = NULL;
+    m_spix     = NULL;
+    m_spiz     = NULL;
     m_ptid     = NULL;
 
     // Return
@@ -940,8 +1006,12 @@ void GSPIEventCube::alloc_data(void)
     // Allocate and initialise pointing data
     if (m_num_pt > 0) {
         m_ptid = new std::string[m_num_pt];
+        m_spix = new GSkyDir[m_num_pt];
+        m_spiz = new GSkyDir[m_num_pt];
         for (int i = 0; i < m_num_pt; ++i) {
             m_ptid[i].clear();
+            m_spix[i].clear();
+            m_spiz[i].clear();
         }
     }
 
@@ -1045,6 +1115,8 @@ void GSPIEventCube::read_pnt(const GFitsTable* pnt, const GFitsTable* gti)
     const GFitsTableCol* pnt_ptid = (*pnt)["PTID_SPI"];
     const GFitsTableCol* ra_spix  = (*pnt)["RA_SPIX"];
     const GFitsTableCol* dec_spix = (*pnt)["DEC_SPIX"];
+    const GFitsTableCol* ra_spiz  = (*pnt)["RA_SPIZ"];
+    const GFitsTableCol* dec_spiz = (*pnt)["DEC_SPIZ"];
     const GFitsTableCol* gti_ptid = (*gti)["PTID_SPI"];
     const GFitsTableCol* det_id   = (*gti)["DET_ID"];
 
@@ -1053,6 +1125,10 @@ void GSPIEventCube::read_pnt(const GFitsTable* pnt, const GFitsTable* gti)
 
         // Store pointing identifier
         m_ptid[ipt] = pnt_ptid->string(ipt);
+
+        // Store SPI X and Z directions
+        m_spix[ipt].radec_deg(ra_spix->real(ipt), dec_spix->real(ipt));
+        m_spiz[ipt].radec_deg(ra_spiz->real(ipt), dec_spiz->real(ipt));
 
         // Set pointing direction
         GSkyDir pnt_dir;
