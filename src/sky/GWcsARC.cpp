@@ -342,7 +342,7 @@ void GWcsARC::prj_set(void) const
  * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
- * This method has been adapted from the wcslib function prj.c::aitx2s().
+ * This method has been adapted from the wcslib function prj.c::arcx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
  * setup previously (as this will be done by the constructor).
@@ -441,7 +441,7 @@ void GWcsARC::prj_x2s(int nx, int ny, int sxy, int spt,
  * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
  *
- * This method has been adapted from the wcslib function prj.c::aits2x().
+ * This method has been adapted from the wcslib function prj.c::arcs2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
  * setup previously (as this will be done by the constructor).
