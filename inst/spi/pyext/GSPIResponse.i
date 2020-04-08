@@ -62,13 +62,15 @@ public:
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
 
     // Other Methods
-    void set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
-    void rspname(const GFilename& rspname);
-    void save(const GFilename& filename);
-    void read(const GFits& fits);
-    void write(GFits& fits) const;
-    void load(const GFilename& filename);
-    void save(const GFilename& filename, const bool& clobber = false) const;
+    void   set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
+    void   rspname(const GFilename& rspname);
+    double zenith(const int& ipt, const GSkyDir& dir) const;
+    double azimuth(const int& ipt, const GSkyDir& dir) const;
+    bool   is_precomputed(void) const;
+    void   read(const GFits& fits);
+    void   write(GFits& fits) const;
+    void   load(const GFilename& filename);
+    void   save(const GFilename& filename, const bool& clobber = false) const;
 };
 
 

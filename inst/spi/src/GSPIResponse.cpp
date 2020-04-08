@@ -406,6 +406,9 @@ void GSPIResponse::set(const GSPIObservation& obs, const GEnergy& energy)
         // Set requested detector identifiers
         set_detids(cube);
 
+        // Set coordination transformation cache
+        set_cache(cube);
+
         // Load IRFs for photo peak region (region 0)
         load_irfs(0);
 
@@ -623,6 +626,10 @@ void GSPIResponse::init_members(void)
     m_max_zenith = 180.0 * gammalib::deg2rad;
     m_exp        =   1.0;
 
+    // Initialise cache
+    m_spix.clear();
+    m_posang.clear();
+
     // Return
     return;
 }
@@ -645,6 +652,10 @@ void GSPIResponse::copy_members(const GSPIResponse& rsp)
     m_gamma      = rsp.m_gamma;
     m_max_zenith = rsp.m_max_zenith;
     m_exp        = rsp.m_exp;
+
+    // Copy cache
+    m_spix   = rsp.m_spix;
+    m_posang = rsp.m_posang;
 
     // Return
     return;
@@ -1072,8 +1083,7 @@ void GSPIResponse::set_detids(const GSPIEventCube* cube)
     int npt  = cube->naxis(0);
     int ndet = cube->naxis(1);
 
-    // Loop over all detectors of the first pointing. This assumes that the
-    // detector identifiers for all pointings are the same
+    // Loop over all pointings and detectors
     for (int ipt = 0; ipt < npt; ++ipt) {
         for (int idet = 0; idet < ndet; ++idet) {
 
@@ -1087,6 +1097,44 @@ void GSPIResponse::set_detids(const GSPIEventCube* cube)
             }
 
         } // endfor: looped over detectors
+    } // endfor: looped over pointings
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set computation cache
+ *
+ * @param[in] cube INTEGRAL/SPI event cube.
+ *
+ * Setup of two vectors for fast coordinate transformation into the
+ * instrument system. The first vector m_spix stores the SPI pointing
+ * direction (the X direction) while the second vector stores the position
+ * angle in celestial coordinates of the SPI Y direction.
+ ***************************************************************************/
+void GSPIResponse::set_cache(const GSPIEventCube* cube)
+{
+    // Extract relevant event cube dimensions
+    int npt = cube->naxis(0);
+
+    // Clear vectors of SPI X direction and position angles
+    m_spix.clear();
+    m_spix.reserve(npt);
+    m_posang.clear();
+    m_posang.reserve(npt);
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < npt; ++ipt) {
+
+        // Compute position angle
+        double posang = cube->spi_x(ipt).posang(cube->spi_z(ipt)) + gammalib::pihalf;
+
+        // Store angles
+        m_spix.push_back(cube->spi_x(ipt));
+        m_posang.push_back(posang);
+
     } // endfor: looped over pointings
 
     // Return

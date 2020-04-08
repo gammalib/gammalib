@@ -91,13 +91,15 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other Methods
-    void set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
-    void rspname(const GFilename& rspname);
-    bool is_precomputed(void) const;
-    void read(const GFits& fits);
-    void write(GFits& fits) const;
-    void load(const GFilename& filename);
-    void save(const GFilename& filename, const bool& clobber = false) const;
+    void   set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
+    void   rspname(const GFilename& rspname);
+    double zenith(const int& ipt, const GSkyDir& dir) const;
+    double azimuth(const int& ipt, const GSkyDir& dir) const;
+    bool   is_precomputed(void) const;
+    void   read(const GFits& fits);
+    void   write(GFits& fits) const;
+    void   load(const GFilename& filename);
+    void   save(const GFilename& filename, const bool& clobber = false) const;
 
 private:
     // Private methods
@@ -110,6 +112,7 @@ private:
     GSkyMap load_irf(const GFilename& rspname) const;
     GSkyMap compute_irf(const double& emin, const double& emax) const;
     void    set_detids(const GSPIEventCube* cube);
+    void    set_cache(const GSPIEventCube* cube);
     int     irf_detid(const int& detid) const;
     double  irf_weight(const double& beta,
                        const double& emin,
@@ -125,6 +128,11 @@ private:
     double           m_gamma;      //!< Power-law spectral index for IRF band
     double           m_max_zenith; //!< Maximum zenith angle (radians)
     double           m_exp;        //!< Non-linear IRF
+
+    // Private cache
+    std::vector<GSkyDir> m_spix;   //!< SPI pointing direction
+    std::vector<double>  m_posang; //!< Position angle of Y axis (radians)
+
 };
 
 
@@ -194,6 +202,42 @@ inline
 bool GSPIResponse::is_precomputed(void) const
 {
     return (!m_ebounds.is_empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Return zenith angle of sky direction for pointing in radians
+ *
+ * @param[in] ipt Pointing index.
+ * @param[in] dir Sky direction.
+ * @return Zenith angle (radians).
+ *
+ * Returns zenith angle of sky direction for pointing in radians.
+ ***************************************************************************/
+inline
+double GSPIResponse::zenith(const int& ipt, const GSkyDir& dir) const
+{
+    return (m_spix[ipt].dist(dir));
+}
+
+
+/***********************************************************************//**
+ * @brief Return azimuth angle of sky direction for pointing in radians
+ *
+ * @param[in] ipt Pointing index.
+ * @param[in] dir Sky direction.
+ * @return Azimuth angle (radians).
+ *
+ * Returns azimuth angle of sky direction for pointing in radians.
+ ***************************************************************************/
+inline
+double GSPIResponse::azimuth(const int& ipt, const GSkyDir& dir) const
+{
+    double azimuth = m_posang[ipt] - m_spix[ipt].posang(dir);
+    if (azimuth < 0.0) {
+        azimuth += gammalib::twopi;
+    }
+    return (azimuth);
 }
 
 #endif /* GSPIRESPONSE_HPP */
