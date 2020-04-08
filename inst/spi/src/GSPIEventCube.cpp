@@ -667,6 +667,38 @@ const std::string& GSPIEventCube::ptid(const int& ipt) const
 
 
 /***********************************************************************//**
+ * @brief Return instrument direction
+ *
+ * @param[in] ipt Pointing index.
+ * @param[in] idet Detector index.
+ * @return Instrument direction.
+ *
+ * @exception GException::out_of_range
+ *            Invalid pointing or detector index
+ *
+ * Returns the instrument direction for the specified pointing and detector
+ * index.
+ ***************************************************************************/
+const GSPIInstDir& GSPIEventCube::dir(const int& ipt, const int& idet) const
+{
+    // Optionally check if the pointing index is valid
+    #if defined(G_RANGE_CHECK)
+    if (ipt < 0 || ipt >= m_num_pt) {
+        throw GException::out_of_range(G_PTID, "Invalid pointing index",
+                                       ipt, m_num_pt);
+    }
+    if (idet < 0 || idet >= m_num_det) {
+        throw GException::out_of_range(G_PTID, "Invalid detector index",
+                                       idet, m_num_det);
+    }
+    #endif
+
+    // Return
+    return (m_dir[ipt*m_num_det+idet]);
+}
+
+
+/***********************************************************************//**
  * @brief Print INTEGRAL/SPI event cube information
  *
  * @param[in] chatter Chattiness.

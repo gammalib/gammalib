@@ -88,6 +88,7 @@ public:
     double             model_counts(const int& index) const;
     int                models(void) const;
     const std::string& ptid(const int& ipt) const;
+    const GSPIInstDir& dir(const int& ipt, const int& idet) const;
 
 protected:
     // Protected methods
