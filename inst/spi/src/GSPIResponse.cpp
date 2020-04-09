@@ -30,6 +30,7 @@
 #endif
 #include <string>
 #include <typeinfo>
+#include <algorithm>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GEbounds.hpp"
