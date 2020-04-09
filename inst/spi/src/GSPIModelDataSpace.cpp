@@ -1290,7 +1290,14 @@ void GSPIModelDataSpace::setup_ebin(GSPIEventCube*            cube,
                                     std::vector<int>*         indices,
                                     std::vector<std::string>* names)
 {
-    // TODO: implement "ebin" method
+    // Get number of detectors
+    int neng = indices->size();
+
+    // Setup index vector
+    for (int ieng = 0; ieng < neng; ++ieng) {
+        (*indices)[ieng] = ieng;
+        names->push_back("E" + gammalib::str(ieng, "%3.3d"));
+    }
 
     // Return
     return;
