@@ -415,7 +415,7 @@ std::string GSPIObservation::print(const GChatter& chatter) const
         if (reduced_chatter > SILENT) {
 
             // Append response
-            //result.append("\n"+m_response.print(reduced_chatter));
+            result.append("\n"+m_response.print(reduced_chatter));
 
             // Append events
             if (m_events != NULL) {
