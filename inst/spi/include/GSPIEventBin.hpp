@@ -91,6 +91,7 @@ public:
     const double& ontime(void) const;
     const double& livetime(void) const;
     const int&    index(void) const;
+    const int&    ipt(void) const;
     const int&    idir(void) const;
     const int&    iebin(void) const;
 
@@ -103,6 +104,7 @@ protected:
     // Protected members
     bool           m_alloc;      //!< Signals proper memory allocation
     int            m_index;      //!< Dataspace index
+    int            m_ipt;        //!< Pointing index
     int            m_idir;       //!< Direction index
     int            m_iebin;      //!< Energy bin index
     int            m_num_models; //!< Number of models in bin
@@ -252,6 +254,20 @@ inline
 const int& GSPIEventBin::index(void) const
 {
     return (m_index);
+}
+
+
+/***********************************************************************//**
+ * @brief Return event bin pointing index
+ *
+ * @return Event bin pointing index
+ *
+ * Returns the event bin pointing index in the event cube.
+ ***************************************************************************/
+inline
+const int& GSPIEventBin::ipt(void) const
+{
+    return (m_ipt);
 }
 
 

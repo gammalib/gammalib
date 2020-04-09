@@ -263,6 +263,7 @@ void GSPIEventBin::init_members(void)
     // Allocate members
     m_alloc      = true;
     m_index      = -1;  // Signals that event bin does not correspond to cube
+    m_ipt        = -1;  // Signals that event bin does not correspond to cube
     m_idir       = -1;  // Signals that event bin does not correspond to cube
     m_iebin      = -1;  // Signals that event bin does not correspond to cube
     m_num_models =  0;  // No models in event bin
@@ -300,6 +301,7 @@ void GSPIEventBin::copy_members(const GSPIEventBin& bin)
 
     // Copy non-pointer members
     m_index      = bin.m_index;
+    m_ipt        = bin.m_ipt;
     m_idir       = bin.m_idir;
     m_iebin      = bin.m_iebin;
     m_num_models = bin.m_num_models;

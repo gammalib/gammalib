@@ -1437,6 +1437,7 @@ void GSPIEventCube::init_bin(void)
     // Prepare event bin
     m_bin.free_members();
     m_bin.m_index      = 0;     //!< Set by set_bin method
+    m_bin.m_ipt        = 0;     //!< Set by set_bin method
     m_bin.m_idir       = 0;     //!< Set by set_bin method
     m_bin.m_iebin      = 0;     //!< Set by set_bin method
     m_bin.m_num_models = m_num_sky + m_num_bgm;
@@ -1482,6 +1483,7 @@ void GSPIEventCube::set_bin(const int& index)
     // Set indices
     m_bin.m_index = index;
     m_bin.m_idir  = index / m_num_ebin;
+    m_bin.m_ipt   = m_bin.m_idir / m_num_det;
     m_bin.m_iebin = index % m_num_ebin;
 
     // Set GSPIEventBin pointers
