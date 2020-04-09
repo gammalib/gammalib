@@ -91,6 +91,8 @@ public:
     const double& ontime(void) const;
     const double& livetime(void) const;
     const int&    index(void) const;
+    const int&    idir(void) const;
+    const int&    iebin(void) const;
 
 protected:
     // Protected methods
@@ -250,6 +252,34 @@ inline
 const int& GSPIEventBin::index(void) const
 {
     return (m_index);
+}
+
+
+/***********************************************************************//**
+ * @brief Return event bin direction index
+ *
+ * @return Event bin direction index
+ *
+ * Returns the event bin instrument direction index in the event cube.
+ ***************************************************************************/
+inline
+const int& GSPIEventBin::idir(void) const
+{
+    return (m_idir);
+}
+
+
+/***********************************************************************//**
+ * @brief Return event bin energy index
+ *
+ * @return Event bin energy index
+ *
+ * Returns the event bin energy index in the event cube.
+ ***************************************************************************/
+inline
+const int& GSPIEventBin::iebin(void) const
+{
+    return (m_iebin);
 }
 
 #endif /* GSPIEVENTBIN_HPP */

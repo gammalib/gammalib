@@ -59,6 +59,8 @@ public:
     const double& ontime(void) const;
     const double& livetime(void) const;
     const int&    index(void) const;
+    const int&    idir(void) const;
+    const int&    iebin(void) const;
 };
 
 
