@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-17 February 2020
+9 April 2020
 
 
 1. Introduction
@@ -12,7 +12,7 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- none
+- GResponseCache
 
 The following classes have been removed:
 - GCTAResponseCache::ndirs()
@@ -49,7 +49,7 @@ The following methods have been removed:
 - none
 
 The following methods have been renamed:
-- none
+- GInstDir::hash() - Returns a cached value
 
 The arguments for the following methods have been changed:
 - GTime::utc(int&) - Add optional precision value
@@ -99,6 +99,12 @@ None
 
 10. Observation module
 ----------------------
+The GResponseCache class was added as a copy of GCTAResponseCache to implement
+a generic response cache for response computation.
+
+An GInstDir::hash() method was added that returns a unique double precision
+value for every class instance that can be used for response caching.
+
 Add GObservations::npred() methods that compute the number of predicted events
 for a model with a given name or for a given reference to a model. Optionally
 an instrument string can be passed so that the number of predicted events are

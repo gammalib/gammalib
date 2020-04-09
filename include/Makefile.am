@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for include module                                            #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -148,6 +148,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GPhases.hpp \
                      GInstDir.hpp \
                      GResponse.hpp \
+                     GResponseCache.hpp \
                      GPhotons.hpp \
                      GPhoton.hpp \
                      GSource.hpp \
