@@ -67,6 +67,27 @@ GSkyDir::GSkyDir(void)
 
 
 /***********************************************************************//**
+ * @brief Vector constructor
+ *
+ * @param[in] vector Sky vector.
+ *
+ * Constructs a sky direction from a 3-element celestial vector. See the
+ * celvector() method for more information.
+ ***************************************************************************/
+GSkyDir::GSkyDir(const GVector& vector)
+{
+    // Initialise members
+    init_members();
+
+    // Set sky direction from vector
+    celvector(vector);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] dir Sky direction.

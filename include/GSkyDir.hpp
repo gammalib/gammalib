@@ -68,6 +68,7 @@ class GSkyDir : public GBase {
 public:
     // Constructors and destructors
     GSkyDir(void);
+    explicit GSkyDir(const GVector& vector);
     GSkyDir(const GSkyDir& dir);
     virtual ~GSkyDir(void);
 
