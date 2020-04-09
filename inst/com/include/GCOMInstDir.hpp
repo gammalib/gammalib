@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMInstDir.hpp - COMPTEL instrument direction class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,7 @@ public:
     virtual void         clear(void);
     virtual GCOMInstDir* clone(void) const;
     virtual std::string  classname(void) const;
+    virtual double       hash(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -83,6 +84,22 @@ inline
 std::string GCOMInstDir::classname(void) const
 {
     return ("GCOMInstDir");
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+inline
+double GCOMInstDir::hash(void) const
+{
+    double hash = m_dir.ra_deg() + m_dir.dec_deg() * 1.0e2 +
+                  m_phibar * 1.0e4;
+    return hash;
 }
 
 

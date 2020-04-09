@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAInstDir.i - CTA instrument direction class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,9 +46,10 @@ public:
     virtual ~GCTAInstDir(void);
 
     // Implemented pure virtual base class methods
-    void         clear(void);
-    GCTAInstDir* clone(void) const;
-    std::string  classname(void) const;
+    virtual void         clear(void);
+    virtual GCTAInstDir* clone(void) const;
+    virtual std::string  classname(void) const;
+    virtual double       hash(void) const;
 
     // Other methods
     void           dir(const GSkyDir& dir);

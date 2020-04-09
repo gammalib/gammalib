@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAInstDir.hpp - CTA instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,6 +74,7 @@ public:
     virtual void         clear(void);
     virtual GCTAInstDir* clone(void) const;
     virtual std::string  classname(void) const;
+    virtual double       hash(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -114,6 +115,21 @@ inline
 std::string GCTAInstDir::classname(void) const
 {
     return ("GCTAInstDir");
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+inline
+double GCTAInstDir::hash(void) const
+{
+    double hash = m_dir.ra_deg() + m_dir.dec_deg() * 1.0e2;
+    return hash;
 }
 
 

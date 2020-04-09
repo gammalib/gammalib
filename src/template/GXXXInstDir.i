@@ -45,6 +45,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void         clear(void);
     virtual GXXXInstDir* clone(void) const;
+    virtual double       hash(void) const;
     virtual std::string  classname(void) const;
 
     // Other methods

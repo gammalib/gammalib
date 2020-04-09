@@ -59,6 +59,7 @@ public:
     virtual void         clear(void);
     virtual GXXXInstDir* clone(void) const;
     virtual std::string  classname(void) const;
+    virtual double       hash(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -81,6 +82,22 @@ inline
 std::string GXXXInstDir::classname(void) const
 {
     return ("GXXXInstDir");
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+inline
+double GInstDir::hash(void) const
+{
+    // TODO: Remplace by a reasonable hash algorithm, assuring that values
+    // are comprised between 0 and 1e6
+    return 12345.67;
 }
 
 #endif /* GXXXINSTDIR_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GMWLInstDir.hpp - Multi-wavelength instrument direction class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,10 +53,11 @@ public:
     GMWLInstDir& operator= (const GMWLInstDir& dir);
 
     // Methods
-    void         clear(void);
-    GMWLInstDir* clone(void) const;
-    std::string  classname(void) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;
+    virtual void         clear(void);
+    virtual GMWLInstDir* clone(void) const;
+    virtual std::string  classname(void) const;
+    virtual double       hash(void) const;
+    virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -75,6 +76,20 @@ inline
 std::string GMWLInstDir::classname(void) const
 {
     return ("GMWLInstDir");
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+inline
+double GMWLInstDir::hash(void) const
+{
+    return 41.0;
 }
 
 #endif /* GMWLINSTDIR_HPP */

@@ -61,6 +61,7 @@ public:
     virtual void         clear(void);
     virtual GSPIInstDir* clone(void) const;
     virtual std::string  classname(void) const;
+    virtual double       hash(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -91,6 +92,22 @@ std::string GSPIInstDir::classname(void) const
 {
     return ("GSPIInstDir");
 }
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+inline
+double GSPIInstDir::hash(void) const
+{
+    double hash = m_dir.ra_deg() + m_dir.dec_deg() * 1.0e2 + m_detid * 1.0e4;
+    return hash;
+}
+
 
 /***********************************************************************//**
  * @brief Set pointing direction
