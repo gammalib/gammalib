@@ -45,6 +45,7 @@ class GModelSky;
 class GEbounds;
 class GSPIObservation;
 class GSPIEventCube;
+class GSPIEventBin;
 
 /* __ Constants __________________________________________________________ */
 
@@ -91,6 +92,9 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other Methods
+    double irf(const GSkyDir&      srcDir,
+               const GSPIEventBin& bin,
+               const int&          ireg) const;
     void   set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
     void   rspname(const GFilename& rspname);
     double zenith(const int& ipt, const GSkyDir& dir) const;
@@ -119,20 +123,27 @@ private:
                        const double& emax) const;
 
     // Private data members
-    GFilename        m_rspname;    //!< File name of response group
-    std::vector<int> m_detids;     //!< Vector of detector IDs
-    GNodeArray       m_energies;   //!< Node array of IRF energies
-    GEbounds         m_ebounds;    //!< Energy bounaries of IRF
-    GSkyMap          m_irfs;       //!< IRFs stored as sky map
-    double           m_dlogE;      //!< Logarithmic energy step for IRF band
-    double           m_gamma;      //!< Power-law spectral index for IRF band
-    double           m_max_zenith; //!< Maximum zenith angle (radians)
-    double           m_exp;        //!< Non-linear IRF
+    GFilename            m_rspname;    //!< File name of response group
+    std::vector<int>     m_detids;     //!< Vector of detector IDs
+    GNodeArray           m_energies;   //!< Node array of IRF energies
+    GEbounds             m_ebounds;    //!< Energy bounaries of IRF
+    GSkyMap              m_irfs;       //!< IRFs stored as sky map
+    double               m_dlogE;      //!< Logarithmic energy step for IRF band
+    double               m_gamma;      //!< Power-law spectral index for IRF band
 
     // Private cache
-    std::vector<GSkyDir> m_spix;   //!< SPI pointing direction
-    std::vector<double>  m_posang; //!< Position angle of Y axis (radians)
-
+    std::vector<GSkyDir> m_spix;         //!< SPI pointing direction
+    std::vector<double>  m_posang;       //!< Position angle of Y axis (radians)
+    mutable bool         m_has_wcs;      //!< Has WCS information
+    mutable double       m_wcs_xmin;     //!< Minimum X value (radians)
+    mutable double       m_wcs_ymin;     //!< Minimum Y value (radians)
+    mutable double       m_wcs_xmax;     //!< Maximum X value (radians)
+    mutable double       m_wcs_ymax;     //!< Maximum Y value (radians)
+    mutable double       m_wcs_xbin;     //!< X value bin size (radians)
+    mutable double       m_wcs_ybin;     //!< Y value bin size (radians)
+    mutable double       m_wcs_xpix_max; //!< Maximum X pixel index
+    mutable double       m_wcs_ypix_max; //!< Maximum Y pixel index
+    mutable double       m_max_zenith;   //!< Maximum zenith angle (radians)
 };
 
 

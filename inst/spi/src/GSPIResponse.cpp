@@ -45,6 +45,7 @@
 #include "GSPIResponse.hpp"
 #include "GSPIObservation.hpp"
 #include "GSPIEventCube.hpp"
+#include "GSPIEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF           "GSPIResponse::irf(GEvent&, GSource&, GObservation&)"
@@ -52,6 +53,7 @@
                                                              "GObservation&)"
 #define G_EBOUNDS                           "GSPIResponse::ebounds(GEnergy&)"
 #define G_SET                 "GSPIResponse::set(const GSPIObservation& obs)"
+#define G_LOAD_IRF                       "GSPIResponse::load_irf(GFilename&)"
 #define G_LOAD_IRFS                           "GSPIResponse::load_irfs(int&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -238,40 +240,165 @@ GSPIResponse* GSPIResponse::clone(void) const
  *
  * @todo Write down formula
  * @todo Describe in detail how the response is computed.
- * @todo Implement method.
  ***************************************************************************/
 double GSPIResponse::irf(const GEvent&       event,
                          const GPhoton&      photon,
                          const GObservation& obs) const
 {
-    // Extract INTEGRAL/SPI observation
-    const GSPIObservation* observation = dynamic_cast<const GSPIObservation*>(&obs);
-    if (observation == NULL) {
-        std::string cls = std::string(typeid(&obs).name());
-        std::string msg = "Observation of type \""+cls+"\" is not an INTEGRAL/SPI "
-                          "observation. Please specify an INTEGRAL/SPI observation "
-                          "as argument.";
-        throw GException::invalid_argument(G_IRF, msg);
-    }
-
-    // TODO: Now comes the real magic, this is your job !!!
-
     // Initialise IRF
     double irf = 0.0;
 
-    // Compile option: Check for NaN/Inf
-    // TODO: Add any relevant information that may help you to debug the
-    // response code. You want to make sure that any NaN is signalled.
-    // This can be switched off upon configuration.
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GSPIResponse::irf:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (irf=" << irf;
-        std::cout << ")";
-        std::cout << std::endl;
+    // Extract INTEGRAL/SPI observation
+    const GSPIObservation* spi_obs = dynamic_cast<const GSPIObservation*>(&obs);
+    if (spi_obs == NULL) {
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not an "
+                          "INTEGRAL/SPI observation. Please specify an "
+                          "INTEGRAL/SPI observation as argument.";
+        throw GException::invalid_argument(G_IRF, msg);
     }
-    #endif
+
+    // Extract INTEGRAL/SPI event cube
+    const GSPIEventCube* cube = dynamic_cast<const GSPIEventCube*>(spi_obs->events());
+    if (cube == NULL) {
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "INTEGRAL/SPI observation does not contain a valid "
+                          "event cube. Please specify an observation with an "
+                          "event cube as argument.";
+        throw GException::invalid_argument(G_IRF, msg);
+    }
+
+    // Extract INTEGRAL/SPI event bin
+    const GSPIEventBin* bin = dynamic_cast<const GSPIEventBin*>(&event);
+    if (bin == NULL) {
+        std::string cls = std::string(typeid(&event).name());
+        std::string msg = "Event of type \""+cls+"\" is  not an INTEGRAL/SPI "
+                          "event. Please specify an INTEGRAL/SPI event as "
+                          "argument.";
+        throw GException::invalid_argument(G_IRF, msg);
+    }
+
+    // Continue only if livetime for event is positive
+    if (bin->livetime() > 0.0) {
+
+        // Get energy bins of event and photon. Since only the photo peak
+        // response is supported so far, both indices need to be identical.
+        // Continue only if this is the case.
+        if (cube->ebounds().index(photon.energy()) == bin->iebin()) {
+
+            // Get IRF value for photo peak
+            irf = this->irf(photon.dir(), *bin, 0);
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+                std::cout << "*** ERROR: GSPIResponse::irf:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (irf=" << irf;
+                std::cout << ")";
+                std::cout << std::endl;
+            }
+            #endif
+
+        } // endif: photon energy in same energy bin as event energy
+
+    } // endif: livetime of event was positive
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of INTEGRAL/SPI instrument response for sky direction
+ *        and event bin
+ *
+ * @param[in] srcDir Sky direction.
+ * @param[in] bin INTEGRAL/SPI event bin.
+ * @param[in] ireg IRF region (0: photo peak).
+ * @return Instrument response $\f(cm^2 sr^{-1})$\f
+ *
+ * Returns the instrument response function for a given sky direction and
+ * event bin. The value of the IRF is bilinearly interpolated from the
+ * pre-computed IRFs cube stored in the class and multiplied with the
+ * livetime of the event bin.
+ ***************************************************************************/
+double GSPIResponse::irf(const GSkyDir&      srcDir,
+                         const GSPIEventBin& bin,
+                         const int&          ireg) const
+{
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Convert sky direction to zenith angle. Continue only is zenith angle
+    // is below maximum zenith angle
+    double zenith  = this->zenith(bin.ipt(),  srcDir);
+    if (zenith < m_max_zenith) {
+
+        // Convert sky direction to azimuth angle
+        double azimuth = this->azimuth(bin.ipt(), srcDir);
+
+        // Compute pixel
+        double xpix = (zenith * std::cos(azimuth) - m_wcs_xmin) / m_wcs_xbin;
+        double ypix = (zenith * std::sin(azimuth) - m_wcs_ymin) / m_wcs_ybin;
+
+        // Continue only if pixel is within IRF
+        if (xpix > 0.0 && xpix < m_wcs_xpix_max &&
+            ypix > 0.0 && ypix < m_wcs_ypix_max) {
+
+            // Get number of pixels in X direction
+            int nx   = m_irfs.nx();
+            int ndet = m_irfs.shape()[0];
+            int nreg = m_irfs.shape()[1];
+
+            // Get IRF detector for event
+            int idet = irf_detid(bin.dir().detid());
+            int ieng = bin.iebin();
+
+            // Get map
+            int map  = idet + (ireg + ieng * nreg) * ndet;
+
+            // Get 4 nearest neighbours
+            int ix_left   = int(xpix);
+            int ix_right  = ix_left + 1;
+            int iy_top    = int(ypix);
+            int iy_bottom = iy_top  + 1;
+
+            // Get weighting factors
+            double wgt_right  = xpix - double(ix_left);
+            double wgt_left   = 1.0  - wgt_right;
+            double wgt_bottom = ypix - double(iy_top);
+            double wgt_top    = 1.0  - wgt_bottom;
+
+            // Get indices of 4 nearest neighbours
+            int inx_1 = ix_left  + iy_top    * nx;
+            int inx_2 = ix_right + iy_top    * nx;
+            int inx_3 = ix_left  + iy_bottom * nx;
+            int inx_4 = ix_right + iy_bottom * nx;
+
+            // Get weights of 4 nearest neighbours
+            double wgt_1 = wgt_left  * wgt_top;
+            double wgt_2 = wgt_right * wgt_top;
+            double wgt_3 = wgt_left  * wgt_bottom;
+            double wgt_4 = wgt_right * wgt_bottom;
+
+            // Compute IRF
+            irf  = m_irfs(inx_1, map) * wgt_1;
+            irf += m_irfs(inx_2, map) * wgt_2;
+            irf += m_irfs(inx_3, map) * wgt_3;
+            irf += m_irfs(inx_4, map) * wgt_4;
+
+            // Multiply IRF with livetime
+            irf *= bin.livetime();
+
+            // Make sure that IRF does not get negative
+            if (irf < 0.0) {
+                irf = 0.0;
+            }
+
+        } // endif: zenith angle was valid
+
+    } // endif: pixel was within IRF
 
     // Return IRF value
     return irf;
@@ -398,6 +525,7 @@ void GSPIResponse::set(const GSPIObservation& obs, const GEnergy& energy)
     m_energies.clear();
     m_ebounds.clear();
     m_irfs.clear();
+    m_has_wcs = false;
 
     // Continue only if the observation contains an event cube
     const GSPIEventCube* cube = dynamic_cast<const GSPIEventCube*>(obs.events());
@@ -590,12 +718,26 @@ std::string GSPIResponse::print(const GChatter& chatter) const
         result.append(m_rspname.url());
         result.append("\n"+gammalib::parformat("Response map pixels"));
         result.append(gammalib::str(nx)+" * "+gammalib::str(ny));
+        result.append("\n"+gammalib::parformat("X axis range"));
+        result.append("["+gammalib::str(m_wcs_xmin * gammalib::rad2deg));
+        result.append(","+gammalib::str(m_wcs_xmax * gammalib::rad2deg));
+        result.append("] deg");
+        result.append("\n"+gammalib::parformat("Y axis range"));
+        result.append("["+gammalib::str(m_wcs_ymin * gammalib::rad2deg));
+        result.append(","+gammalib::str(m_wcs_ymax * gammalib::rad2deg));
+        result.append("] deg");
+        result.append("\n"+gammalib::parformat("Maximum zenith angle"));
+        result.append(gammalib::str(m_max_zenith * gammalib::rad2deg)+" deg");
         result.append("\n"+gammalib::parformat("Number of detectors"));
         result.append(gammalib::str(ndet));
         result.append("\n"+gammalib::parformat("Number of regions"));
         result.append(gammalib::str(nreg));
         result.append("\n"+gammalib::parformat("Number of energies"));
         result.append(gammalib::str(neng));
+        result.append("\n"+gammalib::parformat("Continuum IRF gamma"));
+        result.append(gammalib::str(m_gamma));
+        result.append("\n"+gammalib::parformat("Continnum IRF log(E) step"));
+        result.append(gammalib::str(m_dlogE));
 
     } // endif: chatter was not silent
 
@@ -621,14 +763,22 @@ void GSPIResponse::init_members(void)
     m_energies.clear();
     m_ebounds.clear();
     m_irfs.clear();
-    m_dlogE      =   0.03;
-    m_gamma      =   2.0;
-    m_max_zenith = 180.0 * gammalib::deg2rad;
-    m_exp        =   1.0;
+    m_dlogE = 0.03;
+    m_gamma = 2.0;
 
     // Initialise cache
     m_spix.clear();
     m_posang.clear();
+    m_has_wcs      = false;
+    m_wcs_xmin     = 0.0;
+    m_wcs_ymin     = 0.0;
+    m_wcs_xmax     = 0.0;
+    m_wcs_ymax     = 0.0;
+    m_wcs_xbin     = 0.0;
+    m_wcs_ybin     = 0.0;
+    m_wcs_xpix_max = 0.0;
+    m_wcs_ypix_max = 0.0;
+    m_max_zenith   = 180.0 * gammalib::deg2rad;
 
     // Return
     return;
@@ -643,19 +793,27 @@ void GSPIResponse::init_members(void)
 void GSPIResponse::copy_members(const GSPIResponse& rsp)
 {
     // Copy members
-    m_rspname    = rsp.m_rspname;
-    m_detids     = rsp.m_detids;
-    m_energies   = rsp.m_energies;
-    m_ebounds    = rsp.m_ebounds;
-    m_irfs       = rsp.m_irfs;
-    m_dlogE      = rsp.m_dlogE;
-    m_gamma      = rsp.m_gamma;
-    m_max_zenith = rsp.m_max_zenith;
-    m_exp        = rsp.m_exp;
+    m_rspname  = rsp.m_rspname;
+    m_detids   = rsp.m_detids;
+    m_energies = rsp.m_energies;
+    m_ebounds  = rsp.m_ebounds;
+    m_irfs     = rsp.m_irfs;
+    m_dlogE    = rsp.m_dlogE;
+    m_gamma    = rsp.m_gamma;
 
     // Copy cache
-    m_spix   = rsp.m_spix;
-    m_posang = rsp.m_posang;
+    m_spix         = rsp.m_spix;
+    m_posang       = rsp.m_posang;
+    m_has_wcs      = rsp.m_has_wcs;
+    m_wcs_xmin     = rsp.m_wcs_xmin;
+    m_wcs_ymin     = rsp.m_wcs_ymin;
+    m_wcs_xmax     = rsp.m_wcs_xmax;
+    m_wcs_ymax     = rsp.m_wcs_ymax;
+    m_wcs_xbin     = rsp.m_wcs_xbin;
+    m_wcs_ybin     = rsp.m_wcs_ybin;
+    m_wcs_xpix_max = rsp.m_wcs_xpix_max;
+    m_wcs_ypix_max = rsp.m_wcs_ypix_max;
+    m_max_zenith   = rsp.m_max_zenith;
 
     // Return
     return;
@@ -776,8 +934,58 @@ GSkyMap GSPIResponse::load_irf(const GFilename& irfname) const
     int    naxis4 = image->integer("NAXIS4");
     double crval2 = image->real("CRVAL2");
     double crval3 = image->real("CRVAL3");
+    double crpix2 = image->real("CRPIX2");
+    double crpix3 = image->real("CRPIX3");
     double cdelt2 = image->real("CDELT2");
     double cdelt3 = image->real("CDELT3");
+
+    // Derive image limits. Limits are taken at the pixel centres since
+    // we want to use them for bilinear interpolation. This means that
+    // we will throw away half a pixel at the edge of the IRFs.
+    double wcs_xmin     = (crval2 - (crpix2-1.0) * cdelt2) * gammalib::deg2rad;
+    double wcs_ymin     = (crval3 - (crpix3-1.0) * cdelt3) * gammalib::deg2rad;
+    double wcs_xbin     = cdelt2 * gammalib::deg2rad;
+    double wcs_ybin     = cdelt3 * gammalib::deg2rad;
+    double wcs_xmax     = wcs_xmin + double(naxis2-1) * wcs_xbin;
+    double wcs_ymax     = wcs_ymin + double(naxis3-1) * wcs_ybin;
+    double wcs_xpix_max = double(naxis2-1);
+    double wcs_ypix_max = double(naxis3-1);
+
+    // If no image limits exists so far then store them for fast IRF access
+    // that does not depend on the actual IRF projection (we just use here
+    // the sky map as a convient container)
+    if (!m_has_wcs) {
+        m_has_wcs      = true;
+        m_wcs_xmin     = wcs_xmin;
+        m_wcs_ymin     = wcs_ymin;
+        m_wcs_xbin     = wcs_xbin;
+        m_wcs_ybin     = wcs_ybin;
+        m_wcs_xmax     = wcs_xmax;
+        m_wcs_ymax     = wcs_ymax;
+        m_wcs_xpix_max = wcs_xpix_max;
+        m_wcs_ypix_max = wcs_ypix_max;
+    }
+
+    // ... otherwise check if the limits are consistent
+    else {
+        if ((std::abs(wcs_xmin     - m_wcs_xmin)     > 1.0e-6) ||
+            (std::abs(wcs_ymin     - m_wcs_ymin)     > 1.0e-6) ||
+            (std::abs(wcs_xbin     - m_wcs_xbin)     > 1.0e-6) ||
+            (std::abs(wcs_ybin     - m_wcs_ybin)     > 1.0e-6) ||
+            (std::abs(wcs_xmax     - m_wcs_xmax)     > 1.0e-6) ||
+            (std::abs(wcs_ymax     - m_wcs_ymax)     > 1.0e-6) ||
+            (std::abs(wcs_xpix_max - m_wcs_xpix_max) > 1.0e-6) ||
+            (std::abs(wcs_ypix_max - m_wcs_ypix_max) > 1.0e-6)) {
+            std::string msg = "Inconsistent IRFs encountered in file \""+
+                              irfname.url()+"\". Please specify a response "
+                              "group where all IRFs have the same definition.";
+            throw GException::invalid_value(G_LOAD_IRF, msg);
+        }
+    }
+
+    // Set maximum zenith angle
+    m_max_zenith = (std::abs(m_wcs_xmax) > std::abs(m_wcs_ymax)) ?
+                    std::abs(m_wcs_xmax) : std::abs(m_wcs_ymax);
 
     // Compute sky map attributes
     int nmap = naxis1 * naxis4;

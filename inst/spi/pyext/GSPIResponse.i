@@ -62,6 +62,9 @@ public:
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
 
     // Other Methods
+    double irf(const GSkyDir&      srcDir,
+               const GSPIEventBin& bin,
+               const int&          ireg) const;
     void   set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
     void   rspname(const GFilename& rspname);
     double zenith(const int& ipt, const GSkyDir& dir) const;
