@@ -271,6 +271,7 @@ void GSPIEventBin::init_members(void)
     m_energy     = new GEnergy;
     m_counts     = new double;
     m_ontime     = new double;
+    m_livetime   = new double;
     m_size       = new double;
     m_models     = NULL;
 
@@ -304,12 +305,13 @@ void GSPIEventBin::copy_members(const GSPIEventBin& bin)
     m_num_models = bin.m_num_models;
 
     // Copy members by cloning
-    m_dir    = new GSPIInstDir(*bin.m_dir);
-    m_time   = new GTime(*bin.m_time);
-    m_energy = new GEnergy(*bin.m_energy);
-    m_counts = new double(*bin.m_counts);
-    m_ontime = new double(*bin.m_ontime);
-    m_size   = new double(*bin.m_size);
+    m_dir      = new GSPIInstDir(*bin.m_dir);
+    m_time     = new GTime(*bin.m_time);
+    m_energy   = new GEnergy(*bin.m_energy);
+    m_counts   = new double(*bin.m_counts);
+    m_ontime   = new double(*bin.m_ontime);
+    m_livetime = new double(*bin.m_livetime);
+    m_size     = new double(*bin.m_size);
     
     // Copy models
     if (m_num_models > 0) {
@@ -344,23 +346,25 @@ void GSPIEventBin::free_members(void)
 {
     // If memory was allocated then free members now
     if (m_alloc) {
-        if (m_dir    != NULL) delete m_dir;
-        if (m_time   != NULL) delete m_time;
-        if (m_energy != NULL) delete m_energy;
-        if (m_counts != NULL) delete m_counts;
-        if (m_ontime != NULL) delete m_ontime;
-        if (m_size   != NULL) delete m_size;
-        if (m_models != NULL) delete [] m_models;
+        if (m_dir      != NULL) delete m_dir;
+        if (m_time     != NULL) delete m_time;
+        if (m_energy   != NULL) delete m_energy;
+        if (m_counts   != NULL) delete m_counts;
+        if (m_ontime   != NULL) delete m_ontime;
+        if (m_livetime != NULL) delete m_livetime;
+        if (m_size     != NULL) delete m_size;
+        if (m_models   != NULL) delete [] m_models;
     }
 
     // Signal member pointers as free
-    m_dir    = NULL;
-    m_time   = NULL;
-    m_energy = NULL;
-    m_counts = NULL;
-    m_ontime = NULL;
-    m_size   = NULL;
-    m_models = NULL;
+    m_dir      = NULL;
+    m_time     = NULL;
+    m_energy   = NULL;
+    m_counts   = NULL;
+    m_ontime   = NULL;
+    m_livetime = NULL;
+    m_size     = NULL;
+    m_models   = NULL;
 
     // Signal memory de-allocation
     m_alloc = false;

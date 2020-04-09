@@ -1445,6 +1445,7 @@ void GSPIEventCube::init_bin(void)
     m_bin.m_energy     = NULL;  //!< Set by set_bin method
     m_bin.m_counts     = NULL;  //!< Set by set_bin method
     m_bin.m_ontime     = NULL;  //!< Set by set_bin method
+    m_bin.m_livetime   = NULL;  //!< Set by set_bin method
     m_bin.m_size       = NULL;  //!< Set by set_bin method
     m_bin.m_models     = NULL;  //!< Set by set_bin method
 
@@ -1484,13 +1485,14 @@ void GSPIEventCube::set_bin(const int& index)
     m_bin.m_iebin = index % m_num_ebin;
 
     // Set GSPIEventBin pointers
-    m_bin.m_dir    = m_dir    + m_bin.m_idir;
-    m_bin.m_time   = m_time   + m_bin.m_idir;
-    m_bin.m_energy = m_energy + m_bin.m_iebin;
-    m_bin.m_counts = m_counts + m_bin.m_index;
-    m_bin.m_ontime = m_ontime + m_bin.m_idir;
-    m_bin.m_size   = m_size   + m_bin.m_index;
-    m_bin.m_models = m_models + m_bin.m_index * m_bin.m_num_models;
+    m_bin.m_dir      = m_dir      + m_bin.m_idir;
+    m_bin.m_time     = m_time     + m_bin.m_idir;
+    m_bin.m_energy   = m_energy   + m_bin.m_iebin;
+    m_bin.m_counts   = m_counts   + m_bin.m_index;
+    m_bin.m_ontime   = m_ontime   + m_bin.m_idir;
+    m_bin.m_livetime = m_livetime + m_bin.m_idir;
+    m_bin.m_size     = m_size     + m_bin.m_index;
+    m_bin.m_models   = m_models   + m_bin.m_index * m_bin.m_num_models;
 
     // Return
     return;

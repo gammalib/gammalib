@@ -89,6 +89,7 @@ public:
     // Other methods
     const double& model(const int& index) const;
     const double& ontime(void) const;
+    const double& livetime(void) const;
     const int&    index(void) const;
 
 protected:
@@ -108,6 +109,7 @@ protected:
     GEnergy*       m_energy;     //!< Pointer to energy of bin
     double*        m_counts;     //!< Pointer to number of counts
     double*        m_ontime;     //!< Pointer to ontime of bin
+    double*        m_livetime;   //!< Pointer to livetime of bin
     double*        m_size;       //!< Pointer to size of bin
     double*        m_models;     //!< Pointer to models of bin
 };
@@ -220,6 +222,20 @@ inline
 const double& GSPIEventBin::ontime(void) const
 {
     return (*m_ontime);
+}
+
+
+/***********************************************************************//**
+ * @brief Return livetime of event bin
+ *
+ * @return Size of livetime of bin (s)
+ *
+ * Returns the livetime of the event bin.
+ ***************************************************************************/
+inline
+const double& GSPIEventBin::livetime(void) const
+{
+    return (*m_livetime);
 }
 
 

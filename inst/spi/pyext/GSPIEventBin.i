@@ -57,6 +57,8 @@ public:
     // Other methods
     const double& model(const int& index) const;
     const double& ontime(void) const;
+    const double& livetime(void) const;
+    const int&    index(void) const;
 };
 
 
