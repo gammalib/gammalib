@@ -310,15 +310,15 @@ void GSkyDir::celvector(const GVector& vector)
 /***********************************************************************//**
  * @brief Rotate sky direction by zenith and azimuth angle
  *
- * @param[in] phi Azimuth angle (deg).
- * @param[in] theta Zenith angle (deg).
+ * @param[in] phi Azimuth angle (radians).
+ * @param[in] theta Zenith angle (radians).
  *
  * Rotate sky direction by a zenith and azimuth angle given in the system
  * of the sky direction and aligned in celestial coordinates. 
  * The azimuth angle is counted counter clockwise from celestial north
  * (this is identical to the astronomical definition of a position angle).
  ***************************************************************************/
-void GSkyDir::rotate_deg(const double& phi, const double& theta)
+void GSkyDir::rotate(const double& phi, const double& theta)
 {
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb) {
@@ -336,12 +336,10 @@ void GSkyDir::rotate_deg(const double& phi, const double& theta)
     GMatrix rot = (ry * rz).transpose();
 
     // Set up native coordinate vector
-    double phi_rad   = phi   * gammalib::deg2rad;
-    double theta_rad = theta * gammalib::deg2rad;
-    double cos_phi   = std::cos(phi_rad);
-    double sin_phi   = std::sin(phi_rad);
-    double cos_theta = std::cos(theta_rad);
-    double sin_theta = std::sin(theta_rad);
+    double cos_phi   = std::cos(phi);
+    double sin_phi   = std::sin(phi);
+    double cos_theta = std::cos(theta);
+    double sin_theta = std::sin(theta);
     GVector native(-cos_phi*sin_theta, sin_phi*sin_theta, cos_theta);
 
     // Rotate vector into celestial coordinates
@@ -349,6 +347,31 @@ void GSkyDir::rotate_deg(const double& phi, const double& theta)
 
     // Convert vector into sky position
     celvector(dir);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Rotate sky direction by zenith and azimuth angle
+ *
+ * @param[in] phi Azimuth angle (deg).
+ * @param[in] theta Zenith angle (deg).
+ *
+ * Rotate sky direction by a zenith and azimuth angle given in the system
+ * of the sky direction and aligned in celestial coordinates. 
+ * The azimuth angle is counted counter clockwise from celestial north
+ * (this is identical to the astronomical definition of a position angle).
+ ***************************************************************************/
+void GSkyDir::rotate_deg(const double& phi, const double& theta)
+{
+    // Convert phi and theta in radians
+    double phi_rad   = phi   * gammalib::deg2rad;
+    double theta_rad = theta * gammalib::deg2rad;
+
+    // Rotate
+    rotate(phi, theta);
 
     // Return
     return;

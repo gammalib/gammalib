@@ -34,6 +34,7 @@ The following methods have been added:
 - GSkyDir::precess() - Precess sky position to epoch
 - GSkyDir::sun() - Set sky position of Sun
 - GSkyDir::moon() - Set sky position of Moon
+- GSkyDir::rotate() - Rotate sky direction (radians variant)
 - GSkyMap::extract() - Extract section of sky map
 - GModelSpatial::flux() - Extract flux from sky region
 - GCTAObservation::remove_response_cache(string&) - Remove response cache for model

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.i - Sky direction class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     void          lb(const double& l, const double& b);
     void          lb_deg(const double& l, const double& b);
     void          celvector(const GVector& vector);
+    void          rotate(const double& phi, const double& theta);
     void          rotate_deg(const double& phi, const double& theta);
     void          precess(const double& from_epoch, const double& to_epoch);
     void          sun(const GTime& time, const double& epoch = gammalib::epoch2000);
