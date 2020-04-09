@@ -636,7 +636,7 @@ void GModelSpectralGauss::init_members(void)
     m_sigma.unit("MeV");
     m_sigma.scale(1.0);
     m_sigma.value(100.0);       // default: 100.0 MeV
-    m_sigma.min(0.001);         // min:     0.001 MeV
+    m_sigma.min(0.0001);        // min:     0.1 keV
     m_sigma.free();
     m_sigma.gradient(0.0);
     m_sigma.has_grad(false);
