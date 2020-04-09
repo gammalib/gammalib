@@ -279,7 +279,7 @@ void GWcsARC::free_members(void)
  * @brief Setup of projection
  *
  * This method sets up the projection information. The method has been
- * adapted from the wcslib function prj.c::arcset.
+ * adapted from the wcslib function prj.c::arcset (version 7.2).
  *
  *   Given and/or returned:
  *      m_r0      Reset to 180/pi if 0.
@@ -313,7 +313,7 @@ void GWcsARC::prj_set(void) const
     }
     
     // Compute fiducial offset
-    prj_off(0.0, 0.0);
+    prj_off(0.0, 90.0);
     
     // Return
     return;
