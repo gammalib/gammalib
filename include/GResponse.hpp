@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GResponse.hpp - Abstract response base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GBase.hpp"
 #include "GFunction.hpp"
 #include "GTime.hpp"
+#include "GResponseCache.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GEvent;
@@ -84,9 +85,6 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      irf(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const = 0;
     virtual double      nroi(const GModelSky&    model,
                              const GEnergy&      obsEng,
                              const GTime&        obsTime,
@@ -99,6 +97,9 @@ public:
                                  const GEvent&       event,
                                  const GObservation& obs,
                                  const bool&         grad = true) const;
+    virtual double      irf(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const;
 
 protected:
     // Protected methods
@@ -111,6 +112,23 @@ protected:
                      const GTime&        srcTime,
                      const GObservation& obs,
                      const bool&         grad) const;
+
+    // Virtual protected methods
+    virtual double irf_ptsrc(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const;
+    virtual double irf_radial(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
+    virtual double irf_elliptical(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
+    virtual double irf_composite(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const;
 
     // Protected classes
     class edisp_kern : public GFunction {
@@ -136,6 +154,16 @@ protected:
         GTime               m_srcTime; //!< True arrival time
         bool                m_grad;    //!< Gradient flag
     };
+
+    // Protected members
+    bool m_use_irf_cache;   //!< Control usage of irf cache
+    bool m_use_nroi_cache;  //!< Control usage of nroi cache
+
+    // Cache for irf(GEvent&, GSource&, GObservation&) and
+    // nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)
+    // computations
+    mutable GResponseCache m_irf_cache;
+    mutable GResponseCache m_nroi_cache;
 };
 
 #endif /* GRESPONSE_HPP */

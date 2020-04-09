@@ -288,7 +288,7 @@ double GSPIResponse::irf(const GEvent&       event,
         if (cube->ebounds().index(photon.energy()) == bin->iebin()) {
 
             // Get IRF value for photo peak
-            irf = this->irf(photon.dir(), *bin, 0);
+            irf = irf_value(photon.dir(), *bin, 0);
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
@@ -323,9 +323,9 @@ double GSPIResponse::irf(const GEvent&       event,
  * event bin. The value of the IRF is bilinearly interpolated from the
  * pre-computed IRFs cube that is stored in the class.
  ***************************************************************************/
-double GSPIResponse::irf(const GSkyDir&      srcDir,
-                         const GSPIEventBin& bin,
-                         const int&          ireg) const
+double GSPIResponse::irf_value(const GSkyDir&      srcDir,
+                               const GSPIEventBin& bin,
+                               const int&          ireg) const
 {
     // Initialise IRF value
     double irf = 0.0;
@@ -396,56 +396,6 @@ double GSPIResponse::irf(const GSkyDir&      srcDir,
         } // endif: zenith angle was valid
 
     } // endif: pixel was within IRF
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of INTEGRAL/SPI instrument response for a source
- *
- * @param[in] event Event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- * @return Instrument response $\f(cm^2 sr^{-1})$\f
- *
- * @exception GException::feature_not_implemented
- *            Source model is not supported.
- *
- * Returns the instrument response for a given event, source and observation.
- *
- * @todo Implement whatever is needed here.
- ***************************************************************************/
-double GSPIResponse::irf(const GEvent&       event,
-                         const GSource&      source,
-                         const GObservation& obs) const
-{
-    // Initialise IRF value
-    double irf = 0.0;
-
-    // Select IRF depending on the spatial model type
-    switch (source.model()->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            {
-            const GModelSpatialPointSource* src =
-                  static_cast<const GModelSpatialPointSource*>(source.model());
-            GPhoton photon(src->dir(), source.energy(), source.time());
-            irf = this->irf(event, photon, obs);
-            }
-            break;
-        case GMODEL_SPATIAL_RADIAL:
-        case GMODEL_SPATIAL_ELLIPTICAL:
-        case GMODEL_SPATIAL_DIFFUSE:
-            {
-            std::string msg = "Response computation not yet implemented for "
-                              "spatial model type \""+source.model()->type()+"\".";
-            throw GException::feature_not_implemented(G_IRF, msg);
-            }
-            break;
-        default:
-            break;
-    }
 
     // Return IRF value
     return irf;
@@ -776,6 +726,10 @@ void GSPIResponse::init_members(void)
     m_wcs_xpix_max = 0.0;
     m_wcs_ypix_max = 0.0;
     m_max_zenith   = 180.0 * gammalib::deg2rad;
+
+    // Set energy scale for response cache to MeV
+    //m_irf_cache.energy_scale(GEnergy(1.0, "MeV"));
+    //m_nroi_cache.energy_scale(GEnergy(1.0, "MeV"));
 
     // Return
     return;

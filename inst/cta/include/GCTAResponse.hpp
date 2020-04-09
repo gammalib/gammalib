@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAResponse.hpp - CTA response abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -86,45 +86,24 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemeted methods
-    virtual double irf(const GEvent&       event,
-                       const GSource&      source,
-                       const GObservation& obs) const;
     virtual void   remove_response_cache(const std::string& name);
+
+    // Make sure the base class methods are visible. This is required here
+    // since there are different overloaded irf() methods, and not making
+    // the base class methods available would hide the
+    //
+    // double GResponse::irf(const GEvent&       event,
+    //                       const GSource&      source,
+    //                       const GObservation& obs) const
+    //
+    // method.
+    using GResponse::irf;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAResponse& rsp);
     void free_members(void);
-
-    // Pure virtual protected methods
-    virtual double irf_ptsrc(const GEvent&       event,
-                             const GSource&      source,
-                             const GObservation& obs) const = 0;
-    virtual double irf_radial(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const = 0;
-    virtual double irf_elliptical(const GEvent&       event,
-                                  const GSource&      source,
-                                  const GObservation& obs) const = 0;
-    virtual double irf_diffuse(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const = 0;
-
-    // Implemented protected methods
-    virtual double irf_composite(const GEvent&       event,
-                                 const GSource&      source,
-                                 const GObservation& obs) const;
-
-    // Protected members
-    bool m_use_irf_cache;   //!< Control usage of irf cache
-    bool m_use_nroi_cache;  //!< Control usage of nroi cache
-
-    // Cache for irf(GEvent&, GSource&, GObservation&) and
-    // nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)
-    // computations
-    mutable GCTAResponseCache m_irf_cache;
-    mutable GCTAResponseCache m_nroi_cache;
 };
 
 #endif /* GCTARESPONSE_HPP */

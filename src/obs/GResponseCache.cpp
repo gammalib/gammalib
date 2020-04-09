@@ -389,6 +389,7 @@ void GResponseCache::init_members(void)
 {
     // Initialise members
     m_cache.clear();
+    m_energy_scale = 1.0;
 
     // Return
     return;
@@ -403,7 +404,8 @@ void GResponseCache::init_members(void)
 void GResponseCache::copy_members(const GResponseCache& cache)
 {
     // Copy members
-    m_cache = cache.m_cache;
+    m_cache        = cache.m_cache;
+    m_energy_scale = cache.m_energy_scale;
 
     // Return
     return;
@@ -437,12 +439,15 @@ void GResponseCache::free_members(void)
  * where
  * - \f$E_{\rm reco}\f$ is the reconstructued energy in TeV, and
  * - \f$E_{\rm true}\f$ is the true energy in TeV.
+ *
+ * @todo Verify unique encoding for all instruments!!!
  ***************************************************************************/
 double GResponseCache::encode(const GEnergy& ereco,
                               const GEnergy& etrue) const
 {
     // Construct encoded instrument direction and reconstructued energy
-    double encoded = ereco.MeV() + etrue.MeV() * 1.0e2;
+    double encoded = (ereco.MeV() * 1.0e2 + etrue.MeV()) * m_energy_scale;
+    //double encoded = ereco.TeV() * 1.0e2 + etrue.TeV();
 
     // Return encoded value
     return encoded;
@@ -463,7 +468,7 @@ double GResponseCache::encode(const GEnergy& ereco,
  *
  * \f[
  *    {\tt encode} = {\tt dir.hash()} + E_{\rm reco} \times 10^6 +
-                     E_{\rm true} \times 10^8
+ *                   E_{\rm true} \times 10^8
  * \f]
  *
  * where
@@ -472,14 +477,18 @@ double GResponseCache::encode(const GEnergy& ereco,
  * - \f$E_{\rm reco}\f$ is the reconstructued energy in TeV, and
  * - \f$E_{\rm true}\f$ is the true energy in TeV.
  *
- * @todo Use instrument direction encode method
+ * @todo Verify unique encoding for all instruments!!!
  ***************************************************************************/
 double GResponseCache::encode(const GInstDir& dir,
                               const GEnergy&  ereco,
                               const GEnergy&  etrue) const
 {
     // Construct encoded instrument direction and reconstructued energy
-    double encoded = dir.hash() + ereco.MeV() * 1.0e6 + etrue.MeV() * 1.0e8;
+    double encoded = dir.hash()  * 1.0e5 +
+                     (ereco.TeV() * 1.0e2 + etrue.TeV()) * m_energy_scale;
+    //double encoded = dir.hash()  * 1.0e5 +
+    //                 ereco.TeV() * 1.0e2 +
+    //                 etrue.TeV();
 
     // Return encoded value
     return encoded;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.i - Abstract response base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,9 +51,6 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      irf(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const = 0;
     virtual double      nroi(const GModelSky&    model,
                              const GEnergy&      obsEng,
                              const GTime&        obsTime,
@@ -65,6 +62,9 @@ public:
                                  const GEvent&       event,
                                  const GObservation& obs,
                                  const bool&         grad = true) const;
+    virtual double      irf(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const;
 };
 
 

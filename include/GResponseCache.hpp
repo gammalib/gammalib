@@ -69,6 +69,7 @@ public:
     std::string     classname(void) const;
     int             size(void) const;
     bool            is_empty(void) const;
+    void            energy_scale(const GEnergy& energy);
     void            set(const std::string& name,
                         const GEnergy&     ereco,
                         const GEnergy&     etrue,
@@ -102,7 +103,8 @@ protected:
                   const GEnergy&  etrue) const;
 
     // Protected members
-    GResponseCacheName m_cache;
+    GResponseCacheName m_cache;           //<! Response cache
+    double             m_energy_scale;    //<! Energy scale 1/MeV
 };
 
 
@@ -129,6 +131,21 @@ inline
 bool GResponseCache::is_empty(void) const
 {
     return (m_cache.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Set minimum energy of instrument
+ *
+ * @param[in] energy Energy.
+ *
+ * Sets minimum energy of instrument for hash scaling.
+ ***************************************************************************/
+inline
+void GResponseCache::energy_scale(const GEnergy& energy)
+{
+    m_energy_scale = 1.0 / energy.MeV();
+    return;
 }
 
 

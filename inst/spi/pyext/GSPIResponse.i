@@ -52,9 +52,6 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        irf(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,
@@ -62,9 +59,9 @@ public:
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
 
     // Other Methods
-    double irf(const GSkyDir&      srcDir,
-               const GSPIEventBin& bin,
-               const int&          ireg) const;
+    double irf_value(const GSkyDir&      srcDir,
+                     const GSPIEventBin& bin,
+                     const int&          ireg) const;
     void   set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
     void   rspname(const GFilename& rspname);
     double zenith(const int& ipt, const GSkyDir& dir) const;

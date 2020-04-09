@@ -219,7 +219,7 @@ double GXXXResponse::irf(const GEvent&       event,
         throw GException::invalid_argument(G_IRF, msg);
     }
 
-    // TODO: Now comes the teal magic, this is your job !!!
+    // TODO: Now comes the real magic, this is your job !!!
 
     // Initialise IRF
     double irf = 0.0;
@@ -237,56 +237,6 @@ double GXXXResponse::irf(const GEvent&       event,
         std::cout << std::endl;
     }
     #endif
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of [INSTRUMENT] instrument response for a source
- *
- * @param[in] event Event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- * @return Instrument response $\f(cm^2 sr^{-1})$\f
- *
- * @exception GException::feature_not_implemented
- *            Source model is not supported.
- *
- * Returns the instrument response for a given event, source and observation.
- *
- * @todo Implement whatever is needed here.
- ***************************************************************************/
-double GXXXResponse::irf(const GEvent&       event,
-                         const GSource&      source,
-                         const GObservation& obs) const
-{
-    // Initialise IRF value
-    double irf = 0.0;
-
-    // Select IRF depending on the spatial model type
-    switch (source.model()->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            {
-            const GModelSpatialPointSource* src =
-                  static_cast<const GModelSpatialPointSource*>(source.model());
-            GPhoton photon(src->dir(), source.energy(), source.time());
-            irf = this->irf(event, photon, obs);
-            }
-            break;
-        case GMODEL_SPATIAL_RADIAL:
-        case GMODEL_SPATIAL_ELLIPTICAL:
-        case GMODEL_SPATIAL_DIFFUSE:
-            {
-            std::string msg = "Response computation not yet implemented for "
-                              "spatial model type \""+source.model()->type()+"\".";
-            throw GException::feature_not_implemented(G_IRF, msg);
-            }
-            break;
-        default:
-            break;
-    }
 
     // Return IRF value
     return irf;

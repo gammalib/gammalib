@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.cpp - Abstract response base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,10 +39,12 @@
 #include "GPhoton.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GSource.hpp"        // will become obsolete
-#include "GEbounds.hpp"       // will become obsolete
+#include "GSource.hpp"
+#include "GEbounds.hpp"
 #include "GObservation.hpp"
 #include "GModelSky.hpp"
+#include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialComposite.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF_RADIAL               "GResponse::irf_radial(GEvent&, GSource&,"\
@@ -248,6 +250,73 @@ double GResponse::convolve(const GModelSky&    model,
 }
 
 
+/***********************************************************************//**
+ * @brief Return instrument response
+ *
+ * @param[in] event Event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response.
+ *
+ * Returns the instrument response for a given event, source and observation.
+ ***************************************************************************/
+double GResponse::irf(const GEvent&       event,
+                      const GSource&      source,
+                      const GObservation& obs) const
+{
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Set IRF value attributes
+    std::string     name  = obs.id() + "::" + source.name();
+    const GInstDir& dir   = event.dir();
+    const GEnergy&  ereco = event.energy();
+    const GEnergy&  etrue = source.energy();
+
+    // Signal if spatial model has free parameters
+    bool has_free_pars = source.model()->has_free_pars();
+
+    // If the spatial model component has free parameters, or the response
+    // cache should not be used, or the cache does not contain the requested
+    // IRF value then compute the IRF value for the spatial model.
+    if (has_free_pars    ||
+        !m_use_irf_cache ||
+        !m_irf_cache.contains(name, dir, ereco, etrue, &irf)) {
+
+        // Compute IRF for spatial model
+        switch (source.model()->code()) {
+            case GMODEL_SPATIAL_POINT_SOURCE:
+                irf = irf_ptsrc(event, source, obs);
+                break;
+            case GMODEL_SPATIAL_RADIAL:
+                irf = irf_radial(event, source, obs);
+                break;
+            case GMODEL_SPATIAL_ELLIPTICAL:
+                irf = irf_elliptical(event, source, obs);
+                break;
+            case GMODEL_SPATIAL_DIFFUSE:
+                irf = irf_diffuse(event, source, obs);
+                break;
+            case GMODEL_SPATIAL_COMPOSITE:
+                irf = irf_composite(event, source, obs);
+                break;
+            default:
+                break;
+        }
+
+    } // endif: computed spatial model
+
+    // If the spatial model has no free parameters and the response cache
+    // should be used then put the IRF value in the response cache.
+    if (!has_free_pars && m_use_irf_cache) {
+        m_irf_cache.set(name, dir, ereco, etrue, irf);
+    }
+
+    // Return IRF value
+    return irf;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Protected methods                            =
@@ -259,6 +328,12 @@ double GResponse::convolve(const GModelSky&    model,
  ***************************************************************************/
 void GResponse::init_members(void)
 {
+    // Initialize members
+    m_use_irf_cache  = false;   //!< Switched off by default
+    m_use_nroi_cache = false;   //!< Switched off by default
+    m_irf_cache.clear();
+    m_nroi_cache.clear();
+
     // Return
     return;
 }
@@ -271,6 +346,12 @@ void GResponse::init_members(void)
  ***************************************************************************/
 void GResponse::copy_members(const GResponse& rsp)
 {
+    // Copy members
+    m_use_irf_cache  = rsp.m_use_irf_cache;
+    m_use_nroi_cache = rsp.m_use_nroi_cache;
+    m_irf_cache      = rsp.m_irf_cache;
+    m_nroi_cache     = rsp.m_nroi_cache;
+
     // Return
     return;
 }
@@ -283,6 +364,168 @@ void GResponse::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to point source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to point source.
+ *
+ * Returns the instrument response to a point source.
+ ***************************************************************************/
+double GResponse::irf_ptsrc(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const
+{
+    // Get pointer to point source model
+    const GModelSpatialPointSource* src =
+          static_cast<const GModelSpatialPointSource*>(source.model());
+
+    // Setup photon
+    GPhoton photon(src->dir(), source.energy(), source.time());
+
+    // Get IRF
+    double irf = this->irf(event, photon, obs);
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to radial source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to radial source.
+ *
+ * Returns the instrument response to a radial source.
+ *
+ * @todo Implement method
+ ***************************************************************************/
+double GResponse::irf_radial(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Throw exception
+    std::string msg = "Response computation not yet implemented for spatial "
+                      "model type \""+source.model()->type()+"\".";
+    throw GException::feature_not_implemented(G_IRF_RADIAL, msg);
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to elliptical source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to elliptical source.
+ *
+ * Returns the instrument response to a elliptical source.
+ *
+ * @todo Implement method
+ ***************************************************************************/
+double GResponse::irf_elliptical(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Throw exception
+    std::string msg = "Response computation not yet implemented for spatial "
+                      "model type \""+source.model()->type()+"\".";
+    throw GException::feature_not_implemented(G_IRF_ELLIPTICAL, msg);
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to diffuse source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to diffuse source.
+ *
+ * Returns the instrument response to a diffuse source.
+ *
+ * @todo Implement method
+ ***************************************************************************/
+double GResponse::irf_diffuse(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Throw exception
+    std::string msg = "Response computation not yet implemented for spatial "
+                      "model type \""+source.model()->type()+"\".";
+    throw GException::feature_not_implemented(G_IRF_DIFFUSE, msg);
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to composite source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to composite source.
+ *
+ * Returns the instrument response to a specified composite source.
+ ***************************************************************************/
+double GResponse::irf_composite(const GEvent&       event,
+                                const GSource&      source,
+                                const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to composite model
+    const GModelSpatialComposite* model =
+          dynamic_cast<const GModelSpatialComposite*>(source.model());
+
+    // Loop over model components
+    for (int i = 0; i < model->components(); ++i) {
+
+        // Get pointer to spatial component
+        GModelSpatial* spat = const_cast<GModelSpatial*>(model->component(i));
+
+        // Create new GSource object
+        GSource src(source.name(), spat, source.energy(), source.time());
+
+        // Compute irf value
+        irf += this->irf(event, src, obs) * model->scale(i);
+
+    }
+
+    // Divide by number of model components
+    double sum = model->sum_of_scales();
+    if (sum > 0.0) {
+        irf /= sum;
+    }
+
+    // Return IRF value
+    return irf;
 }
 
 

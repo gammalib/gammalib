@@ -128,7 +128,7 @@ std::string GCTAInstDir::classname(void) const
 inline
 double GCTAInstDir::hash(void) const
 {
-    double hash = m_dir.ra_deg() + m_dir.dec_deg() * 1.0e2;
+    double hash = m_dir.ra_deg() * 1.0e3 + m_dir.dec_deg();
     return hash;
 }
 
