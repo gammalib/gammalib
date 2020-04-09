@@ -320,8 +320,7 @@ double GSPIResponse::irf(const GEvent&       event,
  *
  * Returns the instrument response function for a given sky direction and
  * event bin. The value of the IRF is bilinearly interpolated from the
- * pre-computed IRFs cube stored in the class and multiplied with the
- * livetime of the event bin.
+ * pre-computed IRFs cube that is stored in the class.
  ***************************************************************************/
 double GSPIResponse::irf(const GSkyDir&      srcDir,
                          const GSPIEventBin& bin,
@@ -356,7 +355,7 @@ double GSPIResponse::irf(const GSkyDir&      srcDir,
             int ieng = bin.iebin();
 
             // Get map
-            int map  = idet + (ireg + ieng * nreg) * ndet;
+            int map = idet + (ireg + ieng * nreg) * ndet;
 
             // Get 4 nearest neighbours
             int ix_left   = int(xpix);
@@ -387,9 +386,6 @@ double GSPIResponse::irf(const GSkyDir&      srcDir,
             irf += m_irfs(inx_2, map) * wgt_2;
             irf += m_irfs(inx_3, map) * wgt_3;
             irf += m_irfs(inx_4, map) * wgt_4;
-
-            // Multiply IRF with livetime
-            irf *= bin.livetime();
 
             // Make sure that IRF does not get negative
             if (irf < 0.0) {

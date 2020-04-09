@@ -1296,7 +1296,7 @@ void GSPIEventCube::read_dsp(const GFitsTable* dsp)
             for (int iebin = 0; iebin < m_num_ebin; ++iebin, ++index) {
                 m_counts[index]   = counts->real(irow, iebin);
                 m_stat_err[index] = stat_err->real(irow, iebin);
-                m_size[index]     = m_ontime[irow] * m_ewidth[iebin].MeV();
+                m_size[index]     = m_livetime[irow] * m_ewidth[iebin].MeV();
             }
 
         } // endfor: looped over all detectors
