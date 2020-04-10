@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2019 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2020 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,6 +73,8 @@ void TestGObservation::set(void)
            "Test GPhases class");
     append(static_cast<pfunction>(&TestGObservation::test_photons),
            "Test GPhotons class");
+    append(static_cast<pfunction>(&TestGObservation::test_response_cache),
+           "Test GResponseCache class");
     append(static_cast<pfunction>(&TestGObservation::test_observations_optimizer),
            "Test GObservations::likelihood class");
 
@@ -1505,6 +1507,95 @@ void TestGObservation::test_phases(void)
     phases.extend(phases);
     test_value(phases.size(), 4);
     test_assert(!phases.is_empty(), "Test for non-empty GPhases object");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GResponseCache
+ ***************************************************************************/
+void TestGObservation::test_response_cache(void)
+{
+    // Allocate cache
+    GResponseCache cache;
+
+    // Set a few energies
+    GEnergy      eng10(1.0, "MeV");
+    GEnergy      eng12(1.2, "MeV");
+    GEnergy      eng21(2.1, "MeV");
+    GEnergy      eng37(3.7, "MeV");
+    GTestInstDir dir1;
+    GTestInstDir dir2;
+    GTestInstDir dir3;
+    dir1.hash(1);
+    dir2.hash(2);
+    dir3.hash(3);
+
+    // Test empty cache
+    test_assert(cache.is_empty(), "Test that void cache is empty");
+    test_value(cache.size(), 0, "Test void cache size");
+
+    // Add one element and check
+    cache.set("Crab", eng10, eng12, 1010.0);
+    test_assert(!cache.is_empty(), "Test that filled cache is not empty");
+    test_value(cache.size(), 1, "Test filled cache size");
+    bool   flag  = false;
+    double value = 0.0;
+    flag = cache.contains("Crab", eng10, eng12, &value);
+    test_assert(flag, "Test that cache contains Crab/eng10/eng12 element.");
+    test_value(value, 1010.0, 1.0e-6, "Test cache value");
+
+    // Add another element and check
+    cache.set("Crab", dir1, eng10, eng21, 1021.0);
+    test_value(cache.size(), 2, "Test filled cache size");
+    flag = cache.contains("Crab", dir1, eng10, eng21, &value);
+    test_assert(flag, "Test that cache contains Crab/eng10/eng21 element.");
+    test_value(value, 1021.0, 1.0e-6, "Test cache value");
+
+    // Add a few more elements
+    cache.set("Crab", dir1, eng10, eng21, 1021.0); // Was already in, check update
+    cache.set("Crab", dir3, eng10, eng37, 1037.0);
+    cache.set("Crab", dir1, eng12, eng10, 1210.0);
+    cache.set("Crab", dir2, eng12, eng12, 1212.0);
+    cache.set("Crab", dir2, eng12, eng21, 1221.0);
+    cache.set("Crab", dir2, eng12, eng37, 1237.0);
+    cache.set("Vela", dir2, eng10, eng37, 1037.0);
+
+    // Test cache now
+    test_value(cache.size(), 8, "Test filled cache size");
+    flag = cache.contains("Crab", dir1, eng10, eng21, &value);
+    test_assert(flag, "Test that cache contains Crab/eng10/eng21 element.");
+    test_value(value, 1021.0, 1.0e-6, "Test cache value");
+    flag = cache.contains("Crab", dir2, eng12, eng12, &value);
+    test_assert(flag, "Test that cache contains Crab/eng12/eng12 element.");
+    test_value(value, 1212.0, 1.0e-6, "Test cache value");
+    flag = cache.contains("Vela", dir2, eng10, eng37, &value);
+    test_assert(flag, "Test that cache contains Crab/eng10/eng37 element.");
+    test_value(value, 1037.0, 1.0e-6, "Test cache value");
+
+    // Now copy the cache and test the copy
+    GResponseCache copy_cache = cache;
+    test_value(copy_cache.size(), 8, "Test filled copied cache size");
+    flag = copy_cache.contains("Crab", dir2, eng12, eng12, &value);
+    test_assert(flag, "Test that copied cache contains Crab/eng12/eng12 element.");
+    test_value(value, 1212.0, 1.0e-6, "Test copied cache value");
+    flag = copy_cache.contains("Vela", dir2, eng10, eng37, &value);
+    test_assert(flag, "Test that copied cache contains Crab/eng10/eng37 element.");
+    test_value(value, 1037.0, 1.0e-6, "Test copied cache value");
+
+    // Now remove the Crab values and test the remaining cache
+    cache.remove("Crab");
+    test_value(cache.size(), 1, "Test cache size after Crab removal");
+    flag = cache.contains("Vela", dir2, eng10, eng37, &value);
+    test_assert(flag, "Test that cache contains Vela/eng10/eng37 element.");
+    test_value(value, 1037.0, 1.0e-6, "Test cache value");
+
+    // Now clear the cache and test that it is empty
+    cache.clear();
+    test_assert(cache.is_empty(), "Test that emptied cache is empty");
+    test_value(cache.size(), 0, "Test emptied cache size");
 
     // Return
     return;
