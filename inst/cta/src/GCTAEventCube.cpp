@@ -30,7 +30,9 @@
 #endif
 #include "GTools.hpp"
 #include "GFits.hpp"
-#include "GCTALib.hpp"
+#include "GCTAEventCube.hpp"
+#include "GCTATypemaps.hpp"
+#include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GCTAEventCube::naxis(int)"

@@ -33,7 +33,12 @@
 #include "GLog.hpp"
 #include "GObservations.hpp"
 #include "GSkyRegionCircle.hpp"
-#include "GCTALib.hpp"
+#include "GCTATypemaps.hpp"
+#include "GCTACubeExposure.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAResponse.hpp"
+#include "GCTAResponseIrf.hpp"
+#include "GCTAEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FILL_CUBE    "GCTACubeExposure::fill_cube(GCTAObservation&, GLog*)"

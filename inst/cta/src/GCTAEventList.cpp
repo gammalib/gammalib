@@ -43,7 +43,8 @@
 #include "GFitsTableULongCol.hpp"
 #include "GTime.hpp"
 #include "GTimeReference.hpp"
-#include "GCTALib.hpp"
+#include "GCTAEventList.hpp"
+#include "GCTATypemaps.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */

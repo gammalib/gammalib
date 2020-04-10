@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTATypemaps.hpp - GammaLib CTA typemaps                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,5 +38,8 @@ typedef enum {
 /* __ Typemaps ___________________________________________________________ */
 
 /* __ Prototypes _________________________________________________________ */
+
+/* __ CTA specific definitions ___________________________________________ */
+#define G_CTA_MJDREF 51544.5                 //!< Reference of CTA time frame
 
 #endif /* GCTATYPEMAPS_HPP */
