@@ -35,13 +35,16 @@
 #include "GResponseCache.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GMatrix;
 class GEvent;
 class GPhoton;
 class GSource;
+class GSkyDir;
 class GEnergy;
 class GEbounds;
 class GObservation;
 class GModelSky;
+class GModelSpatialRadial;
 
 
 /***********************************************************************//**
@@ -154,10 +157,69 @@ protected:
         GTime               m_srcTime; //!< True arrival time
         bool                m_grad;    //!< Gradient flag
     };
+    class irf_radial_kern_theta : public GFunction {
+    public:
+        irf_radial_kern_theta(const GResponse*           rsp,
+                              const GEvent*              event,
+                              const GObservation*        obs,
+                              const GModelSpatialRadial* model,
+                              const GMatrix*             rot,
+                              const GEnergy*             srcEng,
+                              const GTime*               srcTime,
+                              int                        iter_phi) :
+                              m_rsp(rsp),
+                              m_event(event),
+                              m_obs(obs),
+                              m_model(model),
+                              m_rot(rot),
+                              m_srcEng(srcEng),
+                              m_srcTime(srcTime),
+                              m_iter_phi(iter_phi) { }
+        double eval(const double& phi);
+    protected:
+        const GResponse*           m_rsp;       //!< Response
+        const GEvent*              m_event;     //!< Event
+        const GObservation*        m_obs;       //!< Observation
+        const GModelSpatialRadial* m_model;     //!< Radial model
+        const GMatrix*             m_rot;       //!< Rotation matrix
+        const GEnergy*             m_srcEng;    //!< True photon energy
+        const GTime*               m_srcTime;   //!< Arrival time
+        int                        m_iter_phi;  //!< Iterations in phi
+    };
+    class irf_radial_kern_phi : public GFunction {
+    public:
+        irf_radial_kern_phi(const GResponse*    rsp,
+                            const GEvent*       event,
+                            const GObservation* obs,
+                            const GMatrix*      rot,
+                            const double&       theta,
+                            const GEnergy*      srcEng,
+                            const GTime*        srcTime) :
+                            m_rsp(rsp),
+                            m_event(event),
+                            m_obs(obs),
+                            m_rot(rot),
+                            m_sin_theta(std::sin(theta)),
+                            m_cos_theta(std::cos(theta)),
+                            m_srcEng(srcEng),
+                            m_srcTime(srcTime) { }
+        double eval(const double& phi);
+    protected:
+        const GResponse*    m_rsp;       //!< Response
+        const GEvent*       m_event;     //!< Event
+        const GObservation* m_obs;       //!< Observation
+        const GMatrix*      m_rot;       //!< Rotation matrix
+        double              m_sin_theta; //!< sin(theta)
+        double              m_cos_theta; //!< cos(theta)
+        const GEnergy*      m_srcEng;    //!< True photon energy
+        const GTime*        m_srcTime;   //!< Arrival time
+    };
 
     // Protected members
-    bool m_use_irf_cache;   //!< Control usage of irf cache
-    bool m_use_nroi_cache;  //!< Control usage of nroi cache
+    bool m_use_irf_cache;          //!< Control usage of irf cache
+    bool m_use_nroi_cache;         //!< Control usage of nroi cache
+    int  m_irf_radial_iter_theta;  //!< Radial model integration theta iterations
+    int  m_irf_radial_iter_phi;    //!< Radial model integration phi iterations
 
     // Cache for irf(GEvent&, GSource&, GObservation&) and
     // nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)

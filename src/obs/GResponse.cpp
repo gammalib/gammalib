@@ -30,9 +30,11 @@
 #endif
 #include <string>
 #include <unistd.h>           // access() function
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
-#include "GException.hpp"
+#include "GVector.hpp"
+#include "GMatrix.hpp"
 #include "GIntegral.hpp"
 #include "GResponse.hpp"
 #include "GEvent.hpp"
@@ -44,6 +46,7 @@
 #include "GObservation.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GModelSpatialComposite.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -329,8 +332,12 @@ double GResponse::irf(const GEvent&       event,
 void GResponse::init_members(void)
 {
     // Initialize members
-    m_use_irf_cache  = false;   //!< Switched off by default
-    m_use_nroi_cache = false;   //!< Switched off by default
+    m_use_irf_cache         = true;   //!< Switched on by default
+    m_use_nroi_cache        = true;   //!< Switched on by default
+    m_irf_radial_iter_theta = 7;
+    m_irf_radial_iter_phi   = 7;
+
+    // Clear cache
     m_irf_cache.clear();
     m_nroi_cache.clear();
 
@@ -347,10 +354,12 @@ void GResponse::init_members(void)
 void GResponse::copy_members(const GResponse& rsp)
 {
     // Copy members
-    m_use_irf_cache  = rsp.m_use_irf_cache;
-    m_use_nroi_cache = rsp.m_use_nroi_cache;
-    m_irf_cache      = rsp.m_irf_cache;
-    m_nroi_cache     = rsp.m_nroi_cache;
+    m_use_irf_cache         = rsp.m_use_irf_cache;
+    m_use_nroi_cache        = rsp.m_use_nroi_cache;
+    m_irf_radial_iter_theta = rsp.m_irf_radial_iter_theta;
+    m_irf_radial_iter_phi   = rsp.m_irf_radial_iter_phi;
+    m_irf_cache             = rsp.m_irf_cache;
+    m_nroi_cache            = rsp.m_nroi_cache;
 
     // Return
     return;
@@ -382,11 +391,11 @@ double GResponse::irf_ptsrc(const GEvent&       event,
                             const GObservation& obs) const
 {
     // Get pointer to point source model
-    const GModelSpatialPointSource* src =
+    const GModelSpatialPointSource* model =
           static_cast<const GModelSpatialPointSource*>(source.model());
 
     // Setup photon
-    GPhoton photon(src->dir(), source.energy(), source.time());
+    GPhoton photon(model->dir(), source.energy(), source.time());
 
     // Get IRF
     double irf = this->irf(event, photon, obs);
@@ -415,10 +424,56 @@ double GResponse::irf_radial(const GEvent&       event,
     // Initialise IRF
     double irf = 0.0;
 
-    // Throw exception
-    std::string msg = "Response computation not yet implemented for spatial "
-                      "model type \""+source.model()->type()+"\".";
-    throw GException::feature_not_implemented(G_IRF_RADIAL, msg);
+    // Get pointer to radial model
+    const GModelSpatialRadial* model =
+          static_cast<const GModelSpatialRadial*>(source.model());
+
+    // Get source attributes
+    const GEnergy& srcEng  = source.energy();
+    const GTime&   srcTime = source.time();
+
+    // Set radial integration range
+    double theta_min = 0.0;
+    double theta_max = model->theta_max();
+
+    // Allocate Euler and rotation matrices
+    GMatrix ry;
+    GMatrix rz;
+
+    // Set up rotation matrix to rotate from native model coordinates to
+    // celestial coordinates
+    ry.eulery( model->dir().dec_deg() - 90.0);
+    rz.eulerz(-model->dir().ra_deg());
+    GMatrix rot = (ry * rz).transpose();
+
+    // Setup integration kernel
+    irf_radial_kern_theta integrand(this,
+                                    &event,
+                                    &obs,
+                                    model,
+                                    &rot,
+                                    &srcEng,
+                                    &srcTime,
+                                    m_irf_radial_iter_phi);
+
+    // Integrate over model's radial coordinate
+    GIntegral integral(&integrand);
+    integral.fixed_iter(m_irf_radial_iter_theta);
+
+    // Integrate kernel
+    irf = integral.romberg(theta_min, theta_max, m_irf_radial_iter_theta);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GResponse::irf_radial:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (irf=" << irf;
+        std::cout << ", theta_min=" << theta_min;
+        std::cout << ", theta_max=" << theta_max << ")";
+        std::cout << std::endl;
+    }
+    #endif
 
     // Return IRF value
     return irf;
@@ -701,4 +756,91 @@ double GResponse::edisp_kern::eval(const double& etrue)
 
     // Return value
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Zenith angle integration kernel for radial model
+ *
+ * @param[in] theta Zenith angle (radians).
+ * @return IRF value.
+ *
+ * Integrated the IRF multiplied by the model value for a given zenith angle
+ * over all azimuth angles.
+ ***************************************************************************/
+double GResponse::irf_radial_kern_theta::eval(const double& theta)
+{
+    // Initialise result
+    double irf = 0.0;
+
+    // Continue only for positive zenith angles (otherwise the integral will
+    // be zero)
+    if (theta > 0.0) {
+
+        // Evaluate sky model
+        double model = m_model->eval(theta, *m_srcEng, *m_srcTime);
+
+        // Continue only if model is positive
+        if (model > 0.0) {
+
+            // Set azimuthal integration range
+            double phi_min = 0.0;
+            double phi_max = gammalib::twopi;
+
+            // Setup integration kernel
+            irf_radial_kern_phi integrand(m_rsp,
+                                          m_event,
+                                          m_obs,
+                                          m_rot,
+                                          theta,
+                                          m_srcEng,
+                                          m_srcTime);
+
+            // Setup integration
+            GIntegral integral(&integrand);
+            integral.fixed_iter(m_iter_phi);
+
+            // Integrate over phi
+            irf = integral.romberg(phi_min, phi_max, m_iter_phi) *
+                  model * std::sin(theta);
+
+        } // endif: model was positive
+
+    } // endif: theta was positive
+
+    // Return result
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Azimuth angle integration kernel for radial model
+ *
+ * @param[in] phi Azimuth angle (radians).
+ * @return IRF value.
+ *
+ * Computes the IRF at a given zenith and azimuth angle with respect to a
+ * specified centre.
+ ***************************************************************************/
+double GResponse::irf_radial_kern_phi::eval(const double& phi)
+{
+    // Set up native coordinate vector
+    double  cos_phi = std::cos(phi);
+    double  sin_phi = std::sin(phi);
+    GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
+
+    // Rotate vector into celestial coordinates
+    GVector vector = (*m_rot) * native;
+
+    // Convert vector into sky direction
+    GSkyDir dir(vector);
+
+    // Setup photon
+    GPhoton photon(dir, *m_srcEng, *m_srcTime);
+
+    // Evaluate IRF for photon
+    double irf = m_rsp->irf(*m_event, photon, *m_obs);
+
+    // Return
+    return irf;
 }
