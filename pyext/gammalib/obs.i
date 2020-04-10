@@ -197,6 +197,7 @@
 %include "GPhases.i"
 %include "GResponse.i"
 %include "GResponseCache.i"
+%include "GResponseCacheKey.i"
 %include "GPhoton.i"
 %include "GPhotons.i"
 %include "GSource.i"

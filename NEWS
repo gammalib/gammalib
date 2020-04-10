@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-9 April 2020
+10 April 2020
 
 
 1. Introduction
@@ -13,6 +13,7 @@ made since the last release of GammaLib.
 ---------------------------------
 The following classes have been added:
 - GResponseCache
+- GResponseCacheKey
 
 The following classes have been removed:
 - GCTAResponseCache::ndirs()
@@ -102,8 +103,12 @@ None
 10. Observation module
 ----------------------
 The GResponseCache class was added as a copy of GCTAResponseCache to implement
-a generic response cache for response computation.
+a generic response cache for response computation. The GResponseCacheKey class
+was added to implement the unique key for the response cache. This will avoid
+any ambiguity in the stored response values. The former CTA specific response
+cache was removed (#3202).
 
+TODO*******
 An GInstDir::hash() method was added that returns a unique double precision
 value for every class instance that can be used for response caching.
 

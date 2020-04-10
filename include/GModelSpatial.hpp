@@ -135,15 +135,15 @@ protected:
                             const double            sindist,
                             const double            modrad,
                             const double            cosmodrad) :
-                           m_model(model),
-                           m_reg(reg),
-                           m_srcEng(srcEng),
-                           m_srcTime(srcTime),
-                           m_dist(distance),
-                           m_cosdist(cosdist),
-                           m_sindist(sindist),
-                           m_modrad(modrad),
-                           m_cosmodrad(cosmodrad) { }
+                            m_model(model),
+                            m_reg(reg),
+                            m_srcEng(srcEng),
+                            m_srcTime(srcTime),
+                            m_dist(distance),
+                            m_cosdist(cosdist),
+                            m_sindist(sindist),
+                            m_modrad(modrad),
+                            m_cosmodrad(cosmodrad) { }
         double eval(const double& rho);
     public:
         const GModelSpatial*    m_model;     //!< Spatial model
@@ -165,11 +165,11 @@ protected:
                               const double&           rho,
                               const GEnergy&          srcEng,
                               const GTime&            srcTime) :
-                             m_model(model),
-                             m_reg(reg),
-                             m_rho(rho),
-                             m_srcEng(srcEng),
-                             m_srcTime(srcTime) { }
+                              m_model(model),
+                              m_reg(reg),
+                              m_rho(rho),
+                              m_srcEng(srcEng),
+                              m_srcTime(srcTime) { }
         double eval(const double& omega);
     public:
         const GModelSpatial*    m_model;   //!< Spatial model
