@@ -13,12 +13,9 @@ made since the last release of GammaLib.
 ---------------------------------
 The following classes have been added:
 - GResponseCache
-- GResponseCacheKey
 
 The following classes have been removed:
-- GCTAResponseCache::ndirs()
-- GCTAResponseCache::nerecos()
-- GCTAResponseCache::netrues()
+- GCTAResponseCache
 
 The following classes have been renamed:
 - none
@@ -103,14 +100,16 @@ None
 10. Observation module
 ----------------------
 The GResponseCache class was added as a copy of GCTAResponseCache to implement
-a generic response cache for response computation. The GResponseCacheKey class
-was added to implement the unique key for the response cache. This will avoid
-any ambiguity in the stored response values. The former CTA specific response
-cache was removed (#3202).
+a generic response cache for response computation. The GResponseCache class now
+implements a three-level response cache, with the first level being the name,
+the second being a hash value of the true and measured energies, and the third
+level a hash value of the instrument direction. The hash values are implemented
+as uint64_t 64 Bit unsigned integers. The former CTA specific response cache was
+removed (#3202).
 
-TODO*******
-An GInstDir::hash() method was added that returns a unique double precision
-value for every class instance that can be used for response caching.
+An GInstDir::hash() method was added that returns a unique 64 Bit unsigned
+integer value for every class instance that can be used for response caching
+(#3202).
 
 Add GObservations::npred() methods that compute the number of predicted events
 for a model with a given name or for a given reference to a model. Optionally
@@ -203,6 +202,9 @@ None
 
 20. CTA interface
 -----------------
+Move the GCTAResponseCache class from the CTA module to the observation module
+so that response caching becomes available for all instruments (#3202).
+
 Remove obsolete ndirs(), nerecos() and netrues() methods for GCTAResponseCache
 class (#2893).
 

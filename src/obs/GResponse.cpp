@@ -352,8 +352,8 @@ void GResponse::init_members(void)
     // Initialize members
     m_use_irf_cache         = true;   //!< Switched on by default
     m_use_nroi_cache        = true;   //!< Switched on by default
-    m_irf_radial_iter_theta = 7;
-    m_irf_radial_iter_phi   = 7;
+    m_irf_radial_iter_theta = 6;
+    m_irf_radial_iter_phi   = 6;
 
     // Clear cache
     m_irf_cache.clear();

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                cta.i - Cherenkov Telescope Array module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -281,7 +281,6 @@
 %include "GCTAResponseIrf.i"
 %include "GCTAResponseCube.i"
 %include "GCTAResponseTable.i"
-%include "GCTAResponseCache.i"
 %include "GCTAAeff.i"
 %include "GCTAAeffPerfTable.i"
 %include "GCTAAeffArf.i"

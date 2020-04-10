@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for cta module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2019 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -47,7 +47,6 @@ sources = src/GCTASupport.cpp \
           src/GCTAResponseCube.cpp \
           src/GCTAResponse_helpers.cpp \
           src/GCTAResponseTable.cpp \
-          src/GCTAResponseCache.cpp \
           src/GCTAAeff.cpp \
           src/GCTAAeffPerfTable.cpp \
           src/GCTAAeffArf.cpp \
@@ -106,7 +105,6 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAResponseIrf.hpp \
                      include/GCTAResponseCube.hpp \
                      include/GCTAResponseTable.hpp \
-                     include/GCTAResponseCache.hpp \
                      include/GCTAAeff.hpp \
                      include/GCTAAeffPerfTable.hpp \
                      include/GCTAAeffArf.hpp \

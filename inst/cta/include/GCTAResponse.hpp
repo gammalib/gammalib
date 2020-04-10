@@ -30,7 +30,6 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GResponse.hpp"
-#include "GCTAResponseCache.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 

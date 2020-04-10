@@ -10,8 +10,9 @@ GammaLib 1.7 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* ...
-* ...
+* Support for INTEGRAL/SPI data analysis
+* Response caching for all instruments
+* Support for extended models for all instruments
 
 
 Bug fixes
@@ -27,6 +28,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3202 <https://cta-redmine.irap.omp.eu/issues/3202>`_] -
+  Replace ``GCTAResponseCache`` class by ``GResponseCache`` class.
 * [`3062 <https://cta-redmine.irap.omp.eu/issues/3062>`_] -
   Add ``GObservations::npred()`` methods.
 * [`2990 <https://cta-redmine.irap.omp.eu/issues/2990>`_] -

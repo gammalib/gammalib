@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTALib.hpp - CTA Support Header files                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,7 +48,6 @@
 #include "GCTAResponseIrf.hpp"
 #include "GCTAResponseCube.hpp"
 #include "GCTAResponseTable.hpp"
-#include "GCTAResponseCache.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAAeffPerfTable.hpp"
 #include "GCTAAeffArf.hpp"
