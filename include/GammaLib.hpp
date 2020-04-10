@@ -189,7 +189,6 @@
 #include "GInstDir.hpp"
 #include "GResponse.hpp"
 #include "GResponseCache.hpp"
-#include "GResponseCacheKey.hpp"
 #include "GPhotons.hpp"
 #include "GPhoton.hpp"
 #include "GSource.hpp"

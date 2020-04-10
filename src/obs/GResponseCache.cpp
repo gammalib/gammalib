@@ -224,7 +224,7 @@ void GResponseCache::set(const std::string& name,
                          const double&      value)
 {
     // Get energy identifier
-    uint64_t energy = this->energy(ereco, etrue);
+    uint64_t energy = hash(ereco, etrue);
 
     // Set cache value
     m_cache[name][energy][0] = value;
@@ -253,7 +253,7 @@ void GResponseCache::set(const std::string& name,
                          const double&      value)
 {
     // Get energy and direction identifier
-    uint64_t energy  = this->energy(ereco, etrue);
+    uint64_t energy  = hash(ereco, etrue);
     uint64_t instdir = dir.hash();
 
     // Set cache value
@@ -288,7 +288,7 @@ bool GResponseCache::contains(const std::string& name,
     bool contains = false;
 
     // Get energy identifier
-    uint64_t energy  = this->energy(ereco, etrue);
+    uint64_t energy  = hash(ereco, etrue);
     uint64_t instdir = 0;
 
     // Search for name in cache
@@ -345,7 +345,7 @@ bool GResponseCache::contains(const std::string& name,
     bool contains = false;
 
     // Get energy identifier
-    uint64_t energy  = this->energy(ereco, etrue);
+    uint64_t energy  = hash(ereco, etrue);
     uint64_t instdir = dir.hash();
 
     // Search for name in cache
@@ -489,30 +489,20 @@ void GResponseCache::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Encode reconstructued and true energy
+ * @brief Encode reconstructued and true energy into hash value
  *
  * @param[in] ereco Reconstructed energy.
  * @param[in] etrue True energy.
  * @return Encoded reconstructued and true energy
  *
  * Encodes the reconstructued and true energy in a 64 Bit unsigned integer
- * value. The energy are converted into floating
- 
- single double precision
- * value. The encoding is done using the following formula:
- *
- * \f[
- *    {\tt encode} = E_{\rm reco} + E_{\rm true} \times 10^2
- * \f]
- *
- * where
- * - \f$E_{\rm reco}\f$ is the reconstructued energy in TeV, and
- * - \f$E_{\rm true}\f$ is the true energy in TeV.
- *
- * @todo Verify unique encoding for all instruments!!!
+ * value. The energy are converted into single precision floating point
+ * values and mapped on a 64 Bit unsigned integer value. This provides unique
+ * hash values for all instruments up to the precision of floating point
+ * singles.
  ***************************************************************************/
-uint64_t GResponseCache::energy(const GEnergy&  ereco,
-                                const GEnergy&  etrue) const
+uint64_t GResponseCache::hash(const GEnergy&  ereco,
+                              const GEnergy&  etrue) const
 {
     // Allocate static array to store the two energies as floats
     static float buffer[2];

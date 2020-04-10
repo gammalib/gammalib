@@ -98,7 +98,7 @@ protected:
     void     init_members(void);
     void     copy_members(const GResponseCache& cache);
     void     free_members(void);
-    uint64_t energy(const GEnergy&  ereco, const GEnergy&  etrue) const;
+    uint64_t hash(const GEnergy&  ereco, const GEnergy&  etrue) const;
 
     // Protected members
     GResponseCacheName m_cache;   //<! Response cache
