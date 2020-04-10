@@ -65,6 +65,7 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GSource&      source,
                             const GObservation& obs) const;
+    virtual void        remove_response_cache(const std::string& name);
 };
 
 

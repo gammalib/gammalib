@@ -85,9 +85,6 @@ public:
     virtual void          write(GXmlElement& xml) const = 0;
     virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
 
-    // Implemeted methods
-    virtual void   remove_response_cache(const std::string& name);
-
     // Make sure the base class methods are visible. This is required here
     // since there are different overloaded irf() methods, and not making
     // the base class methods available would hide the

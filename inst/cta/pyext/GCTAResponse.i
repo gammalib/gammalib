@@ -59,10 +59,6 @@ public:
     virtual void          write(GXmlElement& xml) const = 0;
 
     // Implemeted methods
-    virtual double irf(const GEvent&       event,
-                       const GSource&      source,
-                       const GObservation& obs) const;
-    virtual void   remove_response_cache(const std::string& name);
 };
 
 

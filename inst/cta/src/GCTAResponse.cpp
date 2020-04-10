@@ -151,24 +151,6 @@ GCTAResponse& GCTAResponse::operator=(const GCTAResponse& rsp)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Remove response cache for model
- *
- * @param[in] name Model name.
- *
- * Remove response cache for model @p name from response cache.
- ***************************************************************************/
-void GCTAResponse::remove_response_cache(const std::string& name)
-{
-    // Remove model from response caches
-    m_irf_cache.remove(name);
-    m_nroi_cache.remove(name);
-
-    // Return
-    return;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -180,10 +162,6 @@ void GCTAResponse::remove_response_cache(const std::string& name)
  ***************************************************************************/
 void GCTAResponse::init_members(void)
 {
-    // Initialize members
-    m_use_irf_cache  = true;   //!< Switched on by default
-    m_use_nroi_cache = true;   //!< Switched on by default
-
     // Return
     return;
 }

@@ -320,6 +320,24 @@ double GResponse::irf(const GEvent&       event,
 }
 
 
+/***********************************************************************//**
+ * @brief Remove response cache for model
+ *
+ * @param[in] name Model name.
+ *
+ * Remove response cache for model @p name from response cache.
+ ***************************************************************************/
+void GResponse::remove_response_cache(const std::string& name)
+{
+    // Remove model from response caches
+    m_irf_cache.remove(name);
+    m_nroi_cache.remove(name);
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Protected methods                            =
