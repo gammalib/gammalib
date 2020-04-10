@@ -392,7 +392,7 @@ void GSkyDir::rotate_deg(const double& phi, const double& theta)
     double theta_rad = theta * gammalib::deg2rad;
 
     // Rotate
-    rotate(phi, theta);
+    rotate(phi_rad, theta_rad);
 
     // Return
     return;

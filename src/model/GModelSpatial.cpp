@@ -572,15 +572,11 @@ double GModelSpatial::circle_int_kern_omega::eval(const double& omega)
     // Initialise model value
     double flux = 0.0;
 
-    // Precompute rho and omega in degrees
-    double omega_deg = omega * gammalib::rad2deg;
-    double rho_deg   = m_rho * gammalib::rad2deg;
-
     // Compute sky direction corresponding to given rho, omega
     GSkyDir dir = GSkyDir(m_reg->centre());
 
     // Rotate to obtain requested sky direction
-    dir.rotate_deg(omega_deg, rho_deg);
+    dir.rotate(omega, m_rho);
 
     // Set photon for this sky direction
     GPhoton photon = GPhoton(dir, m_srcEng, m_srcTime);
