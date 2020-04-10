@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cstdint>
 #include "GInstDir.hpp"
 #include "GSkyDir.hpp"
 
@@ -54,7 +55,7 @@ public:
     virtual void         clear(void);
     virtual GCOMInstDir* clone(void) const;
     virtual std::string  classname(void) const;
-    virtual double       hash(void) const;
+    virtual uint64_t     hash(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -84,22 +85,6 @@ inline
 std::string GCOMInstDir::classname(void) const
 {
     return ("GCOMInstDir");
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument direction hash value
- *
- * @return Hash value.
- *
- * Returns a hash value that can be used in the response cache.
- ***************************************************************************/
-inline
-double GCOMInstDir::hash(void) const
-{
-    double hash = m_dir.ra_deg() + m_dir.dec_deg() * 1.0e2 +
-                  m_phibar * 1.0e4;
-    return hash;
 }
 
 
@@ -135,7 +120,7 @@ void GCOMInstDir::dir(const GSkyDir& dir)
 /***********************************************************************//**
  * @brief Return event Compton scatter angle
  *
- * @return Event Compton scatter angle.
+ * @return Event Compton scatter angle (deg).
  *
  * Returns the event Compton scatter angle.
  ***************************************************************************/
@@ -149,7 +134,7 @@ const double& GCOMInstDir::phibar(void) const
 /***********************************************************************//**
  * @brief Set event Compton scatter angle
  *
- * @param[in] phibar Event Compton scatter angle.
+ * @param[in] phibar Event Compton scatter angle (deg).
  *
  * Set the event Compton scatter angle.
  ***************************************************************************/

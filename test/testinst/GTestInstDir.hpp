@@ -24,81 +24,83 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cstdint>
 #include "GInstDir.hpp"
 
 
+/***********************************************************************//**
+ * @class GTestInstDir
+ *
+ * @brief Test instrument direction class.
+ ***************************************************************************/
 class GTestInstDir : public GInstDir {
 
 public:
     // Constructors and destructors
-    GTestInstDir(void){
+    GTestInstDir(void) {
         init_members();
         return;
     }
-        
-    GTestInstDir(const GTestInstDir& dir) : GInstDir(dir){
+    GTestInstDir(const GTestInstDir& dir) : GInstDir(dir) {
         init_members();
-        // Copy members
         copy_members(dir);
         return;
     }
-    
-    virtual ~GTestInstDir(void){
+    virtual ~GTestInstDir(void) {
         free_members();
         return;
     }
 
     // Operators
-    GTestInstDir& operator= (const GTestInstDir& dir){
-         // Execute only if object is not identical
+    GTestInstDir& operator= (const GTestInstDir& dir) {
         if (this != &dir) {
-
-            // Copy base class members
             this->GInstDir::operator=(dir);
-
-            // Free members
             free_members();
-
-            // Initialise private members
             init_members();
-
-            // Copy members
             copy_members(dir);
-
-        } // endif: object was not identical
-
-        // Return this object
-        return *this;   
+        }
+        return *this;
     }
 
     // Methods
-    void clear(void){
-        // Free members
+    void clear(void) {
         free_members();
         this->GInstDir::free_members();
-
-        // Initialise private members
         this->GInstDir::init_members();
         init_members();
-        
         return;
     }
-    
-    GTestInstDir* clone(void) const{ return new GTestInstDir(*this); }
-    std::string   classname(void) const { return "GTestInstDir"; }
-    double        hash(void) const { return 41.0; };
-    
-    std::string  print(const GChatter& chatter = NORMAL) const{ 
+    GTestInstDir* clone(void) const {
+        return new GTestInstDir(*this);
+    }
+    std::string classname(void) const {
+        return "GTestInstDir";
+    }
+    void hash(uint64_t hash) {
+        m_hash = hash;
+    }
+    uint64_t hash(void) const {
+        return m_hash;
+    };
+    std::string print(const GChatter& chatter = NORMAL) const {
         std::string result = "=== GTestInstDir ===";
-            return result;
-        }
-        
+        return result;
+    }
 
 protected:
     // Protected methods
-    void init_members(void){ return; }
-    void copy_members(const GTestInstDir& dir){ return; }
-    void free_members(void){ return; }
+    void init_members(void) {
+        m_hash = 0;
+        return;
+    }
+    void copy_members(const GTestInstDir& dir) {
+        m_hash = dir.m_hash;
+        return;
+    }
+    void free_members(void) {
+        return;
+    }
+    uint64_t m_hash; //!< Hash value
 };
 
 #endif /* GTesINSTDIR_HPP */

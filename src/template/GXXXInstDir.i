@@ -45,8 +45,8 @@ public:
     // Implemented pure virtual base class methods
     virtual void         clear(void);
     virtual GXXXInstDir* clone(void) const;
-    virtual double       hash(void) const;
     virtual std::string  classname(void) const;
+    virtual uint64_t     hash(void) const;
 
     // Other methods
     // TODO: Copy methods from GXXXInstDir.hpp file

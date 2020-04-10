@@ -161,11 +161,49 @@ int GResponseCache::size(void) const
     // Compute size
     for (GResponseCacheName::const_iterator it_name = m_cache.begin();
          it_name != m_cache.end(); ++it_name) {
-        size += it_name->second.size();
+        for (GResponseCacheEnergy::const_iterator it_energy =
+             it_name->second.begin();
+             it_energy != it_name->second.end(); ++it_energy) {
+                size += it_energy->second.size();
+/*
+            for (GResponseCacheDir::const_iterator it_dir =
+                 it_energy->second.begin();
+                 it_dir != it_energy->second.end(); ++it_dir) {
+                size += it_dir->second.size();
+            }
+*/
+        }
     }
 
     // Return size
     return size;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of energies in cache
+ *
+ * @return Number of energies in cache
+ *
+ * Returns the number of energies in the response cache.
+ ***************************************************************************/
+int GResponseCache::nenergies(void) const
+{
+    // Initialize number of energies
+    int nenergies = 0;
+
+    // Compute number of elements
+    for (GResponseCacheName::const_iterator it_name = m_cache.begin();
+         it_name != m_cache.end(); ++it_name) {
+        for (GResponseCacheEnergy::const_iterator it_energy =
+             it_name->second.begin();
+             it_energy != it_name->second.end(); ++it_energy) {
+            nenergies += it_energy->second.size();
+        }
+    }
+
+    // Return number of energies
+    return nenergies;
 }
 
 
@@ -185,11 +223,11 @@ void GResponseCache::set(const std::string& name,
                          const GEnergy&     etrue,
                          const double&      value)
 {
-    // Get element identifier
-    double element = encode(ereco, etrue);
+    // Get energy identifier
+    uint64_t energy = this->energy(ereco, etrue);
 
     // Set cache value
-    m_cache[name][element] = value;
+    m_cache[name][energy][0] = value;
 
     // Return
     return;
@@ -214,11 +252,12 @@ void GResponseCache::set(const std::string& name,
                          const GEnergy&     etrue,
                          const double&      value)
 {
-    // Get element identifier
-    double element = encode(dir, ereco, etrue);
+    // Get energy and direction identifier
+    uint64_t energy  = this->energy(ereco, etrue);
+    uint64_t instdir = dir.hash();
 
     // Set cache value
-    m_cache[name][element] = value;
+    m_cache[name][energy][instdir] = value;
 
     // Return
     return;
@@ -248,22 +287,30 @@ bool GResponseCache::contains(const std::string& name,
     // Initialise containment flag
     bool contains = false;
 
-    // Get element identifier
-    double element = encode(ereco, etrue);
+    // Get energy identifier
+    uint64_t energy  = this->energy(ereco, etrue);
+    uint64_t instdir = 0;
 
     // Search for name in cache
     GResponseCacheName::const_iterator it_name = m_cache.find(name);
     if (it_name != m_cache.end()) {
 
-        // Search for element in cache
-        GResponseCacheElement::const_iterator it_element =
-                                  it_name->second.find(element);
-        if (it_element != it_name->second.end()) {
-            contains = true;
-            if (value != NULL) {
-                *value = it_element->second;
-            }
-        } // endif: element found
+        // Search for energy in cache
+        GResponseCacheEnergy::const_iterator it_energy =
+                                  it_name->second.find(energy);
+        if (it_energy != it_name->second.end()) {
+
+            // Search for direction in cache
+            GResponseCacheDir::const_iterator it_dir =
+                                  it_energy->second.find(instdir);
+            if (it_dir != it_energy->second.end()) {
+                contains = true;
+                if (value != NULL) {
+                    *value = it_dir->second;
+                }
+            } // endif: direction found
+
+        } // endif: energy found
 
     } // endif: name found
 
@@ -289,30 +336,38 @@ bool GResponseCache::contains(const std::string& name,
  * cached value through this argument in case that the value exists.
  ***************************************************************************/
 bool GResponseCache::contains(const std::string& name,
-                                 const GInstDir& dir,
-                                 const GEnergy&  ereco,
-                                 const GEnergy&  etrue,
-                                 double*         value) const
+                              const GInstDir&    dir,
+                              const GEnergy&     ereco,
+                              const GEnergy&     etrue,
+                              double*            value) const
 {
     // Initialise containment flag
     bool contains = false;
 
-    // Get element identifier
-    double element = encode(dir, ereco, etrue);
+    // Get energy identifier
+    uint64_t energy  = this->energy(ereco, etrue);
+    uint64_t instdir = dir.hash();
 
     // Search for name in cache
     GResponseCacheName::const_iterator it_name = m_cache.find(name);
     if (it_name != m_cache.end()) {
 
-        // Search for element in cache
-        GResponseCacheElement::const_iterator it_element =
-                                  it_name->second.find(element);
-        if (it_element != it_name->second.end()) {
-            contains = true;
-            if (value != NULL) {
-                *value = it_element->second;
-            }
-        } // endif: element found
+        // Search for energy in cache
+        GResponseCacheEnergy::const_iterator it_energy =
+                                  it_name->second.find(energy);
+        if (it_energy != it_name->second.end()) {
+
+            // Search for direction in cache
+            GResponseCacheDir::const_iterator it_dir =
+                                  it_energy->second.find(instdir);
+            if (it_dir != it_energy->second.end()) {
+                contains = true;
+                if (value != NULL) {
+                    *value = it_dir->second;
+                }
+            } // endif: direction found
+
+        } // endif: energy found
 
     } // endif: name found
 
@@ -360,12 +415,25 @@ std::string GResponseCache::print(const GChatter& chatter) const
             // Append name
             result.append("\n"+gammalib::parformat("Name")+it_name->first);
 
-            // Compute number of elements
-            int nelement = it_name->second.size();
+            // Compute number of sky directions and energies
+            int ndirs     = 0;
+            int nenergies = 0;
+            for (GResponseCacheEnergy::const_iterator it_energy =
+                 it_name->second.begin();
+                 it_energy != it_name->second.end(); ++it_energy) {
+                nenergies++;
+                for (GResponseCacheDir::const_iterator it_dir =
+                     it_energy->second.begin();
+                     it_dir != it_energy->second.end(); ++it_dir) {
+                    ndirs++;
+                }
+            }
 
-            // Append number of elements
-            result.append("\n"+gammalib::parformat("Elements"));
-            result.append(gammalib::str(nelement));
+            // Append number of reconstructed and true energies
+            result.append("\n"+gammalib::parformat("Number of energies"));
+            result.append(gammalib::str(nenergies));
+            result.append("\n"+gammalib::parformat("Number of directions"));
+            result.append(gammalib::str(ndirs));
 
         } // endfor: looped over names
 
@@ -389,7 +457,6 @@ void GResponseCache::init_members(void)
 {
     // Initialise members
     m_cache.clear();
-    m_energy_scale = 1.0;
 
     // Return
     return;
@@ -404,8 +471,7 @@ void GResponseCache::init_members(void)
 void GResponseCache::copy_members(const GResponseCache& cache)
 {
     // Copy members
-    m_cache        = cache.m_cache;
-    m_energy_scale = cache.m_energy_scale;
+    m_cache = cache.m_cache;
 
     // Return
     return;
@@ -429,7 +495,10 @@ void GResponseCache::free_members(void)
  * @param[in] etrue True energy.
  * @return Encoded reconstructued and true energy
  *
- * Encodes the reconstructued and true energy in a single double precision
+ * Encodes the reconstructued and true energy in a 64 Bit unsigned integer
+ * value. The energy are converted into floating
+ 
+ single double precision
  * value. The encoding is done using the following formula:
  *
  * \f[
@@ -442,54 +511,19 @@ void GResponseCache::free_members(void)
  *
  * @todo Verify unique encoding for all instruments!!!
  ***************************************************************************/
-double GResponseCache::encode(const GEnergy& ereco,
-                              const GEnergy& etrue) const
+uint64_t GResponseCache::energy(const GEnergy&  ereco,
+                                const GEnergy&  etrue) const
 {
-    // Construct encoded instrument direction and reconstructued energy
-    double encoded = (ereco.MeV() * 1.0e2 + etrue.MeV()) * m_energy_scale;
-    //double encoded = ereco.TeV() * 1.0e2 + etrue.TeV();
+    // Allocate static array to store the two energies as floats
+    static float buffer[2];
+
+    // Store the two energies as floats
+    buffer[0] = float(ereco.MeV());
+    buffer[1] = float(etrue.MeV());
+
+    // Map the floats to an unsigned 64 Bit integer
+    uint64_t energy; std::memcpy(&energy, &buffer, sizeof energy);
 
     // Return encoded value
-    return encoded;
-}
-
-
-/***********************************************************************//**
- * @brief Encode instrument direction, reconstructued and true energy
- *
- * @param[in] dir Instrument direction.
- * @param[in] ereco Reconstructed energy.
- * @param[in] etrue True energy.
- * @return Encoded instrument direction, reconstructued and true energy
- *
- * Encodes the instrument direction, reconstructued and true energy in a
- * single double precision value. The encoding is done using the following
- * formula:
- *
- * \f[
- *    {\tt encode} = {\tt dir.hash()} + E_{\rm reco} \times 10^6 +
- *                   E_{\rm true} \times 10^8
- * \f]
- *
- * where
- * - \f${\tt dir.encode()}\f$ is an encoding value returned by @p dir,
- * - \f$\delta\f$ is the Declination of the instrument direction in degrees,
- * - \f$E_{\rm reco}\f$ is the reconstructued energy in TeV, and
- * - \f$E_{\rm true}\f$ is the true energy in TeV.
- *
- * @todo Verify unique encoding for all instruments!!!
- ***************************************************************************/
-double GResponseCache::encode(const GInstDir& dir,
-                              const GEnergy&  ereco,
-                              const GEnergy&  etrue) const
-{
-    // Construct encoded instrument direction and reconstructued energy
-    double encoded = dir.hash()  * 1.0e5 +
-                     (ereco.TeV() * 1.0e2 + etrue.TeV()) * m_energy_scale;
-    //double encoded = dir.hash()  * 1.0e5 +
-    //                 ereco.TeV() * 1.0e2 +
-    //                 etrue.TeV();
-
-    // Return encoded value
-    return encoded;
+    return energy;
 }

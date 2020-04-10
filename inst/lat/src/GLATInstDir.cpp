@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATInstDir.cpp - Fermi/LAT instrument direction class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2020 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -184,9 +184,33 @@ GLATInstDir* GLATInstDir::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+uint64_t GLATInstDir::hash(void) const
+{
+    // Allocate static array to store the information as floats
+    static float buffer[2];
+
+    // Store the two sky coordinates as floats
+    buffer[0] = float(m_dir.ra());
+    buffer[1] = float(m_dir.dec());
+
+    // Map the floats to an unsigned 64 Bit integer
+    uint64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
+
+    // Return hash value
+    return hash;
+}
+
+
+/***********************************************************************//**
  * @brief Print instrument direction information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing instrument direction information.
  ***************************************************************************/
 std::string GLATInstDir::print(const GChatter& chatter) const

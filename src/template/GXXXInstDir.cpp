@@ -167,6 +167,34 @@ GXXXInstDir* GXXXInstDir::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return [INSTRUMENT] instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+uint64_t GXXXInstDir::hash(void) const
+{
+    // TODO: Implement some code that converts the instrument direction
+    // into a unique 64 Bit has value
+
+    // Allocate static array to store the information as floats
+    //static float buffer[2];
+
+    // Store the two sky coordinates as floats
+    //buffer[0] = float(m_dir.ra());
+    //buffer[1] = float(m_dir.dec());
+
+    // Map the floats to an unsigned 64 Bit integer
+    //uint64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
+
+    // Return hash value
+    //return hash;
+    return 0;
+}
+
+
+/***********************************************************************//**
  * @brief Print [INSTRUMENT] instrument direction information
  *
  * @param[in] chatter Chattiness.

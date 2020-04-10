@@ -49,7 +49,7 @@ public:
     virtual void         clear(void);
     virtual GCTAInstDir* clone(void) const;
     virtual std::string  classname(void) const;
-    virtual double       hash(void) const;
+    virtual uint64_t     hash(void) const;
 
     // Other methods
     void           dir(const GSkyDir& dir);

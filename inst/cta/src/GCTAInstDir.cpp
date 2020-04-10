@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAInstDir.cpp - CTA instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -230,6 +230,30 @@ void GCTAInstDir::clear(void)
 GCTAInstDir* GCTAInstDir::clone(void) const
 {
     return new GCTAInstDir(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+uint64_t GCTAInstDir::hash(void) const
+{
+    // Allocate static array to store the information as floats
+    static float buffer[2];
+
+    // Store the two sky coordinates as floats
+    buffer[0] = float(m_dir.ra());
+    buffer[1] = float(m_dir.dec());
+
+    // Map the floats to an unsigned 64 Bit integer
+    uint64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
+
+    // Return hash value
+    return hash;
 }
 
 

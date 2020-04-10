@@ -184,10 +184,6 @@ void GCTAResponse::init_members(void)
     m_use_irf_cache  = true;   //!< Switched on by default
     m_use_nroi_cache = true;   //!< Switched on by default
 
-    // Set energy scale for response cache to TeV
-    m_irf_cache.energy_scale(GEnergy(1.0, "TeV"));
-    m_nroi_cache.energy_scale(GEnergy(1.0, "TeV"));
-
     // Return
     return;
 }

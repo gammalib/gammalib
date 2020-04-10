@@ -82,7 +82,7 @@ GCOMInstDir::GCOMInstDir(const GCOMInstDir& dir) : GInstDir(dir)
  * @brief Instrument direction constructor
  *
  * @param[in] dir Sky direction.
- * @param[in] phibar Phibar.
+ * @param[in] phibar Phibar (deg).
  *
  * Constructs a COMPTEL instrument direction from a sky direction and a
  * phibar value.
@@ -186,9 +186,37 @@ GCOMInstDir* GCOMInstDir::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+uint64_t GCOMInstDir::hash(void) const
+{
+    // Allocate static array to store the information as floats
+    static float buffer[2];
+
+    // Scale Phibar for addition to Right Ascension and Declination in
+    // radians
+    float scaled_phibar = 10.0 * float(m_phibar);
+
+    // Store the two sky coordinates as floats
+    buffer[0] = float(m_dir.ra()  + scaled_phibar);
+    buffer[1] = float(m_dir.dec() + scaled_phibar);
+
+    // Map the floats to an unsigned 64 Bit integer
+    uint64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
+
+    // Return hash value
+    return hash;
+}
+
+
+/***********************************************************************//**
  * @brief Print instrument direction information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing instrument direction information.
  ***************************************************************************/
 std::string GCOMInstDir::print(const GChatter& chatter) const
@@ -206,7 +234,7 @@ std::string GCOMInstDir::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Sky direction (Chi,Psi)"));
         result.append(m_dir.print(chatter));
         result.append("\n"+gammalib::parformat("Scatter angle (Phibar)"));
-        result.append(gammalib::str(m_phibar));
+        result.append(gammalib::str(m_phibar)+" deg");
 
     } // endif: chatter was not silent
 

@@ -52,7 +52,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GInstDir*   clone(void) const = 0;
-    virtual double      hash(void) const = 0;
+    virtual uint64_t    hash(void) const = 0;
     virtual std::string classname(void) const = 0;
 };
 

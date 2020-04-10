@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cstdint>
 #include "GInstDir.hpp"
 #include "GSkyDir.hpp"
 
@@ -57,7 +58,7 @@ public:
     virtual void         clear(void);
     virtual GLATInstDir* clone(void) const;
     virtual std::string  classname(void) const;
-    virtual double       hash(void) const;
+    virtual uint64_t     hash(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -85,21 +86,6 @@ inline
 std::string GLATInstDir::classname(void) const
 {
     return ("GLATInstDir");
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument direction hash value
- *
- * @return Hash value.
- *
- * Returns a hash value that can be used in the response cache.
- ***************************************************************************/
-inline
-double GLATInstDir::hash(void) const
-{
-    double hash = m_dir.ra_deg() + m_dir.dec_deg() * 1.0e2;
-    return hash;
 }
 
 

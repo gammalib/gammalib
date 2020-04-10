@@ -187,6 +187,34 @@ GSPIInstDir* GSPIInstDir::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return instrument direction hash value
+ *
+ * @return Hash value.
+ *
+ * Returns a hash value that can be used in the response cache.
+ ***************************************************************************/
+uint64_t GSPIInstDir::hash(void) const
+{
+    // Allocate static array to store the information as floats
+    static float buffer[2];
+
+    // Shift detector ID for addition to Right Ascension and Declination in
+    // radians
+    float shifted_detid = float(m_detid+10);
+
+    // Store the two sky coordinates as floats
+    buffer[0] = float(m_dir.ra()  + shifted_detid);
+    buffer[1] = float(m_dir.dec() + shifted_detid);
+
+    // Map the floats to an unsigned 64 Bit integer
+    uint64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
+
+    // Return hash value
+    return hash;
+}
+
+
+/***********************************************************************//**
  * @brief Print INTEGRAL/SPI instrument direction information
  *
  * @param[in] chatter Chattiness.

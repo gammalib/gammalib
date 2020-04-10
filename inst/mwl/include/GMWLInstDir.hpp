@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cstdint>
 #include "GInstDir.hpp"
 
 
@@ -56,7 +57,7 @@ public:
     virtual void         clear(void);
     virtual GMWLInstDir* clone(void) const;
     virtual std::string  classname(void) const;
-    virtual double       hash(void) const;
+    virtual uint64_t     hash(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -87,9 +88,9 @@ std::string GMWLInstDir::classname(void) const
  * Returns a hash value that can be used in the response cache.
  ***************************************************************************/
 inline
-double GMWLInstDir::hash(void) const
+uint64_t GMWLInstDir::hash(void) const
 {
-    return 41.0;
+    return 0;
 }
 
 #endif /* GMWLINSTDIR_HPP */

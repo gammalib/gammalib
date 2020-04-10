@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cstdint>
 #include <map>
 #include "GBase.hpp"
 #include "GEnergy.hpp"
@@ -39,8 +40,9 @@ class GInstDir;
 /* __ Constants __________________________________________________________ */
 
 /* __ Typedefs ___________________________________________________________ */
-typedef std::map<double,double>                     GResponseCacheElement;
-typedef std::map<std::string,GResponseCacheElement> GResponseCacheName;
+typedef std::map<uint64_t,double>                  GResponseCacheDir;
+typedef std::map<uint64_t,GResponseCacheDir>       GResponseCacheEnergy;
+typedef std::map<std::string,GResponseCacheEnergy> GResponseCacheName;
 
 
 /***********************************************************************//**
@@ -67,9 +69,9 @@ public:
     void            clear(void);
     GResponseCache* clone(void) const;
     std::string     classname(void) const;
-    int             size(void) const;
     bool            is_empty(void) const;
-    void            energy_scale(const GEnergy& energy);
+    int             size(void) const;
+    int             nenergies(void) const;
     void            set(const std::string& name,
                         const GEnergy&     ereco,
                         const GEnergy&     etrue,
@@ -93,18 +95,13 @@ public:
 
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GResponseCache& cache);
-    void   free_members(void);
-    double encode(const GEnergy&  ereco,
-                  const GEnergy&  etrue) const;
-    double encode(const GInstDir& dir,
-                  const GEnergy&  ereco,
-                  const GEnergy&  etrue) const;
+    void     init_members(void);
+    void     copy_members(const GResponseCache& cache);
+    void     free_members(void);
+    uint64_t energy(const GEnergy&  ereco, const GEnergy&  etrue) const;
 
     // Protected members
-    GResponseCacheName m_cache;           //<! Response cache
-    double             m_energy_scale;    //<! Energy scale 1/MeV
+    GResponseCacheName m_cache;   //<! Response cache
 };
 
 
@@ -131,21 +128,6 @@ inline
 bool GResponseCache::is_empty(void) const
 {
     return (m_cache.empty());
-}
-
-
-/***********************************************************************//**
- * @brief Set minimum energy of instrument
- *
- * @param[in] energy Energy.
- *
- * Sets minimum energy of instrument for hash scaling.
- ***************************************************************************/
-inline
-void GResponseCache::energy_scale(const GEnergy& energy)
-{
-    m_energy_scale = 1.0 / energy.MeV();
-    return;
 }
 
 
