@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <cstdint>
+#include <sys/types.h>
 #include "GBase.hpp"
 
 
@@ -60,7 +60,7 @@ public:
     virtual void        clear(void) = 0;
     virtual GInstDir*   clone(void) const = 0;
     virtual std::string classname(void) const = 0;
-    virtual uint64_t    hash(void) const = 0;
+    virtual u_int64_t   hash(void) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:

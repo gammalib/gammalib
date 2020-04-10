@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <cstdint>
+#include <sys/types.h>
 #include <map>
 #include "GBase.hpp"
 #include "GEnergy.hpp"
@@ -40,8 +40,8 @@ class GInstDir;
 /* __ Constants __________________________________________________________ */
 
 /* __ Typedefs ___________________________________________________________ */
-typedef std::map<uint64_t,double>                  GResponseCacheDir;
-typedef std::map<uint64_t,GResponseCacheDir>       GResponseCacheEnergy;
+typedef std::map<u_int64_t,double>                 GResponseCacheDir;
+typedef std::map<u_int64_t,GResponseCacheDir>      GResponseCacheEnergy;
 typedef std::map<std::string,GResponseCacheEnergy> GResponseCacheName;
 
 
@@ -95,10 +95,10 @@ public:
 
 protected:
     // Protected methods
-    void     init_members(void);
-    void     copy_members(const GResponseCache& cache);
-    void     free_members(void);
-    uint64_t hash(const GEnergy&  ereco, const GEnergy&  etrue) const;
+    void      init_members(void);
+    void      copy_members(const GResponseCache& cache);
+    void      free_members(void);
+    u_int64_t hash(const GEnergy&  ereco, const GEnergy&  etrue) const;
 
     // Protected members
     GResponseCacheName m_cache;   //<! Response cache

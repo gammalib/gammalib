@@ -173,7 +173,7 @@ GXXXInstDir* GXXXInstDir::clone(void) const
  *
  * Returns a hash value that can be used in the response cache.
  ***************************************************************************/
-uint64_t GXXXInstDir::hash(void) const
+u_int64_t GXXXInstDir::hash(void) const
 {
     // TODO: Implement some code that converts the instrument direction
     // into a unique 64 Bit has value
@@ -186,7 +186,7 @@ uint64_t GXXXInstDir::hash(void) const
     //buffer[1] = float(m_dir.dec());
 
     // Map the floats to an unsigned 64 Bit integer
-    //uint64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
+    //u_int64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
 
     // Return hash value
     //return hash;

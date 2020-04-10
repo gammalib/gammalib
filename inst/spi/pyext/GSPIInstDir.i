@@ -47,7 +47,7 @@ public:
     virtual void         clear(void);
     virtual GSPIInstDir* clone(void) const;
     virtual std::string  classname(void) const;
-    virtual uint64_t     hash(void) const;
+    virtual u_int64_t    hash(void) const;
 
     // Other methods
     void           dir(const GSkyDir& dir);

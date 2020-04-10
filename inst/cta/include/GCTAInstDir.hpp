@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <cstdint>
+#include <sys/types.h>
 #include "GInstDir.hpp"
 #include "GSkyDir.hpp"
 #include "GMath.hpp"
@@ -75,7 +75,7 @@ public:
     virtual void         clear(void);
     virtual GCTAInstDir* clone(void) const;
     virtual std::string  classname(void) const;
-    virtual uint64_t     hash(void) const;
+    virtual u_int64_t    hash(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods

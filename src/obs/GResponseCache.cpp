@@ -224,7 +224,7 @@ void GResponseCache::set(const std::string& name,
                          const double&      value)
 {
     // Get energy identifier
-    uint64_t energy = hash(ereco, etrue);
+    u_int64_t energy = hash(ereco, etrue);
 
     // Set cache value
     m_cache[name][energy][0] = value;
@@ -253,8 +253,8 @@ void GResponseCache::set(const std::string& name,
                          const double&      value)
 {
     // Get energy and direction identifier
-    uint64_t energy  = hash(ereco, etrue);
-    uint64_t instdir = dir.hash();
+    u_int64_t energy  = hash(ereco, etrue);
+    u_int64_t instdir = dir.hash();
 
     // Set cache value
     m_cache[name][energy][instdir] = value;
@@ -288,8 +288,8 @@ bool GResponseCache::contains(const std::string& name,
     bool contains = false;
 
     // Get energy identifier
-    uint64_t energy  = hash(ereco, etrue);
-    uint64_t instdir = 0;
+    u_int64_t energy  = hash(ereco, etrue);
+    u_int64_t instdir = 0;
 
     // Search for name in cache
     GResponseCacheName::const_iterator it_name = m_cache.find(name);
@@ -345,8 +345,8 @@ bool GResponseCache::contains(const std::string& name,
     bool contains = false;
 
     // Get energy identifier
-    uint64_t energy  = hash(ereco, etrue);
-    uint64_t instdir = dir.hash();
+    u_int64_t energy  = hash(ereco, etrue);
+    u_int64_t instdir = dir.hash();
 
     // Search for name in cache
     GResponseCacheName::const_iterator it_name = m_cache.find(name);
@@ -501,8 +501,8 @@ void GResponseCache::free_members(void)
  * hash values for all instruments up to the precision of floating point
  * singles.
  ***************************************************************************/
-uint64_t GResponseCache::hash(const GEnergy&  ereco,
-                              const GEnergy&  etrue) const
+u_int64_t GResponseCache::hash(const GEnergy&  ereco,
+                               const GEnergy&  etrue) const
 {
     // Allocate static array to store the two energies as floats
     static float buffer[2];
@@ -512,8 +512,8 @@ uint64_t GResponseCache::hash(const GEnergy&  ereco,
     buffer[1] = float(etrue.MeV());
 
     // Map the floats to an unsigned 64 Bit integer
-    uint64_t energy; std::memcpy(&energy, &buffer, sizeof energy);
+    u_int64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
 
     // Return encoded value
-    return energy;
+    return hash;
 }

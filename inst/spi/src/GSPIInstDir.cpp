@@ -193,7 +193,7 @@ GSPIInstDir* GSPIInstDir::clone(void) const
  *
  * Returns a hash value that can be used in the response cache.
  ***************************************************************************/
-uint64_t GSPIInstDir::hash(void) const
+u_int64_t GSPIInstDir::hash(void) const
 {
     // Allocate static array to store the information as floats
     static float buffer[2];
@@ -207,7 +207,7 @@ uint64_t GSPIInstDir::hash(void) const
     buffer[1] = float(m_dir.dec() + shifted_detid);
 
     // Map the floats to an unsigned 64 Bit integer
-    uint64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
+    u_int64_t hash; std::memcpy(&hash, &buffer, sizeof hash);
 
     // Return hash value
     return hash;

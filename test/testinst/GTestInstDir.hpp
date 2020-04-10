@@ -24,7 +24,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <cstdint>
+#include <sys/types.h>
 #include "GInstDir.hpp"
 
 
@@ -76,10 +76,10 @@ public:
     std::string classname(void) const {
         return "GTestInstDir";
     }
-    void hash(uint64_t hash) {
+    void hash(u_int64_t hash) {
         m_hash = hash;
     }
-    uint64_t hash(void) const {
+    u_int64_t hash(void) const {
         return m_hash;
     };
     std::string print(const GChatter& chatter = NORMAL) const {
@@ -100,7 +100,7 @@ protected:
     void free_members(void) {
         return;
     }
-    uint64_t m_hash; //!< Hash value
+    u_int64_t m_hash; //!< Hash value
 };
 
 #endif /* GTesINSTDIR_HPP */
