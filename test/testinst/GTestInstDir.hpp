@@ -25,7 +25,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <sys/types.h>
-#if defined(sun) && (defined(__svr4__) || defined(__SVR4)) // SOLARIS
+#if defined(__sun) && (defined(__svr4__) || defined(__SVR4)) // SOLARIS
     typedef uint64_t u_int64_t;
 #endif // SOLARIS
 #include "GInstDir.hpp"
