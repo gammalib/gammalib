@@ -226,7 +226,7 @@ GSPIResponse* GSPIResponse::clone(void) const
  * @param[in] event Observed event.
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
- * @return Instrument response $\f(cm^2 sr^{-1})$\f
+ * @return Instrument response \f$(cm^2 sr^{-1})\f$
  *
  * @exception GException::invalid_argument
  *            Observation is not a INTEGRAL/SPI observation.
@@ -317,7 +317,7 @@ double GSPIResponse::irf(const GEvent&       event,
  * @param[in] srcDir Sky direction.
  * @param[in] bin INTEGRAL/SPI event bin.
  * @param[in] ireg IRF region (0: photo peak).
- * @return Instrument response $\f(cm^2 sr^{-1})$\f
+ * @return Instrument response \f$(cm^2 sr^{-1})\f$
  *
  * Returns the instrument response function for a given sky direction and
  * event bin. The value of the IRF is bilinearly interpolated from the

@@ -84,17 +84,6 @@ public:
     virtual void          write(GXmlElement& xml) const = 0;
     virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
 
-    // Make sure the base class methods are visible. This is required here
-    // since there are different overloaded irf() methods, and not making
-    // the base class methods available would hide the
-    //
-    // double GResponse::irf(const GEvent&       event,
-    //                       const GSource&      source,
-    //                       const GObservation& obs) const
-    //
-    // method.
-    using GResponse::irf;
-
 protected:
     // Protected methods
     void init_members(void);

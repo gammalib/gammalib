@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,7 +50,9 @@
 #include "GCOMInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_IRF           "GCOMResponse::irf(GEvent&, GSource&, GObservation&)"
+#define G_IRF           "GCOMResponse::irf(GEvent&, GPhoton&, GObservation&)"
+#define G_IRF_SPATIAL         "GCOMResponse::irf_spatial(GEvent&, GSource&, "\
+                                                             "GObservation&)"
 #define G_NROI            "GCOMResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
 #define G_EBOUNDS                           "GCOMResponse::ebounds(GEnergy&)"
@@ -382,9 +384,9 @@ double GCOMResponse::irf(const GEvent&       event,
  * GCOMObservation::drm() method that also will update the cube in case that
  * any of the parameters changes.
  ***************************************************************************/
-double GCOMResponse::irf(const GEvent&       event,
-                         const GSource&      source,
-                         const GObservation& obs) const
+double GCOMResponse::irf_spatial(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const
 {
     // Initialise IRF value
     double irf = 0.0;
@@ -409,7 +411,7 @@ double GCOMResponse::irf(const GEvent&       event,
             std::string msg = "Observation of type \""+cls+"\" is not a "
                               "COMPTEL observation. Please specify a COMPTEL "
                               "observation as argument.";
-            throw GException::invalid_argument(G_IRF, msg);
+            throw GException::invalid_argument(G_IRF_SPATIAL, msg);
         }
 
         // Get pointer to COMPTEL event bin
@@ -418,7 +420,7 @@ double GCOMResponse::irf(const GEvent&       event,
                               "This method only works on binned COMPTEL data. "
                               "Please make sure that a COMPTEL observation "
                               "containing binned data is provided.";
-            throw GException::invalid_argument(G_IRF, msg);
+            throw GException::invalid_argument(G_IRF_SPATIAL, msg);
         }
         const GCOMEventBin* bin = static_cast<const GCOMEventBin*>(&event);
 
@@ -448,7 +450,7 @@ double GCOMResponse::irf(const GEvent&       event,
                 std::string msg = "Response computation not yet implemented "
                                   "for spatial model type \""+
                                   source.model()->type()+"\".";
-                throw GException::feature_not_implemented(G_IRF, msg);
+                throw GException::feature_not_implemented(G_IRF_SPATIAL, msg);
                 }
                 break;
             default:

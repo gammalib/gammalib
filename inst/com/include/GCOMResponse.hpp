@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCOMResponse.hpp - COMPTEL Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,15 +74,17 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        irf(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,
                                const GObservation& obs) const;
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
+
+    // Overloaded virtual base class methods
+    virtual double        irf_spatial(const GEvent&       event,
+                                      const GSource&      source,
+                                      const GObservation& obs) const;
 
     // Other Methods
     void               caldb(const GCaldb& caldb);

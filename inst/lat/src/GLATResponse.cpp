@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATResponse.cpp - Fermi LAT response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -274,17 +274,17 @@ double GLATResponse::irf(const GEvent&       event,
  * This method returns the response of the instrument to a specific source
  * model. The method handles both event atoms and event bins.
  ***************************************************************************/
-double GLATResponse::irf(const GEvent&       event,
-                         const GSource&      source,
-                         const GObservation& obs) const
+double GLATResponse::irf_spatial(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const
 {
     // Get IRF value
     double rsp;
     if (event.is_atom()) {
-        rsp = irf(static_cast<const GLATEventAtom&>(event), source, obs);
+        rsp = irf_spatial_atom(static_cast<const GLATEventAtom&>(event), source, obs);
     }
     else {
-        rsp = irf(static_cast<const GLATEventBin&>(event), source, obs);
+        rsp = irf_spatial_bin(static_cast<const GLATEventBin&>(event), source, obs);
     }
 
     // Return IRF value
@@ -304,9 +304,9 @@ double GLATResponse::irf(const GEvent&       event,
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-double GLATResponse::irf(const GLATEventAtom& event,
-                         const GSource&       source,
-                         const GObservation&  obs) const
+double GLATResponse::irf_spatial_atom(const GLATEventAtom& event,
+                                      const GSource&       source,
+                                      const GObservation&  obs) const
 {
     // Initialise IRF with "no response"
     double irf = 0.0;
@@ -345,9 +345,9 @@ double GLATResponse::irf(const GLATEventAtom& event,
  *       quite some time since the distance computation is time
  *       consuming.
  ***************************************************************************/
-double GLATResponse::irf(const GLATEventBin& event,
-                         const GSource&      source,
-                         const GObservation& obs) const
+double GLATResponse::irf_spatial_bin(const GLATEventBin& event,
+                                     const GSource&      source,
+                                     const GObservation& obs) const
 {
     // Initialise response value
     double rsp = 0.0;

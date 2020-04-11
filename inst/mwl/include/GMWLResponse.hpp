@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.hpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,7 +63,7 @@ public:
     // Operators
     virtual GMWLResponse& operator=(const GMWLResponse & rsp);
 
-    // Implemented pure virtual methods
+    // Implemented pure base class virtual methods
     virtual void          clear(void);
     virtual GMWLResponse* clone(void) const;
     virtual std::string   classname(void) const;
@@ -72,15 +72,17 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        irf(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,
                                const GObservation& obs) const;
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
+
+    // Overloaded virtual base class methods
+    virtual double        irf_spatial(const GEvent&       event,
+                                      const GSource&      source,
+                                      const GObservation& obs) const;
 
 protected:
     // Protected methods
@@ -136,7 +138,8 @@ bool GMWLResponse::use_tdisp(void) const
  * @return Instrument response function (always 1).
  ***************************************************************************/
 inline
-double GMWLResponse::irf(const GEvent& event, const GPhoton& photon,
+double GMWLResponse::irf(const GEvent&       event,
+                         const GPhoton&      photon,
                          const GObservation& obs) const
 {
     return 1.0;
@@ -153,8 +156,9 @@ double GMWLResponse::irf(const GEvent& event, const GPhoton& photon,
  * @return Instrument response function (always 1).
  ***************************************************************************/
 inline
-double GMWLResponse::irf(const GEvent& event, const GSource& source,
-                         const GObservation& obs) const
+double GMWLResponse::irf_spatial(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const
 {
     return 1.0;
 }

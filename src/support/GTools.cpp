@@ -480,7 +480,7 @@ std::string gammalib::str(const short int& value)
  * @brief Convert integer value into string
  *
  * @param[in] value Integer to be converted into string.
- * @param[in] format Format string.
+ * @param[in] fmt Format string.
  * @return String with integer value.
  ***************************************************************************/
 std::string gammalib::str(const int& value, const std::string& fmt)

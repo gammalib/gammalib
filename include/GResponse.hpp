@@ -45,6 +45,7 @@ class GEbounds;
 class GObservation;
 class GModelSky;
 class GModelSpatialRadial;
+class GModelSpatialElliptical;
 
 
 /***********************************************************************//**
@@ -100,9 +101,9 @@ public:
                                  const GEvent&       event,
                                  const GObservation& obs,
                                  const bool&         grad = true) const;
-    virtual double      irf(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const;
+    virtual double      irf_spatial(const GEvent&       event,
+                                    const GSource&      source,
+                                    const GObservation& obs) const;
     virtual void        remove_response_cache(const std::string& name);
 
 protected:
@@ -215,12 +216,77 @@ protected:
         const GEnergy*      m_srcEng;    //!< True photon energy
         const GTime*        m_srcTime;   //!< Arrival time
     };
+    class irf_elliptical_kern_theta : public GFunction {
+    public:
+        irf_elliptical_kern_theta(const GResponse*               rsp,
+                                  const GEvent*                  event,
+                                  const GObservation*            obs,
+                                  const GModelSpatialElliptical* model,
+                                  const GMatrix*                 rot,
+                                  const GEnergy*                 srcEng,
+                                  const GTime*                   srcTime,
+                                  int                            iter_phi) :
+                                  m_rsp(rsp),
+                                  m_event(event),
+                                  m_obs(obs),
+                                  m_model(model),
+                                  m_rot(rot),
+                                  m_srcEng(srcEng),
+                                  m_srcTime(srcTime),
+                                  m_iter_phi(iter_phi) { }
+        double eval(const double& phi);
+    protected:
+        const GResponse*               m_rsp;       //!< Response
+        const GEvent*                  m_event;     //!< Event
+        const GObservation*            m_obs;       //!< Observation
+        const GModelSpatialElliptical* m_model;     //!< Elliptical model
+        const GMatrix*                 m_rot;       //!< Rotation matrix
+        const GEnergy*                 m_srcEng;    //!< True photon energy
+        const GTime*                   m_srcTime;   //!< Arrival time
+        int                            m_iter_phi;  //!< Iterations in phi
+    };
+    class irf_elliptical_kern_phi : public GFunction {
+    public:
+        irf_elliptical_kern_phi(const GResponse*               rsp,
+                                const GEvent*                  event,
+                                const GObservation*            obs,
+                                const GModelSpatialElliptical* model,
+                                const GMatrix*                 rot,
+                                const double&                  theta,
+                                const GEnergy*                 srcEng,
+                                const GTime*                   srcTime) :
+                                m_rsp(rsp),
+                                m_event(event),
+                                m_obs(obs),
+                                m_model(model),
+                                m_rot(rot),
+                                m_theta(theta),
+                                m_sin_theta(std::sin(theta)),
+                                m_cos_theta(std::cos(theta)),
+                                m_srcEng(srcEng),
+                                m_srcTime(srcTime) { }
+        double eval(const double& phi);
+    protected:
+        const GResponse*               m_rsp;       //!< Response
+        const GEvent*                  m_event;     //!< Event
+        const GObservation*            m_obs;       //!< Observation
+        const GModelSpatialElliptical* m_model;     //!< Elliptical model
+        const GMatrix*                 m_rot;       //!< Rotation matrix
+        double                         m_theta;     //!< Theta
+        double                         m_sin_theta; //!< sin(theta)
+        double                         m_cos_theta; //!< cos(theta)
+        const GEnergy*                 m_srcEng;    //!< True photon energy
+        const GTime*                   m_srcTime;   //!< Arrival time
+    };
 
     // Protected members
-    bool m_use_irf_cache;          //!< Control usage of irf cache
-    bool m_use_nroi_cache;         //!< Control usage of nroi cache
-    int  m_irf_radial_iter_theta;  //!< Radial model integration theta iterations
-    int  m_irf_radial_iter_phi;    //!< Radial model integration phi iterations
+    bool   m_use_irf_cache;             //!< Control usage of irf cache
+    bool   m_use_nroi_cache;            //!< Control usage of nroi cache
+    int    m_irf_radial_iter_theta;     //!< Radial model integration theta iterations
+    int    m_irf_radial_iter_phi;       //!< Radial model integration phi iterations
+    int    m_irf_elliptical_iter_theta; //!< Elliptical model integration theta iterations
+    int    m_irf_elliptical_iter_phi;   //!< Elliptical model integration phi iterations
+    double m_irf_diffuse_resolution;    //!< Angular resolution for diffuse model
 
     // Cache for irf(GEvent&, GSource&, GObservation&) and
     // nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)

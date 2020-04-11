@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-10 April 2020
+11 April 2020
 
 
 1. Introduction
@@ -24,6 +24,7 @@ The following methods have been added:
 - GTime.datetime() - Datetime conversion in Python interface
 - GTime.julian_epoch() - Returns Julian epoch for time
 - GGti::overlap(GTime&, GTime&) - Compute overlap with time interval
+- GInstDir::hash() - Returns a cached value
 - GObservations::npred(string&, string&) - Compute predicted number of events
 - GObservations::npred(GModel&, string&) - Compute predicted number of events 
 - GObservations::remove_response_cache() - Remove response cache for all models
@@ -49,7 +50,9 @@ The following methods have been removed:
 - none
 
 The following methods have been renamed:
-- GInstDir::hash() - Returns a cached value
+- GResponse::irf(GEvent&, GSource&, GObservation&) to GResponse::irf_spatial()
+- GLATResponse::irf(GLATEventAtom&, GSource&, GObservation&) to GLATResponse::irf_spatial_atom()
+- GLATResponse::irf(GLATEventBin&, GSource&, GObservation&) to GLATResponse::irf_spatial_bin()
 
 The arguments for the following methods have been changed:
 - GTime::utc(int&) - Add optional precision value

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.cpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2019 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2020 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1493,7 +1493,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
 
                     // Get ARF value. We need to devide by the deadtime
                     // correction since the IRF method multiplies with it.
-                    double irf = rsp.irf(event, source, obs) / m_deadc;
+                    double irf = rsp.irf_spatial(event, source, obs) / m_deadc;
 
                     // Add up effective area
                     m_arf[i] += irf * pixsolid;

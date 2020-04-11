@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATResponse.i - Fermi/LAT Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,7 +41,7 @@ public:
     GLATResponse(const GLATResponse& rsp);
     virtual ~GLATResponse(void);
 
-    // Implemented pure virtual methods
+    // Implement pure virtual base class methods
     virtual void          clear(void);
     virtual GLATResponse* clone(void) const;
     virtual std::string   classname(void) const;
@@ -50,14 +50,16 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        irf(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,
                                const GObservation& obs) const;
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
+
+    // Overloaded virtual base class methods
+    virtual double        irf_spatial(const GEvent&       event,
+                                      const GSource&      source,
+                                      const GObservation& obs) const;
 
     // Other Methods
     int                size(void) const;
@@ -71,12 +73,12 @@ public:
     GLATEdisp*         edisp(const int& index) const;
 
     // Reponse methods
-    double irf(const GLATEventAtom& event,
-               const GSource&       source,
-               const GObservation&  obs) const;
-    double irf(const GLATEventBin& event,
-               const GSource&      source,
-               const GObservation& obs) const;
+    double irf_spatial_atom(const GLATEventAtom& event,
+                            const GSource&       source,
+                            const GObservation&  obs) const;
+    double irf_spatial_bin(const GLATEventBin& event,
+                           const GSource&      source,
+                           const GObservation& obs) const;
 };
 
 

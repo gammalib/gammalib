@@ -62,9 +62,9 @@ public:
                                  const GEvent&       event,
                                  const GObservation& obs,
                                  const bool&         grad = true) const;
-    virtual double      irf(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const;
+    virtual double      irf_spatial(const GEvent&       event,
+                                    const GSource&      source,
+                                    const GObservation& obs) const;
     virtual void        remove_response_cache(const std::string& name);
 };
 
