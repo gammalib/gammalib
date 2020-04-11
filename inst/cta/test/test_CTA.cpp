@@ -1456,14 +1456,14 @@ void TestGCTAResponse::test_response_cache(void)
     bool   flag  = false;
 
     // Test empty response cache
-    GCTAResponseCache cache1;
+    GResponseCache cache1;
     test_assert(cache1.is_empty(), "Test is_empty() method for empty cache");
 	test_value(cache1.size(), 0, "Test size() method for empty cache");
     flag = cache1.contains("Crab", eng1, eng1, &value);
     test_assert(!flag, "Test contains() method flag for empty cache");
 
     // Test filled response cube (one model, two ereco=etrue)
-    GCTAResponseCache cache2;
+    GResponseCache cache2;
     cache2.set("Crab", eng1, eng1, 1.0);
     cache2.set("Crab", eng2, eng2, 2.0);
     test_assert(!cache2.is_empty(), "Test is_empty() method for filled cache");
@@ -1489,7 +1489,7 @@ void TestGCTAResponse::test_response_cache(void)
     test_assert(!flag, "Test contains() method flag for cleared cache");
 
     // Test filled response cube (two models, two ereco, two etrue per ereco)
-    GCTAResponseCache cache3;
+    GResponseCache cache3;
     cache3.set("Crab", eng1, eng1, 1.0);
     cache3.set("Crab", eng1, eng2, 2.0);
     cache3.set("Crab", eng2, eng1, 3.0);
@@ -1548,7 +1548,7 @@ void TestGCTAResponse::test_response_cache(void)
     cache3.remove("Vela");
 
     // Test filled response cube (two models, two dir, two ereco, two etrue per ereco)
-    GCTAResponseCache cache4;
+    GResponseCache cache4;
     cache4.set("Crab", dir1, eng1, eng1, 1.0);
     cache4.set("Crab", dir1, eng1, eng2, 2.0);
     cache4.set("Crab", dir1, eng2, eng1, 3.0);
