@@ -571,7 +571,7 @@ void GSPIModelDataSpace::write(GXmlElement& xml) const
     write_attributes(*src);
 
     // Write method
-    xml.attribute("method", m_method);
+    src->attribute("method", m_method);
 
     // Return
     return;

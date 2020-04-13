@@ -38,8 +38,9 @@ class Test(gammalib.GPythonTestSuite):
         gammalib.GPythonTestSuite.__init__(self)
 
         # Set test directories
-        self._data  = os.environ['TEST_SPI_DATA']
-        self._caldb = self._data + '/../caldb'
+        self._data   = os.environ['TEST_SPI_DATA']
+        self._caldb  = self._data + '/../caldb'
+        self._og_dol = self._data + '/obs/og_spi.fits'
 
         # Return
         return
@@ -78,11 +79,8 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test GSPIObservation class
         """
-        # Set Observation Group file name
-        og_dol = self._data + '/obs/og_spi.fits'
-
         # Load event cube
-        obs = gammalib.GSPIObservation(og_dol)
+        obs = gammalib.GSPIObservation(self._og_dol)
         self.test_value(obs.ontime(), 193966.8178673, 1.0e-6, 'Check ontime')
         self.test_value(obs.livetime(), 170657.5371606, 1.0e-6, 'Check livetime')
         self.test_value(obs.deadc(), 0.8798285, 1.0e-6, 'Check deadtime correction')
@@ -111,20 +109,26 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GSPIEventBin())
         test_support.pickeling(self, gammalib.GSPIEventCube())
         test_support.pickeling(self, gammalib.GSPIInstDir())
+        test_support.pickeling(self, gammalib.GSPIModelDataSpace())
         test_support.pickeling(self, gammalib.GSPIObservation())
         test_support.pickeling(self, gammalib.GSPIResponse())
 
-        # Setup test (TODO: to be filled with meaningful values)
-        bin  = gammalib.GSPIEventBin()
-        cube = gammalib.GSPIEventCube()
-        dir  = gammalib.GSPIInstDir()
-        obs  = gammalib.GSPIObservation()
-        rsp  = gammalib.GSPIResponse()
+        # Setup test
+        dir = gammalib.GSkyDir()
+        dir.radec_deg(83.6331, 22.0145)
+        instdir = gammalib.GSPIInstDir(dir, 13)
+        obs = gammalib.GSPIObservation(self._og_dol)
+        model = gammalib.GSPIModelDataSpace(obs, 'GEDSAT', 'orbit', 0)
+        #
+        bin  = gammalib.GSPIEventBin()     # pickeling not yet implemented
+        cube = gammalib.GSPIEventCube()    # pickeling not yet implemented
+        rsp  = gammalib.GSPIResponse()     # pickeling not yet implemented
 
         # Perform pickeling tests of filled classes
         test_support.pickeling(self, gammalib.GSPIEventBin(bin))
         test_support.pickeling(self, gammalib.GSPIEventCube(cube))
-        test_support.pickeling(self, gammalib.GSPIInstDir(dir))
+        test_support.pickeling(self, gammalib.GSPIInstDir(instdir))
+        test_support.pickeling(self, gammalib.GSPIModelDataSpace(model))
         test_support.pickeling(self, gammalib.GSPIObservation(obs))
         test_support.pickeling(self, gammalib.GSPIResponse(rsp))
 

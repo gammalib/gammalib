@@ -280,9 +280,10 @@ void GSPIEventBin::init_members(void)
     m_dir->clear();
     m_time->clear();
     m_energy->clear();
-    *m_counts = 0.0;
-    *m_ontime = 0.0;
-    *m_size   = 0.0;
+    *m_counts   = 0.0;
+    *m_ontime   = 0.0;
+    *m_livetime = 0.0;
+    *m_size     = 0.0;
 
     // Return
     return;

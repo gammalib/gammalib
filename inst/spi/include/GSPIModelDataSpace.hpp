@@ -32,7 +32,6 @@
 #include <vector>
 #include "GModelData.hpp"
 #include "GModelPar.hpp"
-//#include "GSPIObservation.hpp"
 #include "GSPIEventCube.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -61,9 +60,9 @@ public:
     // Constructors and destructors
     GSPIModelDataSpace(void);
     GSPIModelDataSpace(const GSPIObservation& obs,
-                       const std::string& name,
-                       const std::string& method,
-                       const int& index);
+                       const std::string&     name,
+                       const std::string&     method,
+                       const int&             index);
     explicit GSPIModelDataSpace(const GXmlElement& xml);
     GSPIModelDataSpace(const GSPIModelDataSpace& model);
     virtual ~GSPIModelDataSpace(void);

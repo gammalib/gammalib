@@ -77,9 +77,13 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.classname()) # TODO: Replace by appropriate class members
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
         return state
     def __setstate__(self, state):
         self.__init__()
+        if gammalib.xml_get_attr('GSPIObservation.__setstate__', state[0], 'ObservationGroup', 'file') != '':
+            self.read(state[0])
 }
 };

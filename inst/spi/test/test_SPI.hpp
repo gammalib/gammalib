@@ -49,8 +49,13 @@ public:
     virtual void        set(void);
     virtual TestGSPI*   clone(void) const;
     virtual std::string classname(void) const { return "TestGSPI"; }
+    void                test_instdir(void);
+    void                test_eventbin(void);
+    void                test_eventcube(void);
+    void                test_modeldataspace(void);
     void                test_obs(void);
     void                test_response(void);
+    void                test_tools(void);
 };
 
 #endif /* TEST_SPI_HPP */

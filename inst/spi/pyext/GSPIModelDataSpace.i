@@ -43,9 +43,9 @@ public:
     // Constructors and destructors
     GSPIModelDataSpace(void);
     GSPIModelDataSpace(const GSPIObservation& obs,
-                       const std::string& name,
-                       const std::string& method,
-                       const int& index);
+                       const std::string&     name,
+                       const std::string&     method,
+                       const int&             index);
     explicit GSPIModelDataSpace(const GXmlElement& xml);
     GSPIModelDataSpace(const GSPIModelDataSpace& model);
     virtual ~GSPIModelDataSpace(void);
@@ -80,9 +80,14 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.classname()) # TODO: Replace by appropriate class members
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = (xml,)
         return state
     def __setstate__(self, state):
-        self.__init__()
+        if state[0][0].elements('parameter') == 0:
+            self.__init__()
+        else:
+            self.__init__(state[0][0])
 }
 };

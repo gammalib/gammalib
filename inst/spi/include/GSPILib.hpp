@@ -31,11 +31,12 @@
 #include "GammaLib.hpp"
 
 /* __ INTEGRAL/SPI specific headers ___________________________________________ */
-#include "GSPITools.hpp"
-#include "GSPIObservation.hpp"
 #include "GSPIEventBin.hpp"
 #include "GSPIEventCube.hpp"
 #include "GSPIInstDir.hpp"
+#include "GSPIModelDataSpace.hpp"
+#include "GSPIObservation.hpp"
 #include "GSPIResponse.hpp"
+#include "GSPITools.hpp"
 
 #endif /* GSPILIB_HPP */

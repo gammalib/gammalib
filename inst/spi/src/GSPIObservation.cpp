@@ -310,9 +310,9 @@ void GSPIObservation::write(GXmlElement& xml) const
     // Allocate XML element pointer
     GXmlElement* par;
 
-    // TODO: Write out all parameters. An example is shown below.
+    // Set ObservationGroup parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "ObservationGroup");
-    par->attribute("ObservationGroup", gammalib::xml_file_reduce(xml, m_filename));
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return
     return;
