@@ -693,12 +693,13 @@ double GResponse::irf_elliptical(const GEvent&       event,
  * source and observation. The method computes
  *
  * \f[
- *    {\tt irf}(p', E', t') = \sum_p M_{\rm S}(p | E, t) \,
+ *    {\tt irf}(p', E', t') = \sum_p M_{\rm S}(p | E, t) \, \Delta(p)
  *                                   R(p', E', t' | p, E, t)
  * \f]
  *
  * where
  * * \f$M_{\rm S}(p | E, t)\f$ is the diffuse model component,
+ * * \f$\Delta(p)\f$ is the solid angle of the map pixel
  * * \f$R(p', E', t' | p, E, t)\f$ is the Instrument Response Function (IRF),
  * * \f$p'\f$ is the measured instrument direction,
  * * \f$E'\f$ is the measured or reconstructed energy,
@@ -720,56 +721,123 @@ double GResponse::irf_diffuse(const GEvent&       event,
     // Initialise IRF
     double irf = 0.0;
 
+    // Get source attributes
+    const GEnergy& srcEng  = source.energy();
+    const GTime&   srcTime = source.time();
+
     // Initialise map
-    GSkyMap skymap;
+    //GSkyMap skymap;
 
     // If model is a diffuse map model then extract sky map
     const GModelSpatialDiffuseMap* map =
           dynamic_cast<const GModelSpatialDiffuseMap*>(source.model());
     if (map != NULL) {
-        skymap = map->map();
-    }
+
+        // Get reference to sky map
+        const GSkyMap& skymap = map->map();
+
+        // Loop over all sky map pixels
+        for (int i = 0; i < skymap.npix(); ++i) {
+
+            // Get map value
+            double value = skymap(i);
+
+            // Go to next pixel if map value is not positive
+            if (value <= 0.0) {
+                continue;
+            }
+
+            // Get sky direction
+            GSkyDir srcDir = skymap.inx2dir(i);
+
+            // Setup photon
+            GPhoton photon(srcDir, srcEng, srcTime);
+
+            // Add IRF multiplied by flux in map pixel. Since the map value
+            // is per steradian we have to multiply with the solid angle of
+            // the map pixel
+            irf += this->irf(event, photon, obs) * value * skymap.solidangle(i);
+
+        } // endfor: looped over all sky map pixels
+
+    } // endif: model was diffuse map
 
     // ... otherwise if model is a cube map model then extract sky map
     else {
         const GModelSpatialDiffuseCube* cube =
               dynamic_cast<const GModelSpatialDiffuseCube*>(source.model());
         if (cube != NULL) {
-            skymap = cube->cube();
-        }
+
+            // Get reference to sky cube
+            const GSkyMap& skymap = cube->cube();
+
+            // Loop over all sky map pixels
+            for (int i = 0; i < skymap.npix(); ++i) {
+
+                // Get sky direction
+                GSkyDir srcDir = skymap.inx2dir(i);
+
+                // Setup photon
+                GPhoton photon(srcDir, srcEng, srcTime);
+
+                // Get map value
+                double value = cube->eval(photon);
+
+                // Go to next pixel if map value is not positive
+                if (value <= 0.0) {
+                    continue;
+                }
+
+                // Add IRF multiplied by flux in map pixel. Since the map
+                // value is per steradian we have to multiply with the solid
+                // angle of the map pixel
+                irf += this->irf(event, photon, obs) * value * skymap.solidangle(i);
+
+            } // endfor: looped over all sky map pixels
+
+        } // endelse: model was diffuse cube
 
         // ... otherwise allocate all sky map with specified resolution
         else {
-            int    nx = int(360.0/m_irf_diffuse_resolution + 0.5);
-            int    ny = int(180.0/m_irf_diffuse_resolution + 0.5);
-            double dx = 360.0 / double(nx);
-            double dy = 180.0 / double(ny);
-            skymap    = GSkyMap("CAR", "CEL", 0.0, 0.0, -dx, dy, nx, ny);
-        }
 
-    } // endelse: model was not a diffuse map
+            // Allocate sky map
+            int     nx     = int(360.0/m_irf_diffuse_resolution + 0.5);
+            int     ny     = int(180.0/m_irf_diffuse_resolution + 0.5);
+            double  dx     = 360.0 / double(nx);
+            double  dy     = 180.0 / double(ny);
+            GSkyMap skymap = GSkyMap("CAR", "CEL", 0.0, 0.0, -dx, dy, nx, ny);
 
-    // Get pointer to diffuse model
-    const GModelSpatialDiffuse* model =
-          static_cast<const GModelSpatialDiffuse*>(source.model());
+            // Get pointer to diffuse model
+            const GModelSpatialDiffuse* model =
+                  static_cast<const GModelSpatialDiffuse*>(source.model());
 
-    // Get source attributes
-    const GEnergy& srcEng  = source.energy();
-    const GTime&   srcTime = source.time();
+            // Loop over all sky map pixels
+            for (int i = 0; i < skymap.npix(); ++i) {
 
-    // Loop over all sky map pixels
-    for (int i = 0; i < skymap.npix(); ++i) {
+                // Get sky direction
+                GSkyDir srcDir = skymap.inx2dir(i);
 
-        // Get sky direction
-        GSkyDir srcDir = skymap.inx2dir(i);
+                // Setup photon
+                GPhoton photon(srcDir, srcEng, srcTime);
 
-        // Setup photon
-        GPhoton photon(srcDir, srcEng, srcTime);
+                // Get model value
+                double value = model->eval(photon);
 
-        // Add IRF for photon
-        irf += this->irf(event, photon, obs) * model->eval(photon);
+                // Go to next pixel if map value is not positive
+                if (value <= 0.0) {
+                    continue;
+                }
 
-    }
+                // Add IRF multiplied by flux in map pixel. Since the map
+                // value is per steradian we have to multiply with the solid
+                // angle of the map pixel
+                irf += this->irf(event, photon, obs) * value * skymap.solidangle(i);
+
+            } // endfor: looped over sky map pixels
+
+        } // endelse: model was not a cube
+
+    } // endelse: model was not a map
 
     // Return IRF value
     return irf;
