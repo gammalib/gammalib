@@ -13,8 +13,8 @@ functions, are implemented as isolated and well defined modules sharing
 an identical abstract interface. This enables a joint multi-instrument
 analysis of data, allowing for consistent broad-band spectral fitting
 or imaging. So far, GammaLib supports analysis of data obtained with
-COMPTEL, Fermi/LAT, and Cherenkov telescopes (CTA, H.E.S.S., MAGIC,
-VERITAS).
+COMPTEL, Fermi/LAT, INTEGRAL/SPI and Cherenkov telescopes (CTA, H.E.S.S.,
+MAGIC, VERITAS).
 
 Except for HEASARC's cfitsio library that is used to implement
 the FITS interface, GammaLib does not rely on any third-party 

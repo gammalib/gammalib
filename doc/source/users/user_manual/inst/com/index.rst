@@ -6,6 +6,10 @@ COMPTEL interface
 Overview
 ~~~~~~~~
 
+The COMPTEL module provides an instrument interface for the COMPTEL 
+telescope that has been operated on the Compton Gamma-Ray Observatory 
+(CGRO) from 1991 to 2000.
+
 The following figure presents an overview over the C++ classes of the COMPTEL
 module and their relations.
 
@@ -16,10 +20,6 @@ module and their relations.
    :align: center
 
    *COMPTEL module*
-
-The COMPTEL module provides an instrument interface for the COMPTEL 
-telescope that has been operated on the Compton Gamma-Ray Observatory 
-(CGRO) from 1991 to 2000.
 
 The central object is a COMPTEL observation, implemented by the
 :doxy:`GCOMObservation` class. The class either holds a COMPTEL event cube,

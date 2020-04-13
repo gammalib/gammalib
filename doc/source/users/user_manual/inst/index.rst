@@ -9,4 +9,5 @@ Instrument modules
    cta/index
    lat/index
    com/index
+   spi/index
    mwl/index

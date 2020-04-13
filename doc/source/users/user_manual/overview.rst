@@ -73,7 +73,8 @@ correspond to the folders in the source code distribution):
 
    GammaLib support the analysis of data from the Cherenkov Telescope Array
    (cta), the Fermi/LAT telescope (lat), the COMPTEL telescope (com),
-   and any multi-wavelength information in form of spectral data points (mwl).
+   the INTEGRAL/SPI telescope (spi), and any multi-wavelength information
+   in form of spectral data points (mwl).
 
 .. _fig_structure:
 
