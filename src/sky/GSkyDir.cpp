@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.cpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@
 #include "GVector.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_POSANG                    "GSkyDir::posang(GSkyDir&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -507,7 +508,7 @@ void GSkyDir::sun(const GTime& time, const double& epoch)
     while (mean_longitude >= 360.0) {
         mean_longitude -= 360.0;
     }
-    
+
     // Compute the mean anomaly of the Sun in radians
     double mean_anomaly = (357.528 + 0.9856003 * n) * gammalib::deg2rad;
 
@@ -872,7 +873,7 @@ void GSkyDir::moon(const GTime& time, const double& epoch)
 
     // Add nutation in longitude
     geolong += nut_long / 3600.0;
-    
+
     // nutate, jd, nlong, elong
     // geolong= geolong + nlong/3.6d3
     // cirrange,geolong
@@ -1049,90 +1050,96 @@ double GSkyDir::cos_dist(const GSkyDir& dir) const
  * @brief Compute position angle between sky directions in radians
  *
  * @param[in] dir Sky direction.
- * @return Position angle in radians.
+ * @param[in] coordsys Coordinate system ("CEL" or "GAL")
+ * @return Position angle (rad).
  *
- * Computes the position angle using
- * \f[PA = \arctan \left( 
- *         \frac{\sin( \alpha_1 - \alpha_0 )}
- *              {\cos \delta_0 \tan \delta_1 -
- *               \sin \delta_0 \cos(\alpha_1 - \alpha_0)} \right)\f]
+ * Computes the position angle of a specified sky direction with respect to
+ * the sky direction of the instance in radians. If "CEL" is specified as
+ * @p coordsys the position angle is counted counterclockwise from celestial
+ * North, if "GAL" is specified the position angle is counted
+ * counterclockwise from Galactic North.
+ *
+ * If @p coordsys is "CEL" the position angle is computed using
+ *
+ * \f[PA = \arctan \left(
+ *         \frac{\sin( \alpha - \alpha_0 )}
+ *              {\cos \delta_0 \tan \delta -
+ *               \sin \delta_0 \cos(\alpha - \alpha_0)} \right)\f]
  * where
- * \f$(\alpha_0,\delta_0)\f$ are the coordinates of the reference point, and
- * \f$(\alpha_1,\delta_1)\f$ are the coordinates of sky direction for which
- * the position angle is to be computed.
+ * * \f$(\alpha_0,\delta_0)\f$ are the celestial coordinates of the instance,
+ *   and
+ * * \f$(\alpha,\delta)\f$ are the celestial coordinates of sky direction.
  *
- * The position angle is counted counterclockwise from north.
+ * If @p coordsys is "GAL" the position angle is computed using
+ *
+ * \f[PA = \arctan \left(
+ *         \frac{\sin( \l - \l_0 )}
+ *              {\cos \b_0 \tan \b - \sin \b_0 \cos(\l - \l_0)} \right)\f]
+ * where
+ * * \f$(\l_0,\l_0)\f$ are the Galactic coordinates of the instance,
+ *   and
+ * * \f$(\l,\b)\f$ are the Galactic coordinates of sky direction.
  ***************************************************************************/
-double GSkyDir::posang(const GSkyDir& dir) const
+double GSkyDir::posang(const GSkyDir& dir, const std::string& coordsys) const
 {
     // Initialise arguments of arctan
     double arg_1;
     double arg_2;
 
-    // Compute dependent on coordinate system availability. This speeds
-    // up things by avoiding unnecessary coordinate transformations.
-    if (m_has_lb) {
-        #if defined(G_SINCOS_CACHE)
-        if (!m_has_lb_cache) {
-            m_has_lb_cache = true;
-            m_sin_b        = std::sin(m_b);
-            m_cos_b        = std::cos(m_b);
-        }
-        #endif
-        if (dir.m_has_lb) {
-            arg_1 = std::sin(dir.m_l - m_l);
-            #if defined(G_SINCOS_CACHE)
-            arg_2 = m_cos_b * std::tan(dir.m_b) -
-                    m_sin_b * std::cos(dir.m_l - m_l);
-            #else
-            arg_2 = std::cos(m_b) * std::tan(dir.m_b) -
-                    std::sin(m_b) * std::cos(dir.m_l - m_l);
-            #endif
-        }
-        else {
-            arg_1 = std::sin(dir.l() - m_l);
-            #if defined(G_SINCOS_CACHE)
-            arg_2 = m_cos_b * std::tan(dir.b()) -
-                    m_sin_b * std::cos(dir.l() - m_l);
-            #else
-            arg_2 = std::cos(m_b) * std::tan(dir.b()) -
-                    std::sin(m_b) * std::cos(dir.l() - m_l);
-            #endif
-        }
-    }
-    else if (m_has_radec) {
+    // Case A: Computation in celestial coordinates
+    if (coordsys == "CEL") {
+
+        // If required then compute sin(dec) and cos(dec) cache values
         #if defined(G_SINCOS_CACHE)
         if (!m_has_radec_cache) {
             m_has_radec_cache = true;
-            m_sin_dec         = std::sin(m_dec);
-            m_cos_dec         = std::cos(m_dec);
+            m_sin_dec         = std::sin(dec());
+            m_cos_dec         = std::cos(dec());
         }
         #endif
-        if (dir.m_has_radec) {
-            arg_1 = std::sin(dir.m_ra - m_ra);
-            #if defined(G_SINCOS_CACHE)
-            arg_2 = m_cos_dec * std::tan(dir.m_dec) -
-                    m_sin_dec * std::cos(dir.m_ra - m_ra);
-            #else
-            arg_2 = std::cos(m_dec) * std::tan(dir.m_dec) -
-                    std::sin(m_dec) * std::cos(dir.m_ra - m_ra);
-            #endif
-        }
-        else {
-            arg_1 = std::sin(dir.ra() - m_ra);
-            #if defined(G_SINCOS_CACHE)
-            arg_2 = m_cos_dec * std::tan(dir.dec()) -
-                    m_sin_dec * std::cos(dir.ra() - m_ra);
-            #else
-            arg_2 = std::cos(m_dec) * std::tan(dir.dec()) -
-                    std::sin(m_dec) * std::cos(dir.ra() - m_ra);
-            #endif
-        }
-    }
-    else {
+
+        // Compute arguments of arctan
         arg_1 = std::sin(dir.ra() - ra());
-        arg_2 = std::cos(dec())*std::tan(dir.dec()) -
-                std::sin(dec())*std::cos(dir.ra() - ra());
+        #if defined(G_SINCOS_CACHE)
+        arg_2 = m_cos_dec * std::tan(dir.dec()) -
+                m_sin_dec * std::cos(dir.ra() - ra());
+        #else
+        arg_2 = std::cos(dec()) * std::tan(dir.dec()) -
+                std::sin(dec()) * std::cos(dir.ra() - ra());
+        #endif
+
+    } // endif: computation in celestial coordinates
+
+    // Case B: Computation in Galactic coordinates
+    else if (coordsys == "GAL") {
+
+        // If required then compute sin(b) and cos(b) cache values
+        #if defined(G_SINCOS_CACHE)
+        if (!m_has_lb_cache) {
+            m_has_lb_cache = true;
+            m_sin_b        = std::sin(b());
+            m_cos_b        = std::cos(b());
+        }
+        #endif
+
+        // Compute arguments of arctan
+        arg_1 = std::sin(dir.l() - l());
+        #if defined(G_SINCOS_CACHE)
+        arg_2 = m_cos_b * std::tan(dir.b()) -
+                m_sin_b * std::cos(dir.l() - l());
+        #else
+        arg_2 = std::cos(b()) * std::tan(dir.b()) -
+                std::sin(b()) * std::cos(dir.l() - l());
+        #endif
+
+    } // endelse: computation in Galactic coordinates
+
+    // ... otherwise throw an exception
+    else {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_POSANG, msg);
     }
 
     // Compute position angle

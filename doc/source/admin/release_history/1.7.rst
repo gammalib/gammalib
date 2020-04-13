@@ -12,12 +12,14 @@ In particular, this release provides:
 
 * Support for INTEGRAL/SPI data analysis
 * Response caching for all instruments
-* Support for extended models for all instruments
+* ...
 
 
 Bug fixes
 ---------
 
+* [`3199 <https://cta-redmine.irap.omp.eu/issues/3199>`_] -
+  Fix ambiguity problem in ``GSkyDir::posang()`` and ``GSkyDir::posang_deg()``
 * [`3126 <https://cta-redmine.irap.omp.eu/issues/3126>`_] -
   Avoid rounding errors in ``GSkyMap`` operators.
 * [`3012 <https://cta-redmine.irap.omp.eu/issues/3012>`_] -

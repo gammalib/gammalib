@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.cpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1407,7 +1407,7 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
     // Compute angle between model centre and measured photon direction and
     // position angle (radians)
     double rho_obs      = model->dir().dist(obsDir);
-    double posangle_obs = model->dir().posang(obsDir);
+    double posangle_obs = model->dir().posang(obsDir); // Celestial
 
     // Get livetime (in seconds)
     double livetime = exposure().livetime();

@@ -315,13 +315,45 @@ void TestGSky::test_GSkyDir(void)
     test_value(dir2.l_deg(),   184.55745, "Longitude of Crab");
     test_value(dir2.b_deg(),    -5.78436, "Latitude of Crab");
 
-    // Test precess method
+    // Test precess() method
     dir2.precess(2000.0, 1950.0);
     test_value(dir2.ra_deg(),  82.88086799, "Right Ascension of Crab (epoch 1950)");
     test_value(dir2.dec_deg(), 21.98181049, "Declination of Crab (epoch 1950)");
     dir2.precess(1950.0, 2000.0);
     test_value(dir2.ra_deg(),  83.633083, "Right Ascension of Crab");
     test_value(dir2.dec_deg(), 22.0145,   "Declination of Crab");
+
+    // Test posang() and posang_deg() methods
+    dir1.radec_deg(0.0,  0.0);
+    dir2.radec_deg(0.0, 10.0);
+    test_value(dir1.posang(dir2), 0.0, "1. Position angle posang()");
+    test_value(dir1.posang(dir2, "CEL"), 0.0, "2. Position angle posang(CEL)");
+    test_value(dir1.posang(dir2, "GAL"), 0.4098000, "3. Position angle posang(GAL)");
+    test_value(dir1.posang_deg(dir2), 0.0, "4. Position angle posang_deg()");
+    test_value(dir1.posang_deg(dir2, "CEL"), 0.0, "5. Position angle posang_deg(CEL)");
+    test_value(dir1.posang_deg(dir2, "GAL"), 23.47981, "6. Position angle posang_deg(GAL)");
+    dir2.radec_deg(90.0, 0.0);
+    test_value(dir1.posang(dir2), 1.5707963, "7. Position angle posang()");
+    test_value(dir1.posang(dir2, "CEL"), 1.5707963, "8. Position angle posang(CEL)");
+    test_value(dir1.posang(dir2, "GAL"), 1.9805963, "9. Position angle posang(GAL)");
+    test_value(dir1.posang_deg(dir2), 90.0, "10. Position angle posang_deg()");
+    test_value(dir1.posang_deg(dir2, "CEL"), 90.0, "11. Position angle posang_deg(CEL)");
+    test_value(dir1.posang_deg(dir2, "GAL"), 113.47981, "12. Position angle posang_deg(GAL)");
+    dir1.lb_deg(0.0,  0.0);
+    dir2.lb_deg(0.0, 10.0);
+    test_value(dir1.posang(dir2), -1.0227397, "13. Position angle posang()");
+    test_value(dir1.posang(dir2, "CEL"), -1.0227397, "14. Position angle posang(CEL)");
+    test_value(dir1.posang(dir2, "GAL"), 0.0, "15. Position angle posang(GAL)");
+    test_value(dir1.posang_deg(dir2), -58.5986663, "16. Position angle posang_deg()");
+    test_value(dir1.posang_deg(dir2, "CEL"), -58.5986663, "17. Position angle posang_deg(CEL)");
+    test_value(dir1.posang_deg(dir2, "GAL"), 0.0, "18. Position angle posang_deg(GAL)");
+    dir2.lb_deg(90.0, 0.0);
+    test_value(dir1.posang(dir2), 0.5480567, "19. Position angle posang()");
+    test_value(dir1.posang(dir2, "CEL"), 0.5480567, "20. Position angle posang(CEL)");
+    test_value(dir1.posang(dir2, "GAL"), 1.5707963, "21. Position angle posang(GAL)");
+    test_value(dir1.posang_deg(dir2), 31.4013337, "22. Position angle posang_deg()");
+    test_value(dir1.posang_deg(dir2, "CEL"), 31.4013337, "23. Position angle posang_deg(CEL)");
+    test_value(dir1.posang_deg(dir2, "GAL"), 90.0, "24. Position angle posang_deg(GAL)");
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMOad.hpp - COMPTEL Orbit Aspect Data class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knodlseder                               *
+ *  copyright (C) 2017-2020 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -409,12 +409,11 @@ double GCOMOad::theta(const GSkyDir& sky) const
 inline
 double GCOMOad::phi(const GSkyDir& sky) const
 {
-    // If position angle has not be initialised the do it now
+    // If position angle has not be initialised then do it now
     if (m_posang > 1.0e20) {
-        m_posang = m_zaxis.posang_deg(m_xaxis);
+        m_posang = m_zaxis.posang_deg(m_xaxis); // Celestial system
     }
-    //return (m_zaxis.posang_deg(m_xaxis) - m_zaxis.posang_deg(sky));
-    return (m_posang - m_zaxis.posang_deg(sky));
+    return (m_posang - m_zaxis.posang_deg(sky)); // Celestial system
 }
 
 #endif /* GCOMOAD_HPP */

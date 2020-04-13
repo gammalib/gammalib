@@ -1582,7 +1582,7 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
 
                     // Compute position of pixel centre in instrument coordinates
                     double theta = obsdir.dist(pixdir);
-                    double phi   = obsdir.posang(pixdir);
+                    double phi   = obsdir.posang(pixdir); // Celestial system
 
                     // Add up effective area
                     m_arf[i] += rsp.aeff(theta, phi,
@@ -2068,7 +2068,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
 
                 // Compute position of pixel centre in instrument coordinates
                 double theta = obsdir.dist(pixdir);
-                double phi   = obsdir.posang(pixdir);
+                double phi   = obsdir.posang(pixdir); // Celestial system
 
                 // Loop over true energy
                 for (int itrue = 0; itrue < ntrue; ++itrue) {

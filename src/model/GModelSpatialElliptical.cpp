@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialElliptical.cpp - Abstract elliptical spatial model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -176,7 +176,7 @@ double GModelSpatialElliptical::eval(const GPhoton& photon,
     // Compute distance from source and position angle (in radians)
     const GSkyDir& srcDir = photon.dir();
     double         theta  = dir().dist(srcDir);
-    double         posang = dir().posang(srcDir);
+    double         posang = dir().posang(srcDir); // Celestial system
 
     // Evaluate model
     double value = eval(theta, posang, photon.energy(), photon.time(), gradients);

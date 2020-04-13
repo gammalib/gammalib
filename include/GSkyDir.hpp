@@ -87,8 +87,8 @@ public:
     void          rotate(const double& phi, const double& theta);
     void          rotate_deg(const double& phi, const double& theta);
     void          precess(const double& from_epoch, const double& to_epoch);
-    void          sun(const GTime& time, const double& epoch = 2000.0);
-    void          moon(const GTime& time, const double& epoch = 2000.0);
+    void          sun(const GTime&  time,  const double& epoch = 2000.0);
+    void          moon(const GTime&  time, const double& epoch = 2000.0);
     const double& l(void) const;
     const double& b(void) const;
     const double& ra(void) const;
@@ -101,8 +101,10 @@ public:
     double        cos_dist(const GSkyDir& dir) const;
     double        dist(const GSkyDir& dir) const;
     double        dist_deg(const GSkyDir& dir) const;
-    double        posang(const GSkyDir& dir) const;
-    double        posang_deg(const GSkyDir& dir) const;
+    double        posang(const GSkyDir&     dir,
+                         const std::string& coordsys = "CEL") const;
+    double        posang_deg(const GSkyDir&     dir,
+                             const std::string& coordsys = "CEL") const;
     std::string   print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -289,17 +291,23 @@ double GSkyDir::dist_deg(const GSkyDir& dir) const
  * @brief Compute position angle between sky directions in degrees
  *
  * @param[in] dir Sky direction.
- * @return Position angle in degrees.
+ * @param[in] coordsys Coordinate system ("CEL" or "GAL")
+ * @return Position angle (deg).
  *
- * Returns the position angle of a sky direction in degrees.
+ * Computes the position angle of a specified sky direction with respect to
+ * the sky direction of the instance in degrees. If "CEL" is specified as
+ * @p coordsys the position angle is counted counterclockwise from celestial
+ * North, if "GAL" is specified the position angle is counted
+ * counterclockwise from Galactic North.
  *
  * See the posang() method for more information about the computation of the
  * position angle.
  ***************************************************************************/
 inline
-double GSkyDir::posang_deg(const GSkyDir& dir) const
+double GSkyDir::posang_deg(const GSkyDir&     dir,
+                           const std::string& coordsys) const
 {
-    return (posang(dir) * gammalib::rad2deg);
+    return (posang(dir, coordsys) * gammalib::rad2deg);
 }
 
 #endif /* GSKYDIR_HPP */

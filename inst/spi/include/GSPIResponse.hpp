@@ -130,7 +130,7 @@ private:
 
     // Private cache
     std::vector<GSkyDir> m_spix;         //!< SPI pointing direction
-    std::vector<double>  m_posang;       //!< Position angle of Y axis (radians)
+    std::vector<double>  m_posang;       //!< Position angle of Y axis (CEL, radians)
     mutable bool         m_has_wcs;      //!< Has WCS information
     mutable double       m_wcs_xmin;     //!< Minimum X value (radians)
     mutable double       m_wcs_ymin;     //!< Minimum Y value (radians)
@@ -241,7 +241,7 @@ double GSPIResponse::zenith(const int& ipt, const GSkyDir& dir) const
 inline
 double GSPIResponse::azimuth(const int& ipt, const GSkyDir& dir) const
 {
-    double azimuth = m_posang[ipt] - m_spix[ipt].posang(dir);
+    double azimuth = m_posang[ipt] - m_spix[ipt].posang(dir); // Celestial system
     if (azimuth < 0.0) {
         azimuth += gammalib::twopi;
     }

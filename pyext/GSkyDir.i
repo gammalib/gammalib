@@ -55,8 +55,8 @@ public:
     void          rotate(const double& phi, const double& theta);
     void          rotate_deg(const double& phi, const double& theta);
     void          precess(const double& from_epoch, const double& to_epoch);
-    void          sun(const GTime& time, const double& epoch = gammalib::epoch2000);
-    void          moon(const GTime& time, const double& epoch = gammalib::epoch2000);
+    void          sun(const GTime&  time,  const double& epoch = 2000.0);
+    void          moon(const GTime&  time, const double& epoch = 2000.0);
     const double& l(void) const;
     const double& b(void) const;
     const double& ra(void) const;
@@ -69,8 +69,10 @@ public:
     double        cos_dist(const GSkyDir& dir) const;
     double        dist(const GSkyDir& dir) const;
     double        dist_deg(const GSkyDir& dir) const;
-    double        posang(const GSkyDir& dir) const;
-    double        posang_deg(const GSkyDir& dir) const;
+    double        posang(const GSkyDir&     dir,
+                         const std::string& coordsys = "CEL") const;
+    double        posang_deg(const GSkyDir&     dir,
+                             const std::string& coordsys = "CEL") const;
 };
 
 

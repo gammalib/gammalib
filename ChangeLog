@@ -1,8 +1,9 @@
-2020-02-17
+2020-04-13
 
         * Version 1.7.0 released
         ========================
 
+        Fix ambiguity problem in GSkyDir::posang() and posang_deg() (#3199)
         Avoid rounding errors in GSkyMap operators (#3126)
         Add GObservations::npred() methods (#3062)
         Exclude upper edge boundary in GSkyMap::contains() method (#3012)

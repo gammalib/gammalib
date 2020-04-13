@@ -727,10 +727,6 @@ void GSPIResponse::init_members(void)
     m_wcs_ypix_max = 0.0;
     m_max_zenith   = 180.0 * gammalib::deg2rad;
 
-    // Set energy scale for response cache to MeV
-    //m_irf_cache.energy_scale(GEnergy(1.0, "MeV"));
-    //m_nroi_cache.energy_scale(GEnergy(1.0, "MeV"));
-
     // Return
     return;
 }
@@ -1287,7 +1283,7 @@ void GSPIResponse::set_cache(const GSPIEventCube* cube)
     // Loop over all pointings
     for (int ipt = 0; ipt < npt; ++ipt) {
 
-        // Compute position angle
+        // Compute position angle is celestial coordinates
         double posang = cube->spi_x(ipt).posang(cube->spi_z(ipt)) + gammalib::pihalf;
 
         // Store angles

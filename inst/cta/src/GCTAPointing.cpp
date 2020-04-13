@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.cpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -262,7 +262,7 @@ GCTAInstDir GCTAPointing::instdir(const GSkyDir& skydir) const
 	}
     #else
     double theta = m_dir.dist(skydir);
-    double phi   = m_dir.posang(skydir);
+    double phi   = m_dir.posang(skydir); // Celestial system
     double detx(0.0);
     double dety(0.0);
 	if (theta > 0.0 ) {

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-11 April 2020
+13 April 2020
 
 
 1. Introduction
@@ -56,6 +56,8 @@ The following methods have been renamed:
 
 The arguments for the following methods have been changed:
 - GTime::utc(int&) - Add optional precision value
+- GSkyDir::posang(GSkyDir&, std::string&) - Add optional coordinate system string
+- GSkyDir::posang_dir(GSkyDir&, std::string&) - Add optional coordinate system string
 
 The return value of the following methods has been changed:
 - none
@@ -142,6 +144,11 @@ None
 
 12. Sky module
 --------------
+The position angle is now computed by GSkyDir::posang() and GSkyDir::posang_deg()
+for the coordinate system that is specified by the coordsys argument. By default
+this argument is set to "CEL", hence by default the methods return the position
+angle with respect to celestial coordinates (#3199).
+
 The GSkyMap operators used the sky map value access operator that bi-linearly
 interpolates sky map values even for maps with identical definition. This could
 lead to rounding errors. For maps with identical definition the operators now

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2519,12 +2519,12 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     // centre and position angle of observed photon direction seen from the
     // model centre [radians]
     double rho_obs      = centre.dist(obsDir);
-    double posangle_obs = centre.posang(obsDir);
+    double posangle_obs = centre.posang(obsDir); // Celestial system
 
     // Determine angular distance between model centre and pointing direction
     // [radians]
     double rho_pnt      = centre.dist(pnt.dir());
-    double posangle_pnt = centre.posang(pnt.dir());
+    double posangle_pnt = centre.posang(pnt.dir()); // Celestial system
 
     // Compute azimuth angle of pointing in model coordinate system [radians]
     double omega_pnt = posangle_pnt - posangle_obs;
@@ -2957,7 +2957,7 @@ double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
 
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
-        double omega0 = centre.posang(roi.centre().dir());
+        double omega0 = centre.posang(roi.centre().dir()); // Celestial system
 
         // Setup integration kernel
         cta_nroi_radial_kern_rho integrand(this,
@@ -3162,7 +3162,7 @@ double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
 
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
-        double posangle_roi = centre.posang(roi.centre().dir());
+        double posangle_roi = centre.posang(roi.centre().dir()); // Celestial system
 
         // Setup integration kernel
         cta_nroi_elliptical_kern_rho integrand(this,
