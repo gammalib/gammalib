@@ -1,0 +1,263 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Response computations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{}}
+\newcommand{\doctype}{\mbox{Response computations}}
+\newcommand{\reference}{\mbox{GammaLib-TN0003}}
+\newcommand{\version}{\mbox{1.0}}
+\newcommand{\calendar}{\mbox{11 April 2020}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{technote}
+\usepackage{url}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Scope
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Scope}
+
+This technical note suggests a modification of the response computation that is useful for binned
+analysis and that can lead to a speed-up of the model fitting of extended models.
+The note relates to the Redmine issue 3203 (see \url{https://cta-redmine.irap.omp.eu/issues/3203}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Current implementation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Current implementation}
+
+The {\tt GObservation::likelihood\_poisson\_binned()} method computes the log-likelihood,
+gradients and curvature matrix using the following formulae:
+\begin{equation}
+-\ln L = \sum_i n_i \ln e_i - e_i
+\label{eq:eventloop}
+\end{equation}
+\begin{equation}
+\frac{\partial \ln L}{\partial a_l} = \sum_i \left(1- \frac{n_i}{e_i} \right)\frac{\partial e_i}{\partial a_l}
+\label{eq:gradient}
+\end{equation}
+\begin{equation}
+\frac{\partial^2 \ln L}{\partial a_l \partial a_m} = \sum_i \left(\frac{n_i}{e_i^2}\right)\frac{\partial e_i}{\partial a_l}\frac{\partial e_i}{\partial a_m}
+\end{equation}
+with $n_i$ being the number of observed events and $e_i$ the number of predicted events, and $a_l$
+the model parameters.
+Now
+\begin{equation}
+e_i = \tilde{e}_i \times \Delta_i
+\end{equation}
+\begin{equation}
+\frac{\partial e_i}{\partial a_l} = \frac{\partial \tilde{e}_i}{\partial a_l} \times \Delta_i
+\end{equation}
+where $\Delta_i$ is the bin size of event $i$ and
+\begin{equation}
+\tilde{e}_i = \sum_k M_{k,e}(E) \times M_{k,t}(t) \times \int_p M_{k,p}(p) R_i(p,E,t) dp
+\end{equation}
+for a sky model, with $R_i(p,E,t)$ being the Instrument Response Function, and
+$M_{k,e}(E)$, $M_{k,t}(t)$ and $M_{k,p}(p)$ the spectral, temporal and spatial components of the
+sky model.
+The gradients for spectral parameters are computed using
+\begin{equation}
+\frac{\partial \tilde{e}_i}{\partial a_l} = \sum_k M_{k,t}(t) \times \frac{\partial M_{k,e}(E)}{\partial a_l} \times \int_p M_{k,p}(p) R_i(p,E,t) dp
+\end{equation}
+and for temporal parameters using
+\begin{equation}
+\frac{\partial \tilde{e}_i}{\partial a_l} = \sum_k M_{k,e}(E) \times \frac{\partial M_{k,t}(t)}{\partial a_l} \times \int_p M_{k,p}(p) R_i(p,E,t) dp
+\end{equation}
+For spatial parameters no analytical computation is possible and the gradients are computed using a difference method
+\begin{equation}
+\frac{\partial \tilde{e}_i}{\partial a_l} = \sum_k \frac{
+M_{k,e}(E) M_{k,t}(t) \int_p M_{k,p}(p|a_l + h) R_i(p,E,t) dp - 
+M_{k,e}(E) M_{k,t}(t) \int_p M_{k,p}(p|a_l - h) R_i(p,E,t) dp}{2 h}
+\end{equation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Modifications for binned analysis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Modifications for binned analysis}
+
+The costly factor in model fitting of extended models is the evaluation of the integrals
+\begin{equation}
+I_{i,k} = \int_p M_{k,p}(p) R_i(p,E,t) dp
+\label{eq:convolution}
+\end{equation}
+hence the convolution of a spatial model with the Instrument Response Function $R_i(p,E,t)$.
+In the current implementation this convolution is done independently for every event.
+
+The most time-consuming part in the evaluation of the integral are the coordinate transforms that map 
+$p'$ into $p$, and to transform from the sky system to a local system of the model (or the instrument).
+For binned analysis, many events share the same $p'$ (for example all events in a same spatial pixel
+but with different energies).
+Hence computation time can be saved when doing the coordinate transform only once for all events that
+share the same spatial direction.
+Eq.~\ref{eq:convolution} should therefore be evaluated for bunches of events.
+
+Since the likelihood computation needs to sum the contribution for each event (see Eq.~\ref{eq:eventloop})
+the evaluation of event bunches cannot be done within the event loop.
+Some pre computation is needed before entering the computation of Eq.~\ref{eq:eventloop}.
+
+Here is a possible scheme that could be implemented:
+\begin{itemize}
+\item Before entering the event loop, {\tt GObservation::likelihood\_poisson\_binned()} pre computes
+the integrals $I_{i,k}$ for all sky models. In case that a sky model has free parameters, also the
+gradients $\frac{\partial I_{i,k}}{\partial a_l}$ with respect to all free parameters $a_l$ are pre
+computed.
+\item The {\tt GResponse::eval\_prob()} method checks whether for a given model pre computed
+$I_{i,k}$ are available. If yes, instead of calling {\tt GResponse::irf\_spatial} the method will use
+the pre computed $I_{i,k}$.
+\item The {\tt GResponse::eval\_prob()} method deals also with the numerical computation of the
+gradients $\frac{\partial I_{i,k}}{\partial a_l}$ for all free sky model parameters. This allows to use the pre
+computed gradients $\frac{\partial I_{i,k}}{\partial a_l}$ instead. For all parameters for which
+spatial gradients exist, {\tt GResponse::eval\_prob()} will set the {\tt has\_grad()} flag, so that
+numerical gradients are no longer computed in {\tt GObservation::model()}.
+\end{itemize}
+
+In the case that energy dispersion should be considered, $I_{i,k}$ and $\frac{\partial I_{i,k}}{\partial a_l}$
+would be needed for an important number of true photon energies (33 in the current implementation).
+This would be very likely unmanageable.
+An approximation can be made, however, that uses the measured energy $E'$ instead of the true
+energy $E$ for the computation of Eq.~\ref{eq:convolution}.
+Energy dispersion would still be applied for the spectral model component, yet it would be assumed
+that the $I_{i,k}$ and $\frac{\partial I_{i,k}}{\partial a_l}$ would be constant under small variations of $E$.
+In that case the energy dispersion integration should be moved from {\tt GResponse::convolve()} to
+{\tt GResponse::eval\_prob()} so that it only applies to the spectral part of the model, and consequently,
+the spectral gradients should be also computed numerically in this modified {\tt GResponse::eval\_prob()}
+method.
+Then, the special treatment for energy dispersion in {\tt GObservation::model()}, where for the moment all
+gradients are computed numerically, will not be needed anymore.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Implementing pre computation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementing pre computation}
+
+Currently, Eq.~\ref{eq:convolution} is computed for every event using the method
+\begin{verbatim}
+virtual double irf_spatial(const GEvent&       event,
+                           const GSource&      source,
+                           const GObservation& obs) const;
+\end{verbatim}
+To benefit from common computations for all events a method needs to be implemented returning
+a vector $I_{i,k}$ for all events in an observation
+\begin{verbatim}
+virtual GVector irf_spatial(const GSource&      source,
+                            const GObservation& obs) const;
+\end{verbatim}
+This would have the advantage that the event loop can be put in the innermost possible place, avoiding
+to repeat any computations that do not need to be repeated for every event.
+This means that a the class {\tt GIntegral}, that is widely used for the IRF integration, must be extended
+to support vector integration.
+Specifically, it must provide a method
+\begin{verbatim}
+GVector GIntegral::trapzd(const double& a,
+                          const double& b, 
+                          const int&    n,
+                          GVector       result);
+\end{verbatim}
+and a method
+\begin{verbatim}
+GVector GIntegral::romberg_vector(const double& a,
+                                  const double& b,
+                                  const int&    order)
+\end{verbatim}
+to support vector integration.
+Furthermore, a new class {\tt GFunctions} is needed that provides 
+\begin{verbatim}
+virtual GVector eval(const double& x) = 0;
+\end{verbatim}
+and that can be used to implement the integration kernels.
+{\tt GIntegral} must be able to hold a pointer to such a kernel, and constructor and kernel access
+methods need to be added:
+\begin{verbatim}
+explicit GIntegral(GFunctions* kernel);
+void              kernel(GFunctions* kernel);
+const GFunctions* kernel(void) const;
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Gradients of spatial parameters
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gradients of spatial parameters}
+
+Using the definition of the gradient
+\begin{equation}
+\frac{\partial f(x)}{\partial x} = \lim\limits_{h \rightarrow 0} \frac{f(x+h) - f(x-h)}{2h}
+\end{equation}
+and applying the integral sum rule
+\begin{equation}
+\int f(x) + g(x) dx = \int f(x) dx + \int g(x) fx
+\end{equation}
+one can write
+\begin{eqnarray}
+\frac{\partial I_{i,k}}{\partial a_l} & = & \lim\limits_{h \rightarrow 0} \frac{\int_p M_{k,p}(p|a_l + h) R_i(p,E,t) dp - \int_p M_{k,p}(p|a_l - h) R_i(p,E,t) dp}{2h} \\
+& = & \lim\limits_{h \rightarrow 0} \frac{\int_p \left( M_{k,p}(p|a_l + h) - M_{k,p}(p|a_l - h) \right) R_i(p,E,t) dp}{2h} \\
+& = & \lim\limits_{h \rightarrow 0} \int_p \frac{M_{k,p}(p|a_l + h) - M_{k,p}(p|a_l - h)}{2h} R_i(p,E,t) dp \\
+& = & \int_p \frac{\partial M_{k,p}(p)}{\partial a_l} R_i(p,E,t) dp
+\end{eqnarray}
+In other words, the gradients of the spatial parameters are simply the model gradients integrated
+over the kernel of the response functions.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Point source}
+
+The point source can be considered as a Dirac function $\delta(x-x_0)$, where $x_0$ is the
+location of the source in one dimension.
+Using
+\begin{equation}
+f(x) \delta'(x) = -f'(x) \delta(x)
+\end{equation}
+and
+\begin{equation}
+\int f(x) \delta(x) = f(0)
+\end{equation}
+it follows
+\begin{equation}
+\int f(x) \delta'(x) = -\int f'(x) \delta(x) = -f'(0)
+\end{equation}
+and hence
+\begin{equation}
+\frac{\partial I_{i,k}}{\partial a_l} = -\frac{\partial R_i(p,E,t)}{\partial p}
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Gaussian source}
+
+\begin{equation}
+f(x) = \frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}
+\end{equation}
+\begin{equation}
+\frac{\partial f(x)}{\partial \mu} = \frac{1}{\sigma^2 \sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2} = \frac{1}{\sigma}f(x)
+\end{equation}
+\begin{equation}
+\frac{\partial f(x)}{\partial \sigma} = \frac{-1}{\sigma^2 \sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}  +
+\frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2} \frac{x-\mu}{\sigma^2} =
+f(x) \left( \frac{x-\mu}{\sigma^2} - \frac{1}{\sigma} \right)
+\end{equation}
+
+
+
+\end{document}
+
