@@ -59,6 +59,17 @@ New features
 
 * [`2961 <https://cta-redmine.irap.omp.eu/issues/2961>`_] -
   Change order of Python module import.
+* [`733 <https://cta-redmine.irap.omp.eu/issues/733>`_]
+  [`734 <https://cta-redmine.irap.omp.eu/issues/734>`_]
+  [`735 <https://cta-redmine.irap.omp.eu/issues/735>`_]
+  [`736 <https://cta-redmine.irap.omp.eu/issues/736>`_]
+  [`740 <https://cta-redmine.irap.omp.eu/issues/740>`_]
+  [`742 <https://cta-redmine.irap.omp.eu/issues/742>`_]
+  [`745 <https://cta-redmine.irap.omp.eu/issues/745>`_]
+  [`746 <https://cta-redmine.irap.omp.eu/issues/746>`_] -
+  Implement INTEGRAL/SPI instrument interface.
+* [`742 <https://cta-redmine.irap.omp.eu/issues/742>`_] -
+  Implement ``GSPIResponse`` class.
 
 
 Clean up

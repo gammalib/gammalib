@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-13 April 2020
+14 April 2020
 
 
 1. Introduction
@@ -13,6 +13,12 @@ made since the last release of GammaLib.
 ---------------------------------
 The following classes have been added:
 - GResponseCache
+- GSPIEventBin
+- GSPIEventCube
+- GSPIInstDir
+- GSPIModelDataSpace
+- GSPIObservation
+- GSPIResponse
 
 The following classes have been removed:
 - GCTAResponseCache
@@ -240,3 +246,10 @@ Add GCOMTim::write() and GCOMTim::save() methods for writing and saving TIM
 datasets (#2973).
 
 Correctly write model attributes in GCOMModelDRBFitting class.
+
+
+22. INTEGRAL/SPI interface
+--------------------------
+Add instrument module for INTEGRAL/SPI to analyse and specifically fit data from
+the SPI telescope aboard ESA's INTEGRAL mission (#733, #734, #735, #736, #740,
+#742, #745, #746).
