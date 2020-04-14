@@ -36,9 +36,11 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir   = std::getenv("TEST_SPI_DATA");
-const std::string spi_caldb = datadir + "/../../caldb";
-const std::string og_dol    = datadir+"/obs/og_spi.fits";
+const std::string datadir          = std::getenv("TEST_SPI_DATA");
+const std::string spi_caldb        = datadir + "/../../caldb";
+const std::string og_dol           = datadir+"/obs/og_spi.fits";
+const std::string spi_model        = datadir+"/models.xml";
+const std::string spi_model_noinit = datadir+"/models_noinit.xml";
 
 
 /***********************************************************************//**
@@ -252,49 +254,88 @@ void TestGSPI::test_modeldataspace(void)
     GSPIModelDataSpace model3(*xml.element(0));
     test_value(model3.type(), "DataSpace", "XML constructed instance type");
     test_value(model3.size(), 1, "XML constructed ORBIT instance size");
-    test_value(model3.instruments(), "SPI", "XML constructed ORBIT instance instruments");
+    test_value(model3.instruments(), "SPI",
+               "XML constructed ORBIT instance instruments");
     test_value(model3.name(), "GEDSAT", "ORBIT instance name");
-    test_value(model3[0].name(), "GEDSAT O0044", "XML constructed ORBIT instance parameter");
+    test_value(model3[0].name(), "GEDSAT O0044",
+               "XML constructed ORBIT instance parameter");
 
     // Construct "orbit,dete" model from OG
     GSPIModelDataSpace model4(obs, "GEDSAT", "orbit,dete", 0);
     test_value(model4.size(), 19, "ORBIT,DETE instance size");
-    test_value(model4[1].name(), "GEDSAT D001 O0044", "ORBIT,DETE instance parameter");
+    test_value(model4[1].name(), "GEDSAT D001 O0044",
+               "ORBIT,DETE instance parameter");
 
     // Construct "orbit,dete,ebin" model from OG
     GSPIModelDataSpace model5(obs, "GEDSAT", "orbit,dete,ebin", 0);
     test_value(model5.size(), 190, "ORBIT,DETE,EBIN instance size");
-    test_value(model5[35].name(), "GEDSAT E005 D003 O0044", "ORBIT,DETE,EBIN instance parameter");
+    test_value(model5[35].name(), "GEDSAT E005 D003 O0044",
+               "ORBIT,DETE,EBIN instance parameter");
 
     // Construct "point" model from OG
     GSPIModelDataSpace model6(obs, "GEDSAT", "point", 0);
     test_value(model6.size(), 88, "POINT instance size");
-    test_value(model6[35].name(), "GEDSAT P000035", "POINT instance parameter");
+    test_value(model6[35].name(), "GEDSAT P000035",
+               "POINT instance parameter");
 
     // Construct "date 10 min" model from OG
     GSPIModelDataSpace model7(obs, "GEDSAT", "date 10 mins", 0);
     test_value(model7.size(), 88, "DATE 10 MIN instance size");
-    test_value(model7[35].name(), "GEDSAT T000035", "DATE 10 MIN instance parameter");
+    test_value(model7[35].name(), "GEDSAT T000035",
+               "DATE 10 MIN instance parameter");
 
     // Construct "date 3 hours" model from OG
     GSPIModelDataSpace model8(obs, "GEDSAT", "date 3 hours", 0);
     test_value(model8.size(), 20, "DATE 3 HOURS instance size");
-    test_value(model8[5].name(), "GEDSAT T000005", "DATE 3 HOURS instance parameter");
+    test_value(model8[5].name(), "GEDSAT T000005",
+               "DATE 3 HOURS instance parameter");
 
     // Construct "date 1 day" model from OG
     GSPIModelDataSpace model9(obs, "GEDSAT", "date 1 day", 0);
     test_value(model9.size(), 3, "DATE 1 DAY instance size");
-    test_value(model9[1].name(), "GEDSAT T000001", "DATE 1 DAY instance parameter");
+    test_value(model9[1].name(), "GEDSAT T000001",
+               "DATE 1 DAY instance parameter");
 
     // Construct "date 2 weeks" model from OG
     GSPIModelDataSpace model10(obs, "GEDSAT", "date 2 weeks", 0);
     test_value(model10.size(), 1, "DATE 2 WEEKS instance size");
-    test_value(model10[0].name(), "GEDSAT T000000", "DATE 2 WEEKS instance parameter");
+    test_value(model10[0].name(), "GEDSAT T000000",
+               "DATE 2 WEEKS instance parameter");
 
     // Construct "evtclass" model from OG
     GSPIModelDataSpace model11(obs, "GEDSAT", "evtclass", 0);
     test_value(model11.size(), 1, "EVTCLASS instance size");
     test_value(model11[0].name(), "GEDSAT C0", "EVTCLASS instance parameter");
+
+    // Construct "orbit,gedfail,dete" model from OG
+    GSPIModelDataSpace model12(obs, "GEDSAT", "orbit,gedfail,dete", 0);
+    test_value(model12.size(), 19, "ORBIT,GEDFAIL,DETE instance size");
+    test_value(model12[5].name(), "GEDSAT D005 O0044",
+               "ORBIT,GEDFAIL,DETE instance parameter");
+
+    // Construct "orbit,gedanneal,dete" model from OG
+    GSPIModelDataSpace model13(obs, "GEDSAT", "orbit,gedanneal,dete", 0);
+    test_value(model13.size(), 19, "ORBIT,GEDANNEAL,DETE instance size");
+    test_value(model13[10].name(), "GEDSAT D010 O0044",
+               "ORBIT,GEDANNEAL,DETE instance parameter");
+
+    // Test loading of initialised model
+    GModels models1(spi_model);
+    test_value(models1.size(), 2, "Two models");
+    test_value(models1["GEDSAT"]->size(), 19,
+               "Initialised model with 19 parameters");
+
+    // Test loading of non-initialised model
+    GModels models2(spi_model_noinit);
+    test_value(models2.size(), 2, "Two models");
+    test_value(models2["GEDSAT"]->size(), 0,
+               "Uninitialised model with 0 parameters");
+
+    // Evaluate model to initialise model
+    double value = models2["GEDSAT"]->eval(*((*(obs.events()))[0]), obs);
+    test_value(value, 413.8837485, "Evaluation of uninitialized model");
+    test_value(models2["GEDSAT"]->size(), 19,
+               "Uninitialised model after eval() call with 19 parameters");
 
     // Return
     return;

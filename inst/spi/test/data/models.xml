@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<source_library title="source library">
+  <source name="Crab" type="PointSource">
+    <spectrum type="PowerLaw">
+      <parameter name="Prefactor"   value="1.0" scale="1.0"  min="0" free="1"/>
+      <parameter name="Index"       value="1.0" scale="-2.0" min="-5" max="5" free="1"/>
+      <parameter name="PivotEnergy" value="1.0" scale="0.1"  free="0" />
+    </spectrum>
+    <spatialModel type="PointSource">
+      <parameter name="RA"  value="83.6331" scale="1.0" min="-360" max="360" free="1"/>
+      <parameter name="DEC" value="22.0145" scale="1.0" min="-90"  max="90"  free="1"/>
+    </spatialModel>
+  </source>
+  <source name="GEDSAT" type="DataSpace" instrument="SPI" method="orbit,dete" index="0">
+    <parameter name="GEDSAT D000 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D001 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D002 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D003 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D004 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D005 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D006 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D007 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D008 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D009 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D010 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D011 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D012 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D013 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D014 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D015 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D016 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D017 O0044" value="1" scale="1" free="1" />
+    <parameter name="GEDSAT D018 O0044" value="1" scale="1" free="1" />
+  </source>
+</source_library>

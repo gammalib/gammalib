@@ -31,11 +31,13 @@
 #include <typeinfo>
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelRegistry.hpp"
+#include "GTimes.hpp"
 #include "GModelPar.hpp"
+#include "GModelRegistry.hpp"
 #include "GSPIModelDataSpace.hpp"
 #include "GSPIObservation.hpp"
 #include "GSPIEventBin.hpp"
+#include "GSPITools.hpp"
 
 /* __ Constants __________________________________________________________ */
 
@@ -439,7 +441,7 @@ GSPIEventCube* GSPIModelDataSpace::mc(const GObservation& obs,
  * The model is composed of a list of scale parameters. The following XML
  * file format is expected:
  *
- *     <source name="Background" type="DataSpace" method="orbit,dete" instrument="SPI">
+ *     <source name="Background" type="DataSpace" method="orbit,dete" index="0" instrument="SPI">
  *       <parameter name="REV0019_DETID00"        .../>
  *       <parameter name="REV0019_DETID01"        .../>
  *       ...
@@ -450,8 +452,9 @@ void GSPIModelDataSpace::read(const GXmlElement& xml)
     // Clear instance
     clear();
 
-    // Set model method
+    // Set model method and index
     m_method = xml.attribute("method");
+    m_index  = gammalib::toint(xml.attribute("index"));
 
     // Get number of parameters from XML file
     int npars = xml.elements("parameter");
@@ -498,7 +501,7 @@ void GSPIModelDataSpace::read(const GXmlElement& xml)
  * The model is composed of a list of scale parameters. The following XML
  * file structure will be written:
  *
- *     <source name="Background" type="DataSpace" method="orbit,dete" instrument="SPI">
+ *     <source name="Background" type="DataSpace" method="orbit,dete" index="0" instrument="SPI">
  *       <parameter name="REV0019_DETID00"        .../>
  *       <parameter name="REV0019_DETID01"        .../>
  *       ...
@@ -571,8 +574,9 @@ void GSPIModelDataSpace::write(GXmlElement& xml) const
     // Write model attributes
     write_attributes(*src);
 
-    // Write method
+    // Write method and index
     src->attribute("method", m_method);
+    src->attribute("index",  gammalib::str(m_index));
 
     // Return
     return;
@@ -1271,7 +1275,13 @@ void GSPIModelDataSpace::add_gedfail(GSPIEventCube*            cube,
                                      std::vector<int>*         indices,
                                      std::vector<std::string>* names)
 {
-    // TODO: implement "gedfail" method
+    // Set detector failure times
+    GTimes times = gammalib::spi_gedfail_times();
+
+    // Split pointings for all detector failures
+    for (int i = 0; i < times.size(); ++i) {
+        split_pointing_indices(cube, indices, names, times[i], "F");
+    }
 
     // Return
     return;
@@ -1292,7 +1302,13 @@ void GSPIModelDataSpace::add_gedanneal(GSPIEventCube*            cube,
                                        std::vector<int>*         indices,
                                        std::vector<std::string>* names)
 {
-    // TODO: implement "gedanneal" method
+    // Set detector annealing start times
+    GTimes times = gammalib::spi_annealing_start_times();
+
+    // Split pointings for all detector annealings
+    for (int i = 0; i < times.size(); ++i) {
+        split_pointing_indices(cube, indices, names, times[i], "A");
+    }
 
     // Return
     return;
@@ -1478,4 +1494,103 @@ double GSPIModelDataSpace::get_date_time(const std::string& method) const
 
     // Return time
     return time;
+}
+
+
+/***********************************************************************//**
+ * @brief Split pointing indices and names at given time
+ *
+ * @param[in] cube Event cube.
+ * @param[in,out] indices Vector of pointing indices.
+ * @param[in,out] names Vector of pointing names.
+ * @param[in] time Time of split.
+ * @param[in] reason Reason for split.
+ *
+ * Split the pointing indices at a given time.
+ ***************************************************************************/
+void GSPIModelDataSpace::split_pointing_indices(GSPIEventCube*            cube,
+                                                std::vector<int>*         indices,
+                                                std::vector<std::string>* names,
+                                                const GTime&              time,
+                                                const std::string&        reason) const
+{
+    // Get number of pointings
+    int npt = indices->size();
+
+    // Continue only if there are pointings
+    if (npt > 0) {
+
+        // Get index of largest pointing group plus one
+        int igrp_last = 0;
+        for (int ipt = 0; ipt < npt; ++ipt) {
+            if ((*indices)[ipt] > igrp_last) {
+                igrp_last = ipt;
+            }
+        }
+        igrp_last++;
+
+        // Initialise time span of pointing group
+        int   ipt_start    = 0;
+        int   ipt_stop     = 0;
+        int   igrp_current = (*indices)[ipt_start];
+        GTime tstart       = cube->gti().tstart(ipt_start);
+        GTime tstop        = cube->gti().tstop(ipt_start);
+
+        // Loop over all pointings
+        for (int ipt = 0; ipt < npt; ++ipt) {
+
+            // If pointing is in same pointing group then update stop
+            // time
+            if ((*indices)[ipt] == igrp_current) {
+                tstop    = cube->gti().tstop(ipt);
+                ipt_stop = ipt;
+            }
+
+            // If pointing is in different pointing group or the end of
+            // the pointings has been reached then check whether specified
+            // time is comprised in the time interval of the pointing
+            // group. If this is the case and attempt is made to split
+            // the pointing group into two.
+            if (((*indices)[ipt] != igrp_current) || (ipt == npt-1)) {
+
+                // If time is comprised within pointing group then split
+                // pointing group
+                if ((time > tstart) && (time < tstop)) {
+
+                    // Assign a new pointing group index to all pointings
+                    // that have a start time not earlier than the
+                    // specified time
+                    int nnew = 0;
+                    for (int kpt = ipt_start; kpt <= ipt_stop; ++kpt) {
+                        if (cube->gti().tstart(kpt) > time) {
+                            (*indices)[kpt] = igrp_last;
+                            nnew++;
+                        }
+                    }
+
+                    // If a new pointing group was assigned then add a
+                    // name to the vector and increment the new pointing
+                    // group index
+                    if (nnew > 0) {
+                        igrp_last++;
+                        names->push_back((*names)[igrp_current]+"-"+reason);
+                    }
+
+                } // endif: pointing group splitted
+
+                // Update time span of next pointing group
+                ipt_start    = ipt;
+                ipt_stop     = ipt;
+                igrp_current = (*indices)[ipt];
+                tstart       = cube->gti().tstart(ipt);
+                tstop        = cube->gti().tstop(ipt);
+
+            } // endif: next pointing group or end encountered
+
+        } // endfor: looped over pointings
+
+    } // endif: there were pointings
+
+    // Return
+    return;
 }

@@ -69,7 +69,9 @@ libspi_la_LDFLAGS =
 #caldbirfs_DATA = $(caldb_irfs)
 
 # Test data to distribute
-testdata            = test/data/obs.xml
+testdata            = test/data/obs.xml \
+                      test/data/models.xml \
+                      test/data/models_noinit.xml
 testdatadir         = $(pyexecdir)/gammalib/tests/spi/data
 testdata_DATA       = $(testdata)
 #

@@ -38,4 +38,6 @@ namespace gammalib {
     int               spi_num_hdus(const GFits&       fits,
                                    const std::string& extname);
     GTime             spi_ijd2time(const double& ijd);
+    GTimes            spi_annealing_start_times(void);
+    GTimes            spi_gedfail_times(void);
 }

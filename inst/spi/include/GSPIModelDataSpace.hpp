@@ -130,6 +130,11 @@ protected:
                       std::vector<int>*         indices,
                       std::vector<std::string>* names);
     double get_date_time(const std::string& method) const;
+    void   split_pointing_indices(GSPIEventCube*            cube,
+                                  std::vector<int>*         indices,
+                                  std::vector<std::string>* names,
+                                  const GTime&              time,
+                                  const std::string&        reason) const;
 
     // Protected data members
     mutable GSPIObservation* m_obs;         //!< SPI observation
