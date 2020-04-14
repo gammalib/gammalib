@@ -50,6 +50,7 @@ const GModelRegistry     g_spi_data_space_registry(&g_spi_data_space_seed);
 #define G_READ                       "GSPIModelDataSpace::read(GXmlElement&)"
 #define G_WRITE                     "GSPIModelDataSpace::write(GXmlElement&)"
 #define G_SETUP_MODEL         "GSPIModelDataSpace::setup_model(Observation&)"
+#define G_GET_DATE_TIME     "GSPIModelDataSpace::get_date_time(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -1017,7 +1018,8 @@ void GSPIModelDataSpace::setup_pointing_indices(GSPIEventCube*            cube,
 
     // Search for "date"
     else if (gammalib::contains(method, "date")) {
-        setup_date(cube, indices, names);
+        double time = get_date_time(method);
+        setup_date(cube, indices, names, time);
     }
 
     // Handle "gedfail"
@@ -1181,14 +1183,73 @@ void GSPIModelDataSpace::setup_orbit(GSPIEventCube*            cube,
  * @param[in] cube Event cube.
  * @param[in,out] indices Vector of pointing indices.
  * @param[in,out] names Vector of pointing names.
+ * @param[in] time Time scale in seconds.
  *
  * Setup vectors of pointing indices and names for "date" method.
  ***************************************************************************/
 void GSPIModelDataSpace::setup_date(GSPIEventCube*            cube,
                                     std::vector<int>*         indices,
-                                    std::vector<std::string>* names)
+                                    std::vector<std::string>* names,
+                                    const double&             time)
 {
-    // TODO: implement "date" method
+    // Compute start time, number of time bins and length of time bin in
+    // seconds
+    double tstart = cube->gti().tstart().secs();
+    double tbin   = cube->gti().telapse();
+    int    nbins  = int(tbin / time + 0.5);
+    if (nbins < 1) {
+        nbins = 1;
+    }
+    tbin /= double(nbins);
+
+    // Get number of pointings
+    int npt = indices->size();
+
+    // Loop over all pointings
+    for (int ipt = 0; ipt < npt; ++ipt) {
+
+        // Get time of pointing in seconds
+        double t = 0.5 * (cube->gti().tstart(ipt).secs() +
+                          cube->gti().tstop(ipt).secs());
+
+        // Compute grouping index. Make sure that it is in valid range.
+        int index = int((t - tstart) / tbin);
+        if (index < 0) {
+            index = 0;
+        }
+        else if (index >= nbins) {
+            index = nbins - 1;
+        }
+
+        // Store index
+        (*indices)[ipt] = index;
+
+    } // endfor: looped over indices
+
+    // Remove unused indices
+    for (int index = 0, used_index = 0; index < nbins; ++index) {
+
+        // Replace all indices "index" by "used_index"
+        int nindex = 0;
+        for (int ipt = 0; ipt < npt; ++ipt) {
+            if ((*indices)[ipt] == index) {
+                (*indices)[ipt] = used_index;
+                nindex++;
+            }
+        }
+
+        // If we found indices to replaced the increase "used_index"
+        if (nindex > 0) {
+
+            // Add date to names
+            names->push_back("T" + gammalib::str(used_index, "%6.6d"));
+
+            // Increment used index
+            used_index++;
+
+        } // endif: index was used
+
+    } // endfor: looped over all pointings
 
     // Return
     return;
@@ -1308,4 +1369,57 @@ void GSPIModelDataSpace::setup_ebin(GSPIEventCube*            cube,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get time scale from method string
+ *
+ * @param[in] method Method string.
+ * @return Time scale (seconds).
+ *
+ * Get the time scale for the "DATE" method from the method string. The
+ * following time units are supported: min, hour, day, week, month or year.
+ ***************************************************************************/
+double GSPIModelDataSpace::get_date_time(const std::string& method) const
+{
+    // Get position of "date" method in string
+    size_t start = method.find("date") + 4;
+
+    // Get scale of time
+    double scale = 0.0;
+    size_t stop  = std::string::npos;
+    if ((stop = method.find("min", start)) != std::string::npos) {
+        scale = 60.0;
+    }
+    else if ((stop = method.find("hour", start)) != std::string::npos) {
+        scale = 3600.0;
+    }
+    else if ((stop = method.find("day", start)) != std::string::npos) {
+        scale = 86400.0;
+    }
+    else if ((stop = method.find("week", start)) != std::string::npos) {
+        scale = 604800.0;
+    }
+    else if ((stop = method.find("month", start)) != std::string::npos) {
+        scale = 2628000.0;
+    }
+    else if ((stop = method.find("year", start)) != std::string::npos) {
+        scale = 31536000.0;
+    }
+
+    // Throw an exception if no time scale was found
+    if (stop == std::string::npos) {
+        std::string msg = "Method string \""+method+"\" does not contain "
+                          "time units for \"DATE\" method. Please specify one "
+                          "of the following units: min, hour, day, week, "
+                          "month or year.";
+        throw GException::invalid_value(G_GET_DATE_TIME, msg);
+    }
+
+    // Get time in seconds
+    double time = gammalib::todouble(method.substr(start, stop-start)) * scale;
+
+    // Return time
+    return time;
 }

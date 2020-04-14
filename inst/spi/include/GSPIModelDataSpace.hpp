@@ -89,45 +89,47 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GSPIModelDataSpace& model);
-    void free_members(void);
-    void set_pointers(void);
-    void setup_model(const GObservation& obs) const;
-    void setup_pars(GSPIEventCube* cube);
-    void setup_pointing_indices(GSPIEventCube*            cube,
+    void   init_members(void);
+    void   copy_members(const GSPIModelDataSpace& model);
+    void   free_members(void);
+    void   set_pointers(void);
+    void   setup_model(const GObservation& obs) const;
+    void   setup_pars(GSPIEventCube* cube);
+    void   setup_pointing_indices(GSPIEventCube*            cube,
+                                  std::vector<int>*         indices,
+                                  std::vector<std::string>* names);
+    void   setup_detector_indices(GSPIEventCube* cube,
+                                  std::vector<int>*         indices,
+                                  std::vector<std::string>* names);
+    void   setup_energy_indices(GSPIEventCube* cube,
                                 std::vector<int>*         indices,
                                 std::vector<std::string>* names);
-    void setup_detector_indices(GSPIEventCube* cube,
-                                std::vector<int>*         indices,
-                                std::vector<std::string>* names);
-    void setup_energy_indices(GSPIEventCube* cube,
-                              std::vector<int>*         indices,
-                              std::vector<std::string>* names);
-    void setup_point(GSPIEventCube*            cube,
-                     std::vector<int>*         indices,
-                     std::vector<std::string>* names);
-    void setup_orbit(GSPIEventCube*            cube,
-                     std::vector<int>*         indices,
-                     std::vector<std::string>* names);
-    void setup_date(GSPIEventCube*            cube,
-                    std::vector<int>*         indices,
-                    std::vector<std::string>* names);
-    void add_gedfail(GSPIEventCube*            cube,
-                     std::vector<int>*         indices,
-                     std::vector<std::string>* names);
-    void add_gedanneal(GSPIEventCube*            cube,
+    void   setup_point(GSPIEventCube*            cube,
                        std::vector<int>*         indices,
                        std::vector<std::string>* names);
-    void setup_dete(GSPIEventCube*            cube,
-                    std::vector<int>*         indices,
-                    std::vector<std::string>* names);
-    void setup_evtclass(GSPIEventCube*            cube,
-                        std::vector<int>*         indices,
-                        std::vector<std::string>* names);
-    void setup_ebin(GSPIEventCube*            cube,
-                    std::vector<int>*         indices,
-                    std::vector<std::string>* names);
+    void   setup_orbit(GSPIEventCube*            cube,
+                       std::vector<int>*         indices,
+                       std::vector<std::string>* names);
+    void   setup_date(GSPIEventCube*            cube,
+                      std::vector<int>*         indices,
+                      std::vector<std::string>* names,
+                      const double&             time);
+    void   add_gedfail(GSPIEventCube*            cube,
+                       std::vector<int>*         indices,
+                       std::vector<std::string>* names);
+    void   add_gedanneal(GSPIEventCube*            cube,
+                         std::vector<int>*         indices,
+                         std::vector<std::string>* names);
+    void   setup_dete(GSPIEventCube*            cube,
+                      std::vector<int>*         indices,
+                      std::vector<std::string>* names);
+    void   setup_evtclass(GSPIEventCube*            cube,
+                          std::vector<int>*         indices,
+                          std::vector<std::string>* names);
+    void   setup_ebin(GSPIEventCube*            cube,
+                      std::vector<int>*         indices,
+                      std::vector<std::string>* names);
+    double get_date_time(const std::string& method) const;
 
     // Protected data members
     mutable GSPIObservation* m_obs;         //!< SPI observation

@@ -271,6 +271,26 @@ void TestGSPI::test_modeldataspace(void)
     test_value(model6.size(), 88, "POINT instance size");
     test_value(model6[35].name(), "GEDSAT P000035", "POINT instance parameter");
 
+    // Construct "date 10 min" model from OG
+    GSPIModelDataSpace model7(obs, "GEDSAT", "date 10 mins", 0);
+    test_value(model7.size(), 88, "DATE 10 MIN instance size");
+    test_value(model7[35].name(), "GEDSAT T000035", "DATE 10 MIN instance parameter");
+
+    // Construct "date 3 hours" model from OG
+    GSPIModelDataSpace model8(obs, "GEDSAT", "date 3 hours", 0);
+    test_value(model8.size(), 20, "DATE 3 HOURS instance size");
+    test_value(model8[5].name(), "GEDSAT T000005", "DATE 3 HOURS instance parameter");
+
+    // Construct "date 1 day" model from OG
+    GSPIModelDataSpace model9(obs, "GEDSAT", "date 1 day", 0);
+    test_value(model9.size(), 3, "DATE 1 DAY instance size");
+    test_value(model9[1].name(), "GEDSAT T000001", "DATE 1 DAY instance parameter");
+
+    // Construct "date 2 weeks" model from OG
+    GSPIModelDataSpace model10(obs, "GEDSAT", "date 2 weeks", 0);
+    test_value(model10.size(), 1, "DATE 2 WEEKS instance size");
+    test_value(model10[0].name(), "GEDSAT T000000", "DATE 2 WEEKS instance parameter");
+
     // Return
     return;
 }
