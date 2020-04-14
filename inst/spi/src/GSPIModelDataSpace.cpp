@@ -1238,7 +1238,8 @@ void GSPIModelDataSpace::setup_date(GSPIEventCube*            cube,
             }
         }
 
-        // If we found indices to replaced the increase "used_index"
+        // If we found indices to replace then add an index name and
+        // increase "used_index"
         if (nindex > 0) {
 
             // Add date to names
@@ -1338,7 +1339,62 @@ void GSPIModelDataSpace::setup_evtclass(GSPIEventCube*            cube,
                                         std::vector<int>*         indices,
                                         std::vector<std::string>* names)
 {
-    // TODO: implement "evtclass" method
+    // Get number of detectors
+    int ndet = indices->size();
+
+    // Flag which event classes occur in the actual dataset
+    for (int idet = 0; idet < ndet; ++idet) {
+
+        // Get detector ID for first pointing
+        int detid = cube->dir(0, idet).detid();
+
+        // Set the corresponding event class flag
+        if (detid >=0 and detid < 19) {
+            (*indices)[idet] = 0; // SE
+        }
+        else if (detid >= 19 and detid < 61) {
+            (*indices)[idet] = 1; // ME2
+        }
+        else if (detid >= 61 and detid < 85) {
+            (*indices)[idet] = 2; // ME3
+        }
+        else if (detid >= 85 and detid < 104) {
+            (*indices)[idet] = 3; // PEE
+        }
+        else if (detid >= 104 and detid < 123) {
+            (*indices)[idet] = 4; // PES
+        }
+        else if (detid >= 123 and detid < 142) {
+            (*indices)[idet] = 5; // PEM
+        }
+
+    } // endfor: looped over all detectors
+
+    // Remove unused indices
+    for (int index = 0, used_index = 0; index < 6; ++index) {
+
+        // Replace all indices "index" by "used_index"
+        int nindex = 0;
+        for (int idet = 0; idet < ndet; ++idet) {
+            if ((*indices)[idet] == index) {
+                (*indices)[idet] = used_index;
+                nindex++;
+            }
+        }
+
+        // If we found indices to replace then add an index name and
+        // increase "used_index"
+        if (nindex > 0) {
+
+            // Add date to names
+            names->push_back("C" + gammalib::str(used_index, "%1.1d"));
+
+            // Increment used index
+            used_index++;
+
+        } // endif: index was used
+
+    } // endfor: looped over all pointings
 
     // Return
     return;

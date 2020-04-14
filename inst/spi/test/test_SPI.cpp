@@ -291,6 +291,11 @@ void TestGSPI::test_modeldataspace(void)
     test_value(model10.size(), 1, "DATE 2 WEEKS instance size");
     test_value(model10[0].name(), "GEDSAT T000000", "DATE 2 WEEKS instance parameter");
 
+    // Construct "evtclass" model from OG
+    GSPIModelDataSpace model11(obs, "GEDSAT", "evtclass", 0);
+    test_value(model11.size(), 1, "EVTCLASS instance size");
+    test_value(model11[0].name(), "GEDSAT C0", "EVTCLASS instance parameter");
+
     // Return
     return;
 }
