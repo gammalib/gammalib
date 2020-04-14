@@ -508,13 +508,13 @@ void GSPIResponse::set(const GSPIObservation& obs, const GEnergy& energy)
 
             // If line energy is specified then compute a line response for
             // the energy bin that overlaps with the line energy
-            double energy_keV = energy.keV();
-            if (energy_keV > 0.0) {
-                if (energy_keV < emin || energy_keV > emax) {
+            m_energy_keV = energy.keV();
+            if (m_energy_keV > 0.0) {
+                if (m_energy_keV < emin || m_energy_keV > emax) {
                     continue;
                 }
-                emin = energy_keV;
-                emax = energy_keV;
+                emin = m_energy_keV;
+                emax = m_energy_keV;
             }
 
             // Pre-compute IRF for this energy bin
@@ -558,6 +558,21 @@ void GSPIResponse::set(const GSPIObservation& obs, const GEnergy& energy)
  ***************************************************************************/
 void GSPIResponse::read(const GFits& fits)
 {
+    // Get IRF image
+    const GFitsImage* image = fits.image(0);
+
+    // Read IRFs
+    m_irfs.read(*image);
+
+    // Set WCS image limits
+    set_wcs(image);
+
+    // Read detector identifiers
+    read_detids(fits);
+
+    // Read energies
+    read_energies(fits);
+
     // Return
     return;
 }
@@ -681,10 +696,16 @@ std::string GSPIResponse::print(const GChatter& chatter) const
         result.append(gammalib::str(nreg));
         result.append("\n"+gammalib::parformat("Number of energies"));
         result.append(gammalib::str(neng));
-        result.append("\n"+gammalib::parformat("Continuum IRF gamma"));
-        result.append(gammalib::str(m_gamma));
-        result.append("\n"+gammalib::parformat("Continnum IRF log(E) step"));
-        result.append(gammalib::str(m_dlogE));
+        if (m_energy_keV > 0.0) {
+            result.append("\n"+gammalib::parformat("Line IRF energy"));
+            result.append(gammalib::str(m_energy_keV)+" keV");
+        }
+        else {
+            result.append("\n"+gammalib::parformat("Continuum IRF gamma"));
+            result.append(gammalib::str(m_gamma));
+            result.append("\n"+gammalib::parformat("Continnum IRF log(E) step"));
+            result.append(gammalib::str(m_dlogE));
+        }
 
     } // endif: chatter was not silent
 
@@ -710,8 +731,9 @@ void GSPIResponse::init_members(void)
     m_energies.clear();
     m_ebounds.clear();
     m_irfs.clear();
-    m_dlogE = 0.03;
-    m_gamma = 2.0;
+    m_energy_keV = 0.0;
+    m_dlogE      = 0.03;
+    m_gamma      = 2.0;
 
     // Initialise cache
     m_spix.clear();
@@ -740,13 +762,14 @@ void GSPIResponse::init_members(void)
 void GSPIResponse::copy_members(const GSPIResponse& rsp)
 {
     // Copy members
-    m_rspname  = rsp.m_rspname;
-    m_detids   = rsp.m_detids;
-    m_energies = rsp.m_energies;
-    m_ebounds  = rsp.m_ebounds;
-    m_irfs     = rsp.m_irfs;
-    m_dlogE    = rsp.m_dlogE;
-    m_gamma    = rsp.m_gamma;
+    m_rspname    = rsp.m_rspname;
+    m_detids     = rsp.m_detids;
+    m_energies   = rsp.m_energies;
+    m_ebounds    = rsp.m_ebounds;
+    m_irfs       = rsp.m_irfs;
+    m_energy_keV = rsp.m_energy_keV;
+    m_dlogE      = rsp.m_dlogE;
+    m_gamma      = rsp.m_gamma;
 
     // Copy cache
     m_spix         = rsp.m_spix;
@@ -772,6 +795,107 @@ void GSPIResponse::copy_members(const GSPIResponse& rsp)
  ***************************************************************************/
 void GSPIResponse::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read detector identifiers from FITS object
+ *
+ * @param[in] fits FITS object.
+ *
+ * Read the detector identifiers from a FITS file into the m_detids member.
+ ***************************************************************************/
+void GSPIResponse::read_detids(const GFits& fits)
+{
+    // Clear detids vector
+    m_detids.clear();
+
+    // Get DETID table extension
+    const GFitsTable&    table     = *fits.table("DETIDS");
+    const GFitsTableCol* col_detid = table["DET_ID"];
+
+    // Get number of detector identifiers
+    int num = table.nrows();
+
+    // Reserve space for detector identifiers
+    m_detids.reserve(num);
+
+    // Extract values
+    for (int i = 0; i < num; ++i) {
+        m_detids.push_back(col_detid->real(i));
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read energies from FITS object
+ *
+ * @param[in] fits FITS object.
+ *
+ * Read the energies from a FITS file. If the FITS file contains energy
+ * boundaries then read them, otherwise read the energy vector.
+ ***************************************************************************/
+void GSPIResponse::read_energies(const GFits& fits)
+{
+    // Clear energies and energy boundary vectors
+    m_energies.clear();
+    m_ebounds.clear();
+
+    // If FITS file contains energy boundaries then the IRF was precomputed
+    // and hence we read the energy boundaries from the FITS file
+    if (fits.contains(gammalib::extname_ebounds)) {
+
+        // Get reference to FITS table
+        const GFitsTable& table = *fits.table(gammalib::extname_ebounds);
+
+        // Read energy boundaries
+        m_ebounds.read(table);
+
+        // Set response attributes
+        m_energy_keV = (table.has_card("ENERGY")) ? table.real("ENERGY") : 0.0;
+        m_dlogE      = (table.has_card("DLOGE"))  ? table.real("DLOGE") : 0.03;
+        m_gamma      = (table.has_card("GAMMA"))  ? table.real("GAMMA") : 2.0;
+
+    } // endif: energy boundaries detected
+
+    // ... otherwise we have a response group and we read the energies of
+    // the response group
+    else {
+
+        // Get energies table extension
+        const GFitsTable&    table      = *fits.table(gammalib::extname_energies);
+        const GFitsTableCol* col_energy = table["ENERGY"];
+
+        // Get number of energies
+        int num = table.nrows();
+
+        // Reserve space for energies
+        m_energies.reserve(num);
+
+        // Get energy unit
+        std::string unit = "keV";
+        if (table.has_card("TUNIT1")) {
+            unit = table.string("TUNIT1");
+        }
+
+        // Extract values
+        for (int i = 0; i < num; ++i) {
+
+            // Get energy
+            GEnergy energy = GEnergy(col_energy->real(i), unit);
+
+            // Store as keV
+            m_energies.append(energy.keV());
+
+        } // endfor: looped over all values
+
+    } // endelse: energies extension was required
+
     // Return
     return;
 }
@@ -824,8 +948,19 @@ void GSPIResponse::write_energies(GFits& fits) const
     // If there are energy boundaries then the IRF was precomputed and
     // hence we store the energy boundaries in the FITS file
     if (!m_ebounds.is_empty()) {
+
+        // Write energy boundaries
         m_ebounds.write(fits);
-    }
+
+        // Recover the FITS table to write some keywords
+        GFitsTable& table = *fits.table(gammalib::extname_ebounds);
+
+        // Write keywords
+        table.card("ENERGY", m_energy_keV, "[keV] IRF line energy (0 for continuum IRF)");
+        table.card("DLOGE",  m_dlogE, "Logarithmic step size for continuum IRF");
+        table.card("GAMMA",  m_gamma, "Power-law index for continuum IRF");
+
+    } // endif: IRF was precomputed
 
     // ... otherwise we write the energies
     else {
@@ -1001,7 +1136,7 @@ void GSPIResponse::load_irfs(const int& region)
 
         // Setup node array for response energies
         for (int i_irf = 0; i_irf < num_irfs; ++i_irf) {
-            m_energies.append((*grp)["ENERGY"]->real(i_irf));
+            m_energies.append((*grp)["ENERGY"]->real(i_irf)); // in keV
         }
 
         // Loop over all IRFs
@@ -1216,6 +1351,49 @@ GSkyMap GSPIResponse::compute_irf(const double& emin, const double& emax) const
 
     // Return IRF
     return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Set IRF image limits
+ *
+ * @param[in] image IRF FITS image.
+ *
+ * Computes the IRF image limits.
+ ***************************************************************************/
+void GSPIResponse::set_wcs(const GFitsImage* image)
+{
+    // Get image attributes
+    int    naxis1 = image->integer("NAXIS1");
+    int    naxis2 = image->integer("NAXIS2");
+    double crval1 = image->real("CRVAL1");
+    double crval2 = image->real("CRVAL2");
+    double crpix1 = image->real("CRPIX1");
+    double crpix2 = image->real("CRPIX2");
+    double cdelt1 = image->real("CDELT1");
+    double cdelt2 = image->real("CDELT2");
+
+    // Derive image limits. Limits are taken at the pixel centres since
+    // we want to use them for bilinear interpolation. This means that
+    // we will throw away half a pixel at the edge of the IRFs.
+    m_wcs_xmin     = (crval1 - (crpix1-1.0) * cdelt1) * gammalib::deg2rad;
+    m_wcs_ymin     = (crval2 - (crpix2-1.0) * cdelt2) * gammalib::deg2rad;
+    m_wcs_xbin     = cdelt1 * gammalib::deg2rad;
+    m_wcs_ybin     = cdelt2 * gammalib::deg2rad;
+    m_wcs_xmax     = m_wcs_xmin + double(naxis1-1) * m_wcs_xbin;
+    m_wcs_ymax     = m_wcs_ymin + double(naxis2-1) * m_wcs_ybin;
+    m_wcs_xpix_max = double(naxis1-1);
+    m_wcs_ypix_max = double(naxis2-1);
+
+    // Set maximum zenith angle
+    m_max_zenith = (std::abs(m_wcs_xmax) > std::abs(m_wcs_ymax)) ?
+                    std::abs(m_wcs_xmax) : std::abs(m_wcs_ymax);
+
+    // Signal that image limits exist
+    m_has_wcs = true;
+
+    // Return
+    return;
 }
 
 

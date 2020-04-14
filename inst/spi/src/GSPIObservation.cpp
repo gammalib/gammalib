@@ -269,6 +269,29 @@ void GSPIObservation::response(const GResponse& rsp)
  *       <parameter name="ObservationGroup" file="og_spi.fits"/>
  *     </observation>
  *
+ * In addition, a response group can be specified using
+ *
+ *     <observation name="Crab" id="0044" instrument="SPI">
+ *       <parameter name="ObservationGroup" file="og_spi.fits"/>
+ *       <parameter name="ResponseGroup"    file="spi_irf_grp.fits"/>
+ *     </observation>
+ *
+ * If a response group is found the file is loaded and the response is set.
+ * Optionally, an energy attribute can be specified in units of keV, leading
+ * to the setup of a line response
+ *
+ *     <observation name="Crab" id="0044" instrument="SPI">
+ *       <parameter name="ObservationGroup" file="og_spi.fits"/>
+ *       <parameter name="ResponseGroup"    file="spi_irf_grp.fits" energy="511"/>
+ *     </observation>
+ *
+ * Alternatively, a response file can be specified, which will be directly
+ * loaded in the SPI response class.
+ *
+ *     <observation name="Crab" id="0044" instrument="SPI">
+ *       <parameter name="ObservationGroup" file="og_spi.fits"/>
+ *       <parameter name="ResponseFile"     file="irf.fits"/>
+ *     </observation>
  ***************************************************************************/
 void GSPIObservation::read(const GXmlElement& xml)
 {
@@ -278,14 +301,54 @@ void GSPIObservation::read(const GXmlElement& xml)
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
 
-    // Get parameters
-    std::string filename = gammalib::xml_get_attr(G_READ, xml, "ObservationGroup", "file");
+    // Get expanded Observation Group file name
+    m_filename = gammalib::xml_get_attr(G_READ, xml, "ObservationGroup", "file");
+    m_filename = gammalib::xml_file_expand(xml, m_filename);
 
-    // Expand file names
-    filename = gammalib::xml_file_expand(xml, filename);
+    // Load Observation Group
+    load(m_filename);
 
-    // Load observation
-    load(filename);
+    // If a response group is specified then get expanded file name and
+    // load it
+    if (gammalib::xml_has_par(xml, "ResponseGroup")) {
+
+        // Get parameter
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "ResponseGroup");
+
+        // Get expanded filename
+        m_rsp_grpname = par->attribute("file");
+        m_rsp_grpname = gammalib::xml_file_expand(xml, m_rsp_grpname);
+
+        // Set response group name
+        m_response.rspname(m_rsp_grpname);
+
+        // If we have an energy attribute then extract line energy and set
+        // response as line response
+        if (par->has_attribute("energy")) {
+            double  value = gammalib::todouble(par->attribute("energy"));
+            GEnergy energy(value, "keV");
+            m_response.set(*this, energy);
+        }
+
+        // ... otherwise set response as continnum response
+        else {
+            m_response.set(*this);
+        }
+        
+    } // endif: reponse group specified
+
+    // ... otherwise if a response file is specified then load the response
+    // from the response file
+    else if (gammalib::xml_has_par(xml, "ResponseFile")) {
+
+        // Get expanded response file name
+        m_rsp_filename = gammalib::xml_get_attr(G_READ, xml, "ResponseFile", "file");
+        m_rsp_filename = gammalib::xml_file_expand(xml, m_rsp_filename);
+
+        // Load response
+        m_response.load(m_rsp_filename);
+
+    } // endelse: reponse file was specified
 
     // Return
     return;
@@ -297,13 +360,30 @@ void GSPIObservation::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * Writes information for a INTEGRAL/SPI observation into an XML element. The
- * format of the XML element is
+ * Writes information for a INTEGRAL/SPI observation into an XML element.
+ * In case that no response information is available the method writes the
+ * format
  *
  *     <observation name="Crab" id="0044" instrument="SPI">
  *       <parameter name="ObservationGroup" file="og_spi.fits"/>
  *     </observation>
  *
+ * If a response group file is defined the method writes the format
+ *
+ *     <observation name="Crab" id="0044" instrument="SPI">
+ *       <parameter name="ObservationGroup" file="og_spi.fits"/>
+ *       <parameter name="ResponseGroup"    file="spi_irf_grp.fits" energy="511"/>
+ *     </observation>
+ *
+ * The energy attribute is optional, and is only written in case that the
+ * IRF is a line IRF.
+ *
+ * Otherwise, if a response file is defined the method writes the format
+ *
+ *     <observation name="Crab" id="0044" instrument="SPI">
+ *       <parameter name="ObservationGroup" file="og_spi.fits"/>
+ *       <parameter name="ResponseFile"     file="irf.fits"/>
+ *     </observation>
  ***************************************************************************/
 void GSPIObservation::write(GXmlElement& xml) const
 {
@@ -313,6 +393,23 @@ void GSPIObservation::write(GXmlElement& xml) const
     // Set ObservationGroup parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "ObservationGroup");
     par->attribute("file", gammalib::xml_file_reduce(xml, m_filename));
+
+    // If we have a response group filename then write it as response
+    // group
+    if (!m_rsp_grpname.is_empty()) {
+        par = gammalib::xml_need_par(G_WRITE, xml, "ResponseGroup");
+        par->attribute("file", gammalib::xml_file_reduce(xml, m_rsp_grpname));
+        if (m_response.energy_keV() > 0.0) {
+            par->attribute("energy", gammalib::str(m_response.energy_keV()));
+        }
+    }
+
+    // ... otherwise if we have a response file then write the response
+    // file
+    else if (!m_rsp_filename.is_empty()) {
+        par = gammalib::xml_need_par(G_WRITE, xml, "ResponseFile");
+        par->attribute("file", gammalib::xml_file_reduce(xml, m_rsp_filename));
+    }
 
     // Return
     return;
@@ -400,6 +497,16 @@ std::string GSPIObservation::print(const GChatter& chatter) const
 
         // Append standard information for observation
         result.append("\n"+gammalib::parformat("Name")+name());
+        result.append("\n"+gammalib::parformat("Observation group filename"));
+        result.append(m_filename.url());
+        if (!m_rsp_grpname.is_empty()) {
+            result.append("\n"+gammalib::parformat("Response group filename"));
+            result.append(m_rsp_grpname.url());
+        }
+        if (!m_rsp_filename.is_empty()) {
+            result.append("\n"+gammalib::parformat("Response filename"));
+            result.append(m_rsp_filename.url());
+        }
         result.append("\n"+gammalib::parformat("Identifier")+id());
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
         result.append("\n"+gammalib::parformat("Statistic")+statistic());
@@ -445,6 +552,8 @@ void GSPIObservation::init_members(void)
     // Initialise members
     m_instrument = "SPI";
     m_filename.clear();
+    m_rsp_grpname.clear();
+    m_rsp_filename.clear();
     m_response.clear();
     m_ontime   = 0.0;
     m_livetime = 0.0;
@@ -463,12 +572,14 @@ void GSPIObservation::init_members(void)
 void GSPIObservation::copy_members(const GSPIObservation& obs)
 {
     // Copy members
-    m_instrument = obs.m_instrument;
-    m_filename   = obs.m_filename;
-    m_response   = obs.m_response;
-    m_ontime     = obs.m_ontime;
-    m_livetime   = obs.m_livetime;
-    m_deadc      = obs.m_deadc;
+    m_instrument   = obs.m_instrument;
+    m_filename     = obs.m_filename;
+    m_rsp_grpname  = obs.m_rsp_grpname;
+    m_rsp_filename = obs.m_rsp_filename;
+    m_response     = obs.m_response;
+    m_ontime       = obs.m_ontime;
+    m_livetime     = obs.m_livetime;
+    m_deadc        = obs.m_deadc;
 
     // Return
     return;

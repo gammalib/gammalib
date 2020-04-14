@@ -59,18 +59,24 @@ public:
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
 
     // Other Methods
-    double irf_value(const GSkyDir&      srcDir,
-                     const GSPIEventBin& bin,
-                     const int&          ireg) const;
-    void   set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
-    void   rspname(const GFilename& rspname);
-    double zenith(const int& ipt, const GSkyDir& dir) const;
-    double azimuth(const int& ipt, const GSkyDir& dir) const;
-    bool   is_precomputed(void) const;
-    void   read(const GFits& fits);
-    void   write(GFits& fits) const;
-    void   load(const GFilename& filename);
-    void   save(const GFilename& filename, const bool& clobber = false) const;
+    void             rspname(const GFilename& rspname);
+    const GFilename& rspname(void) const;
+    bool             is_precomputed(void) const;
+    const double&    energy_keV(void) const;
+    const double&    dlogE(void) const;
+    const double&    gamma(void) const;
+    void             set(const GSPIObservation& obs,
+                         const GEnergy&         energy = GEnergy());
+    double           irf_value(const GSkyDir&      srcDir,
+                               const GSPIEventBin& bin,
+                               const int&          ireg) const;
+    double           zenith(const int& ipt, const GSkyDir& dir) const;
+    double           azimuth(const int& ipt, const GSkyDir& dir) const;
+    void             read(const GFits& fits);
+    void             write(GFits& fits) const;
+    void             load(const GFilename& filename);
+    void             save(const GFilename& filename,
+                          const bool&      clobber = false) const;
 };
 
 

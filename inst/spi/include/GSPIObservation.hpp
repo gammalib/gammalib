@@ -29,10 +29,13 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GFilename.hpp"
 #include "GObservation.hpp"
 #include "GSPIResponse.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GTime;
+class GFits;
 class GResponse;
 class GXmlElement;
 
@@ -89,12 +92,14 @@ protected:
     void free_members(void);
 
     // Protected members
-    std::string  m_instrument;  //!< Instrument name
-    std::string  m_filename;    //!< OG FITS filename
-    GSPIResponse m_response;    //!< Response functions
-    double       m_ontime;      //!< Ontime (sec)
-    double       m_livetime;    //!< Livetime (sec)
-    double       m_deadc;       //!< Deadtime correction
+    std::string  m_instrument;   //!< Instrument name
+    GFilename    m_filename;     //!< OG FITS filename
+    GFilename    m_rsp_grpname;  //!< Response group FITS filename (optional)
+    GFilename    m_rsp_filename; //!< Response FITS filename (optional)
+    GSPIResponse m_response;     //!< Response functions
+    double       m_ontime;       //!< Ontime (sec)
+    double       m_livetime;     //!< Livetime (sec)
+    double       m_deadc;        //!< Deadtime correction
 };
 
 

@@ -89,29 +89,38 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other Methods
-    double irf_value(const GSkyDir&      srcDir,
-                     const GSPIEventBin& bin,
-                     const int&          ireg) const;
-    void   set(const GSPIObservation& obs, const GEnergy& energy = GEnergy());
-    void   rspname(const GFilename& rspname);
-    double zenith(const int& ipt, const GSkyDir& dir) const;
-    double azimuth(const int& ipt, const GSkyDir& dir) const;
-    bool   is_precomputed(void) const;
-    void   read(const GFits& fits);
-    void   write(GFits& fits) const;
-    void   load(const GFilename& filename);
-    void   save(const GFilename& filename, const bool& clobber = false) const;
+    void             rspname(const GFilename& rspname);
+    const GFilename& rspname(void) const;
+    bool             is_precomputed(void) const;
+    const double&    energy_keV(void) const;
+    const double&    dlogE(void) const;
+    const double&    gamma(void) const;
+    void             set(const GSPIObservation& obs,
+                         const GEnergy&         energy = GEnergy());
+    double           irf_value(const GSkyDir&      srcDir,
+                               const GSPIEventBin& bin,
+                               const int&          ireg) const;
+    double           zenith(const int& ipt, const GSkyDir& dir) const;
+    double           azimuth(const int& ipt, const GSkyDir& dir) const;
+    void             read(const GFits& fits);
+    void             write(GFits& fits) const;
+    void             load(const GFilename& filename);
+    void             save(const GFilename& filename,
+                          const bool&      clobber = false) const;
 
 private:
     // Private methods
     void    init_members(void);
     void    copy_members(const GSPIResponse& rsp);
     void    free_members(void);
+    void    read_detids(const GFits& fits);
+    void    read_energies(const GFits& fits);
     void    write_detids(GFits& fits) const;
     void    write_energies(GFits& fits) const;
     void    load_irfs(const int& region);
     GSkyMap load_irf(const GFilename& rspname) const;
     GSkyMap compute_irf(const double& emin, const double& emax) const;
+    void    set_wcs(const GFitsImage* image);
     void    set_detids(const GSPIEventCube* cube);
     void    set_cache(const GSPIEventCube* cube);
     int     irf_detid(const int& detid) const;
@@ -125,6 +134,7 @@ private:
     GNodeArray           m_energies;   //!< Node array of IRF energies
     GEbounds             m_ebounds;    //!< Energy bounaries of IRF
     GSkyMap              m_irfs;       //!< IRFs stored as sky map
+    double               m_energy_keV; //!< IRF line energy (optional)
     double               m_dlogE;      //!< Logarithmic energy step for IRF band
     double               m_gamma;      //!< Power-law spectral index for IRF band
 
@@ -200,6 +210,20 @@ void GSPIResponse::rspname(const GFilename& rspname)
 
 
 /***********************************************************************//**
+ * @brief Get response group file name
+ *
+ * @return Response group file name.
+ *
+ * Returns the response group file name.
+ ***************************************************************************/
+inline
+const GFilename& GSPIResponse::rspname(void) const
+{
+    return m_rspname;
+}
+
+
+/***********************************************************************//**
  * @brief Signals if response is precomputed
  *
  * @return True if response is precomputed.
@@ -210,6 +234,49 @@ inline
 bool GSPIResponse::is_precomputed(void) const
 {
     return (!m_ebounds.is_empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Return line IRF energy in keV
+ *
+ * @return Line IRF energy (keV).
+ *
+ * Returns the energy in keV for a line IRF. If the IRF is a continuum IRF
+ * the method returns 0.
+ ***************************************************************************/
+inline
+const double& GSPIResponse::energy_keV(void) const
+{
+    return (m_energy_keV);
+}
+
+
+/***********************************************************************//**
+ * @brief Return logarithmic step size for continuum IRFs
+ *
+ * @return Logarithmic step size for continuum IRFs.
+ *
+ * Returns the logarithmic step size for the computation of continuum IRFs.
+ ***************************************************************************/
+inline
+const double& GSPIResponse::dlogE(void) const
+{
+    return (m_dlogE);
+}
+
+
+/***********************************************************************//**
+ * @brief Return power-law index for continuum IRFs
+ *
+ * @return Power-law index for continuum IRFs.
+ *
+ * Returns the power-law index for the computation of continuum IRFs.
+ ***************************************************************************/
+inline
+const double& GSPIResponse::gamma(void) const
+{
+    return (m_gamma);
 }
 
 
