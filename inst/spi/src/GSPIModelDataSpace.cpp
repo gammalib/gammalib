@@ -1107,7 +1107,14 @@ void GSPIModelDataSpace::setup_point(GSPIEventCube*            cube,
                                      std::vector<int>*         indices,
                                      std::vector<std::string>* names)
 {
-    // TODO: implement "point" method
+    // Get number of detectors
+    int npt = indices->size();
+
+    // Setup index vector
+    for (int ipt = 0; ipt < npt; ++ipt) {
+        (*indices)[ipt] = ipt;
+        names->push_back("P" + gammalib::str(ipt, "%6.6d"));
+    }
 
     // Return
     return;
@@ -1155,7 +1162,7 @@ void GSPIModelDataSpace::setup_orbit(GSPIEventCube*            cube,
         if (index == -1) {
             index = orbits.size();
             orbits.push_back(orbit);
-            names->push_back("Rev" + orbit);
+            names->push_back("O" + orbit);
         }
 
         // Store index

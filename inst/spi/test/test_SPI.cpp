@@ -29,7 +29,6 @@
 #include <config.h>
 #endif
 #include <cstdlib>     // getenv
-#include "GTools.hpp"
 #include "test_SPI.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -245,7 +244,7 @@ void TestGSPI::test_modeldataspace(void)
     test_value(model2.size(), 1, "ORBIT instance size");
     test_value(model2.instruments(), "SPI", "ORBIT instance instruments");
     test_value(model2.name(), "GEDSAT", "ORBIT instance name");
-    test_value(model2[0].name(), "GEDSAT Rev0044", "ORBIT instance parameter");
+    test_value(model2[0].name(), "GEDSAT O0044", "ORBIT instance parameter");
     xml.clear();
     model2.write(xml);
 
@@ -255,19 +254,22 @@ void TestGSPI::test_modeldataspace(void)
     test_value(model3.size(), 1, "XML constructed ORBIT instance size");
     test_value(model3.instruments(), "SPI", "XML constructed ORBIT instance instruments");
     test_value(model3.name(), "GEDSAT", "ORBIT instance name");
-    test_value(model3[0].name(), "GEDSAT Rev0044", "XML constructed ORBIT instance parameter");
+    test_value(model3[0].name(), "GEDSAT O0044", "XML constructed ORBIT instance parameter");
 
     // Construct "orbit,dete" model from OG
     GSPIModelDataSpace model4(obs, "GEDSAT", "orbit,dete", 0);
-    test_value(model4.type(), "DataSpace", "ORBIT,DETE instance type");
     test_value(model4.size(), 19, "ORBIT,DETE instance size");
-    test_value(model4[1].name(), "GEDSAT D001 Rev0044", "ORBIT,DETE instance parameter");
+    test_value(model4[1].name(), "GEDSAT D001 O0044", "ORBIT,DETE instance parameter");
 
     // Construct "orbit,dete,ebin" model from OG
     GSPIModelDataSpace model5(obs, "GEDSAT", "orbit,dete,ebin", 0);
-    test_value(model5.type(), "DataSpace", "ORBIT,DETE,EBIN instance type");
     test_value(model5.size(), 190, "ORBIT,DETE,EBIN instance size");
-    test_value(model5[35].name(), "GEDSAT E005 D003 Rev0044", "ORBIT,DETE,EBIN instance parameter");
+    test_value(model5[35].name(), "GEDSAT E005 D003 O0044", "ORBIT,DETE,EBIN instance parameter");
+
+    // Construct "point" model from OG
+    GSPIModelDataSpace model6(obs, "GEDSAT", "point", 0);
+    test_value(model6.size(), 88, "POINT instance size");
+    test_value(model6[35].name(), "GEDSAT P000035", "POINT instance parameter");
 
     // Return
     return;
