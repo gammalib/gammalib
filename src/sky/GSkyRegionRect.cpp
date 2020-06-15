@@ -281,10 +281,7 @@ void GSkyRegionRect::posang(const double& posang)
 void GSkyRegionRect::posang_deg(const double& posang)
 {
     // Set the position angle
-    m_posang = posang * gammalib::deg2rad;
-
-    // Update the cache
-    update_cache();
+    this->posang(posang * gammalib::deg2rad);
 
     // Return
     return;
