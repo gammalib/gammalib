@@ -34,6 +34,7 @@
 #include "GSkyMap.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
+#include "GSkyRegionRect.hpp"
 #include "GSkyRegionMap.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -120,6 +121,7 @@ GSkyRegionMap::GSkyRegionMap(const GSkyRegion* region) : GSkyRegion(*region)
     // Get dynamic casts
     const GSkyRegionMap*    map    = dynamic_cast<const GSkyRegionMap*>(region);
     const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(region);
+    const GSkyRegionRect*   rect   = dynamic_cast<const GSkyRegionRect*>(region);
 
     // If region is of type GSkyRegionMap then copy class members
     if (map != NULL) {
@@ -130,6 +132,11 @@ GSkyRegionMap::GSkyRegionMap(const GSkyRegion* region) : GSkyRegion(*region)
     // map from region circle
     else if (circle != NULL) {
         set_region_circle(circle);
+    }
+
+    // If region is of type GSkyRegionRect than set region map fron region rect
+    else if (rect != NULL) {
+        set_region_rect(rect);
     }
 
     // Return
@@ -239,7 +246,7 @@ GSkyRegionMap* GSkyRegionMap::clone(void) const
 
 /***********************************************************************//**
  * @brief Set sky map
- * 
+ *
  * @param[in] map Sky map
  *
  * Sets the sky map of a region map.
@@ -251,7 +258,7 @@ void GSkyRegionMap::map(const GSkyMap& map)
 
     // Set non-zero pixel indices
     set_nonzero_indices();
-    
+
     // Compute solid angle
     compute_solid_angle();
 
@@ -275,10 +282,10 @@ void GSkyRegionMap::load(const GFilename& filename)
 
     // Load map
     m_map.load(filename);
-    
+
     // Set non-zero indices
     set_nonzero_indices();
-    
+
     // Compute solid angle
     compute_solid_angle();
 
@@ -365,13 +372,13 @@ bool GSkyRegionMap::contains(const GSkyDir& dir) const
 
     // If direction is within map boundaries
     if (m_map.contains(dir)) {
-        
+
         // Convert sky direction into pixel index
         int i = m_map.dir2inx(dir);
 
         // Set containment flag
         contain = (m_map(i,0) != 0.0);
-        
+
     } // endif: map contains direction
 
     // Return value
@@ -393,17 +400,17 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
 {
     // Initialise return value
     bool inside = true;
-    
+
     // Case of a region map
     if (reg.type() == "Map") {
-        
+
         // Cast to map type
         const GSkyRegionMap* inreg = dynamic_cast<const GSkyRegionMap*>(&reg);
-        
+
         // Retrieve map data
         const GSkyMap&          regmap   = inreg->map();
         const std::vector<int>& regnzvec = inreg->nonzero_indices();
-        
+
         // Loop over input map non-zero pixels and check if they are all in
         for (int i = 0; i < regnzvec.size(); ++i) {
             if (!contains(regmap.inx2dir(regnzvec[i]))) {
@@ -416,14 +423,14 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
 
     // Case of a circular region
     else if (reg.type() == "Circle") {
-        
+
         // Create circular region from reg
         const GSkyRegionCircle* inreg = dynamic_cast<const GSkyRegionCircle*>(&reg);
 
         // Retrieve circle data
         const GSkyDir& centre = inreg->centre();
         double         rad    = inreg->radius();
-        
+
         // Test a number of points along the circle
         const int numtest  = 360;
         double    rotangle = 360.0 / numtest;
@@ -444,7 +451,7 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
         throw GException::feature_not_implemented(G_CONTAINS,
               "Method only implemented for cicular and map regions.");
     }
-    
+
     // Return result
     return inside;
 }
@@ -460,8 +467,8 @@ bool GSkyRegionMap::overlaps(const GSkyRegion& reg) const
 {
     // Initialise return value
     bool overlap = false;
-    
-    // Loop over non-zero pixels until direction is contained into region 
+
+    // Loop over non-zero pixels until direction is contained into region
     for (int i = 0; i < m_nonzero_indices.size(); ++i) {
         GSkyDir dir = m_map.inx2dir(m_nonzero_indices[i]);
         if (reg.contains(dir)) {
@@ -508,7 +515,7 @@ void GSkyRegionMap::copy_members(const GSkyRegionMap& map)
     // Copy members
     m_map             = map.m_map;
     m_nonzero_indices = map.m_nonzero_indices;
-    
+
     // Compute solid angle
     compute_solid_angle();
 
@@ -539,7 +546,7 @@ void GSkyRegionMap::compute_solid_angle(void)
     for (int i = 0; i < m_nonzero_indices.size(); ++i) {
         m_solid += m_map.solidangle(m_nonzero_indices[i]);
     }
-    
+
     // Return
     return;
 }
@@ -559,7 +566,7 @@ void GSkyRegionMap::set_nonzero_indices(void)
             m_nonzero_indices.push_back(i);
         }
     }
-    
+
     // Return
     return;
 }
@@ -616,6 +623,74 @@ void GSkyRegionMap::set_region_circle(const GSkyRegionCircle* circle)
 
     // Set sky map as region map
     this->map(map);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set region map from region rectangle
+ *
+ * @param[in] rect Region rectangle
+ *
+ * Sets a region map from a region rectangle.
+ * A skymap is allocated with a resolution goal of 0.01 degrees (same for both
+ * axes).
+ * The particular resolution of either axes depends on the w/h of the rectangle.
+ * The sky map will be in celestial coordinates and TAN projection.
+ ***************************************************************************/
+void GSkyRegionMap::set_region_rect(const GSkyRegionRect* rect)
+{
+    // Define desired resolution (in degrees)
+     const double resolution_goal = 0.01;
+
+    // Compute num of bins in x direction, round
+    int nbins_x = int(rect->width()  / resolution_goal +0.5);
+    int nbins_y = int(rect->height() / resolution_goal +0.5);
+
+    // Ensure a minimum num of bins
+    if (nbins_x < 10) {
+        nbins_x = 10;
+    }
+    if (nbins_y < 10) {
+        nbins_y = 10;
+    }
+
+    // Compute actual resolution using nbins
+    double resolution_x = rect->width()  / nbins_x;
+    double resolution_y = rect->height() / nbins_y;
+
+    // Add leakage pixels
+    nbins_x += 6;
+    nbins_y += 6;
+
+    // Create coarse 9-pixel map to later avoid "bending" of fine box-map
+    GSkyMap map_coarse("TAN", "CEL", rect->ra(),    rect->dec(),
+                                     rect->width(), rect->height(),
+                                     3,             3
+                      );
+    map_coarse(4) = 1.0;
+    GSkyRegionMap regionmap_coarse = GSkyRegionMap(map_coarse);
+
+    // Create fine sky map
+    GSkyMap map_fine("TAN", "CEL", rect->ra(),   rect->dec(),
+                                   resolution_x, resolution_y,
+                                   nbins_x,      nbins_y
+                    );
+
+    // Set sky map pixels
+    for (int i = 0; i < map_fine.npix(); ++i) {
+
+        // If pixel is contained in rectangle then set map pixel to 1
+        if (regionmap_coarse.contains(map_fine.inx2dir(i))) {
+            map_fine(i) = 1.0;
+        }
+
+    } // endfor: looped over sky map pixels
+
+    // Set sky map as region map
+    this->map(map_fine);
 
     // Return
     return;

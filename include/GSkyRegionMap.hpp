@@ -37,6 +37,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GSkyDir;
 class GSkyRegionMap;
+class GSkyRegionRect;
 
 
 /***********************************************************************//**
@@ -87,6 +88,7 @@ protected:
     void compute_solid_angle(void);
     void set_nonzero_indices(void);
     void set_region_circle(const GSkyRegionCircle* circle);
+    void set_region_rect(const GSkyRegionRect* rect);
 
     // Protected members
     GSkyMap	          m_map;             //!< The region map
@@ -108,7 +110,7 @@ std::string GSkyRegionMap::classname(void) const
 
 /***********************************************************************//**
  * @brief Return sky map
- * 
+ *
 * @return region sky map.
  ***************************************************************************/
 inline
@@ -120,7 +122,7 @@ const GSkyMap& GSkyRegionMap::map(void) const
 
 /***********************************************************************//**
  * @brief Get non-zero index vector
- * 
+ *
  * @return Reference to non-zero pixel indices vector.
  ***************************************************************************/
 inline
