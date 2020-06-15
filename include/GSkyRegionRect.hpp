@@ -96,6 +96,7 @@ public:
 
     GSkyDir           transform_to_local(const GSkyDir& skydir) const;
     GSkyDir           transform_to_global(const GSkyDir& locdir) const;
+    GSkyDir           get_corner(const int& index) const;
 
 protected:
     // Protected methods

@@ -76,6 +76,7 @@ public:
 
     GSkyDir           transform_to_local(const GSkyDir& skydir) const;
     GSkyDir           transform_to_global(const GSkyDir& localdir) const;
+    GSkyDir           get_corner(const int& index) const;
 };
 
 

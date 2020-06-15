@@ -30,6 +30,7 @@
 #endif
 #include "GSkyRegionCircle.hpp"
 #include "GSkyRegionRect.hpp"
+#include "GSkyRegionMap.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -38,6 +39,7 @@
 #define G_READ                         "GSkyRegionRect::read(std::string&)"
 #define G_CONTAINS                  "GSkyRegionRect::contains(GSkyRegion&)"
 #define G_OVERLAPS                  "GSkyRegionRect::overlaps(GSkyRegion&)"
+#define G_GET_CORNER                     "GSkyRegionRect::get_corner(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -645,16 +647,8 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
         // Loop over the four corners of the rectangle :regrect:
         for(int icorner=0; icorner<4; ++icorner) {
 
-            // Compute the offset to the corners
-            double dx = 0.5*regrect->width()  * (1 - 2*int(icorner < 2));
-            double dy = 0.5*regrect->height() * (1 - 2*int(icorner % 2));
-
-            // Define local corner sky direction
-            GSkyDir corner;
-            corner.radec_deg(dx,dy);
-
-            // Transform to global sky direction
-            corner = regrect->transform_to_global(corner);
+            // Get skydir of current corner
+            GSkyDir corner = regrect->get_corner(icorner);
 
             // Check corner containment
             if (!contains(corner)) {
@@ -674,7 +668,8 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
     // ... otherwise throw an exception
     else {
         throw GException::feature_not_implemented(G_CONTAINS,
-              "Cannot compare rectangular region with other than circle yet.");
+              "Cannot compare rectangular region with other than rectangle or"
+              " circle yet.");
     }
 
     // Return value
@@ -690,6 +685,7 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
  *
+ * @todo: - Improve implementation for rectangle-rectangle
  ***************************************************************************/
 bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
 {
@@ -721,10 +717,23 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
         }
     } // Region was of type "Circle"
 
+    else if (reg.type() == "Rect") {
+
+        // Create rectangular region from reg
+        const GSkyRegionRect* regrect =
+              dynamic_cast<const GSkyRegionRect*>(&reg);
+
+        // Dirty cludge: compare vs map
+        GSkyRegionMap regmap = GSkyRegionMap(regrect);
+        is_overlapping = regmap.overlaps(*this);
+
+    } // Region was of type "Rect"
+
     // ... otherwise throw an exception
     else {
         throw GException::feature_not_implemented(G_OVERLAPS,
-              "Cannot compare rectangular region with other than circle yet.");
+              "Cannot compare rectangular region with other than rectangle or"
+              " circle yet.");
     }
 
     // Return value
@@ -790,6 +799,39 @@ GSkyDir GSkyRegionRect::transform_to_global(const GSkyDir& locdir) const
 
     // Return
     return transformed;
+}
+
+
+/***********************************************************************//**
+ * @brief Get the sky direction of a corner of the rectangle, there are four.
+ *
+ * @param[in] index Corner index [0,3]
+ * @return Sky direction of corner in global coordinate system.
+ *
+ * @exception GException::out_of_range
+ *            Corner index is not in [0,3].
+ ***************************************************************************/
+GSkyDir GSkyRegionRect::get_corner(const int& index) const
+{
+    // Assert index is in [0,3]
+    if ((index<0) || (index>3)) {
+        throw GException::out_of_range(G_GET_CORNER, index, 0, 3);
+    }
+
+    // Compute the offset to the corners
+    // Will be tr, br, tl, bl for indices 0-3 respectively
+    double dx = m_halfwidth  * (1 - 2*int(index < 2));
+    double dy = m_halfheight * (1 - 2*int(index % 2));
+
+    // Define local corner sky direction
+    GSkyDir corner;
+    corner.radec_deg(dx,dy);
+
+    // Transform to global sky direction
+    corner = transform_to_global(corner);
+
+    // Return
+    return corner;
 }
 
 
