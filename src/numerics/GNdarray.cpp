@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNdarray.cpp - N-dimensional array class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -741,6 +741,32 @@ const double& GNdarray::at(const std::vector<int>& i) const
 
 
 /***********************************************************************//**
+ * @brief Compute array element index
+ *
+ * @param[in] i Index vector.
+ * @return Array element index.
+ *
+ * Computes the array element index from an index vector. The method assumes
+ * that the index vector has the same dimension as the array. If this
+ * condition is not guaranteed, the condition needs to be checked before
+ * calling the method.
+ ***************************************************************************/
+int GNdarray::index(const std::vector<int>& i) const
+{
+    // Initialise element index
+    int index = 0;
+
+    // Compute element index
+    for (int k = 0; k < m_shape.size(); ++k) {
+        index += m_strides[k] * i[k];
+    }
+
+    // Return index
+    return index;
+}
+
+
+/***********************************************************************//**
  * @brief Print array information
  *
  * @param[in] chatter Chattiness.
@@ -820,32 +846,6 @@ void GNdarray::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Compute array element index
- *
- * @param[in] i Index vector.
- * @return Array element index.
- *
- * Computes the array element index from an index vector. The method assumes
- * that the index vector has the same dimension as the array. If this
- * condition is not guaranteed, the condition needs to be checked before
- * calling the method.
- ***************************************************************************/
-int GNdarray::index(const std::vector<int>& i) const
-{
-    // Initialise element index
-    int index = 0;
-
-    // Compute element index
-    for (int k = 0; k < m_shape.size(); ++k) {
-        index += m_strides[k] * i[k];
-    }
-
-    // Return index
-    return index;
 }
 
 

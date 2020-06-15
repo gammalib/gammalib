@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNdarray.i - N-dimensional array class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,6 +70,7 @@ public:
     const std::vector<int>& shape(void) const;
     const std::vector<int>& strides(void) const;
     void                    shape(const std::vector<int>& shape);
+    int                     index(const std::vector<int>& i) const;
     double*                 data(void);
 };
 
