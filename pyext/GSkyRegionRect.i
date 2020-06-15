@@ -72,6 +72,8 @@ public:
     bool              contains(const GSkyDir& dir) const;
     bool              contains(const GSkyRegion& reg) const;
     bool              overlaps(const GSkyRegion& reg) const;
+
+    GSkyDir           transform_to_local(const GSkyDir& skydir) const;
 };
 
 

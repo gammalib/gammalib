@@ -93,18 +93,24 @@ public:
     bool              overlaps(const GSkyRegion& reg) const;
     std::string       print(const GChatter& chatter = NORMAL) const;
 
+    GSkyDir           transform_to_local(const GSkyDir& skydir) const;
+
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GSkyRegionRect& region);
     void free_members(void);
     void compute_solid_angle(void);
+    void update_cache(void);
 
     // Protected members
-    GSkyDir	m_centre;   //!< Centre or reference point of the region
-    double 	m_halfwidth;  //!< Half width of the region [deg]
+    GSkyDir m_centre;     //!< Centre or reference point of the region
+    double  m_halfwidth;  //!< Half width of the region [deg]
     double  m_halfheight; //!< Half height of the region [deg]
     double  m_posang;     //!< Position angle, counterclockwise from North [radians]
+
+    double m_posang_cos; //!< Cache for transform_to_local
+    double m_posang_sin; //!< Cache for transform_to_local
 };
 
 
@@ -149,44 +155,6 @@ double GSkyRegionRect::posang_deg(void) const
 {
     // Return
     return (m_posang * gammalib::rad2deg);
-}
-
-
-/***********************************************************************//**
- * @brief Set position angle of rectangular region
- *
- * @param[in] posang Position angle [radians].
- *
- * Sets the position angle of the rectangular sky region. The position angle
- * is counted counterclockwise from North.
- ***************************************************************************/
-inline
-void GSkyRegionRect::posang(const double& posang)
-{
-    // Set the position angle
-    m_posang = posang;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set position angle of rectangular region
- *
- * @param[in] posang Position angle [degrees].
- *
- * Sets the position angle of the rectangular sky region. The position angle
- * is counted counterclockwise from North.
- ***************************************************************************/
-inline
-void GSkyRegionRect::posang_deg(const double& posang)
-{
-    // Set the position angle
-    m_posang = posang * gammalib::deg2rad;
-
-    // Return
-    return;
 }
 
 

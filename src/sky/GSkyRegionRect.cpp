@@ -250,6 +250,48 @@ GSkyRegionRect* GSkyRegionRect::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Set position angle of rectangular region
+ *
+ * @param[in] posang Position angle [radians].
+ *
+ * Sets the position angle of the rectangular sky region. The position angle
+ * is counted counterclockwise from North.
+ ***************************************************************************/
+void GSkyRegionRect::posang(const double& posang)
+{
+    // Set the position angle
+    m_posang = posang;
+
+    // Update the cache
+    update_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set position angle of rectangular region
+ *
+ * @param[in] posang Position angle [degrees].
+ *
+ * Sets the position angle of the rectangular sky region. The position angle
+ * is counted counterclockwise from North.
+ ***************************************************************************/
+void GSkyRegionRect::posang_deg(const double& posang)
+{
+    // Set the position angle
+    m_posang = posang * gammalib::deg2rad;
+
+    // Update the cache
+    update_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set width of rectangular region
  *
  * @param[in] width Width [deg].
@@ -586,6 +628,38 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
 }
 
 
+/***********************************************************************//**
+ * @brief Transform a sky direction to the local coordinate system.
+ *
+ * @param[in] skydir Sky direction in global coordinate system.
+ * @return Sky direction in local region object coordinates.
+ *
+ * Transform the sky direction :skydir: to the local coordinate system. The
+ * origin of the local coordinate system is fixed to the center of the
+ * rectangle and aligned in +ra (width) and +dec (height).
+ ***************************************************************************/
+GSkyDir GSkyRegionRect::transform_to_local(const GSkyDir& skydir) const
+{
+    // Compute separation (in radians)
+    double dx = skydir.ra()  - m_centre.ra();
+    double dy = skydir.dec() - m_centre.dec();
+
+    // Correct for spherical coordinate system (global dx -> local dx)
+    dx *= std::cos(skydir.dec());
+
+    // Rotate with neg. PA
+    double new_x = m_posang_cos*dx - m_posang_sin*dy;
+    double new_y = m_posang_sin*dx + m_posang_cos*dy;
+
+    // Create output sky direction
+    GSkyDir transformed;
+    transformed.radec(new_x, new_y);
+
+    // Return
+    return transformed;
+}
+
+
 
 /*==========================================================================
  =                                                                         =
@@ -623,6 +697,10 @@ void GSkyRegionRect::copy_members(const GSkyRegionRect& region)
     m_halfheight = region.m_halfheight;
     m_posang     = region.m_posang;
 
+    // Copy cache
+    m_posang_cos = region.m_posang_cos;
+    m_posang_sin = region.m_posang_sin;
+
     // Return
     return;
 }
@@ -646,6 +724,20 @@ void GSkyRegionRect::compute_solid_angle(void)
     // Compute solid angle
     m_solid = (2*m_halfwidth) * (2*m_halfheight) * \
                 (gammalib::deg2rad * gammalib::deg2rad);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update the cache.
+ ***************************************************************************/
+void GSkyRegionRect::update_cache(void)
+{
+    // Precompute cos and sin of position angle
+    m_posang_cos = std::cos(m_posang);
+    m_posang_sin = std::sin(m_posang);
 
     // Return
     return;
