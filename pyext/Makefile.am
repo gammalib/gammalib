@@ -129,6 +129,7 @@ testdata = $(top_srcdir)/test/data/initial_coords.txt \
            $(top_srcdir)/test/data/model_point_plaw.xml \
            $(top_srcdir)/test/data/test_cube.fits \
            $(top_srcdir)/test/data/filefunction.txt \
+           $(top_srcdir)/test/data/model_point_table.fits \
            $(top_srcdir)/test/data/model_temporal_lightcurve.fits \
            $(top_srcdir)/test/data/model_temporal_phasecurve.fits
 

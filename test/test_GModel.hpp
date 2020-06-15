@@ -78,6 +78,7 @@ public:
     void                test_filefct(void);
     void                test_spectral_composite(void);
     void                test_spectral_model(void);
+    void                test_table(void);
     void                test_temp_const(void);
     void                test_temp_lightcurve(void);
     void                test_temp_phasecurve(void);
@@ -109,6 +110,7 @@ private:
     std::string m_map_file;
     std::string m_cube_file;
     std::string m_filefct;
+    std::string m_table;
     std::string m_temp_lightcurve;
     std::string m_temp_phasecurve;
     std::string m_xml_file;
@@ -125,10 +127,11 @@ private:
     std::string m_xml_model_point_smoothbplaw;
     std::string m_xml_model_point_supeplaw;
     std::string m_xml_model_point_logparabola;
-    std::string m_xml_point_multiplicative;
-    std::string m_xml_point_exponential;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_point_filefct;
+    std::string m_xml_model_point_table;
+    std::string m_xml_point_multiplicative;
+    std::string m_xml_point_exponential;
     std::string m_xml_model_spectral_composite;
     std::string m_xml_model_diffuse_const;
     std::string m_xml_model_diffuse_cube;

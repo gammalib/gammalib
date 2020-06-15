@@ -51,6 +51,7 @@ void TestGModel::set(void)
     m_map_file        = datadir + "/cena_lobes_parkes.fits";
     m_cube_file       = datadir + "/test_cube.fits";
     m_filefct         = datadir + "/filefunction.txt";
+    m_table           = datadir + "/model_point_table.fits";
     m_temp_lightcurve = datadir + "/model_temporal_lightcurve.fits";
     m_temp_phasecurve = datadir + "/model_temporal_phasecurve.fits";
     m_xml_file        = datadir + "/crab.xml";
@@ -67,10 +68,11 @@ void TestGModel::set(void)
     m_xml_model_point_smoothbplaw  = datadir + "/model_point_smoothbplaw.xml";
     m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
     m_xml_model_point_logparabola  = datadir + "/model_point_logparabola.xml";
-    m_xml_point_multiplicative     = datadir + "/model_point_multiplicative.xml";
-    m_xml_point_exponential        = datadir + "/model_point_exponential.xml";
     m_xml_model_point_nodes        = datadir + "/model_point_nodes.xml";
     m_xml_model_point_filefct      = datadir + "/model_point_filefct.xml";
+    m_xml_model_point_table        = datadir + "/model_point_table.xml";
+    m_xml_point_multiplicative     = datadir + "/model_point_multiplicative.xml";
+    m_xml_point_exponential        = datadir + "/model_point_exponential.xml";
     m_xml_model_spectral_composite = datadir + "/model_spectral_composite.xml";
     m_xml_model_diffuse_const      = datadir + "/model_diffuse_const.xml";
     m_xml_model_diffuse_cube       = datadir + "/model_diffuse_cube.xml";
@@ -170,6 +172,8 @@ void TestGModel::set(void)
            "Test GModelSpectralNodes");
     append(static_cast<pfunction>(&TestGModel::test_filefct),
            "Test GModelSpectralFunc");
+    append(static_cast<pfunction>(&TestGModel::test_table),
+           "Test GModelSpectralTable");
     append(static_cast<pfunction>(&TestGModel::test_spectral_composite),
            "Test GModelSpectralComposite");
     append(static_cast<pfunction>(&TestGModel::test_spectral_model),
@@ -2290,6 +2294,61 @@ void TestGModel::test_filefct(void)
     // Exit test
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralTable class
+ ***************************************************************************/
+void TestGModel::test_table(void)
+{
+    // Test void constructor
+    GModelSpectralTable model1;
+    test_value(model1.type(), "TableModel", "Check void model type");
+
+    // Test value constructor
+    GModelSpectralTable model2(m_table, 2.0);
+    test_value(model2.filename().url(), m_table,
+                "Check file function data file name");
+    test_value(model2.norm(), 2.0);
+   
+    // Test XML constructor
+    GXml                xml(m_xml_model_point_table);
+    GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralTable model3(*element);
+    test_value(model3.size(), 3);
+    test_value(model3.type(), "TableModel", "Check model type");
+    test_value(model3.filename().url(), m_table,
+               "Check table model data file name");
+    test_value(model3.norm(), 1.0);
+
+    // Test filename method
+    //model3.filename(m_table);
+    //test_value(model3.filename().url(), m_table,
+    //           "Check table model data file name");
+
+    // Test norm method
+    model3.norm(3.0);
+    test_value(model3.norm(), 3.0);
+
+    // Test operator access
+    /*
+    const char* strarray[] = {"Normalization"};
+    for (int i = 0; i < 1; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+    */
+
+    // Exit test
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Test GModelSpectralComposite class

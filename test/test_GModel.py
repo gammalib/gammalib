@@ -147,6 +147,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GModelSpectralPlawPhotonFlux())
         test_support.pickeling(self, gammalib.GModelSpectralSmoothBrokenPlaw())
         test_support.pickeling(self, gammalib.GModelSpectralSuperExpPlaw())
+        test_support.pickeling(self, gammalib.GModelSpectralTable())
         test_support.pickeling(self, gammalib.GModelTemporalConst())
         test_support.pickeling(self, gammalib.GModelTemporalLightCurve())
         test_support.pickeling(self, gammalib.GModelTemporalPhaseCurve())
@@ -175,6 +176,7 @@ class Test(gammalib.GPythonTestSuite):
         lcrv  = gammalib.GFilename(os.environ['TEST_DATA']+'/model_temporal_lightcurve.fits')
         pcrv  = gammalib.GFilename(os.environ['TEST_DATA']+'/model_temporal_phasecurve.fits')
         cube  = gammalib.GFilename(os.environ['TEST_DATA']+'/test_cube.fits')
+        table = gammalib.GFilename(os.environ['TEST_DATA']+'/model_point_table.fits')
         dir   = gammalib.GSkyDir()
 
         # Perform pickeling tests of filled classes
@@ -212,6 +214,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GModelSpectralPlawPhotonFlux(1.0,-2.0,pivot,pivot))
         test_support.pickeling(self, gammalib.GModelSpectralSmoothBrokenPlaw(1.0,-2.0,pivot,-2.1,pivot,0.9))
         test_support.pickeling(self, gammalib.GModelSpectralSuperExpPlaw(1.0,-2.0,pivot,pivot,0.9))
+        test_support.pickeling(self, gammalib.GModelSpectralTable(table, 2.0))
         test_support.pickeling(self, gammalib.GModelTemporalConst(cnst))
         test_support.pickeling(self, gammalib.GModelTemporalLightCurve(lcrv, 2.0))
         test_support.pickeling(self, gammalib.GModelTemporalPhaseCurve(pcrv, time, 0.5, 1.0, 1.0, 1.0, 2.0))

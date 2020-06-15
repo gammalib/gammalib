@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralTable.cpp - Spectral table model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019 by Juergen Knoedlseder                              *
+ *  copyright (C) 2019-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -494,6 +494,9 @@ void GModelSpectralTable::read(const GXmlElement& xml)
               "Spectral function requires exactly 1 parameter.");
     }
 
+    // Load table model from file (do this first since method calls clear())
+    load(gammalib::xml_file_expand(xml, xml.attribute("file")));
+
     // Get parameter element
     const GXmlElement* par = xml.element("parameter", 0);
 
@@ -505,9 +508,6 @@ void GModelSpectralTable::read(const GXmlElement& xml)
         throw GException::model_invalid_parnames(G_READ, xml,
                           "Require \"Normalization\" parameter.");
     }
-
-    // Load table model from file
-    load(gammalib::xml_file_expand(xml, xml.attribute("file")));
 
     // Return
     return;
