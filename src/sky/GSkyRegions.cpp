@@ -34,6 +34,7 @@
 #include "GSkyDir.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
+#include "GSkyRegionRect.hpp"
 #include "GSkyRegions.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -369,7 +370,7 @@ void GSkyRegions::remove(const int& index)
 
     // Erase region component from container
     m_regions.erase(m_regions.begin() + index);
-    
+
     // Return
     return;
 }
@@ -395,7 +396,7 @@ void GSkyRegions::extend(const GSkyRegions& regions)
         // Reserve enough space
         reserve(size() + num);
 
-        // Loop over all region components and append pointers to deep copies 
+        // Loop over all region components and append pointers to deep copies
         for (int i = 0; i < num; ++i) {
 
             // Append region to container
@@ -404,7 +405,7 @@ void GSkyRegions::extend(const GSkyRegions& regions)
         } // endfor: looped over all regions
 
     } // endif: region container was not empty
-    
+
     // Return
     return;
 }
@@ -424,7 +425,7 @@ bool GSkyRegions::contains(const GSkyDir& dir) const
 {
     // Initialise return value
     bool overlap = false;
- 
+
     // Loop over regions
     for (int i = 0; i < size(); ++i) {
         overlap = m_regions[i]->contains(dir);
@@ -432,12 +433,12 @@ bool GSkyRegions::contains(const GSkyDir& dir) const
             break;
         }
     }
- 
+
     // Return result
     return overlap;
 }
 
- 
+
 /***********************************************************************//**
  * @brief Check if region overlaps one of the regions
  *
@@ -451,7 +452,7 @@ bool GSkyRegions::overlaps(const GSkyRegion& region) const
 {
     // Initialise return value
     bool overlap = false;
-    
+
     // Loop over regions
     for (int i = 0; i < size(); ++i) {
         overlap = m_regions[i]->overlaps(region);
@@ -459,7 +460,7 @@ bool GSkyRegions::overlaps(const GSkyRegion& region) const
             break;
         }
     }
-    
+
     // Return result
     return overlap;
 }
@@ -473,14 +474,14 @@ bool GSkyRegions::overlaps(const GSkyRegion& region) const
  *         with one of the regions in the container, false otherwise
  *
  * Tells if all regions in  overlaps one of the regions. Note, this method
- * returns true if ANY of the regions in the two containers overlap with 
+ * returns true if ANY of the regions in the two containers overlap with
  * each other
  ***************************************************************************/
 bool GSkyRegions::overlaps(const GSkyRegions& regions) const
 {
     // Initialize return value
     bool overlap = false;
-    
+
     // Loop over each region in the container
     for (int i = 0; i < size(); ++i) {
         overlap = regions.overlaps(*m_regions[i]);
@@ -488,7 +489,7 @@ bool GSkyRegions::overlaps(const GSkyRegions& regions) const
             break;
         }
     }
-    
+
     // Return result
     return overlap;
 }
@@ -513,7 +514,7 @@ void GSkyRegions::load(const GFilename& filename)
     std::ifstream ds9file;
     ds9file.open(filename.url().c_str());
     if (ds9file.is_open()) {
-        
+
         // Loop over file lines
         std::string fileline = "";
         std::string coordsys = "galactic";
@@ -548,7 +549,50 @@ void GSkyRegions::load(const GFilename& filename)
                     region.read(fileline);
                     append(region);
                 }
-                
+
+                // else, prepend the coordinate system
+                else {
+				    std::string newfileline = coordsys;
+					newfileline.append("; ");
+					newfileline.append(fileline);
+					region.read(newfileline);
+					append(region);
+				}
+			}
+
+            // If region is a rectangle
+            if (std::string::npos != fileline.find("box")) {
+
+                // Create instance of GSkyRegion object
+                GSkyRegionRect region;
+
+                // If coordinate system and region defined on the same line
+                if ((std::string::npos != fileline.find("fk5")) ||
+                    (std::string::npos != fileline.find("icrs")) ||
+                    (std::string::npos != fileline.find("galactic"))) {
+                    region.read(fileline);
+                    append(region);
+                }
+
+                // else, prepend the coordinate system
+                else {
+                coordsys = "icrs";
+            }
+
+            // If region is a circle
+            if (std::string::npos != fileline.find("circle")) {
+
+                // Create instance of GSkyRegion object
+                GSkyRegionCircle region;
+
+                // If coordinate system and region defined on the same line
+                if ((std::string::npos != fileline.find("fk5")) ||
+                    (std::string::npos != fileline.find("icrs")) ||
+                    (std::string::npos != fileline.find("galactic"))) {
+                    region.read(fileline);
+                    append(region);
+                }
+
                 // else, prepend the coordinate system
                 else {
                     std::string newfileline = coordsys;
@@ -557,7 +601,7 @@ void GSkyRegions::load(const GFilename& filename)
                     region.read(newfileline);
                     append(region);
                 }
-            } 
+            }
         }
 
         // Close file
@@ -566,7 +610,7 @@ void GSkyRegions::load(const GFilename& filename)
         // Store filename
         m_filename = filename;
 
-    } 
+    }
 
     // File could not be opened
     else {
@@ -596,7 +640,7 @@ void GSkyRegions::save(const GFilename& filename) const
 
     // If file opened correctly, then save regions
     if (ds9file.is_open()) {
-    
+
         // Write global definition
         std::string fileline;
         fileline.append("# Region file format: DS9 version 4.1\n");
@@ -610,7 +654,7 @@ void GSkyRegions::save(const GFilename& filename) const
 
         // Close file
         ds9file.close();
-    
+
         // Store filename
         m_filename = filename;
 
