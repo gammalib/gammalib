@@ -109,7 +109,7 @@ protected:
     // Protected members
     GModelPar           m_norm;       //!< Normalization factor
     mutable GNodeArray  m_lin_nodes;  //!< Energy nodes of function
-    mutable GNodeArray  m_log_nodes;  //!< lof10(Energy) nodes of function
+    mutable GNodeArray  m_log_nodes;  //!< log10(Energy) nodes of function
     std::vector<double> m_lin_values; //!< Function values at nodes
     std::vector<double> m_log_values; //!< log10(Function) values at nodes
     GFilename           m_filename;   //!< Name of file function
