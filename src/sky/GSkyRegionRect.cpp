@@ -555,30 +555,25 @@ std::string GSkyRegionRect::print(const GChatter& chatter) const
  * @param[in] dir Sky direction.
  *
  * A sky direction lies within a region when its distance to the region
- * centre is not larger than the region radius.
+ * centre is not larger than the region extension in both axes directions.
  ***************************************************************************/
 bool GSkyRegionRect::contains(const GSkyDir& dir) const
 {
     // Initialise return value
     bool dir_is_in = false;
 
-    // std::cout<<"GSkyRegionRect::contains: (1/2) dec: "<<m_centre.dec_deg()-m_halfheight<<"<="<<dir.dec_deg()<<"<="<<m_centre.dec_deg()+m_halfheight<<std::endl;
+    // Compute sky direction in local coordinate system
+    GSkyDir local_dir = transform_to_local(dir);
 
-    // Check dec axis
-    if ((dir.dec_deg()<=(m_centre.dec_deg() + m_halfheight)) &&
-        (dir.dec_deg()>=(m_centre.dec_deg() - m_halfheight))) {
+    // Check containment: declination axis
+    if (std::abs(local_dir.dec_deg()) <= m_halfheight) {
 
-        // Compute width scaled for declination of queried skydir
-        double scale = std::cos(dir.dec());
-        double half_width_scaled = m_halfwidth/scale;
+        // Check containment: right ascension axis
+        if (std::abs(local_dir.ra_deg()) <= m_halfwidth) {
 
-        // Check ra axis
-        if ((dir.ra_deg()<=(m_centre.ra_deg() + half_width_scaled)) &&
-            (dir.ra_deg()>=(m_centre.ra_deg() - half_width_scaled))) {
+            // Sky direction is inside the rectangle
             dir_is_in = true;
         }
-
-        // std::cout<<"GSkyRegionRect::contains: (2/2)  ra: "<<m_centre.ra_deg()-half_width_scaled<<"<="<<dir.ra_deg()<<"<="<<m_centre.ra_deg()+half_width_scaled<<std::endl;
     }
 
     // Return bool
