@@ -89,11 +89,13 @@ public:
     void              read(const std::string& line);
     std::string       write(void) const;
     bool              contains(const GSkyDir& dir) const;
+    bool              contains_local(const GSkyDir& locdir) const;
     bool              contains(const GSkyRegion& reg) const;
     bool              overlaps(const GSkyRegion& reg) const;
     std::string       print(const GChatter& chatter = NORMAL) const;
 
     GSkyDir           transform_to_local(const GSkyDir& skydir) const;
+    GSkyDir           transform_to_global(const GSkyDir& locdir) const;
 
 protected:
     // Protected methods
