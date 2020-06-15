@@ -33,6 +33,7 @@
 #include "GMath.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyRegion.hpp"
+#include "GTools.hpp"
 
 
 /***********************************************************************//**
@@ -53,8 +54,14 @@ class GSkyRegionRect : public GSkyRegion {
 public:
     // Constructors and destructors
     GSkyRegionRect(void);
-    GSkyRegionRect(const GSkyDir& centre, const double& w, const double& h);
-    GSkyRegionRect(const double& ra, const double& dec, const double& w, const double& h);
+    GSkyRegionRect(const GSkyDir& centre
+                  ,const double& w, const double& h
+                  ,const double& posang_deg
+                  );
+    GSkyRegionRect(const double& ra, const double& dec
+                  ,const double& w, const double& h
+                  ,const double& posang_deg
+                  );
     explicit GSkyRegionRect(const std::string& line);
     GSkyRegionRect(const GSkyRegionRect& region);
     virtual ~GSkyRegionRect(void);
@@ -66,6 +73,10 @@ public:
     void              clear(void);
     GSkyRegionRect*   clone(void) const;
     std::string       classname(void) const;
+    double            posang(void) const;
+    void              posang(const double& posang);
+    double            posang_deg(void) const;
+    void              posang_deg(const double& posang);
     double            width(void) const;
     void              width(const double& width);
     double            height(void) const;
@@ -93,6 +104,7 @@ protected:
     GSkyDir	m_centre;   //!< Centre or reference point of the region
     double 	m_halfwidth;  //!< Half width of the region [deg]
     double  m_halfheight; //!< Half height of the region [deg]
+    double  m_posang;     //!< Position angle, counterclockwise from North [radians]
 };
 
 
@@ -105,6 +117,76 @@ inline
 std::string GSkyRegionRect::classname(void) const
 {
     return ("GSkyRegionRect");
+}
+
+
+/***********************************************************************//**
+ * @brief Return region position angle (in radians)
+ *
+ * @return Region position angle [radians].
+ *
+ * Returns the region position angle in radians. The position angle is
+ * counted counterclockwise from North.
+ ***************************************************************************/
+inline
+double GSkyRegionRect::posang(void) const
+{
+    // Return
+    return (m_posang);
+}
+
+
+/***********************************************************************//**
+ * @brief Return region position angle (in degrees)
+ *
+ * @return Region position angle [degrees].
+ *
+ * Returns the region position angle in degrees. The position angle is
+ * counted counterclockwise from North.
+ ***************************************************************************/
+inline
+double GSkyRegionRect::posang_deg(void) const
+{
+    // Return
+    return (m_posang * gammalib::rad2deg);
+}
+
+
+/***********************************************************************//**
+ * @brief Set position angle of rectangular region
+ *
+ * @param[in] posang Position angle [radians].
+ *
+ * Sets the position angle of the rectangular sky region. The position angle
+ * is counted counterclockwise from North.
+ ***************************************************************************/
+inline
+void GSkyRegionRect::posang(const double& posang)
+{
+    // Set the position angle
+    m_posang = posang;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set position angle of rectangular region
+ *
+ * @param[in] posang Position angle [degrees].
+ *
+ * Sets the position angle of the rectangular sky region. The position angle
+ * is counted counterclockwise from North.
+ ***************************************************************************/
+inline
+void GSkyRegionRect::posang_deg(const double& posang)
+{
+    // Set the position angle
+    m_posang = posang * gammalib::deg2rad;
+
+    // Return
+    return;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                      GSkyRegionRect.i - Sky region class              *
+ *                      GSkyRegionRect.i - Sky region class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2019 by Andreas Specovius                           *
+ *  copyright (C) 2019-2020 by Andreas Specovius                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,8 +38,14 @@ class GSkyRegionRect : public GSkyRegion {
 public:
     // Constructors and destructors
     GSkyRegionRect(void);
-    GSkyRegionRect(const GSkyDir& centre, const double& w, const double& h);
-    GSkyRegionRect(const double& ra, const double& dec, const double& w, const double& h);
+    GSkyRegionRect(const GSkyDir& centre
+                  ,const double& w, const double& h
+                  ,const double& posang_deg
+                  );
+    GSkyRegionRect(const double& ra, const double& dec
+                  ,const double& w, const double& h
+                  ,const double& posang_deg
+                  );
     explicit GSkyRegionRect(const std::string& line);
     GSkyRegionRect(const GSkyRegionRect& region);
     virtual ~GSkyRegionRect(void);
@@ -48,6 +54,10 @@ public:
     void              clear(void);
     GSkyRegionRect*   clone(void) const;
     std::string       classname(void) const;
+    double            posang(void) const;
+    void              posang(const double& posang);
+    double            posang_deg(void) const;
+    void              posang_deg(const double& posang);
     double            width(void) const;
     void              width(const double& width);
     double            height(void) const;
@@ -74,10 +84,10 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.centre(), self.width(), self.height(), self.name())
+        state = (self.centre(), self.width(), self.height(), self.posang(), self.name())
         return state
     def __setstate__(self, state):
-        self.__init__(state[0], state[1], state[2])
-        self.name(state[3])
+        self.__init__(state[0], state[1], state[2], state[3])
+        self.name(state[4])
 }
 };

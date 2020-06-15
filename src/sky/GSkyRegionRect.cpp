@@ -74,7 +74,7 @@ GSkyRegionRect::GSkyRegionRect(void) : GSkyRegion()
  * @param[in] h Region height [deg].
  ***************************************************************************/
 GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre, const double& w,
-                                   const double& h) :
+                                   const double& h, const double& posang_deg) :
                   GSkyRegion()
 {
     // Initialise members
@@ -84,6 +84,7 @@ GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre, const double& w,
 	this->centre(centre);
     this->width(w);
     this->height(h);
+    this->posang_deg(posang_deg);
 
 	// Compute solid angle
 	compute_solid_angle();
@@ -99,9 +100,11 @@ GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre, const double& w,
  * @param[in] ra Right Ascension of region centre [deg].
  * @param[in] dec Declination of region centre [deg].
  * @param[in] radius Region radius [deg].
+ * @param[in] radius Region radius [deg].
  ***************************************************************************/
 GSkyRegionRect::GSkyRegionRect(const double& ra, const double& dec,
-                                   const double& w, const double& h) :
+                                   const double& w, const double& h,
+                                   const double& posang_deg) :
                   GSkyRegion()
 {
     // Initialise members
@@ -111,6 +114,7 @@ GSkyRegionRect::GSkyRegionRect(const double& ra, const double& dec,
 	this->centre(ra, dec);
     this->width(w);
     this->height(h);
+    this->posang_deg(posang_deg);
 
 	// Compute solid angle
 	compute_solid_angle();
@@ -344,7 +348,7 @@ void GSkyRegionRect::read(const std::string& line)
 	// Get the substring of the important values
 	unsigned    pos          = region_def.find("box(");
 	unsigned    end          = region_def.find(")");
-	std::string regionstring = region_def.substr(pos+7, end);
+	std::string regionstring = region_def.substr(pos+4, end);
 	regionstring.erase(regionstring.find(")"), 1);
 
 	// Get the values of the region x,y,and radius
@@ -362,14 +366,6 @@ void GSkyRegionRect::read(const std::string& line)
     double h      = gammalib::todouble(values[3]);
     double posang = gammalib::todouble(values[4]);
 
-    // Assert posang is zero
-    if (std::abs(posang)>0.1) {
-        std::string msg =
-            "Box position angle is not zero! Handling of rotated rectangular"
-            " sky regions is generally possible but not implemented.";
-        throw GException::invalid_value(G_READ, msg);
-    }
-
     // Get radius units
     if (gammalib::contains(values[2], "'")) {
         w /= 60.0;
@@ -382,6 +378,12 @@ void GSkyRegionRect::read(const std::string& line)
     }
     else if (gammalib::contains(values[3], "\"")) {
         h /= 3600.0;
+    }
+    if (gammalib::contains(values[4], "'")) {
+        posang /= 60.0;
+    }
+    else if (gammalib::contains(values[4], "\"")) {
+        posang /= 3600.0;
     }
 
 	// Initialise centre direction
@@ -407,6 +409,7 @@ void GSkyRegionRect::read(const std::string& line)
 	this->centre(centre);
     this->width(w);
     this->height(h);
+    this->posang_deg(posang);
 
 	// Compute solid angle
 	compute_solid_angle();
@@ -455,7 +458,7 @@ std::string GSkyRegionRect::write(void) const
     result.append(",");
     result.append(gammalib::str(2*m_halfheight));
     result.append(",");
-    result.append(gammalib::str(0));
+    result.append(gammalib::str(m_posang*gammalib::rad2deg));
 	result.append(")");
 
     // Optionally add region name
@@ -495,6 +498,8 @@ std::string GSkyRegionRect::print(const GChatter& chatter) const
         result.append(gammalib::str(2*m_halfwidth)+" deg");
         result.append("\n"+gammalib::parformat("Height"));
         result.append(gammalib::str(2*m_halfheight)+" deg");
+        result.append("\n"+gammalib::parformat("PA"));
+        result.append(gammalib::str(m_posang*gammalib::rad2deg)+" deg");
 
     } // endif: chatter was not silent
 
@@ -597,6 +602,7 @@ void GSkyRegionRect::init_members(void)
 	m_centre = GSkyDir();
 	m_halfwidth  = 0.0;
     m_halfheight = 0.0;
+    m_posang     = 0.0;
 	m_type   = "Rect";
 
 	//Return
@@ -612,9 +618,10 @@ void GSkyRegionRect::init_members(void)
 void GSkyRegionRect::copy_members(const GSkyRegionRect& region)
 {
 	// Copy attributes
-	m_centre = region.m_centre;
+	m_centre     = region.m_centre;
 	m_halfwidth  = region.m_halfwidth;
     m_halfheight = region.m_halfheight;
+    m_posang     = region.m_posang;
 
     // Return
     return;
@@ -632,19 +639,13 @@ void GSkyRegionRect::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Compute solid angle
- *
- * As width and height are opening angles the rectangular boundaries are
- * not aligned to spherical coordinate lines, the box keeps it opening angles.
- * Hence the solidangle will vary.
+ * @brief Compute solid angle [sr]
  ***************************************************************************/
 void GSkyRegionRect::compute_solid_angle(void)
 {
-    // Compute width scaling factor from box center
-    double scale = std::cos(m_centre.dec());
-
     // Compute solid angle
-    m_solid = (2*m_halfwidth)/scale * (2*m_halfheight);
+    m_solid = (2*m_halfwidth) * (2*m_halfheight) * \
+                (gammalib::deg2rad * gammalib::deg2rad);
 
     // Return
     return;
