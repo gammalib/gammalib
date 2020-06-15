@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GSkyRegionCircle.hpp"
 #include "GSkyRegionRect.hpp"
 #include "GTools.hpp"
 
@@ -588,13 +589,41 @@ bool GSkyRegionRect::contains(const GSkyDir& dir) const
 bool GSkyRegionRect::contains(const GSkyRegion& reg) const
 {
     // Initialise return value
-    bool fully_inside = false;
+    bool is_fully_inside = false;
 
-    throw GException::feature_not_implemented(G_CONTAINS,
-              "Cannot compare Rect region type yet");
+    // If other region is circle use a simple way to calculate
+    if (reg.type() == "Circle") {
+
+        // Create circular region from reg
+        const GSkyRegionCircle* regcirc =
+              dynamic_cast<const GSkyRegionCircle*>(&reg);
+
+        // Transform circle center to local coordinate system
+        GSkyDir local_centre = transform_to_local(regcirc->centre());
+
+        // Get circle radius
+        const double circ_rad = regcirc->radius();
+
+        // Check extension of circle along declination axis
+        if ((std::abs(local_centre.dec_deg()) + circ_rad) <= m_halfheight) {
+
+            // Check extension of circle along right ascension axis
+            if ((std::abs(local_centre.ra_deg()) + circ_rad) <= m_halfwidth) {
+
+                // Circle is fully contained in this rectangle
+                is_fully_inside = true;
+            }
+        }
+    } // Region was of type "Circle"
+
+    // ... otherwise throw an exception
+    else {
+        throw GException::feature_not_implemented(G_CONTAINS,
+              "Cannot compare rectangular region with other than circle yet");
+    }
 
     // Return value
-    return fully_inside;
+    return is_fully_inside;
 }
 
 
@@ -608,15 +637,42 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
  ***************************************************************************/
 bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
 {
-
     // Initialise return value
-    bool overlap = false;
+    bool is_overlapping = false;
 
-    throw GException::feature_not_implemented(G_OVERLAPS,
-          "Cannot compare Rect region type yet");
+    // If other region is circle use a simple way to calculate
+    if (reg.type() == "Circle") {
+
+        // Create circular region from reg
+        const GSkyRegionCircle* regcirc =
+              dynamic_cast<const GSkyRegionCircle*>(&reg);
+
+        // Transform circle center to local coordinate system
+        GSkyDir local_centre = transform_to_local(regcirc->centre());
+
+        // Get circle radius
+        const double circ_rad = regcirc->radius();
+
+        // Check extension of circle along declination axis
+        if (std::abs(local_centre.dec_deg()) <= (m_halfheight + circ_rad)) {
+
+            // Check extension of circle along right ascension axis
+            if (std::abs(local_centre.ra_deg()) <= (m_halfwidth + circ_rad)) {
+
+                // Circle is fully contained in this rectangle
+                is_overlapping = true;
+            }
+        }
+    } // Region was of type "Circle"
+
+    // ... otherwise throw an exception
+    else {
+        throw GException::feature_not_implemented(G_OVERLAPS,
+              "Cannot compare rectangular region with other than circle yet");
+    }
 
     // Return value
-    return overlap;
+    return is_overlapping;
 }
 
 
