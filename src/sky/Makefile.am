@@ -34,6 +34,7 @@ sources = GSkyDir.cpp \
           GSkyRegion.cpp \
           GSkyRegionCircle.cpp \
           GSkyRegionMap.cpp \
+          GSkyRegionRect.cpp \
           GSkyProjection.cpp \
           GHealpix.cpp \
           GWcsRegistry.cpp \

@@ -118,6 +118,7 @@ namespace std {
 %include "GSkyRegions.i"
 %include "GSkyRegion.i"
 %include "GSkyRegionCircle.i"
+%include "GSkyRegionRect.i"
 %include "GSkyRegionMap.i"
 %include "GSkyProjection.i"
 %include "GHealpix.i"
