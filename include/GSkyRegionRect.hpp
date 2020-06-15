@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GSkyRegionRect.hpp - circular sky region class           *
+ *             GSkyRegionRect.hpp - rectangular sky region class           *
  * ----------------------------------------------------------------------- *
- * copyright (C) 2013-2015 by Michael Mayer                                *
+ * copyright (C) 2019-2020 by Andreas Specovius                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GSkyRegionRect.hpp
- * @brief Circular sky region class interface definition
- * @author Michael Mayer
+ * @brief Rectangular sky region class interface definition
+ * @author Andreas Specovius
  */
 
 #ifndef GSKYREGIONRECT_HPP
@@ -38,21 +38,14 @@
 /***********************************************************************//**
  * @class GSkyRegionRect
  *
- * @brief Interface for the circular sky region class
+ * @brief Interface for the rectangular sky region class
  *
- * This class provides an implementation for a circular sky region. The sky
+ * This class provides an implementation for a rectangular sky region. The sky
  * region is defined by an array of parameters, the meaning of which is
  * specific to the derived class where the region type or shape is defined.
- * The parameters are GModelPar objects for convenience.
  *
  * The class holds several properties such as solid angle subtended by the
  * region and computed through internal method compute_solid().
- *
- * To be clarified:
- * - Do we want a member relating the region to an observation run ?
- * - Constructor and read/write using XML may not be needed if we use DS9
- *   region file format ?
- * - Replace GModelPar by double for the parameters (GModelPar is overkill) ?
  *
  ***************************************************************************/
 class GSkyRegionRect : public GSkyRegion {
@@ -146,7 +139,7 @@ double GSkyRegionRect::height(void) const
 
 
 /***********************************************************************//**
- * @brief Return circular region centre
+ * @brief Return rectangular region centre
  *
  * @return Region centre.
  *
@@ -160,11 +153,11 @@ const GSkyDir& GSkyRegionRect::centre(void) const
 
 
 /***********************************************************************//**
- * @brief Set circular region centre
+ * @brief Set rectangular region centre
  *
  * @param[in] dir Region centre.
  *
- * Sets the centre of the circular region to the specified sky direction.
+ * Sets the centre of the rectangular region to the specified sky direction.
  ***************************************************************************/
 inline
 void GSkyRegionRect::centre(const GSkyDir& dir)
@@ -178,12 +171,12 @@ void GSkyRegionRect::centre(const GSkyDir& dir)
 
 
 /***********************************************************************//**
- * @brief Set circular region centre Right Ascension and Declincation
+ * @brief Set rectangular region centre Right Ascension and Declincation
  *
  * @param[in] ra Right Ascension [deg].
  * @param[in] dec Declination [deg].
  *
- * Sets the centre of the circular region to the specified Right Ascension
+ * Sets the centre of the rectangular region to the specified Right Ascension
  * and Declination.
  ***************************************************************************/
 inline
@@ -198,7 +191,7 @@ void GSkyRegionRect::centre(const double& ra, const double& dec)
 
 
 /***********************************************************************//**
- * @brief Return circular region centre Right Ascension
+ * @brief Return rectangular region centre Right Ascension
  *
  * @return Region centre Right Ascension [deg].
  *
@@ -212,7 +205,7 @@ double GSkyRegionRect::ra(void) const
 
 
 /***********************************************************************//**
- * @brief Return circular region centre Declination
+ * @brief Return rectangular region centre Declination
  *
  * @return Region centre Declination [deg].
  *

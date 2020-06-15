@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GSkyRegionRect.cpp - Circular sky region class          *
+ *              GSkyRegionRect.cpp - Rectangular sky region class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Michael Mayer                               *
+ *  copyright (C) 2019-2020 by Andreas Specovius                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GSkyRegionRect.hpp
- * @brief Circular sky region implementation
- * @author Michael Mayer
+ * @brief Rectangular sky region implementation
+ * @author Andreas Specovius
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -144,7 +144,7 @@ GSkyRegionRect::GSkyRegionRect(const std::string& line) : GSkyRegion()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] region Circular sky region.
+ * @param[in] region Rectangular sky region.
  ***************************************************************************/
 GSkyRegionRect::GSkyRegionRect(const GSkyRegionRect& region) :
                   GSkyRegion(region)
@@ -182,8 +182,8 @@ GSkyRegionRect::~GSkyRegionRect(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] region Circular sky region.
- * @return Circular sky region.
+ * @param[in] region Rectangular sky region.
+ * @return Rectangular sky region.
  ***************************************************************************/
 GSkyRegionRect& GSkyRegionRect::operator=(const GSkyRegionRect& region)
 {
@@ -344,15 +344,15 @@ void GSkyRegionRect::read(const std::string& line)
 	// Get the substring of the important values
 	unsigned    pos          = region_def.find("box(");
 	unsigned    end          = region_def.find(")");
-	std::string circlestring = region_def.substr(pos+7, end);
-	circlestring.erase(circlestring.find(")"), 1);
+	std::string regionstring = region_def.substr(pos+7, end);
+	regionstring.erase(regionstring.find(")"), 1);
 
 	// Get the values of the region x,y,and radius
-	std::vector<std::string> values = gammalib::split(circlestring,",");
+	std::vector<std::string> values = gammalib::split(regionstring,",");
 	if (values.size() != 5) {
         std::string msg =
             "Invalid number of "+gammalib::str(values.size())+" arguments"
-            " after the \"circle\" key word in provided string \""+line+"\".\n"
+            " after the \"box\" key word in provided string \""+line+"\".\n"
             "Exactly 5 arguments are expected.";
 		throw GException::invalid_value(G_READ, msg);
 	}
@@ -486,7 +486,7 @@ std::string GSkyRegionRect::print(const GChatter& chatter) const
         // Append header
     	result.append("=== GSkyRegionRect ===");
 
-        // Append sky circle information
+        // Append sky region information
         result.append("\n"+gammalib::parformat("Right Ascension of centre"));
         result.append(gammalib::str(m_centre.ra_deg())+" deg");
         result.append("\n"+gammalib::parformat("Declination of centre"));
@@ -607,7 +607,7 @@ void GSkyRegionRect::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] region Circular sky region.
+ * @param[in] region Rectangular sky region.
  ***************************************************************************/
 void GSkyRegionRect::copy_members(const GSkyRegionRect& region)
 {
