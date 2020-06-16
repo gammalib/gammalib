@@ -754,6 +754,7 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
 GSkyDir GSkyRegionRect::transform_to_local(const GSkyDir& skydir) const
 {
     // Get rid of negative right ascension coordinates
+    // to obtain angles in [0,2pi]
     // (Surely there is a more clever way to to this)
     double skydir_ra = skydir.ra();
     if (skydir_ra < 0) {
@@ -767,6 +768,11 @@ GSkyDir GSkyRegionRect::transform_to_local(const GSkyDir& skydir) const
     // Compute separation (in radians)
     double dx = skydir_ra    - centre_ra;
     double dy = skydir.dec() - m_centre.dec();
+
+    // Make sure the closest angular separation is chosen
+    if (std::abs(dx) > gammalib::pi) {
+        dx = gammalib::twopi - std::abs(dx);
+    }
 
     // Correction for spherical coordinate system
     dx *= std::cos(skydir.dec());
