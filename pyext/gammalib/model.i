@@ -170,6 +170,7 @@
 %include "GModelSpatialPointSource.i"
 %include "GModelSpatialRadial.i"
 %include "GModelSpatialRadialDisk.i"
+%include "GModelSpatialRadialRing.i"
 %include "GModelSpatialRadialGauss.i"
 %include "GModelSpatialRadialShell.i"
 %include "GModelSpatialRadialProfile.i"

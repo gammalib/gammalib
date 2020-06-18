@@ -207,6 +207,7 @@
 #include "GModelSpatialRadialDisk.hpp"
 #include "GModelSpatialRadialGauss.hpp"
 #include "GModelSpatialRadialShell.hpp"
+#include "GModelSpatialRadialRing.hpp"
 #include "GModelSpatialRadialProfile.hpp"
 #include "GModelSpatialRadialProfileGauss.hpp"
 #include "GModelSpatialRadialProfileDMBurkert.hpp"

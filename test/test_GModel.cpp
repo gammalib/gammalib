@@ -76,6 +76,7 @@ void TestGModel::set(void)
     m_xml_model_diffuse_cube       = datadir + "/model_diffuse_cube.xml";
     m_xml_model_diffuse_map        = datadir + "/model_diffuse_map.xml";
     m_xml_model_radial_disk        = datadir + "/model_radial_disk.xml";
+    m_xml_model_radial_ring        = datadir + "/model_radial_ring.xml";
     m_xml_model_radial_gauss       = datadir + "/model_radial_gauss.xml";
     m_xml_model_radial_shell       = datadir + "/model_radial_shell.xml";
     m_xml_model_elliptical_disk    = datadir + "/model_elliptical_disk.xml";
@@ -113,6 +114,8 @@ void TestGModel::set(void)
            "Test GModelSpatialPointSource");
     append(static_cast<pfunction>(&TestGModel::test_radial_disk),
            "Test GModelSpatialRadialDisk");
+    append(static_cast<pfunction>(&TestGModel::test_radial_ring),
+           "Test GModelSpatialRadialRing");
     append(static_cast<pfunction>(&TestGModel::test_radial_gauss),
            "Test GModelSpatialRadialGauss");
     append(static_cast<pfunction>(&TestGModel::test_radial_shell),
@@ -933,6 +936,88 @@ void TestGModel::test_radial_disk(void)
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialRadialRing class
+ ***************************************************************************/
+void TestGModel::test_radial_ring(void)
+{
+    // Test void constructor
+    GModelSpatialRadialRing model1;
+    test_value(model1.type(), "RadialRing");
+
+    // Test value constructor
+    GSkyDir dir1;
+    dir1.radec_deg(83.6331, +22.0145);
+    GModelSpatialRadialRing model2(dir1, 3.0,1.0);
+    test_value(model2.ra(), 83.6331);
+    test_value(model2.dec(), 22.0145);
+    test_value(model2.radius(), 3.0);
+    test_value(model2.width(), 1.0);
+    
+    // Test XML constructor
+    GXml         xml(m_xml_model_radial_ring);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialRadialRing model3(*element);
+    test_value(model3.size(), 4);
+    test_value(model3.type(), "RadialRing");
+    test_value(model3.ra(), 83.6331);
+    test_value(model3.dec(), 22.0145);
+    test_value(model3.radius(), 0.45);
+    test_value(model3.width(), 0.15);
+
+    // Test ra method
+    model3.ra(100.0);
+    test_value(model3.ra(), 100.0);
+
+    // Test dec method
+    model3.dec(10.0);
+    test_value(model3.dec(), 10.0);
+
+    // Test dir method
+    GSkyDir dir2;
+    dir2.radec_deg(83.6331, +22.0145);
+    model3.dir(dir2);
+    test_assert(model3.dir() == dir2, "Test sky direction");
+
+    // Test radius method
+    model3.radius(1.0);
+    test_value(model3.radius(), 1.0);
+    
+    // Test width method
+    model3.width(0.5);
+    test_value(model3.width(), 0.5);
+
+    // Test region method
+    GSkyDir dir3;
+    dir3.radec_deg(83.6331, +22.0145);
+    test_assert(model3.region()->contains(dir3), "Test region() method (inside)");
+    dir3.radec_deg(83.6331, +26.0);
+    test_assert(!model3.region()->contains(dir3), "Test region() method (outside)");
+    
+    // Test contains method
+    dir3.radec_deg(83.6331, +22.75);
+    test_assert(model3.contains(dir3), "Test contains() method (inside)");
+    dir3.radec_deg(83.6331, +22.0145);
+    test_assert(!model3.contains(dir3), "Test contains() method (outside interior of ring)");
+    dir3.radec_deg(83.6331, +26.0);
+    test_assert(!model3.contains(dir3), "Test contains() method (outside exterior of ring)");
+    
+    // Test operator access
+    const char* strarray[] = {"RA", "DEC", "Radius", "Width"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+
+    // Exit test
+    return;
+}
 
 /***********************************************************************//**
  * @brief Test GModelSpatialRadialGauss class
@@ -2509,6 +2594,7 @@ void TestGModel::test_spatial_model(void)
     // Test spatial models XML interface
     test_xml_model("GModelSpatialPointSource",     m_xml_model_point_plaw);
     test_xml_model("GModelSpatialRadialDisk",      m_xml_model_radial_disk);
+    test_xml_model("GModelSpatialRadialRing",      m_xml_model_radial_ring);
     test_xml_model("GModelSpatialRadialGauss",     m_xml_model_radial_gauss);
     test_xml_model("GModelSpatialRadialShell",     m_xml_model_radial_shell);
     test_xml_model("GModelSpatialEllipticalDisk",  m_xml_model_elliptical_disk);

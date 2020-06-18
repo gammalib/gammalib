@@ -54,6 +54,7 @@ public:
     void                test_diffuse_cube(void);
     void                test_diffuse_map(void);
     void                test_radial_disk(void);
+    void                test_radial_ring(void);
     void                test_radial_gauss(void);
     void                test_radial_shell(void);
     void                test_elliptical_disk(void);
@@ -133,6 +134,7 @@ private:
     std::string m_xml_model_diffuse_cube;
     std::string m_xml_model_diffuse_map;
     std::string m_xml_model_radial_disk;
+    std::string m_xml_model_radial_ring;
     std::string m_xml_model_radial_gauss;
     std::string m_xml_model_radial_shell;
     std::string m_xml_model_elliptical_disk;
