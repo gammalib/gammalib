@@ -344,12 +344,9 @@ GSkyDir GModelSpatialRadialRing::mc(const GEnergy& energy,
                                     const GTime&   time,
                                     GRan&          ran) const
 {
-    // Update precomputation cache
-    update();
-    
     // Simulate offset from photon arrival direction
-    double cosirad = std::cos(m_inner_radius_rad);
-    double cosorad = std::cos(m_outer_radius_rad);
+    double cosirad = std::cos((radius()-width()) * gammalib::deg2rad);
+    double cosorad = std::cos(radius() * gammalib::deg2rad);
     double theta  = std::acos(cosirad - ran.uniform() * (cosirad - cosorad)) *
                     gammalib::rad2deg;
     double phi    = 360.0 * ran.uniform();
@@ -375,19 +372,12 @@ GSkyDir GModelSpatialRadialRing::mc(const GEnergy& energy,
 bool GModelSpatialRadialRing::contains(const GSkyDir& dir,
                                        const double&  margin) const
 {
-    // Update precomputation cache
-    update();
-    
     // Compute distance to centre (radians)
     double distance = dir.dist(this->dir());
     
-    // Set flag
-    bool flag;
-    flag = (distance <= m_outer_radius_rad + margin*gammalib::deg2rad)
-           *(distance >= m_inner_radius_rad - margin*gammalib::deg2rad);
-    
     // Return flag
-    return flag;
+    return (distance <= theta_max() + margin*gammalib::deg2rad)
+           *(distance >= theta_min() - margin*gammalib::deg2rad);;
 }
 
 
@@ -399,7 +389,7 @@ bool GModelSpatialRadialRing::contains(const GSkyDir& dir,
 double GModelSpatialRadialRing::theta_max(void) const
 {
     // Return value
-    return m_outer_radius_rad;
+    return (radius() * gammalib::deg2rad);
 }
 
 
@@ -411,7 +401,7 @@ double GModelSpatialRadialRing::theta_max(void) const
 double GModelSpatialRadialRing::theta_min(void) const
 {
     // Return value
-    return m_inner_radius_rad;
+    return ((radius()-width()) * gammalib::deg2rad);
 }
 
 /***********************************************************************//**
@@ -672,9 +662,6 @@ void GModelSpatialRadialRing::update() const
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
-    
-    // Also update region
-    set_region();
     
     // Return
     return;
