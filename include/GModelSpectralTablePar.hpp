@@ -63,6 +63,8 @@ public:
     GModelPar&              par(void);
     const GModelPar&        par(void) const;
     const GNodeArray&       values(void) const;
+    const int&              method(void) const;
+    void                    method(const int& method);
     std::string             print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -72,8 +74,9 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar  m_par;    // Model parameter
-    GNodeArray m_values; // Parameter values
+    GModelPar  m_par;    //!< Model parameter
+    GNodeArray m_values; //!< Parameter values
+    int        m_method; //!< Interpolation method (0: linear, 1: logarithmic)
 };
 
 
@@ -150,6 +153,31 @@ inline
 const GNodeArray& GModelSpectralTablePar::values(void) const
 {
     return m_values;
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to table model parameter interpolation method
+ *
+ * @return Interpolation method (0: linear, 1: logarithmic).
+ ***************************************************************************/
+inline
+const int& GModelSpectralTablePar::method(void) const
+{
+    return m_method;
+}
+
+
+/***********************************************************************//**
+ * @brief Set table model parameter interpolation method
+ *
+ * @param[in] method Interpolation method (0: linear, 1: logarithmic).
+ ***************************************************************************/
+inline
+void GModelSpectralTablePar::method(const int& method)
+{
+    m_method = method;
+    return;
 }
 
 #endif /* GMODELSPECTRALTABLEPAR_HPP */

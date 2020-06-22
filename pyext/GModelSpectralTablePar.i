@@ -58,6 +58,8 @@ public:
     GModelPar&              par(void);
     const GModelPar&        par(void) const;
     const GNodeArray&       values(void) const;
+    const int&              method(void) const;
+    void                    method(const int& method);
 };
 
 

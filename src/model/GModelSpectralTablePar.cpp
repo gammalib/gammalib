@@ -213,6 +213,16 @@ std::string GModelSpectralTablePar::print(const GChatter& chatter) const
         result.append(m_par.name());
         result.append("\n"+gammalib::parformat("Number of values"));
         result.append(gammalib::str(m_values.size()));
+        result.append("\n"+gammalib::parformat("Interpolation method"));
+        if (m_method == 0) {
+            result.append("linear");
+        }
+        else if (m_method == 1) {
+            result.append("logarithmic");
+        }
+        else {
+            result.append("invalid");
+        }
 
     } // endif: chatter was not silent
 
@@ -235,6 +245,7 @@ void GModelSpectralTablePar::init_members(void)
     // Initialize members
     m_par.clear();
     m_values.clear();
+    m_method = 0;
 
     // Return
     return;
@@ -251,6 +262,7 @@ void GModelSpectralTablePar::copy_members(const GModelSpectralTablePar& par)
     // Copy members
     m_par    = par.m_par;
     m_values = par.m_values;
+    m_method = par.m_method;
 
     // Return
     return;
