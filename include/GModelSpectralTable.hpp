@@ -34,6 +34,7 @@
 #include "GEbounds.hpp"
 #include "GModelPar.hpp"
 #include "GNdarray.hpp"
+#include "GNodeArray.hpp"
 #include "GFilename.hpp"
 #include "GModelSpectralTablePars.hpp"
 
@@ -88,12 +89,19 @@ public:
     virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double           norm(void) const;
-    void             norm(const double& norm);
-    void             load(const GFilename& filename);
-    void             save(const GFilename& filename,
-                          const bool&      clobber = false) const;
-    const GFilename& filename(void) const;
+    GModelSpectralTablePar&       table_par(const int& index);
+    const GModelSpectralTablePar& table_par(const int& index) const;
+    GModelSpectralTablePar&       table_par(const std::string& name);
+    const GModelSpectralTablePar& table_par(const std::string& name) const;
+    double                        norm(void) const;
+    void                          norm(const double& norm);
+    const GEbounds&               ebounds(void) const;
+    void                          load(const GFilename& filename);
+    void                          save(const GFilename& filename,
+                                       const bool&      clobber = false) const;
+    const GFilename&              filename(void) const;
+
+    void                          update(void);
 
 protected:
     // Protected methods
@@ -101,19 +109,28 @@ protected:
     void          copy_members(const GModelSpectralTable& model);
     void          free_members(void);
     void          set_par_pointers(void);
+    void          set_energy_nodes(void);
     GFitsBinTable create_par_table(void) const;
     GFitsBinTable create_eng_table(void) const;
     GFitsBinTable create_spec_table(void) const;
     void          load_par(const GFits& fits);
     void          load_eng(const GFits& fits);
     void          load_spec(const GFits& fits);
+    int           par_index(const std::string& name) const;
 
     // Protected members
-    GModelPar               m_norm;        //!< Normalization factor
-    GModelSpectralTablePars m_table_pars;  //!< Table model parameters
-    GNdarray                m_spectra;     //!< Spectra
-    GEbounds                m_ebounds;     //!< Energy boundaries
-    mutable GFilename       m_filename;    //!< Filename of table
+    GModelPar                   m_norm;        //!< Normalization factor
+    GModelSpectralTablePars     m_table_pars;  //!< Table model parameters
+    GNdarray                    m_spectra;     //!< Spectra
+    GEbounds                    m_ebounds;     //!< Energy boundaries
+    mutable GFilename           m_filename;    //!< Filename of table
+
+    // Cached members used for pre-computations
+    mutable std::vector<double> m_last_values; //!< Last parameter values
+    mutable GNodeArray          m_lin_nodes;   //!< Energy nodes of function
+    mutable GNodeArray          m_log_nodes;   //!< log10(Energy) nodes of function
+    mutable std::vector<double> m_lin_values;  //!< Function values at nodes
+    mutable std::vector<double> m_log_values;  //!< log10(Function) values at nodes
 };
 
 
@@ -169,6 +186,20 @@ void GModelSpectralTable::norm(const double& norm)
 {
     m_norm.value(norm);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to energy boundaries
+ *
+ * @return Reference to energy boundaries.
+ *
+ * Returns a reference to energy boundaries.
+ ***************************************************************************/
+inline
+const GEbounds& GModelSpectralTable::ebounds(void) const
+{
+    return (m_ebounds);
 }
 
 

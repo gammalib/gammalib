@@ -58,6 +58,8 @@ const GModelSpectralRegistry g_spectral_table_registry(&g_spectral_table_seed);
 #define G_READ                      "GModelSpectralTable::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralTable::write(GXmlElement&)"
 #define G_LOAD                        "GModelSpectralTable::load(GFilename&)"
+#define G_TABLE_PAR                    "GModelSpectralTable::table_par(int&)"
+#define PAR_INDEX              "GModelSpectralTable::par_index(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,6 +67,7 @@ const GModelSpectralRegistry g_spectral_table_registry(&g_spectral_table_seed);
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_LOAD_SPEC                     //!< Debug load_spec() method
+#define G_DEBUG_UPDATE                           //!< Debug update() method
 
 
 /*==========================================================================
@@ -170,6 +173,9 @@ GModelSpectralTable::GModelSpectralTable(const GEbounds&                ebounds,
     m_ebounds    = ebounds;
     m_table_pars = pars;
     m_spectra    = spectra;
+
+    // Set energy nodes
+    set_energy_nodes();
 
     // Set parameter pointers
     set_par_pointers();
@@ -610,6 +616,9 @@ void GModelSpectralTable::load(const GFilename& filename)
         // Close FITS file
         fits.close();
 
+        // Set energy nodes
+        set_energy_nodes();
+
         // Set parameter pointers
         set_par_pointers();
 
@@ -677,6 +686,74 @@ void GModelSpectralTable::save(const GFilename& filename,
 
 
 /***********************************************************************//**
+ * @brief Return reference to table parameter
+ *
+ * @param[in] index Table parameter index.
+ * @return Reference to table parameter.
+ ***************************************************************************/
+GModelSpectralTablePar& GModelSpectralTable::table_par(const int& index)
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_TABLE_PAR, index, size());
+    }
+
+    // Return reference
+    return *(m_table_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return const reference to table parameter
+ *
+ * @param[in] index Table parameter index.
+ * @return Const reference to table parameter.
+ ***************************************************************************/
+const GModelSpectralTablePar& GModelSpectralTable::table_par(const int& index) const
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_TABLE_PAR, index, size());
+    }
+
+    // Return reference
+    return *(m_table_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to table parameter
+ *
+ * @param[in] name Table parameter name.
+ * @return Reference to table parameter.
+ ***************************************************************************/
+GModelSpectralTablePar& GModelSpectralTable::table_par(const std::string& name)
+{
+    // Get index from name
+    int index = par_index(name);
+
+    // Return reference
+    return *(m_table_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return const reference to table parameter
+ *
+ * @param[in] name Table parameter name.
+ * @return Const reference to table parameter.
+ ***************************************************************************/
+const GModelSpectralTablePar& GModelSpectralTable::table_par(const std::string& name) const
+{
+    // Get index from name
+    int index = par_index(name);
+
+    // Return reference
+    return *(m_table_pars[index]);
+}
+
+
+/***********************************************************************//**
  * @brief Print table model information
  *
  * @param[in] chatter Chattiness.
@@ -722,6 +799,12 @@ std::string GModelSpectralTable::print(const GChatter& chatter) const
                 }
                 result.append(" ["+gammalib::str(min)+", "+gammalib::str(max)+"]");
             }
+            if (m_table_pars[i]->method() == 0) {
+                result.append("  (linear)");
+            }
+            else if (m_table_pars[i]->method() == 1) {
+                result.append("  (logarithmic)");
+            }
         }
 
         // Append energy boundaries
@@ -737,8 +820,9 @@ std::string GModelSpectralTable::print(const GChatter& chatter) const
         int nspectra = 0;
         int nebins   = 0;
         if (m_spectra.dim() > 0) {
+            nspectra = 1;
             for (int i = 0; i < m_spectra.dim()-1; ++i) {
-                nspectra += m_spectra.shape()[i];
+                nspectra *= m_spectra.shape()[i];
             }
             nebins = m_spectra.shape()[m_spectra.dim()-1];
         }
@@ -783,6 +867,13 @@ void GModelSpectralTable::init_members(void)
     m_ebounds.clear();
     m_filename.clear();
 
+    // Initialize cache
+    m_last_values.clear();
+    m_lin_nodes.clear();
+    m_log_nodes.clear();
+    m_lin_values.clear();
+    m_log_values.clear();
+
     // Set parameter pointer(s)
     set_par_pointers();
 
@@ -799,11 +890,21 @@ void GModelSpectralTable::init_members(void)
 void GModelSpectralTable::copy_members(const GModelSpectralTable& model)
 {
     // Copy members
-    m_norm       = model.m_norm;
-    m_table_pars = model.m_table_pars;
-    m_spectra    = model.m_spectra;
-    m_ebounds    = model.m_ebounds;
-    m_filename   = model.m_filename;
+    m_norm        = model.m_norm;
+    m_table_pars  = model.m_table_pars;
+    m_spectra     = model.m_spectra;
+    m_ebounds     = model.m_ebounds;
+    m_filename    = model.m_filename;
+
+    // Copy cache
+    m_last_values = model.m_last_values;
+    m_lin_nodes   = model.m_lin_nodes;
+    m_log_nodes   = model.m_log_nodes;
+    m_lin_values  = model.m_lin_values;
+    m_log_values  = model.m_log_values;
+
+    // Set energy nodes
+    set_energy_nodes();
 
     // Set parameter pointer(s)
     set_par_pointers();
@@ -838,6 +939,38 @@ void GModelSpectralTable::set_par_pointers(void)
     for (int i = 0; i < m_table_pars.size(); ++i) {
         m_pars.push_back(&(m_table_pars[i]->par()));
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy nodes from energy boundaries
+ ***************************************************************************/
+void GModelSpectralTable::set_energy_nodes(void)
+{
+    // Determine number of energy bins
+    int nebins = m_ebounds.size();
+
+    // Continue only if there are energy bins
+    if (nebins > 0) {
+
+        // Initialise vectors for values
+        m_lin_nodes  = GNodeArray();
+        m_log_nodes  = GNodeArray();
+        m_lin_values = std::vector<double>(nebins, 0.0);
+        m_log_values = std::vector<double>(nebins, 0.0);
+
+        // Compute node values
+        for (int i = 0; i < nebins; ++i) {
+            double energy_MeV       = m_ebounds.elogmean(i).MeV();
+            double log10_energy_MeV = std::log10(energy_MeV);
+            m_lin_nodes.append(energy_MeV);
+            m_log_nodes.append(log10_energy_MeV);
+        }
+
+    } // endif: there were energy bins
 
     // Return
     return;
@@ -886,7 +1019,7 @@ GFitsBinTable GModelSpectralTable::create_par_table(void) const
 
         // Set parameter name and initial value
         col_name(i)    = par.name();
-        col_method(i)  = 1;  // Interpolation: 0=linear, 1=logarithmic
+        col_method(i)  = m_table_pars[i]->method();
         col_initial(i) = (float)par.value();
 
         // Handle free/fixed parameter attribute
@@ -1071,8 +1204,8 @@ GFitsBinTable GModelSpectralTable::create_spec_table(void) const
             col_spec(i,k) = m_spectra(index);
         }
 
-        // Increment parameter index
-        int ipar = 0;
+        // Increment parameter index. Last parameter index is changing fastest
+        int ipar = npars-1;
         do {
             inx[ipar] += 1;
             if (inx[ipar] < m_spectra.shape()[ipar]) {
@@ -1080,9 +1213,9 @@ GFitsBinTable GModelSpectralTable::create_spec_table(void) const
             }
             else {
                 inx[ipar] = 0;
-                ipar++;
+                ipar--;
             }
-        } while (ipar < npars);
+        } while (ipar >= 0);
 
     } // endfor: looped over rows
 
@@ -1131,7 +1264,7 @@ void GModelSpectralTable::load_par(const GFits& fits)
         GModelPar par(table["NAME"]->string(i), table["INITIAL"]->real(i));
 
         // Apply hard minimum and maximum as parameter range. Note that the
-        // minimum and maximum applt to the value factor, hence in case of
+        // minimum and maximum apply to the value factor, hence in case of
         // a negative scale factor the minimum becomes the maximum and vice
         // versa. This is actually a bug in GammaLib, see
         // https://cta-redmine.irap.omp.eu/issues/3072
@@ -1160,6 +1293,9 @@ void GModelSpectralTable::load_par(const GFits& fits)
 
         // Set table model parameter
         GModelSpectralTablePar table_model_par(par, values);
+
+        // Set interpolation method
+        table_model_par.method(table["METHOD"]->integer(i));
 
         // Append table model parameter
         m_table_pars.append(table_model_par);
@@ -1292,6 +1428,195 @@ void GModelSpectralTable::load_spec(const GFits& fits)
         }
 
     } // endfor: looped over rows
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return index for parameter name
+ *
+ * @param[in] name Parameter name.
+ * @return Parameter index.
+ *
+ * @exception GException::invalid_argument
+ *            Parameter name not found in spectral table.
+ ***************************************************************************/
+int GModelSpectralTable::par_index(const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_table_pars[index]->par().name() == name) {
+            break;
+        }
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size()) {
+        throw GException::par_not_found(PAR_INDEX, name);
+        std::string msg = "Parameter name \""+name+"\" not found in spectral "
+                          "table. Please specify one of the following parameter "
+                          "names:";
+        for (int i = 0; i < size(); ++i) {
+            if (i > 0) {
+                msg += ",";
+            }
+            msg += " \""+m_table_pars[i]->par().name()+"\"";
+        }
+        throw GException::invalid_argument(PAR_INDEX, msg);
+    }
+
+    // Return index
+    return index;
+}
+
+
+/***********************************************************************//**
+ * @brief Update
+ ***************************************************************************/
+void GModelSpectralTable::update(void)
+{
+    // Debug option: write header
+    #if defined(G_DEBUG_UPDATE)
+    std::cout << "GModelSpectralTable::update() entered" << std::endl;
+    #endif
+
+    // Get dimension of spectral table
+    int dim = m_table_pars.size();
+
+    // Initialise update flag
+    bool need_update = false;
+
+    // If dimension of last cached parameter values differ from dimension
+    // of spectral table then reallocate cache and request update
+    if (m_last_values.size() != dim) {
+        m_last_values = std::vector<double>(dim, 0.0);
+        need_update   = true;
+    }
+
+    // ... otherwise check if some parameter values have changed
+    else {
+        for (int i = 0; i < dim; ++i) {
+            if (m_table_pars[i]->par().value() != m_last_values[i]) {
+                need_update = true;
+                break;
+            }
+        }
+    }
+
+    // Continue only if update is required
+    if (need_update) {
+
+        // Initialise vectors for weights and indices
+        std::vector<double> m_weights(2*dim, 0.0);
+        std::vector<int>    m_indices(2*dim, 0);
+
+        // Loop over all parameters
+        for (int i = 0; i < dim; ++i) {
+
+            // Get pointers to node array and parameter
+            const GNodeArray* nodes = &(m_table_pars[i]->values());
+            const GModelPar*  par   = &(m_table_pars[i]->par());
+
+            // Get parameter value
+            double value = par->value();
+
+            // Set values for node array
+            nodes->set_value(value);
+
+            // Cache parameter value
+            m_last_values[i] = value;
+
+            // Compute left and right indices
+            int il = 2*i;
+            int ir = il + 1;
+
+            // Push back weigths and indices
+            m_weights[il] = nodes->wgt_left();
+            m_weights[ir] = nodes->wgt_right();
+            m_indices[il] = nodes->inx_left();
+            m_indices[ir] = nodes->inx_right();
+
+            // Debug option: print weights and indices
+            #if defined(G_DEBUG_UPDATE)
+            std::cout << " wgt_l=" << m_weights[il];
+            std::cout << " wgt_r=" << m_weights[ir];
+            std::cout << " inx_l=" << m_indices[il];
+            std::cout << " inx_r=" << m_indices[ir] << std::endl;
+            #endif
+
+        } // endfor: looped over all parameters
+
+        // Compute number of combinations
+        int combinations = 1 << dim;
+
+        // Initialise vectors for values
+        m_lin_values = std::vector<double>(ebounds().size(), 0.0);
+        m_log_values = std::vector<double>(ebounds().size(), 0.0);
+
+        // Debug option: initial sum of weights
+        #if defined(G_DEBUG_UPDATE)
+        double weight_sum = 0.0;
+        #endif
+
+        // Loop over combinations
+        for (int i = 0; i < combinations; ++i) {
+
+            // Debug option: start printing combination
+            #if defined(G_DEBUG_UPDATE)
+            std::cout << " " << i << ": ";
+            #endif
+
+            // Initialise weight
+            double weight = 1.0;
+
+            // Initialise index vector (including the energy dimension)
+            std::vector<int> index_shape(dim+1,0);
+
+            // Loop over dimensions
+            for (int k = 0, div = 1; k < dim; ++k, div *= 2) {
+
+                // Compute index for each dimension
+                int index = i/div % 2 + k * 2;
+
+                // Update weight
+                weight *= m_weights[index];
+
+                // Add index
+                index_shape[k] = m_indices[index];
+
+                // Debug option: print information for dimension
+                #if defined(G_DEBUG_UPDATE)
+                std::cout << index;
+                std::cout << " (" << m_weights[index];
+                std::cout << " @ " << m_indices[index] << ")";
+                #endif
+
+            } // endfor: looped over dimensions
+
+            // Get index of spectrum
+            int index_spectra = m_spectra.index(index_shape);
+
+            // Add
+
+
+            // Debug option: print total weight and index for combination
+            #if defined(G_DEBUG_UPDATE)
+            std::cout << ": wgt=" << weight;
+            std::cout << " (" << index_spectra << ")" << std::endl;
+            weight_sum += weight;
+            #endif
+    
+        } // endfor: looped over combinations
+
+        // Debug option: print sum of weights
+        #if defined(G_DEBUG_UPDATE)
+        std::cout << " sum(wgt)=" << weight_sum << std::endl;
+        #endif
+
+    } // endif: updated requested
 
     // Return
     return;

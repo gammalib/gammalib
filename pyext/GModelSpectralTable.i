@@ -66,12 +66,19 @@ public:
     virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
-    double           norm(void) const;
-    void             norm(const double& norm);
-    void             load(const GFilename& filename);
-    void             save(const GFilename& filename,
-                          const bool&      clobber = false) const;
-    const GFilename& filename(void) const;
+    GModelSpectralTablePar&       table_par(const int& index);
+    const GModelSpectralTablePar& table_par(const int& index) const;
+    GModelSpectralTablePar&       table_par(const std::string& name);
+    const GModelSpectralTablePar& table_par(const std::string& name) const;
+    double                        norm(void) const;
+    void                          norm(const double& norm);
+    const GEbounds&               ebounds(void) const;
+    void                          load(const GFilename& filename);
+    void                          save(const GFilename& filename,
+                                       const bool&      clobber = false) const;
+    const GFilename&              filename(void) const;
+
+    void                          update(void);
 };
 
 
