@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialRadialRing.i - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Pierrick Martin                             *
+ *  copyright (C) 2020 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,14 +28,14 @@
 #include "GModelSpatialRadialRing.hpp"
 %}
 
-/**************************************************************************
+/***************************************************************************
  * @class GModelSpatialRadialRing
  *
  * @brief Ring source model class
  *
- * This class implements the spatial component of the factorised source
- * model for a ring source, i.e. constant surface brightness between an
- * inner radius and an outer radius, and no emission elsewhere.
+ * This class implements the spatial component of the factorised source model
+ * model for a ring source, i.e. constant surface brightness starting from a
+ * given radius and an outer radius, and no emission elsewhere.
  ***************************************************************************/
 class GModelSpatialRadialRing : public GModelSpatialRadial {
 
@@ -61,8 +61,8 @@ public:
                                         GRan&          ran) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
-    virtual double                   theta_max(void) const;
     virtual double                   theta_min(void) const;
+    virtual double                   theta_max(void) const;
     virtual GSkyRegion*              region(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;

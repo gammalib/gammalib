@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-14 April 2020
+22 June 2020
 
 
 1. Introduction
@@ -13,6 +13,7 @@ made since the last release of GammaLib.
 ---------------------------------
 The following classes have been added:
 - GResponseCache
+- GModelSpatialRadialRing
 - GSPIEventBin
 - GSPIEventCube
 - GSPIInstDir
@@ -98,6 +99,9 @@ None
 
 8. Model module
 ---------------
+A GModelSpatialRadialRing class was added that implements a radial ring model
+with uniform source intensity (#3253).
+
 The method GModelSpatial::flux() was added that extracts the flux by integrating
 over a specific sky region. For the moment only circular sky regions are
 implemented (#2961).

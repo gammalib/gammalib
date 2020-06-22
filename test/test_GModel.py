@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib model module
 #
-# Copyright (C) 2012-2018 Juergen Knoedlseder
+# Copyright (C) 2012-2020 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

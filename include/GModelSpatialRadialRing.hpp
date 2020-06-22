@@ -50,7 +50,6 @@ class GModelSpatialRadialRing : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialRing(void);
-    GModelSpatialRadialRing(const bool& dummy, const std::string& type);
     GModelSpatialRadialRing(const GSkyDir& dir, const double& radius, const double& width);
     explicit GModelSpatialRadialRing(const GXmlElement& xml);
     GModelSpatialRadialRing(const GModelSpatialRadialRing& model);
@@ -73,8 +72,8 @@ public:
                                         GRan&          ran) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
-    virtual double                   theta_max(void) const;
     virtual double                   theta_min(void) const;
+    virtual double                   theta_max(void) const;
     virtual GSkyRegion*              region(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
@@ -101,12 +100,13 @@ protected:
     mutable GSkyRegionCircle m_region;    //!< Bounding circle
 
     // Cached members used for pre-computations
-    mutable double m_last_radius;         //!< Last ring radius
-    mutable double m_last_width;          //!< Last ring width
-    mutable double m_inner_radius_rad;    //!< Inner radius in radians
-    mutable double m_outer_radius_rad;    //!< Outer radius in radians
-    mutable double m_width_rad;           //!< Ring width in radians
-    mutable double m_norm;                //!< Normalization
+    mutable double m_last_radius;          //!< Last ring radius
+    mutable double m_last_width;           //!< Last ring width
+    mutable double m_inner_radius_rad;     //!< Inner radius in radians
+    mutable double m_outer_radius_rad;     //!< Outer radius in radians
+    mutable double m_cos_inner_radius_rad; //!< Cosine of inner radius in radians
+    mutable double m_cos_outer_radius_rad; //!< Cosine of outer radius in radians
+    mutable double m_norm;                 //!< Normalization
 };
 
 

@@ -57,6 +57,8 @@ Improvements
 New features
 ------------
 
+* [`3253 <https://cta-redmine.irap.omp.eu/issues/3253>`_] -
+  Add ``GModelSpatialRadialRing`` class.
 * [`2961 <https://cta-redmine.irap.omp.eu/issues/2961>`_] -
   Change order of Python module import.
 * [`733 <https://cta-redmine.irap.omp.eu/issues/733>`_]

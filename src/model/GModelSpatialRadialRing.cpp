@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialRing.cpp - Radial ring source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Pierrick Martin                             *
+ *  copyright (C) 2020 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,10 +39,6 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialRing g_radial_ring_seed;
 const GModelSpatialRegistry   g_radial_ring_registry(&g_radial_ring_seed);
-#if defined(G_LEGACY_XML_FORMAT)
-const GModelSpatialRadialRing g_radial_ring_legacy_seed(true, "RingFunction");
-const GModelSpatialRegistry   g_radial_ring_legacy_registry(&g_radial_ring_legacy_seed);
-#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                  "GModelSpatialRadialRing::read(GXmlElement&)"
@@ -77,38 +73,15 @@ GModelSpatialRadialRing::GModelSpatialRadialRing(void) : GModelSpatialRadial()
 
 
 /***********************************************************************//**
- * @brief Model type constructor
- *
- * @param[in] dummy Dummy flag.
- * @param[in] type Model type.
- *
- * Constructs empty radial ring model by specifying a model @p type.
- ***************************************************************************/
-GModelSpatialRadialRing::GModelSpatialRadialRing(const bool&        dummy,
-                                                 const std::string& type) :
-                         GModelSpatialRadial()
-{
-    // Initialise members
-    init_members();
-
-    // Set model type
-    m_type = type;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Ring constructor
  *
  * @param[in] dir Sky position of ring centre.
- * @param[in] radius Ring outer radius (degrees).
+ * @param[in] radius Ring inner radius (degrees).
  * @param[in] width Ring width (degrees).
  *
  * Constructs radial ring model from the sky position of the ring centre
- * (@p dir) and the ring outer radius @p radius and width 
- * @p width in degrees.
+ * (@p dir) and the ring inner radius (@p radius) and width (@p width) in
+ * degrees.
  ***************************************************************************/
 GModelSpatialRadialRing::GModelSpatialRadialRing(const GSkyDir& dir,
                                                  const double&  radius,
@@ -118,17 +91,10 @@ GModelSpatialRadialRing::GModelSpatialRadialRing(const GSkyDir& dir,
     // Initialise members
     init_members();
 
-    // Assign center location
+    // Assign center location, radius and width
     this->dir(dir);
-    
-    // Assign radius and width after check
-    if (width <= radius)  {
-        this->radius(radius);
-        this->width(width);
-    } else {
-        this->radius(radius);
-        this->width(radius);
-    }
+    this->radius(radius);
+    this->width(width);
 
     // Return
     return;
@@ -308,8 +274,9 @@ double GModelSpatialRadialRing::eval(const double&  theta,
 
     // Set value
     double value = 0.0;
-    value = (theta <= m_outer_radius_rad) ? 1.0 : 0.0;
-    value *= (theta >= m_inner_radius_rad) ? m_norm : 0.0;
+    if ((theta >= m_inner_radius_rad) && (theta <= m_outer_radius_rad)) {
+        value = m_norm;
+    }
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -344,12 +311,14 @@ GSkyDir GModelSpatialRadialRing::mc(const GEnergy& energy,
                                     const GTime&   time,
                                     GRan&          ran) const
 {
+    // Update precomputation cache
+    update();
+
     // Simulate offset from photon arrival direction
-    double cosirad = std::cos((radius()-width()) * gammalib::deg2rad);
-    double cosorad = std::cos(radius() * gammalib::deg2rad);
-    double theta  = std::acos(cosirad - ran.uniform() * (cosirad - cosorad)) *
-                    gammalib::rad2deg;
-    double phi    = 360.0 * ran.uniform();
+    double theta   = std::acos(m_cos_inner_radius_rad - ran.uniform() *
+                               (m_cos_inner_radius_rad - m_cos_outer_radius_rad)) *
+                     gammalib::rad2deg;
+    double phi     = 360.0 * ran.uniform();
 
     // Rotate sky direction by offset
     GSkyDir sky_dir = dir();
@@ -374,22 +343,17 @@ bool GModelSpatialRadialRing::contains(const GSkyDir& dir,
 {
     // Compute distance to centre (radians)
     double distance = dir.dist(this->dir());
-    
+
+    // Compute margin in radians
+    double margin_rad   = margin * gammalib::deg2rad;
+    double distance_min = theta_min() - margin_rad;
+    double distance_max = theta_max() + margin_rad;
+    if (distance_min < 0.0) {
+        distance_min = 0.0;
+    }
+
     // Return flag
-    return (distance <= theta_max() + margin*gammalib::deg2rad)
-           *(distance >= theta_min() - margin*gammalib::deg2rad);;
-}
-
-
-/***********************************************************************//**
- * @brief Return maximum model radius (in radians)
- *
- * @return Maximum model radius (in radians).
- ***************************************************************************/
-double GModelSpatialRadialRing::theta_max(void) const
-{
-    // Return value
-    return (radius() * gammalib::deg2rad);
+    return ((distance >= distance_min) && (distance <= distance_max));
 }
 
 
@@ -401,8 +365,21 @@ double GModelSpatialRadialRing::theta_max(void) const
 double GModelSpatialRadialRing::theta_min(void) const
 {
     // Return value
-    return ((radius()-width()) * gammalib::deg2rad);
+    return (radius() * gammalib::deg2rad);
 }
+
+
+/***********************************************************************//**
+ * @brief Return maximum model radius (in radians)
+ *
+ * @return Maximum model radius (in radians).
+ ***************************************************************************/
+double GModelSpatialRadialRing::theta_max(void) const
+{
+    // Return value
+    return ((radius()+width()) * gammalib::deg2rad);
+}
+
 
 /***********************************************************************//**
  * @brief Read model from XML element
@@ -433,8 +410,8 @@ double GModelSpatialRadialRing::theta_min(void) const
  *       <parameter name="Width"  scale="1.0" value="0.15"    min="0.01" max="10"  free="1"/>
  *     </spatialModel>
  * 
- * @todo Implement a test of the radius and radius boundary. The radius
- *       and radius minimum should be >0.
+ * @todo Implement a test of the radius and width. Both parameters should
+ * be >0.
  ***************************************************************************/
 void GModelSpatialRadialRing::read(const GXmlElement& xml)
 {
@@ -452,7 +429,7 @@ void GModelSpatialRadialRing::read(const GXmlElement& xml)
 
     // Get parameters
     const GXmlElement* radius = gammalib::xml_get_par(G_READ, xml, m_radius.name());
-    const GXmlElement* width = gammalib::xml_get_par(G_READ, xml, m_width.name());
+    const GXmlElement* width  = gammalib::xml_get_par(G_READ, xml, m_width.name());
 
     // Read parameters
     m_radius.read(*radius);
@@ -491,7 +468,7 @@ void GModelSpatialRadialRing::write(GXmlElement& xml) const
 
     // Get or create parameters
     GXmlElement* radius = gammalib::xml_need_par(G_WRITE, xml, m_radius.name());
-    GXmlElement* width = gammalib::xml_need_par(G_WRITE, xml, m_width.name());
+    GXmlElement* width  = gammalib::xml_need_par(G_WRITE, xml, m_width.name());
 
     // Write parameters
     m_radius.write(*radius);
@@ -505,7 +482,7 @@ void GModelSpatialRadialRing::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialRadialRing::print(const GChatter& chatter) const
@@ -556,7 +533,7 @@ void GModelSpatialRadialRing::init_members(void)
     m_radius.free();
     m_radius.scale(1.0);
     m_radius.gradient(0.0);
-    m_radius.has_grad(false);  // Radial components never have gradients
+    m_radius.has_grad(false); // Radial components never have gradients
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);
@@ -565,8 +542,8 @@ void GModelSpatialRadialRing::init_members(void)
     m_width.clear();
     m_width.name("Width");
     m_width.unit("deg");
-    m_width.value(2.778e-4); // 1 arcsec
-    m_width.min(2.778e-4);   // 1 arcsec
+    m_width.value(2.778e-4);  // 1 arcsec
+    m_width.min(2.778e-4);    // 1 arcsec
     m_width.free();
     m_width.scale(1.0);
     m_width.gradient(0.0);
@@ -576,12 +553,13 @@ void GModelSpatialRadialRing::init_members(void)
     m_pars.push_back(&m_width);
     
     // Initialise precomputation cache
-    m_last_radius       = 0.0;
-    m_last_width        = 0.0;
-    m_inner_radius_rad  = 0.0;
-    m_outer_radius_rad  = 0.0;
-    m_width_rad         = 0.0;
-    m_norm              = 0.0;
+    m_last_radius          = 0.0;
+    m_last_width           = 0.0;
+    m_inner_radius_rad     = 0.0;
+    m_outer_radius_rad     = 0.0;
+    m_cos_inner_radius_rad = 0.0;
+    m_cos_outer_radius_rad = 0.0;
+    m_norm                 = 0.0;
 
     // Initialise other members
     m_region.clear();
@@ -609,12 +587,13 @@ void GModelSpatialRadialRing::copy_members(const GModelSpatialRadialRing& model)
     m_region = model.m_region;
 
     // Copy precomputation cache
-    m_last_radius       = model.m_last_radius;
-    m_last_width        = model.m_last_width;
-    m_inner_radius_rad  = model.m_inner_radius_rad;
-    m_outer_radius_rad  = model.m_outer_radius_rad;
-    m_width_rad         = model.m_width_rad;
-    m_norm              = model.m_norm;
+    m_last_radius          = model.m_last_radius;
+    m_last_width           = model.m_last_width;
+    m_inner_radius_rad     = model.m_inner_radius_rad;
+    m_outer_radius_rad     = model.m_outer_radius_rad;
+    m_cos_inner_radius_rad = model.m_cos_inner_radius_rad;
+    m_cos_outer_radius_rad = model.m_cos_outer_radius_rad;
+    m_norm                 = model.m_norm;
 
     // Return
     return;
@@ -651,14 +630,14 @@ void GModelSpatialRadialRing::update() const
         m_last_width  = width();
 
         // Compute ring parameters in radians
-        m_outer_radius_rad = radius() * gammalib::deg2rad;
-        m_inner_radius_rad = (radius()-width()) * gammalib::deg2rad;
-        m_width_rad = width() * gammalib::deg2rad;
+        m_inner_radius_rad     = theta_min();
+        m_outer_radius_rad     = theta_max();
+        m_cos_inner_radius_rad = std::cos(m_inner_radius_rad);
+        m_cos_outer_radius_rad = std::cos(m_outer_radius_rad);
 
         // Perform precomputations
-        double denom = gammalib::twopi * 
-                       (std::cos(m_inner_radius_rad) - 
-                        std::cos(m_outer_radius_rad));
+        double denom = gammalib::twopi * (m_cos_inner_radius_rad -
+                                          m_cos_outer_radius_rad);
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
@@ -677,7 +656,7 @@ void GModelSpatialRadialRing::set_region(void) const
     m_region.centre(m_ra.value(), m_dec.value());
 
     // Set sky region radius to ring radius
-    m_region.radius(m_radius.value());
+    m_region.radius(radius()+width());
 
     // Return
     return;

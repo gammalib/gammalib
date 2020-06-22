@@ -954,7 +954,7 @@ void TestGModel::test_radial_ring(void)
     test_value(model2.dec(), 22.0145);
     test_value(model2.radius(), 3.0);
     test_value(model2.width(), 1.0);
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_radial_ring);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -981,9 +981,9 @@ void TestGModel::test_radial_ring(void)
     test_assert(model3.dir() == dir2, "Test sky direction");
 
     // Test radius method
-    model3.radius(2.0);
-    test_value(model3.radius(), 2.0);
-    
+    model3.radius(1.5);
+    test_value(model3.radius(), 1.5);
+
     // Test width method
     model3.width(0.5);
     test_value(model3.width(), 0.5);
@@ -994,7 +994,7 @@ void TestGModel::test_radial_ring(void)
     test_assert(model3.region()->contains(dir3), "Test region() method (inside)");
     dir3.radec_deg(83.6331, +26.0);
     test_assert(!model3.region()->contains(dir3), "Test region() method (outside)");
-    
+
     // Test contains method
     dir3.radec_deg(83.6331, +23.75);
     test_assert(model3.contains(dir3), "Test contains() method (inside)");
@@ -1002,7 +1002,7 @@ void TestGModel::test_radial_ring(void)
     test_assert(!model3.contains(dir3), "Test contains() method (outside interior of ring)");
     dir3.radec_deg(83.6331, +26.0);
     test_assert(!model3.contains(dir3), "Test contains() method (outside exterior of ring)");
-    
+
     // Test operator access
     const char* strarray[] = {"RA", "DEC", "Radius", "Width"};
     for (int i = 0; i < 4; ++i) {

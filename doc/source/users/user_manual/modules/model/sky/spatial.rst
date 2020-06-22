@@ -38,6 +38,24 @@ Radial disk
 .. code-block:: xml
 
   <source name="Crab" type="ExtendedSource">
+    <spatialModel type="RadialRing">
+      <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      <parameter name="Radius" scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
+      <parameter name="Width"  scale="1.0" value="0.15"    min="0.01" max="10"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+
+Radial ring
+===========
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
     <spatialModel type="RadialDisk">
       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>

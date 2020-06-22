@@ -1,8 +1,9 @@
-2020-04-14
+2020-06-22
 
         * Version 1.7.0 released
         ========================
 
+        Add GModelSpatialRadialRing class (#3253)
         Fix ambiguity problem in GSkyDir::posang() and posang_deg() (#3199)
         Avoid rounding errors in GSkyMap operators (#3126)
         Add GObservations::npred() methods (#3062)
