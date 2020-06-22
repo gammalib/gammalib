@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNodeArray.cpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -582,12 +582,6 @@ void GNodeArray::set_value(const double& value) const
     // Get number of nodes
     int nodes = m_node.size();
 
-    /*
-    // Throw an exception if less than 2 nodes are available
-    if (nodes < 2) {
-        throw GException::not_enough_nodes(G_SET_VALUE, nodes);
-    }
-    */
     // Throw an exception if there are no nodes
     if (nodes < 1) {
         std::string msg = "Attempting to set interpolating value without "
@@ -616,10 +610,12 @@ void GNodeArray::set_value(const double& value) const
 
         // Handle special case of a single node
         if (nodes == 1) {
-            m_inx_left  = 0;
-            m_inx_right = 0;
-            m_wgt_left  = 1.0;
-            m_wgt_right = 0.0;
+            m_inx_left       = 0;
+            m_inx_right      = 0;
+            m_wgt_left       = 1.0;
+            m_wgt_right      = 0.0;
+            m_wgt_grad_left  = 0.0;
+            m_wgt_grad_right = 0.0;
         }
 
         // Handle all other cases
@@ -674,9 +670,11 @@ void GNodeArray::set_value(const double& value) const
             // Set right index
             m_inx_right = m_inx_left + 1;
 
-            // Set weighting factors
-            m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
-            m_wgt_left  = 1.0 - m_wgt_right;
+            // Set weighting factors and gradients
+            m_wgt_grad_right = 1.0 / m_step[m_inx_left];
+            m_wgt_grad_left  = -m_wgt_grad_right;
+            m_wgt_right      = (value - m_node[m_inx_left]) * m_wgt_grad_right;
+            m_wgt_left       = 1.0 - m_wgt_right;
 
         } // endelse: more than one node was present
 
@@ -874,6 +872,9 @@ std::string GNodeArray::print(const GChatter& chatter) const
             result.append(gammalib::str(m_inx_right)+")=");
             result.append("("+gammalib::str(m_wgt_left)+",");
             result.append(gammalib::str(m_wgt_right)+")");
+            result.append(" grad=");
+            result.append("("+gammalib::str(m_wgt_grad_left)+",");
+            result.append(gammalib::str(m_wgt_grad_right)+")");
         }
 
         // VERBOSE: Append nodes
@@ -917,6 +918,8 @@ void GNodeArray::init_members(void)
     m_inx_right      = 0;
     m_wgt_left       = 0.0;
     m_wgt_right      = 0.0;
+    m_wgt_grad_left  = 0.0;
+    m_wgt_grad_right = 0.0;
     m_need_setup     = false;
 
     // Return
@@ -943,6 +946,8 @@ void GNodeArray::copy_members(const GNodeArray& array)
     m_inx_right      = array.m_inx_right;
     m_wgt_left       = array.m_wgt_left;
     m_wgt_right      = array.m_wgt_right;
+    m_wgt_grad_left  = array.m_wgt_grad_left;
+    m_wgt_grad_right = array.m_wgt_grad_right;
     m_need_setup     = array.m_need_setup;
 
     // Return

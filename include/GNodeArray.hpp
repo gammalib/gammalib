@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNodeArray.hpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,6 +97,8 @@ public:
     const int&    inx_right(void) const;
     const double& wgt_left(void) const;
     const double& wgt_right(void) const;
+    const double& wgt_grad_left(void) const;
+    const double& wgt_grad_right(void) const;
     void          load(const GFilename& filename);
     void          save(const GFilename& filename,
                        const bool&      clobber = false) const;
@@ -127,6 +129,8 @@ private:
     mutable int                 m_inx_right;      //!< Index of right node for linear interpolation
     mutable double              m_wgt_left;       //!< Weight for left node for linear interpolation
     mutable double              m_wgt_right;      //!< Weight for right node for linear interpolation
+    mutable double              m_wgt_grad_left;  //!< Weight gradient for left node
+    mutable double              m_wgt_grad_right; //!< Weight gradient for right node
 };
 
 
@@ -275,6 +279,36 @@ inline
 const double& GNodeArray::wgt_right(void) const
 {
     return m_wgt_right;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns left node weight gradient
+ *
+ * @return Left node weight gradient.
+ *
+ * Returns the weighting factor gradient with respect to the value for the
+ * left node to be used for interpolation.
+ ***************************************************************************/
+inline
+const double& GNodeArray::wgt_grad_left(void) const
+{
+    return m_wgt_grad_left;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns right node weight gradient
+ *
+ * @return Right node weight gradient.
+ *
+ * Returns the weighting factor gradient with respect to the value for the
+ * right node to be used for interpolation.
+ ***************************************************************************/
+inline
+const double& GNodeArray::wgt_grad_right(void) const
+{
+    return m_wgt_grad_right;
 }
 
 #endif /* GNODEARRAY_HPP */

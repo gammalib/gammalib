@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GNodeArray.i - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,6 +71,8 @@ public:
     const int&    inx_right(void) const;
     const double& wgt_left(void) const;
     const double& wgt_right(void) const;
+    const double& wgt_grad_left(void) const;
+    const double& wgt_grad_right(void) const;
     void          load(const GFilename& filename);
     void          save(const GFilename& filename,
                        const bool&      clobber = false) const;

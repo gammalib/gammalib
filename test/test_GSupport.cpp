@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -421,6 +421,8 @@ void TestGSupport::test_node_array(void)
     test_value(nodes.inx_right(), 2, "Expected node 2");
     test_value(nodes.wgt_left(), 0.5, 1.0e-6, "Expected weight 0.5");
     test_value(nodes.wgt_right(), 0.5, 1.0e-6, "Expected weight 0.5");
+    test_value(nodes.wgt_grad_left(), -1.0, 1.0e-6, "Expected weight gradient -1.0");
+    test_value(nodes.wgt_grad_right(), 1.0, 2.0e-6, "Expected weight gradient 1.0");
     nodes[1] = 3.0;
     nodes[2] = 4.0;
     nodes.set_value(2.5);
@@ -428,6 +430,8 @@ void TestGSupport::test_node_array(void)
     test_value(nodes.inx_right(), 1, "Expected node 1");
     test_value(nodes.wgt_left(), 0.25, 1.0e-6, "Expected weight 0.25");
     test_value(nodes.wgt_right(), 0.75, 1.0e-6, "Expected weight 0.75");
+    test_value(nodes.wgt_grad_left(), -0.5, 3.0e-6, "Expected weight gradient -0.5");
+    test_value(nodes.wgt_grad_right(), 0.5, 4.0e-6, "Expected weight gradient 0.5");
 
     // Remove test file
     GFilename filename("test_nodes.fits");
