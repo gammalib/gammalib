@@ -89,6 +89,119 @@ specified. Any environment variable present in the path name will be
 expanded.
 
 
+Table model
+===========
+
+An arbitrary spectral model defined on a M-dimensional grid of parameter
+values. The spectrum is computed using M-dimensional linear interpolation.
+The model definition is provided by a FITS file that follows the
+`<https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_92_009/ogip_92_009.html>`_
+standard.
+
+The structure of the table model FITS file is shown below. The FITS file
+contains three binary table extensions after an empty image extension.
+
+.. _fig_model_table:
+
+.. figure:: model_table.png
+   :align: center
+   :width: 100%
+
+   *Structure of table model FITS file*
+
+The ``PARAMETERS`` extension contains the definition of the model parameters.
+Each row defines one model parameter. Each model parameter is defined by a
+unique ``NAME``. The ``METHOD`` column indicates whether the model should be
+interpolated linarly (value ``0``) or logarithmically (value ``1``). GammaLib
+so far only supports linear interpolation, hence the field is ignored.
+The ``INITIAL`` column indicates the initial parameter value, if the value in
+the ``DELTA`` column is negative the parameter will be fixed, otherwise it will
+be fitted. The ``MINIMUM`` and ``MAXIMUM`` columns indicate the range of values
+for a given parameter, the ``BOTTOM`` and ``TOP`` columns are ignored by
+GammaLib. The ``NUMBVALS`` column indicates the number of parameter values for
+which the table model was computed, the ``VALUE`` column indicates the
+specific parameter values.
+
+In the example below there are two parameters named ``Index`` and ``Cutoff``,
+and spectra were computed for 100 index values and 50 cutoff values, hence
+a total of 5000 spectra are stored in the table model.
+
+.. _fig_model_table_parameters:
+
+.. figure:: model_table_parameters.png
+   :align: center
+   :width: 100%
+
+   *Table model parameters extension*
+
+The ``ENERGIES`` extension contains the energy boundaries for the spectra in
+the usual OGIP format:
+
+.. _fig_model_table_energies:
+
+.. figure:: model_table_energies.png
+   :align: center
+   :width: 40%
+
+   *Energy boundaries extension*
+
+The ``SPECTRA`` extension contains the spectra of the table model. It consists
+of two vector column. The ``PARAMVAL`` column provides the parameter values
+for which the spectrum was computed. Since there are two parameters in the
+example the vector column has two entries. The ``INTPSPEC`` column provides
+the spectrum :math:`\frac{dN(p)}{dE}` for the specific parameters. Since there
+are 200 energy bins in this example the vector column has 200 entries.
+
+.. _fig_model_table_spectra:
+
+.. figure:: model_table_spectra.png
+   :align: center
+   :width: 40%
+
+   *Spectra extension*
+
+
+The model is defined using:
+
+.. math::
+    \frac{dN}{dE} = N_0 \left. \frac{dN(p)}{dE} \right\rvert_{\rm file}
+
+where the parameters in the XML definition have the following mappings:
+
+* :math:`N_0` = ``Normalization``
+* :math:`p` = M model parameters (e.g. ``Index``, ``Cutoff``)
+
+The XML format for specifying a table model is:
+
+.. code-block:: xml
+
+   <spectrum type="TableModel" file="model_table.fits">
+    <parameter scale="1.0" name="Normalization" min="0.0" max="1000.0" value="1.0" free="1"/>
+   </spectrum>
+
+If the ``file`` attribute is a relative path, the path is relative to the
+directory where the XML file resides. Alternatively, an absolute path may be
+specified. Any environment variable present in the path name will be 
+expanded.
+
+Note that the default parameters of the table model are provided in the FITS
+file, according to the
+`<https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_92_009/ogip_92_009.html>`_
+standard.
+However, table model parameters may also be specified in the XML file, and
+these parameter will then overwrite the parameters in the FITS file. For
+example, for a 2-dimensional table model with an ``Index`` and a ``Cutoff``
+parameter, the XML file may look like
+
+.. code-block:: xml
+
+   <spectrum type="TableModel" file="model_table.fits">
+    <parameter scale="1e-16" name="Normalization" min="1e-07" max="1000" value="5.8"  free="1"/>
+    <parameter scale="-1"    name="Index"         min="1.0"   max="3.0"  value="2.4"  free="1"/>
+    <parameter scale="1e6"   name="Cutoff"        min="0.1"   max="28.2" value="0.89" free="1"/>
+   </spectrum>
+
+
 Power law
 =========
 

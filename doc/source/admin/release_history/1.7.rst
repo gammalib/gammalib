@@ -72,6 +72,8 @@ New features
   Implement INTEGRAL/SPI instrument interface.
 * [`742 <https://cta-redmine.irap.omp.eu/issues/742>`_] -
   Implement ``GSPIResponse`` class.
+* [`599 <https://cta-redmine.irap.omp.eu/issues/599>`_] -
+  Add ``GModelSpectralTable`` class.
 
 
 Clean up

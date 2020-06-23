@@ -116,6 +116,8 @@ protected:
     void          load_spec(const GFits& fits);
     int           par_index(const std::string& name) const;
     void          update(void) const;
+    void          update_flux(void) const;
+    void          update_mc(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
     GModelPar                   m_norm;        //!< Normalization factor
@@ -130,8 +132,19 @@ protected:
     mutable std::vector<double> m_last_values; //!< Last parameter values
     mutable GNodeArray          m_lin_nodes;   //!< Energy nodes of function
     mutable GNodeArray          m_log_nodes;   //!< log10(Energy) nodes of function
-    mutable GNdarray            m_lin_values;  //!< Function values and gradients
-    mutable GNdarray            m_log_values;  //!< log10(Function) values and gradients
+    mutable GNdarray            m_lin_values;  //!< Function values and grad's
+    mutable GNdarray            m_log_values;  //!< log10(Function) values and grad's
+    mutable std::vector<double> m_prefactor;   //!< Power-law normalisations
+    mutable std::vector<double> m_gamma;       //!< Power-law indices
+    mutable std::vector<double> m_epivot;      //!< Power-law pivot energies
+    mutable std::vector<double> m_flux;        //!< Photon fluxes
+    mutable std::vector<double> m_eflux;       //!< Energy fluxes
+    mutable GEnergy             m_mc_emin;     //!< Minimum energy
+    mutable GEnergy             m_mc_emax;     //!< Maximum energy
+    mutable std::vector<double> m_mc_cum;      //!< Cumulative distribution
+    mutable std::vector<double> m_mc_min;      //!< Lower boundary for MC
+    mutable std::vector<double> m_mc_max;      //!< Upper boundary for MC
+    mutable std::vector<double> m_mc_exp;      //!< Exponent for MC
 };
 
 

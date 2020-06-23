@@ -376,7 +376,7 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
         } // endelse: emin and emax not between same nodes
 
         // Multiply flux by normalisation factor
-        flux *= m_norm.value();
+        flux *= norm();
 
     } // endif: integration range was valid
 
@@ -730,7 +730,14 @@ void GModelSpectralFunc::init_members(void)
     m_log_values.clear();
     m_filename.clear();
 
-    // Initialise cache
+    // Initialise flux cache
+    m_prefactor.clear();
+    m_gamma.clear();
+    m_epivot.clear();
+    m_flux.clear();
+    m_eflux.clear();
+
+    // Initialise MC cache
     m_mc_emin.clear();
     m_mc_emax.clear();
     m_mc_cum.clear();
@@ -758,7 +765,7 @@ void GModelSpectralFunc::copy_members(const GModelSpectralFunc& model)
     m_log_values = model.m_log_values;
     m_filename   = model.m_filename;
 
-    // Copy pre-computation cache
+    // Copy flux cache
     m_prefactor  = model.m_prefactor;
     m_gamma      = model.m_gamma;
     m_epivot     = model.m_epivot;
@@ -1100,7 +1107,6 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin,
         } // endif: e_max > e_min
 
     } // endif: Update was required
-
 
     // Return
     return;
