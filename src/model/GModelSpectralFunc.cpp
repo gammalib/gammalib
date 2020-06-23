@@ -240,11 +240,12 @@ GModelSpectralFunc* GModelSpectralFunc::clone(void) const
  * Evaluates
  *
  * \f[
- *    S_{\rm E}(E | t) = {\tt m\_norm}
+ *    S_{\rm E}(E | t) = {\tt m\_norm} F(E)
  * \f]
  *
  * where
- * - \f${\tt m\_norm}\f$ is the normalization factor.
+ * - \f${\tt m\_norm}\f$ is the normalization factor and
+ * - \f${F(E)}\f$ is the spectral function.
  *
  * If the @p gradients flag is true the method will also compute the
  * partial derivatives of the model with respect to the parameters using

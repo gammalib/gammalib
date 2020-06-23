@@ -77,8 +77,6 @@ public:
     void                          save(const GFilename& filename,
                                        const bool&      clobber = false) const;
     const GFilename&              filename(void) const;
-
-    void                          update(void);
 };
 
 

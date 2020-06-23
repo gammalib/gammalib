@@ -101,8 +101,6 @@ public:
                                        const bool&      clobber = false) const;
     const GFilename&              filename(void) const;
 
-    void                          update(void);
-
 protected:
     // Protected methods
     void          init_members(void);
@@ -117,6 +115,7 @@ protected:
     void          load_eng(const GFits& fits);
     void          load_spec(const GFits& fits);
     int           par_index(const std::string& name) const;
+    void          update(void) const;
 
     // Protected members
     GModelPar                   m_norm;        //!< Normalization factor
@@ -126,11 +125,13 @@ protected:
     mutable GFilename           m_filename;    //!< Filename of table
 
     // Cached members used for pre-computations
+    mutable int                 m_npars;       //!< Number of parameters
+    mutable int                 m_nebins;      //!< Number of energy bins
     mutable std::vector<double> m_last_values; //!< Last parameter values
     mutable GNodeArray          m_lin_nodes;   //!< Energy nodes of function
     mutable GNodeArray          m_log_nodes;   //!< log10(Energy) nodes of function
-    mutable std::vector<double> m_lin_values;  //!< Function values at nodes
-    mutable std::vector<double> m_log_values;  //!< log10(Function) values at nodes
+    mutable GNdarray            m_lin_values;  //!< Function values and gradients
+    mutable GNdarray            m_log_values;  //!< log10(Function) values and gradients
 };
 
 

@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GRan.hpp"
 #include "GEnergy.hpp"
 #include "GFits.hpp"
@@ -59,7 +60,9 @@ const GModelSpectralRegistry g_spectral_table_registry(&g_spectral_table_seed);
 #define G_WRITE                    "GModelSpectralTable::write(GXmlElement&)"
 #define G_LOAD                        "GModelSpectralTable::load(GFilename&)"
 #define G_TABLE_PAR                    "GModelSpectralTable::table_par(int&)"
-#define PAR_INDEX              "GModelSpectralTable::par_index(std::string&)"
+#define G_LOAD_PAR                    "GModelSpectralTable::load_par(GFits&)"
+#define G_PAR_INDEX            "GModelSpectralTable::par_index(std::string&)"
+#define G_UPDATE                              "GModelSpectralTable::update()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -311,33 +314,112 @@ GModelSpectralTable* GModelSpectralTable::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate table model
+ * @brief Evaluate spectral table model
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  * @param[in] gradients Compute gradients?
  * @return Model value (ph/cm2/s/MeV).
  *
- * Evaluates ...
+ * Evaluates
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm} \times
+ *                       \left( w_l F_l(p) + w_r F_r(p) \right)
+ * \f]
+ *
+ * where
+ * - \f${\tt m\_norm}\f$ is the normalization factor of the spectral table
+ *   model,
+ * - \f$w_l\f$ is the weight of the spectral vector \f$F_l(p)\f$ with the
+ *   largest energy \f$E_l\f$ that satisfies \f$E<E_l\f$, and
+ * - \f$w_r\f$ is the weight of the spectral vector \f$F_r(p)\f$ with the
+ *   smallest energy \f$E_r\f$ that satisfies \f$E>E_r\f$.
+ *
+ * The weights are computed using
+ *
+ * \f[
+ *    w_r = \frac{\log_{10} E - \log_{10} E_l}{\log_{10} E_r - \log_{10} E_l}
+ * \f]
+ *
+ * and \f$w_l = 1 - w_r\f$.
+ *
+ * If @p gradient is true, the method also computes the parameter gradients
+ * using
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_norm}}
+ * \f]
+ *
+ * and
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta p} =
+ *    {\tt m\_norm} \times
+ *    \left( w_l \frac{\delta F_l(p)}{\delta p} +
+ *           w_r \frac{\delta F_r(p)}{\delta p} \right)
+ * \f]
+ *
+ * for all other parameters.
+ *
+ * For the computation of \f$F_l(p)\f$, \f$F_r(p)\f$,
+ * \f$\frac{\delta F_l(p)}{\delta p}\f$, and
+ * \f$\frac{\delta F_r(p)}{\delta p}\f$ see the update() method.
  ***************************************************************************/
 double GModelSpectralTable::eval(const GEnergy& srcEng,
                                  const GTime&   srcTime,
                                  const bool&    gradients) const
 {
-    // Evaluate function
-    double func = 1.0; // TODO
+    // Update spectral function
+    update();
+
+    // Interpolate function in log10 energy
+    m_log_nodes.set_value(srcEng.log10MeV());
+    double wgt_left  = m_log_nodes.wgt_left();
+    double wgt_right = m_log_nodes.wgt_right();
+    int    inx_left  = m_log_nodes.inx_left();
+    int    inx_right = m_log_nodes.inx_right();
+    //double arg       = wgt_left  * m_log_values(inx_left,0) +
+    //                   wgt_right * m_log_values(inx_right,0);
+    //double func = std::pow(10.0, arg);
+    double func      = wgt_left  * m_lin_values(inx_left,0) +
+                       wgt_right * m_lin_values(inx_right,0);
 
     // Compute function value
-    double value  = m_norm.value() * func;
+    double value = m_norm.value() * func;
 
     // Optionally compute gradients
     if (gradients) {
 
-        // Compute partial derivatives of the parameter values
+        // Compute partial derivative of function normalisation
         double g_norm  = (m_norm.is_free())  ? m_norm.scale() * func : 0.0;
 
-        // Set gradients
+        // Set normalisation gradient
         m_norm.factor_gradient(g_norm);
+
+        // Compute partial derivatives of all other free parameters
+        int dim = m_table_pars.size();
+        for (int i = 0; i < dim; ++i) {
+
+            // Initialise gradient
+            double grad = 0.0;
+
+            // Get reference to model parameter (circumvent const correctness)
+            GModelPar& par =
+                const_cast<GModelSpectralTablePar*>(m_table_pars[i])->par();
+
+            // If parameter is free then compute gradient
+            if (par.is_free()) {
+                grad = (wgt_left  * m_lin_values(inx_left,i+1) +
+                        wgt_right * m_lin_values(inx_right,i+1)) *
+                        par.scale() * m_norm.value();
+            }
+
+            // Set gradient
+            par.factor_gradient(grad);
+
+        } // endfor: looped over all parameters
 
     } // endif: gradient computation was requested
 
@@ -868,6 +950,8 @@ void GModelSpectralTable::init_members(void)
     m_filename.clear();
 
     // Initialize cache
+    m_npars  = 0;
+    m_nebins = 0;
     m_last_values.clear();
     m_lin_nodes.clear();
     m_log_nodes.clear();
@@ -897,6 +981,8 @@ void GModelSpectralTable::copy_members(const GModelSpectralTable& model)
     m_filename    = model.m_filename;
 
     // Copy cache
+    m_npars       = model.m_npars;
+    m_nebins      = model.m_nebins;
     m_last_values = model.m_last_values;
     m_lin_nodes   = model.m_lin_nodes;
     m_log_nodes   = model.m_log_nodes;
@@ -959,8 +1045,8 @@ void GModelSpectralTable::set_energy_nodes(void)
         // Initialise vectors for values
         m_lin_nodes  = GNodeArray();
         m_log_nodes  = GNodeArray();
-        m_lin_values = std::vector<double>(nebins, 0.0);
-        m_log_values = std::vector<double>(nebins, 0.0);
+        m_lin_values = GNdarray(nebins, 1);
+        m_log_values = GNdarray(nebins, 1);
 
         // Compute node values
         for (int i = 0; i < nebins; ++i) {
@@ -1245,6 +1331,10 @@ GFitsBinTable GModelSpectralTable::create_spec_table(void) const
  *
  * @param[in] fits FITS file.
  *
+ * @exception GException::invalid_value
+ *            Non-positive parameter value encountered for logarithmic
+ *            parameters.
+ *
  * The method loads data from the PARAMETERS binary table. The format of the
  * table needs to be compliant with
  * https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_92_009/node6.html
@@ -1280,16 +1370,42 @@ void GModelSpectralTable::load_par(const GFits& fits)
         // Fix or free parameter according to DELTA value
         if (table["DELTA"]->real(i) < 0.0) {
             par.fix();
+            par.has_grad(false);
         }
         else {
             par.free();
+            par.has_grad(true);
         }
 
         // Set vector of parameter values
         std::vector<double> values;
         for (int k = 0; k < table["NUMBVALS"]->integer(i); ++k) {
-            values.push_back(table["VALUE"]->real(i,k));
-        }
+
+            // Extract value
+            double value = table["VALUE"]->real(i,k);
+
+            // If method is logarithmic then store log of the parameter
+            // values in the spectral table parameters
+            /*
+            if (table["METHOD"]->integer(i) == 1) {
+                if (value > 0.0) {
+                    value = std::log(value);
+                }
+                else {
+                    std::string msg = "Non-positive value "+gammalib::str(value)+
+                                      " encountered for logarithmic parameter "
+                                      "\""+table["NAME"]->string(i)+"\". Please "
+                                      "provide only positive parameter "
+                                      "values for logarithmic parameters.";
+                    throw GException::invalid_value(G_LOAD_PAR, msg);
+                }
+            }
+            */
+
+            // Append value
+            values.push_back(value);
+
+        } // endfor: looped over parameter values
 
         // Set table model parameter
         GModelSpectralTablePar table_model_par(par, values);
@@ -1455,7 +1571,7 @@ int GModelSpectralTable::par_index(const std::string& name) const
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(PAR_INDEX, name);
+        throw GException::par_not_found(G_PAR_INDEX, name);
         std::string msg = "Parameter name \""+name+"\" not found in spectral "
                           "table. Please specify one of the following parameter "
                           "names:";
@@ -1465,7 +1581,7 @@ int GModelSpectralTable::par_index(const std::string& name) const
             }
             msg += " \""+m_table_pars[i]->par().name()+"\"";
         }
-        throw GException::invalid_argument(PAR_INDEX, msg);
+        throw GException::invalid_argument(G_PAR_INDEX, msg);
     }
 
     // Return index
@@ -1475,30 +1591,85 @@ int GModelSpectralTable::par_index(const std::string& name) const
 
 /***********************************************************************//**
  * @brief Update
+ *
+ * @exception GException::invalid_value
+ *            Non-positive parameter value encountered for logarithmic
+ *            parameters.
+ *
+ * Update interval vectors for function values and gradients. An update is
+ * performed in case that some of the parameter values have changed. The
+ * method sets the following cache members:
+ *
+ *      m_npars (number of model parameters)
+ *      m_nebins (number of energy bins in spectra)
+ *      m_last_values (last model parameter values)
+ *      m_lin_values (function values)
+ *
+ * The array \f${\tt m\_lin\_values}\f$ holds the vector \f$F(E|p)\f$ as
+ * function of energy \f$E\f$, computed for the current set of parameters
+ * \f$p\f$. The computation is done using the N-dimensional linear
+ * interpolation
+ *
+ * \f[
+ *    F(E|p) = \sum_{k=1}^M \left( \prod_{i=1}^N w_x(p) \right) F_p(E)
+ * \f]
+ *
+ * where
+ * - \f$M=2^N\f$ is the number of parameter combinations,
+ * - \f$N\f$ is the number of table model parameters,
+ * - \f$w_x(p) = \{w_0^l, w_0^r, w_1^l, w_1^r, ...\}\f$
+ *   is an array of subsequently arranged left and right weighting factors
+ *   for the linear interpolation of parameters, where \f$w_0^l\f$ and
+ *   \f$w_0^r\f$ are the left and right weighting factors for the first
+ *   parameter, \f$w_1^l\f$ and \f$w_1^r\f$ are the left and right weighting
+ *   factors for the second parameter, and so on,
+ * - \f$x=2 k + i/2^k \mod 2\f$ is the index in the array of
+ *   weighting factors for parameter combination \f$k\f$ and parameter
+ *   \f$i\f$, and
+ * - \f$F_p(E)\f$ are the table model spectra, computed for a grid of
+ *   possible parameter values.
+ *
+ * For each parameter \f$i\f$, the weighting factors \f$w_i^l(p)\f$
+ * and \f$w_i^r(p)\f$ are computed using
+ *
+ * \f[
+ *    w_i^r(p) = \frac{p - p_l}{p_r - p_l}
+ * \f]
+ *
+ * and \f$w_i^l(p) = 1 - w_i^r(p)\f$, where
+ * \f$p_l\f$ is the largest parameter value that satisfies \f$p<p_l\f$ and
+ * \f$p_r\f$ is the smallest parameter value that satisfies \f$p>p_r\f$.
+ *
+ * The method also computes the gradients
+ *
+ * \f[
+ *    \frac{\delta F(E|p)}{\delta p} = \sum_{k=1}^M \left(
+ *    \frac{\delta w_{x_p}(p)}{\delta p} \prod_{i=1 \land i \neq i_p}^N
+ *    w_x(p) \right) F_p(E)
+ * \f]
+ *
+ * where
+ * \f$x_p = 2 k + i_p/2^k \mod 2\f$.
  ***************************************************************************/
-void GModelSpectralTable::update(void)
+void GModelSpectralTable::update(void) const
 {
-    // Debug option: write header
-    #if defined(G_DEBUG_UPDATE)
-    std::cout << "GModelSpectralTable::update() entered" << std::endl;
-    #endif
-
-    // Get dimension of spectral table
-    int dim = m_table_pars.size();
+    // Get number of parameters and number of energy bins
+    m_npars  = m_table_pars.size();
+    m_nebins = ebounds().size();
 
     // Initialise update flag
     bool need_update = false;
 
     // If dimension of last cached parameter values differ from dimension
     // of spectral table then reallocate cache and request update
-    if (m_last_values.size() != dim) {
-        m_last_values = std::vector<double>(dim, 0.0);
+    if (m_last_values.size() != m_npars) {
+        m_last_values = std::vector<double>(m_npars, 0.0);
         need_update   = true;
     }
 
     // ... otherwise check if some parameter values have changed
     else {
-        for (int i = 0; i < dim; ++i) {
+        for (int i = 0; i < m_npars; ++i) {
             if (m_table_pars[i]->par().value() != m_last_values[i]) {
                 need_update = true;
                 break;
@@ -1509,12 +1680,19 @@ void GModelSpectralTable::update(void)
     // Continue only if update is required
     if (need_update) {
 
-        // Initialise vectors for weights and indices
-        std::vector<double> m_weights(2*dim, 0.0);
-        std::vector<int>    m_indices(2*dim, 0);
+        // Debug option: write header
+        #if defined(G_DEBUG_UPDATE)
+        std::cout << "GModelSpectralTable::update() required" << std::endl;
+        #endif
 
-        // Loop over all parameters
-        for (int i = 0; i < dim; ++i) {
+        // Initialise vectors for weights, weight gradients and indices
+        std::vector<double> weights(2*m_npars, 0.0);
+        std::vector<double> weight_gradients(2*m_npars, 0.0);
+        std::vector<int>    indices(2*m_npars, 0);
+
+        // Loop over all parameters and extract left and right weights,
+        // weight gradients and indices and put them into single arrays
+        for (int i = 0; i < m_npars; ++i) {
 
             // Get pointers to node array and parameter
             const GNodeArray* nodes = &(m_table_pars[i]->values());
@@ -1523,38 +1701,57 @@ void GModelSpectralTable::update(void)
             // Get parameter value
             double value = par->value();
 
-            // Set values for node array
-            nodes->set_value(value);
-
             // Cache parameter value
             m_last_values[i] = value;
+
+            // Use log of value for logarithmic parameters
+            /*
+            if (m_table_pars[i]->method() == 1) {
+                if (value > 0.0) {
+                    value = std::log(value);
+                }
+                else {
+                    std::string msg = "Non-positive value "+gammalib::str(value)+
+                                      " encountered for logarithmic parameter "
+                                      "\""+m_table_pars[i]->par().name()+"\".";
+                    throw GException::invalid_value(G_UPDATE, msg);
+                }
+            }
+            */
+
+            // Set values for node array
+            nodes->set_value(value);
 
             // Compute left and right indices
             int il = 2*i;
             int ir = il + 1;
 
-            // Push back weigths and indices
-            m_weights[il] = nodes->wgt_left();
-            m_weights[ir] = nodes->wgt_right();
-            m_indices[il] = nodes->inx_left();
-            m_indices[ir] = nodes->inx_right();
+            // Push back weigths, weight gradients and indices
+            weights[il]          = nodes->wgt_left();
+            weights[ir]          = nodes->wgt_right();
+            weight_gradients[il] = nodes->wgt_grad_left();
+            weight_gradients[ir] = nodes->wgt_grad_right();
+            indices[il]          = nodes->inx_left();
+            indices[ir]          = nodes->inx_right();
 
             // Debug option: print weights and indices
             #if defined(G_DEBUG_UPDATE)
-            std::cout << " wgt_l=" << m_weights[il];
-            std::cout << " wgt_r=" << m_weights[ir];
-            std::cout << " inx_l=" << m_indices[il];
-            std::cout << " inx_r=" << m_indices[ir] << std::endl;
+            std::cout << " wgt_l=" << weights[il];
+            std::cout << " wgt_r=" << weights[ir];
+            std::cout << " wgt_grad_l=" << weight_gradients[il];
+            std::cout << " wgt_grad_r=" << weight_gradients[ir];
+            std::cout << " inx_l=" << indices[il];
+            std::cout << " inx_r=" << indices[ir] << std::endl;
             #endif
 
         } // endfor: looped over all parameters
 
         // Compute number of combinations
-        int combinations = 1 << dim;
+        int combinations = 1 << m_npars;
 
-        // Initialise vectors for values
-        m_lin_values = std::vector<double>(ebounds().size(), 0.0);
-        m_log_values = std::vector<double>(ebounds().size(), 0.0);
+        // Initialise 2d arrays for values and gradients
+        m_lin_values = GNdarray(m_nebins, m_npars+1);
+        m_log_values = GNdarray(m_nebins, m_npars+1);
 
         // Debug option: initial sum of weights
         #if defined(G_DEBUG_UPDATE)
@@ -1569,47 +1766,90 @@ void GModelSpectralTable::update(void)
             std::cout << " " << i << ": ";
             #endif
 
-            // Initialise weight
-            double weight = 1.0;
+            // Initialise weight and gradient weights
+            double              weight = 1.0;
+            std::vector<double> grad_weight(m_npars, 1.0);
 
             // Initialise index vector (including the energy dimension)
-            std::vector<int> index_shape(dim+1,0);
+            std::vector<int> index_shape(m_npars+1,0);
 
             // Loop over dimensions
-            for (int k = 0, div = 1; k < dim; ++k, div *= 2) {
+            for (int k = 0, div = 1; k < m_npars; ++k, div *= 2) {
 
                 // Compute index for each dimension
                 int index = i/div % 2 + k * 2;
 
                 // Update weight
-                weight *= m_weights[index];
+                weight *= weights[index];
 
                 // Add index
-                index_shape[k] = m_indices[index];
+                index_shape[k] = indices[index];
 
-                // Debug option: print information for dimension
+                // Update gradient weights
+                for (int j = 0; j < m_npars; ++j) {
+                    if (k == j) {
+                        grad_weight[j] *= weight_gradients[index];
+                    }
+                    else {
+                        grad_weight[j] *= weights[index];
+                    }
+                } // endfor: update gradient weights
+
+                // Debug option: print index and weight for current dimension
                 #if defined(G_DEBUG_UPDATE)
                 std::cout << index;
-                std::cout << " (" << m_weights[index];
-                std::cout << " @ " << m_indices[index] << ")";
+                std::cout << " (" << weights[index];
+                std::cout << " @ " << indices[index] << ") ";
                 #endif
 
             } // endfor: looped over dimensions
 
-            // Get index of spectrum
-            int index_spectra = m_spectra.index(index_shape);
-
-            // Add
-
-
-            // Debug option: print total weight and index for combination
+            // Debug option: print total weight and weight gradient
             #if defined(G_DEBUG_UPDATE)
             std::cout << ": wgt=" << weight;
-            std::cout << " (" << index_spectra << ")" << std::endl;
+            std::cout << " [";
+            for (int k = 0; k < m_npars; ++k) {
+                if (k > 0) {
+                    std::cout << ",";
+                }
+                std::cout << grad_weight[k];
+            }
+            std::cout << "]" << std::endl;
             weight_sum += weight;
             #endif
-    
+
+            // Compute interpolated value and gradient
+            for (int iebin = 0; iebin < m_nebins; ++iebin) {
+
+                // Set energy index
+                index_shape[m_npars] = iebin;
+
+                // Get spectral value
+                double value = m_spectra(index_shape);
+
+                // Compute contribution and store in value slot
+                m_lin_values(iebin,0) += weight * value;
+
+                // Compute gradients and store in gradient slots
+                for (int j = 0; j < m_npars; ++j) {
+                    m_lin_values(iebin,j+1) += grad_weight[j] * value;
+                }
+
+            } // endfor: looped over all energy bins
+
         } // endfor: looped over combinations
+
+        // Compute log10 values of function values
+        /*
+        for (int iebin = 0; iebin < m_nebins; ++iebin) {
+            if (m_lin_values(iebin,0) > 0.0) {
+                m_log_values(iebin,0) = std::log10(m_lin_values(iebin,0));
+            }
+            else {
+                m_log_values(iebin,0) = -1000.0; // Set to a tiny value
+            }
+        }
+        */
 
         // Debug option: print sum of weights
         #if defined(G_DEBUG_UPDATE)

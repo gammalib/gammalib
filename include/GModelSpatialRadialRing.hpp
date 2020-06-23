@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialRing.hpp - Radial ring source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Pierrick Martin                             *
+ *  copyright (C) 2020 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -137,11 +137,11 @@ std::string GModelSpatialRadialRing::type(void) const
 
 
 /***********************************************************************//**
- * @brief Return ring outer radius
+ * @brief Return ring inner radius
  *
- * @return Ring outer radius (degrees).
+ * @return Ring inner radius (degrees).
  *
- * Returns the outer radius of the ring in degrees.
+ * Returns the inner radius of the ring in degrees.
  ***************************************************************************/
 inline
 double GModelSpatialRadialRing::radius(void) const
@@ -151,11 +151,11 @@ double GModelSpatialRadialRing::radius(void) const
 
 
 /***********************************************************************//**
- * @brief Set ring outer radius
+ * @brief Set ring inner radius
  *
- * @param[in] Ring outer radius (degrees).
+ * @param[in] radius Ring inner radius (degrees).
  *
- * Sets the outer radius of the ring in degrees.
+ * Sets the inner radius of the ring in degrees.
  ***************************************************************************/
 inline
 void GModelSpatialRadialRing::radius(const double& radius)
@@ -182,7 +182,7 @@ double GModelSpatialRadialRing::width(void) const
 /***********************************************************************//**
  * @brief Set ring width
  *
- * @param[in] Ring width (degrees).
+ * @param[in] width Ring width (degrees).
  *
  * Sets the width of the ring in degrees.
  ***************************************************************************/
