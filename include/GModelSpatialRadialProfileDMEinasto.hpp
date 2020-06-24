@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileDMEinasto.hpp - DM Einasto profile class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Nathan Kelley-Hoskins                       *
+ *  copyright (C) 2016-2020 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,13 +62,12 @@ public:
     virtual void                                 clear(void);
     virtual GModelSpatialRadialProfileDMEinasto* clone(void) const;
     virtual std::string                          classname(void) const;
-    virtual std::string                          type(void) const;
     virtual double                               theta_min(void) const;
     virtual double                               theta_max(void) const;
     virtual void                                 read(const GXmlElement& xml);
     virtual void                                 write(GXmlElement& xml) const;
     virtual std::string                          print(const GChatter& chatter = NORMAL) const;
-    
+
     // Other methods
     double scale_radius(void) const;
     void   scale_radius(const double& scale_radius);
@@ -119,7 +118,7 @@ protected:
     GModelPar m_halo_distance; //!< Distance from earth to halo center
     GModelPar m_alpha;         //!< Einasto spatial power index
     GModelPar m_core_radius;   //!< Core radius
-    
+
     // Cached members used for pre-computation
     mutable double m_last_scale_radius;
     mutable double m_last_scale_density;
@@ -141,19 +140,6 @@ std::string GModelSpatialRadialProfileDMEinasto::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return model type
- *
- * @return "DMEinastoProfile".
- *
- * Returns the type of the radial profile model.
- ***************************************************************************/
-inline
-std::string GModelSpatialRadialProfileDMEinasto::type(void) const
-{
-    return "DMEinastoProfile";
-}
-
-/***********************************************************************//**
  * @brief Return scale radius
  *
  * @return scale radius (kpc).
@@ -166,9 +152,10 @@ double GModelSpatialRadialProfileDMEinasto::scale_radius(void) const
     return (m_scale_radius.value());
 }
 
+
 /***********************************************************************//**
  * @brief Set scale radius
- *  
+ *
  * @param[in] radius Scale radius (kpc).
  *
  * Sets the scale radius of the halo profile in kpc.
@@ -179,6 +166,7 @@ void GModelSpatialRadialProfileDMEinasto::scale_radius(const double& radius)
     m_scale_radius.value(radius);
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Return scale density
@@ -193,9 +181,10 @@ double GModelSpatialRadialProfileDMEinasto::scale_density(void) const
     return (m_scale_density.value());
 }
 
+
 /***********************************************************************//**
  * @brief Set scale density 
- *  
+ *
  * @param[in] density Scale density (GeV/cm^3).
  *
  * Sets the scale density (mass/volume density at the scale radius) of 
@@ -207,6 +196,7 @@ void GModelSpatialRadialProfileDMEinasto::scale_density(const double& density)
     m_scale_density.value(density);
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Return halo distance
@@ -221,9 +211,10 @@ double GModelSpatialRadialProfileDMEinasto::halo_distance(void) const
     return (m_halo_distance.value());
 }
 
+
 /***********************************************************************//**
  * @brief Set halo distance
- *  
+ *
  * @param[in] distance Halo distance (kpc).
  *
  * Sets the distance between the observer and the halo center in kpc.
@@ -234,6 +225,7 @@ void GModelSpatialRadialProfileDMEinasto::halo_distance(const double& distance)
     m_halo_distance.value(distance);
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Return Einasto alpha power index
@@ -248,9 +240,10 @@ double GModelSpatialRadialProfileDMEinasto::alpha(void) const
     return (m_alpha.value());
 }
 
+
 /***********************************************************************//**
  * @brief Set Einasto profile power index
- *  
+ *
  * @param[in] alpha Einasto profile power index (unitless).
  *
  * Sets the Einasto profile power index, should be positive.

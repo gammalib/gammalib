@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfile.cpp - Radial profile source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -294,7 +294,6 @@ void GModelSpatialRadialProfile::init_members(void)
     // Initialise members
     m_coord_indep = false;
     m_num_nodes   = 100;
-    m_region.clear();
 
     // Initialise pre-computation cache
     m_profile.clear();
@@ -315,7 +314,6 @@ void GModelSpatialRadialProfile::copy_members(const GModelSpatialRadialProfile& 
     m_coord_indep = model.m_coord_indep;
     m_num_nodes   = model.m_num_nodes;
     m_profile     = model.m_profile;
-    m_region      = model.m_region;
 
     // Return
     return;
@@ -442,11 +440,12 @@ int GModelSpatialRadialProfile::cache_index(void) const
  ***************************************************************************/
 void GModelSpatialRadialProfile::set_region(void) const
 {
-    // Set sky region centre to disk centre
-    m_region.centre(m_ra.value(), m_dec.value());
+    // Set sky region circle
+    GSkyRegionCircle region(m_ra.value(), m_dec.value(), theta_max()*gammalib::rad2deg);
 
-    // Set sky region radius to maximum theta angle
-    m_region.radius(theta_max()*gammalib::rad2deg);
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialRadialProfile*>(this)->m_region = region;
+
 
     // Return
     return;

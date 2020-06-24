@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialElliptical.i - Abstract elliptical spatial model class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,7 +46,6 @@ public:
     virtual void                     clear(void) = 0;
     virtual GModelSpatialElliptical* clone(void) const = 0;
     virtual std::string              classname(void) const = 0;
-    virtual std::string              type(void) const = 0;
     virtual double                   eval(const double&  theta,
                                           const double&  posangle,
                                           const GEnergy& energy,
@@ -58,7 +57,6 @@ public:
                                         const GTime&   time,
                                         GRan&          ran) const = 0;
     virtual double                   theta_max(void) const = 0;
-    virtual GSkyRegion*              region(void) const = 0;
 
     // Implemented virtual methods
     virtual double eval(const GPhoton& photon,

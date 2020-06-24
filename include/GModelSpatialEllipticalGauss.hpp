@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialEllipticalGauss.hpp - Elliptical gauss source model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2016 by Michael Mayer                               *
+ *  copyright (C) 2015-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,7 +66,6 @@ public:
     virtual void                          clear(void);
     virtual GModelSpatialEllipticalGauss* clone(void) const;
     virtual std::string                   classname(void) const;
-    virtual std::string                   type(void) const;
     virtual double                        eval(const double&  theta,
                                                const double&  posangle,
                                                const GEnergy& energy,
@@ -78,7 +77,6 @@ public:
     virtual bool                          contains(const GSkyDir& dir,
                                                    const double&  margin = 0.0) const;
     virtual double                        theta_max(void) const;
-    virtual GSkyRegion*                   region(void) const;
     virtual void                          read(const GXmlElement& xml);
     virtual void                          write(GXmlElement& xml) const;
     virtual std::string                   print(const GChatter& chatter = NORMAL) const;
@@ -86,15 +84,13 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialEllipticalGauss& model);
-    void free_members(void);
-    void update(void) const;
-    void set_region(void) const;
+    void         init_members(void);
+    void         copy_members(const GModelSpatialEllipticalGauss& model);
+    void         free_members(void);
+    void         update(void) const;
+    virtual void set_region(void) const;
 
     // Protected members
-    std::string              m_type;    //!< Model type
-    mutable GSkyRegionCircle m_region;  //!< Bounding circle
 
     // Cached members used for pre-computations
     mutable double m_last_minor;        //!< Last semi-minor axis
@@ -124,35 +120,6 @@ inline
 std::string GModelSpatialEllipticalGauss::classname(void) const
 {
     return ("GModelSpatialEllipticalGauss");
-}
-
-
-/***********************************************************************//**
- * @brief Return model type
- *
- * @return Model type.
- *
- * Returns the type of the elliptical gauss model.
- ***************************************************************************/
-inline
-std::string GModelSpatialEllipticalGauss::type(void) const
-{
-    return (m_type);
-}
-
-
-/***********************************************************************//**
- * @brief Return boundary sky region
- *
- * @return Boundary sky region.
- *
- * Returns a sky region that fully encloses the spatial model component.
- ***************************************************************************/
-inline
-GSkyRegion* GModelSpatialEllipticalGauss::region(void) const
-{
-    set_region();
-    return (&m_region);
 }
 
 #endif /* GMODELSPATIALELLIPTICALGAUSS_HPP */

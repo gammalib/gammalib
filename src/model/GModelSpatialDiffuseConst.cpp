@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseConst.cpp - Spatial isotropic model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -535,9 +535,6 @@ void GModelSpatialDiffuseConst::init_members(void)
     m_pars.clear();
     m_pars.push_back(&m_value);
 
-    // Initialise other members
-    m_region.clear();
-
     // Return
     return;
 }
@@ -551,9 +548,8 @@ void GModelSpatialDiffuseConst::init_members(void)
 void GModelSpatialDiffuseConst::copy_members(const GModelSpatialDiffuseConst& model)
 {
     // Copy members
-    m_type          = model.m_type;
+    m_type          = model.m_type;   // Needed to conserve model type
     m_value         = model.m_value;
-    m_region        = model.m_region;
     m_mc_centre     = model.m_mc_centre;
     m_mc_cos_radius = model.m_mc_cos_radius;
 
@@ -581,11 +577,11 @@ void GModelSpatialDiffuseConst::free_members(void)
  ***************************************************************************/
 void GModelSpatialDiffuseConst::set_region(void) const
 {
-    // Set sky region centre to (0,0)
-    m_region.centre(0.0, 0.0);
+    // Set sky region circle (all sky)
+    GSkyRegionCircle region(0.0, 0.0, 180.0);
 
-    // Set sky region radius to 180 degrees (all points included)
-    m_region.radius(180.0);
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialDiffuseConst*>(this)->m_region = region;
 
     // Return
     return;

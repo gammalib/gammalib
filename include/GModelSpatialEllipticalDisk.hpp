@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.hpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Michael Mayer                               *
+ *  copyright (C) 2013-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,7 +65,6 @@ public:
     virtual void                         clear(void);
     virtual GModelSpatialEllipticalDisk* clone(void) const;
     virtual std::string                  classname(void) const;
-    virtual std::string                  type(void) const;
     virtual double                       eval(const double&  theta,
                                               const double&  posangle,
                                               const GEnergy& energy,
@@ -77,7 +76,6 @@ public:
     virtual bool                         contains(const GSkyDir& dir,
                                                   const double&  margin = 0.0) const;
     virtual double                       theta_max(void) const;
-    virtual GSkyRegion*                  region(void) const;
     virtual void                         read(const GXmlElement& xml);
     virtual void                         write(GXmlElement& xml) const;
     virtual std::string                  print(const GChatter& chatter = NORMAL) const;
@@ -85,14 +83,11 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialEllipticalDisk& model);
-    void free_members(void);
-    void update(void) const;
-    void set_region(void) const;
-
-    // Protected members
-    mutable GSkyRegionCircle m_region; //!< Bounding circle
+    void         init_members(void);
+    void         copy_members(const GModelSpatialEllipticalDisk& model);
+    void         free_members(void);
+    void         update(void) const;
+    virtual void set_region(void) const;
 
     // Cached members used for pre-computations
     mutable double m_last_semiminor;   //!< Last semi-minor axis
@@ -112,35 +107,6 @@ inline
 std::string GModelSpatialEllipticalDisk::classname(void) const
 {
     return ("GModelSpatialEllipticalDisk");
-}
-
-
-/***********************************************************************//**
- * @brief Return model type
- *
- * @return "EllipticalDisk".
- *
- * Returns the type of the elliptical disk model.
- ***************************************************************************/
-inline
-std::string GModelSpatialEllipticalDisk::type(void) const
-{
-    return "EllipticalDisk";
-}
-
-
-/***********************************************************************//**
- * @brief Return boundary sky region
- *
- * @return Boundary sky region.
- *
- * Returns a sky region that fully encloses the spatial model component.
- ***************************************************************************/
-inline
-GSkyRegion* GModelSpatialEllipticalDisk::region(void) const
-{
-    set_region();
-    return (&m_region);
 }
 
 #endif /* GMODELSPATIALELLIPTICALDISK_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialComposite.i - Spatial point source model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Domenico Tiziani                            *
+ *  copyright (C) 2016-2020 by Domenico Tiziani                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,7 +47,6 @@ public:
     virtual void                    clear(void);
     virtual GModelSpatialComposite* clone(void) const;
     virtual std::string             classname(void) const;
-    virtual std::string             type(void) const;
     virtual double                  eval(const GPhoton& photon,
                                          const bool& gradients = false) const;
     virtual GSkyDir                 mc(const GEnergy& energy,
@@ -57,12 +56,10 @@ public:
                                             const double&  radius) const;
     virtual bool                    contains(const GSkyDir& dir,
                                              const double&  margin = 0.0) const;
-    virtual GSkyRegion*             region(void) const;
     virtual void                    read(const GXmlElement& xml);
     virtual void                    write(GXmlElement& xml) const;
 
     // Other methods
-    void                 type(const std::string& type);
     int                  components(void) const;
     void                 append(const GModelSpatial& component,
                                 const std::string&   name = "",

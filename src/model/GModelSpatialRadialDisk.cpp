@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.cpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Christoph Deil                              *
+ *  copyright (C) 2011-2020 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -471,7 +471,7 @@ void GModelSpatialRadialDisk::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialRadialDisk::print(const GChatter& chatter) const
@@ -533,9 +533,6 @@ void GModelSpatialRadialDisk::init_members(void)
     m_radius_rad  = 0.0;
     m_norm        = 0.0;
 
-    // Initialise other members
-    m_region.clear();
-
     // Return
     return;
 }
@@ -553,9 +550,8 @@ void GModelSpatialRadialDisk::init_members(void)
 void GModelSpatialRadialDisk::copy_members(const GModelSpatialRadialDisk& model)
 {
     // Copy members
-    m_type   = model.m_type;
+    m_type   = model.m_type;   // Needed to conserve model type
     m_radius = model.m_radius;
-    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_radius = model.m_last_radius;
@@ -617,11 +613,11 @@ void GModelSpatialRadialDisk::update() const
  ***************************************************************************/
 void GModelSpatialRadialDisk::set_region(void) const
 {
-    // Set sky region centre to disk centre
-    m_region.centre(m_ra.value(), m_dec.value());
+    // Set sky region circle
+    GSkyRegionCircle region(m_ra.value(), m_dec.value(), m_radius.value());
 
-    // Set sky region radius to disk radius
-    m_region.radius(m_radius.value());
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialRadialDisk*>(this)->m_region = region;
 
     // Return
     return;

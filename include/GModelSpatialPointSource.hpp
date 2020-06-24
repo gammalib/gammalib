@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,7 +64,6 @@ public:
     virtual void                      clear(void);
     virtual GModelSpatialPointSource* clone(void) const;
     virtual std::string               classname(void) const;
-    virtual std::string               type(void) const;
     virtual GClassCode                code(void) const;
     virtual double                    eval(const GPhoton& photon,
                                            const bool& gradients = false) const;
@@ -75,13 +74,11 @@ public:
                                               const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
-    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void    type(const std::string& type);
     double  ra(void) const;
     double  dec(void) const;
     void    ra(const double& ra);
@@ -91,16 +88,14 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialPointSource& model);
-    void free_members(void);
-    void set_region(void) const;
+    void         init_members(void);
+    void         copy_members(const GModelSpatialPointSource& model);
+    void         free_members(void);
+    virtual void set_region(void) const;
 
     // Protected members
-    std::string              m_type;   //!< Model type
-    GModelPar                m_ra;     //!< Right Ascension (deg)
-    GModelPar                m_dec;    //!< Declination (deg)
-    mutable GSkyRegionCircle m_region; //!< Bounding circle
+    GModelPar m_ra;     //!< Right Ascension (deg)
+    GModelPar m_dec;    //!< Declination (deg)
 };
 
 
@@ -113,35 +108,6 @@ inline
 std::string GModelSpatialPointSource::classname(void) const
 {
     return ("GModelSpatialPointSource");
-}
-
-
-/***********************************************************************//**
- * @brief Return model type
- *
- * @return Model type.
- *
- * Returns the type of the spatial point source model.
- ***************************************************************************/
-inline
-std::string GModelSpatialPointSource::type(void) const
-{
-    return (m_type);
-}
-
-
-/***********************************************************************//**
- * @brief Set model type
- *
- * @param[in] type Model type.
- *
- * Set the type of the spatial point source model.
- ***************************************************************************/
-inline
-void GModelSpatialPointSource::type(const std::string& type)
-{
-    m_type = type;
-    return;
 }
 
 
@@ -234,21 +200,6 @@ double GModelSpatialPointSource::mc_norm(const GSkyDir& dir,
 {
     double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
     return (norm);
-}
-
-
-/***********************************************************************//**
- * @brief Return boundary sky region
- *
- * @return Boundary sky region.
- *
- * Returns a sky region that fully encloses the point source.
- ***************************************************************************/
-inline
-GSkyRegion* GModelSpatialPointSource::region(void) const
-{
-    set_region();
-    return (&m_region);
 }
 
 #endif /* GMODELSPATIALPOINTSOURCE_HPP */

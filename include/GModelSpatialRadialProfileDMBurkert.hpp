@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileDMBurkert.hpp - DM Burkert profile class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Nathan Kelley-Hoskins                       *
+ *  copyright (C) 2016-2020 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,13 +62,12 @@ public:
     virtual void                                 clear(void);
     virtual GModelSpatialRadialProfileDMBurkert* clone(void) const;
     virtual std::string                          classname(void) const;
-    virtual std::string                          type(void) const;
     virtual double                               theta_min(void) const;
     virtual double                               theta_max(void) const;
     virtual void                                 read(const GXmlElement& xml);
     virtual void                                 write(GXmlElement& xml) const;
     virtual std::string                          print(const GChatter& chatter = NORMAL) const;
-    
+
     // Other methods
     double scale_radius(void) const;
     void   scale_radius(const double& scale_radius);
@@ -135,73 +134,64 @@ std::string GModelSpatialRadialProfileDMBurkert::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return model type
- *
- * @return "DMBurkertProfile".
- *
- * Returns the type of the radial profile model.
- ***************************************************************************/
-inline
-std::string GModelSpatialRadialProfileDMBurkert::type(void) const
-{
-    return "DMBurkertProfile";
-}
-
-/***********************************************************************//**
  * @brief Return scale radius 
- *                      
+ *
  * @return Scale radius (kpc).
- *                      
+ *
  * Returns the scale radius of the halo profile in kpc.
  ***************************************************************************/
-inline  
+inline
 double GModelSpatialRadialProfileDMBurkert::scale_radius(void) const
-{       
+{
     return (m_scale_radius.value());
-}       
-        
+}
+
+
 /***********************************************************************//**
  * @brief Set scale radius
- *  
+ *
  * @param[in] radius Scale radius (kpc).
- *  
+ *
  * Sets the scale radius of the halo profile in kpc.
  ***************************************************************************/
 inline
 void GModelSpatialRadialProfileDMBurkert::scale_radius(const double& radius)
-{   
+{
     m_scale_radius.value(radius);
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Return scale density
- *                      
+ *
  * @return Scale density (GeV/cm^3).
- *                      
+ *
  * Returns the scale density (mass/volume density at the scale radius) of 
  * the halo profile in GeV/cm^3.
  ***************************************************************************/
-inline  
+inline
 double GModelSpatialRadialProfileDMBurkert::scale_density(void) const
-{       
+{
     return (m_scale_density.value());
-}       
-        
+}
+
+
 /***********************************************************************//**
  * @brief Set scale density
- *  
+ *
  * @param[in] density Scale density (GeV/cm^3).
- *  
+ *
  * Sets the scale density ( mass/volume density at the scale radius) of the 
  * halo profile in GeV/cm^3.
  ***************************************************************************/
 inline
 void GModelSpatialRadialProfileDMBurkert::scale_density(const double& density)
-{   
+{
     m_scale_density.value(density);
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Return halo distance
@@ -216,9 +206,10 @@ double GModelSpatialRadialProfileDMBurkert::halo_distance(void) const
     return (m_halo_distance.value());
 }
 
+
 /***********************************************************************//**
  * @brief Set halo distance
- *  
+ *
  * @param[in] distance Halo distance (kpc).
  *
  * Sets the distance between the observer and the halo center in kpc.

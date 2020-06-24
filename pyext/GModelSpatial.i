@@ -46,7 +46,6 @@ public:
     virtual void           clear(void) = 0;
     virtual GModelSpatial* clone(void) const = 0;
     virtual std::string    classname(void) const = 0;
-    virtual std::string    type(void) const = 0;
     virtual double         eval(const GPhoton& photon,
                                 const bool& gradients = false) const = 0;
     virtual GSkyDir        mc(const GEnergy& energy, const GTime& time,
@@ -57,16 +56,20 @@ public:
                                     const double&  margin = 0.0) const = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
-    virtual GSkyRegion*    region(void) const = 0;
 
     // Methods
-    bool       has_par(const std::string& name) const;
-    bool       has_free_pars(void) const;
-    int        size(void) const;
-    void       autoscale(void);
-    double     flux(const GSkyRegion* reg,
-                    const GEnergy&    srcEng = GEnergy(),
-                    const GTime&      srcTime = GTime()) const;
+    std::string       type(void) const;
+    void              type(const std::string& type);
+    GModelPar&        at(const int& index);
+    const GModelPar&  at(const int& index) const;
+    bool              has_par(const std::string& name) const;
+    bool              has_free_pars(void) const;
+    int               size(void) const;
+    void              autoscale(void);
+    double            flux(const GSkyRegion* reg,
+                           const GEnergy&    srcEng = GEnergy(),
+                           const GTime&      srcTime = GTime()) const;
+    const GSkyRegion* region(void) const;
 };
 
 

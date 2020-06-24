@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialProfileDMZhao.cpp - Zhao radial profile class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Nathan Kelley-Hoskins                       *
+ *  copyright (C) 2016-2020 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -445,6 +445,8 @@ std::string GModelSpatialRadialProfileDMZhao::print(const GChatter& chatter) con
  ***************************************************************************/
 void GModelSpatialRadialProfileDMZhao::init_members(void)
 {
+    // Initialise model type
+    m_type = "DMZhaoProfile";
 
     // Initialise scale radius
     m_scale_radius.clear();
@@ -456,7 +458,7 @@ void GModelSpatialRadialProfileDMZhao::init_members(void)
     m_scale_radius.scale(1.0);
     m_scale_radius.gradient(0.0);
     m_scale_radius.has_grad(false);   // Radial components never have gradients
-    
+
     // Initialise scale density
     m_scale_density.clear();
     m_scale_density.name("ScaleDensity");
@@ -582,6 +584,7 @@ void GModelSpatialRadialProfileDMZhao::copy_members(const GModelSpatialRadialPro
     // Copy members. We do not have to push back the members on the parameter
     // stack as this should have been done by init_members() that was called
     // before.
+    m_type          = model.m_type;   // Needed to conserve model type
     m_scale_radius  = model.m_scale_radius;
     m_scale_density = model.m_scale_density;
     m_halo_distance = model.m_halo_distance;
@@ -596,8 +599,8 @@ void GModelSpatialRadialProfileDMZhao::copy_members(const GModelSpatialRadialPro
     m_last_scale_radius     = model.m_last_scale_radius;
     m_last_scale_density    = model.m_last_scale_density;
     m_mass_radius           = model.m_mass_radius;
-    m_scale_density_squared = model.m_scale_density_squared ;
-    
+    m_scale_density_squared = model.m_scale_density_squared;
+
     // Return
     return;
 }

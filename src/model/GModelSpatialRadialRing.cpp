@@ -561,9 +561,6 @@ void GModelSpatialRadialRing::init_members(void)
     m_cos_outer_radius_rad = 0.0;
     m_norm                 = 0.0;
 
-    // Initialise other members
-    m_region.clear();
-
     // Return
     return;
 }
@@ -581,10 +578,9 @@ void GModelSpatialRadialRing::init_members(void)
 void GModelSpatialRadialRing::copy_members(const GModelSpatialRadialRing& model)
 {
     // Copy members
-    m_type   = model.m_type;
+    m_type   = model.m_type;   // Needed to conserve model type
     m_radius = model.m_radius;
     m_width  = model.m_width;
-    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_radius          = model.m_last_radius;
@@ -652,11 +648,12 @@ void GModelSpatialRadialRing::update() const
  ***************************************************************************/
 void GModelSpatialRadialRing::set_region(void) const
 {
-    // Set sky region centre to ring centre
-    m_region.centre(m_ra.value(), m_dec.value());
+    // Set sky region circle (maximum Gaussian sigma times a scaling
+    // factor (actually 3))
+    GSkyRegionCircle region(m_ra.value(), m_dec.value(), radius()+width());
 
-    // Set sky region radius to ring radius
-    m_region.radius(radius()+width());
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialRadialRing*>(this)->m_region = region;
 
     // Return
     return;

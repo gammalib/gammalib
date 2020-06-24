@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialProfile.hpp - Radial profile source model class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,6 @@ public:
     virtual void                        clear(void) = 0;
     virtual GModelSpatialRadialProfile* clone(void) const = 0;
     virtual std::string                 classname(void) const = 0;
-    virtual std::string                 type(void) const = 0;
     virtual double                      theta_min(void) const = 0;
     virtual double                      theta_max(void) const = 0;
     virtual std::string                 print(const GChatter& chatter = NORMAL) const = 0;
@@ -77,7 +76,6 @@ public:
                            GRan&          ran) const;
     virtual bool        contains(const GSkyDir& dir,
                                  const double&  margin = 0.0) const;
-    virtual GSkyRegion* region(void) const;
 
     // Implement other methods
     int  num_nodes(void) const;
@@ -90,13 +88,11 @@ protected:
     void           free_members(void);
     int            cache_index(void) const;
     virtual double profile_value(const double& theta) const = 0;
-    void           set_region(void) const;
+    virtual void   set_region(void) const;
 
     // Protected members
-    bool                     m_coord_indep; //!< True if model independent
-                                            //!< of sky coordinates
-    int                      m_num_nodes;   //!< Number of profile nodes
-    mutable GSkyRegionCircle m_region;      //!< Bounding circle
+    bool m_coord_indep; //!< True if model independent of sky coordinates
+    int  m_num_nodes;   //!< Number of profile nodes
 
     // Pre-computed radial profile
     struct profile {
@@ -138,21 +134,6 @@ void GModelSpatialRadialProfile::num_nodes(const int& number)
 {
     m_num_nodes = number;
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return boundary sky region
- *
- * @return Boundary sky region.
- *
- * Returns a sky region that fully encloses the spatial model component.
- ***************************************************************************/
-inline
-GSkyRegion* GModelSpatialRadialProfile::region(void) const
-{
-    set_region();
-    return (&m_region);
 }
 
 #endif /* GMODELSPATIALRADIALPROFILE_HPP */

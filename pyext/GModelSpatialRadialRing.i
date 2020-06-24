@@ -51,7 +51,6 @@ public:
     virtual void                     clear(void);
     virtual GModelSpatialRadialRing* clone(void) const;
     virtual std::string              classname(void) const;
-    virtual std::string              type(void) const;
     virtual double                   eval(const double&  theta,
                                           const GEnergy& energy,
                                           const GTime&   time,
@@ -63,7 +62,6 @@ public:
                                               const double&  margin = 0.0) const;
     virtual double                   theta_min(void) const;
     virtual double                   theta_max(void) const;
-    virtual GSkyRegion*              region(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
 

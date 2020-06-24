@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileGauss.hpp - Gaussian radial profile class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,7 +61,6 @@ public:
     virtual void                             clear(void);
     virtual GModelSpatialRadialProfileGauss* clone(void) const;
     virtual std::string                      classname(void) const;
-    virtual std::string                      type(void) const;
     virtual double                           theta_min(void) const;
     virtual double                           theta_max(void) const;
     virtual void                             read(const GXmlElement& xml);
@@ -93,20 +92,6 @@ inline
 std::string GModelSpatialRadialProfileGauss::classname(void) const
 {
     return ("GModelSpatialRadialProfileGauss");
-}
-
-
-/***********************************************************************//**
- * @brief Return model type
- *
- * @return "GaussianProfile".
- *
- * Returns the type of the radial profile model.
- ***************************************************************************/
-inline
-std::string GModelSpatialRadialProfileGauss::type(void) const
-{
-    return "GaussianProfile";
 }
 
 

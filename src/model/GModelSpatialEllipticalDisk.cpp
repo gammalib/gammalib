@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Michael Mayer                               *
+ *  copyright (C) 2013-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -566,6 +566,9 @@ std::string GModelSpatialEllipticalDisk::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::init_members(void)
 {
+    // Initialise model type
+    m_type = "EllipticalDisk";
+
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius is not meaningful
     m_last_semiminor = 0.0;
@@ -573,9 +576,6 @@ void GModelSpatialEllipticalDisk::init_members(void)
     m_semiminor_rad  = 0.0;
     m_semimajor_rad  = 0.0;
     m_norm           = 0.0;
-
-    // Initialise other members
-    m_region.clear();
 
     // Return
     return;
@@ -594,7 +594,7 @@ void GModelSpatialEllipticalDisk::init_members(void)
 void GModelSpatialEllipticalDisk::copy_members(const GModelSpatialEllipticalDisk& model)
 {
     // Copy members
-    m_region = model.m_region;
+    m_type = model.m_type;   // Needed to conserve model type
 
     // Copy precomputation cache
     m_last_semiminor = model.m_last_semiminor;
@@ -659,14 +659,14 @@ void GModelSpatialEllipticalDisk::update() const
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::set_region(void) const
 {
-    // Set sky region centre to disk centre
-    m_region.centre(m_ra.value(), m_dec.value());
-
     // Set maximum model radius
     double max_radius = (semimajor() > semiminor()) ? semimajor() : semiminor();
 
-    // Set sky region radius to maximum disk radius
-    m_region.radius(max_radius);
+    // Set sky region circle
+    GSkyRegionCircle region(m_ra.value(), m_dec.value(), max_radius);
+
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialEllipticalDisk*>(this)->m_region = region;
 
     // Return
     return;

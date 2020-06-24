@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialEllipticalDisk.i - Elliptical disk source model class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Michael Mayer                               *
+ *  copyright (C) 2013-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,7 +51,6 @@ public:
     virtual void                         clear(void);
     virtual GModelSpatialEllipticalDisk* clone(void) const;
     virtual std::string                  classname(void) const;
-    virtual std::string                  type(void) const;
     virtual double                       eval(const double&  theta,
                                               const double&  posangle,
                                               const GEnergy& energy,
@@ -63,7 +62,6 @@ public:
     virtual bool                         contains(const GSkyDir& dir,
                                                   const double&  margin = 0.0) const;
     virtual double                       theta_max(void) const;
-    virtual GSkyRegion*                  region(void) const;
     virtual void                         read(const GXmlElement& xml);
     virtual void                         write(GXmlElement& xml) const;
 };

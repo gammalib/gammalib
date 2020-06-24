@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.hpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,7 +64,6 @@ public:
     virtual void                      clear(void);
     virtual GModelSpatialRadialGauss* clone(void) const;
     virtual std::string               classname(void) const;
-    virtual std::string               type(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
                                            const GTime&   time,
@@ -75,7 +74,6 @@ public:
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
     virtual double                    theta_max(void) const;
-    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -86,15 +84,13 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialRadialGauss& model);
-    void free_members(void);
-    void set_region(void) const;
+    void         init_members(void);
+    void         copy_members(const GModelSpatialRadialGauss& model);
+    void         free_members(void);
+    virtual void set_region(void) const;
 
     // Protected members
-    std::string              m_type;   //!< Model type
-    GModelPar                m_sigma;  //!< Gaussian width (deg)
-    mutable GSkyRegionCircle m_region; //!< Bounding circle
+    GModelPar m_sigma;  //!< Gaussian width (deg)
 };
 
 
@@ -107,20 +103,6 @@ inline
 std::string GModelSpatialRadialGauss::classname(void) const
 {
     return ("GModelSpatialRadialGauss");
-}
-
-
-/***********************************************************************//**
- * @brief Return model type
- *
- * @return Model type.
- *
- * Returns the type of the radial Gauss model.
- ***************************************************************************/
-inline
-std::string GModelSpatialRadialGauss::type(void) const
-{
-    return (m_type);
 }
 
 
@@ -150,21 +132,6 @@ void GModelSpatialRadialGauss::sigma(const double& sigma)
 {
     m_sigma.value(sigma);
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return boundary sky region
- *
- * @return Boundary sky region.
- *
- * Returns a sky region that fully encloses the spatial model component.
- ***************************************************************************/
-inline
-GSkyRegion* GModelSpatialRadialGauss::region(void) const
-{
-    set_region();
-    return (&m_region);
 }
 
 #endif /* GMODELSPATIALRADIALGAUSS_HPP */

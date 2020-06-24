@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialDiffuse.i - Abstract diffuse spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,7 +45,6 @@ public:
     virtual void                  clear(void) = 0;
     virtual GModelSpatialDiffuse* clone(void) const = 0;
     virtual std::string           classname(void) const = 0;
-    virtual std::string           type(void) const = 0;
     virtual double                eval(const GPhoton& photon,
                                        const bool& gradients = false) const = 0;
     virtual GSkyDir               mc(const GEnergy& energy, const GTime& time,
@@ -54,7 +53,6 @@ public:
                                           const double&  radius) const = 0;
     virtual bool                  contains(const GSkyDir& dir,
                                            const double&  margin = 0.0) const = 0;
-    virtual GSkyRegion*           region(void) const = 0;
     virtual void                  read(const GXmlElement& xml) = 0;
     virtual void                  write(GXmlElement& xml) const = 0;
 };

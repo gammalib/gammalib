@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialEllipticalGauss.cpp - Elliptical gauss source model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2018 by Michael Mayer                               *
+ *  copyright (C) 2015-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -656,9 +656,6 @@ void GModelSpatialEllipticalGauss::init_members(void)
     m_term2             = 0.0;
     m_term3             = 0.0;
 
-    // Initialise other members
-    m_region.clear();
-
     // Return
     return;
 }
@@ -672,24 +669,23 @@ void GModelSpatialEllipticalGauss::init_members(void)
 void GModelSpatialEllipticalGauss::copy_members(const GModelSpatialEllipticalGauss& model)
 {
     // Copy members
-    m_type   = model.m_type;
-    m_region = model.m_region;
+    m_type = model.m_type;   // Needed to conserve model type
 
     // Copy precomputation cache
-    m_last_minor        = model.m_last_minor;
-    m_last_major        = model.m_last_major;
-    m_minor_rad         = model.m_minor_rad;
-    m_major_rad         = model.m_major_rad;
-    m_norm              = model.m_norm;
-    m_last_posangle     = model.m_last_posangle;
-    m_sin2pos           = model.m_sin2pos;
-    m_cospos2           = model.m_cospos2;
-    m_sinpos2           = model.m_sinpos2;
-    m_minor2            = model.m_minor2;
-    m_major2            = model.m_major2;
-    m_term1             = model.m_term1;
-    m_term2             = model.m_term2;
-    m_term3             = model.m_term3;
+    m_last_minor    = model.m_last_minor;
+    m_last_major    = model.m_last_major;
+    m_minor_rad     = model.m_minor_rad;
+    m_major_rad     = model.m_major_rad;
+    m_norm          = model.m_norm;
+    m_last_posangle = model.m_last_posangle;
+    m_sin2pos       = model.m_sin2pos;
+    m_cospos2       = model.m_cospos2;
+    m_sinpos2       = model.m_sinpos2;
+    m_minor2        = model.m_minor2;
+    m_major2        = model.m_major2;
+    m_term1         = model.m_term1;
+    m_term2         = model.m_term2;
+    m_term3         = model.m_term3;
 
     // Return
     return;
@@ -797,15 +793,15 @@ void GModelSpatialEllipticalGauss::update() const
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::set_region(void) const
 {
-    // Set sky region centre to Gaussian centre
-    m_region.centre(m_ra.value(), m_dec.value());
-
     // Set maximum model radius
     double max_radius = (semimajor() > semiminor()) ? semimajor() : semiminor();
 
-    // Set sky region radius to maximum Gaussian sigma times a scaling
-    // factor (actually 3)
-    m_region.radius(max_radius * c_theta_max);
+    // Set sky region circle (maximum Gaussian sigma times a scaling
+    // factor (actually 3))
+    GSkyRegionCircle region(m_ra.value(), m_dec.value(), max_radius * c_theta_max);
+
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialEllipticalGauss*>(this)->m_region = region;
 
     // Return
     return;

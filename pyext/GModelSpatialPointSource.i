@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialPointSource.i - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,7 +49,6 @@ public:
     virtual void                      clear(void);
     virtual GModelSpatialPointSource* clone(void) const;
     virtual std::string               classname(void) const;
-    virtual std::string               type(void) const;
     virtual double                    eval(const GPhoton& photon,
                                            const bool& gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
@@ -61,10 +60,8 @@ public:
                                                const double&  margin = 0.0) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
-    virtual GSkyRegion*               region(void) const;
 
     // Other methods
-    void    type(const std::string& type);
     double  ra(void) const;
     double  dec(void) const;
     void    ra(const double& ra);

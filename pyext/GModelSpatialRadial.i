@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialRadial.i - Abstract radial spatial model base class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,7 +47,6 @@ public:
     virtual void                 clear(void) = 0;
     virtual GModelSpatialRadial* clone(void) const = 0;
     virtual std::string          classname(void) const = 0;
-    virtual std::string          type(void) const = 0;
     virtual double               eval(const double&  theta,
                                       const GEnergy& energy,
                                       const GTime& time,
@@ -58,7 +57,6 @@ public:
     virtual bool                 contains(const GSkyDir& dir,
                                           const double&  margin = 0.0) const = 0;
     virtual double               theta_max(void) const = 0;
-    virtual GSkyRegion*          region(void) const = 0;
 
     // Implemented virtual base class methods
     virtual double eval(const GPhoton& photon,

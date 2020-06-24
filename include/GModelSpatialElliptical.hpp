@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialElliptical.hpp - Abstract elliptical spatial model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,7 +65,6 @@ public:
     virtual void                     clear(void) = 0;
     virtual GModelSpatialElliptical* clone(void) const = 0;
     virtual std::string              classname(void) const = 0;
-    virtual std::string              type(void) const = 0;
     virtual double                   eval(const double&  theta,
                                           const double&  posangle,
                                           const GEnergy& energy,
@@ -77,7 +76,6 @@ public:
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const = 0;
     virtual double                   theta_max(void) const = 0;
-    virtual GSkyRegion*              region(void) const = 0;
     virtual std::string              print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented virtual base class methods
@@ -104,9 +102,10 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialElliptical& model);
-    void free_members(void);
+    void         init_members(void);
+    void         copy_members(const GModelSpatialElliptical& model);
+    void         free_members(void);
+    virtual void set_region(void) const = 0;
 
     // Protected members
     GModelPar m_ra;        //!< Right Ascension (deg)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialRadialProfile.i - Radial profile source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2002 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,7 +50,6 @@ public:
     virtual void                        clear(void) = 0;
     virtual GModelSpatialRadialProfile* clone(void) const = 0;
     virtual std::string                 classname(void) const = 0;
-    virtual std::string                 type(void) const = 0;
     virtual double                      theta_min(void) const = 0;
     virtual double                      theta_max(void) const = 0;
 
@@ -64,7 +63,6 @@ public:
                            GRan&          ran) const;
     virtual bool        contains(const GSkyDir& dir,
                                  const double&  margin = 0.0) const;
-    virtual GSkyRegion* region(void) const;
 
     // Implement other methods
     int  num_nodes(void) const;

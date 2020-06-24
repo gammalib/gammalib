@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialComposite.cpp - Spatial composite model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Domenico Tiziani                            *
+ *  copyright (C) 2016-2020 by Domenico Tiziani                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -764,7 +764,6 @@ void GModelSpatialComposite::init_members(void)
     // Initialise other members
     m_components.clear();
     m_names.clear();
-    m_region.clear();
     m_pars.clear();
     m_scales.clear();
 
@@ -781,9 +780,8 @@ void GModelSpatialComposite::init_members(void)
 void GModelSpatialComposite::copy_members(const GModelSpatialComposite& model)
 {
     // Copy members
-    m_type   = model.m_type;
-    m_names  = model.m_names;
-    m_region = model.m_region;
+    m_type  = model.m_type;  // To copy model type
+    m_names = model.m_names;
 
     // Initialise components and scales
     m_components.clear();
@@ -869,11 +867,11 @@ void GModelSpatialComposite::free_members(void)
  ***************************************************************************/
 void GModelSpatialComposite::set_region(void) const
 {
-    // Set sky region centre to (0,0)
-    m_region.centre(0.0, 0.0);
+    // Set sky region circle (all sky)
+    GSkyRegionCircle region(0.0, 0.0, 180.0);
 
-    // Set sky region radius to 180 degrees (all points included)
-    m_region.radius(180.0);
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialComposite*>(this)->m_region = region;
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileDMZhao.hpp - DM Zhao profile class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Nathan Kelley-Hoskins                       *
+ *  copyright (C) 2016-2020 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,6 @@ public:
     virtual void                              clear(void);
     virtual GModelSpatialRadialProfileDMZhao* clone(void) const;
     virtual std::string                       classname(void) const;
-    virtual std::string                       type(void) const;
     virtual double                            theta_min(void) const;
     virtual double                            theta_max(void) const;
     virtual void                              read(const GXmlElement& xml);
@@ -153,19 +152,6 @@ std::string GModelSpatialRadialProfileDMZhao::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return model type
- *
- * @return "DMZhaoProfile".
- *
- * Returns the type of the radial profile model.
- ***************************************************************************/
-inline
-std::string GModelSpatialRadialProfileDMZhao::type(void) const
-{
-    return "DMZhaoProfile";
-}
-
-/***********************************************************************//**
  * @brief Return scale radius
  *
  * @return Scale radius (kpc).
@@ -177,6 +163,7 @@ double GModelSpatialRadialProfileDMZhao::scale_radius(void) const
 {
     return (m_scale_radius.value());
 }
+
 
 /***********************************************************************//**
  * @brief Set scale radius
@@ -192,6 +179,7 @@ void GModelSpatialRadialProfileDMZhao::scale_radius(const double& radius)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Return scale density
  *
@@ -205,6 +193,7 @@ double GModelSpatialRadialProfileDMZhao::scale_density(void) const
 {
     return (m_scale_density.value());
 }
+
 
 /***********************************************************************//**
  * @brief Set scale density
@@ -221,6 +210,7 @@ void GModelSpatialRadialProfileDMZhao::scale_density(const double& density)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Return halo distance
  *
@@ -234,9 +224,10 @@ double GModelSpatialRadialProfileDMZhao::halo_distance(void) const
     return (m_halo_distance.value());
 }
 
+
 /***********************************************************************//**
  * @brief Set halo distance
- *  
+ *
  * @param[in] distance Halo distance (kpc).
  *
  * Sets the distance between the observer and the halo center in kpc.
@@ -247,6 +238,7 @@ void GModelSpatialRadialProfileDMZhao::halo_distance(const double& distance)
     m_halo_distance.value(distance);
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Return Zhao alpha power index
@@ -261,9 +253,10 @@ double GModelSpatialRadialProfileDMZhao::alpha(void) const
     return (m_alpha.value());
 }
 
+
 /***********************************************************************//**
  * @brief Set Zhao alpha power index
- *  
+ *
  * @param[in] alpha (unitless).
  *
  * Sets the Zhao profile alpha power index.
@@ -274,6 +267,7 @@ void GModelSpatialRadialProfileDMZhao::alpha(const double& alpha)
     m_alpha.value(alpha);
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Return Zhao beta power index
@@ -287,6 +281,7 @@ double GModelSpatialRadialProfileDMZhao::beta(void) const
 {
     return (m_beta.value());
 }
+
 
 /***********************************************************************//**
  * @brief Set Zhao beta power index
@@ -302,6 +297,7 @@ void GModelSpatialRadialProfileDMZhao::beta(const double& beta)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Return Zhao gamma power index
  *
@@ -314,6 +310,7 @@ double GModelSpatialRadialProfileDMZhao::gamma(void) const
 {
     return (m_gamma.value());
 }
+
 
 /***********************************************************************//**
  * @brief Set Zhao gamma power index

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.cpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Christoph Deil                              *
+ *  copyright (C) 2011-2020 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -534,7 +534,7 @@ void GModelSpatialRadialShell::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialRadialShell::print(const GChatter& chatter) const
@@ -602,9 +602,6 @@ void GModelSpatialRadialShell::init_members(void)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
 
-    // Initialise other members
-    m_region.clear();
-
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius and width shell is not meaningful
     m_last_radius = 0.0;
@@ -632,10 +629,9 @@ void GModelSpatialRadialShell::init_members(void)
 void GModelSpatialRadialShell::copy_members(const GModelSpatialRadialShell& model)
 {
     // Copy members
-    m_type   = model.m_type;
+    m_type   = model.m_type;   // Needed to conserve model type
     m_radius = model.m_radius;
     m_width  = model.m_width;
-    m_region = model.m_region;
 
     // Copy precomputation cache
     m_last_radius = model.m_last_radius;
@@ -775,11 +771,12 @@ double GModelSpatialRadialShell::f2(double x)
  ***************************************************************************/
 void GModelSpatialRadialShell::set_region(void) const
 {
-    // Set sky region centre to Gaussian centre
-    m_region.centre(m_ra.value(), m_dec.value());
+    // Set sky region circle (maximum Gaussian sigma times a scaling
+    // factor (actually 3))
+    GSkyRegionCircle region(m_ra.value(), m_dec.value(), m_radius.value() + m_width.value());
 
-    // Set sky region radius to sum of shell radius and width
-    m_region.radius(m_radius.value() + m_width.value());
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialRadialShell*>(this)->m_region = region;
 
     // Return
     return;

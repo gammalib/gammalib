@@ -440,6 +440,8 @@ double GModelSpatial::flux(const GSkyRegion* reg,
 void GModelSpatial::init_members(void)
 {
     // Initialise members
+    m_type.clear();
+    m_region.clear();
     m_pars.clear();
 
     // Return
@@ -455,7 +457,9 @@ void GModelSpatial::init_members(void)
 void GModelSpatial::copy_members(const GModelSpatial& model)
 {
     // Copy members
-    m_pars = model.m_pars;
+    m_type   = model.m_type;
+    m_region = model.m_region;
+    m_pars   = model.m_pars;
 
     // Return
     return;

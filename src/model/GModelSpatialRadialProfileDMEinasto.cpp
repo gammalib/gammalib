@@ -1,7 +1,7 @@
 /***************************************************************************
  * GModelSpatialRadialProfileDMEinasto.cpp - Einasto radial profile class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Nathan Kelley-Hoskins                       *
+ *  copyright (C) 2016-2020 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -427,6 +427,8 @@ std::string GModelSpatialRadialProfileDMEinasto::print(const GChatter& chatter) 
  ***************************************************************************/
 void GModelSpatialRadialProfileDMEinasto::init_members(void)
 {
+    // Initialise model type
+    m_type = "DMEinastoProfile";
 
     // Initialise scale radius
     m_scale_radius.clear();
@@ -539,6 +541,7 @@ void GModelSpatialRadialProfileDMEinasto::copy_members(const GModelSpatialRadial
     // Copy members. We do not have to push back the members on the parameter
     // stack as this should have been done by init_members() that was called
     // before.
+    m_type          = model.m_type;   // Needed to conserve model type
     m_scale_radius  = model.m_scale_radius;
     m_scale_density = model.m_scale_density;
     m_halo_distance = model.m_halo_distance;

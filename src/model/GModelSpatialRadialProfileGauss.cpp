@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileGauss.cpp - Gaussian radial profile class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -368,6 +368,9 @@ std::string GModelSpatialRadialProfileGauss::print(const GChatter& chatter) cons
  ***************************************************************************/
 void GModelSpatialRadialProfileGauss::init_members(void)
 {
+    // Initialise model type
+    m_type = "GaussianProfile";
+
     // Initialise Gaussian sigma
     m_sigma.clear();
     m_sigma.name("Sigma");
@@ -402,6 +405,7 @@ void GModelSpatialRadialProfileGauss::copy_members(const GModelSpatialRadialProf
     // Copy members. We do not have to push back the members on the parameter
     // stack as this should have been done by init_members() that was called
     // before. Otherwise we would have sigma twice on the stack.
+    m_type  = model.m_type;   // Needed to conserve model type
     m_sigma = model.m_sigma;
 
     // Return

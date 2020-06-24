@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.hpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Christoph Deil                              *
+ *  copyright (C) 2011-2020 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,7 +75,6 @@ public:
     virtual void                      clear(void);
     virtual GModelSpatialRadialShell* clone(void) const;
     virtual std::string               classname(void) const;
-    virtual std::string               type(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
                                            const GTime&   time,
@@ -86,7 +85,6 @@ public:
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
     virtual double                    theta_max(void) const;
-    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -105,13 +103,11 @@ protected:
     void          update(void) const;
     static double f1(double x);
     static double f2(double x);
-    void          set_region(void) const;
+    virtual void  set_region(void) const;
 
     // Protected members
-    std::string              m_type;   //!< Model type
-    GModelPar                m_radius; //!< Inner shell radius (deg)
-    GModelPar                m_width;  //!< Shell thickness (deg)
-    mutable GSkyRegionCircle m_region; //!< Bounding circle
+    GModelPar m_radius; //!< Inner shell radius (deg)
+    GModelPar m_width;  //!< Shell thickness (deg)
 
     // Cached members used for pre-computations
     mutable double  m_last_radius;   //!< Last shell radius (deg)
@@ -133,20 +129,6 @@ inline
 std::string GModelSpatialRadialShell::classname(void) const
 {
     return ("GModelSpatialRadialShell");
-}
-
-
-/***********************************************************************//**
- * @brief Return model type
- *
- * @return Model type.
- *
- * Returns the type of the radial shell model.
- ***************************************************************************/
-inline
-std::string GModelSpatialRadialShell::type(void) const
-{
-    return (m_type);
 }
 
 
@@ -205,21 +187,6 @@ void GModelSpatialRadialShell::width(const double& width)
 {
     m_width.value(width);
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return boundary sky region
- *
- * @return Boundary sky region.
- *
- * Returns a sky region that fully encloses the spatial model component.
- ***************************************************************************/
-inline
-GSkyRegion* GModelSpatialRadialShell::region(void) const
-{
-    set_region();
-    return (&m_region);
 }
 
 #endif /* GMODELSPATIALRADIALSHELL_HPP */

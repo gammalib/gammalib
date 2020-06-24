@@ -91,7 +91,6 @@ public:
     virtual void           clear(void) = 0;
     virtual GModelSpatial* clone(void) const = 0;
     virtual std::string    classname(void) const = 0;
-    virtual std::string    type(void) const = 0;
     virtual GClassCode     code(void) const = 0;
     virtual double         eval(const GPhoton& photon,
                                 const bool& gradients = false) const = 0;
@@ -103,25 +102,28 @@ public:
                                     const double&  margin = 0.0) const = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
-    virtual GSkyRegion*    region(void) const = 0;
     virtual std::string    print(const GChatter& chatter = NORMAL) const = 0;
 
     // Methods
-    GModelPar&       at(const int& index);
-    const GModelPar& at(const int& index) const;
-    bool             has_par(const std::string& name) const;
-    bool             has_free_pars(void) const;
-    int              size(void) const;
-    void             autoscale(void);
-    double           flux(const GSkyRegion* reg,
-                          const GEnergy&    srcEng = GEnergy(),
-                          const GTime&      srcTime = GTime()) const;
+    std::string       type(void) const;
+    void              type(const std::string& type);
+    GModelPar&        at(const int& index);
+    const GModelPar&  at(const int& index) const;
+    bool              has_par(const std::string& name) const;
+    bool              has_free_pars(void) const;
+    int               size(void) const;
+    void              autoscale(void);
+    double            flux(const GSkyRegion* reg,
+                           const GEnergy&    srcEng = GEnergy(),
+                           const GTime&      srcTime = GTime()) const;
+    const GSkyRegion* region(void) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatial& model);
-    void free_members(void);
+    void         init_members(void);
+    void         copy_members(const GModelSpatial& model);
+    void         free_members(void);
+    virtual void set_region(void) const = 0;
 
     // Kernel for circular sky region radial integration
     class circle_int_kern_rho : public GFunction {
@@ -180,8 +182,39 @@ protected:
     };
 
     // Proteced members
+    std::string             m_type;   //!< Spatial model type
+    GSkyRegionCircle        m_region; //!< Bounding circle
     std::vector<GModelPar*> m_pars;   //!< Parameter pointers
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return Model type.
+ *
+ * Returns the type of the spatial model.
+ ***************************************************************************/
+inline
+std::string GModelSpatial::type(void) const
+{
+    return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type
+ *
+ * @param[in] type Model type.
+ *
+ * Set the type of the spatial model.
+ ***************************************************************************/
+inline
+void GModelSpatial::type(const std::string& type)
+{
+    m_type = type;
+    return;
+}
 
 
 /***********************************************************************//**
@@ -225,6 +258,21 @@ inline
 int GModelSpatial::size(void) const
 {
     return (int)m_pars.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return boundary sky region
+ *
+ * @return Boundary sky region.
+ *
+ * Returns a sky region that fully encloses the spatial model component.
+ ***************************************************************************/
+inline
+const GSkyRegion* GModelSpatial::region(void) const
+{
+    const_cast<GModelSpatial*>(this)->set_region();
+    return (&m_region);
 }
 
 #endif /* GMODELSPATIAL_HPP */

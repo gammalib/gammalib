@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.cpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -529,9 +529,6 @@ void GModelSpatialRadialGauss::init_members(void)
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);
 
-    // Initialise other members
-    m_region.clear();
-
     // Return
     return;
 }
@@ -549,9 +546,8 @@ void GModelSpatialRadialGauss::init_members(void)
 void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& model)
 {
     // Copy members
-    m_type   = model.m_type;
-    m_sigma  = model.m_sigma;
-    m_region = model.m_region;
+    m_type  = model.m_type;   // Needed to conserve model type
+    m_sigma = model.m_sigma;
 
     // Return
     return;
@@ -573,11 +569,11 @@ void GModelSpatialRadialGauss::free_members(void)
  ***************************************************************************/
 void GModelSpatialRadialGauss::set_region(void) const
 {
-    // Set sky region centre to Gaussian centre
-    m_region.centre(m_ra.value(), m_dec.value());
+    // Set sky region circle (5 times Gaussian sigma)
+    GSkyRegionCircle region(m_ra.value(), m_dec.value(), m_sigma.value() * 5.0);
 
-    // Set sky region radius to 5 times the Gaussian sigma
-    m_region.radius(m_sigma.value() * 5.0);
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialRadialGauss*>(this)->m_region = region;
 
     // Return
     return;
