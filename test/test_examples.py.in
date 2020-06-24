@@ -111,10 +111,10 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self.test_numerics, 'Test numerics')
         self.append(self.test_optimize, 'Test optimize')
         self.append(self.test_readmodel, 'Test readmodel')
-        self.append(self.test_matrix_howto, 'Test matrix howto')
-        self.append(self.test_models_howto, 'Test models howto')
-        self.append(self.test_xml_howto, 'Test XML howto')
-        self.append(self.test_xml_html_create, 'Test HTML creation')
+        self.append(self.test_howto_matrix, 'Test matrix howto')
+        self.append(self.test_howto_models, 'Test models howto')
+        self.append(self.test_howto_xml, 'Test XML howto')
+        self.append(self.test_howto_create_html, 'Test HTML creation howto')
 
         # Return
         return
@@ -197,45 +197,45 @@ class Test(gammalib.GPythonTestSuite):
         return
 
     # Test matrix howto
-    def test_matrix_howto(self):
+    def test_howto_matrix(self):
         """
         Test matrix howto
         """
         # Execute python script
-        self._execute_python('matrix_howto')
+        self._execute_python('howto_matrix')
 
         # Return
         return
 
     # Test models howto
-    def test_models_howto(self):
+    def test_howto_models(self):
         """
         Test models howto
         """
         # Execute python script
-        self._execute_python('models_howto')
+        self._execute_python('howto_models')
 
         # Return
         return
 
     # Test XML howto
-    def test_xml_howto(self):
+    def test_howto_xml(self):
         """
         Test XML howto
         """
         # Execute python script
-        self._execute_python('xml_howto')
+        self._execute_python('howto_xml')
 
         # Return
         return
 
-    # Test HTML creation
-    def test_xml_html_create(self):
+    # Test HTML creation howto
+    def test_howto_create_html(self):
         """
         Test HTML creation
         """
         # Execute python script
-        self._execute_python('xml_html_create')
+        self._execute_python('howto_create_html')
 
         # Return
         return
