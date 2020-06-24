@@ -61,7 +61,6 @@ public:
     std::string       type(void) const;
     void              type(const std::string& type);
     GModelPar&        at(const int& index);
-    const GModelPar&  at(const int& index) const;
     bool              has_par(const std::string& name) const;
     bool              has_free_pars(void) const;
     int               size(void) const;
