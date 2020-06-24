@@ -453,11 +453,11 @@ double GTime::julian_epoch(const std::string& timesys) const
  * @param[in] precision Digits of precision to show in the seconds field
  * @return Time as string in UTC time system.
  *
- * Returns time in the format YYYY-MM-DDThh:mm:ss, where YYYY is a four-digit
- * year, MM a two-digit month, DD a two-digit day of month, hh two digits of
- * hour (0 through 23), mm two digits of minutes, and ss two digits of
- * second (ISO 8601 time standard). In case that @p precision > 0 digits
- * in the second after the comma will be returned.
+ * Returns time in the format YYYY-MM-DDThh:mm:ss(.ss...), where YYYY is a
+ * four-digit year, MM a two-digit month, DD a two-digit day of month, hh two
+ * digits of hour (0 through 23), mm two digits of minutes, and ss(.ss...)
+ * two digits of second (ISO 8601 time standard). In case that
+ * @p precision > 0 digits in the second after the comma will be returned.
  *
  * The method is only valid for dates from year 1972 on.
  ***************************************************************************/
@@ -488,9 +488,30 @@ std::string GTime::utc(const int& precision) const
     int    day      = (int)mjd;
     double fraction = mjd - (double)day;
 
-    // Compute time in day. We add a margin of 0.5 to the seconds and
-    // subtract it later to avoid rounding of 59 to 60.
-    double second = fraction * gammalib::sec_in_day + 0.5;
+    // Get margin for computation. We add the margin to the seconds and
+    // subtract it later to avoid rounding to 60 seconds
+    double margin = 0.5;
+    if (precision > 0) {
+        switch (precision) {
+            case 1:
+                margin = 0.05;
+                break;
+            case 2:
+                margin = 0.005;
+                break;
+            case 3:
+                margin = 0.0005;
+                break;
+            default:
+                for (int i = 0; i < precision; ++i) {
+                    margin *= 0.1;
+                }
+                break;
+        }
+    }
+
+    // Compute time in day
+    double second = fraction * gammalib::sec_in_day + margin;
     int    hour   = (int)second / 3600;
     second       -= hour * 3600.0;
     int minute    = (int)second / 60;
@@ -499,7 +520,7 @@ std::string GTime::utc(const int& precision) const
         hour -= 24;
         day++;
     }
-    second -= 0.5;
+    second -= margin;
     if (second < 0.0) {
         second = 0.0;
     }

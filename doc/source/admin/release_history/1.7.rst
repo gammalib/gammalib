@@ -26,6 +26,8 @@ Bug fixes
   Avoid rounding errors in ``GSkyMap`` operators.
 * [`3012 <https://cta-redmine.irap.omp.eu/issues/3012>`_] -
   Exclude upper edge boundary in ``GSkyMap::contains()`` method.
+* [`2917 <https://cta-redmine.irap.omp.eu/issues/2917>`_] -
+  Fix ``GTime.utc()`` precision bug.
 * Correctly write model attributes in ``GCOMModelDRBFitting`` class.
 
 

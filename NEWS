@@ -156,6 +156,9 @@ derived classes (#2973).
 Add GGti::overlap() method to compute the temporal overlap in seconds with
 a specified time interval.
 
+Avoid rounding of seconds in case that digits after the comma are requested in
+GTime::utc() method (#2917).
+
 Add GTime.datetime() method to the Python interface to convert times from and
 to datetime.datetime objects. Add an optional precision argument to the GTime.utc()
 to set the number of digits after the comma for the seconds (#2909).

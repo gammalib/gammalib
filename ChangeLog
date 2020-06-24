@@ -22,6 +22,7 @@
         Change order of Python module import (#2961)
         Add GGti::overlap() method
         Correctly write model attributes in GCOMModelDRBFitting class
+        Fix GTime.utc() precision bug (#2917)
         Add GTime.datetime() method and add optional precision to GTime.utc() (#2909)
         Remove obsolete methods from GCTAResponseCache class (#2893)
         Allow RoI centres different from pointing direction in unbinned analysis
