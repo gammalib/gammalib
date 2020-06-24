@@ -3,6 +3,7 @@
         * Version 1.7.0 released
         ========================
 
+        Add equality and non-equality operators to GSkyRegionCircle class
         Add GModelSpatialRadialRing class (#3253)
         Fix ambiguity problem in GSkyDir::posang() and posang_deg() (#3199)
         Avoid rounding errors in GSkyMap operators (#3126)

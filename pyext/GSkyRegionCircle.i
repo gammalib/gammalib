@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GSkyRegionCircle.i - Sky region class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2019 by Michael Mayer                               *
+ *  copyright (C) 2013-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,6 +67,12 @@ public:
  * @brief GSkyRegionCircle class extension
  ***************************************************************************/
 %extend GSkyRegionCircle {
+    bool __eq__(const GSkyRegionCircle& region) const {
+        return ((*self) == region);
+    }
+    bool __ne__(const GSkyRegionCircle& region) const {
+        return ((*self) != region);
+    }
     GSkyRegionCircle copy() {
         return (*self);
     }

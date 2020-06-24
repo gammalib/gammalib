@@ -44,7 +44,10 @@ The following methods have been added:
 - GSkyDir::rotate() - Rotate sky direction (radians variant)
 - GSkyDir::GSkyDir(GVector&) - Sky direction vector constructor
 - GSkyMap::extract() - Extract section of sky map
+- GSkyRegionCircle::operator==() - Equality operator
+- GSkyRegionCircle::operator!=() - Non-equality operator 
 - GModelSpatial::flux() - Extract flux from sky region
+- GModelSpatialDiffuseCube::mc_cone() - Return MC simulation cone
 - GCTAObservation::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponse::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponseCache::remove(string&) - Remove response cache for model
@@ -58,6 +61,7 @@ The following methods have been removed:
 - none
 
 The following methods have been renamed:
+- GModelSpatialDiffuseCube::set_mc_cone() to GModelSpatialDiffuseCube::mc_cone()
 - GResponse::irf(GEvent&, GSource&, GObservation&) to GResponse::irf_spatial()
 - GLATResponse::irf(GLATEventAtom&, GSource&, GObservation&) to GLATResponse::irf_spatial_atom()
 - GLATResponse::irf(GLATEventBin&, GSource&, GObservation&) to GLATResponse::irf_spatial_bin()
@@ -161,6 +165,8 @@ None
 
 12. Sky module
 --------------
+Added equality and non-equality operators to the GSkyRegionCircle class.
+
 The position angle is now computed by GSkyDir::posang() and GSkyDir::posang_deg()
 for the coordinate system that is specified by the coordsys argument. By default
 this argument is set to "CEL", hence by default the methods return the position

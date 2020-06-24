@@ -30,6 +30,7 @@ Bug fixes
 Improvements
 ------------
 
+* Add equality and non-equality operators to ``GSkyRegionCircle`` class.
 * [`3202 <https://cta-redmine.irap.omp.eu/issues/3202>`_] -
   Replace ``GCTAResponseCache`` class by ``GResponseCache`` class.
 * [`3062 <https://cta-redmine.irap.omp.eu/issues/3062>`_] -

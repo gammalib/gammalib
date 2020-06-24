@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib sky module.
 #
-# Copyright (C) 2012-2018 Juergen Knoedlseder
+# Copyright (C) 2012-2020 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -164,7 +164,7 @@ class Test(gammalib.GPythonTestSuite):
         map[2] = 3.0
         map[3] = 4.0
         map_b  = map.copy()
-        
+
         # Addition operator
         map += map_b
         self.test_value(map[0], 2.0)
@@ -561,6 +561,30 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GSkyRegionCircle class
+    def _test_region_circle(self):
+        """
+        Test GSkyRegionCircle class
+        """
+        # Setup sky region circles
+        circle1  = gammalib.GSkyRegionCircle(0.0,   0.0, 180.0)
+        circle2  = gammalib.GSkyRegionCircle(0.0,   0.0,  90.0)
+        circle3  = gammalib.GSkyRegionCircle(10.0, 10.0, 180.0)
+        circle4  = gammalib.GSkyRegionCircle(10.0, 10.0, 180.0)
+
+        # Test equality and non-equality operators
+        self.test_assert(circle1 == circle1, 'Test equality operator (1)')
+        self.test_assert(not(circle1 == circle2), 'Test equality operator (2)')
+        self.test_assert(not(circle1 == circle3), 'Test equality operator (3)')
+        self.test_assert(not(circle1 == circle4), 'Test equality operator (4)')
+        self.test_assert(not(circle1 != circle1), 'Test non-equality operator (1)')
+        self.test_assert(circle1 != circle2, 'Test non-equality operator (2)')
+        self.test_assert(circle1 != circle3, 'Test non-equality operator (3)')
+        self.test_assert(circle1 != circle4, 'Test non-equality operator (4)')
+
+        # Return
+        return
+
     # Test class pickeling
     def _test_pickeling(self):
         """
@@ -651,6 +675,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self._test_skymap_tan, 'Test TAN projection map')
         self.append(self._test_regions_access, 'Test GSkyRegions region access')
         self.append(self._test_regions_slicing, 'Test GSkyRegions slicing')
+        self.append(self._test_region_circle, 'Test GSkyRegionCircle class')
         self.append(self._test_pickeling, 'Test sky class pickeling')
 
         # Return

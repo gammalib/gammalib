@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GSkyRegionCircle.hpp - circular sky region class           *
  * ----------------------------------------------------------------------- *
- * copyright (C) 2013-2015 by Michael Mayer                                *
+ * copyright (C) 2013-2020 by Michael Mayer                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,10 @@
  ***************************************************************************/
 class GSkyRegionCircle : public GSkyRegion {
 
+    // Operator friends
+    friend bool operator==(const GSkyRegionCircle &a, const GSkyRegionCircle &b);
+    friend bool operator!=(const GSkyRegionCircle &a, const GSkyRegionCircle &b);
+
 public:
     // Constructors and destructors
     GSkyRegionCircle(void);
@@ -96,7 +100,7 @@ protected:
 
     // Protected members
     GSkyDir	m_centre;   //!< Centre or reference point of the region
-    double 	m_radius;  	//!< Radius of circular the region [deg]
+    double 	m_radius;  	//!< Radius of circular the region (degrees)
 };
 
 

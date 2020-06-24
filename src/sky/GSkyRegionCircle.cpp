@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GSkyRegionCircle.cpp - Circular sky region class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Michael Mayer                               *
+ *  copyright (C) 2013-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -608,4 +608,34 @@ void GSkyRegionCircle::compute_solid_angle(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Equality operator
+ *
+ * @param[in] a First sky region circle.
+ * @param[in] b Second sky region circle.
+ * @return True if both sky region circles are identical.
+ *
+ * Returns true if two sky region circles and identical.
+ ***************************************************************************/
+bool operator==(const GSkyRegionCircle &a, const GSkyRegionCircle &b)
+{
+    // Return equality
+    return ((a.m_centre == b.m_centre) && (a.m_radius == b.m_radius));
+}
+
+
+/***********************************************************************//**
+ * @brief Non equality operator
+ *
+ * @param[in] a First sky region circle.
+ * @param[in] b Second sky region circle.
+ * @return True if both sky region circles are different.
+ ***************************************************************************/
+bool operator!=(const GSkyRegionCircle &a, const GSkyRegionCircle &b)
+{
+    // Return non equality
+    return ((a.m_centre != b.m_centre) || (a.m_radius != b.m_radius));
 }
