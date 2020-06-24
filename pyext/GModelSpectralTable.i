@@ -67,9 +67,7 @@ public:
 
     // Other methods
     GModelSpectralTablePar&       table_par(const int& index);
-    const GModelSpectralTablePar& table_par(const int& index) const;
     GModelSpectralTablePar&       table_par(const std::string& name);
-    const GModelSpectralTablePar& table_par(const std::string& name) const;
     double                        norm(void) const;
     void                          norm(const double& norm);
     const GEbounds&               ebounds(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralExponential.i - Exponential spectral model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 Luigi Tibaldo                                       *
+ *  copyright (C) 2018-2020 Luigi Tibaldo                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,9 +44,6 @@ public:
     explicit GModelSpectralExponential(const GModelSpectral* spec);
     GModelSpectralExponential(const GModelSpectralExponential& model);
     virtual ~GModelSpectralExponential(void);
-
-    // Operators
-    virtual GModelSpectralExponential& operator=(const GModelSpectralExponential& model);
 
     // Implemented pure virtual methods
     virtual void                       clear(void);

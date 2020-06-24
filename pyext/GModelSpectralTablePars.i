@@ -42,10 +42,6 @@ public:
     GModelSpectralTablePars(const GModelSpectralTablePars& pars);
     virtual ~GModelSpectralTablePars(void);
 
-    // Operators
-    GModelSpectralTablePar* operator[](const int& index);
-    GModelSpectralTablePar* operator[](const std::string& name);
-
     // Implemented pure virtual base class methods
     void                     clear(void);
     GModelSpectralTablePars* clone(void) const;

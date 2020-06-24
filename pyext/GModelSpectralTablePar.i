@@ -46,9 +46,6 @@ public:
     GModelSpectralTablePar(const GModelSpectralTablePar& par);
     virtual ~GModelSpectralTablePar(void);
 
-    // Operators
-    GModelSpectralTablePar& operator=(const GModelSpectralTablePar& par);
-
     // Methods
     void                    clear(void);
     GModelSpectralTablePar* clone(void) const;
@@ -56,7 +53,6 @@ public:
     int                     size(void) const;
     bool                    is_empty(void) const;
     GModelPar&              par(void);
-    const GModelPar&        par(void) const;
     const GNodeArray&       values(void) const;
     const int&              method(void) const;
     void                    method(const int& method);
