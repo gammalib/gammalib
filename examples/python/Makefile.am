@@ -1,7 +1,7 @@
 #############################################################################
-# Makefile.am for examples module                                           #
+# Makefile.am for examples/python module                                    #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2020 Juergen Knoedlseder                                    #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -19,5 +19,20 @@
 #                                                                           #
 #############################################################################
 
-# Set sub directories
-SUBDIRS = cpp python
+# Scripts to be distributes
+scripts = howto_create_html.py \
+          howto_matrix.py \
+          howto_models.py \
+          howto_xml.py
+
+# Distribute Python scripts
+EXTRA_DIST  = $(scripts)
+pythondir   = $(prefix)/share/examples/python
+python_DATA = $(scripts)
+
+# Add hook rule to make scripts executable
+install-data-hook:
+	@list='$(scripts_DATA)';\
+	for p in $$list; do \
+	  if test -f "$$p"; then chmod +x "$(DESTDIR)$(scriptsdir)/$$p"; fi; \
+	done

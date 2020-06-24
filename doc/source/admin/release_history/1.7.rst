@@ -41,6 +41,8 @@ Improvements
   Implement methods to remove models from a response cache.
   Add ``GCOMObservation::drm(GModels&)`` method.
   Add ``GCOMDri::cone_content()`` method.
+* [`2971 <https://cta-redmine.irap.omp.eu/issues/2971>`_] -
+  Install example binaries in share/examples folder.
 * [`2961 <https://cta-redmine.irap.omp.eu/issues/2961>`_] -
   Add ``GModelSpatial::flux()`` method.
 * Add ``GGti::overlap()`` method.

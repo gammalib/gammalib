@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for example/cpp module                                        #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -43,6 +43,20 @@ check_PROGRAMS = createfits \
                  numerics \
                  optimize \
                  readmodel
+
+# Set install directories
+bindir = ${prefix}/share/examples/cpp
+
+# Distribute cpp code
+EXTRA_DIST = $(code)
+codedir    = $(prefix)/share/examples/cpp
+code_DATA  = createfits.cpp \
+             createskymap.cpp \
+             createxml.cpp \
+             interpolate.cpp \
+             numerics.cpp \
+             optimize.cpp \
+             readmodel.cpp
 
 # Program definition
 createfits_SOURCES = createfits.cpp

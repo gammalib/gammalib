@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-23 June 2020
+24 June 2020
 
 
 1. Introduction
@@ -76,6 +76,9 @@ The return value of the following methods has been changed:
 The order of the Python module imports was changed since there were some issues
 with type casting with the present order. This is some side effect of how SWIG
 handles type casting among multiple modules.
+
+The example binaries as well as the cpp source code file and Python scripts are
+now installed in the share/examples folder (#2971).
 
 
 4. Application module

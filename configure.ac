@@ -1472,6 +1472,7 @@ AC_CONFIG_FILES([Makefile
                  dev/conda.recipe/meta.yaml
                  examples/Makefile
                  examples/cpp/Makefile
+                 examples/python/Makefile
                  gammalib.pc
                  testconf.sh],
                 [if test -f test/test_python.sh; then chmod +x test/test_python.sh; fi;
