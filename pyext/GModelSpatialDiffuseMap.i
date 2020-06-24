@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatialDiffuseMap.i - Spatial map model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,7 +52,6 @@ public:
     virtual void                     clear(void);
     virtual GModelSpatialDiffuseMap* clone(void) const;
     virtual std::string              classname(void) const;
-    virtual std::string              type(void) const;
     virtual double                   eval(const GPhoton& photon,
                                           const bool& gradients = false) const;
     virtual GSkyDir                  mc(const GEnergy& energy,
@@ -62,20 +61,19 @@ public:
                                              const double&  radius) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
-    virtual GSkyRegion*              region(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
 
     // Other methods
-    double           value(void) const;
-    void             value(const double& value);
-    const GFilename& filename(void) const;
-    void             load(const GFilename& filename);
-    const GSkyMap&   map(void) const;
-    void             map(const GSkyMap& map);
-    bool             normalize(void) const;
-    void             set_mc_cone(const GSkyDir& centre,
-                                 const double&  radius) const;
+    double                  value(void) const;
+    void                    value(const double& value);
+    const GFilename&        filename(void) const;
+    void                    load(const GFilename& filename);
+    const GSkyMap&          map(void) const;
+    void                    map(const GSkyMap& map);
+    bool                    normalize(void) const;
+    void                    mc_cone(const GSkyRegionCircle& cone) const;
+    const GSkyRegionCircle& mc_cone(void) const;
 };
 
 
@@ -90,9 +88,10 @@ public:
     def __getstate__(self):
         xml = gammalib.GXmlElement()
         self.write(xml)
-        state = (xml,)
+        state = (xml, self.mc_cone())
         return state
     def __setstate__(self, state):
         self.__init__(state[0])
+        self.mc_cone(state[1])
 }
 };

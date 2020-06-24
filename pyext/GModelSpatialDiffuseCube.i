@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialDiffuseCube.i - Spatial map cube model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,7 +52,6 @@ public:
     virtual void                      clear(void);
     virtual GModelSpatialDiffuseCube* clone(void) const;
     virtual std::string               classname(void) const;
-    virtual std::string               type(void) const;
     virtual double                    eval(const GPhoton& photon,
                                            const bool& gradients = false) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
@@ -62,7 +61,6 @@ public:
                                               const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
-    virtual GSkyRegion*               region(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
 
@@ -78,8 +76,8 @@ public:
     GEnergies                  energies(void);
     void                       energies(const GEnergies& energies);
     const GModelSpectralNodes& spectrum(void) const;
-    void                       set_mc_cone(const GSkyDir& centre,
-                                           const double&  radius) const;
+    void                       mc_cone(const GSkyRegionCircle& cone) const;
+    const GSkyRegionCircle&    mc_cone(void) const;
     void                       load(const GFilename& filename);
     void                       save(const GFilename& filename,
                                     const bool& clobber = false) const;
@@ -99,12 +97,13 @@ public:
     def __getstate__(self):
         fits = gammalib.GFits()
         self.write(fits)
-        state = (fits, self.filename(), self[0])
+        state = (fits, self.filename(), self[0], self.mc_cone())
         return state
     def __setstate__(self, state):
         self.__init__()
         self.read(state[0])
         self.filename(state[1])
         self[0] = state[2]
+        self.mc_cone(state[3])
 }
 };

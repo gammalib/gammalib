@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatialDiffuseMap.hpp - Spatial map model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,7 +70,6 @@ public:
     virtual void                     clear(void);
     virtual GModelSpatialDiffuseMap* clone(void) const;
     virtual std::string              classname(void) const;
-    virtual std::string              type(void) const;
     virtual double                   eval(const GPhoton& photon,
                                           const bool& gradients = false) const;
     virtual GSkyDir                  mc(const GEnergy& energy,
@@ -80,47 +79,41 @@ public:
                                              const double&  radius) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
-    virtual GSkyRegion*              region(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double           value(void) const;
-    void             value(const double& value);
-    const GFilename& filename(void) const;
-    void             load(const GFilename& filename);
-    const GSkyMap&   map(void) const;
-    void             map(const GSkyMap& map);
-    bool             normalize(void) const;
-    void             set_mc_cone(const GSkyDir& centre,
-                                 const double&  radius) const;
+    double                  value(void) const;
+    void                    value(const double& value);
+    const GFilename&        filename(void) const;
+    void                    load(const GFilename& filename);
+    const GSkyMap&          map(void) const;
+    void                    map(const GSkyMap& map);
+    bool                    normalize(void) const;
+    void                    mc_cone(const GSkyRegionCircle& cone) const;
+    const GSkyRegionCircle& mc_cone(void) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialDiffuseMap& model);
-    void free_members(void);
-    void prepare_map(void);
-    void set_region(void) const;
+    void         init_members(void);
+    void         copy_members(const GModelSpatialDiffuseMap& model);
+    void         free_members(void);
+    void         prepare_map(void);
+    virtual void set_region(void) const;
 
     // Protected members
-    std::string              m_type;          //!< Model type
-    GModelPar                m_value;         //!< Value
-    GSkyMap                  m_map;           //!< Skymap
-    GFilename                m_filename;      //!< Name of skymap
-    GSkyDir                  m_centre;        //!< Centre of bounding circle
-    double                   m_radius;        //!< Radius of bounding circle
-    bool                     m_normalize;     //!< Normalize map (default: true)
-    bool                     m_has_normalize; //!< XML has normalize attribute
-    mutable GSkyRegionCircle m_region;        //!< Bounding circle
+    GModelPar m_value;         //!< Value
+    GSkyMap   m_map;           //!< Skymap
+    GFilename m_filename;      //!< Name of skymap
+    bool      m_normalize;     //!< Normalize map (default: true)
+    bool      m_has_normalize; //!< XML has normalize attribute
 
     // MC simulation cache
-    mutable GSkyDir m_mc_centre;           //!< Centre of MC cone
-    mutable double  m_mc_radius;           //!< Radius of MC cone
-    mutable double  m_mc_one_minus_cosrad; //!< 1-cosine of radius
-    mutable double  m_mc_norm;             //!< Map normalization
-    mutable double  m_mc_max;              //!< Map maximum for MC
+    mutable GSkyRegionCircle m_mc_cone;             //!< MC cone
+    mutable double           m_mc_one_minus_cosrad; //!< 1-cosine of radius
+    mutable double           m_mc_norm;             //!< Map normalization
+    mutable double           m_mc_max;              //!< Map maximum for MC
 };
 
 
@@ -133,20 +126,6 @@ inline
 std::string GModelSpatialDiffuseMap::classname(void) const
 {
     return ("GModelSpatialDiffuseMap");
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial model type
- *
- * @return Model type.
- *
- * Returns the type of the spatial map model.
- ***************************************************************************/
-inline
-std::string GModelSpatialDiffuseMap::type(void) const
-{
-    return (m_type);
 }
 
 
@@ -238,17 +217,16 @@ bool GModelSpatialDiffuseMap::normalize(void) const
 
 
 /***********************************************************************//**
- * @brief Return boundary sky region
+ * @brief Get Monte Carlo simulation cone
  *
- * @return Boundary sky region.
+ * @return Monte Carlo simulation sky region circle.
  *
- * Returns a sky region that fully encloses the point source.
+ * Returns the sky region circle used for Monte Carlo simulations.
  ***************************************************************************/
 inline
-GSkyRegion* GModelSpatialDiffuseMap::region(void) const
+const GSkyRegionCircle& GModelSpatialDiffuseMap::mc_cone(void) const
 {
-    set_region();
-    return (&m_region);
+    return (m_mc_cone);
 }
 
 #endif /* GMODELSPATIALDIFFUSEMAP_HPP */

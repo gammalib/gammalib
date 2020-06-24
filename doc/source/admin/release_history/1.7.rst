@@ -19,7 +19,9 @@ Bug fixes
 ---------
 
 * [`3199 <https://cta-redmine.irap.omp.eu/issues/3199>`_] -
-  Fix ambiguity problem in ``GSkyDir::posang()`` and ``GSkyDir::posang_deg()``
+  Fix ambiguity problem in ``GSkyDir::posang()`` and ``GSkyDir::posang_deg()``.
+* [`3179 <https://cta-redmine.irap.omp.eu/issues/3179>`_] -
+  Fix ``GModelSpatialDiffuseCube`` pickeling issue.
 * [`3126 <https://cta-redmine.irap.omp.eu/issues/3126>`_] -
   Avoid rounding errors in ``GSkyMap`` operators.
 * [`3012 <https://cta-redmine.irap.omp.eu/issues/3012>`_] -
@@ -82,5 +84,9 @@ New features
 Clean up
 --------
 
+* [`3179 <https://cta-redmine.irap.omp.eu/issues/3179>`_] -
+  Rename ``GModelSpatialDiffuseCube::set_mc_cone()`` to ``GModelSpatialDiffuseCube::mc_cone()`` and add ``mc_cone()``getter methods.
+* [`3179 <https://cta-redmine.irap.omp.eu/issues/3179>`_] -
+  Rename ``GModelSpatialDiffuseMap::set_mc_cone()`` to ``GModelSpatialDiffuseMap::mc_cone()`` and add ``mc_cone()``getter methods.
 * [`2893 <https://cta-redmine.irap.omp.eu/issues/2893>`_] -
   Remove ``GCTAResponseCache::ndirs()``, ``GCTAResponseCache::nerecos()`` and ``GCTAResponseCache::netrues()`` methods.

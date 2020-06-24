@@ -48,6 +48,7 @@ The following methods have been added:
 - GSkyRegionCircle::operator!=() - Non-equality operator 
 - GModelSpatial::flux() - Extract flux from sky region
 - GModelSpatialDiffuseCube::mc_cone() - Return MC simulation cone
+- GModelSpatialDiffuseMap::mc_cone() - Return MC simulation cone
 - GCTAObservation::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponse::remove_response_cache(string&) - Remove response cache for model
 - GCTAResponseCache::remove(string&) - Remove response cache for model
@@ -62,6 +63,7 @@ The following methods have been removed:
 
 The following methods have been renamed:
 - GModelSpatialDiffuseCube::set_mc_cone() to GModelSpatialDiffuseCube::mc_cone()
+- GModelSpatialDiffuseMap::set_mc_cone() to GModelSpatialDiffuseMap::mc_cone()
 - GResponse::irf(GEvent&, GSource&, GObservation&) to GResponse::irf_spatial()
 - GLATResponse::irf(GLATEventAtom&, GSource&, GObservation&) to GLATResponse::irf_spatial_atom()
 - GLATResponse::irf(GLATEventBin&, GSource&, GObservation&) to GLATResponse::irf_spatial_bin()
@@ -109,6 +111,10 @@ None
 ---------------
 The GModelSpatialRadialRing class was added that implements a radial ring model
 with uniform source intensity (#3253).
+
+The set_mc_cone() methods of the GModelSpatialDiffuseCube and GModelSpatialDiffuseMap
+class were renamed to mc_cone() and mc_cone() getter methods were implemented
+for both classes. This solves a problem with pickling both classes (#3179).
 
 The method GModelSpatial::flux() was added that extracts the flux by integrating
 over a specific sky region. For the moment only circular sky regions are

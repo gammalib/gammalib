@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseCube.cpp - Spatial map cube model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -458,7 +458,7 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
         double theta = std::acos(1.0 - ran.uniform() * m_mc_one_minus_cosrad) *
                        gammalib::rad2deg;
         double phi   = 360.0 * ran.uniform();
-        dir = m_mc_centre;
+        dir = m_mc_cone.centre();
         dir.rotate_deg(phi, theta);
 
         // Get map value at simulated sky direction
@@ -761,26 +761,23 @@ GEnergies GModelSpatialDiffuseCube::energies(void)
 /***********************************************************************//**
  * @brief Set Monte Carlo simulation cone
  *
- * @param[in] centre Simulation cone centre.
- * @param[in] radius Simulation cone radius (degrees).
+ * @param[in] cone Monte Carlo simulation cone.
  *
- * Sets the simulation cone centre and radius that defines the directions
- * that will be simulated using the mc() method and pre-computes the maximum
- * intensity and the spatially integrated flux of each map within the
- * simulation cone region.
+ * Sets the simulation cone that defines the directions that will be
+ * simulated using the mc() method and pre-computes the maximum intensity
+ * and the spatially integrated flux of each map within the simulation cone
+ * region.
  ***************************************************************************/
-void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
-                                           const double&  radius) const
+void GModelSpatialDiffuseCube::mc_cone(const GSkyRegionCircle& cone) const
 {
     // Continue only if the simulation cone has changed
-    if ((centre != m_mc_centre) || (radius != m_mc_radius)) {
+    if (cone != m_mc_cone) {
 
         // Save simulation cone definition
-        m_mc_centre = centre;
-        m_mc_radius = radius;
+        m_mc_cone = cone;
 
         // Pre-compute 1 - cosine of radius
-        m_mc_one_minus_cosrad = 1.0 - std::cos(m_mc_radius*gammalib::deg2rad);
+        m_mc_one_minus_cosrad = 1.0 - std::cos(m_mc_cone.radius()*gammalib::deg2rad);
 
         // Initialise Monte Carlo cache
         m_mc_max.clear();
@@ -804,8 +801,8 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             for (int k = 0; k < npix; ++k) {
 
                 // Continue only if pixel is within MC cone
-                double distance = centre.dist_deg(m_cube.pix2dir(k));
-                if (distance <= radius) {
+                double distance = m_mc_cone.centre().dist_deg(m_cube.pix2dir(k));
+                if (distance <= m_mc_cone.radius()) {
 
                     // Loop over all maps
                     for (int i = 0; i < nmaps; ++i) {
@@ -857,7 +854,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
 
             // Log maximum intensity and total flux for debugging
             #if defined(G_DEBUG_MC_CACHE)
-            std::cout << "GModelSpatialDiffuseCube::set_mc_cone:" << std::endl;
+            std::cout << "GModelSpatialDiffuseCube::mc_cone:" << std::endl;
             std::cout << "  Maximum map intensity:" << std::endl;
             for (int i = 0; i < m_mc_max.size(); ++i) {
                 GEnergy energy;
@@ -1139,11 +1136,9 @@ void GModelSpatialDiffuseCube::init_members(void)
     m_logE.clear();
     m_ebounds.clear();
     m_loaded = false;
-    m_region.clear();
 
     // Initialise MC cache
-    m_mc_centre.clear();
-    m_mc_radius           = -1.0;    //!< Signal that initialisation is needed
+    m_mc_cone.clear();
     m_mc_one_minus_cosrad =  1.0;
     m_mc_max.clear();
     m_mc_spectrum.clear();
@@ -1161,18 +1156,16 @@ void GModelSpatialDiffuseCube::init_members(void)
 void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& model)
 {
     // Copy members
-    m_type     = model.m_type;
+    m_type     = model.m_type;   // Needed to conserve model type
     m_value    = model.m_value;
     m_filename = model.m_filename;
     m_cube     = model.m_cube;
     m_logE     = model.m_logE;
     m_ebounds  = model.m_ebounds;
     m_loaded   = model.m_loaded;
-    m_region   = model.m_region;
 
     // Copy MC cache
-    m_mc_centre           = model.m_mc_centre;
-    m_mc_radius           = model.m_mc_radius;
+    m_mc_cone             = model.m_mc_cone;
     m_mc_one_minus_cosrad = model.m_mc_one_minus_cosrad;
     m_mc_max              = model.m_mc_max;
     m_mc_spectrum         = model.m_mc_spectrum;
@@ -1326,18 +1319,16 @@ void GModelSpatialDiffuseCube::set_energy_boundaries(void)
 /***********************************************************************//**
  * @brief Update Monte Carlo cache
  *
- * Initialise the cache for Monte Carlo sampling of the map cube. The Monte
- * Carlo cache consists of a linear array that maps a value between 0 and 1
- * into the skymap pixel for all maps in the cube.
+ * Initialise the cache for Monte Carlo sampling of the map cube. See the
+ * mc_cone() for more information.
  ***************************************************************************/
 void GModelSpatialDiffuseCube::update_mc_cache(void)
 {
-    // Set centre and radius to all sky
-    GSkyDir centre;
-    double  radius = 360.0;
+    // Initialise sky region to all sky (dummy)
+    GSkyRegionCircle cone(0.0, 0.0, 360.0);
 
-    // Compute cache
-    set_mc_cone(centre, radius);
+    // Set cone
+    mc_cone(cone);
 
     // Return
     return;
@@ -1395,11 +1386,11 @@ double GModelSpatialDiffuseCube::cube_intensity(const GPhoton& photon) const
  ***************************************************************************/
 void GModelSpatialDiffuseCube::set_region(void) const
 {
-    // Set sky region centre to (0,0)
-    m_region.centre(0.0, 0.0);
+    // Set sky region circle (all sky)
+    GSkyRegionCircle region(0.0, 0.0, 180.0);
 
-    // Set sky region radius to 180 degrees (all points included)
-    m_region.radius(180.0);
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialDiffuseCube*>(this)->m_region = region;
 
     // Return
     return;

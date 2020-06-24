@@ -6,6 +6,9 @@
         Add equality and non-equality operators to GSkyRegionCircle class
         Add GModelSpatialRadialRing class (#3253)
         Fix ambiguity problem in GSkyDir::posang() and posang_deg() (#3199)
+        Fix GModelSpatialDiffuseCube pickeling issue (#3179)
+        Rename GModelSpatialDiffuseCube::set_mc_cone() to mc_cone() (#3179)
+        Rename GModelSpatialDiffuseMap::set_mc_cone() to mc_cone() (#3179)
         Avoid rounding errors in GSkyMap operators (#3126)
         Add GObservations::npred() methods (#3062)
         Exclude upper edge boundary in GSkyMap::contains() method (#3012)

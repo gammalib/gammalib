@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -878,7 +878,7 @@ GPhotons GModelSky::mc(const double& area,
             if (cube != NULL) {
 
                 // Set MC cone
-                cube->set_mc_cone(dir, radius);
+                cube->mc_cone(GSkyRegionCircle(dir, radius));
 
                 // Allocate node function to replace the spectral component
                 GModelSpectralNodes* nodes =

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatialDiffuseMap.cpp - Spatial map model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -403,7 +403,7 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
         double theta = std::acos(1.0 - ran.uniform() * m_mc_one_minus_cosrad) *
                        gammalib::rad2deg;
         double phi   = 360.0 * ran.uniform();
-        dir = m_mc_centre;
+        dir = m_mc_cone.centre();
         dir.rotate_deg(phi, theta);
 
         // Get map value at simulated sky direction. If the map value is non-
@@ -448,7 +448,7 @@ double GModelSpatialDiffuseMap::mc_norm(const GSkyDir& dir,
                                         const double&  radius) const
 {
     // Set the MC cone
-    set_mc_cone(dir, radius);
+    mc_cone(GSkyRegionCircle(dir, radius));
 
     // Retrieve normalization
     double norm = m_mc_norm * value();
@@ -475,14 +475,14 @@ bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
     bool contains = false;
 
     // Continue only if radius is positive
-    if (m_radius > 0.0) {
+    if (m_region.radius() > 0.0) {
 
         // Compute distance to centre
-        double distance = m_centre.dist_deg(dir);
+        double distance = m_region.centre().dist_deg(dir);
 
         // If distance is smaller than radius plus margin we consider
         // the position to be contained within the bounding circle
-        if (distance < m_radius + margin) {
+        if (distance < m_region.radius() + margin) {
             contains = true;
         }
 
@@ -656,26 +656,23 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Set Monte Carlo simulation cone
  *
- * @param[in] centre Simulation cone centre.
- * @param[in] radius Simulation cone radius (degrees).
+ * @param[in] cone Monte Carlo simulation cone.
  *
- * Sets the simulation cone centre and radius that defines the directions
- * that will be simulated using the mc() method and pre-computes the maximum
- * intensity and the spatially integrated flux of the map within the
- * simulation cone region.
+ * Sets the simulation cone that defines the directions that will be
+ * simulated using the mc() method and pre-computes the maximum intensity and
+ * the spatially integrated flux of the map within the simulation cone
+ * region.
  ***************************************************************************/
-void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
-                                          const double&  radius) const
+void GModelSpatialDiffuseMap::mc_cone(const GSkyRegionCircle& cone) const
 {
     // Continue only if the simulation cone has changed
-    if ((centre != m_mc_centre) || (radius != m_mc_radius)) {
+    if (cone != m_mc_cone) {
 
         // Save simulation cone definition
-        m_mc_centre = centre;
-        m_mc_radius = radius;
+        m_mc_cone = cone;
 
         // Pre-compute 1 - cosine of radius
-        m_mc_one_minus_cosrad = 1.0 - std::cos(m_mc_radius*gammalib::deg2rad);
+        m_mc_one_minus_cosrad = 1.0 - std::cos(m_mc_cone.radius()*gammalib::deg2rad);
 
         // Initialise map maximum and normalisation
         m_mc_max  = 0.0;
@@ -695,18 +692,18 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
                 // Get map flux, intensity and distance from MC cone centre
                 double flux      = m_map.flux(i);
                 double intensity = m_map(i);
-                double distance  = centre.dist_deg(m_map.pix2dir(i));
+                double distance  = m_mc_cone.centre().dist_deg(m_map.pix2dir(i));
 
                 // Add flux if positive
                 if (flux > 0.0) {
-                    if (distance <= radius) {
+                    if (distance <= m_mc_cone.radius()) {
                         sum += flux; // flux within simulation cone
                     }
                     sum_map += flux; // total flux
                 }
     
                 // Update maximum intensity
-                if (distance <= radius) {
+                if (distance <= m_mc_cone.radius()) {
                     if (intensity > m_mc_max) {
                         m_mc_max = intensity;
                     }
@@ -730,7 +727,7 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
 
             // Log maximum intensity and total flux for debugging
             #if defined(G_DEBUG_MC_CACHE)
-            std::cout << "GModelSpatialDiffuseMap::set_mc_cone:" << std::endl;
+            std::cout << "GModelSpatialDiffuseMap::mc_cone:" << std::endl;
             std::cout << "  Maximum map intensity:";
             std::cout << m_mc_max << " ph/cm2/s/sr" << std::endl;
             std::cout << "  Spatially integrated flux:" << std::endl;
@@ -774,9 +771,9 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
             result.append(" [normalized]");
         }
         result.append("\n"+gammalib::parformat("Map centre"));
-        result.append(m_centre.print());
+        result.append(m_region.centre().print());
         result.append("\n"+gammalib::parformat("Map radius"));
-        result.append(gammalib::str(m_radius)+" deg");
+        result.append(gammalib::str(m_region.radius())+" deg");
         result.append("\n"+gammalib::parformat("Number of parameters"));
         result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
@@ -860,13 +857,9 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_filename.clear();
     m_normalize     = true;
     m_has_normalize = false;
-    m_centre.clear();
-    m_radius        = 0.0;
-    m_region.clear();
 
     // Initialise MC cache
-    m_mc_centre.clear();
-    m_mc_radius           = -1.0;   //!< Signal initialisation
+    m_mc_cone.clear();
     m_mc_one_minus_cosrad =  1.0;
     m_mc_norm             =  0.0;
     m_mc_max              =  0.0;
@@ -884,19 +877,15 @@ void GModelSpatialDiffuseMap::init_members(void)
 void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
 {
     // Copy members
-    m_type          = model.m_type;
+    m_type          = model.m_type;   // Needed to conserve model type
     m_value         = model.m_value;
     m_map           = model.m_map;
     m_filename      = model.m_filename;
     m_normalize     = model.m_normalize;
     m_has_normalize = model.m_has_normalize;
-    m_centre        = model.m_centre;
-    m_radius        = model.m_radius;
-    m_region        = model.m_region;
 
     // Copy MC cache
-    m_mc_centre           = model.m_mc_centre;
-    m_mc_radius           = model.m_mc_radius;
+    m_mc_cone             = model.m_mc_cone;
     m_mc_one_minus_cosrad = model.m_mc_one_minus_cosrad;
     m_mc_norm             = model.m_mc_norm;
     m_mc_max              = model.m_mc_max;
@@ -935,8 +924,8 @@ void GModelSpatialDiffuseMap::free_members(void)
 void GModelSpatialDiffuseMap::prepare_map(void)
 {
     // Initialise centre and radius
-    m_centre.clear();
-    m_radius = 0.0;
+    m_region.clear();
+    //m_radius = 0.0;
 
     // Determine number of skymap pixels
     int npix = m_map.npix();
@@ -971,28 +960,34 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 
         // If we have a HealPix map then set radius to 180 deg
         if (m_map.projection()->code() == "HPX") {
-            m_radius = 180.0;
+            m_region = GSkyRegionCircle(0.0, 0.0, 180.0);
         }
 
         // ... otherwise compute map centre and radius
         else {
 
+            // Initialise maximum radius
+            double max_radius = 0.0;
+
             // Get map centre
-            GSkyPixel centre(m_map.nx()/2.0, m_map.ny()/2.0);
-            m_centre = m_map.pix2dir(centre);
+            GSkyPixel pixel(m_map.nx()/2.0, m_map.ny()/2.0);
+            GSkyDir   centre = m_map.pix2dir(pixel);
 
             // Determine map radius
             for (int i = 0; i < npix; ++i) {
-                double radius = m_map.inx2dir(i).dist_deg(m_centre);
-                if (radius > m_radius) {
-                    m_radius = radius;
+                double radius = m_map.inx2dir(i).dist_deg(centre);
+                if (radius > max_radius) {
+                    max_radius = radius;
                 }
             }
+
+            // Set sky region
+            m_region = GSkyRegionCircle(centre, max_radius);
 
         } // endelse: computed map centre and radius
 
         // Set simulation cone
-        set_mc_cone(m_centre, m_radius);
+        mc_cone(m_region);
 
     } // endif: there were skymap pixels
 
@@ -1006,11 +1001,13 @@ void GModelSpatialDiffuseMap::prepare_map(void)
  ***************************************************************************/
 void GModelSpatialDiffuseMap::set_region(void) const
 {
-    // Set sky region centre to bounding circle centre
-    m_region.centre(m_centre);
+    /*
+    // Set sky region circle (all sky)
+    GSkyRegionCircle region(m_centre, m_radius);
 
-    // Set sky region radius to bounding circle radius
-    m_region.radius(m_radius);
+    // Set region (circumvent const correctness)
+    const_cast<GModelSpatialDiffuseMap*>(this)->m_region = region;
+    */
 
     // Return
     return;
