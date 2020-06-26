@@ -92,8 +92,6 @@ public:
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int                        maps(void) const;
-    int                        pixels(void) const;
     double                     value(void) const;
     void                       value(const double& value);
     const GFilename&           filename(void) const;
@@ -148,34 +146,6 @@ inline
 std::string GModelSpatialDiffuseCube::classname(void) const
 {
     return ("GModelSpatialDiffuseCube");
-}
-
-
-/***********************************************************************//**
- * @brief Return number of maps in cube
- *
- * @return Number of maps in cube.
- *
- * Returns the number of maps in the cube.
- ***************************************************************************/
-inline
-int GModelSpatialDiffuseCube::maps(void) const
-{
-    return (m_cube.nmaps());
-}
-
-
-/***********************************************************************//**
- * @brief Return number of pixels in cube
- *
- * @return Number of pixels in cube.
- *
- * Returns the number of pixels in the cube.
- ***************************************************************************/
-inline
-int GModelSpatialDiffuseCube::pixels(void) const
-{
-    return (m_cube.npix());
 }
 
 
@@ -247,6 +217,7 @@ void GModelSpatialDiffuseCube::filename(const GFilename& filename)
 inline
 const GSkyMap& GModelSpatialDiffuseCube::cube(void) const
 {
+    fetch_cube();
     return (m_cube);
 }
 
@@ -261,6 +232,7 @@ const GSkyMap& GModelSpatialDiffuseCube::cube(void) const
 inline
 const GModelSpectralNodes& GModelSpatialDiffuseCube::spectrum(void) const
 {
+    fetch_cube();
     return (m_mc_spectrum);
 }
 

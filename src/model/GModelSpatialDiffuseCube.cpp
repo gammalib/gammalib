@@ -382,7 +382,7 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
     fetch_cube();
 
     // Determine number of skymap pixels
-    int npix = pixels();
+    int npix = cube().npix();
 
     // Throw an exception if there are no sky map pixels
     if (npix <= 0) {
@@ -787,8 +787,8 @@ void GModelSpatialDiffuseCube::mc_cone(const GSkyRegionCircle& cone) const
         fetch_cube();
 
         // Determine number of cube pixels and maps
-        int npix  = pixels();
-        int nmaps = maps();
+        int npix  = cube().npix();
+        int nmaps = cube().nmaps();
 
         // Continue only if there are pixels and maps
         if (npix > 0 && nmaps > 0) {

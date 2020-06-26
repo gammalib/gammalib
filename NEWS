@@ -59,7 +59,8 @@ The following methods have been added:
 - GCOMDri::cone_content() - Get DRI content within event cone 
 
 The following methods have been removed:
-- none
+- GModelSpatialDiffuseCube::maps()
+- GModelSpatialDiffuseCube::pixels()
 
 The following methods have been renamed:
 - GModelSpatialDiffuseCube::set_mc_cone() to GModelSpatialDiffuseCube::mc_cone()
@@ -119,6 +120,12 @@ for both classes. This solves a problem with pickling both classes (#3179).
 The method GModelSpatial::flux() was added that extracts the flux by integrating
 over a specific sky region. For the moment only circular sky regions are
 implemented (#2961).
+
+The GModelSpatialDiffuseCube::maps() and GModelSpatialDiffuseCube::pixels()
+methods were removed since the same information can be accessed through the
+GModelSpatialDiffuseCube::cube().nmaps() and cube().npix() methods. Also, the
+GModelSpatialDiffuseCube::cube() method now fetches the cubes so that the
+information is always reliable (#1761).
 
 The GModelSpectralTable class was added that implements a spectral table model.
 This allows fitting of arbitrary spectral models (#599).

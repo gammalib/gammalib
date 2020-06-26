@@ -31,6 +31,8 @@
         Add GSkyDir::moon() method (#1855)
         Add GSkyDir::sun(), GSkyDir::precess() and GTime::julian_epoch() methods
           (#1854)
+        Remove GModelSpatialDiffuseCube::maps() and
+          GModelSpatialDiffuseCube::pixels() methods (#1761)
         Implement INTEGRAL/SPI instrument interface (#733, #734, #735, #736,
           #740, #742, #745, #746)
         Add GModelSpectralTable class (#599)

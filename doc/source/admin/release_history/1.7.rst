@@ -94,3 +94,5 @@ Clean up
   Rename ``GModelSpatialDiffuseMap::set_mc_cone()`` to ``GModelSpatialDiffuseMap::mc_cone()`` and add ``mc_cone()``getter methods.
 * [`2893 <https://cta-redmine.irap.omp.eu/issues/2893>`_] -
   Remove ``GCTAResponseCache::ndirs()``, ``GCTAResponseCache::nerecos()`` and ``GCTAResponseCache::netrues()`` methods.
+* [`1761 <https://cta-redmine.irap.omp.eu/issues/1761>`_] -
+  Remove ``GModelSpatialDiffuseCube::maps()`` and ``GModelSpatialDiffuseCube::pixels()`` methods.

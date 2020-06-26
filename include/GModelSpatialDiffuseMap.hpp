@@ -64,7 +64,7 @@ public:
     virtual ~GModelSpatialDiffuseMap(void);
 
     // Operators
-    virtual GModelSpatialDiffuseMap& operator= (const GModelSpatialDiffuseMap& model);
+    virtual GModelSpatialDiffuseMap& operator=(const GModelSpatialDiffuseMap& model);
 
     // Implemented pure virtual methods
     virtual void                     clear(void);

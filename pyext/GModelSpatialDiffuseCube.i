@@ -65,8 +65,6 @@ public:
     virtual void                      write(GXmlElement& xml) const;
 
     // Other methods
-    int                        maps(void) const;
-    int                        pixels(void) const;
     double                     value(void) const;
     void                       value(const double& value);
     const GFilename&           filename(void) const;
