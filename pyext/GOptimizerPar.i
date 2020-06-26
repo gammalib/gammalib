@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GOptimizerPar.i - Optimizer parameter class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,8 +61,8 @@ public:
     const double& factor_value(void) const;
     const double& factor_error(void) const;
     const double& factor_gradient(void) const;
-    const double& factor_min(void) const;
-    const double& factor_max(void) const;
+    double        factor_min(void) const;
+    double        factor_max(void) const;
     const double& scale(void) const;
     void          factor_value(const double& value);
     void          factor_error(const double& error);
@@ -110,8 +110,8 @@ public:
 %pythoncode {
     def __getstate__(self):
         state = self.name(), self.unit(), \
-                self.factor_value(), self.factor_error(), self.factor_min(), \
-                self.factor_max(), self.factor_gradient(), self.scale(), \
+                self.factor_value(), self.factor_error(), self.min(), \
+                self.max(), self.factor_gradient(), self.scale(), \
                 self.is_free(), self.has_min(), self.has_max(), self.has_grad()
         return state
     def __setstate__(self, state):
@@ -126,9 +126,9 @@ public:
         else:
             self.fix()
         if state[9]:
-            self.factor_min(state[4])
+            self.min(state[4])
         if state[10]:
-            self.factor_max(state[5])
+            self.max(state[5])
         if state[11]:
             self.factor_gradient(state[6])
         self.has_grad(state[11])

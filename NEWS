@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-24 June 2020
+26 June 2020
 
 
 1. Introduction
@@ -169,7 +169,9 @@ Add GTime.julian_epoch() methods that return the Julian epoch for a given time
 
 11. Optimization module
 -----------------------
-None
+Fixed a bug in the handling of parameter boundaries for negative scale factors in
+GOptimizerPar. Before the minimum and maximum were inverted, now they are kept and
+correctly applied (#3072).
 
 
 12. Sky module

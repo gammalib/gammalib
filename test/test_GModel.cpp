@@ -449,8 +449,8 @@ void TestGModel::test_model_par(void)
     test_value(par.value(), -5.0e-16);
     test_value(par.error(), 1.0e-16);
     test_value(par.gradient(), 2.0e-16);
-    test_value(par.min(), -3.0e-16);     // Inverted due to autoscale ???
-    test_value(par.max(), -8.0e-16);     // Inverted due to autoscale ???
+    test_value(par.min(), -8.0e-16);
+    test_value(par.max(), -3.0e-16);
 
     // Exit test
     return;

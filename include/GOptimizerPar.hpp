@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GOptimizerPar.hpp - Optimizer parameter class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,8 +47,8 @@
  * - @p error gives the statistical uncertainty in the parameter value
  * - @p gradient gives the gradient of a function with respect to the
  *      parameter
- * - @p min gives the minimum value that the parameter value can take
- * - @p max gives the maximum value that the parameter value can take
+ * - @p min gives the minimum value that the parameter can take
+ * - @p max gives the maximum value that the parameter can take
  *
  * The parameter attributes are set and retrieved using the value(),
  * error(), gradient(), min() and max() methods, respectively. Furthermore,
@@ -79,8 +79,6 @@
  *     value    = m_factor_value    * m_scale
  *     error    = m_factor_error    * m_scale
  *     gradient = m_factor_gradient * m_scale
- *     min      = m_factor_min      * m_scale
- *     max      = m_factor_max      * m_scale
  *
  * The @p factor and @p scale terms can be set and retrieved using the
  * factor_value(), factor_error(), factor_gradient(), factor_min(),
@@ -117,8 +115,8 @@ public:
     const double& factor_value(void) const;
     const double& factor_error(void) const;
     const double& factor_gradient(void) const;
-    const double& factor_min(void) const;
-    const double& factor_max(void) const;
+    double        factor_min(void) const;
+    double        factor_max(void) const;
     const double& scale(void) const;
     void          factor_value(const double& value);
     void          factor_error(const double& error);
@@ -166,8 +164,8 @@ protected:
     std::string    m_unit;            //!< Parameter unit
     double         m_factor_value;    //!< Parameter value factor
     double         m_factor_error;    //!< Uncertainty in parameter value factor
-    double         m_factor_min;      //!< Parameter minimum factor
-    double         m_factor_max;      //!< Parameter maximum factor
+    double         m_min_value;       //!< Parameter minimum value
+    double         m_max_value;       //!< Parameter maximum value
     mutable double m_factor_gradient; //!< Function gradient factor
     double         m_scale;           //!< Parameter scaling (true = factor * scale)
     bool           m_free;            //!< Parameter is free
@@ -244,13 +242,12 @@ double GOptimizerPar::gradient(void) const
  *
  * @return Parameter minimum boundary.
  *
- * Returns the parameter minimum boundary. The parameter minimum boundary is
- * computed by multiplying the minimum boundary factor by the scale factor.
+ * Returns the parameter minimum boundary.
  ***************************************************************************/
 inline
 double GOptimizerPar::min(void) const
 {
-    return (m_factor_min * m_scale);
+    return (m_min_value);
 }
 
 
@@ -259,13 +256,12 @@ double GOptimizerPar::min(void) const
  *
  * @return Parameter maximum boundary.
  *
- * Returns the parameter maximum boundary. The parameter maximum boundary is
- * computed by multiplying the maximum boundary factor by the scale factor.
+ * Returns the parameter maximum boundary.
  ***************************************************************************/
 inline
 double GOptimizerPar::max(void) const
 {
-    return (m_factor_max * m_scale);
+    return (m_max_value);
 }
 
 
@@ -312,30 +308,19 @@ const double& GOptimizerPar::factor_gradient(void) const
 
 
 /***********************************************************************//**
- * @brief Return parameter minimum boundary factor
+ * @brief Set minimum and maximum parameter boundaries
  *
- * @return Parameter minimum boundary factor.
+ * @param[in] min Parameter minimum.
+ * @param[in] max Parameter maximum.
  *
- * Returns the parameter minimum boundary factor.
+ * Sets the minimum and maximum parameter boundaries.
  ***************************************************************************/
 inline
-const double& GOptimizerPar::factor_min(void) const
+void GOptimizerPar::range(const double& min, const double& max)
 {
-    return (m_factor_min);
-}
-
-
-/***********************************************************************//**
- * @brief Return parameter maximum boundary factor
- *
- * @return Parameter maximum boundary factor.
- *
- * Returns the parameter maximum boundary factor.
- ***************************************************************************/
-inline
-const double& GOptimizerPar::factor_max(void) const
-{
-    return (m_factor_max);
+    this->min(min);
+    this->max(max);
+    return;
 }
 
 

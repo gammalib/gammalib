@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GOptimizerPar.cpp - Optimizer parameter class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT     "GOptimizerPar::GOptimizerPar(std::string&, double&,"\
                                                                   " double&)"
+#define G_MIN                                   "GOptimizerPar::min(double&)"
+#define G_MAX                                   "GOptimizerPar::max(double&)"
 #define G_FACTOR_VALUE                 "GOptimizerPar::factor_value(double&)"
 #define G_FACTOR_MIN                     "GOptimizerPar::factor_min(double&)"
 #define G_FACTOR_MAX                     "GOptimizerPar::factor_max(double&)"
@@ -302,16 +304,28 @@ void GOptimizerPar::gradient(const double& gradient)
 /***********************************************************************//**
  * @brief Set minimum parameter boundary
  *
- * @param[in] min Parameter minimum.
+ * @param[in] min Minimum parameter boundary.
  *
- * Sets the minimum parameter boundary. The method stores the minimum
- * boundary factor which is obtained by dividing @p min by the scale factor.
+ * @exception GException::invalid_argument
+ *            Minimum parameter boundary is larger than the parameter value
+ *
+ * Sets the minimum parameter boundary.
  ***************************************************************************/
 void GOptimizerPar::min(const double& min)
 {
-    // Set minimum boundary factor. The GOptimizerPar class makes sure that
-    // m_scale is never 0, so no test is needed here
-    factor_min(min / m_scale);
+    // Check if minimum is larger than value
+    if (min > value()) {
+        std::string msg = "Specified minimum parameter value "+
+                          gammalib::str(min)+" is larger than the parameter "
+                          "value "+gammalib::str(value())+".";
+        throw GException::invalid_argument(G_MIN, msg);
+    }
+
+    // Store minimum
+    m_min_value = min;
+
+    // Flag that minimum was set
+    m_has_min = true;
 
     // Return
     return;
@@ -321,16 +335,28 @@ void GOptimizerPar::min(const double& min)
 /***********************************************************************//**
  * @brief Set maximum parameter boundary
  *
- * @param[in] max Parameter maximum.
+ * @param[in] max Maximum parameter boundary.
  *
- * Sets the maximum parameter boundary. The method stores the maximum
- * boundary factor which is obtained by dividing @p max by the scale factor.
+ * @exception GException::invalid_argument
+ *            Maximum parameter boundary is smaller than the parameter value
+ *
+ * Sets the maximum parameter boundary.
  ***************************************************************************/
 void GOptimizerPar::max(const double& max)
 {
-    // Set maximum boundary factor. The GOptimizerPar class makes sure that
-    // m_scale is never 0, so no test is needed here
-    factor_max(max / m_scale);
+    // Check if maximum is smaller than value
+    if (max < value()) {
+        std::string msg = "Specified maximum parameter value "+
+                          gammalib::str(max)+" is smaller than the parameter "
+                          "value "+gammalib::str(value())+".";
+        throw GException::invalid_argument(G_MAX, msg);
+    }
+
+    // Store maximum
+    m_max_value = max;
+
+    // Flag that maximum was set
+    m_has_max = true;
 
     // Return
     return;
@@ -338,22 +364,50 @@ void GOptimizerPar::max(const double& max)
 
 
 /***********************************************************************//**
- * @brief Set minimum and maximum parameter boundaries
+ * @brief Return minimum parameter boundary factor
  *
- * @param[in] min Parameter minimum.
- * @param[in] max Parameter maximum.
+ * @return Minimum parameter boundary factor.
  *
- * Sets the minimum and maximum parameter boundaries. The method calls the
- * min() and max() methods to set the boundaries.
+ * Returns the minimum parameter boundary factor.
+ *
+ * For positive scale factors the minimum boundary factor is the minimum
+ * boundary value divided by the scale factor, for negative scale factors
+ * it is the maximum boundary value divided by the scale factor.
  ***************************************************************************/
-void GOptimizerPar::range(const double& min, const double& max)
+double GOptimizerPar::factor_min(void) const
 {
-    // Set minimum and maximum
-    this->min(min);
-    this->max(max);
+    // Determine the minimum boundary factor. If the scale factor is negative
+    // the maximum boundary value divided by the scale factor is returned,
+    // otherwise the minimum boundary value divided by the scale factor is
+    // returned
+    double min = (m_scale < 0) ? m_max_value/m_scale : m_min_value/m_scale;
 
-    // Return
-    return;
+    // Return minimum boundary factor
+    return (min);
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum parameter boundary factor
+ *
+ * @return Maximum parameter boundary factor.
+ *
+ * Returns the maximum parameter boundary factor.
+ *
+ * For positive scale factors the maximum boundary factor is the maximum
+ * boundary value divided by the scale factor, for negative scale factors
+ * it is the minimum boundary value divided by the scale factor.
+ ***************************************************************************/
+double GOptimizerPar::factor_max(void) const
+{
+    // Determine the minimum boundary factor. If the scale factor is negative
+    // the minimum boundary value divided by the scale factor is returned,
+    // otherwise the maximum boundary value divided by the scale factor is
+    // returned
+    double max = (m_scale < 0) ? m_min_value/m_scale : m_max_value/m_scale;
+
+    // Return maximum boundary factor
+    return (max);
 }
 
 
@@ -372,19 +426,19 @@ void GOptimizerPar::factor_value(const double& value)
 {
     // If there is a minimum boundary and if value is below this boundary
     // then throw an exception
-    if (m_has_min && value < m_factor_min) {
+    if (m_has_min && value < factor_min()) {
         std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is smaller than the minimum boundary "+
-                          gammalib::str(m_factor_min)+".";
+                          gammalib::str(factor_min())+".";
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
     // If there is a maximum boundary and if value is above this boundary
     // then throw an exception
-    if (m_has_max && value > m_factor_max) {
+    if (m_has_max && value > factor_max()) {
         std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is larger than the maximum boundary "+
-                          gammalib::str(m_factor_max)+".";
+                          gammalib::str(factor_max())+".";
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
@@ -397,12 +451,12 @@ void GOptimizerPar::factor_value(const double& value)
 
 
 /***********************************************************************//**
- * @brief Set parameter minimum factor
+ * @brief Set minimum parameter boundary factor
  *
- * @param[in] min Minimum factor.
+ * @param[in] min Minimum parameter boundary factor.
  *
  * @exception GException::invalid_argument
- *            Parameter @p min larger than value factor.
+ *            Minimum parameter boundary factor larger than value factor.
  *
  * Sets the minimum boundary factor of the parameter. The method makes
  * sure that the minimum is not larger than the actual value factor.
@@ -418,11 +472,16 @@ void GOptimizerPar::factor_min(const double& min)
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
-    // Assign minimum factor
-    m_factor_min = min;
-
-    // Flag that minimum was set
-    m_has_min = true;
+    // For negative scale factors, the minimum is stored as the maximum
+    // value after multiplication with the scale factor. For positive
+    // scale factors it is stored as minimum value after multiplication
+    // with the scale factor.
+    if (m_scale < 0) {
+        this->max(min * m_scale);
+    }
+    else {
+        this->min(min * m_scale);
+    }
 
     // Return
     return;
@@ -430,12 +489,12 @@ void GOptimizerPar::factor_min(const double& min)
 
 
 /***********************************************************************//**
- * @brief Set parameter maximum factor
+ * @brief Set maximum parameter boundary factor
  *
- * @param[in] max Maximum factor.
+ * @param[in] max Maximum parameter boundary factor.
  *
  * @exception GException::invalid_argument
- *            Parameter @p max smaller than value factor.
+ *            Maximum parameter boundary factor smaller than value factor.
  *
  * Sets the maximum boundary factor of the parameter. The method makes
  * sure that the maximum is not smaller than the actual value factor.
@@ -451,11 +510,16 @@ void GOptimizerPar::factor_max(const double& max)
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
-    // Assign maximum
-    m_factor_max = max;
-
-    // Flag that maximum was set
-    m_has_max = true;
+    // For negative scale factors, the maximum is stored as the minimum
+    // value after multiplication with the scale factor. For positive
+    // scale factors it is stored as maximum value after multiplication
+    // with the scale factor.
+    if (m_scale < 0) {
+        this->min(max * m_scale);
+    }
+    else {
+        this->max(max * m_scale);
+    }
 
     // Return
     return;
@@ -463,13 +527,13 @@ void GOptimizerPar::factor_max(const double& max)
 
 
 /***********************************************************************//**
- * @brief Set parameter minimum and maximum factors
+ * @brief Set minimum and maximum parameter boundary factors
  *
- * @param[in] min Minimum factor.
- * @param[in] max Maximum factor.
+ * @param[in] min Minimum parameter boundary factor.
+ * @param[in] max Maximum parameter boundary factor.
  *
- * Sets the minimum and maximum boundary factors. The method calls the
- * factor_min() and factor_max() methods which perform validity checking
+ * Sets the minimum and maximum parameter boundary factors. The method calls
+ * the factor_min() and factor_max() methods which perform validity checking
  * of the arguments.
  ***************************************************************************/
 void GOptimizerPar::factor_range(const double& min, const double& max)
@@ -494,12 +558,6 @@ void GOptimizerPar::factor_range(const double& min, const double& max)
  * Sets the scale factor of the parameter. All parameter attributes are
  * rescaled accordingly.
  *
- * Special care is taken for value boundaries, that need swaping if the scale
- * factor changes its sign. In case of sign change the following logic applies:
- * - if minimum and maximum boundaries are set they are swapped
- * - if only a minimum boundary exists it will be replaced by a maximum boundary
- * - if only a maximum boundary exists it will be replaced by a minimum boundary
- *
  * An exception is thrown if a scale factor of 0 is specified.
  ***************************************************************************/
 void GOptimizerPar::scale(const double& scale)
@@ -521,33 +579,6 @@ void GOptimizerPar::scale(const double& scale)
     m_factor_value    *= rescale;
     m_factor_error    *= rescale;
     m_factor_gradient *= rescale;
-    if (m_has_min) {
-        m_factor_min *= rescale;
-    }
-    if (m_has_max) {
-        m_factor_max *= rescale;
-    }
-
-    // Takes care of boundaries in case of sign change
-    if (rescale < 0.0) {
-        if (m_has_min && m_has_max) {
-            double swap  = m_factor_min;
-            m_factor_min = m_factor_max;
-            m_factor_max = swap;
-        }
-        else if (m_has_min) {
-            m_factor_max = m_factor_min;
-            m_has_max     = true;
-            m_factor_min = 0.0;
-            m_has_min     = false;
-        }
-        else if (m_has_max) {
-            m_factor_min = m_factor_max;
-            m_has_min     = true;
-            m_factor_max = 0.0;
-            m_has_max     = false;
-        }
-    }
 
     // Return
     return;
@@ -561,12 +592,6 @@ void GOptimizerPar::scale(const double& scale)
  * of the parameter. The method will also adjust the error factor and
  * gradient factor, as well as the minimum and maximum factors if they
  * exist.
- *
- * Special care is taken for value boundaries, that need swaping if the scale
- * factor changes its sign. In case of sign change the following logic applies:
- * - if minimum and maximum boundaries are set they are swapped
- * - if only a minimum boundary exists it will be replaced by a maximum boundary
- * - if only a maximum boundary exists it will be replaced by a minimum boundary
  *
  * The method does nothing if the actual value factor is zero.
  ***************************************************************************/
@@ -588,33 +613,6 @@ void GOptimizerPar::autoscale(void)
         m_factor_value    *= renormalization;
         m_factor_error    *= renormalization;
         m_factor_gradient /= renormalization;
-        if (m_has_min) {
-            m_factor_min *= renormalization;
-        }
-        if (m_has_max) {
-            m_factor_max *= renormalization;
-        }
-
-        // Takes care of boundaries in case of sign change
-        if (renormalization < 0.0) {
-            if (m_has_min && m_has_max) {
-                double swap  = m_factor_min;
-                m_factor_min = m_factor_max;
-                m_factor_max = swap;
-            }
-            else if (m_has_min) {
-                m_factor_max = m_factor_min;
-                m_has_max     = true;
-                m_factor_min = 0.0;
-                m_has_min     = false;
-            }
-            else if (m_has_max) {
-                m_factor_min = m_factor_max;
-                m_has_min     = true;
-                m_factor_max = 0.0;
-                m_has_max     = false;
-            }
-        }
 
     } // endif: value was non-zero
 
@@ -705,8 +703,8 @@ void GOptimizerPar::init_members(void)
     m_factor_value    = 0.0;
     m_factor_error    = 0.0;
     m_factor_gradient = 0.0;
-    m_factor_min      = 0.0;
-    m_factor_max      = 0.0;
+    m_min_value       = 0.0;
+    m_max_value       = 0.0;
     m_scale           = 1.0;
     m_free            = true;
     m_has_min         = false;
@@ -731,8 +729,8 @@ void GOptimizerPar::copy_members(const GOptimizerPar& par)
     m_factor_value    = par.m_factor_value;
     m_factor_error    = par.m_factor_error;
     m_factor_gradient = par.m_factor_gradient;
-    m_factor_min      = par.m_factor_min;
-    m_factor_max      = par.m_factor_max;
+    m_min_value       = par.m_min_value;
+    m_max_value       = par.m_max_value;
     m_scale           = par.m_scale;
     m_free            = par.m_free;
     m_has_min         = par.m_has_min;

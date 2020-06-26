@@ -66,6 +66,8 @@ New features
 
 * [`3253 <https://cta-redmine.irap.omp.eu/issues/3253>`_] -
   Add ``GModelSpatialRadialRing`` class.
+* [`3072 <https://cta-redmine.irap.omp.eu/issues/3072>`_] -
+  Fix inverted min-max boundary in ``GOptimizePar`` for negative scale factors.
 * [`2961 <https://cta-redmine.irap.omp.eu/issues/2961>`_] -
   Change order of Python module import.
 * [`733 <https://cta-redmine.irap.omp.eu/issues/733>`_]

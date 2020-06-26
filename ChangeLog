@@ -1,4 +1,4 @@
-2020-06-24
+2020-06-26
 
         * Version 1.7.0 released
         ========================
@@ -10,6 +10,7 @@
         Rename GModelSpatialDiffuseCube::set_mc_cone() to mc_cone() (#3179)
         Rename GModelSpatialDiffuseMap::set_mc_cone() to mc_cone() (#3179)
         Avoid rounding errors in GSkyMap operators (#3126)
+        Fix inverted min-max boundary in GOptimizePar for negative scale factors (#3072)
         Add GObservations::npred() methods (#3062)
         Exclude upper edge boundary in GSkyMap::contains() method (#3012)
         Add GSkyMap::extract() methods (#2990)
