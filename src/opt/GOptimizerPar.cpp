@@ -426,7 +426,7 @@ void GOptimizerPar::factor_value(const double& value)
 {
     // If there is a minimum boundary and if value is below this boundary
     // then throw an exception
-    if (m_has_min && value < factor_min()) {
+    if (m_has_min && (value*m_scale < min())) {
         std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is smaller than the minimum boundary "+
                           gammalib::str(factor_min())+".";
@@ -435,7 +435,7 @@ void GOptimizerPar::factor_value(const double& value)
 
     // If there is a maximum boundary and if value is above this boundary
     // then throw an exception
-    if (m_has_max && value > factor_max()) {
+    if (m_has_max && (value*m_scale > max())) {
         std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is larger than the maximum boundary "+
                           gammalib::str(factor_max())+".";
