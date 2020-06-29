@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-26 June 2020
+29 June 2020
 
 
 1. Introduction
@@ -46,6 +46,10 @@ The following methods have been added:
 - GSkyMap::extract() - Extract section of sky map
 - GSkyRegionCircle::operator==() - Equality operator
 - GSkyRegionCircle::operator!=() - Non-equality operator 
+- GModelPar::has_factor_min() - Test if parameter has factor minimum
+- GModelPar::has_factor_max() - Test if parameter has factor maximum
+- GModelPar::remove_factor_min - Remove factor minimum
+- GModelPar::remove_factor_max - Remove factor maximum
 - GModelSpatial::flux() - Extract flux from sky region
 - GModelSpatialDiffuseCube::mc_cone() - Return MC simulation cone
 - GModelSpatialDiffuseMap::mc_cone() - Return MC simulation cone

@@ -270,7 +270,7 @@ void GModelPar::read(const GXmlElement& xml)
         factor_min(gammalib::todouble(arg));
     }
     else {
-        remove_min();
+        remove_factor_min();
     }
 
     // Get max
@@ -279,7 +279,7 @@ void GModelPar::read(const GXmlElement& xml)
         factor_max(gammalib::todouble(arg));
     }
     else {
-        remove_max();
+        remove_factor_max();
     }
 
     // Get free
@@ -293,7 +293,7 @@ void GModelPar::read(const GXmlElement& xml)
 
     // If there is a minimum and maximum, make sure that the maximum is
     // not smaller than the minimum
-    if (m_has_min && m_has_max) {
+    if (has_min() && has_max()) {
         if (min() > max()) {
             std::string msg = "The model parameter \""+m_name+
                               "\" in the XML document has a minimum boundary "+
@@ -305,7 +305,7 @@ void GModelPar::read(const GXmlElement& xml)
     }
 
     // If there is a minimum, make sure that the value is not below it
-    if (m_has_min && value() < min()) {
+    if (has_min() && (value() < min())) {
         std::string msg = "The model parameter \""+m_name+
                           "\" in the XML document has a value "+
                             gammalib::str(value())+
@@ -315,7 +315,7 @@ void GModelPar::read(const GXmlElement& xml)
     }
 
     // If there is a maximum, make sure that the value is not above it
-    if (m_has_max && value() > max()) {
+    if (has_max() && (value() > max())) {
         std::string msg = "The model parameter \""+m_name+
                           "\" in the XML document has a value "+
                             gammalib::str(value())+
@@ -365,12 +365,12 @@ void GModelPar::write(GXmlElement& xml) const
     xml.attribute("scale", gammalib::str(m_scale));
 
     // Set minimum
-    if (has_min()) {
+    if (has_factor_min()) {
         xml.attribute("min", gammalib::str(factor_min()));
     }
 
     // Set maximum
-    if (has_max()) {
+    if (has_factor_max()) {
         xml.attribute("max", gammalib::str(factor_max()));
     }
 

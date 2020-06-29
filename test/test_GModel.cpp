@@ -252,37 +252,31 @@ TestGModel* TestGModel::clone(void) const
 void TestGModel::test_model_par(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelPar par;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelPar par1;
+    test_value(par1.value(), 0.0);
+    test_value(par1.error(), 0.0);
+    test_value(par1.gradient(), 0.0);
+    test_value(par1.min(), 0.0);
+    test_value(par1.max(), 0.0);
+    test_assert(!par1.has_min(), "Parameter shall have no minimum.");
+    test_assert(!par1.has_max(), "Parameter shall have no maximum.");
+    test_assert(!par1.has_range(), "Parameter shall have no range.");
     
-    // Test parameter constructor (value version)
-    test_try("Test parameter constructor");
-    try {
-        GModelPar par("Test parameter", 47.0);
-        test_value(par.value(), 47.0);
-        test_value(par.error(), 0.0);
-        test_value(par.gradient(), 0.0);
-        test_value(par.min(), 0.0);
-        test_value(par.max(), 0.0);
-        test_assert(!par.has_min(), "Parameter shall have no minimum.");
-        test_assert(!par.has_max(), "Parameter shall have no maximum.");
-        test_assert(!par.has_range(), "Parameter shall have no range.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test parameter value constructor (value version)
+    GModelPar par2("Test parameter", 47.0);
+    test_value(par2.value(), 47.0);
+    test_value(par2.error(), 0.0);
+    test_value(par2.gradient(), 0.0);
+    test_value(par2.min(), 0.0);
+    test_value(par2.max(), 0.0);
+    test_assert(!par2.has_min(), "Parameter shall have no minimum.");
+    test_assert(!par2.has_max(), "Parameter shall have no maximum.");
+    test_assert(!par2.has_range(), "Parameter shall have no range.");
     
     // Test invalid parameter constructor (factor & scale version)
     test_try("Test invalid parameter constructor");
     try {
-        GModelPar par("Test parameter", 1.0, 0.0);
+        GModelPar par3("Test parameter", 1.0, 0.0);
         test_try_failure("Parameter constructor with zero scale factor"
                          " shall throw an exception.");
     }
@@ -294,57 +288,50 @@ void TestGModel::test_model_par(void)
     }
 
     // Test valid parameter constructor (factor & scale version)
-    test_try("Test invalid parameter constructor");
-    try {
-        GModelPar par("Test parameter", 47.01, 2.0);
-        par.factor_error(2.003);
-        par.factor_gradient(51.0);
-        par.unit("MeV");
-        par.free();
-        test_value(par.value(), 94.02);
-        test_value(par.error(), 4.006);
-        test_value(par.gradient(), 25.5);
-        test_value(par.factor_value(), 47.01);
-        test_value(par.factor_error(), 2.003);
-        test_value(par.factor_gradient(), 51.0);
-        test_value(par.scale(), 2.0);
-        test_assert(par.name() == "Test parameter", "Parameter name");
-        test_assert(par.unit() == "MeV", "Parameter unit");
-        test_assert(par.is_free(), "Parameter freezing");
-        test_assert(par.print() == 
-                    "  Test parameter ...........: 94.02 +/- 4.006 MeV"
-                    " (free,scale=2)", "Parameter printing");
-        GModelPar par2("Another test parameter", 3.14, 3.0);
-        test_value(par2.value(), 9.42);
-        test_value(par2.factor_value(), 3.14);
-        test_value(par2.scale(), 3.0);
-        test_assert(par2.name() == "Another test parameter", "Parameter name");
-        test_assert(par2.is_free(), "Parameter freezing");
-        test_assert(par2.print() == 
-                    "  Another test parameter ...: 9.42 +/- 0  (free,scale=3)",
-                    "Parameter printing");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelPar par4("Test parameter", 47.01, 2.0);
+    par4.factor_error(2.003);
+    par4.factor_gradient(51.0);
+    par4.unit("MeV");
+    par4.free();
+    test_value(par4.value(), 94.02);
+    test_value(par4.error(), 4.006);
+    test_value(par4.gradient(), 25.5);
+    test_value(par4.factor_value(), 47.01);
+    test_value(par4.factor_error(), 2.003);
+    test_value(par4.factor_gradient(), 51.0);
+    test_value(par4.scale(), 2.0);
+    test_assert(par4.name() == "Test parameter", "Parameter name");
+    test_assert(par4.unit() == "MeV", "Parameter unit");
+    test_assert(par4.is_free(), "Parameter freezing");
+    test_assert(par4.print() ==
+                "  Test parameter ...........: 94.02 +/- 4.006 MeV"
+                " (free,scale=2)", "Parameter printing");
+    GModelPar par5("Another test parameter", 3.14, 3.0);
+    test_value(par5.value(), 9.42);
+    test_value(par5.factor_value(), 3.14);
+    test_value(par5.scale(), 3.0);
+    test_assert(par5.name() == "Another test parameter", "Parameter name");
+    test_assert(par5.is_free(), "Parameter freezing");
+    test_assert(par5.print() ==
+                "  Another test parameter ...: 9.42 +/- 0  (free,scale=3)",
+                "Parameter printing");
 
     // Test boundary handling 1
     test_try("Test boundary handling (1/4)");
     try {
-        GModelPar par("Test boundary", 1.0);
-        test_assert(!par.has_min(), "Parameter shall have no minimum.");
-        test_assert(!par.has_max(), "Parameter shall have no maximum.");
-        test_assert(!par.has_range(), "Parameter shall have no range.");
-        par.min(0.5);
-        test_assert(par.has_min(), "Parameter shall have minimum.");
-        test_assert(!par.has_max(), "Parameter shall have no maximum.");
-        test_assert(!par.has_range(), "Parameter shall have no range.");
-        par.max(2.0);
-        test_assert(par.has_min(), "Parameter shall have minimum.");
-        test_assert(par.has_max(), "Parameter shall have maximum.");
-        test_assert(par.has_range(), "Parameter shall have range.");
-        par.value(5.0);
+        GModelPar par6("Test boundary", 1.0);
+        test_assert(!par6.has_min(), "Parameter shall have no minimum.");
+        test_assert(!par6.has_max(), "Parameter shall have no maximum.");
+        test_assert(!par6.has_range(), "Parameter shall have no range.");
+        par6.min(0.5);
+        test_assert(par6.has_min(), "Parameter shall have minimum.");
+        test_assert(!par6.has_max(), "Parameter shall have no maximum.");
+        test_assert(!par6.has_range(), "Parameter shall have no range.");
+        par6.max(2.0);
+        test_assert(par6.has_min(), "Parameter shall have minimum.");
+        test_assert(par6.has_max(), "Parameter shall have maximum.");
+        test_assert(par6.has_range(), "Parameter shall have range.");
+        par6.value(5.0);
         test_try_failure("Setting a parameter outside boundaries shall"
                          " generate an exception.");
     }
@@ -358,8 +345,8 @@ void TestGModel::test_model_par(void)
     // Test boundary handling 2/4
     test_try("Test boundary handling (2/4)");
     try {
-        GModelPar par("Test boundary", 1.0);
-        par.min(2.0);
+        GModelPar par7("Test boundary", 1.0);
+        par7.min(2.0);
         test_try_failure("Setting the minimum boundary that is larger"
                          " than the parameter value shall generate an"
                          " exception.");
@@ -374,8 +361,8 @@ void TestGModel::test_model_par(void)
     // Test boundary handling 3/4
     test_try("Test boundary handling (3/4)");
     try {
-        GModelPar par("Test boundary", 1.0);
-        par.max(0.5);
+        GModelPar par8("Test boundary", 1.0);
+        par8.max(0.5);
         test_try_failure("Setting the maximum boundary that is smaller"
                          " than the parameter value shall generate an"
                          " exception.");
@@ -390,8 +377,8 @@ void TestGModel::test_model_par(void)
     // Test boundary handling 4/4
     test_try("Test boundary handling (4/4)");
     try {
-        GModelPar par("Test boundary", 1.0);
-        par.range(2.0, 0.5);
+        GModelPar par9("Test boundary", 1.0);
+        par9.range(2.0, 0.5);
         test_try_failure("Setting the minimum boundary that is larger"
                          " than the maximum boundary shall generate an"
                          " exception.");
@@ -402,6 +389,47 @@ void TestGModel::test_model_par(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
+
+    // Test boundary handling
+    GModelPar par10("Test parameter", 3.0, 3.0);
+    par10.min(1.0);
+    test_assert(par10.has_min(), "1Parameter shall have minimum.");
+    test_assert(!par10.has_max(), "1Parameter shall have no maximum.");
+    test_assert(par10.has_factor_min(), "1Parameter shall have factor minimum.");
+    test_assert(!par10.has_factor_max(), "1Parameter shall have no factor maximum.");
+    test_assert(!par10.has_range(), "1Parameter shall have no range.");
+    test_value(par10.min(), 1.0);
+    test_value(par10.factor_min(), 1.0/3.0);
+    test_value(par10.factor_max(), 0.0);
+    par10.scale(-1.0);
+    test_assert(par10.has_min(), "2Parameter shall have minimum.");
+    test_assert(!par10.has_max(), "2Parameter shall have no maximum.");
+    test_assert(!par10.has_factor_min(), "2Parameter shall have factor minimum.");
+    test_assert(par10.has_factor_max(), "2Parameter shall have no factor maximum.");
+    test_assert(!par10.has_range(), "2Parameter shall have no range.");
+    test_value(par10.min(), 1.0);
+    test_value(par10.factor_min(),  0.0);
+    test_value(par10.factor_max(), -1.0);
+    //
+    par10.remove_min();
+    par10.max(10.0);
+    test_assert(!par10.has_min(), "3Parameter shall have no minimum.");
+    test_assert(par10.has_max(), "3Parameter shall have maximum.");
+    test_assert(par10.has_factor_min(), "3Parameter shall have no factor minimum.");
+    test_assert(!par10.has_factor_max(), "3Parameter shall have factor maximum.");
+    test_assert(!par10.has_range(), "3Parameter shall have no range.");
+    test_value(par10.max(), 10.0);
+    test_value(par10.factor_min(), -10.0);
+    test_value(par10.factor_max(),   0.0);
+    par10.scale(3.0);
+    test_assert(!par10.has_min(), "4Parameter shall have no minimum.");
+    test_assert(par10.has_max(), "4Parameter shall have maximum.");
+    test_assert(!par10.has_factor_min(), "4Parameter shall have no factor minimum.");
+    test_assert(par10.has_factor_max(), "4Parameter shall have factor maximum.");
+    test_assert(!par10.has_range(), "4Parameter shall have no range.");
+    test_value(par10.max(), 10.0);
+    test_value(par10.factor_min(),      0.0);
+    test_value(par10.factor_max(), 10.0/3.0);
 
     // Test autoscaling
     GModelPar par("Test parameter", 3.0);

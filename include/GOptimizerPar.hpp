@@ -79,6 +79,10 @@
  *     value    = m_factor_value    * m_scale
  *     error    = m_factor_error    * m_scale
  *     gradient = m_factor_gradient * m_scale
+ *     min      = m_factor_min      * m_scale for m_scale > 0
+ *                m_factor_max      * m_scale otherwise
+ *     max      = m_factor_max      * m_scale for m_scale > 0
+ *                m_factor_min      * m_scale otherwise
  *
  * The @p factor and @p scale terms can be set and retrieved using the
  * factor_value(), factor_error(), factor_gradient(), factor_min(),
@@ -115,8 +119,8 @@ public:
     const double& factor_value(void) const;
     const double& factor_error(void) const;
     const double& factor_gradient(void) const;
-    double        factor_min(void) const;
-    double        factor_max(void) const;
+    const double& factor_min(void) const;
+    const double& factor_max(void) const;
     const double& scale(void) const;
     void          factor_value(const double& value);
     void          factor_error(const double& error);
@@ -129,9 +133,13 @@ public:
     // Boundary methods
     bool has_min(void) const;
     bool has_max(void) const;
+    bool has_factor_min(void) const;
+    bool has_factor_max(void) const;
     bool has_range(void) const;
     void remove_min(void);
     void remove_max(void);
+    void remove_factor_min(void);
+    void remove_factor_max(void);
     void remove_range(void);
 
     // Property methods
@@ -162,15 +170,15 @@ protected:
     // Proteced data members
     std::string    m_name;            //!< Parameter name
     std::string    m_unit;            //!< Parameter unit
-    double         m_factor_value;    //!< Parameter value factor
-    double         m_factor_error;    //!< Uncertainty in parameter value factor
-    double         m_min_value;       //!< Parameter minimum value
-    double         m_max_value;       //!< Parameter maximum value
-    mutable double m_factor_gradient; //!< Function gradient factor
+    double         m_factor_value;    //!< Parameter factor value
+    double         m_factor_error;    //!< Uncertainty in parameter factor value
+    double         m_factor_min;      //!< Parameter minimum factor value
+    double         m_factor_max;      //!< Parameter maximum factor value
+    mutable double m_factor_gradient; //!< Function factor gradient
     double         m_scale;           //!< Parameter scaling (true = factor * scale)
     bool           m_free;            //!< Parameter is free
-    bool           m_has_min;         //!< Parameter has minimum boundary
-    bool           m_has_max;         //!< Parameter has maximum boundary
+    bool           m_has_factor_min;  //!< Parameter has minimum factor boundary
+    bool           m_has_factor_max;  //!< Parameter has maximum factor boundary
     bool           m_has_grad;        //!< Parameter has analytic gradient
 };
 
@@ -247,7 +255,7 @@ double GOptimizerPar::gradient(void) const
 inline
 double GOptimizerPar::min(void) const
 {
-    return (m_min_value);
+    return ((m_scale < 0) ? m_factor_max * m_scale : m_factor_min * m_scale);
 }
 
 
@@ -261,16 +269,16 @@ double GOptimizerPar::min(void) const
 inline
 double GOptimizerPar::max(void) const
 {
-    return (m_max_value);
+    return ((m_scale < 0) ? m_factor_min * m_scale : m_factor_max * m_scale);
 }
 
 
 /***********************************************************************//**
- * @brief Return parameter value factor
+ * @brief Return parameter factor value
  *
- * @return Parameter value factor.
+ * @return Parameter factor value.
  *
- * Returns the parameter value factor.
+ * Returns the parameter factor value.
  ***************************************************************************/
 inline
 const double& GOptimizerPar::factor_value(void) const
@@ -280,11 +288,11 @@ const double& GOptimizerPar::factor_value(void) const
 
 
 /***********************************************************************//**
- * @brief Return parameter error factor
+ * @brief Return parameter factor error
  *
- * @return Parameter error factor.
+ * @return Parameter factor error.
  *
- * Returns the parameter error factor.
+ * Returns the parameter factor error.
  ***************************************************************************/
 inline
 const double& GOptimizerPar::factor_error(void) const
@@ -294,16 +302,44 @@ const double& GOptimizerPar::factor_error(void) const
 
 
 /***********************************************************************//**
- * @brief Return parameter gradient factor
+ * @brief Return parameter factor gradient
  *
- * @return Parameter gradient factor.
+ * @return Parameter factor gradient.
  *
- * Returns the parameter gradient factor.
+ * Returns the parameter factor gradient.
  ***************************************************************************/
 inline
 const double& GOptimizerPar::factor_gradient(void) const
 {
     return (m_factor_gradient);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter minimum factor boundary
+ *
+ * @return Minimum parameter factor boundary.
+ *
+ * Returns the minimum parameter factor boundary.
+ ***************************************************************************/
+inline
+const double& GOptimizerPar::factor_min(void) const
+{
+    return (m_factor_min);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter maximum factor boundary
+ *
+ * @return Maximum parameter factor boundary.
+ *
+ * Returns the maximum parameter factor boundary.
+ ***************************************************************************/
+inline
+const double& GOptimizerPar::factor_max(void) const
+{
+    return (m_factor_max);
 }
 
 
@@ -339,11 +375,11 @@ const double& GOptimizerPar::scale(void) const
 
 
 /***********************************************************************//**
- * @brief Set parameter error factor
+ * @brief Set parameter factor error
  *
- * @param[in] error Parameter error factor.
+ * @param[in] error Parameter factor error.
  *
- * Sets the parameter error factor.
+ * Sets the parameter factor error.
  ***************************************************************************/
 inline
 void GOptimizerPar::factor_error(const double& error)
@@ -354,11 +390,11 @@ void GOptimizerPar::factor_error(const double& error)
 
 
 /***********************************************************************//**
- * @brief Set parameter gradient factor
+ * @brief Set parameter factor gradient
  *
- * @param[in] gradient Parameter gradient factor.
+ * @param[in] gradient Parameter factor gradient.
  *
- * Sets the parameter gradient factor.
+ * Sets the parameter factor gradient.
  ***************************************************************************/
 inline
 void GOptimizerPar::factor_gradient(const double& gradient) const
@@ -378,7 +414,7 @@ void GOptimizerPar::factor_gradient(const double& gradient) const
 inline
 bool GOptimizerPar::has_min(void) const
 {
-    return m_has_min;
+    return ((m_scale < 0) ? m_has_factor_max : m_has_factor_min);
 }
 
 
@@ -392,7 +428,35 @@ bool GOptimizerPar::has_min(void) const
 inline
 bool GOptimizerPar::has_max(void) const
 {
-    return m_has_max;
+    return ((m_scale < 0) ? m_has_factor_min : m_has_factor_max);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if parameter has minimum factor boundary
+ *
+ * @return True if parameter has minimum factor boundary, false otherwise.
+ *
+ * Signals if the parameter has a minimum factor boundary.
+ ***************************************************************************/
+inline
+bool GOptimizerPar::has_factor_min(void) const
+{
+    return m_has_factor_min;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if parameter has maximum factor boundary
+ *
+ * @return True if parameter has maximum factor boundary, false otherwise.
+ *
+ * Signals if the parameter has a maximum factor boundary.
+ ***************************************************************************/
+inline
+bool GOptimizerPar::has_factor_max(void) const
+{
+    return m_has_factor_max;
 }
 
 
@@ -407,7 +471,7 @@ bool GOptimizerPar::has_max(void) const
 inline
 bool GOptimizerPar::has_range(void) const
 {
-    return (m_has_min && m_has_max);
+    return (m_has_factor_min && m_has_factor_max);
 }
 
 
@@ -419,7 +483,14 @@ bool GOptimizerPar::has_range(void) const
 inline
 void GOptimizerPar::remove_min(void)
 {
-    m_has_min = false;
+    if (m_scale < 0) {
+        m_has_factor_max = false;
+        m_factor_max     = 0.0;
+    }
+    else {
+        m_has_factor_min = false;
+        m_factor_min     = 0.0;
+    }
     return;
 }
 
@@ -432,7 +503,42 @@ void GOptimizerPar::remove_min(void)
 inline
 void GOptimizerPar::remove_max(void)
 {
-    m_has_max = false;
+    if (m_scale < 0) {
+        m_has_factor_min = false;
+        m_factor_min     = 0.0;
+    }
+    else {
+        m_has_factor_max = false;
+        m_factor_max     = 0.0;
+    }
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Removes minimum factor boundary
+ *
+ * Removes minimum factor boundary from the parameter.
+ ***************************************************************************/
+inline
+void GOptimizerPar::remove_factor_min(void)
+{
+    m_has_factor_min = false;
+    m_factor_min     = 0.0;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Removes maximum factor boundary
+ *
+ * Removes maximum factor boundary from the parameter.
+ ***************************************************************************/
+inline
+void GOptimizerPar::remove_factor_max(void)
+{
+    m_has_factor_max = false;
+    m_factor_max     = 0.0;
     return;
 }
 
@@ -445,8 +551,8 @@ void GOptimizerPar::remove_max(void)
 inline
 void GOptimizerPar::remove_range(void)
 {
-    m_has_min = false;
-    m_has_max = false;
+    m_has_factor_min = false;
+    m_has_factor_max = false;
     return;
 }
 

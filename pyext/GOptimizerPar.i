@@ -61,8 +61,8 @@ public:
     const double& factor_value(void) const;
     const double& factor_error(void) const;
     const double& factor_gradient(void) const;
-    double        factor_min(void) const;
-    double        factor_max(void) const;
+    const double& factor_min(void) const;
+    const double& factor_max(void) const;
     const double& scale(void) const;
     void          factor_value(const double& value);
     void          factor_error(const double& error);
@@ -75,9 +75,13 @@ public:
     // Boundary methods
     bool has_min(void) const;
     bool has_max(void) const;
+    bool has_factor_min(void) const;
+    bool has_factor_max(void) const;
     bool has_range(void) const;
     void remove_min(void);
     void remove_max(void);
+    void remove_factor_min(void);
+    void remove_factor_max(void);
     void remove_range(void);
 
     // Property methods

@@ -321,11 +321,17 @@ void GOptimizerPar::min(const double& min)
         throw GException::invalid_argument(G_MIN, msg);
     }
 
-    // Store minimum
-    m_min_value = min;
+    // If scale is negative then set maximum factor boundary
+    if (m_scale < 0) {
+        m_factor_max     = min / m_scale;
+        m_has_factor_max = true;
+    }
 
-    // Flag that minimum was set
-    m_has_min = true;
+    // ... otherwise set minimum factor boundary
+    else {
+        m_factor_min     = min / m_scale;
+        m_has_factor_min = true;
+    }
 
     // Return
     return;
@@ -352,62 +358,20 @@ void GOptimizerPar::max(const double& max)
         throw GException::invalid_argument(G_MAX, msg);
     }
 
-    // Store maximum
-    m_max_value = max;
+    // If scale is negative then set minimum factor boundary
+    if (m_scale < 0) {
+        m_factor_min     = max / m_scale;
+        m_has_factor_min = true;
+    }
 
-    // Flag that maximum was set
-    m_has_max = true;
+    // ... otherwise set maximum factor boundary
+    else {
+        m_factor_max     = max / m_scale;
+        m_has_factor_max = true;
+    }
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return minimum parameter boundary factor
- *
- * @return Minimum parameter boundary factor.
- *
- * Returns the minimum parameter boundary factor.
- *
- * For positive scale factors the minimum boundary factor is the minimum
- * boundary value divided by the scale factor, for negative scale factors
- * it is the maximum boundary value divided by the scale factor.
- ***************************************************************************/
-double GOptimizerPar::factor_min(void) const
-{
-    // Determine the minimum boundary factor. If the scale factor is negative
-    // the maximum boundary value divided by the scale factor is returned,
-    // otherwise the minimum boundary value divided by the scale factor is
-    // returned
-    double min = (m_scale < 0) ? m_max_value/m_scale : m_min_value/m_scale;
-
-    // Return minimum boundary factor
-    return (min);
-}
-
-
-/***********************************************************************//**
- * @brief Return maximum parameter boundary factor
- *
- * @return Maximum parameter boundary factor.
- *
- * Returns the maximum parameter boundary factor.
- *
- * For positive scale factors the maximum boundary factor is the maximum
- * boundary value divided by the scale factor, for negative scale factors
- * it is the minimum boundary value divided by the scale factor.
- ***************************************************************************/
-double GOptimizerPar::factor_max(void) const
-{
-    // Determine the minimum boundary factor. If the scale factor is negative
-    // the minimum boundary value divided by the scale factor is returned,
-    // otherwise the maximum boundary value divided by the scale factor is
-    // returned
-    double max = (m_scale < 0) ? m_min_value/m_scale : m_max_value/m_scale;
-
-    // Return maximum boundary factor
-    return (max);
 }
 
 
@@ -426,7 +390,7 @@ void GOptimizerPar::factor_value(const double& value)
 {
     // If there is a minimum boundary and if value is below this boundary
     // then throw an exception
-    if (m_has_min && (value*m_scale < min())) {
+    if (has_factor_min() && (value < factor_min())) {
         std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is smaller than the minimum boundary "+
                           gammalib::str(factor_min())+".";
@@ -435,7 +399,7 @@ void GOptimizerPar::factor_value(const double& value)
 
     // If there is a maximum boundary and if value is above this boundary
     // then throw an exception
-    if (m_has_max && (value*m_scale > max())) {
+    if (has_factor_max() && (value > factor_max())) {
         std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is larger than the maximum boundary "+
                           gammalib::str(factor_max())+".";
@@ -472,16 +436,9 @@ void GOptimizerPar::factor_min(const double& min)
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
-    // For negative scale factors, the minimum is stored as the maximum
-    // value after multiplication with the scale factor. For positive
-    // scale factors it is stored as minimum value after multiplication
-    // with the scale factor.
-    if (m_scale < 0) {
-        this->max(min * m_scale);
-    }
-    else {
-        this->min(min * m_scale);
-    }
+    // Set value and flag
+    m_factor_min     = min;
+    m_has_factor_min = true;
 
     // Return
     return;
@@ -510,16 +467,9 @@ void GOptimizerPar::factor_max(const double& max)
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
-    // For negative scale factors, the maximum is stored as the minimum
-    // value after multiplication with the scale factor. For positive
-    // scale factors it is stored as maximum value after multiplication
-    // with the scale factor.
-    if (m_scale < 0) {
-        this->min(max * m_scale);
-    }
-    else {
-        this->max(max * m_scale);
-    }
+    // Set value and flag
+    m_factor_max     = max;
+    m_has_factor_max = true;
 
     // Return
     return;
@@ -578,7 +528,25 @@ void GOptimizerPar::scale(const double& scale)
     // Set values, error, gradient, min and max
     m_factor_value    *= rescale;
     m_factor_error    *= rescale;
-    m_factor_gradient *= rescale;
+    m_factor_gradient /= rescale;
+    m_factor_min      *= rescale;
+    m_factor_max      *= rescale;
+
+    // If re-scaling changes sign then swap minimum and maximum boundary
+    if (rescale < 0.0) {
+
+        // Store maximum in swap space
+        bool   bswap     = m_has_factor_max;
+        double dswap     = m_factor_max;
+
+        // Set maximum
+        m_has_factor_max = m_has_factor_min;
+        m_factor_max     = m_factor_min;
+
+        // Set minimum
+        m_has_factor_min = bswap;
+        m_factor_min     = dswap;
+    }
 
     // Return
     return;
@@ -603,16 +571,8 @@ void GOptimizerPar::autoscale(void)
     // Continue only if the value is non-zero
     if (value != 0.0) {
 
-        // Get the renormalization factor
-        double renormalization = m_scale / value;
-
-        // Set the new scale factor to the actual value
-        m_scale = value;
-
-        // Renormalize values, error, gradient, min and max
-        m_factor_value    *= renormalization;
-        m_factor_error    *= renormalization;
-        m_factor_gradient /= renormalization;
+        // Re-scale to value
+        this->scale(value);
 
     } // endif: value was non-zero
 
@@ -647,13 +607,13 @@ std::string GOptimizerPar::print(const GChatter& chatter) const
         }
 
         // Append parameter limites if they exist
-        if (m_has_min && m_has_max) {
+        if (has_min() && has_max()) {
             result.append(" ["+gammalib::str(min()) + ","+gammalib::str(max())+"]");
         }
-        else if (m_has_min) {
+        else if (has_min()) {
             result.append(" ["+gammalib::str(min()) + ",infty[");
         }
-        else if (m_has_max) {
+        else if (has_max()) {
             result.append(" ]-infty,"+gammalib::str(max())+"]");
         }
 
@@ -703,12 +663,12 @@ void GOptimizerPar::init_members(void)
     m_factor_value    = 0.0;
     m_factor_error    = 0.0;
     m_factor_gradient = 0.0;
-    m_min_value       = 0.0;
-    m_max_value       = 0.0;
+    m_factor_min      = 0.0;
+    m_factor_max      = 0.0;
     m_scale           = 1.0;
     m_free            = true;
-    m_has_min         = false;
-    m_has_max         = false;
+    m_has_factor_min  = false;
+    m_has_factor_max  = false;
     m_has_grad        = false;
 
     // Return
@@ -729,12 +689,12 @@ void GOptimizerPar::copy_members(const GOptimizerPar& par)
     m_factor_value    = par.m_factor_value;
     m_factor_error    = par.m_factor_error;
     m_factor_gradient = par.m_factor_gradient;
-    m_min_value       = par.m_min_value;
-    m_max_value       = par.m_max_value;
+    m_factor_min      = par.m_factor_min;
+    m_factor_max      = par.m_factor_max;
     m_scale           = par.m_scale;
     m_free            = par.m_free;
-    m_has_min         = par.m_has_min;
-    m_has_max         = par.m_has_max;
+    m_has_factor_min  = par.m_has_factor_min;
+    m_has_factor_max  = par.m_has_factor_max;
     m_has_grad        = par.m_has_grad;
 
     // Return
