@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2263,6 +2263,122 @@ void GSkyMap::stack_maps(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky region circle that encloses the sky map
+ *
+ * @return Enclosing sky region circle.
+ *
+ * Returns a sky region circle that encloses the sky map.
+ *
+ * For a sky map in HealPix projection the method returns a region circle
+ * that encloses the full sky, with a centre at Right Ascension and
+ * Declination of 0 and a radius of 180 degrees.
+ *
+ * For a sky map in World Coordinate projection the method returns a region
+ * circle that is centred on the central pixel of the sky map (i.e. the
+ * pixel with indices \f$(n_x/2,n_y/2)\f$, where \f$n_x\f$ and \f$n_y\f$ are
+ * the number of pixels in the X- and Y-drection) and a radius that is
+ * determined from the maximum radial distance of all pixels with respect
+ * to the central pixel.
+ ***************************************************************************/
+GSkyRegionCircle GSkyMap::region_circle(void) const
+{
+    // Initialise sky region circle
+    GSkyRegionCircle region;
+
+    // If the sky map is in HealPix projection then set radius to 180 deg
+    if (projection()->code() == "HPX") {
+        region = GSkyRegionCircle(0.0, 0.0, 180.0);
+    }
+
+    // ... otherwise sky map is in World Coordinate Projection
+    else {
+
+        // Initialise maximum radius
+        double max_radius = 0.0;
+        int    max_index  =  -1;
+
+        // Determine map centre
+        GSkyPixel pixel(nx()/2.0, ny()/2.0);
+        GSkyDir   centre = pix2dir(pixel);
+
+        // Determine maximum pixel distance with respect to map centre
+        for (int i = 0; i < npix(); ++i) {
+            double radius = inx2dir(i).dist_deg(centre);
+            if (radius > max_radius) {
+                max_radius = radius;
+                max_index  = i;
+            }
+        }
+
+        // Consider edges of pixel with maximum distance
+        if (max_index != -1) {
+        
+            // Set upper pixel edge just beyond the upper boundary since the
+            // upper boundary is excluded
+            const double up = 0.4999999;
+
+            // Get pixel with maximum distance
+            GSkyPixel pixel = inx2pix(max_index);
+
+            // Get boundaries of pixel
+            GSkyDir boundary1 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5));
+            GSkyDir boundary2 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5));
+            GSkyDir boundary3 = pix2dir(GSkyPixel(pixel.x()+up,  pixel.y()-0.5));
+            GSkyDir boundary4 = pix2dir(GSkyPixel(pixel.x()+up,  pixel.y()));
+            GSkyDir boundary5 = pix2dir(GSkyPixel(pixel.x()+up,  pixel.y()+up));
+            GSkyDir boundary6 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()+up));
+            GSkyDir boundary7 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+up));
+            GSkyDir boundary8 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()));
+
+            // Get radii
+            double radius1 = boundary1.dist_deg(centre);
+            double radius2 = boundary2.dist_deg(centre);
+            double radius3 = boundary3.dist_deg(centre);
+            double radius4 = boundary4.dist_deg(centre);
+            double radius5 = boundary5.dist_deg(centre);
+            double radius6 = boundary6.dist_deg(centre);
+            double radius7 = boundary7.dist_deg(centre);
+            double radius8 = boundary8.dist_deg(centre);
+
+            // Determine maximum radius
+            if (radius1 > max_radius) {
+                max_radius = radius1;
+            }
+            if (radius2 > max_radius) {
+                max_radius = radius2;
+            }
+            if (radius3 > max_radius) {
+                max_radius = radius3;
+            }
+            if (radius4 > max_radius) {
+                max_radius = radius4;
+            }
+            if (radius5 > max_radius) {
+                max_radius = radius5;
+            }
+            if (radius6 > max_radius) {
+                max_radius = radius6;
+            }
+            if (radius7 > max_radius) {
+                max_radius = radius7;
+            }
+            if (radius8 > max_radius) {
+                max_radius = radius8;
+            }
+
+        } // endif: considered edges of pixel
+
+        // Set sky region
+        region = GSkyRegionCircle(centre, max_radius);
+
+    } // endelse: sky map was in World Coordinate Projection
+
+    // Return region
+    return region;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSkyMap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -182,6 +182,7 @@ public:
                                     const int& starty, const int& stopy) const;
     GSkyMap                 extract(const GSkyRegions& inclusions) const;
     void                    stack_maps(void);
+    GSkyRegionCircle        region_circle(void) const;
     void                    load(const GFilename& filename);
     void                    save(const GFilename& filename,
                                  const bool&      clobber = false) const;

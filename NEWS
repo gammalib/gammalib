@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-29 June 2020
+30 June 2020
 
 
 1. Introduction
@@ -44,6 +44,7 @@ The following methods have been added:
 - GSkyDir::rotate() - Rotate sky direction (radians variant)
 - GSkyDir::GSkyDir(GVector&) - Sky direction vector constructor
 - GSkyMap::extract() - Extract section of sky map
+- GSkyMap::region_circle() - Get bounding region circle of sky map
 - GSkyRegionCircle::operator==() - Equality operator
 - GSkyRegionCircle::operator!=() - Non-equality operator 
 - GModelPar::has_factor_min() - Test if parameter has factor minimum
@@ -193,6 +194,9 @@ The position angle is now computed by GSkyDir::posang() and GSkyDir::posang_deg(
 for the coordinate system that is specified by the coordsys argument. By default
 this argument is set to "CEL", hence by default the methods return the position
 angle with respect to celestial coordinates (#3199).
+
+Added GSkyMap::region_circle() method to compute a bounding region circle that
+encloses all sky map pixels (#3145).
 
 The GSkyMap operators used the sky map value access operator that bi-linearly
 interpolates sky map values even for maps with identical definition. This could
