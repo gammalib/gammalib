@@ -563,8 +563,10 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
         // a fixed energy sampling for an instance of GModelSpectralNodes.
         // This is analogous to to the GCTAModelIrfBackground::mc method.
         // We make sure that only non-negative nodes get appended.
-        GEbounds spectral_ebounds =
-            GEbounds(m_n_mc_energies, ebounds.emin(), ebounds.emax(), true);
+        GEbounds spectral_ebounds(m_n_mc_energies,
+                                  ebounds.emin(),
+                                  ebounds.emax(),
+                                  "LOG");
         GModelSpectralNodes spectral;
         for (int i = 0; i < spectral_ebounds.size(); ++i) {
             GEnergy energy    = spectral_ebounds.elogmean(i);

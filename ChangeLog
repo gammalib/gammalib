@@ -27,6 +27,7 @@
         Fix GTime.utc() precision bug (#2917)
         Add GTime.datetime() method and add optional precision to GTime.utc() (#2909)
         Remove obsolete methods from GCTAResponseCache class (#2893)
+        Replace log flag by string in GEbounds class (#2881)
         Allow RoI centres different from pointing direction in unbinned analysis
           (#2695)
         Add GSkyDir::moon() method (#1855)

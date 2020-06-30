@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012-2019 Juergen Knoedlseder
+# Copyright (C) 2012-2020 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -361,7 +361,7 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Setup energies container
         ebounds = gammalib.GEbounds(10, gammalib.GEnergy(1.0,  'MeV'),
-                                        gammalib.GEnergy(11.0, 'MeV'), False)
+                                        gammalib.GEnergy(11.0, 'MeV'), 'LIN')
 
         # Test ebounds[start:end]
         self.test_value(len(ebounds[3:5]), 2)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GXspec.hpp - Test Xspec module                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -88,7 +88,7 @@ void TestGXspec::test_GPha(void)
     test_value(pha1.ancrfile(), "", "Check if empty PHA has empty ARF");
 
     // Test energy boundary constructor, filling and accessing
-    GEbounds ebds2(9, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"), false);
+    GEbounds ebds2(9, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"), "LIN");
     GPha     pha2(ebds2);
     pha2.exposure(1234.5);
     pha2.backfile("background");

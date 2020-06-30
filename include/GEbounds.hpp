@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEbounds.hpp - Energy boundaries class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,8 +71,11 @@ public:
     explicit GEbounds(const GEnergies& energies);
     GEbounds(const GEbounds& ebds);
     GEbounds(const GEnergy& emin, const GEnergy& emax);
-    GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
-             const bool& log = true);
+    GEbounds(const int&         num,
+             const GEnergy&     emin,
+             const GEnergy&     emax,
+             const std::string& method = "LOG",
+             const double&      gamma  = 1.0);
     virtual ~GEbounds(void);
 
     // Operators
@@ -92,8 +95,11 @@ public:
     void           reserve(const int& num);
     void           extend(const GEbounds& ebds);
     void           set(const GEnergies& energies);
-    void           set_lin(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void           set_log(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void           set(const int&         num,
+                       const GEnergy&     emin,
+                       const GEnergy&     emax,
+                       const std::string& method = "LOG",
+                       const double&      gamma  = 1.0);
     void           load(const GFilename& filename);
     void           save(const GFilename& filename,
                         const bool& clobber = false,
@@ -118,7 +124,6 @@ public:
     bool           contains(const GEnergy& emin, const GEnergy& emax) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
 
-
 protected:
     // Protected methods
     void init_members(void);
@@ -126,6 +131,11 @@ protected:
     void free_members(void);
     void set_attributes(void);
     void insert_eng(const int& index, const GEnergy& emin, const GEnergy& emax);
+    void set_lin(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void set_log(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void set_pow(const int& num, const GEnergy& emin, const GEnergy& emax,
+                 const double& gamma);
+
 
     // Protected data area
     int      m_num;         //!< Number of energy boundaries

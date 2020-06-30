@@ -201,7 +201,7 @@ void TestGObservation::test_ebounds(void)
 
     // Check linear boundaries
     ebds.clear();
-    ebds.set_lin(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"));
+    ebds.set(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"), "LIN");
     test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
     test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
@@ -213,7 +213,19 @@ void TestGObservation::test_ebounds(void)
 
     // Check logarithmic boundaries
     ebds.clear();
-    ebds.set_log(2, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.set(2, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"), "LOG");
+    test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
+    test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
+    test_value(ebds.emin(1).MeV(), 10.0, 1.0e-10, "Bin 1 minimum energy should be 10.");
+    test_value(ebds.emax(0).MeV(), 10.0, 1.0e-10, "Bin 0 maximum energy should be 10.");
+    test_value(ebds.emax(1).MeV(), 100.0, 1.0e-10, "Bin 1 maximum energy should be 100.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 100.0, 1.0e-10, "Maximum energy should be 100.");
+
+    // Check power-law boundaries
+    ebds.clear();
+    ebds.set(2, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"), "POW", 1.0);
     test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
     test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
@@ -238,7 +250,7 @@ void TestGObservation::test_ebounds(void)
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
     // Check emean, elogmean and ewidth methods
-    ebds.set_log(1, GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    ebds.set(1, GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"), "LOG");
     test_value(ebds.emean(0).MeV(), 5.5, 1.0e-10, "Mean energy should be 5.5.");
     test_value(ebds.elogmean(0).MeV(), 3.16227766017, 1.0e-10, "Log mean energy should be 3.16227766017.");
     test_value(ebds.ewidth(0).MeV(), 9.0, 1.0e-10, "Energy width should be 9.0.");
@@ -259,7 +271,7 @@ void TestGObservation::test_ebounds(void)
     // Check constructing of linear invalid energy boundaries
     test_try("Test constructing of linear invalid energy boundaries");
     try {
-        GEbounds bad(10, GEnergy(100.0, "MeV"), GEnergy(10.0, "MeV"), false);
+        GEbounds bad(10, GEnergy(100.0, "MeV"), GEnergy(10.0, "MeV"), "LIN");
         test_try_failure("Constructing of linear invalid energy boundaries "
                          "shall throw an exception.");
     }
@@ -273,7 +285,7 @@ void TestGObservation::test_ebounds(void)
     // Check constructing of logarithmic invalid energy boundaries
     test_try("Test constructing of logarithmic invalid energy boundaries");
     try {
-        GEbounds bad(10, GEnergy(100.0, "MeV"), GEnergy(10.0, "MeV"), true);
+        GEbounds bad(10, GEnergy(100.0, "MeV"), GEnergy(10.0, "MeV"), "LOG");
         test_try_failure("Constructing of logarithmic invalid energy "
                          "boundaries shall throw an exception.");
     }
@@ -287,7 +299,7 @@ void TestGObservation::test_ebounds(void)
     // Check constructing of logarithmic invalid energy boundaries
     test_try("Test constructing of logarithmic invalid energy boundaries");
     try {
-        GEbounds bad(10, GEnergy(0.0, "MeV"), GEnergy(10.0, "MeV"), true);
+        GEbounds bad(10, GEnergy(0.0, "MeV"), GEnergy(10.0, "MeV"), "LOG");
         test_try_failure("Constructing of logarithmic invalid energy "
                          "boundaries shall throw an exception.");
     }
@@ -301,7 +313,7 @@ void TestGObservation::test_ebounds(void)
     // Check constructing of logarithmic invalid energy boundaries
     test_try("Test constructing of logarithmic invalid energy boundaries");
     try {
-        GEbounds bad(10, GEnergy(10.0, "MeV"), GEnergy(0.0, "MeV"), true);
+        GEbounds bad(10, GEnergy(10.0, "MeV"), GEnergy(0.0, "MeV"), "LOG");
         test_try_failure("Constructing of logarithmic invalid energy "
                          "boundaries shall throw an exception.");
     }
@@ -1370,7 +1382,7 @@ void TestGObservation::test_energies(void)
     test_value(energies[2].MeV(), 100.0, 1.0e-10, "Energy 2 should be 100 MeV.");
 
     // Check energy boundary set method
-    GEbounds ebds1(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"), false);
+    GEbounds ebds1(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"), "LIN");
     energies.set(ebds1);
     test_value(energies.size(), 3, "GEbounds constructor (3 elements)");
     test_value(energies[0].MeV(), 1.0, 1.0e-10, "GEbounds constructor (3 elements)");
