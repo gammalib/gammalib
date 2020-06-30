@@ -261,7 +261,7 @@ void TestGModel::test_model_par(void)
     test_assert(!par1.has_min(), "Parameter shall have no minimum.");
     test_assert(!par1.has_max(), "Parameter shall have no maximum.");
     test_assert(!par1.has_range(), "Parameter shall have no range.");
-    
+
     // Test parameter value constructor (value version)
     GModelPar par2("Test parameter", 47.0);
     test_value(par2.value(), 47.0);
@@ -272,7 +272,7 @@ void TestGModel::test_model_par(void)
     test_assert(!par2.has_min(), "Parameter shall have no minimum.");
     test_assert(!par2.has_max(), "Parameter shall have no maximum.");
     test_assert(!par2.has_range(), "Parameter shall have no range.");
-    
+
     // Test invalid parameter constructor (factor & scale version)
     test_try("Test invalid parameter constructor");
     try {
@@ -540,7 +540,7 @@ void TestGModel::test_sky_model(void)
     sky4.spectral(&spec_plaw);
     test_value(sky4.size(), 5); // 1 spatial, 3 spectral, 1 temporal
     test_value(sky4.spectral()->classname(), "GModelSpectralPlaw");
-    
+
     // Test XML constructor
     GXml         xml1(m_xml_file);
     GXmlElement* element1 = xml1.element(0)->element(0);
@@ -622,7 +622,7 @@ void TestGModel::test_point_source(void)
     GModelSpatialPointSource model3(83.6331, +22.0145);
     test_value(model3.ra(), 83.6331);
     test_value(model3.dec(), +22.0145);
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_point_plaw);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -701,7 +701,7 @@ void TestGModel::test_diffuse_const(void)
     // Test value constructor
     GModelSpatialDiffuseConst model2(3.0);
     test_value(model2.value(), 3.0);
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_diffuse_const);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -759,7 +759,7 @@ void TestGModel::test_diffuse_cube(void)
     test_value(model3.value(), 3.0);
     test_value(model3.filename().url(), "");
     //test_assert(model.cube() == map, "Map cube is not the expected one");
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_diffuse_cube);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -769,20 +769,28 @@ void TestGModel::test_diffuse_cube(void)
     test_value(model4.value(), 1.0);
     test_value(model4.filename().url(), m_cube_file);
 
-    // Test value method
+    // Test value() method
     model4.value(3.9);
     test_value(model4.value(), 3.9);
 
-    // Test region method
+    // Test region() method
     GSkyDir dir1;
-    dir1.radec_deg(3.9, 3.9);
+    dir1.radec_deg(84.2, 22.0);
     test_assert(model4.region()->contains(dir1), "Test region() method (inside)");
+    dir1.radec_deg(80.0, 24.0);
+    test_assert(!model4.region()->contains(dir1), "Test region() method (outside)");
 
-    // Test filename method
+    // Test contains() method
+    dir1.radec_deg(84.2, 22.0);
+    test_assert(model4.contains(dir1), "Test contains() method (inside)");
+    dir1.radec_deg(80.0, 24.0);
+    test_assert(!model4.contains(dir1), "Test contains() method (outside)");
+
+    // Test filename() method
     model4.filename("Help me!");
     test_value(model4.filename().url(), "Help me!");
 
-    // Test cube method
+    // Test cube() method
     model4.cube(GSkyMap("GAL", 16, "RING", 10));
     test_value(model4.cube().npix(), 3072);
 
@@ -822,7 +830,7 @@ void TestGModel::test_diffuse_map(void)
     GModelSpatialDiffuseMap model3(map, 3.0);
     test_value(model3.value(), 3.0);
     test_value(model3.filename().url(), "");
-    
+
     // Test XML constructor and attribute methods
     GXml         xml(m_xml_model_diffuse_map);
     GXmlElement* elementp = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -832,22 +840,28 @@ void TestGModel::test_diffuse_map(void)
     test_value(model.value(), 1.0);
     test_value(model.filename().url(), m_map_file);
 
-    // Test value method
+    // Test value() method
     model.value(3.9);
     test_value(model.value(), 3.9);
 
-    // Test region method
+    // Test region() method
     GSkyDir dir1;
     dir1.radec_deg(201.365, -43.019);
     test_assert(model.region()->contains(dir1), "Test region() method (inside)");
     dir1.radec_deg(180.0, -43.019);
     test_assert(!model.region()->contains(dir1), "Test region() method (outside)");
 
-    // Test load method
+    // Test contains() method
+    dir1.radec_deg(201.365, -43.019);
+    test_assert(model.contains(dir1), "Test region() method (inside)");
+    dir1.radec_deg(180.0, -43.019);
+    test_assert(!model.contains(dir1), "Test region() method (outside)");
+
+    // Test load() method
     model.load(m_map_file);
     test_value(model.filename().url(), m_map_file);
 
-    // Test map method
+    // Test map() method
     model.map(GSkyMap("GAL", 16, "RING", 10));
     test_value(model.map().npix(), 3072);
 
@@ -916,7 +930,7 @@ void TestGModel::test_radial_disk(void)
     test_value(model2.ra(), 83.6331);
     test_value(model2.dec(), 22.0145);
     test_value(model2.radius(), 3.0);
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_radial_disk);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -1067,7 +1081,7 @@ void TestGModel::test_radial_gauss(void)
     test_value(model2.ra(), 83.6331);
     test_value(model2.dec(), 22.0145);
     test_value(model2.sigma(), 3.0);
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_radial_gauss);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -1137,7 +1151,7 @@ void TestGModel::test_radial_shell(void)
     test_value(model2.dec(), 22.0145);
     test_value(model2.radius(), 3.0);
     test_value(model2.width(), 1.0);
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_radial_shell);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -1213,7 +1227,7 @@ void TestGModel::test_elliptical_disk(void)
     test_value(model2.posangle(), 45.0);
     test_value(model2.semimajor(), 3.0);
     test_value(model2.semiminor(), 2.0);
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_elliptical_disk);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
@@ -1389,7 +1403,7 @@ void TestGModel::test_spatial_composite(void)
     GSkyDir dir2;
     dir2.radec_deg(83.6331, 22.01);
     test_assert(model2.region()->contains(dir2), "Test region() method (inside)");
-    
+
     // Test access of individual parameters
     test_value(model2["2:RA"].value(), 83.6331);
     test_value(model2["2:DEC"].value(), 22.0145);
@@ -1420,7 +1434,7 @@ void TestGModel::test_const(void)
     // Test value constructor
     GModelSpectralConst model2(3.0);
     test_value(model2.value(), 3.0);
-    
+
     // Test XML constructor
     GXml                xml(m_xml_model_point_const);
     GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -1520,7 +1534,7 @@ void TestGModel::test_plaw(void)
     test_value(model2.prefactor(), 2.0);
     test_value(model2.index(), -2.1);
     test_value(model2.pivot().MeV(), 100.0);
-    
+
     // Test XML constructor
     GXml               xml(m_xml_model_point_plaw);
     GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -1641,7 +1655,7 @@ void TestGModel::test_plaw_eflux(void)
     test_value(model2.index(), -2.1);
     test_value(model2.emin().MeV(), 10.0);
     test_value(model2.emax().MeV(), 100.0);
-    
+
     // Test XML constructor and value
     GXml         xml(m_xml_model_point_plaw_eflux);
     GXmlElement* element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -1702,7 +1716,7 @@ void TestGModel::test_eplaw(void)
     test_value(model2.index(), -2.1);
     test_value(model2.pivot().MeV(), 100.0);
     test_value(model2.cutoff().GeV(), 1.0);
-    
+
     // Test XML constructor
     GXml                  xml(m_xml_model_point_eplaw);
     GXmlElement*          element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -1841,7 +1855,7 @@ void TestGModel::test_supeplaw(void)
     test_value(model2.pivot().MeV(), 100.0);
     test_value(model2.cutoff().GeV(), 1.0);
     test_value(model2.index2(), 1.1);
-    
+
     // Test XML constructor
     GXml                       xml(m_xml_model_point_supeplaw);
     GXmlElement*               element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -1908,7 +1922,7 @@ void TestGModel::test_bplaw(void)
     test_value(model2.index1(), -2.1);
     test_value(model2.breakenergy().MeV(), 100.0);
     test_value(model2.index2(), -2.8);
-    
+
     // Test XML constructor
     GXml                     xml(m_xml_model_point_bplaw);
     GXmlElement*             element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -1962,7 +1976,7 @@ void TestGModel::test_smoothbplaw(void)
     // Test void constructor
     GModelSpectralSmoothBrokenPlaw model1;
     test_value(model1.type(), "SmoothBrokenPowerLaw", "Check void model type");
-    
+
     // Test value constructor
     GModelSpectralSmoothBrokenPlaw model2(2.0, -2.1, GEnergy(100.0, "MeV"), -2.8,
                                           GEnergy(1000.0, "MeV"), 2.0);
@@ -1972,8 +1986,7 @@ void TestGModel::test_smoothbplaw(void)
     test_value(model2.index2(), -2.8);
     test_value(model2.breakenergy().MeV(), 1000.0);
     test_value(model2.beta(), 2.0);
-    
-    
+
     // Test XML constructor
     GXml         xml(m_xml_model_point_smoothbplaw);
     GXmlElement* element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -1985,20 +1998,19 @@ void TestGModel::test_smoothbplaw(void)
     test_value(model3.pivot().TeV(), 1.0);
     test_value(model3.index2(), -2.70);
     test_value(model3.breakenergy().TeV(), 0.3);
-    
-    
+
     // Test prefactor method
     model3.prefactor(2.3e-16);
     test_value(model3.prefactor(), 2.3e-16);
-    
+
     // Test index1 method
     model3.index1(-2.6);
     test_value(model3.index1(), -2.6);
-    
+
     // Test pivot method
     model3.pivot(GEnergy(0.5, "TeV"));
     test_value(model3.pivot().TeV(), 0.5);
-    
+
     // Test index2 method
     model3.index2(-3.6);
     test_value(model3.index2(), -3.6);
@@ -2006,7 +2018,7 @@ void TestGModel::test_smoothbplaw(void)
     // Test breakenergy method
     model3.breakenergy(GEnergy(0.5, "TeV"));
     test_value(model3.breakenergy().TeV(), 0.5);
-    
+
     // Test operator access
     const char* strarray[] = {"Prefactor", "Index1", "PivotEnergy", "Index2",
                               "BreakEnergy", "BreakSmoothness"};
@@ -2020,7 +2032,7 @@ void TestGModel::test_smoothbplaw(void)
         test_value(model3[keyname].error(), 1.9);
         test_value(model3[keyname].gradient(), 0.8);
     }
-    
+
     // Exit test
     return;
 }
@@ -2041,7 +2053,7 @@ void TestGModel::test_logparabola(void)
     test_value(model2.index(), -2.1);
     test_value(model2.pivot().MeV(), 100.0);
     test_value(model2.curvature(), -0.2);
-    
+
     // Test XML constructor
     GXml                      xml(m_xml_model_point_logparabola);
     GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -2286,7 +2298,7 @@ void TestGModel::test_filefct(void)
     test_value(model2.filename().url(), m_filefct,
                 "Check file function data file name");
     test_value(model2.norm(), 2.0);
-   
+
     // Test XML constructor
     GXml               xml(m_xml_model_point_filefct);
     GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -2338,7 +2350,7 @@ void TestGModel::test_table(void)
     test_value(model2.filename().url(), m_table,
                 "Check file function data file name");
     test_value(model2.norm(), 2.0);
-   
+
     // Test XML constructor
     GXml                xml(m_xml_model_point_table);
     GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);

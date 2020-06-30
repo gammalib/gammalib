@@ -122,6 +122,9 @@ The set_mc_cone() methods of the GModelSpatialDiffuseCube and GModelSpatialDiffu
 class were renamed to mc_cone() and mc_cone() getter methods were implemented
 for both classes. This solves a problem with pickling both classes (#3179).
 
+Set the GModelSpatialDiffuseCube::m_region member using the m_cube::region_circle()
+method and implemented the GModelSpatialDiffuseCube::contains() method (#3145).
+
 The method GModelSpatial::flux() was added that extracts the flux by integrating
 over a specific sky region. For the moment only circular sky regions are
 implemented (#2961).

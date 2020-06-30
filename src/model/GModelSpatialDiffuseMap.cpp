@@ -923,9 +923,8 @@ void GModelSpatialDiffuseMap::free_members(void)
  ***************************************************************************/
 void GModelSpatialDiffuseMap::prepare_map(void)
 {
-    // Initialise centre and radius
+    // Initialise region
     m_region.clear();
-    //m_radius = 0.0;
 
     // Determine number of skymap pixels
     int npix = m_map.npix();
@@ -958,33 +957,8 @@ void GModelSpatialDiffuseMap::prepare_map(void)
             }
         }
 
-        // If we have a HealPix map then set radius to 180 deg
-        if (m_map.projection()->code() == "HPX") {
-            m_region = GSkyRegionCircle(0.0, 0.0, 180.0);
-        }
-
-        // ... otherwise compute map centre and radius
-        else {
-
-            // Initialise maximum radius
-            double max_radius = 0.0;
-
-            // Get map centre
-            GSkyPixel pixel(m_map.nx()/2.0, m_map.ny()/2.0);
-            GSkyDir   centre = m_map.pix2dir(pixel);
-
-            // Determine map radius
-            for (int i = 0; i < npix; ++i) {
-                double radius = m_map.inx2dir(i).dist_deg(centre);
-                if (radius > max_radius) {
-                    max_radius = radius;
-                }
-            }
-
-            // Set sky region
-            m_region = GSkyRegionCircle(centre, max_radius);
-
-        } // endelse: computed map centre and radius
+        // Get region circle
+        m_region = m_map.region_circle();
 
         // Set simulation cone
         mc_cone(m_region);
@@ -1001,14 +975,6 @@ void GModelSpatialDiffuseMap::prepare_map(void)
  ***************************************************************************/
 void GModelSpatialDiffuseMap::set_region(void) const
 {
-    /*
-    // Set sky region circle (all sky)
-    GSkyRegionCircle region(m_centre, m_radius);
-
-    // Set region (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseMap*>(this)->m_region = region;
-    */
-
     // Return
     return;
 }

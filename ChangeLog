@@ -1,4 +1,4 @@
-2020-06-26
+2020-06-30
 
         * Version 1.7.0 released
         ========================
@@ -9,6 +9,7 @@
         Fix GModelSpatialDiffuseCube pickeling issue (#3179)
         Rename GModelSpatialDiffuseCube::set_mc_cone() to mc_cone() (#3179)
         Rename GModelSpatialDiffuseMap::set_mc_cone() to mc_cone() (#3179)
+        Properly set region for GModelSpatialDiffuseCube class (#3145)
         Avoid rounding errors in GSkyMap operators (#3126)
         Fix inverted min-max boundary in GOptimizePar for negative scale factors (#3072)
         Add GObservations::npred() methods (#3062)

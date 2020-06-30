@@ -37,6 +37,8 @@ Improvements
 * Add equality and non-equality operators to ``GSkyRegionCircle`` class.
 * [`3202 <https://cta-redmine.irap.omp.eu/issues/3202>`_] -
   Replace ``GCTAResponseCache`` class by ``GResponseCache`` class.
+* [`3145 <https://cta-redmine.irap.omp.eu/issues/3145>`_] -
+  Properly set region for ``GModelSpatialDiffuseCube``class.
 * [`3062 <https://cta-redmine.irap.omp.eu/issues/3062>`_] -
   Add ``GObservations::npred()`` methods.
 * [`2990 <https://cta-redmine.irap.omp.eu/issues/2990>`_] -

@@ -511,13 +511,32 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
  *
  * Signals whether a sky direction falls within the bounding circle of
  * the diffuse cube.
- *
- * @todo To be implemented.
  ***************************************************************************/
 bool GModelSpatialDiffuseCube::contains(const GSkyDir& dir,
                                         const double&  margin) const
 {
-    return (true);
+    // Make sure that cube in online
+    fetch_cube();
+
+    // Initialise containment flag
+    bool contains = false;
+
+    // Continue only if radius is positive
+    if (m_region.radius() > 0.0) {
+
+        // Compute distance to centre
+        double distance = m_region.centre().dist_deg(dir);
+
+        // If distance is smaller than radius plus margin we consider
+        // the position to be contained within the bounding circle
+        if (distance < m_region.radius() + margin) {
+            contains = true;
+        }
+
+    }
+
+    // Return containment
+    return (contains);
 }
 
 
@@ -1224,8 +1243,9 @@ void GModelSpatialDiffuseCube::fetch_cube(void) const
  ***************************************************************************/
 void GModelSpatialDiffuseCube::load_cube(const GFilename& filename)
 {
-    // Initialise skymap
+    // Initialise sky map cube, region and log(energy) nodes
     m_cube.clear();
+    m_region.clear();
     m_logE.clear();
 
     // Store filename of cube (for XML writing). Note that we do
@@ -1263,6 +1283,12 @@ void GModelSpatialDiffuseCube::load_cube(const GFilename& filename)
 
     // Set energy boundaries
     set_energy_boundaries();
+
+    // Get region circle
+    m_region = m_cube.region_circle();
+
+    // Set simulation cone
+    mc_cone(m_region);
 
     // Return
     return;
@@ -1381,16 +1407,11 @@ double GModelSpatialDiffuseCube::cube_intensity(const GPhoton& photon) const
 
 /***********************************************************************//**
  * @brief Set boundary sky region
- *
- * @todo Implement determination of the cube boundary circle
  ***************************************************************************/
 void GModelSpatialDiffuseCube::set_region(void) const
 {
-    // Set sky region circle (all sky)
-    GSkyRegionCircle region(0.0, 0.0, 180.0);
-
-    // Set region (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseCube*>(this)->m_region = region;
+    // Make sure that cube in online
+    fetch_cube();
 
     // Return
     return;
