@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GHealpix.cpp - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -114,7 +114,7 @@ GHealpix::GHealpix(void) : GSkyProjection()
  *
  * @param[in] nside Number of sides.
  * @param[in] order Pixel ordering ('RING' or 'NESTED').
- * @param[in] coords Coordinate system ('EQU' or 'GAL').
+ * @param[in] coords Coordinate system ('CEL' or 'GAL').
  *
  * @exception GException::wcs_hpx_bad_nside 
  *            Invalid nside parameter.
@@ -370,7 +370,7 @@ void GHealpix::write(GFitsHDU& hdu) const
     hdu.card("ORDERING", ordering(),
              "Pixel ordering scheme, either RING or NESTED");
     hdu.card("COORDSYS", coordsys(),
-             "Coordinate system, either EQU or GAL");
+             "Coordinate system, either CEL or GAL");
 
     // Return
     return;

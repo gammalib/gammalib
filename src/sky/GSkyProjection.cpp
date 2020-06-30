@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSkyProjection.cpp - Abstract sky projection base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -141,7 +141,7 @@ GSkyProjection& GSkyProjection::operator= (const GSkyProjection& proj)
  * @return Coordinate system string.
  *
  * Returns one of 
- * 'EQU' (equatorial),
+ * 'CEL' (celestial),
  * 'GAL' (galactic),
  ***************************************************************************/
 std::string GSkyProjection::coordsys(void) const
@@ -150,7 +150,7 @@ std::string GSkyProjection::coordsys(void) const
     std::string s_coordsys;
     switch (m_coordsys) {
     case 0:
-        s_coordsys = "EQU";
+        s_coordsys = "CEL";
         break;
     case 1:
         s_coordsys = "GAL";
@@ -211,7 +211,7 @@ void GSkyProjection::coordsys(const std::string& coordsys)
 void GSkyProjection::init_members(void)
 {
     // Initialise members
-    m_coordsys = 0; // 0 means EQU
+    m_coordsys = 0; // 0 means CEL
 
     // Return
     return;

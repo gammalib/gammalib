@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GException_sky.cpp  -  sky exception handlers             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2020 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -187,7 +187,7 @@ GException::wcs_bad_coords::wcs_bad_coords(std::string origin,
     // Set origin and message
     m_origin  = origin;
     m_message = "Invalid WCS coordinate system ("+coordsys+"). "
-                "Should be one of EQU/CEL/GAL/ECL/HEL/SGL.";
+                "Should be one of CEL/GAL/ECL/HEL/SGL.";
 
     // Return
     return;

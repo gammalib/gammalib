@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.cpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -245,12 +245,12 @@ void GWcs::read(const GFitsHDU& hdu)
         if (xcoord == "RA--" && ycoord == "DEC-") {
             m_lng  = 0;
             m_lat  = 1;
-            coords = "EQU";
+            coords = "CEL";
         }
         else if (xcoord == "DEC-" && ycoord == "RA--") {
             m_lng  = 1;
             m_lat  = 0;
-            coords = "EQU";
+            coords = "CEL";
         }
         else if (xcoord == "GLON" && ycoord == "GLAT") {
             m_lng  = 0;

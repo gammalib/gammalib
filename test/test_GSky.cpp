@@ -733,26 +733,12 @@ void TestGSky::test_GSkyMap_healpix_construct(void)
 	test_value(map1.ny(), 0, "Check for no Y-direction map pixels");
 	test_value(map1.nmaps(), 1, "Check for one sky map");
     //
-    GSkyMap map2("CEL", 1, "RING", 2);
+    GSkyMap map2("CEL", 1, "NESTED", 2);
 	test_assert(!map2.is_empty(), "Check for non-empty sky map");
 	test_value(map2.npix(), 12, "Check for 12 sky map pixels");
 	test_value(map2.nx(), 0, "Check for no X-direction map pixels");
 	test_value(map2.ny(), 0, "Check for no Y-direction map pixels");
 	test_value(map2.nmaps(), 2, "Check for one sky map");
-    //
-    GSkyMap map3("EQU", 1, "RING", 1);
-	test_assert(!map3.is_empty(), "Check for non-empty sky map");
-	test_value(map3.npix(), 12, "Check for 12 sky map pixels");
-	test_value(map3.nx(), 0, "Check for no X-direction map pixels");
-	test_value(map3.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(map3.nmaps(), 1, "Check for one sky map");
-    //
-    GSkyMap map4("EQU", 1, "NESTED", 2);
-	test_assert(!map4.is_empty(), "Check for non-empty sky map");
-	test_value(map4.npix(), 12, "Check for 12 sky map pixels");
-	test_value(map4.nx(), 0, "Check for no X-direction map pixels");
-	test_value(map4.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(map4.nmaps(), 2, "Check for one sky map");
 
     // Test Healpix copy constructor
     GSkyMap ring1cpy = ring1;

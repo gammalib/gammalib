@@ -226,6 +226,8 @@ the Sun for a given date and a specific epoch. To support the method, a
 GSkyDir::precess() method was added that allows precessing a sky direction to
 a specific epoch (#1854).
 
+The GSkyProjection::coordsys() method now returns CEL instead of EQU (#1829).
+
 
 13. Support module
 ------------------
