@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GEnergies.i - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,8 +44,11 @@ public:
     explicit GEnergies(const GFilename& filename);
     explicit  GEnergies(const GEbounds& ebounds);
     GEnergies(const GEnergies& energies);
-    GEnergies(const int& num, const GEnergy& emin, const GEnergy& emax,
-              const bool& log = true);
+    GEnergies(const int&         num,
+              const GEnergy&     emin,
+              const GEnergy&     emax,
+              const std::string& method = "LOG",
+              const double&      gamma  = 1.0);
     virtual ~GEnergies(void);
  
     // Methods
@@ -60,10 +63,11 @@ public:
     void        reserve(const int& num);
     void        extend(const GEnergies& energies);
     void        set(const GEbounds& ebounds);
-    void        set_lin(const int& num, const GEnergy& emin,
-                                        const GEnergy& emax);
-    void        set_log(const int& num, const GEnergy& emin,
-                                        const GEnergy& emax);
+    void        set(const int&         num,
+                    const GEnergy&     emin,
+                    const GEnergy&     emax,
+                    const std::string& method = "LOG",
+                    const double&      gamma  = 1.0);
     void        load(const GFilename& filename);
     void        save(const GFilename& filename,
                      const bool&      clobber = false) const;

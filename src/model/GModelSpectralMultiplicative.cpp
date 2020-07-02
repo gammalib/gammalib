@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpectralMultiplicative.cpp - Multiplicative spectral model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Michael Mayer                               *
+ *  copyright (C) 2016-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -842,7 +842,7 @@ void GModelSpectralMultiplicative::update_mc_cache(const GEnergy& emin,
         }
 
         // Initialise energy array with fixed number of nodes
-        GEnergies energies = GEnergies(nodes, m_mc_emin, m_mc_emax, true);
+        GEnergies energies = GEnergies(nodes, m_mc_emin, m_mc_emax, "LOG");
 
         // Append nodes to spectral function
         for (int i = 0; i < energies.size(); ++i) {

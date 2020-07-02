@@ -368,7 +368,7 @@ void TestGObservation::test_ebounds(void)
     test_value(xml1.emax().MeV(), 10.0, 1.0e-10, "XML write and read methods");
 
     // Check energies constructor method
-    GEnergies energies1(3, GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"), false);
+    GEnergies energies1(3, GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"), "LIN");
     GEbounds ebds1(energies1);
     test_value(ebds1.size(), 2, "GEnergies constructor (3 elements)");
     test_value(ebds1.emin().MeV(),  1.0, 1.0e-10, "GEnergies constructor (3 elements)");
@@ -376,7 +376,7 @@ void TestGObservation::test_ebounds(void)
     test_value(ebds1.emax().MeV(), 10.0, 1.0e-10, "GEnergies constructor (3 elements)");
 
     // Check energies constructor method
-    GEnergies energies2(1, GEnergy(1.0, "MeV"), GEnergy(1.0, "MeV"), false);
+    GEnergies energies2(1, GEnergy(1.0, "MeV"), GEnergy(1.0, "MeV"), "LIN");
     GEbounds ebds2(energies2);
     test_value(ebds2.size(), 1, "GEnergies constructor (1 element)");
     test_value(ebds2.emin().MeV(), 1.0, 1.0e-10, "GEnergies constructor (1 element)");
@@ -1365,7 +1365,7 @@ void TestGObservation::test_energies(void)
 
     // Check linear energies
     energies.clear();
-    energies.set_lin(3, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"));
+    energies.set(3, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"), "LIN");
     test_value(energies.size(), 3, "GEnergies should have 3 elements.");
     test_assert(!energies.is_empty(), "GEnergies should not be empty.");
     test_value(energies[0].MeV(), 1.0, 1.0e-10, "Energy 0 should be 1 MeV.");
@@ -1374,7 +1374,16 @@ void TestGObservation::test_energies(void)
 
     // Check logarithmic energies
     energies.clear();
-    energies.set_log(3, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    energies.set(3, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"), "LOG");
+    test_value(energies.size(), 3, "GEnergies should have 3 elements.");
+    test_assert(!energies.is_empty(), "GEnergies should not be empty.");
+    test_value(energies[0].MeV(), 1.0, 1.0e-10, "Energy 0 should be 1 MeV.");
+    test_value(energies[1].MeV(), 10.0, 1.0e-10, "Energy 1 should be 10 MeV.");
+    test_value(energies[2].MeV(), 100.0, 1.0e-10, "Energy 2 should be 100 MeV.");
+
+    // Check power-law energies
+    energies.clear();
+    energies.set(3, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"), "POW", 1.0);
     test_value(energies.size(), 3, "GEnergies should have 3 elements.");
     test_assert(!energies.is_empty(), "GEnergies should not be empty.");
     test_value(energies[0].MeV(), 1.0, 1.0e-10, "Energy 0 should be 1 MeV.");

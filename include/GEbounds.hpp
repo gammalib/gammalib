@@ -131,11 +131,6 @@ protected:
     void free_members(void);
     void set_attributes(void);
     void insert_eng(const int& index, const GEnergy& emin, const GEnergy& emax);
-    void set_lin(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void set_log(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void set_pow(const int& num, const GEnergy& emin, const GEnergy& emax,
-                 const double& gamma);
-
 
     // Protected data area
     int      m_num;         //!< Number of energy boundaries

@@ -255,7 +255,7 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Setup energies container
         energies = gammalib.GEnergies(10, gammalib.GEnergy(1.0,  'MeV'),
-                                          gammalib.GEnergy(10.0, 'MeV'), False)
+                                          gammalib.GEnergy(10.0, 'MeV'), 'LIN')
 
         # Loop over all elements using the container iterator and count the
         # number of iterations
@@ -286,7 +286,7 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Setup energies container
         energies = gammalib.GEnergies(10, gammalib.GEnergy(1.0,  'MeV'),
-                                          gammalib.GEnergy(10.0, 'MeV'), False)
+                                          gammalib.GEnergy(10.0, 'MeV'), 'LIN')
 
         # Test energies[start:end]
         self.test_value(len(energies[3:5]), 2)

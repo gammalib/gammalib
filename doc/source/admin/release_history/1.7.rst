@@ -56,7 +56,7 @@ Improvements
 * [`2909 <https://cta-redmine.irap.omp.eu/issues/2909>`_] -
   Add ``GTime.datetime()`` method and add optional precision to ``GTime.utc()`` method.
 * [`2881 <https://cta-redmine.irap.omp.eu/issues/2881>`_] -
-  Replace ``log`` flag by ``string`` in ``GEbounds`` class.
+  Replace ``log`` flag by ``string`` in ``GEbounds`` and ``GEnergies`` classes.
 * [`2695 <https://cta-redmine.irap.omp.eu/issues/2695>`_] -
   Allow RoI centres different from pointing direction in unbinned analysis.
 * [`1855 <https://cta-redmine.irap.omp.eu/issues/1855>`_] -

@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpectralExponential.cpp - Exponential spectral model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Luigi Tibaldo                                    *
+ *  copyright (C) 2018-2020 by Luigi Tibaldo                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -715,7 +715,7 @@ void GModelSpectralExponential::update_mc_cache(const GEnergy& emin,
         }
 
         // Initialise energy array with fixed number of nodes
-        GEnergies energies = GEnergies(nodes, m_mc_emin, m_mc_emax, true);
+        GEnergies energies = GEnergies(nodes, m_mc_emin, m_mc_emax, "LOG");
 
         // Append nodes to spectral function
         for (int i = 0; i < energies.size(); ++i) {

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.0
 
-30 June 2020
+2 July 2020
 
 
 1. Introduction
@@ -48,6 +48,7 @@ The following methods have been added:
 - GSkyRegionCircle::operator==() - Equality operator
 - GSkyRegionCircle::operator!=() - Non-equality operator
 - GEbounds::set() - Set energy boundaries for different methods 
+- GEnergies::set() - Set energies for different methods
 - GModelPar::has_factor_min() - Test if parameter has factor minimum
 - GModelPar::has_factor_max() - Test if parameter has factor maximum
 - GModelPar::remove_factor_min - Remove factor minimum
@@ -65,8 +66,10 @@ The following methods have been added:
 - GCOMDri::cone_content() - Get DRI content within event cone 
 
 The following methods have been removed:
-- GEbounds::set_lin() - method is now private
-- GEbounds::set_log() - method is now private
+- GEbounds::set_lin()
+- GEbounds::set_log()
+- GEnergies::set_lin() - method is now private
+- GEnergies::set_log() - method is now private
 - GModelSpatialDiffuseCube::maps()
 - GModelSpatialDiffuseCube::pixels()
 
@@ -82,6 +85,7 @@ The arguments for the following methods have been changed:
 - GSkyDir::posang(GSkyDir&, std::string&) - Add optional coordinate system string
 - GSkyDir::posang_dir(GSkyDir&, std::string&) - Add optional coordinate system string
 - GEbounds::GEbounds(int&, GEnergy&, GEnergy&, std::string&, double&) - Replace bool by string and double
+- GEnergies::GEnergies(int&, GEnergy&, GEnergy&, std::string&, double&) - Replace bool by string and double
 
 The return value of the following methods has been changed:
 - none
@@ -182,13 +186,13 @@ Add GTime.datetime() method to the Python interface to convert times from and
 to datetime.datetime objects. Add an optional precision argument to the GTime.utc()
 to set the number of digits after the comma for the seconds (#2909).
 
-The interface of the GEbounds constructor that sets a given number of energy
-boundaries was changed. The bool argument that toggled between linear and
-logarithmic spacing was replaced by a string that can take the values "LIN",
-"LOG" or "POW". For the "POW" method an additional optional argument was added
-to specify the power-law index. The GEbounds::set() method was added with the
-same method arguments, and the former set_lin() and set_log() methods were
-made private (#2881).
+The interface of the GEbounds and GEnergies constructors that sets a given number
+of energy boundaries or values was changed. The bool argument that toggled between
+linear and logarithmic spacing was replaced by a string that can take the values
+"LIN", "LOG" or "POW". For the "POW" method an additional optional argument was added
+to specify the power-law index. The GEbounds::set() and GEnergies::set() methods
+were added with the same method arguments, and the former set_lin() and set_log()
+methods were removed from the public interface (#2881).
 
 Add GTime.julian_epoch() methods that return the Julian epoch for a given time
 (#1854).
