@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GMath.hpp - Mathematical functions                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,8 @@ namespace gammalib {
     const double ln2          =  0.6931471805599453094172321214581766;
     const double ln10         =  2.3025850929940456840179914546843642;
     const double inv_ln2      =  1.4426950408889634073599246810018921;
+    const double inv_ln10     =  1.0/ln10;
+    const double inv_loge     =  1.0/std::log10(std::exp(1.0));
     const double onethird     =  1.0/3.0;
     const double twothird     =  2.0/3.0;
     const double fourthird    =  4.0/3.0;
@@ -52,8 +54,6 @@ namespace gammalib {
     const double sqrt_two     = std::sqrt(2.0);
     const double sqrt_pihalf  = std::sqrt(pihalf);
     const double sqrt_twopi   = std::sqrt(twopi);
-    const double inv_ln10     =  1.0/ln10;
-    const double inv_loge     =  1.0/std::log10(std::exp(1.0));
 }
 
 /* __ Prototypes _________________________________________________________ */

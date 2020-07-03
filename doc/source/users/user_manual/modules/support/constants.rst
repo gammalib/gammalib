@@ -71,9 +71,11 @@ Function                              Description
 ``gammalib::xml_has_par``             Checks is XML file has parameter.
 ``gammalib::xml_need_par``            Require specific parameter in XML file.
 ``gammalib::xml_get_par``             Get parameter from XML file.
+``gammalib::xml_get_attr``            Get attribute from XML file.
 ``gammalib::xml_check_par``           Check parameter in XML file.
 ``gammalib::xml_file_expand``         Expand file name in XML file.
 ``gammalib::xml_file_reduce``         Reduce file name in XML file.
 ``gammalib::xml_get_name_value_pair`` Get name/value pair from XML node.
 ``gammalib::recv``                    Receive on socket with timeout.
+``gammalib::roi_arclength``           Compute arc length of intersection with Region of Interest.
 ===================================== ===========

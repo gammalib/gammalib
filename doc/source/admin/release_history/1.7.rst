@@ -12,7 +12,8 @@ In particular, this release provides:
 
 * Support for INTEGRAL/SPI data analysis
 * Response caching for all instruments
-* ...
+* A radial ring as new spatial model
+* A spectral table as new spectral model
 
 
 Bug fixes

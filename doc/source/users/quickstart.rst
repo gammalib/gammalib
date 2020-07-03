@@ -74,6 +74,7 @@ Now let's append a model to this container. For this, type:
      PivotEnergy ..............: 100 MeV (fixed,scale=100,gradient)
     Number of temporal par's ..: 1
      Normalization ............: 1 (relative value) (fixed,scale=1,gradient)
+    Number of scale par's .....: 0
 
 With this sequence of commands you first defined a sky direction in
 celestial coordinates using :doxy:`GSkyDir`. You may recognise that this
