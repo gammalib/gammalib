@@ -535,9 +535,6 @@ void GModelSpatialRadialRing::init_members(void)
     m_radius.gradient(0.0);
     m_radius.has_grad(false); // Radial components never have gradients
 
-    // Set parameter pointer(s)
-    m_pars.push_back(&m_radius);
-    
     // Initialise Width
     m_width.clear();
     m_width.name("Width");
@@ -550,15 +547,16 @@ void GModelSpatialRadialRing::init_members(void)
     m_width.has_grad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)
+    m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
-    
+
     // Initialise precomputation cache
     m_last_radius          = 0.0;
     m_last_width           = 0.0;
     m_inner_radius_rad     = 0.0;
     m_outer_radius_rad     = 0.0;
-    m_cos_inner_radius_rad = 0.0;
-    m_cos_outer_radius_rad = 0.0;
+    m_cos_inner_radius_rad = 1.0;
+    m_cos_outer_radius_rad = 1.0;
     m_norm                 = 0.0;
 
     // Return
@@ -637,7 +635,7 @@ void GModelSpatialRadialRing::update() const
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
-    
+
     // Return
     return;
 }

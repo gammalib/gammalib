@@ -43,6 +43,7 @@
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialShell.hpp"
+#include "GModelSpatialRadialRing.hpp"
 #include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialComposite.hpp"
 #include "GArf.hpp"
@@ -2288,6 +2289,10 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
     const GModelSpatialRadialShell* shell =
           dynamic_cast<const GModelSpatialRadialShell*>(model);
 
+    // Get pointer on ring model (will be NULL for other models)
+    const GModelSpatialRadialRing* ring =
+          dynamic_cast<const GModelSpatialRadialRing*>(model);
+
     // Set number of iterations for Romberg integration.
     // These values have been determined after careful testing, see
     // https://cta-redmine.irap.omp.eu/issues/1299
@@ -2398,6 +2403,16 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
             double shell_radius = shell->radius() * gammalib::deg2rad;
             if (shell_radius > rho_min && shell_radius < rho_max) {
                 bounds.push_back(shell_radius);
+            }
+        }
+
+        // If we have a ring model then add an integration boundary for the
+        // ring radius as a function discontinuity will occur at this
+        // location
+        if (ring != NULL) {
+            double ring_radius = ring->radius() * gammalib::deg2rad;
+            if (ring_radius > rho_min && ring_radius < rho_max) {
+                bounds.push_back(ring_radius);
             }
         }
 
@@ -3006,6 +3021,17 @@ double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
             double shell_radius = shell->radius() * gammalib::deg2rad;
             if (shell_radius > rho_min && shell_radius < rho_max) {
                 bounds.push_back(shell_radius);
+            }
+        }
+
+        // If we have a ring model then add an integration boundary for the
+        // ring radius as a function discontinuity will occur at this
+        // location
+        const GModelSpatialRadialRing* ring = dynamic_cast<const GModelSpatialRadialRing*>(spatial);
+        if (ring != NULL) {
+            double ring_radius = ring->radius() * gammalib::deg2rad;
+            if (ring_radius > rho_min && ring_radius < rho_max) {
+                bounds.push_back(ring_radius);
             }
         }
 
