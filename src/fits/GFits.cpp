@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp - FITS file access class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1698,8 +1698,8 @@ GFitsImage* GFits::new_primary(void)
     GFitsImage* image = new GFitsImageByte;
 
     // Create primary image in memory
-    int status = 0;
-    __fitsfile* fptr;
+    int         status = 0;
+    __fitsfile* fptr   = NULL;
     status = __ffinit(&fptr, "mem://", &status);
     status = __ffcrim(fptr, 8, 0, NULL, &status);
 
