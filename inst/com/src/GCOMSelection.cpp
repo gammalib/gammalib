@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMSelection.cpp - COMPTEL selection set class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -206,7 +206,7 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
     double zeta = event.eha() - event.phibar();
 
     // Check for bad minitelescopes
-    if (event.modcom() < 1 && event.modcom() > 98) {
+    if (event.modcom() < 1 || event.modcom() > 98) {
         m_num_invalid_modcom++;
         use = false;
     }
