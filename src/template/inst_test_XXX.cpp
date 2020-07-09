@@ -103,15 +103,12 @@ int main(void)
     std::string caldb = "CALDB="+xxx_caldb;
     putenv((char*)caldb.c_str());
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create test suites and append them to the container
     TestGXXX suite;
     testsuites.append(suite);
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GXXX.xml");

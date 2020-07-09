@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventList.cpp - Fermi/LAT event list class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -548,9 +548,6 @@ void GLATEventList::read_events(const GFitsTable& table)
     // Clear existing events
     m_events.clear();
 
-    // Allocate space for keyword name
-    char keyword[10];
-
     // Extract number of events in FT1 file
     int num = table.integer("NAXIS2");
 
@@ -615,6 +612,9 @@ void GLATEventList::read_events(const GFitsTable& table)
 
             // Load diffuse columns
             for (int k = 0; k < num_difrsp; ++k) {
+
+                // Allocate space for keyword name
+                char keyword[10];
 
                 // Set keyword name
                 std::sprintf(keyword, "DIFRSP%d", k);

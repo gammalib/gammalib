@@ -685,37 +685,6 @@ void GCTAResponseCube::free_members(void)
 }
 
 
-/***********************************************************************//**
- * @brief Determine cache index for model
- *
- * @param[in] name Model name.
- * @return Cache index (-1 if model has not been found).
- *
- * Determines the cache index for a given model @p name.
- ***************************************************************************/
-int GCTAResponseCube::cache_index(const std::string& name) const
-{
-    // Initialise index
-    int index = -1;
-
-    // Continue only if there are models in cache
-    if (!m_cache.empty()) {
-
-         // Search for model name
-         for (int i = 0; i < m_cache.size(); ++i) {
-             if (m_cache[i]->name() == name) {
-                 index = i;
-                 break;
-             }
-         }
-
-    } // endif: there were models in cache
-
-    // Return index
-    return index;
-}
-
-
 #if defined(G_RADIAL_PSF_BASED)
 /***********************************************************************//**
  * @brief Integrate Psf over radial model
@@ -1554,10 +1523,10 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
             }
 
             // Apply deadtime correction
-            irf *= exposure().deadc();
+            irf *= deadc;
 
         } // endif: exposure was positive
-        
+
     } // endif: livetime was positive
 
     // Compile option: Check for NaN/Inf

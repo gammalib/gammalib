@@ -262,7 +262,6 @@ double GSPIResponse::irf(const GEvent&       event,
     // Extract INTEGRAL/SPI event cube
     const GSPIEventCube* cube = dynamic_cast<const GSPIEventCube*>(spi_obs->events());
     if (cube == NULL) {
-        std::string cls = std::string(typeid(&obs).name());
         std::string msg = "INTEGRAL/SPI observation does not contain a valid "
                           "event cube. Please specify an observation with an "
                           "event cube as argument.";
@@ -1171,7 +1170,6 @@ void GSPIResponse::load_irfs(const int& region)
             int nx   = irf.nx();
             int ny   = irf.ny();
             int ndet = irf.shape()[0];
-            int nreg = irf.shape()[1];
 
             // Loop over requested regions
             for (int i_region = 0; i_region < num_regions; ++i_region) {

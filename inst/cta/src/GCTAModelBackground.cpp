@@ -521,7 +521,6 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
         // Get reference on CTA pointing, background response and event list
         // from observation
         const GCTAObservation& cta    = gammalib::cta_obs(G_MC, obs);
-        const GCTAPointing&    pnt    = gammalib::cta_pnt(G_MC, obs);
         const GCTAEventList&   events = gammalib::cta_event_list(G_MC, obs);
 
         // Get simulation region

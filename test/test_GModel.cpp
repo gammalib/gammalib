@@ -3697,9 +3697,6 @@ int main(void)
     // Create test suites
     GTestSuites testsuite("GModel");
 
-    // Initialise success flag
-    bool success = true;
-
     // Create a test suite
     TestGModel test;
 
@@ -3707,7 +3704,7 @@ int main(void)
     testsuite.append(test);
 
     // Run the testsuites
-    success = testsuite.run();
+    bool success = testsuite.run();
 
     // Save xml report
     testsuite.save("reports/GModel.xml");

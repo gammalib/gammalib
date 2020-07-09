@@ -299,7 +299,6 @@ GCTAInstDir GCTAModelSpatial::mc(const GEnergy&         energy,
     // Initialise rejection method
     double    f                    = 0.0;
     double    ftest                = 1.0;
-    int       zeros                = 0;
     const int max_subsequent_zeros = 10;
 
     // Find instrument direction by rejection method

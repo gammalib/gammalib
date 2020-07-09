@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEdisp.cpp - Fermi LAT energy dispersion               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -253,9 +253,11 @@ void GLATEdisp::read(const GFits& fits, const std::string& evtype)
     if (!fits.contains(engdisp)) {
         engdisp += "_" + m_evtype;
     }
+    /*
     if (!fits.contains(escales)) {
         escales += "_" + m_evtype;
     }
+    */
 
     // Get pointer to effective area HDU
     const GFitsTable& hdu_edisp = *fits.table(engdisp);

@@ -622,20 +622,18 @@ int main(void)
 {
     GTestSuites testsuite("GNumerics");
 
-    bool was_successful=true;
-
-    //Create a test suite
+    // Create a test suite
     TestGNumerics test;
 
-    //Append to the container
+    // Append to the container
     testsuite.append(test);
 
-    //Run
-    was_successful=testsuite.run();
+    // Run
+    bool success = testsuite.run();
 
-    //save xml report
+    // save xml report
     testsuite.save("reports/GNumerics.xml");
 
     // Return
-    return was_successful ? 0:1;
+    return (success ? 0:1);
 }

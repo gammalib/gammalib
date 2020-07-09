@@ -1923,9 +1923,6 @@ int main(void)
     // Allocate test suit container
     GTestSuites testsuites("Observation module");
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create and append test suites
     TestGObservation obs;
     testsuites.append(obs);
@@ -1937,7 +1934,7 @@ int main(void)
     #endif
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GObservation.xml");

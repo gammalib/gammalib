@@ -664,7 +664,6 @@ void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
     // Initialise XML elements
     const GXmlElement* rad  = NULL;
     const GXmlElement* spec = NULL;
-    const GXmlElement* temp = NULL;
 
     // Get pointers on spectrum and radial model
     rad  = xml.element("radialModel", 0);
@@ -676,7 +675,7 @@ void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
 
     // Optionally get temporal model
     try {
-        temp = xml.element("lightcurve", 0);
+        const GXmlElement* temp = xml.element("lightcurve", 0);
         m_temporal = xml_temporal(*temp);
     }
     catch (GException::xml_name_not_found &e) {

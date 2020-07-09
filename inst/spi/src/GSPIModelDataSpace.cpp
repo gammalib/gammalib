@@ -874,9 +874,6 @@ void GSPIModelDataSpace::setup_pars(GSPIEventCube* cube)
             for (int idet = 0; idet < ndet; ++idet) {
                 for (int ieng = 0; ieng < neng; ++ieng) {
 
-                    // Set energy name
-                    std::string eng_name = (eng_names.size()  > 0) ? eng_names[ieng] : "";
-
                     // Build parameter name
                     std::string par_name;
                     if (m_name.empty()) {

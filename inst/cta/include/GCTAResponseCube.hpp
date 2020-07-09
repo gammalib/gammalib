@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -112,7 +112,6 @@ private:
     void   init_members(void);
     void   copy_members(const GCTAResponseCube& rsp);
     void   free_members(void);
-    int    cache_index(const std::string& name) const;
     double psf_radial(const GModelSpatialRadial* model,
                       const double&              rho_obs,
                       const GSkyDir&             obsDir,

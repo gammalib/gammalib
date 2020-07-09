@@ -970,8 +970,8 @@ GPha GCTAOnOffObservation::model_background(const GModels& models) const
 
             // Perform likelihood profiling and derive likelihood value
             // The number of background counts is updated to the profile value
-            double logL = wstat_value(non, noff, alpha,  ngam, nonpred, nbgd,
-                                      dlogLdsky,d2logLdsky2);
+            wstat_value(non, noff, alpha,  ngam, nonpred, nbgd,
+                        dlogLdsky,d2logLdsky2);
 
         } // endelse: WSTAT
 
@@ -2463,9 +2463,6 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
     // Continue only if bin number is valid and if there are model parameters
     if ((ibin >= 0) && (ibin < m_on_spec.size()) && (npars > 0))  {
 
-        // Initialise parameter index
-        int ipar = 0;
-
         // Get reconstructed energy bin mean and width
         GEnergy emean  = m_on_spec.ebounds().elogmean(ibin);
         double  ewidth = m_on_spec.ebounds().ewidth(ibin).MeV();
@@ -2482,7 +2479,7 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
             double norm     = background * exposure * ewidth;
 
             // Loop over models
-            for (int j = 0; j < models.size(); ++j) {
+            for (int j = 0, ipar = 0; j < models.size(); ++j) {
 
                 // Get model pointer. Fall through if pointer is not valid
                 const GModel* mptr = models[j];
@@ -2666,18 +2663,17 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
     int    n_zero_data   = 0;
     double sum_data      = 0.0;
     double sum_model     = 0.0;
-    double init_npred    = *npred;
     #endif
 
-	// Initialise log-likelihood value
+    // Initialise log-likelihood value
     double value = 0.0;
 
-	// Get number of model parameters in model container
+    // Get number of model parameters in model container
     int npars = models.npars();
 
-	// Create model gradient vectors for sky and background parameters
-	GVector sky_grad(npars);
-	GVector bgd_grad(npars);
+    // Create model gradient vectors for sky and background parameters
+    GVector sky_grad(npars);
+    GVector bgd_grad(npars);
 
     // Allocate working array
     GVector colvar(npars);
@@ -2909,7 +2905,6 @@ double GCTAOnOffObservation::likelihood_wstat(const GModels& models,
     int    n_used        = 0;
     double sum_data      = 0.0;
     double sum_model     = 0.0;
-    double init_npred    = *npred;
     #endif
 
     // Initialise log-likelihood value

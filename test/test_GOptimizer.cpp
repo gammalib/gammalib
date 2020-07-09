@@ -190,15 +190,12 @@ int main(void)
     // Allocate test suit container
     GTestSuites testsuites("Optimizer module");
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create and append test suite
     TestGOptimizer openmp;
     testsuites.append(openmp);
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GOptimizer.xml");

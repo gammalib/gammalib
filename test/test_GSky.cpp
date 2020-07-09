@@ -1837,8 +1837,6 @@ int main(void)
 {
     GTestSuites testsuites("GSky");
 
-    bool was_successful = true;
-
     // Create a test suite
     TestGSky test;
 
@@ -1846,7 +1844,7 @@ int main(void)
     testsuites.append(test);
 
     // Run
-    was_successful=testsuites.run();
+    bool was_successful = testsuites.run();
 
     // Save xml report
     testsuites.save("reports/GSky.xml");

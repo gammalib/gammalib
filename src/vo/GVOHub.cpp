@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOHub.cpp - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2019 by Thierry Louge                               *
+ *  copyright (C) 2014-2020 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2183,15 +2183,12 @@ std::string GVOHub::get_mtype(const GXml& xml) const
     std::cout << "In GVOHub::get_mtype" << std::endl;
     #endif
 
-    // Initialise response
-    std::string client_key = "";
-
     // Get the XML node containing the client's private key
     const GXmlNode* node = xml.element("methodCall > params > param[1] > "
                                        "value > struct ");
 
     // Get the client's private key
-    client_key = get_response_value(node, "samp.mtype");
+    std::string client_key = get_response_value(node, "samp.mtype");
 
     // Return key
     return client_key;

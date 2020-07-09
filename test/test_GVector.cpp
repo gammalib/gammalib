@@ -591,9 +591,6 @@ int main(void)
     // Allocate test suite container
     GTestSuites testsuites("GVector");
 
-    // Initially assume that we pass all tests
-    bool was_successful=true;
-
     // Create a test suite
     TestGVector test;
 
@@ -601,7 +598,7 @@ int main(void)
     testsuites.append(test);
 
     // Run
-    was_successful=testsuites.run();
+    bool was_successful = testsuites.run();
 
     // Save xml report
     testsuites.save("reports/GVector.xml");

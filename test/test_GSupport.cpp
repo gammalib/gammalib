@@ -988,9 +988,6 @@ int main(void)
     // Allocate test suite container
     GTestSuites testsuites("Support module");
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create and append test suite
     TestGSupport test;
 
@@ -998,7 +995,7 @@ int main(void)
     testsuites.append(test);
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GSupport.xml");

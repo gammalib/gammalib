@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelCubeBackground.cpp - CTA cube background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Michael Mayer                               *
+ *  copyright (C) 2013-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -551,7 +551,6 @@ void GCTAModelCubeBackground::read(const GXmlElement& xml)
 
     // Initialise XML elements
     const GXmlElement* spectral = NULL;
-    const GXmlElement* temporal = NULL;
 
     // Get pointer on spectrum
     spectral = xml.element("spectrum", 0);
@@ -561,7 +560,7 @@ void GCTAModelCubeBackground::read(const GXmlElement& xml)
 
     // Optionally get temporal model
     if (xml.elements("temporalModel")) {
-        temporal   = xml.element("temporalModel", 0);
+        const GXmlElement* temporal = xml.element("temporalModel", 0);
         m_temporal = xml_temporal(*temporal);
     }
     else {

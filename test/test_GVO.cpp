@@ -208,9 +208,6 @@ int main(void)
     // into the test directory)
     unsetenv("HOME");
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create a test suite
     TestGVO test;
 
@@ -218,7 +215,7 @@ int main(void)
     testsuites.append(test);
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GVO.xml");

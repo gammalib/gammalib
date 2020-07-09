@@ -252,7 +252,7 @@ GPhases gammalib::read_ds_phase(const GFitsHDU& hdu)
 
         // Set data sub-space key strings
         std::string type_key  = "DSTYP"+gammalib::str(i);
-        std::string unit_key  = "DSUNI"+gammalib::str(i);
+        //std::string unit_key  = "DSUNI"+gammalib::str(i);
         std::string value_key = "DSVAL"+gammalib::str(i);
 
         // Continue only if type_key is found and if this key is PHASE
@@ -318,7 +318,7 @@ std::string gammalib::read_ds_gti_extname(const GFitsHDU& hdu)
 
         // Set data sub-space key strings
         std::string type_key  = "DSTYP"+gammalib::str(i);
-        std::string unit_key  = "DSUNI"+gammalib::str(i);
+        //std::string unit_key  = "DSUNI"+gammalib::str(i);
         std::string value_key = "DSVAL"+gammalib::str(i);
         std::string ref_key   = "DSREF"+gammalib::str(i);
 

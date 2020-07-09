@@ -870,9 +870,6 @@ int main(void)
     // Allocate test suit container
     GTestSuites testsuites("GMatrix class testing");
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create a test suite
     TestGMatrix test;
 
@@ -880,7 +877,7 @@ int main(void)
     testsuites.append(test);
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GMatrix.xml");

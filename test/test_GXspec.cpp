@@ -573,9 +573,6 @@ int main(void)
     // Allocate test suit container
     GTestSuites testsuites("Xspec module");
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create a test suite
     TestGXspec test;
 
@@ -583,7 +580,7 @@ int main(void)
     testsuites.append(test);
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GXspec.xml");
