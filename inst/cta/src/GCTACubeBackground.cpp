@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTACubeBackground.cpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2018 by Michael Mayer                               *
+ *  copyright (C) 2015-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -468,7 +468,6 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
             // Initialise values for integration over energy bin
             double f1 = 0.0;
-            double f2 = 0.0;
 
             // Loop over all energy bins of the cube
             for (int iebin = 0, ibin = ipix; iebin < nebins; ++iebin, ibin += npix) {
@@ -485,7 +484,7 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
                 GCTAEventBin* bin = eventcube[ibin];
                 bin->dir(dir); // Set instrument direction
                 bin->energy(m_ebounds.emax(iebin));
-                f2 = obs.models().eval(*bin, *cta);
+                double f2 = obs.models().eval(*bin, *cta);
 
                 // Add background model value to cube if the energy bin is
                 // fully container in the observation interval and if both f1
