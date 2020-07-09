@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdisp2D.cpp - CTA 2D energy dispersion class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2019 by Florent Forest                              *
+ *  copyright (C) 2015-2020 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -527,7 +527,6 @@ GEnergy GCTAEdisp2D::mc(GRan&          ran,
     double    ewidth               = emax - emin;
     double    f                    = 0.0;
     double    ftest                = 1.0;
-    int       zeros                = 0;
     const int max_subsequent_zeros = 10;
 
     // Find energy by rejection method
