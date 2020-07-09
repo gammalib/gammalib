@@ -219,8 +219,13 @@ GWcs& GWcs::operator=(const GWcs& wcs)
  ***************************************************************************/
 void GWcs::read(const GFitsHDU& hdu)
 {
-    // Clear object
-    clear();
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GSkyProjection::free_members();
+
+    // Initialise members
+    this->GSkyProjection::init_members();
+    init_members();
 
     // Continue only if there are standard keywords
     if (hdu.has_card("CTYPE1") && hdu.has_card("CTYPE2") &&
