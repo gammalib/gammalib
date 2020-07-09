@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMIaq.cpp - COMPTEL instrument response representation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -342,8 +342,10 @@ void GCOMIaq::set(const GModelSpectral& spectrum, const GEbounds& ebounds)
         double weight = spectrum.flux(ebds.emin(i), ebds.emax(i)) /
                         flux_total;
 
-        // Initialise sum
+        // Debug: Initialise sum
+        #if defined(G_DEBUG_SET_CONTINUUM)
         double sum = 0.0;
+        #endif
 
         // Continue only if we have weight
         if (weight > 0.0) {
@@ -361,12 +363,14 @@ void GCOMIaq::set(const GModelSpectral& spectrum, const GEbounds& ebounds)
             for (int k = 0; k < iaq.npix(); ++k) {
                 double value = m_iaq(k) * weight;
                 iaq(k)      += value;
+                #if defined(G_DEBUG_SET_CONTINUUM)
                 sum         += value;
+                #endif
             }
 
         } // endif: we has weight
 
-        // Debug
+        // Debug: print results
         #if defined(G_DEBUG_SET_CONTINUUM)
         std::cout << "Energy=" << energy;
         std::cout << " weight=" << weight;
@@ -1171,10 +1175,14 @@ void GCOMIaq::location_smearing(const double& zenith)
 
         // Copy phigeo vector
         std::vector<double> values;
+        #if defined(G_DEBUG_LOCATION_SMEARING)
         double              sum_before = 0.0;
+        #endif
         for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
             values.push_back(m_iaq(i_phigeo, i_phibar));
+            #if defined(G_DEBUG_LOCATION_SMEARING)
             sum_before += m_iaq(i_phigeo, i_phibar);
+            #endif
         }
 
         // Compute convolution integral for each phigeo pixel
@@ -1211,10 +1219,14 @@ void GCOMIaq::location_smearing(const double& zenith)
         } // endfor: convolution integral
 
         // Restore phigeo vector
+        #if defined(G_DEBUG_LOCATION_SMEARING)
         double sum_after = 0.0;
+        #endif
         for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
             m_iaq(i_phigeo, i_phibar) = convolved_values[i_phigeo];
+            #if defined(G_DEBUG_LOCATION_SMEARING)
             sum_after += convolved_values[i_phigeo];
+            #endif
         }
 
         // Debug
