@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralPlawEnergyFlux.cpp - Spectral power law model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Michael Mayer                                    *
+ *  copyright (C) 2016-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -412,33 +412,35 @@ double GModelSpectralPlawEnergyFlux::flux(const GEnergy& emin,
     // Compute only if integration range is valid
     if (emin < emax) {
 
-    	// Compute power law normalization
-    	double norm = 0.0;
-    	if (index() != -2.0) {
-			double gamma        = m_index.value() + 2.0;
-			double pow_ref_emin = std::pow(this->emin().MeV(), gamma);
-			double pow_ref_emax = std::pow(this->emax().MeV(), gamma);
-			norm = m_eflux.value() * gammalib::erg2MeV * gamma / (pow_ref_emax - pow_ref_emin);
+        // Compute power law normalization
+        double norm = 0.0;
+        if (index() != -2.0) {
+            double gamma        = m_index.value() + 2.0;
+            double pow_ref_emin = std::pow(this->emin().MeV(), gamma);
+            double pow_ref_emax = std::pow(this->emax().MeV(), gamma);
+            norm = m_eflux.value() * gammalib::erg2MeV * gamma /
+                   (pow_ref_emax - pow_ref_emin);
 		}
 		else {
-			double log_ref_emin = std::log(this->emin().MeV());
-			double log_ref_emax = std::log(this->emax().MeV());
-			norm = m_eflux.value() * gammalib::erg2MeV / (log_ref_emax - log_ref_emin);
+            double log_ref_emin = std::log(this->emin().MeV());
+            double log_ref_emax = std::log(this->emax().MeV());
+            norm = m_eflux.value() * gammalib::erg2MeV /
+                   (log_ref_emax - log_ref_emin);
 		}
 
     	// Compute photon flux
 		if (index() != -1.0) {
-			double gamma    = m_index.value() + 1.0;
-			double pow_emin = std::pow(emin.MeV(), gamma);
-			double pow_emax = std::pow(emax.MeV(), gamma);
-			flux = norm / gamma * (pow_emax - pow_emin);
+            double gamma    = m_index.value() + 1.0;
+            double pow_emin = std::pow(emin.MeV(), gamma);
+            double pow_emax = std::pow(emax.MeV(), gamma);
+            flux = norm / gamma * (pow_emax - pow_emin);
 		}
 
 		// Case B: Index is -1
 		else {
-			double log_emin = std::log(emin.MeV());
-			double log_emax = std::log(emax.MeV());
-			flux = norm * (log_emax - log_emin);
+            double log_emin = std::log(emin.MeV());
+            double log_emax = std::log(emax.MeV());
+            flux = norm * (log_emax - log_emin);
 		}
 
     } // endif: integration range was valid
@@ -475,7 +477,6 @@ double GModelSpectralPlawEnergyFlux::eflux(const GEnergy& emin,
     if (emin < emax) {
 
         // Compute power law normalization
-        double norm;
         if (index() != -2.0) {
             double gamma        = m_index.value() + 2.0;
             double pow_ref_emin = std::pow(this->emin().MeV(), gamma);
@@ -483,17 +484,17 @@ double GModelSpectralPlawEnergyFlux::eflux(const GEnergy& emin,
             double pow_emin     = std::pow(emin.MeV(), gamma);
             double pow_emax     = std::pow(emax.MeV(), gamma);
             double factor       = (pow_emax - pow_emin) /
-                                              (pow_ref_emax - pow_ref_emin);
+                                  (pow_ref_emax - pow_ref_emin);
             eflux               = m_eflux.value() * factor;
         }
         else {
         	double log_emin     = std::log(emin.MeV());
-			double log_emax     = std::log(emax.MeV());
-			double log_ref_emin = std::log(this->emin().MeV());
-			double log_ref_emax = std::log(this->emax().MeV());
-			double factor       = (log_emax - log_emin) /
-								  (log_ref_emax - log_ref_emin);
-			eflux               = m_eflux.value() * factor;
+            double log_emax     = std::log(emax.MeV());
+            double log_ref_emin = std::log(this->emin().MeV());
+            double log_ref_emax = std::log(this->emax().MeV());
+            double factor       = (log_emax - log_emin) /
+                                  (log_ref_emax - log_ref_emin);
+            eflux               = m_eflux.value() * factor;
         }
 
     } // endif: integration range was valid
@@ -743,7 +744,7 @@ void GModelSpectralPlawEnergyFlux::init_members(void)
 void GModelSpectralPlawEnergyFlux::copy_members(const GModelSpectralPlawEnergyFlux& model)
 {
     // Copy members
-	m_type  = model.m_type;
+    m_type  = model.m_type;
     m_eflux = model.m_eflux;
     m_index = model.m_index;
     m_emin  = model.m_emin;

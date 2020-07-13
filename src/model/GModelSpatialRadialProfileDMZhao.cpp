@@ -627,9 +627,6 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
     // Update precomputation cache
     update();
 
-    // Initialize integral value
-    double value = 0.0;
-
     // Set up integration limits
     double los_min = m_halo_distance.value() - m_mass_radius;
     double los_max = m_halo_distance.value() + m_mass_radius;
@@ -654,7 +651,7 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
     bounds.push_back(m_halo_distance.value());
 
     // Compute value
-    value = integral.romberg(bounds);
+    double value = integral.romberg(bounds);
 
     // apply scale density squared
     // TODO: must be multiplied by the particle physics factor
@@ -802,17 +799,16 @@ double GModelSpatialRadialProfileDMZhao::mass_density(const double& radius) cons
 double GModelSpatialRadialProfileDMZhao::jfactor(const double& angle) const
 {
     // Integration settings
-    double minradian = 0.0;
-    int    npoints   = 200;
+    const double minradian = 0.0;
+    const int    npoints   = 200;
   
     // Initialize other variables
     double jfactor = 0.0;
     double dr      = (angle - minradian) / npoints;
-    double r       = 0.0;
   
     // Loop over different radii in the profile
     for (int i = 0; i < npoints; ++i) {
-        r        = minradian + (i * dr);
+        double r = minradian + (i * dr);
         jfactor += profile_value(r) * r * dr;
     }
   

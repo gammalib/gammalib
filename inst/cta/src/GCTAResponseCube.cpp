@@ -1093,9 +1093,6 @@ double GCTAResponseCube::psf_diffuse(const GModelSpatial* model,
     static const int max_iter_delta = 8;
     static const int max_iter_phi   = 8;
 
-    // Initialise PSF
-    double psf = 0.0;
-
     // Compute rotation matrix to convert from PSF centred coordinate system
     // spanned by delta and phi into the reference frame of the observed
     // arrival direction given in Right Ascension and Declination.
@@ -1132,7 +1129,7 @@ double GCTAResponseCube::psf_diffuse(const GModelSpatial* model,
     integral.fixed_iter(iter);
 
     // Integrate over PSF delta angle
-    psf = integral.romberg(delta_min, delta_max);
+    double psf = integral.romberg(delta_min, delta_max);
 
     // Return PSF
     return psf;

@@ -185,7 +185,7 @@ GXXXEventBin* GXXXEventCube::operator[](const int& index)
 const GXXXEventBin* GXXXEventCube::operator[](const int& index) const
 {
     // Set event bin (circumvent const correctness)
-    ((GXXXEventCube*)this)->set_bin(index);
+    const_cast<GXXXEventCube*>(this)->set_bin(index);
 
     // Return pointer
     return (&m_bin);

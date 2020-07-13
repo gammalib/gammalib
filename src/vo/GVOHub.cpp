@@ -2158,9 +2158,8 @@ std::string GVOHub::random_string(const size_t& length) const
     srand(time(0));
     std::string str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmno"
                       "pqrstuvwxyz";
-    int pos;
     while(str.size() != length) {
-        pos = ((rand() % (str.size() - 1)));
+        int pos = ((rand() % (str.size() - 1)));
         str.erase(pos, 1);
     }
 

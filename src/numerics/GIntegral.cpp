@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GIntegral.cpp - Integration class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -742,7 +742,6 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
 
     // Initialise integration result
     double result = 0.0;
-    double error  = 0.0; 
 
     // Allocate some arrays
     double fv1[5];
@@ -814,12 +813,11 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
                        gammalib::gkw21b[k] *
                        (std::abs(fv3[k] - mean) + std::abs(fv4[k] - mean)));
         }
-        resasc *= abs_h ;
-        result  = res21 * h;
-        error   = rescale_error((res21 - res10) * h, resabs, resasc);
+        resasc      *= abs_h ;
+        result       = res21 * h;
+        double error = rescale_error((res21 - res10) * h, resabs, resasc);
 
         // Test for convergence */
-        //if (err < epsabs || err < epsrel * fabs (result))
         if (error < m_eps * std::abs(result)) {
             m_has_abserr = true;
             m_abserr     = error;
@@ -848,7 +846,6 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
 
         // Test for convergence */
         error = rescale_error((res43 - res21) * h, resabs, resasc);
-        //if (err < epsabs || err < epsrel * fabs (result))
         if (error < m_eps * std::abs(result)) {
             m_has_abserr = true;
             m_abserr     = error;
@@ -876,7 +873,6 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
 
         // Test for convergence */
         error = rescale_error ((res87 - res43) * h, resabs, resasc);
-        //if (err < epsabs || err < epsrel * fabs (result))
         if (error < m_eps * std::abs(result)) {
             m_has_abserr = true;
             m_abserr     = error;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATObservation.cpp - Fermi LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -499,9 +499,7 @@ void GLATObservation::write(GXmlElement& xml) const
 
         // Handle IRF
         else if (par->attribute("name") == "IRF") {
-            std::string irfname = "";
-            irfname = m_response.rspname();
-            par->attribute("value", irfname);
+            par->attribute("value", m_response.rspname());
             npar[3]++;
         }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrixSparse.cpp - Sparse matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -3191,9 +3191,9 @@ void GMatrixSparse::remove_zero_row_col(void)
         int num = 0;
 
         // Loop over all elements in original column
-        int c_row;
         for (int i = i_start; i < i_stop; ++i) {
-            if ((c_row = row_map[m_rowinx[i]]) >= 0) {
+            int c_row = row_map[m_rowinx[i]];
+            if (c_row >= 0) {
                 *d_data++   = m_data[i];
                 *d_rowinx++ = c_row;
                 num++;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.cpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1142,16 +1142,13 @@ double GCTABackground3D::solid_angle(const double& detx1, const double& dety1,
                                      const double& detx2, const double& dety2,
                                      const double& detx3, const double& dety3) const
 {
-    // Initialise solid angle
-    double solidangle = 0.0;
-
     // Set sky directions
-	double  theta1 = std::sqrt(detx1 * detx1 + dety1 * dety1);
-	double  phi1   = std::atan2(dety1, detx1);
-	double  theta2 = std::sqrt(detx2 * detx2 + dety2 * dety2);
-	double  phi2   = std::atan2(dety2, detx2);
-	double  theta3 = std::sqrt(detx3 * detx3 + dety3 * dety3);
-	double  phi3   = std::atan2(dety3, detx3);
+    double  theta1 = std::sqrt(detx1 * detx1 + dety1 * dety1);
+    double  phi1   = std::atan2(dety1, detx1);
+    double  theta2 = std::sqrt(detx2 * detx2 + dety2 * dety2);
+    double  phi2   = std::atan2(dety2, detx2);
+    double  theta3 = std::sqrt(detx3 * detx3 + dety3 * dety3);
+    double  phi3   = std::atan2(dety3, detx3);
     GSkyDir dir1;
     GSkyDir dir2;
     GSkyDir dir3;
@@ -1165,11 +1162,11 @@ double GCTABackground3D::solid_angle(const double& detx1, const double& dety1,
     double a23 = dir2.dist(dir3);
 
     // Compute solid angle
-    double s   = 0.5 * (a12 + a23 + a13);
-    solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
-                                           std::tan(0.5*(s-a12)) *
-                                           std::tan(0.5*(s-a23)) *
-                                           std::tan(0.5*(s-a13))));
+    double s          = 0.5 * (a12 + a23 + a13);
+    double solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                                  std::tan(0.5*(s-a12)) *
+                                                  std::tan(0.5*(s-a23)) *
+                                                  std::tan(0.5*(s-a13))));
 
     // Return solid angle
     return solidangle;

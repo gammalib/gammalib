@@ -272,7 +272,7 @@ void GXXXObservation::read(const GXmlElement& xml)
 void GXXXObservation::write(GXmlElement& xml) const
 {
     // Allocate XML element pointer
-    GXmlElement* par;
+    //GXmlElement* par;
 
     // TODO: Write out all parameters. An example is shown below.
     //par = gammalib::xml_need_par(G_WRITE, xml, "DRE");

@@ -1736,7 +1736,6 @@ int GModelSpectralTable::par_index(const std::string& name) const
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_PAR_INDEX, name);
         std::string msg = "Parameter name \""+name+"\" not found in spectral "
                           "table. Please specify one of the following parameter "
                           "names:";

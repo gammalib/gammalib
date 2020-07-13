@@ -816,7 +816,7 @@ void GSkyDir::moon(const GTime& time, const double& epoch)
     // Sum the periodic terms
     double sum_l = Al;
     double sum_b = Ab;
-    double sum_r = 0.0; // A_r = 0
+    //double sum_r = 0.0; // A_r = 0
     for (int i = 0; i < 60; ++i) {
 
         // Compute sine and cosine of longitude and sine of latitude

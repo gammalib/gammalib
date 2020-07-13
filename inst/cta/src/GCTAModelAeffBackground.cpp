@@ -1108,9 +1108,6 @@ GModelTemporal* GCTAModelAeffBackground::xml_temporal(const GXmlElement& tempora
 double GCTAModelAeffBackground::aeff_integral(const GObservation& obs,
                                               const double&       logE) const
 {
-    // Initialise result
-    double value = 0.0;
-
     // Set number of iterations for Romberg integration.
     static const int iter_theta = 6;
     static const int iter_phi   = 6;
@@ -1140,7 +1137,7 @@ double GCTAModelAeffBackground::aeff_integral(const GObservation& obs,
     integral.fixed_iter(iter_theta);
 
     // Spatially integrate radial component
-    value = integral.romberg(0.0, roi_radius);
+    double value = integral.romberg(0.0, roi_radius);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)

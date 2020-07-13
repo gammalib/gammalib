@@ -450,7 +450,7 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
             const GCTAResponseCube& rsp = gammalib::cta_rsp_cube(G_NPRED, obs);
 
             // Retrieve CTA background
-            const GCTACubeBackground bgd = rsp.background();
+            const GCTACubeBackground& bgd = rsp.background();
 
             // Get log10 of energy in TeV
             double logE = obsEng.log10TeV();

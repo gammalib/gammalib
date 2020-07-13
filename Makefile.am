@@ -108,7 +108,7 @@ cppcheck:
 	@if type cppcheck >/dev/null 2>&1; then \
 		cppcheck -v --enable=all --xml --xml-version=2 \
         --suppress=missingIncludeSystem \
-		-Iinclude -Iinst/lat/include -Iinst/cta/include -Iinst/mwl/include \
+		-Iinclude -Iinst/com/include -Iinst/cta/include -Iinst/lat/include -Iinst/mwl/include -Iinst/spi/include  \
 		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
 	else \
 		echo "cppcheck not found in PATH."; \

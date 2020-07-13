@@ -573,9 +573,6 @@ double GModelSpatial::circle_int_kern_rho::eval(const double& rho)
  ***************************************************************************/
 double GModelSpatial::circle_int_kern_omega::eval(const double& omega)
 {
-    // Initialise model value
-    double flux = 0.0;
-
     // Compute sky direction corresponding to given rho, omega
     GSkyDir dir = GSkyDir(m_reg->centre());
 
@@ -586,7 +583,7 @@ double GModelSpatial::circle_int_kern_omega::eval(const double& omega)
     GPhoton photon = GPhoton(dir, m_srcEng, m_srcTime);
 
     // Evaluate model for this sky direction
-    flux = m_model->eval(photon);
+    double flux = m_model->eval(photon);
 
     // Return
     return flux;

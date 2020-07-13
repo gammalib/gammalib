@@ -384,9 +384,6 @@ double GCTAModelSpatial::npred(const GEnergy&      energy,
     static const int max_iter_theta = 8;
     static const int max_iter_phi   = 8;
 
-    // Initialise result
-    double npred = 0.0;
-
     // Get reference on CTA pointing and event list from observation
     const GCTAPointing&  pnt    = gammalib::cta_pnt(G_NPRED, obs);
     const GCTAEventList& events = gammalib::cta_event_list(G_NPRED, obs);
@@ -417,7 +414,7 @@ double GCTAModelSpatial::npred(const GEnergy&      energy,
 
     // Spatially integrate radial component (assumes that RoI centre is
     // at DETX=DETY=0)
-    npred = integral.romberg(0.0, roi_radius);
+    double npred = integral.romberg(0.0, roi_radius);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)

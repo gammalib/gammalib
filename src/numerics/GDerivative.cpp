@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GDerivative.cpp - Derivative class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -850,16 +850,14 @@ void GDerivative::set_tiny(void)
     GDerivative::tiny tiny;
 
     // Calculate machine precision
-    double epstry = 0.5;
-    double epsbak = 0.0;
-    double epsp1  = 0.0;
-    double one    = 1.0;
+    double       epstry = 0.5;
+    const double one    = 1.0;
 
     // Loop until we found
     for (int i = 0; i < 100; ++i) {
-        epstry *= 0.5;
-        epsp1   = one + epstry;
-        epsbak  = tiny(epsp1);
+        epstry       *= 0.5;
+        double epsp1  = one + epstry;
+        double epsbak = tiny(epsp1);
         if (epsbak < epstry) {
             m_tiny = 8.0 * epstry;
             break;

@@ -1769,14 +1769,11 @@ double cta_psf_radial_kern_rho::eval(const double& rho)
  ***************************************************************************/
 double cta_psf_radial_kern_omega::eval(const double& omega)
 {
-    // Initialise Irf value
-    double irf = 0.0;
-
     // Compute Psf offset angle (radians)
     double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
 
     // Evaluate Psf * model for this delta
-    irf = m_rsp->psf()(m_srcDir, delta, m_srcEng);
+    double irf = m_rsp->psf()(m_srcDir, delta, m_srcEng);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelTemporalLightCurve.cpp - Temporal light curve model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -723,9 +723,6 @@ void GModelTemporalLightCurve::mc_update(const GTime& tmin,
         m_mc_time.clear();
         m_mc_dt.clear();
 
-        // Initialise duration
-        double duration = 0.0;
-
         // Continue only if time interval overlaps with temporal file function
         // and if time interval is valid
         if (tmax > m_tmin && tmin < m_tmax && tmax > tmin) {
@@ -769,9 +766,8 @@ void GModelTemporalLightCurve::mc_update(const GTime& tmin,
                 slope  /= renorm;
                 offset /= renorm;
 
-                // Update effective duration and real duration
+                // Update effective duration
                 m_mc_eff_duration += cum;
-                duration          += dt;
 
                 // Put mean normalization and integral on stack
                 m_mc_cum.push_back(cum);

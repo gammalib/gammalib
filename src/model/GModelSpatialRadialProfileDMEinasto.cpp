@@ -755,17 +755,16 @@ double GModelSpatialRadialProfileDMEinasto::mass_density(const double& radius) c
 double GModelSpatialRadialProfileDMEinasto::jfactor(const double& angle) const
 {
     // Integration settings
-    double minradian = 0.0;
-    int    npoints   = 200;
+    const double minradian = 0.0;
+    const int    npoints   = 200;
 
     // Initialize other variables
-    double jfactor   = 0.0 ;
-    double dr        = (angle - minradian) / npoints;
-    double r         = 0.0;
+    double jfactor = 0.0;
+    double dr      = (angle - minradian) / npoints;
 
     // Loop over different radii in the profile
     for (int i = 0; i < npoints; ++i) {
-        r      = minradian + (i * dr);
+        double r = minradian + (i * dr);
         jfactor += profile_value(r) * r * dr;
     }
 

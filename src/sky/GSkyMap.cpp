@@ -2468,7 +2468,7 @@ void GSkyMap::load(const GFilename& filename)
                 // If HDU is WCS then read data
                 if (is_wcs(hdu)) {
                     read_wcs(static_cast<const GFitsImage&>(hdu));
-                    loaded = true;
+                    //loaded = true;
                     break;
                 }
 
@@ -3397,20 +3397,17 @@ double GSkyMap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
 double GSkyMap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
                            const GSkyDir& dir3) const
 {
-    // Initialise solid angle
-    double solidangle = 0.0;
-
     // Compute angular distances between pixel corners
     double a12 = dir1.dist(dir2);
     double a13 = dir1.dist(dir3);
     double a23 = dir2.dist(dir3);
 
     // Compute solid angle
-    double s   = 0.5 * (a12 + a23 + a13);
-    solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
-                                           std::tan(0.5*(s-a12)) *
-                                           std::tan(0.5*(s-a23)) *
-                                           std::tan(0.5*(s-a13))));
+    double s          = 0.5 * (a12 + a23 + a13);
+    double solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                                  std::tan(0.5*(s-a12)) *
+                                                  std::tan(0.5*(s-a23)) *
+                                                  std::tan(0.5*(s-a13))));
 
     // Return solid angle
     return solidangle;

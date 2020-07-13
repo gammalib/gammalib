@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsTable.cpp - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1734,7 +1734,6 @@ char* GFitsTable::get_tform(const int& colnum) const
             break;
         default:
             throw GException::fits_unknown_tabtype(G_GET_TFORM, m_type);
-            break;
         }
         ptr[size] = '\0';
     }

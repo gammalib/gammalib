@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.cpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -649,10 +649,6 @@ void GVOClient::free_members(void)
  ***************************************************************************/
 bool GVOClient::find_hub(void)
 {
-    // Allocate line buffer
-    const int n = 1000; 
-    char      line[n];
-
     // Initialise find flag to false
     bool found = false;
 
@@ -672,6 +668,10 @@ bool GVOClient::find_hub(void)
         // Open SAMP lockfile. Continue only if opening was successful
         FILE* fptr = fopen(lockurl.c_str(), "r");
         if (fptr != NULL) {
+
+            // Allocate line buffer
+            const int n = 1000;
+            char      line[n];
 
             // Parse lockfile and search for mandatory tokens
             while (fgets(line, n, fptr) != NULL) {

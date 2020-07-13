@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFft.hpp - Fast Fourier transformation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Juergen Knoedlseder                              *
+ *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -746,9 +746,6 @@ void GFft::transform(std::complex<double>* data,
 
         // Update factorisation product
         product *= factor;
-
-        // Compute number of coefficients per factor
-        int q = n / product;
 
         // Set state dependent stuff
         std::complex<double>* in;
