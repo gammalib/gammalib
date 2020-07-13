@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -772,15 +772,12 @@ int main(void)
     std::string caldb = "CALDB="+com_caldb;
     putenv((char*)caldb.c_str());
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create test suite and append it to the container
     TestGCOM test;
     testsuites.append(test);
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GCOM.xml");

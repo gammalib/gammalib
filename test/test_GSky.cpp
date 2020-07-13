@@ -886,7 +886,7 @@ void TestGSky::test_GSkyMap_healpix_io(void)
 void TestGSky::test_GSkyMap_wcs_construct(void)
 {
     // Set precision
-    double eps = 1.0e-5;
+    const double eps = 1.0e-5;
 
     // Test void constructor
     test_try("Test void constructor");

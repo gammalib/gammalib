@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.cpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -214,7 +214,7 @@ GCOMEventBin* GCOMEventCube::operator[](const int& index)
 const GCOMEventBin* GCOMEventCube::operator[](const int& index) const
 {
     // Set event bin (circumvent const correctness)
-    ((GCOMEventCube*)this)->set_bin(index);
+    const_cast<GCOMEventCube*>(this)->set_bin(index);
 
     // Return pointer
     return (&m_bin);

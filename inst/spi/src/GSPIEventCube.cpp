@@ -199,7 +199,7 @@ GSPIEventBin* GSPIEventCube::operator[](const int& index)
 const GSPIEventBin* GSPIEventCube::operator[](const int& index) const
 {
     // Set event bin (circumvent const correctness)
-    ((GSPIEventCube*)this)->set_bin(index);
+    const_cast<GSPIEventCube*>(this)->set_bin(index);
 
     // Return pointer
     return (&m_bin);
@@ -1057,7 +1057,7 @@ void GSPIEventCube::alloc_data(void)
 /***********************************************************************//**
  * @brief Read data from INTEGRAL/SPI "SPI.-EBDS-SET" extension
  *
- * @param[in] ebds Energy boundaries FITS table.
+ * @param[in] ebds Pointer to energy boundaries FITS table.
  *
  * @exception GException::invalid_value
  *            Incompatible number of energy bins encountered
@@ -1067,30 +1067,34 @@ void GSPIEventCube::alloc_data(void)
  ***************************************************************************/
 void GSPIEventCube::read_ebds(const GFitsTable* ebds)
 {
-    // Read energy boundaries
-    m_ebounds.read(*ebds);
+    // Continue only if energy boundary FITS table pointer is valid
+    if (ebds != NULL) {
 
-    // Throw an exception if the number of energy boundaries is not
-    // consistent with DSP keyword
-    if (m_ebounds.size() != m_num_ebin) {
-        std::string msg = "Number of energy bins "+
-                          gammalib::str(m_ebounds.size())+" found in "
-                          "\"SPI.-EBDS-SET\" extension differes from value "+
-                          gammalib::str(m_num_det)+" of \"DET_NUM\" keyword "
-                          "in \"SPI.-OBS.-DSP\" extension. Please specify a "
-                          "valid Observation Group.";
-        throw GException::invalid_value(G_READ_EBDS, msg);
-    }
+        // Read energy boundaries
+        m_ebounds.read(*ebds);
 
-    // Loop over all energy bins
-    for (int iebin = 0; iebin < m_num_ebin; ++iebin) {
+        // Throw an exception if the number of energy boundaries is not
+        // consistent with DSP keyword
+        if (m_ebounds.size() != m_num_ebin) {
+            std::string msg = "Number of energy bins "+
+                              gammalib::str(m_ebounds.size())+" found in "
+                              "\"SPI.-EBDS-SET\" extension differes from value "+
+                              gammalib::str(m_num_det)+" of \"DET_NUM\" keyword "
+                              "in \"SPI.-OBS.-DSP\" extension. Please specify a "
+                              "valid Observation Group.";
+            throw GException::invalid_value(G_READ_EBDS, msg);
+        }
 
-        // Store linear mean energy and bin width
-        m_energy[iebin] = m_ebounds.emean(iebin);
-        m_ewidth[iebin] = m_ebounds.ewidth(iebin);
+        // Loop over all energy bins
+        for (int iebin = 0; iebin < m_num_ebin; ++iebin) {
 
-    } // endfor: looped over all energy bins
+            // Store linear mean energy and bin width
+            m_energy[iebin] = m_ebounds.emean(iebin);
+            m_ewidth[iebin] = m_ebounds.ewidth(iebin);
 
+        } // endfor: looped over all energy bins
+
+    } // endif: energy boundary FITS table pointer was valid
 
     // Return
     return;
@@ -1100,8 +1104,8 @@ void GSPIEventCube::read_ebds(const GFitsTable* ebds)
 /***********************************************************************//**
  * @brief Read pointing information
  *
- * @param[in] pnt Pointing FITS table.
- * @param[in] gti GTI FITS table.
+ * @param[in] pnt Pointer to pointing FITS table.
+ * @param[in] gti Pointer to GTI FITS table.
  *
  * @exception GException::invalid_value
  *            Incompatible PTID_SPI pointing identifiers encountered
@@ -1111,54 +1115,59 @@ void GSPIEventCube::read_ebds(const GFitsTable* ebds)
  ***************************************************************************/
 void GSPIEventCube::read_pnt(const GFitsTable* pnt, const GFitsTable* gti)
 {
-    // Get relevant columns
-    const GFitsTableCol* pnt_ptid = (*pnt)["PTID_SPI"];
-    const GFitsTableCol* ra_spix  = (*pnt)["RA_SPIX"];
-    const GFitsTableCol* dec_spix = (*pnt)["DEC_SPIX"];
-    const GFitsTableCol* ra_spiz  = (*pnt)["RA_SPIZ"];
-    const GFitsTableCol* dec_spiz = (*pnt)["DEC_SPIZ"];
-    const GFitsTableCol* gti_ptid = (*gti)["PTID_SPI"];
-    const GFitsTableCol* det_id   = (*gti)["DET_ID"];
+    // Continue only if FITS table pointers are valid
+    if (pnt != NULL && gti != NULL) {
 
-    // Loop over all pointings
-    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+        // Get relevant columns
+        const GFitsTableCol* pnt_ptid = (*pnt)["PTID_SPI"];
+        const GFitsTableCol* ra_spix  = (*pnt)["RA_SPIX"];
+        const GFitsTableCol* dec_spix = (*pnt)["DEC_SPIX"];
+        const GFitsTableCol* ra_spiz  = (*pnt)["RA_SPIZ"];
+        const GFitsTableCol* dec_spiz = (*pnt)["DEC_SPIZ"];
+        const GFitsTableCol* gti_ptid = (*gti)["PTID_SPI"];
+        const GFitsTableCol* det_id   = (*gti)["DET_ID"];
 
-        // Store pointing identifier
-        m_ptid[ipt] = pnt_ptid->string(ipt);
+        // Loop over all pointings
+        for (int ipt = 0; ipt < m_num_pt; ++ipt) {
 
-        // Store SPI X and Z directions
-        m_spix[ipt].radec_deg(ra_spix->real(ipt), dec_spix->real(ipt));
-        m_spiz[ipt].radec_deg(ra_spiz->real(ipt), dec_spiz->real(ipt));
+            // Store pointing identifier
+            m_ptid[ipt] = pnt_ptid->string(ipt);
 
-        // Set pointing direction
-        GSkyDir pnt_dir;
-        pnt_dir.radec_deg(ra_spix->real(ipt), dec_spix->real(ipt));
+            // Store SPI X and Z directions
+            m_spix[ipt].radec_deg(ra_spix->real(ipt), dec_spix->real(ipt));
+            m_spiz[ipt].radec_deg(ra_spiz->real(ipt), dec_spiz->real(ipt));
 
-        // Loop over all detectors
-        for (int idet = 0; idet < m_num_det; ++idet) {
+            // Set pointing direction
+            GSkyDir pnt_dir;
+            pnt_dir.radec_deg(ra_spix->real(ipt), dec_spix->real(ipt));
 
-            // Get row index in table
-            int irow = ipt * m_num_det + idet;
+            // Loop over all detectors
+            for (int idet = 0; idet < m_num_det; ++idet) {
 
-            // Throw an exception if the pointing identifier in the pointing
-            // and the GTI extension is not the same
-            if (pnt_ptid->string(ipt) != gti_ptid->string(irow)) {
-                std::string msg = "PITD_SPI \""+pnt_ptid->string(ipt)+"\" in "
-                                  "\"SPI.-OBS.-PNT\" differs from \""+
-                                  gti_ptid->string(irow)+"\" in "
-                                  "\"SPI.-OBS.-GTI\" extension for detector "+
-                                  gammalib::str(det_id->real(irow))+". Please "
-                                  "specify a valid Observation Group.";
-                throw GException::invalid_value(G_READ_PNT, msg);
-            }
+                // Get row index in table
+                int irow = ipt * m_num_det + idet;
 
-            // Store pointing direction and detector identifier
-            m_dir[irow].dir(pnt_dir);
-            m_dir[irow].detid(det_id->real(irow));
+                // Throw an exception if the pointing identifier in the pointing
+                // and the GTI extension is not the same
+                if (pnt_ptid->string(ipt) != gti_ptid->string(irow)) {
+                    std::string msg = "PITD_SPI \""+pnt_ptid->string(ipt)+"\" in "
+                                      "\"SPI.-OBS.-PNT\" differs from \""+
+                                      gti_ptid->string(irow)+"\" in "
+                                      "\"SPI.-OBS.-GTI\" extension for detector "+
+                                      gammalib::str(det_id->real(irow))+". Please "
+                                      "specify a valid Observation Group.";
+                    throw GException::invalid_value(G_READ_PNT, msg);
+                }
 
-        } // endfor: looped over all detectors
+                // Store pointing direction and detector identifier
+                m_dir[irow].dir(pnt_dir);
+                m_dir[irow].detid(det_id->real(irow));
 
-    } // endfor: looped over all pointings
+            } // endfor: looped over all detectors
+
+        } // endfor: looped over all pointings
+
+    } // endif: FITS table pointers were valid
 
     // Return
     return;
@@ -1168,60 +1177,65 @@ void GSPIEventCube::read_pnt(const GFitsTable* pnt, const GFitsTable* gti)
 /***********************************************************************//**
  * @brief Read data from INTEGRAL/SPI "SPI.-OBS.-GTI" extension
  *
- * @param[in] gti GTI FITS table.
+ * @param[in] gti Pointer to GTI FITS table.
  *
  * Reads data from an INTEGRAL/SPI "SPI.-OBS.-GTI" extension. The method
  * sets up the m_ontime array and the m_gti member.
  ***************************************************************************/
 void GSPIEventCube::read_gti(const GFitsTable* gti)
 {
-    // Get relevant columns
-    const GFitsTableCol* ontime = (*gti)["ONTIME"];
-    const GFitsTableCol* tstart = (*gti)["TSTART"];
-    const GFitsTableCol* tstop  = (*gti)["TSTOP"];
+    // Continue only if FITS table pointer is valid
+    if (gti != NULL) {
 
-    // Loop over all pointings
-    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+        // Get relevant columns
+        const GFitsTableCol* ontime = (*gti)["ONTIME"];
+        const GFitsTableCol* tstart = (*gti)["TSTART"];
+        const GFitsTableCol* tstop  = (*gti)["TSTOP"];
 
-        // Initialise minimum TSTART and maximum TSTOP for GTI (they should
-        // all be identical and are anyways not used, but we want to have a
-        // reasonable GTI object
-        double t_start = 0.0;
-        double t_stop  = 0.0;
+        // Loop over all pointings
+        for (int ipt = 0; ipt < m_num_pt; ++ipt) {
 
-        // Loop over all detectors
-        for (int idet = 0; idet < m_num_det; ++idet) {
+            // Initialise minimum TSTART and maximum TSTOP for GTI (they should
+            // all be identical and are anyways not used, but we want to have a
+            // reasonable GTI object
+            double t_start = 0.0;
+            double t_stop  = 0.0;
 
-            // Get row index in table
-            int irow = ipt * m_num_det + idet;
+            // Loop over all detectors
+            for (int idet = 0; idet < m_num_det; ++idet) {
 
-            // Store ontime
-            m_ontime[irow] = ontime->real(irow);
+                // Get row index in table
+                int irow = ipt * m_num_det + idet;
 
-            // Compute and store mean time
-            double ijd   = 0.5 * (tstart->real(irow) + tstop->real(irow));
-            m_time[irow] = gammalib::spi_ijd2time(ijd);
+                // Store ontime
+                m_ontime[irow] = ontime->real(irow);
 
-            // Update TSTART and TSTOP (only if ontime is > 0.0 since TSTART
-            // and TSTOP may be zero for zero ontime)
-            if (ontime->real(irow) > 0.0) {
-                if (t_start == 0.0 || (tstart->real(irow) < t_start)) {
-                    t_start = tstart->real(irow);
+                // Compute and store mean time
+                double ijd   = 0.5 * (tstart->real(irow) + tstop->real(irow));
+                m_time[irow] = gammalib::spi_ijd2time(ijd);
+
+                // Update TSTART and TSTOP (only if ontime is > 0.0 since TSTART
+                // and TSTOP may be zero for zero ontime)
+                if (ontime->real(irow) > 0.0) {
+                    if (t_start == 0.0 || (tstart->real(irow) < t_start)) {
+                        t_start = tstart->real(irow);
+                    }
+                    if (t_stop == 0.0 || (tstop->real(irow) > t_stop)) {
+                        t_stop = tstop->real(irow);
+                    }
                 }
-                if (t_stop == 0.0 || (tstop->real(irow) > t_stop)) {
-                    t_stop = tstop->real(irow);
-                }
+
+            } // endfor: looped over all detectors
+
+            // Append GTI (only if TSTART and TSTOP are not zero)
+            if (t_start != 0.0 && t_stop != 0.0) {
+                m_gti.append(gammalib::spi_ijd2time(t_start),
+                             gammalib::spi_ijd2time(t_stop));
             }
 
-        } // endfor: looped over all detectors
+        } // endfor: looped over all pointings
 
-        // Append GTI (only if TSTART and TSTOP are not zero)
-        if (t_start != 0.0 && t_stop != 0.0) {
-            m_gti.append(gammalib::spi_ijd2time(t_start),
-                         gammalib::spi_ijd2time(t_stop));
-        }
-
-    } // endfor: looped over all pointings
+    } // endif: FITS table pointer was valid
 
     // Return
     return;
@@ -1231,31 +1245,36 @@ void GSPIEventCube::read_gti(const GFitsTable* gti)
 /***********************************************************************//**
  * @brief Read data from INTEGRAL/SPI "SPI.-OBS.-DTI" extension
  *
- * @param[in] dti Dead time information FITS table.
+ * @param[in] dti Pointer to Dead time information FITS table.
  *
  * Reads data from an INTEGRAL/SPI "SPI.-OBS.-DTI" extension. The method
  * sets up the m_ontime array and the m_gti member.
  ***************************************************************************/
 void GSPIEventCube::read_dti(const GFitsTable* dti)
 {
-    // Get relevant columns
-    const GFitsTableCol* livetime = (*dti)["LIVETIME"];
+    // Continue only if FITS table pointer is valid
+    if (dti != NULL) {
 
-    // Loop over all pointings
-    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+        // Get relevant columns
+        const GFitsTableCol* livetime = (*dti)["LIVETIME"];
 
-        // Loop over all detectors
-        for (int idet = 0; idet < m_num_det; ++idet) {
+        // Loop over all pointings
+        for (int ipt = 0; ipt < m_num_pt; ++ipt) {
 
-            // Get row index in table
-            int irow = ipt * m_num_det + idet;
+            // Loop over all detectors
+            for (int idet = 0; idet < m_num_det; ++idet) {
 
-            // Store livetime
-            m_livetime[irow] = livetime->real(irow);
+                // Get row index in table
+                int irow = ipt * m_num_det + idet;
 
-        } // endfor: looped over all detectors
+                // Store livetime
+                m_livetime[irow] = livetime->real(irow);
 
-    } // endfor: looped over all pointings
+            } // endfor: looped over all detectors
+
+        } // endfor: looped over all pointings
+
+    } // endif: FITS table pointer was valid
 
     // Return
     return;
@@ -1276,32 +1295,37 @@ void GSPIEventCube::read_dti(const GFitsTable* dti)
  ***************************************************************************/
 void GSPIEventCube::read_dsp(const GFitsTable* dsp)
 {
-    // Get relevant columns
-    const GFitsTableCol* counts   = (*dsp)["COUNTS"];
-    const GFitsTableCol* stat_err = (*dsp)["STAT_ERR"];
+    // Continue only if FITS table pointer is valid
+    if (dsp != NULL) {
 
-    // Loop over all pointings
-    for (int ipt = 0; ipt < m_num_pt; ++ipt) {
+        // Get relevant columns
+        const GFitsTableCol* counts   = (*dsp)["COUNTS"];
+        const GFitsTableCol* stat_err = (*dsp)["STAT_ERR"];
 
-        // Loop over all detectors
-        for (int idet = 0; idet < m_num_det; ++idet) {
+        // Loop over all pointings
+        for (int ipt = 0; ipt < m_num_pt; ++ipt) {
 
-            // Get row index in table
-            int irow  = ipt * m_num_det + idet;
+            // Loop over all detectors
+            for (int idet = 0; idet < m_num_det; ++idet) {
 
-            // Set start index in destination arrays
-            int index = irow * m_num_ebin;
+                // Get row index in table
+                int irow  = ipt * m_num_det + idet;
 
-            // Copy energy bins
-            for (int iebin = 0; iebin < m_num_ebin; ++iebin, ++index) {
-                m_counts[index]   = counts->real(irow, iebin);
-                m_stat_err[index] = stat_err->real(irow, iebin);
-                m_size[index]     = m_livetime[irow] * m_ewidth[iebin].MeV();
-            }
+                // Set start index in destination arrays
+                int index = irow * m_num_ebin;
 
-        } // endfor: looped over all detectors
+                // Copy energy bins
+                for (int iebin = 0; iebin < m_num_ebin; ++iebin, ++index) {
+                    m_counts[index]   = counts->real(irow, iebin);
+                    m_stat_err[index] = stat_err->real(irow, iebin);
+                    m_size[index]     = m_livetime[irow] * m_ewidth[iebin].MeV();
+                }
 
-    } // endfor: looped over all pointings
+            } // endfor: looped over all detectors
+
+        } // endfor: looped over all pointings
+
+    } // endif: FITS table pointer was valid
 
     // Return
     return;

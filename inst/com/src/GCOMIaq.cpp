@@ -717,7 +717,9 @@ void GCOMIaq::compton_kinematics(const double& energy)
         #endif
 
         // Initialise sum
+        #if defined(G_DEBUG_COMPTON_KINEMATICS)
         double sum = 0.0;
+        #endif
 
         // Loop over phibar
         for (int i_phibar = 0; i_phibar < n_phibar; ++i_phibar) {
@@ -743,7 +745,9 @@ void GCOMIaq::compton_kinematics(const double& energy)
             m_iaq(i_phigeo, i_phibar) = response;
 
             // Add response to sum
+            #if defined(G_DEBUG_COMPTON_KINEMATICS)
             sum += response;
+            #endif
 
         } // endfor: looped over phibar
 

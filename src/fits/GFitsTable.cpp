@@ -1362,35 +1362,38 @@ void GFitsTable::data_save(void)
 
             // Delete current FITS HDU
             status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
-            if (status != 0) {
-                throw GException::fits_error(G_DATA_SAVE, status);
-            }
+            //if (status != 0) {
+            //    throw GException::fits_error(G_DATA_SAVE, status);
+            //}
+            if (status == 0) {
 
-            // Insert either ASCII or Binary table at current HDU position
-            if (exttype() == GFitsHDU::HT_ASCII_TABLE) {
-                long tbcol  = 0;
-                long rowlen = 0;
-                status = __ffgabc(tfields, tform, 1, &rowlen, &tbcol, &status);
-                status = __ffitab(FPTR(m_fitsfile), rowlen, m_rows, tfields, ttype,
-                                  &tbcol, tform, tunit, NULL, &status);
-            }
-            else {
-                status = __ffibin(FPTR(m_fitsfile), m_rows, tfields, ttype, tform,
-                                tunit, NULL, 0, &status);
-            }
-            if (status != 0) {
-                throw GException::fits_error(G_DATA_SAVE, status);
-            }
+                // Insert either ASCII or Binary table at current HDU position
+                if (exttype() == GFitsHDU::HT_ASCII_TABLE) {
+                    long tbcol  = 0;
+                    long rowlen = 0;
+                    status = __ffgabc(tfields, tform, 1, &rowlen, &tbcol, &status);
+                    status = __ffitab(FPTR(m_fitsfile), rowlen, m_rows, tfields, ttype,
+                                      &tbcol, tform, tunit, NULL, &status);
+                }
+                else {
+                    status = __ffibin(FPTR(m_fitsfile), m_rows, tfields, ttype, tform,
+                                      tunit, NULL, 0, &status);
+                }
+                //if (status != 0) {
+                //    throw GException::fits_error(G_DATA_SAVE, status);
+                //}
 
-        }
+            } // endif: deletion of current FITS HDU successful
+
+        } // endif: replacement of FITS table requested
 
         // ... otherwise create FITS table
         else {
             status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields,
                               ttype, tform, tunit, NULL, &status);
-            if (status != 0) {
-                throw GException::fits_error(G_DATA_SAVE, status);
-            }
+            //if (status != 0) {
+            //    throw GException::fits_error(G_DATA_SAVE, status);
+            //}
         }
 
         // De-allocate column definition arrays
@@ -1403,6 +1406,11 @@ void GFitsTable::data_save(void)
             if (ttype != NULL) delete [] ttype;
             if (ttype != NULL) delete [] tform;
             if (ttype != NULL) delete [] tunit;
+        }
+
+        // If status is not okay then throw an exception
+        if (status != 0) {
+            throw GException::fits_error(G_DATA_SAVE, status);
         }
 
         // Connect all existing columns to FITS table

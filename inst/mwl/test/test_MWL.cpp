@@ -268,9 +268,6 @@ int main(void)
     // Allocate test suit container
     GTestSuites testsuites("Multi-wavelength instrument specific class testing");
 
-    // Initially assume that we pass all tests
-    bool success = true;
-
     // Create a test suite
     TestGMWL test;
 
@@ -278,7 +275,7 @@ int main(void)
     testsuites.append(test);
 
     // Run the testsuites
-    success = testsuites.run();
+    bool success = testsuites.run();
 
     // Save test report
     testsuites.save("reports/GMWL.xml");

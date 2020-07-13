@@ -1562,9 +1562,8 @@ void TestGObservation::test_response_cache(void)
     cache.set("Crab", eng10, eng12, 1010.0);
     test_assert(!cache.is_empty(), "Test that filled cache is not empty");
     test_value(cache.size(), 1, "Test filled cache size");
-    bool   flag  = false;
     double value = 0.0;
-    flag = cache.contains("Crab", eng10, eng12, &value);
+    bool flag = cache.contains("Crab", eng10, eng12, &value);
     test_assert(flag, "Test that cache contains Crab/eng10/eng12 element.");
     test_value(value, 1010.0, 1.0e-6, "Test cache value");
 

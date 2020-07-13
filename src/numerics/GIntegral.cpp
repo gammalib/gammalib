@@ -431,7 +431,7 @@ double GIntegral::romberg(const double& a, const double& b, const int& order)
     m_isvalid    = true;
     m_calls      = 0;
     m_has_abserr = false;
-    m_relerr     = false;
+    m_has_relerr = false;
     
     // Continue only if integration range is valid
     if (b > a) {
@@ -680,7 +680,7 @@ double GIntegral::adaptive_simpson(const double& a, const double& b) const
     m_calls      = 0;
     m_iter       = m_max_iter;
     m_has_abserr = false;
-    m_relerr     = false;
+    m_has_relerr = false;
 
     // Compute mid-point c
     double c = 0.5*(a + b);    //!< Mid-point of interval [a,b]
@@ -738,7 +738,7 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
     m_iter       = 0;
     m_calls      = 0;
     m_has_abserr = false;
-    m_relerr     = false;
+    m_has_relerr = false;
 
     // Initialise integration result
     double result = 0.0;

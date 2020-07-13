@@ -249,7 +249,7 @@ void GLATEdisp::read(const GFits& fits, const std::string& evtype)
 
     // Set extension names
     std::string engdisp = gammalib::extname_lat_edisp;
-    std::string escales = gammalib::extname_lat_edisp_scale;
+    //std::string escales = gammalib::extname_lat_edisp_scale;
     if (!fits.contains(engdisp)) {
         engdisp += "_" + m_evtype;
     }

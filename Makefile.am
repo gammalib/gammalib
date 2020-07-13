@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for GammaLib package                                          #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2017 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -107,8 +107,11 @@ dynamic-analysis: coverage valgrind
 cppcheck:
 	@if type cppcheck >/dev/null 2>&1; then \
 		cppcheck -v --enable=all --xml --xml-version=2 \
-        --suppress=missingIncludeSystem \
-		-Iinclude -Iinst/com/include -Iinst/cta/include -Iinst/lat/include -Iinst/mwl/include -Iinst/spi/include  \
+        --suppress=missingIncludeSystem -Usun --max-configs=20 \
+		-Iinclude -Isrc/fits -Isrc/template \
+		-Iinst/com/include -Iinst/com/src \
+		-Iinst/cta/include -Iinst/cta/src \
+		-Iinst/lat/include -Iinst/mwl/include -Iinst/spi/include \
 		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
 	else \
 		echo "cppcheck not found in PATH."; \

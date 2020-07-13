@@ -1453,13 +1453,12 @@ void TestGCTAResponse::test_response_cache(void)
 
     // Initialise results
     double value = 0.0;
-    bool   flag  = false;
 
     // Test empty response cache
     GResponseCache cache1;
     test_assert(cache1.is_empty(), "Test is_empty() method for empty cache");
 	test_value(cache1.size(), 0, "Test size() method for empty cache");
-    flag = cache1.contains("Crab", eng1, eng1, &value);
+    bool flag = cache1.contains("Crab", eng1, eng1, &value);
     test_assert(!flag, "Test contains() method flag for empty cache");
 
     // Test filled response cube (one model, two ereco=etrue)
