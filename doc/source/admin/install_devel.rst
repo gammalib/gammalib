@@ -14,7 +14,7 @@ Source tarball
 
 Download the source tarball from the following link
 
-- `GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.7.0.dev.tar.gz>`_
+- `GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.8.0.dev.tar.gz>`_
 
 and follow the instructions on :ref:`install_source`.
 
@@ -103,7 +103,7 @@ version as follows:
 
    $ conda create -n gammalib-devel python=3.6
    $ source activate gammalib-devel
-   $ conda install --use-local gammalib=1.7.0.dev
+   $ conda install --use-local gammalib=1.8.0.dev
 
 Note that you can chose between Python 2.7, 3.5, 3.6 and 3.7 for your
 conda environment.
