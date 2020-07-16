@@ -95,8 +95,7 @@ Table model
 An arbitrary spectral model defined on a M-dimensional grid of parameter
 values. The spectrum is computed using M-dimensional linear interpolation.
 The model definition is provided by a FITS file that follows the
-`<https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_92_009/ogip_92_009.html>`_
-standard.
+`HEASARC OGIP standard <https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_92_009/ogip_92_009.html>`_.
 
 The structure of the table model FITS file is shown below. The FITS file
 contains three binary table extensions after an empty image extension.
@@ -146,7 +145,7 @@ the usual OGIP format:
    *Energy boundaries extension*
 
 The ``SPECTRA`` extension contains the spectra of the table model. It consists
-of two vector column. The ``PARAMVAL`` column provides the parameter values
+of two vector columns. The ``PARAMVAL`` column provides the parameter values
 for which the spectrum was computed. Since there are two parameters in the
 example the vector column has two entries. The ``INTPSPEC`` column provides
 the spectrum :math:`\frac{dN(p)}{dE}` for the specific parameters. Since there
@@ -186,10 +185,9 @@ expanded.
 
 Note that the default parameters of the table model are provided in the FITS
 file, according to the
-`<https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_92_009/ogip_92_009.html>`_
-standard.
+`HEASARC OGIP standard <https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/general/ogip_92_009/ogip_92_009.html>`_.
 However, table model parameters may also be specified in the XML file, and
-these parameter will then overwrite the parameters in the FITS file. For
+these parameters will then overwrite the parameters in the FITS file. For
 example, for a 2-dimensional table model with an ``Index`` and a ``Cutoff``
 parameter, the XML file may look like
 
