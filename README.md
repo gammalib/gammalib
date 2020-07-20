@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-* Version: 1.7.1 (29 May 2019)
+* Version: 1.7.1 (20 July 2020)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
 

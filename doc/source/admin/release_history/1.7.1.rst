@@ -1,0 +1,13 @@
+.. _1.7.1:
+
+GammaLib 1.7.1 release (20 July 2020)
+=====================================
+
+Overview
+--------
+
+GammaLib 1.7.1 is a bug fix release for GammaLib release 1.7.
+
+The following bugs were fixed:
+
+* ...

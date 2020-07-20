@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.7.0
+New Features and Important Changes in GammaLib 1.7.1
 
-2 July 2020
+20 July 2020
 
 
 1. Introduction
@@ -12,80 +12,25 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- GResponseCache
-- GModelSpatialRadialRing
-- GModelSpectralTable
-- GSPIEventBin
-- GSPIEventCube
-- GSPIInstDir
-- GSPIModelDataSpace
-- GSPIObservation
-- GSPIResponse
+- none
 
 The following classes have been removed:
-- GCTAResponseCache
+- none
 
 The following classes have been renamed:
 - none
 
 The following methods have been added:
-- GTime.datetime() - Datetime conversion in Python interface
-- GTime.julian_epoch() - Returns Julian epoch for time
-- GGti::overlap(GTime&, GTime&) - Compute overlap with time interval
-- GInstDir::hash() - Returns a cached value
-- GObservations::npred(string&, string&) - Compute predicted number of events
-- GObservations::npred(GModel&, string&) - Compute predicted number of events 
-- GObservations::remove_response_cache() - Remove response cache for all models
-- GObservations::remove_response_cache(string&) - Remove response cache for model
-- GObservation::remove_response_cache(string&) - Remove response cache for model
-- GSkyDir::precess() - Precess sky position to epoch
-- GSkyDir::sun() - Set sky position of Sun
-- GSkyDir::moon() - Set sky position of Moon
-- GSkyDir::rotate() - Rotate sky direction (radians variant)
-- GSkyDir::GSkyDir(GVector&) - Sky direction vector constructor
-- GSkyMap::extract() - Extract section of sky map
-- GSkyMap::region_circle() - Get bounding region circle of sky map
-- GSkyRegionCircle::operator==() - Equality operator
-- GSkyRegionCircle::operator!=() - Non-equality operator
-- GEbounds::set() - Set energy boundaries for different methods 
-- GEnergies::set() - Set energies for different methods
-- GModelPar::has_factor_min() - Test if parameter has factor minimum
-- GModelPar::has_factor_max() - Test if parameter has factor maximum
-- GModelPar::remove_factor_min - Remove factor minimum
-- GModelPar::remove_factor_max - Remove factor maximum
-- GModelSpatial::flux() - Extract flux from sky region
-- GModelSpatialDiffuseCube::mc_cone() - Return MC simulation cone
-- GModelSpatialDiffuseMap::mc_cone() - Return MC simulation cone
-- GCTAObservation::remove_response_cache(string&) - Remove response cache for model
-- GCTAResponse::remove_response_cache(string&) - Remove response cache for model
-- GCTAResponseCache::remove(string&) - Remove response cache for model
-- GCOMObservation::drm(GModels&) - Compute model cube
-- GCOMObservation::remove_response_cache(string&) - Remove response cache for model
-- GCOMTim::save(GFilename&, bool&) - Save TIM into FITS file
-- GCOMTim::write(GFitsBinTable&) - Write TIM into FITS binary table
-- GCOMDri::cone_content() - Get DRI content within event cone 
+- none
 
 The following methods have been removed:
-- GEbounds::set_lin()
-- GEbounds::set_log()
-- GEnergies::set_lin() - method is now private
-- GEnergies::set_log() - method is now private
-- GModelSpatialDiffuseCube::maps()
-- GModelSpatialDiffuseCube::pixels()
+- none
 
 The following methods have been renamed:
-- GModelSpatialDiffuseCube::set_mc_cone() to GModelSpatialDiffuseCube::mc_cone()
-- GModelSpatialDiffuseMap::set_mc_cone() to GModelSpatialDiffuseMap::mc_cone()
-- GResponse::irf(GEvent&, GSource&, GObservation&) to GResponse::irf_spatial()
-- GLATResponse::irf(GLATEventAtom&, GSource&, GObservation&) to GLATResponse::irf_spatial_atom()
-- GLATResponse::irf(GLATEventBin&, GSource&, GObservation&) to GLATResponse::irf_spatial_bin()
+- none
 
 The arguments for the following methods have been changed:
-- GTime::utc(int&) - Add optional precision value
-- GSkyDir::posang(GSkyDir&, std::string&) - Add optional coordinate system string
-- GSkyDir::posang_dir(GSkyDir&, std::string&) - Add optional coordinate system string
-- GEbounds::GEbounds(int&, GEnergy&, GEnergy&, std::string&, double&) - Replace bool by string and double
-- GEnergies::GEnergies(int&, GEnergy&, GEnergy&, std::string&, double&) - Replace bool by string and double
+- none
 
 The return value of the following methods has been changed:
 - none
@@ -93,12 +38,7 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-The order of the Python module imports was changed since there were some issues
-with type casting with the present order. This is some side effect of how SWIG
-handles type casting among multiple modules.
-
-The example binaries as well as the cpp source code file and Python scripts are
-now installed in the share/examples folder (#2971).
+None
 
 
 4. Application module
@@ -123,28 +63,7 @@ None
 
 8. Model module
 ---------------
-The GModelSpatialRadialRing class was added that implements a radial ring model
-with uniform source intensity (#3253).
-
-The set_mc_cone() methods of the GModelSpatialDiffuseCube and GModelSpatialDiffuseMap
-class were renamed to mc_cone() and mc_cone() getter methods were implemented
-for both classes. This solves a problem with pickling both classes (#3179).
-
-Set the GModelSpatialDiffuseCube::m_region member using the m_cube::region_circle()
-method and implemented the GModelSpatialDiffuseCube::contains() method (#3145).
-
-The method GModelSpatial::flux() was added that extracts the flux by integrating
-over a specific sky region. For the moment only circular sky regions are
-implemented (#2961).
-
-The GModelSpatialDiffuseCube::maps() and GModelSpatialDiffuseCube::pixels()
-methods were removed since the same information can be accessed through the
-GModelSpatialDiffuseCube::cube().nmaps() and cube().npix() methods. Also, the
-GModelSpatialDiffuseCube::cube() method now fetches the cubes so that the
-information is always reliable (#1761).
-
-The GModelSpectralTable class was added that implements a spectral table model.
-This allows fitting of arbitrary spectral models (#599).
+None
 
 
 9. Numerics module
@@ -154,95 +73,17 @@ None
 
 10. Observation module
 ----------------------
-The GResponseCache class was added as a copy of GCTAResponseCache to implement
-a generic response cache for response computation. The GResponseCache class now
-implements a three-level response cache, with the first level being the name,
-the second being a hash value of the true and measured energies, and the third
-level a hash value of the instrument direction. The hash values are implemented
-as uint64_t 64 Bit unsigned integers. The former CTA specific response cache was
-removed (#3202).
-
-An GInstDir::hash() method was added that returns a unique 64 Bit unsigned
-integer value for every class instance that can be used for response caching
-(#3202).
-
-Add GObservations::npred() methods that compute the number of predicted events
-for a model with a given name or for a given reference to a model. Optionally
-an instrument string can be passed so that the number of predicted events are
-only computed for that instrument (#3062).
-
-Implement remove_response_cache() methods for GObservations and GObservation
-classes that serve as a hook to remove all models or one model from a response
-cache. The actual cache deallocation needs to be implemented at the level of the
-derived classes (#2973).
-
-Add GGti::overlap() method to compute the temporal overlap in seconds with
-a specified time interval.
-
-Avoid rounding of seconds in case that digits after the comma are requested in
-GTime::utc() method (#2917).
-
-Add GTime.datetime() method to the Python interface to convert times from and
-to datetime.datetime objects. Add an optional precision argument to the GTime.utc()
-to set the number of digits after the comma for the seconds (#2909).
-
-The interface of the GEbounds and GEnergies constructors that sets a given number
-of energy boundaries or values was changed. The bool argument that toggled between
-linear and logarithmic spacing was replaced by a string that can take the values
-"LIN", "LOG" or "POW". For the "POW" method an additional optional argument was added
-to specify the power-law index. The GEbounds::set() and GEnergies::set() methods
-were added with the same method arguments, and the former set_lin() and set_log()
-methods were removed from the public interface (#2881).
-
-Add GTime.julian_epoch() methods that return the Julian epoch for a given time
-(#1854).
+None
 
 
 11. Optimization module
 -----------------------
-Fixed a bug in the handling of parameter boundaries for negative scale factors in
-GOptimizerPar. Before the minimum and maximum were inverted, now they are kept and
-correctly applied (#3072).
+None
 
 
 12. Sky module
 --------------
-Added equality and non-equality operators to the GSkyRegionCircle class.
-
-The position angle is now computed by GSkyDir::posang() and GSkyDir::posang_deg()
-for the coordinate system that is specified by the coordsys argument. By default
-this argument is set to "CEL", hence by default the methods return the position
-angle with respect to celestial coordinates (#3199).
-
-Added GSkyMap::region_circle() method to compute a bounding region circle that
-encloses all sky map pixels (#3145).
-
-The GSkyMap operators used the sky map value access operator that bi-linearly
-interpolates sky map values even for maps with identical definition. This could
-lead to rounding errors. For maps with identical definition the operators now
-directly act on the pixel values, avoid thus the bi-linear interpolation. This
-has also the side effect to speed up the computation for maps with identical
-definition (#3126).
-
-Exclude the upper sky map boundary in GSkyMap::contains() method. Originally the
-boundary was excluded, but this was changed in commit 0ecb6a07 when the
-GSkyMap::flux() method was added since the flux method evaluates intensities at
-the upper pixel boundaries. Now the GSkyMap::flux() method evaluates intensities
-just below the upper pixel boundaries (#3012).
-
-Two GSkyMap::extract() methods were added. The first method extracts a patch of
-pixels, defined by the start and stop pixel indices in X and Y direction. The second
-method extracts all patch of pixels that is defined by inclusion sky regions (#2990). 
-
-A GSkyDir::moon() method was added that sets the sky direction to the position of
-the Moon for a given date and a specific epoch (#1855).
-
-A GSkyDir::sun() method was added that sets the sky direction to the position of
-the Sun for a given date and a specific epoch. To support the method, a
-GSkyDir::precess() method was added that allows precessing a sky direction to
-a specific epoch (#1854).
-
-The GSkyProjection::coordsys() method now returns CEL instead of EQU (#1829).
+None
 
 
 13. Support module
@@ -282,38 +123,14 @@ None
 
 20. CTA interface
 -----------------
-Move the GCTAResponseCache class from the CTA module to the observation module
-so that response caching becomes available for all instruments (#3202).
-
-Remove obsolete ndirs(), nerecos() and netrues() methods for GCTAResponseCache
-class (#2893).
-
-Implement remove_response_cache() methods for GCTAObservation and
-GCTAReponse, allowing de-allocation of models in the response cache (#2973).
-
-The GCTAModelAeffBackground, GCTAModelIrfBackground and GCTAModelBackground
-classes were adapted so that the npred() method now also works for RoI centres
-that differ from the pointing direction. This now allows using the corresponding
-models in an unbinned analysis where the RoI centres differ from the pointing
-directions (#2695).
+None
 
 
 21. COMPTEL interface
 ---------------------
-Add the method GCOMObservation::drm(GModels&) that computes a DRM model cube
-using the models that are in a model container (#2973).
-
-Implement GCOMObservation::remove_response_cache() allowing de-allocation of
-models in the response cache (#2973).
-
-Add GCOMTim::write() and GCOMTim::save() methods for writing and saving TIM
-datasets (#2973).
-
-Correctly write model attributes in GCOMModelDRBFitting class.
+None
 
 
 22. INTEGRAL/SPI interface
 --------------------------
-Add instrument module for INTEGRAL/SPI to analyse and specifically fit data from
-the SPI telescope aboard ESA's INTEGRAL mission (#733, #734, #735, #736, #740,
-#742, #745, #746).
+None
