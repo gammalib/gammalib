@@ -1,7 +1,9 @@
-2020-07-20
+2020-07-22
 
         * Bug fix version 1.7.1 released
         ================================
+
+        Fix broken power law flux and eflux computation bug (#3279)
 
 
 2020-07-02

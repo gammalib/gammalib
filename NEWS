@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.1
 
-20 July 2020
+22 July 2020
 
 
 1. Introduction
@@ -63,7 +63,10 @@ None
 
 8. Model module
 ---------------
-None
+The flux() and eflux() methods of the GModelSpectralBrokenPlaw class returned
+a value of zero if one of the energy boundaries was identical to the break
+energy. The reason was an incomplete coverage of the possible conditions that
+left this special case out of the computation. This is fixed now (#3279).
 
 
 9. Numerics module

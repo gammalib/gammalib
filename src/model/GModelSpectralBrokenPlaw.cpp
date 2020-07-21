@@ -452,8 +452,8 @@ double GModelSpectralBrokenPlaw::flux(const GEnergy& emin,
                                                m_index2.value()));
         }
         
-        // Second case: breakenergy > emax:
-        else if (m_breakenergy.value() > emax.MeV()) {
+        // Second case: breakenergy >= emax
+        else if (m_breakenergy.value() >= emax.MeV()) {
             flux = m_norm.value() *
                    gammalib::plaw_photon_flux(emin.MeV(),
                                               emax.MeV(),
@@ -461,8 +461,8 @@ double GModelSpectralBrokenPlaw::flux(const GEnergy& emin,
                                               m_index1.value());
         }
         
-        // Third case breakenergy < emin:
-        else if (m_breakenergy.value() < emin.MeV()) {
+        // Third case: breakenergy <= emin
+        else if (m_breakenergy.value() <= emin.MeV()) {
             flux = m_norm.value() *
                    gammalib::plaw_photon_flux(emin.MeV(),
                                               emax.MeV(),
@@ -517,8 +517,8 @@ double GModelSpectralBrokenPlaw::eflux(const GEnergy& emin,
                                                m_index2.value()));
         }
 
-        // Second case: breakenergy > emax:
-        else if (m_breakenergy.value() > emax.MeV()) {
+        // Second case: breakenergy >= emax
+        else if (m_breakenergy.value() >= emax.MeV()) {
             eflux = m_norm.value() *
                    gammalib::plaw_energy_flux(emin.MeV(),
                                               emax.MeV(),
@@ -526,8 +526,8 @@ double GModelSpectralBrokenPlaw::eflux(const GEnergy& emin,
                                               m_index1.value());
         }
 
-        // Third case breakenergy < emin:
-        else if (m_breakenergy.value() < emin.MeV()) {
+        // Third case: breakenergy <= emin
+        else if (m_breakenergy.value() <= emin.MeV()) {
             eflux = m_norm.value() *
                    gammalib::plaw_energy_flux(emin.MeV(),
                                               emax.MeV(),
