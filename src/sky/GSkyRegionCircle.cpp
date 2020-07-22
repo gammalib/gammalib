@@ -303,8 +303,8 @@ void GSkyRegionCircle::read(const std::string& line)
 	std::string system = gammalib::split(region_def, ";")[0];
 
 	// Get the substring of the important values
-	unsigned    pos          = region_def.find("circle(");
-	unsigned    end          = region_def.find(")");
+	size_t      pos          = region_def.find("circle(");
+	size_t      end          = region_def.find(")");
 	std::string circlestring = region_def.substr(pos+7, end);
 	circlestring.erase(circlestring.find(")"), 1);
 
@@ -355,21 +355,68 @@ void GSkyRegionCircle::read(const std::string& line)
 	// Compute solid angle
 	compute_solid_angle();
 
-	// Check if there is a given name for the region and set it
-	std::vector<std::string>comments = gammalib::split(comment, " ");
-	for (int i = 0; i < comments.size(); i++) {
-		if (gammalib::contains(comments[i], "text")) {
-			std::vector<std::string> attributes = gammalib::split(comments[i], "=");
-			if (attributes.size() < 2) {
-                std::string msg =
-                      "Invalid character sequence encountered in provided"
-                      " string \""+line+"\".\n"
-                      "An attribute of the type \"text=Name\" is expected.";
-				throw GException::invalid_value(G_READ, msg);
-			}
-			m_name = attributes[1];
-		}
-	}
+	// Check if there is a given name for the region and set it. Strings may
+    // be quoted with " or ' or {}
+    pos = comment.find("text");
+    if (pos != std::string::npos) {
+        pos = comment.find("=", pos+4);
+        if (pos != std::string::npos) {
+
+            // Set possible quotes
+            const std::string quotes_open  = "{'\"";
+            const std::string quotes_close = "}'\"";
+
+            // Set quotes found flag
+            bool found = false;
+
+            // Search for possible quotes and extract name
+            for (int i = 0; i < quotes_open.size(); ++i) {
+                std::string quote_open  = quotes_open.substr(i,1);
+                std::string quote_close = quotes_close.substr(i,1);
+                pos = comment.find(quote_open, pos+1);
+                if (pos != std::string::npos) {
+                    end = comment.find(quote_close, pos+1);
+                    if (end != std::string::npos) {
+                        int length = end-pos-1;
+                        if (length > 0) {
+                            m_name = comment.substr(pos+1, length);
+                        }
+                        else {
+                            m_name = "";
+                        }
+                        found = true;
+                    }
+                    else {
+                        std::string msg = "Missing "+quote_open+" following "+
+                                          quote_close+" encountered after "
+                                          "text attribute. Please add closing "
+                                          "quotes to text="+quote_open+"Name"+
+                                          quote_close+" attribute.";
+                        throw GException::invalid_value(G_READ, msg);
+                    }
+                }
+            } // endfor: looped over possible quotes
+
+            // Throw an exception if no quotes were found
+            if (!found) {
+                std::string msg = "Missing quotes \" or ' or {} following "
+                                  "text attribute. Please specify quotes "
+                                  "around the names of the text, for example "
+                                  "text={Name}.";
+                throw GException::invalid_value(G_READ, msg);
+            }
+
+        } // endif: = character found
+
+        // Signal that no = character was found after text
+        else {
+            std::string msg = "Missing = following text attribute.  Please "
+                              "specify the value for a text attribute, "
+                              "for example text={Name}.";
+            throw GException::invalid_value(G_READ, msg);
+        }
+
+    } // endif: text attribute found
 
 	// Return
 	return;
@@ -401,7 +448,9 @@ std::string GSkyRegionCircle::write(void) const
     // Optionally add region name
     if (m_name.length() > 0) {
         result.append(" # text=");
+        result.append("{");
         result.append(m_name);
+        result.append("}");
     }
 
     // Return string

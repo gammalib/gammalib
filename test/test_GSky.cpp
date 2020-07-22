@@ -1594,11 +1594,17 @@ void TestGSky::test_GSkyMap_io(void)
 	}
 
     // Check if region was loaded correctly
+    test_value(regions.size(), 5, "5 sky regions expected");
     GSkyRegionCircle* circle = dynamic_cast<GSkyRegionCircle*>(regions[0]);
     test_assert(circle->type() == "Circle", "Region is not a circle");
     test_value(circle->radius(), 10.0, 1.0e-10);
     test_value(circle->ra(), 0.1, 1.0e-10);
     test_value(circle->dec(), -35.6, 1.0e-10);
+    test_value(regions[0]->name(), "", "No name for first sky region");
+    test_value(regions[1]->name(), "", "Empty name for second sky region");
+    test_value(regions[2]->name(), "Test 1", "Name \"Test 1\" for third sky region");
+    test_value(regions[3]->name(), "Test 2", "Name \"Test 2\" for fourth sky region");
+    test_value(regions[4]->name(), "Test 3", "Name \"Test 3\" for fifth sky region");
 
 	// Test regions saving
 	test_try("Test regions saving");
@@ -1621,11 +1627,17 @@ void TestGSky::test_GSkyMap_io(void)
 	}
 
     // Check if region was loaded correctly
+    test_value(regions.size(), 5, "5 sky regions expected");
     circle = dynamic_cast<GSkyRegionCircle*>(regions[0]);
     test_assert(circle->type() == "Circle", "Region is not a circle");
     test_value(circle->radius(), 10.0, 1.0e-10);
     test_value(circle->ra(), 0.1, 1.0e-10);
     test_value(circle->dec(), -35.6, 1.0e-10);
+    test_value(regions[0]->name(), "", "No name for first sky region");
+    test_value(regions[1]->name(), "", "Empty name for second sky region");
+    test_value(regions[2]->name(), "Test 1", "Name \"Test 1\" for third sky region");
+    test_value(regions[3]->name(), "Test 2", "Name \"Test 2\" for fourth sky region");
+    test_value(regions[4]->name(), "Test 3", "Name \"Test 3\" for fifth sky region");
 
     // Exit test
     return;

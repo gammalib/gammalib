@@ -3,6 +3,7 @@
         * Bug fix version 1.7.1 released
         ================================
 
+        Add quotes to sky region names (#3280)
         Fix broken power law flux and eflux computation bug (#3279)
 
 

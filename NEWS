@@ -86,7 +86,10 @@ None
 
 12. Sky module
 --------------
-None
+The region files written by GSkyRegions were not readable by ds9 when region
+names were specified. It turned out that region names have to be put in quotes,
+either ", ' or {}. I modified the GSkyRegionCircle::read() and write() methods
+to support this logic, where {} are used in GSkyRegionCircle::write() (#3280).
 
 
 13. Support module
