@@ -422,19 +422,19 @@ void GSkyRegions::extend(const GSkyRegions& regions)
  ***************************************************************************/
 bool GSkyRegions::contains(const GSkyDir& dir) const
 {
-	 // Initialise return value
-	 bool overlap = false;
-	 
-	 // Loop over regions
-	 for (int i = 0; i < size(); ++i) {
-		 overlap = m_regions[i]->contains(dir);
-		 if (overlap) {
+    // Initialise return value
+    bool overlap = false;
+ 
+    // Loop over regions
+    for (int i = 0; i < size(); ++i) {
+        overlap = m_regions[i]->contains(dir);
+        if (overlap) {
             break;
         }
-	 }
-	 
-	 // Return result
-	 return overlap;
+    }
+ 
+    // Return result
+    return overlap;
 }
 
  
@@ -512,67 +512,67 @@ void GSkyRegions::load(const GFilename& filename)
     // Open file. Throw an exception if opening failed.
     std::ifstream ds9file;
     ds9file.open(filename.url().c_str());
-	if (ds9file.is_open()) {
+    if (ds9file.is_open()) {
         
-		// Loop over file lines
-		std::string fileline = "";
-		std::string coordsys = "galactic";
+        // Loop over file lines
+        std::string fileline = "";
+        std::string coordsys = "galactic";
         while (ds9file.good()) {
-			
-			// Read one line
-			getline(ds9file,fileline);
-			
-			// If line is a comment then continue
-			if (fileline[0] == '#') {
+
+            // Read one line
+            getline(ds9file,fileline);
+
+            // If line is a comment then continue
+            if (fileline[0] == '#') {
                 continue;
             }
-			
-			// Check for global definition of coordinate system
-			if (std::string::npos != fileline.find("fk5")) {
-				coordsys = "fk5";
-			}
+
+            // Check for global definition of coordinate system
+            if (std::string::npos != fileline.find("fk5")) {
+                coordsys = "fk5";
+            }
             else if (std::string::npos != fileline.find("icrs")) {
-				coordsys = "icrs";
-			}
-			
-			// If region is a circle
-			if (std::string::npos != fileline.find("circle")) {
+                coordsys = "icrs";
+            }
 
-				// Create instance of GSkyRegion object
-				GSkyRegionCircle region;				
+            // If region is a circle
+            if (std::string::npos != fileline.find("circle")) {
 
-				// If coordinate system and region defined on the same line
-				if ((std::string::npos != fileline.find("fk5")) ||
+                // Create instance of GSkyRegion object
+                GSkyRegionCircle region;
+
+                // If coordinate system and region defined on the same line
+                if ((std::string::npos != fileline.find("fk5")) ||
                     (std::string::npos != fileline.find("icrs")) ||
-					(std::string::npos != fileline.find("galactic"))) {
-					region.read(fileline);
-					append(region);
-				}
+                    (std::string::npos != fileline.find("galactic"))) {
+                    region.read(fileline);
+                    append(region);
+                }
                 
-				// else, prepend the coordinate system
+                // else, prepend the coordinate system
                 else {
-				    std::string newfileline = coordsys;
-					newfileline.append("; ");
-					newfileline.append(fileline);
-					region.read(newfileline);
-					append(region);
-				}
-			} 
-		}
-		
+                    std::string newfileline = coordsys;
+                    newfileline.append("; ");
+                    newfileline.append(fileline);
+                    region.read(newfileline);
+                    append(region);
+                }
+            } 
+        }
+
         // Close file
         ds9file.close();
 
         // Store filename
         m_filename = filename;
 
-	} 
+    } 
 
-	// File could not be opened
+    // File could not be opened
     else {
         throw GException::file_open_error(G_LOAD, filename.url());
     }
-		
+
     // Return
     return;
 }
@@ -597,34 +597,31 @@ void GSkyRegions::save(const GFilename& filename) const
     // If file opened correctly, then save regions
     if (ds9file.is_open()) {
     
-		// Write global definition
-		std::string fileline;
-		fileline.append("# Region file format: DS9 version 4.1\n");
-		fileline.append("global color=green dashlist=8 3 width=1");
-//		fileline.append("font=\"helvetica 10 normal\" select=1");
-//                                "highlite=1 dash=0 fixed=0 edit=1 move=1"+
-//                                "delete=1 include=1 source=1";
-		ds9file << fileline << "\n";
-		
-		// Loop over regions in container
-		for (int i = 0; i < size(); ++i) {
-			ds9file << m_regions[i]->write() << "\n";
-		}
-		
-		// Close file
-		ds9file.close();
+        // Write global definition
+        std::string fileline;
+        fileline.append("# Region file format: DS9 version 4.1\n");
+        fileline.append("global color=green dashlist=8 3 width=1");
+        ds9file << fileline << "\n";
+
+        // Loop over regions in container
+        for (int i = 0; i < size(); ++i) {
+            ds9file << m_regions[i]->write() << "\n";
+        }
+
+        // Close file
+        ds9file.close();
     
         // Store filename
         m_filename = filename;
 
-	} 
+    }
 
-	// ... otherwise, if file could not be opened then throw an exception
+    // ... otherwise, if file could not be opened then throw an exception
     else {
         throw GException::file_open_error(G_SAVE, filename.url());
-    }	
-		
-	// Return
+    }
+
+    // Return
     return;
 }
 

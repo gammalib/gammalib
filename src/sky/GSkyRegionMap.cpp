@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GSkyRegionMap.cpp - Sky region map class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Pierrick Martin                             *
+ *  copyright (C) 2017-2020 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -397,8 +397,8 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
     // Case of a region map
     if (reg.type() == "Map") {
         
-		// Cast to map type
-		const GSkyRegionMap* inreg = dynamic_cast<const GSkyRegionMap*>(&reg);
+        // Cast to map type
+        const GSkyRegionMap* inreg = dynamic_cast<const GSkyRegionMap*>(&reg);
         
         // Retrieve map data
         const GSkyMap&          regmap   = inreg->map();
@@ -417,8 +417,8 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
     // Case of a circular region
     else if (reg.type() == "Circle") {
         
-		// Create circular region from reg
-		const GSkyRegionCircle* inreg = dynamic_cast<const GSkyRegionCircle*>(&reg);
+        // Create circular region from reg
+        const GSkyRegionCircle* inreg = dynamic_cast<const GSkyRegionCircle*>(&reg);
 
         // Retrieve circle data
         const GSkyDir& centre = inreg->centre();
