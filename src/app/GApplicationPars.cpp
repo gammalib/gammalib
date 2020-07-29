@@ -1268,62 +1268,66 @@ std::string GApplicationPars::outpath(const std::string& filename) const
  ***************************************************************************/
 void GApplicationPars::read(const std::string& filename)
 {
-    // Allocate line buffer
-    const int n = 1000; 
-    char  line[n];
+    // Put in OpenMP critical zone
+    #pragma omp critical(GApplicationsPars_read)
+    {
+        // Allocate line buffer
+        const int n = 1000; 
+        char  line[n];
 
-    // Trying to get file lock
-    #if defined(G_LOCK_PARFILE)
-    struct flock lock;
-    lock.l_type   = F_RDLCK;  // Want a read lock
-    lock.l_whence = SEEK_SET; // Want beginning of file
-    lock.l_start  = 0;        // No offset, lock entire file ...
-    lock.l_len    = 0;        // ... to the end
-    lock.l_pid    = getpid(); // Current process ID
-    int fd;
-    if ((fd = open(filename.c_str(), O_RDONLY)) == -1) {
-        throw GException::par_file_open_error(G_READ, filename,
-              "Could not open file for locking.");
-    }
-    #if defined(G_CHECK_LOCK_PARFILE)
-    if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
-        throw GException::par_file_open_error(G_READ, filename,
-              "Could not get a lock on the file.");
-    }
-    #else
-    fcntl(fd, F_SETLKW, &lock);
-    #endif
-    #endif
-
-    // Open parameter file
-    FILE* fptr = fopen(filename.c_str(), "r");
-    if (fptr == NULL) {
-        throw GException::par_file_open_error(G_READ, filename);
-    }
-
-    // Read lines
-    while (fgets(line, n, fptr) != NULL) {
-        m_parfile.push_back(std::string(line));
-    }
-
-    // Close file
-    fclose(fptr);
-
-    // Unlock file
-    #if defined(G_LOCK_PARFILE)
-    if (fd != -1) {
-        lock.l_type = F_UNLCK;
-        #if defined(G_CHECK_LOCK_PARFILE)
-        if (fcntl(fd, F_SETLK, &lock) == -1) {
+        // Trying to get file lock
+        #if defined(G_LOCK_PARFILE)
+        struct flock lock;
+        lock.l_type   = F_RDLCK;  // Want a read lock
+        lock.l_whence = SEEK_SET; // Want beginning of file
+        lock.l_start  = 0;        // No offset, lock entire file ...
+        lock.l_len    = 0;        // ... to the end
+        lock.l_pid    = getpid(); // Current process ID
+        int fd;
+        if ((fd = open(filename.c_str(), O_RDONLY)) == -1) {
             throw GException::par_file_open_error(G_READ, filename,
-                  "Could not unlock the file.");
+                  "Could not open file for locking.");
+        }
+        #if defined(G_CHECK_LOCK_PARFILE)
+        if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
+            throw GException::par_file_open_error(G_READ, filename,
+                  "Could not get a lock on the file.");
         }
         #else
-        fcntl(fd, F_SETLK, &lock);
+        fcntl(fd, F_SETLKW, &lock);
         #endif
-        close(fd);
+        #endif
+
+        // Open parameter file
+        FILE* fptr = fopen(filename.c_str(), "r");
+        if (fptr == NULL) {
+            throw GException::par_file_open_error(G_READ, filename);
+        }
+
+        // Read lines
+        while (fgets(line, n, fptr) != NULL) {
+            m_parfile.push_back(std::string(line));
+        }
+
+        // Close file
+        fclose(fptr);
+
+        // Unlock file
+        #if defined(G_LOCK_PARFILE)
+        if (fd != -1) {
+            lock.l_type = F_UNLCK;
+            #if defined(G_CHECK_LOCK_PARFILE)
+            if (fcntl(fd, F_SETLK, &lock) == -1) {
+                throw GException::par_file_open_error(G_READ, filename,
+                      "Could not unlock the file.");
+            }
+            #else
+            fcntl(fd, F_SETLK, &lock);
+            #endif
+            close(fd);
+        }
+        #endif
     }
-    #endif
 
     // Return
     return;
@@ -1343,42 +1347,23 @@ void GApplicationPars::read(const std::string& filename)
  ***************************************************************************/
 void GApplicationPars::write(const std::string& filename) const
 {
-    // Trying to get file lock. We have to do this after opening the file
-    // using the fopen function, as the file may not exist, hence it needs
-    // to be created first.
-    #if defined(G_LOCK_PARFILE)
-    struct flock lock;
-    lock.l_type   = F_WRLCK;  // Want a write lock
-    lock.l_whence = SEEK_SET; // Want beginning of file
-    lock.l_start  = 0;        // No offset, lock entire file ...
-    lock.l_len    = 0;        // ... to the end
-    lock.l_pid    = getpid(); // Current process ID
-    int  fd;
-    if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
-        #if defined(G_CHECK_LOCK_PARFILE)
-        if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
-            throw GException::par_file_open_error(G_WRITE, filename,
-                  "Could not get a lock on the file.");
-        }
-        #else
-        fcntl(fd, F_SETLKW, &lock);
-        #endif
-    }
-    #endif
-
-    // Open parameter file.
-    FILE* fptr = fopen(filename.c_str(), "w");
-    if (fptr == NULL) {
-        throw GException::par_file_open_error(G_WRITE, filename);
-    }
-
-    // If file is not locked then lock it now.
-    #if defined(G_LOCK_PARFILE)
-    if (fd == -1) {
+    // Put in OpenMP critical zone
+    #pragma omp critical(GApplicationsPars_write)
+    {
+        // Trying to get file lock. We have to do this after opening the file
+        // using the fopen function, as the file may not exist, hence it needs
+        // to be created first.
+        #if defined(G_LOCK_PARFILE)
+        struct flock lock;
+        lock.l_type   = F_WRLCK;  // Want a write lock
+        lock.l_whence = SEEK_SET; // Want beginning of file
+        lock.l_start  = 0;        // No offset, lock entire file ...
+        lock.l_len    = 0;        // ... to the end
+        lock.l_pid    = getpid(); // Current process ID
+        int  fd;
         if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
             #if defined(G_CHECK_LOCK_PARFILE)
             if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
-                fclose(fptr);
                 throw GException::par_file_open_error(G_WRITE, filename,
                       "Could not get a lock on the file.");
             }
@@ -1386,33 +1371,56 @@ void GApplicationPars::write(const std::string& filename) const
             fcntl(fd, F_SETLKW, &lock);
             #endif
         }
-    }
-    #endif
-
-    // Write lines
-    for (int i = 0; i < m_parfile.size(); ++i) {
-        fprintf(fptr, "%s", m_parfile[i].c_str());
-    }
-
-    // Close file
-    fclose(fptr);
-
-    // Unlock file
-    #if defined(G_LOCK_PARFILE)
-    if (fd != -1) {
-        lock.l_type = F_UNLCK;
-        #if defined(G_CHECK_LOCK_PARFILE)
-        if (fcntl(fd, F_SETLK, &lock) == -1) {
-            throw GException::par_file_open_error(G_WRITE, filename,
-                  "Could not unlock the file.");
-        }
-        #else
-        fcntl(fd, F_SETLK, &lock);
         #endif
-        close(fd);
-    }
-    #endif
 
+        // Open parameter file.
+        FILE* fptr = fopen(filename.c_str(), "w");
+        if (fptr == NULL) {
+            throw GException::par_file_open_error(G_WRITE, filename);
+        }
+
+        // If file is not locked then lock it now.
+        #if defined(G_LOCK_PARFILE)
+        if (fd == -1) {
+            if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
+                #if defined(G_CHECK_LOCK_PARFILE)
+                if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
+                    fclose(fptr);
+                    throw GException::par_file_open_error(G_WRITE, filename,
+                          "Could not get a lock on the file.");
+                }
+                #else
+                fcntl(fd, F_SETLKW, &lock);
+                #endif
+            }
+        }
+        #endif
+
+        // Write lines
+        for (int i = 0; i < m_parfile.size(); ++i) {
+            fprintf(fptr, "%s", m_parfile[i].c_str());
+        }
+
+        // Close file
+        fclose(fptr);
+
+        // Unlock file
+        #if defined(G_LOCK_PARFILE)
+        if (fd != -1) {
+            lock.l_type = F_UNLCK;
+            #if defined(G_CHECK_LOCK_PARFILE)
+            if (fcntl(fd, F_SETLK, &lock) == -1) {
+                throw GException::par_file_open_error(G_WRITE, filename,
+                      "Could not unlock the file.");
+            }
+            #else
+            fcntl(fd, F_SETLK, &lock);
+            #endif
+            close(fd);
+        }
+        #endif
+    }
+    
     // Return
     return;
 }

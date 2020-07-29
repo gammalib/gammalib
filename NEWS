@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.1
 
-22 July 2020
+29 July 2020
 
 
 1. Introduction
@@ -43,7 +43,9 @@ None
 
 4. Application module
 ---------------------
-None
+The reading and writing of the parameter file in GApplicationPars::read()
+and GApplicationPars::write() was put in an OpenMP critical zone to assure
+that the reading and writing is thread safe (#3287).
 
 
 5. Base module

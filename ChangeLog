@@ -1,8 +1,9 @@
-2020-07-22
+2020-07-29
 
         * Bug fix version 1.7.1 released
         ================================
 
+        Make parameter file reading and writing thread safe (#3287)
         Add quotes to sky region names (#3280)
         Fix broken power law flux and eflux computation bug (#3279)
 
