@@ -1,8 +1,9 @@
-2020-07-29
+2020-08-02
 
         * Bug fix version 1.7.1 released
         ================================
 
+        Fix automatic type casting in Python interface (#3295)
         Make parameter file reading and writing thread safe (#3287)
         Add quotes to sky region names (#3280)
         Fix broken power law flux and eflux computation bug (#3279)

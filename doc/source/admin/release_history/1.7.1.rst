@@ -1,7 +1,7 @@
 .. _1.7.1:
 
-GammaLib 1.7.1 release (29 July 2020)
-=====================================
+GammaLib 1.7.1 release (2 August 2020)
+======================================
 
 Overview
 --------
@@ -10,6 +10,8 @@ GammaLib 1.7.1 is a bug fix release for GammaLib release 1.7.
 
 The following bugs were fixed:
 
+* [`3295 <https://cta-redmine.irap.omp.eu/issues/3295>`_] -
+  Fix automatic type casting in Python interface
 * [`3287 <https://cta-redmine.irap.omp.eu/issues/3287>`_] -
   Make parameter file reading and writing thread safe
 * [`3280 <https://cta-redmine.irap.omp.eu/issues/3280>`_] -

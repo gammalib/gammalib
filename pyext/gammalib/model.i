@@ -34,6 +34,9 @@
 #include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GSkyRegion.hpp"
+#include "GSkyRegionCircle.hpp"
+#include "GSkyRegionMap.hpp"
 %}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
@@ -57,6 +60,8 @@
 
 /* __ Inform about other classes (needed for typecasting) ________________ */
 %import(module="gammalib.sky") "GSkyRegion.i";
+%import(module="gammalib.sky") "GSkyRegionCircle.i";
+%import(module="gammalib.sky") "GSkyRegionMap.i";
 
 /* __ Typemaps ___________________________________________________________ */
 %typemap(out) GModel* {

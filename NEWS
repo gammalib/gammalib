@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.1
 
-29 July 2020
+2 August 2020
 
 
 1. Introduction
@@ -38,7 +38,11 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-None
+Automatic type casting did not work fully in the Python interface since for
+some classes the members were not accessible after type casting. It turned
+out that the interface for the derived classes needed to be added explicitly
+when typecasting across module boundaries, so that all information is properly
+available (#3295).
 
 
 4. Application module
