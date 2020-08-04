@@ -470,7 +470,8 @@ GApplicationPar& GApplicationPars::insert(const int& index, const GApplicationPa
  * Inserts a parameter into the container before the parameter with the
  * specified @p name.
  ***************************************************************************/
-GApplicationPar& GApplicationPars::insert(const std::string& name, const GApplicationPar& par)
+GApplicationPar& GApplicationPars::insert(const std::string&     name,
+                                          const GApplicationPar& par)
 {
     // Get parameter index
     int index = get_index(name);
@@ -1071,8 +1072,6 @@ std::string GApplicationPars::inpath(const std::string& filename) const
     }
     #endif
 
-    //printf("parfile=%s\n", path.c_str());
-
     // Return path
     return path;
 }
@@ -1268,8 +1267,11 @@ std::string GApplicationPars::outpath(const std::string& filename) const
  ***************************************************************************/
 void GApplicationPars::read(const std::string& filename)
 {
-    // Put in OpenMP critical zone
-    #pragma omp critical(GApplicationsPars_read)
+    // Put in OpenMP critical zone. Note that it is important that the zone
+    // has an identical name to the corresponding zone in the write()
+    // method so that multiple threads cannot at the same time read and write
+    // the parameter file (see #3287).
+    #pragma omp critical(GApplicationsPars_io)
     {
         // Allocate line buffer
         const int n = 1000; 
@@ -1347,8 +1349,11 @@ void GApplicationPars::read(const std::string& filename)
  ***************************************************************************/
 void GApplicationPars::write(const std::string& filename) const
 {
-    // Put in OpenMP critical zone
-    #pragma omp critical(GApplicationsPars_write)
+    // Put in OpenMP critical zone Note that it is important that the zone
+    // has an identical name to the corresponding zone in the read()
+    // method so that multiple threads cannot at the same time read and write
+    // the parameter file (see #3287).
+    #pragma omp critical(GApplicationsPars_io)
     {
         // Trying to get file lock. We have to do this after opening the file
         // using the fopen function, as the file may not exist, hence it needs
@@ -1675,7 +1680,9 @@ int GApplicationPars::get_index(const std::string& name) const
  * Constructs the parameter file line for a specific parameter and returns
  * the line as a string. The line is terminated by a \n character.
  ***************************************************************************/
-std::string GApplicationPars::parline(GApplicationPar& par, size_t* start, size_t* stop) const
+std::string GApplicationPars::parline(GApplicationPar& par,
+                                      size_t*          start,
+                                      size_t*          stop) const
 {
     // Declate line
     std::string line;
