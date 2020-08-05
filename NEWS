@@ -69,6 +69,13 @@ None
 
 8. Model module
 ---------------
+The GModels::save() method implements a specific variant of the
+GModels::write() method that actually circumvents the source checking in the
+GModel::write() methods. Since when saving a model definition XML file we
+know that a source does not yet exist before writing, we do not need source
+checking. This will substantially speeds-up the saving, in particular for
+large models (#3308).
+
 The flux() and eflux() methods of the GModelSpectralBrokenPlaw class returned
 a value of zero if one of the energy boundaries was identical to the break
 energy. The reason was an incomplete coverage of the possible conditions that

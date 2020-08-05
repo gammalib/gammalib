@@ -697,8 +697,28 @@ void GModels::save(const GFilename& filename) const
     // Declare empty XML document
     GXml xml;
 
+    // Append source library element
+    GXmlNode* lib =
+        xml.append(GXmlElement("source_library title=\"source library\""));
+
+    // Write all sources into library.
+    for (int i = 0; i < size(); ++i) {
+
+        // Allocate XML element
+        GXmlElement source;
+
+        // Write model into XML element
+        m_models[i]->write(source);
+
+        // Append source to source library. Since write appends only a
+        // single source we can just access the first element in the
+        // source node.
+        lib->append(*source.element(0));
+
+    } // endfor: looped over sources
+
     // Write models into XML file
-    write(xml);
+    //write(xml);
 
     // Save XML document
     xml.save(filename);
@@ -795,29 +815,10 @@ void GModels::write(GXml& xml) const
     // Get pointer on source library
     GXmlElement* lib = xml.element("source_library", 0);
 
-    // Write all sources into library. We circumvent the GModel::write()
-    // method here since the implementations all search through the entire
-    // list of sources, checking whether a source already exists. And this
-    // is very time consuming! We know that a GModels object cannot have
-    // two sources with the same name, hence we can savely circumvent the
-    // checking in the GModel::write() method.
+    // Write all sources into library
     for (int i = 0; i < size(); ++i) {
-
-        // Allocate XML element
-        GXmlElement source;
-
-        // Write model into XML element
-        m_models[i]->write(source);
-
-        // Append source to source library. Since write appends only a
-        // single source we can just access the first element in the
-        // source node.
-        lib->append(*source.element(0));
-
-        // Old code
-        //m_models[i]->write(*lib);
-
-    } // endfor: looped over sources
+        m_models[i]->write(*lib);
+    }
 
     // Return
     return;
