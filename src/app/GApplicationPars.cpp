@@ -377,9 +377,9 @@ void GApplicationPars::append_standard(void)
 {
     // Append standard parameters
     append(GApplicationPar("chatter","i","h","2","0","4","Chattiness of output"));
-	append(GApplicationPar("clobber","b","h","yes","","","Overwrite existing output files with new output files?"));
-	append(GApplicationPar("debug","b","h","no","","","Debugging mode activated"));
-	append(GApplicationPar("mode","s","h","ql","","","Mode of automatic parameters"));
+    append(GApplicationPar("clobber","b","h","yes","","","Overwrite existing output files with new output files?"));
+    append(GApplicationPar("debug","b","h","no","","","Debugging mode activated"));
+    append(GApplicationPar("mode","s","h","ql","","","Mode of automatic parameters"));
 
     // Return
     return;
