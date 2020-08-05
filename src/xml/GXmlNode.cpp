@@ -813,8 +813,6 @@ const GXmlElement* GXmlNode::element(const std::string& name, const int& index) 
     const GXmlElement* element  = NULL;
     int                elements = 0;
     for (int i = 0; i < m_nodes.size(); ++i) {
-        //const GXmlElement* src = dynamic_cast<const GXmlElement*>(m_nodes[i]);
-        //if (src != NULL) {
         if (m_nodes[i]->type() == NT_ELEMENT) {
             GXmlElement* src = static_cast<GXmlElement*>(m_nodes[i]);
             if (src->name() == name) {
