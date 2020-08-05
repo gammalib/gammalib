@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.1
 
-4 August 2020
+5 August 2020
 
 
 1. Introduction
@@ -100,12 +100,14 @@ to support this logic, where {} are used in GSkyRegionCircle::write() (#3280).
 
 13. Support module
 ------------------
-None
+Pre-compute number of XML elements in gammalib::xml_need_par() and
+gammalib::xml_has_par() methods (#3308).
 
 
 14. XML module
 --------------
-None
+Avoid dynamic type casting and unnecessary computation of the number of elements
+in GXmlNode::element(std::string,int) method (#3308).
 
 
 15. VO module
