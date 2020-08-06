@@ -166,13 +166,6 @@ int GResponseCache::size(void) const
              it_name->second.begin();
              it_energy != it_name->second.end(); ++it_energy) {
                 size += it_energy->second.size();
-/*
-            for (GResponseCacheDir::const_iterator it_dir =
-                 it_energy->second.begin();
-                 it_dir != it_energy->second.end(); ++it_dir) {
-                size += it_dir->second.size();
-            }
-*/
         }
     }
 
