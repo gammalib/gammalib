@@ -147,14 +147,6 @@ private:
     GCTACubeEdisp      m_edisp;       //!< Energy dispersion cube
     mutable bool       m_apply_edisp; //!< Apply energy dispersion
     mutable bool       m_has_edisp;   //!< Flag to indicate if energy
-                                      //!< dispersion is available
-
-    // Response cache
-    mutable std::vector<GCTACubeSource*> m_cache;        //!< Response cache
-    mutable GNodeArray                   m_diffuse_logE; //!< Diffuse energy
-                                                         //!< bounds
-                                                         //!< computation
-                                                         //!< cache
 };
 
 

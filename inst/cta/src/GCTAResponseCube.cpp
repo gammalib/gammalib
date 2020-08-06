@@ -636,9 +636,6 @@ void GCTAResponseCube::init_members(void)
     m_apply_edisp = false;
     m_has_edisp   = false;
 
-    // Initialise cache
-    m_cache.clear();
-
     // Return
     return;
 }
@@ -659,11 +656,6 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
     m_apply_edisp = rsp.m_apply_edisp;
     m_has_edisp   = rsp.m_has_edisp;
 
-    // Copy cache
-    for (int i = 0; i < rsp.m_cache.size(); ++i) {
-        m_cache.push_back((rsp.m_cache[i]->clone()));
-    }
-
     // Return
     return;
 }
@@ -674,12 +666,6 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
  ***************************************************************************/
 void GCTAResponseCube::free_members(void)
 {
-    // Free cache
-    for (int i = 0; i < m_cache.size(); ++i) {
-        if (m_cache[i] != NULL) delete m_cache[i];
-        m_cache[i] = NULL;
-    }
-
     // Return
     return;
 }
