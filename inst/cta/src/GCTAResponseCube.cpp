@@ -182,7 +182,7 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
  **************************************************************************/
 GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
                                    const GCTACubePsf&        psf,
-								   const GCTACubeEdisp&      edisp,
+                                   const GCTACubeEdisp&      edisp,
                                    const GCTACubeBackground& background) :
                   GCTAResponse()
 {
@@ -353,7 +353,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
-				irf *= edisp()(obsEng, srcEng, srcDir);
+                irf *= edisp()(obsEng, srcEng, srcDir);
             }
 
             // Divide by livetime
@@ -434,8 +434,8 @@ double GCTAResponseCube::nroi(const GModelSky&    model,
  ***************************************************************************/
 GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEng) const
 {
-	// Get energy boundaries from energy dispersion
-	GEbounds ebounds = m_edisp.ebounds(obsEng);
+    // Get energy boundaries from energy dispersion
+    GEbounds ebounds = m_edisp.ebounds(obsEng);
 
     // Return energy boundaries
     return ebounds;
@@ -487,11 +487,11 @@ void GCTAResponseCube::read(const GXmlElement& xml)
 
     // Optionally load energy dispersion cube
     if (gammalib::xml_has_par(xml, "EdispCube")) {
-		const GXmlElement* edisppar  = gammalib::xml_get_par(G_READ, xml, "EdispCube");
-		std::string        edispname = gammalib::xml_file_expand(xml,
+        const GXmlElement* edisppar  = gammalib::xml_get_par(G_READ, xml, "EdispCube");
+        std::string        edispname = gammalib::xml_file_expand(xml,
                                                  edisppar->attribute("file"));
-		m_edisp.load(edispname);
-		m_has_edisp = true;
+        m_edisp.load(edispname);
+        m_has_edisp = true;
     }
 
     // Return
@@ -535,11 +535,11 @@ void GCTAResponseCube::write(GXmlElement& xml) const
 
     // Optionally add energy dispersions cube filename
     if (m_has_edisp) {
-		filename = gammalib::xml_file_reduce(xml, m_edisp.filename());
-		if (!(filename.empty())) {
-			GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
-			par->attribute("file", filename);
-		}
+        filename = gammalib::xml_file_reduce(xml, m_edisp.filename());
+        if (!(filename.empty())) {
+            GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
+            par->attribute("file", filename);
+        }
     }
 
     // Add background cube filename
