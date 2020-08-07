@@ -308,50 +308,55 @@ double GResponse::irf_spatial(const GEvent&       event,
     // Initialise IRF value
     double irf = 0.0;
 
-    // Set IRF value attributes
-    std::string     name  = obs.id() + "::" + source.name();
-    const GInstDir& dir   = event.dir();
-    const GEnergy&  ereco = event.energy();
-    const GEnergy&  etrue = source.energy();
+    // Continue only if source should be used
+    if (use_source(event, source, obs)) {
 
-    // Signal if spatial model has free parameters
-    bool has_free_pars = source.model()->has_free_pars();
+        // Set IRF value attributes
+        std::string     name  = obs.id() + "::" + source.name();
+        const GInstDir& dir   = event.dir();
+        const GEnergy&  ereco = event.energy();
+        const GEnergy&  etrue = source.energy();
 
-    // If the spatial model component has free parameters, or the response
-    // cache should not be used, or the cache does not contain the requested
-    // IRF value then compute the IRF value for the spatial model.
-    if (has_free_pars    ||
-        !m_use_irf_cache ||
-        !m_irf_cache.contains(name, dir, ereco, etrue, &irf)) {
+        // Signal if spatial model has free parameters
+        bool has_free_pars = source.model()->has_free_pars();
 
-        // Compute IRF for spatial model
-        switch (source.model()->code()) {
-            case GMODEL_SPATIAL_POINT_SOURCE:
-                irf = irf_ptsrc(event, source, obs);
-                break;
-            case GMODEL_SPATIAL_RADIAL:
-                irf = irf_radial(event, source, obs);
-                break;
-            case GMODEL_SPATIAL_ELLIPTICAL:
-                irf = irf_elliptical(event, source, obs);
-                break;
-            case GMODEL_SPATIAL_DIFFUSE:
-                irf = irf_diffuse(event, source, obs);
-                break;
-            case GMODEL_SPATIAL_COMPOSITE:
-                irf = irf_composite(event, source, obs);
-                break;
-            default:
-                break;
+        // If the spatial model component has free parameters, or the response
+        // cache should not be used, or the cache does not contain the requested
+        // IRF value then compute the IRF value for the spatial model.
+        if (has_free_pars    ||
+            !m_use_irf_cache ||
+            !m_irf_cache.contains(name, dir, ereco, etrue, &irf)) {
+
+            // Compute IRF for spatial model
+            switch (source.model()->code()) {
+                case GMODEL_SPATIAL_POINT_SOURCE:
+                    irf = irf_ptsrc(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_RADIAL:
+                    irf = irf_radial(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_ELLIPTICAL:
+                    irf = irf_elliptical(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_DIFFUSE:
+                    irf = irf_diffuse(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_COMPOSITE:
+                    irf = irf_composite(event, source, obs);
+                    break;
+                default:
+                    break;
+            }
+
+        } // endif: computed spatial model
+
+        // If the spatial model has no free parameters and the response cache
+        // should be used then put the IRF value in the response cache.
+        if (!has_free_pars && m_use_irf_cache) {
+            m_irf_cache.set(name, dir, ereco, etrue, irf);
         }
 
-    } // endif: computed spatial model
-
-    // If the spatial model has no free parameters and the response cache
-    // should be used then put the IRF value in the response cache.
-    if (!has_free_pars && m_use_irf_cache) {
-        m_irf_cache.set(name, dir, ereco, etrue, irf);
-    }
+    } // endif: source was used
 
     // Return IRF value
     return irf;
@@ -435,6 +440,30 @@ void GResponse::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if source should be used
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return True if source should be used.
+ *
+ * Returns true if the source should be used.
+ *
+ * This method is a hook. The base class version of this method returns
+ * always true, but derived classes may implement a version of this method
+ * that actually evaluates whether a source should be used or not for a given
+ * event.
+ ***************************************************************************/
+bool GResponse::use_source(const GEvent&       event,
+                           const GSource&      source,
+                           const GObservation& obs) const
+{
+    // Return true
+    return true;
 }
 
 

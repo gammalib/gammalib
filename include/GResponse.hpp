@@ -119,6 +119,9 @@ protected:
                      const bool&         grad) const;
 
     // Virtual protected methods
+    virtual bool   use_source(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
     virtual double irf_ptsrc(const GEvent&       event,
                              const GSource&      source,
                              const GObservation& obs) const;
