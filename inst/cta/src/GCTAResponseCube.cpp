@@ -157,8 +157,8 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
     init_members();
 
     // Set members
-    m_exposure = exposure;
-    m_psf      = psf;
+    m_exposure   = exposure;
+    m_psf        = psf;
     m_background = background;
 
     // Signal that no energy dispersion was given
@@ -633,8 +633,10 @@ void GCTAResponseCube::init_members(void)
     m_psf.clear();
     m_edisp.clear();
     m_background.clear();
-    m_apply_edisp = false;
-    m_has_edisp   = false;
+    m_apply_edisp    = false;
+    m_has_edisp      = false;
+    m_use_irf_cache  = false;  //!< Current response cache uses too
+    m_use_nroi_cache = false;  //!< much memory (#3305)
 
     // Return
     return;
