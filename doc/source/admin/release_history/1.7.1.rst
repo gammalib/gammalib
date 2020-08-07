@@ -1,6 +1,6 @@
 .. _1.7.1:
 
-GammaLib 1.7.1 release (5 August 2020)
+GammaLib 1.7.1 release (7 August 2020)
 ======================================
 
 Overview
@@ -12,6 +12,8 @@ The following bugs were fixed:
 
 * [`3308 <https://cta-redmine.irap.omp.eu/issues/3308>`_] -
   Speed up model definition XML file writing
+* [`3305 <https://cta-redmine.irap.omp.eu/issues/3305>`_] -
+  Switch off response cache for stacked CTA analysis
 * [`3295 <https://cta-redmine.irap.omp.eu/issues/3295>`_] -
   Fix automatic type casting in Python interface
 * [`3287 <https://cta-redmine.irap.omp.eu/issues/3287>`_] -

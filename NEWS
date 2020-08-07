@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.1
 
-5 August 2020
+7 August 2020
 
 
 1. Introduction
@@ -144,7 +144,8 @@ None
 
 20. CTA interface
 -----------------
-None
+The response cache was switched off for CTA stacked analysis since it used up
+too much memory in case that many sources needed to be cached (#3305).
 
 
 21. COMPTEL interface
