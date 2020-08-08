@@ -68,11 +68,6 @@ public:
     virtual void              read(const GXmlElement& xml);
     virtual void              write(GXmlElement& xml) const;
 
-    // Overloaded virtual base class methods
-    virtual double      irf_spatial(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const;
-
     // Other Methods
     const GCTACubeExposure&   exposure(void) const;
     void                      exposure(const GCTACubeExposure& exposure);

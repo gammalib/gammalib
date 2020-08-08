@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponseIrf.i - CTA instrument response function class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,8 +59,6 @@ public:
     virtual GEbounds         ebounds(const GEnergy& obsEnergy) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
-
-    // Overload virtual base class methods
 
     // Other Methods
     bool                  apply_edisp(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponse.i - CTA response abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,7 +58,10 @@ public:
     virtual void          read(const GXmlElement& xml) = 0;
     virtual void          write(GXmlElement& xml) const = 0;
 
-    // Implemeted methods
+    // Overloaded virtual base class methods
+    virtual double irf_spatial(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
 };
 
 

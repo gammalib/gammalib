@@ -30,7 +30,6 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GNdarray.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTACubePsf.hpp"
@@ -98,11 +97,6 @@ public:
     virtual void              write(GXmlElement& xml) const;
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
 
-    // Overloaded virtual base class methods
-    virtual double      irf_spatial(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const;
-
     // Other Methods
     const GCTACubeExposure&   exposure(void) const;
     void                      exposure(const GCTACubeExposure& exposure);
@@ -153,10 +147,6 @@ private:
     GCTACubeEdisp      m_edisp;       //!< Energy dispersion cube
     mutable bool       m_apply_edisp; //!< Apply energy dispersion
     mutable bool       m_has_edisp;   //!< Flag to indicate if energy
-
-    // Kludge: cube response cache
-    mutable std::vector<std::string> m_cache_names;  //!< Model names
-    mutable std::vector<GNdarray>    m_cache_values; //!< Cached values
 };
 
 

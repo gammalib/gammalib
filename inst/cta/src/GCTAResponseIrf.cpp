@@ -2131,8 +2131,6 @@ void GCTAResponseIrf::copy_members(const GCTAResponseIrf& rsp)
     m_xml_caldb      = rsp.m_xml_caldb;
     m_xml_rspname    = rsp.m_xml_rspname;
 
-    // Copy nroi cache
-
     // Clone members
     m_aeff       = (rsp.m_aeff       != NULL) ? rsp.m_aeff->clone()  : NULL;
     m_psf        = (rsp.m_psf        != NULL) ? rsp.m_psf->clone()   : NULL;

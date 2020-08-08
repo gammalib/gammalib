@@ -144,10 +144,10 @@ None
 
 20. CTA interface
 -----------------
-A specific response cache was implemented for the stacked analysis that reduces
-the memory requirements by at least a factor of 6. Instead of using the std::map
-cache, the full data-space is cached, avoiding the need for any bookkeeping
-(#3316).
+A specific response cache was implemented for the binned and stacked analysis
+that reduces the memory requirements by at least a factor of 6. Instead of
+using the std::map cache, the full data cube is cached, avoiding the need for
+any bookkeeping that takes a lot of memory in the traditional cache (#3316).
 
 
 21. COMPTEL interface

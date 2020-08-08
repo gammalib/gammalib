@@ -11,7 +11,7 @@ GammaLib 1.7.1 is a bug fix release for GammaLib release 1.7.
 The following bugs were fixed:
 
 * [`3316 <https://cta-redmine.irap.omp.eu/issues/3316>`_] -
-  Implement specific response cache for CTA stacked analysis
+  Implement specific response cache for CTA binned and stacked analysis
 * [`3308 <https://cta-redmine.irap.omp.eu/issues/3308>`_] -
   Speed up model definition XML file writing
 * [`3295 <https://cta-redmine.irap.omp.eu/issues/3295>`_] -

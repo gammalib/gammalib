@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GNdarray.hpp"
 #include "GResponse.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -84,11 +85,20 @@ public:
     virtual void          write(GXmlElement& xml) const = 0;
     virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
 
+    // Overloaded virtual base class methods
+    virtual double irf_spatial(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
+
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAResponse& rsp);
     void free_members(void);
+
+    // Kludge: cube response cache
+    mutable std::vector<std::string> m_cache_names;  //!< Model names
+    mutable std::vector<GNdarray>    m_cache_values; //!< Cached values
 };
 
 #endif /* GCTARESPONSE_HPP */
