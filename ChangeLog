@@ -1,10 +1,10 @@
-2020-08-07
+2020-08-08
 
         * Bug fix version 1.7.1 released
         ================================
 
+        Implement specific response cache for CTA stacked analysis (#3316)
         Speed up model definition XML file writing (#3308)
-        Switch off response cache for stacked CTA analysis (#3305)
         Fix automatic type casting in Python interface (#3295)
         Make parameter file reading and writing thread safe (#3287)
         Add quotes to sky region names (#3280)
