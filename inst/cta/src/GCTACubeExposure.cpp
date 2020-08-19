@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTACubeExposure.cpp - CTA cube analysis exposure class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2020 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -233,11 +233,11 @@ GCTACubeExposure& GCTACubeExposure::operator=(const GCTACubeExposure& cube)
 
 
 /***********************************************************************//**
- * @brief Return exposure (in units of cm2 s)
+ * @brief Return exposure (in units of cm**2 s)
  *
  * @param[in] dir Coordinate of the true photon position.
  * @param[in] energy Energy of the true photon.
- * @return Exposure (in units of cm2 s)
+ * @return Exposure (in units of cm**2 s)
  ***************************************************************************/
 double GCTACubeExposure::operator()(const GSkyDir& dir, const GEnergy& energy) const
 {
@@ -454,14 +454,14 @@ void GCTACubeExposure::load(const GFilename& filename)
     #pragma omp critical(GCTACubeExposure_load)
     {
 
-    // Open FITS file
-    GFits fits(filename);
+        // Open FITS file
+        GFits fits(filename);
 
-    // Read PSF cube
-    read(fits);
+        // Read PSF cube
+        read(fits);
 
-    // Close FITS file
-    fits.close();
+        // Close FITS file
+        fits.close();
 
     } // end of OpenMP critical zone
 
@@ -487,17 +487,17 @@ void GCTACubeExposure::save(const GFilename& filename, const bool& clobber) cons
     #pragma omp critical(GCTACubeExposure_save)
     {
 
-    // Create FITS file
-    GFits fits;
+        // Create FITS file
+        GFits fits;
 
-    // Write exposure cube
-    write(fits);
+        // Write exposure cube
+        write(fits);
 
-    // Save FITS file
-    fits.saveto(filename, clobber);
+        // Save FITS file
+        fits.saveto(filename, clobber);
 
-    // Close Edisp file
-    fits.close();
+        // Close Edisp file
+        fits.close();
 
     } // end of OpenMP critical zone
 
@@ -868,6 +868,9 @@ void GCTACubeExposure::write_attributes(GFitsHDU& hdu) const
     hdu.card("LIVETIME", m_livetime, "[s] Total livetime");
     hdu.card("DEADC",    deadc, "Deadtime correction factor");
     hdu.card("TIMEDEL",  1.0, "Time resolution");
+
+    // Set exposure cube units
+    hdu.card("BUNIT",  "cm**2 s", "Unit of exposure cube");
 
     // Return
     return;

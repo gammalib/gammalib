@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.1
 
-8 August 2020
+19 August 2020
 
 
 1. Introduction
@@ -144,6 +144,10 @@ None
 
 20. CTA interface
 -----------------
+The response cube classes GCTACubeExposure, GCTACubePsf, GCTACubeEdisp and
+GCTACubeBackground now write the units of the response cube into the FITS
+files (#3321).
+
 A specific response cache was implemented for the stacked analysis that reduces
 the memory requirements by at least a factor of 6. Instead of using the std::map
 cache, the full data-space is cached, avoiding the need for any bookkeeping

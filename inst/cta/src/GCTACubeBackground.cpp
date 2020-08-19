@@ -625,6 +625,13 @@ void GCTACubeBackground::write(GFits& fits) const
     // Write cube
     m_cube.write(fits);
 
+    // Get last HDU and write attributes
+    if (fits.size() > 0) {
+        GFitsHDU& hdu = *fits[fits.size()-1];
+        hdu.card("BUNIT",  "MeV**(-1) s**(-1) sr**(-1)",
+                 "Unit of background cube");
+    }
+
     // Write energy boundaries
     m_ebounds.write(fits);
 
@@ -646,14 +653,14 @@ void GCTACubeBackground::load(const GFilename& filename)
     #pragma omp critical(GCTACubeBackground_load)
     {
 
-    // Open FITS file
-    GFits fits(filename);
+        // Open FITS file
+        GFits fits(filename);
 
-    // Read background cube
-    read(fits);
+        // Read background cube
+        read(fits);
 
-    // Close FITS file
-    fits.close();
+        // Close FITS file
+        fits.close();
 
     } // end of OpenMP critical zone
 
@@ -681,17 +688,17 @@ void GCTACubeBackground::save(const GFilename& filename,
     #pragma omp critical(GCTACubeBackground_save)
     {
 
-    // Open or create FITS file
-    GFits fits;
+        // Open or create FITS file
+        GFits fits;
 
-    // Write background cube
-    write(fits);
+        // Write background cube
+        write(fits);
 
-    // Save FITS file
-    fits.saveto(filename, clobber);
+        // Save FITS file
+        fits.saveto(filename, clobber);
 
-    // Close Edisp file
-    fits.close();
+        // Close Edisp file
+        fits.close();
 
     } // end of OpenMP critical zone
 

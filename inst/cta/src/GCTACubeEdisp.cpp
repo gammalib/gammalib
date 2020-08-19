@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTACubeEdisp.cpp - CTA cube analysis energy dispersion class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Michael Mayer                               *
+ *  copyright (C) 2016-2020 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -545,6 +545,12 @@ void GCTACubeEdisp::write(GFits& fits) const
     // Write cube
     m_cube.write(fits);
 
+    // Get last HDU and write attributes
+    if (fits.size() > 0) {
+        GFitsHDU& hdu = *fits[fits.size()-1];
+        hdu.card("BUNIT",  "MeV**(-1)", "Unit of energy dispersion cube");
+    }
+
     // Write energy boundaries
     m_energies.write(fits, gammalib::extname_energies);
 
@@ -570,14 +576,14 @@ void GCTACubeEdisp::load(const GFilename& filename)
     #pragma omp critical(GCTACubeEdisp_load)
     {
 
-    // Open FITS file
-    GFits fits(filename);
+        // Open FITS file
+        GFits fits(filename);
 
-    // Read Edisp cube
-    read(fits);
+        // Read Edisp cube
+        read(fits);
 
-    // Close Edisp file
-    fits.close();
+        // Close Edisp file
+        fits.close();
 
     } // end of OpenMP critical zone
 
@@ -603,17 +609,17 @@ void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
     #pragma omp critical(GCTACubeEdisp_save)
     {
 
-    // Create FITS file
-    GFits fits;
+        // Create FITS file
+        GFits fits;
 
-    // Write PSF cube
-    write(fits);
+        // Write PSF cube
+        write(fits);
 
-    // Save FITS file
-    fits.saveto(filename, clobber);
+        // Save FITS file
+        fits.saveto(filename, clobber);
 
-    // Close Edisp file
-    fits.close();
+        // Close Edisp file
+        fits.close();
 
     } // end of OpenMP critical zone
 
