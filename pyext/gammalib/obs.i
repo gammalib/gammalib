@@ -34,6 +34,26 @@
 #include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GModelSpatial.hpp"
+#include "GModelSpatialComposite.hpp"
+#include "GModelSpatialDiffuse.hpp"
+#include "GModelSpatialDiffuseConst.hpp"
+#include "GModelSpatialDiffuseCube.hpp"
+#include "GModelSpatialDiffuseMap.hpp"
+#include "GModelSpatialElliptical.hpp"
+#include "GModelSpatialEllipticalDisk.hpp"
+#include "GModelSpatialEllipticalGauss.hpp"
+#include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialRadial.hpp"
+#include "GModelSpatialRadialDisk.hpp"
+#include "GModelSpatialRadialGauss.hpp"
+#include "GModelSpatialRadialRing.hpp"
+#include "GModelSpatialRadialShell.hpp"
+#include "GModelSpatialRadialProfile.hpp"
+#include "GModelSpatialRadialProfileDMBurkert.hpp"
+#include "GModelSpatialRadialProfileDMEinasto.hpp"
+#include "GModelSpatialRadialProfileDMZhao.hpp"
+#include "GModelSpatialRadialProfileGauss.hpp"
 %}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
@@ -53,6 +73,28 @@
 
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
+
+/* __ Inform about base classes __________________________________________ */
+%import(module="gammalib.model") "GModelSpatial.i";
+%import(module="gammalib.model") "GModelSpatialComposite.i";
+%import(module="gammalib.model") "GModelSpatialDiffuse.i";
+%import(module="gammalib.model") "GModelSpatialDiffuseConst.i";
+%import(module="gammalib.model") "GModelSpatialDiffuseCube.i";
+%import(module="gammalib.model") "GModelSpatialDiffuseMap.i";
+%import(module="gammalib.model") "GModelSpatialElliptical.i";
+%import(module="gammalib.model") "GModelSpatialEllipticalDisk.i";
+%import(module="gammalib.model") "GModelSpatialEllipticalGauss.i";
+%import(module="gammalib.model") "GModelSpatialPointSource.i";
+%import(module="gammalib.model") "GModelSpatialRadial.i";
+%import(module="gammalib.model") "GModelSpatialRadialDisk.i";
+%import(module="gammalib.model") "GModelSpatialRadialGauss.i";
+%import(module="gammalib.model") "GModelSpatialRadialRing.i";
+%import(module="gammalib.model") "GModelSpatialRadialShell.i";
+%import(module="gammalib.model") "GModelSpatialRadialProfile.i";
+%import(module="gammalib.model") "GModelSpatialRadialProfileDMBurkert.i";
+%import(module="gammalib.model") "GModelSpatialRadialProfileDMEinasto.i";
+%import(module="gammalib.model") "GModelSpatialRadialProfileDMZhao.i";
+%import(module="gammalib.model") "GModelSpatialRadialProfileGauss.i";
 
 /* __ Typemaps ___________________________________________________________ */
 %typemap(out) GObservation* {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.cpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -633,27 +633,8 @@ int GXmlNode::elements(const std::string& name) const
  ***************************************************************************/
 GXmlElement* GXmlNode::element(const int& index)
 {
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= elements()) {
-        throw GException::out_of_range(G_ELEMENT1, index, 0, elements()-1);
-    }
-
-    // Get the requested child element
-    GXmlElement* element  = NULL;
-    int          elements = 0;
-    for (int i = 0; i < m_nodes.size(); ++i) {
-        GXmlElement* src = dynamic_cast<GXmlElement*>(m_nodes[i]);
-        if (src != NULL) {
-            if (elements == index) {
-                element = src;
-                break;
-            }
-            elements++;
-        }
-    }
-
-    // Return child element
-    return element;
+    // Return child element using const method
+    return const_cast<GXmlElement*>(static_cast<const GXmlNode*>(this)->element(index));
 }
 
 
@@ -680,8 +661,8 @@ const GXmlElement* GXmlNode::element(const int& index) const
     const GXmlElement* element  = NULL;
     int                elements = 0;
     for (int i = 0; i < m_nodes.size(); ++i) {
-        const GXmlElement* src = dynamic_cast<const GXmlElement*>(m_nodes[i]);
-        if (src != NULL) {
+        if (m_nodes[i]->type() == NT_ELEMENT) {
+            GXmlElement* src = static_cast<GXmlElement*>(m_nodes[i]);
             if (elements == index) {
                 element = src;
                 break;
@@ -718,41 +699,8 @@ const GXmlElement* GXmlNode::element(const int& index) const
  ***************************************************************************/
 GXmlElement* GXmlNode::element(const std::string& name)
 {
-    // Initialise child node pointer
-    GXmlElement* element = NULL;
-
-    // Split name into tags
-    std::vector<std::string> tags = gammalib::split(name, ">");
-
-    // Walk down the hierarchy
-    GXmlNode* current = this;
-    for (int i = 0; i < tags.size(); ++i) {
-
-        // Get tag name and index
-        std::string tag   = gammalib::strip_whitespace(tags[i]);
-        int         index = extract_index(tag);
-
-        // Break if the requested node does not exist
-        int n = current->elements(tag);
-        if (n < 1 || index < 0 || index >= n) {
-            element = NULL;
-            break;
-        }
-
-        // Get node
-        element = current->element(tag, index);
-        current = element;
-
-        // Break if node has not been found
-        if (current == NULL) {
-            element = NULL;
-            break;
-        }
-        
-    } // endfor: walked down hierarchy
-
-    // Return child element
-    return element;
+    // Return child element using const method
+    return const_cast<GXmlElement*>(static_cast<const GXmlNode*>(this)->element(name));
 }
 
 
@@ -835,37 +783,8 @@ const GXmlElement* GXmlNode::element(const std::string& name) const
  ***************************************************************************/
 GXmlElement* GXmlNode::element(const std::string& name, const int& index)
 {
-    // Determine number of child elements
-    int n = elements(name);
-
-    // Signal if no children exist
-    if (n < 1) {
-        throw GException::xml_name_not_found(G_ELEMENT3, name);
-    }
-
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= n) {
-        throw GException::out_of_range(G_ELEMENT3, index, 0, n-1);
-    }
-
-    // Get the requested child element
-    GXmlElement* element  = NULL;
-    int          elements = 0;
-    for (int i = 0; i < m_nodes.size(); ++i) {
-        GXmlElement* src = dynamic_cast<GXmlElement*>(m_nodes[i]);
-        if (src != NULL) {
-            if (src->name() == name) {
-                if (elements == index) {
-                    element = src;
-                    break;
-                }
-                elements++;
-            }
-        }
-    }
-
-    // Return child element
-    return element;
+    // Return child element using const method
+    return const_cast<GXmlElement*>(static_cast<const GXmlNode*>(this)->element(name, index));
 }
 
 
@@ -886,8 +805,26 @@ GXmlElement* GXmlNode::element(const std::string& name, const int& index)
  ***************************************************************************/
 const GXmlElement* GXmlNode::element(const std::string& name, const int& index) const
 {
-    // Determine number of child elements
-    int n = elements(name);
+    // Initialise number of elements with given name to determine the
+    // number of child elements on the fly
+    int n = 0;
+
+    // Get the requested child element
+    const GXmlElement* element  = NULL;
+    int                elements = 0;
+    for (int i = 0; i < m_nodes.size(); ++i) {
+        if (m_nodes[i]->type() == NT_ELEMENT) {
+            GXmlElement* src = static_cast<GXmlElement*>(m_nodes[i]);
+            if (src->name() == name) {
+                n++;
+                if (elements == index) {
+                    element = src;
+                    break;
+                }
+                elements++;
+            }
+        }
+    }
 
     // Signal if no children exist
     if (n < 1) {
@@ -897,22 +834,6 @@ const GXmlElement* GXmlNode::element(const std::string& name, const int& index) 
     // If index is outside boundary then throw an error
     if (index < 0 || index >= n) {
         throw GException::out_of_range(G_ELEMENT3, index, 0, n-1);
-    }
-
-    // Get the requested child element
-    const GXmlElement* element  = NULL;
-    int                elements = 0;
-    for (int i = 0; i < m_nodes.size(); ++i) {
-        const GXmlElement* src = dynamic_cast<const GXmlElement*>(m_nodes[i]);
-        if (src != NULL) {
-            if (src->name() == name) {
-                if (elements == index) {
-                    element = src;
-                    break;
-                }
-                elements++;
-            }
-        }
     }
 
     // Return child element

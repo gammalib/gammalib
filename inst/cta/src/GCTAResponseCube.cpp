@@ -31,17 +31,6 @@
 #include <cmath>
 #include <string>
 #include "GTools.hpp"
-#include "GCTAResponseCube.hpp"
-#include "GCTAResponse_helpers.hpp"
-#include "GCTAInstDir.hpp"
-#include "GCTAEventBin.hpp"
-#include "GCTASupport.hpp"
-#include "GModelSpatialPointSource.hpp"
-#include "GModelSpatialRadial.hpp"
-#include "GModelSpatialRadialShell.hpp"
-#include "GModelSpatialElliptical.hpp"
-#include "GModelSpatialComposite.hpp"
-#include "GModelSpatialDiffuse.hpp"
 #include "GPhoton.hpp"
 #include "GSource.hpp"
 #include "GEvent.hpp"
@@ -50,6 +39,19 @@
 #include "GTime.hpp"
 #include "GIntegral.hpp"
 #include "GObservation.hpp"
+#include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialRadial.hpp"
+#include "GModelSpatialRadialShell.hpp"
+#include "GModelSpatialElliptical.hpp"
+#include "GModelSpatialComposite.hpp"
+#include "GModelSpatialDiffuse.hpp"
+#include "GCTAResponseCube.hpp"
+#include "GCTAResponse_helpers.hpp"
+#include "GCTAInstDir.hpp"
+#include "GCTAEventBin.hpp"
+#include "GCTASupport.hpp"
+#include "GCTAEventCube.hpp"               // Kludge
+#include "GCTAEventBin.hpp"                // Kludge
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
@@ -157,8 +159,8 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
     init_members();
 
     // Set members
-    m_exposure = exposure;
-    m_psf      = psf;
+    m_exposure   = exposure;
+    m_psf        = psf;
     m_background = background;
 
     // Signal that no energy dispersion was given
@@ -182,7 +184,7 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
  **************************************************************************/
 GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
                                    const GCTACubePsf&        psf,
-								   const GCTACubeEdisp&      edisp,
+                                   const GCTACubeEdisp&      edisp,
                                    const GCTACubeBackground& background) :
                   GCTAResponse()
 {
@@ -353,7 +355,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
-				irf *= edisp()(obsEng, srcEng, srcDir);
+                irf *= edisp()(obsEng, srcEng, srcDir);
             }
 
             // Divide by livetime
@@ -434,11 +436,193 @@ double GCTAResponseCube::nroi(const GModelSky&    model,
  ***************************************************************************/
 GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEng) const
 {
-	// Get energy boundaries from energy dispersion
-	GEbounds ebounds = m_edisp.ebounds(obsEng);
+    // Get energy boundaries from energy dispersion
+    GEbounds ebounds = m_edisp.ebounds(obsEng);
 
     // Return energy boundaries
     return ebounds;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response integrated over the spatial model
+ *
+ * @param[in] event Event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to a spatial model.
+ *
+ * Returns the instrument response for a given event, source and observation
+ * integrated over the spatial model component. The method computes
+ *
+ * \f[
+ *    {\tt irf}(p', E', t') = \int_p M_{\rm S}(p | E, t) \,
+ *                                   R(p', E', t' | p, E, t) \, d\,p
+ * \f]
+ *
+ * where
+ * * \f$M_{\rm S}(p | E, t)\f$ is the spatial model component,
+ * * \f$R(p', E', t' | p, E, t)\f$ is the Instrument Response Function (IRF),
+ * * \f$p'\f$ is the measured instrument direction,
+ * * \f$E'\f$ is the measured or reconstructed energy,
+ * * \f$t'\f$ is the measured arrival time,
+ * * \f$p\f$ is the true photon arrival direction,
+ * * \f$E\f$ is the true photon energy, and
+ * * \f$t\f$ is the true trigger time.
+ *
+ * The integration is done over all relevant true sky directions \f$p\f$.
+ *
+ * Depending on the type of the source model the method branches to the
+ * following methods to perform the actual computations
+ *
+ *      irf_ptsrc() - for the handling of a point source
+ *      irf_radial() - for radial models
+ *      irf_elliptical() - for elliptical models
+ *      irf_diffuse() - for diffuse models
+ *      irf_composite() - for composite models
+ *
+ * The method implements a caching mechanism for spatial models that have all
+ * parameters fixed. For those models the instrument response for a given
+ * event and observation is only computed once and then stored in an internal
+ * cache from which it is fetched back in case that the method is called
+ * again for the same event and observation.
+ ***************************************************************************/
+double GCTAResponseCube::irf_spatial(const GEvent&       event,
+                                     const GSource&      source,
+                                     const GObservation& obs) const
+{
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Set IRF value attributes
+    std::string     name  = obs.id() + "::" + source.name();
+    const GInstDir& dir   = event.dir();
+    const GEnergy&  ereco = event.energy();
+    const GEnergy&  etrue = source.energy();
+
+    // Signal if spatial model has free parameters
+    bool has_free_pars = source.model()->has_free_pars();
+
+    // Kludge: the IRF response cache should be used, the model has no
+    // free parameters and there is no energy dispersion
+    if (m_use_irf_cache && !has_free_pars && !use_edisp()) {
+
+        // Build unique cache name
+        std::string name  = obs.id() + "::" + source.name();
+
+        // Get index in cache, returns -1 if name is not found in cache
+        int index = -1;
+        for (int i = 0; i < m_cache_names.size(); ++i) {
+            if (m_cache_names[i] == name) {
+                index = i;
+                break;
+            }
+        }
+
+        // If index was not found then allocate a new cache map
+        if (index == -1) {
+
+            // Get pointer to event cube
+            const GCTAEventCube* cube =
+                  static_cast<const GCTAEventCube*>(obs.events());
+
+            // Allocate cache
+            GNdarray cache(cube->nx()*cube->ny(), cube->ebins());
+
+            // Initialise all cache values with -1 (not set)
+            for (int i = 0; i < cache.size(); ++i) {
+                cache(i) = -1.0;
+            }
+
+            // Insert cache
+            m_cache_names.push_back(name);
+            m_cache_values.push_back(cache);
+
+            // Set index
+            index = m_cache_names.size()-1;
+
+        } // endif: allocated new cache
+
+        // Get reference to CTA event bin
+        const GCTAEventBin& bin = static_cast<const GCTAEventBin&>(event);
+
+        // Get cache value
+        irf = m_cache_values[index](bin.ipix(), bin.ieng());
+
+        // If cache value is not valid then copute IRF
+        if (irf < 0.0) {
+
+            // Compute IRF for spatial model
+            switch (source.model()->code()) {
+                case GMODEL_SPATIAL_POINT_SOURCE:
+                    irf = irf_ptsrc(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_RADIAL:
+                    irf = irf_radial(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_ELLIPTICAL:
+                    irf = irf_elliptical(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_DIFFUSE:
+                    irf = irf_diffuse(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_COMPOSITE:
+                    irf = irf_composite(event, source, obs);
+                    break;
+                default:
+                    break;
+            }
+
+            // Set cache value
+            m_cache_values[index](bin.ipix(), bin.ieng()) = irf;
+
+        } // endif: computed IRF
+
+    } // endif: kludge
+
+    // ... otherwise use release 1.7 response cache
+    else {
+
+        // If the spatial model component has free parameters, or the response
+        // cache should not be used, or the cache does not contain the requested
+        // IRF value then compute the IRF value for the spatial model.
+        if (has_free_pars    ||
+            !m_use_irf_cache ||
+            !m_irf_cache.contains(name, dir, ereco, etrue, &irf)) {
+
+            // Compute IRF for spatial model
+            switch (source.model()->code()) {
+                case GMODEL_SPATIAL_POINT_SOURCE:
+                    irf = irf_ptsrc(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_RADIAL:
+                    irf = irf_radial(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_ELLIPTICAL:
+                    irf = irf_elliptical(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_DIFFUSE:
+                    irf = irf_diffuse(event, source, obs);
+                    break;
+                case GMODEL_SPATIAL_COMPOSITE:
+                    irf = irf_composite(event, source, obs);
+                    break;
+                default:
+                    break;
+            }
+
+        } // endif: computed spatial model
+
+        // If the spatial model has no free parameters and the response cache
+        // should be used then put the IRF value in the response cache.
+        if (!has_free_pars && m_use_irf_cache) {
+            m_irf_cache.set(name, dir, ereco, etrue, irf);
+        }
+
+    } // endelse: used release 1.7 response cache
+
+    // Return IRF value
+    return irf;
 }
 
 
@@ -487,11 +671,11 @@ void GCTAResponseCube::read(const GXmlElement& xml)
 
     // Optionally load energy dispersion cube
     if (gammalib::xml_has_par(xml, "EdispCube")) {
-		const GXmlElement* edisppar  = gammalib::xml_get_par(G_READ, xml, "EdispCube");
-		std::string        edispname = gammalib::xml_file_expand(xml,
+        const GXmlElement* edisppar  = gammalib::xml_get_par(G_READ, xml, "EdispCube");
+        std::string        edispname = gammalib::xml_file_expand(xml,
                                                  edisppar->attribute("file"));
-		m_edisp.load(edispname);
-		m_has_edisp = true;
+        m_edisp.load(edispname);
+        m_has_edisp = true;
     }
 
     // Return
@@ -535,11 +719,11 @@ void GCTAResponseCube::write(GXmlElement& xml) const
 
     // Optionally add energy dispersions cube filename
     if (m_has_edisp) {
-		filename = gammalib::xml_file_reduce(xml, m_edisp.filename());
-		if (!(filename.empty())) {
-			GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
-			par->attribute("file", filename);
-		}
+        filename = gammalib::xml_file_reduce(xml, m_edisp.filename());
+        if (!(filename.empty())) {
+            GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
+            par->attribute("file", filename);
+        }
     }
 
     // Add background cube filename
@@ -633,11 +817,12 @@ void GCTAResponseCube::init_members(void)
     m_psf.clear();
     m_edisp.clear();
     m_background.clear();
-    m_apply_edisp = false;
-    m_has_edisp   = false;
+    m_apply_edisp    = false;
+    m_has_edisp      = false;
 
-    // Initialise cache
-    m_cache.clear();
+    // Kludge: Initialise cube response cache
+    m_cache_names.clear();
+    m_cache_values.clear();
 
     // Return
     return;
@@ -659,10 +844,9 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
     m_apply_edisp = rsp.m_apply_edisp;
     m_has_edisp   = rsp.m_has_edisp;
 
-    // Copy cache
-    for (int i = 0; i < rsp.m_cache.size(); ++i) {
-        m_cache.push_back((rsp.m_cache[i]->clone()));
-    }
+    // Kludge: Copy cube response cache
+    m_cache_names  = rsp.m_cache_names;
+    m_cache_values = rsp.m_cache_values;
 
     // Return
     return;
@@ -674,12 +858,6 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
  ***************************************************************************/
 void GCTAResponseCube::free_members(void)
 {
-    // Free cache
-    for (int i = 0; i < m_cache.size(); ++i) {
-        if (m_cache[i] != NULL) delete m_cache[i];
-        m_cache[i] = NULL;
-    }
-
     // Return
     return;
 }

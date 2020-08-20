@@ -1,0 +1,28 @@
+.. _1.7.1:
+
+GammaLib 1.7.1 release (20 August 2020)
+=======================================
+
+Overview
+--------
+
+GammaLib 1.7.1 is a bug fix release for GammaLib release 1.7.
+
+The following bugs were fixed:
+
+* [`3322 <https://cta-redmine.irap.omp.eu/issues/3322>`_] -
+  Copy Python modules into pyext/gammalib folder
+* [`3321 <https://cta-redmine.irap.omp.eu/issues/3321>`_] -
+  Write units of response cubes into FITS files
+* [`3316 <https://cta-redmine.irap.omp.eu/issues/3316>`_] -
+  Implement specific response cache for CTA stacked analysis
+* [`3308 <https://cta-redmine.irap.omp.eu/issues/3308>`_] -
+  Speed up model definition XML file writing
+* [`3295 <https://cta-redmine.irap.omp.eu/issues/3295>`_] -
+  Fix automatic type casting in Python interface
+* [`3287 <https://cta-redmine.irap.omp.eu/issues/3287>`_] -
+  Make parameter file reading and writing thread safe
+* [`3280 <https://cta-redmine.irap.omp.eu/issues/3280>`_] -
+  Add quotes to sky region names
+* [`3279 <https://cta-redmine.irap.omp.eu/issues/3279>`_] -
+  Fix broken power law flux and eflux computation bug

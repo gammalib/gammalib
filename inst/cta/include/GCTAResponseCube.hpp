@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GNdarray.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTACubePsf.hpp"
@@ -69,7 +70,7 @@ public:
                      const GCTACubeBackground& background);
     GCTAResponseCube(const GCTACubeExposure&   exposure,
                      const GCTACubePsf&        psf,
-					 const GCTACubeEdisp&      edisp,
+                     const GCTACubeEdisp&      edisp,
                      const GCTACubeBackground& background);
     virtual ~GCTAResponseCube(void);
 
@@ -96,6 +97,11 @@ public:
     virtual void              read(const GXmlElement& xml);
     virtual void              write(GXmlElement& xml) const;
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
+
+    // Overloaded virtual base class methods
+    virtual double      irf_spatial(const GEvent&       event,
+                                    const GSource&      source,
+                                    const GObservation& obs) const;
 
     // Other Methods
     const GCTACubeExposure&   exposure(void) const;
@@ -147,14 +153,10 @@ private:
     GCTACubeEdisp      m_edisp;       //!< Energy dispersion cube
     mutable bool       m_apply_edisp; //!< Apply energy dispersion
     mutable bool       m_has_edisp;   //!< Flag to indicate if energy
-                                      //   dispersion is available
 
-    // Response cache
-    mutable std::vector<GCTACubeSource*> m_cache;        //!< Response cache
-    mutable GNodeArray                   m_diffuse_logE; //!< Diffuse energy
-                                                         //   bounds
-                                                         //   computation
-                                                         //   cache
+    // Kludge: cube response cache
+    mutable std::vector<std::string> m_cache_names;  //!< Model names
+    mutable std::vector<GNdarray>    m_cache_values; //!< Cached values
 };
 
 

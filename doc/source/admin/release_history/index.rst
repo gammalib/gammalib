@@ -6,6 +6,8 @@ Release History
 .. toctree::
    :maxdepth: 1
 
+   GammaLib 1.8 <1.8>
+   GammaLib 1.7.1 <1.7.1>
    GammaLib 1.7 <1.7>
    GammaLib 1.6.3 <1.6.3>
    GammaLib 1.6.2 <1.6.2>

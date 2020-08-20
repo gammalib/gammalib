@@ -75,14 +75,14 @@ GSkyRegionCircle::GSkyRegionCircle(const GSkyDir& centre, const double& radius) 
                   GSkyRegion()
 {
     // Initialise members
-	init_members();
+    init_members();
 
-	// Set members
-	this->centre(centre);
+    // Set members
+    this->centre(centre);
     this->radius(radius);
 
-	// Compute solid angle
-	compute_solid_angle();
+    // Compute solid angle
+    compute_solid_angle();
 
     // Return
     return;
@@ -100,14 +100,14 @@ GSkyRegionCircle::GSkyRegionCircle(const double& ra, const double& dec,
                                    const double& radius) : GSkyRegion()
 {
     // Initialise members
-	init_members();
+    init_members();
 
-	// Set members
-	this->centre(ra, dec);
+    // Set members
+    this->centre(ra, dec);
     this->radius(radius);
 
-	// Compute solid angle
-	compute_solid_angle();
+    // Compute solid angle
+    compute_solid_angle();
 
     // Return
     return;
@@ -123,14 +123,14 @@ GSkyRegionCircle::GSkyRegionCircle(const double& ra, const double& dec,
  ***************************************************************************/
 GSkyRegionCircle::GSkyRegionCircle(const std::string& line) : GSkyRegion()
 {
-	 // Initialise members
-	 init_members();
+    // Initialise members
+    init_members();
 
-	 // Read information from DS9 region file line
-	 read(line);
+    // Read information from DS9 region file line
+    read(line);
 
-	 // Return
-	 return;
+    // Return
+    return;
 
 }
 
@@ -252,14 +252,15 @@ GSkyRegionCircle* GSkyRegionCircle::clone(void) const
  ***************************************************************************/
 void GSkyRegionCircle::radius(const double& radius)
 {
-	if (radius < 0.0) {
+    // Check if radius is valid
+    if (radius < 0.0) {
         std::string msg =
             "A radius of "+gammalib::str(radius)+" degrees has been"
             " specified for a circular sky region.\n"
             "The radius of a circular sky region can't be less than 0"
             " degrees.";
-		throw GException::invalid_argument(G_RADIUS, msg);
-	}
+        throw GException::invalid_argument(G_RADIUS, msg);
+    }
 
     // Set radius value
     m_radius = radius;
@@ -282,44 +283,44 @@ void GSkyRegionCircle::radius(const double& radius)
  ***************************************************************************/
 void GSkyRegionCircle::read(const std::string& line)
 {
-	// Clear the current instance
-	clear();
+    // Clear the current instance
+    clear();
 
-	// Split the string into 2 parts seperated by #
-	std::vector<std::string> substrings = gammalib::split(line,"#");
-	std::string region_def = (!substrings.empty())   ? substrings[0] : "";
-	std::string comment    = (substrings.size() > 1) ? substrings[1] : "";
+    // Split the string into 2 parts seperated by #
+    std::vector<std::string> substrings = gammalib::split(line,"#");
+    std::string region_def = (!substrings.empty())   ? substrings[0] : "";
+    std::string comment    = (substrings.size() > 1) ? substrings[1] : "";
 
-	// Finding the circle
-	if (region_def.find("circle") == std::string::npos) {
+    // Finding the circle
+    if (region_def.find("circle") == std::string::npos) {
         std::string msg =
             "Unable to find the key word \"circle\" in provided string"
             " \""+line+"\".\n"
             "The \"circle\" key word is mandatory.";
-		throw GException::invalid_value(G_READ, msg);
-	}
+        throw GException::invalid_value(G_READ, msg);
+    }
 
-	// Get the the coordinate system of the values
-	std::string system = gammalib::split(region_def, ";")[0];
+    // Get the the coordinate system of the values
+    std::string system = gammalib::split(region_def, ";")[0];
 
-	// Get the substring of the important values
-	unsigned    pos          = region_def.find("circle(");
-	unsigned    end          = region_def.find(")");
-	std::string circlestring = region_def.substr(pos+7, end);
-	circlestring.erase(circlestring.find(")"), 1);
+    // Get the substring of the important values
+    size_t      pos          = region_def.find("circle(");
+    size_t      end          = region_def.find(")");
+    std::string circlestring = region_def.substr(pos+7, end);
+    circlestring.erase(circlestring.find(")"), 1);
 
-	// Get the values of the region x,y,and radius
-	std::vector<std::string> values = gammalib::split(circlestring,",");
-	if (values.size() != 3) {
+    // Get the values of the region x,y,and radius
+    std::vector<std::string> values = gammalib::split(circlestring,",");
+    if (values.size() != 3) {
         std::string msg =
             "Invalid number of "+gammalib::str(values.size())+" arguments"
             " after the \"circle\" key word in provided string \""+line+"\".\n"
             "Exactly 3 arguments are expected.";
-		throw GException::invalid_value(G_READ, msg);
-	}
-	double x      = gammalib::todouble(values[0]);
-	double y      = gammalib::todouble(values[1]);
-	double radius = gammalib::todouble(values[2]);
+        throw GException::invalid_value(G_READ, msg);
+    }
+    double x      = gammalib::todouble(values[0]);
+    double y      = gammalib::todouble(values[1]);
+    double radius = gammalib::todouble(values[2]);
 
     // Get radius units
     if (gammalib::contains(values[2], "'")) {
@@ -329,50 +330,97 @@ void GSkyRegionCircle::read(const std::string& line)
         radius /= 3600.0;
     }
 
-	// Initialise centre direction
-	GSkyDir centre = GSkyDir();
+    // Initialise centre direction
+    GSkyDir centre = GSkyDir();
 
-	// Set the values in the correct system
-	if (system == "fk5" || system == "icrs") {
-		centre.radec_deg(x,y);
-	}
-	else if (system == "galactic") {
-		centre.lb_deg(x,y);
-	}
-	else {
+    // Set the values in the correct system
+    if (system == "fk5" || system == "icrs") {
+        centre.radec_deg(x,y);
+    }
+    else if (system == "galactic") {
+        centre.lb_deg(x,y);
+    }
+    else {
         std::string msg =
             "Unsupported coordinate system \""+system+"\" in provided string"
             " \""+line+"\".\n"
             "Only the following coordinate systems are supported: "
             "\"fk5\", \"icrs\" and \"galactic\".";
-		throw GException::invalid_value(G_READ, msg);
-	}
+        throw GException::invalid_value(G_READ, msg);
+    }
 
-	// Set members
-	this->centre(centre);
+    // Set members
+    this->centre(centre);
     this->radius(radius);
 
-	// Compute solid angle
-	compute_solid_angle();
+    // Compute solid angle
+    compute_solid_angle();
 
-	// Check if there is a given name for the region and set it
-	std::vector<std::string>comments = gammalib::split(comment, " ");
-	for (int i = 0; i < comments.size(); i++) {
-		if (gammalib::contains(comments[i], "text")) {
-			std::vector<std::string> attributes = gammalib::split(comments[i], "=");
-			if (attributes.size() < 2) {
-                std::string msg =
-                      "Invalid character sequence encountered in provided"
-                      " string \""+line+"\".\n"
-                      "An attribute of the type \"text=Name\" is expected.";
-				throw GException::invalid_value(G_READ, msg);
-			}
-			m_name = attributes[1];
-		}
-	}
+    // Check if there is a given name for the region and set it. Strings may
+    // be quoted with " or ' or {}
+    pos = comment.find("text");
+    if (pos != std::string::npos) {
+        pos = comment.find("=", pos+4);
+        if (pos != std::string::npos) {
 
-	// Return
-	return;
+            // Set possible quotes
+            const std::string quotes_open  = "{'\"";
+            const std::string quotes_close = "}'\"";
+
+            // Set quotes found flag
+            bool found = false;
+
+            // Search for possible quotes and extract name
+            for (int i = 0; i < quotes_open.size(); ++i) {
+                std::string quote_open  = quotes_open.substr(i,1);
+                std::string quote_close = quotes_close.substr(i,1);
+                pos = comment.find(quote_open, pos+1);
+                if (pos != std::string::npos) {
+                    end = comment.find(quote_close, pos+1);
+                    if (end != std::string::npos) {
+                        int length = end-pos-1;
+                        if (length > 0) {
+                            m_name = comment.substr(pos+1, length);
+                        }
+                        else {
+                            m_name = "";
+                        }
+                        found = true;
+                    }
+                    else {
+                        std::string msg = "Missing "+quote_open+" following "+
+                                          quote_close+" encountered after "
+                                          "text attribute. Please add closing "
+                                          "quotes to text="+quote_open+"Name"+
+                                          quote_close+" attribute.";
+                        throw GException::invalid_value(G_READ, msg);
+                    }
+                }
+            } // endfor: looped over possible quotes
+
+            // Throw an exception if no quotes were found
+            if (!found) {
+                std::string msg = "Missing quotes \" or ' or {} following "
+                                  "text attribute. Please specify quotes "
+                                  "around the names of the text, for example "
+                                  "text={Name}.";
+                throw GException::invalid_value(G_READ, msg);
+            }
+
+        } // endif: = character found
+
+        // Signal that no = character was found after text
+        else {
+            std::string msg = "Missing = following text attribute.  Please "
+                              "specify the value for a text attribute, "
+                              "for example text={Name}.";
+            throw GException::invalid_value(G_READ, msg);
+        }
+
+    } // endif: text attribute found
+
+    // Return
+    return;
 }
 
 
@@ -387,25 +435,27 @@ void GSkyRegionCircle::read(const std::string& line)
 std::string GSkyRegionCircle::write(void) const
 {
     // Allocate string
-	std::string result;
+    std::string result;
 
     // Set string
-	result.append("fk5;circle(");
-	result.append(gammalib::str(m_centre.ra_deg()));
-	result.append(",");
-	result.append(gammalib::str(m_centre.dec_deg()));
-	result.append(",");
-	result.append(gammalib::str(m_radius));
-	result.append(")");
+    result.append("fk5;circle(");
+    result.append(gammalib::str(m_centre.ra_deg()));
+    result.append(",");
+    result.append(gammalib::str(m_centre.dec_deg()));
+    result.append(",");
+    result.append(gammalib::str(m_radius));
+    result.append(")");
 
     // Optionally add region name
     if (m_name.length() > 0) {
         result.append(" # text=");
+        result.append("{");
         result.append(m_name);
+        result.append("}");
     }
 
     // Return string
-	return result;
+    return result;
 }
 
 
@@ -424,7 +474,7 @@ std::string GSkyRegionCircle::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-    	result.append("=== GSkyRegionCircle ===");
+        result.append("=== GSkyRegionCircle ===");
 
         // Append sky circle information
         result.append("\n"+gammalib::parformat("Right Ascension of centre"));
@@ -450,19 +500,19 @@ std::string GSkyRegionCircle::print(const GChatter& chatter) const
  ***************************************************************************/
 bool GSkyRegionCircle::contains(const GSkyDir& dir) const
 {
-	// Initialise return value
-	bool dir_is_in = false;
+    // Initialise return value
+    bool dir_is_in = false;
 
-	// calculate distance from dir to centre
-	double distance = dir.dist_deg(m_centre);
+    // calculate distance from dir to centre
+    double distance = dir.dist_deg(m_centre);
 
-	// Check if distance < radius
-	if (distance <= radius()) {
-		dir_is_in = true;
-	}
+    // Check if distance < radius
+    if (distance <= radius()) {
+        dir_is_in = true;
+    }
 
-	// Return bool
-	return dir_is_in;
+    // Return bool
+    return dir_is_in;
 }
 
 /***********************************************************************//**
@@ -475,34 +525,34 @@ bool GSkyRegionCircle::contains(const GSkyDir& dir) const
  ***************************************************************************/
 bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
 {
-	// Initialise return value
-	bool fully_inside = false;
+    // Initialise return value
+    bool fully_inside = false;
 
-	// If other region is circle use a simple way to calculate
-	if (reg.type() == "Circle") {
+    // If other region is circle use a simple way to calculate
+    if (reg.type() == "Circle") {
 
-		// Create circular region from reg
-		const GSkyRegionCircle* regcirc =
+        // Create circular region from reg
+        const GSkyRegionCircle* regcirc =
               dynamic_cast<const GSkyRegionCircle*>(&reg);
 
-		// Calculate angular distance between the centres
-		double ang_dist = m_centre.dist_deg(regcirc->centre());
+        // Calculate angular distance between the centres
+        double ang_dist = m_centre.dist_deg(regcirc->centre());
 
-		// Check if the region is contained in this
-		if ((ang_dist + regcirc->radius()) <= m_radius) {
-			fully_inside = true;
-		}
+        // Check if the region is contained in this
+        if ((ang_dist + regcirc->radius()) <= m_radius) {
+            fully_inside = true;
+        }
         
-	}
+    }
     
     // ... otherwise throw an exception
-	else {
-		throw GException::feature_not_implemented(G_CONTAINS,
+    else {
+        throw GException::feature_not_implemented(G_CONTAINS,
               "Cannot compare two different region types yet");
-	}
-    
-	// Return value
-	return fully_inside;
+    }
+
+    // Return value
+    return fully_inside;
 }
 
 
@@ -516,34 +566,34 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
  ***************************************************************************/
 bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
 {
-	// Initialise return value
-	bool overlap = false;
+    // Initialise return value
+    bool overlap = false;
 
-	// If other region is circle use a simple way to calculate
-	if (reg.type() == "Circle") {
+    // If other region is circle use a simple way to calculate
+    if (reg.type() == "Circle") {
 
-		// Create circular region from reg
-		const GSkyRegionCircle* regcirc =
+        // Create circular region from reg
+        const GSkyRegionCircle* regcirc =
               dynamic_cast<const GSkyRegionCircle*>(&reg);
 
-		// Calculate angular distance between the centres
-		double ang_dist = m_centre.dist_deg(regcirc->centre());
+        // Calculate angular distance between the centres
+        double ang_dist = m_centre.dist_deg(regcirc->centre());
 
-		// Check if the distance is smaller than the sum of both radii
-		if (ang_dist <= (m_radius + regcirc->radius())) {
-			overlap = true;
-		}
-        
-	}
+        // Check if the distance is smaller than the sum of both radii
+        if (ang_dist <= (m_radius + regcirc->radius())) {
+            overlap = true;
+        }
+
+    }
 
     // ... otherwise throw an exception
-	else {
-		throw GException::feature_not_implemented(G_OVERLAPS,
+    else {
+        throw GException::feature_not_implemented(G_OVERLAPS,
               "Cannot compare two different region types yet");
-	}
+    }
 
-	// Return value
-	return overlap;
+    // Return value
+    return overlap;
 }
 
 
@@ -560,12 +610,12 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
 void GSkyRegionCircle::init_members(void)
 {
     // Initialise members
-	m_centre = GSkyDir();
-	m_radius = 0.0;
-	m_type   = "Circle";
+    m_centre = GSkyDir();
+    m_radius = 0.0;
+    m_type   = "Circle";
 
-	//Return
-	return;
+    //Return
+    return;
 }
 
 
@@ -576,9 +626,9 @@ void GSkyRegionCircle::init_members(void)
  ***************************************************************************/
 void GSkyRegionCircle::copy_members(const GSkyRegionCircle& region)
 {
-	// Copy attributes
-	m_centre = region.m_centre;
-	m_radius = region.m_radius;
+    // Copy attributes
+    m_centre = region.m_centre;
+    m_radius = region.m_radius;
 
     // Return
     return;
@@ -600,11 +650,11 @@ void GSkyRegionCircle::free_members(void)
  ***************************************************************************/
 void GSkyRegionCircle::compute_solid_angle(void)
 {
-	// Convert radius from degrees to radians
-	double radius_rad = m_radius * gammalib::deg2rad;
+    // Convert radius from degrees to radians
+    double radius_rad = m_radius * gammalib::deg2rad;
 
-	// Compute solid angle
-	m_solid = gammalib::twopi * (1.0 - std::cos(radius_rad));
+    // Compute solid angle
+    m_solid = gammalib::twopi * (1.0 - std::cos(radius_rad));
 
     // Return
     return;

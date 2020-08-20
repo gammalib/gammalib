@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.cpp - Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -697,8 +697,28 @@ void GModels::save(const GFilename& filename) const
     // Declare empty XML document
     GXml xml;
 
+    // Append source library element
+    GXmlNode* lib =
+        xml.append(GXmlElement("source_library title=\"source library\""));
+
+    // Write all sources into library.
+    for (int i = 0; i < size(); ++i) {
+
+        // Allocate XML element
+        GXmlElement source;
+
+        // Write model into XML element
+        m_models[i]->write(source);
+
+        // Append source to source library. Since write appends only a
+        // single source we can just access the first element in the
+        // source node.
+        lib->append(*source.element(0));
+
+    } // endfor: looped over sources
+
     // Write models into XML file
-    write(xml);
+    //write(xml);
 
     // Save XML document
     xml.save(filename);

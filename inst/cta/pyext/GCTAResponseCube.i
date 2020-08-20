@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAResponseCube.i - CTA cube analysis response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,6 +67,11 @@ public:
     virtual GEbounds          ebounds(const GEnergy& obsEnergy) const;
     virtual void              read(const GXmlElement& xml);
     virtual void              write(GXmlElement& xml) const;
+
+    // Overloaded virtual base class methods
+    virtual double      irf_spatial(const GEvent&       event,
+                                    const GSource&      source,
+                                    const GObservation& obs) const;
 
     // Other Methods
     const GCTACubeExposure&   exposure(void) const;

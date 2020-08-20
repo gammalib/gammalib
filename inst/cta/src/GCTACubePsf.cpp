@@ -290,13 +290,13 @@ GCTACubePsf& GCTACubePsf::operator=(const GCTACubePsf& cube)
 
 
 /***********************************************************************//**
- * @brief Return point spread function (in units of sr^-1)
+ * @brief Return point spread function (in units of sr\f$^{-1}\f$)
  *
  * @param[in] dir Coordinate of the true photon position.
  * @param[in] delta Angular separation between true and measured photon
  *            directions (rad).
  * @param[in] energy Energy of the true photon.
- * @return point spread function (in units of sr^-1)
+ * @return point spread function (in units of sr\f$^{-1}\f$)
  *
  * Returns the point spread function for a given angular separation in units
  * of sr^-1 for a given energy and coordinate.
@@ -519,6 +519,12 @@ void GCTACubePsf::write(GFits& fits) const
     // Write cube
     m_cube.write(fits);
 
+    // Get last HDU and write attributes
+    if (fits.size() > 0) {
+        GFitsHDU& hdu = *fits[fits.size()-1];
+        hdu.card("BUNIT",  "sr**(-1)", "Unit of PSF cube");
+    }
+
     // Write energies
     m_energies.write(fits);
 
@@ -546,17 +552,17 @@ void GCTACubePsf::load(const GFilename& filename)
     #pragma omp critical(GCTACubePsf_load)
     {
 
-    // Open FITS file
-    GFits fits(filename);
+        // Open FITS file
+        GFits fits(filename);
 
-    // Read PSF cube
-    read(fits);
+        // Read PSF cube
+        read(fits);
 
-    // Close FITS file
-    fits.close();
+        // Close FITS file
+        fits.close();
 
-    // Store filename
-    m_filename = filename;
+        // Store filename
+        m_filename = filename;
 
     } // end of OpenMP critical zone
 
@@ -579,17 +585,17 @@ void GCTACubePsf::save(const GFilename& filename, const bool& clobber) const
     #pragma omp critical(GCTACubePsf_save)
     {
 
-    // Create FITS file
-    GFits fits;
+        // Create FITS file
+        GFits fits;
 
-    // Write PSF cube
-    write(fits);
+        // Write PSF cube
+        write(fits);
 
-    // Save FITS file
-    fits.saveto(filename, clobber);
+        // Save FITS file
+        fits.saveto(filename, clobber);
 
-    // Close Edisp file
-    fits.close();
+        // Close Edisp file
+        fits.close();
 
     } // end of OpenMP critical zone
 

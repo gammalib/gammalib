@@ -1,3 +1,24 @@
+2020-08-20
+
+        * Version 1.8.0 released
+        ========================
+
+
+2020-08-20
+
+        * Bug fix version 1.7.1 released
+        ================================
+
+        Copy Python modules into pyext/gammalib folder (#3322)
+        Write units of response cubes into FITS files (#3321)
+        Implement specific response cache for CTA stacked analysis (#3316)
+        Speed up model definition XML file writing (#3308)
+        Fix automatic type casting in Python interface (#3295)
+        Make parameter file reading and writing thread safe (#3287)
+        Add quotes to sky region names (#3280)
+        Fix broken power law flux and eflux computation bug (#3279)
+
+
 2020-07-02
 
         * Version 1.7.0 released

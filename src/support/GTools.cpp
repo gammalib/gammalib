@@ -1488,8 +1488,11 @@ bool gammalib::xml_has_par(const GXmlElement& xml, const std::string& name)
     // Initialize flag
     bool found = false;
 
+    // Get number of elements
+    int n = xml.elements("parameter");
+    
     // Search for parameter with given name
-    for (int i = 0; i < xml.elements("parameter"); ++i) {
+    for (int i = 0; i < n; ++i) {
         const GXmlElement* element = xml.element("parameter", i);
         if (element->attribute("name") == name) {
             found = true;
@@ -1531,8 +1534,11 @@ GXmlElement* gammalib::xml_need_par(const std::string& origin,
     // Number of elements
     int number = 0;
 
+    // Get number of elements in XML element
+    int n = xml.elements("parameter");
+
     // Search for parameter with given name
-    for (int i = 0; i < xml.elements("parameter"); ++i) {
+    for (int i = 0; i < n; ++i) {
         GXmlElement* element = xml.element("parameter", i);
         if (element->attribute("name") == name) {
             par = element;
@@ -1580,8 +1586,11 @@ const GXmlElement* gammalib::xml_get_par(const std::string& origin,
     // Number of elements
     int number = 0;
 
+    // Get number of elements in XML element
+    int n = xml.elements("parameter");
+
     // Search for parameter with given name
-    for (int i = 0; i < xml.elements("parameter"); ++i) {
+    for (int i = 0; i < n; ++i) {
         const GXmlElement* element = xml.element("parameter", i);
         if (element->attribute("name") == name) {
             par = element;
