@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.1
 
-19 August 2020
+20 August 2020
 
 
 1. Introduction
@@ -38,6 +38,10 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
+The Python modules are now copied from pyext/build/gammalib into pyext/gammalib
+since code generated using recent swig versions needs the modules in that
+place (#3322).
+
 Automatic type casting did not work fully in the Python interface since for
 some classes the members were not accessible after type casting. It turned
 out that the interface for the derived classes needed to be added explicitly

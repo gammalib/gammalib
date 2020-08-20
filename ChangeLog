@@ -1,8 +1,9 @@
-2020-08-19
+2020-08-20
 
         * Bug fix version 1.7.1 released
         ================================
 
+        Copy Python modules into pyext/gammalib folder (#3322)
         Write units of response cubes into FITS files (#3321)
         Implement specific response cache for CTA stacked analysis (#3316)
         Speed up model definition XML file writing (#3308)

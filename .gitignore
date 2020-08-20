@@ -19,6 +19,7 @@ inst/spi/test/*.trs
 # Generated files
 pyext/gammalib/*.py
 pyext/gammalib/*.cpp
+pyext/gammalib/*.so
 pyext/setup.py
 dev/conda.recipe/meta.yaml
 m4/libtool.m4
