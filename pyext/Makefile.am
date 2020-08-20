@@ -247,6 +247,11 @@ if IS_ELCAPITAN
 		install_name_tool -add_rpath $(abs_top_builddir)/src/.libs $$f; \
 	done
 endif
+	-for f in build/gammalib/_*.so; do \
+		dst=`echo $$f | sed 's/build\///g'`; \
+		cp $$f $$dst; \
+		echo "Copied "$$f" -> "$$dst; \
+	done
 
 # Do nothing for 'make check'
 #check-local:
