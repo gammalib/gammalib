@@ -120,6 +120,9 @@ if test `uname -s` = "Darwin"; then
   if [ test $version -ge 1011 ]; then
     osx_el_capitan=yes
   fi
+  if [ test $version -ge 110 ]; then
+    osx_el_capitan=yes
+  fi
 fi
 AC_MSG_CHECKING([for Mac OS X >= 10.7])
 if [test "x$osx_lion" = "xyes"]; then

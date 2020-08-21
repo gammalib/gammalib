@@ -1,8 +1,15 @@
 2020-08-20
 
+        * Version 1.8.0 released
+        ========================
+
+
+2020-08-21
+
         * Bug fix version 1.7.1 released
         ================================
 
+        Test for Big Sur in configuration step (#3326)
         Copy Python modules into pyext/gammalib folder (#3322)
         Write units of response cubes into FITS files (#3321)
         Implement specific response cache for CTA stacked analysis (#3316)

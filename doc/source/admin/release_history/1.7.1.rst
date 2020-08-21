@@ -1,6 +1,6 @@
 .. _1.7.1:
 
-GammaLib 1.7.1 release (20 August 2020)
+GammaLib 1.7.1 release (21 August 2020)
 =======================================
 
 Overview
@@ -10,6 +10,8 @@ GammaLib 1.7.1 is a bug fix release for GammaLib release 1.7.
 
 The following bugs were fixed:
 
+* [`3326 <https://cta-redmine.irap.omp.eu/issues/3326>`_] -
+  Test for Big Sur in configuration step
 * [`3322 <https://cta-redmine.irap.omp.eu/issues/3322>`_] -
   Copy Python modules into pyext/gammalib folder
 * [`3321 <https://cta-redmine.irap.omp.eu/issues/3321>`_] -
