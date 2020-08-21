@@ -38,6 +38,9 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
+The configuration now checks for Big Sur and later so that the path names in
+the Python modules are adapted as needed (#3326).
+
 The Python modules are now copied from pyext/build/gammalib into pyext/gammalib
 since code generated using recent swig versions needs the modules in that
 place (#3322).
