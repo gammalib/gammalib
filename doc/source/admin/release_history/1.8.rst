@@ -1,7 +1,7 @@
 .. _1.8:
 
-GammaLib 1.8 release (20 August 2020)
-=====================================
+GammaLib 1.8 release (3 September 2020)
+=======================================
 
 Overview
 --------
@@ -17,18 +17,16 @@ In particular, this release provides:
 Bug fixes
 ---------
 
-* [`3199 <https://cta-redmine.irap.omp.eu/issues/3199>`_] -
-  ...
-
 
 Improvements
 ------------
 
 
-
 New features
 ------------
 
+* [`3328 <https://cta-redmine.irap.omp.eu/issues/3328>`_] -
+  Add ``GFunctions`` abstract base class
 
 
 Clean up

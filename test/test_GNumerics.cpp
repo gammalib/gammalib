@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.cpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2020 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,10 @@ void TestGNumerics::set(void)
            "Test GNdarray");
     append(static_cast<pfunction>(&TestGNumerics::test_fft),
            "Test GFft");
+    append(static_cast<pfunction>(&TestGNumerics::test_function),
+           "Test GFunction");
+    append(static_cast<pfunction>(&TestGNumerics::test_functions),
+           "Test GFunctions");
     append(static_cast<pfunction>(&TestGNumerics::test_integral),
            "Test GIntegral");
     append(static_cast<pfunction>(&TestGNumerics::test_romberg_integration),
@@ -495,7 +499,55 @@ void TestGNumerics::check_fft2(const GNdarray& array,
 
 
 /***********************************************************************//**
- * @brief Test model parameter handling
+ * @brief Test GFunction class
+ ***************************************************************************/
+void TestGNumerics::test_function(void)
+{
+    // Allocate function
+    Gauss function(m_sigma);
+
+    // Test function value
+    test_value(function.eval(0.0), 0.159576912, "Check function value at x=0");
+    test_value(function.eval(1.0), 0.147308056, "Check function value at x=1");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GFunctions class
+ ***************************************************************************/
+void TestGNumerics::test_functions(void)
+{
+    // Set vector
+    GVector sigma(1.0, 2.0, 4.0);
+
+    // Allocate functions
+    GaussVector functions(sigma);
+
+    // Evaluate functions for x=0
+    GVector result = functions.eval(0.0);
+
+    // Test function values
+    test_value(result[0], 0.39894228, "Check function[0] value at x=0");
+    test_value(result[1], 0.19947114, "Check function[1] value at x=0");
+    test_value(result[2], 0.09973557, "Check function[2] value at x=0");
+
+    // Evaluate functions for x=1
+    result = functions.eval(1.0);
+
+    // Test function values
+    test_value(result[0], 0.24197072, "Check function[0] value at x=1");
+    test_value(result[1], 0.17603266, "Check function[1] value at x=1");
+    test_value(result[2], 0.09666703, "Check function[2] value at x=1");
+
+    // Exit test
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Test GIntegral class
  ***************************************************************************/
 void TestGNumerics::test_integral(void)
 {

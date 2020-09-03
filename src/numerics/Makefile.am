@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for numerics module                                           #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -28,6 +28,7 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = GIntegral.cpp \
           GDerivative.cpp \
           GFunction.cpp \
+          GFunctions.cpp \
           GMath.cpp \
           GNdarray.cpp \
           GFft.cpp \

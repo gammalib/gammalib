@@ -62,6 +62,7 @@
 #include "GIntegral.hpp"
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
+#include "GFunctions.hpp"
 #include "GMath.hpp"
 #include "GNdarray.hpp"
 #include "GFft.hpp"

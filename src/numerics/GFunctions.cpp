@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GFunction.cpp - Single parameter function abstract base class      *
+ *  GFunctions.cpp - Single parameter vector function abstract base class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFunction.cpp
- * @brief Single parameter function abstract base class implementation
+ * @file GFunctions.cpp
+ * @brief Single parameter vector function abstract base class implementation
  * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
-#include "GFunction.hpp"
+#include "GFunctions.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -45,7 +45,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GFunction::GFunction(void)
+GFunctions::GFunctions(void)
 {
     // Initialise members
     init_members();
@@ -58,15 +58,15 @@ GFunction::GFunction(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] function Function.
+ * @param[in] functions Functions.
  ***************************************************************************/
-GFunction::GFunction(const GFunction& function)
+GFunctions::GFunctions(const GFunctions& functions)
 {
     // Initialise members
     init_members();
 
     // Copy members
-    copy_members(function);
+    copy_members(functions);
 
     // Return
     return;
@@ -76,7 +76,7 @@ GFunction::GFunction(const GFunction& function)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFunction::~GFunction(void)
+GFunctions::~GFunctions(void)
 {
     // Free members
     free_members();
@@ -95,13 +95,13 @@ GFunction::~GFunction(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] function Function.
+ * @param[in] functions Functions.
  * @return Functions.
  ***************************************************************************/
-GFunction& GFunction::operator=(const GFunction& function)
+GFunctions& GFunctions::operator=(const GFunctions& functions)
 {
     // Execute only if object is not identical
-    if (this != &function) {
+    if (this != &functions) {
 
         // Free members
         free_members();
@@ -110,7 +110,7 @@ GFunction& GFunction::operator=(const GFunction& function)
         init_members();
 
         // Copy members
-        copy_members(function);
+        copy_members(functions);
 
     } // endif: object was not identical
 
@@ -134,7 +134,7 @@ GFunction& GFunction::operator=(const GFunction& function)
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GFunction::init_members(void)
+void GFunctions::init_members(void)
 {
     // Return
     return;
@@ -144,9 +144,9 @@ void GFunction::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] function Function.
+ * @param[in] functions Functions.
  ***************************************************************************/
-void GFunction::copy_members(const GFunction& function)
+void GFunctions::copy_members(const GFunctions& functions)
 {
     // Return
     return;
@@ -156,7 +156,7 @@ void GFunction::copy_members(const GFunction& function)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GFunction::free_members(void)
+void GFunctions::free_members(void)
 {
     // Return
     return;

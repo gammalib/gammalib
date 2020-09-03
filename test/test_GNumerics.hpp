@@ -53,6 +53,28 @@ protected:
 
 
 /***********************************************************************//**
+ * @class GaussVector
+ *
+ * @brief Gaussian vector function
+ ***************************************************************************/
+class GaussVector : public GFunctions {
+public:
+    GaussVector(const GVector& sigma) : m_sigma(sigma) { return; }
+    virtual ~GaussVector(void) { return; }
+    GVector eval(const double& x) {
+        GVector val(m_sigma.size());
+        for (int i = 0; i < m_sigma.size(); ++i) {
+            double arg = -0.5*x*x/m_sigma[i]/m_sigma[i];
+            val[i]     = 1.0/std::sqrt(gammalib::twopi)/m_sigma[i] * std::exp(arg);
+        }
+        return val;
+    }
+protected:
+    GVector m_sigma;
+};
+
+
+/***********************************************************************//**
  * @class TestGNumerics
  *
  * @brief Test suite for numerical functions
@@ -77,6 +99,8 @@ public:
     void                   check_fft2(const GNdarray& array,
                                       const GFft&     fft,
                                       const GNdarray& back);
+    void                   test_function(void);
+    void                   test_functions(void);
     void                   test_integral(void);
     void                   test_romberg_integration(void);
     void                   test_adaptive_simpson_integration(void);

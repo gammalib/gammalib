@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      numerics.i - Numerics module                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,7 @@
 /* __ Numerics module ____________________________________________________ */
 %include "GDerivative.i"
 %include "GFunction.i"
+%include "GFunctions.i"
 %include "GIntegral.i"
 %include "GMath.i"
 %include "GNdarray.i"
