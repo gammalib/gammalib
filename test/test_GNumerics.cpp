@@ -520,27 +520,30 @@ void TestGNumerics::test_function(void)
  ***************************************************************************/
 void TestGNumerics::test_functions(void)
 {
-    // Set vector
-    GVector sigma(1.0, 2.0, 4.0);
+    // Set sigma array
+    GNdarray sigma(1,3);
+    sigma(0,0) = 1.0;
+    sigma(0,1) = 2.0;
+    sigma(0,2) = 4.0;
 
     // Allocate functions
-    GaussVector functions(sigma);
+    GaussArray functions(sigma);
 
     // Evaluate functions for x=0
-    GVector result = functions.eval(0.0);
+    GNdarray result = functions.eval(0.0);
 
     // Test function values
-    test_value(result[0], 0.39894228, "Check function[0] value at x=0");
-    test_value(result[1], 0.19947114, "Check function[1] value at x=0");
-    test_value(result[2], 0.09973557, "Check function[2] value at x=0");
+    test_value(result(0,0), 0.39894228, "Check function[0] value at x=0");
+    test_value(result(0,1), 0.19947114, "Check function[1] value at x=0");
+    test_value(result(0,2), 0.09973557, "Check function[2] value at x=0");
 
     // Evaluate functions for x=1
     result = functions.eval(1.0);
 
     // Test function values
-    test_value(result[0], 0.24197072, "Check function[0] value at x=1");
-    test_value(result[1], 0.17603266, "Check function[1] value at x=1");
-    test_value(result[2], 0.09666703, "Check function[2] value at x=1");
+    test_value(result(0,0), 0.24197072, "Check function[0] value at x=1");
+    test_value(result(0,1), 0.17603266, "Check function[1] value at x=1");
+    test_value(result(0,2), 0.09666703, "Check function[2] value at x=1");
 
     // Exit test
     return;

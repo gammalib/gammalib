@@ -1,5 +1,5 @@
 /***************************************************************************
- *  GFunctions.hpp - Single parameter vector function abstract base class  *
+ *     GFunctions.hpp - Single parameter functions abstract base class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFunctions.hpp
- * @brief Single parameter vector function abstract base class definition
+ * @brief Single parameter functions abstract base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -30,23 +30,22 @@
 /* __ Includes ___________________________________________________________ */
 
 /* __ Forward declarations _______________________________________________ */
-class GVector;
+class GNdarray;
 
 
 /***********************************************************************//**
  * @class GFunctions
  *
- * @brief Single parameter vector function abstract base class
+ * @brief Single parameter functions abstract base class
  *
- * This class implements the abstract interface for a one parameter vector
- * function. A vector function is a function that returns a vector of values,
- * implemented by the GVector class.
+ * This class implements the abstract interface for a set of one parameter
+ * functions.
  *
- * The vector function is for example used for integration or numerical
+ * The set of functions is for example used for integration or numerical
  * computation of derivatives. This class has no members. The only pure
  * virtual method that needs to be implemented by the derived class is the
- * eval() method that provides vector function evaluation at a given value
- * x, e.g. y=eval(x).
+ * eval() method that evaluates the functions at a given value x and returns
+ * the evaluation result as an GNdarray object.
  ***************************************************************************/
 class GFunctions {
 
@@ -61,7 +60,7 @@ public:
     GFunctions& operator=(const GFunctions& functions);
 
     // Methods
-    virtual GVector eval(const double& x) = 0;
+    virtual GNdarray eval(const double& x) = 0;
 
 protected:
     // Protected methods

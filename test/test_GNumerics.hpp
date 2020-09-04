@@ -53,24 +53,24 @@ protected:
 
 
 /***********************************************************************//**
- * @class GaussVector
+ * @class GaussArray
  *
- * @brief Gaussian vector function
+ * @brief Gaussian function array
  ***************************************************************************/
-class GaussVector : public GFunctions {
+class GaussArray : public GFunctions {
 public:
-    GaussVector(const GVector& sigma) : m_sigma(sigma) { return; }
-    virtual ~GaussVector(void) { return; }
-    GVector eval(const double& x) {
-        GVector val(m_sigma.size());
+    GaussArray(const GNdarray& sigma) : m_sigma(sigma) { return; }
+    virtual ~GaussArray(void) { return; }
+    GNdarray eval(const double& x) {
+        GNdarray val(m_sigma.shape());
         for (int i = 0; i < m_sigma.size(); ++i) {
-            double arg = -0.5*x*x/m_sigma[i]/m_sigma[i];
-            val[i]     = 1.0/std::sqrt(gammalib::twopi)/m_sigma[i] * std::exp(arg);
+            double arg = -0.5*x*x/m_sigma(i)/m_sigma(i);
+            val(i)     = 1.0/std::sqrt(gammalib::twopi)/m_sigma(i) * std::exp(arg);
         }
         return val;
     }
 protected:
-    GVector m_sigma;
+    GNdarray m_sigma;
 };
 
 

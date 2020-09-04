@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GFunctions.i - Single parameter vector function abstract base class   *
+ *      GFunctions.i - Single parameter functions abstract base class      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -20,13 +20,13 @@
  ***************************************************************************/
 /**
  * @file GFunctions.i
- * @brief Single parameter vector function abstract base class interface definition
+ * @brief Single parameter functions abstract base class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFunctions.hpp"
-#include "GVector.hpp"
+#include "GNdarray.hpp"
 %}
 
 
@@ -43,5 +43,5 @@ public:
     virtual ~GFunction(void);
 
     // Methods
-    virtual GVector eval(const double& x) = 0;
+    virtual GNdarray eval(const double& x) = 0;
 };

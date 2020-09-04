@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTABackgroundPerfTable.hpp - CTA performance table background class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GFilename.hpp"
+#include "GFunction.hpp"
 #include "GEnergies.hpp"
 #include "GNodeArray.hpp"
 #include "GModelSpectralNodes.hpp"

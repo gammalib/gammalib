@@ -1,5 +1,5 @@
 /***************************************************************************
- *  GFunctions.cpp - Single parameter vector function abstract base class  *
+ *     GFunctions.cpp - Single parameter functions abstract base class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFunctions.cpp
- * @brief Single parameter vector function abstract base class implementation
+ * @brief Single parameter functions abstract base class implementation
  * @author Juergen Knoedlseder
  */
 
