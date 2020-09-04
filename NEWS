@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.7.1
 
-20 August 2020
+4 September 2020
 
 
 1. Introduction
@@ -38,6 +38,10 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
+The Python include path was added in the Python.h header check in configure.ac
+since due to a bug introduced in Python 3.8 the cpython/initconfig.h header was
+not found (#3329).
+
 The configuration now checks for Big Sur and later so that the path names in
 the Python modules are adapted as needed (#3326).
 
