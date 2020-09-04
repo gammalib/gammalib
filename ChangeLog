@@ -1,9 +1,10 @@
-2020-09-03
+2020-09-04
 
         * Version 1.8.0 released
         ========================
 
         Add GFunctions abstract base class (#3328)
+        Add GIntegrals class (#3328)
 
 
 2020-08-21

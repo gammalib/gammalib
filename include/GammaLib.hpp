@@ -60,6 +60,7 @@
 
 /* __ Numerics module ____________________________________________________ */
 #include "GIntegral.hpp"
+#include "GIntegrals.hpp"
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
 #include "GFunctions.hpp"

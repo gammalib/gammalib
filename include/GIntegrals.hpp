@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GIntegral.hpp - Integration class                     *
+ *          GIntegrals.hpp - Integration class for set of functions        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,46 +19,47 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GIntegral.hpp
- * @brief Integration class interface definition
+ * @file GIntegrals.hpp
+ * @brief Integration class for set of functions interface definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GINTEGRAL_HPP
-#define GINTEGRAL_HPP
+#ifndef GINTEGRALS_HPP
+#define GINTEGRALS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
 #include "GBase.hpp"
+#include "GNdarray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GFunction;
+class GFunctions;
 
 /***********************************************************************//**
- * @class GIntegral
+ * @class GIntegrals
  *
- * @brief GIntegral class interface definition.
+ * @brief Integration class for set of functions
  *
- * This class allows to perform integration using various methods. The
- * integrand is implemented by a derived class of GFunction.
+ * This class allows to perform integration of a set of functions. The
+ * integrand is implemented by a derived class of GFunctions.
  ***************************************************************************/
-class GIntegral : public GBase {
+class GIntegrals : public GBase {
 
 public:
 
     // Constructors and destructors
-    explicit GIntegral(void);
-    explicit GIntegral(GFunction* kernel);
-    GIntegral(const GIntegral& integral);
-    virtual ~GIntegral(void);
+    explicit GIntegrals(void);
+    explicit GIntegrals(GFunctions* kernels);
+    GIntegrals(const GIntegrals& integral);
+    virtual ~GIntegrals(void);
 
     // Operators
-    GIntegral& operator=(const GIntegral& integral);
+    GIntegrals& operator=(const GIntegrals& integral);
 
     // Methods
     void               clear(void);
-    GIntegral*         clone(void) const;
+    GIntegrals*        clone(void) const;
     std::string        classname(void) const;
     void               max_iter(const int& iter);
     const int&         max_iter(void) const;
@@ -72,37 +73,33 @@ public:
     const int&         calls(void) const;
     const bool&        is_valid(void) const;
     const std::string& message(void) const;
-    void               kernel(GFunction* kernel);
-    const GFunction*   kernel(void) const;
-    double             romberg(std::vector<double> bounds,
-                               const int& order = 5);
-    double             romberg(const double& a, const double& b,
-                               const int& order = 5);
-    double             trapzd(const double& a,
+    void               kernels(GFunctions* kernels);
+    const GFunctions*  kernels(void) const;
+    GNdarray           romberg(std::vector<double> bounds,
+                               const int&          order = 5);
+    GNdarray           romberg(const double& a,
+                               const double& b,
+                               const int&    order = 5);
+    GNdarray           trapzd(const double& a,
                               const double& b,
-                              const int&    n = 1,
-                              double        result = 0.0);
-    double             adaptive_simpson(const double& a, const double& b) const;
-    double             gauss_kronrod(const double& a, const double& b) const;
+                              const int&    n,
+                              GNdarray      result);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
     void   init_members(void);
-    void   copy_members(const GIntegral& integral);
+    void   copy_members(const GIntegrals& integral);
     void   free_members(void);
-    double polint(double* xa, double* ya, int n, double x, double *dy);
-    double adaptive_simpson_aux(const double& a, const double& b,
-                                const double& eps, const double& S,
-                                const double& fa, const double& fb,
-                                const double& fc,
-                                const int& bottom) const;
-    double rescale_error(double err,
-                         const double& result_abs,
-                         const double& result_asc) const;
+    double polint(const double*   xa,
+                  const GNdarray* ya,
+                  const int&      n,
+                  const int&      index,
+                  const double&   x,
+                  double          *dy);
 
     // Protected data area
-    GFunction*  m_kernel;    //!< Pointer to function kernel
+    GFunctions* m_kernels;   //!< Pointer to function kernels
     double      m_eps;       //!< Requested relative integration precision
     int         m_max_iter;  //!< Maximum number of iterations
     int         m_fix_iter;  //!< Fixed number of iterations
@@ -112,10 +109,10 @@ protected:
     mutable int         m_iter;       //!< Number of iterations used
     mutable int         m_calls;      //!< Number of function calls used
     mutable bool        m_isvalid;    //!< Integration result valid (true=yes)
-    mutable bool        m_has_abserr; //!< Has absolute integration error
-    mutable bool        m_has_relerr; //!< Has relative integration error
-    mutable double      m_abserr;     //!< Absolute integration error
-    mutable double      m_relerr;     //!< Absolute integration error
+    mutable bool        m_has_abserr; //!< Has absolute integration errors
+    mutable bool        m_has_relerr; //!< Has relative integration errors
+    mutable GNdarray    m_abserr;     //!< Absolute integration errors
+    mutable GNdarray    m_relerr;     //!< Absolute integration errors
     mutable std::string m_message;    //!< Status message (if result is invalid)
 };
 
@@ -123,12 +120,12 @@ protected:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GIntegral").
+ * @return String containing the class name ("GIntegrals").
  ***************************************************************************/
 inline
-std::string GIntegral::classname(void) const
+std::string GIntegrals::classname(void) const
 {
-    return ("GIntegral");
+    return ("GIntegrals");
 }
 
 
@@ -138,7 +135,7 @@ std::string GIntegral::classname(void) const
  * @return Number of iterations.
  ***************************************************************************/
 inline
-const int& GIntegral::iter(void) const
+const int& GIntegrals::iter(void) const
 {
     return m_iter;
 }
@@ -150,7 +147,7 @@ const int& GIntegral::iter(void) const
  * @param[in] iter Maximum number of iterations.
  ***************************************************************************/
 inline
-void GIntegral::max_iter(const int& iter)
+void GIntegrals::max_iter(const int& iter)
 {
     m_max_iter = iter;
     return;
@@ -163,7 +160,7 @@ void GIntegral::max_iter(const int& iter)
  * @return Maximum number of iterations.
  ***************************************************************************/
 inline
-const int& GIntegral::max_iter(void) const
+const int& GIntegrals::max_iter(void) const
 {
     return m_max_iter;
 }
@@ -180,7 +177,7 @@ const int& GIntegral::max_iter(void) const
  * numerical derivates from numerically integrated functions.
  ***************************************************************************/
 inline
-void GIntegral::fixed_iter(const int& iter)
+void GIntegrals::fixed_iter(const int& iter)
 {
     m_fix_iter = iter;
     return;
@@ -193,7 +190,7 @@ void GIntegral::fixed_iter(const int& iter)
  * @return Fixed number of iterations.
  ***************************************************************************/
 inline
-const int& GIntegral::fixed_iter(void) const
+const int& GIntegrals::fixed_iter(void) const
 {
     return m_fix_iter;
 }
@@ -205,7 +202,7 @@ const int& GIntegral::fixed_iter(void) const
  * @param[in] eps Relative precision.
  ***************************************************************************/
 inline
-void GIntegral::eps(const double& eps)
+void GIntegrals::eps(const double& eps)
 {
     m_eps = eps;
     return;
@@ -218,7 +215,7 @@ void GIntegral::eps(const double& eps)
  * @return Relative precision.
  ***************************************************************************/
 inline
-const double& GIntegral::eps(void) const
+const double& GIntegrals::eps(void) const
 {
     return m_eps;
 }
@@ -230,7 +227,7 @@ const double& GIntegral::eps(void) const
  * @return Number of function calls.
  ***************************************************************************/
 inline
-const int& GIntegral::calls(void) const
+const int& GIntegrals::calls(void) const
 {
     return m_calls;
 }
@@ -242,7 +239,7 @@ const int& GIntegral::calls(void) const
  * @param[in] silent Silence flag.
  ***************************************************************************/
 inline
-void GIntegral::silent(const bool& silent)
+void GIntegrals::silent(const bool& silent)
 {
     m_silent = silent;
     return;
@@ -255,36 +252,36 @@ void GIntegral::silent(const bool& silent)
  * @return True is class is silent, false otherwise.
  ***************************************************************************/
 inline
-const bool& GIntegral::silent(void) const
+const bool& GIntegrals::silent(void) const
 {
     return m_silent;
 }
 
 
 /***********************************************************************//**
- * @brief Set function kernel
+ * @brief Set function kernels
  *
- * @param[in] kernel Function kernel.
+ * @param[in] kernels Function kernels.
  *
- * Sets the function kernel for which the integral should be determined.
+ * Sets the function kernels for which the integral should be determined.
  ***************************************************************************/
 inline
-void GIntegral::kernel(GFunction* kernel)
+void GIntegrals::kernels(GFunctions* kernels)
 {
-    m_kernel = kernel;
+    m_kernels = kernels;
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Get function kernel
+ * @brief Get function kernels
  *
- * @return Function kernel.
+ * @return Function kernels.
  ***************************************************************************/
 inline
-const GFunction* GIntegral::kernel(void) const
+const GFunctions* GIntegrals::kernels(void) const
 {
-    return m_kernel;
+    return m_kernels;
 }
 
 
@@ -294,7 +291,7 @@ const GFunction* GIntegral::kernel(void) const
  * @return True is integration result is valid.
  ***************************************************************************/
 inline
-const bool& GIntegral::is_valid(void) const
+const bool& GIntegrals::is_valid(void) const
 {
     return m_isvalid;
 }
@@ -306,9 +303,9 @@ const bool& GIntegral::is_valid(void) const
  * @return Integration status message.
  ***************************************************************************/
 inline
-const std::string& GIntegral::message(void) const
+const std::string& GIntegrals::message(void) const
 {
     return m_message;
 }
 
-#endif /* GINTEGRAL_HPP */
+#endif /* GINTEGRALS_HPP */

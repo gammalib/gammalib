@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.8.0
 
-3 September 2020
+4 September 2020
 
 
 1. Introduction
@@ -13,6 +13,7 @@ made since the last release of GammaLib.
 ---------------------------------
 The following classes have been added:
 - GFunctions
+- GIntegrals
 
 The following classes have been removed:
 - none
@@ -68,8 +69,9 @@ None
 
 9. Numerics module
 ------------------
-The GFunctions class was added to implement the virtual base class for a vector
-function (#3328).
+The GFunctions class was added to implement the virtual base class for a set of
+functions. The GIntegrals class was added that performs integration over a set
+of functions (#3328).
 
 
 10. Observation module

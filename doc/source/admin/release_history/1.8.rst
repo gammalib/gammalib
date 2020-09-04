@@ -26,7 +26,7 @@ New features
 ------------
 
 * [`3328 <https://cta-redmine.irap.omp.eu/issues/3328>`_] -
-  Add ``GFunctions`` abstract base class
+  Add ``GFunctions`` abstract base class and ``GIntegrals`` class
 
 
 Clean up

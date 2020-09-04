@@ -60,7 +60,8 @@ public:
     GFunctions& operator=(const GFunctions& functions);
 
     // Methods
-    virtual GNdarray eval(const double& x) = 0;
+    virtual const GNdarray& array(void) const = 0;
+    virtual GNdarray        eval(const double& x) = 0;
 
 protected:
     // Protected methods
