@@ -4,11 +4,12 @@
         ========================
 
 
-2020-08-21
+2020-09-04
 
         * Bug fix version 1.7.1 released
         ================================
 
+        Add Python include path in search for Python.h (#3329)
         Test for Big Sur in configuration step (#3326)
         Copy Python modules into pyext/gammalib folder (#3322)
         Write units of response cubes into FITS files (#3321)

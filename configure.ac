@@ -921,7 +921,10 @@ else
       python_path=`$PYTHON -c "import distutils.sysconfig; \
                                print(distutils.sysconfig.get_python_inc());"`
       if test -n "${python_path}"; then
-        AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
+        SAVED_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS -I$python_path"
+        AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"])
+        CPPFLAGS=$SAVED_CPPFLAGS
         python_path="-I$python_path"
       fi
       PYTHON_CPPFLAGS=$python_path
@@ -963,7 +966,10 @@ else
       PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
 
       # Check if we have Python.h
+      SAVED_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$PY_INCLUDE"
       AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
+      CPPFLAGS=$SAVED_CPPFLAGS
 
     fi
 
