@@ -39,7 +39,7 @@
 #define G_GAUSS_KRONROD         "GIntegrals::gauss_kronrod(double&, double&)"
 #define G_TRAPZD       "GIntegrals::trapzd(double&, double&, int&, GNdarray)"
 #define G_POLINT  "GIntegrals::polint(double*, GNdarray*, int, int, double, "\
-                                                                   "double*)"
+                                                                 "GNdarray*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -335,7 +335,7 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                 for (int i = 0; i < result.size(); ++i) {
                     result(i) = polint(&h[m_iter-order],
                                        &s[m_iter-order],
-                                       order, i, 0.0, &dss(i));
+                                       order, i, 0.0, &dss);
                 }
 
                 // If a fixed number of iterations has been requested and if
@@ -352,7 +352,7 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                 else {
                     converged = true;
                     for (int i = 0; i < result.size(); ++i) {
-                        if (abs(dss(i)) > m_eps * abs(result(i))) {
+                        if (std::abs(dss(i)) > m_eps * std::abs(result(i))) {
                             converged = false;
                             break;
                         }
@@ -692,7 +692,7 @@ void GIntegrals::free_members(void)
  * @param[in] n Number of elements in arrays.
  * @param[in] index Ndarray index for with interpolations should be performed.
  * @param[in] x X value for which interpolations should be performed.
- * @param[out] dy Error estimate for interpolated values.
+ * @param[out] dy Pointer to Ndarray of error estimates for interpolated values.
  * @return Interpolated value.
  *
  * Given arrays @p xa[1,..,n] and @p ya[1,..,n], and given a value @p x, this
@@ -704,7 +704,7 @@ double GIntegrals::polint(const double*   xa,
                           const int&      n,
                           const int&      index,
                           const double&   x,
-                          double*         dy)
+                          GNdarray*       dy)
 {
     // Initialise result
     double y = 0.0;
@@ -756,10 +756,10 @@ double GIntegrals::polint(const double*   xa,
         }
 
         // Compute y correction
-        *dy = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
+        (*dy)(index) = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
 
         // Update y
-        y += *dy;
+        y += (*dy)(index);
 
     } // endfor: looped over columns of tableau
 
