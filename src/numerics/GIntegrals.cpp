@@ -279,7 +279,7 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
     m_calls      = 0;
     m_has_abserr = false;
     m_has_relerr = false;
-    
+
     // Continue only if integration range is valid
     if (b > a) {
 
@@ -303,8 +303,8 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
         }
 
         // Allocate temporal storage
-        GNdarray s[max_iter+2];
-        double   h[max_iter+2];
+        GNdarray* s = new GNdarray[max_iter+2];
+        double*   h = new double[max_iter+2];
 
         // Initialise step size
         h[1] = 1.0;
@@ -322,7 +322,7 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                             "(a="+gammalib::str(a)+", b="+gammalib::str(b)+""
                             ", k="+gammalib::str(k)+"): NaN/Inf encountered"
                             " (s["+gammalib::str(m_iter)+"]="
-                            ""+s[m_iter].print()+")";
+                            ""+s[m_iter]->print()+")";
                 std::cout << m_message << std::endl;
                 m_isvalid = false;
             }
@@ -384,7 +384,7 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
             } // endif: polynomial interpolation performed
 
             // Reduce step size
-            h[m_iter+1]= 0.25 * h[m_iter];
+            h[m_iter+1] = 0.25 * h[m_iter];
 
         } // endfor: iterative loop
 
@@ -404,7 +404,11 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                 gammalib::warning(origin, m_message);
             }
         }
-    
+
+        // Delete temporal storage
+        delete [] s;
+        delete [] h;
+
     } // endif: integration range was valid
 
     // Return result
@@ -461,21 +465,21 @@ GNdarray GIntegrals::trapzd(const double& a,
     if (a == b) {
         result = GNdarray(result.shape());
     }
-    
+
     // ... otherwise use trapeziodal rule
     else {
-    
+
         // Case A: Only a single step is requested
         if (n == 1) {
-        
+
             // Evaluate integrand at boundaries
             GNdarray y_a = m_kernels->eval(a);
             GNdarray y_b = m_kernels->eval(b);
             m_calls += 2;
-            
+
             // Compute result
             result = 0.5*(b-a)*(y_a + y_b);
-            
+
         } // endif: only a single step was requested
 
         // Case B: More than a single step is requested
@@ -525,20 +529,20 @@ GNdarray GIntegrals::trapzd(const double& a,
             double x   = a + 0.5*del;
             GNdarray sum(result.shape());
             for (int j = 0; j < it; ++j, x+=del) {
-                
+
                 // Evaluate integrand
                 GNdarray y = m_kernels->eval(x);
                 m_calls++;
 
                 // Add integrand
                 sum += y;
-                
+
             } // endfor: looped over steps
 
             // Set result
             result = 0.5*(result + (b-a)*sum/tnm);
         }
-        
+
     } // endelse: trapeziodal rule was applied
 
     // Return result
