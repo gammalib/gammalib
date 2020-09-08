@@ -31,6 +31,7 @@
 #include "GIntegral.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GFunction.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ROMBERG                "GIntegral::romberg(double&, double&, int&)"
@@ -555,15 +556,42 @@ double GIntegral::romberg(const double& a, const double& b, const int& order)
  * @param[in] b Right integration boundary.
  * @param[in] n Number of steps.
  * @param[in] result Result from a previous trapezoidal integration step.
+ * @return Integration results.
  *
- * The original Numerical Recipes function had result declared as a static
- * variable, yet this led to some untrackable integration problems. For this
- * reason, previous results are now passed using an argument.
- * Result initialisation is done if n=1.
+ * @exception GException::invalid_value
+ *            Function kernel not set.
+ *
+ * The method performs a trapezoidal integration of the function kernel for
+ * the integration interval [a,b].
+ *
+ * If @p n = 1 the integral is computed using
+ *
+ * \f[
+ *    \int_a^b f(x) \, dx = \frac{1}{2} (b-a) (f(a) + f(b))
+ * \f]
+ *
+ * For @p n > 1 the integral is computed using
+ *
+ * \f[
+ *    \int_a^b f(x) \, dx = \frac{1}{2} \left[{\tt result} +
+ *    \frac{b-a}{2^{n-1}}
+ *    \sum_{i=0}^{2^{n-1}-1} f \left( a + (0.5+i) \frac{b-a}{2^{n-1}} \right) \right]
+ *
+ * \f]
+ *
+ * where \f${\tt result}\f$ is the integration result from a previous call
+ * to the method with @p n = @p n - 1.
  ***************************************************************************/
 double GIntegral::trapzd(const double& a, const double& b, const int& n,
                          double result)
 {
+    // Throw an exception if the instance has no kernel
+    if (m_kernel == NULL) {
+        std::string msg = "Function kernel not set. Please set a function "
+                          "kernel before calling the method.";
+        throw GException::invalid_value(G_TRAPZD, msg);
+    }
+
     // Handle case of identical boundaries
     if (a == b) {
         result = 0.0;
@@ -604,7 +632,9 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
                             ", n="+gammalib::str(n)+
                             ", result="+gammalib::str(result)+
                             ". Looks like n is too large.";
-                gammalib::warning(G_TRAPZD, m_message);
+                if (!m_silent) {
+                    gammalib::warning(G_TRAPZD, m_message);
+                }
             }
 
             // Set step size
@@ -621,7 +651,9 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
                             ", n="+gammalib::str(n)+
                             ", result="+gammalib::str(result)+
                             ". Step is too small to make sense.";
-                gammalib::warning(G_TRAPZD, m_message);
+                if (!m_silent) {
+                    gammalib::warning(G_TRAPZD, m_message);
+                }
             }
 
             // Sum up values
@@ -908,7 +940,7 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
 /***********************************************************************//**
  * @brief Print integral information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing integral information.
  ***************************************************************************/
 std::string GIntegral::print(const GChatter& chatter) const
@@ -1101,7 +1133,9 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double* dy)
                 m_message = "Invalid step size "+gammalib::str(den)+
                             " encountered. Two values in xa array are"
                             " identical.";
-                gammalib::warning(G_POLINT, m_message);
+                if (!m_silent) {
+                    gammalib::warning(G_POLINT, m_message);
+                }
             }
             den  = w/den;
             d[i] = hp*den;
@@ -1191,8 +1225,6 @@ double GIntegral::adaptive_simpson_aux(const double& a, const double& b,
 }
 
 
-//#define GSL_DBL_EPSILON        2.2204460492503131e-16
-//#define GSL_DBL_MIN        2.2250738585072014e-308
 /***********************************************************************//**
  * @brief Rescale errors for Gauss-Kronrod integration
  *
@@ -1201,7 +1233,9 @@ double GIntegral::adaptive_simpson_aux(const double& a, const double& b,
  * @param[in] result_asc ???.
  * @return Rescaled error estimate.
  ***************************************************************************/
-double GIntegral::rescale_error(double err, const double& result_abs, const double& result_asc) const
+double GIntegral::rescale_error(double        err,
+                                const double& result_abs,
+                                const double& result_asc) const
 {
     // Take absolute value of error
     err = std::abs(err);

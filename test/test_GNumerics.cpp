@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.cpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2020 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,8 +56,14 @@ void TestGNumerics::set(void)
            "Test GNdarray");
     append(static_cast<pfunction>(&TestGNumerics::test_fft),
            "Test GFft");
+    append(static_cast<pfunction>(&TestGNumerics::test_function),
+           "Test GFunction");
+    append(static_cast<pfunction>(&TestGNumerics::test_functions),
+           "Test GFunctions");
     append(static_cast<pfunction>(&TestGNumerics::test_integral),
            "Test GIntegral");
+    append(static_cast<pfunction>(&TestGNumerics::test_integrals),
+           "Test GIntegrals");
     append(static_cast<pfunction>(&TestGNumerics::test_romberg_integration),
            "Test Romberg integration");
     append(static_cast<pfunction>(&TestGNumerics::test_adaptive_simpson_integration),
@@ -495,7 +501,58 @@ void TestGNumerics::check_fft2(const GNdarray& array,
 
 
 /***********************************************************************//**
- * @brief Test model parameter handling
+ * @brief Test GFunction class
+ ***************************************************************************/
+void TestGNumerics::test_function(void)
+{
+    // Allocate function
+    Gauss function(m_sigma);
+
+    // Test function value
+    test_value(function.eval(0.0), 0.159576912, "Check function value at x=0");
+    test_value(function.eval(1.0), 0.147308056, "Check function value at x=1");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GFunctions class
+ ***************************************************************************/
+void TestGNumerics::test_functions(void)
+{
+    // Set sigma array
+    GNdarray sigma(1,3);
+    sigma(0,0) = 1.0;
+    sigma(0,1) = 2.0;
+    sigma(0,2) = 4.0;
+
+    // Allocate functions
+    GaussArray functions(sigma);
+
+    // Evaluate functions for x=0
+    GNdarray result = functions.eval(0.0);
+
+    // Test function values
+    test_value(result(0,0), 0.39894228, "Check function[0] value at x=0");
+    test_value(result(0,1), 0.19947114, "Check function[1] value at x=0");
+    test_value(result(0,2), 0.09973557, "Check function[2] value at x=0");
+
+    // Evaluate functions for x=1
+    result = functions.eval(1.0);
+
+    // Test function values
+    test_value(result(0,0), 0.24197072, "Check function[0] value at x=1");
+    test_value(result(0,1), 0.17603266, "Check function[1] value at x=1");
+    test_value(result(0,2), 0.09666703, "Check function[2] value at x=1");
+
+    // Exit test
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Test GIntegral class
  ***************************************************************************/
 void TestGNumerics::test_integral(void)
 {
@@ -506,6 +563,44 @@ void TestGNumerics::test_integral(void)
     // Exit test
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Test GIntegrals class
+ ***************************************************************************/
+void TestGNumerics::test_integrals(void)
+{
+    // Set sigma array
+    GNdarray sigma(1,3);
+    sigma(0,0) = 1.0;
+    sigma(0,1) = 2.0;
+    sigma(0,2) = 4.0;
+
+    // Test kernels and integrals allocation
+    GaussArray kernels(sigma);
+    GIntegrals integrals(&kernels);
+    test_value(integrals.iter(), 0, "Check initial iterations");
+    test_value(integrals.calls(), 0, "Check initial calls");
+
+    // Integrate over the entire Gaussian
+    GNdarray result = integrals.romberg(-40.0, 40.0);
+    test_value(result(0,0), 1.0, 1.0e-6, "Check full integration result for (0,0)");
+    test_value(result(0,1), 1.0, 1.0e-6, "Check full integration result for (0,1)");
+    test_value(result(0,2), 1.0, 1.0e-6, "Check full integration result for (0,2)");
+
+    // Test [-1,1] integration
+    result = integrals.romberg(-1.0, 1.0);
+    test_value(result(0,0), 0.68268948, 1.0e-6,
+               "Check [-1,1] integration result for (0,0)");
+    test_value(result(0,1), 0.38292492, 1.0e-6,
+               "Check [-1,1] integration result for (0,1)");
+    test_value(result(0,2), 0.19741265, 1.0e-6,
+               "Check [-1,1] integration result for (0,2)");
+
+    // Exit test
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Test Romberg integration
@@ -518,15 +613,17 @@ void TestGNumerics::test_romberg_integration(void)
 
     // Integrate over the entire Gaussian
     double result = integral.romberg(-10.0*m_sigma, 10.0*m_sigma);
-    test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+gammalib::str(result)+")");
+    test_value(result, 1.0, 1.0e-6, "Check full integration result");
 
     // Test [-1sigma, 1sigma]
     result = integral.romberg(-m_sigma, m_sigma);
-    test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+gammalib::str((result-0.68268948130801355))+")");
+    test_value(result, 0.68268948, 1.0e-6,
+               "Check [-1sigma, 1sigma] integration results");
 
     // Test [0.0, 1sigma]
     result = integral.romberg(0.0, m_sigma);
-    test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+gammalib::str((result-0.3413447460687748))+")");
+    test_value(result, 0.34134475, 1.0e-6,
+               "Check [0, 1sigma] integration results");
 
     // Return
     return;
@@ -544,30 +641,18 @@ void TestGNumerics::test_adaptive_simpson_integration(void)
 
     // Integrate over the entire Gaussian
     double result = integral.adaptive_simpson(-10.0*m_sigma, 10.0*m_sigma);
-/*
-std::cout << result << std::endl;
-std::cout << result-1.0 << std::endl;
-std::cout << integral << std::endl;
-*/
-    test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+gammalib::str(result)+")");
+    test_value(result, 1.0, 1.0e-6, "Check full integration result");
 
     // Test [-1sigma, 1sigma]
     result = integral.adaptive_simpson(-m_sigma, m_sigma);
-/*
-std::cout << result << std::endl;
-std::cout << result-0.68268948130801355 << std::endl;
-std::cout << integral << std::endl;
-*/
-    test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+gammalib::str((result-0.68268948130801355))+")");
+    test_value(result, 0.68268948, 1.0e-6,
+               "Check [-1sigma, 1sigma] integration results");
+
 
     // Test [0.0, 1sigma]
     result = integral.adaptive_simpson(0.0, m_sigma);
-/*
-std::cout << result << std::endl;
-std::cout << result-0.3413447460687748 << std::endl;
-std::cout << integral << std::endl;
-*/
-    test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+gammalib::str((result-0.3413447460687748))+")");
+    test_value(result, 0.34134475, 1.0e-6,
+               "Check [0, 1sigma] integration results");
 
     // Return
     return;
@@ -585,30 +670,17 @@ void TestGNumerics::test_gauss_kronrod_integration(void)
 
     // Integrate over the entire Gaussian
     double result = integral.gauss_kronrod(-10.0*m_sigma, 10.0*m_sigma);
-/*
-std::cout << result << std::endl;
-std::cout << result-1.0 << std::endl;
-std::cout << integral << std::endl;
-*/
-    test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+gammalib::str(result)+")");
+    test_value(result, 1.0, 1.0e-6, "Check full integration result");
 
     // Test [-1sigma, 1sigma]
     result = integral.gauss_kronrod(-m_sigma, m_sigma);
-/*
-std::cout << result << std::endl;
-std::cout << result-0.68268948130801355 << std::endl;
-std::cout << integral << std::endl;
-*/
-    test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+gammalib::str((result-0.68268948130801355))+")");
+    test_value(result, 0.68268948, 1.0e-6,
+               "Check [-1sigma, 1sigma] integration results");
 
     // Test [0.0, 1sigma]
     result = integral.gauss_kronrod(0.0, m_sigma);
-/*
-std::cout << result << std::endl;
-std::cout << result-0.3413447460687748 << std::endl;
-std::cout << integral << std::endl;
-*/
-    test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+gammalib::str((result-0.3413447460687748))+")");
+    test_value(result, 0.34134475, 1.0e-6,
+               "Check [0, 1sigma] integration results");
 
     // Return
     return;

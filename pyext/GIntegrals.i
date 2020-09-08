@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GIntegral.i - Integration class                      *
+ *           GIntegrals.i - Integration class for set of functions         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,36 +19,36 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GIntegral.i
+ * @file GIntegrals.i
  * @brief Integration class Python interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GIntegral.hpp"
+#include "GIntegrals.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GIntegral
+ * @class GIntegrals
  *
- * @brief Integration class Python interface definition.
+ * @brief Integration class for set of functions
  *
- * This class allows to perform integration using various methods. The
- * integrand is implemented by a derived class of GFunction.
+ * This class allows to perform integration of a set of functions. The
+ * integrand is implemented by a derived class of GFunctions.
  ***************************************************************************/
-class GIntegral : public GBase {
+class GIntegrals : public GBase {
 public:
 
     // Constructors and destructors
-    explicit GIntegral(void);
-    explicit GIntegral(GFunction* kernel);
-    GIntegral(const GIntegral& integral);
-    virtual ~GIntegral(void);
+    explicit GIntegrals(void);
+    explicit GIntegrals(GFunctions* kernels);
+    GIntegrals(const GIntegrals& integral);
+    virtual ~GIntegrals(void);
 
     // Methods
     void               clear(void);
-    GIntegral*         clone(void) const;
+    GIntegrals*        clone(void) const;
     std::string        classname(void) const;
     void               max_iter(const int& iter);
     const int&         max_iter(void) const;
@@ -62,24 +62,25 @@ public:
     const int&         calls(void) const;
     const bool&        is_valid(void) const;
     const std::string& message(void) const;
-    void               kernel(GFunction* kernel);
-    const GFunction*   kernel(void) const;
-    double             romberg(std::vector<double> bounds,
-                               const int& order = 5);
-    double             romberg(const double& a, const double& b,
-                               const int& order = 5);
-    double             trapzd(const double& a, const double& b,
-                              const int& n = 1, double result = 0.0);
-    double             adaptive_simpson(const double& a, const double& b) const;
-    double             gauss_kronrod(const double& a, const double& b) const;
+    void               kernels(GFunctions* kernels);
+    const GFunctions*  kernels(void) const;
+    GNdarray           romberg(std::vector<double> bounds,
+                               const int&          order = 5);
+    GNdarray           romberg(const double& a,
+                               const double& b,
+                               const int&    order = 5);
+    GNdarray           trapzd(const double& a,
+                              const double& b,
+                              const int&    n,
+                              GNdarray      result);
 };
 
 
 /***********************************************************************//**
- * @brief GIntegral class extension
+ * @brief GIntegrals class extension
  ***************************************************************************/
-%extend GIntegral {
-    GIntegral copy() {
+%extend GIntegrals {
+    GIntegrals copy() {
         return (*self);
     }
 };

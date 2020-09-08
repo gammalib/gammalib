@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GNumerics.hpp - test numerics modules              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,6 +53,29 @@ protected:
 
 
 /***********************************************************************//**
+ * @class GaussArray
+ *
+ * @brief Gaussian function array
+ ***************************************************************************/
+class GaussArray : public GFunctions {
+public:
+    GaussArray(const GNdarray& sigma) : m_sigma(sigma) { return; }
+    virtual ~GaussArray(void) { return; }
+    const GNdarray& array(void) const { return m_sigma; }
+    GNdarray eval(const double& x) {
+        GNdarray val(m_sigma.shape());
+        for (int i = 0; i < m_sigma.size(); ++i) {
+            double arg = -0.5*x*x/m_sigma(i)/m_sigma(i);
+            val(i)     = 1.0/std::sqrt(gammalib::twopi)/m_sigma(i) * std::exp(arg);
+        }
+        return val;
+    }
+protected:
+    GNdarray m_sigma;
+};
+
+
+/***********************************************************************//**
  * @class TestGNumerics
  *
  * @brief Test suite for numerical functions
@@ -77,7 +100,10 @@ public:
     void                   check_fft2(const GNdarray& array,
                                       const GFft&     fft,
                                       const GNdarray& back);
+    void                   test_function(void);
+    void                   test_functions(void);
     void                   test_integral(void);
+    void                   test_integrals(void);
     void                   test_romberg_integration(void);
     void                   test_adaptive_simpson_integration(void);
     void                   test_gauss_kronrod_integration(void);
