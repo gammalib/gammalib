@@ -1,6 +1,6 @@
 .. _1.7.1:
 
-GammaLib 1.7.1 release (4 September 2020)
+GammaLib 1.7.1 release (7 September 2020)
 =========================================
 
 Overview
