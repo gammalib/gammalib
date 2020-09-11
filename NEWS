@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.8.0
 
-4 September 2020
+11 September 2020
 
 
 1. Introduction
@@ -76,7 +76,14 @@ of functions (#3328).
 
 10. Observation module
 ----------------------
-None
+The GResponse::edisp_kern integration kernel class that is used for the integration
+over true energies in case that energy dispersion should be considered now derives
+from GFunctions. The actual function value is returned in the first slot of the
+GNdarray returned by the GResponse::edisp_kern::eval() method, while the other slots
+contain the analytical parameter gradients. The GIntegrals class is now used in the
+GResponse::convolve() method to perform the true energy integration, integrating not
+only the function but also any available parameter gradients (#3333).
+
 
 
 11. Optimization module

@@ -303,11 +303,12 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
         }
 
         // Allocate temporal storage
-        GNdarray* s = new GNdarray[max_iter+2];
         double*   h = new double[max_iter+2];
+        GNdarray* s = new GNdarray[max_iter+2];
 
-        // Initialise step size
+        // Initialise step size and initial result
         h[1] = 1.0;
+        s[0] = GNdarray(m_kernels->array().shape());
 
         // Iterative loop
         for (m_iter = 1; m_iter <= max_iter; ++m_iter) {
@@ -333,9 +334,10 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
 
                 // Compute result using polynom interpolation
                 for (int i = 0; i < result.size(); ++i) {
-                    result(i) = polint(&h[m_iter-order],
-                                       &s[m_iter-order],
-                                       order, i, 0.0, &dss);
+                    double dy = 0;
+                    result(i) = polint(&h[m_iter-order], &s[m_iter-order],
+                                       order, i, 0.0, &dy);
+                    dss(i)    = dy;
                 }
 
                 // If a fixed number of iterations has been requested and if
@@ -369,8 +371,8 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                     m_abserr     = abs(dss);
                     m_relerr     = m_abserr;
                     for (int i = 0; i < result.size(); ++i) {
-                        double abs_result = abs(result(i));
-                        if (abs_result != 0.0) {
+                        double abs_result = std::abs(result(i));
+                        if (abs_result > 0.0) {
                             m_relerr(i) /= abs_result;
                             m_has_relerr = true;
                         }
@@ -388,6 +390,10 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
 
         } // endfor: iterative loop
 
+        // Delete temporal storage
+        delete [] s;
+        delete [] h;
+
         // Set status and optionally dump warning
         if (!converged) {
             m_isvalid = false;
@@ -404,10 +410,6 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                 gammalib::warning(origin, m_message);
             }
         }
-
-        // Delete temporal storage
-        delete [] s;
-        delete [] h;
 
     } // endif: integration range was valid
 
@@ -478,7 +480,7 @@ GNdarray GIntegrals::trapzd(const double& a,
             m_calls += 2;
 
             // Compute result
-            result = 0.5*(b-a)*(y_a + y_b);
+            result = 0.5 * (b-a) * (y_a + y_b);
 
         } // endif: only a single step was requested
 
@@ -526,22 +528,20 @@ GNdarray GIntegrals::trapzd(const double& a,
             }
 
             // Sum up values
-            double x   = a + 0.5*del;
+            double   x = a + 0.5 * del;
             GNdarray sum(result.shape());
-            for (int j = 0; j < it; ++j, x+=del) {
+            for (int j = 0; j < it; ++j, x += del) {
 
-                // Evaluate integrand
-                GNdarray y = m_kernels->eval(x);
+                // Evaluate and add integrand
+                sum += m_kernels->eval(x);
                 m_calls++;
-
-                // Add integrand
-                sum += y;
 
             } // endfor: looped over steps
 
             // Set result
-            result = 0.5*(result + (b-a)*sum/tnm);
-        }
+            result = 0.5 * (result + del * sum);
+
+        } // endelse: Case B
 
     } // endelse: trapeziodal rule was applied
 
@@ -708,7 +708,7 @@ double GIntegrals::polint(const double*   xa,
                           const int&      n,
                           const int&      index,
                           const double&   x,
-                          GNdarray*       dy)
+                          double*         dy)
 {
     // Initialise result
     double y = 0.0;
@@ -728,8 +728,9 @@ double GIntegrals::polint(const double*   xa,
             ns  = i;
             dif = dift;
         }
-        c[i] = ya[i+1](index);
-        d[i] = ya[i+1](index);
+        double value = ya[i+1](index);
+        c[i]         = value;
+        d[i]         = value;
     }
 
     // Get initial approximation to y
@@ -760,10 +761,10 @@ double GIntegrals::polint(const double*   xa,
         }
 
         // Compute y correction
-        (*dy)(index) = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
+        *dy = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
 
         // Update y
-        y += (*dy)(index);
+        y += *dy;
 
     } // endfor: looped over columns of tableau
 

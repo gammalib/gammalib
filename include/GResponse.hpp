@@ -33,6 +33,8 @@
 #include "GFunction.hpp"
 #include "GTime.hpp"
 #include "GResponseCache.hpp"
+#include "GFunctions.hpp"
+#include "GNdarray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GMatrix;
@@ -43,6 +45,7 @@ class GSkyDir;
 class GEnergy;
 class GEbounds;
 class GObservation;
+class GModelPar;
 class GModelSky;
 class GModelSpatialRadial;
 class GModelSpatialElliptical;
@@ -136,28 +139,25 @@ protected:
                                  const GObservation& obs) const;
 
     // Protected classes
-    class edisp_kern : public GFunction {
+    class edisp_kern : public GFunctions {
     public:
         edisp_kern(const GResponse*    parent,
                    const GObservation* obs,
                    const GModelSky*    model,
                    const GEvent*       event,
                    const GTime&        srcTime,
-                   const bool&         grad) :
-                   m_parent(parent),
-                   m_obs(obs),
-                   m_model(model),
-                   m_event(event),
-                   m_srcTime(srcTime),
-                   m_grad(grad) { }
-        double eval(const double& etrue);
+                   const bool&         grad);
+        const GNdarray& array(void) const;
+        GNdarray        eval(const double& etrue);
     protected:
-        const GResponse*    m_parent;  //!< Response
-        const GObservation* m_obs;     //!< Observation
-        const GModelSky*    m_model;   //!< Sky model
-        const GEvent*       m_event;   //!< Event
-        GTime               m_srcTime; //!< True arrival time
-        bool                m_grad;    //!< Gradient flag
+        const GResponse*        m_parent;  //!< Response
+        const GObservation*     m_obs;     //!< Observation
+        const GModelSky*        m_model;   //!< Sky model
+        const GEvent*           m_event;   //!< Event
+        GNdarray                m_array;   //!< Array of values and gradients
+        std::vector<GModelPar*> m_pars;    //!< Parameter pointers
+        GTime                   m_srcTime; //!< True arrival time
+        bool                    m_grad;    //!< Gradient flag
     };
     class irf_radial_kern_theta : public GFunction {
     public:

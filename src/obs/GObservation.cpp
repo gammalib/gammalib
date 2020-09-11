@@ -271,9 +271,12 @@ double GObservation::model(const GModels& models,
     int    igrad     = 0;      // Reset gradient counter
     int    grad_size = 0;      // Reset gradient size
 
+    // Set gradient usage flag
+    bool use_grad = (gradient != NULL);
+
     // If gradient is available then reset gradient vector elements to 0
     // and determine vector size
-    if (gradient != NULL) {
+    if (use_grad) {
         (*gradient) = 0.0;
         grad_size   = gradient->size();
     }
@@ -289,19 +292,11 @@ double GObservation::model(const GModels& models,
             // observation identifier
             if (mptr->is_valid(instrument(), id())) {
 
-                // Compute value and add to model. If energy dispersion
-                // is used, don't compute model gradients as we cannot
-                // use them. This is somehow a kluge, but makes the
-                // code faster
-                model += mptr->eval(event, *this, !response()->use_edisp());
+                // Compute value and add to model
+                model += mptr->eval(event, *this, use_grad);
 
-                // Optionally determine model gradients. If the model has a
-                // gradient then use it, unless we have energy dispersion.
-                // For energy dispersion, no gradients are available as we
-                // have not implemented code that integrates the gradients
-                // over the energy dispersion. Here it's simpler to just use
-                // numerical gradients.
-                if (gradient != NULL) {
+                // Optionally determine model gradients
+                if (use_grad) {
 
                     // Make sure that we have a slot for the gradient
                     #if defined(G_RANGE_CHECK)
@@ -334,7 +329,7 @@ double GObservation::model(const GModels& models,
 
                             // Set gradient
                             if (par.is_free()) {
-                                if (par.has_grad() && !response()->use_edisp()) {
+                                if (par.has_grad()) {
                                     (*gradient)[igrad+ipar] = par.factor_gradient();
                                 }
                                 else {
@@ -360,7 +355,7 @@ double GObservation::model(const GModels& models,
 
                             // Set gradient
                             if (par.is_free()) {
-                                if (par.has_grad() && !response()->use_edisp()) {
+                                if (par.has_grad()) {
                                     (*gradient)[igrad+ipar] = par.factor_gradient();
                                 }
                                 else {
@@ -512,7 +507,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
  *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
  * \f]
  *
- * where                         
+ * where
  * \f$S(p,E,t)\f$ is the source model,
  * \f$R(p',E',t'|p,E,t)\f$ is the instrument response function,
  * \f$p'\f$ is the measured photon direction,

@@ -36,6 +36,7 @@
 #include "GVector.hpp"
 #include "GMatrix.hpp"
 #include "GIntegral.hpp"
+#include "GIntegrals.hpp"
 #include "GResponse.hpp"
 #include "GEvent.hpp"
 #include "GPhoton.hpp"
@@ -165,7 +166,7 @@ GResponse& GResponse::operator=(const GResponse& rsp)
  * @param[in] model Sky model.
  * @param[in] event Event.
  * @param[in] obs Observation.
- * @param[in] grad Should model gradients be computed? (default: true)
+ * @param[in] grad Should model gradients be computed?
  * @return Event probability.
  *
  * Computes the event probability
@@ -202,6 +203,9 @@ double GResponse::convolve(const GModelSky&    model,
             // Retrieve true energy boundaries
             GEbounds ebounds = this->ebounds(event.energy());
 
+            // Initialise Ndarray array
+            GNdarray array;
+
             // Loop over all boundaries
             for (int i = 0; i < ebounds.size(); ++i) {
 
@@ -214,19 +218,67 @@ double GResponse::convolve(const GModelSky&    model,
 
                     // Setup integration function
                     edisp_kern integrand(this, &obs, &model, &event, srcTime, grad);
-                    GIntegral  integral(&integrand);
+                    GIntegrals integral(&integrand);
 
                     // Set number of iterations
                     integral.fixed_iter(iter);
 
                     // Do Romberg integration
-                    prob += integral.romberg(etrue_min, etrue_max);
+                    if (array.size() == 0) {
+                        array = integral.romberg(etrue_min, etrue_max);
+                    }
+                    else {
+                        array += integral.romberg(etrue_min, etrue_max);
+                    }
 
                 } // endif: interval was valid
 
             } // endfor: looped over intervals
 
-        }
+            // Initialise array index
+            int index = 0;
+
+            // Get probability
+            prob = array(index++);
+
+            // Set gradients
+            if (grad) {
+
+                // Set spectral gradients
+                if (model.spectral() != NULL) {
+                    for (int i = 0; i < model.spectral()->size(); ++i) {
+                        GModelPar& par = (*(model.spectral()))[i];
+                        if (par.is_free() && par.has_grad()) {
+                            par.factor_gradient(array(index++));
+                        }
+                    }
+                }
+
+                // Set temporal gradients
+                if (model.temporal() != NULL) {
+                    for (int i = 0; i < model.temporal()->size(); ++i) {
+                        GModelPar& par = (*(model.temporal()))[i];
+                        if (par.is_free() && par.has_grad()) {
+                            par.factor_gradient(array(index++));
+                        }
+                    }
+                }
+
+                // Optionally set scale gradient for instrument
+                if (model.has_scales()) {
+                    for (int i = 0; i < model.scales(); ++i) {
+                        const GModelPar& par = model.scale(i);
+                        if (par.name() == obs.instrument()) {
+                            if (par.is_free() && par.has_grad()) {
+                                par.factor_gradient(array(index++));
+                            }
+                        }
+                    }
+                }
+
+            } // endif: set gradients
+
+        } // endif: Case A
 
         // Case B: No integration (assume no energy dispersion)
         else {
@@ -237,7 +289,7 @@ double GResponse::convolve(const GModelSky&    model,
             // Evaluate probability
             prob = eval_prob(model, event, srcEng, srcTime, obs, grad);
 
-        }
+        } // endelse: Case B
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -1032,36 +1084,133 @@ double GResponse::eval_prob(const GModelSky&    model,
 
 
 /***********************************************************************//**
- * @brief Integration kernel for GResponse::edisp_kern() class
+ * @brief Constructor for energy dispersion integration kernel class
+ *
+ * @param[in] parent Pointer to response.
+ * @param[in] obs Pointer to observation.
+ * @param[in] model Pointer to sky model.
+ * @param[in] event Pointer to event.
+ * @param[in] srcTime True time.
+ * @param[in] grad Evaluate gradients?
+ *
+ * This method constructs the integration kernel needed for the energy
+ * dispersion computation.
+ ***************************************************************************/
+GResponse::edisp_kern::edisp_kern(const GResponse*    parent,
+                                  const GObservation* obs,
+                                  const GModelSky*    model,
+                                  const GEvent*       event,
+                                  const GTime&        srcTime,
+                                  const bool&         grad)
+{
+    // Set members
+    m_parent  = parent;
+    m_obs     = obs;
+    m_model   = model;
+    m_event   = event;
+    m_srcTime = srcTime;
+    m_grad    = grad;
+
+    // If gradients are requested then put pointers to all relevant parameter
+    // in the parameter pointer vector
+    m_pars.clear();
+    if (m_grad) {
+        if (m_model->spectral() != NULL) {
+            for (int i = 0; i < m_model->spectral()->size(); ++i) {
+                GModelPar& par = (*(m_model->spectral()))[i];
+                if (par.is_free() && par.has_grad()) {
+                    m_pars.push_back(&par);
+                }
+            }
+        }
+        if (m_model->temporal() != NULL) {
+            for (int i = 0; i < m_model->temporal()->size(); ++i) {
+                GModelPar& par = (*(m_model->temporal()))[i];
+                if (par.is_free() && par.has_grad()) {
+                    m_pars.push_back(&par);
+                }
+            }
+        }
+        if (m_model->has_scales()) {
+            for (int i = 0; i < m_model->scales(); ++i) {
+                GModelPar& par = const_cast<GModelPar&>(m_model->scale(i));
+                if (par.name() == m_obs->instrument()) {
+                    if (par.is_free() && par.has_grad()) {
+                        m_pars.push_back(&par);
+                    }
+                }
+            }
+        }
+    }
+
+    // Allocate Ndarray to be returned as return type
+    m_array = GNdarray(m_pars.size()+1);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy dispersion integration kernel
+ *
+ * @return Ndarray.
+ *
+ * This method returns an Ndarray with the last values that were computed
+ * by the eval() method. In case that eval() was not called before, the
+ * method returns an Ndarray with the right dimension and with all values
+ * set to zero.
+ ***************************************************************************/
+const GNdarray& GResponse::edisp_kern::array(void) const
+{
+    // Return Ndarray
+    return m_array;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate energy dispersion integration kernel
  *
  * @param[in] etrue True photon energy in MeV.
  *
  * This method implements the integration kernel needed for the
  * GResponse::edisp_kern() class.
  ***************************************************************************/
-double GResponse::edisp_kern::eval(const double& etrue)
+GNdarray GResponse::edisp_kern::eval(const double& etrue)
 {
+    // Initialise Ndarray array index
+    int index = 0;
+
     // Set true energy
     GEnergy srcEng;
     srcEng.MeV(etrue);
 
     // Get function value
-    double value = m_parent->eval_prob(*m_model, *m_event,
-                                       srcEng, m_srcTime, *m_obs, m_grad);
+    m_array(index++) = m_parent->eval_prob(*m_model, *m_event,
+                                           srcEng, m_srcTime, *m_obs,
+                                           m_grad);
+
+    // If gradients are requested then extract them and put them into the
+    // array
+    if (m_grad) {
+        for (int i = 0; i < m_pars.size(); ++i, ++index) {
+            m_array(index) = m_pars[i]->factor_gradient();
+        }
+    }
 
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+    if (gammalib::is_notanumber(m_array(0)) || gammalib::is_infinite(m_array(0))) {
         std::cout << "*** ERROR: GResponse::edisp_kern::eval";
         std::cout << "(etrue=" << etrue << "): ";
         std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
+        std::cout << " (value=" << m_array(0);
         std::cout << ")" << std::endl;
     }
     #endif
 
-    // Return value
-    return value;
+    // Return array
+    return m_array;
 }
 
 
