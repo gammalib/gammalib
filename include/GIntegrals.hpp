@@ -96,7 +96,7 @@ protected:
                   const int&      n,
                   const int&      index,
                   const double&   x,
-                  GNdarray*       dy);
+                  double*         dy);
 
     // Protected data area
     GFunctions* m_kernels;   //!< Pointer to function kernels

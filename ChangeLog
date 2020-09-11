@@ -1,8 +1,9 @@
-2020-09-04
+2020-09-11
 
         * Version 1.8.0 released
         ========================
 
+        Integrate analytical gradients for energy dispersion computation (#3333)
         Add GFunctions abstract base class (#3328)
         Add GIntegrals class (#3328)
 
