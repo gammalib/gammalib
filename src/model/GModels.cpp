@@ -37,6 +37,7 @@
 #include "GObservation.hpp"
 #include "GXml.hpp"
 #include "GXmlElement.hpp"
+#include "GOptimizerPars.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                          "GModels::operator[](std::string&)"
@@ -892,7 +893,7 @@ double GModels::eval(const GEvent&       event,
                      const GObservation& obs,
                      const bool&         gradients) const
 {
-    // Initialise function value
+    // Initialise model value
     double value = 0.0;
 
     // Evaluate function for all models
@@ -902,7 +903,7 @@ double GModels::eval(const GEvent&       event,
         }
     }
 
-    // Return
+    // Return model value
     return value;
 }
 
@@ -910,7 +911,7 @@ double GModels::eval(const GEvent&       event,
 /***********************************************************************//**
  * @brief Print models
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model container information.
  *
  * Prints all models into a string.

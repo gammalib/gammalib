@@ -565,7 +565,7 @@ double GModelSky::eval(const GEvent&       event,
                        const GObservation& obs,
                        const bool&         gradients) const
 {
-    // Evaluate function
+    // Evaluate model
     double value = obs.response()->convolve(*this, event, obs, gradients);
 
     // Return

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GModels.hpp - Model container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,14 +30,14 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GContainer.hpp"
-#include "GModel.hpp"
-#include "GOptimizerPars.hpp"
-#include "GXml.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GEvent;
 class GObservation;
+class GModel;
 class GFilename;
+class GOptimizerPars;
+class GXml;
 
 
 /***********************************************************************//**
