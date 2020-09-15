@@ -42,6 +42,9 @@
 #include "GCTAResponseCube.hpp"
 #include "GModelSpatialElliptical.hpp"
 #include "GFunction.hpp"
+//
+#include "GFunctions.hpp"
+#include "GEnergies.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -1133,6 +1136,44 @@ public:
  *
  * @brief Kernel for Psf delta angle integration used for stacked analysis
  ***************************************************************************/
+class cta_psf_radial_kerns_delta : public GFunctions {
+public:
+    cta_psf_radial_kerns_delta(const GCTAResponseCube*    rsp,
+                               const GModelSpatialRadial* model,
+                               const GSkyDir&             srcDir,
+                               const GEnergies&           srcEngs,
+                               const GTime&               srcTime,
+                               const double&              delta_mod,
+                               const double&              theta_max,
+                               const int&                 iter) :
+                               m_rsp(rsp),
+                               m_model(model),
+                               m_array(GNdarray(srcEngs.size())),
+                               m_srcDir(srcDir),
+                               m_srcEngs(srcEngs),
+                               m_srcTime(srcTime),
+                               m_delta_mod(delta_mod),
+                               m_cos_delta_mod(std::cos(delta_mod)),
+                               m_sin_delta_mod(std::sin(delta_mod)),
+                               m_theta_max(theta_max),
+                               m_cos_theta_max(std::cos(theta_max)),
+                               m_iter(iter) { }
+    const GNdarray& array(void) const { return m_array; }
+    GNdarray        eval(const double& delta);
+protected:
+    const GCTAResponseCube*    m_rsp;           //!< Response cube
+    const GModelSpatialRadial* m_model;         //!< Radial model
+    GNdarray                   m_array;         //!< Result array
+    GSkyDir                    m_srcDir;        //!< True photon arrival direction
+    GEnergies                  m_srcEngs;       //!< True photon energies
+    GTime                      m_srcTime;       //!< True photon arrival time
+    double                     m_delta_mod;     //!< Distance of model from Psf
+    double                     m_cos_delta_mod; //!< Cosine of m_delta_mod
+    double                     m_sin_delta_mod; //!< Sine of m_delta_mod
+    double                     m_theta_max;     //!< Maximum model radius
+    double                     m_cos_theta_max; //!< Cosine of m_theta_max
+    int                        m_iter;          //!< Integration iterations
+};
 class cta_psf_radial_kern_delta : public GFunction {
 public:
     cta_psf_radial_kern_delta(const GCTAResponseCube*    rsp,
@@ -1175,6 +1216,29 @@ protected:
  *
  * @brief Kernel for Psf phi angle integration used for stacked analysis
  ***************************************************************************/
+class cta_psf_radial_kerns_phi : public GFunctions {
+public:
+    cta_psf_radial_kerns_phi(const GModelSpatialRadial* model,
+                             const GEnergies&           srcEngs,
+                             const GTime&               srcTime,
+                             const double&              sin_fact,
+                             const double&              cos_fact) :
+                             m_model(model),
+                             m_array(GNdarray(srcEngs.size())),
+                             m_srcEngs(srcEngs),
+                             m_srcTime(srcTime),
+                             m_sin_fact(sin_fact),
+                             m_cos_fact(cos_fact) { }
+    const GNdarray& array(void) const { return m_array; }
+    GNdarray        eval(const double& phi);
+protected:
+    const GModelSpatialRadial* m_model;     //!< Radial model
+    GNdarray                   m_array;      //!< Result array
+    GEnergies                  m_srcEngs;   //!< True photon energies
+    GTime                      m_srcTime;   //!< True photon arrival time
+    double                     m_sin_fact;  //!< sin(delta)*sin(delta_mod)
+    double                     m_cos_fact;  //!< cos(delta)*cos(delta_mod)
+};
 class cta_psf_radial_kern_phi : public GFunction {
 public:
     cta_psf_radial_kern_phi(const GModelSpatialRadial* model,

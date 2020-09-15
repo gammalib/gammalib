@@ -50,6 +50,7 @@
 #include "GCTAAeff.hpp"
 #include "GCTABackground.hpp"
 #include "GCTAEventList.hpp"
+#include "GCTAEventCube.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAModelBackground.hpp"
@@ -750,6 +751,40 @@ const GCTAEventList& gammalib::cta_event_list(const std::string&  origin,
     }
 
     // Return CTA event list
+    return (*events);
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA event cube from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ * @return Reference to CTA event cube.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs does not contain a CTA event cube.
+ *
+ * Extract CTA event cube from a CTA observation.
+ ***************************************************************************/
+const GCTAEventCube& gammalib::cta_event_cube(const std::string&  origin,
+                                              const GObservation& obs)
+{
+    // Retrieve CTA observation
+    const GCTAObservation& cta = gammalib::cta_obs(origin, obs);
+
+    // Get pointer on CTA event cube
+    const GCTAEventCube* events = dynamic_cast<const GCTAEventCube*>(cta.events());
+
+    // If pointer is not valid then throw an exception
+    if (events == NULL) {
+        std::string msg = "Specified observation does not contain a CTA event "
+                          "cube. Please specify a CTA observation containing "
+                          "a CTA event cube as argument.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return CTA event cube
     return (*events);
 }
 

@@ -55,6 +55,7 @@ class GCTAResponseCube;
 class GCTAAeff;
 class GCTABackground;
 class GCTAEventList;
+class GCTAEventCube;
 class GCTAInstDir;
 class GModelData;
 class GModelSpectral;
@@ -95,6 +96,8 @@ namespace gammalib {
     const GCTABackground&   cta_rsp_bkg(const std::string&  origin,
                                         const GObservation& obs);
     const GCTAEventList&    cta_event_list(const std::string&  origin,
+                                           const GObservation& obs);
+    const GCTAEventCube&    cta_event_cube(const std::string&  origin,
                                            const GObservation& obs);
     const GCTAInstDir&      cta_dir(const std::string&  origin,
                                     const GEvent&       event);

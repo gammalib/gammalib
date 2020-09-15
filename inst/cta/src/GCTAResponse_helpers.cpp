@@ -40,6 +40,9 @@
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialDiffuseConst.hpp"
 #include "GWcs.hpp"
+//
+#include "GNdarray.hpp"
+#include "GIntegrals.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -1887,6 +1890,82 @@ double cta_psf_radial_kern_delta::eval(const double& delta)
     // Return kernel value
     return value;
 }
+GNdarray cta_psf_radial_kerns_delta::eval(const double& delta)
+{
+    // Initialise values
+    GNdarray values(m_srcEngs.size());
+
+    // If we're at the Psf peak the model is zero (due to the sin(delta)
+    // term. We thus only integrate for positive deltas.
+    if (delta > 0.0) {
+
+        // Compute half length of the arc (in radians) from a circle with
+        // radius delta that intersects with the model, defined as a circle
+        // with maximum radius m_theta_max
+        double dphi = 0.5 * gammalib::roi_arclength(delta,
+                                                    m_delta_mod,
+                                                    m_cos_delta_mod,
+                                                    m_sin_delta_mod,
+                                                    m_theta_max,
+                                                    m_cos_theta_max);
+
+        // Continue only if arc length is positive
+        if (dphi > 0.0) {
+
+            // Compute phi integration range
+            double phi_min = -dphi;
+            double phi_max = +dphi;
+
+            // Precompute cosine and sine terms for azimuthal integration
+            double sin_delta = std::sin(delta);
+            double cos_delta = std::cos(delta);
+            double sin_fact  = sin_delta * m_sin_delta_mod;
+            double cos_fact  = cos_delta * m_cos_delta_mod;
+
+            // Setup kernel for azimuthal integration of the spatial model
+            cta_psf_radial_kerns_phi integrand(m_model,
+                                               m_srcEngs,
+                                               m_srcTime,
+                                               sin_fact,
+                                               cos_fact);
+
+            // Setup integrator
+            GIntegrals integral(&integrand);
+            integral.fixed_iter(m_iter);
+
+            // Integrate over azimuth
+            values = integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
+
+            // Multiply in energy dependent Psf
+            for (int i = 0; i < m_srcEngs.size(); ++i) {
+
+                // Get Psf for this energy
+                double psf = m_rsp->psf()(m_srcDir, delta, m_srcEngs[i]);
+
+                // Compute value
+                values(i) *= psf;
+
+                // Debug: Check for NaN
+                #if defined(G_NAN_CHECK)
+                if (gammalib::is_notanumber(values(i)) ||
+                    gammalib::is_infinite(values(i))) {
+                    std::cout << "*** ERROR: cta_psf_radial_kern_delta::eval";
+                    std::cout << "(delta=" << delta << "):";
+                    std::cout << " NaN/Inf encountered";
+                    std::cout << " (value=" << values(i);
+                    std::cout << ")" << std::endl;
+                }
+                #endif
+
+            } // endfor: looped over energies
+
+        } // endif: arc length was positive
+
+    } // endif: delta was positive
+
+    // Return kernel values
+    return values;
+}
 
 
 /***********************************************************************//**
@@ -1949,6 +2028,55 @@ double cta_psf_radial_kern_phi::eval(const double& phi)
 
     // Return kernel value
     return value;
+}
+GNdarray cta_psf_radial_kerns_phi::eval(const double& phi)
+{
+    // Compute radial model theta angle
+    double theta = std::acos(m_cos_fact + m_sin_fact * std::cos(phi));
+
+    // Reduce theta by an infinite amount to avoid rounding errors at the
+    // boundary of a sharp edged model
+    double theta_kluge = theta - 1.0e-12;
+    if (theta_kluge < 0.0) {
+        theta_kluge = 0.0;
+    }
+
+    // Initialise values
+    GNdarray values(m_srcEngs.size());
+
+    // Loop over energies
+    for (int i = 0; i < m_srcEngs.size(); ++i) {
+
+        // Compute value
+        values(i) = m_model->eval(theta_kluge, m_srcEngs[i], m_srcTime);
+
+        // Debug: test if model is non positive
+        #if defined(G_DEBUG_MODEL_ZERO)
+        if (values(i) <= 0.0) {
+            std::cout << "*** WARNING: cta_psf_radial_kern_phi::eval";
+            std::cout << " zero model for (phi)=(";
+            std::cout << phi*gammalib::rad2deg << ")";
+            std::cout << " theta-r_model=" << (theta-m_model->theta_max());
+            std::cout << " radians" << std::endl;
+        }
+        #endif
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(values(i)) ||
+            gammalib::is_infinite(values(i))) {
+            std::cout << "*** ERROR: cta_psf_radial_kern_phi::eval";
+            std::cout << "(phi=" << phi << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (value=" << values(i);
+            std::cout << ")" << std::endl;
+        }
+        #endif
+
+    } // endfor: looped over energies
+
+    // Return kernel values
+    return values;
 }
 
 

@@ -39,6 +39,7 @@
 #include "GTime.hpp"
 #include "GIntegral.hpp"
 #include "GObservation.hpp"
+#include "GNdarray.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialShell.hpp"
@@ -52,6 +53,10 @@
 #include "GCTASupport.hpp"
 #include "GCTAEventCube.hpp"               // Kludge
 #include "GCTAEventBin.hpp"                // Kludge
+#if defined(G_CUBE_FAST)
+#include "GIntegrals.hpp"
+#include "GEnergies.hpp"
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
@@ -1506,6 +1511,9 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
 }
 
 
+
+
+
 /***********************************************************************//**
  * @brief Return instrument response to elliptical source
  *
@@ -1716,4 +1724,170 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
 
     // Return IRF value
     return irf;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                           New private methods                           =
+ =                                                                         =
+ ==========================================================================*/
+double GCTAResponseCube::convolve(const GModelSky&    model,
+                                  const GEvent&       event,
+                                  const GObservation& obs,
+                                  const bool&         grad) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+    // Kluge: if spatial model is Gaussian then use specific code
+    if (model.spatial()->classname() == "GModelSpatialRadialGauss") {
+        // TODO
+    }
+    else {
+        irf = GResponse::convolve(model, event, obs, grad);
+    }
+
+    // Return IRF
+    return irf;
+}
+GNdarray GCTAResponseCube::irf_radial(const GModelSpatial* model,
+                                      const GSkyDir&       obsDir,
+                                      const GEnergies&     srcEngs,
+                                      const GObservation&  obs) const
+{
+    // Initialise IRF
+    GNdarray irf(srcEngs.size());
+
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is positive
+    if (livetime > 0.0) {
+
+        // Get pointer to radial model
+        const GModelSpatialRadial* radial =
+              static_cast<const GModelSpatialRadial*>(model);
+
+        // Compute angle between model centre and measured photon direction
+        // (radians)
+        double rho_obs = radial->dir().dist(obsDir);
+
+        // Continue only if we're sufficiently close to the model centre to
+        // get a non-zero response
+        if (rho_obs <= radial->theta_max()+psf().delta_max()) {
+
+            // Get time of CTA event cube
+            const GTime& srcTime = gammalib::cta_event_cube(G_IRF_RADIAL, obs).time();
+
+            // Get IRF
+            irf = psf_radial(radial, rho_obs, obsDir, srcEngs, srcTime);
+
+            // Loop over true energies
+            for (int i = 0; i < srcEngs.size(); ++i) {
+
+                // Continue only if IRF is positive
+                if (irf(i) > 0.0) {
+
+                    // Get exposure at the observed event direction.
+                    //
+                    // The current code assumes that the exposure at the
+                    // observed and true event direction does not vary
+                    // significantly. In other words, the code assumes that
+                    // the exposure is constant over the size of the PSF.
+                    irf(i) *= exposure()(obsDir, srcEngs[i]);
+
+                    // Recover effective area from exposure
+                    irf(i) /= livetime;
+
+                    // Apply deadtime correction
+                    irf(i) *= exposure().deadc();
+
+                } // endif: IRF was positive
+
+            } // endfor: looped over energies
+
+        } // endif: observed direction was sufficiently close to model centre
+
+    } // endif: livetime was positive
+
+    // Return IRF values
+    return irf;
+}
+GNdarray GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
+                                      const double&              delta_mod,
+                                      const GSkyDir&             obsDir,
+                                      const GEnergies            srcEngs,
+                                      const GTime&               srcTime) const
+{
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1291
+    static const int iter_delta = 5;
+    static const int iter_phi   = 6;
+
+    // Initialise value
+    GNdarray values(srcEngs.size());
+
+    // Get maximum Psf radius (radians)
+    double psf_max = psf().delta_max();
+
+    // Get maximum model radius (radians)
+    double theta_max = model->theta_max();
+
+    // Set offset angle integration range (radians)
+    double delta_min = (delta_mod > theta_max) ? delta_mod - theta_max : 0.0;
+    double delta_max = delta_mod + theta_max;
+    if (delta_max > psf_max) {
+        delta_max = psf_max;
+    }
+
+    // Setup integration kernel. We take here the observed photon arrival
+    // direction as the true photon arrival direction because the PSF does
+    // not vary significantly over a small region.
+    cta_psf_radial_kerns_delta integrand(this,
+                                         model,
+                                         obsDir,
+                                         srcEngs,
+                                         srcTime,
+                                         delta_mod,
+                                         theta_max,
+                                         iter_phi);
+
+    // Integrate over model's zenith angle
+    GIntegrals integral(&integrand);
+    integral.fixed_iter(iter_delta);
+
+    // Setup integration boundaries
+    std::vector<double> bounds;
+    bounds.push_back(delta_min);
+    bounds.push_back(delta_max);
+
+    // If the integration range includes a transition between full
+    // containment of Psf within model and partial containment, then
+    // add a boundary at this location
+    double transition_point = theta_max - delta_mod;
+    if (transition_point > delta_min && transition_point < delta_max) {
+        bounds.push_back(transition_point);
+    }
+
+    // Integrate kernel
+    values = integral.romberg(bounds, iter_delta);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    for (int i = 0; i < srcEngs.size(); ++i) {
+        if (gammalib::is_notanumber(values(i)) ||
+            gammalib::is_infinite(values(i))) {
+            std::cout << "*** ERROR: GCTAResponseCube::psf_radial:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (value=" << values(i);
+            std::cout << ", delta_min=" << delta_min;
+            std::cout << ", delta_max=" << delta_max << ")";
+            std::cout << std::endl;
+        }
+    }
+    #endif
+
+    // Return integrals
+    return values;
 }

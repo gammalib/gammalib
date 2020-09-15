@@ -27,6 +27,9 @@
 #ifndef GCTARESPONSECUBE_HPP
 #define GCTARESPONSECUBE_HPP
 
+/* __ Coding definitions _________________________________________________ */
+#define G_CUBE_FAST
+
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
@@ -41,6 +44,9 @@
 /* __ Type definitions ___________________________________________________ */
 
 /* __ Forward declarations _______________________________________________ */
+#if defined(G_CUBE_FAST)
+class GEnergies;
+#endif
 class GPhoton;
 class GEvent;
 class GObservation;
@@ -99,9 +105,9 @@ public:
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
 
     // Overloaded virtual base class methods
-    virtual double      irf_spatial(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const;
+    virtual double            irf_spatial(const GEvent&       event,
+                                          const GSource&      source,
+                                          const GObservation& obs) const;
 
     // Other Methods
     const GCTACubeExposure&   exposure(void) const;
@@ -145,6 +151,21 @@ private:
     double irf_diffuse(const GEvent&       event,
                        const GSource&      source,
                        const GObservation& obs) const;
+
+    // New methods
+    double convolve(const GModelSky&    model,
+                    const GEvent&       event,
+                    const GObservation& obs,
+                    const bool&         grad = true) const;
+    GNdarray irf_radial(const GModelSpatial* model,
+                        const GSkyDir&       obsDir,
+                        const GEnergies&     srcEngs,
+                        const GObservation&  obs) const;
+    GNdarray psf_radial(const GModelSpatialRadial* model,
+                        const double&              rho_obs,
+                        const GSkyDir&             obsDir,
+                        const GEnergies            srcEngs,
+                        const GTime&               srcTime) const;
 
     // Private data members
     GCTACubeExposure   m_exposure;    //!< Exposure cube
