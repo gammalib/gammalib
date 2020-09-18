@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GModelSky.hpp - Sky model class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -155,6 +155,10 @@ public:
     virtual void        read(const GXmlElement& xml);
     virtual void        write(GXmlElement& xml) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
+
+    // Reimplemented virtual base class methods
+    virtual GVector     eval(const GObservation& obs,
+                             GMatrixSparse*      gradients = NULL) const;
 
     // Other methods
     GModelSpatial*      spatial(void) const;

@@ -574,6 +574,30 @@ double GModelSky::eval(const GEvent&       event,
 
 
 /***********************************************************************//**
+ * @brief Evaluate sky model for all events of an observation
+ *
+ * @param[in] obs Observation.
+ * @param[out] gradients Pointer to sparse matrix holding model gradients.
+ * @return Values of sky model.
+ *
+ * Evalutes the value of the sky model for an @p event of a specific
+ * observation @p obs.
+ *
+ * If the @p gradients flag is true the method will also compute the
+ * parameter gradients for all model parameters.
+ ***************************************************************************/
+GVector GModelSky::eval(const GObservation& obs,
+                        GMatrixSparse*      gradients) const
+{
+    // Evaluate model
+    GVector values = obs.response()->convolve(*this, obs, gradients);
+
+    // Return
+    return values;
+}
+
+
+/***********************************************************************//**
  * @brief Return spatially integrated sky model
  *
  * @param[in] obsEng Measured photon energy.
@@ -595,7 +619,7 @@ double GModelSky::eval(const GEvent&       event,
  *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
  * \f]
  *
- * where                         
+ * where
  * \f$S(p,E,t)\f$ is the source model,
  * \f$R(p',E',t'|p,E,t)\f$ is the instrument response function,
  * \f$p'\f$ is the measured photon direction,
@@ -1118,7 +1142,7 @@ void GModelSky::copy_members(const GModelSky& model)
 {
     // Copy attributes
     m_type = model.m_type;
-    
+
     // Clone model components
     m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
     m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
@@ -1218,12 +1242,12 @@ void GModelSky::set_type(void)
 
     // Continue only if we have a spatial model component
     if (m_spatial != NULL) {
-    
+
         // Is spatial model a point source?
         if (dynamic_cast<const GModelSpatialPointSource*>(m_spatial) != NULL) {
             m_type = "PointSource";
         }
-        
+
         // ... otherwise, is spatial model a radial source?
         else if (dynamic_cast<const GModelSpatialRadial*>(m_spatial) != NULL) {
             m_type = "ExtendedSource";
@@ -1243,7 +1267,7 @@ void GModelSky::set_type(void)
         else {
             m_type = "DiffuseSource";
         }
-    
+
     } // endif: there was a spatial model component
 
     // Return

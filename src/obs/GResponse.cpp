@@ -35,6 +35,7 @@
 #include "GMath.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
+#include "GMatrixSparse.hpp"
 #include "GIntegral.hpp"
 #include "GIntegrals.hpp"
 #include "GResponse.hpp"
@@ -56,6 +57,8 @@
 #include "GModelSpatialComposite.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONVOLVE          "GResponse::convolve(GModelSky&, GObservation&, "\
+                                                            "GMatrixSparse*)"
 #define G_IRF_RADIAL               "GResponse::irf_radial(GEvent&, GSource&,"\
                                                             " GObservation&)"
 #define G_IRF_ELLIPTICAL       "GResponse::irf_elliptical(GEvent&, GSource&,"\
@@ -307,6 +310,254 @@ double GResponse::convolve(const GModelSky&    model,
 
     // Return probability
     return prob;
+}
+
+
+/***********************************************************************//**
+ * @brief Convolve sky model with the instrument response
+ *
+ * @param[in] model Sky model.
+ * @param[in] obs Observation.
+ * @param[out] gradients Pointer to matrix of gradients.
+ * @return Event probabilities.
+ *
+ * Computes the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * without taking into account any time dispersion. Energy dispersion is
+ * correctly handled by this method. If time dispersion is indeed needed,
+ * an instrument specific method needs to be provided.
+ ***************************************************************************/
+GVector GResponse::convolve(const GModelSky&    model,
+                            const GObservation& obs,
+                            GMatrixSparse*      gradients) const
+{
+    // Set number of iterations for Romberg integration.
+    static const int iter = 6;
+
+    // Get number of model parameters and number of events
+    int npars   = model.size();
+    int nevents = obs.events()->size();
+
+    // Initialise gradients flag
+    bool grad = (gradients != NULL);
+
+    // Check matrix consistency
+    if (grad) {
+        if (gradients->rows() != npars) {
+            std::string msg = "Number of "+gammalib::str(gradients->rows())+
+                              " rows in gradient matrix differs from number "
+                              "of "+gammalib::str(npars)+" parameters "
+                              "in model. Please provide a compatible gradient "
+                              "matrix.";
+            throw GException::invalid_argument(G_CONVOLVE, msg);
+        }
+        if (gradients->columns() != nevents) {
+            std::string msg = "Number of "+gammalib::str(gradients->columns())+
+                              " columns in gradient matrix differs from number "
+                              "of "+gammalib::str(nevents)+" events in "
+                              "observation. Please provide a compatible "
+                              "gradient matrix.";
+            throw GException::invalid_argument(G_CONVOLVE, msg);
+        }
+    }
+
+    // Initialise result
+    GVector probs(nevents);
+
+    // Continue only if the model has a spatial component
+    if (model.spatial() != NULL) {
+
+        // Loop over events
+        for (int k = 0; k < nevents; ++k) {
+
+            // Get reference to event
+            const GEvent& event = *((*obs.events())[k]);
+
+            // Get source time (no dispersion)
+            GTime srcTime = event.time();
+
+            // Case A: Integration
+            if (use_edisp()) {
+
+                // Retrieve true energy boundaries
+                GEbounds ebounds = this->ebounds(event.energy());
+
+                // Initialise Ndarray array
+                GNdarray array;
+
+                // Loop over all boundaries
+                for (int i = 0; i < ebounds.size(); ++i) {
+
+                    // Get true energy boundaries in MeV
+                    double etrue_min = ebounds.emin(i).MeV();
+                    double etrue_max = ebounds.emax(i).MeV();
+
+                    // Continue only if valid
+                    if (etrue_max > etrue_min) {
+
+                        // Setup integration function
+                        edisp_kern integrand(this, &obs, &model, &event, srcTime, grad);
+                        GIntegrals integral(&integrand);
+
+                        // Set number of iterations
+                        integral.fixed_iter(iter);
+
+                        // Do Romberg integration
+                        if (array.size() == 0) {
+                            array = integral.romberg(etrue_min, etrue_max);
+                        }
+                        else {
+                            array += integral.romberg(etrue_min, etrue_max);
+                        }
+
+                    } // endif: interval was valid
+
+                } // endfor: looped over intervals
+
+                // Initialise array index
+                int index = 0;
+
+                // Get probability
+                probs[k] = array(index++);
+
+                // Set gradients
+                if (grad) {
+
+                    // Initialise gradient vector
+                    GVector gradient(npars);
+
+                    // Get number of spatial, spectral and temporal parameters
+                    int n_spat = model.spatial()->size();
+                    int n_spec = model.spectral()->size();
+                    int n_temp = model.temporal()->size();
+
+                    // Set spectral gradients
+                    if (model.spectral() != NULL) {
+                        int offset = n_spat;
+                        for (int i = 0; i < n_spec; ++i) {
+                            GModelPar& par = (*(model.spectral()))[i];
+                            if (par.is_free() && par.has_grad()) {
+                                gradient[offset+i] = array(index++);
+                            }
+                        }
+                    }
+
+                    // Set temporal gradients
+                    if (model.temporal() != NULL) {
+                        int offset = n_spat + n_spec;
+                        for (int i = 0; i < n_temp; ++i) {
+                            GModelPar& par = (*(model.temporal()))[i];
+                            if (par.is_free() && par.has_grad()) {
+                                gradient[offset+i] = array(index++);
+                            }
+                        }
+                    }
+
+                    // Optionally set scale gradient for instrument
+                    if (model.has_scales()) {
+                        int offset = n_spat + n_spec + n_temp;
+                        for (int i = 0; i < model.scales(); ++i) {
+                            const GModelPar& par = model.scale(i);
+                            if (par.name() == obs.instrument()) {
+                                if (par.is_free() && par.has_grad()) {
+                                    gradient[offset+i] = array(index++);
+                                }
+                            }
+                        }
+                    }
+
+                    // Insert gradient vector into matrix
+                    gradients->add_to_column(k, gradient);
+
+                } // endif: set gradients
+
+            } // endif: Case A
+
+            // Case B: No integration (assume no energy dispersion)
+            else {
+
+                // Get source energy (no dispersion)
+                GEnergy srcEng  = event.energy();
+
+                // Evaluate probability
+                probs[k] = eval_prob(model, event, srcEng, srcTime, obs, grad);
+
+                // Set gradients
+                if (grad) {
+
+                    // Initialise gradient vector
+                    GVector gradient(npars);
+
+                    // Get number of spatial, spectral and temporal parameters
+                    int n_spat = model.spatial()->size();
+                    int n_spec = model.spectral()->size();
+                    int n_temp = model.temporal()->size();
+
+                    // Set spectral gradients
+                    if (model.spectral() != NULL) {
+                        int offset = n_spat;
+                        for (int i = 0; i < n_spec; ++i) {
+                            GModelPar& par = (*(model.spectral()))[i];
+                            if (par.is_free() && par.has_grad()) {
+                                gradient[offset+i] = par.factor_gradient();
+                            }
+                        }
+                    }
+
+                    // Set temporal gradients
+                    if (model.temporal() != NULL) {
+                        int offset = n_spat + n_spec;
+                        for (int i = 0; i < n_temp; ++i) {
+                            GModelPar& par = (*(model.temporal()))[i];
+                            if (par.is_free() && par.has_grad()) {
+                                gradient[offset+i] = par.factor_gradient();
+                            }
+                        }
+                    }
+
+                    // Optionally set scale gradient for instrument
+                    if (model.has_scales()) {
+                        int offset = n_spat + n_spec + n_temp;
+                        for (int i = 0; i < model.scales(); ++i) {
+                            const GModelPar& par = model.scale(i);
+                            if (par.name() == obs.instrument()) {
+                                if (par.is_free() && par.has_grad()) {
+                                    gradient[offset+i] = par.factor_gradient();
+                                }
+                            }
+                        }
+                    }
+
+                    // Insert gradient vector into matrix
+                    gradients->add_to_column(k, gradient);
+
+                } // endif: set gradients
+
+            } // endelse: Case B
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(probs[k]) || gammalib::is_infinite(probs[k])) {
+                std::cout << "*** ERROR: GResponse::convolve:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (probs[" << k << "]=" << probs[k];
+                std::cout << ", event=" << event;
+                std::cout << ", srcTime=" << srcTime;
+                std::cout << ")" << std::endl;
+            }
+            #endif
+
+        } // endfor: looped over events
+
+    } // endif: spatial component valid
+
+    // Return probabilities
+    return probs;
 }
 
 

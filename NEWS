@@ -22,7 +22,11 @@ The following classes have been renamed:
 - none
 
 The following methods have been added:
-- none
+- GVector GModel::eval(GObservation&, GMatrixSparse*)
+- GVector GModelSky::eval(GObservation&, GMatrixSparse*)
+- GVector GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
+- GVector GObservation::model(GModels&, GMatrixSparse*)
+- GVector GObservation::model_grad(GModel&, GModelPar&) 
 
 The following methods have been removed:
 - none

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GObservations.cpp - Observation container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,8 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GFilename.hpp"
+#include "GXml.hpp"
+#include "GModel.hpp"
 #include "GObservations.hpp"
 #include "GObservationRegistry.hpp"
 #include "GMatrixSparse.hpp"

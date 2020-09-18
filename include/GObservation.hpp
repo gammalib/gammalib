@@ -102,6 +102,8 @@ public:
     virtual double           model(const GModels& models,
                                    const GEvent&  event,
                                    GVector*       gradient = NULL) const;
+    virtual GVector          model(const GModels& models,
+                                   GMatrixSparse* gradient = NULL) const;
     virtual int              nobserved(void) const;
     virtual double           npred(const GModels& models,
                                    GVector*       gradient = NULL) const;
@@ -109,13 +111,11 @@ public:
     virtual double           model_grad(const GModel&    model,
                                         const GModelPar& par,
                                         const GEvent&    event) const;
+    virtual GVector          model_grad(const GModel&    model,
+                                        const GModelPar& par) const;
     virtual double           npred_grad(const GModel&    model,
                                         const GModelPar& par) const;
     virtual void             remove_response_cache(const std::string& name);
-
-    // New methods
-    virtual GVector          model(const GModels& models,
-                                   GMatrixSparse* gradient = NULL) const;
 
     // Implemented methods
     bool               has_events(void) const;

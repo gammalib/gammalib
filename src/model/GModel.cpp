@@ -31,9 +31,13 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GModel.hpp"
+#include "GVector.hpp"
+#include "GMatrixSparse.hpp"
+#include "GObservation.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                           "GModel::operator[](std::string&)"
+#define G_EVAL                  "GModel::eval(GObservation&, GMatrixSparse*)"
 #define G_AT                                               "GModel::at(int&)"
 #define G_SCALE                              "GModelPar& GModel::scale(int&)"
 #define G_WRITE_SCALES                   "GModel::write_scales(GXmlElement&)"
@@ -221,6 +225,91 @@ const GModelPar& GModel::operator[](const std::string& name) const
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Return model values and gradients
+ *
+ * @param[in] obs Observation.
+ * @param[out] gradients Pointer to matrix of gradients.
+ * @return Model values.
+ *
+ * Evaluates the model values and parameter gradients for all events in an
+ * observation. Gradients are only returned if the @p gradients pointer is
+ * not NULL.
+ *
+ * The matrix of gradients is a sparse matrix where the number of rows
+ * corresponds to the number of model parameters and the number of columns
+ * corresponds to the number of events. An exception is thrown if the
+ * dimension of the @p gradients matrix is not compatible with the model
+ * and the observations.
+ ***************************************************************************/
+GVector GModel::eval(const GObservation& obs,
+                     GMatrixSparse*      gradients) const
+{
+    // Get number of model parameters and number of events
+    int npars   = size();
+    int nevents = obs.events()->size();
+
+    // Initialise gradients flag
+    bool grad = (gradients != NULL);
+
+    // Check matrix consistency
+    if (grad) {
+        if (gradients->rows() != npars) {
+            std::string msg = "Number of "+gammalib::str(gradients->rows())+
+                              " rows in gradient matrix differs from number "
+                              "of "+gammalib::str(npars)+" parameters "
+                              "in model. Please provide a compatible gradient "
+                              "matrix.";
+            throw GException::invalid_argument(G_EVAL, msg);
+        }
+        if (gradients->columns() != nevents) {
+            std::string msg = "Number of "+gammalib::str(gradients->columns())+
+                              " columns in gradient matrix differs from number "
+                              "of "+gammalib::str(nevents)+" events in "
+                              "observation. Please provide a compatible "
+                              "gradient matrix.";
+            throw GException::invalid_argument(G_EVAL, msg);
+        }
+    }
+
+    // Initialise values
+    GVector values(nevents);
+
+    // Loop over events
+    for (int k = 0; k < nevents; ++k) {
+
+        // Get reference to event
+        const GEvent& event = *((*obs.events())[k]);
+
+        // Evaluate probability
+        values[k] = eval(event, obs, grad);
+
+        // Set gradients
+        if (grad) {
+
+            // Initialise gradient vector
+            GVector gradient(npars);
+
+            // Extract relevant parameter gradients
+            for (int i = 0; i < npars; ++i) {
+                const GModelPar& par = (*this)[i];
+                if (par.is_free() && par.has_grad()) {
+                    gradient[i] = par.factor_gradient();
+                }
+            }
+
+            // Insert gradient vector into matrix
+            gradients->add_to_column(k, gradient);
+
+        } // endif: looped over gradients
+
+    } // endfor: looped over events
+
+    // Return values
+    return values;
+}
+
+
+/***********************************************************************//**
  * @brief Returns reference to model parameter by index
  *
  * @param[in] index Parameter index [0,...,size()-1].
@@ -297,6 +386,8 @@ bool GModel::has_par(const std::string& name) const
 
 /***********************************************************************//**
  * @brief Returns instruments to which model applies
+ *
+ * @return Instruments.
  *
  * Returns a comma separated list of instruments to which model applies. If
  * no instrument exists then an empty string is returned.
@@ -485,6 +576,8 @@ void GModel::scale(const GModelPar& par)
 /***********************************************************************//**
  * @brief Returns observation identifiers to which model applies
  *
+ * @return Observation identifiers.
+ *
  * Returns a comma separated list of observation identifiers to which model
  * applies. If no observation identifier exists then an empty string is
  * returned.
@@ -542,7 +635,7 @@ void GModel::ids(const std::string& ids)
  *
  * @param[in] instrument Instrument name.
  * @param[in] id Observation identifier.
- * @return Validity flag
+ * @return Validity flag.
  *
  * Checks if specified instrument name and observation identifier is in list
  * of applicable instruments and identifiers. The check is case sensitive.

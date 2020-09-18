@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GObservations_likelihood.cpp - Likelihood function class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include "GObservations.hpp"
 #include "GTools.hpp"
 #include "GFilename.hpp"
+#include "GModel.hpp"
 #include "GEvent.hpp"
 #include "GEventList.hpp"
 #include "GEventCube.hpp"

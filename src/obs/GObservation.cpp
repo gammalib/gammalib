@@ -48,8 +48,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_LIKELIHOOD           "GObservation::likelihood(GModels&, GVector*,"\
                                                   " GMatrixSparse*, double*)"
-#define G_MODEL                   "GObservation::model(GModels&, GPointing&,"\
-                                    " GInstDir&, GEnergy&, GTime&, GVector*)"
+#define G_MODEL1           "GObservation::model(GModels&, GEvent&, GVector*)"
+#define G_MODEL2              "GObservation::model(GModels&, GMatrixSparse*)"
 #define G_EVENTS                                     "GObservation::events()"
 #define G_NPRED                                "GObservation::npred(GModel&)"
 #define G_NPRED_SPEC              "GObservation::npred_spec(GModel&, GTime&)"
@@ -248,6 +248,7 @@ double GObservation::likelihood(const GModels& models,
  * @param[in] models Model container.
  * @param[in] event Observed event.
  * @param[out] gradient Pointer to gradient vector (optional).
+ * @return Model value.
  *
  * @exception GException::invalid_value
  *            Dimension of gradient vector mismatches number of parameters.
@@ -306,7 +307,7 @@ double GObservation::model(const GModels& models,
                             gammalib::str(models.npars())+" elements "
                             "requested while vector only contains "+
                             gammalib::str(gradient->size())+" elements.";
-                        throw GException::invalid_value(G_MODEL, msg);
+                        throw GException::invalid_value(G_MODEL1, msg);
                     }
                     #endif
 
@@ -390,41 +391,55 @@ double GObservation::model(const GModels& models,
  * @brief Return model values and (optionally) gradients
  *
  * @param[in] models Model container.
- * @param[out] gradient Pointer to gradient vector (optional).
+ * @param[out] gradient Pointer to sparse gradient matrix.
+ * @return Vector of model values.
  *
  * @exception GException::invalid_argument
  *            Gradient matrix mismatches number of events or model parameters.
+ *
+ * Returns the model values for each event in the observation.
+ *
+ * If @p gradient is not NULL, the matrix contains on output the model
+ * factor gradients for all events. Each row of the @p gradient matrix
+ * corresponds to one event, the columns correspond to the parameters
+ * of the @p models container.
  ***************************************************************************/
-#define G_MODEL2 "GObservation::model(GModels&, GMatrixSparse*)"
 GVector GObservation::model(const GModels& models,
                             GMatrixSparse* gradient) const
 {
-    // Initialise model values
-    GVector model(events()->size());
-
-    // Set gradient usage flag and initialise gradient counter
+    // Initialise variables
+    int  nevents  = events()->size();
     bool use_grad = (gradient != NULL);
-    int  igrad    = 0;      // Reset gradient counter
+    int  igrad    = 0;
 
-    // If gradient is available then gradient size
+    // Initialise model values
+    GVector values(nevents);
+
+    // If gradient is available then check gradient size and initialise
+    // sparse matrix stack
     if (use_grad) {
-        if (gradient->columns() != models.size()) {
+
+        // Check number of columns
+        if (gradient->columns() != models.npars()) {
             std::string msg = "Number of "+gammalib::str(gradient->columns())+
                               " columns in gradient matrix differs from number "
-                              "of "+gammalib::str(models.size())+" parameters "
-                              "in model container Please specify compatible "
+                              "of "+gammalib::str(models.npars())+" parameters "
+                              "in model container. Please specify compatible "
                               "arguments.";
             throw GException::invalid_argument(G_MODEL2, msg);
         }
-        if (gradient->rows() != events()->size()) {
+
+        // Check number of rows
+        if (gradient->rows() != nevents) {
             std::string msg = "Number of "+gammalib::str(gradient->rows())+
                               " rows in gradient matrix differs from number "
-                              "of "+gammalib::str(events()->size())+" events "
+                              "of "+gammalib::str(nevents)+" events "
                               "in observation. Please specify compatible "
                               "arguments.";
             throw GException::invalid_argument(G_MODEL2, msg);
         }
-    }
+
+    } // endif: Gradient requested
 
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
@@ -437,83 +452,91 @@ GVector GObservation::model(const GModels& models,
             // observation identifier
             if (mptr->is_valid(instrument(), id())) {
 
-                // Loop over events
-                for (int k = 0; k < events()->size(); ++k) {
+                // If no gradients should be used then evaluate model and
+                // add it to values
+                if (!use_grad) {
+                    values += mptr->eval(*this, NULL);
+                }
 
-                    // Get reference to event
-                    const GEvent& event = *((*events())[k]);
+                // ... otherwise evaluate model and gradients and add to
+                // model vector and gradient matrix
+                else {
 
-                    // Compute value and add to model
-                    model[k] += mptr->eval(event, *this, use_grad);
+                    // Allocate gradient matrix
+                    GMatrixSparse gradients(mptr->size(), nevents);
 
-                    // Optionally determine model gradients
-                    if (use_grad) {
+                    // Initialise sparse matrix stack
+                    gradients.stack_init(mptr->size()*1000, 1000);
 
-                        // If model provides the parameter indices that were
-                        // updated by the eval() method then use them as this
-                        // is less time consuming than looping over all indices
-                        if (mptr->has_eval_indices()) {
+                    // Evaluate model and add to values
+                    values += mptr->eval(*this, &gradients);
 
-                            // Get number of relevant parameters
-                            int npars = mptr->eval_indices().size();
+                    // Destroy sparse matrix stack (fills stack in matrix)
+                    gradients.stack_destroy();
 
-                            // Loop over all relevant parameters
-                            for (int index = 0; index < npars; ++index) {
+                    // If model provides the parameter indices that were
+                    // updated by the eval() method then use them as this
+                    // is less time consuming than looping over all indices
+                    if (mptr->has_eval_indices()) {
 
-                                // Retrieve parameter index
-                                int ipar = mptr->eval_indices()[index];
+                        // Get number of relevant parameters
+                        int npars = mptr->eval_indices().size();
 
-                                // Get reference to model parameter
-                                const GModelPar& par = (*mptr)[ipar];
+                        // Loop over all relevant parameters
+                        for (int index = 0; index < npars; ++index) {
 
-                                // Determine gradient
-                                double grad = 0.0;
-                                if (par.is_free()) {
-                                    if (par.has_grad()) {
-                                        grad = par.factor_gradient();
-                                    }
-                                    else {
-                                        grad = model_grad(*mptr, par, event);
-                                    }
+                            // Retrieve parameter index
+                            int ipar = mptr->eval_indices()[index];
+
+                            // Get reference to model parameter
+                            const GModelPar& par = (*mptr)[ipar];
+
+                            // Determine gradient
+                            GVector grad(nevents);
+                            if (par.is_free()) {
+                                if (par.has_grad()) {
+                                    grad = gradients.row(ipar);
                                 }
-
-                                // Set gradient
-                                (*gradient)(k,igrad+ipar) = grad;
-
-                            } // endfor: looped over all parameter indices
-
-                        } // endif: parameter indices were available
-
-                        // ... otherwise loop over all parameter indices
-                        else {
-
-                            // Loop over all parameters
-                            for (int ipar = 0; ipar < mptr->size(); ++ipar) {
-
-                                // Get reference to model parameter
-                                const GModelPar& par = (*mptr)[ipar];
-
-                                // Determine gradient
-                                double grad = 0.0;
-                                if (par.is_free()) {
-                                    if (par.has_grad()) {
-                                        grad = par.factor_gradient();
-                                    }
-                                    else {
-                                        grad = model_grad(*mptr, par, event);
-                                    }
+                                else {
+                                    grad = model_grad(*mptr, par);
                                 }
+                            }
 
-                                // Set gradient
-                                (*gradient)(k,igrad+ipar) = grad;
+                            // Set gradient
+                            gradient->column(igrad+ipar, grad);
 
-                            } // endfor: looped over all parameter indices
+                        } // endfor: looped over all parameter indices
 
-                        } // endelse: no parameter indices were available
+                    } // endif: parameter indices were available
 
-                    } // endif: use model gradients
+                    // ... otherwise loop over all parameter indices
+                    else {
 
-                } // endfor: loop over events
+                        // Loop over all parameters
+                        for (int ipar = 0; ipar < mptr->size(); ++ipar) {
+
+                            // Get reference to model parameter
+                            const GModelPar& par = (*mptr)[ipar];
+
+                            // Determine gradient
+                            GVector grad(nevents);
+                            if (par.is_free()) {
+                                if (par.has_grad()) {
+                                    grad = gradients.row(ipar);
+                                }
+                                else {
+                                    grad = model_grad(*mptr, par);
+                                }
+                            }
+
+                            // Set gradient
+                            gradient->column(igrad+ipar, grad);
+
+                        } // endfor: looped over all parameter indices
+
+                    } // endelse: no parameter indices were available
+
+                } // endif: use model gradients
 
             } // endif: model component was valid for instrument
 
@@ -524,8 +547,8 @@ GVector GObservation::model(const GModels& models,
 
     } // endfor: Looped over models
 
-    // Return
-    return model;
+    // Return values
+    return values;
 }
 
 
@@ -815,6 +838,123 @@ double GObservation::model_grad(const GModel&    model,
 
     // Return gradient
     return grad;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter gradients of model for all events
+ *
+ * @param[in] model Model.
+ * @param[in] par Model parameter.
+ *
+ * This method uses a robust but simple difference method to estimate
+ * parameter gradients that have not been provided by the model. We use here
+ * a simple method as this method is likely used for spatial model parameters,
+ * and the spatial model may eventually be noisy due to numerical integration
+ * limits.
+ *
+ * The step size for the simple method has been fixed to 0.0002, which
+ * corresponds to about 1 arcsec for parameters that are given in degrees.
+ * The reasoning behind this value is that parameters that use numerical
+ * gradients are typically angles, such as for example the position, and
+ * we want to achieve arcsec precision with this method.
+ ***************************************************************************/
+GVector GObservation::model_grad(const GModel&    model,
+                                 const GModelPar& par) const
+{
+    // Initialise gradients
+    GVector gradients(events()->size());
+
+    // Compute gradient only if parameter is free
+    if (par.is_free()) {
+
+        // Get non-const model pointer
+        GModelPar* ptr = const_cast<GModelPar*>(&par);
+
+        // Save current model parameter
+        GModelPar current = par;
+
+        // Get actual parameter value
+        double x = par.factor_value();
+
+        // Set fixed step size for computation of derivative.
+        // By default, the step size is fixed to 0.0002.
+        const double step_size = 0.0002; // ~1 arcsec
+        double       h         = step_size;
+
+        // Re-adjust the step-size h in case that the initial step size is
+        // larger than the allowed parameter range
+        if (par.has_min() && par.has_max()) {
+            double par_h = par.factor_max() - par.factor_min();
+            if (par_h < h) {
+                h = par_h;
+            }
+        }
+
+        // Continue only if step size is positive
+        if (h > 0.0) {
+
+            // Setup derivative function
+            //GObservation::model_func function(this, &model, ptr, &event);
+            //GDerivative              derivative(&function);
+
+            // If we are too close to the minimum boundary use a right sided
+            // difference ...
+            if (par.has_min() && ((x-par.factor_min()) < h)) {
+                //grad = derivative.right_difference(x, h);
+                // Compute fs1
+                ptr->factor_value(x);
+                GVector fs1 = model.eval(*this, NULL);
+
+                // Compute fs2
+                ptr->factor_value(x+h);
+                GVector fs2 = model.eval(*this, NULL);
+
+                // Compute derivative
+                gradients = (fs1 - fs2) / h;
+
+            }
+
+            // ... otherwise if we are too close to the maximum boundary use
+            // a left sided difference ...
+            else if (par.has_max() && ((par.factor_max()-x) < h)) {
+                //grad = derivative.left_difference(x, h);
+                // Compute fs1
+                ptr->factor_value(x);
+                GVector fs1 = model.eval(*this, NULL);
+
+                // Compute fs2
+                ptr->factor_value(x-h);
+                GVector fs2 = model.eval(*this, NULL);
+
+                // Compute derivative
+                gradients = (fs1 - fs2) / h;
+            }
+
+            // ... otherwise use a symmetric difference
+            else {
+                //grad = derivative.difference(x, h);
+                // Compute fs1
+                ptr->factor_value(x+h);
+                GVector fs1 = model.eval(*this, NULL);
+
+                // Compute fs2
+                ptr->factor_value(x-h);
+                GVector fs2 = model.eval(*this, NULL);
+
+                // Compute derivative
+                gradients = 0.5 * (fs1 - fs2) / h;
+            }
+
+        } // endif: step size was positive
+
+        // Restore current model parameter
+        *ptr = current;
+
+    } // endif: model parameter was free
+
+    // Return gradients
+    return gradients;
 }
 
 
@@ -1159,7 +1299,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
 
         // Update Poissonian statistic (excluding factorial term for faster
         // computation)
-        value -= log(model);
+        value -= std::log(model);
 
         // Skip bin now if there are no non-zero derivatives
         if (ndev < 1) {
@@ -1255,10 +1395,10 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
     // Allocate some working arrays
     int*          inx    = new int[npars];
     double*       values = new double[npars];
-    GMatrixSparse wrk_grad(nevents, npars);
+    GMatrixSparse wrk_matrix(nevents, npars);
 
     // Compute model and derivative
-    GVector model_vector = this->model(models, &wrk_grad);
+    GVector model_vector = this->model(models, &wrk_matrix);
 
     // Iterate over all bins
     for (int i = 0; i < events()->size(); ++i) {
@@ -1307,15 +1447,15 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
         // Update Npred
         *npred += model;
 
-        // Multiply gradient by bin size
-        //wrk_grad *= bin->size();
+        // Extract working gradient multiplied by bin size
+        GVector wrk_grad = wrk_matrix.row(i) * bin->size();
 
         // Create index array of non-zero derivatives and initialise working
         // array
         int ndev = 0;
         for (int k = 0; k < npars; ++k) {
             values[k] = 0.0;
-            if (wrk_grad(i,k) != 0.0 && !gammalib::is_infinite(wrk_grad(i,k))) {
+            if (wrk_grad[k] != 0.0 && !gammalib::is_infinite(wrk_grad[k])) {
                 inx[ndev] = k;
                 ndev++;
             }
@@ -1330,7 +1470,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
 
             // Update Poissonian statistic (excluding factorial term for
             // faster computation)
-            value -= data * log(model) - model;
+            value -= data * std::log(model) - model;
 
             // Skip bin now if there are no non-zero derivatives
             if (ndev < 1) {
@@ -1347,8 +1487,8 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
 
                 // Initialise computation
                 register int jpar    = inx[jdev];
-                double       g       = wrk_grad(i,jpar) * bin->size();
-                double       fa_i    = fa * g * bin->size();
+                double       g       = wrk_grad[jpar];
+                double       fa_i    = fa * g;
 
                 // Update gradient
                 (*gradient)[jpar] += fc * g;
@@ -1356,7 +1496,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
                 // Loop over rows
                 register int* ipar = inx;
                 for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
-                    values[idev] = fa_i * wrk_grad(i,*ipar);
+                    values[idev] = fa_i * wrk_grad[*ipar];
                 }
 
                 // Add column to matrix
@@ -1386,7 +1526,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
             // Update gradient
             register int* ipar = inx;
             for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
-                (*gradient)[*ipar] += wrk_grad(i,*ipar) * bin->size();
+                (*gradient)[*ipar] += wrk_grad[*ipar];
             }
 
         } // endif: data was 0
