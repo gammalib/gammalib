@@ -1,6 +1,6 @@
 .. _1.8:
 
-GammaLib 1.8 release (11 September 2020)
+GammaLib 1.8 release (18 September 2020)
 ========================================
 
 Overview
@@ -23,6 +23,7 @@ Improvements
 
 * [`3333 <https://cta-redmine.irap.omp.eu/issues/3333>`_] -
   Integrate analytical gradients for energy dispersion computation
+* Implement ``GMatrixSparse::row()`` and ``GMatrixSparse::add_to_row()`` methods
 
 New features
 ------------

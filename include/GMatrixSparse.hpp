@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GMatrixSparse.hpp - Sparse matrix class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -292,6 +292,7 @@ private:
     void mix_column(const double* src1_data, const int* src1_row, int src1_num,
                     const double* src2_data, const int* src2_row, int src2_num,
                     double* dst_data, int* dst_row, int* dst_num);
+    void insert_row(const int& row, const GVector& vector, const bool& add);
 
     // Private data members
     int*             m_rowinx;       //!< Row-indices of all elements

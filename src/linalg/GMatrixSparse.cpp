@@ -50,7 +50,6 @@
 #define G_EXTRACT_COLUMN                     "GMatrixSymmetric::column(int&)"
 #define G_SET_COLUMN               "GMatrixSymmetric::column(int&, GVector&)"
 #define G_SET_COLUMN2    "GMatrixSymmetric::column(int&, double*, int*, int)"
-#define G_ADD_TO_ROW           "GMatrixSymmetric::add_to_row(int&, GVector&)"
 #define G_ADD_TO_COLUMN     "GMatrixSymmetric::add_to_column(int&, GVector&)"
 #define G_ADD_TO_COLUMN2     "GMatrixSymmetric::add_to_column(int&, double*,"\
                                                                 " int*, int)"
@@ -65,6 +64,7 @@
 #define G_ALLOC                   "GMatrixSparse::alloc_elements(int&, int&)"
 #define G_FREE                     "GMatrixSparse::free_elements(int&, int&)"
 #define G_REMOVE_ZERO              "GMatrixSparse::remove_zero_row_col(void)"
+#define G_INSERT_ROW       "GMatrixSparse::insert_row(int&, GVector&, bool&)"
 #define G_SYMPERM                    "cs_symperm(GMatrixSparse*, int*, int&)"
 #define G_TRANSPOSE                       "cs_transpose(GMatrixSparse*, int)"
 
@@ -295,7 +295,7 @@ GMatrixSparse& GMatrixSparse::operator=(const double& value)
 {
     // Fill any pending element to have a non-pending state
     fill_pending();
-    
+
     // If value is 0 then simply reinitialize column start indices
     if (value == 0) {
 
@@ -470,7 +470,7 @@ GMatrixSparse GMatrixSparse::operator-(void) const
     for (int i = 0; i < matrix.m_elements; ++i, ++ptr) {
         *ptr = -(*ptr);
     }
-    
+
     // Return matrix
     return matrix;
 }
@@ -713,7 +713,7 @@ void GMatrixSparse::clear(void)
 
     // Initialise private members
     init_members();
-    
+
     // Return
     return; 
 }
@@ -832,16 +832,13 @@ GVector GMatrixSparse::row(const int& row) const
 /***********************************************************************//**
  * @brief Set row in matrix
  *
- * @todo To be implemented.
+ * @param[in] row Row index [0,...,row()-1].
+ * @param[in] vector Vector.
  ***************************************************************************/
 void GMatrixSparse::row(const int& row, const GVector& vector)
 {
-    // Raise an exception if the row index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_SET_ROW, row, 0, m_rows-1);
-    }
-    #endif
+    // Insert row
+    insert_row(row, vector, false);
 
     // Return
     return;
@@ -1173,16 +1170,13 @@ void GMatrixSparse::column(const int& column, const double* values,
 /***********************************************************************//**
  * @brief Add row to matrix elements
  *
- * @todo To be implemented.
+ * @param[in] row Row index [0,...,row()-1].
+ * @param[in] vector Vector.
  ***************************************************************************/
 void GMatrixSparse::add_to_row(const int& row, const GVector& vector)
 {
-    // Raise an exception if the row index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_ADD_TO_ROW, row, 0, m_rows-1);
-    }
-    #endif
+    // Add row
+    insert_row(row, vector, true);
 
     // Return
     return;
@@ -1459,10 +1453,10 @@ GMatrixSparse GMatrixSparse::transpose(void) const
 
     // Fill pending element
     matrix.fill_pending();
-    
+
     // Compute the transpose
     matrix = cs_transpose(matrix, 1);
-    
+
     // Return matrix
     return matrix;
 }
@@ -1488,7 +1482,7 @@ GMatrixSparse GMatrixSparse::invert(void) const
 
     // Invert matrix
     matrix = matrix.cholesky_invert(true);
-    
+
     // Return matrix
     return matrix;
 }
@@ -1753,7 +1747,7 @@ GVector GMatrixSparse::cholesky_solver(const GVector& vector,
         throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, vector.size(),
                                                  m_rows, m_cols);
     }
-    
+
     // Raise an exception if there is no symbolic pointer
     if (!m_symbolic) {
         throw GException::matrix_not_factorised(G_CHOL_SOLVE, 
@@ -2055,7 +2049,7 @@ std::string GMatrixSparse::print(const GChatter& chatter) const
         if (m_stack_data == NULL) {
             result.append(" (none)");
         }
-    
+
         // Append elements and compression schemes
         result.append(print_elements(chatter));
         result.append(print_row_compression(chatter));
@@ -3377,7 +3371,7 @@ void GMatrixSparse::mix_column_prepare(const int* src1_row, int src1_num,
 
     // We're done
     return;
-}		
+}
 
 
 /***********************************************************************//**
@@ -3471,6 +3465,164 @@ void GMatrixSparse::mix_column(const double* src1_data, const int* src1_row,
 }
 
 
+/***********************************************************************//**
+ * @brief Insert row in matrix
+ *
+ * @param[in] row Row index [0,...,row()-1].
+ * @param[in] vector Vector.
+ * @param[in] add Add vector to existing elements?
+ *
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ * @exception GException::invalid_argument
+ *            Vector length incompatible with number of matrix columns.
+ *
+ * @todo Remove elements that are empty after addition
+ ***************************************************************************/
+void GMatrixSparse::insert_row(const int&     row,
+                               const GVector& vector,
+                               const bool&    add)
+{
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_INSERT_ROW, "Row index", row, m_rows);
+    }
+    #endif
+
+    // Raise an exception if the vector length is invalid
+    if (vector.size() != m_cols) {
+        std::string msg = "Vector length "+gammalib::str(vector.size())+
+                          " differs from number of "+gammalib::str(m_cols)+
+                          " matrix columns.";
+        throw GException::invalid_argument(G_INSERT_ROW, msg);
+    }
+
+    // Fill pending element into matrix
+    fill_pending();
+
+    // Determine indices of new columns that need to be allocated and set
+    // or add all vector elements that do not need a new memory allocation
+    std::vector<int> new_columns;
+    std::vector<int> k_insert;
+    for (int i = m_cols-1; i >= 0; --i) {
+        if (vector[i] != 0.0) {
+            int  k          = m_colstart[i];
+            int  istop      = m_colstart[i+1];
+            bool add_column = true;
+            for (; k < istop; ++k) {
+                if (m_rowinx[k] == row) {
+                    if (add) {
+                        m_data[k] += vector[i];
+                    }
+                    else {
+                        m_data[k] = vector[i];
+                    }
+                    add_column = false;
+                    break;
+                }
+                else if (m_rowinx[k] > row) {
+                    break;
+                }
+            }
+            if (add_column) {
+                new_columns.push_back(i);
+                k_insert.push_back(k);
+            }
+        }
+    }
+
+    // If new columns are needed then allocate new memory and insert
+    // new columns
+    if (!new_columns.empty()) {
+
+        // Determine the requested new logical size of the matrix
+        int new_size = m_elements + new_columns.size();
+
+        // Initialise pointers to destination
+        bool    new_memory = false;
+        double* new_data   = m_data;
+        int*    new_rowinx = m_rowinx;
+
+        // If requested size is smaller than allocated size then allocate
+        // new memory
+        if (new_size > m_alloc) {
+
+            // Propose a new memory size
+            int new_propose = m_alloc + m_mem_block;
+
+            // Make sure that enough memory is allocated
+            m_alloc = (new_size > new_propose) ? new_size : new_propose;
+
+            // Allocate memory for new elements
+            new_data   = new double[m_alloc];
+            new_rowinx = new int[m_alloc];
+
+            // Signal that new memory was allocated
+            new_memory = true;
+
+        } // endif: memory allocation required
+
+        // Loop over all new columns
+        int n_insert = new_columns.size();
+        int k_last   = m_elements;
+        for (int i = 0; i < new_columns.size(); ++i) {
+
+            // Move data back by n_insert positions
+            for (int k = k_insert[i]; k < k_last; ++k) {
+                new_data[k+n_insert]   = m_data[k];
+                new_rowinx[k+n_insert] = m_rowinx[k];
+            }
+
+            // Insert vector element just before the block that was moved
+            // back
+            new_data[k_insert[i]+n_insert-1]   = vector[new_columns[i]];
+            new_rowinx[k_insert[i]+n_insert-1] = row;
+
+            // Update number of positions to move back and end of block
+            n_insert--;
+            k_last = k_insert[i];
+
+        } // endfor: looped over all new columns
+
+        // Update column start and number of elements
+        int i_insert = 0;
+        n_insert = new_columns.size();
+        for (int i = m_cols; i > 0; --i) {
+            if (new_columns[i_insert] == i) {
+                n_insert--;
+                i_insert++;
+                if (n_insert < 1) {
+                    break;
+                }
+            }
+            m_colstart[i] += n_insert;
+        }
+
+        // Update number of elements
+        m_elements = new_size;
+
+        // If memory was allocated then free old memory and attach new
+        // memory
+        if (new_memory) {
+
+            // Delete old memory
+            if (m_data   != NULL) delete [] m_data;
+            if (m_rowinx != NULL) delete [] m_rowinx;
+
+            // Update pointers to new memory and update element counter
+            m_data      = new_data;
+            m_rowinx    = new_rowinx;
+
+        } // endif: memory was allocated
+
+    } // endif: new columns were needed
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                           Friend functions                              =
@@ -3548,7 +3700,7 @@ GMatrixSparse cs_symperm(const GMatrixSparse& matrix, const int* pinv)
 
     // Free workspace
     delete [] wrk_int;
-  
+
     // Rectify the number of elements in matrix C
     C.free_elements(Cp[n], (C.m_elements-Cp[n]));
 
@@ -3614,7 +3766,7 @@ GMatrixSparse cs_transpose(const GMatrixSparse& matrix, int values)
             }
         }
     }
-    
+
     // Free workspace
     delete [] wrk_int;
 

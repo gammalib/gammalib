@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.8.0
 
-11 September 2020
+18 September 2020
 
 
 1. Introduction
@@ -59,7 +59,8 @@ None
 
 7. Linear algebra module
 ------------------------
-None
+Implement GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
+
 
 
 8. Model module
