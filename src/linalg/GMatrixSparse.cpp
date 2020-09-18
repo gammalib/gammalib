@@ -804,18 +804,26 @@ GVector GMatrixSparse::row(const int& row) const
         int i_start = m_colstart[col];
         int i_stop  = m_colstart[col+1];
 
-        // Search requested row in elements
-        int i;
-        for (i = i_start; i < i_stop; ++i) {
-            if (m_rowinx[i] == row) {
-                break;
-            }
-        }
+        // If column is not empty then search requested row by bisection
+        if (i_stop > i_start) {
 
-        // Copy element if we found one
-        if (i < i_stop) {
-            result[col] = m_data[i];
-        }
+            // Find row by bisection
+            while ((i_stop - i_start) > 1) {
+                int mid = (i_start+i_stop) / 2;
+                if (m_rowinx[mid] > row) {
+                    i_stop = mid;
+                }
+                else {
+                    i_start = mid;
+                }
+            }
+
+            // Copy element if we found the row
+            if (m_rowinx[i_start] == row) {
+                result[col] = m_data[i_start];
+            }
+
+        } // endif: column was not empty
 
     } // endfor: looped over all columns
 
@@ -2786,40 +2794,56 @@ void GMatrixSparse::free_stack_members(void)
  *
  * @param[in] row Row index.
  * @param[in] column Column index.
+ * @return Element index.
  *
  * Returns the index in the compressed array for (row,col). The following
  * special results exist:
- * -1: Requested index does not exist in the matrix.
- * m_elements: Requested index is the pending element.
+ *
+ *       -1: Requested index does not exist in the matrix.
+ *       m_elements: Requested index is the pending element.
  ***************************************************************************/
 int GMatrixSparse::get_index(const int& row, const int& column) const
 {
     // Initialise element to 'not found'
     int index = -1;
 
-    // If we have a pending element then check if this element is requested
-    if (m_fill_val != 0.0) {
-        if (row == m_fill_row && column == m_fill_col) {
-            return m_elements;
-        }
+    // If we have a pending element and the pending element is requested
+    // then return m_elements as index
+    if ((m_fill_val != 0.0) && (row == m_fill_row && column == m_fill_col)) {
+        index = m_elements;
     }
+    
+    // ... otherwise if there are elements in the matrix then search for
+    // the requested row and column.
+    else if (m_elements > 0) {
 
-    // If requested element is not the pending element then check if it exists
-    // in the matrix. Only if it is found its index is returned. Otherwise
-    // the default index is -1, signalling that the element is absent.
-    if (m_elements > 0) {
+        // Get the start and stop of the elements
         int* ptr_colstart = m_colstart + column;
         int  i_start      = *ptr_colstart++;
         int  i_stop       = *ptr_colstart;
-        int* ptr_rowinx   = m_rowinx + i_start;
-        for (int i = i_start; i < i_stop; ++i) {
-            int row_test = *ptr_rowinx++;
-            if (row_test == row) {
-                index = i;
-                break;
+
+        // If column is not empty then search requested row by bisection
+        if (i_stop > i_start) {
+
+            // Find row by bisection
+            while ((i_stop - i_start) > 1) {
+                int mid = (i_start+i_stop) / 2;
+                if (m_rowinx[mid] > row) {
+                    i_stop = mid;
+                }
+                else {
+                    i_start = mid;
+                }
             }
-        }
-    }
+
+            // If we found the row then store the index
+            if (m_rowinx[i_start] == row) {
+                index = i_start;
+            }
+
+        } // endif: column was not empty
+
+    } // endif: matrix contained elements
 
     // Return index
     return index;
