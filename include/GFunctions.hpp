@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 
 /* __ Forward declarations _______________________________________________ */
-class GNdarray;
+class GVector;
 
 
 /***********************************************************************//**
@@ -60,8 +60,8 @@ public:
     GFunctions& operator=(const GFunctions& functions);
 
     // Methods
-    virtual const GNdarray& array(void) const = 0;
-    virtual GNdarray        eval(const double& x) = 0;
+    virtual int     size(void) const = 0;
+    virtual GVector eval(const double& x) = 0;
 
 protected:
     // Protected methods

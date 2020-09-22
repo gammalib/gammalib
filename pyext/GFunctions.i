@@ -26,7 +26,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFunctions.hpp"
-#include "GNdarray.hpp"
+#include "GVector.hpp"
 %}
 
 
@@ -43,6 +43,6 @@ public:
     virtual ~GFunction(void);
 
     // Methods
-    virtual const GNdarray& array(void) const = 0;
-    virtual GNdarray        eval(const double& x) = 0;
+    virtual int     size(void) const = 0;
+    virtual GVector eval(const double& x) = 0;
 };

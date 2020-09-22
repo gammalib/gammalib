@@ -64,15 +64,15 @@ public:
     const std::string& message(void) const;
     void               kernels(GFunctions* kernels);
     const GFunctions*  kernels(void) const;
-    GNdarray           romberg(std::vector<double> bounds,
+    GVector            romberg(std::vector<double> bounds,
                                const int&          order = 5);
-    GNdarray           romberg(const double& a,
+    GVector            romberg(const double& a,
                                const double& b,
                                const int&    order = 5);
-    GNdarray           trapzd(const double& a,
+    GVector            trapzd(const double& a,
                               const double& b,
                               const int&    n,
-                              GNdarray      result);
+                              GVector       result);
 };
 
 

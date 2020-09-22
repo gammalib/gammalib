@@ -37,9 +37,9 @@
 #define G_ROMBERG1           "GIntegrals::romberg(std::vector<double>, int&)"
 #define G_ROMBERG2              "GIntegrals::romberg(double&, double&, int&)"
 #define G_GAUSS_KRONROD         "GIntegrals::gauss_kronrod(double&, double&)"
-#define G_TRAPZD       "GIntegrals::trapzd(double&, double&, int&, GNdarray)"
-#define G_POLINT  "GIntegrals::polint(double*, GNdarray*, int, int, double, "\
-                                                                 "GNdarray*)"
+#define G_TRAPZD        "GIntegrals::trapzd(double&, double&, int&, GVector)"
+#define G_POLINT   "GIntegrals::polint(double*, GVector*, int, int, double, "\
+                                                                  "GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -192,7 +192,7 @@ GIntegrals* GIntegrals::clone(void) const
  *
  * @param[in] bounds Integration boundaries.
  * @param[in] order Integration order (default: 5)
- * @return Array of integration results.
+ * @return Vector of integration results.
  *
  * Returns the integral of the integrand, computed over a number of
  * intervals [a0,a1], [a1,a2], ... that are given as an unordered vector
@@ -207,7 +207,7 @@ GIntegrals* GIntegrals::clone(void) const
  * The number of iterations is limited by m_max_iter. m_eps specifies the
  * requested fractional accuracy. By default it is set to 1e-6.
  ***************************************************************************/
-GNdarray GIntegrals::romberg(std::vector<double> bounds, const int& order)
+GVector GIntegrals::romberg(std::vector<double> bounds, const int& order)
 {
     // Throw an exception if the instance has no kernels
     if (m_kernels == NULL) {
@@ -220,7 +220,7 @@ GNdarray GIntegrals::romberg(std::vector<double> bounds, const int& order)
     std::sort(bounds.begin(), bounds.end());
 
     // Initialise result
-    GNdarray result(m_kernels->array().shape());
+    GVector result(m_kernels->size());
 
     // Initialise integration status information
     int calls = 0;
@@ -245,7 +245,7 @@ GNdarray GIntegrals::romberg(std::vector<double> bounds, const int& order)
  * @param[in] a Left integration boundary.
  * @param[in] b Right integration boundary.
  * @param[in] order Integration order (default: 5)
- * @return Array of integration results.
+ * @return Vector of integration results.
  *
  * @exception GException::invalid_value
  *            Function kernels not set.
@@ -262,7 +262,7 @@ GNdarray GIntegrals::romberg(std::vector<double> bounds, const int& order)
  * The number of iterations is limited by m_max_iter. m_eps specifies the
  * requested fractional accuracy. By default it is set to 1e-6.
  ***************************************************************************/
-GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
+GVector GIntegrals::romberg(const double& a, const double& b, const int& order)
 {
     // Throw an exception if the instance has no kernels
     if (m_kernels == NULL) {
@@ -272,7 +272,7 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
     }
 
     // Initialise result
-    GNdarray result(m_kernels->array().shape());
+    GVector result(m_kernels->size());
 
     // Initialise integration status information
     m_isvalid    = true;
@@ -284,8 +284,8 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
     if (b > a) {
 
         // Initialise variables
-        bool     converged = false;
-        GNdarray dss(m_kernels->array().shape());
+        bool    converged = false;
+        GVector dss(m_kernels->size());
 
         // Determine (maximum) number of iterations
         int max_iter = (m_fix_iter > 0) ? m_fix_iter : m_max_iter;
@@ -303,12 +303,12 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
         }
 
         // Allocate temporal storage
-        double*   h = new double[max_iter+2];
-        GNdarray* s = new GNdarray[max_iter+2];
+        double*  h = new double[max_iter+2];
+        GVector* s = new GVector[max_iter+2];
 
         // Initialise step size and initial result
         h[1] = 1.0;
-        s[0] = GNdarray(m_kernels->array().shape());
+        s[0] = GVector(m_kernels->size());
 
         // Iterative loop
         for (m_iter = 1; m_iter <= max_iter; ++m_iter) {
@@ -335,9 +335,9 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                 // Compute result using polynom interpolation
                 for (int i = 0; i < result.size(); ++i) {
                     double dy = 0;
-                    result(i) = polint(&h[m_iter-order], &s[m_iter-order],
+                    result[i] = polint(&h[m_iter-order], &s[m_iter-order],
                                        order, i, 0.0, &dy);
-                    dss(i)    = dy;
+                    dss[i]    = dy;
                 }
 
                 // If a fixed number of iterations has been requested and if
@@ -354,7 +354,7 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                 else {
                     converged = true;
                     for (int i = 0; i < result.size(); ++i) {
-                        if (std::abs(dss(i)) > m_eps * std::abs(result(i))) {
+                        if (std::abs(dss[i]) > m_eps * std::abs(result[i])) {
                             converged = false;
                             break;
                         }
@@ -371,13 +371,13 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
                     m_abserr     = abs(dss);
                     m_relerr     = m_abserr;
                     for (int i = 0; i < result.size(); ++i) {
-                        double abs_result = std::abs(result(i));
+                        double abs_result = std::abs(result[i]);
                         if (abs_result > 0.0) {
-                            m_relerr(i) /= abs_result;
+                            m_relerr[i] /= abs_result;
                             m_has_relerr = true;
                         }
                         else {
-                            m_relerr(i) = 0.0;
+                            m_relerr[i] = 0.0;
                         }
                     }
                     break;
@@ -424,8 +424,8 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
  * @param[in] a Left integration boundary.
  * @param[in] b Right integration boundary.
  * @param[in] n Number of steps.
- * @param[in] result Result array from a previous trapezoidal integration step.
- * @return Array of integration results.
+ * @param[in] result Result vector from a previous trapezoidal integration step.
+ * @return Vector of integration results.
  *
  * @exception GException::invalid_value
  *            Function kernels not set.
@@ -451,10 +451,10 @@ GNdarray GIntegrals::romberg(const double& a, const double& b, const int& order)
  * where \f${\tt result}_j\f$ is the integration result for function \f$j\f$
  * from a previous call to the method with @p n = @p n - 1.
  ***************************************************************************/
-GNdarray GIntegrals::trapzd(const double& a,
-                            const double& b,
-                            const int&    n,
-                            GNdarray      result)
+GVector GIntegrals::trapzd(const double& a,
+                           const double& b,
+                           const int&    n,
+                           GVector      result)
 {
     // Throw an exception if the instance has no kernel
     if (m_kernels == NULL) {
@@ -465,7 +465,7 @@ GNdarray GIntegrals::trapzd(const double& a,
 
     // Handle case of identical boundaries
     if (a == b) {
-        result = GNdarray(result.shape());
+        result = GVector(result.size());
     }
 
     // ... otherwise use trapeziodal rule
@@ -475,9 +475,9 @@ GNdarray GIntegrals::trapzd(const double& a,
         if (n == 1) {
 
             // Evaluate integrand at boundaries
-            GNdarray y_a = m_kernels->eval(a);
-            GNdarray y_b = m_kernels->eval(b);
-            m_calls += 2;
+            GVector y_a = m_kernels->eval(a);
+            GVector y_b = m_kernels->eval(b);
+            m_calls    += 2;
 
             // Compute result
             result = 0.5 * (b-a) * (y_a + y_b);
@@ -528,8 +528,8 @@ GNdarray GIntegrals::trapzd(const double& a,
             }
 
             // Sum up values
-            double   x = a + 0.5 * del;
-            GNdarray sum(result.shape());
+            double  x = a + 0.5 * del;
+            GVector sum(result.size());
             for (int j = 0; j < it; ++j, x += del) {
 
                 // Evaluate and add integrand
@@ -692,23 +692,23 @@ void GIntegrals::free_members(void)
  * @brief Perform Polynomial interpolation
  *
  * @param[in] xa Pointer to array of X values.
- * @param[in] ya Pointer to Ndarray of Y values.
+ * @param[in] ya Pointer to GVector of Y values.
  * @param[in] n Number of elements in arrays.
- * @param[in] index Ndarray index for with interpolations should be performed.
+ * @param[in] index GVector index for with interpolations should be performed.
  * @param[in] x X value for which interpolations should be performed.
- * @param[out] dy Pointer to Ndarray of error estimates for interpolated values.
+ * @param[out] dy Pointer to array of error estimates for interpolated values.
  * @return Interpolated value.
  *
  * Given arrays @p xa[1,..,n] and @p ya[1,..,n], and given a value @p x, this
  * method returns a value y, and an error estimate @p dy. If P(x) is the
  * polynomial of degree n-1, then the returned value y=P(x).
  ***************************************************************************/
-double GIntegrals::polint(const double*   xa,
-                          const GNdarray* ya,
-                          const int&      n,
-                          const int&      index,
-                          const double&   x,
-                          double*         dy)
+double GIntegrals::polint(const double*  xa,
+                          const GVector* ya,
+                          const int&     n,
+                          const int&     index,
+                          const double&  x,
+                          double*        dy)
 {
     // Initialise result
     double y = 0.0;
@@ -728,13 +728,13 @@ double GIntegrals::polint(const double*   xa,
             ns  = i;
             dif = dift;
         }
-        double value = ya[i+1](index);
+        double value = ya[i+1][index];
         c[i]         = value;
         d[i]         = value;
     }
 
     // Get initial approximation to y
-    y = ya[ns+1](index);
+    y = ya[ns+1][index];
     ns--;
 
     // Loop over each column of the tableau

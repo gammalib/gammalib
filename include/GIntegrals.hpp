@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 #include "GBase.hpp"
-#include "GNdarray.hpp"
+#include "GVector.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFunctions;
@@ -75,15 +75,15 @@ public:
     const std::string& message(void) const;
     void               kernels(GFunctions* kernels);
     const GFunctions*  kernels(void) const;
-    GNdarray           romberg(std::vector<double> bounds,
+    GVector            romberg(std::vector<double> bounds,
                                const int&          order = 5);
-    GNdarray           romberg(const double& a,
+    GVector            romberg(const double& a,
                                const double& b,
                                const int&    order = 5);
-    GNdarray           trapzd(const double& a,
+    GVector            trapzd(const double& a,
                               const double& b,
                               const int&    n,
-                              GNdarray      result);
+                              GVector       result);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -91,12 +91,12 @@ protected:
     void   init_members(void);
     void   copy_members(const GIntegrals& integral);
     void   free_members(void);
-    double polint(const double*   xa,
-                  const GNdarray* ya,
-                  const int&      n,
-                  const int&      index,
-                  const double&   x,
-                  double*         dy);
+    double polint(const double*  xa,
+                  const GVector* ya,
+                  const int&     n,
+                  const int&     index,
+                  const double&  x,
+                  double*        dy);
 
     // Protected data area
     GFunctions* m_kernels;   //!< Pointer to function kernels
@@ -111,8 +111,8 @@ protected:
     mutable bool        m_isvalid;    //!< Integration result valid (true=yes)
     mutable bool        m_has_abserr; //!< Has absolute integration errors
     mutable bool        m_has_relerr; //!< Has relative integration errors
-    mutable GNdarray    m_abserr;     //!< Absolute integration errors
-    mutable GNdarray    m_relerr;     //!< Absolute integration errors
+    mutable GVector     m_abserr;     //!< Absolute integration errors
+    mutable GVector     m_relerr;     //!< Absolute integration errors
     mutable std::string m_message;    //!< Status message (if result is invalid)
 };
 
