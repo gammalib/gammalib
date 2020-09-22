@@ -59,6 +59,8 @@ public:
     virtual double               theta_max(void) const = 0;
 
     // Implemented virtual base class methods
+    virtual bool   is_energy_dependent(void) const;
+    virtual bool   is_time_dependent(void) const;
     virtual double eval(const GPhoton& photon,
                         const bool&    gradients = false) const;
     virtual double mc_norm(const GSkyDir& dir, const double&  radius) const;

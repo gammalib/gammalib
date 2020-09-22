@@ -79,6 +79,8 @@ public:
 
     // Implemented pure virtual base class methods
     virtual GClassCode code(void) const;
+    virtual bool       is_energy_dependent(void) const;
+    virtual bool       is_time_dependent(void) const;
     virtual double     eval(const GPhoton& photon,
                             const bool&    gradients = false) const;
     virtual double     mc_norm(const GSkyDir& dir, const double&  radius) const;
@@ -117,6 +119,36 @@ inline
 GClassCode GModelSpatialRadial::code(void) const
 {
     return GMODEL_SPATIAL_RADIAL;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals whether radial model is energy dependent
+ *
+ * @return True if radial model is energy dependent, false otherwise.
+ *
+ * Signals whether the radial model is energy dependent. This method always
+ * returns false.
+ ***************************************************************************/
+inline
+bool GModelSpatialRadial::is_energy_dependent(void) const
+{
+    return (false);
+}
+
+
+/***********************************************************************//**
+ * @brief Signals whether radial model is time dependent
+ *
+ * @return True if radial model is time dependent, false otherwise.
+ *
+ * Signals whether the radial model is time dependent. This method always
+ * returns false.
+ ***************************************************************************/
+inline
+bool GModelSpatialRadial::is_time_dependent(void) const
+{
+    return (false);
 }
 
 

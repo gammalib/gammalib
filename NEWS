@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 1.8.0
 
-18 September 2020
+22 September 2020
 
 
 1. Introduction
@@ -22,11 +22,13 @@ The following classes have been renamed:
 - none
 
 The following methods have been added:
-- GVector GModel::eval(GObservation&, GMatrixSparse*)
-- GVector GModelSky::eval(GObservation&, GMatrixSparse*)
-- GVector GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
-- GVector GObservation::model(GModels&, GMatrixSparse*)
-- GVector GObservation::model_grad(GModel&, GModelPar&) 
+- GModel::eval(GObservation&, GMatrixSparse*)
+- GModelSky::eval(GObservation&, GMatrixSparse*)
+- GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
+- GObservation::model(GModels&, GMatrixSparse*)
+- GObservation::model_grad(GModel&, GModelPar&)
+- GModelSpatialRadial::is_energy_dependent()
+- GModelSpatialRadial::is_time_dependent()
 
 The following methods have been removed:
 - none
@@ -69,7 +71,8 @@ Implement GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 8. Model module
 ---------------
-None
+Added is_energy_dependent() and is_time_dependent() methods to GModelSpatialRadial
+to allow for checking of energy or time dependence of spatial model components.
 
 
 9. Numerics module
