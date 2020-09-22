@@ -1805,7 +1805,6 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
                     // size of the PSF.
                     if (irf(ieng) > 0.0) {
                         irfs[index] = norm * irf(ieng) * exposure()(obsDir, srcEngs[ieng]);
-                        //irfs[index] = norm * irf(ieng) * exposures[ieng];
                     }
 
                 } // endfor: looped over energies

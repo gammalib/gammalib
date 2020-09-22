@@ -1890,82 +1890,6 @@ double cta_psf_radial_kern_delta::eval(const double& delta)
     // Return kernel value
     return value;
 }
-GNdarray cta_psf_radial_kerns_delta::eval(const double& delta)
-{
-    // Initialise values
-    GNdarray values(m_srcEngs.size());
-
-    // If we're at the Psf peak the model is zero (due to the sin(delta)
-    // term. We thus only integrate for positive deltas.
-    if (delta > 0.0) {
-
-        // Compute half length of the arc (in radians) from a circle with
-        // radius delta that intersects with the model, defined as a circle
-        // with maximum radius m_theta_max
-        double dphi = 0.5 * gammalib::roi_arclength(delta,
-                                                    m_delta_mod,
-                                                    m_cos_delta_mod,
-                                                    m_sin_delta_mod,
-                                                    m_theta_max,
-                                                    m_cos_theta_max);
-
-        // Continue only if arc length is positive
-        if (dphi > 0.0) {
-
-            // Compute phi integration range
-            double phi_min = -dphi;
-            double phi_max = +dphi;
-
-            // Precompute cosine and sine terms for azimuthal integration
-            double sin_delta = std::sin(delta);
-            double cos_delta = std::cos(delta);
-            double sin_fact  = sin_delta * m_sin_delta_mod;
-            double cos_fact  = cos_delta * m_cos_delta_mod;
-
-            // Setup kernel for azimuthal integration of the spatial model
-            cta_psf_radial_kerns_phi integrand(m_model,
-                                               m_srcEngs,
-                                               m_srcTime,
-                                               sin_fact,
-                                               cos_fact);
-
-            // Setup integrator
-            GIntegrals integral(&integrand);
-            integral.fixed_iter(m_iter);
-
-            // Integrate over azimuth
-            values = integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
-
-            // Multiply in energy dependent Psf
-            for (int i = 0; i < m_srcEngs.size(); ++i) {
-
-                // Get Psf for this energy
-                double psf = m_rsp->psf()(m_srcDir, delta, m_srcEngs[i]);
-
-                // Compute value
-                values(i) *= psf;
-
-                // Debug: Check for NaN
-                #if defined(G_NAN_CHECK)
-                if (gammalib::is_notanumber(values(i)) ||
-                    gammalib::is_infinite(values(i))) {
-                    std::cout << "*** ERROR: cta_psf_radial_kern_delta::eval";
-                    std::cout << "(delta=" << delta << "):";
-                    std::cout << " NaN/Inf encountered";
-                    std::cout << " (value=" << values(i);
-                    std::cout << ")" << std::endl;
-                }
-                #endif
-
-            } // endfor: looped over energies
-
-        } // endif: arc length was positive
-
-    } // endif: delta was positive
-
-    // Return kernel values
-    return values;
-}
 
 
 /***********************************************************************//**
@@ -2029,6 +1953,154 @@ double cta_psf_radial_kern_phi::eval(const double& phi)
     // Return kernel value
     return value;
 }
+
+
+/***********************************************************************//**
+ * @brief Kernel for PSF integration of radial model
+ *
+ * @param[in] delta PSF offset angle (radians).
+ * @return Azimuthally integrated product between PSF and radial model
+ *         values for all energies.
+ *
+ * Computes the azimuthally integrated product of point spread function and
+ * the radial model intensity. As the PSF is azimuthally symmetric, it is
+ * not included in the azimuthally integration, but just multiplied on the
+ * azimuthally integrated model. The method returns thus
+ *
+ * \f[
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta {\rm d}\phi
+ * \f]
+ *
+ * where \f${\rm M}(\delta, \phi)\f$ is the radial model in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ ***************************************************************************/
+GNdarray cta_psf_radial_kerns_delta::eval(const double& delta)
+{
+    // Initialise values
+    GNdarray values(m_srcEngs.size());
+
+    // If we're at the Psf peak the model is zero (due to the sin(delta)
+    // term. We thus only integrate for positive deltas.
+    if (delta > 0.0) {
+
+        // Compute half length of the arc (in radians) from a circle with
+        // radius delta that intersects with the model, defined as a circle
+        // with maximum radius m_theta_max
+        double dphi = 0.5 * gammalib::roi_arclength(delta,
+                                                    m_delta_mod,
+                                                    m_cos_delta_mod,
+                                                    m_sin_delta_mod,
+                                                    m_theta_max,
+                                                    m_cos_theta_max);
+
+        // Continue only if arc length is positive
+        if (dphi > 0.0) {
+
+            // Compute phi integration range
+            double phi_min = -dphi;
+            double phi_max = +dphi;
+
+            // Precompute cosine and sine terms for azimuthal integration
+            double sin_delta = std::sin(delta);
+            double cos_delta = std::cos(delta);
+            double sin_fact  = sin_delta * m_sin_delta_mod;
+            double cos_fact  = cos_delta * m_cos_delta_mod;
+
+            // If radial model is energy dependent then use the vector
+            // integration method
+            if (m_model->is_energy_dependent()) {
+            
+                // Setup kernel for azimuthal integration of the spatial model
+                cta_psf_radial_kerns_phi integrand(m_model,
+                                                   m_srcEngs,
+                                                   m_srcTime,
+                                                   sin_fact,
+                                                   cos_fact);
+
+                // Setup integrator
+                GIntegrals integral(&integrand);
+                integral.fixed_iter(m_iter);
+
+                // Integrate over azimuth
+                values = integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
+
+                // Multiply in energy dependent Psf
+                for (int i = 0; i < m_srcEngs.size(); ++i) {
+
+                    // Get Psf for this energy
+                    double psf = m_rsp->psf()(m_srcDir, delta, m_srcEngs[i]);
+
+                    // Compute value
+                    values(i) *= psf;
+
+                } // endfor: looped over energies
+
+            } // endif: radial model was energy dependent
+
+            // ... otherwise perform azimuth integration for a single energy
+            else {
+
+                // Setup kernel for azimuthal integration of the spatial model
+                cta_psf_radial_kern_phi integrand(m_model,
+                                                  m_srcEngs[0],
+                                                  m_srcTime,
+                                                  sin_fact,
+                                                  cos_fact);
+
+                // Setup integrator
+                GIntegral integral(&integrand);
+                integral.fixed_iter(m_iter);
+
+                // Integrate over azimuth
+                double value = integral.romberg(phi_min, phi_max, m_iter) *
+                               sin_delta;
+
+                // Multiply in energy dependent Psf
+                for (int i = 0; i < m_srcEngs.size(); ++i) {
+
+                    // Get Psf for this energy
+                    double psf = m_rsp->psf()(m_srcDir, delta, m_srcEngs[i]);
+
+                    // Compute value
+                    values(i) = value * psf;
+
+                } // endfor: looped over energies
+
+            } // endelse: radial model had no energy dependence
+
+        } // endif: arc length was positive
+
+    } // endif: delta was positive
+
+    // Return kernel values
+    return values;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuthal radial model integration
+ *
+ * @param[in] phi Azimuth angle (radians).
+ * @return Radial model values for all energies.
+ *
+ * Computes the value of the radial model at the position \f$(\delta,\phi)\f$
+ * given in point spread function coordinates. The \f$\theta\f$ angle of the
+ * radial model is computed using
+ *
+ * \f[
+ *    \theta = \arccos \left( \cos \delta \cos \zeta +
+ *                            \sin \delta \sin \zeta \cos \phi \right)
+ * \f]
+ *
+ * where \f$\delta\f$ is the angle between true and measured photon
+ * direction, \f$\zeta\f$ is the angle between model centre and measured
+ * photon direction, and \f$\phi\f$ is the azimuth angle with respect to the
+ * measured photon direction, where \f$\phi=0\f$ corresponds to the
+ * connecting line between model centre and measured photon direction.
+ ***************************************************************************/
 GNdarray cta_psf_radial_kerns_phi::eval(const double& phi)
 {
     // Compute radial model theta angle
