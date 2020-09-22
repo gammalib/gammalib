@@ -112,19 +112,24 @@ public:
     virtual double      irf_spatial(const GEvent&       event,
                                     const GSource&      source,
                                     const GObservation& obs) const;
+    virtual GVector     irf_spatial(const GModelSky&    model,
+                                    const GObservation& obs) const;
     virtual void        remove_response_cache(const std::string& name);
 
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GResponse& rsp);
-    void   free_members(void);
-    double eval_prob(const GModelSky&    model,
+    void    init_members(void);
+    void    copy_members(const GResponse& rsp);
+    void    free_members(void);
+    double  eval_prob(const GModelSky&    model,
                      const GEvent&       event,
                      const GEnergy&      srcEng,
                      const GTime&        srcTime,
                      const GObservation& obs,
                      const bool&         grad) const;
+    GVector eval_prob(const GModelSky&    model,
+                      const GObservation& obs,
+                      GMatrixSparse*      gradients = NULL) const;
 
     // Virtual protected methods
     virtual double irf_ptsrc(const GEvent&       event,
@@ -142,6 +147,16 @@ protected:
     virtual double irf_composite(const GEvent&       event,
                                  const GSource&      source,
                                  const GObservation& obs) const;
+    virtual GVector irf_ptsrc(const GModelSky&    model,
+                              const GObservation& obs) const;
+    virtual GVector irf_radial(const GModelSky&    model,
+                               const GObservation& obs) const;
+    virtual GVector irf_elliptical(const GModelSky&    model,
+                                   const GObservation& obs) const;
+    virtual GVector irf_diffuse(const GModelSky&    model,
+                                const GObservation& obs) const;
+    virtual GVector irf_composite(const GModelSky&    model,
+                                  const GObservation& obs) const;
 
     // Protected classes
     class edisp_kern : public GFunctions {

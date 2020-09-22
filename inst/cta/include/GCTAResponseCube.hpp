@@ -153,14 +153,14 @@ private:
                        const GObservation& obs) const;
 
     // New methods
-    double convolve(const GModelSky&    model,
-                    const GEvent&       event,
-                    const GObservation& obs,
-                    const bool&         grad = true) const;
+    GVector  irf_radial(const GModelSky&    model,
+                        const GObservation& obs) const;
+    /*
     GNdarray irf_radial(const GModelSpatial* model,
                         const GSkyDir&       obsDir,
                         const GEnergies&     srcEngs,
                         const GObservation&  obs) const;
+    */
     GNdarray psf_radial(const GModelSpatialRadial* model,
                         const double&              rho_obs,
                         const GSkyDir&             obsDir,

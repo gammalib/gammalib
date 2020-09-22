@@ -1732,24 +1732,94 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
  =                           New private methods                           =
  =                                                                         =
  ==========================================================================*/
-double GCTAResponseCube::convolve(const GModelSky&    model,
-                                  const GEvent&       event,
-                                  const GObservation& obs,
-                                  const bool&         grad) const
+GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
+                                     const GObservation& obs) const
 {
-    // Initialise IRF
-    double irf = 0.0;
-    // Kluge: if spatial model is Gaussian then use specific code
-    if (model.spatial()->classname() == "GModelSpatialRadialGauss") {
-        // TODO
-    }
-    else {
-        irf = GResponse::convolve(model, event, obs, grad);
-    }
+    // Get number of events
+    int nevents = obs.events()->size();
 
-    // Return IRF
-    return irf;
+    // Initialise result
+    GVector irfs(nevents);
+
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is positive
+    if (livetime > 0.0) {
+
+        // Get pointer to radial model
+        const GModelSpatialRadial* radial =
+              static_cast<const GModelSpatialRadial*>(model.spatial());
+
+        // Get CTA event cube
+        const GCTAEventCube& cube = gammalib::cta_event_cube(G_IRF_RADIAL, obs);
+
+        // Get CTA event cube dimensions
+        int ndirs = cube.npix();
+        int nengs = cube.ebins();
+
+        // Setup energies container
+        GEnergies srcEngs;
+        for (int ieng = 0; ieng < nengs; ++ieng) {
+            srcEngs.append(cube.energy(ieng));
+        }
+
+        // Setup exposures
+        /*
+        std::vector<double> exposures;
+        for (int ieng = 0; ieng < nengs; ++ieng) {
+            exposures.push_back(exposure()(radial->dir(), srcEngs[ieng]));
+        }
+        */
+
+        // Setup cube time
+        GTime srcTime = cube.time();
+
+        // Set IRF normalisation
+        double norm = exposure().deadc() / livetime;
+
+        // Loop over event directions
+        for (int idir = 0; idir < ndirs; ++idir) {
+
+            // Get event direction
+            GSkyDir obsDir = cube.counts().inx2dir(idir);
+
+            // Compute angle between model centre and measured photon direction
+            // (radians)
+            double rho_obs = radial->dir().dist(obsDir);
+
+            // Continue only if we're sufficiently close to the model centre to
+            // get a non-zero response
+            if (rho_obs <= radial->theta_max()+psf().delta_max()) {
+
+                // Get IRF
+                GNdarray irf = psf_radial(radial, rho_obs, obsDir, srcEngs, srcTime);
+
+                // Loop over true energies
+                for (int ieng = 0, index = idir; ieng < nengs; ++ieng, index += ndirs) {
+
+                    // Set IRF value if it is positive. The current code assumes
+                    // that the exposure at the observed and true event
+                    // direction does not vary significantly. In other words,
+                    // the code assumes that the exposure is constant over the
+                    // size of the PSF.
+                    if (irf(ieng) > 0.0) {
+                        irfs[index] = norm * irf(ieng) * exposure()(obsDir, srcEngs[ieng]);
+                        //irfs[index] = norm * irf(ieng) * exposures[ieng];
+                    }
+
+                } // endfor: looped over energies
+
+            } // endif: direction close enough to model centre
+
+        } // endfor: looped over event directions
+
+    } // endif: livetime was positive
+
+    // Return IRF value
+    return irfs;
 }
+/*
 GNdarray GCTAResponseCube::irf_radial(const GModelSpatial* model,
                                       const GSkyDir&       obsDir,
                                       const GEnergies&     srcEngs,
@@ -1813,6 +1883,7 @@ GNdarray GCTAResponseCube::irf_radial(const GModelSpatial* model,
     // Return IRF values
     return irf;
 }
+*/
 GNdarray GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
                                       const double&              delta_mod,
                                       const GSkyDir&             obsDir,
