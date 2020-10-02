@@ -1409,39 +1409,30 @@ class cta_psf_radial_kerns_delta : public GFunctions {
 public:
     cta_psf_radial_kerns_delta(const GCTAResponseCube*    rsp,
                                const GModelSpatialRadial* model,
-                               const GSkyDir&             srcDir,
+                               const GSkyDir&             obsDir,
                                const GEnergies&           srcEngs,
-                               const GTime&               srcTime,
-                               const double&              delta_mod,
+                               const double&              zeta,
                                const double&              theta_max,
-                               const int&                 iter) :
-                               m_rsp(rsp),
-                               m_model(model),
-                               m_array(GNdarray(srcEngs.size())),
-                               m_srcDir(srcDir),
-                               m_srcEngs(srcEngs),
-                               m_srcTime(srcTime),
-                               m_delta_mod(delta_mod),
-                               m_cos_delta_mod(std::cos(delta_mod)),
-                               m_sin_delta_mod(std::sin(delta_mod)),
-                               m_theta_max(theta_max),
-                               m_cos_theta_max(std::cos(theta_max)),
-                               m_iter(iter) { }
-    const GNdarray& array(void) const { return m_array; }
-    GNdarray        eval(const double& delta);
+                               const int&                 iter,
+                               const bool&                grad);
+    int     size(void) const;
+    GVector eval(const double& delta);
 protected:
-    const GCTAResponseCube*    m_rsp;           //!< Response cube
-    const GModelSpatialRadial* m_model;         //!< Radial model
-    GNdarray                   m_array;         //!< Result array
-    GSkyDir                    m_srcDir;        //!< True photon arrival direction
-    GEnergies                  m_srcEngs;       //!< True photon energies
-    GTime                      m_srcTime;       //!< True photon arrival time
-    double                     m_delta_mod;     //!< Distance of model from Psf
-    double                     m_cos_delta_mod; //!< Cosine of m_delta_mod
-    double                     m_sin_delta_mod; //!< Sine of m_delta_mod
-    double                     m_theta_max;     //!< Maximum model radius
-    double                     m_cos_theta_max; //!< Cosine of m_theta_max
-    int                        m_iter;          //!< Integration iterations
+    const GCTAResponseCube*    m_rsp;            //!< Response cube
+    const GModelSpatialRadial* m_model;          //!< Radial model
+    GSkyDir                    m_obsDir;         //!< Reconstructed event direction
+    GEnergies                  m_srcEngs;        //!< True photon energies
+    double                     m_zeta;           //!< Distance of model from Psf
+    double                     m_cos_zeta;       //!< Cosine of m_zeta
+    double                     m_sin_zeta;       //!< Sine of m_zeta
+    double                     m_theta_max;      //!< Maximum model radius
+    double                     m_cos_theta_max;  //!< Cosine of m_theta_max
+    double                     m_dzeta_dalpha_0; //!< d(zeta)/d(alpha0)
+    double                     m_dzeta_dbeta_0;  //!< d(zeta)/d(beta0)
+    double                     m_dphi_dalpha_0;  //!< d(phi)/d(alpha0)
+    double                     m_dphi_dbeta_0;   //!< d(phi)/d(beta0)
+    int                        m_iter;           //!< Integration iterations
+    bool                       m_grad;           //!< Compute gradients
 };
 
 
@@ -1449,29 +1440,47 @@ protected:
  * @class cta_psf_radial_kerns_phi
  *
  * @brief Kernel for Psf phi angle integration used for stacked analysis
+ *
+ * The eval() method of the kernel returns a vector that contains for a
+ * given azimuth angle phi the model value and all model parameter gradients.
  ***************************************************************************/
 class cta_psf_radial_kerns_phi : public GFunctions {
 public:
     cta_psf_radial_kerns_phi(const GModelSpatialRadial* model,
-                             const GEnergies&           srcEngs,
-                             const GTime&               srcTime,
-                             const double&              sin_fact,
-                             const double&              cos_fact) :
+                             const double&              sin_delta_sin_zeta,
+                             const double&              sin_delta_cos_zeta,
+                             const double&              cos_delta_sin_zeta,
+                             const double&              cos_delta_cos_zeta,
+                             const double&              dzeta_dalpha_0,
+                             const double&              dzeta_dbeta_0,
+                             const double&              dphi_dalpha_0,
+                             const double&              dphi_dbeta_0,
+                             const bool&                grad) :
                              m_model(model),
-                             m_array(GNdarray(srcEngs.size())),
-                             m_srcEngs(srcEngs),
-                             m_srcTime(srcTime),
-                             m_sin_fact(sin_fact),
-                             m_cos_fact(cos_fact) { }
-    const GNdarray& array(void) const { return m_array; }
-    GNdarray        eval(const double& phi);
+                             m_size(model->size()+1),
+                             m_sin_delta_sin_zeta(sin_delta_sin_zeta),
+                             m_sin_delta_cos_zeta(sin_delta_cos_zeta),
+                             m_cos_delta_sin_zeta(cos_delta_sin_zeta),
+                             m_cos_delta_cos_zeta(cos_delta_cos_zeta),
+                             m_dzeta_dalpha_0(dzeta_dalpha_0),
+                             m_dzeta_dbeta_0(dzeta_dbeta_0),
+                             m_dphi_dalpha_0(dphi_dalpha_0),
+                             m_dphi_dbeta_0(dphi_dbeta_0),
+                             m_grad(grad) { }
+    int     size(void) const { return m_size; }
+    GVector eval(const double& phi);
 protected:
-    const GModelSpatialRadial* m_model;     //!< Radial model
-    GNdarray                   m_array;      //!< Result array
-    GEnergies                  m_srcEngs;   //!< True photon energies
-    GTime                      m_srcTime;   //!< True photon arrival time
-    double                     m_sin_fact;  //!< sin(delta)*sin(delta_mod)
-    double                     m_cos_fact;  //!< cos(delta)*cos(delta_mod)
+    const GModelSpatialRadial* m_model;              //!< Radial model
+    int                        m_size;               //!< Result size
+    double                     m_sin_delta_sin_zeta; //!< sin(delta) * sin(zeta)
+    double                     m_sin_delta_cos_zeta; //!< sin(delta) * cos(zeta)
+    double                     m_cos_delta_sin_zeta; //!< cos(delta) * sin(zeta)
+    double                     m_cos_delta_cos_zeta; //!< cos(delta) * cos(zeta)
+    double                     m_dzeta_dalpha_0;     //!< d(zeta)/d(alpha0)
+    double                     m_dzeta_dbeta_0;      //!< d(zeta)/d(beta0)
+    double                     m_dphi_dalpha_0;      //!< d(phi)/d(alpha0)
+    double                     m_dphi_dbeta_0;       //!< d(phi)/d(beta0)
+    bool                       m_grad;               //!< Compute gradients
 };
 
 #endif /* GCTARESPONSE_HELPERS_HPP */

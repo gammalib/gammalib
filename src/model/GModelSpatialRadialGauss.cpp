@@ -45,6 +45,8 @@ const GModelSpatialRegistry    g_radial_gauss_legacy_registry(&g_radial_gauss_le
 #endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_EVAL   "GModelSpatialRadialGauss::eval(double&, GEnergy&, GTime&, "\
+                                                                     "bool&)"
 #define G_READ                 "GModelSpatialRadialGauss::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialRadialGauss::write(GXmlElement&)"
 
@@ -273,7 +275,7 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * - \f$\sigma\f$ is the Gaussian width.
  *
  * The method will not compute analytical parameter gradients, even if the
- * @p gradients argument is set to true. Radial disk parameter gradients
+ * @p gradients argument is set to true. Radial Gaussian parameter gradients
  * need to be computed numerically.
  *
  * @todo The Gaussian function is only correct in the small angle
@@ -287,20 +289,52 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
     // Compute value
     double sigma_rad = sigma() * gammalib::deg2rad;
     double sigma2    = sigma_rad * sigma_rad;
-    double theta2    = theta   * theta;
-    double value     = std::exp(-0.5 * theta2 / sigma2) /
-                       (gammalib::twopi * sigma2);
+    double theta2    = theta * theta;
+    double arg2      = theta2 / sigma2;
+    double value     = std::exp(-0.5 * arg2) / (gammalib::twopi * sigma2);
+
+    // Optionally compute gradients
+    if (gradients) {
+
+        // Evaluate position gradients. Note that this requires that the
+        // partial derivatives of theta with respect to Right Ascension
+        // and Declination are preset in the m_ra.factor_gradient() and
+        // m_dec.factor_gradient() members.
+        double g_ra  = 0.0;
+        double g_dec = 0.0;
+        if (m_ra.is_free() || m_dec.is_free()) {
+            double g_theta = -theta / sigma2 * gammalib::deg2rad * value;
+            if (m_ra.is_free()) {
+                g_ra = g_theta * m_ra.factor_gradient() * m_ra.scale();
+            }
+            if (m_dec.is_free()) {
+                g_dec = g_theta * m_dec.factor_gradient() * m_dec.scale();
+            }
+        }
+        m_ra.factor_gradient(g_ra);
+        m_dec.factor_gradient(g_dec);
+
+        // Evaluate sigma gradient
+        double g_sigma = 0.0;
+        if (m_sigma.is_free()) {
+            g_sigma = (arg2 - 2.0) / sigma_rad * value *
+                             m_sigma.scale() * gammalib::deg2rad;
+        }
+        m_sigma.factor_gradient(g_sigma);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpatialRadialGauss::eval";
-        std::cout << "(theta=" << theta << "): NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", sigma_rad=" << sigma_rad;
-        std::cout << ", sigma2=" << sigma2;
-        std::cout << ", theta2=" << theta2;
-        std::cout << ")" << std::endl;
+        std::string msg = "Model value not a number:";
+        for (int i = 0; i < m_pars.size(); ++i) {
+            msg += " " + m_pars[i]->name() + "=";
+            msg += gammalib::str(m_pars[i]->value());
+        }
+        msg += " energy=" + energy.print();
+        msg += " time=" + time.print();
+        gammalib::warning(G_EVAL, msg);
     }
     #endif
 
@@ -524,7 +558,8 @@ void GModelSpatialRadialGauss::init_members(void)
     m_sigma.free();
     m_sigma.scale(1.0);
     m_sigma.gradient(0.0);
-    m_sigma.has_grad(false);  // Radial components never have gradients
+    //m_sigma.has_grad(false);  // Radial components never have gradients
+    m_sigma.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);

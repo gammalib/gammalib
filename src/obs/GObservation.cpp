@@ -523,6 +523,21 @@ GVector GObservation::model(const GModels& models,
                             if (par.is_free()) {
                                 if (par.has_grad()) {
                                     grad = gradients.row(ipar);
+// Debugging
+/*
+if (ipar < 3) {
+    GVector num_grad = model_grad(*mptr, par);
+    for (int k = 0; k < nevents; ++k) {
+        if (grad[k] != 0.0 || num_grad[k] != 0.0) {
+            std::cout << "ipar=" << ipar;
+            std::cout << " par=" << par.name();
+            std::cout << " k=" << k;
+            std::cout << " ana=" << grad[k];
+            std::cout << " num=" << num_grad[k] << std::endl;
+        }
+    }
+}
+*/
                                 }
                                 else {
                                     grad = model_grad(*mptr, par);

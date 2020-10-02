@@ -36,10 +36,13 @@
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
+#include "GEnergies.hpp"
 #include "GTime.hpp"
 #include "GIntegral.hpp"
+#include "GIntegrals.hpp"
 #include "GObservation.hpp"
 #include "GNdarray.hpp"
+#include "GMatrixSparse.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialShell.hpp"
@@ -53,10 +56,6 @@
 #include "GCTASupport.hpp"
 #include "GCTAEventCube.hpp"               // Kludge
 #include "GCTAEventBin.hpp"                // Kludge
-#if defined(G_CUBE_FAST)
-#include "GIntegrals.hpp"
-#include "GEnergies.hpp"
-#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
@@ -71,6 +70,8 @@
 #define G_EBOUNDS                       "GCTAResponseCube::ebounds(GEnergy&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 #define G_WRITE                       "GCTAResponseCube::write(GXmlElement&)"
+#define G_IRF_RADIAL2             "GCTAResponseCube::irf_radial(GModelSky&, "\
+                                             "GObservation&, GMatrixSparse*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -1732,8 +1733,24 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
  =                           New private methods                           =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return instrument response to radial source
+ *
+ * @param[in] model Sky model.
+ * @param[in] obs Observation.
+ * @param[out] gradients Optional spatial model gradients for all events.
+ * @return Instrument response to radial source for all events in observation.
+ *
+ * Returns the instrument response to a specified radial source.
+ *
+ * @p gradients is an optional sparse matrix where the number of rows
+ * corresponds to the number of events in the observation and the number
+ * of columns corresponds to the number of spatial model parameters.
+ ***************************************************************************/
 GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
-                                     const GObservation& obs) const
+                                     const GObservation& obs,
+                                     GMatrixSparse*      gradients) const
 {
     // Get number of events
     int nevents = obs.events()->size();
@@ -1744,19 +1761,49 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
     // Get livetime (in seconds)
     double livetime = exposure().livetime();
 
+    // Set gradients flag
+    bool grad = (gradients != NULL);
+
+    // Get pointer to radial model
+    const GModelSpatialRadial* radial =
+          static_cast<const GModelSpatialRadial*>(model.spatial());
+
+    // Signal that this method will compute analytical RA and DEC gradients
+    if (grad) {
+        (*(const_cast<GModelSpatialRadial*>(radial)))["RA"].has_grad(true);
+        (*(const_cast<GModelSpatialRadial*>(radial)))["DEC"].has_grad(true);
+    }
+
     // Continue only if livetime is positive
     if (livetime > 0.0) {
 
-        // Get pointer to radial model
-        const GModelSpatialRadial* radial =
-              static_cast<const GModelSpatialRadial*>(model.spatial());
-
         // Get CTA event cube
-        const GCTAEventCube& cube = gammalib::cta_event_cube(G_IRF_RADIAL, obs);
+        const GCTAEventCube& cube = gammalib::cta_event_cube(G_IRF_RADIAL2, obs);
 
-        // Get CTA event cube dimensions
+        // Get number of radial model parameters and CTA event cube dimensions
+        int npars = radial->size();
         int ndirs = cube.npix();
         int nengs = cube.ebins();
+
+        // Check matrix consistency
+        if (grad) {
+            if (gradients->rows() != nevents) {
+                std::string msg = "Number of "+gammalib::str(gradients->rows())+
+                                  " rows in gradient matrix differs from number "
+                                  "of "+gammalib::str(nevents)+" events in "
+                                  "observation. Please provide a compatible "
+                                  "gradient matrix.";
+                throw GException::invalid_argument(G_IRF_RADIAL2, msg);
+            }
+            if (gradients->columns() != npars) {
+                std::string msg = "Number of "+gammalib::str(gradients->columns())+
+                                  " columns in gradient matrix differs from number "
+                                  "of "+gammalib::str(npars)+" parameters in "
+                                  "model. Please provide a compatible "
+                                  "gradient matrix.";
+                throw GException::invalid_argument(G_IRF_RADIAL2, msg);
+            }
+        }
 
         // Setup energies container
         GEnergies srcEngs;
@@ -1764,13 +1811,14 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
             srcEngs.append(cube.energy(ieng));
         }
 
-        // Setup exposures
-        /*
-        std::vector<double> exposures;
-        for (int ieng = 0; ieng < nengs; ++ieng) {
-            exposures.push_back(exposure()(radial->dir(), srcEngs[ieng]));
+        // If requested, setup vectors of gradients
+        GVector* gradient = NULL;
+        if (grad) {
+            gradient = new GVector[npars];
+            for (int ipar = 0; ipar < npars; ++ipar) {
+                gradient[ipar] = GVector(nevents);
+            }
         }
-        */
 
         // Setup cube time
         GTime srcTime = cube.time();
@@ -1786,25 +1834,44 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
 
             // Compute angle between model centre and measured photon direction
             // (radians)
-            double rho_obs = radial->dir().dist(obsDir);
+            double zeta = radial->dir().dist(obsDir);
 
             // Continue only if we're sufficiently close to the model centre to
             // get a non-zero response
-            if (rho_obs <= radial->theta_max()+psf().delta_max()) {
+            if (zeta <= radial->theta_max()+psf().delta_max()) {
 
-                // Get IRF
-                GNdarray irf = psf_radial(radial, rho_obs, obsDir, srcEngs, srcTime);
+                // Get radially integrated PSF
+                GVector psf = psf_radial(radial, zeta, obsDir, srcEngs, srcTime, grad);
 
                 // Loop over true energies
                 for (int ieng = 0, index = idir; ieng < nengs; ++ieng, index += ndirs) {
 
-                    // Set IRF value if it is positive. The current code assumes
-                    // that the exposure at the observed and true event
+                    // Get effective area at the observed direction. This
+                    // assumes that the exposure at the observed and true event
                     // direction does not vary significantly. In other words,
-                    // the code assumes that the exposure is constant over the
+                    // is is assumed that the exposure is constant over the
                     // size of the PSF.
-                    if (irf(ieng) > 0.0) {
-                        irfs[index] = norm * irf(ieng) * exposure()(obsDir, srcEngs[ieng]);
+                    double aeff = norm * exposure()(obsDir, srcEngs[ieng]);
+
+                    // Compute IRF value
+                    irfs[index] = aeff * psf[ieng];
+
+                    // Optionally compute gradients
+                    if (grad) {
+                        for (int ipar = 0, ipsf = ieng+nengs; ipar < npars;
+                             ++ipar, ipsf += nengs) {
+                            gradient[ipar][index] = aeff * psf[ipsf];
+/*
+std::cout << "index=" << index;
+std::cout << " ipar=" << ipar;
+std::cout << " ipsf=" << ipsf;
+std::cout << " psf.size()=" << psf.size();
+std::cout << " gradient.size()=" << gradient[ipar].size();
+std::cout << " aeff=" << aeff;
+std::cout << " psf[ipsf]=" << psf[ipsf];
+std::cout << " grad=" << gradient[ipar][index] << std::endl;
+*/
+                        }
                     }
 
                 } // endfor: looped over energies
@@ -1813,90 +1880,48 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
 
         } // endfor: looped over event directions
 
+        // If gradients were requested then insert vectors into the gradient
+        // matrix
+        if (grad) {
+            for (int ipar = 0; ipar < npars; ++ipar) {
+                gradients->add_to_column(ipar, gradient[ipar]);
+            }
+        }
+
+        // If needed, free vectors of gradients
+        if (gradient != NULL) {
+            delete [] gradient;
+        }
+
     } // endif: livetime was positive
 
     // Return IRF value
     return irfs;
 }
-/*
-GNdarray GCTAResponseCube::irf_radial(const GModelSpatial* model,
-                                      const GSkyDir&       obsDir,
-                                      const GEnergies&     srcEngs,
-                                      const GObservation&  obs) const
-{
-    // Initialise IRF
-    GNdarray irf(srcEngs.size());
 
-    // Get livetime (in seconds)
-    double livetime = exposure().livetime();
 
-    // Continue only if livetime is positive
-    if (livetime > 0.0) {
-
-        // Get pointer to radial model
-        const GModelSpatialRadial* radial =
-              static_cast<const GModelSpatialRadial*>(model);
-
-        // Compute angle between model centre and measured photon direction
-        // (radians)
-        double rho_obs = radial->dir().dist(obsDir);
-
-        // Continue only if we're sufficiently close to the model centre to
-        // get a non-zero response
-        if (rho_obs <= radial->theta_max()+psf().delta_max()) {
-
-            // Get time of CTA event cube
-            const GTime& srcTime = gammalib::cta_event_cube(G_IRF_RADIAL, obs).time();
-
-            // Get IRF
-            irf = psf_radial(radial, rho_obs, obsDir, srcEngs, srcTime);
-
-            // Loop over true energies
-            for (int i = 0; i < srcEngs.size(); ++i) {
-
-                // Continue only if IRF is positive
-                if (irf(i) > 0.0) {
-
-                    // Get exposure at the observed event direction.
-                    //
-                    // The current code assumes that the exposure at the
-                    // observed and true event direction does not vary
-                    // significantly. In other words, the code assumes that
-                    // the exposure is constant over the size of the PSF.
-                    irf(i) *= exposure()(obsDir, srcEngs[i]);
-
-                    // Recover effective area from exposure
-                    irf(i) /= livetime;
-
-                    // Apply deadtime correction
-                    irf(i) *= exposure().deadc();
-
-                } // endif: IRF was positive
-
-            } // endfor: looped over energies
-
-        } // endif: observed direction was sufficiently close to model centre
-
-    } // endif: livetime was positive
-
-    // Return IRF values
-    return irf;
-}
-*/
-GNdarray GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
-                                      const double&              delta_mod,
-                                      const GSkyDir&             obsDir,
-                                      const GEnergies            srcEngs,
-                                      const GTime&               srcTime) const
+/***********************************************************************//**
+ * @brief Integrate Psf over radial model
+ *
+ * @param[in] model Radial model.
+ * @param[in] zeta Angle between model centre and event direction (radians).
+ * @param[in] obsDir Observed event direction.
+ * @param[in] srcEngs True photon energies.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] grad Compute gradients?
+ ***************************************************************************/
+GVector GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
+                                     const double&              zeta,
+                                     const GSkyDir&             obsDir,
+                                     const GEnergies            srcEngs,
+                                     const GTime&               srcTime,
+                                     const bool&                grad) const
 {
     // Set number of iterations for Romberg integration.
     // These values have been determined after careful testing, see
     // https://cta-redmine.irap.omp.eu/issues/1291
     static const int iter_delta = 5;
     static const int iter_phi   = 6;
-
-    // Initialise value
-    GNdarray values(srcEngs.size());
 
     // Get maximum Psf radius (radians)
     double psf_max = psf().delta_max();
@@ -1905,8 +1930,8 @@ GNdarray GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     double theta_max = model->theta_max();
 
     // Set offset angle integration range (radians)
-    double delta_min = (delta_mod > theta_max) ? delta_mod - theta_max : 0.0;
-    double delta_max = delta_mod + theta_max;
+    double delta_min = (zeta > theta_max) ? zeta - theta_max : 0.0;
+    double delta_max = zeta + theta_max;
     if (delta_max > psf_max) {
         delta_max = psf_max;
     }
@@ -1918,10 +1943,10 @@ GNdarray GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
                                          model,
                                          obsDir,
                                          srcEngs,
-                                         srcTime,
-                                         delta_mod,
+                                         zeta,
                                          theta_max,
-                                         iter_phi);
+                                         iter_phi,
+                                         grad);
 
     // Integrate over model's zenith angle
     GIntegrals integral(&integrand);
@@ -1935,22 +1960,22 @@ GNdarray GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     // If the integration range includes a transition between full
     // containment of Psf within model and partial containment, then
     // add a boundary at this location
-    double transition_point = theta_max - delta_mod;
+    double transition_point = theta_max - zeta;
     if (transition_point > delta_min && transition_point < delta_max) {
         bounds.push_back(transition_point);
     }
 
     // Integrate kernel
-    values = integral.romberg(bounds, iter_delta);
+    GVector values = integral.romberg(bounds, iter_delta);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     for (int i = 0; i < srcEngs.size(); ++i) {
-        if (gammalib::is_notanumber(values(i)) ||
-            gammalib::is_infinite(values(i))) {
+        if (gammalib::is_notanumber(values[i]) ||
+            gammalib::is_infinite(values[i])) {
             std::cout << "*** ERROR: GCTAResponseCube::psf_radial:";
             std::cout << " NaN/Inf encountered";
-            std::cout << " (value=" << values(i);
+            std::cout << " (value=" << values[i];
             std::cout << ", delta_min=" << delta_min;
             std::cout << ", delta_max=" << delta_max << ")";
             std::cout << std::endl;

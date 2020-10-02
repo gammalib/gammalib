@@ -32,6 +32,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
+#include "GIntegrals.hpp"
 #include "GVector.hpp"
 #include "GCTAResponse_helpers.hpp"
 #include "GCTAEdisp.hpp"
@@ -40,11 +41,9 @@
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialDiffuseConst.hpp"
 #include "GWcs.hpp"
-//
-#include "GNdarray.hpp"
-#include "GIntegrals.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_PSF_RADIAL_KERNS_PHI      "cta_psf_radial_kerns_phi::eval(double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -1956,6 +1955,97 @@ double cta_psf_radial_kern_phi::eval(const double& phi)
 
 
 /***********************************************************************//**
+ * @brief Return size of vector kernel for PSF integration of radial model
+ *
+ * @return Size of vector kernel.
+ *
+ * The size of the vector kernel depends on whether gradient computation is
+ * requested or not. With gradient computation, the size is given by the
+ * product of the number of true energies and the number of model parameters
+ * plus one, without gradient computation the size is simply the number of
+ * true energies.
+ ***************************************************************************/
+int cta_psf_radial_kerns_delta::size(void) const
+{
+    // Set size
+    int nengs = m_srcEngs.size();
+    int npars = m_model->size();
+    int size  = (m_grad) ? nengs * (npars+1) : nengs;
+
+    // Return size
+    return size;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel constructor for PSF integration of radial model
+ *
+ * @param[in] delta PSF offset angle (radians).
+ ***************************************************************************/
+cta_psf_radial_kerns_delta::cta_psf_radial_kerns_delta(const GCTAResponseCube*    rsp,
+                                                       const GModelSpatialRadial* model,
+                                                       const GSkyDir&             obsDir,
+                                                       const GEnergies&           srcEngs,
+                                                       const double&              zeta,
+                                                       const double&              theta_max,
+                                                       const int&                 iter,
+                                                       const bool&                grad)
+{
+    // Store constructor arguments
+    m_rsp       = rsp;
+    m_model     = model;
+    m_obsDir    = obsDir;
+    m_srcEngs   = srcEngs;
+    m_zeta      = zeta;
+    m_theta_max = theta_max;
+    m_iter      = iter;
+    m_grad      = grad;
+
+    // Pre-compute trigonometric functions
+    m_cos_zeta      = std::cos(zeta);
+    m_sin_zeta      = std::sin(zeta);
+    m_cos_theta_max = std::cos(theta_max);
+
+    // Pre-compute constants needed for gradient computation. The following
+    // exceptions need to be handled
+    // * beta_0 = +/-90 deg
+    // * m_sin_zeta = 0
+    // * denom = 0
+    if (grad) {
+        double alpha_0        = model->ra()  * gammalib::deg2rad;
+        double beta_0         = model->dec() * gammalib::deg2rad;
+        double alpha_reco     = obsDir.ra();
+        double beta_reco      = obsDir.dec();
+        double sin_beta_0     = std::sin(beta_0);
+        double cos_beta_0     = std::cos(beta_0);
+        double tan_beta_0     = std::tan(beta_0);  // Exception: beta_0 = 90 deg
+        double sin_beta_reco  = std::sin(beta_reco);
+        double cos_beta_reco  = std::cos(beta_reco);
+        double sin_dalpha     = std::sin(alpha_0 - alpha_reco);
+        double cos_dalpha     = std::cos(alpha_0 - alpha_reco);
+        double arg            = cos_beta_reco * tan_beta_0 -
+                                sin_beta_reco * cos_dalpha;
+        double denom          = sin_dalpha * sin_dalpha + arg * arg;
+        m_dzeta_dalpha_0      = cos_beta_0 * cos_beta_reco * sin_dalpha / m_sin_zeta;
+        m_dzeta_dbeta_0       = (sin_beta_0 * cos_beta_reco * cos_dalpha -
+                                 cos_beta_0 * sin_beta_reco) / m_sin_zeta;
+        m_dphi_dalpha_0       = (sin_beta_reco - cos_dalpha * cos_beta_reco * tan_beta_0) /
+                                denom;
+        m_dphi_dbeta_0        = (sin_dalpha * cos_beta_reco * (1.0 + tan_beta_0 * tan_beta_0)) /
+                                denom;
+    }
+    else {
+        m_dzeta_dalpha_0 = 0.0;
+        m_dzeta_dbeta_0  = 0.0;
+        m_dphi_dalpha_0  = 0.0;
+        m_dphi_dbeta_0   = 0.0;
+    }
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
  * @brief Kernel for PSF integration of radial model
  *
  * @param[in] delta PSF offset angle (radians).
@@ -1977,10 +2067,14 @@ double cta_psf_radial_kern_phi::eval(const double& phi)
  * between the true and the measured photon direction and the azimuth angle
  * \f$\phi\f$ around the measured photon direction.
  ***************************************************************************/
-GNdarray cta_psf_radial_kerns_delta::eval(const double& delta)
+GVector cta_psf_radial_kerns_delta::eval(const double& delta)
 {
-    // Initialise values
-    GNdarray values(m_srcEngs.size());
+    // Determine size of the result vector
+    int npars = m_model->size();
+    int nengs = m_srcEngs.size();
+
+    // Initialise result vector
+    GVector values(size());
 
     // If we're at the Psf peak the model is zero (due to the sin(delta)
     // term. We thus only integrate for positive deltas.
@@ -1990,9 +2084,9 @@ GNdarray cta_psf_radial_kerns_delta::eval(const double& delta)
         // radius delta that intersects with the model, defined as a circle
         // with maximum radius m_theta_max
         double dphi = 0.5 * gammalib::roi_arclength(delta,
-                                                    m_delta_mod,
-                                                    m_cos_delta_mod,
-                                                    m_sin_delta_mod,
+                                                    m_zeta,
+                                                    m_cos_zeta,
+                                                    m_sin_zeta,
                                                     m_theta_max,
                                                     m_cos_theta_max);
 
@@ -2006,70 +2100,57 @@ GNdarray cta_psf_radial_kerns_delta::eval(const double& delta)
             // Precompute cosine and sine terms for azimuthal integration
             double sin_delta = std::sin(delta);
             double cos_delta = std::cos(delta);
-            double sin_fact  = sin_delta * m_sin_delta_mod;
-            double cos_fact  = cos_delta * m_cos_delta_mod;
+            double sin_delta_sin_zeta = sin_delta * m_sin_zeta;
+            double sin_delta_cos_zeta = sin_delta * m_cos_zeta;
+            double cos_delta_sin_zeta = cos_delta * m_sin_zeta;
+            double cos_delta_cos_zeta = cos_delta * m_cos_zeta;
 
-            // If radial model is energy dependent then use the vector
-            // integration method
-            if (m_model->is_energy_dependent()) {
-            
-                // Setup kernel for azimuthal integration of the spatial model
-                cta_psf_radial_kerns_phi integrand(m_model,
-                                                   m_srcEngs,
-                                                   m_srcTime,
-                                                   sin_fact,
-                                                   cos_fact);
+            // Setup kernel for azimuthal integration of the spatial model
+            cta_psf_radial_kerns_phi integrand(m_model,
+                                               sin_delta_sin_zeta,
+                                               sin_delta_cos_zeta,
+                                               cos_delta_sin_zeta,
+                                               cos_delta_cos_zeta,
+                                               m_dzeta_dalpha_0,
+                                               m_dzeta_dbeta_0,
+                                               m_dphi_dalpha_0,
+                                               m_dphi_dbeta_0,
+                                               m_grad);
 
-                // Setup integrator
-                GIntegrals integral(&integrand);
-                integral.fixed_iter(m_iter);
+            // Setup integrator
+            GIntegrals integral(&integrand);
+            integral.fixed_iter(m_iter);
 
-                // Integrate over azimuth
-                values = integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
+            // Integrate over azimuth
+            GVector irf = integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
 
-                // Multiply in energy dependent Psf
-                for (int i = 0; i < m_srcEngs.size(); ++i) {
+            // Extract value and gradients
+            double value = irf[0];
 
-                    // Get Psf for this energy
-                    double psf = m_rsp->psf()(m_srcDir, delta, m_srcEngs[i]);
+            // Multiply in energy dependent Psf
+            for (int i = 0; i < nengs; ++i) {
 
-                    // Compute value
-                    values(i) *= psf;
+                // Get Psf for this energy. We approximate here the true sky
+                // direction by the reconstructed sky direction.
+                double psf = m_rsp->psf()(m_obsDir, delta, m_srcEngs[i]);
 
-                } // endfor: looped over energies
-
-            } // endif: radial model was energy dependent
-
-            // ... otherwise perform azimuth integration for a single energy
-            else {
-
-                // Setup kernel for azimuthal integration of the spatial model
-                cta_psf_radial_kern_phi integrand(m_model,
-                                                  m_srcEngs[0],
-                                                  m_srcTime,
-                                                  sin_fact,
-                                                  cos_fact);
-
-                // Setup integrator
-                GIntegral integral(&integrand);
-                integral.fixed_iter(m_iter);
-
-                // Integrate over azimuth
-                double value = integral.romberg(phi_min, phi_max, m_iter) *
-                               sin_delta;
-
-                // Multiply in energy dependent Psf
-                for (int i = 0; i < m_srcEngs.size(); ++i) {
-
-                    // Get Psf for this energy
-                    double psf = m_rsp->psf()(m_srcDir, delta, m_srcEngs[i]);
+                // Continue only if Psf is positive
+                if (psf > 0.0) {
 
                     // Compute value
-                    values(i) = value * psf;
+                    values[i] = value * psf;
 
-                } // endfor: looped over energies
+                    // If gradient computation is requested the multiply also
+                    // all factor gradients with the Psf value
+                    if (m_grad) {
+                        for (int k = 1, ig = i+nengs; k <= npars; ++k, ig += nengs) {
+                            values[ig] = irf[k] * psf;
+                        }
+                    }
 
-            } // endelse: radial model had no energy dependence
+                } // endif: Psf was positive
+
+            } // endfor: looped over energies
 
         } // endif: arc length was positive
 
@@ -2084,11 +2165,13 @@ GNdarray cta_psf_radial_kerns_delta::eval(const double& delta)
  * @brief Kernel for azimuthal radial model integration
  *
  * @param[in] phi Azimuth angle (radians).
- * @return Radial model values for all energies.
+ * @return Vector of radial model value and parameter factor gradients.
  *
- * Computes the value of the radial model at the position \f$(\delta,\phi)\f$
- * given in point spread function coordinates. The \f$\theta\f$ angle of the
- * radial model is computed using
+ * Computes the value and parameter factor gradients of the radial model at
+ * the position \f$(\delta,\phi)\f$ given in point spread function
+ * coordinates.
+ *
+ * The \f$\theta\f$ angle of the radial model is computed using
  *
  * \f[
  *    \theta = \arccos \left( \cos \delta \cos \zeta +
@@ -2101,10 +2184,26 @@ GNdarray cta_psf_radial_kerns_delta::eval(const double& delta)
  * measured photon direction, where \f$\phi=0\f$ corresponds to the
  * connecting line between model centre and measured photon direction.
  ***************************************************************************/
-GNdarray cta_psf_radial_kerns_phi::eval(const double& phi)
+GVector cta_psf_radial_kerns_phi::eval(const double& phi)
 {
+    // Allocate dummy energy and time to satisfy interface
+    static const GEnergy srcEng;
+    static const GTime   srcTime;
+
+    // Compute sin(phi) and cos(phi). The following code allows usage of the
+    // sincos() method in case that gradients are requested.
+    double sin_phi;
+    double cos_phi;
+    if (m_grad) {
+        sin_phi = std::sin(phi);
+        cos_phi = std::cos(phi);
+    }
+    else {
+        cos_phi = std::cos(phi);
+    }
+
     // Compute radial model theta angle
-    double theta = std::acos(m_cos_fact + m_sin_fact * std::cos(phi));
+    double theta = std::acos(m_cos_delta_cos_zeta + m_sin_delta_sin_zeta * cos_phi);
 
     // Reduce theta by an infinite amount to avoid rounding errors at the
     // boundary of a sharp edged model
@@ -2113,39 +2212,49 @@ GNdarray cta_psf_radial_kerns_phi::eval(const double& phi)
         theta_kluge = 0.0;
     }
 
-    // Initialise values
-    GNdarray values(m_srcEngs.size());
+    // Initialise kernel values
+    GVector values(m_size);
 
-    // Loop over energies
-    for (int i = 0; i < m_srcEngs.size(); ++i) {
+    // If gradients are requested then compute partial derivatives of theta
+    // with respect to Right Ascension and Declination and store them into
+    // the respective factor gradients
+    if (m_grad) {
+        double g_ra  = 0.0;
+        double g_dec = 0.0;
+        if (theta > 0.0) {
+            double sin_theta = std::sin(theta);
+            if (sin_theta != 0.0) {
+                double dtheta_dzeta = (m_cos_delta_sin_zeta -
+                                       m_sin_delta_cos_zeta * cos_phi) /
+                                       sin_theta;
+                double dtheta_dphi  = (m_sin_delta_sin_zeta * sin_phi) /
+                                       sin_theta;
+                g_ra  = dtheta_dzeta * m_dzeta_dalpha_0 + dtheta_dphi * m_dphi_dalpha_0;
+                g_dec = dtheta_dzeta * m_dzeta_dbeta_0  + dtheta_dphi * m_dphi_dbeta_0;
+            }
 
-        // Compute value
-        values(i) = m_model->eval(theta_kluge, m_srcEngs[i], m_srcTime);
-
-        // Debug: test if model is non positive
-        #if defined(G_DEBUG_MODEL_ZERO)
-        if (values(i) <= 0.0) {
-            std::cout << "*** WARNING: cta_psf_radial_kern_phi::eval";
-            std::cout << " zero model for (phi)=(";
-            std::cout << phi*gammalib::rad2deg << ")";
-            std::cout << " theta-r_model=" << (theta-m_model->theta_max());
-            std::cout << " radians" << std::endl;
         }
-        #endif
+        (*m_model)["RA"].factor_gradient(g_ra);
+        (*m_model)["DEC"].factor_gradient(g_dec);
+    }
 
-        // Debug: Check for NaN
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(values(i)) ||
-            gammalib::is_infinite(values(i))) {
-            std::cout << "*** ERROR: cta_psf_radial_kern_phi::eval";
-            std::cout << "(phi=" << phi << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (value=" << values(i);
-            std::cout << ")" << std::endl;
+    // Compute model value and optionally model parameter gradients
+    values[0] = m_model->eval(theta_kluge, srcEng, srcTime, m_grad);
+
+    // If requested extract model parameter gradients into kernel values
+    if (m_grad) {
+        for (int i = 1, k = 0; i < m_size; ++i, ++k) {
+            values[i] = (*m_model)[k].factor_gradient();
         }
-        #endif
+    }
 
-    } // endfor: looped over energies
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(values[0]) || gammalib::is_infinite(values[0])) {
+        std::string msg = "NaN/Inf encountered for phi="+gammalib::str(phi);
+        gammalib::warning(G_PSF_RADIAL_KERNS_PHI, msg);
+    }
+    #endif
 
     // Return kernel values
     return values;

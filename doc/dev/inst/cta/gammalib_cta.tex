@@ -1,0 +1,161 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GammaLib CTA Interface
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{CTA}}
+\newcommand{\doctype}{\mbox{CTA interface}}
+\newcommand{\version}{\mbox{draft}}
+\newcommand{\calendar}{\mbox{23 September 2020}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{../manual}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+The present document describes the CTA specific interface that is implemented in \this.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Instrument response
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Instrument response}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Response for stacked analysis}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Radial models}
+
+A radial model is defined by a function $f(\theta)$ where $\theta$ is the angular distance between
+the photon direction $(\alpha,\beta)$ and the model centre $(\alpha_0,\beta_0)$, given by
+\begin{equation}
+\theta = \arccos{ \left( \sin \beta \sin \beta_0 + \cos \beta \cos \beta_0 \cos (\alpha-\alpha_0) \right) } .
+\end{equation}
+The spatial integration of the model is performed in a spherical coordinate system that is centred on
+the reconstructed event direction $(\hat{\alpha},\hat{\beta})$, spanned by the offset angle
+\begin{equation}
+\delta = \arccos{ \left( \sin \beta \sin \hat{\beta} + \cos \beta \cos \hat{\beta} \cos (\alpha-\hat{\alpha}) \right) } ,
+\end{equation}
+which is the angular distance between true and reconstructed event direction, and
+\begin{equation}
+\varphi =
+\arctan \left( \frac{\sin(\alpha-\hat{\alpha})}{\cos \hat{\beta} \tan \beta - \sin \hat{\beta} \cos(\alpha-\hat{\alpha})} \right) -
+\arctan \left( \frac{\sin(\alpha_0-\hat{\alpha})}{\cos \hat{\beta} \tan \beta_0 - \sin \hat{\beta} \cos(\alpha_0-\hat{\alpha})} \right)
+\end{equation}
+which is the azimuth angle around the reconstructed event direction $(\hat{\alpha},\hat{\beta})$,
+measured from a line that connects $(\hat{\alpha},\hat{\beta})$ and $(\alpha_0,\beta_0)$.
+In this system, the radial model argument $\theta$ is given by
+\begin{equation}
+\theta = \arccos{ \left( \cos \delta \cos \zeta + \sin \delta \sin \zeta \cos \varphi \right) }
+\end{equation}
+where
+$\zeta$ is the angular distance between the reconstructed event direction $(\hat{\alpha},\hat{\beta})$ and
+the model centre $(\alpha_0,\beta_0)$, given by
+\begin{equation}
+\zeta = \arccos{ \left( \sin \beta_0 \sin \hat{\beta} + \cos \beta_0 \cos \hat{\beta} \cos (\alpha_0-\hat{\alpha}) \right) } .
+\end{equation}
+Figure~\ref{fig:radial-model} illustrates the definition of the angles.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!t]
+\center
+\epsfig{figure=cta-radial-models.eps, width=10cm}
+\caption{Angles for the computation of the response for stacked analysis. The red circle indicates
+the zone where the model is valid, the blue circle indicates the zone where the PSF is positive. The
+model integration is performed in a spherical system centred on the reconstructed event
+direction $(\alpha_0,\beta_0)$ that is spanned by $\delta$ and $\varphi$.}
+\label{fig:radial-model}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The partial derivatives of $f(\theta)$ with respect to $\alpha_0$ and $\beta_0$ are given by
+\begin{equation}
+\frac{\partial f}{\partial \alpha_0} = \frac{\partial f}{\partial \theta}
+\left(
+\frac{\partial \theta}{\partial \zeta} \frac{\partial \zeta}{\partial \alpha_0} +
+\frac{\partial \theta}{\partial \varphi} \frac{\partial \varphi}{\partial \alpha_0}
+\right)
+\end{equation}
+and
+\begin{equation}
+\frac{\partial f}{\partial \beta_0} = \frac{\partial f}{\partial \theta}
+\left(
+\frac{\partial \theta}{\partial \zeta} \frac{\partial \zeta}{\partial \beta_0} +
+\frac{\partial \theta}{\partial \varphi} \frac{\partial \varphi}{\partial \beta_0}
+\right)
+\end{equation}
+with
+\begin{equation}
+\frac{\partial \theta}{\partial \zeta} = \frac{\cos \delta \sin \zeta - \sin \delta \cos \zeta \cos \varphi}{\sin \theta} ,
+\end{equation}
+\begin{equation}
+\frac{\partial \theta}{\partial \varphi} = \frac{\sin \delta \sin \zeta \sin \varphi}{\sin \theta} ,
+\end{equation}
+\begin{equation}
+\frac{\partial \zeta}{\partial \alpha_0}  = \frac{\cos \beta_0 \cos \hat{\beta} \sin(\alpha_0-\hat{\alpha})}{\sin \zeta} ,
+\end{equation}
+\begin{equation}
+\frac{\partial \zeta}{\partial \beta_0}  = \frac{\sin \beta_0 \cos \hat{\beta} \cos(\alpha_0-\hat{\alpha}) - \cos \beta_0 \sin \hat{\beta}}{\sin \zeta} ,
+\end{equation}
+\begin{equation}
+\frac{\partial \varphi}{\partial \alpha_0}  = \frac
+{\sin \hat{\beta} - \cos(\alpha_0-\hat{\alpha}) \cos \hat{\beta} \tan \beta_0}
+{\sin^2(\alpha_0-\hat{\alpha}) + (\cos \hat{\beta} \tan \beta_0 - \sin \hat{\beta} \cos(\alpha_0-\hat{\alpha}))^2} ,
+\end{equation}
+and
+\begin{equation}
+\frac{\partial \varphi}{\partial \beta_0}  = \frac
+{\sin(\alpha_0-\hat{\alpha}) \cos \hat{\beta} (1 + \tan^2 \beta_0)}
+{\sin^2(\alpha_0-\hat{\alpha}) + (\cos \hat{\beta} \tan \beta_0 - \sin \hat{\beta} \cos(\alpha_0-\hat{\alpha}))^2} ,
+\end{equation}
+Note that for $\theta=0$
+\begin{equation}
+\frac{\partial \theta}{\partial \zeta} = \frac{\partial \theta}{\partial \varphi} = 0
+\end{equation}
+and for $\zeta=0$
+\begin{equation}
+\frac{\partial \zeta}{\partial \alpha_0}  = \frac{\partial \zeta}{\partial \beta_0} = 0
+\end{equation}
+and
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Radial Gaussian}
+
+The radial Gaussian function $f(\theta)$ is given by
+\begin{equation}
+f(\theta) = \frac{1}{2 \pi \sigma^2} \exp \left( -\frac{1}{2} \frac{\theta^2}{\sigma^2} \right)
+\end{equation}
+with the partial derivatives
+\begin{equation}
+\frac{\delta f}{\delta \theta}  = - \frac{\theta}{\sigma^2} f(\theta)
+\end{equation}
+and
+\begin{equation}
+\frac{\delta f}{\delta \sigma}  = \left( \frac{\theta^2}{\sigma^3} - \frac{2}{\sigma} \right) f(\theta) .
+\end{equation}
+
+\end{document}

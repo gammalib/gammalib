@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw.cpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,6 +52,7 @@ const GModelSpectralRegistry g_spectral_plaw_registry2(&g_spectral_plaw_seed2);
 #endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_EVAL            "GModelSpectralPlaw::eval(GEnergy&, GTime&, bool&)"
 #define G_MC      "GModelSpectralPlaw::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                       "GModelSpectralPlaw::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpectralPlaw::write(GXmlElement&)"
@@ -343,16 +344,14 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng,
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralPlaw::eval";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", m_norm=" << m_norm.value();
-        std::cout << ", m_index=" << m_index.value();
-        std::cout << ", m_pivot=" << m_pivot.value();
-        std::cout << ", m_last_power=" << m_last_power;
-        std::cout << ")" << std::endl;
+        std::string msg = "Model value not a number:";
+        for (int i = 0; i < m_pars.size(); ++i) {
+            msg += " " + m_pars[i]->name() + "=";
+            msg += gammalib::str(m_pars[i]->value());
+        }
+        msg += " srcEng=" + srcEng.print();
+        msg += " srcTime=" + srcTime.print();
+        gammalib::warning(G_EVAL, msg);
     }
     #endif
 

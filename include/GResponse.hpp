@@ -34,7 +34,6 @@
 #include "GTime.hpp"
 #include "GResponseCache.hpp"
 #include "GFunctions.hpp"
-#include "GNdarray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GVector;
@@ -113,7 +112,8 @@ public:
                                     const GSource&      source,
                                     const GObservation& obs) const;
     virtual GVector     irf_spatial(const GModelSky&    model,
-                                    const GObservation& obs) const;
+                                    const GObservation& obs,
+                                    GMatrixSparse*      gradients = NULL) const;
     virtual void        remove_response_cache(const std::string& name);
 
 protected:
@@ -127,9 +127,9 @@ protected:
                      const GTime&        srcTime,
                      const GObservation& obs,
                      const bool&         grad) const;
-    GVector eval_prob(const GModelSky&    model,
-                      const GObservation& obs,
-                      GMatrixSparse*      gradients = NULL) const;
+    GVector eval_probs(const GModelSky&    model,
+                       const GObservation& obs,
+                       GMatrixSparse*      gradients = NULL) const;
 
     // Virtual protected methods
     virtual double irf_ptsrc(const GEvent&       event,
@@ -148,33 +148,38 @@ protected:
                                  const GSource&      source,
                                  const GObservation& obs) const;
     virtual GVector irf_ptsrc(const GModelSky&    model,
-                              const GObservation& obs) const;
+                              const GObservation& obs,
+                              GMatrixSparse*      gradients = NULL) const;
     virtual GVector irf_radial(const GModelSky&    model,
-                               const GObservation& obs) const;
+                               const GObservation& obs,
+                               GMatrixSparse*      gradients = NULL) const;
     virtual GVector irf_elliptical(const GModelSky&    model,
-                                   const GObservation& obs) const;
+                                   const GObservation& obs,
+                                   GMatrixSparse*      gradients = NULL) const;
     virtual GVector irf_diffuse(const GModelSky&    model,
-                                const GObservation& obs) const;
+                                const GObservation& obs,
+                                GMatrixSparse*      gradients = NULL) const;
     virtual GVector irf_composite(const GModelSky&    model,
-                                  const GObservation& obs) const;
+                                  const GObservation& obs,
+                                  GMatrixSparse*      gradients = NULL) const;
 
     // Protected classes
-    class edisp_kern : public GFunctions {
+    class edisp_kerns : public GFunctions {
     public:
-        edisp_kern(const GResponse*    parent,
-                   const GObservation* obs,
-                   const GModelSky*    model,
-                   const GEvent*       event,
-                   const GTime&        srcTime,
-                   const bool&         grad);
-        const GNdarray& array(void) const;
-        GNdarray        eval(const double& etrue);
+        edisp_kerns(const GResponse*    parent,
+                    const GObservation* obs,
+                    const GModelSky*    model,
+                    const GEvent*       event,
+                    const GTime&        srcTime,
+                    const bool&         grad);
+        int     size(void) const { return m_size; }
+        GVector eval(const double& etrue);
     protected:
         const GResponse*        m_parent;  //!< Response
         const GObservation*     m_obs;     //!< Observation
         const GModelSky*        m_model;   //!< Sky model
         const GEvent*           m_event;   //!< Event
-        GNdarray                m_array;   //!< Array of values and gradients
+        int                     m_size;    //!< Array of values and gradients
         std::vector<GModelPar*> m_pars;    //!< Parameter pointers
         GTime                   m_srcTime; //!< True arrival time
         bool                    m_grad;    //!< Gradient flag

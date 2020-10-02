@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{Maths}}
 \newcommand{\doctype}{\mbox{Mathematical Implementation}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{23 February 2013}}
+\newcommand{\calendar}{\mbox{22 September 2020}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -125,9 +125,31 @@ r_{\rm max} = \sigma \sqrt{ 2 u_{\rm max}}
 \section{Spatial models}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Radial Shell}
+\subsection{Radial models}
 
-\subsubsection{Small angle approximation}
+A radial model is defined by the function $f(\theta)$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Radial Gaussian}
+
+The radial Gaussian function $f(\theta)$ is given by
+\begin{equation}
+f(\theta) = \frac{1}{2 \pi \sigma^2} \exp \left( -\frac{1}{2} \frac{\theta^2}{\sigma^2} \right)
+\end{equation}
+with the partial derivatives
+\begin{equation}
+\frac{\delta f}{\delta \theta}  = - \frac{\theta}{\sigma^2} f(\theta)
+\end{equation}
+and
+\begin{equation}
+\frac{\delta f}{\delta \sigma}  = \left( \frac{\theta^2}{\sigma^3} - \frac{2}{\sigma} \right) f(\theta)
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Radial Shell}
+
+\paragraph{Small angle approximation}
 
 The shell function is a radial function $f(\theta)$, where $\theta$ is the angular separation
 between shell centre and the actual location.
@@ -177,7 +199,7 @@ we obtain
 \end{eqnarray}
 
 
-\subsubsection{Spherical formulation}
+\paragraph{Spherical formulation}
  
 The shell function on a sphere is given by
 \begin{equation}
@@ -280,7 +302,7 @@ $\theta_{\rm in} = \frac{2}{3}\theta_{\rm out}$.}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Elliptical disk}
+\subsubsection{Elliptical disk}
 
 The effective radius $\theta_0$ of the ellipse on the sphere is given by
 \begin{equation}

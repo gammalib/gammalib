@@ -153,19 +153,15 @@ private:
                        const GObservation& obs) const;
 
     // New methods
-    GVector  irf_radial(const GModelSky&    model,
-                        const GObservation& obs) const;
-    /*
-    GNdarray irf_radial(const GModelSpatial* model,
-                        const GSkyDir&       obsDir,
-                        const GEnergies&     srcEngs,
-                        const GObservation&  obs) const;
-    */
-    GNdarray psf_radial(const GModelSpatialRadial* model,
-                        const double&              rho_obs,
-                        const GSkyDir&             obsDir,
-                        const GEnergies            srcEngs,
-                        const GTime&               srcTime) const;
+    GVector irf_radial(const GModelSky&    model,
+                       const GObservation& obs,
+                       GMatrixSparse*      gradients = NULL) const;
+    GVector psf_radial(const GModelSpatialRadial* model,
+                       const double&              zeta,
+                       const GSkyDir&             obsDir,
+                       const GEnergies            srcEngs,
+                       const GTime&               srcTime,
+                       const bool&                grad) const;
 
     // Private data members
     GCTACubeExposure   m_exposure;    //!< Exposure cube
