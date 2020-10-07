@@ -2006,6 +2006,10 @@ cta_psf_radial_kerns_delta::cta_psf_radial_kerns_delta(const GCTAResponseCube*  
     m_sin_zeta      = std::sin(zeta);
     m_cos_theta_max = std::cos(theta_max);
 
+    // Store references to Right Ascension and Declination parameters
+    m_par_ra  = &((*(const_cast<GModelSpatialRadial*>(model)))["RA"]);
+    m_par_dec = &((*(const_cast<GModelSpatialRadial*>(model)))["DEC"]);
+
     // Pre-compute constants needed for gradient computation. The following
     // exceptions need to be handled
     // * beta_0 = +/-90 deg
@@ -2033,6 +2037,8 @@ cta_psf_radial_kerns_delta::cta_psf_radial_kerns_delta(const GCTAResponseCube*  
                                 denom;
         m_dphi_dbeta_0        = (sin_dalpha * cos_beta_reco * (1.0 + tan_beta_0 * tan_beta_0)) /
                                 denom;
+        m_par_ra->has_grad(true);
+        m_par_dec->has_grad(true);
     }
     else {
         m_dzeta_dalpha_0 = 0.0;
@@ -2106,16 +2112,11 @@ GVector cta_psf_radial_kerns_delta::eval(const double& delta)
             double cos_delta_cos_zeta = cos_delta * m_cos_zeta;
 
             // Setup kernel for azimuthal integration of the spatial model
-            cta_psf_radial_kerns_phi integrand(m_model,
+            cta_psf_radial_kerns_phi integrand(this,
                                                sin_delta_sin_zeta,
                                                sin_delta_cos_zeta,
                                                cos_delta_sin_zeta,
-                                               cos_delta_cos_zeta,
-                                               m_dzeta_dalpha_0,
-                                               m_dzeta_dbeta_0,
-                                               m_dphi_dalpha_0,
-                                               m_dphi_dbeta_0,
-                                               m_grad);
+                                               cos_delta_cos_zeta);
 
             // Setup integrator
             GIntegrals integral(&integrand);
@@ -2171,7 +2172,7 @@ GVector cta_psf_radial_kerns_delta::eval(const double& delta)
  * the position \f$(\delta,\phi)\f$ given in point spread function
  * coordinates.
  *
- * The \f$\theta\f$ angle of the radial model is computed using
+ * The angle \f$\theta\f$ of the radial model is computed using
  *
  * \f[
  *    \theta = \arccos \left( \cos \delta \cos \zeta +
@@ -2183,6 +2184,21 @@ GVector cta_psf_radial_kerns_delta::eval(const double& delta)
  * photon direction, and \f$\phi\f$ is the azimuth angle with respect to the
  * measured photon direction, where \f$\phi=0\f$ corresponds to the
  * connecting line between model centre and measured photon direction.
+ *
+ * If gradient computation is requested, the method also returns the gradients
+ *
+ * \f[
+ *    \frac{\partial f}{\partial \alpha_0}
+ * \f]
+ *
+ * and
+ *
+ * \f[
+ *    \frac{\partial f}{\partial \beta_0}
+ * \f]
+ *
+ * in the second and third slot of the returned vector. The following slots
+ * contains gradients with respect to other model parameters.
  ***************************************************************************/
 GVector cta_psf_radial_kerns_phi::eval(const double& phi)
 {
@@ -2194,7 +2210,7 @@ GVector cta_psf_radial_kerns_phi::eval(const double& phi)
     // sincos() method in case that gradients are requested.
     double sin_phi;
     double cos_phi;
-    if (m_grad) {
+    if (m_outer->m_grad) {
         sin_phi = std::sin(phi);
         cos_phi = std::cos(phi);
     }
@@ -2203,7 +2219,8 @@ GVector cta_psf_radial_kerns_phi::eval(const double& phi)
     }
 
     // Compute radial model theta angle
-    double theta = std::acos(m_cos_delta_cos_zeta + m_sin_delta_sin_zeta * cos_phi);
+    double cos_theta = m_cos_delta_cos_zeta + m_sin_delta_sin_zeta * cos_phi;
+    double theta     = std::acos(cos_theta);
 
     // Reduce theta by an infinite amount to avoid rounding errors at the
     // boundary of a sharp edged model
@@ -2216,35 +2233,46 @@ GVector cta_psf_radial_kerns_phi::eval(const double& phi)
     GVector values(m_size);
 
     // If gradients are requested then compute partial derivatives of theta
-    // with respect to Right Ascension and Declination and store them into
-    // the respective factor gradients
-    if (m_grad) {
+    // and phi with respect to Right Ascension and Declination and store them
+    // into the respective factor gradients so that the
+    // GModelSpatialRadial::eval() method can use the information.
+    if (m_outer->m_grad) {
         double g_ra  = 0.0;
         double g_dec = 0.0;
         if (theta > 0.0) {
-            double sin_theta = std::sin(theta);
-            if (sin_theta != 0.0) {
-                double dtheta_dzeta = (m_cos_delta_sin_zeta -
-                                       m_sin_delta_cos_zeta * cos_phi) /
-                                       sin_theta;
-                double dtheta_dphi  = (m_sin_delta_sin_zeta * sin_phi) /
-                                       sin_theta;
-                g_ra  = dtheta_dzeta * m_dzeta_dalpha_0 + dtheta_dphi * m_dphi_dalpha_0;
-                g_dec = dtheta_dzeta * m_dzeta_dbeta_0  + dtheta_dphi * m_dphi_dbeta_0;
-            }
 
+            // Compute sin(theta) by avoiding to use a call to sine
+            //double sin_theta = std::sin(theta);
+            double sin_theta2 = 1.0 - cos_theta * cos_theta;
+            double sin_theta  = (sin_theta2 > 0.0) ? std::sqrt(sin_theta2) : 0.0;
+
+            // Continue only is sine is non-zero
+            if (sin_theta != 0.0) {
+                double norm         = 1.0 / sin_theta;
+                double dtheta_dzeta = (m_cos_delta_sin_zeta -
+                                       m_sin_delta_cos_zeta * cos_phi) *
+                                       norm;
+                double dtheta_dphi  = (m_sin_delta_sin_zeta * sin_phi) *
+                                       norm;
+                g_ra  = dtheta_dzeta * m_outer->m_dzeta_dalpha_0 +
+                        dtheta_dphi  * m_outer->m_dphi_dalpha_0;
+                g_dec = dtheta_dzeta * m_outer->m_dzeta_dbeta_0  +
+                        dtheta_dphi  * m_outer->m_dphi_dbeta_0;
+            }
         }
-        (*m_model)["RA"].factor_gradient(g_ra);
-        (*m_model)["DEC"].factor_gradient(g_dec);
+        m_outer->m_par_ra->factor_gradient(g_ra);
+        m_outer->m_par_dec->factor_gradient(g_dec);
     }
 
     // Compute model value and optionally model parameter gradients
-    values[0] = m_model->eval(theta_kluge, srcEng, srcTime, m_grad);
+    values[0] = m_outer->m_model->eval(theta_kluge, srcEng, srcTime,
+                                       m_outer->m_grad);
 
-    // If requested extract model parameter gradients into kernel values
-    if (m_grad) {
+    // If gradients are requested, extract now the fully computed model
+    // parameter gradients into the kernel values vector
+    if (m_outer->m_grad) {
         for (int i = 1, k = 0; i < m_size; ++i, ++k) {
-            values[i] = (*m_model)[k].factor_gradient();
+            values[i] = (*(m_outer->m_model))[k].factor_gradient();
         }
     }
 

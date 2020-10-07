@@ -35,16 +35,16 @@
 #include "GCTAObservation.hpp"
 #include "GMatrix.hpp"
 #include "GEnergy.hpp"
+#include "GEnergies.hpp"
 #include "GTime.hpp"
+#include "GModelPar.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GCTAResponseCube.hpp"
 #include "GModelSpatialElliptical.hpp"
 #include "GFunction.hpp"
-//
 #include "GFunctions.hpp"
-#include "GEnergies.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -1406,6 +1406,7 @@ protected:
  * @brief Kernel for Psf delta angle integration used for stacked analysis
  ***************************************************************************/
 class cta_psf_radial_kerns_delta : public GFunctions {
+    friend class cta_psf_radial_kerns_phi;
 public:
     cta_psf_radial_kerns_delta(const GCTAResponseCube*    rsp,
                                const GModelSpatialRadial* model,
@@ -1420,6 +1421,8 @@ public:
 protected:
     const GCTAResponseCube*    m_rsp;            //!< Response cube
     const GModelSpatialRadial* m_model;          //!< Radial model
+    GModelPar*                 m_par_ra;         //!< Right Ascension parameter
+    GModelPar*                 m_par_dec;        //!< Declination parameter
     GSkyDir                    m_obsDir;         //!< Reconstructed event direction
     GEnergies                  m_srcEngs;        //!< True photon energies
     double                     m_zeta;           //!< Distance of model from Psf
@@ -1446,41 +1449,26 @@ protected:
  ***************************************************************************/
 class cta_psf_radial_kerns_phi : public GFunctions {
 public:
-    cta_psf_radial_kerns_phi(const GModelSpatialRadial* model,
-                             const double&              sin_delta_sin_zeta,
-                             const double&              sin_delta_cos_zeta,
-                             const double&              cos_delta_sin_zeta,
-                             const double&              cos_delta_cos_zeta,
-                             const double&              dzeta_dalpha_0,
-                             const double&              dzeta_dbeta_0,
-                             const double&              dphi_dalpha_0,
-                             const double&              dphi_dbeta_0,
-                             const bool&                grad) :
-                             m_model(model),
-                             m_size(model->size()+1),
+    cta_psf_radial_kerns_phi(cta_psf_radial_kerns_delta* outer,
+                             const double&               sin_delta_sin_zeta,
+                             const double&               sin_delta_cos_zeta,
+                             const double&               cos_delta_sin_zeta,
+                             const double&               cos_delta_cos_zeta) :
+                             m_outer(outer),
+                             m_size(outer->m_model->size()+1),
                              m_sin_delta_sin_zeta(sin_delta_sin_zeta),
                              m_sin_delta_cos_zeta(sin_delta_cos_zeta),
                              m_cos_delta_sin_zeta(cos_delta_sin_zeta),
-                             m_cos_delta_cos_zeta(cos_delta_cos_zeta),
-                             m_dzeta_dalpha_0(dzeta_dalpha_0),
-                             m_dzeta_dbeta_0(dzeta_dbeta_0),
-                             m_dphi_dalpha_0(dphi_dalpha_0),
-                             m_dphi_dbeta_0(dphi_dbeta_0),
-                             m_grad(grad) { }
+                             m_cos_delta_cos_zeta(cos_delta_cos_zeta) { }
     int     size(void) const { return m_size; }
     GVector eval(const double& phi);
 protected:
-    const GModelSpatialRadial* m_model;              //!< Radial model
-    int                        m_size;               //!< Result size
-    double                     m_sin_delta_sin_zeta; //!< sin(delta) * sin(zeta)
-    double                     m_sin_delta_cos_zeta; //!< sin(delta) * cos(zeta)
-    double                     m_cos_delta_sin_zeta; //!< cos(delta) * sin(zeta)
-    double                     m_cos_delta_cos_zeta; //!< cos(delta) * cos(zeta)
-    double                     m_dzeta_dalpha_0;     //!< d(zeta)/d(alpha0)
-    double                     m_dzeta_dbeta_0;      //!< d(zeta)/d(beta0)
-    double                     m_dphi_dalpha_0;      //!< d(phi)/d(alpha0)
-    double                     m_dphi_dbeta_0;       //!< d(phi)/d(beta0)
-    bool                       m_grad;               //!< Compute gradients
+    cta_psf_radial_kerns_delta* m_outer;              //!< Pointer to outer integr.
+    int                         m_size;               //!< Result size
+    double                      m_sin_delta_sin_zeta; //!< sin(delta) * sin(zeta)
+    double                      m_sin_delta_cos_zeta; //!< sin(delta) * cos(zeta)
+    double                      m_cos_delta_sin_zeta; //!< cos(delta) * sin(zeta)
+    double                      m_cos_delta_cos_zeta; //!< cos(delta) * cos(zeta)
 };
 
 #endif /* GCTARESPONSE_HELPERS_HPP */

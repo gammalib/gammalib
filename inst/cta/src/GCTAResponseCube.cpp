@@ -1761,21 +1761,15 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
     // Get livetime (in seconds)
     double livetime = exposure().livetime();
 
-    // Set gradients flag
-    bool grad = (gradients != NULL);
-
-    // Get pointer to radial model
-    const GModelSpatialRadial* radial =
-          static_cast<const GModelSpatialRadial*>(model.spatial());
-
-    // Signal that this method will compute analytical RA and DEC gradients
-    if (grad) {
-        (*(const_cast<GModelSpatialRadial*>(radial)))["RA"].has_grad(true);
-        (*(const_cast<GModelSpatialRadial*>(radial)))["DEC"].has_grad(true);
-    }
-
     // Continue only if livetime is positive
     if (livetime > 0.0) {
+
+        // Set gradients flag
+        bool grad = (gradients != NULL);
+
+        // Get pointer to radial model
+        const GModelSpatialRadial* radial =
+              static_cast<const GModelSpatialRadial*>(model.spatial());
 
         // Get CTA event cube
         const GCTAEventCube& cube = gammalib::cta_event_cube(G_IRF_RADIAL2, obs);
@@ -1861,16 +1855,6 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
                         for (int ipar = 0, ipsf = ieng+nengs; ipar < npars;
                              ++ipar, ipsf += nengs) {
                             gradient[ipar][index] = aeff * psf[ipsf];
-/*
-std::cout << "index=" << index;
-std::cout << " ipar=" << ipar;
-std::cout << " ipsf=" << ipsf;
-std::cout << " psf.size()=" << psf.size();
-std::cout << " gradient.size()=" << gradient[ipar].size();
-std::cout << " aeff=" << aeff;
-std::cout << " psf[ipsf]=" << psf[ipsf];
-std::cout << " grad=" << gradient[ipar][index] << std::endl;
-*/
                         }
                     }
 
@@ -1960,10 +1944,12 @@ GVector GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     // If the integration range includes a transition between full
     // containment of Psf within model and partial containment, then
     // add a boundary at this location
+    /*
     double transition_point = theta_max - zeta;
     if (transition_point > delta_min && transition_point < delta_max) {
         bounds.push_back(transition_point);
     }
+    */
 
     // Integrate kernel
     GVector values = integral.romberg(bounds, iter_delta);
