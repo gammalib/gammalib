@@ -463,10 +463,12 @@ GVector GObservation::model(const GModels& models,
                 else {
 
                     // Allocate gradient matrix
-                    GMatrixSparse gradients(mptr->size(), nevents);
+                    //GMatrixSparse gradients(mptr->size(), nevents);
+                    GMatrixSparse gradients(nevents, mptr->size());
 
                     // Initialise sparse matrix stack
-                    gradients.stack_init(mptr->size()*1000, 1000);
+                    //gradients.stack_init(mptr->size()*1000, 1000);
+                    gradients.stack_init(nevents*mptr->size(), mptr->size());
 
                     // Evaluate model and add to values
                     values += mptr->eval(*this, &gradients);
@@ -495,7 +497,8 @@ GVector GObservation::model(const GModels& models,
                             GVector grad(nevents);
                             if (par.is_free()) {
                                 if (par.has_grad()) {
-                                    grad = gradients.row(ipar);
+                                    //grad = gradients.row(ipar);
+                                    grad = gradients.column(ipar);
                                 }
                                 else {
                                     grad = model_grad(*mptr, par);
@@ -522,7 +525,8 @@ GVector GObservation::model(const GModels& models,
                             GVector grad(nevents);
                             if (par.is_free()) {
                                 if (par.has_grad()) {
-                                    grad = gradients.row(ipar);
+                                    //grad = gradients.row(ipar);
+                                    grad = gradients.column(ipar);
 // Debugging
 /*
 if (ipar < 3) {

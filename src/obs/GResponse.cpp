@@ -348,17 +348,17 @@ GVector GResponse::convolve(const GModelSky&    model,
 
     // Check matrix consistency
     if (grad) {
-        if (gradients->rows() != npars) {
-            std::string msg = "Number of "+gammalib::str(gradients->rows())+
-                              " rows in gradient matrix differs from number "
+        if (gradients->columns() != npars) {
+            std::string msg = "Number of "+gammalib::str(gradients->columns())+
+                              " columns in gradient matrix differs from number "
                               "of "+gammalib::str(npars)+" parameters "
                               "in model. Please provide a compatible gradient "
                               "matrix.";
             throw GException::invalid_argument(G_CONVOLVE, msg);
         }
-        if (gradients->columns() != nevents) {
-            std::string msg = "Number of "+gammalib::str(gradients->columns())+
-                              " columns in gradient matrix differs from number "
+        if (gradients->rows() != nevents) {
+            std::string msg = "Number of "+gammalib::str(gradients->rows())+
+                              " rows in gradient matrix differs from number "
                               "of "+gammalib::str(nevents)+" events in "
                               "observation. Please provide a compatible "
                               "gradient matrix.";
@@ -374,6 +374,12 @@ GVector GResponse::convolve(const GModelSky&    model,
 
         // Case A: Integration
         if (use_edisp()) {
+
+            // Initialise temporary vectors to hold gradients
+            GVector* tmp_gradients = new GVector[npars];
+            for (int i = 0; i < npars; ++i) {
+                tmp_gradients[i] = GVector(nevents);
+            }
 
             // Loop over events
             for (int k = 0; k < nevents; ++k) {
@@ -429,7 +435,7 @@ GVector GResponse::convolve(const GModelSky&    model,
                 if (grad) {
 
                     // Initialise gradient vector
-                    GVector gradient(npars);
+                    //GVector gradient(npars);
 
                     // Get number of spatial, spectral and temporal parameters
                     int n_spat = model.spatial()->size();
@@ -442,7 +448,8 @@ GVector GResponse::convolve(const GModelSky&    model,
                         for (int i = 0; i < n_spec; ++i) {
                             GModelPar& par = (*(model.spectral()))[i];
                             if (par.is_free() && par.has_grad()) {
-                                gradient[offset+i] = array[index++];
+                                //gradient[offset+i] = array[index++];
+                                tmp_gradients[offset+i][k] = array[index++];
                             }
                         }
                     }
@@ -453,7 +460,8 @@ GVector GResponse::convolve(const GModelSky&    model,
                         for (int i = 0; i < n_temp; ++i) {
                             GModelPar& par = (*(model.temporal()))[i];
                             if (par.is_free() && par.has_grad()) {
-                                gradient[offset+i] = array[index++];
+                                //gradient[offset+i] = array[index++];
+                                tmp_gradients[offset+i][k] = array[index++];
                             }
                         }
                     }
@@ -465,14 +473,15 @@ GVector GResponse::convolve(const GModelSky&    model,
                             const GModelPar& par = model.scale(i);
                             if (par.name() == obs.instrument()) {
                                 if (par.is_free() && par.has_grad()) {
-                                    gradient[offset+i] = array[index++];
+                                    //gradient[offset+i] = array[index++];
+                                    tmp_gradients[offset+i][k] = array[index++];
                                 }
                             }
                         }
                     }
 
                     // Insert gradient vector into matrix
-                    gradients->add_to_column(k, gradient);
+                    //gradients->add_to_column(k, gradient);
 
                 } // endif: set gradients
 
@@ -489,6 +498,14 @@ GVector GResponse::convolve(const GModelSky&    model,
                 #endif
 
             } // endfor: looped over events
+
+            // Fill gradients into matrix
+            for (int i = 0; i < npars; ++i) {
+                gradients->column(i, tmp_gradients[i]);
+            }
+
+            // Delete temporal gradients
+            delete [] tmp_gradients;
 
         } // endif: Case A
 
@@ -1624,6 +1641,12 @@ GVector GResponse::eval_probs(const GModelSky&    model,
         double scale = (model.has_scales())
                        ? model.scale(obs.instrument()).value() : 1.0;
 
+        // Initialise temporary vectors to hold gradients
+        GVector* tmp_gradients = new GVector[npars];
+        for (int i = 0; i < npars; ++i) {
+            tmp_gradients[i] = GVector(nevents);
+        }
+
         // Loop over events
         for (int k = 0; k < nevents; ++k) {
 
@@ -1655,7 +1678,7 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                 if (grad) {
 
                     // Initialise gradient vector
-                    GVector gradient(npars);
+                    //GVector gradient(npars);
 
                     // Get number of spatial, spectral and temporal parameters
                     int n_spat = model.spatial()->size();
@@ -1666,7 +1689,8 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                     if (model.spatial() != NULL) {
                         double fact = spec * temp * scale;
                         for (int i = 0; i < n_spat; ++i) {
-                            gradient[i] = spat_gradients(k,i) * fact;
+                            //gradient[i] = spat_gradients(k,i) * fact;
+                            tmp_gradients[i][k] = spat_gradients(k,i) * fact;
                         }
                     }
 
@@ -1675,7 +1699,8 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                         int    offset = n_spat;
                         double fact   = spat * temp * scale;
                         for (int i = 0; i < n_spec; ++i) {
-                            gradient[offset+i] =
+                            //gradient[offset+i] =
+                            tmp_gradients[offset+i][k] =
                                 (*(model.spectral()))[i].factor_gradient() * fact;
                         }
                     }
@@ -1685,7 +1710,8 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                         int    offset = n_spat + n_spec;
                         double fact   = spat * spec * scale;
                         for (int i = 0; i < n_temp; ++i) {
-                            gradient[offset+i] =
+                            //gradient[offset+i] =
+                            tmp_gradients[offset+i][k] =
                                 (*(model.temporal()))[i].factor_gradient() * fact;
                         }
                     }
@@ -1699,61 +1725,19 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                             double           g_scale = 0.0;
                             if (par.name() == obs.instrument()) {
                                 if (par.is_free()) {
-                                    gradient[offset+i] = par.scale() * fact;
+                                    //gradient[offset+i] = par.scale() * fact;
+                                    tmp_gradients[offset+i][k] = par.scale() * fact;
                                 }
                             }
                         }
                     }
 
                     // Add gradient vector to matrix
-                    gradients->add_to_column(k, gradient);
+                    //gradients->add_to_column(k, gradient);
 
                 } // endif: computed partial derivatives
 
-            } // endif: IRF value was positive
-
-            // ... otherwise if gradient computation is requested then set the
-            // spectral and temporal gradients to zero
-            /*
-            else if (grad) {
-
-                // Initialise gradient vector
-                GVector gradient(npars);
-
-                // Get number of spatial, spectral and temporal parameters
-                int n_spat = model.spatial()->size();
-                int n_spec = model.spectral()->size();
-                int n_temp = model.temporal()->size();
-
-                // Reset spectral gradients
-                if (model.spectral() != NULL) {
-                    int offset = n_spat;
-                    for (int i = 0; i < n_spec; ++i) {
-                        gradient[offset+i] = 0.0;
-                    }
-                }
-
-                // Reset temporal gradients
-                if (model.temporal() != NULL) {
-                    int offset = n_spat + n_spec;
-                    for (int i = 0; i < n_temp; ++i) {
-                        gradient[offset+i] = 0.0;
-                    }
-                }
-
-                // Optionally reset scale gradients
-                if (model.has_scales()) {
-                    int offset = n_spat + n_spec + n_temp;
-                    for (int i = 0; i < model.scales(); ++i) {
-                        gradient[offset+i] = 0.0;
-                    }
-                }
-
-                // Add gradient vector to matrix
-                gradients->add_to_column(k, gradient);
-
-            } // endelse: IRF value was not positive
-            */
+            } // endif: IRF spatial value was positive
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
@@ -1767,6 +1751,14 @@ GVector GResponse::eval_probs(const GModelSky&    model,
             #endif
 
         } // endfor: looped over events
+
+        // Fill gradients into matrix
+        for (int i = 0; i < npars; ++i) {
+            gradients->column(i, tmp_gradients[i]);
+        }
+
+        // Delete temporal gradients
+        delete [] tmp_gradients;
 
     } // endif: Gamma-ray source model had a spatial component
 

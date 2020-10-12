@@ -253,17 +253,17 @@ GVector GModel::eval(const GObservation& obs,
 
     // Check matrix consistency
     if (grad) {
-        if (gradients->rows() != npars) {
-            std::string msg = "Number of "+gammalib::str(gradients->rows())+
-                              " rows in gradient matrix differs from number "
+        if (gradients->columns() != npars) {
+            std::string msg = "Number of "+gammalib::str(gradients->columns())+
+                              " columns in gradient matrix differs from number "
                               "of "+gammalib::str(npars)+" parameters "
                               "in model. Please provide a compatible gradient "
                               "matrix.";
             throw GException::invalid_argument(G_EVAL, msg);
         }
-        if (gradients->columns() != nevents) {
-            std::string msg = "Number of "+gammalib::str(gradients->columns())+
-                              " columns in gradient matrix differs from number "
+        if (gradients->rows() != nevents) {
+            std::string msg = "Number of "+gammalib::str(gradients->rows())+
+                              " rows in gradient matrix differs from number "
                               "of "+gammalib::str(nevents)+" events in "
                               "observation. Please provide a compatible "
                               "gradient matrix.";
@@ -273,6 +273,12 @@ GVector GModel::eval(const GObservation& obs,
 
     // Initialise values
     GVector values(nevents);
+
+    // Initialise temporary vectors to hold gradients
+    GVector* tmp_gradients = new GVector[npars];
+    for (int i = 0; i < npars; ++i) {
+        tmp_gradients[i] = GVector(nevents);
+    }
 
     // Loop over events
     for (int k = 0; k < nevents; ++k) {
@@ -287,22 +293,31 @@ GVector GModel::eval(const GObservation& obs,
         if (grad) {
 
             // Initialise gradient vector
-            GVector gradient(npars);
+            //GVector gradient(npars);
 
             // Extract relevant parameter gradients
             for (int i = 0; i < npars; ++i) {
                 const GModelPar& par = (*this)[i];
                 if (par.is_free() && par.has_grad()) {
-                    gradient[i] = par.factor_gradient();
+                    //gradient[i] = par.factor_gradient();
+                    tmp_gradients[i][k] = par.factor_gradient();
                 }
             }
 
             // Insert gradient vector into matrix
-            gradients->add_to_column(k, gradient);
+            //gradients->add_to_column(k, gradient);
 
         } // endif: looped over gradients
 
     } // endfor: looped over events
+
+    // Fill gradients into matrix
+    for (int i = 0; i < npars; ++i) {
+        gradients->column(i, tmp_gradients[i]);
+    }
+
+    // Delete temporal gradients
+    delete [] tmp_gradients;
 
     // Return values
     return values;
