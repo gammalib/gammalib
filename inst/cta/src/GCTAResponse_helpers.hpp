@@ -1459,7 +1459,8 @@ public:
                              m_sin_delta_sin_zeta(sin_delta_sin_zeta),
                              m_sin_delta_cos_zeta(sin_delta_cos_zeta),
                              m_cos_delta_sin_zeta(cos_delta_sin_zeta),
-                             m_cos_delta_cos_zeta(cos_delta_cos_zeta) { }
+                             m_cos_delta_cos_zeta(cos_delta_cos_zeta),
+                             m_values(GVector(outer->m_model->size()+1)) { }
     int     size(void) const { return m_size; }
     GVector eval(const double& phi);
 protected:
@@ -1469,6 +1470,7 @@ protected:
     double                      m_sin_delta_cos_zeta; //!< sin(delta) * cos(zeta)
     double                      m_cos_delta_sin_zeta; //!< cos(delta) * sin(zeta)
     double                      m_cos_delta_cos_zeta; //!< cos(delta) * cos(zeta)
+    GVector                     m_values;             //!< Return value
 };
 
 #endif /* GCTARESPONSE_HELPERS_HPP */

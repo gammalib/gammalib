@@ -2230,7 +2230,7 @@ GVector cta_psf_radial_kerns_phi::eval(const double& phi)
     }
 
     // Initialise kernel values
-    GVector values(m_size);
+    //GVector values(m_size);
 
     // If gradients are requested then compute partial derivatives of theta
     // and phi with respect to Right Ascension and Declination and store them
@@ -2265,27 +2265,32 @@ GVector cta_psf_radial_kerns_phi::eval(const double& phi)
     }
 
     // Compute model value and optionally model parameter gradients
-    values[0] = m_outer->m_model->eval(theta_kluge, srcEng, srcTime,
-                                       m_outer->m_grad);
+    //values[0] = m_outer->m_model->eval(theta_kluge, srcEng, srcTime,
+    //                                   m_outer->m_grad);
+    m_values[0] = m_outer->m_model->eval(theta_kluge, srcEng, srcTime,
+                                         m_outer->m_grad);
 
     // If gradients are requested, extract now the fully computed model
     // parameter gradients into the kernel values vector
     if (m_outer->m_grad) {
         for (int i = 1, k = 0; i < m_size; ++i, ++k) {
-            values[i] = (*(m_outer->m_model))[k].factor_gradient();
+            //values[i] = (*(m_outer->m_model))[k].factor_gradient();
+            m_values[i] = (*(m_outer->m_model))[k].factor_gradient();
         }
     }
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(values[0]) || gammalib::is_infinite(values[0])) {
+//    if (gammalib::is_notanumber(values[0]) || gammalib::is_infinite(values[0])) {
+    if (gammalib::is_notanumber(m_values[0]) || gammalib::is_infinite(m_values[0])) {
         std::string msg = "NaN/Inf encountered for phi="+gammalib::str(phi);
         gammalib::warning(G_PSF_RADIAL_KERNS_PHI, msg);
     }
     #endif
 
     // Return kernel values
-    return values;
+    //return values;
+    return m_values;
 }
 
 
