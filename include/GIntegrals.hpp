@@ -80,10 +80,10 @@ public:
     GVector            romberg(const double& a,
                                const double& b,
                                const int&    order = 5);
-    GVector            trapzd(const double& a,
-                              const double& b,
-                              const int&    n,
-                              GVector       result);
+    GVector            trapzd(const double&  a,
+                              const double&  b,
+                              const int&     n,
+                              const GVector& previous_result);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:

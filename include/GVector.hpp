@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GVector.hpp - Vector class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -247,7 +247,7 @@ GVector operator+(const double& scalar, const GVector& vector)
  * Returns the difference between vector @p a and @p b.
  ***************************************************************************/
 inline
-GVector operator- (const GVector& a, const GVector& b)
+GVector operator-(const GVector& a, const GVector& b)
 {
     GVector result = a;
     result -= b;

@@ -424,7 +424,8 @@ GVector GIntegrals::romberg(const double& a, const double& b, const int& order)
  * @param[in] a Left integration boundary.
  * @param[in] b Right integration boundary.
  * @param[in] n Number of steps.
- * @param[in] result Result vector from a previous trapezoidal integration step.
+ * @param[in] previous_result Result vector from a previous trapezoidal
+ *                            integration step.
  * @return Vector of integration results.
  *
  * @exception GException::invalid_value
@@ -442,19 +443,19 @@ GVector GIntegrals::romberg(const double& a, const double& b, const int& order)
  * For @p n > 1 the integral is computed using
  *
  * \f[
- *    \int_a^b f_j(x) \, dx = \frac{1}{2} \left[{\tt result}_j +
+ *    \int_a^b f_j(x) \, dx = \frac{1}{2} \left[{\tt previous\_result}_j +
  *    \frac{b-a}{2^{n-1}}
- *    \sum_{i=0}^{2^{n-1}-1} f_j \left( a + (0.5+i) \frac{b-a}{2^{n-1}} \right) \right]
- *
+ *    \sum_{i=0}^{2^{n-1}-1} f_j \left( a + (0.5+i) \frac{b-a}{2^{n-1}}
+ *    \right) \right]
  * \f]
  *
- * where \f${\tt result}_j\f$ is the integration result for function \f$j\f$
- * from a previous call to the method with @p n = @p n - 1.
+ * where \f${\tt previous\_result}_j\f$ is the integration result for
+ * function \f$j\f$ from a previous call to the method with @p n = @p n - 1.
  ***************************************************************************/
-GVector GIntegrals::trapzd(const double& a,
-                           const double& b,
-                           const int&    n,
-                           GVector      result)
+GVector GIntegrals::trapzd(const double&  a,
+                           const double&  b,
+                           const int&     n,
+                           const GVector& previous_result)
 {
     // Throw an exception if the instance has no kernel
     if (m_kernels == NULL) {
@@ -463,24 +464,22 @@ GVector GIntegrals::trapzd(const double& a,
         throw GException::invalid_value(G_TRAPZD, msg);
     }
 
-    // Handle case of identical boundaries
-    if (a == b) {
-        result = GVector(result.size());
-    }
-
-    // ... otherwise use trapeziodal rule
-    else {
+    // If lower boundary is smaller than upper boundary than use trapezoidal
+    // rule
+    if (a < b) {
 
         // Case A: Only a single step is requested
         if (n == 1) {
 
             // Evaluate integrand at boundaries
-            GVector y_a = m_kernels->eval(a);
-            GVector y_b = m_kernels->eval(b);
-            m_calls    += 2;
+            GVector result = 0.5 * (b-a) * (m_kernels->eval(a) +
+                                            m_kernels->eval(b));
 
-            // Compute result
-            result = 0.5 * (b-a) * (y_a + y_b);
+            // Bookkeeping of function calls
+            m_calls += 2;
+
+            // Return result here to avoid an extra vector copy
+            return result;
 
         } // endif: only a single step was requested
 
@@ -501,7 +500,7 @@ GVector GIntegrals::trapzd(const double& a,
                             " a="+gammalib::str(a)+
                             ", b="+gammalib::str(b)+
                             ", n="+gammalib::str(n)+
-                            ", result="+result.print()+
+                            ", result="+previous_result.print()+
                             ". Looks like n is too large.";
                 if (!m_silent) {
                     gammalib::warning(G_TRAPZD, m_message);
@@ -520,33 +519,52 @@ GVector GIntegrals::trapzd(const double& a,
                             " a="+gammalib::str(a)+
                             ", b="+gammalib::str(b)+
                             ", n="+gammalib::str(n)+
-                            ", result="+result.print()+
+                            ", result="+previous_result.print()+
                             ". Step is too small to make sense.";
                 if (!m_silent) {
                     gammalib::warning(G_TRAPZD, m_message);
                 }
             }
 
+            // Initialise result
+            GVector result(previous_result.size());
+            
+            // Initialise argument
+            double x = a + 0.5 * del;
+
             // Sum up values
-            double  x = a + 0.5 * del;
-            GVector sum(result.size());
             for (int j = 0; j < it; ++j, x += del) {
 
                 // Evaluate and add integrand
-                sum += m_kernels->eval(x);
+                result += m_kernels->eval(x);
+
+                // Bookkeeping of function calls
                 m_calls++;
 
             } // endfor: looped over steps
 
-            // Set result
-            result = 0.5 * (result + del * sum);
+            // Compute result benefiting from previous result
+            result *= del;
+            result += previous_result;
+            result *= 0.5;
+
+            // Return result here to avoid an extra vector copy
+            return result;
 
         } // endelse: Case B
 
-    } // endelse: trapeziodal rule was applied
+    } // endif: trapezoidal rule was applied
 
-    // Return result
-    return result;
+    // ... otherwise handle case a >= b
+    else {
+
+        // Set empty vector
+        GVector result(previous_result.size());
+
+        // Return result here to avoid an extra vector copy
+        return result;
+    }
+
 }
 
 
@@ -714,8 +732,8 @@ double GIntegrals::polint(const double*  xa,
     double y = 0.0;
 
     // Allocate temporary memory
-    std::vector<double> c(n, 0.0);
-    std::vector<double> d(n, 0.0);
+    double* c = new double[n];
+    double* d = new double[n];
 
     // Compute initial distance to first node
     double dif = std::abs(x-xa[1]);
@@ -767,6 +785,10 @@ double GIntegrals::polint(const double*  xa,
         y += *dy;
 
     } // endfor: looped over columns of tableau
+
+    // Free temporary memory
+    delete [] c;
+    delete [] d;
 
     // Return
     return y;

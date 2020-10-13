@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GVector.cpp - Vector class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -688,8 +688,10 @@ void GVector::alloc_members(void)
     // Continue only if vector has non-zero length
     if (m_num > 0) {
 
-        // Allocate vector and initialize elements to 0
+        // Allocate vector
         m_data = new double[m_num];
+
+        // Initialize elements to 0
         for (int i = 0; i < m_num; ++i) {
             m_data[i] = 0.0;
         }
@@ -711,13 +713,18 @@ void GVector::copy_members(const GVector& vector)
     // Copy attributes
     m_num = vector.m_num;
 
-    // Copy elements
+    // Continue only if vector has non-zero length
     if (m_num > 0) {
-        alloc_members();
+
+        // Allocate vector
+        m_data = new double[m_num];
+
+        // Copy elements
         for (int i = 0; i <  m_num; ++i) {
             m_data[i] = vector.m_data[i];
         }
-    }
+
+    } // endif: vector had non-zero length
 
     // Return
     return;
