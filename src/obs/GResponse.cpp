@@ -668,7 +668,8 @@ double GResponse::irf_spatial(const GEvent&       event,
  ***************************************************************************/
 GVector GResponse::irf_spatial(const GModelSky&    model,
                                const GObservation& obs,
-                               GMatrixSparse*      gradients) const
+                               //GMatrixSparse*      gradients) const
+                               GMatrix*            gradients) const
 {
     // Get number of model parameters and number of events
     int npars   = model.size();
@@ -1253,7 +1254,8 @@ double GResponse::irf_composite(const GEvent&       event,
  ***************************************************************************/
 GVector GResponse::irf_ptsrc(const GModelSky&    model,
                              const GObservation& obs,
-                             GMatrixSparse*      gradients) const
+                             //GMatrixSparse*      gradients) const
+                             GMatrix*            gradients) const
 {
     // Get number of events
     int nevents = obs.events()->size();
@@ -1296,7 +1298,8 @@ GVector GResponse::irf_ptsrc(const GModelSky&    model,
  ***************************************************************************/
 GVector GResponse::irf_radial(const GModelSky&    model,
                               const GObservation& obs,
-                              GMatrixSparse*      gradients) const
+//                              GMatrixSparse*      gradients) const
+                              GMatrix*            gradients) const
 {
     // Get number of events
     int nevents = obs.events()->size();
@@ -1339,7 +1342,8 @@ GVector GResponse::irf_radial(const GModelSky&    model,
  ***************************************************************************/
 GVector GResponse::irf_elliptical(const GModelSky&    model,
                                   const GObservation& obs,
-                                  GMatrixSparse*      gradients) const
+                                  //GMatrixSparse*      gradients) const
+                                  GMatrix*            gradients) const
 {
     // Get number of events
     int nevents = obs.events()->size();
@@ -1382,7 +1386,8 @@ GVector GResponse::irf_elliptical(const GModelSky&    model,
  ***************************************************************************/
 GVector GResponse::irf_diffuse(const GModelSky&    model,
                                const GObservation& obs,
-                               GMatrixSparse*      gradients) const
+                               //GMatrixSparse*      gradients) const
+                               GMatrix*            gradients) const
 {
     // Get number of events
     int nevents = obs.events()->size();
@@ -1425,7 +1430,8 @@ GVector GResponse::irf_diffuse(const GModelSky&    model,
  ***************************************************************************/
 GVector GResponse::irf_composite(const GModelSky&    model,
                                  const GObservation& obs,
-                                 GMatrixSparse*      gradients) const
+                                 //GMatrixSparse*      gradients) const
+                                 GMatrix*            gradients) const
 {
     // Get number of events
     int nevents = obs.events()->size();
@@ -1631,7 +1637,8 @@ GVector GResponse::eval_probs(const GModelSky&    model,
     if (model.spatial() != NULL) {
 
         // Initialise sparse matrix to hold spatial gradients
-        GMatrixSparse spat_gradients(nevents, model.spatial()->size());
+        //GMatrixSparse spat_gradients(nevents, model.spatial()->size());
+        GMatrix spat_gradients(nevents, model.spatial()->size());
 
         // Compute IRF value
         //probs = irf_spatial(model, obs);

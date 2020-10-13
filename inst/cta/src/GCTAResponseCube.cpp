@@ -1750,7 +1750,8 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
  ***************************************************************************/
 GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
                                      const GObservation& obs,
-                                     GMatrixSparse*      gradients) const
+//                                     GMatrixSparse*      gradients) const
+                                     GMatrix*            gradients) const
 {
     // Get number of events
     int nevents = obs.events()->size();
@@ -1868,7 +1869,7 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
         // matrix
         if (grad) {
             for (int ipar = 0; ipar < npars; ++ipar) {
-                gradients->add_to_column(ipar, gradient[ipar]);
+                gradients->column(ipar, gradient[ipar]);
             }
         }
 

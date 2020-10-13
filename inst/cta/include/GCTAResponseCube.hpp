@@ -155,7 +155,8 @@ private:
     // New methods
     GVector irf_radial(const GModelSky&    model,
                        const GObservation& obs,
-                       GMatrixSparse*      gradients = NULL) const;
+                       //GMatrixSparse*      gradients = NULL) const;
+                       GMatrix*            gradients = NULL) const;
     GVector psf_radial(const GModelSpatialRadial* model,
                        const double&              zeta,
                        const GSkyDir&             obsDir,
