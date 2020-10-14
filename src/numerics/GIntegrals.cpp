@@ -333,12 +333,7 @@ GVector GIntegrals::romberg(const double& a, const double& b, const int& order)
             if (m_iter >= order) {
 
                 // Compute result using polynom interpolation
-                for (int i = 0; i < result.size(); ++i) {
-                    double dy = 0;
-                    result[i] = polint(&h[m_iter-order], &s[m_iter-order],
-                                       order, i, 0.0, &dy);
-                    dss[i]    = dy;
-                }
+                result = polint(&h[m_iter-order], &s[m_iter-order], order, 0.0, &dss);
 
                 // If a fixed number of iterations has been requested and if
                 // the final iteration was reached then set the converged
@@ -711,80 +706,94 @@ void GIntegrals::free_members(void)
  *
  * @param[in] xa Pointer to array of X values.
  * @param[in] ya Pointer to GVector of Y values.
- * @param[in] n Number of elements in arrays.
- * @param[in] index GVector index for with interpolations should be performed.
+ * @param[in] order Number of elements in arrays.
  * @param[in] x X value for which interpolations should be performed.
- * @param[out] dy Pointer to array of error estimates for interpolated values.
- * @return Interpolated value.
+ * @param[out] dy Pointer to vector of error estimates for interpolated values.
+ * @return Vector of interpolated values.
  *
  * Given arrays @p xa[1,..,n] and @p ya[1,..,n], and given a value @p x, this
  * method returns a value y, and an error estimate @p dy. If P(x) is the
  * polynomial of degree n-1, then the returned value y=P(x).
  ***************************************************************************/
-double GIntegrals::polint(const double*  xa,
-                          const GVector* ya,
-                          const int&     n,
-                          const int&     index,
-                          const double&  x,
-                          double*        dy)
+GVector GIntegrals::polint(const double*  xa,
+                           const GVector* ya,
+                           const int&     order,
+                           const double&  x,
+                           GVector*       dy)
 {
+    // Get vector dimension
+    int nsize = ya->size();
+
     // Initialise result
-    double y = 0.0;
+    GVector y(nsize);
 
     // Allocate temporary memory
-    double* c = new double[n];
-    double* d = new double[n];
+    double* c = new double[order];
+    double* d = new double[order];
 
-    // Compute initial distance to first node
-    double dif = std::abs(x-xa[1]);
-
-    // Find index ns of the closest table entry
-    int ns = 0;
-    for (int i = 0; i < n; ++i) {
+    // Find index nclosest of the closest table entry
+    int    nclosest = 0;
+    double dif      = std::abs(x-xa[1]);
+    for (int i = 1; i < order; ++i) {
         double dift = std::abs(x-xa[i+1]);
         if (dift < dif) {
-            ns  = i;
-            dif = dift;
+            nclosest  = i;
+            dif       = dift;
         }
-        double value = ya[i+1][index];
-        c[i]         = value;
-        d[i]         = value;
     }
 
-    // Get initial approximation to y
-    y = ya[ns+1][index];
-    ns--;
+    // Loop over vector dimension
+    for (int index = 0; index < nsize; ++index) {
 
-    // Loop over each column of the tableau
-    for (int m = 1; m < n; ++m) {
+        // Set closest table entry
+        int ns = nclosest;
 
-        // Update current c's and d's
-        for (int i = 0; i < n-m; ++i) {
-            double ho  = xa[i+1]   - x;
-            double hp  = xa[i+m+1] - x;
-            double w   = c[i+1] - d[i];
-            double den = ho - hp;
-            if (den == 0.0) {
-                m_isvalid = false;
-                m_message = "Invalid step size "+gammalib::str(den)+
-                            " encountered. Two values in xa array are"
-                            " identical.";
-                if (!m_silent) {
-                    gammalib::warning(G_POLINT, m_message);
-                }
-            }
-            den  = w/den;
-            d[i] = hp*den;
-            c[i] = ho*den;
+        // Initialise table values
+        for (int i = 0; i < order; ++i) {
+            double value = ya[i+1][index];
+            c[i]         = value;
+            d[i]         = value;
         }
 
-        // Compute y correction
-        *dy = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
+        // Get initial approximation to y
+        y[index] = ya[ns+1][index];
+        ns--;
 
-        // Update y
-        y += *dy;
+        // Loop over each column of the tableau
+        for (int m = 1; m < order; ++m) {
 
-    } // endfor: looped over columns of tableau
+            // Update current c's and d's
+            for (int i = 0; i < order-m; ++i) {
+                double ho  = xa[i+1]   - x;
+                double hp  = xa[i+m+1] - x;
+                double w   = c[i+1] - d[i];
+                double den = ho - hp;
+                if (den == 0.0) {
+                    m_isvalid = false;
+                    m_message = "Invalid step size "+gammalib::str(den)+
+                                " encountered. Two values in xa array are"
+                                " identical.";
+                    if (!m_silent) {
+                        gammalib::warning(G_POLINT, m_message);
+                    }
+                }
+                den  = w/den;
+                d[i] = hp*den;
+                c[i] = ho*den;
+            }
+
+            // Compute y correction
+            double delta_y = (2*(ns+1) < (order-m)) ? c[ns+1] : d[ns--];
+        
+            // Update y
+            y[index] += delta_y;
+
+            // Store result
+            (*dy)[index] = delta_y;
+
+        } // endfor: looped over columns of tableau
+
+    } // endfor: looped over vector dimension
 
     // Free temporary memory
     delete [] c;

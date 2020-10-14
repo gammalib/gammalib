@@ -88,15 +88,14 @@ public:
 
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GIntegrals& integral);
-    void   free_members(void);
-    double polint(const double*  xa,
-                  const GVector* ya,
-                  const int&     n,
-                  const int&     index,
-                  const double&  x,
-                  double*        dy);
+    void    init_members(void);
+    void    copy_members(const GIntegrals& integral);
+    void    free_members(void);
+    GVector polint(const double*  xa,
+                   const GVector* ya,
+                   const int&     order,
+                   const double&  x,
+                   GVector*       dy);
 
     // Protected data area
     GFunctions* m_kernels;   //!< Pointer to function kernels
