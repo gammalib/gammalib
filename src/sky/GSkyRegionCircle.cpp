@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GSkyRegionCircle.hpp"
+#include "GSkyRegionRect.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -538,17 +539,34 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
         // Calculate angular distance between the centres
         double ang_dist = m_centre.dist_deg(regcirc->centre());
 
+        // Calculate angular distance between the centres
+        double ang_dist = m_centre.dist_deg(regcirc->centre());
+
         // Check if the region is contained in this
         if ((ang_dist + regcirc->radius()) <= m_radius) {
             fully_inside = true;
         }
-        
+
     }
-    
+
+    // If other region is rectangle check corners
+    else if (reg.type() == "Rect") {
+
+        // Create rectangular region from reg
+        const GSkyRegionRect* regrect =
+              dynamic_cast<const GSkyRegionRect*>(&reg);
+
+        // Check containment of all edges
+        fully_inside = contains(regrect->get_corner(0)) &
+                       contains(regrect->get_corner(1)) &
+                       contains(regrect->get_corner(2)) &
+                       contains(regrect->get_corner(3));
+    }
+
     // ... otherwise throw an exception
     else {
         throw GException::feature_not_implemented(G_CONTAINS,
-              "Cannot compare two different region types yet");
+              "Cannot compare to region type \""+reg.type()+"\" yet");
     }
 
     // Return value
