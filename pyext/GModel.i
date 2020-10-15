@@ -53,6 +53,8 @@ public:
     virtual double      eval(const GEvent& event,
                              const GObservation& obs,
                              const bool& gradients = false) const = 0;
+    virtual GVector     eval(const GObservation& obs,
+                             GMatrixSparse* gradients = NULL) const = 0;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;

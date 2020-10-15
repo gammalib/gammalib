@@ -161,6 +161,72 @@ GObservation& GObservation::operator=(const GObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Return events
+ *
+ * @exception GException::no_events
+ *            No events allocated for observation.
+ *
+ * Returns pointer to events.
+ ***************************************************************************/
+GEvents* GObservation::events(void)
+{
+    // Throw an exception if the event container is not valid
+    if (m_events == NULL) {
+        std::string msg = "No events allocated for observation.";
+        throw GException::invalid_value(G_EVENTS, msg);
+    }
+
+    // Return pointer to events
+    return (m_events);
+}
+
+
+/***********************************************************************//**
+ * @brief Return events (const version)
+ *
+ * @exception GException::no_events
+ *            No events allocated for observation.
+ *
+ * Returns const pointer to events.
+ ***************************************************************************/
+const GEvents* GObservation::events(void) const
+{
+    // Throw an exception if the event container is not valid
+    if (m_events == NULL) {
+        std::string msg = "No events allocated for observation.";
+        throw GException::invalid_value(G_EVENTS, msg);
+    }
+
+    // Return pointer to events
+    return (m_events);
+}
+
+
+/***********************************************************************//**
+ * @brief Set event container
+ *
+ * @param[in] events Event container.
+ *
+ * Set the event container for this observation by cloning the container
+ * specified in the argument.
+ ***************************************************************************/
+void GObservation::events(const GEvents& events)
+{
+    // Free existing event container only if it differs from current event
+    // container. This prevents unintential deallocation of the argument
+    if ((m_events != NULL) && (m_events != &events)) {
+        delete m_events;
+    }
+
+    // Clone events
+    m_events = events.clone();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Compute likelihood function
  *
  * @param[in] models Models.
@@ -330,7 +396,7 @@ double GObservation::model(const GModels& models,
 
                             // Set gradient
                             if (par.is_free()) {
-                                if (par.has_grad()) {
+                                if (has_gradient(par)) {
                                     (*gradient)[igrad+ipar] = par.factor_gradient();
                                 }
                                 else {
@@ -356,7 +422,7 @@ double GObservation::model(const GModels& models,
 
                             // Set gradient
                             if (par.is_free()) {
-                                if (par.has_grad()) {
+                                if (has_gradient(par)) {
                                     (*gradient)[igrad+ipar] = par.factor_gradient();
                                 }
                                 else {
@@ -463,11 +529,9 @@ GVector GObservation::model(const GModels& models,
                 else {
 
                     // Allocate gradient matrix
-                    //GMatrixSparse gradients(mptr->size(), nevents);
                     GMatrixSparse gradients(nevents, mptr->size());
 
                     // Initialise sparse matrix stack
-                    //gradients.stack_init(mptr->size()*1000, 1000);
                     gradients.stack_init(nevents*mptr->size(), mptr->size());
 
                     // Evaluate model and add to values
@@ -495,14 +559,11 @@ GVector GObservation::model(const GModels& models,
 
                             // Determine gradient
                             GVector grad(nevents);
-                            if (par.is_free()) {
-                                if (par.has_grad()) {
-                                    //grad = gradients.row(ipar);
-                                    grad = gradients.column(ipar);
-                                }
-                                else {
-                                    grad = model_grad(*mptr, par);
-                                }
+                            if (has_gradient(par)) {
+                                grad = gradients.column(ipar);
+                            }
+                            else {
+                                grad = model_grad(*mptr, par);
                             }
 
                             // Set gradient
@@ -523,10 +584,8 @@ GVector GObservation::model(const GModels& models,
 
                             // Determine gradient
                             GVector grad(nevents);
-                            if (par.is_free()) {
-                                if (par.has_grad()) {
-                                    //grad = gradients.row(ipar);
-                                    grad = gradients.column(ipar);
+                            if (has_gradient(par)) {
+                                grad = gradients.column(ipar);
 // Debugging
 /*
 if (ipar < 3) {
@@ -542,10 +601,9 @@ if (ipar < 3) {
     }
 }
 */
-                                }
-                                else {
-                                    grad = model_grad(*mptr, par);
-                                }
+                            }
+                            else {
+                                grad = model_grad(*mptr, par);
                             }
 
                             // Set gradient
@@ -1110,68 +1168,65 @@ void GObservation::remove_response_cache(const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Set event container
+ * @brief Check whether a model parameter has an analytical gradient
  *
- * @param[in] events Event container.
+ * @param[in] par Model parameter.
+ * @returns True if model parameter is free and has an analytical gradient.
  *
- * Set the event container for this observation by cloning the container
- * specified in the argument.
+ * Checks whether a model parameter is free and has an analytical gradient.
  ***************************************************************************/
-void GObservation::events(const GEvents& events)
+bool GObservation::has_gradient(const GModelPar& par) const
 {
-    // Free existing event container only if it differs from current event
-    // container. This prevents unintential deallocation of the argument
-    if ((m_events != NULL) && (m_events != &events)) {
-        delete m_events;
+    // Initialise flag
+    bool has_gradient = false;
+    
+    // Only consider free parameters
+    if (par.is_free()) {
+
+        // Search for parameter address in stack and set flag to true if
+        // parameter address was found
+        for (int i = 0; i < m_spat_pars_with_gradients.size(); ++i) {
+            if (m_spat_pars_with_gradients[i] == &par) {
+                has_gradient = true;
+                break;
+            }
+        }
+
+    } // endif: parameter was free
+
+    // Return flag
+    return has_gradient;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals that an analytical gradient was computed for a model
+ *        parameter
+ *
+ * @param[in] par Model parameter.
+ *
+ * Signals that an analytical gradient was computed for a model parameter.
+ ***************************************************************************/
+void GObservation::computed_gradient(const GModelPar& par) const
+{
+    // Initialise flag
+    bool in_stack = false;
+
+    // Check if parameter is already in stack
+    for (int i = 0; i < m_spat_pars_with_gradients.size(); ++i) {
+        if (m_spat_pars_with_gradients[i] == &par) {
+            in_stack = true;
+            break;
+        }
     }
 
-    // Clone events
-    m_events = events.clone();
+    // If parameter is not yet in stack the push it on the stack
+    if (!in_stack) {
+        m_spat_pars_with_gradients.push_back(const_cast<GModelPar*>(&par));
+    }
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return events
- *
- * @exception GException::no_events
- *            No events allocated for observation.
- *
- * Returns pointer to events.
- ***************************************************************************/
-GEvents* GObservation::events(void)
-{
-    // Throw an exception if the event container is not valid
-    if (m_events == NULL) {
-        std::string msg = "No events allocated for observation.";
-        throw GException::invalid_value(G_EVENTS, msg);
-    }
-
-    // Return pointer to events
-    return (m_events);
-}
-
-
-/***********************************************************************//**
- * @brief Return events (const version)
- *
- * @exception GException::no_events
- *            No events allocated for observation.
- *
- * Returns const pointer to events.
- ***************************************************************************/
-const GEvents* GObservation::events(void) const
-{
-    // Throw an exception if the event container is not valid
-    if (m_events == NULL) {
-        std::string msg = "No events allocated for observation.";
-        throw GException::invalid_value(G_EVENTS, msg);
-    }
-
-    // Return pointer to events
-    return (m_events);
 }
 
 
@@ -1192,6 +1247,9 @@ void GObservation::init_members(void)
     m_statistic = "cstat";
     m_events    = NULL;
 
+    // Initialise stack of pointers to spatial parameters with gradients
+    m_spat_pars_with_gradients.clear();
+
     // Return
     return;
 }
@@ -1210,6 +1268,9 @@ void GObservation::copy_members(const GObservation& obs)
     m_name      = obs.m_name;
     m_id        = obs.m_id;
     m_statistic = obs.m_statistic;
+
+    // Copy stack of pointers to spatial parameters with gradients
+    m_spat_pars_with_gradients = obs.m_spat_pars_with_gradients;
 
     // Clone members
     m_events = (obs.m_events != NULL) ? obs.m_events->clone() : NULL;

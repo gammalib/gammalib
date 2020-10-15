@@ -40,7 +40,6 @@
 #include "GPhoton.hpp"
 #include "GPhotons.hpp"
 #include "GRan.hpp"
-#include "GVector.hpp"
 #include "GEvent.hpp"
 #include "GObservation.hpp"
 #include "GXmlElement.hpp"
@@ -48,6 +47,8 @@
 /* __ Forward declarations _______________________________________________ */
 class GEvent;
 class GObservation;
+class GVector;
+class GMatrixSparse;
 
 
 /***********************************************************************//**
@@ -149,16 +150,14 @@ public:
     virtual double      eval(const GEvent& event,
                              const GObservation& obs,
                              const bool& gradients = false) const;
+    virtual GVector     eval(const GObservation& obs,
+                             GMatrixSparse*      gradients = NULL) const;
     virtual double      npred(const GEnergy& obsEng,
                               const GTime& obsTime,
                               const GObservation& obs) const;
     virtual void        read(const GXmlElement& xml);
     virtual void        write(GXmlElement& xml) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
-
-    // Reimplemented virtual base class methods
-    virtual GVector     eval(const GObservation& obs,
-                             GMatrixSparse*      gradients = NULL) const;
 
     // Other methods
     GModelSpatial*      spatial(void) const;
@@ -182,6 +181,7 @@ protected:
     void            free_members(void);
     void            set_pointers(void);
     void            set_type(void);
+    void            signal_analytical_gradients(const GObservation& obs) const;
     GModelSpatial*  xml_spatial(const GXmlElement& spatial) const;
     GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
     GModelTemporal* xml_temporal(const GXmlElement& temporal) const;

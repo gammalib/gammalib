@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GModelData.i - Abstract virtual data model class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,10 @@ public:
     virtual GEvents*    mc(const GObservation& obs, GRan& ran) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
+
+    // Implemented pure virtual base class methods
+    virtual GVector     eval(const GObservation& obs,
+                             GMatrixSparse* gradients = NULL) const;
 };
 
 

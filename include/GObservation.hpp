@@ -29,17 +29,18 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GBase.hpp"
 #include "GEvents.hpp"
 #include "GTime.hpp"
 #include "GFunction.hpp"
+#include "GModelPar.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GVector;
 class GMatrixSparse;
 class GModel;
 class GModels;
-class GModelPar;
 class GResponse;
 class GXmlElement;
 
@@ -119,12 +120,14 @@ public:
 
     // Implemented methods
     bool               has_events(void) const;
+    bool               has_gradient(const GModelPar& par) const;
     void               name(const std::string& name);
     void               id(const std::string& id);
     void               statistic(const std::string& statistic);
     const std::string& name(void) const;
     const std::string& id(void) const;
     const std::string& statistic(void) const;
+    void               computed_gradient(const GModelPar& par) const;
 
 protected:
     // Protected methods
@@ -217,6 +220,9 @@ protected:
     std::string m_id;          //!< Observation identifier
     std::string m_statistic;   //!< Optimizer statistic
     GEvents*    m_events;      //!< Pointer to event container
+
+    // Stack of pointers to spatial parameters with gradients
+    mutable std::vector<GModelPar*> m_spat_pars_with_gradients;
 };
 
 

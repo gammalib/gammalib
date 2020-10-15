@@ -568,6 +568,12 @@ double GModelSky::eval(const GEvent&       event,
     // Evaluate model
     double value = obs.response()->convolve(*this, event, obs, gradients);
 
+    // If gradients were requested then signal all computed analytical
+    // gradients
+    if (gradients) {
+        signal_analytical_gradients(obs);
+    }
+
     // Return
     return value;
 }
@@ -591,6 +597,12 @@ GVector GModelSky::eval(const GObservation& obs,
 {
     // Evaluate model
     GVector values = obs.response()->convolve(*this, obs, gradients);
+
+    // If gradients were requested then signal all computed analytical
+    // gradients
+    if (gradients) {
+        signal_analytical_gradients(obs);
+    }
 
     // Return
     return values;
@@ -1269,6 +1281,63 @@ void GModelSky::set_type(void)
         }
 
     } // endif: there was a spatial model component
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal all parameters that have analytical gradients for a given
+ *        observation
+ *
+ * @param[in] obs Observation.
+ *
+ * This method signals all spectral, temporal and model scaling parameters
+ * for which analytical gradients exist for a given observation. Analytical
+ * gradients will be signalled for all of these parameters that are free
+ * and for which `has_grad()` is `true`.
+ *
+ * Note that spatial analytical gradients are excluded. These will be
+ * signalled by the underlying convolution method as analytical gradients
+ * are not (yet) supported by all convolution methods.
+ ***************************************************************************/
+void GModelSky::signal_analytical_gradients(const GObservation& obs) const
+{
+    // If the model has a spectral component then signal all free parameters
+    // with analytical gradients
+    if (spectral() != NULL) {
+        for (int i = 0; i < spectral()->size(); ++i) {
+            GModelPar& par = (*(spectral()))[i];
+            if (par.is_free() && par.has_grad()) {
+                obs.computed_gradient(par);
+            }
+        }
+    }
+
+    // If the model has a temporal component then signal all free parameters
+    // with analytical gradients
+    if (temporal() != NULL) {
+        for (int i = 0; i < temporal()->size(); ++i) {
+            GModelPar& par = (*(temporal()))[i];
+            if (par.is_free() && par.has_grad()) {
+                obs.computed_gradient(par);
+            }
+        }
+    }
+
+    // If the model has a scales then signal all free parameters with
+    // analytical gradients
+    if (has_scales()) {
+        for (int i = 0; i < scales(); ++i) {
+            const GModelPar& par = scale(i);
+            if (par.name() == obs.instrument()) {
+                if (par.is_free() && par.has_grad()) {
+                    obs.computed_gradient(par);
+                }
+            }
+        }
+    }
 
     // Return
     return;
