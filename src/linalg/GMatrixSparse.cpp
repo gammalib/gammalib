@@ -916,7 +916,7 @@ void GMatrixSparse::column(const int& column, const GVector& vector)
     // Debug header
     #if defined(G_DEBUG_SPARSE_INSERTION)
     std::cout << "GMatrixSparse::column(";
-    std::cout << column << ", [" << v << "]):" << std::endl;
+    std::cout << column << ", [" << vector << "]):" << std::endl;
     std::cout << " In Data : ";
     for (int i = 0; i < m_elements; ++i) {
         std::cout << m_data[i] << " ";
@@ -1019,7 +1019,7 @@ void GMatrixSparse::column(const int& column, const GVector& vector)
     for (int i = 0; i < m_elements; ++i) {
         std::cout << m_rowinx[i] << " ";
     }
-    std::cout << endl << " Out Col : ";
+    std::cout << std::endl << " Out Col : ";
     for (int i = 0; i < m_cols+1; ++i) {
         std::cout << m_colstart[i] << " ";
     }
