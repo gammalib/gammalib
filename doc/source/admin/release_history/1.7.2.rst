@@ -1,0 +1,14 @@
+.. _1.7.2:
+
+GammaLib 1.7.2 release (15 October 2020)
+========================================
+
+Overview
+--------
+
+GammaLib 1.7.2 is a bug fix release for GammaLib release 1.7.
+
+The following bugs were fixed:
+
+* [`3402 <https://cta-redmine.irap.omp.eu/issues/3402>`_] -
+  Fix copy of base class members in copy constructor of some spatial models.

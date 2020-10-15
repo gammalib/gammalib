@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.7.1
+New Features and Important Changes in GammaLib 1.7.2
 
-7 September 2020
+15 October 2020
 
 
 1. Introduction
@@ -38,29 +38,12 @@ The return value of the following methods has been changed:
 
 3. Configuration
 -----------------
-The Python include path was added in the Python.h header check in configure.ac
-since due to a bug introduced in Python 3.8 the cpython/initconfig.h header was
-not found (#3329).
-
-The configuration now checks for Big Sur and later so that the path names in
-the Python modules are adapted as needed (#3326).
-
-The Python modules are now copied from pyext/build/gammalib into pyext/gammalib
-since code generated using recent swig versions needs the modules in that
-place (#3322).
-
-Automatic type casting did not work fully in the Python interface since for
-some classes the members were not accessible after type casting. It turned
-out that the interface for the derived classes needed to be added explicitly
-when typecasting across module boundaries, so that all information is properly
-available (#3295).
+None
 
 
 4. Application module
 ---------------------
-The reading and writing of the parameter file in GApplicationPars::read()
-and GApplicationPars::write() was put in an OpenMP critical zone to assure
-that the reading and writing is thread safe (#3287).
+None
 
 
 5. Base module
@@ -80,17 +63,7 @@ None
 
 8. Model module
 ---------------
-The GModels::save() method implements a specific variant of the
-GModels::write() method that actually circumvents the source checking in the
-GModel::write() methods. Since when saving a model definition XML file we
-know that a source does not yet exist before writing, we do not need source
-checking. This will substantially speeds-up the saving, in particular for
-large models (#3308).
-
-The flux() and eflux() methods of the GModelSpectralBrokenPlaw class returned
-a value of zero if one of the energy boundaries was identical to the break
-energy. The reason was an incomplete coverage of the possible conditions that
-left this special case out of the computation. This is fixed now (#3279).
+The copy constructors of the classes ...
 
 
 9. Numerics module
@@ -110,22 +83,17 @@ None
 
 12. Sky module
 --------------
-The region files written by GSkyRegions were not readable by ds9 when region
-names were specified. It turned out that region names have to be put in quotes,
-either ", ' or {}. I modified the GSkyRegionCircle::read() and write() methods
-to support this logic, where {} are used in GSkyRegionCircle::write() (#3280).
+None
 
 
 13. Support module
 ------------------
-Pre-compute number of XML elements in gammalib::xml_need_par() and
-gammalib::xml_has_par() methods (#3308).
+None
 
 
 14. XML module
 --------------
-Avoid dynamic type casting and unnecessary computation of the number of elements
-in GXmlNode::element(std::string,int) method (#3308).
+None
 
 
 15. VO module
@@ -155,21 +123,14 @@ None
 
 20. CTA interface
 -----------------
-The response cube classes GCTACubeExposure, GCTACubePsf, GCTACubeEdisp and
-GCTACubeBackground now write the units of the response cube into the FITS
-files (#3321).
-
-A specific response cache was implemented for the stacked analysis that reduces
-the memory requirements by at least a factor of 6. Instead of using the std::map
-cache, the full data-space is cached, avoiding the need for any bookkeeping
-(#3316).
-
-
-21. COMPTEL interface
----------------------
 None
 
 
-22. INTEGRAL/SPI interface
---------------------------
+21. COMPTEL interface 
+--------------------- 
+None
+
+
+22. INTEGRAL/SPI interface 
+-------------------------- 
 None
