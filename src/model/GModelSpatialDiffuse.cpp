@@ -65,7 +65,7 @@ GModelSpatialDiffuse::GModelSpatialDiffuse(void) : GModelSpatial()
  * @param[in] model Diffuse spatial model.
  ***************************************************************************/
 GModelSpatialDiffuse::GModelSpatialDiffuse(const GModelSpatialDiffuse& model) :
-                      GModelSpatial()
+                      GModelSpatial(model)
 {
     // Initialise members
     init_members();

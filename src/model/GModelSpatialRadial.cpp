@@ -90,7 +90,7 @@ GModelSpatialRadial::GModelSpatialRadial(const GXmlElement& xml) :
  * @param[in] model Radial spatial model.
  ***************************************************************************/
 GModelSpatialRadial::GModelSpatialRadial(const GModelSpatialRadial& model) :
-                     GModelSpatial()
+                     GModelSpatial(model)
 {
     // Initialise members
     init_members();

@@ -89,7 +89,7 @@ GModelSpatialElliptical::GModelSpatialElliptical(const GXmlElement& xml) :
  * @param[in] model Elliptical spatial model.
  ***************************************************************************/
 GModelSpatialElliptical::GModelSpatialElliptical(const GModelSpatialElliptical& model) :
-                         GModelSpatial()
+                         GModelSpatial(model)
 {
     // Initialise members
     init_members();
