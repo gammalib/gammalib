@@ -63,7 +63,11 @@ None
 
 8. Model module
 ---------------
-The copy constructors of the classes ...
+The copy constructors of the GModelSpatialDiffuse, GModelSpatialElliptical
+and GModelSpatialRadial classes did not properly copy the base class members
+in their copy constructors. This prevented specifically the fitting of
+diffuse maps in the stacked analysis. The code was modified to fix the
+issue.
 
 
 9. Numerics module
