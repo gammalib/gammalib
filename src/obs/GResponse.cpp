@@ -203,8 +203,39 @@ double GResponse::convolve(const GModelSky&    model,
             // Retrieve true energy boundaries
             GEbounds ebounds = this->ebounds(event.energy());
 
+            // Determine size of result array
+            int size = 1;
+            if (grad) {
+                if (model.spectral() != NULL) {
+                    for (int i = 0; i < model.spectral()->size(); ++i) {
+                        GModelPar& par = (*(model.spectral()))[i];
+                        if (par.is_free() && par.has_grad()) {
+                            size++;
+                        }
+                    }
+                }
+                if (model.temporal() != NULL) {
+                    for (int i = 0; i < model.temporal()->size(); ++i) {
+                        GModelPar& par = (*(model.temporal()))[i];
+                        if (par.is_free() && par.has_grad()) {
+                            size++;
+                        }
+                    }
+                }
+                if (model.has_scales()) {
+                    for (int i = 0; i < model.scales(); ++i) {
+                        GModelPar& par = const_cast<GModelPar&>(model.scale(i));
+                        if (par.name() == obs.instrument()) {
+                            if (par.is_free() && par.has_grad()) {
+                                size++;
+                            }
+                        }
+                    }
+                }
+            }
+
             // Initialise Ndarray array
-            GNdarray array;
+            GNdarray array(size);
 
             // Loop over all boundaries
             for (int i = 0; i < ebounds.size(); ++i) {
@@ -224,12 +255,7 @@ double GResponse::convolve(const GModelSky&    model,
                     integral.fixed_iter(iter);
 
                     // Do Romberg integration
-                    if (array.size() == 0) {
-                        array = integral.romberg(etrue_min, etrue_max);
-                    }
-                    else {
-                        array += integral.romberg(etrue_min, etrue_max);
-                    }
+                    array += integral.romberg(etrue_min, etrue_max);
 
                 } // endif: interval was valid
 
