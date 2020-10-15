@@ -254,18 +254,18 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate Gaussian source model
  *
  * @param[in] theta Angular distance from Gaussian centre (radians).
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
+ * @param[in] energy Photon energy (not used).
+ * @param[in] time Photon arrival time (not used).
  * @param[in] gradients Compute gradients?
- * @return Model value.
+ * @return Model value (\f${\rm sr}^{-1}\f$).
  *
  * Evaluates the spatial component for a Gaussian source model using
  *
  * \f[
- *    S_{\rm p}(\vec{p} | E, t) =
+ *    M_{\rm S}({\bf p} | E, t) = M_{\rm S}(\theta) =
  *    \frac{1}{2 \pi \sigma^2} \exp 
  *    \left(-\frac{1}{2}\frac{\theta^2}{\sigma^2} \right)
  * \f]
@@ -274,12 +274,50 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * - \f$\theta\f$ is the angular separation from the centre of the model, and
  * - \f$\sigma\f$ is the Gaussian width.
  *
- * The method will not compute analytical parameter gradients, even if the
- * @p gradients argument is set to true. Radial Gaussian parameter gradients
- * need to be computed numerically.
+ * If @p gradients is `true` the method will also compute analytical parameter
+ * gradients
  *
- * @todo The Gaussian function is only correct in the small angle
- *       approximation.
+ * \f[
+ *    \frac{\partial M_{\rm S}}{\partial \alpha_0} =
+ *    \frac{\partial M_{\rm S}}{\partial \theta}
+ *    \frac{\partial \theta}{\partial \alpha_0}
+ * \f]
+ *
+ * \f[
+ *    \frac{\partial M_{\rm S}}{\partial \beta_0} =
+ *    \frac{\partial M_{\rm S}}{\partial \theta}
+ *    \frac{\partial \theta}{\partial \beta_0}
+ * \f]
+ *
+ * with
+ *
+ * \f[
+ *    \frac{\partial M_{\rm S}}{\partial \theta} =
+ *    -\frac{\theta}{\sigma^2} M_{\rm S}(\theta)
+ * \f]
+ *
+ * and
+ *
+ * \f[
+ *    \frac{\partial M_{\rm S}}{\partial \sigma} =
+ *    \left( \frac{\theta^2}{\sigma^3} - \frac{2}{\sigma} \right)
+ *    M_{\rm S}(\theta)
+ * \f]
+ *
+ * where
+ * - \f$\alpha_0\f$ is the Right Ascension of the model centre, and
+ * - \f$\beta_0\f$ is the Declination of the model centre.
+ *
+ * The computation of the analytical gradients with respect to the model
+ * centre relies on the computation of the partial derivatives
+ * \f$\frac{\partial \theta}{\partial \alpha_0}\f$ and
+ * \f$\frac{\partial \theta}{\partial \beta_0}\f$ which are assumed to
+ * be stored in `m_ra.factor_gradient()` and `m_dec.factor_gradient()`
+ * when the method is entered. No check is performed whether these values
+ * are actually available and valid.
+ *
+ * Note that the model normalisation is only correct in the small angle
+ * approximation.
  ***************************************************************************/
 double GModelSpatialRadialGauss::eval(const double&  theta,
                                       const GEnergy& energy,
@@ -318,7 +356,7 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
         double g_sigma = 0.0;
         if (m_sigma.is_free()) {
             g_sigma = (arg2 - 2.0) / sigma_rad * value *
-                             m_sigma.scale() * gammalib::deg2rad;
+                      m_sigma.scale() * gammalib::deg2rad;
         }
         m_sigma.factor_gradient(g_sigma);
 
@@ -540,9 +578,7 @@ std::string GModelSpatialRadialGauss::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- * Note that this model implements no gradients, as spatial models will
- * always require numerical gradient computations. The minimum Gaussian
- * width is set to 1 arcsec.
+ * Note that the minimum Gaussian width is set to 1 arcsec.
  ***************************************************************************/
 void GModelSpatialRadialGauss::init_members(void)
 {
@@ -558,7 +594,10 @@ void GModelSpatialRadialGauss::init_members(void)
     m_sigma.free();
     m_sigma.scale(1.0);
     m_sigma.gradient(0.0);
-    //m_sigma.has_grad(false);  // Radial components never have gradients
+
+    // Signal that this model provides analytical parameter gradients
+    m_ra.has_grad(true);
+    m_dec.has_grad(true);
     m_sigma.has_grad(true);
 
     // Set parameter pointer(s)

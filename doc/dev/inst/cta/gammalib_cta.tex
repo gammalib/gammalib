@@ -94,19 +94,23 @@ direction $(\alpha_0,\beta_0)$ that is spanned by $\delta$ and $\varphi$.}
 
 The partial derivatives of $f(\theta)$ with respect to $\alpha_0$ and $\beta_0$ are given by
 \begin{equation}
-\frac{\partial f}{\partial \alpha_0} = \frac{\partial f}{\partial \theta}
-\left(
-\frac{\partial \theta}{\partial \zeta} \frac{\partial \zeta}{\partial \alpha_0} +
-\frac{\partial \theta}{\partial \varphi} \frac{\partial \varphi}{\partial \alpha_0}
-\right)
+\frac{\partial f}{\partial \alpha_0} = \frac{\partial f}{\partial \theta} \frac{\partial \theta}{\partial \alpha_0}
 \end{equation}
 and
 \begin{equation}
-\frac{\partial f}{\partial \beta_0} = \frac{\partial f}{\partial \theta}
-\left(
+\frac{\partial f}{\partial \beta_0} = \frac{\partial f}{\partial \theta} \frac{\partial \theta}{\partial \beta_0}.
+\end{equation}
+For the general case,
+\begin{equation}
+\frac{\partial \theta}{\partial \alpha_0} = 
+\frac{\partial \theta}{\partial \zeta} \frac{\partial \zeta}{\partial \alpha_0} +
+\frac{\partial \theta}{\partial \varphi} \frac{\partial \varphi}{\partial \alpha_0}
+\end{equation}
+and
+\begin{equation}
+\frac{\partial \theta}{\partial \beta_0} =
 \frac{\partial \theta}{\partial \zeta} \frac{\partial \zeta}{\partial \beta_0} +
 \frac{\partial \theta}{\partial \varphi} \frac{\partial \varphi}{\partial \beta_0}
-\right)
 \end{equation}
 with
 \begin{equation}
@@ -132,15 +136,66 @@ and
 {\sin(\alpha_0-\hat{\alpha}) \cos \hat{\beta} (1 + \tan^2 \beta_0)}
 {\sin^2(\alpha_0-\hat{\alpha}) + (\cos \hat{\beta} \tan \beta_0 - \sin \hat{\beta} \cos(\alpha_0-\hat{\alpha}))^2} ,
 \end{equation}
-Note that for $\theta=0$
+Several special cases need to be considered.
+For $\theta=0$
 \begin{equation}
-\frac{\partial \theta}{\partial \zeta} = \frac{\partial \theta}{\partial \varphi} = 0
+\frac{\partial \theta}{\partial \alpha_0} = \frac{\partial \theta}{\partial \beta_0} = 0
 \end{equation}
-and for $\zeta=0$
+For $\zeta=0$ ...
 \begin{equation}
-\frac{\partial \zeta}{\partial \alpha_0}  = \frac{\partial \zeta}{\partial \beta_0} = 0
+\frac{\partial \theta}{\partial \alpha_0} = ?
 \end{equation}
 and
+\begin{equation}
+\frac{\partial \theta}{\partial \beta_0} = - \cos \varphi
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Radial disk}
+
+The radial disk function $f(\theta)$ is given by
+\begin{equation}
+f(\theta) = \left \{
+   \begin{array}{l l}
+     \displaystyle \frac{1}{2 \pi (1 - \cos \theta_0)} & \mbox{if $\theta \le \theta_0$} \\ \\
+     \displaystyle 0 & \mbox{if $\theta > \theta_0$}
+   \end{array}
+   \right .
+\end{equation}
+with the partial derivatives
+\begin{equation}
+\frac{\partial f}{\partial \theta}  = \delta(\theta - \theta_0)
+\end{equation}
+and
+\begin{equation}
+\frac{\partial f}{\partial \theta_0}  = ? .
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Radial ring}
+
+The radial ring function $f(\theta)$ is given by
+\begin{equation}
+f(\theta) = \left \{
+   \begin{array}{l l}
+     \displaystyle 0 & \mbox{if $\theta < \theta_{\rm in}$} \\ \\
+     \displaystyle \frac{1}{2 \pi (\cos \theta_{\rm in} - \cos \theta_{\rm out})} & \mbox{if $\theta \ge \theta_{\rm in}$ and $\theta \le \theta_{\rm out}$} \\ \\
+     \displaystyle 0 & \mbox{if $\theta > \theta_{\rm out}$}
+   \end{array}
+   \right .
+\end{equation}
+with the partial derivatives
+\begin{equation}
+\frac{\partial f}{\partial \theta}  = ?
+\end{equation}
+and
+\begin{equation}
+\frac{\partial f}{\partial \theta_{\rm in}}  = ?
+\end{equation}
+and
+\begin{equation}
+\frac{\partial f}{\partial \theta_{\rm out}}  = ? .
+\end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Radial Gaussian}
@@ -151,11 +206,36 @@ f(\theta) = \frac{1}{2 \pi \sigma^2} \exp \left( -\frac{1}{2} \frac{\theta^2}{\s
 \end{equation}
 with the partial derivatives
 \begin{equation}
-\frac{\delta f}{\delta \theta}  = - \frac{\theta}{\sigma^2} f(\theta)
+\frac{\partial f}{\partial \theta}  = - \frac{\theta}{\sigma^2} f(\theta)
 \end{equation}
 and
 \begin{equation}
-\frac{\delta f}{\delta \sigma}  = \left( \frac{\theta^2}{\sigma^3} - \frac{2}{\sigma} \right) f(\theta) .
+\frac{\partial f}{\partial \sigma}  = \left( \frac{\theta^2}{\sigma^3} - \frac{2}{\sigma} \right) f(\theta) .
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Radial shell}
+
+The shell function on a sphere is given by
+\begin{equation}
+f(\theta) = f_0 \left \{
+   \begin{array}{l l}
+      \displaystyle
+      \sqrt{ \sin^2 \theta_{\rm out} - \sin^2 \theta } - \sqrt{ \sin^2 \theta_{\rm in} - \sin^2 \theta }
+      & \mbox{if $\theta \le \theta_{\rm in}$} \\
+      \\
+     \displaystyle
+      \sqrt{ \sin^2 \theta_{\rm out} - \sin^2 \theta }
+      & \mbox{if $\theta_{\rm in} < \theta \le \theta_{\rm out}$} \\
+      \\
+     \displaystyle
+     0 & \mbox{if $\theta > \theta_{\rm out}$}
+   \end{array}
+   \right .
+\end{equation}
+The normalization constant $f_0$ is determined by
+\begin{equation}
+2 \pi \int_0^{\pi/2} f(\theta) \sin \theta \, {\rm d}\theta = 1
 \end{equation}
 
 \end{document}

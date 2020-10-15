@@ -319,7 +319,7 @@ double GResponse::convolve(const GModelSky&    model,
  * @param[in] model Sky model.
  * @param[in] obs Observation.
  * @param[out] gradients Pointer to matrix of gradients.
- * @return Event probabilities.
+ * @return Vector of event probabilities.
  *
  * Computes the event probability
  *
@@ -376,9 +376,12 @@ GVector GResponse::convolve(const GModelSky&    model,
         if (use_edisp()) {
 
             // Initialise temporary vectors to hold gradients
-            GVector* tmp_gradients = new GVector[npars];
-            for (int i = 0; i < npars; ++i) {
-                tmp_gradients[i] = GVector(nevents);
+            GVector* tmp_gradients = NULL;
+            if (grad) {
+                tmp_gradients = new GVector[npars];
+                for (int i = 0; i < npars; ++i) {
+                    tmp_gradients[i] = GVector(nevents);
+                }
             }
 
             // Loop over events
@@ -434,9 +437,6 @@ GVector GResponse::convolve(const GModelSky&    model,
                 // Set gradients
                 if (grad) {
 
-                    // Initialise gradient vector
-                    //GVector gradient(npars);
-
                     // Get number of spatial, spectral and temporal parameters
                     int n_spat = model.spatial()->size();
                     int n_spec = model.spectral()->size();
@@ -448,7 +448,6 @@ GVector GResponse::convolve(const GModelSky&    model,
                         for (int i = 0; i < n_spec; ++i) {
                             GModelPar& par = (*(model.spectral()))[i];
                             if (par.is_free() && par.has_grad()) {
-                                //gradient[offset+i] = array[index++];
                                 tmp_gradients[offset+i][k] = array[index++];
                             }
                         }
@@ -460,7 +459,6 @@ GVector GResponse::convolve(const GModelSky&    model,
                         for (int i = 0; i < n_temp; ++i) {
                             GModelPar& par = (*(model.temporal()))[i];
                             if (par.is_free() && par.has_grad()) {
-                                //gradient[offset+i] = array[index++];
                                 tmp_gradients[offset+i][k] = array[index++];
                             }
                         }
@@ -473,15 +471,11 @@ GVector GResponse::convolve(const GModelSky&    model,
                             const GModelPar& par = model.scale(i);
                             if (par.name() == obs.instrument()) {
                                 if (par.is_free() && par.has_grad()) {
-                                    //gradient[offset+i] = array[index++];
                                     tmp_gradients[offset+i][k] = array[index++];
                                 }
                             }
                         }
                     }
-
-                    // Insert gradient vector into matrix
-                    //gradients->add_to_column(k, gradient);
 
                 } // endif: set gradients
 
@@ -499,13 +493,18 @@ GVector GResponse::convolve(const GModelSky&    model,
 
             } // endfor: looped over events
 
-            // Fill gradients into matrix
-            for (int i = 0; i < npars; ++i) {
-                gradients->column(i, tmp_gradients[i]);
-            }
+            // Post-process gradients
+            if (grad) {
 
-            // Delete temporal gradients
-            delete [] tmp_gradients;
+                // Fill gradients into matrix
+                for (int i = 0; i < npars; ++i) {
+                    gradients->column(i, tmp_gradients[i]);
+                }
+
+                // Delete temporal gradients
+                delete [] tmp_gradients;
+
+            } // endif: post-processed gradients
 
         } // endif: Case A
 
@@ -629,6 +628,7 @@ double GResponse::irf_spatial(const GEvent&       event,
  *
  * @param[in] source Source.
  * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
  * @return Instrument response to a spatial model.
  *
  * Returns the instrument response for a given event, source and observation
@@ -668,7 +668,6 @@ double GResponse::irf_spatial(const GEvent&       event,
  ***************************************************************************/
 GVector GResponse::irf_spatial(const GModelSky&    model,
                                const GObservation& obs,
-                               //GMatrixSparse*      gradients) const
                                GMatrix*            gradients) const
 {
     // Get number of model parameters and number of events
@@ -1077,9 +1076,6 @@ double GResponse::irf_diffuse(const GEvent&       event,
     const GEnergy& srcEng  = source.energy();
     const GTime&   srcTime = source.time();
 
-    // Initialise map
-    //GSkyMap skymap;
-
     // If model is a diffuse map model then extract sky map
     const GModelSpatialDiffuseMap* map =
           dynamic_cast<const GModelSpatialDiffuseMap*>(source.model());
@@ -1247,6 +1243,7 @@ double GResponse::irf_composite(const GEvent&       event,
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
  * @return Instrument response to point source sky model.
  *
  * Returns the instrument response to a point source sky model for all
@@ -1254,7 +1251,6 @@ double GResponse::irf_composite(const GEvent&       event,
  ***************************************************************************/
 GVector GResponse::irf_ptsrc(const GModelSky&    model,
                              const GObservation& obs,
-                             //GMatrixSparse*      gradients) const
                              GMatrix*            gradients) const
 {
     // Get number of events
@@ -1291,6 +1287,7 @@ GVector GResponse::irf_ptsrc(const GModelSky&    model,
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
  * @return Instrument response to radial source sky model.
  *
  * Returns the instrument response to a radial source sky model for all
@@ -1298,7 +1295,6 @@ GVector GResponse::irf_ptsrc(const GModelSky&    model,
  ***************************************************************************/
 GVector GResponse::irf_radial(const GModelSky&    model,
                               const GObservation& obs,
-//                              GMatrixSparse*      gradients) const
                               GMatrix*            gradients) const
 {
     // Get number of events
@@ -1335,6 +1331,7 @@ GVector GResponse::irf_radial(const GModelSky&    model,
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
  * @return Instrument response to ellipitical source sky model.
  *
  * Returns the instrument response to a ellipitical source sky model for all
@@ -1342,7 +1339,6 @@ GVector GResponse::irf_radial(const GModelSky&    model,
  ***************************************************************************/
 GVector GResponse::irf_elliptical(const GModelSky&    model,
                                   const GObservation& obs,
-                                  //GMatrixSparse*      gradients) const
                                   GMatrix*            gradients) const
 {
     // Get number of events
@@ -1379,6 +1375,7 @@ GVector GResponse::irf_elliptical(const GModelSky&    model,
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
  * @return Instrument response to diffuse source sky model.
  *
  * Returns the instrument response to a diffuse source sky model for all
@@ -1386,7 +1383,6 @@ GVector GResponse::irf_elliptical(const GModelSky&    model,
  ***************************************************************************/
 GVector GResponse::irf_diffuse(const GModelSky&    model,
                                const GObservation& obs,
-                               //GMatrixSparse*      gradients) const
                                GMatrix*            gradients) const
 {
     // Get number of events
@@ -1423,6 +1419,7 @@ GVector GResponse::irf_diffuse(const GModelSky&    model,
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
  * @return Instrument response to composite source sky model.
  *
  * Returns the instrument response to a composite source sky model for all
@@ -1430,7 +1427,6 @@ GVector GResponse::irf_diffuse(const GModelSky&    model,
  ***************************************************************************/
 GVector GResponse::irf_composite(const GModelSky&    model,
                                  const GObservation& obs,
-                                 //GMatrixSparse*      gradients) const
                                  GMatrix*            gradients) const
 {
     // Get number of events
@@ -1636,12 +1632,10 @@ GVector GResponse::eval_probs(const GModelSky&    model,
     // Continue only if the model has a spatial component
     if (model.spatial() != NULL) {
 
-        // Initialise sparse matrix to hold spatial gradients
-        //GMatrixSparse spat_gradients(nevents, model.spatial()->size());
+        // Initialise matrix to hold spatial gradients
         GMatrix spat_gradients(nevents, model.spatial()->size());
 
         // Compute IRF value
-        //probs = irf_spatial(model, obs);
         probs = irf_spatial(model, obs, &spat_gradients);
 
         // Get global model scaling
@@ -1649,9 +1643,12 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                        ? model.scale(obs.instrument()).value() : 1.0;
 
         // Initialise temporary vectors to hold gradients
-        GVector* tmp_gradients = new GVector[npars];
-        for (int i = 0; i < npars; ++i) {
-            tmp_gradients[i] = GVector(nevents);
+        GVector* tmp_gradients = NULL;
+        if (grad) {
+            tmp_gradients = new GVector[npars];
+            for (int i = 0; i < npars; ++i) {
+                tmp_gradients[i] = GVector(nevents);
+            }
         }
 
         // Loop over events
@@ -1684,9 +1681,6 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                 // Optionally compute partial derivatives
                 if (grad) {
 
-                    // Initialise gradient vector
-                    //GVector gradient(npars);
-
                     // Get number of spatial, spectral and temporal parameters
                     int n_spat = model.spatial()->size();
                     int n_spec = model.spectral()->size();
@@ -1696,7 +1690,6 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                     if (model.spatial() != NULL) {
                         double fact = spec * temp * scale;
                         for (int i = 0; i < n_spat; ++i) {
-                            //gradient[i] = spat_gradients(k,i) * fact;
                             tmp_gradients[i][k] = spat_gradients(k,i) * fact;
                         }
                     }
@@ -1706,7 +1699,6 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                         int    offset = n_spat;
                         double fact   = spat * temp * scale;
                         for (int i = 0; i < n_spec; ++i) {
-                            //gradient[offset+i] =
                             tmp_gradients[offset+i][k] =
                                 (*(model.spectral()))[i].factor_gradient() * fact;
                         }
@@ -1717,7 +1709,6 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                         int    offset = n_spat + n_spec;
                         double fact   = spat * spec * scale;
                         for (int i = 0; i < n_temp; ++i) {
-                            //gradient[offset+i] =
                             tmp_gradients[offset+i][k] =
                                 (*(model.temporal()))[i].factor_gradient() * fact;
                         }
@@ -1732,15 +1723,11 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                             double           g_scale = 0.0;
                             if (par.name() == obs.instrument()) {
                                 if (par.is_free()) {
-                                    //gradient[offset+i] = par.scale() * fact;
                                     tmp_gradients[offset+i][k] = par.scale() * fact;
                                 }
                             }
                         }
                     }
-
-                    // Add gradient vector to matrix
-                    //gradients->add_to_column(k, gradient);
 
                 } // endif: computed partial derivatives
 
@@ -1759,13 +1746,18 @@ GVector GResponse::eval_probs(const GModelSky&    model,
 
         } // endfor: looped over events
 
-        // Fill gradients into matrix
-        for (int i = 0; i < npars; ++i) {
-            gradients->column(i, tmp_gradients[i]);
-        }
+        // Post-process gradients
+        if (grad) {
 
-        // Delete temporal gradients
-        delete [] tmp_gradients;
+            // Fill gradients into matrix
+            for (int i = 0; i < npars; ++i) {
+                gradients->column(i, tmp_gradients[i]);
+            }
+
+            // Delete temporal gradients
+            delete [] tmp_gradients;
+
+        } // endif: gradient post processing
 
     } // endif: Gamma-ray source model had a spatial component
 

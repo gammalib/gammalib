@@ -64,7 +64,8 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 #define G_LN_ENERGY_INT   //!< ln(E) variable substitution for integration
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_OPT_DEBUG
+//#define G_OPT_DEBUG                       //!< Debug likelihood computation
+//#define G_DEBUG_VECTOR_MODEL              //!< Debug vector model
 
 
 /*==========================================================================
@@ -397,10 +398,12 @@ double GObservation::model(const GModels& models,
                             // Set gradient
                             if (par.is_free()) {
                                 if (has_gradient(par)) {
-                                    (*gradient)[igrad+ipar] = par.factor_gradient();
+                                    (*gradient)[igrad+ipar] =
+                                        par.factor_gradient();
                                 }
                                 else {
-                                    (*gradient)[igrad+ipar] = model_grad(*mptr, par, event);
+                                    (*gradient)[igrad+ipar] =
+                                        model_grad(*mptr, par, event);
                                 }
                             }
                             else {
@@ -423,10 +426,12 @@ double GObservation::model(const GModels& models,
                             // Set gradient
                             if (par.is_free()) {
                                 if (has_gradient(par)) {
-                                    (*gradient)[igrad+ipar] = par.factor_gradient();
+                                    (*gradient)[igrad+ipar] =
+                                        par.factor_gradient();
                                 }
                                 else {
-                                    (*gradient)[igrad+ipar] = model_grad(*mptr, par, event);
+                                    (*gradient)[igrad+ipar] =
+                                        model_grad(*mptr, par, event);
                                 }
                             }
                             else {
@@ -454,7 +459,7 @@ double GObservation::model(const GModels& models,
 
 
 /***********************************************************************//**
- * @brief Return model values and (optionally) gradients
+ * @brief Return vector of model values and (optionally) gradients
  *
  * @param[in] models Model container.
  * @param[out] gradient Pointer to sparse gradient matrix.
@@ -586,21 +591,21 @@ GVector GObservation::model(const GModels& models,
                             GVector grad(nevents);
                             if (has_gradient(par)) {
                                 grad = gradients.column(ipar);
-// Debugging
-/*
-if (ipar < 3) {
-    GVector num_grad = model_grad(*mptr, par);
-    for (int k = 0; k < nevents; ++k) {
-        if (grad[k] != 0.0 || num_grad[k] != 0.0) {
-            std::cout << "ipar=" << ipar;
-            std::cout << " par=" << par.name();
-            std::cout << " k=" << k;
-            std::cout << " ana=" << grad[k];
-            std::cout << " num=" << num_grad[k] << std::endl;
-        }
-    }
-}
-*/
+                                #if defined(G_DEBUG_VECTOR_MODEL)
+                                if (ipar < 3) {
+                                    GVector num_grad = model_grad(*mptr, par);
+                                    for (int k = 0; k < nevents; ++k) {
+                                        if (grad[k] != 0.0 || num_grad[k] != 0.0) {
+                                            std::cout << "ipar=" << ipar;
+                                            std::cout << " par=" << par.name();
+                                            std::cout << " k=" << k;
+                                            std::cout << " ana=" << grad[k];
+                                            std::cout << " num=" << num_grad[k];
+                                            std::cout << std::endl;
+                                        }
+                                    }
+                                }
+                                #endif
                             }
                             else {
                                 grad = model_grad(*mptr, par);

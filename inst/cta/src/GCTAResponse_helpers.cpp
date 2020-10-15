@@ -2037,8 +2037,6 @@ cta_psf_radial_kerns_delta::cta_psf_radial_kerns_delta(const GCTAResponseCube*  
                                 denom;
         m_dphi_dbeta_0        = (sin_dalpha * cos_beta_reco * (1.0 + tan_beta_0 * tan_beta_0)) /
                                 denom;
-        m_par_ra->has_grad(true);
-        m_par_dec->has_grad(true);
     }
     else {
         m_dzeta_dalpha_0 = 0.0;

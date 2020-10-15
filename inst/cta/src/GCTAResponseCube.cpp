@@ -1750,7 +1750,6 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
  ***************************************************************************/
 GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
                                      const GObservation& obs,
-//                                     GMatrixSparse*      gradients) const
                                      GMatrix*            gradients) const
 {
     // Get number of events
@@ -1809,11 +1808,24 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
         // If requested, setup vectors of gradients
         GVector* gradient = NULL;
         if (grad) {
+
+            // Allocate vectors to hold the gradients
             gradient = new GVector[npars];
             for (int ipar = 0; ipar < npars; ++ipar) {
                 gradient[ipar] = GVector(nevents);
             }
-        }
+
+            // Signal all parameters that will have analytical gradients.
+            // These are all parameters that are free for which the model
+            // provides analytical gradients.
+            for (int ipar = 0; ipar < npars; ++ipar) {
+                const GModelPar& par = (*radial)[ipar];
+                if (par.is_free() && par.has_grad()) {
+                    obs.computed_gradient(par);
+                }
+            }
+
+        } // endif: setup of gradient computation
 
         // Setup cube time
         GTime srcTime = cube.time();
@@ -1945,12 +1957,10 @@ GVector GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     // If the integration range includes a transition between full
     // containment of Psf within model and partial containment, then
     // add a boundary at this location
-    /*
     double transition_point = theta_max - zeta;
     if (transition_point > delta_min && transition_point < delta_max) {
         bounds.push_back(transition_point);
     }
-    */
 
     // Integrate kernel
     GVector values = integral.romberg(bounds, iter_delta);

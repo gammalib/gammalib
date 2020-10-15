@@ -43,10 +43,10 @@ def compute_zeta(dir_true, dir_reco, dir_model):
                 math.cos(dir_model.ra() - dir_reco.ra()) -
                 math.cos(dir_model.dec()) * math.sin(dir_reco.dec())) / sin_zeta
     else:
-        print('dzeta/dra:  sin(zeta)=0')
-        print('dzeta/ddec: sin(zeta)=0')
-        dra  = 0.0
+        dra  = math.cos(dir_model.dec()) * math.cos(dir_reco.dec())
         ddec = 1.0
+        print('dzeta/dra:  sin(zeta)=0', dra)
+        print('dzeta/ddec: sin(zeta)=0', ddec)
 
     # Return zeta and gradients
     return zeta, dra, ddec
@@ -71,15 +71,11 @@ def compute_phi(dir_true, dir_reco, dir_model):
     phi_true = math.atan2(math.sin(dir_true.ra() - dir_reco.ra()),
                           math.cos(dir_reco.dec()) * math.tan(dir_true.dec()) -
                           sin_beta_reco * math.cos(dir_true.ra() - dir_reco.ra()))
-    phi_reco =  math.atan2(math.sin(dir_model.ra() - dir_reco.ra()), denom)
+    phi_reco = math.atan2(math.sin(dir_model.ra() - dir_reco.ra()), denom)
     phi      = phi_true - phi_reco
 
     # Compute gradients
-    denom2  = denom * denom
-    tan_phi = math.tan(phi_reco)
-    norm    = 1.0 / (1.0 + tan_phi*tan_phi)
-    #dra     = norm * (sin_dalpha*sin_dalpha*sin_beta_reco/denom2 - cos_dalpha/denom)
-    #ddec    = norm * (sin_dalpha * cos_beta_reco * (1.0 + tan_beta_0*tan_beta_0))/denom2
+    denom2    = denom * denom
     dra_nom   = sin_beta_reco - cos_dalpha * cos_beta_reco * tan_beta_0
     ddec_nom  = sin_dalpha * cos_beta_reco * (1.0 + tan_beta_0*tan_beta_0)
     dra_denom = sin_dalpha * sin_dalpha + denom2
@@ -124,10 +120,14 @@ def compute_theta(dir_true, dir_reco, dir_model):
     cos_delta = math.cos(delta)
     sin_phi   = math.sin(phi)
     cos_phi   = math.cos(phi)
+
+    #
     sin_theta = math.sin(theta)
     if sin_theta != 0.0:
         dzeta = (cos_delta * sin_zeta - sin_delta * cos_zeta * cos_phi) / sin_theta
         dphi  = (sin_delta * sin_zeta * sin_phi) / sin_theta
+        print(dzeta, dphi, dzeta_ra, dphi_ra, dzeta * dzeta_ra  + dphi * dphi_ra)
+        #print('beta ', phi, dphi,  dzeta * dzeta_dec,dphi * dphi_dec)
     else:
         print('dtheta/dzeta: sin(theta)=0')
         print('dtheta/dphi:  sin(theta)=0')
@@ -135,10 +135,12 @@ def compute_theta(dir_true, dir_reco, dir_model):
         dphi  = 0.0
     
     # Compute partial derivaties of theta with respect to RA and Dec
-    dra  = dzeta * dzeta_ra  + dphi * dphi_ra
-    ddec = dzeta * dzeta_dec + dphi * dphi_dec
-    #print('dzeta=',dzeta, dzeta_ra, dzeta_dec, dzeta * dzeta_ra, dzeta * dzeta_dec)
-    #print('dphi=',dphi, dphi_ra, dphi_dec, dphi * dphi_ra, dphi * dphi_dec)
+    if zeta != 0.0:
+        dra  = dzeta * dzeta_ra  + dphi * dphi_ra
+        ddec = dzeta * dzeta_dec + dphi * dphi_dec
+    else:
+        dra  = 0.0 # ???? What value
+        ddec = dzeta
 
     # Return theta and gradients
     return theta, dra, ddec
@@ -152,7 +154,6 @@ def test_derivatives(function, dir_true, dir_reco, dir_model):
     Test derivative
     """
     # Get modified model directions for numerical gradient
-    #dh         = 0.0001
     dh         = 0.000001
     dra_plus   = gammalib.GSkyDir()
     dra_minus  = gammalib.GSkyDir()
@@ -169,8 +170,6 @@ def test_derivatives(function, dir_true, dir_reco, dir_model):
     fa_minus, _, _        = function(dir_true, dir_reco, dra_minus)
     fb_plus, _, _         = function(dir_true, dir_reco, ddec_plus)
     fb_minus, _, _        = function(dir_true, dir_reco, ddec_minus)
-    #print(f, fa_plus, fa_minus)
-    #print(f, fb_plus, fb_minus)
 
     # Compute numerical gradients
     dfda_num = 0.5 * (fa_plus - fa_minus) / dh
@@ -201,13 +200,23 @@ if __name__ == '__main__':
     dir_reco  = gammalib.GSkyDir()
     dir_model = gammalib.GSkyDir()
     dir_true.radec_deg(85.0, +25.0)
-    #dir_true.radec_deg(82.0, +23.0)
     dir_reco.radec_deg(82.0, +23.0)
+    dir_model.radec_deg(83.0, +22.0)
+    
+    # Test theta=0: dir_true = dir_model
+    #dir_true.radec_deg(83.0, +22.0)
+    
+    # Test zeta=0: dir_reco = dir_model
+    dir_reco.radec_deg(83.0, +22.0)
+    #dir_reco.radec_deg(dir_reco.ra_deg(),dir_reco.dec_deg()-0.0001)
+    
+    #dir_true.radec_deg(82.0, +23.0)
+    #dir_reco.radec_deg(82.0, +23.0)
     #dir_reco.radec_deg(82.001, +23.001)
     #dir_reco.radec_deg(85.0, +25.0)
     #dir_model.radec_deg(83.0, +22.0)
     #dir_model.radec_deg(85.0, +25.0)
-    dir_model.radec_deg(82.0, +23.0)
+    #dir_model.radec_deg(82.0, +23.0)
 
     # Test
     zeta  = test_derivatives(compute_zeta,  dir_true, dir_reco, dir_model)

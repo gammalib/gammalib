@@ -113,7 +113,6 @@ public:
                                     const GObservation& obs) const;
     virtual GVector     irf_spatial(const GModelSky&    model,
                                     const GObservation& obs,
-                                    //GMatrixSparse*      gradients = NULL) const;
                                     GMatrix*            gradients = NULL) const;
     virtual void        remove_response_cache(const std::string& name);
 
@@ -150,23 +149,18 @@ protected:
                                  const GObservation& obs) const;
     virtual GVector irf_ptsrc(const GModelSky&    model,
                               const GObservation& obs,
-                              //GMatrixSparse*      gradients = NULL) const;
                               GMatrix*            gradients = NULL) const;
     virtual GVector irf_radial(const GModelSky&    model,
                                const GObservation& obs,
-                               //GMatrixSparse*      gradients = NULL) const;
                                GMatrix*            gradients = NULL) const;
     virtual GVector irf_elliptical(const GModelSky&    model,
                                    const GObservation& obs,
-                                   //GMatrixSparse*      gradients = NULL) const;
                                    GMatrix*            gradients = NULL) const;
     virtual GVector irf_diffuse(const GModelSky&    model,
                                 const GObservation& obs,
-                                //GMatrixSparse*      gradients = NULL) const;
                                 GMatrix*            gradients = NULL) const;
     virtual GVector irf_composite(const GModelSky&    model,
                                   const GObservation& obs,
-                                  //GMatrixSparse*      gradients = NULL) const;
                                   GMatrix*            gradients = NULL) const;
 
     // Protected classes
