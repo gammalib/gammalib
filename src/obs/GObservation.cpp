@@ -1486,7 +1486,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
     GVector model_vector = this->model(models, &wrk_matrix);
 
     // Iterate over all bins
-    for (int i = 0; i < events()->size(); ++i) {
+    for (int i = 0; i < nevents; ++i) {
 
         // Update number of bins
         #if defined(G_OPT_DEBUG)
@@ -1509,10 +1509,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
         }
 
         // Get model value
-        double model = model_vector[i];
-
-        // Multiply model by bin size
-        model *= bin->size();
+        double model = model_vector[i] * bin->size();
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= minmod) {
@@ -1675,16 +1672,20 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
     // Initialise likelihood value
     double value = 0.0;
 
-    // Get number of parameters
-    int npars = gradient->size();
+    // Get number of events and parameters
+    int nevents = events()->size();
+    int npars   = gradient->size();
 
     // Allocate some working arrays
-    int*    inx    = new int[npars];
-    double* values = new double[npars];
-    GVector wrk_grad(npars);
+    int*          inx    = new int[npars];
+    double*       values = new double[npars];
+    GMatrixSparse wrk_matrix(nevents, npars);
+
+    // Compute model and derivative
+    GVector model_vector = this->model(models, &wrk_matrix);
 
     // Iterate over all bins
-    for (int i = 0; i < events()->size(); ++i) {
+    for (int i = 0; i < nevents; ++i) {
 
         // Get event pointer
         const GEventBin* bin =
@@ -1706,11 +1707,8 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
             continue;
         }
 
-        // Get model and derivative
-        double model = this->model(models, *bin, &wrk_grad);
-
-        // Multiply model by bin size
-        model *= bin->size();
+        // Get model value
+        double model = model_vector[i] * bin->size();
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= minmod) {
@@ -1720,8 +1718,8 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
         // Update Npred
         *npred += model;
 
-        // Multiply gradient by bin size
-        wrk_grad *= bin->size();
+        // Extract working gradient multiplied by bin size
+        GVector wrk_grad = wrk_matrix.row(i) * bin->size();
 
         // Create index array of non-zero derivatives and initialise working
         // array
