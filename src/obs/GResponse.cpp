@@ -442,7 +442,7 @@ GVector GResponse::convolve(const GModelSky&    model,
                     if (model.spectral() != NULL) {
                         int offset = n_spat;
                         for (int i = 0; i < n_spec; ++i) {
-                            GModelPar& par = (*(model.spectral()))[i];
+                            const GModelPar& par = (*(model.spectral()))[i];
                             if (par.is_free() && par.has_grad()) {
                                 tmp_gradients[offset+i][k] = array[index++];
                             }
@@ -453,7 +453,7 @@ GVector GResponse::convolve(const GModelSky&    model,
                     if (model.temporal() != NULL) {
                         int offset = n_spat + n_spec;
                         for (int i = 0; i < n_temp; ++i) {
-                            GModelPar& par = (*(model.temporal()))[i];
+                            const GModelPar& par = (*(model.temporal()))[i];
                             if (par.is_free() && par.has_grad()) {
                                 tmp_gradients[offset+i][k] = array[index++];
                             }
@@ -1920,7 +1920,7 @@ GVector GResponse::edisp_kerns::eval(const double& etrue)
     // array
     if (m_grad) {
         for (int i = 0; i < m_pars.size(); ++i, ++index) {
-            kernels[index++] = m_pars[i]->factor_gradient();
+            kernels[index] = m_pars[i]->factor_gradient();
         }
     }
 
