@@ -1006,10 +1006,10 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
         // Create index array of non-zero derivatives and initialise working
         // array
         int ndev = 0;
-        for (int i = 0; i < npars; ++i) {
-            values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !gammalib::is_infinite(wrk_grad[i])) {
-                inx[ndev] = i;
+        for (int ipar = 0; ipar < npars; ++ipar) {
+            values[ipar] = 0.0;
+            if (wrk_grad[ipar] != 0.0 && !gammalib::is_infinite(wrk_grad[ipar])) {
+                inx[ndev] = ipar;
                 ndev++;
             }
         }
@@ -1166,13 +1166,19 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
         // Create index array of non-zero derivatives and initialise working
         // array
         int ndev = 0;
-        for (int i = 0; i < npars; ++i) {
-            values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !gammalib::is_infinite(wrk_grad[i])) {
-                inx[ndev] = i;
+        for (int ipar = 0; ipar < npars; ++ipar) {
+            values[ipar] = 0.0;
+            if (wrk_grad[ipar] != 0.0 && !gammalib::is_infinite(wrk_grad[ipar])) {
+                inx[ndev] = ipar;
                 ndev++;
             }
+            /*
+            else if gammalib::is_infinite(wrk_grad[ipar]) {
+                std::cout << "Infinite gradient for ipar=" << ipar << std::endl;
+            }
+            */
         }
+//std::cout << ndev << std::endl;
 
         // Update gradient vector and curvature matrix. To avoid
         // unneccessary computations we distinguish the case where
@@ -1354,10 +1360,10 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
         // Create index array of non-zero derivatives and initialise working
         // array
         int ndev = 0;
-        for (int i = 0; i < npars; ++i) {
-            values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !gammalib::is_infinite(wrk_grad[i])) {
-                inx[ndev] = i;
+        for (int ipar = 0; ipar < npars; ++ipar) {
+            values[ipar] = 0.0;
+            if (wrk_grad[ipar] != 0.0 && !gammalib::is_infinite(wrk_grad[ipar])) {
+                inx[ndev] = ipar;
                 ndev++;
             }
         }
