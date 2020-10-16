@@ -126,7 +126,7 @@ def compute_theta(dir_true, dir_reco, dir_model):
     if sin_theta != 0.0:
         dzeta = (cos_delta * sin_zeta - sin_delta * cos_zeta * cos_phi) / sin_theta
         dphi  = (sin_delta * sin_zeta * sin_phi) / sin_theta
-        print(dzeta, dphi, dzeta_ra, dphi_ra, dzeta * dzeta_ra  + dphi * dphi_ra)
+        #print(dzeta, dphi, dzeta_ra, dphi_ra, dzeta * dzeta_ra  + dphi * dphi_ra)
         #print('beta ', phi, dphi,  dzeta * dzeta_dec,dphi * dphi_dec)
     else:
         print('dtheta/dzeta: sin(theta)=0')
@@ -140,7 +140,8 @@ def compute_theta(dir_true, dir_reco, dir_model):
         ddec = dzeta * dzeta_dec + dphi * dphi_dec
     else:
         dra  = 0.0 # ???? What value
-        ddec = dzeta
+        #ddec = dzeta
+        ddec = -cos_phi
 
     # Return theta and gradients
     return theta, dra, ddec

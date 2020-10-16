@@ -34,7 +34,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/inst/cta/src
 
 # Define sources for this directory
-sources = src/GCTASupport.cpp \
+sources = src/cta_helpers_response_stacked_vector.cpp \
+          src/GCTASupport.cpp \
           src/GCTAException.cpp \
           src/GCTAObservation.cpp \
           src/GCTAOnOffObservation.cpp \
@@ -144,7 +145,6 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAModelRadialProfile.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
                      include/GCTALib.hpp
-
 
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la

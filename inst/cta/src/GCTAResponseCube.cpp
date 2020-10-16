@@ -56,6 +56,7 @@
 #include "GCTASupport.hpp"
 #include "GCTAEventCube.hpp"               // Kludge
 #include "GCTAEventBin.hpp"                // Kludge
+#include "cta_helpers_response_stacked_vector.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
