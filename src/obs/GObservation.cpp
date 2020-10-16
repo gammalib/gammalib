@@ -1341,13 +1341,15 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
     // Initialise likelihood value
     double value = 0.0;
 
-    // Get number of parameters
-    int npars = gradient->size();
+    // Get number of events and parameters
+    int nevents = events()->size();
+    int npars   = gradient->size();
 
     // Allocate some working arrays
-    int*    inx    = new int[npars];
-    double* values = new double[npars];
-    GVector wrk_grad(npars);
+    int*          inx    = new int[npars];
+    double*       values = new double[npars];
+    GMatrixSparse wrk_matrix(nevents, npars);
+    GVector       wrk_grad(npars);
 
     // Determine Npred value and gradient for this observation
     double npred_value = this->npred(models, &wrk_grad);
@@ -1357,19 +1359,25 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
     *npred    += npred_value;
     *gradient += wrk_grad;
 
+    // Compute model and derivative
+    GVector model_vector = this->model(models, &wrk_matrix);
+
     // Iterate over all events
-    for (int i = 0; i < events()->size(); ++i) {
+    for (int i = 0; i < nevents; ++i) {
 
         // Get event pointer
         const GEvent* event = (*events())[i];
 
-        // Get model and derivative
-        double model = this->model(models, *event, &wrk_grad);
+        // Get model value
+        double model = model_vector[i];
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= minmod) {
             continue;
         }
+
+        // Extract working gradient multiplied by bin size
+        GVector wrk_grad = wrk_matrix.row(i);
 
         // Create index array of non-zero derivatives and initialise working
         // array
@@ -1863,7 +1871,7 @@ double GObservation::npred_kern::eval(const double& x)
  *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
  * \f]
  *
- * where                         
+ * where
  * \f$S(p,E,t)\f$ is the source model,
  * \f$R(p',E',t'|p,E,t)\f$ is the instrument response function,
  * \f$p'\f$ is the measured photon direction,
