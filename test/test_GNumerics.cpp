@@ -523,29 +523,29 @@ void TestGNumerics::test_function(void)
 void TestGNumerics::test_functions(void)
 {
     // Set sigma array
-    GNdarray sigma(1,3);
-    sigma(0,0) = 1.0;
-    sigma(0,1) = 2.0;
-    sigma(0,2) = 4.0;
+    GVector sigma(3);
+    sigma[0] = 1.0;
+    sigma[1] = 2.0;
+    sigma[2] = 4.0;
 
     // Allocate functions
     GaussArray functions(sigma);
 
     // Evaluate functions for x=0
-    GNdarray result = functions.eval(0.0);
+    GVector result = functions.eval(0.0);
 
     // Test function values
-    test_value(result(0,0), 0.39894228, "Check function[0] value at x=0");
-    test_value(result(0,1), 0.19947114, "Check function[1] value at x=0");
-    test_value(result(0,2), 0.09973557, "Check function[2] value at x=0");
+    test_value(result[0], 0.39894228, "Check function[0] value at x=0");
+    test_value(result[1], 0.19947114, "Check function[1] value at x=0");
+    test_value(result[2], 0.09973557, "Check function[2] value at x=0");
 
     // Evaluate functions for x=1
     result = functions.eval(1.0);
 
     // Test function values
-    test_value(result(0,0), 0.24197072, "Check function[0] value at x=1");
-    test_value(result(0,1), 0.17603266, "Check function[1] value at x=1");
-    test_value(result(0,2), 0.09666703, "Check function[2] value at x=1");
+    test_value(result[0], 0.24197072, "Check function[0] value at x=1");
+    test_value(result[1], 0.17603266, "Check function[1] value at x=1");
+    test_value(result[2], 0.09666703, "Check function[2] value at x=1");
 
     // Exit test
     return;
@@ -571,10 +571,10 @@ void TestGNumerics::test_integral(void)
 void TestGNumerics::test_integrals(void)
 {
     // Set sigma array
-    GNdarray sigma(1,3);
-    sigma(0,0) = 1.0;
-    sigma(0,1) = 2.0;
-    sigma(0,2) = 4.0;
+    GVector sigma(3);
+    sigma[0] = 1.0;
+    sigma[1] = 2.0;
+    sigma[2] = 4.0;
 
     // Test kernels and integrals allocation
     GaussArray kernels(sigma);
@@ -583,18 +583,18 @@ void TestGNumerics::test_integrals(void)
     test_value(integrals.calls(), 0, "Check initial calls");
 
     // Integrate over the entire Gaussian
-    GNdarray result = integrals.romberg(-40.0, 40.0);
-    test_value(result(0,0), 1.0, 1.0e-6, "Check full integration result for (0,0)");
-    test_value(result(0,1), 1.0, 1.0e-6, "Check full integration result for (0,1)");
-    test_value(result(0,2), 1.0, 1.0e-6, "Check full integration result for (0,2)");
+    GVector result = integrals.romberg(-40.0, 40.0);
+    test_value(result[0], 1.0, 1.0e-6, "Check full integration result for (0,0)");
+    test_value(result[1], 1.0, 1.0e-6, "Check full integration result for (0,1)");
+    test_value(result[2], 1.0, 1.0e-6, "Check full integration result for (0,2)");
 
     // Test [-1,1] integration
     result = integrals.romberg(-1.0, 1.0);
-    test_value(result(0,0), 0.68268948, 1.0e-6,
+    test_value(result[0], 0.68268948, 1.0e-6,
                "Check [-1,1] integration result for (0,0)");
-    test_value(result(0,1), 0.38292492, 1.0e-6,
+    test_value(result[1], 0.38292492, 1.0e-6,
                "Check [-1,1] integration result for (0,1)");
-    test_value(result(0,2), 0.19741265, 1.0e-6,
+    test_value(result[2], 0.19741265, 1.0e-6,
                "Check [-1,1] integration result for (0,2)");
 
     // Exit test
