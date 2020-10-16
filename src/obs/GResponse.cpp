@@ -207,37 +207,9 @@ double GResponse::convolve(const GModelSky&    model,
             GEbounds ebounds = this->ebounds(event.energy());
 
             // Determine size of result array
-            int size = 1;
-            if (grad) {
-                if (model.spectral() != NULL) {
-                    for (int i = 0; i < model.spectral()->size(); ++i) {
-                        GModelPar& par = (*(model.spectral()))[i];
-                        if (par.is_free() && par.has_grad()) {
-                            size++;
-                        }
-                    }
-                }
-                if (model.temporal() != NULL) {
-                    for (int i = 0; i < model.temporal()->size(); ++i) {
-                        GModelPar& par = (*(model.temporal()))[i];
-                        if (par.is_free() && par.has_grad()) {
-                            size++;
-                        }
-                    }
-                }
-                if (model.has_scales()) {
-                    for (int i = 0; i < model.scales(); ++i) {
-                        GModelPar& par = const_cast<GModelPar&>(model.scale(i));
-                        if (par.name() == obs.instrument()) {
-                            if (par.is_free() && par.has_grad()) {
-                                size++;
-                            }
-                        }
-                    }
-                }
-            }
+            int size = size_edisp_vector(model, obs, grad);
 
-            // Initialise Ndarray array
+            // Initialise vector array
             GVector array(size);
 
             // Loop over all boundaries
@@ -410,6 +382,9 @@ GVector GResponse::convolve(const GModelSky&    model,
                 }
             }
 
+            // Determine size of result array
+            int size = size_edisp_vector(model, obs, grad);
+
             // Loop over events
             for (int k = 0; k < nevents; ++k) {
 
@@ -422,8 +397,8 @@ GVector GResponse::convolve(const GModelSky&    model,
                 // Retrieve true energy boundaries
                 GEbounds ebounds = this->ebounds(event.energy());
 
-                // Initialise vector
-                GVector array;
+                // Initialise vector array
+                GVector array(size);
 
                 // Loop over all boundaries
                 for (int i = 0; i < ebounds.size(); ++i) {
@@ -443,12 +418,7 @@ GVector GResponse::convolve(const GModelSky&    model,
                         integral.fixed_iter(iter);
 
                         // Do Romberg integration
-                        if (array.size() == 0) {
-                            array = integral.romberg(etrue_min, etrue_max);
-                        }
-                        else {
-                            array += integral.romberg(etrue_min, etrue_max);
-                        }
+                        array += integral.romberg(etrue_min, etrue_max);
 
                     } // endif: interval was valid
 
@@ -1789,6 +1759,59 @@ GVector GResponse::eval_probs(const GModelSky&    model,
 
     // Return event probabilities
     return probs;
+}
+
+
+/***********************************************************************//**
+ * @brief Return size of vector for energy dispersion computation
+ *
+ * @param[in] model Sky model.
+ * @param[in] obs Observation.
+ * @param[out] grad Signals whether gradients should be computed.
+ * @return Size of vector for energy dispersion computation.
+ *
+ * Computes the size of the vector that will be computed for the computation
+ * of the energy dispersion.
+ ***************************************************************************/
+int GResponse::size_edisp_vector(const GModelSky&    model,
+                                 const GObservation& obs,
+                                 const bool&         grad) const
+{
+    // Initialise vector size
+    int size = 1;
+
+    // Determine size of gradient part
+    if (grad) {
+        if (model.spectral() != NULL) {
+            for (int i = 0; i < model.spectral()->size(); ++i) {
+                GModelPar& par = (*(model.spectral()))[i];
+                if (par.is_free() && par.has_grad()) {
+                    size++;
+                }
+            }
+        }
+        if (model.temporal() != NULL) {
+            for (int i = 0; i < model.temporal()->size(); ++i) {
+                GModelPar& par = (*(model.temporal()))[i];
+                if (par.is_free() && par.has_grad()) {
+                    size++;
+                }
+            }
+        }
+        if (model.has_scales()) {
+            for (int i = 0; i < model.scales(); ++i) {
+                GModelPar& par = const_cast<GModelPar&>(model.scale(i));
+                if (par.name() == obs.instrument()) {
+                    if (par.is_free() && par.has_grad()) {
+                        size++;
+                    }
+                }
+            }
+        }
+    }
+
+    // Return size
+    return size;
 }
 
 

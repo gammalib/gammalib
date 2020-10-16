@@ -122,14 +122,17 @@ protected:
     void    copy_members(const GResponse& rsp);
     void    free_members(void);
     double  eval_prob(const GModelSky&    model,
-                     const GEvent&       event,
-                     const GEnergy&      srcEng,
-                     const GTime&        srcTime,
-                     const GObservation& obs,
-                     const bool&         grad) const;
+                      const GEvent&       event,
+                      const GEnergy&      srcEng,
+                      const GTime&        srcTime,
+                      const GObservation& obs,
+                      const bool&         grad) const;
     GVector eval_probs(const GModelSky&    model,
                        const GObservation& obs,
                        GMatrixSparse*      gradients = NULL) const;
+    int     size_edisp_vector(const GModelSky&    model,
+                              const GObservation& obs,
+                              const bool&         grad) const;
 
     // Virtual protected methods
     virtual double irf_ptsrc(const GEvent&       event,
