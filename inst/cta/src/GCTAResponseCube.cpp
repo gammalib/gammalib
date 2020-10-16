@@ -77,7 +77,6 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_RADIAL_PSF_BASED  //!< Use Psf-based integration for radial model
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -870,7 +869,6 @@ void GCTAResponseCube::free_members(void)
 }
 
 
-#if defined(G_RADIAL_PSF_BASED)
 /***********************************************************************//**
  * @brief Integrate Psf over radial model
  *
@@ -975,125 +973,6 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     // Return integral
     return value;
 }
-#else
-/***********************************************************************//**
- * @brief Integrate Psf over radial model
- *
- * @param[in] model Radial model.
- * @param[in] rho_obs Angle between model centre and measured photon direction
- *                    (radians).
- * @param[in] obsDir Observed event direction.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- *
- * Integrates the product of the spatial model and the point spread
- * function over the true photon arrival direction using
- * 
- * \f[
- *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
- *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
- *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
- *    {\rm Psf}(\rho, \omega) d\omega d\rho
- * \f]
- *
- * where
- * \f$S_{\rm p}(\rho | E, t)\f$ is the radial spatial model,
- * \f${\rm Psf}(\rho, \omega)\f$ is the point spread function,
- * \f$\rho\f$ is the radial distance from the model centre, and
- * \f$\omega\f$ is the position angle around the model centre measured
- * counterclockwise from the connecting line between the model centre and
- * the observed photon arrival direction.
- ***************************************************************************/
-double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
-                                    const double&              rho_obs,
-                                    const GSkyDir&             obsDir,
-                                    const GEnergy&             srcEng,
-                                    const GTime&               srcTime) const
-{
-    // Set number of iterations for Romberg integration.
-    // These values have been determined after careful testing, see
-    // https://cta-redmine.irap.omp.eu/issues/1299
-    static const int iter_rho = 5;
-    static const int iter_phi = 5;
-
-    // Initialise value
-    double irf = 0.0;
-
-    // Get maximum PSF radius (radians)
-    double delta_max = psf().delta_max();
-
-    // Set zenith angle integration range for radial model (radians)
-    double rho_min = (rho_obs > delta_max) ? rho_obs - delta_max : 0.0;
-    double rho_max = rho_obs + delta_max;
-    double src_max = model->theta_max();
-    if (rho_max > src_max) {
-        rho_max = src_max;
-    }
-
-    // Perform zenith angle integration if interval is valid
-    if (rho_max > rho_min) {
-
-        // Setup integration kernel. We take here the observed photon arrival
-        // direction as the true photon arrival direction because the PSF does
-        // not vary significantly over a small region.
-        cta_psf_radial_kern_rho integrand(this,
-                                          model,
-                                          obsDir,
-                                          srcEng,
-                                          srcTime,
-                                          rho_obs,
-                                          delta_max,
-                                          iter_phi);
-
-        // Integrate over model's zenith angle
-        GIntegral integral(&integrand);
-        integral.fixed_iter(iter_rho);
-
-        // Setup integration boundaries
-        std::vector<double> bounds;
-        bounds.push_back(rho_min);
-        bounds.push_back(rho_max);
-
-        // If the integration range includes a transition between full
-        // containment of model within Psf and partial containment, then
-        // add a boundary at this location
-        double transition_point = delta_max - rho_obs;
-        if (transition_point > rho_min && transition_point < rho_max) {
-            bounds.push_back(transition_point);
-        }
-
-        // If we have a shell model then add an integration boundary for the
-        // shell radius as a function discontinuity will occur at this
-        // location
-        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
-        if (shell != NULL) {
-            double shell_radius = shell->radius() * gammalib::deg2rad;
-            if (shell_radius > rho_min && shell_radius < rho_max) {
-                bounds.push_back(shell_radius);
-            }
-        }
-
-        // Integrate kernel
-        irf = integral.romberg(bounds, iter_rho);
-
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-            std::cout << "*** ERROR: GCTAResponseCube::psf_radial:";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (irf=" << irf;
-            std::cout << ", rho_min=" << rho_min;
-            std::cout << ", rho_max=" << rho_max << ")";
-            std::cout << std::endl;
-        }
-        #endif
-
-    } // endif: integration interval is valid
-
-    // Return PSF
-    return irf;
-}
-#endif
 
 
 /***********************************************************************//**
@@ -1513,9 +1392,6 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
 }
 
 
-
-
-
 /***********************************************************************//**
  * @brief Return instrument response to elliptical source
  *
@@ -1664,9 +1540,6 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     const GModelSpatialDiffuse* model =
           static_cast<const GModelSpatialDiffuse*>(source.model());
 
-    // Get pointer on CTA response cube
-    //const GCTAResponseCube* rsp = gammalib::cta_rsp_cube(G_IRF_DIFFUSE, obs);
-
     // Get livetime (in seconds) and deadtime correction factor
     double livetime = exposure().livetime();
     double deadc    = exposure().deadc();
@@ -1731,7 +1604,7 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
 
 /*==========================================================================
  =                                                                         =
- =                           New private methods                           =
+ =                          Vector response methods                        =
  =                                                                         =
  ==========================================================================*/
 
