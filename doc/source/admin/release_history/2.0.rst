@@ -1,16 +1,16 @@
-.. _1.8:
+.. _2.0:
 
-GammaLib 1.8 release (18 September 2020)
-========================================
+GammaLib 2.0 release (17 October 2020)
+======================================
 
 Overview
 --------
 
-GammaLib 1.8 is a major release that adds significant functionality.
+GammaLib 2.0 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* ...
+* vectorised response computation
 * ...
 
 
@@ -24,6 +24,9 @@ Improvements
 * [`3333 <https://cta-redmine.irap.omp.eu/issues/3333>`_] -
   Integrate analytical gradients for energy dispersion computation
 * Implement ``GMatrixSparse::row()`` and ``GMatrixSparse::add_to_row()`` methods
+* [`3203 <https://cta-redmine.irap.omp.eu/issues/3203>`_] -
+  Implement vectorised response computation and analytical gradients for
+  the radial Gaussian model in a stacked analysis
 
 New features
 ------------

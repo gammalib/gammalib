@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.8.0
+New Features and Important Changes in GammaLib 2.0.0
 
-22 September 2020
+17 October 2020
 
 
 1. Introduction
@@ -25,6 +25,7 @@ The following methods have been added:
 - GModel::eval(GObservation&, GMatrixSparse*)
 - GModelSky::eval(GObservation&, GMatrixSparse*)
 - GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
+- GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
 - GObservation::model(GModels&, GMatrixSparse*)
 - GObservation::model_grad(GModel&, GModelPar&)
 - GModelSpatialRadial::is_energy_dependent()
@@ -71,6 +72,8 @@ Implement GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 8. Model module
 ---------------
+Added analytical gradients to the GModelSpatialRadialGauss class (#3203).
+
 Added is_energy_dependent() and is_time_dependent() methods to GModelSpatialRadial
 to allow for checking of energy or time dependence of spatial model components.
 
@@ -84,6 +87,12 @@ of functions (#3328).
 
 10. Observation module
 ----------------------
+A vectorised response computation was implemented in GResponse that computes the
+IRF for all events in a given observations. This allows for a considerable reduction
+of the operations, in particular for binned or stacked analysis, where the code can
+benefit from the cube structure of the data. The vectorised response is now used
+by all likelihood functions (#3203).
+
 The GResponse::edisp_kern integration kernel class that is used for the integration
 over true energies in case that energy dispersion should be considered now derives
 from GFunctions. The actual function value is returned in the first slot of the
@@ -136,12 +145,14 @@ None
 
 19. Fermi-LAT interface
 -----------------------
-None
+Adapted the GLATResponse interface to the vectorised response computation (#3203).
 
 
 20. CTA interface
 -----------------
-None
+Implement in GCTAResponseCube an optimised vectorised response computation for radial
+models that applies for a stacked analysis. The code supports in particular analytical
+spatial model gradients (#3203).
 
 
 21. COMPTEL interface
