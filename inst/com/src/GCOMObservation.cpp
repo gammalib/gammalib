@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,7 +57,7 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 #define G_LOAD_DRB                    "GCOMObservation::load_drb(GFilename&)"
 #define G_LOAD_DRG                    "GCOMObservation::load_drg(GFilename&)"
 #define G_DRM                                "GCOMObservation::drm(GModels&)"
-#define G_ADD_DRM                        "GCOMObservation::add_drm(GSource&)"
+#define G_ADD_DRM                      "GCOMObservation::add_drm(GSkyModel&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -637,25 +637,25 @@ void GCOMObservation::load(const GFilename&              evpname,
 
 
 /***********************************************************************//**
- * @brief Return source model DRM cube
+ * @brief Return model DRM cube
  *
- * @param[in] source Source.
+ * @param[in] model Sky model.
  *
- * @return Source model DRM cube.
+ * @return model DRM cube.
  ***************************************************************************/
-const GCOMDri& GCOMObservation::drm(const GSource& source) const
+const GCOMDri& GCOMObservation::drm(const GModelSky& model) const
 {
-    // Search source in DRM cache
+    // Search model in DRM cache
     int index = 0;
     for (; index < m_drms.size(); ++index) {
-        if (source.name() == m_drms[index].name()) {
+        if (model.name() == m_drms[index].name()) {
             break;
         }
     }
 
-    // If no source was found then add a cube to the DRM cache
+    // If no model was found then add a cube to the DRM cache
     if (index >= m_drms.size()) {
-        const_cast<GCOMObservation*>(this)->add_drm(source);
+        const_cast<GCOMObservation*>(this)->add_drm(model);
         index = m_drms.size() - 1;
     }
 
@@ -1078,7 +1078,7 @@ void GCOMObservation::load_drx(const GFilename& drxname)
 /***********************************************************************//**
  * @brief Add DRM cube to observation response cache
  *
- * @param[in] source Source.
+ * @param[in] model Sky model.
  *
  * @exception GException::invalid_value
  *            Observation does not contain an event cube.
@@ -1086,7 +1086,7 @@ void GCOMObservation::load_drx(const GFilename& drxname)
  * Adds a DRM cube based on the given source to the observation response
  * cache.
  ***************************************************************************/
-void GCOMObservation::add_drm(const GSource& source)
+void GCOMObservation::add_drm(const GModelSky& model)
 {
     // Get pointer on COMPTEL event cube
     const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(m_events);
@@ -1101,14 +1101,11 @@ void GCOMObservation::add_drm(const GSource& source)
     // Initialise DRM cube based on DRE cube
     GCOMDri drm = cube->dre();
 
-    // Setup sky model for DRM computation
-    GModelSky model(*(source.model()), GModelSpectralConst());
-
     // Compute DRM
     drm.compute_drm((*this), model);
 
     // Set model name
-    drm.name(source.name());
+    drm.name(model.name());
 
     // Push model on stack
     m_drms.push_back(drm);

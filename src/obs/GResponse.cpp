@@ -1430,25 +1430,31 @@ GVector GResponse::irf_composite(const GModelSky&    model,
     // Initialise result
     GVector irfs(nevents);
 
-    // Loop over events
-    for (int k = 0; k < nevents; ++k) {
+    // Get pointer to composite spatial model
+    const GModelSpatialComposite* composite =
+          dynamic_cast<const GModelSpatialComposite*>(model.spatial());
 
-        // Get reference to event
-        const GEvent& event = *((*obs.events())[k]);
+    // Create copy of sky model
+    GModelSky sky = model;
 
-        // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
+    // Loop over model components
+    for (int i = 0; i < composite->components(); ++i) {
 
-        // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
+        // Set spatial component of sky model
+        sky.spatial(const_cast<GModelSpatial*>(composite->component(i)));
 
-        // Get IRF value for event
-        irfs[k] = this->irf_composite(event, source, obs);
+        // Compute and add IRF values
+        irfs += irf_spatial(sky, obs, gradients) * composite->scale(i);
 
-    } // endfor: looped over events
+    } // endfor: looped over all model components
 
-    // Return IRF value
+    // Divide by number of model components
+    double sum = composite->sum_of_scales();
+    if (sum > 0.0) {
+        irfs /= sum;
+    }
+
+    // Return IRF values
     return irfs;
 }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCOMObservation.hpp - COMPTEL observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,7 +43,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GCaldb;
 class GResponse;
-class GSource;
+class GModelSky;
 class GModels;
 class GXmlElement;
 class GFitsHDU;
@@ -118,7 +118,7 @@ public:
     const GSkyMap&  drb(void) const;
     const GSkyMap&  drg(void) const;
     const GSkyMap&  drx(void) const;
-    const GCOMDri&  drm(const GSource& source) const;
+    const GCOMDri&  drm(const GModelSky& model) const;
     GCOMDri         drm(const GModels& models) const;
     const GCOMTim&  tim(void) const;
     const GCOMOads& oads(void) const;
@@ -132,7 +132,7 @@ protected:
     void load_drb(const GFilename& drbname);
     void load_drg(const GFilename& drgname);
     void load_drx(const GFilename& drxname);
-    void add_drm(const GSource& source);
+    void add_drm(const GModelSky& model);
     bool check_map(const GSkyMap& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;

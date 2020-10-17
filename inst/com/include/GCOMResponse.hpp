@@ -34,6 +34,8 @@
 /* __ Type definitions ___________________________________________________ */
 
 /* __ Forward declaration ________________________________________________ */
+class GVector;
+class GMatrix;
 class GModelSky;
 class GEvent;
 class GPhoton;
@@ -96,9 +98,25 @@ public:
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GCOMResponse& rsp);
-    void free_members(void);
+    void    init_members(void);
+    void    copy_members(const GCOMResponse& rsp);
+    void    free_members(void);
+    GVector irf_drm(const GModelSky&    model,
+                            const GObservation& obs) const;
+
+    // Overloaded virtual base class methods
+    virtual GVector irf_ptsrc(const GModelSky&    model,
+                              const GObservation& obs,
+                              GMatrix*            gradients = NULL) const;
+    virtual GVector irf_radial(const GModelSky&    model,
+                               const GObservation& obs,
+                               GMatrix*            gradients = NULL) const;
+    virtual GVector irf_elliptical(const GModelSky&    model,
+                                   const GObservation& obs,
+                                   GMatrix*            gradients = NULL) const;
+    virtual GVector irf_diffuse(const GModelSky&    model,
+                                const GObservation& obs,
+                                GMatrix*            gradients = NULL) const;
 
     // Private data members
     GCaldb              m_caldb;             //!< Calibration database

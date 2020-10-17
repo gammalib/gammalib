@@ -38,7 +38,7 @@ The following methods have been renamed:
 - none
 
 The arguments for the following methods have been changed:
-- none
+- GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
 
 The return value of the following methods has been changed:
 - none

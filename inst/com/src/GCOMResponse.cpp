@@ -44,6 +44,7 @@
 #include "GFitsImageFloat.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GModelSpectralConst.hpp"
 #include "GCOMResponse.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventBin.hpp"
@@ -56,6 +57,13 @@
 #define G_NROI            "GCOMResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
 #define G_EBOUNDS                           "GCOMResponse::ebounds(GEnergy&)"
+#define G_IRF_DRM          "GCOMResponse::irf_drm(GModelSky&, GObservation&)"
+#define G_IRF_RADIAL   "GCOMResponse::irf_radial(GModelSky&, GObservation&, "\
+                                                                  "GMatrix*)"
+#define G_IRF_ELLIPTICAL          "GCOMResponse::irf_elliptical(GModelSky&, "\
+                                                  " GObservation&, GMatrix*)"
+#define G_IRF_DIFFUSE "GCOMResponse::irf_diffuse(GModelSky&, GObservation&, "\
+                                                                  "GMatrix*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -424,8 +432,11 @@ double GCOMResponse::irf_spatial(const GEvent&       event,
         }
         const GCOMEventBin* bin = static_cast<const GCOMEventBin*>(&event);
 
+        // Setup sky model for DRM computation
+        GModelSky model(*(source.model()), GModelSpectralConst());
+
         // Get IRF value
-        irf = comobs->drm(source)[bin->index()];
+        irf = comobs->drm(model)[bin->index()];
 
     } // endif: all spatial parameters were fixed
 
@@ -786,7 +797,7 @@ void GCOMResponse::init_members(void)
     m_phibar_ref_pixel = 0.0;
     m_phibar_bin_size  = 0.0;
     m_phibar_min       = 0.0;
-    
+
     // Return
     return;
 }
@@ -826,4 +837,209 @@ void GCOMResponse::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response
+ *
+ * @param[in] event Event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid observation or event type specified.
+ * @exception GException::feature_not_implemented
+ *            Computation for specified spatial model not implemented.
+ *
+ * Returns the instrument response for a given event, source and observation.
+ * If all spatial model parameters are fixed a DRM cube stored in the COMPTEL
+ * observation is used. The computation of this cube is handled by the
+ * GCOMObservation::drm() method that also will update the cube in case that
+ * any of the parameters changes.
+ ***************************************************************************/
+GVector GCOMResponse::irf_drm(const GModelSky&    model,
+                              const GObservation& obs) const
+{
+    // Get number of events
+    int nevents = obs.events()->size();
+
+    // Initialise result
+    GVector irfs(nevents);
+
+    // Get pointer to COMPTEL observation
+    const GCOMObservation* comobs = dynamic_cast<const GCOMObservation*>(&obs);
+    if (comobs == NULL) {
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not a "
+                          "COMPTEL observation. Please specify a COMPTEL "
+                          "observation as argument.";
+        throw GException::invalid_argument(G_IRF_DRM, msg);
+    }
+
+    // Get reference to DRM
+    const GCOMDri& drm = comobs->drm(model);
+
+    // Extract model values from DRM cache
+    for (int k = 0; k < nevents; ++k) {
+        irfs[k] = drm[k];
+    }
+
+    // Return
+    return irfs;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to point source sky model
+ *
+ * @param[in] model Sky model.
+ * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
+ * @return Instrument response to point source sky model.
+ *
+ * Returns the instrument response to a point source sky model for all
+ * events.
+ ***************************************************************************/
+GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
+                                const GObservation& obs,
+                                GMatrix*            gradients) const
+{
+    // Get number of events
+    int nevents = obs.events()->size();
+
+    // Initialise result
+    GVector irfs(nevents);
+
+    // Check if spatial model has free parameters
+    bool has_free_pars = model.spatial()->has_free_pars();
+
+    // If model has free parameters then compute IRF value for all events
+    if (has_free_pars) {
+ 
+        // Get point source direction
+        GSkyDir srcDir =
+        static_cast<const GModelSpatialPointSource*>(model.spatial())->dir();
+ 
+        // Loop over events
+        for (int k = 0; k < nevents; ++k) {
+
+            // Get reference to event
+            const GEvent& event = *((*obs.events())[k]);
+
+            // Get source energy and time (no dispersion)
+            GEnergy srcEng  = event.energy();
+            GTime   srcTime = event.time();
+
+            // Setup photon
+            GPhoton photon(srcDir, srcEng, srcTime);
+
+            // Get IRF value
+            irfs[k] = this->irf(event, photon, obs);
+
+        } // endfor: looped over events
+
+    } // endif: model had free parameters
+
+    // ... otherwise extract model from DRM cache
+    else {
+        irfs = irf_drm(model, obs);
+    }
+
+    // Return IRF value
+    return irfs;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to radial source sky model
+ *
+ * @param[in] model Sky model.
+ * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
+ * @return Instrument response to radial source sky model.
+ *
+ * @todo Implement method.
+ ***************************************************************************/
+GVector GCOMResponse::irf_radial(const GModelSky&    model,
+                                 const GObservation& obs,
+                                 GMatrix*            gradients) const
+{
+    // Throw exception
+    std::string msg = "Response computation not yet implemented "
+                      "for spatial model type \""+
+                      model.spatial()->type()+"\".";
+    throw GException::feature_not_implemented(G_IRF_RADIAL, msg);
+
+    // Get number of events
+    int nevents = obs.events()->size();
+
+    // Initialise result
+    GVector irfs(nevents);
+
+    // Return IRF value
+    return irfs;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to elliptical source sky model
+ *
+ * @param[in] model Sky model.
+ * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
+ * @return Instrument response to elliptical source sky model.
+ *
+ * @todo Implement method.
+ ***************************************************************************/
+GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
+                                     const GObservation& obs,
+                                     GMatrix*            gradients) const
+{
+    // Throw exception
+    std::string msg = "Response computation not yet implemented "
+                      "for spatial model type \""+
+                      model.spatial()->type()+"\".";
+    throw GException::feature_not_implemented(G_IRF_ELLIPTICAL, msg);
+
+    // Get number of events
+    int nevents = obs.events()->size();
+
+    // Initialise result
+    GVector irfs(nevents);
+
+    // Return IRF value
+    return irfs;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to diffuse source sky model
+ *
+ * @param[in] model Sky model.
+ * @param[in] obs Observation.
+ * @param[in] gradients Gradients matrix.
+ * @return Instrument response to diffuse source sky model.
+ *
+ * @todo Implement method.
+ ***************************************************************************/
+GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
+                                  const GObservation& obs,
+                                  GMatrix*            gradients) const
+{
+    // Throw exception
+    std::string msg = "Response computation not yet implemented "
+                      "for spatial model type \""+
+                      model.spatial()->type()+"\".";
+    throw GException::feature_not_implemented(G_IRF_DIFFUSE, msg);
+
+    // Get number of events
+    int nevents = obs.events()->size();
+
+    // Initialise result
+    GVector irfs(nevents);
+
+    // Return IRF value
+    return irfs;
 }
