@@ -1695,7 +1695,7 @@ GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
             for (int ipar = 0; ipar < npars; ++ipar) {
                 const GModelPar& par = (*radial)[ipar];
                 if (par.is_free() && par.has_grad()) {
-                    obs.computed_gradient(par);
+                    obs.computed_gradient(model, par);
                 }
             }
 

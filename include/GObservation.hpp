@@ -120,14 +120,16 @@ public:
 
     // Implemented methods
     bool               has_events(void) const;
-    bool               has_gradient(const GModelPar& par) const;
+    bool               has_gradient(const GModel& model,
+                                    const GModelPar& par) const;
     void               name(const std::string& name);
     void               id(const std::string& id);
     void               statistic(const std::string& statistic);
     const std::string& name(void) const;
     const std::string& id(void) const;
     const std::string& statistic(void) const;
-    void               computed_gradient(const GModelPar& par) const;
+    void               computed_gradient(const GModel& model,
+                                         const GModelPar& par) const;
 
 protected:
     // Protected methods
@@ -221,8 +223,8 @@ protected:
     std::string m_statistic;   //!< Optimizer statistic
     GEvents*    m_events;      //!< Pointer to event container
 
-    // Stack of pointers to spatial parameters with gradients
-    mutable std::vector<GModelPar*> m_spat_pars_with_gradients;
+    // Stack of identifiers of parameters with gradients
+    mutable std::vector<std::string> m_pars_with_gradients;
 };
 
 

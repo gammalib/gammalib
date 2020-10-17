@@ -218,7 +218,7 @@ GVector GModelData::eval(const GObservation& obs,
         for (int i = 0; i < npars; ++i) {
             const GModelPar& par = (*this)[i];
             if (par.is_free() && par.has_grad()) {
-                obs.computed_gradient(par);
+                obs.computed_gradient(*this, par);
             }
         }
 

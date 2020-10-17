@@ -397,7 +397,7 @@ double GObservation::model(const GModels& models,
 
                             // Set gradient
                             if (par.is_free()) {
-                                if (has_gradient(par)) {
+                                if (has_gradient(*mptr, par)) {
                                     (*gradient)[igrad+ipar] =
                                         par.factor_gradient();
                                 }
@@ -425,7 +425,7 @@ double GObservation::model(const GModels& models,
 
                             // Set gradient
                             if (par.is_free()) {
-                                if (has_gradient(par)) {
+                                if (has_gradient(*mptr, par)) {
                                     (*gradient)[igrad+ipar] =
                                         par.factor_gradient();
                                 }
@@ -562,17 +562,22 @@ GVector GObservation::model(const GModels& models,
                             // Get reference to model parameter
                             const GModelPar& par = (*mptr)[ipar];
 
-                            // Determine gradient
-                            GVector grad(nevents);
-                            if (has_gradient(par)) {
-                                grad = gradients.column(ipar);
-                            }
-                            else {
-                                grad = model_grad(*mptr, par);
-                            }
+                            // If parameters is free then set gradient
+                            if (par.is_free()) {
 
-                            // Set gradient
-                            gradient->column(igrad+ipar, grad);
+                                // Determine gradient
+                                GVector grad(nevents);
+                                if (has_gradient(*mptr, par)) {
+                                    grad = gradients.column(ipar);
+                                }
+                                else {
+                                    grad = model_grad(*mptr, par);
+                                }
+
+                                // Set gradient
+                                gradient->column(igrad+ipar, grad);
+
+                            } // endif: parameter was free
 
                         } // endfor: looped over all parameter indices
 
@@ -587,32 +592,37 @@ GVector GObservation::model(const GModels& models,
                             // Get reference to model parameter
                             const GModelPar& par = (*mptr)[ipar];
 
-                            // Determine gradient
-                            GVector grad(nevents);
-                            if (has_gradient(par)) {
-                                grad = gradients.column(ipar);
-                                #if defined(G_DEBUG_VECTOR_MODEL)
-                                if (ipar < 3) {
-                                    GVector num_grad = model_grad(*mptr, par);
-                                    for (int k = 0; k < nevents; ++k) {
-                                        if (grad[k] != 0.0 || num_grad[k] != 0.0) {
-                                            std::cout << "ipar=" << ipar;
-                                            std::cout << " par=" << par.name();
-                                            std::cout << " k=" << k;
-                                            std::cout << " ana=" << grad[k];
-                                            std::cout << " num=" << num_grad[k];
-                                            std::cout << std::endl;
+                            // If parameters is free then set gradient
+                            if (par.is_free()) {
+
+                                // Determine gradient
+                                GVector grad(nevents);
+                                if (has_gradient(*mptr, par)) {
+                                    grad = gradients.column(ipar);
+                                    #if defined(G_DEBUG_VECTOR_MODEL)
+                                    if (ipar < 3) {
+                                        GVector num_grad = model_grad(*mptr, par);
+                                        for (int k = 0; k < nevents; ++k) {
+                                            if (grad[k] != 0.0 || num_grad[k] != 0.0) {
+                                                std::cout << "ipar=" << ipar;
+                                                std::cout << " par=" << par.name();
+                                                std::cout << " k=" << k;
+                                                std::cout << " ana=" << grad[k];
+                                                std::cout << " num=" << num_grad[k];
+                                                std::cout << std::endl;
+                                            }
                                         }
                                     }
+                                    #endif
                                 }
-                                #endif
-                            }
-                            else {
-                                grad = model_grad(*mptr, par);
-                            }
+                                else {
+                                    grad = model_grad(*mptr, par);
+                                }
 
-                            // Set gradient
-                            gradient->column(igrad+ipar, grad);
+                                // Set gradient
+                                gradient->column(igrad+ipar, grad);
+
+                            } // endif: parameter was free
 
                         } // endfor: looped over all parameter indices
 
@@ -1175,12 +1185,13 @@ void GObservation::remove_response_cache(const std::string& name)
 /***********************************************************************//**
  * @brief Check whether a model parameter has an analytical gradient
  *
+ * @param[in] model Model.
  * @param[in] par Model parameter.
  * @returns True if model parameter is free and has an analytical gradient.
  *
  * Checks whether a model parameter is free and has an analytical gradient.
  ***************************************************************************/
-bool GObservation::has_gradient(const GModelPar& par) const
+bool GObservation::has_gradient(const GModel& model, const GModelPar& par) const
 {
     // Initialise flag
     bool has_gradient = false;
@@ -1188,10 +1199,13 @@ bool GObservation::has_gradient(const GModelPar& par) const
     // Only consider free parameters
     if (par.is_free()) {
 
+        // Build identifier
+        std::string id = model.name() + "::" + par.name();
+
         // Search for parameter address in stack and set flag to true if
         // parameter address was found
-        for (int i = 0; i < m_spat_pars_with_gradients.size(); ++i) {
-            if (m_spat_pars_with_gradients[i] == &par) {
+        for (int i = 0; i < m_pars_with_gradients.size(); ++i) {
+            if (m_pars_with_gradients[i] == id) {
                 has_gradient = true;
                 break;
             }
@@ -1208,18 +1222,22 @@ bool GObservation::has_gradient(const GModelPar& par) const
  * @brief Signals that an analytical gradient was computed for a model
  *        parameter
  *
+ * @param[in] model Model.
  * @param[in] par Model parameter.
  *
  * Signals that an analytical gradient was computed for a model parameter.
  ***************************************************************************/
-void GObservation::computed_gradient(const GModelPar& par) const
+void GObservation::computed_gradient(const GModel& model, const GModelPar& par) const
 {
     // Initialise flag
     bool in_stack = false;
 
+    // Build identifier
+    std::string id = model.name() + "::" + par.name();
+
     // Check if parameter is already in stack
-    for (int i = 0; i < m_spat_pars_with_gradients.size(); ++i) {
-        if (m_spat_pars_with_gradients[i] == &par) {
+    for (int i = 0; i < m_pars_with_gradients.size(); ++i) {
+        if (m_pars_with_gradients[i] == id) {
             in_stack = true;
             break;
         }
@@ -1227,7 +1245,7 @@ void GObservation::computed_gradient(const GModelPar& par) const
 
     // If parameter is not yet in stack the push it on the stack
     if (!in_stack) {
-        m_spat_pars_with_gradients.push_back(const_cast<GModelPar*>(&par));
+        m_pars_with_gradients.push_back(id);
     }
 
     // Return
@@ -1252,8 +1270,8 @@ void GObservation::init_members(void)
     m_statistic = "cstat";
     m_events    = NULL;
 
-    // Initialise stack of pointers to spatial parameters with gradients
-    m_spat_pars_with_gradients.clear();
+    // Initialise stack of identifiers of parameters with gradients
+    m_pars_with_gradients.clear();
 
     // Return
     return;
@@ -1274,8 +1292,8 @@ void GObservation::copy_members(const GObservation& obs)
     m_id        = obs.m_id;
     m_statistic = obs.m_statistic;
 
-    // Copy stack of pointers to spatial parameters with gradients
-    m_spat_pars_with_gradients = obs.m_spat_pars_with_gradients;
+    // Copy stack of identifiers of parameters with gradients
+    m_pars_with_gradients = obs.m_pars_with_gradients;
 
     // Clone members
     m_events = (obs.m_events != NULL) ? obs.m_events->clone() : NULL;

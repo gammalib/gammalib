@@ -94,14 +94,16 @@ public:
 
     // Implemented methods
     bool               has_events(void) const;
-    bool               has_gradient(const GModelPar& par) const;
+    bool               has_gradient(const GModel& model,
+                                    const GModelPar& par) const;
     void               name(const std::string& name);
     void               id(const std::string& id);
     void               statistic(const std::string& statistic);
     const std::string& name(void) const;
     const std::string& id(void) const;
     const std::string& statistic(void) const;
-    void               computed_gradient(const GModelPar& par) const;
+    void               computed_gradient(const GModel& model,
+                                         const GModelPar& par) const;
 };
 
 

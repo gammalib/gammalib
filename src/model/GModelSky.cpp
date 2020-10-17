@@ -1310,7 +1310,7 @@ void GModelSky::signal_analytical_gradients(const GObservation& obs) const
         for (int i = 0; i < spectral()->size(); ++i) {
             GModelPar& par = (*(spectral()))[i];
             if (par.is_free() && par.has_grad()) {
-                obs.computed_gradient(par);
+                obs.computed_gradient(*this, par);
             }
         }
     }
@@ -1321,7 +1321,7 @@ void GModelSky::signal_analytical_gradients(const GObservation& obs) const
         for (int i = 0; i < temporal()->size(); ++i) {
             GModelPar& par = (*(temporal()))[i];
             if (par.is_free() && par.has_grad()) {
-                obs.computed_gradient(par);
+                obs.computed_gradient(*this, par);
             }
         }
     }
@@ -1333,7 +1333,7 @@ void GModelSky::signal_analytical_gradients(const GObservation& obs) const
             const GModelPar& par = scale(i);
             if (par.name() == obs.instrument()) {
                 if (par.is_free() && par.has_grad()) {
-                    obs.computed_gradient(par);
+                    obs.computed_gradient(*this, par);
                 }
             }
         }
