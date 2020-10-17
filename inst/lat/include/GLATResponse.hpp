@@ -110,6 +110,14 @@ private:
     void copy_members(const GLATResponse& rsp);
     void free_members(void);
 
+    // Overloaded virtual base class methods
+    virtual double irf_ptsrc(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
+
     // Private members
     std::string               m_rspname;    //!< Name of the instrument response
     bool                      m_force_mean; //!< Use mean PSF in any case

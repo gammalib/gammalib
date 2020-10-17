@@ -830,7 +830,7 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
     for (int i = 0; i < rsp.m_aeff.size(); ++i) {
         m_aeff.push_back(rsp.m_aeff[i]->clone());
     }
-    
+
     // Clone Psf response components
     m_psf.clear();
     for (int i = 0; i < rsp.m_psf.size(); ++i) {
@@ -889,4 +889,64 @@ void GLATResponse::free_members(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to point source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to point source.
+ *
+ * Returns the instrument response to a point source.
+ ***************************************************************************/
+double GLATResponse::irf_ptsrc(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const
+{
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Get IRF value
+    if (event.is_atom()) {
+        irf = irf_spatial_atom(static_cast<const GLATEventAtom&>(event), source, obs);
+    }
+    else {
+        irf = irf_spatial_bin(static_cast<const GLATEventBin&>(event), source, obs);
+    }
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to diffuse source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to point source.
+ *
+ * Returns the instrument response to a diffuse source.
+ ***************************************************************************/
+double GLATResponse::irf_diffuse(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const
+{
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Get IRF value
+    if (event.is_atom()) {
+        irf = irf_spatial_atom(static_cast<const GLATEventAtom&>(event), source, obs);
+    }
+    else {
+        irf = irf_spatial_bin(static_cast<const GLATEventBin&>(event), source, obs);
+    }
+
+    // Return IRF value
+    return irf;
 }
