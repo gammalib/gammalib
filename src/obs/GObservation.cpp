@@ -1200,7 +1200,7 @@ bool GObservation::has_gradient(const GModel& model, const GModelPar& par) const
     if (par.is_free()) {
 
         // Build identifier
-        std::string id = model.name() + "::" + par.name();
+        std::string id = model.name() + ":" + par.name();
 
         // Search for parameter address in stack and set flag to true if
         // parameter address was found
@@ -1233,7 +1233,7 @@ void GObservation::computed_gradient(const GModel& model, const GModelPar& par) 
     bool in_stack = false;
 
     // Build identifier
-    std::string id = model.name() + "::" + par.name();
+    std::string id = model.name() + ":" + par.name();
 
     // Check if parameter is already in stack
     for (int i = 0; i < m_pars_with_gradients.size(); ++i) {
