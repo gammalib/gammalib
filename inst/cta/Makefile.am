@@ -197,5 +197,6 @@ testdc1cta_DATA   = $(testdc1cta)
 # Extra files to be distributed in the tar file
 EXTRA_DIST = README.md caldb pyext \
              include/GCTALib.hpp \
+             src/cta_helpers_response_stacked_vector.hpp \
              src/GCTAResponse_helpers.hpp src/GCTASupport.hpp \
              test/test_CTA.hpp test/test_CTA.py test/caldb test/data
