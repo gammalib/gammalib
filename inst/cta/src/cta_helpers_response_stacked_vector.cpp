@@ -30,6 +30,7 @@
 #endif
 #include <cmath>
 #include "cta_helpers_response_stacked_vector.hpp"
+#include "GCTAResponse_helpers.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GCTAResponseCube.hpp"
@@ -218,50 +219,94 @@ GVector cta_psf_radial_kerns_delta::eval(const double& delta)
             double cos_delta = std::cos(delta);
             double sin_delta_sin_zeta = sin_delta * m_sin_zeta;
             double sin_delta_cos_zeta = sin_delta * m_cos_zeta;
-            double cos_delta_sin_zeta = cos_delta * m_sin_zeta;
-            double cos_delta_cos_zeta = cos_delta * m_cos_zeta;
 
-            // Setup kernel for azimuthal integration of the spatial model
-            cta_psf_radial_kerns_phi integrand(this,
-                                               sin_delta_sin_zeta,
-                                               sin_delta_cos_zeta,
-                                               cos_delta_sin_zeta,
-                                               cos_delta_cos_zeta);
+            // If gradients are requested then use vector integrator
+            if (m_grad) {
 
-            // Setup integrator
-            GIntegrals integral(&integrand);
-            integral.fixed_iter(m_iter);
+                // Precompute terms for gradient computation
+                double cos_delta_sin_zeta = cos_delta * m_sin_zeta;
+                double cos_delta_cos_zeta = cos_delta * m_cos_zeta;
 
-            // Integrate over azimuth
-            GVector irf = integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
+                // Setup kernel for azimuthal integration of the spatial model
+                cta_psf_radial_kerns_phi integrand(this,
+                                                   sin_delta_sin_zeta,
+                                                   sin_delta_cos_zeta,
+                                                   cos_delta_sin_zeta,
+                                                   cos_delta_cos_zeta);
 
-            // Extract value and gradients
-            double value = irf[0];
+                // Setup integrator
+                GIntegrals integral(&integrand);
+                integral.fixed_iter(m_iter);
 
-            // Multiply in energy dependent Psf
-            for (int i = 0; i < nengs; ++i) {
+                // Integrate over azimuth
+                GVector irf = integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
 
-                // Get Psf for this energy. We approximate here the true sky
-                // direction by the reconstructed sky direction.
-                double psf = m_rsp->psf()(m_obsDir, delta, m_srcEngs[i]);
+                // Extract value and gradients
+                double value = irf[0];
 
-                // Continue only if Psf is positive
-                if (psf > 0.0) {
+                // Multiply in energy dependent PSF
+                for (int i = 0; i < nengs; ++i) {
 
-                    // Compute value
-                    values[i] = value * psf;
+                    // Get Psf for this energy. We approximate here the true sky
+                    // direction by the reconstructed sky direction.
+                    double psf = m_rsp->psf()(m_obsDir, delta, m_srcEngs[i]);
 
-                    // If gradient computation is requested the multiply also
-                    // all factor gradients with the Psf value
-                    if (m_grad) {
-                        for (int k = 1, ig = i+nengs; k <= npars; ++k, ig += nengs) {
-                            values[ig] = irf[k] * psf;
+                    // Continue only if PSF is positive
+                    if (psf > 0.0) {
+
+                        // Compute value
+                        values[i] = value * psf;
+
+                        // If gradient computation is requested the multiply also
+                        // all factor gradients with the Psf value
+                        if (m_grad) {
+                            for (int k = 1, ig = i+nengs; k <= npars; ++k, ig += nengs) {
+                                values[ig] = irf[k] * psf;
+                            }
                         }
+
+                    } // endif: PSF was positive
+
+                } // endfor: looped over energies
+
+            } // endif: gradient computation was requested
+
+            // ... otherwise use scalar integration
+            else {
+ 
+                // Allocate dummy energy and time to satisfy interface
+                static const GEnergy srcEng;
+                static const GTime   srcTime;
+
+                // Setup kernel for azimuthal integration of the spatial model
+                cta_psf_radial_kern_phi integrand(m_model,
+                                                  srcEng,
+                                                  srcTime,
+                                                  sin_delta_sin_zeta,
+                                                  sin_delta_cos_zeta);
+
+                // Setup integrator
+                GIntegral integral(&integrand);
+                integral.fixed_iter(m_iter);
+
+                // Integrate over azimuth
+                double value = integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
+
+                // Multiply in energy dependent PSF
+                for (int i = 0; i < nengs; ++i) {
+
+                    // Get Psf for this energy. We approximate here the true sky
+                    // direction by the reconstructed sky direction.
+                    double psf = m_rsp->psf()(m_obsDir, delta, m_srcEngs[i]);
+
+                    // If PSF is positive then compute corresponding value
+                    if (psf > 0.0) {
+                        values[i] = value * psf;
                     }
 
-                } // endif: Psf was positive
+                } // endfor: looped over energies
 
-            } // endfor: looped over energies
+            } // endelse: scalar integration requested
 
         } // endif: arc length was positive
 
